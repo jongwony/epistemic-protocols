@@ -15,7 +15,7 @@ Conduct how a session's epistemic work will be carried out — the order, indepe
 ── FLOW ──
 Hyphegesis(WP) → BindPlanInput(WP) → PI →
   [PI = LivePlan(plan, loc): bind_I(Some(plan)) ∧ Λ.carried_handoff := loc |
-   PI = Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) (extension) → deactivate | E → ReadPlan(E) → plan → bind_I(Some(plan)) ∧ Λ.carried_handoff := Some(N)) |
+   PI = Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) (extension) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) ∧ Λ.carried_handoff := Some(N)) |
    PI = NoPlan: bind_I(None) ∧ Λ.carried_handoff := None] → MethodBrief(WP) → guard[relay-test, anti-self-application] →
   [single-move ∨ trivial-conduct: relay-route(extension) → deactivate] |
   [multi-move ∧ non-trivial:
@@ -27,7 +27,7 @@ Hyphegesis(WP) → BindPlanInput(WP) → PI →
 
 ── MORPHISM ──
 WorkProspect × ProtocolGraph
-  → resolve(plan_input)                      -- live /apportion plan binds directly; a navigation block is dereferenced and its emitted record read back into all five plan fields, its navigation block retained for the handoff; an unreadable or support-unsound handoff stops
+  → resolve(plan_input)                      -- live /apportion plan binds directly; a navigation block is dereferenced to the ONE carrier record its locator names and the plan read back from it, the block retained for the handoff; an unreadable or support-unsound handoff stops
   → brief(method, conduction_warrant)         -- infer the work prospect's method-brief; judge whether conduction is warranted
   → guard(relay_test, anti_self_application)  -- single-move work relays to that one protocol; Hyphegesis does not conduct Hyphegesis
   → identify(moves)                           -- candidate cognitive moves over the protocol graph, presented for Recognition (Rule 2)
@@ -122,11 +122,11 @@ PlanEnvelopeEntry = { accepted_residuals: Set(AcceptedResidualEntry), oos: Set(O
 GoalEntry      = UnitEntry ⊎ PlanEntry ⊎ PlanEnvelopeEntry
 E              = Set(GoalEntry)  -- the durable /apportion record set reached through a navigation block
 N              = NavigationBlock { purpose_frame: String, canonical_locator: HandoffLocator, dereference_instruction: DereferenceInstruction, snapshot_anchor: Option(String), grounding_instruction: GroundingInstruction }  -- the fixed cross-session shape; a pointer, never a copied plan
-HandoffLocator = { record: the durable identity of E, session: the id of the session that emitted E }
-DereferenceInstruction = an instruction to read E at the canonical locator's record identity within the session that locator names
+HandoffLocator = { record: the durable identity of the carrier record C the plan was parked in, session: the id of the session that parked it }
+DereferenceInstruction = an instruction to read the carrier record at the canonical locator's record identity, within the session that locator names
 GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent grounding pass, and stop when a source is unreachable or a needed premise lacks support-integrity
 PI             = PlanInput ∈ LivePlan(ConditionBearingUnitPlan × Option(N)) ⊎ Navigation(N) ⊎ NoPlan
-ReadPlan(E)    = ConditionBearingUnitPlan { units: {e∈E | e is UnitEntry}, plan_conditions: {e∈E | e is PlanEntry}, accepted_residuals: envelope(E).accepted_residuals, oos: envelope(E).oos, unbounded_approved: envelope(E).unbounded_approved }  -- envelope(E) is E's unique PlanEnvelopeEntry
+ReadPlan(C)    = the ConditionBearingUnitPlan /apportion parked in the carrier record C, read back field-by-field: units, plan_conditions, accepted_residuals, oos, unbounded_approved. One dereference yields all five — the carrier holds the whole plan, so no field is reassembled from separate records or from session memory
 I              = Option(ConditionBearingUnitPlan)
 
 determinate_leaves(r) = { d | v ∈ I.units, move_assignment placed UnitMoveBinding(v.unit_ref) in region r, DeterminateResolution { predicate: d, ... } = v.resolution }
@@ -162,14 +162,14 @@ PI (bound alongside WP) = LivePlan(plan, loc) when the /apportion plan is still 
                           locator /apportion emitted beside it; Navigation(N) when the explicit argument,
                           colocated expression, or prior user turn carries Merismos's navigation block;
                           NoPlan only when neither carrier is present
-I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → ReadPlan(E) → Some(plan) |
+I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → ReadPlan(C) → Some(plan) |
     NoPlan → None. Either plan-bearing arm retains its navigation block as Λ.carried_handoff — the live
     carrier's, or the one it dereferenced. DereferencePlan reads N.canonical_locator's record identity within the
     session that locator names; a locator missing either half is not dereferenceable. A failed dereference or
     support-integrity check stops and deactivates; it never selects None
 
 ── PHASE TRANSITIONS ──
-Phase 0: WP → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | E → ReadPlan(E) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
+Phase 0: WP → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
 Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
            A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' is stamped by exactly one move of MS' ∧ every u ∈ I.units has its unit_ref stamped in MS' or already recorded in withdrawn_units ∧ no move of MS' is stamped with a unit_ref already in withdrawn_units): re-present Sc naming the units with more than one stamped move, the units with none, and the withdrawn units still holding a move — NOT accepted | MS := MS' →
                                        [|MS| = 1 ∧ withdrawn_units = ∅: relay-route to the surviving move, deactivate
@@ -270,9 +270,9 @@ conducted(WP) = dom(move_assignment) = MS
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 BindPlanInput (sense)        → Internal analysis (classify the incoming carrier as LivePlan, Navigation, or NoPlan; on the LivePlan arm also read the navigation block the carrier supplies beside the plan, None when it supplies none)
-Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading its record identity within the session that locator names — honor its snapshot anchor when present, and run the grounding instruction; an unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates)
-Phase 0 ReadPlan (sense)             → Internal analysis (read E exactly as ReadPlan(E) defines; no field comes from session memory)
-Phase 0 bind_I (track)               → Internal state update (write Λ.incoming_plan from the resolved carrier: Some(live plan), Some(ReadPlan(E)), or None only for explicit NoPlan)
+Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading the ONE carrier record that locator names, within the session it names — honor its snapshot anchor when present, and run the grounding instruction; an unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates)
+Phase 0 ReadPlan (sense)             → Internal analysis (read the carrier exactly as ReadPlan(C) defines; no field comes from session memory)
+Phase 0 bind_I (track)               → Internal state update (write Λ.incoming_plan from the resolved carrier: Some(live plan), Some(ReadPlan(C)), or None only for explicit NoPlan)
 Phase 0 retain_handoff (track)       → Internal state update (write Λ.carried_handoff on EVERY arm: the navigation block the live carrier supplied beside the plan, Some(N) after a successful dereference, or None on the NoPlan arm. The write is total, so an Amend re-entry never leaves a prior block standing beside a plan that no longer exists)
 Phase 0 MethodBrief (sense)           → Internal analysis (infer the work prospect's method-brief + span from the session)
 Phase 0 guard (sense)                 → Internal analysis (relay-test: single-move ∨ trivial-conduct → relay; anti-self-application; no Λ mutation)
