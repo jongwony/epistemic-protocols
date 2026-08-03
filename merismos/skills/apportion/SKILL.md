@@ -22,7 +22,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
       Anchor empty ∧ residual = ∅ ∧ U = ∅ ∧ oos = ∅:  → relay(goal's scope too thin to read any obligation — route to /inquire) (extension) → deactivate  -- nothing was ever apportioned; emitting an empty plan would misreport that apportionment occurred
       Anchor empty ∧ residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅):  → Phase 2                -- every obligation apportioned or visibly delegated, and something was actually read
       Anchor empty ∧ residual ≠ ∅:  → autonomous_pack(residual) (track) → [any packed unit with SpanFit ≠ Fits, or residual ≠ ∅ after packing: it re-enters as the next cycle's Anchor (reason surfaced as relay) → loop] | (U'' Fits-worthy) → ∀u∈U'': integrate_unit(u) → u' → U := U ∪ {u'}, residual := ∅ → surface (extension) → Phase 2  -- seam evidence exhausted; AI packs the remainder at Heuristic seams, surfaced as relay; a packed unit never enters U on an unfitting span; every Fits-worthy packed unit is routed through integrate_unit — the SAME operation Qu's AcceptUnit uses — so it receives a fresh UnitRef before entering U, never entering unrefed
-      SingleDominantUnit(Anchor, proposed_unit) ∧ SpanFit = Fits: → relay(AcceptUnit) (extension) → integrate_unit → loop  -- no genuine alternative apportionment exists for this Anchor
+      SpanFit = Fits ∧ Pack's search finds no second Fits-worthy cut for Anchor: → relay(AcceptUnit) (extension) → integrate_unit → loop  -- option-set relay test: presenting one candidate as a choice would be a false gate
       else:                         → Qu(Anchor, proposed_unit, SpanFit, Seam, U_snapshot) → Stop → Aᵤ →
         Esc:                → ungraceful deactivate (EarlyExit — no emission, no handoff recorded)
         Aᵤ = AcceptUnit     → integrate_unit(proposed_unit) → loop                -- offered iff SpanFit = Fits; assigns the accepted unit a fresh UnitRef
@@ -53,7 +53,7 @@ AutonomousGoal × ExecutionHorizon
   → pack(seams, horizon) → ProposedUnit -- THE IRREDUCIBLE CORE, part one: apportion the obligations into coarse units such that each unit fits one execution horizon and every obligation lands in some unit; produces a ProposedUnit — no unit_ref yet, see ProposedUnit; also reads each unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary)
   → fit(unit, horizon) → SpanFit       -- per-unit horizon-fit predicate; Indeterminate is surfaced, never silently read as Fits
   → qualify(cut) → Seam                -- Grounded when a dependency / deliverable / verification / ownership seam is cited; Heuristic when the goal carries no such evidence — declared, not asserted as a natural joint
-  → [SingleDominantUnit(Anchor, proposed_unit) ∧ SpanFit = Fits: relay(AcceptUnit) (extension) | else: present(anchor, proposed_unit, SpanFit, Seam) (constitution)]
+  → [SpanFit = Fits ∧ no second Fits-worthy cut exists for Anchor: relay(AcceptUnit) (extension) | else: present(anchor, proposed_unit, SpanFit, Seam) (constitution)]  -- option-set relay test
   → integrate(unit_judgment, U, residual) → (U', residual')   -- monotone in coverage: an obligation leaves residual only when it enters some unit; integrate_unit(ProposedUnit) → Unit is the only constructor Unit has, and assigns the accepted unit its fresh UnitRef in that same step
   → derive(unit) → (Set(κ), Set(ρ))    -- THE IRREDUCIBLE CORE, part two: per obligation of the unit, a verifiable predicate (completion or invariant) or a residual; every obligation of the unit lands in exactly one of the two sets
   → derive_plan(goal, U) → P           -- conditions whose subject is the whole goal, not any one unit; NOT distributed across units to fit the leaf type
@@ -136,18 +136,6 @@ SpanFit        ∈ {Fits, Overflows, Indeterminate}
 fit_override_recorded(u) ≡ u.unit_ref ∈ Λ.fit_overrides   -- written by OverrideFit, AFTER integrate_unit assigns
                --   u.unit_ref — comparing by unit_ref (not by the Unit value) is what makes this sound: the
                --   recorded identity and the integrated identity are provably the same unit (see integrate)
-SingleDominantUnit(Anchor, proposed_unit) ≡ Pack's search over Anchor's residual obligations, under the seam
-                                             evidence gathered in Scan and the horizon H, admits no second cut
-                                             whose obligation set differs from proposed_unit's and whose fit
-                                             is also Fits
-               -- proposed_unit: ProposedUnit — Pack's own output, pre-integration; this predicate is decided
-               --   before any UnitRef exists, so it is never keyed on unit_ref
-               -- decided AT Pack time, from the same search that already produces proposed_unit and SpanFit —
-               --   not a separately invented judgment. Analogous to fit and qualify: an internal-analysis
-               --   sense predicate the AI computes and can cite, not a value Λ stores. False (and Qu
-               --   presented) whenever Pack's search finds ≥2 differently-scoped Fits-worthy cuts for the
-               --   Anchor, or cannot establish singularity from the evidence available — an unjudgeable case
-               --   falls through to Qu like any other non-dominant anchor; it never defaults to relay
 Seam           = Grounded(Evidence) ⊎ Heuristic
                -- a coproduct, not a record with an optional field: Grounded CARRIES its citation by
                --   construction — there is no representable state where the quality reads Grounded and no
@@ -524,7 +512,7 @@ Phase 1: (G, residual) → Scan [Tool] → seams → Pack(seams, H) → (Anchor,
            Anchor empty ∧ residual = ∅ ∧ U = ∅ ∧ oos = ∅ → relay(goal's scope too thin to read any obligation — route to /inquire) (extension) → deactivate   -- scope too thin to read any obligation; an empty plan would misreport apportionment as having occurred
            Anchor empty ∧ residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅) → Phase 2
            Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → ∀u∈U'' (Fits-worthy packed units): integrate(u) → u' → U := U ∪ {u'} → surface (extension) → Phase 2 | re-anchor → Phase 1
-           SingleDominantUnit ∧ SpanFit = Fits → relay(AcceptUnit) (extension) → integrate → Phase 1
+           SpanFit = Fits ∧ no second Fits-worthy cut exists for Anchor → relay(AcceptUnit) (extension) → integrate → Phase 1  -- option-set relay test
            else → Qu → Stop → Aᵤ (constitution) [Tool]
              Aᵤ = AcceptUnit   → integrate(U, residual) → Phase 1        -- offered iff SpanFit = Fits; assigns the accepted unit a fresh UnitRef
              Aᵤ = Recut(d)     → re-derive Anchor frame under d → Phase 1
@@ -567,8 +555,7 @@ Apportionment loop (Phase 1): one anchor per cycle.
   AcceptUnit and OverrideFit strictly shrink residual (the accepted unit's obligations leave it), so the loop
   cannot cycle on coverage. Recut leaves residual unchanged by design — it re-frames the SAME anchor under a
   user direction — and is therefore bounded by user agency, as are Sufficient (which packs the remainder) and
-  Esc. A single dominant unit that fits relays without a turn yield: no genuine alternative apportionment
-  exists for that anchor, so presenting one would be a false choice. A cycle entered via Reopen (the one
+  Esc. A cycle entered via Reopen (the one
   back-edge from Phase 2, below) carries the reopened unit's restored obligations in residual and every other
   already-packed unit's obligations untouched — the loop resumes exactly where that unit's apportionment was
   undone, never from a freshly re-seeded residual (D3).
@@ -684,10 +671,10 @@ Phase 0 relay        (extension)    → TextPresent+Proceed (no autonomous inter
 Phase 0 ReadObligations (sense)     → Internal analysis (construct O_G once as G.obligations plus the exact obligations field of a /conduct owed-reapportionment entry when owed_unit(G); a local read, never a G mutation. Produces the set VelocityFilter, residual seeding, and coverage_complete consume; this is the formal carrier for Composition's owed-unit path and Known Limitations' one non-heuristic obligation read; R6)
 Phase 1 VelocityFilter (sense)      → Internal analysis (obligations guardable only by pre-action interception; computed once at Phase 1 entry from O_G, before residual is seeded, so an out-of-scope obligation never enters the packing loop and a re-apportioned owed unit's obligations are screened exactly like any other; empty scope with no obligation and no delegation relays to /inquire rather than proceeding)
 Phase 1 Scan         (observe)      → Read, Grep (optional seam evidence gathering over the goal's cited substrate; read-only)
-Phase 1 Pack         (sense)        → Internal analysis (apportionment search: units fitting one horizon, coverage over obligations; produces a ProposedUnit, not a Unit — no unit_ref exists until integrate_unit assigns one; reads each proposed unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary); the same search evaluates SingleDominantUnit — whether any alternative Fits-worthy cut of this Anchor exists beside proposed_unit)
+Phase 1 Pack         (sense)        → Internal analysis (apportionment search: units fitting one horizon, coverage over obligations; produces a ProposedUnit, not a Unit — no unit_ref exists until integrate_unit assigns one; reads each proposed unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary); the same search determines whether any alternative Fits-worthy cut of this Anchor exists beside proposed_unit, feeding the option-set relay test)
 Phase 1 fit          (sense)        → Internal analysis (per-unit horizon-fit verdict; Indeterminate surfaced, never read as Fits)
 Phase 1 qualify      (sense)        → Internal analysis (seam quality: Grounded with citation, or Heuristic declared)
-Phase 1 relay        (extension)    → TextPresent+Proceed (SingleDominantUnit with a fitting horizon: accept the unit without a turn yield — no genuine alternative apportionment exists for this anchor)
+Phase 1 relay        (extension)    → TextPresent+Proceed (no alternative Fits-worthy cut exists for this Anchor: accept the unit without a turn yield — the option-set relay test)
 Phase 1 autonomous_pack (track)     → Internal state update (extension — pack the remainder at Heuristic seams when seam evidence is exhausted or the user declares the apportionment sufficient; produces ProposedUnit values exactly as Pack does — no unit_ref until integrate assigns one; reads capability requirements and feasibility notes for each packed unit exactly as Pack does — functional descriptions only, never a concrete executor/model/runtime/tool token; each packed unit re-checks fit and is surfaced as relay with its heuristic declaration; a packed unit whose fit is not Fits does NOT enter U — it re-enters as the next cycle's anchor for Qu, where the override is the user's to record; a still-non-empty residual likewise re-anchors; every Fits-worthy packed unit is routed through integrate — the SAME UnitRef-assigning operation Qu's AcceptUnit uses — before entering U, so no unit ever enters U, or is later emitted, without a UnitRef)
 Phase 1 Qu           (constitution) → present (the anchor's proposed unit [ProposedUnit] + horizon-fit verdict + seam quality with its basis + current cut-set + cycle counter; the accept option is fit-complementary — AcceptUnit when the span fits, OverrideFit when it does not; Esc → EarlyExit) [Tool]
 Phase 1 integrate    (track)        → Internal state update (consumes a ProposedUnit and produces a Unit — the only constructor Unit has: the accepted unit enters the apportionment and its obligations leave the residual; a fresh UnitRef is assigned to the unit in that same step, stable for the remainder of the apportionment; OverrideFit records THAT fresh UnitRef into Λ.fit_overrides after assignment, never before, so fit_override_recorded compares the same identity that was integrated)
