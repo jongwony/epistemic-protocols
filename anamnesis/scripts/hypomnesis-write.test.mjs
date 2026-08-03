@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, protocolMap } from "./hypomnesis-write.mjs";
+import { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, skillCalls, protocolMap } from "./hypomnesis-write.mjs";
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -112,21 +112,33 @@ test("buildMarkersMd: evidence_modes is a multi-line YAML mapping (clue.md patte
 
 // --- protocol invocation detection ---
 
-test("invokes matches bare, namespaced, and command-tagged forms", () => {
-  assert.equal(invokes("/apportion the goal", "/apportion", "merismos"), true);
-  assert.equal(invokes("run /apportion now", "/apportion", "merismos"), true);
-  assert.equal(invokes("/merismos:apportion now", "/apportion", "merismos"), true);
+test("invokes counts only real invocation records, not prose mentions", () => {
+  // the two channels that actually record an invocation
   assert.equal(invokes("<command-name>/apportion</command-name>", "/apportion", "merismos"), true);
   assert.equal(invokes("<command-name>/merismos:apportion</command-name>", "/apportion", "merismos"), true);
-  assert.equal(invokes("/unrelated:apportion", "/apportion", "merismos"), false);
-  assert.equal(invokes("/apportion", "/apportion", "merismos"), true);
+  assert.equal(invokes("  <command-name>/apportion</command-name> ok", "/apportion", "merismos"), true);
+  // a mention is not a use
+  assert.equal(invokes("don't run /apportion here", "/apportion", "merismos"), false);
+  assert.equal(invokes("/apportion the goal", "/apportion", "merismos"), false);
+  // wrong plugin namespace, prefix collision, absent command
+  assert.equal(invokes("<command-name>/unrelated:apportion</command-name>", "/apportion", "merismos"), false);
+  assert.equal(invokes("<command-name>/apportionment</command-name>", "/apportion", "merismos"), false);
+  assert.equal(invokes("<command-name>/background</command-name>", "/ground", "analogia"), false);
+  assert.equal(invokes("nothing here", "/apportion", "merismos"), false);
 });
 
-test("invokes rejects prefix collisions and absent commands", () => {
-  assert.equal(invokes("/apportionment plan", "/apportion", "merismos"), false);
-  assert.equal(invokes("/background job", "/ground", "analogia"), false);
-  assert.equal(invokes("apportion without a slash", "/apportion", "merismos"), false);
-  assert.equal(invokes("nothing here", "/apportion", "merismos"), false);
+test("skillCalls extracts assistant-side Skill invocations only", () => {
+  assert.deepEqual(
+    skillCalls([
+      { type: "tool_use", name: "Skill", input: { skill: "merismos:apportion" } },
+      { type: "tool_use", name: "Bash", input: { command: "echo /apportion" } },
+      { type: "text", text: "/apportion mentioned" },
+      { type: "tool_use", name: "Skill", input: { skill: "conduct" } },
+    ]),
+    ["merismos:apportion", "conduct"],
+  );
+  assert.deepEqual(skillCalls("not an array"), []);
+  assert.deepEqual(skillCalls([{ type: "tool_use", name: "Skill", input: {} }]), []);
 });
 
 // A protocol rename (e.g. prosoche/attend -> merismos/apportion) must fail here

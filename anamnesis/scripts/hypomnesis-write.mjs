@@ -49,14 +49,22 @@ try { process.on("SIGHUP", () => {}); } catch {}
 const MIN_SESSION_BYTES = 1024;
 const MAX_USER_MSGS = 150;
 
-// A command reaches a session bare (/apportion), plugin-namespaced
-// (/merismos:apportion), or wrapped in Claude's transcript tag
-// (<command-name>/apportion</command-name>) — accept all three at a command
-// boundary, and reject prefix collisions like /apportionment.
+// A protocol is INVOKED in exactly two ways, and both leave a record: the user
+// types the command, which the harness wraps in <command-name> (bare or
+// plugin-namespaced), or the assistant calls the Skill tool. A bare mention in
+// prose ("don't run /apportion") is neither, so it is not counted.
 const invokes = (text, slash, plugin) => {
-  const ns = plugin ? `(${plugin}:)?` : "";
-  return new RegExp(`(^|[\\s>])/${ns}${slash.slice(1)}(?![\\w-])`, "m").test(text);
+  const ns = plugin ? `(?:${plugin}:)?` : "(?:[\\w.-]+:)?";
+  return new RegExp(`<command-name>\\s*/${ns}${slash.slice(1)}(?![\\w-])`, "m").test(text);
 };
+
+const skillCalls = (content) =>
+  Array.isArray(content)
+    ? content
+        .filter((b) => b?.type === "tool_use" && b.name === "Skill")
+        .map((b) => String(b.input?.skill ?? ""))
+        .filter(Boolean)
+    : [];
 
 // One entry per protocol plugin command, plus the utility commands worth
 // recording. hypomnesis-write.test.mjs checks this against the plugin skill
@@ -218,6 +226,14 @@ function parseSession(transcriptPath) {
         if (invokes(text, slash, plugin)) protocols.add(name);
       }
       if (userMsgs.length < MAX_USER_MSGS) userMsgs.push({ text, ts });
+    }
+
+    if (etype === "assistant") {
+      for (const called of skillCalls(entry.message?.content)) {
+        const bare = called.includes(":") ? called.slice(called.indexOf(":") + 1) : called;
+        const hit = protocolMap[`/${bare}`];
+        if (hit) protocols.add(hit[0]);
+      }
     }
 
     if (etype === "user" || etype === "assistant") {
@@ -1088,7 +1104,7 @@ function main() {
   }
 }
 
-export { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, protocolMap };
+export { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, skillCalls, protocolMap };
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
 try {

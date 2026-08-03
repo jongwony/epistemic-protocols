@@ -26,9 +26,9 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
       SpanFit = Fits ∧ Pack's search finds no second Fits-worthy cut for Anchor: → relay(AcceptUnit) (extension) → integrate_unit → loop  -- option-set relay test
       else:                         → Qu(Anchor, proposed_unit, SpanFit, Seam, U_snapshot) → Stop → Aᵤ →
         Esc:                → ungraceful deactivate (EarlyExit — no emission, no handoff recorded)
-        Aᵤ = AcceptUnit     → integrate_unit(proposed_unit) → loop                -- offered iff SpanFit = Fits
+        Aᵤ = AcceptUnit     → integrate_unit(proposed_unit) → loop                -- in Aᵤ's defined set iff SpanFit = Fits
         Aᵤ = Recut(d)       → re-derive the Anchor frame under d → loop           -- same residual, different cut
-        Aᵤ = OverrideFit    → integrate_unit(proposed_unit) → u' → Λ.fit_overrides ∪= {u'.unit_ref} → loop  -- offered iff SpanFit ≠ Fits
+        Aᵤ = OverrideFit    → integrate_unit(proposed_unit) → u' → Λ.fit_overrides ∪= {u'.unit_ref} → loop  -- in Aᵤ's defined set iff SpanFit ≠ Fits
         Aᵤ = Sufficient     → autonomous_pack(residual) (track) → [any packed unit with SpanFit ≠ Fits, or residual ≠ ∅ after packing: next cycle's Anchor → loop] | (U'' Fits-worthy) → ∀u∈U'': integrate_unit(u) → u' → U := U ∪ {u'}, residual := ∅ → surface (extension) → Phase 2
     Phase 2 ∀u∈U, ¬derived_already(u,K,R): Derive(u) → (Set(κ), Set(ρ)) → K:=K∪κs, R:=R∪ρs ∥ [¬Λ.plan_conditions_derived: DerivePlan(G, U) → P; Λ.plan_conditions_derived := ⊤] →
       oos ≠ ∅ → OOS(oos) (extension)                                            -- obligations needing pre-action interception: out of scope, substrate named
@@ -100,7 +100,7 @@ P              = Set(PlanCondition)              -- cross-unit conditions
 PlanCondition  = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, dischargeable_when: PlanStateRequirement }
 PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} ∪ Emergent(PlanScope)
 UnitRef        = a stable identity carried by an emitted unit, assigned at integration and never reused
-PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }
+PlanStateRequirement = { predicate: VerifiablePredicate, basis: NonEmptySet(Evidence) }   -- /conduct judges which regions can invalidate this requirement against basis, so it cites the evidence the requirement rests on and is never empty; whether that evidence still tracks what it asserts is the receiving side's support-integrity judgment, not something this protocol can certify at compile time
 topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference
 LeafConjunct   = { condition: VerifiablePredicate, kind: PredicateKind }
 NonEmptySet(T) = { S: Set(T) | S ≠ ∅ }
@@ -121,7 +121,7 @@ span_fit(U)    ≡ ∀ u ∈ U : u.fit = Fits ∨ u.unit_ref ∈ Λ.fit_override
 obligation_derived(u, K, R) ≡ ∀ o ∈ u.obligations : (∃ κ ∈ K : κ.unit = u ∧ κ.obligation = o) ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.obligation = o)
 derived_already(u, K, R) ≡ (∃ κ ∈ K : κ.unit = u) ∨ (∃ ρ ∈ R : ρ.unit = Some(u))
 acceptance_present(P) ≡ ∃ p ∈ P : p.scope = WholeGoalAcceptance
-Aᵤ             = UnitJudgment ∈ {AcceptUnit, Recut(direction), OverrideFit, Sufficient}
+Aᵤ             = UnitJudgment ∈ {AcceptUnit, Recut(direction), Sufficient} when SpanFit = Fits; {OverrideFit, Recut(direction), Sufficient} otherwise   -- the accept/override pair is INDEXED by the fit verdict rather than deleted at presentation: the defined set for a firing IS what that firing presents, so Rule 18's intact-presentation invariant holds and an unfitting unit has no unguarded accept
 V              = Judgment ∈ {Confirm, Adjust(direction), Reopen(unit)}
 Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, ApproveUnbounded}
 plan_condition(d) = PlanCondition { scope: WholeGoalAcceptance, kind: completion, condition: [the predicate direction d states], dischargeable_when: PlanStateRequirement { predicate: λ candidate_plan. False, basis: ∅ } }
@@ -156,9 +156,9 @@ Phase 1: (G, residual) → Scan [Tool] → seams → Pack(seams, H) → (Anchor,
            Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → ∀u∈U'' (Fits-worthy packed units): integrate(u) → u' → U := U ∪ {u'} → surface (extension) → Phase 2 | re-anchor → Phase 1
            SpanFit = Fits ∧ no second Fits-worthy cut exists for Anchor → relay(AcceptUnit) (extension) → integrate → Phase 1  -- option-set relay test
            else → Qu → Stop → Aᵤ (constitution) [Tool]
-             Aᵤ = AcceptUnit   → integrate(U, residual) → Phase 1        -- offered iff SpanFit = Fits
+             Aᵤ = AcceptUnit   → integrate(U, residual) → Phase 1        -- in Aᵤ's defined set iff SpanFit = Fits
              Aᵤ = Recut(d)     → re-derive Anchor frame under d → Phase 1
-             Aᵤ = OverrideFit  → integrate(U, residual) → u' → Λ.fit_overrides := Λ.fit_overrides ∪ {u'.unit_ref} → Phase 1   -- offered iff SpanFit ≠ Fits
+             Aᵤ = OverrideFit  → integrate(U, residual) → u' → Λ.fit_overrides := Λ.fit_overrides ∪ {u'.unit_ref} → Phase 1   -- in Aᵤ's defined set iff SpanFit ≠ Fits
              Aᵤ = Sufficient   → autonomous_pack(residual) (track) → ∀u∈U'' (Fits-worthy packed units): integrate(u) → u' → U := U ∪ {u'} → surface (extension) → Phase 2 | re-anchor → Phase 1
              Esc               → deactivate (EarlyExit)
 Phase 2: U → ∀u∈U, ¬derived_already(u,K,R): Derive(u) → (Set(κ), Set(ρ)) → K:=K∪κs, R:=R∪ρs ∥ [¬Λ.plan_conditions_derived: DerivePlan(G, U) → P; Λ.plan_conditions_derived := ⊤]   -- condition derivation (sense), scoped to units and plan conditions not yet derived this apportionment
