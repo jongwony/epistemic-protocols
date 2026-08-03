@@ -47,90 +47,62 @@ invariant: Conduction over Substrate
 WP     = WorkProspect: the work or goal facing object-level cognition, with its method (conduct plan) not yet determined
 PG     = ProtocolGraph: available protocols and move-neighbors (the dependency graph plus ad-hoc moves)
 Move   = CognitiveMove { step: protocol invocation | analysis pass | delegation, unit_ref: Option(UnitRef) }
-         -- a single cognitive step, the unit Hyphegesis arranges, always object-level (never another conduction).
-         -- unit_ref is stamped at Phase 1 MoveId on every move derived from an incoming /apportion UnitEntry,
-         --   and is None on a self-identified move
 MS     = MoveSet: (WP × PG) → {Move₁ … Moveₙ}, n ≥ 2
 stamp_functional(MS') ≡ ∀ r ∈ {m.unit_ref | m ∈ MS', m.unit_ref ≠ None} : |{m ∈ MS' | m.unit_ref = r}| = 1
                       ∧ ∀ u ∈ I.units : u.unit_ref ∈ {m.unit_ref | m ∈ MS'} ∨ u.unit_ref ∈ {r | (_, r) ∈ withdrawn_units}
 A_s    = SelectionJudgment ∈ {Confirm(MS'), Withdraw(Set(UnitEntry)), Esc}
-         -- Withdraw is offered ONLY when I ≠ None and the confirmed selection would leave an incoming unit
-         --   with no stamped move
-MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }  -- span = invocation → next planned /compact or /clear (the design-time horizon; the user types the command)
-Warrant = ConductionWarrant ∈ {warranted, relay}  -- warranted = (moves ≥ 2 ∧ conduct non-trivial: ≥ 2 conduct-plans with differential futures); relay = single-move ∨ trivial (conduction entropy → 0)
-MoveRegion = a contiguous sub-graph of moves sharing one conduct treatment; the single region "whole" when order is not a dependency DAG
-axis   ∈ {order, independence, reconciliation, termination, routing}  -- FINITE seed; surfaced impact/leverage-first (most-constrained axis·region first), NOT a fixed sequence
+MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }  -- span = invocation → the next planned /compact or /clear
+Warrant = ConductionWarrant ∈ {warranted, relay}  -- warranted = moves ≥ 2 ∧ conduct non-trivial; relay = single-move ∨ trivial
+MoveRegion = a contiguous sub-graph of moves sharing one conduct treatment
+axis   ∈ {order, independence, reconciliation, termination, routing}
   Gen(order)          ∈ {single_move (relay-only: trips the guard; never selected in Phase 2), sequential_chain, parallel_fan, dependency_dag}
-  Gen(independence)   ∈ {isolated, shared}                                          -- isolation before synthesis-contamination
-  Gen(reconciliation) ∈ {aggregate, dialectic, adversarial_refute, synthesis}       -- the only composable axis (⨾/∥)
+  Gen(independence)   ∈ {isolated, shared}
+  Gen(reconciliation) ∈ {aggregate, dialectic, adversarial_refute, synthesis}
   Gen(termination)    ∈ {single_pass, bounded_rounds, until_dry_ceiling, until_goal_met}
-  Gen(routing)        ∈ {return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding, handoff_to_span}  -- handoff_to_span: the move/region output is routed ACROSS the span wall to a future span (post /compact, /clear, or a new session — a consumer that does not share this session's context); /conduct declares the EXTERNALIZATION obligation in the handoff annotation and the executing substrate externalizes the output to a substrate-owned record at execution. Design-time routing (expected_handoff names a future-span consumer), NOT runtime detection of the wall
-ResolvedValue⟨a⟩ = per-axis resolved value, axis-typed (composition is NOT axis-uniform):
-   ResolvedValue⟨reconciliation⟩ = Gen(reconciliation) ⊕ Compose(RVᵣ, RVᵣ, op)  -- the sole composable axis (the reconciliation-stage algebra)
-   ResolvedValue⟨order⟩ = Gen(order);  ResolvedValue⟨independence⟩ = Gen(independence);  ResolvedValue⟨termination⟩ = Gen(termination);  ResolvedValue⟨routing⟩ = Gen(routing)  -- SCALAR axes: Gen only
-op     ∈ {⨾ sequential, ∥ parallel}             -- reconciliation-stage operators; extensible at operator level
-CT     = ConductTopology = Map(axis → Map(MoveRegion → ResolvedValue⟨axis⟩))  -- EDGE-LOCAL: when Gen(order) = dependency_dag, independence/reconciliation/routing/termination resolve per move-region (non-uniform); order defines the regions (global); uniform axes carry the single region "whole"
-CT_default = ⟨order: sequential_chain, independence: isolated, reconciliation: synthesis, termination: bounded_rounds, routing: return_to_user⟩ over the single region "whole"  -- the assembled tuple of per-axis Gen defaults; surfaced as relay context but selected only through AxisGate (Sufficient accepts the remaining defaults). NORMALIZATION: the flat tuple is shorthand for Map(axis → {whole → value})
-AxisGate = { axis, region, options, default, basis }  -- one surfaced per elicitation cycle, impact/leverage-first; reconciliation gate additionally offers ⨾/∥ composites
+  Gen(routing)        ∈ {return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding, handoff_to_span}  -- handoff_to_span: the move/region output crosses the span wall to a future span that does not share this session's context
+ResolvedValue⟨a⟩ = per-axis resolved value, axis-typed:
+   ResolvedValue⟨reconciliation⟩ = Gen(reconciliation) ⊕ Compose(RVᵣ, RVᵣ, op)
+   ResolvedValue⟨order⟩ = Gen(order);  ResolvedValue⟨independence⟩ = Gen(independence);  ResolvedValue⟨termination⟩ = Gen(termination);  ResolvedValue⟨routing⟩ = Gen(routing)
+op     ∈ {⨾ sequential, ∥ parallel}             -- extensible at operator level
+CT     = ConductTopology = Map(axis → Map(MoveRegion → ResolvedValue⟨axis⟩))
+CT_default = ⟨order: sequential_chain, independence: isolated, reconciliation: synthesis, termination: bounded_rounds, routing: return_to_user⟩ over the single region "whole"  -- the per-axis Gen defaults. NORMALIZATION: the flat tuple is shorthand for Map(axis → {whole → value})
+AxisGate = { axis, region, options, default, basis }
 Checkpoint = { region: MoveRegion, decision: DeferredDecision, brief: Option(CheckpointBrief) }
-               -- one generic in-session conductor re-entry record. decision states WHAT Constitution re-opens
-               --   over — registered only for a decision whose evidence does not exist at design time and
-               --   does exist at the checkpoint. Every checkpoint fires after its region's moves complete, at
-               --   that region's reconciliation point
 DeferredDecision = SynthesisOutputShape
-               -- the deferred-decision payload the generic Checkpoint record carries
 CheckpointSet = ordered Set(Checkpoint)
                -- ordered by topology order between regions, with registration order breaking ties
 SynthesisCheckpoint = the Checkpoint c with c.decision = SynthesisOutputShape, registered per region whose
                --   resolved reconciliation ∋ synthesis ∧ routing ∈ {return_to_user, handoff_to_span}
 CheckpointBrief = SynthesisBrief
 SynthesisBrief = { findings_ref: Map(Move → Slot(output_ref)), convergences: Slot(Set(finding)), divergences: Slot(Set(finding)), decision_axes: Slot(Set(decision_axis)), private_gap_slots: Set(GapSlot), fusion_candidates: Slot(Set(fusion_candidate)), output_shape_candidates: Slot(Set(OutputShape)) }
-               -- the Recognition presentation contract for SynthesisOutputShape: structure only, never move
-               --   content
+               -- the Recognition presentation contract for SynthesisOutputShape
    Slot(T) = a typed placeholder compiled at design time and filled with T by the substrate at execution
-   GapSlot = { category: a limit category the assigned move's protocol contracts to report, content: Slot(filled ∨ declined) }  -- private-gap slots are typed at design time by the contracted limit categories, surfaced for the user to fill or decline
-OutputShape = the first-class unit the synthesis output is organized around  -- determined by the mission's question form, NOT by the topology. An open organizing unit, not an enum: the candidate space is never fixed in advance
+   GapSlot = { category: a limit category the assigned move's protocol contracts to report, content: Slot(filled ∨ declined) }
+OutputShape = the first-class unit the synthesis output is organized around  -- an open organizing unit, not an enum: the candidate space is never fixed in advance
 checkpoint_set(WP, CT) =
                { Checkpoint(r, SynthesisOutputShape, None) |
                    CT[reconciliation][r] contains synthesis ∧
                    CT[routing][r] ∈ {return_to_user, handoff_to_span} }
-               -- exact replace-value RegisterCheckpoints writes on EVERY topology materialization pass
 checkpoint_registry_projection(CP) = [ (c.region, c.decision) | c ∈ CP in CP order ]
                -- CP order = CheckpointSet's own declared order
 compile_checkpoint_brief(c, WP, CT, MS) =
                SynthesisBrief compiled from current CT + MS when c.decision = SynthesisOutputShape
-               -- total over checkpoint_set(WP,CT), and only over that registry
 SH     = SubstrateHandoff = { feasibility: Map(MoveRegion → FeasibilityAnnotation), annotations: Set(HandoffAnnotation) }
-               --   feasibility: substrate realizability per resolved topology value (matter), keyed by
-               --   MoveRegion
-               --   annotations: the record carrier for obligations that travel WITH the handoff regardless
-               --   of when they were incurred — currently the withdrawal obligation only (see
-               --   HandoffAnnotation)
 FeasibilityAnnotation = { realizable: Bool, basis: String }
-               -- the per-region substrate-realizability verdict: realizable states whether the session's read
-               --   inventory (agents, skills, MCP servers, tools) can host that region's resolved axis
-               --   combination (peer persistence, addressability, statefulness) or, for a handoff_to_span
-               --   region, whether a durable record surface exists to externalize its output to; basis cites
-               --   the inventory evidence the verdict rests on. realizable=True is a proposal only, never a
-               --   binding this protocol performs
+               -- the per-region substrate-realizability verdict; basis cites the inventory evidence it rests on
 HandoffAnnotation = OwedReapportionment(unit: UnitEntry, resolver: Resolver)   -- open coproduct (one
-               --   constructor today): an incoming unit withdrawn at Phase 1 Sc travels here as an owed
-               --   obligation, the WHOLE UnitEntry rather than its ref alone
+               --   constructor today)
 owed_reapportionment(w) = HandoffAnnotation.OwedReapportionment(w, /apportion)
-VM     = ConductMove ∈ {Select(value), Compose(via op), Reorient(axis), Sufficient}  -- per-cycle user move in the axis gate; Compose offered on the reconciliation axis only
-         Sufficient = a MOVE in the axis gate (NOT a separate gate) → converge elicitation (user Constitution declaration)
-ResidualAxis = { axis, region, status: DefaultBound, reason }  -- an axis·region the current topology
-               --   pass default-bound because Sufficient ended elicitation before it was settled; the trace
-               --   surfaces this record, so default-binding is never silent
-Degradation = { region: MoveRegion, kind ∈ {independence_relaxed, substrate_infeasible}, resolved_value, reason }  -- a surfaced acknowledgment that a resolved value relaxes an epistemic guarantee or cannot be realized; never silently bound
-   kind ∈ {independence_relaxed, substrate_infeasible}  -- independence_relaxed: selecting independence=shared at Phase 2 relaxes region isolation (epistemic); substrate_infeasible: the substrate cannot realize the resolved topology at Phase 3 (matter). Both flow into degradations
+VM     = ConductMove ∈ {Select(value), Compose(via op), Reorient(axis), Sufficient}
+         Sufficient = a MOVE in the axis gate → converge elicitation (user Constitution declaration)
+ResidualAxis = { axis, region, status: DefaultBound, reason }
+Degradation = { region: MoveRegion, kind ∈ {independence_relaxed, substrate_infeasible}, resolved_value, reason }  -- a surfaced acknowledgment that a resolved value relaxes an epistemic guarantee or cannot be realized
+   kind ∈ {independence_relaxed, substrate_infeasible}
 FinalizeTopology(CT_partial, surfaced_axes) =
                (CT, default_bound_residuals(CT, surfaced_axes), topology_degradations(CT))
                where CT = { a ↦ { r ↦ (CT_partial[a][r] if (a,r) ∈ surfaced_axes else Gen(a)'s default) |
                                   r ∈ regions } | a ∈ {order, independence, reconciliation, termination, routing} },
                      regions = ⋃_{a∈dom(CT_partial)} dom(CT_partial[a]), or {whole} when that union is ∅
-               -- REPLACES Λ.topology, Λ.residuals, and the Phase-2 portion of Λ.degradations, never unions
-               --   with a prior pass
 default_bound_residuals(CT, surfaced_axes) =
                { ResidualAxis{axis: a, region: r, status: DefaultBound,
                               reason: "Sufficient bound the unsurfaced value to its Gen default"} |
@@ -141,13 +113,13 @@ topology_degradations(CT) = { Degradation{region: r, kind: independence_relaxed,
 substrate_degradations(SH, CT) = { Degradation{region: r, kind: substrate_infeasible,
                                                 resolved_value: CT-value, reason: SH.feasibility[r].basis} |
                                       r ∈ dom(SH.feasibility) ∧ SH.feasibility[r].realizable = False }
-CoverageLimit = { region: MoveRegion, bound ∈ {top_n, no_retry, sampling, emergent}, dropped: prose-scope, reason }  -- a coverage cap the resolved topology imposes (what the method does NOT cover); surfaced explicitly — the "no silent caps" discipline. dropped = the uncovered intra-region extent (prose); see derived_coverage_limits for the exact source→bound mapping. Never separately gated
+CoverageLimit = { region: MoveRegion, bound ∈ {top_n, no_retry, sampling, emergent}, dropped: prose-scope, reason }  -- a coverage cap the resolved topology imposes (what the method does NOT cover); dropped = the uncovered intra-region extent (prose)
 Reference = { cites: String }   -- a locator naming WHERE the referenced content is recorded, resolvable by
-               --   the executing substrate at runtime. It holds no compiled predicate of its own
+               --   the executing substrate at runtime
 ref(x) = Reference { cites: the locator naming x }   -- a CITATION of x — a pointer the executing substrate
                --   later dereferences and verifies at runtime — never a copy of x's compiled form
-TerminationGround = { region: MoveRegion, ground ∈ {protocol_contract(ref), stated_condition(ref), resolution_required(resolver)} }  -- recorded per region whose termination resolved until_goal_met: the referenceable ground that makes "goal met" determinate — the assigned move protocol's own convergence contract (protocol_contract), an already user-stated or /apportion-compiled condition (stated_condition), or resolution_required naming the downstream resolver that owns the definition. A REFERENCE, never a compiled predicate. An absent ground records resolution_required — unresolved, NEVER an accepted-unbounded run. The three constructors carry a fixed precedence (relay, never separately gated), resolved at assembly: a stated/compiled condition first, else the assigned protocols' own convergence contracts, else resolution_required as the fallback when neither reference exists; the fallback's resolver payload follows `Resolver`'s own per-move rule, conjoined across the region's moves
-TC     = TraceContract = { residuals: Set(ResidualAxis), degradations: Set(Degradation), coverage_limits: Set(CoverageLimit), termination_grounds: Set(TerminationGround) }  -- CROSS-CUTTING OVERLAY over CT (spans all axes·regions): the method's disclosure contract. INVARIANT, not a sixth axis — it carries no Gen set, no AxisGate, no per-region selection; ASSEMBLED (relay) at handoff from the final topology pass's replace-only residual/current degradation state + derived coverage caps, never constituted by user choice and never unioned across superseded CTs
+TerminationGround = { region: MoveRegion, ground ∈ {protocol_contract(ref), stated_condition(ref), resolution_required(resolver)} }  -- recorded per region whose termination resolved until_goal_met: the referenceable ground that makes "goal met" determinate. The three constructors carry a fixed precedence (relay, never separately gated), resolved at assembly: a stated/compiled condition first, else the assigned protocols' own convergence contracts, else resolution_required as the fallback when neither reference exists; the fallback's resolver payload follows `Resolver`'s own per-move rule, conjoined across the region's moves
+TC     = TraceContract = { residuals: Set(ResidualAxis), degradations: Set(Degradation), coverage_limits: Set(CoverageLimit), termination_grounds: Set(TerminationGround) }  -- the method's cross-cutting disclosure overlay over CT
 derived_coverage_limits(CT, unit_condition_bindings) = every CoverageLimit required by CoverageLimit's
                --   source→bound functor over CT (single_pass → no_retry; bounded_rounds or
                --   until_dry_ceiling → top_n; an intra-region sampling → sampling; any other imposed cap →
@@ -158,23 +130,16 @@ derived_termination_grounds(CT, MS, move_assignment, I) = exactly one Terminatio
                --   /apportion-compiled condition, the assigned protocols' convergence contracts, or the
                --   per-move resolution_required resolver payload. No other region contributes a ground
 ConductedMethod = { topology: CT, move_assignment: Map(Move → ⟨order_position, region⟩), checkpoints: CheckpointSet, substrate_handoff: SH, trace_contract: TraceContract, unit_condition_bindings: Set(UnitConditionBinding), plan_condition_bindings: Set(PlanConditionBinding), carried_plan: Option(ConditionBearingUnitPlan) }
-               -- I AS IT STANDS AT PHASE 3, carried through UNREAD and UNCHANGED, field-by-field, for every
-               --   unit still in it
-         -- the method PLAN; handed off (the substrate executes), with a conduct trace surfaced (completion evidence)
-         -- order_position = the move's slot in the order topology (Gen(order) shape); the per-region axis values (independence/reconciliation/termination/routing) are read from CT[axis][region] — so all five axis values per move are recoverable from ⟨order_position, region⟩ + CT: each is a settled ResolvedValue, or (for an unresolved axis·region) its Gen default tagged with DefaultBound — recoverability returns ResolvedValue ⊕ DefaultBound, never an empty slot
-         -- unit_condition_bindings/plan_condition_bindings populate ONLY when I ≠ None (WP arrived as a
-         --   ConditionBearingUnitPlan from /apportion); both stay ∅ on the self-identified-move-set path
-handoff_plan = the ConductedMethod value this invocation constructs and, on convergence, hands off —
-               --   referenced in CONVERGENCE. Its dispatch at Phase 3's handoff (dispatch) step IS the
-               --   evidence a plan was handed off
+         -- the method PLAN; handed off (the substrate executes)
+         -- order_position = the move's slot in the order topology (Gen(order) shape); the per-region axis values (independence/reconciliation/termination/routing) are read from CT[axis][region]
+handoff_plan = the ConductedMethod value this invocation constructs and, on convergence, hands off
 
 -- Consumed from merismos (see merismos/skills/apportion/SKILL.md TYPES for the canonical producer
 --   definition):
 UnitRef        = a stable identity carried by an emitted unit, assigned at merismos integration; opaque to
                --   this protocol — never re-derived, only compared for equality
 PredicateKind  ∈ {completion, invariant}
-VerifiablePredicate = an executable check with a determinate pass/fail outcome (command exit status,
-               --   test result, countable threshold, file-state assertion). Opaque here: this protocol
+VerifiablePredicate = an executable check with a determinate pass/fail outcome. Opaque here: this protocol
                --   never evaluates one — it places WHERE it is evaluated (see satisfies)
 Evidence       = { source: String, content: String }   -- where merismos observed what it cites; opaque here
 Resolver       = the party, or conjunction of per-move parties, that owes an unresolved definition — an
@@ -189,37 +154,26 @@ UnitResolution = DeterminateResolution { predicate: VerifiablePredicate,
                                          conjuncts: Set(LeafConjunct) }
                ⊎ AcceptedUncoveredResolution { accepted_completion_residuals: NonEmptySet(Obligation),
                                                 conjuncts: Set(LeafConjunct) }
-               -- merismos's CROSS-SEAM TERMINATION CERTIFICATE, restated exactly. Determinate requires at
-               --   least one compiled COMPLETION condition and carries the conjoined completion+invariant
-               --   predicate plus every typed conjunct. AcceptedUncovered requires no compiled completion
-               --   condition and carries the NON-EMPTY completion-residual witness plus every compiled
-               --   invariant conjunct. This protocol reads the constructor and predicate (see
-               --   determinate_leaves) but never re-derives completion kind, acceptance evidence, or
-               --   conjunct provenance
+               -- merismos's CROSS-SEAM TERMINATION CERTIFICATE, restated exactly. This protocol reads the
+               --   constructor and predicate (see determinate_leaves) but never re-derives completion kind,
+               --   acceptance evidence, or conjunct provenance
 UnitEntry      = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation),
                    resolution: UnitResolution,
                    capability_requirements: Set(CapabilityRequirement),
                    feasibility_notes: Set(FeasibilityNote) }
-               -- restated with EVERY producer field. capability_requirements and feasibility_notes are what
-               --   let the consuming runtime bind an executor without re-deriving what merismos already read;
-               --   this protocol neither reads nor binds them (Conduction over Substrate)
-               -- obligations: opaque here exactly like the rest of this restatement — this protocol's own
-               --   topology work never reads or derives from it
+               -- restated with EVERY producer field
 Obligation     = the coverage unit merismos apportioned; opaque here, carried for the consumer past this one
 OOSDeclaration = { obligation: Obligation, substrate: String, basis: Evidence }
 AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kind: PredicateKind }
 PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }
-               -- topology-free: contains no UnitRef, Move, MoveRegion, or order-position reference; binding
-               --   that requirement to a topology position is this protocol's job (see PlanConditionBinding)
+               -- topology-free: contains no UnitRef, Move, MoveRegion, or order-position reference
 PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} ∪ Emergent(PlanScope)
 PlanEntry      = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate,
                    dischargeable_when: PlanStateRequirement }
 ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEntry),
                              accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration),
                              unbounded_approved: Bool }
-               -- the incoming artifact when WP originates from /apportion; the last three fields are the
-               --   qualifying facts — obligations accepted as uncovered, obligations delegated out of scope
-               --   with their substrate, and the whole-goal acceptance waiver
+               -- the incoming artifact when WP originates from /apportion
 PlanEnvelopeEntry = { accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration),
                       unbounded_approved: Bool }
 GoalEntry      = UnitEntry ⊎ PlanEntry ⊎ PlanEnvelopeEntry
@@ -227,8 +181,7 @@ E              = Set(GoalEntry)  -- the durable /apportion record set reached th
 N              = NavigationBlock { purpose_frame: String, canonical_locator: HandoffLocator,
                                     dereference_instruction: DereferenceInstruction, snapshot_anchor: Option(String),
                                     grounding_instruction: GroundingInstruction }
-               -- the fixed cross-session shape; the optional snapshot anchor is carried only when exact-state
-               --   determinacy is needed. It is a pointer, never a copied plan
+               -- the fixed cross-session shape; a pointer, never a copied plan
 HandoffLocator = the durable identity of E
 DereferenceInstruction = an instruction to read E at the canonical locator
 GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent
@@ -239,24 +192,18 @@ ReadPlan(E)    = ConditionBearingUnitPlan {
                    units: {e∈E | e is UnitEntry}, plan_conditions: {e∈E | e is PlanEntry},
                    accepted_residuals: envelope(E).accepted_residuals, oos: envelope(E).oos,
                    unbounded_approved: envelope(E).unbounded_approved }
-               -- envelope(E) is E's unique PlanEnvelopeEntry. ReadPlan derives no field from session memory
-I              = Option(ConditionBearingUnitPlan)  -- written by bind_I after PI resolves at Phase 0;
-               --   None only for the explicit NoPlan constructor
+               -- envelope(E) is E's unique PlanEnvelopeEntry
+I              = Option(ConditionBearingUnitPlan)
 
 region_of(v)   = the MoveRegion move_assignment placed UnitMoveBinding(v.unit_ref) in
-units_of(r)    = { v ∈ I.units | region_of(v) = r }   -- the incoming units whose moves landed in r
+units_of(r)    = { v ∈ I.units | region_of(v) = r }
 determinate_leaves(r) = { d | v ∈ units_of(r),
                              DeterminateResolution { predicate: d, ... } = v.resolution }
-               -- the subset of units_of(r) merismos compiled a real predicate for; what grounds_termination
-               --   conjoins (see UnitGroundDisposition)
-UnitMoveBinding = total Map(UnitRef → Move)   -- ties each incoming unit to the Move this protocol arranges
-               --   for it; total over I.units so no incoming unit is silently dropped from the topology.
-               --   FUNCTIONAL by the Phase 1 Sc guard stamp_functional, which Confirm(MS') evaluates before
-               --   accepting a selection.
-               --   DERIVED, not asserted: { (m.unit_ref, m) | m ∈ MS, m.unit_ref ≠ None }
+UnitMoveBinding = total Map(UnitRef → Move)
+               --   DERIVED: { (m.unit_ref, m) | m ∈ MS, m.unit_ref ≠ None }
 UnitConditionBinding = {
   unit_ref: UnitRef, move: Move, region: MoveRegion, disposition: UnitGroundDisposition
-}              -- per incoming unit: where its move landed, and what its already-compiled predicate does there
+}
 UnitGroundDisposition =
     grounds_termination(g, uncited_conjuncts: Set(LeafConjunct))
       where g = stated_condition(ref(⋀ determinate_leaves(region)))   when determinate_leaves(region) ≠ ∅
@@ -264,30 +211,16 @@ UnitGroundDisposition =
         and, for the unit v this binding names (v.unit_ref = the binding's unit_ref):
             uncited_conjuncts = v.resolution.conjuncts   when v.resolution is AcceptedUncoveredResolution
                               = ∅                          when v.resolution is DeterminateResolution
-      -- the region's resolved termination is until_goal_met, so its DeterminateResolution predicates
-      --   are what make "goal met" determinate for it — recorded BY REFERENCE, never re-derived (see
-      --   TerminationGround). uncited_conjuncts is PER-UNIT, never shared across the region like g is: it
-      --   carries the compiled invariant conjuncts g does not cite, for enforcement inside that unit's own
-      --   interval
+      -- the disposition when the region's resolved termination is until_goal_met
   ⊎ executor_enforced(CoverageLimit)
-      -- the region's termination resolved to single_pass, bounded_rounds or until_dry_ceiling, so the region
-      --   stops on its own axis value and the unit's resolution is NOT its stop criterion; the carried
-      --   CoverageLimit records the uncovered extent
+      -- the disposition when that region resolved to any other termination value
 FiringSite     = TopologyFrontier(Set(MoveRegion)) ⊎ terminal ⊎ resolution_required(Resolver, Set(MoveRegion))
                -- WHERE a plan condition becomes authoritative, expressed over the RESOLVED topology's regions
-               --   — never over merismos's pre-conduct units or order-positions. A FRONTIER (a set of
-               --   regions), not a single region.
-               --   resolution_required(resolver, affected): no sound frontier exists in the resolved topology
-               --   for this condition's dischargeable_when — RECORDED rather than fabricated, and carrying
-               --   its OWN payload: the resolver that owes the resolution, and the regions the unresolved
-               --   condition bears on
+               --   resolution_required(resolver, affected): no sound frontier exists for this condition's
+               --   dischargeable_when
 PlanConditionBinding = { plan_entry: PlanEntry, site: FiringSite }
-               -- binds an incoming plan-level condition to the topology position where its
-               --   dischargeable_when requirement is satisfied, OR to resolution_required when no such
-               --   position exists — every incoming plan condition gets exactly one binding
 completes(region, CT) ≡ every move CT assigns to region has reached the stop its region's resolved
-               --   termination axis value defines — until_goal_met at its recorded TerminationGround,
-               --   single_pass after one pass, bounded_rounds at its bound, until_dry_ceiling at its ceiling
+               --   termination axis value defines — an until_goal_met region at its recorded TerminationGround
 satisfies(site, req, CT) ≡
      (site = resolution_required(_, _) ⟹ FALSE)
    ∧ (site = terminal            ⟹ ∀ region ∈ {r | (_, r) ∈ range(move_assignment)} : completes(region, CT)
@@ -305,13 +238,9 @@ resolution_resolver(affected) = the Resolver derived for the moves assigned to a
 earliest(S₁, S₂, CT) ≡ defined over FiringSite, not over region sets alone:
                --   S₁, S₂ both TopologyFrontier: every region of S₁ completes no later than every region of
                --     S₂ under CT's resolved order
-               --   S₂ = terminal, S₁ a frontier: TRUE — terminal sits past every region, so every frontier is
-               --     at or before it
+               --   S₂ = terminal, S₁ a frontier: TRUE
                --   S₁ = terminal: TRUE only when S₂ = terminal
-               --   either side resolution_required: FALSE — satisfies() already rejects it
-               -- SCOPE: this is a DESIGN-TIME predicate over the resolved topology. It establishes that the
-               --   site is a POSITION at which req.predicate is authoritative; whether req.predicate actually
-               --   HOLDS there is a runtime fact the executing substrate evaluates
+               --   either side resolution_required: FALSE
 deciding_divergence(p, CT) : Option(axis × MoveRegion) = TOTAL:
                --   = Some((axis, region))   when (axis, region) is the pair whose resolved CT value is what
                --       makes p's OWN candidate sound sites diverge: {S | satisfies(S, p.dischargeable_when,
@@ -326,8 +255,6 @@ InvalidateTopologyProducts =
                  Λ.checkpoints := ∅;
                  Λ.unit_condition_bindings := ∅;
                  Λ.plan_condition_bindings := ∅
-               -- fires BEFORE a deciding-divergence back-edge mutates CT; historical/bounding state
-               --   (reopened_divergences, withdrawn_units) is deliberately preserved
 
 ── WP-BINDING ──
 bind(WP) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_prospect
