@@ -387,7 +387,7 @@ Heuristic signals for goal-plan-uncompiled detection (not hard gates):
 
 **Skip**:
 - No autonomous intent — the request is for an ordinary explanatory plan, not execution preparation
-- The goal already carries units whose completion conditions are determinate predicates (a prior `/apportion` plan covers this goal and the goal is unchanged)
+- The goal already carries units whose completion conditions are settled — closed by a determinate predicate or by a recorded acceptance (a prior `/apportion` plan covers this goal and the goal is unchanged)
 - One self-evident leaf: the goal fits one execution horizon as a single unit and its done-criterion is already determinate
 - The user asks for ordering, independence, reconciliation or routing → `/conduct` (the units already exist)
 - The goal's own scope is too thin to read obligations from → `/inquire` (gather the missing pre-plan fact first)
