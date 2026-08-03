@@ -36,7 +36,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
         Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]
         Vₜ = RouteBound       → deactivate                                       -- Rerouted
         Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤
-      BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, Pᵦ, oos) → InvariantStatus   -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ plan_conditions_topology_free
+      BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, Pᵦ, oos) → Λ.invariant_status := InvariantStatus   -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ plan_conditions_topology_free
       Λ.plan_conditions_stale → StaleNotice(P) (extension)                       -- pre-gate text before Qc: Adjust to update, or Confirm to keep as recorded
       Qc(U, K, R, P, InvariantStatus, oos) → Stop → V →
         V = Adjust(d)  → rederive(K, R, P, d) → (K, R, P) := (K', R', P') → Λ.plan_conditions_stale := ⊥ → [¬acceptance_present(P') → Qt(K', P') → Stop → Vₜ → P' updated as at Phase 2 entry] → [acceptance_present(P') ∧ Λ.unbounded_approved: Λ.unbounded_approved := ⊥] → BindPlanRequirements(P', U) → P' := Pᵦ' → check(U, K', R', Pᵦ', oos) → InvariantStatus → Qc(...)   -- over the SAME U: K' ∪ R' spans every obligation of every unit; no removal — a withdrawn condition becomes a residual
@@ -167,7 +167,7 @@ Phase 2: U → ∀u∈U, ¬derived_already(u,K,R): Derive(u) → (Set(κ), Set(�
              Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]
              Vₜ = RouteBound       → deactivate (Rerouted)
              Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤
-           BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, Pᵦ, oos) → InvariantStatus   -- normalize every WholeGoalAcceptance requirement against the current |U| BEFORE topology_free is checked; coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ plan_conditions_topology_free (track)
+           BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, Pᵦ, oos) → Λ.invariant_status := InvariantStatus (track)   -- the ONLY writer of Λ.invariant_status, which Confirm's hard_invariants_hold guard reads; normalize every WholeGoalAcceptance requirement against the current |U| BEFORE topology_free is checked; coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ plan_conditions_topology_free (track)
            Λ.plan_conditions_stale → StaleNotice(P) (extension)        -- pre-Qc surfacing: review, Adjust, or Confirm as recorded
            Qc(U, K, R, P, InvariantStatus, oos) → Stop → V (constitution) [Tool]
              V = Adjust(d) → rederive over the SAME U → (K, R, P) := (K', R', P') → Λ.plan_conditions_stale := ⊥ → [¬acceptance_present(P') → Qt] → [acceptance_present(P') ∧ Λ.unbounded_approved: Λ.unbounded_approved := ⊥] → BindPlanRequirements(P', U) → P' := Pᵦ' → check(U, K', R', Pᵦ', oos) → InvariantStatus → re-present Qc   -- obligation_derived(u, K', R') holds for every u ∈ U; check is RE-RUN against the normalized adjusted state before Qc re-presents
@@ -284,7 +284,7 @@ Phase 2 OOS          (extension)    → TextPresent+Proceed (out-of-scope declar
 Phase 2 Qt           (constitution) → present (conditional: the whole goal has no acceptance criterion — define it now / route its definition to /bound / proceed unbounded on record; fires at pass entry and again after any Adjust that clears acceptance, always before Qc re-presents; DefineNow additionally retracts Λ.unbounded_approved when it still reads ⊤ from an earlier Qt firing on this same invocation) [Tool]
 Phase 2 ApproveUnbounded (track)    → Internal state update (record Λ.unbounded_approved, materializing the informed acceptance for the convergence predicate; does NOT touch P, so a later Qt re-fire can still reach DefineNow while this reads ⊤)
 Phase 2 BindPlanRequirements (track) → Internal state replacement (immediately before every check, replace P with the same conditions except that every WholeGoalAcceptance entry carries dischargeable_when = plan_terminal(|U|); runs after DerivePlan/Qt and after every Adjust/Qt re-fire. The sole producer of the scope-owned convergence clause and its identity-free expected count)
-Phase 2 check        (track)        → Internal state update (invariant status: coverage, horizon fit, termination coverage, obligation derivation, oos substrate-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment; RE-RUN every time Qc is about to (re-)present, at pass entry and again after every Adjust plus any Qt re-fire it triggers)
+Phase 2 check        (track)        → Internal state update (WRITE Λ.invariant_status — invariant status: coverage, horizon fit, termination coverage, obligation derivation, oos substrate-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment; RE-RUN every time Qc is about to (re-)present, at pass entry and again after every Adjust plus any Qt re-fire it triggers)
 Phase 2 StaleNotice   (extension)   → TextPresent+Proceed (conditional: Λ.plan_conditions_stale = ⊤ — surface, as pre-gate text before Qc, that plan-level conditions were derived or last user-adjusted against a unit set a subsequent Reopen has since changed; relay only, mutates no Λ field)
 Phase 2 Qc           (constitution) → present (apportionment + derived conditions + residual dispositions + invariant status + the staleness notice when present: Confirm / Adjust / Reopen) [Tool]
 Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted and write ρ.disposition := AcceptUncovered for each ρ ∈ R. This supplies accepted_completion_residuals(u,R), the non-empty witness resolve_unit's accepted constructor requires at Emit. P is untouched)
@@ -356,7 +356,9 @@ goal_plan_uncompiled(G) ≡ autonomous_intent(G) ∧ ¬condition_bearing(G)
                           predicate OR by a recorded acceptance, read back by DEREFERENCING a prior /apportion plan at its
                           navigation block, or supplied by the user as an explicit
                           unit-and-condition set) ∧ ¬owed_unit(G). A goal with units but no conditions, or conditions but
-                          no units, is uncompiled: both halves are this protocol's product
+                          no units, is uncompiled: both halves are this protocol's product — except a plan whose
+                          obligations are ALL out-of-scope delegations, which carries no units by construction
+                          and is condition-bearing, so a re-invocation over it relays rather than re-emitting
 ```
 
 **Activation layer**:
