@@ -73,83 +73,42 @@ invariant: Declared Seam over Asserted Joint  -- a cut cites its seam evidence o
 ── TYPES ──
 G              = AutonomousGoal { utterance: String, obligations: Set(Obligation), prior: ProtocolOutput?, session: Context }
 O_G            = ReadObligations(G) = G.obligations ∪ (owed_unit(G) ? owed_obligations(G) : ∅)
-               -- invocation-local Set(Obligation), produced once at Phase 0 and used by VelocityFilter,
-               --   residual seeding, and coverage_complete. It is an augmented READ of G, not a write into
-               --   G.obligations
-ProtocolOutput = prior protocol's converged output in current session (e.g., a boundary map, a conducted method's autonomous region, or /conduct's owed-reapportionment entry for a unit it could not place a move for)
+ProtocolOutput = prior protocol's converged output in current session
 owed_unit(G)   ≡ G.prior names a /conduct owed-reapportionment entry for a unit it could not place a move for
-               -- the OwedReapportionment(unit, resolver) HandoffAnnotation hyphegesis's SubstrateHandoff
-               --   carries (see hyphegesis SKILL.md TYPES, HandoffAnnotation); opaque here beyond its unit
-               --   field
-owed_obligations(G) = (the named entry's unit).obligations   -- defined when owed_unit(G); the exact
-               --   Set(Obligation) that unit was emitted with in ITS original UnitEntry (see merismos TYPES,
-               --   GoalEntry), carried through /conduct unread — not re-derived, not inferred from prose
+owed_obligations(G) = (the named entry's unit).obligations
 Obligation     = a stated or inferred requirement the goal must satisfy — the unit of coverage; each cites its evidence in G
-H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit (turns, time, context lifecycle); read from context, cue cited
+H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit; read from context, cue cited
 U              = Set(Unit)             -- the apportionment
 Anchor         = Set(Obligation)
                -- Pack's per-cycle focus region: the (possibly proper) subset of `residual` Scan's seam
                --   evidence gives Pack something to prioritize a cut around this cycle
-               -- Anchor empty ≡ Pack found no region to prioritize THIS cycle — independent of residual = ∅
 ProposedUnit   = { subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam,
                     capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
-               -- Pack's and autonomous_pack's output shape — everything a cut carries BEFORE integration
-               --   assigns it an identity
 Unit           = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam,
                     capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
-               -- subject: a coarse framing of the work the unit carries, not a procedural step decomposition
-               -- unit_ref: a stable identity assigned at integration, independent of subject — see UnitRef
-               -- capability_requirements / feasibility_notes: both empty is valid; never populated with a
-               --   concrete executor, model, runtime, or tool token (see Substrate Boundary)
 SpanFit        ∈ {Fits, Overflows, Indeterminate}
-               -- Fits: the unit's work completes within one execution horizon
-               -- Overflows: exceeds it — recut, or commit under an explicit user override recorded on fit
-               -- Indeterminate: not judgeable from available evidence; surfaced at the gate, never silently read as Fits
-fit_override_recorded(u) ≡ u.unit_ref ∈ Λ.fit_overrides   -- written by OverrideFit, AFTER integrate_unit assigns
-               --   u.unit_ref
+fit_override_recorded(u) ≡ u.unit_ref ∈ Λ.fit_overrides
 Seam           = Grounded(Evidence) ⊎ Heuristic
-               -- Grounded(e): the cut sits on a cited seam — a dependency edge, a deliverable boundary, a
-               --   verification point, or an ownership change; e is that citation
-               -- Heuristic: the goal carries no such seam evidence; the cut is an emergent judgment,
-               --   declared as such
-Evidence       = { source: String, content: String }   -- where the seam was observed in G or its cited substrate
+Evidence       = { source: String, content: String }
 CapabilityRequirement = a functional description of what carrying out the unit's work requires — descriptive only
 FeasibilityNote = a free-text observation flagging a feasibility concern read from the goal — descriptive, not
                enforced; the empty set is valid when the unit carries no such concern
-Derive         = Unit → (Set(κ), Set(ρ))   -- per obligation of the unit: κ when a verifiable predicate exists, ρ otherwise.
+Derive         = Unit → (Set(κ), Set(ρ))
 κ              = CompiledCondition { unit: Unit, obligation: Obligation, kind: PredicateKind, condition: VerifiablePredicate }
 PredicateKind  ∈ {completion, invariant}
-               -- completion: the unit achieved its result
-               -- invariant: the run preserved a boundary while achieving it
 VerifiablePredicate = an executable check with a determinate pass/fail outcome
-               -- natural-language prose is not a predicate
 ρ              = Residual { obligation: Obligation, unit: Option(Unit), kind: PredicateKind,
                             disposition: ResidualDisposition }
-               -- kind records WHICH predicate the residual stands in for
 ResidualDisposition ∈ {Sharpen, AcceptUncovered}
-               -- Sharpen: user supplies direction at Qc → rederive toward κ (an Adjust direction)
-               -- AcceptUncovered: Confirm over a remaining residual constitutes acceptance — that obligation
-               --   is unguarded during the interval, recorded in the trace, never emitted as prose
 K              = Set(CompiledCondition)          -- unit-local conditions
 P              = Set(PlanCondition)              -- cross-unit conditions
 PlanCondition  = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate,
                    dischargeable_when: PlanStateRequirement }
 PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} ∪ Emergent(PlanScope)
-               -- a condition whose subject is the whole goal rather than any one unit. dischargeable_when
-               --   states WHEN the plan state makes it safe to discharge the condition — a property of plan
-               --   state alone, never a named unit or order-position
 UnitRef        = a stable identity carried by an emitted unit, assigned at integration and never reused
 PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }
-               -- a self-contained property of PLAN STATE: contains no UnitRef, Move, MoveRegion, or
-               --   order-position reference
-               -- SCOPE-OWNED at WholeGoalAcceptance: those open alternatives are for the OTHER plan scopes
-               --   (FinalIntegration, GlobalNonRegression), whose discharge points genuinely vary with what
-               --   the condition asserts. At WholeGoalAcceptance, dischargeable_when is protocol-owned and
-               --   IS plan_terminal(|U|), whichever step produced the condition
 topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference
-               -- an AI-judged semantic check over req.predicate and req.basis, not a structural guarantee
 leaf(u)        = ⋀ { κ.condition | κ ∈ K, κ.unit = u }
-               -- THE JOIN RULE: one unit = one execution interval = one conjoined leaf predicate
 LeafConjunct   = { condition: VerifiablePredicate, kind: PredicateKind }
 NonEmptySet(T) = { S: Set(T) | S ≠ ∅ }
 conjuncts(u)   = { { condition: κ.condition, kind: κ.kind } | κ ∈ K, κ.unit = u }
@@ -169,7 +128,6 @@ resolve_unit(u, K, R) : UnitResolution
                    conjuncts: conjuncts(u) }
                    when ∄ κ ∈ K : κ.unit = u ∧ κ.kind = completion
                     ∧ accepted_completion_residuals(u, R) ≠ ∅
-               -- constructed only in Phase 3, after AcceptResiduals
 accepted_completion_projection(candidate_plan) =
                { a.obligation | a ∈ candidate_plan.accepted_residuals, a.kind = completion }
 resolution_holds(r, candidate_plan) ≡
@@ -180,7 +138,6 @@ resolution_holds(r, candidate_plan) ≡
 resolution_basis(n) = Evidence { source: "the current plan's UnitResolution and accepted-residual projections",
                                  content: "expected aggregate resolution count = " + String(n) +
                                           "; all executable resolution conditions; aggregate accepted-completion record" }
-               -- aggregate evidence for plan_terminal
 E              = Set(GoalEntry)        -- emission
 GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, obligations: Set(Obligation),
                              resolution: UnitResolution,
@@ -190,77 +147,43 @@ GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, obligations: Se
                              dischargeable_when: PlanStateRequirement }
                ⊎ PlanEnvelopeEntry { accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration),
                              unbounded_approved: Bool }
-               -- exactly one per emission (see CONVERGENCE), carrying the three plan-level facts that belong
-               --   to no single unit or plan condition
-               -- per unit: UnitEntry(u.unit_ref, u.subject, u.obligations, resolve_unit(u, K, R),
-               --   u.capability_requirements, u.feasibility_notes); per plan condition: PlanEntry(p.scope, p.kind, p.condition,
-               --   p.dischargeable_when); once per emission: PlanEnvelopeEntry(the Λ-accepted residuals as
-               --   AcceptedResidualEntry values, Λ.oos, Λ.unbounded_approved)
 oos            = Set(OOSDeclaration)   -- obligations guardable only by pre-action interception
 OOSDeclaration = { obligation: Obligation, substrate: String, basis: Evidence }
-               -- substrate names the delegated enforcement channel
 declared_oos(o) ≡ ∃ d ∈ oos : d.obligation = o ∧ d.substrate ≠ ""
-ReadObligations = G → O_G              -- exact producer of the local obligation set
-VelocityFilter = O_G → oos             -- an obligation whose violation must be caught BEFORE an action executes
-               --   cannot be a stop-time predicate. Declared out of scope with its substrate named
+ReadObligations = G → O_G
+VelocityFilter = O_G → oos
 InvariantStatus = { coverage_complete: Bool, span_fit: Bool, termination_covered: Bool,
                     obligations_derived: Bool, oos_substrate_named: Bool,
                     plan_conditions_topology_free: Bool }
 hard_invariants_hold(Λ) ≡ Λ.invariant_status.coverage_complete ∧ Λ.invariant_status.span_fit
                         ∧ Λ.invariant_status.termination_covered ∧ Λ.invariant_status.obligations_derived
                         ∧ Λ.invariant_status.oos_substrate_named ∧ Λ.invariant_status.plan_conditions_topology_free
-               -- every clause of apportioned(G) that a Qc judgment can still violate
 coverage_complete(U, O_G) ≡ ∀ o ∈ O_G : (∃ u ∈ U : o ∈ u.obligations) ∨ declared_oos(o) ∨ accepted_uncovered(o)
-               -- HARD invariant. Every goal obligation is apportioned to some unit, visibly delegated, or
-               --   accepted as uncovered on record — never silently absent
 span_fit(U)    ≡ ∀ u ∈ U : u.fit = Fits ∨ fit_override_recorded(u)
-               -- HARD invariant, with an explicit user-override path
 obligation_derived(u, K, R) ≡ ∀ o ∈ u.obligations : (∃ κ ∈ K : κ.unit = u ∧ κ.obligation = o)
                                                   ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.obligation = o)
 derived_already(u, K, R) ≡ (∃ κ ∈ K : κ.unit = u) ∨ (∃ ρ ∈ R : ρ.unit = Some(u))
 unit_termination_covered(u, K, R) ≡ (∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion)
                                  ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion)
-               -- a unit with no completion predicate is not an executable interval; it closes as a predicate
-               --   or as an acceptance OF ITS TERMINATION
-               -- evaluated PRE-Confirm as the guard on entering Confirm: tests whether the unit WILL be
-               --   covered once AcceptResiduals commits, not whether ρ.disposition already reads
-               --   AcceptUncovered
 acceptance_present(P) ≡ ∃ p ∈ P : p.scope = WholeGoalAcceptance
-               -- whether the GOAL as a whole has an acceptance criterion — distinct from per-unit completion
-accepted_uncovered(o) ≡ o ∈ Λ.accepted   -- recorded by AcceptResiduals on Confirm, not inferred
-unbounded_approved ≡ Λ.unbounded_approved -- recorded by Qt on ApproveUnbounded, not inferred
+accepted_uncovered(o) ≡ o ∈ Λ.accepted
+unbounded_approved ≡ Λ.unbounded_approved
 Aᵤ             = UnitJudgment ∈ {AcceptUnit, Recut(direction), OverrideFit, Sufficient}
-               -- AcceptUnit  offered iff SpanFit = Fits
-               -- OverrideFit offered iff SpanFit ≠ Fits
-               -- The two are fit-complementary, never both offered. Recut and Sufficient always offered
 V              = Judgment ∈ {Confirm, Adjust(direction), Reopen(unit)}
 Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, ApproveUnbounded}
-               -- DefineNow: the user states the whole-goal acceptance criterion now; it enters P
-               -- RouteBound: the acceptance boundary goes to /bound; this pass ends (Rerouted) and a later
-               --   /apportion recompiles fresh
-               -- ApproveUnbounded: informed acceptance of a goal with no whole-goal acceptance criterion
 plan_condition(d) = PlanCondition { scope: WholeGoalAcceptance, kind: completion,
                      condition: [the predicate direction d states],
                      dischargeable_when: PlanStateRequirement { predicate: λ candidate_plan. False, basis: ∅ } }
-               -- dischargeable_when is seeded with an inert, permanently-false placeholder only to keep this
-               --   mandatory field populated at construction; BindPlanRequirements is the authoritative
-               --   producer of its real value
 BindPlanRequirements(P, U) = { p with dischargeable_when := plan_terminal(|U|) when p.scope = WholeGoalAcceptance;
                                p unchanged otherwise | p ∈ P }
-               -- REPLACEMENT, not an after-the-fact patch: the sole producer of the WholeGoalAcceptance
-               --   scope invariant
 unit_resolution_projection(candidate_plan) = { e.resolution | e ∈ candidate_plan.units }
 plan_terminal(n) = PlanStateRequirement {
                    predicate: λ candidate_plan.
                      |candidate_plan.units| = n
                      ∧ ∀ r ∈ unit_resolution_projection(candidate_plan) : resolution_holds(r, candidate_plan),
                    basis: {resolution_basis(n)} }
-               -- the ordinary conservative terminal requirement, defined over the plan presented to the
-               --   executing substrate at evaluation time rather than over invocation-local U/K/R
-               -- n is fixed at BindPlanRequirements time to |U| of THIS apportionment pass and never re-derived
-               --   from a later plan
-Rerouted       = routed_to_bound       -- deliberate non-emission exit at Qt; distinct from EarlyExit (abort)
-EarlyExit      = user_esc              -- non-convergent abort: no emission, no handoff recorded
+Rerouted       = routed_to_bound
+EarlyExit      = user_esc
 Emit           = (U, K, P) → E [Tool: TaskCreate]
 Phase          ∈ {0, 1, 2, 3}
 Qu             = Per-cycle apportionment interaction with (Anchor, proposed_unit: ProposedUnit, SpanFit, Seam, cut-set snapshot) [Tool: Constitution interaction]
@@ -269,30 +192,19 @@ Qc             = Unit-plan confirmation interaction with (U, K, R, P, InvariantS
 ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEntry),
                               accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration),
                               unbounded_approved: Bool }
-               -- every field is E partitioned by its coproduct constructor: units from UnitEntry,
-               --   plan_conditions from PlanEntry, and accepted_residuals/oos/unbounded_approved from the one
-               --   PlanEnvelopeEntry. The value is a VIEW of the emitted record, never a parallel copy.
-               --   Well-formed exactly when apportioned(G) holds (see CONVERGENCE)
 AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kind: PredicateKind }
-               -- one entry per residual whose disposition is AcceptUncovered at Confirm; unit_ref threads
-               --   back to the owning UnitEntry
-plan           = the ConditionBearingUnitPlan value returned by this invocation -- referenced in CONVERGENCE
+plan           = the ConditionBearingUnitPlan value returned by this invocation
 HandoffLocator = the durable identity of the emitted record set E — what a later session dereferences to
-               --   read this plan back. Written into N by record_handoff, required by apportioned(G)
-               -- the handoff is a POINTER to the emitted record, never a re-authored copy of it
-locator        = E → HandoffLocator   -- read by record_handoff from the durable identities TaskCreate returned
+               --   read this plan back
+locator        = E → HandoffLocator
 N              = NavigationBlock { purpose_frame: String, canonical_locator: HandoffLocator,
                                     dereference_instruction: DereferenceInstruction, snapshot_anchor: Option(String),
                                     grounding_instruction: GroundingInstruction }
-               -- emitted in the settled fixed shape: Purpose / frame; Canonical locator; Dereference
-               --   instruction; optional Snapshot anchor only when exact-state determinacy is needed; and
-               --   Grounding instruction. It carries entry points, never a copy of E
 DereferenceInstruction = an instruction to read E at the canonical locator
 GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent
                --   grounding pass, and stop when a source is unreachable or a needed premise lacks
                --   support-integrity
-emitted(N)     ≡ record_handoff presented N in the handoff output — the emission IS the text, since N
-               --   crosses the session boundary as presented text and not as Λ state
+emitted(N)     ≡ record_handoff presented N in the handoff output — the emission IS the text
 handoff_recorded(N, E) ≡ emitted(N) ∧ N.purpose_frame ≠ ""
                           ∧ N.canonical_locator = locator(E)
 ── PHASE TRANSITIONS ──
