@@ -162,6 +162,11 @@ function parseSession(transcriptPath) {
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
+  // A command reaches a session either bare (/apportion) or plugin-namespaced
+  // (/merismos:apportion); match both at a command boundary.
+  const invokes = (text, slash) =>
+    new RegExp(`(^|\\s)/([\\w.-]+:)?${slash.slice(1)}(?![\\w-])`, "m").test(text);
+
   const protocolMap = {
     "/frame": "frame", "/gap": "gap", "/clarify": "clarify",
     "/goal": "goal", "/bound": "bound", "/inquire": "inquire",
@@ -193,13 +198,13 @@ function parseSession(transcriptPath) {
     const etype = entry.type ?? "";
     if (typeof entry.cwd === "string" && entry.cwd) cwd = entry.cwd;
 
-    if (etype === "user" && userMsgs.length < MAX_USER_MSGS) {
+    if (etype === "user") {
       const text = textFromContent(entry.message?.content ?? "");
       if (!text) continue;
       for (const [slash, name] of Object.entries(protocolMap)) {
-        if (text.includes(slash)) protocols.add(name);
+        if (invokes(text, slash)) protocols.add(name);
       }
-      userMsgs.push({ text, ts });
+      if (userMsgs.length < MAX_USER_MSGS) userMsgs.push({ text, ts });
     }
 
     if (etype === "user" || etype === "assistant") {

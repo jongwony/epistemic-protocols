@@ -43,7 +43,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
         V = Reopen(u)  → residual := residual ∪ u.obligations; U := U \ {u}; K := K \ {κ∈K:κ.unit=u}; R := R \ {ρ∈R:ρ.unit=Some(u)}; Λ.fit_overrides := Λ.fit_overrides \ {u.unit_ref}; Λ.plan_conditions_stale := ⊤ → Phase 1   -- residual is NOT reseeded from O_G \ oos; every other unit's obligations carry forward untouched; plan-level P is NOT re-derived (Rule 25)
         V = Confirm ∧ ¬hard_invariants_hold(Λ): → re-present Qc with the violated invariant named
         V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.obligation | ρ∈R}; ∀ρ∈R: ρ.disposition := AcceptUncovered → Phase 3   -- P is read-only on this edge; AcceptResiduals supplies the non-empty accepted-completion witness resolve_unit reads at Phase 3
-    Phase 3 Emit(U, K, R, P, oos, unbounded_approved) → E [TaskCreate] → package(E) → plan → record_handoff(plan) → C [TaskCreate] → N → converge(apportionment trace) → ConditionBearingUnitPlan
+    Phase 3 Emit(U, K, R, P, oos, unbounded_approved) → E [TaskCreate] → package(E) → plan → park_carrier(plan) → C [TaskCreate] → record_handoff(C) → N → converge(apportionment trace) → ConditionBearingUnitPlan
 
 ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
@@ -61,7 +61,8 @@ AutonomousGoal × ExecutionHorizon
   → confirm(unit_plan)                 -- user judges the apportionment together with its conditions
   → emit(goal_entries)                 -- one entry per unit; resolve_unit's single certificate — DeterminateResolution when a compiled COMPLETION condition exists, otherwise AcceptedUncoveredResolution with a non-empty accepted-completion witness and any compiled invariant conjuncts
   → package(E)                         -- constructs the whole returned plan from E's own coproduct partition, envelope included — a read-back of what was emitted, never a second derivation beside it
-  → record_handoff(plan) → (C, N)      -- parks the packaged plan in ONE durable carrier record, then emits the fixed-shape navigation block a later session dereferences to read that carrier back
+  → park_carrier(plan) → C             -- parks the packaged plan in ONE durable carrier record
+  → record_handoff(C) → N              -- emits the fixed-shape navigation block a later session dereferences to read that carrier back
   → ConditionBearingUnitPlan
 requires: user_initiated(G)            -- user declares autonomous execution intent via /apportion
 deficit:  GoalPlanUncompiled           -- activation precondition (Layer 1)
@@ -136,13 +137,13 @@ Qc             = Unit-plan confirmation interaction with (U, K, R, P, InvariantS
 ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEntry), accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration), unbounded_approved: Bool }
 AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kind: PredicateKind }
 plan           = the ConditionBearingUnitPlan value returned by this invocation
-HandoffLocator = { record: the durable identity of the emitted record set E, session: the id of the session that emitted E }
+HandoffLocator = { record: the durable identity of the carrier record C, session: the id of the session that parked it }
 C              = PlanCarrier: the ONE durable record record_handoff parks the packaged plan in — a single dereferenceable entry, distinct from E's per-unit entries, which exist for the downstream completion-predicate enforcer and carry no aggregate identity of their own
 locator(C)     = HandoffLocator { record: C's record identity as its TaskCreate returned it; session: the id of the session running record_handoff }
 N              = NavigationBlock { purpose_frame: String, canonical_locator: HandoffLocator, dereference_instruction: DereferenceInstruction, snapshot_anchor: Option(String), grounding_instruction: GroundingInstruction }
-DereferenceInstruction = an instruction to read E at the canonical locator's record identity within the session that locator names
+DereferenceInstruction = an instruction to read the carrier record at the canonical locator's record identity, within the session that locator names — one read yields the whole plan
 GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent grounding pass, and stop when a source is unreachable or a needed premise lacks support-integrity
-handoff_recorded(N, C) ≡ record_handoff parked the packaged plan in C ∧ presented N in the handoff output ∧ N.purpose_frame ≠ "" ∧ N.canonical_locator = locator(C) ∧ N.canonical_locator.session ≠ ""   -- the emission IS the text
+handoff_recorded(N, C) ≡ park_carrier wrote the packaged plan into C ∧ record_handoff presented N in the handoff output ∧ N.purpose_frame ≠ "" ∧ N.canonical_locator = locator(C) ∧ N.canonical_locator.session ≠ ""   -- the emission IS the text
 ── PHASE TRANSITIONS ──
 Phase 0: G → Probe(G) [Tool] → goal_plan_uncompiled?                   -- activation checkpoint (observe): dereferences a prior navigation block when one is in scope, else internal analysis
            ¬autonomous_intent(G) → relay → deactivate                  -- no autonomous interval in scope (extension)
@@ -173,7 +174,7 @@ Phase 2: U → ∀u∈U, ¬derived_already(u,K,R): Derive(u) → (Set(κ), Set(�
              V = Reopen(u) → residual := residual ∪ u.obligations; U := U \ {u}; K := K \ {κ∈K:κ.unit=u}; R := R \ {ρ∈R:ρ.unit=Some(u)}; Λ.fit_overrides := Λ.fit_overrides \ {u.unit_ref}; Λ.plan_conditions_stale := ⊤ → Phase 1   -- the reopened unit's derived conditions and fit-override record leave with it; P itself is not re-derived (Rule 25)
              V = Confirm ∧ ¬hard_invariants_hold(Λ) → re-present Qc naming the violated invariant
              V = Confirm ∧ hard_invariants_hold(Λ) → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.obligation | ρ ∈ R}; ∀ρ∈R: ρ.disposition := AcceptUncovered (track) → Phase 3   -- AcceptResiduals produces the accepted-completion witnesses resolve_unit reads during Emit
-Phase 3: (U, K, R, P, oos, unbounded_approved) → Emit → E [Tool: TaskCreate] → package(E) → plan → record_handoff(plan) → C [Tool: TaskCreate] → N (extension) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
+Phase 3: (U, K, R, P, oos, unbounded_approved) → Emit → E [Tool: TaskCreate] → package(E) → plan → park_carrier(plan) → C [Tool: TaskCreate] (track) → record_handoff(C) → N (extension) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
 
 Phase 0 → Phase 1: goal_plan_uncompiled(G)                             -- this edge alone performs the one-time VelocityFilter/residual init
 Phase 0 → deactivate: ¬autonomous_intent(G) ∨ condition_bearing(G) ∨ (navigation block in scope ∧ ¬dereferenceable)   -- relay the scan result; no activation
@@ -289,7 +290,8 @@ Phase 2 Qc           (constitution) → present (apportionment + derived conditi
 Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted and write ρ.disposition := AcceptUncovered for each ρ ∈ R. This supplies accepted_completion_residuals(u,R), the non-empty witness resolve_unit's accepted constructor requires at Emit. P is untouched)
 Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + obligations + resolve_unit's single UnitResolution certificate — DeterminateResolution carries the conjoined predicate and every typed conjunct when a completion κ exists; AcceptedUncoveredResolution carries a non-empty accepted-completion witness plus any invariant conjuncts when no completion κ exists — + capability requirements and feasibility notes carried verbatim; plan-level conditions as their own entries carrying scope + kind + condition + the already-checked dischargeable_when; AND exactly one plan-envelope entry carrying the Λ-accepted residuals, the computed oos set, and Λ.unbounded_approved. TodoWrite is the harness-equivalent realization; sets Λ.emitted on completion — these entries serve the enforcer; the cross-session carrier is record_handoff's own, outside Λ) [Tool]
 Phase 3 package      (track)        → Internal state update (constructs the returned ConditionBearingUnitPlan as a VIEW of E, partitioned by constructor: units from the UnitEntry members, plan_conditions from the PlanEntry members, and accepted_residuals/oos/unbounded_approved read back off the emitted PlanEnvelopeEntry — never re-derived from Λ)
-Phase 3 record_handoff (extension)  → TaskCreate, TextPresent+Proceed (FIRST park package's plan value in ONE new record C — the whole plan in one entry, so a single dereference reconstructs it — then emit N in the fixed navigation-block shape with canonical_locator = locator(C): its record half is what C's own TaskCreate returned, its session half this session's own id. N also carries a dereference instruction, the optional snapshot anchor only when exact-state determinacy is needed, and the grounding instruction; N is entry points only, never a re-authored plan. C and this emitted block are what handoff_recorded(N, C) reads)
+Phase 3 park_carrier   (track)      → TaskCreate (write package's plan value into ONE new record C — the whole plan in one entry, so a single dereference reconstructs it; C's own TaskCreate returns the record identity locator(C) reads) [Tool]
+Phase 3 record_handoff (extension)  → TextPresent+Proceed (emit N in the fixed navigation-block shape with canonical_locator = locator(C) — record half from C's TaskCreate, session half this session's own id — plus a dereference instruction, the optional snapshot anchor only when exact-state determinacy is needed, and the grounding instruction. N is entry points only, never a re-authored plan; C and this emitted block are what handoff_recorded(N, C) reads)
 converge             (extension)    → TextPresent+Proceed (apportionment trace after the navigation block has been emitted; deactivate)
 esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not ConditionBearingUnitPlan)
 seam                 (extension)    → TextPresent+Proceed (two seams, scoped separately. INBOUND activation seam (before this protocol activates): the `/bound → /apportion` and `/conduct → /apportion` legs of the `## Composition` chain relay when a user-declared chain names `/apportion` next, or an invocation follows that declared composition edge — proceed directly, citing the settling source. OUTBOUND emission seam (after this protocol emits): the `/apportion → enforcer` edge is EXCLUDED — Rule 8 (Separate activation) governs it; the `/apportion → /conduct` edge relays only under a user-declared chain naming /conduct next, never automatically, and carries the no-reentry guard of Rule 9. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
