@@ -124,7 +124,7 @@ The screening venue splits by substrate. When applying the edit is itself a subs
 **Apply executor (tiered).** Applying is execution, not judgment — the judgment already
 landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
 
-1. **Adversarial change-point scan (inherit tier, before handoff)**: the session driving
+1. **Adversarial change-point scan (inherit tier, before writing)**: the session driving
    the loop adversarially scans each planned edit site before delegating — does the fix
    interact with adjacent code, break an invariant the finding did not mention, or recur
    at unswept sites? The scan compiles the self-contained fix brief: each fix
@@ -133,7 +133,7 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    enumerated across the artifact at scan time. Each enumerated site is semantically
    verified and risk-screened per site (Rule 6) before it enters the brief; a site the
    writer discovers beyond the brief is returned for screening, never written unbriefed.
-   A brief carrying a fix whose predicate is unnamed is incomplete and does not hand off.
+   A fix whose predicate is unnamed is not written, on any tier.
 2. **Write on the low-cost tier**: hand the brief to a fresh subagent on the low-cost
    executor tier — a role, not a model name: the running harness's configuration (its
    tier registry or agent config) resolves the concrete model — the normal case, since
@@ -266,8 +266,8 @@ At exit — converged or free — surface each ledger entry with the durable hom
 8. **Tiered apply with a required completeness sweep, and recurrence escalation** — the
    inherit-tier session adversarially scans the change points and compiles the fix brief,
    naming for every fix the predicate that fix instantiates and enumerating that
-   predicate's sites across the artifact; a brief whose fix carries an unnamed predicate
-   is incomplete and does not hand off. The sweep over those sites runs in the same
+   predicate's sites across the artifact; a fix whose predicate is unnamed is not
+   written, on any tier. The sweep over those sites runs in the same
    apply pass — the Phase 5 re-review is its backstop, not its substitute — with each
    swept site semantically verified and risk-screened per site (Rule 6). A low-cost
    subagent writes the
