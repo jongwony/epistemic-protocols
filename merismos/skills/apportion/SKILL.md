@@ -93,8 +93,8 @@ Derive         = Unit → (Set(κ), Set(ρ))
 κ              = CompiledCondition { unit: Unit, obligation: Obligation, kind: PredicateKind, condition: VerifiablePredicate }
 PredicateKind  ∈ {completion, invariant}
 VerifiablePredicate = an executable check with a determinate pass/fail outcome
-ρ              = Residual { obligation: Obligation, unit: Option(Unit), kind: PredicateKind, disposition: ResidualDisposition }
-ResidualDisposition ∈ {Sharpen, AcceptUncovered}
+ρ              = Residual { obligation: Obligation, unit: Option(Unit), kind: PredicateKind, disposition: Option(ResidualDisposition) }
+ResidualDisposition ∈ {AcceptUncovered} ∪ Emergent(ResidualDisposition)   -- written only by Phase 2 AcceptResiduals; a residual carries None until that step runs, which is what the AcceptUncovered filters distinguish
 K              = Set(CompiledCondition)          -- unit-local conditions
 P              = Set(PlanCondition)              -- cross-unit conditions
 PlanCondition  = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, dischargeable_when: PlanStateRequirement }
