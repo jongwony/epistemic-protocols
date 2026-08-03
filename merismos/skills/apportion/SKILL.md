@@ -19,7 +19,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
   condition_bearing(G):   → relay(units and conditions already present) (extension) → deactivate
   uncompiled: ReadObligations(G) → O_G → VelocityFilter(O_G) → oos → init_loop_state: U=∅, residual=O_G \ {d.obligation | d∈oos}, K=∅, R=∅, P=∅,
                               plan_conditions_derived=⊥, plan_conditions_stale=⊥, fit_overrides=∅, invariant_status=⊥, accepted=∅, unbounded_approved=⊥, loop:   -- init_loop_state runs EXACTLY ONCE, on this Phase 0 → Phase 1 edge; Phase 2's Reopen re-enters "loop:" directly without re-executing it
-    Phase 1 Scan(G, residual) [per-cycle re-scan] → seams(residual) → Pack(seams, horizon) → (Anchor, proposed_unit, SpanFit, Seam) →
+    Phase 1 Scan(G, residual) [per-cycle re-scan] → seams(residual) → Pack(seams, horizon) → (Anchor, proposed_unit, SpanFit) → qualify(that cut) → Seam →
       Anchor empty ∧ residual = ∅ ∧ U = ∅ ∧ oos = ∅:  → relay(goal's scope too thin to read any obligation — route to /inquire) (extension) → deactivate
       Anchor empty ∧ residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅):  → Phase 2
       Anchor empty ∧ residual ≠ ∅:  → autonomous_pack(residual) (track) → [any packed unit with SpanFit ≠ Fits, or residual ≠ ∅ after packing: it re-enters as the next cycle's Anchor (reason surfaced as relay) → loop] | (U'' Fits-worthy) → ∀u∈U'': integrate_unit(u) → u' → U := U ∪ {u'}, residual := ∅ → surface (extension) → Phase 2
@@ -150,7 +150,7 @@ Phase 0: G → Probe(G) [Tool] → goal_plan_uncompiled?                   -- ac
            navigation block in scope ∧ (¬dereferenceable ∨ support-integrity failure) → relay → deactivate   -- handoff unreadable, whether the carrier would not resolve or the grounding pass could not support a load-bearing premise; the uncompiled arm is NOT taken (extension)
            condition_bearing(G)  → relay → deactivate                  -- units and conditions already present (extension)
            uncompiled            → ReadObligations(G) → O_G → VelocityFilter(O_G) → oos; residual := O_G \ {d.obligation | d∈oos} → Phase 1   -- ONE-TIME init, fired only on this edge; Phase 2's Reopen re-enters Phase 1 without re-running it. ReadObligations is this edge's formal producer for an owed unit's obligations entering the LOCAL compilation set; G remains unchanged
-Phase 1: (G, residual) → Scan [Tool] → seams → Pack(seams, H) → (Anchor, proposed_unit, SpanFit, Seam)   -- apportionment loop (sense); residual/oos enter this phase either freshly seeded or as Reopen left them — never re-seeded on entry
+Phase 1: (G, residual) → Scan [Tool] → seams → Pack(seams, H) → (Anchor, proposed_unit, SpanFit) → qualify(that cut) → Seam   -- Pack searches; qualify is the step that produces the Seam disposition, so the four-tuple the gate receives has a named producer for each component. apportionment loop (sense); residual/oos enter this phase either freshly seeded or as Reopen left them — never re-seeded on entry
            Anchor empty ∧ residual = ∅ ∧ U = ∅ ∧ oos = ∅ → relay(goal's scope too thin to read any obligation — route to /inquire) (extension) → deactivate
            Anchor empty ∧ residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅) → Phase 2
            Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → ∀u∈U'' (Fits-worthy packed units): integrate(u) → u' → U := U ∪ {u'} → surface (extension) → Phase 2 | re-anchor → Phase 1
