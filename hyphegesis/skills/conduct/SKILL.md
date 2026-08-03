@@ -54,17 +54,17 @@ MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }
 Warrant = ConductionWarrant ∈ {warranted, relay}  -- warranted = moves ≥ 2 ∧ conduct non-trivial; relay = single-move ∨ trivial
 MoveRegion = a contiguous sub-graph of moves sharing one conduct treatment; the partition over MS is an optional input carried into the topology and revised at the axis gate by Reorient, never derived here
 axis   ∈ {order, independence, reconciliation, termination, routing}
-  Gen(order)          ∈ {single_move (relay-only: trips the guard; never selected in Phase 2), sequential_chain, parallel_fan, dependency_dag}
-  Gen(independence)   ∈ {isolated, shared}
-  Gen(reconciliation) ∈ {aggregate, dialectic, adversarial_refute, synthesis}
-  Gen(termination)    ∈ {single_pass, bounded_rounds(n), until_dry_ceiling(k), until_goal_met}   -- n and k are constituted with the value at that region's termination gate; Select carries them inside the value, so no separate producer is needed
-  Gen(routing)        ∈ {return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding, handoff_to_span}  -- handoff_to_span: the move/region output crosses the span wall to a future span that does not share this session's context
+  Gen(order)          ∈ {single_move (relay-only: trips the guard; never selected in Phase 2), sequential_chain, parallel_fan, dependency_dag} ∪ Emergent(order)
+  Gen(independence)   ∈ {isolated, shared} ∪ Emergent(independence)
+  Gen(reconciliation) ∈ {aggregate, dialectic, adversarial_refute, synthesis} ∪ Emergent(reconciliation)
+  Gen(termination)    ∈ {single_pass, bounded_rounds(n), until_dry_ceiling(k), until_goal_met} ∪ Emergent(termination)   -- n and k are constituted with the value at that region's termination gate; Select carries them inside the value, so no separate producer is needed
+  Gen(routing)        ∈ {return_to_user, chain_to_next, handoff_to_protocol(target), deepen_on_finding, handoff_to_span} ∪ Emergent(routing)  -- handoff_to_protocol carries the protocol it routes to, constituted with the value at that region's routing gate, so the handoff is dispatchable without a second lookup; handoff_to_span: the move/region output crosses the span wall to a future span that does not share this session's context
 ResolvedValue⟨a⟩ = per-axis resolved value, axis-typed:
    ResolvedValue⟨reconciliation⟩ = Gen(reconciliation) ⊕ Compose(RVᵣ, RVᵣ, op)
    ResolvedValue⟨order⟩ = Gen(order);  ResolvedValue⟨independence⟩ = Gen(independence);  ResolvedValue⟨termination⟩ = Gen(termination);  ResolvedValue⟨routing⟩ = Gen(routing)
 op     ∈ {⨾ sequential, ∥ parallel}             -- extensible at operator level
 CT     = ConductTopology = Map(axis → Map(MoveRegion → ResolvedValue⟨axis⟩))
-CT_default = ⟨order: sequential_chain, independence: isolated, reconciliation: synthesis, termination: bounded_rounds(n), routing: return_to_user⟩ over the single region "whole"  -- the per-axis Gen defaults; n is constituted at that region's termination gate, and a region that never surfaces the axis carries it as a DefaultBound residual naming n unset, which the trace contract discloses rather than the protocol silently choosing a number. NORMALIZATION: the flat tuple is shorthand for Map(axis → {whole → value})
+CT_default = ⟨order: sequential_chain, independence: isolated, reconciliation: synthesis, termination: single_pass, routing: return_to_user⟩ over the single region "whole"  -- the per-axis Gen defaults. termination defaults to the one value needing no stop parameter, so Sufficient at the first gate always yields an executable method; bounded_rounds(n) and until_dry_ceiling(k) are constituted WITH their parameter at that region's gate, never default-bound with it unset. NORMALIZATION: the flat tuple is shorthand for Map(axis → {whole → value})
 AxisGate = { axis, region, options, default, basis }
 Checkpoint = { region: MoveRegion, decision: DeferredDecision, brief: Option(CheckpointBrief) }
 DeferredDecision ∈ {SynthesisOutputShape} ∪ Emergent(DeferredDecision)  -- a non-axis decision whose deciding evidence exists only at the checkpoint
@@ -171,7 +171,7 @@ I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → 
     support-integrity check stops and deactivates; it never selects None
 
 ── PHASE TRANSITIONS ──
-Phase 0: WP → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
+Phase 0: WP → init_state(track: every pass-scoped and historical Λ field to its empty value — sets to ∅, carried_plan and trace_contract to None; runs EXACTLY ONCE on activation, before any read) → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
 Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
            A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' is stamped by exactly one move of MS' ∧ every u ∈ I.units has its unit_ref stamped in MS' or already recorded in withdrawn_units ∧ no move of MS' is stamped with a unit_ref already in withdrawn_units): re-present Sc naming the units with more than one stamped move, the units with none, and the withdrawn units still holding a move — NOT accepted | MS := MS' →
                                        [|MS| = 1 ∧ withdrawn_units = ∅: relay-route to the surviving move, deactivate
@@ -195,7 +195,7 @@ After Phase 0 (Method Brief + Warrant):
 During Phase 2 (Conduct Design — topology elicitation):
   Entry surface: present CT_default + basis as pre-gate relay text, then open the first AxisGate and yield. The default is a surfaced candidate, not an Extension-selected method; silence carries Stop. Selecting Sufficient at this first gate is the explicit user path that binds the remaining axes to their Gen defaults.
   Each cycle surfaces the single most decision-relevant UNSURFACED axis·region by impact/leverage — the most-constrained axis first (the one whose values most divide the downstream conduct-plans), NOT a fixed order. Every surfaced axis·region is settled at its own gate this cycle — Select, Compose, or Reorient — or left to its Gen default when the loop ends by Sufficient. A decision defers past design time only when its deciding evidence does not yet exist; such a decision never enters this loop as a Gen-typed axis, and registers through the generic Checkpoint record after topology finalization. Each move integrates one ConductMove and updates MODE STATE:
-    VM = Select(value)  → record axis·region → Gen(value) in CT; surfaced_axes ∪= {(axis, region)}; auto-advance to next axis·region
+    VM = Select(value)  → record axis·region → Gen(value) in CT; surfaced_axes ∪= {(axis, region)}; auto-advance to next axis·region   -- value is a named Gen member or an Emergent(axis) one the user proposes at the gate: the presented set aids Recognition and never bounds the space, so an emergent value records exactly like a named one
     VM = Compose(op)    → [reconciliation axis ONLY] record reconciliation → Compose(RVᵣ, RVᵣ, op) in CT; surfaced_axes ∪= {(reconciliation, region)}; auto-advance
     VM = Reorient(axis, partition) → remove the (axis, region) pair from surfaced_axes and CT[axis][region]; when partition ≠ None, replace the region keys of the four edge-local axes with it so subsequent axis·region gates are edge-local over the new cut — order's single {whole} key is untouched, so the constituted global sequence survives every re-partition; re-surface the reframed (axis, region) (does NOT auto-advance)
     VM = Sufficient     → exit elicitation → FinalizeTopology fills every unresolved axis·region with its Gen default and REPLACES Λ.residuals with exactly one DefaultBound ResidualAxis per final-CT value that remains unconstituted
@@ -215,11 +215,14 @@ Convergence evidence: At handoff, present every withdrawn incoming unit with the
 
 ── CONVERGENCE ──
 conducted(WP) = dom(move_assignment) = MS
+              ∧ (∀m ∈ MS: let ⟨pos, r⟩ = move_assignment(m) in
+                     r ∈ dom(CT[independence]) ∧ pos is m's slot under CT[order][whole])   -- the assignment is INDUCED by the resolved topology, not merely total over MS
               ∧ [ (c.region, c.decision) | c ∈ checkpoints in CheckpointSet's declared order ]
                   = [ (c.region, c.decision) | c ∈ checkpoint_set(WP, CT) in that same order ]
               ∧ (∀c∈checkpoints:
                    c.brief = Some(compile_checkpoint_brief(c, WP, CT, MS)))
               ∧ substrate_handoff ≠ None
+              ∧ dom(substrate_handoff.feasibility) = {r | (_, r) ∈ range(move_assignment)}   -- every resolved region carries a verdict; an uncovered region would yield neither annotation nor degradation and still converge
               ∧ residuals = default_bound_residuals(CT, surfaced_axes)
               ∧ degradations = topology_degradations(CT)
                                    ∪ substrate_degradations(substrate_handoff, CT)
@@ -273,6 +276,7 @@ conducted(WP) = dom(move_assignment) = MS
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+Phase 0 init_state (track)           → Internal state update (seed every pass-scoped and historical Λ field once, on activation: surfaced_axes, checkpoints, residuals, degradations, move_assignment, withdrawn_units, reopened_divergences and both binding sets to ∅; carried_plan and trace_contract to None. Phase 1's withdrawn_units read and every later empty-set read consult THIS write, never an implicit default)
 Phase 0 BindPlanInput (sense)        → Internal analysis (classify the incoming carrier as LivePlan, Navigation, or NoPlan; on the LivePlan arm also read the navigation block the carrier supplies beside the plan, None when it supplies none)
 Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading the ONE carrier record that locator names, within the session it names — honor its snapshot anchor when present, and run the grounding instruction; an unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates)
 Phase 0 ReadPlan (sense)             → Internal analysis (read the carrier exactly as ReadPlan(C) defines; no field comes from session memory)

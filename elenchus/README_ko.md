@@ -41,7 +41,7 @@ Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, P
 | **Deferred(re_trigger_condition)** | Disposition 보류; 조건 충족 시 루프 복귀. Downstream은 commit 없이 진행. |
 | **Conditional(measurement)** | 외부 측정 대기 중; downstream은 provisional 태그. |
 | **Bounded(external_reference)** | 권위 있는 답은 세션 밖; downstream은 외부 reference를 인용. |
-| **Routed(downstream_protocol)** | 해당 도전은 다른 프로토콜 영역 — `/gap`, `/apportion`, `/epharmoge`, `/bound`로 이양. |
+| **Routed(downstream_protocol)** | 해당 도전은 다른 프로토콜 영역 — `/gap`, `/apportion`, `/contextualize`, `/bound`로 이양. |
 
 ## Source 식별 기준
 
