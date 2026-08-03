@@ -48,6 +48,28 @@ try { process.on("SIGHUP", () => {}); } catch {}
 
 const MIN_SESSION_BYTES = 1024;
 const MAX_USER_MSGS = 150;
+
+// A command reaches a session bare (/apportion), plugin-namespaced
+// (/merismos:apportion), or wrapped in Claude's transcript tag
+// (<command-name>/apportion</command-name>) — accept all three at a command
+// boundary, and reject prefix collisions like /apportionment.
+const invokes = (text, slash) =>
+  new RegExp(`(^|[\\s>])/([\\w.-]+:)?${slash.slice(1)}(?![\\w-])`, "m").test(text);
+
+// One entry per protocol plugin command, plus the utility commands worth
+// recording. hypomnesis-write.test.mjs checks this against the plugin skill
+// directories, so a protocol rename fails the suite instead of going silent.
+const protocolMap = {
+  "/ascend": "ascend", "/inquire": "inquire", "/ground": "ground",
+  "/recollect": "recollect", "/sublate": "sublate",
+  "/contextualize": "contextualize", "/elicit": "elicit",
+  "/ideate": "ideate", "/bound": "bound", "/conduct": "conduct",
+  "/grasp": "grasp", "/apportion": "apportion", "/induce": "induce",
+  "/preview": "preview", "/frame": "frame", "/gap": "gap",
+  "/clarify": "clarify", "/goal": "goal", "/reflect": "reflect",
+  "/write": "write", "/verify": "verify",
+};
+
 const MAX_ALL_CHARS = 80_000;
 const HAIKU_TIMEOUT = 120_000;
 
@@ -161,20 +183,6 @@ function parseSession(transcriptPath) {
   let sawAnyAssistantUsage = false;
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
-
-  // A command reaches a session either bare (/apportion) or plugin-namespaced
-  // (/merismos:apportion); match both at a command boundary.
-  const invokes = (text, slash) =>
-    new RegExp(`(^|\\s)/([\\w.-]+:)?${slash.slice(1)}(?![\\w-])`, "m").test(text);
-
-  const protocolMap = {
-    "/frame": "frame", "/gap": "gap", "/clarify": "clarify",
-    "/goal": "goal", "/bound": "bound", "/inquire": "inquire",
-    "/ground": "ground", "/apportion": "apportion",
-    "/contextualize": "contextualize", "/grasp": "grasp",
-    "/reflect": "reflect", "/recollect": "recollect",
-    "/write": "write", "/verify": "verify",
-  };
 
   let raw;
   try {
@@ -1075,7 +1083,7 @@ function main() {
   }
 }
 
-export { extractCrossRefs, buildClueMd, buildMarkersMd };
+export { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, protocolMap };
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
 try {

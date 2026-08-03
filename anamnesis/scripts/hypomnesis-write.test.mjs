@@ -4,7 +4,10 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { extractCrossRefs, buildClueMd, buildMarkersMd } from "./hypomnesis-write.mjs";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, protocolMap } from "./hypomnesis-write.mjs";
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -105,4 +108,43 @@ test("buildMarkersMd: evidence_modes is a multi-line YAML mapping (clue.md patte
   assert.ok(lines.includes("  singularity: attested"));
   assert.ok(!md.includes("evidence_modes: {"));
   assert.ok(lines.includes("derived_from: ssot:sid-4"));
+});
+
+// --- protocol invocation detection ---
+
+test("invokes matches bare, namespaced, and command-tagged forms", () => {
+  assert.equal(invokes("/apportion the goal", "/apportion"), true);
+  assert.equal(invokes("run /apportion now", "/apportion"), true);
+  assert.equal(invokes("/merismos:apportion now", "/apportion"), true);
+  assert.equal(invokes("<command-name>/apportion</command-name>", "/apportion"), true);
+  assert.equal(invokes("<command-name>/merismos:apportion</command-name>", "/apportion"), true);
+  assert.equal(invokes("/apportion", "/apportion"), true);
+});
+
+test("invokes rejects prefix collisions and absent commands", () => {
+  assert.equal(invokes("/apportionment plan", "/apportion"), false);
+  assert.equal(invokes("/background job", "/ground"), false);
+  assert.equal(invokes("apportion without a slash", "/apportion"), false);
+  assert.equal(invokes("nothing here", "/apportion"), false);
+});
+
+// A protocol rename (e.g. prosoche/attend -> merismos/apportion) must fail here
+// rather than silently dropping the protocol from every hypomnesis record.
+test("protocolMap covers every protocol plugin command on disk", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const skipDirs = new Set(["epistemic-cooperative", "node_modules", "scripts", "docs"]);
+  const commands = [];
+  for (const plugin of fs.readdirSync(repoRoot, { withFileTypes: true })) {
+    if (!plugin.isDirectory() || plugin.name.startsWith(".") || skipDirs.has(plugin.name)) continue;
+    const skillsDir = path.join(repoRoot, plugin.name, "skills");
+    if (!fs.existsSync(skillsDir)) continue;
+    for (const skill of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+      if (!skill.isDirectory()) continue;
+      if (!fs.existsSync(path.join(skillsDir, skill.name, "SKILL.md"))) continue;
+      commands.push(`/${skill.name}`);
+    }
+  }
+  assert.ok(commands.length > 0, "discovery found no protocol skills — the sweep itself is broken");
+  const missing = commands.filter((c) => !(c in protocolMap));
+  assert.deepEqual(missing, [], `protocolMap is missing: ${missing.join(", ")}`);
 });
