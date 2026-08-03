@@ -82,7 +82,7 @@ FeasibilityAnnotation = { realizable: Bool, basis: String }  -- the per-region s
 HandoffAnnotation ∈ {OwedReapportionment(unit: UnitEntry, resolver: Resolver), SpanExternalization(region: MoveRegion, record_surface: Option(String))} ∪ Emergent(HandoffAnnotation)   -- SpanExternalization carries the externalization obligation a handoff_to_span region's seam declares; record_surface names the durable surface SubstrateFeasibility proposed, and is None exactly when that region was found unrealizable — the obligation still travels, beside the substrate_infeasible degradation the same pass records
 span_externalization(r, CT, SH) = HandoffAnnotation.SpanExternalization(r, SH.feasibility[r].realizable ? Some(SH.feasibility[r].basis) : None)
 owed_reapportionment(w) = HandoffAnnotation.OwedReapportionment(w, /apportion)
-VM     = ConductMove ∈ {Select(value), Compose(via op), Reorient(axis), Sufficient}
+VM     = ConductMove ∈ {Select(value), Compose(via op), Reorient(axis, partition: Option(Set(MoveRegion))), Sufficient}   -- partition is the revised region cut the user's reframing supplies; it is the ONLY path by which a partition finer than the default whole enters CT, which is what makes edge-local values reachable
          Sufficient = a MOVE in the axis gate → converge elicitation (user Constitution declaration)
 ResidualAxis = { axis, region, status: DefaultBound, reason }
 Degradation = { region: MoveRegion, kind ∈ {independence_relaxed, substrate_infeasible}, resolved_value, reason }  -- a surfaced acknowledgment that a resolved value relaxes an epistemic guarantee or cannot be realized
@@ -188,7 +188,7 @@ Phase 3: CT → SubstrateFeasibility(extension) → SH → AnnotateHandoff(track
 
 ── LOOP ──
 After Phase 0 (Method Brief + Warrant):
-  warrant = relay     → relay-route to the single resolving protocol, emit it as the routing, deactivate (conduction not needed)
+  warrant = relay     → relay-route: the single resolving protocol, or — when conduct is trivial rather than single-move — the brief's own evident method; emit it as the routing, deactivate (conduction not needed)
   warrant = warranted → Phase 1 → Phase 2 → Phase 3
   -- Esc key → terminate (no plan emitted)
 
@@ -197,7 +197,7 @@ During Phase 2 (Conduct Design — topology elicitation):
   Each cycle surfaces the single most decision-relevant UNSURFACED axis·region by impact/leverage — the most-constrained axis first (the one whose values most divide the downstream conduct-plans), NOT a fixed order. Every surfaced axis·region is settled at its own gate this cycle — Select, Compose, or Reorient — or left to its Gen default when the loop ends by Sufficient. A decision defers past design time only when its deciding evidence does not yet exist; such a decision never enters this loop as a Gen-typed axis, and registers through the generic Checkpoint record after topology finalization. Each move integrates one ConductMove and updates MODE STATE:
     VM = Select(value)  → record axis·region → Gen(value) in CT; surfaced_axes ∪= {(axis, region)}; auto-advance to next axis·region
     VM = Compose(op)    → [reconciliation axis ONLY] record reconciliation → Compose(RVᵣ, RVᵣ, op) in CT; surfaced_axes ∪= {(reconciliation, region)}; auto-advance
-    VM = Reorient(axis) → remove the (axis, region) pair from surfaced_axes and CT[axis][region], re-surface the reframed (axis, region) (does NOT auto-advance)
+    VM = Reorient(axis, partition) → remove the (axis, region) pair from surfaced_axes and CT[axis][region]; when partition ≠ None, replace the region keys of CT with it so subsequent axis·region gates are edge-local over the new cut; re-surface the reframed (axis, region) (does NOT auto-advance)
     VM = Sufficient     → exit elicitation → FinalizeTopology fills every unresolved axis·region with its Gen default and REPLACES Λ.residuals with exactly one DefaultBound ResidualAxis per final-CT value that remains unconstituted
     EXHAUSTION (all axis·regions surfaced ∧ ¬Sufficient) → implicit Sufficient (relay): exit with the now-complete CT → FinalizeTopology replaces Λ.residuals with ∅
   BOUND: the loop is bounded by user agency — the user's Sufficient move or Esc-Stop terminates it. The seed axis set is FINITE, so each unsurfaced axis·region auto-resolves to its Gen default, and the finite set guarantees a terminal.
@@ -280,7 +280,7 @@ Phase 0 bind_I (track)               → Internal state update (write Λ.incomin
 Phase 0 retain_handoff (track)       → Internal state update (write Λ.carried_handoff on EVERY arm: the navigation block the live carrier supplied beside the plan, Some(N) after a successful dereference, or None on the NoPlan arm. The write is total, so an Amend re-entry never leaves a prior block standing beside a plan that no longer exists)
 Phase 0 MethodBrief (sense)           → Internal analysis (infer the work prospect's method-brief + span from the session)
 Phase 0 guard (sense)                 → Internal analysis (relay-test: single-move ∨ trivial-conduct → relay; anti-self-application; no Λ mutation)
-Phase 0 relay_route (extension)       → TextPresent+Proceed (the relay-test's two causes: a single-move resolution routes to that one protocol as the recommendation; a trivial-conduct multi-move prospect presents its moves in their evident order, with no topology designed and no move dropped. Either way, deactivate)
+Phase 0 relay_route (extension)       → TextPresent+Proceed (the relay-test's two causes, both read off the Method Brief because this branch precedes MoveId and no MoveSet exists yet: a single-move resolution routes to that one protocol as the recommendation; a trivial-conduct prospect presents the brief's evident method — self-evident enough that no topology is designed — naming the protocols it runs through rather than an identified move set. Either way, deactivate)
 Phase 0 Qc (constitution)             → present (conditional: warrant=warranted only — the guard decides warrant before this gate opens; work prospect confirmation + conduction-warrant; relay-test result as pre-gate text; the response is parsed as A_w — Accept proceeds, Amend(WP') writes Λ.work_prospect and re-enters the brief and its guard over the corrected prospect, Esc → loop termination at LOOP level)
 Phase 1 MoveId (observe)              → Read, Grep, Glob (the dependency graph + session context to identify candidate moves; when I ≠ None, every move derived from an incoming UnitEntry is STAMPED with that unit's unit_ref, and a unit for which no move is identified is surfaced here)
 Phase 1 Sc (constitution)            → present (MoveSet confirmation; multiSelect: true; Esc key → loop termination at LOOP level. When I ≠ None, a deselection that would leave some I.units entry with no stamped move is surfaced BEFORE the selection is accepted, naming the units it would strand. The user resolves it in the same gate via A_s: Confirm(MS') restores the move set, Withdraw(units) removes those units from I and records them in Λ.withdrawn_units as an owed re-apportionment, then re-presents over the reduced plan)
