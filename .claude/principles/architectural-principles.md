@@ -38,15 +38,15 @@ The act of creating Standing authority — writing a system prompt rule, configu
 
 ## Epistemic Cost Topology
 
-The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, axioms, formal systems), unused protocols pollute cognitive space — the cost of an unused protocol exceeds the cost of a missing one. This asymmetry justifies empirical restraint as the correct posture for protocol creation, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost function difference surfaced.
+Full text: `premise/tiering-and-scope.md`. This project's specialization: unused *protocols* (not just unused mechanisms in general) pollute cognitive space, and `project-profile-calibration.md` depends on this meta/execution asymmetry — do not delete this section, demote further only past that dependency.
 
 ## Unix Philosophy Homomorphism
 
-Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized cost situations, not follow a prescribed pipeline. The precedence order is a logical default for multi-activation, not a mandatory sequence.
+Each protocol is a single-purpose epistemic tool; composition is bottom-up. Full text: `premise/tiering-and-scope.md`.
 
 ## Session Text Composition
 
-Inter-protocol data flows as natural language in the session context — no structured data channels between protocols. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. Cell-based structured transport was considered and rejected: structuring context loses information. If structured transport becomes necessary, functor composition is the escalation path.
+Full text of the opening principle (inter-protocol data flows as natural language, not structured channels): `premise/tiering-and-scope.md`.
 
 **Stigmergy signal constraint**: Classification artifacts that flow between protocols (e.g., BoundaryMap) carry signal only, not payload. Downstream protocols read the classification and autonomously modify their own behavior — this is behavioral stigmergy, not central prescription. Loading candidates or behavioral directives into classification entries converts the signal into payload, breaking the stigmergy pattern. Test: "Is the downstream protocol reading a signal and choosing its behavior, or following a central prescription?" Former is correct.
 
@@ -110,15 +110,13 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 ## Coexistence over Mirroring
 
-Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as orthogonal tools occupying different layers:
+General principle (three-layer split, do not mirror execution capabilities into protocol definitions): `premise/tiering-and-scope.md`. This project's instance — which concrete tools occupy which layer:
 
 | Layer | Concern | Tools |
 |-------|---------|-------|
 | Epistemic | "Are we doing the right thing?" | Protocols (`/inquire`, `/gap`, `/bound`, `/frame`, ...) |
-| Execution | "Are we doing it correctly?" | Built-ins (`/batch`, `/simplify`) |
+| Execution | "Are we doing it correctly?" | Claude Code built-ins (`/batch`, `/simplify`) |
 | Verification | "Did we understand?" | Protocol (`/grasp`) |
-
-Do not mirror built-in execution capabilities (e.g., worktree isolation, PR creation) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results at handoff points only.
 
 ## Three-Tier Termination
 
@@ -148,13 +146,7 @@ The original Audience Reach principle addresses leakage FROM contributor-facing 
 
 ## Utility Skills — Adversarial Anticipation (Safeguard) Delegation
 
-**Pure relay utilities** — utilities that do NOT present gates and do NOT synthesize protocol outputs — delegate Adversarial Anticipation guards (Safeguard tier; formerly A7, see `safeguards.md §Adversarial Anticipation`) to the composed protocols they call. A pure-relay utility is not obligated to implement gate-integrity guards when it has no gates of its own.
-
-**Principle**: Adversarial Anticipation guards attach to the gate boundary, not to every wrapper layer. Wrapping a protocol in a pure-relay utility skill does NOT require re-implementing adversarial guards in the utility.
-
-**Scope boundary**: This delegation applies only to utilities that behave as relay pipes (forward outputs unchanged). Utilities that perform **output synthesis or post-processing** — selecting among, merging, or narratively recomposing protocol outputs — exercise constitutive authority (A2 constitution territory) and must inherit adversarial guards against the same rationalization paths the synthesis step introduces. The operational test: "Does the utility's output-layer add selection, interpretation, or composition beyond forwarding?" If yes, Adversarial Anticipation applies at the synthesis step even if no formal gate is presented.
-
-**Implication**: Pure-relay utility SKILL.md authoring may omit adversarial-guard sections; document only the composed protocol's guard inheritance. Synthesis utilities must document their adversarial-guard obligations at the synthesis boundary.
+General principle (pure-relay utilities delegate adversarial guards to the protocols they compose; synthesis utilities inherit guards at their synthesis boundary): `premise/gate-design.md` §Utility Delegation of Adversarial Guards. This project's instance: a pure-relay utility SKILL.md may omit adversarial-guard sections and document only the composed protocol's guard inheritance; a synthesis utility must document its own adversarial-guard obligations at the synthesis boundary.
 
 ## Direction over Accumulated Workload
 

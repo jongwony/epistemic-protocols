@@ -2,18 +2,9 @@
 
 Each project declares a profile that determines the default Cognitive Partnership Move mode (Extension or Constitution; see `.claude/rules/axioms.md` A2/A5) for ambiguous decisions. The profile is the project's calibration of how much Phase 1 entropy reduction is feasible relative to gating cost. This mechanism specializes the `.claude/principles/architectural-principles.md §Epistemic Cost Topology` meta-layer asymmetry to the project-specific calibration dimension: the meta-layer cost gradient governs *creation* decisions for new protocols, while project profile governs *gating-default* decisions for already-existing protocols.
 
-## Profile Variables (six)
+## Profile Variables (six) and Calibration Rule
 
-1. **Revision cost** — labor per unit change. Lower → broader Extension scope.
-2. **Deploy fan-out** — user count / dependent system count. Lower → broader Extension scope.
-3. **Dependency lock-in** — external dependency / API contract surface. Less → broader Extension scope.
-4. **Runtime persistence** — state durability. Lower → broader Extension scope.
-5. **Hermeneutic circle availability** — dogfooding + post-deploy correction frequency. Higher → richer correction channel for Extension.
-6. **Notation maturity** — cost of cross-domain restructuring. Higher maturity → Extension-supportive.
-
-## Calibration Rule
-
-Aggregated low-cost profile → Extension-default for ambiguous gates with Katalepsis (`/grasp`) + active-use feedback as correction channel; aggregated high-cost profile → Constitution-tighten. The aggregate function is qualitative; projects with mixed profiles classify per-decision rather than globally.
+General methodology (the six variables, their aggregate qualitative rule, and how a mixed profile classifies per-decision): `premise/calibration-methodology.md`. This project's instantiation of the Calibration Rule (low-cost profile → Extension-default): with Katalepsis (`/grasp`) serving as the comprehension-verification step plus active-use feedback as the correction channel — see `Calibration Result` in `.claude/rules/project-profile.md`.
 
 ## Scope Boundary
 

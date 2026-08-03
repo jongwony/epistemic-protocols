@@ -221,12 +221,12 @@ const perspectives = [
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
   },
   {
     name: 'claude-code-ecosystem',
     prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
-    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
   }
 ];
 

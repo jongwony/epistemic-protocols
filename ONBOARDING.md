@@ -43,9 +43,9 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
-- [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles + Gate Integrity (Safeguard tier); the north star (~10 min)
-- [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations
-- [ ] `.claude/rules/architectural-principles.md` — Epistemic Completeness Boundary (T1, per-turn); Tier Factorization and other architectural principles — including Epistemic Cost Topology — live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
+- [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — A1–A6 foundational principles + Gate Integrity, now in portable form; `.claude/rules/axioms.md` keeps the in-repo anchor headings other files cite by name (~10 min)
+- [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations; several sections are now stubs pointing at `premise/recognition-and-authority.md` and `premise/gate-design.md`
+- [ ] `.claude/rules/architectural-principles.md` — Epistemic Completeness Boundary (T1, per-turn); other architectural principles live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load) and, for their portable form, in `premise/tiering-and-scope.md` / `premise/gate-design.md`
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
@@ -67,7 +67,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ## Contribution Workflow
 
-1. **Scope** — read the rule file(s) for the area you're touching (`axioms.md` / `derived-principles.md` / `architectural-principles.md`); run `/horismos:bound` if multiple domains are in play
+1. **Scope** — read the rule file(s) for the area you're touching (`axioms.md` / `derived-principles.md` / `architectural-principles.md`, and their portable counterparts under `premise/`); run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/syneidesis:gap` before locking in a direction; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `docs/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
@@ -97,7 +97,7 @@ Two principles to internalize before your first PR:
 
 1. Clone the repo and open it in Claude Code
 2. Read `CLAUDE.md` end-to-end
-3. Read `.claude/rules/axioms.md`
+3. Read `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises now live here); `.claude/rules/axioms.md` keeps the in-repo anchor headings
 4. Run `/verify` to confirm your environment
 5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
 6. Browse recent merged PRs to see the actual pattern of contribution

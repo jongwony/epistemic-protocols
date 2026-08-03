@@ -6,7 +6,7 @@ Cross-traditional grounding for A2's relay/constitution boundary, A5's extended-
 
 ## §A2. Relay/Constitution Boundary — Philosophical Lineage
 
-A2's relay/constitution boundary (defined in `.claude/rules/axioms.md` §A2) is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
+A2's relay/constitution boundary (defined in `premise/recognition-and-authority.md`; `.claude/rules/axioms.md` §A2 keeps the in-repo anchor) is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
 
 ### Husserl's passive/active synthesis
 
@@ -30,7 +30,7 @@ The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unk
 
 ## §A5. Interaction Kind Factorization — Extended Mind Ground
 
-A5 (defined in `.claude/rules/axioms.md` §A5) shares the extended-cognition ground that A2's Philosophical Lineage establishes. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence; gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated.
+A5 (defined in `premise/interaction-factorization.md`; `.claude/rules/axioms.md` §A5 keeps the in-repo anchor) shares the extended-cognition ground that A2's Philosophical Lineage establishes. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence; gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated.
 
 ### Non-derivability from A2 (despite shared ground)
 
@@ -194,9 +194,9 @@ hypothesis, not a permanent commitment.
 
 ## Cross-references
 
-- `.claude/rules/axioms.md` §A2 (main axiom; Constitution/Relay retained as operational terms, etymology lives here)
-- `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
-- `.claude/principles/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
+- `premise/recognition-and-authority.md` (A2 principle statement; Constitution/Relay retained as operational terms in `.claude/rules/axioms.md` §A2's in-repo anchor; etymology lives here)
+- `premise/interaction-factorization.md` (A5 principle statement; `.claude/rules/axioms.md` §A5 keeps the in-repo anchor; philosophical ground lives here)
+- `premise/tiering-and-scope.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
 - `prothesis/skills/frame/SKILL.md` (forms the distinct interpretive lenses that `hyphegesis/skills/conduct/SKILL.md`'s synthesis checkpoint later fuses via Gadamer's Horizontverschmelzung — compiled into the CheckpointBrief, executed by the substrate; Katalepsis' `Horizon` gap is the comprehension-layer complement — see §Katalepsis Horizon Gap)
 

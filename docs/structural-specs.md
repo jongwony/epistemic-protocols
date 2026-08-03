@@ -192,7 +192,7 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 ## Extension Classification Audit Trail
 
-When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`axioms.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing A2 indicators.
+When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`premise/recognition-and-authority.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited; `.claude/rules/axioms.md` §A2 keeps the in-repo anchor). This is not a new principle but an audit format surfacing existing A2 indicators.
 
 ### Extension Justification Format
 
