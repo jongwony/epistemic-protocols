@@ -238,8 +238,6 @@ conducted(WP) = method_handed_off
                    ∃! tg ∈ trace_contract.termination_grounds : tg.region = b.region ∧ tg.ground = g)   -- the overlay and the per-unit bindings report the SAME ground for a region, never two
               ∧ carried_plan = I
               ∧ carried_handoff = Λ.carried_handoff
-              ∧ (I ≠ None ∧ (∃ tg ∈ trace_contract.termination_grounds : tg.ground = resolution_required(/apportion))
-                   → carried_handoff ≠ None)   -- a region owing /apportion against a plan that EXISTS must hand off the route to it: the locator names the record and the session, and the receiving session grounds with /inquire
               ∧ (I ≠ None → ∀(w, r) ∈ withdrawn_units: r ∉ {u.unit_ref | u ∈ I.units}
                                        ∧ owed_reapportionment(w) ∈ substrate_handoff.annotations)
               ∧ (∀r ∈ dom(CT[routing]): (CT[routing][r] = handoff_to_span ∨ CT[routing][r] declares crosses_span) →
