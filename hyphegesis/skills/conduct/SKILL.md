@@ -23,7 +23,7 @@ Hyphegesis(WP) → BindPlanInput(WP) → PI →
     MoveId(WP × PG) → Sc(MoveSet) → MS →
     CT_default_surface → loop( AxisGate(impact-first axis·region) → Stop → VM → update(CT) → auto-advance ) until Sufficient → FinalizeTopology(CT, surfaced_axes) → (CT, residuals, topology_degradations) → AssignMoves(MS, CT) → move_assignment → RegisterCheckpoints(WP, CT) → checkpoints →
     [I ≠ None: BindUnitConditions(I, MS, move_assignment, CT) → BindPlanConditions(I, CT, move_assignment) → (divergent sound frontiers: InvalidateTopologyProducts (records the re-opening in Λ.reopened_divergences) → re-open the deciding axis·region → back to the AxisGate loop | proceed)] →
-    SubstrateFeasibility(CT) → SH → AnnotateHandoff(withdrawn_units, CT) → CarryPlan(I) → CompileCheckpointBrief(checkpoints, WP, CT, MS) → RecordDegradation(SH, CT) → degradations → AssembleTraceContract(residuals, degradations, coverage, termination grounds) → TC → converge(conduct trace incl. trace contract + checkpoint briefs + condition bindings) → ConductedMethod ]
+    SubstrateFeasibility(CT) → SH → AnnotateHandoff(withdrawn_units, CT) → CarryPlan(I) → CompileCheckpointBrief(checkpoints, WP, CT, MS) → RecordDegradation(SH, CT) → degradations → AssembleTraceContract(residuals, degradations, coverage, termination grounds) → TC → handoff(ConductedMethod) → converge(conduct trace incl. trace contract + checkpoint briefs + condition bindings) → ConductedMethod ]
 
 ── MORPHISM ──
 WorkProspect × ProtocolGraph
@@ -116,7 +116,7 @@ UnitEntry      = { unit_ref: UnitRef, subject: String, obligations: Set(Obligati
 Obligation     = the coverage unit merismos apportioned; opaque here, carried for the consumer past this one
 OOSDeclaration = { obligation: Obligation, substrate: String, basis: Evidence }
 AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kind: PredicateKind }
-PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }  -- topology-free: contains no UnitRef, Move, MoveRegion, or order-position reference
+PlanStateRequirement = { predicate: VerifiablePredicate, basis: NonEmptySet(Evidence) }  -- topology-free: contains no UnitRef, Move, MoveRegion, or order-position reference. Merismos emits it non-empty and this side consumes it non-empty: can_invalidate judges against this basis, so weakening it here would let an unsupported plan condition bind a frontier across the seam
 PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} ∪ Emergent(PlanScope)
 PlanEntry      = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, dischargeable_when: PlanStateRequirement }
 ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEntry), accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration), unbounded_approved: Bool }  -- the incoming artifact when WP originates from /apportion
@@ -147,6 +147,7 @@ UnitGroundDisposition =
       -- the disposition when that region resolved to any other termination value
 FiringSite     = TopologyFrontier(Set(MoveRegion)) ⊎ terminal ⊎ resolution_required(Resolver, Set(MoveRegion))  -- WHERE a plan condition becomes authoritative, expressed over the RESOLVED topology's regions  -- resolution_required(resolver, affected): no sound frontier exists for this condition's dischargeable_when
 PlanConditionBinding = { plan_entry: PlanEntry, site: FiringSite }
+method_handed_off ≡ the assembled ConductedMethod was emitted to the substrate in the handoff output — the emission IS the text, so convergence is never true before the dispatch the MORPHISM's handoff arrow names
 completes(region, CT) ≡ every move CT assigns to region has reached the stop its region's resolved termination axis value defines, read off that region's recorded TerminationGround — an until_goal_met region at its ground, a bounded_rounds region at its round_bound(n), an until_dry_ceiling region at its dry_ceiling(k); single_pass completes after one pass and records no ground
 satisfies(site, req, CT) ≡ (site = resolution_required(_, _) ⟹ FALSE) ∧ (site = terminal            ⟹ ∀ region ∈ {r | (_, r) ∈ range(move_assignment)} : completes(region, CT) ∧ terminal is past every region, hence past every invalidator of req.predicate under CT) ∧ (site = TopologyFrontier(F) ⟹ F ⊆ {region | (_, region) ∈ range(move_assignment)} ∧ ∀ region ∈ F : completes(region, CT) ∧ ∀ region ∉ F : ¬can_invalidate(region, req))   -- every region the frontier has NOT completed, parallel and incomparable ones included, not only those reachable after F
 can_invalidate(region, req) ≡ some move CT assigns to region acts on what req.predicate reads, judged against req.basis. An AI judgment over the topology, surfaced with its basis at the binding, not a decidable structural test
@@ -185,7 +186,7 @@ Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →     
                                      → re-present Sc over the reduced plan
            A_s = Esc               → deactivate (loop termination at LOOP level)
 Phase 2: MS → CT_default_surface(extension: present CT_default + basis as pre-gate text) → loop( AxisGate(next axis·region, impact/leverage-first — most-constrained first: default + basis + per-value differential implications; [reconciliation axis ONLY: + ⨾/∥ composites + affordance]) → Stop → VM ∈ {Select | Compose(reconciliation only) | Reorient | Sufficient} → update(CT, surfaced_axes) → [VM=Sufficient: exit | last axis·region surfaced ∧ ¬Sufficient: implicit-Sufficient(relay) | else: auto-advance(relay) to next axis·region] ) until Sufficient ∨ all-axes-resolved → FinalizeTopology(track: replace CT + residuals + topology-derived degradations) → AssignMoves(track: replace move_assignment) → RegisterCheckpoints(track: replace checkpoints from checkpoint_set(WP, CT)) → [I ≠ None: BindUnitConditions(track: replace) → BindPlanConditions(track: replace) → (materially-divergent sound frontiers for some plan condition p: InvalidateTopologyProducts(track) → record (p, deciding pair) in reopened_divergences → re-open that axis·region → back into the axis loop above, bounded by the same Sufficient/Esc agency | else proceed)] → converge(topology trace)   -- the first AxisGate always yields the turn; silence carries Stop and selects no topology [Tool]
-Phase 3: CT → SubstrateFeasibility(extension) → SH → AnnotateHandoff(track) → CarryPlan(track) → CompileCheckpointBrief(track) → RecordDegradation(track) → AssembleTraceContract(track) → TC → converge(conduct trace incl. trace contract + checkpoint briefs + condition bindings) → handoff(ConductedMethod) → deactivate   [Tool]
+Phase 3: CT → SubstrateFeasibility(extension) → SH → AnnotateHandoff(track) → CarryPlan(track) → CompileCheckpointBrief(track) → RecordDegradation(track) → AssembleTraceContract(track) → TC → handoff(ConductedMethod) → converge(conduct trace incl. trace contract + checkpoint briefs + condition bindings) → deactivate   [Tool]
 
 ── LOOP ──
 After Phase 0 (Method Brief + Warrant):
@@ -215,7 +216,8 @@ Continue until convergence: warrant=relay deactivation, ConductedMethod handed o
 Convergence evidence: At handoff, present every withdrawn incoming unit with the resolver that owes its re-apportionment (∅ when none were withdrawn), and — when the carried plan carries a WholeGoalAcceptance condition — a visible note that its count-based discharge is permanently blocked for THIS plan — and, for every OTHER retained plan condition (non-count-scoped), a caveat that its /apportion-compiled basis predates this withdrawal and this protocol's binding of it here is not a re-validation of that basis — AND the per-move trace — for each Move, show (Move → its ⟨order_position, region⟩ in CT) — AND the per-axis topology trace — for each resolved axis·region, show (axis·region → ConductMove → value, default-bound → Gen default + DefaultBound) — AND the SubstrateHandoff annotations and the exact current-pass CheckpointSet (with every checkpoint's decision-typed compiled CheckpointBrief) — AND, when I ≠ None, the condition-binding trace: each incoming unit's UnitConditionBinding (unit_ref → move/region → the termination ground it now grounds, plus any uncited invariant conjuncts that ground carries) and each incoming plan condition's PlanConditionBinding (plan_entry → its resolved FiringSite, or resolution_required when no sound frontier exists) — AND the trace contract: the cross-cutting disclosure overlay (every final-pass residual, every degradation, every coverage cap the topology imposes, and every until_goal_met region's termination ground — a resolution_required ground shown with its owed resolver, and marked unroutable when carried_handoff is None), never silent. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-conducted(WP) = dom(move_assignment) = MS
+conducted(WP) = method_handed_off
+              ∧ dom(move_assignment) = MS
               ∧ (∀m ∈ MS: let ⟨pos, r⟩ = move_assignment(m) in
                      r ∈ dom(CT[independence]) ∧ m ∈ r ∧ pos is m's slot under CT[order][whole])   -- the assignment is INDUCED by the resolved topology: m must BELONG to the region it is assigned to, since MoveRegion is a sub-graph of moves and the four edge-local axis values are read at that region
               ∧ [ (c.region, c.decision) | c ∈ checkpoints in CheckpointSet's declared order ]
@@ -236,6 +238,8 @@ conducted(WP) = dom(move_assignment) = MS
                    ∃! tg ∈ trace_contract.termination_grounds : tg.region = b.region ∧ tg.ground = g)   -- the overlay and the per-unit bindings report the SAME ground for a region, never two
               ∧ carried_plan = I
               ∧ carried_handoff = Λ.carried_handoff
+              ∧ (I ≠ None ∧ (∃ tg ∈ trace_contract.termination_grounds : tg.ground = resolution_required(/apportion))
+                   → carried_handoff ≠ None)   -- a region owing /apportion against a plan that EXISTS must hand off the route to it: the locator names the record and the session, and the receiving session grounds with /inquire
               ∧ (I ≠ None → ∀(w, r) ∈ withdrawn_units: r ∉ {u.unit_ref | u ∈ I.units}
                                        ∧ owed_reapportionment(w) ∈ substrate_handoff.annotations)
               ∧ (∀r ∈ dom(CT[routing]): (CT[routing][r] = handoff_to_span ∨ CT[routing][r] declares crosses_span) →

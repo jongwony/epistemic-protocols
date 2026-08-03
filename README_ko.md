@@ -30,6 +30,15 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 `/onboard`를 실행하세요 — 최근 세션 기반으로 빠른 추천을 받고, 원하면 시나리오, 실행, 퀴즈를 통한 가이드 학습으로 이어갑니다.
 
+**Merismos 이전 릴리스에서 올라오는 경우**: `prosoche`(`/attend`)와 `diairesis`(`/delimit`)는 은퇴했습니다. marketplace 카탈로그에서 빠지면 목록에서는 사라지지만 이미 설치된 것이 제거되지는 않으므로, 명시적으로 지우기 전까지 기존 설치본이 계속 그 명령을 제공합니다:
+
+```
+/plugin uninstall prosoche
+/plugin uninstall diairesis
+```
+
+`/apportion`이 `/attend`를 대체합니다. `/delimit`의 외부 WBS 재단은 대체가 아니라 폐기이며, 근거는 [`merismos/skills/apportion/SKILL.md`](./merismos/skills/apportion/SKILL.md)의 granularity 항목에 있습니다.
+
 ### Codex
 
 이 레포지토리는 Codex 플러그인 marketplace이기도 합니다. GitHub에서 추가하려면:
