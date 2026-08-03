@@ -48,8 +48,6 @@ WP     = WorkProspect: the work or goal facing object-level cognition, with its 
 PG     = ProtocolGraph: available protocols and move-neighbors (the dependency graph plus ad-hoc moves)
 Move   = CognitiveMove { step: protocol invocation | analysis pass | delegation, unit_ref: Option(UnitRef) }
 MS     = MoveSet: (WP × PG) → {Move₁ … Moveₙ}, n ≥ 2
-stamp_functional(MS') ≡ ∀ r ∈ {m.unit_ref | m ∈ MS', m.unit_ref ≠ None} : |{m ∈ MS' | m.unit_ref = r}| = 1
-                      ∧ ∀ u ∈ I.units : u.unit_ref ∈ {m.unit_ref | m ∈ MS'} ∨ u.unit_ref ∈ {r | (_, r) ∈ withdrawn_units}
 A_s    = SelectionJudgment ∈ {Confirm(MS'), Withdraw(Set(UnitEntry)), Esc}
 MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }  -- span = invocation → the next planned /compact or /clear
 Warrant = ConductionWarrant ∈ {warranted, relay}  -- warranted = moves ≥ 2 ∧ conduct non-trivial; relay = single-move ∨ trivial
@@ -71,8 +69,6 @@ Checkpoint = { region: MoveRegion, decision: DeferredDecision, brief: Option(Che
 DeferredDecision = SynthesisOutputShape
 CheckpointSet = ordered Set(Checkpoint)
                -- ordered by topology order between regions, with registration order breaking ties
-SynthesisCheckpoint = the Checkpoint c with c.decision = SynthesisOutputShape, registered per region whose
-               --   resolved reconciliation ∋ synthesis ∧ routing ∈ {return_to_user, handoff_to_span}
 CheckpointBrief = SynthesisBrief
 SynthesisBrief = { findings_ref: Map(Move → Slot(output_ref)), convergences: Slot(Set(finding)), divergences: Slot(Set(finding)), decision_axes: Slot(Set(decision_axis)), private_gap_slots: Set(GapSlot), fusion_candidates: Slot(Set(fusion_candidate)), output_shape_candidates: Slot(Set(OutputShape)) }
                -- the Recognition presentation contract for SynthesisOutputShape
@@ -83,8 +79,6 @@ checkpoint_set(WP, CT) =
                { Checkpoint(r, SynthesisOutputShape, None) |
                    CT[reconciliation][r] contains synthesis ∧
                    CT[routing][r] ∈ {return_to_user, handoff_to_span} }
-checkpoint_registry_projection(CP) = [ (c.region, c.decision) | c ∈ CP in CP order ]
-               -- CP order = CheckpointSet's own declared order
 compile_checkpoint_brief(c, WP, CT, MS) =
                SynthesisBrief compiled from current CT + MS when c.decision = SynthesisOutputShape
 SH     = SubstrateHandoff = { feasibility: Map(MoveRegion → FeasibilityAnnotation), annotations: Set(HandoffAnnotation) }
@@ -132,7 +126,6 @@ derived_termination_grounds(CT, MS, move_assignment, I) = exactly one Terminatio
 ConductedMethod = { topology: CT, move_assignment: Map(Move → ⟨order_position, region⟩), checkpoints: CheckpointSet, substrate_handoff: SH, trace_contract: TraceContract, unit_condition_bindings: Set(UnitConditionBinding), plan_condition_bindings: Set(PlanConditionBinding), carried_plan: Option(ConditionBearingUnitPlan) }
          -- the method PLAN; handed off (the substrate executes)
          -- order_position = the move's slot in the order topology (Gen(order) shape); the per-region axis values (independence/reconciliation/termination/routing) are read from CT[axis][region]
-handoff_plan = the ConductedMethod value this invocation constructs and, on convergence, hands off
 
 -- Consumed from merismos (see merismos/skills/apportion/SKILL.md TYPES for the canonical producer
 --   definition):
@@ -195,9 +188,7 @@ ReadPlan(E)    = ConditionBearingUnitPlan {
                -- envelope(E) is E's unique PlanEnvelopeEntry
 I              = Option(ConditionBearingUnitPlan)
 
-region_of(v)   = the MoveRegion move_assignment placed UnitMoveBinding(v.unit_ref) in
-units_of(r)    = { v ∈ I.units | region_of(v) = r }
-determinate_leaves(r) = { d | v ∈ units_of(r),
+determinate_leaves(r) = { d | v ∈ I.units, move_assignment placed UnitMoveBinding(v.unit_ref) in region r,
                              DeterminateResolution { predicate: d, ... } = v.resolution }
 UnitMoveBinding = total Map(UnitRef → Move)
                --   DERIVED: { (m.unit_ref, m) | m ∈ MS, m.unit_ref ≠ None }
@@ -232,29 +223,8 @@ satisfies(site, req, CT) ≡
 can_invalidate(region, req) ≡ some move CT assigns to region acts on what req.predicate reads, judged
                --   against req.basis. An AI judgment over the topology, surfaced with its basis at the
                --   binding, not a decidable structural test
-affected_regions(req) ≡ {r | (_, r) ∈ range(move_assignment) ∧ can_invalidate(r, req)}
 resolution_resolver(affected) = the Resolver derived for the moves assigned to affected by TerminationGround's
                --   per-move precedence; multiple owners form the conjunction that must discharge the binding
-earliest(S₁, S₂, CT) ≡ defined over FiringSite, not over region sets alone:
-               --   S₁, S₂ both TopologyFrontier: every region of S₁ completes no later than every region of
-               --     S₂ under CT's resolved order
-               --   S₂ = terminal, S₁ a frontier: TRUE
-               --   S₁ = terminal: TRUE only when S₂ = terminal
-               --   either side resolution_required: FALSE
-deciding_divergence(p, CT) : Option(axis × MoveRegion) = TOTAL:
-               --   = Some((axis, region))   when (axis, region) is the pair whose resolved CT value is what
-               --       makes p's OWN candidate sound sites diverge: {S | satisfies(S, p.dischargeable_when,
-               --       CT)} contains ≥2 members with materially different downstream futures (an AI judgment
-               --       over the topology, in the same sense can_invalidate and earliest already are)
-               --   = None                    when at most one sound site exists for p under the CURRENT CT,
-               --       or when several sound sites exist but agree on downstream future
-InvalidateTopologyProducts =
-                 Λ.residuals := ∅;
-                 Λ.degradations := ∅;
-                 Λ.move_assignment := ∅;
-                 Λ.checkpoints := ∅;
-                 Λ.unit_condition_bindings := ∅;
-                 Λ.plan_condition_bindings := ∅
 
 ── WP-BINDING ──
 bind(WP) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_prospect
@@ -274,7 +244,7 @@ I = LivePlan(plan) → Some(plan) | Navigation(N) → DereferencePlan(N) → Rea
 ── PHASE TRANSITIONS ──
 Phase 0: WP → BindPlanInput(WP) → PI → [LivePlan(plan): bind_I(Some(plan)) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | E → ReadPlan(E) → plan → bind_I(Some(plan))) | NoPlan: bind_I(None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → continue]   [Tool]
 Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
-           A_s = Confirm(MS')      → [I ≠ None ∧ ¬stamp_functional(MS'): re-present Sc naming the units with more than one stamped move, and the units with none — NOT accepted | MS := MS' →
+           A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' is stamped by exactly one move of MS' ∧ every u ∈ I.units has its unit_ref stamped in MS' or already recorded in withdrawn_units): re-present Sc naming the units with more than one stamped move, and the units with none — NOT accepted | MS := MS' →
                                        [|MS| = 1 ∧ withdrawn_units = ∅: relay-route to the surviving move's protocol, deactivate
                                        | |MS| = 1 ∧ withdrawn_units ≠ ∅: PresentOwedReapportionment(withdrawn_units) → relay-route to the surviving move's protocol AND present {owed_reapportionment(w) | (w, r) ∈ withdrawn_units} directly in that same relay text
                                        | |MS| = 0 ∧ withdrawn_units = ∅: relay(no move survives — nothing to conduct or route to), deactivate
@@ -316,8 +286,8 @@ Convergence evidence: At handoff, present every withdrawn incoming unit with the
 
 ── CONVERGENCE ──
 conducted(WP) = dom(move_assignment) = MS
-              ∧ checkpoint_registry_projection(checkpoints)
-                  = checkpoint_registry_projection(checkpoint_set(WP, CT))
+              ∧ [ (c.region, c.decision) | c ∈ checkpoints in CheckpointSet's declared order ]
+                  = [ (c.region, c.decision) | c ∈ checkpoint_set(WP, CT) in that same order ]
               ∧ (∀c∈checkpoints:
                    c.brief = Some(compile_checkpoint_brief(c, WP, CT, MS)))
               ∧ substrate_handoff ≠ None
@@ -349,17 +319,24 @@ conducted(WP) = dom(move_assignment) = MS
                       ∧ (b.disposition = executor_enforced(cl) → cl ∈ trace_contract.coverage_limits))
                  ∧ (∀p ∈ I.plan_conditions: ∃! b ∈ plan_condition_bindings :
                         b.plan_entry = p ∧ ((b.site = resolution_required(resolution_resolver(affected), affected)
-                                             ∧ affected = affected_regions(p.dischargeable_when)
+                                             ∧ affected = {r | (_, r) ∈ range(move_assignment) ∧ can_invalidate(r, p.dischargeable_when)}
                                              ∧ affected ≠ ∅
                                              ∧ (¬∃ S : satisfies(S, p.dischargeable_when, CT)
-                                                ∨ (∃ dd : deciding_divergence(p, CT) = Some(dd) ∧ (p, dd) ∈ reopened_divergences))
+                                                ∨ (∃ (a, r) : (p, (a, r)) ∈ reopened_divergences ∧ the resolved CT value at
+                                                     (a, r) is what makes p's OWN sound sites {S | satisfies(S,
+                                                     p.dischargeable_when, CT)} hold ≥2 members with materially different
+                                                     downstream futures — an AI judgment over the topology, as can_invalidate is))
                                              ∨ (satisfies(b.site, p.dischargeable_when, CT)
-                                                ∧ ¬∃ S₂ : satisfies(S₂, p.dischargeable_when, CT)
-                                                          ∧ earliest(S₂, b.site, CT) ∧ S₂ ≠ b.site))))
+                                                ∧ ¬∃ S₂ : satisfies(S₂, p.dischargeable_when, CT) ∧ S₂ ≠ b.site
+                                                          ∧ S₂ is no later than b.site over FiringSite, not over region sets
+                                                            alone — both frontiers: every region of S₂ completes no later than
+                                                            every region of b.site under CT's resolved order; S₂ a frontier and
+                                                            b.site terminal: TRUE; S₂ terminal: TRUE only when b.site is
+                                                            terminal; either side resolution_required: FALSE))))
               ∧ (I ≠ None → ∀b ∈ unit_condition_bindings: ∃u ∈ I.units: b.unit_ref = u.unit_ref)
               ∧ (I ≠ None → ∀b ∈ plan_condition_bindings: b.plan_entry ∈ I.plan_conditions)
               ∧ (I = None → unit_condition_bindings = ∅ ∧ plan_condition_bindings = ∅)
--- handoff_plan (the ConductedMethod value — see TYPES) is well-formed exactly when conducted(WP) holds.
+-- The ConductedMethod value this invocation constructs and, on convergence, hands off is well-formed exactly when conducted(WP) holds.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -378,7 +355,7 @@ Phase 1 PresentOwedReapportionment (extension) → TextPresent+Proceed (fires on
 Phase 2 CT_default_surface (extension) → TextPresent+Proceed (present CT_default + basis as pre-gate relay context, then proceed only to AxisGate; it selects no topology value)
 Phase 2 AxisGate (constitution)       → present (always opens on Phase 2 entry for warranted work; single axis·region gate, impact/leverage-first: default + basis + per-value differential implications; reconciliation axis ONLY additionally surfaces ⨾/∥ composites + a one-line affordance; moves {Select | Compose(reconciliation) | Reorient | Sufficient}; Stop holds on silence; Esc key → loop termination at LOOP level)
 Phase 2 FinalizeTopology (track)      → internal Λ replacement (fill every unresolved axis·region with its Gen default; replace Λ.topology with the complete CT, Λ.residuals with exactly default_bound_residuals(CT, surfaced_axes), and Λ.degradations with topology_degradations(CT))
-Phase 2 RegisterCheckpoints (track)   → internal Λ replacement (write Λ.checkpoints := checkpoint_set(WP, CT) on every finalized topology pass: SynthesisCheckpoint values at their qualifying reconciliation points)
+Phase 2 RegisterCheckpoints (track)   → internal Λ replacement (write Λ.checkpoints := checkpoint_set(WP, CT) on every finalized topology pass: the SynthesisOutputShape checkpoints at their qualifying reconciliation points)
 Phase 2 converge (extension)          → TextPresent+Proceed (topology trace: per resolved axis·region → ConductMove → value, default-bound → Gen default + DefaultBound disposition; every registered checkpoint appears brief-less here — briefs compile at Phase 3)
 Phase 3 SubstrateFeasibility (extension) → TextPresent+Proceed (per resolved MoveRegion, compute and SURFACE a FeasibilityAnnotation{realizable, basis} as pre-gate relay text; for a routing=handoff_to_span region, realizable/basis is exactly the proposed durable record surface or its absence; an extension op surfaces only — it does NOT mutate Λ)
 Phase 2 AssignMoves  (track)             → internal Λ replacement (PLACE every selected move from the current CT's order and region shape and REPLACE Λ.move_assignment with that exact map. This produces dom(move_assignment) = MS)
@@ -392,7 +369,7 @@ Phase 3 RecordDegradation (track)        → TaskUpdate/internal Λ update (writ
 Phase 3 AssembleTraceContract (track)    → internal Λ update (ASSEMBLE the cross-cutting disclosure overlay: populate Λ.trace_contract from Λ.residuals + Λ.degradations + derived_coverage_limits(CT, unit_condition_bindings) + derived_termination_grounds(CT, MS, move_assignment, I); an INVARIANT aggregation, never gated)
 Phase 3 surface trace contract (extension) → TextPresent+Proceed (surface the trace contract in the convergence trace: every residual, degradation, coverage cap, and termination ground (a resolution_required ground names its owed resolver); relay only — it does NOT mutate Λ)
 Phase 3 surface checkpoint briefs (extension) → TextPresent+Proceed (surface each compiled CheckpointBrief in the convergence trace; follows degradation recording, so a brief demoted to advisory is surfaced with that demotion visible; relay only — it does NOT mutate Λ)
-Phase 3 handoff (dispatch)            → Agent (hand the ConductedMethod plan to the substrate; the substrate executes — execution is out of scope; this dispatch is the plan's own handoff witness — see handoff_plan, TYPES)
+Phase 3 handoff (dispatch)            → Agent (hand the ConductedMethod plan to the substrate; the substrate executes — execution is out of scope; this dispatch is the plan's own handoff witness)
 Λ (track)                             → TaskCreate/TaskUpdate (work prospect + framing shifts durable; per-axis bookkeeping stays in session)
 Seam transition to declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares, settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged. A routing=handoff_to_span region names no next protocol: its seam declares an externalization obligation the executing substrate discharges by writing the output to a substrate-owned record, and the future span receives a navigation block over that record in the fixed shape Rule 19 declares)
 -- Substrate realization: at the Phase 3 seam, read the session's actually-loaded inventory — its agents, skills, MCP servers, and the tools/system-prompt each exposes — and propose realizable substrates from that live inventory rather than a fixed list; the inventory is the authority. Topology→substrate feasibility is a non-epistemic substrate handoff: the protocol surfaces feasibility, the substrate enforces realizability. A routing = handoff_to_span region requires a durable record surface its output can be externalized to across the span wall, proposed as the bridge substrate at this seam. Surface feasibility per resolved topology value as a delegated handoff annotation (extension: surface only); when the read inventory cannot realize the resolved topology — including no realizable durable record surface for a handoff_to_span region — record a substrate_infeasible degradation (track: the Λ.degradations mutation). The (constitution)/(extension)/(track) markers above remain the authoritative axis.
