@@ -269,9 +269,10 @@ conducted(WP) = dom(move_assignment) = MS
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 BindPlanInput (sense)        → Internal analysis (classify the incoming carrier as LivePlan, Navigation, or NoPlan; on the LivePlan arm also read the locator the carrier supplies beside the plan, None when it supplies none)
-Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading its record identity within the session that locator names — honor its snapshot anchor when present, and run the grounding instruction; an unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates. On a successful dereference this step also WRITES Λ.carried_locator := Some(N.canonical_locator))
+Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading its record identity within the session that locator names — honor its snapshot anchor when present, and run the grounding instruction; an unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates)
 Phase 0 ReadPlan (sense)             → Internal analysis (read E exactly as ReadPlan(E) defines; no field comes from session memory)
 Phase 0 bind_I (track)               → Internal state update (write Λ.incoming_plan from the resolved carrier: Some(live plan), Some(ReadPlan(E)), or None only for explicit NoPlan)
+Phase 0 retain_locator (track)       → Internal state update (write Λ.carried_locator on either plan-bearing arm: the locator the live carrier supplied beside the plan, or Some(N.canonical_locator) after a successful dereference)
 Phase 0 MethodBrief (sense)           → Internal analysis (infer the work prospect's method-brief + span from the session)
 Phase 0 guard (sense)                 → Internal analysis (relay-test: single-move ∨ trivial-conduct → relay; anti-self-application; no Λ mutation)
 Phase 0 relay_route (extension)       → TextPresent+Proceed (single-move resolution: route to that one protocol as the recommendation, deactivate)
