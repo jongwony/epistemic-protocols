@@ -53,21 +53,26 @@ const MAX_USER_MSGS = 150;
 // (/merismos:apportion), or wrapped in Claude's transcript tag
 // (<command-name>/apportion</command-name>) — accept all three at a command
 // boundary, and reject prefix collisions like /apportionment.
-const invokes = (text, slash) =>
-  new RegExp(`(^|[\\s>])/([\\w.-]+:)?${slash.slice(1)}(?![\\w-])`, "m").test(text);
+const invokes = (text, slash, plugin) => {
+  const ns = plugin ? `(${plugin}:)?` : "";
+  return new RegExp(`(^|[\\s>])/${ns}${slash.slice(1)}(?![\\w-])`, "m").test(text);
+};
 
 // One entry per protocol plugin command, plus the utility commands worth
 // recording. hypomnesis-write.test.mjs checks this against the plugin skill
 // directories, so a protocol rename fails the suite instead of going silent.
 const protocolMap = {
-  "/ascend": "ascend", "/inquire": "inquire", "/ground": "ground",
-  "/recollect": "recollect", "/sublate": "sublate",
-  "/contextualize": "contextualize", "/elicit": "elicit",
-  "/ideate": "ideate", "/bound": "bound", "/conduct": "conduct",
-  "/grasp": "grasp", "/apportion": "apportion", "/induce": "induce",
-  "/preview": "preview", "/frame": "frame", "/gap": "gap",
-  "/clarify": "clarify", "/goal": "goal", "/reflect": "reflect",
-  "/write": "write", "/verify": "verify",
+  "/ascend": ["ascend", "anagoge"], "/inquire": ["inquire", "aitesis"],
+  "/ground": ["ground", "analogia"], "/recollect": ["recollect", "anamnesis"],
+  "/sublate": ["sublate", "elenchus"], "/contextualize": ["contextualize", "epharmoge"],
+  "/elicit": ["elicit", "euporia"], "/ideate": ["ideate", "heuresis"],
+  "/bound": ["bound", "horismos"], "/conduct": ["conduct", "hyphegesis"],
+  "/grasp": ["grasp", "katalepsis"], "/apportion": ["apportion", "merismos"],
+  "/induce": ["induce", "periagoge"], "/preview": ["preview", "proplasma"],
+  "/frame": ["frame", "prothesis"], "/gap": ["gap", "syneidesis"],
+  "/clarify": ["clarify", null], "/goal": ["goal", null],
+  "/reflect": ["reflect", null], "/write": ["write", null],
+  "/verify": ["verify", null],
 };
 
 const MAX_ALL_CHARS = 80_000;
@@ -209,8 +214,8 @@ function parseSession(transcriptPath) {
     if (etype === "user") {
       const text = textFromContent(entry.message?.content ?? "");
       if (!text) continue;
-      for (const [slash, name] of Object.entries(protocolMap)) {
-        if (invokes(text, slash)) protocols.add(name);
+      for (const [slash, [name, plugin]] of Object.entries(protocolMap)) {
+        if (invokes(text, slash, plugin)) protocols.add(name);
       }
       if (userMsgs.length < MAX_USER_MSGS) userMsgs.push({ text, ts });
     }

@@ -113,19 +113,20 @@ test("buildMarkersMd: evidence_modes is a multi-line YAML mapping (clue.md patte
 // --- protocol invocation detection ---
 
 test("invokes matches bare, namespaced, and command-tagged forms", () => {
-  assert.equal(invokes("/apportion the goal", "/apportion"), true);
-  assert.equal(invokes("run /apportion now", "/apportion"), true);
-  assert.equal(invokes("/merismos:apportion now", "/apportion"), true);
-  assert.equal(invokes("<command-name>/apportion</command-name>", "/apportion"), true);
-  assert.equal(invokes("<command-name>/merismos:apportion</command-name>", "/apportion"), true);
-  assert.equal(invokes("/apportion", "/apportion"), true);
+  assert.equal(invokes("/apportion the goal", "/apportion", "merismos"), true);
+  assert.equal(invokes("run /apportion now", "/apportion", "merismos"), true);
+  assert.equal(invokes("/merismos:apportion now", "/apportion", "merismos"), true);
+  assert.equal(invokes("<command-name>/apportion</command-name>", "/apportion", "merismos"), true);
+  assert.equal(invokes("<command-name>/merismos:apportion</command-name>", "/apportion", "merismos"), true);
+  assert.equal(invokes("/unrelated:apportion", "/apportion", "merismos"), false);
+  assert.equal(invokes("/apportion", "/apportion", "merismos"), true);
 });
 
 test("invokes rejects prefix collisions and absent commands", () => {
-  assert.equal(invokes("/apportionment plan", "/apportion"), false);
-  assert.equal(invokes("/background job", "/ground"), false);
-  assert.equal(invokes("apportion without a slash", "/apportion"), false);
-  assert.equal(invokes("nothing here", "/apportion"), false);
+  assert.equal(invokes("/apportionment plan", "/apportion", "merismos"), false);
+  assert.equal(invokes("/background job", "/ground", "analogia"), false);
+  assert.equal(invokes("apportion without a slash", "/apportion", "merismos"), false);
+  assert.equal(invokes("nothing here", "/apportion", "merismos"), false);
 });
 
 // A protocol rename (e.g. prosoche/attend -> merismos/apportion) must fail here
@@ -141,10 +142,12 @@ test("protocolMap covers every protocol plugin command on disk", () => {
     for (const skill of fs.readdirSync(skillsDir, { withFileTypes: true })) {
       if (!skill.isDirectory()) continue;
       if (!fs.existsSync(path.join(skillsDir, skill.name, "SKILL.md"))) continue;
-      commands.push(`/${skill.name}`);
+      commands.push([`/${skill.name}`, plugin.name]);
     }
   }
   assert.ok(commands.length > 0, "discovery found no protocol skills — the sweep itself is broken");
-  const missing = commands.filter((c) => !(c in protocolMap));
-  assert.deepEqual(missing, [], `protocolMap is missing: ${missing.join(", ")}`);
+  const missing = commands.filter(([c]) => !(c in protocolMap));
+  assert.deepEqual(missing, [], `protocolMap is missing: ${missing.map(([c]) => c).join(", ")}`);
+  const wrongPlugin = commands.filter(([c, p]) => protocolMap[c]?.[1] !== p);
+  assert.deepEqual(wrongPlugin, [], `protocolMap plugin mismatch: ${wrongPlugin.map(([c, p]) => `${c} should be ${p}`).join(", ")}`);
 });
