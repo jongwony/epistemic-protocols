@@ -12,7 +12,7 @@ Apportion an autonomous goal into coarse execution units and derive each unit's 
 
 ## What It Does
 
-Merismos is a stateless plan compiler with two halves. It reads the goal's obligations and cuts them into coarse units at seams it can cite — a dependency edge, a deliverable boundary, a verification point, an ownership change — judging each unit against one execution horizon. Then it derives each unit's conditions: a completion predicate (the unit achieved its result) plus any invariant predicates (the run preserved a boundary while achieving it), keeping the conditions whose subject is the whole goal at plan level rather than distributing them across units. It emits one goal entry per unit, that unit's conditions conjoined into a single leaf predicate, for a downstream completion-predicate enforcer (on Claude Code: `/goal`). Obligations that can only be guarded by pre-action interception are declared out of scope and delegated to the harness substrate.
+Merismos is a stateless plan compiler with two halves. It reads the goal's obligations and cuts them into coarse units at seams it can cite — a dependency edge, a deliverable boundary, a verification point, an ownership change — judging each unit against one execution horizon. Then it derives each unit's conditions: a completion predicate (the unit achieved its result) plus any invariant predicates (the run preserved a boundary while achieving it), keeping the conditions whose subject is the whole goal at plan level rather than distributing them across units. It emits one goal entry per unit carrying that unit's resolution certificate — the conditions conjoined into a single leaf predicate where a completion condition was derivable, an accepted-completion witness plus any invariant conjuncts where none was — for a downstream completion-predicate enforcer (on Claude Code: `/goal`). Obligations that can only be guarded by pre-action interception are declared out of scope and delegated to the harness substrate.
 
 The emitted plan is deliberately **pre-conduct**: it carries unit boundaries and conditions only. Order, independence, reconciliation, termination topology and routing remain `/conduct`'s.
 
@@ -20,7 +20,7 @@ The emitted plan is deliberately **pre-conduct**: it carries unit boundaries and
 
 ## When It Activates
 
-- User calls `/apportion` (user-initiated only) for a goal an autonomous run is intended for, when that goal is not yet carried by units each bearing a determinate completion condition
+- User calls `/apportion` (user-initiated only) for a goal an autonomous run is intended for, when that goal is not yet carried by units each bearing its own settled completion condition
 
 ## The Two Hard Invariants
 
