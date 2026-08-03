@@ -87,7 +87,6 @@ ProposedUnit   = { subject: String, obligations: Set(Obligation), fit: SpanFit, 
 Unit           = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam,
                     capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
 SpanFit        ∈ {Fits, Overflows, Indeterminate}
-fit_override_recorded(u) ≡ u.unit_ref ∈ Λ.fit_overrides
 Seam           = Grounded(Evidence) ⊎ Heuristic
 Evidence       = { source: String, content: String }
 CapabilityRequirement = a functional description of what carrying out the unit's work requires — descriptive only
@@ -108,7 +107,6 @@ PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} 
 UnitRef        = a stable identity carried by an emitted unit, assigned at integration and never reused
 PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }
 topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference
-leaf(u)        = ⋀ { κ.condition | κ ∈ K, κ.unit = u }
 LeafConjunct   = { condition: VerifiablePredicate, kind: PredicateKind }
 NonEmptySet(T) = { S: Set(T) | S ≠ ∅ }
 conjuncts(u)   = { { condition: κ.condition, kind: κ.kind } | κ ∈ K, κ.unit = u }
@@ -121,23 +119,13 @@ UnitResolution = DeterminateResolution { predicate: VerifiablePredicate,
                                                 conjuncts: Set(LeafConjunct) }
                -- THE CROSS-SEAM TERMINATION CERTIFICATE
 resolve_unit(u, K, R) : UnitResolution
-               = DeterminateResolution { predicate: leaf(u), conjuncts: conjuncts(u) }
+               = DeterminateResolution { predicate: ⋀ { κ.condition | κ ∈ K, κ.unit = u }, conjuncts: conjuncts(u) }
                    when ∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion
                = AcceptedUncoveredResolution {
                    accepted_completion_residuals: accepted_completion_residuals(u, R),
                    conjuncts: conjuncts(u) }
                    when ∄ κ ∈ K : κ.unit = u ∧ κ.kind = completion
                     ∧ accepted_completion_residuals(u, R) ≠ ∅
-accepted_completion_projection(candidate_plan) =
-               { a.obligation | a ∈ candidate_plan.accepted_residuals, a.kind = completion }
-resolution_holds(r, candidate_plan) ≡
-               (r = DeterminateResolution { predicate: d, ... } ⟹ d holds)
-               ∧ (r = AcceptedUncoveredResolution { accepted_completion_residuals: A, conjuncts: C } ⟹
-                    A ≠ ∅ ∧ A ⊆ accepted_completion_projection(candidate_plan)
-                    ∧ ∀ c ∈ C : c.condition holds)
-resolution_basis(n) = Evidence { source: "the current plan's UnitResolution and accepted-residual projections",
-                                 content: "expected aggregate resolution count = " + String(n) +
-                                          "; all executable resolution conditions; aggregate accepted-completion record" }
 E              = Set(GoalEntry)        -- emission
 GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, obligations: Set(Obligation),
                              resolution: UnitResolution,
@@ -149,7 +137,6 @@ GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, obligations: Se
                              unbounded_approved: Bool }
 oos            = Set(OOSDeclaration)   -- obligations guardable only by pre-action interception
 OOSDeclaration = { obligation: Obligation, substrate: String, basis: Evidence }
-declared_oos(o) ≡ ∃ d ∈ oos : d.obligation = o ∧ d.substrate ≠ ""
 ReadObligations = G → O_G
 VelocityFilter = O_G → oos
 InvariantStatus = { coverage_complete: Bool, span_fit: Bool, termination_covered: Bool,
@@ -158,16 +145,12 @@ InvariantStatus = { coverage_complete: Bool, span_fit: Bool, termination_covered
 hard_invariants_hold(Λ) ≡ Λ.invariant_status.coverage_complete ∧ Λ.invariant_status.span_fit
                         ∧ Λ.invariant_status.termination_covered ∧ Λ.invariant_status.obligations_derived
                         ∧ Λ.invariant_status.oos_substrate_named ∧ Λ.invariant_status.plan_conditions_topology_free
-coverage_complete(U, O_G) ≡ ∀ o ∈ O_G : (∃ u ∈ U : o ∈ u.obligations) ∨ declared_oos(o) ∨ accepted_uncovered(o)
-span_fit(U)    ≡ ∀ u ∈ U : u.fit = Fits ∨ fit_override_recorded(u)
+coverage_complete(U, O_G) ≡ ∀ o ∈ O_G : (∃ u ∈ U : o ∈ u.obligations) ∨ (∃ d ∈ oos : d.obligation = o ∧ d.substrate ≠ "") ∨ o ∈ Λ.accepted
+span_fit(U)    ≡ ∀ u ∈ U : u.fit = Fits ∨ u.unit_ref ∈ Λ.fit_overrides
 obligation_derived(u, K, R) ≡ ∀ o ∈ u.obligations : (∃ κ ∈ K : κ.unit = u ∧ κ.obligation = o)
                                                   ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.obligation = o)
 derived_already(u, K, R) ≡ (∃ κ ∈ K : κ.unit = u) ∨ (∃ ρ ∈ R : ρ.unit = Some(u))
-unit_termination_covered(u, K, R) ≡ (∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion)
-                                 ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion)
 acceptance_present(P) ≡ ∃ p ∈ P : p.scope = WholeGoalAcceptance
-accepted_uncovered(o) ≡ o ∈ Λ.accepted
-unbounded_approved ≡ Λ.unbounded_approved
 Aᵤ             = UnitJudgment ∈ {AcceptUnit, Recut(direction), OverrideFit, Sufficient}
 V              = Judgment ∈ {Confirm, Adjust(direction), Reopen(unit)}
 Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, ApproveUnbounded}
@@ -176,12 +159,17 @@ plan_condition(d) = PlanCondition { scope: WholeGoalAcceptance, kind: completion
                      dischargeable_when: PlanStateRequirement { predicate: λ candidate_plan. False, basis: ∅ } }
 BindPlanRequirements(P, U) = { p with dischargeable_when := plan_terminal(|U|) when p.scope = WholeGoalAcceptance;
                                p unchanged otherwise | p ∈ P }
-unit_resolution_projection(candidate_plan) = { e.resolution | e ∈ candidate_plan.units }
 plan_terminal(n) = PlanStateRequirement {
                    predicate: λ candidate_plan.
                      |candidate_plan.units| = n
-                     ∧ ∀ r ∈ unit_resolution_projection(candidate_plan) : resolution_holds(r, candidate_plan),
-                   basis: {resolution_basis(n)} }
+                     ∧ ∀ r ∈ { e.resolution | e ∈ candidate_plan.units } :
+                         (r = DeterminateResolution { predicate: d, ... } ⟹ d holds)
+                         ∧ (r = AcceptedUncoveredResolution { accepted_completion_residuals: A, conjuncts: C } ⟹
+                              A ≠ ∅ ∧ A ⊆ { a.obligation | a ∈ candidate_plan.accepted_residuals, a.kind = completion }
+                              ∧ ∀ c ∈ C : c.condition holds),
+                   basis: {Evidence { source: "the current plan's UnitResolution and accepted-residual projections",
+                                      content: "expected aggregate resolution count = " + String(n) +
+                                               "; all executable resolution conditions; aggregate accepted-completion record" }} }
 Rerouted       = routed_to_bound
 EarlyExit      = user_esc
 Emit           = (U, K, P) → E [Tool: TaskCreate]
@@ -204,9 +192,8 @@ DereferenceInstruction = an instruction to read E at the canonical locator
 GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent
                --   grounding pass, and stop when a source is unreachable or a needed premise lacks
                --   support-integrity
-emitted(N)     ≡ record_handoff presented N in the handoff output — the emission IS the text
-handoff_recorded(N, E) ≡ emitted(N) ∧ N.purpose_frame ≠ ""
-                          ∧ N.canonical_locator = locator(E)
+handoff_recorded(N, E) ≡ record_handoff presented N in the handoff output
+                          ∧ N.purpose_frame ≠ "" ∧ N.canonical_locator = locator(E)   -- the emission IS the text
 ── PHASE TRANSITIONS ──
 Phase 0: G → Probe(G) → goal_plan_uncompiled?                          -- activation checkpoint (sense)
            ¬autonomous_intent(G) → relay → deactivate                  -- no autonomous interval in scope (extension)
@@ -302,7 +289,7 @@ Convergence is demonstrated, not asserted.
 apportioned(G) = emitted(E) ∧ handoff_recorded(N, E)
                  ∧ coverage_complete(U, O_G) ∧ span_fit(U)
                  ∧ (U ≠ ∅ ∨ oos ≠ ∅)                                                -- a goal with nothing read from it never claims apportionment occurred
-                 ∧ (∀u∈U: unit_termination_covered(u, K, R))
+                 ∧ (∀u∈U: (∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion) ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion))
                  ∧ (∀u∈U: obligation_derived(u, K, R))
                  ∧ (∀u∈U: |{e ∈ E : e is UnitEntry ∧ e.unit_ref = u.unit_ref}| = 1)   -- the join rule holds: one unit entry per unit, keyed on unit_ref — subject is not unique across units
                  ∧ (∀u∈U: ∀e∈E: (e is UnitEntry ∧ e.unit_ref = u.unit_ref) → (e.obligations = u.obligations ∧ e.resolution = resolve_unit(u, K, R)
@@ -316,8 +303,8 @@ apportioned(G) = emitted(E) ∧ handoff_recorded(N, E)
                  ∧ (∀p∈P: p.scope = WholeGoalAcceptance → p.dischargeable_when = plan_terminal(|U|))   -- produced by BindPlanRequirements before the final check; the captured aggregate count prevents a dropped-unit projection from satisfying the terminal universal vacuously
                  ∧ plan.units = {e ∈ E : e is UnitEntry}                             -- the RETURNED plan's units are exactly E's UnitEntry partition — produced by Phase 3 package from E
                  ∧ plan.plan_conditions = {e ∈ E : e is PlanEntry}                   -- the RETURNED plan's plan conditions are exactly E's PlanEntry partition — produced by Phase 3 package from E
-                 ∧ (acceptance_present(P) ∨ unbounded_approved)
-                 ∧ ¬(acceptance_present(P) ∧ unbounded_approved)                    -- a real acceptance condition and an unbounded waiver never both hold at emission
+                 ∧ (acceptance_present(P) ∨ Λ.unbounded_approved)
+                 ∧ ¬(acceptance_present(P) ∧ Λ.unbounded_approved)                  -- a real acceptance condition and an unbounded waiver never both hold at emission
                  ∧ (∀d∈oos: d.substrate ≠ "")
                  ∧ (∃! e ∈ E : e is PlanEnvelopeEntry)                               -- exactly one envelope per emission
                  ∧ (∀e∈E: e is PlanEnvelopeEntry →
