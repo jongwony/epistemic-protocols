@@ -13,18 +13,26 @@ Each document below stands on its own: it does not assume you know any particula
 
 ## Documents
 
-| Document | When to read it |
-|---|---|
-| [`recognition-and-authority.md`](recognition-and-authority.md) | Deciding whether to settle something yourself or put it to the person you're working with; presenting a set of options for someone to choose from; the person interrupts you mid-task. |
-| [`interaction-factorization.md`](interaction-factorization.md) | Designing the options offered at a checkpoint; judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several. |
-| [`gate-design.md`](gate-design.md) | Designing or defending a checkpoint, a convergence condition, or a termination condition; checking whether a process can shortcut or skip past itself. |
-| [`tiering-and-scope.md`](tiering-and-scope.md) | Deciding which surface a principle belongs on; classifying whether a principle should matter more or less as the underlying model improves. |
-| [`calibration-methodology.md`](calibration-methodology.md) | Setting or changing how much a project resolves on its own versus routes to its user for judgment. |
-| [`approach-verification.md`](approach-verification.md) | Before deciding what to do with a request; unsure whether the conversation is at design level or implementation level; deciding how far a fix should reach; a time or date arrives without a stated zone. |
-| [`verification-discipline.md`](verification-discipline.md) | Before declaring something done; a delegated agent reports that its work is complete; weighing advice that arrived from outside the work, or deciding whether something warrants an independent second look. |
-| [`instruction-authoring.md`](instruction-authoring.md) | Writing or revising instructions and durable records; judging whether a new rule earns its place; deciding how much to inline for a reader versus leaving as a reference. |
-| [`delegation-and-subagents.md`](delegation-and-subagents.md) | Handing work to an agent that cannot see this conversation; deciding what a coordinator keeps for itself versus delegates outward. |
-| [`session-and-handoff.md`](session-and-handoff.md) | Deferring work or crossing a session boundary; an input arrives that would pull focus off the task currently in progress. |
-| [`boundaries-and-safety.md`](boundaries-and-safety.md) | Before replacing a file or taking any other hard-to-reverse action; reading configuration text that could be executed; deciding when work needs to be made durable. |
+Read [`recognition-and-authority.md`](recognition-and-authority.md) when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, or when that person interrupts you mid-task.
 
-Every document in the table above exists today. A later addition to this collection extends the table with a further row; it does not require reworking what is already present.
+Read [`interaction-factorization.md`](interaction-factorization.md) when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several.
+
+Read [`gate-design.md`](gate-design.md) when designing or defending a checkpoint, a convergence condition, or a termination condition, and when checking whether a process can shortcut or skip past itself.
+
+Read [`tiering-and-scope.md`](tiering-and-scope.md) when deciding which surface a principle belongs on, and when classifying whether a principle should matter more or less as the underlying model improves.
+
+Read [`calibration-methodology.md`](calibration-methodology.md) when setting or changing how much a project resolves on its own versus routes to its user for judgment.
+
+Read [`approach-verification.md`](approach-verification.md) before deciding what to do with a request, when unsure whether the conversation is at design level or implementation level, when deciding how far a fix should reach, and when a time or date arrives without a stated zone.
+
+Read [`verification-discipline.md`](verification-discipline.md) before declaring something done, when a delegated agent reports that its work is complete, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look.
+
+Read [`instruction-authoring.md`](instruction-authoring.md) when writing or revising instructions and durable records, when judging whether a new rule earns its place, and when deciding how much to inline for a reader versus leaving as a reference.
+
+Read [`delegation-and-subagents.md`](delegation-and-subagents.md) when handing work to an agent that cannot see this conversation, and when deciding what a coordinator keeps for itself versus delegates outward.
+
+Read [`session-and-handoff.md`](session-and-handoff.md) when deferring work or crossing a session boundary, and when an input arrives that would pull focus off the task currently in progress.
+
+Read [`boundaries-and-safety.md`](boundaries-and-safety.md) before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable.
+
+Every document named above exists today. A later addition to this collection adds a further paragraph; it does not require reworking what is already present.
