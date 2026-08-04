@@ -2,7 +2,7 @@
 
 Project structure decisions; independent of the axiom system.
 
-> **Demotion zone**: lazy-load, not auto-loaded by the Claude Code harness. Per-section demotion rationale: `.claude/principles/README.md` Demotion Ledger.
+> **Demotion zone**: lazy-load, not auto-loaded by the Claude Code harness. Per-section demotion rationale is recorded in the git record (commit history / PR bodies), not restated here.
 
 ## Tier Factorization
 

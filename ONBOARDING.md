@@ -48,7 +48,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles in portable form, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins; this repo's own instances of them live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
-- [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger
+- [ ] `.claude/principles/README.md` — demotion zone overview, index of current principle files
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each static check enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)

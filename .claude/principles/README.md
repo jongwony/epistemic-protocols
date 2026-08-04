@@ -11,45 +11,24 @@ The Claude Code harness does not auto-load files in this directory. Files here a
 | `.claude/rules/` | T1 | Auto-loaded by harness at session start | Per-turn |
 | `.claude/principles/` | T2-T3 | Lazy-load via Read/Grep | Per-session / per-authoring |
 
-The split realizes the orthogonal e-tier × o-tier mapping established in this project (`architectural-principles.md` §Authority Mode's A5 coordination note + PR #270/#273 reclassification ⊥ compression + PR introducing this directory). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
+This table is the canonical statement of the load mechanism in this repository; other files point here rather than restating it.
+
+The split realizes the orthogonal e-tier × o-tier mapping established in this project (`.claude/principles/architectural-principles.md` §Authority Mode's A5 coordination note). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
 
 ## Index
 
-| File | Source | Demoted sections |
-|------|--------|------------------|
-| `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Plugin Encapsulation, Utility Skills delegation |
-| `hermeneutic-cycle.md` | `docs/structural-specs.md` | Pattern over Vocabulary (Gadamerian formal-block mapping) + 6 surface catalog (Primary / Secondary / Tertiary / Inter-version / Inter-agent / Operational axis) |
-| `safeguards.md` | `.claude/rules/safeguards.md` (whole file relocated) | Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness — all authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` |
-| `project-profile-calibration.md` | `.claude/rules/project-profile-calibration.md` (whole file relocated; §Cross-Project Corroboration deliberately deleted in transit — audit item S9, 2026-07-03 — and the Self-containment policy's historical opening clause trimmed — S11) | Profile Variables, Calibration Rule, Scope Boundary — authoring/calibration-time reference, not per-turn |
-| `outcome-equivalence.md` | `.claude/rules/derived-principles.md` | Outcome Equivalence (whole section) — Derived tier, runtime-inert argument chain |
-
-## Demotion Ledger
-
-| Section | Source file | Demotion date | Reason |
-|---------|-------------|---------------|--------|
-| Unix Philosophy Homomorphism | `architectural-principles.md` | 2026-04-27 | T2 — invoked at protocol design time, not per-turn |
-| Session Text Composition (incl. Stigmergy signal constraint) | `architectural-principles.md` | 2026-04-27 | T2 — inter-protocol architecture decision, infrequent invocation |
-| Cross-Session Knowledge Composition (incl. Formal layer boundary, Pollution caveat) | `architectural-principles.md` | 2026-04-27 | T2-T3 — Anamnesis hypomnesis design context, narrow scope |
-| Dual Advisory Layer (incl. Advisory cycle convergence, Emergent boundary annotations, Definitional-Observational convergence, Authoring checkpoint) | `architectural-principles.md` | 2026-04-27 | T2-T3 — graph.json + nudge architecture, authoring guidance |
-| Coexistence over Mirroring | `architectural-principles.md` | 2026-04-27 | T2 — plugin design boundary, infrequent invocation |
-| Three-Tier Termination | `architectural-principles.md` | 2026-04-27 | T2 — protocol exit design, per-protocol authoring |
-| Audience Reach (incl. Session-level observer exception, Bidirectional Reach) | `architectural-principles.md` | 2026-04-27 | T2-T3 — plugin encapsulation context, infrequent |
-| Utility Skills — Adversarial Anticipation Delegation | `architectural-principles.md` | 2026-04-27 | T3 — utility skill authoring guidance only |
-| Direction over Accumulated Workload | `architectural-principles.md` | 2026-04-27 | T2 — contributor authoring decision principle |
-| Pattern over Vocabulary (Gadamerian formal-block mapping + Primary/Secondary surfaces) | `structural-specs.md` | 2026-05-14 | T2-T3 — extracted to dedicated `hermeneutic-cycle.md` as canonical home; structural-specs slimmed to gate runtime semantics only |
-| Safeguards (whole file) | `safeguards.md` | 2026-05-27 | T2-T3 — every section is authoring/audit/verify-time (Rule Classification Framework methodology, Literature Application Discipline, Adversarial Anticipation authoring guards, Gate Type Soundness verify check); no per-turn runtime dependency after `axioms.md` inlined the Gate Integrity guards. White Bear's prior auto-load dependency converted to on-demand Read in `white-bear` SKILL.md |
-| Epistemic Cost Topology | `architectural-principles.md` | 2026-05-27 | Recurring framing-contamination: T1 auto-load made it top-of-mind, entering analyses as a one-sided cost-only prior (observed: surface-invariance pre-loaded into delegation prompts, biasing toward minimality before independent root-need assessment). Reverses prior deliberate T1 retention; non-reducible content (project-profile-calibration depends on the meta/execution asymmetry) → demoted, not deleted. |
-| Tier Factorization | `.claude/rules/architectural-principles.md` | 2026-07-03 | T2 — meta/design-time cross-reference (axis_α × axis_β), not per-turn load-bearing; `.claude/rules/architectural-principles.md` keeps only §Epistemic Completeness Boundary as T1. |
-| project-profile-calibration.md (whole file) | `.claude/rules/project-profile-calibration.md` | 2026-07-03 | T2-T3 — six-variable derivation and Scope Boundary are authoring/calibration-time reference; `project-profile.md` (rules layer) carries the per-turn operative Calibration Result and stays in `.claude/rules/`. In transit, §Cross-Project Corroboration was deliberately deleted (audit item S9) and the Self-containment policy's historical opening clause was trimmed (S11). |
-| Outcome Equivalence | `.claude/rules/derived-principles.md` | 2026-07-03 | T2-T3 — empirical-corollary argument chain (A4 + realization-completeness) invoked at authoring/verify time, not per-turn; A4 itself retains a one-line pointer in `axioms.md`. |
-| A5 Composition Scope | `.claude/rules/axioms.md` | 2026-07-28 | T2-T3 — authoring/design-time cross-protocol composition question (does the G = R(p) ∘ A factorization compose across protocol boundaries), not per-turn load-bearing; appended into `architectural-principles.md §Session Text Composition`, the section it names as the inter-protocol composition mechanism. |
-| A2 Authority Mode: Standing/Active | `.claude/rules/axioms.md` | 2026-07-28 | T2-T3 — second-order authority-allocation design question (Standing vs. Active authority source), not per-turn load-bearing; A2 retains its 1st-order operative core (AI detects, User judges; the Extension/Constitution distinction and indicator table) plus a one-line pointer. Appended into `architectural-principles.md §Tier Factorization` as `### Authority Mode: Standing/Active`, materializing the axis_α × axis_β observed-instance example already named there. |
-| A5 Gated interaction realization | `.claude/rules/axioms.md` | 2026-07-28 | T2-T3 — gate-presentation authoring guidance (rationale-option structure, user's implicit freedom to extend/replace), not per-turn load-bearing; A5 retains the factorization statement, the Extension/Constitution classification, and the full Option-set-level relay test, plus a one-line pointer. Appended into `hermeneutic-cycle.md §Inter-agent surface`, alongside the horizon-fusion gate description it elaborates. |
-| Task Externalization Boundary (whole section) | `.claude/rules/derived-principles.md` | 2026-07-28 | T2-T3 — durable-record externalization criteria (what crosses to the ledger, event-based trigger discipline) are authoring/session-design guidance, not per-turn load-bearing; the principle is actively cited elsewhere (`docs/analysis/periagoge-decompose-recovery-move.md`, `docs/analysis/task-externalization-evidence.md`), so a one-line pointer remains in `derived-principles.md`. Appended into `architectural-principles.md §Task Externalization Boundary`, alongside Cross-Session Knowledge Composition. |
-| Reference over Copy (whole section) | `.claude/rules/derived-principles.md` | 2026-07-28 | T2-T3 — handoff-boundary reference/copy criteria for context crossing tool/agent/session/turn boundaries are authoring-time design guidance, not per-turn load-bearing; the principle is actively cited elsewhere (`docs/analysis/task-externalization-evidence.md`), so a one-line pointer remains in `derived-principles.md`. Appended into `architectural-principles.md §Reference over Copy`, immediately after Task Externalization Boundary. |
+| File | Current contents |
+|------|------------------|
+| `architectural-principles.md` | Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Plugin Encapsulation, Utility Skills delegation |
+| `hermeneutic-cycle.md` | Pattern over Vocabulary (Gadamerian formal-block mapping) + 6 surface catalog (Primary / Secondary / Tertiary / Inter-version / Inter-agent / Operational axis) |
+| `safeguards.md` | Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness — all authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` |
+| `project-profile-calibration.md` | Profile Variables (six) and Calibration Rule, Scope Boundary — authoring/calibration-time reference, not per-turn |
+| `outcome-equivalence.md` | Outcome Equivalence (whole section) — Derived tier, runtime-inert argument chain |
 
 ## Philosophy
 
 This directory is not an archive (content remains canonical and current) and not a docs/ replacement (docs/ holds investigation/research products, not prescriptive principles). It is a **Tier Factorization o-tier zone** — same content, different invocation frequency, different load mechanism.
 
 The demotion zone reduces auto-load memory pressure (Epistemic Cost Topology applied to the loading dimension) while keeping the demoted content canonical and editable. The split is one-directional by default: there is no formal re-promotion pathway. A demoted section returning to `.claude/rules/` is a contributor-judgment decision per case, not an inscribed criterion.
+
+Per-section demotion history — which section moved from where, when, and why — is not restated here; it is recorded in the git record (commit messages, PR bodies), per this project's Ledger binding (`AGENTS.md` §Settled Directions).
