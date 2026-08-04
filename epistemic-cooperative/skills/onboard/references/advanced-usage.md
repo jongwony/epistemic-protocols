@@ -2,6 +2,8 @@
 
 Curated protocol usage patterns for Phase 6 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days.
 
+Provenance caveat: those sessions ran before `/apportion` existed. The two rows naming it are projections from the retired `/attend`'s observed position, carried forward because the workflow slot is the same, and they are NOT observations under `/apportion`'s own contract — `/attend` compiled conditions for an already-bounded interval, while `/apportion` cuts a goal into units first. Read them as candidate chains until sessions under the current contract accumulate.
+
 ## Protocol Chaining
 
 Protocols whose output naturally feeds into the next. These are observed chains, not prescribed sequences.
@@ -14,7 +16,7 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 
 | Pattern | Description |
 |---------|-------------|
-| Full workflow traversal | Up to 8 protocols in one session: inquire → apportion → contextualize → grasp |
+| Full workflow traversal | Up to 8 protocols in one session: inquire → apportion → contextualize → grasp (apportion slot projected from `/attend`; see the provenance caveat) |
 | On-demand invocation | Protocols are independent tools — invoke whenever the need arises, not in prescribed order |
 | Mid-session protocol switch | Start with one protocol, switch to another when a different deficit emerges |
 
@@ -52,5 +54,5 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Pattern |
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
-| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each carrying its own completion condition before the run |
+| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each carrying its own completion condition before the run (projected from `/attend`; see the provenance caveat) |
 | Any built-in → `/gap` | After any execution, audit for overlooked gaps |
