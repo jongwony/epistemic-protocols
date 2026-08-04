@@ -8,9 +8,6 @@
  *   - docs/**                     Repo documentation reports
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
  *
- * Separately, .claude/worktrees/ is pruned from the walk: sibling checkouts of
- * this repository, each verified from its own root.
- *
  * Severity: warn (Stage 1 surface posture; fail promotion gated on Stage 2
  * retention evidence). One warn record per file with Korean lines listed.
  *
@@ -52,10 +49,9 @@ const TEXT_EXTENSIONS = new Set([
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', '.husky']);
 
-// Matched against the root-relative path, not the bare directory name.
-const SKIP_PATH_PATTERNS = [
-  /^\.claude\/worktrees(\/|$)/,
-];
+// Sibling checkouts of this repository, each verified from its own root. Matched on
+// the root-relative path so an unrelated directory named `worktrees` stays in scope.
+const WORKTREES_PATH = /^\.claude\/worktrees(\/|$)/;
 
 function isWhitelisted(relPath) {
   return WHITELIST_PATTERNS.some(p => p.test(relPath));
@@ -79,7 +75,7 @@ function runLanguagePurityCheck({ projectRoot }) {
       const rel = path.relative(projectRoot, full).replace(/\\/g, '/');
       if (entry.isDirectory()) {
         if (SKIP_DIRS.has(entry.name)) continue;
-        if (SKIP_PATH_PATTERNS.some(p => p.test(rel))) continue;
+        if (WORKTREES_PATH.test(rel)) continue;
         walk(full);
         continue;
       }

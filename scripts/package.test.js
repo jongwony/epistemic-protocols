@@ -369,31 +369,24 @@ describe('artifact-self-containment detector liveness', () => {
   });
 });
 
-// ============================================================
-// language-purity worktree prune
-// ============================================================
-// Unlike the liveness tests around it, this one builds a throwaway tree instead
-// of mutating live files, so it carries no concurrent-run hazard.
 describe('language-purity worktree prune', () => {
-  // Hangul via escape so this file stays self-pure under the check it exercises.
-  const HANGUL = String.fromCharCode(0xAC00, 0xAE00);
+  // path -> still warned? Rejects a missing prune, a bare-name prune, and a
+  // prune without the path-segment boundary; a dead detector fails all three.
+  const CASES = {
+    '.claude/worktrees/wt/x.md': false,
+    'foo/worktrees/y.md': true,
+    '.claude/worktrees-copy/w.md': true,
+  };
 
   it('prunes .claude/worktrees/ by path, not by bare directory name', () => {
-    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'lp-worktree-prune-'));
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'lp-prune-'));
     try {
-      const body = `# fixture\n${HANGUL}\n`;
-      writeFixtureFile(root, '.claude/worktrees/wt/design/x.md', body);
-      writeFixtureFile(root, '.claude/worktrees-copy/w.md', body);
-      writeFixtureFile(root, 'foo/worktrees/y.md', body);
-      writeFixtureFile(root, 'z.md', body);
-
+      // Hangul by charCode so this file stays self-pure under the check it exercises.
+      for (const rel of Object.keys(CASES)) writeFixtureFile(root, rel, String.fromCharCode(0xAC00));
       const warned = runLanguagePurityCheck({ projectRoot: root }).warn.map(w => w.file);
-      const seen = `Warned: ${JSON.stringify(warned)}`;
-
-      assert.ok(warned.includes('z.md'), `detector is dead; the fixture proves nothing. ${seen}`);
-      assert.ok(!warned.includes('.claude/worktrees/wt/design/x.md'), `.claude/worktrees/ must be pruned. ${seen}`);
-      assert.ok(warned.includes('foo/worktrees/y.md'), `a bare-name prune would drop this unrelated 'worktrees'. ${seen}`);
-      assert.ok(warned.includes('.claude/worktrees-copy/w.md'), `the prune must stop at a path-segment boundary. ${seen}`);
+      for (const [rel, expected] of Object.entries(CASES)) {
+        assert.equal(warned.includes(rel), expected, `${rel}: warned should be ${expected}. Got ${JSON.stringify(warned)}`);
+      }
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
