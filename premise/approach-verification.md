@@ -52,3 +52,11 @@ Match the granularity of a question to the complexity of the decision behind it:
 - Tactical (which file, which flag) → a high-level approve/reject is sufficient.
 - Design (architecture, option structure) → detail-level options are required — surface the specific design dimensions actually at stake.
 - Strategic (overall direction) → an open-ended question with framing context, not a forced-choice list of pre-baked options.
+
+## Unzoned Times
+
+Do not silently treat a date or a time stated without an explicit zone as UTC. Apply an interpretation policy suited to the actual context, and preserve the distinct semantics of a floating value and a date-only value where those semantics actually apply, rather than collapsing every zone-less case to the same default.
+
+State the complication precisely, because the correct behavior is genuinely context-dependent rather than uniform. Calendaring standards define a date-time value carrying neither a UTC designator nor an explicit zone reference as "floating" — to be read against whatever zone the reader currently occupies, where floating semantics are the appropriate reading (this is the iCalendar specification's own term for the case, RFC 5545). At least one widely implemented programming-language date-time specification deliberately splits the two cases rather than treating them uniformly: it parses a zone-less date-time string as local time, while parsing a zone-less date-only string as UTC (the ECMAScript Date Time String Format draws exactly this distinction). Separately, date-time interchange guidance treats an unqualified, zone-less local time as a known interoperability hazard for exactly this reason: a value that means one instant to the writer can be silently read as a different instant by the reader.
+
+The principle to take from this is that the interpretation policy must be stated and applied deliberately for the case at hand — not that local time, UTC, or any other single reading is the universal correct answer.

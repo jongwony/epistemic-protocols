@@ -58,7 +58,7 @@ A companion codification of the same authority split, framed by reversibility ra
 
 ### Interview Triggers
 
-**Required** (ask): irreversible actions — a harness's own risky-action categories, plus any user-specific extensions on top of them (see `premise/boundaries-and-safety.md`, a planned addition to this collection, for the general reversible/irreversible classification).
+**Required** (ask): irreversible actions — a harness's own risky-action categories, plus any user-specific extensions on top of them (see `premise/boundaries-and-safety.md` for the general reversible/irreversible classification).
 
 ### Interruption Handling
 
