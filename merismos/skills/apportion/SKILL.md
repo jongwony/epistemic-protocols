@@ -82,7 +82,7 @@ Obligation     = a stated or inferred requirement the goal must satisfy — the 
 H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit; read from context, cue cited
 U              = Set(Unit)             -- the apportionment
 Anchor         = Set(Obligation) -- Pack's per-cycle focus region: the (possibly proper) subset of `residual` Scan's seam evidence gives Pack something to prioritize a cut around this cycle
-ProposedUnit   = { subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam,   -- inhabited only after complete_unit writes fit and seam; Pack alone yields a draft missing both capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
+ProposedUnit   = { subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }   -- inhabited only after complete_unit writes fit and seam; Pack alone yields a draft missing both
 Unit           = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
 SpanFit        ∈ {Fits, Overflows, Indeterminate}
 Seam           = Grounded(Evidence) ⊎ Heuristic
@@ -107,7 +107,8 @@ NonEmptySet(T) = { S: Set(T) | S ≠ ∅ }
 conjuncts(u)   = { { condition: κ.condition, kind: κ.kind } | κ ∈ K, κ.unit = u }
 accepted_completion_residuals(u, R) = { ρ.obligation | ρ ∈ R, ρ.unit = Some(u), ρ.kind = completion, ρ.disposition = AcceptUncovered }
 UnitResolution = DeterminateResolution { predicate: VerifiablePredicate, conjuncts: Set(LeafConjunct) } ⊎ AcceptedUncoveredResolution { accepted_completion_residuals: NonEmptySet(Obligation), conjuncts: Set(LeafConjunct) } -- THE CROSS-SEAM TERMINATION CERTIFICATE
-resolve_unit(u, K, R) : UnitResolution = DeterminateResolution { predicate: ⋀ { κ.condition | κ ∈ K, κ.unit = u }, conjuncts: conjuncts(u) } when ∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion = AcceptedUncoveredResolution { accepted_completion_residuals: accepted_completion_residuals(u, R), conjuncts: conjuncts(u) } when ∄ κ ∈ K : κ.unit = u ∧ κ.kind = completion ∧ accepted_completion_residuals(u, R) ≠ ∅
+resolve_unit(u, K, R) : UnitResolution = DeterminateResolution { predicate: ⋀ { κ.condition | κ ∈ K, κ.unit = u }, conjuncts: conjuncts(u) } when ∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion
+                                        ; AcceptedUncoveredResolution { accepted_completion_residuals: accepted_completion_residuals(u, R), conjuncts: conjuncts(u) } when ∄ κ ∈ K : κ.unit = u ∧ κ.kind = completion ∧ accepted_completion_residuals(u, R) ≠ ∅
 E              = Set(GoalEntry)        -- emission
 GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), resolution: UnitResolution, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) } ⊎ PlanEntry { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, dischargeable_when: PlanStateRequirement } ⊎ PlanEnvelopeEntry { accepted_residuals: Set(AcceptedResidualEntry), oos: Set(OOSDeclaration), unbounded_approved: Bool }
 oos            = Set(OOSDeclaration)   -- obligations guardable only by pre-action interception
@@ -357,7 +358,8 @@ goal_plan_uncompiled(G) ≡ autonomous_intent(G) ∧ ¬condition_bearing(G)
   condition_bearing(G)  ≡ (G already carries units whose conditions are compiled — each closed by a determinate completion
                           predicate OR by a recorded acceptance, read back by DEREFERENCING a prior /apportion plan at its
                           navigation block, or supplied by the user as an explicit
-                          unit-and-condition set) ∧ ¬owed_unit(G). A goal with units but no conditions, or conditions but
+                          unit-and-condition set) ∧ ¬owed_unit(G), OR (G's obligations are ALL out-of-scope
+                          delegations, so it carries no units by construction and there is nothing left to compile). A goal with units but no conditions, or conditions but
                           no units, is uncompiled: both halves are this protocol's product — except a plan whose
                           obligations are ALL out-of-scope delegations, which carries no units by construction
                           and is condition-bearing, so a re-invocation over it relays rather than re-emitting
