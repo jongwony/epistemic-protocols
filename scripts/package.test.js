@@ -11,6 +11,7 @@ const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const zlib = require('zlib');
 const { CANONICAL_PRECEDENCE } = require('./load-protocols');
@@ -38,6 +39,7 @@ const {
   generateReleaseNotes
 } = require('./package');
 const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
+const { runLanguagePurityCheck } = require('../.claude/skills/verify/scripts/language-purity');
 const { discoverPlugins } = require('./load-protocols');
 
 function writeFixtureFile(root, relativePath, content = 'fixture\n') {
@@ -364,6 +366,70 @@ describe('artifact-self-containment detector liveness', () => {
         );
         throw restoreErr;
       }
+    }
+  });
+});
+
+// ============================================================
+// language-purity worktree prune
+// ============================================================
+// `.claude/worktrees/` holds sibling checkouts of this same repository, so
+// scanning them re-reports files the primary tree already whitelists. The walk
+// prunes them by root-relative path rather than by bare directory name. Each
+// fixture entry rejects a distinct wrong implementation: `z.md` fails if the
+// detector is dead, `.claude/worktrees/wt/...` fails if the prune is absent,
+// `foo/worktrees/...` fails under a bare-name prune, and
+// `.claude/worktrees-copy/...` fails under a prune that omits the path-segment
+// boundary or excludes `.claude/` wholesale.
+// Unlike the liveness tests above and below, this one builds a throwaway tree
+// and calls the exported function against it — no live repo file is mutated,
+// so it carries no concurrent-run hazard.
+describe('language-purity worktree prune', () => {
+  // Hangul via escape so this test file stays self-pure under the check it exercises
+  // (the check compares charCodes, and these source bytes are ASCII).
+  const HANGUL_LINE = String.fromCharCode(0xAC00, 0xAE00);
+
+  function buildFixture() {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'lp-worktree-prune-'));
+    for (const rel of [
+      path.join('.claude', 'worktrees', 'wt', 'design', 'x.md'),
+      path.join('foo', 'worktrees', 'y.md'),
+      path.join('.claude', 'worktrees-copy', 'w.md'),
+      'z.md',
+    ]) {
+      const full = path.join(root, rel);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, `# fixture\n${HANGUL_LINE}\n`);
+    }
+    return root;
+  }
+
+  it('prunes .claude/worktrees/ by path while keeping a same-named directory elsewhere in scope', () => {
+    const root = buildFixture();
+    try {
+      const warned = runLanguagePurityCheck({ projectRoot: root }).warn.map(w => w.file);
+
+      assert.ok(
+        warned.includes('z.md'),
+        `control file was not warned, so the fixture proves nothing about the prune. Warned: ${JSON.stringify(warned)}`
+      );
+      assert.ok(
+        !warned.includes('.claude/worktrees/wt/design/x.md'),
+        `.claude/worktrees/ content must be pruned from the walk. Warned: ${JSON.stringify(warned)}`
+      );
+      assert.ok(
+        warned.includes('foo/worktrees/y.md'),
+        `an unrelated directory named 'worktrees' must stay in scope — a bare-name prune ` +
+        `would silently drop it. Warned: ${JSON.stringify(warned)}`
+      );
+      assert.ok(
+        warned.includes('.claude/worktrees-copy/w.md'),
+        `the prune must stop at a path-segment boundary — a pattern without one ` +
+        `(or a broader '.claude/' exclusion) would swallow this sibling. ` +
+        `Warned: ${JSON.stringify(warned)}`
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
     }
   });
 });
