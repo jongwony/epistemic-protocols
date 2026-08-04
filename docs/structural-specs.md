@@ -16,11 +16,10 @@ All protocols share this structure within `Definition` code block:
 ── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
 ── MORPHISM ──          (if applicable) Essential type transition skeleton: requires/deficit/preserves/invariant
 ── TYPES ──             Symbol definitions with type signatures and comments
-── ENTRY TYPES ──       (if applicable) Extended types for entry modes
-── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure
-── *-BINDING ──         (if applicable) Input binding resolution rules (U-BINDING, E-BINDING, G-BINDING)
+── *-BINDING ──         (if applicable) Input binding resolution rules (R-BINDING, A-BINDING, U-BINDING, SCOPE-BINDING, V-BINDING, WP-BINDING)
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
+── CONVERGENCE ──       (if applicable) Terminal predicates making LOOP's termination claims true
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions

@@ -1071,7 +1071,7 @@ function checkGraphIntegrity() {
 // ============================================================
 function checkSpecVsImpl() {
   // Extract type definitions from all TYPES sections of a formal block
-  // Matches: ── TYPES ──, ── ENTRY TYPES ──, ── DELEGATION TYPES ──, etc.
+  // Matches: ── TYPES ──, and any other section ending in " TYPES ──"
   function extractTypeNames(content) {
     const typeNames = [];
     for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
