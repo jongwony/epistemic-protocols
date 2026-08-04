@@ -265,7 +265,7 @@
       "source": "hyphegesis",
       "target": "merismos",
       "type": "advisory",
-      "satisfies": "지휘된 방법의 미해결 자율 구역 중 단위가 아직 조건화되지 않은 구역을 분배·조건화로 이관 — 그 구역의 토폴로지는 고정 입력이고 merismos가 재지휘하지 않음 (재진입 금지 가드). 이미 조건 보유인 계획에서 온 구역은 이 가장자리를 타지 않는다: apportion Phase 0가 relay로 즉시 비활성화하며, 그 구역의 resolution_required(/apportion) 종료 근거는 재진입이 아니라 항법 핸드오프로 이행된다. 별도로, conduct가 이동을 배치하지 못해 철회한 단위는 재분배 귀속 의무(owed re-apportionment)로 apportion에 되돌아간다 — 아래 apportion → conduct 가장자리(조건 보유 계획 유입)와는 다른, 세 번째 경로 (R10: 이 문장은 conduct → apportion 방향 흐름이므로 이 가장자리에 속한다)"
+      "satisfies": "지휘된 방법의 미해결 자율 구역 중 단위가 아직 조건화되지 않은 구역을 분배·조건화로 이관 — 그 구역의 토폴로지는 고정 입력이고 merismos가 재지휘하지 않음 (재진입 금지 가드). 이미 조건 보유인 계획에서 온 구역은 이 가장자리를 타지 않는다: apportion Phase 0가 relay로 즉시 비활성화하며, 그 구역의 resolution_required(/apportion) 종료 근거는 재진입이 아니라 항법 핸드오프로 이행된다. 별도로, conduct가 이동을 배치하지 못해 철회한 단위는 재분배 귀속 의무(owed re-apportionment)로 apportion에 되돌아간다 — 아래 apportion → conduct 가장자리(조건 보유 계획 유입)와는 다른, 세 번째 경로"
     },
     {
       "source": "merismos",
