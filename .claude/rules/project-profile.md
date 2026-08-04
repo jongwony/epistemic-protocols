@@ -4,12 +4,12 @@ This project's Cognitive Partnership Move calibration profile (per `.claude/prin
 
 ## Calibration Result
 
-**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `.claude/principles/project-profile-calibration.md §Scope Boundary` (aligned with `architectural-principles.md §Epistemic Completeness Boundary`).
+**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `.claude/principles/project-profile-calibration.md §Scope Boundary` (aligned with `premise/tiering-and-scope.md §Epistemic Completeness Boundary`).
 
 Floor (runtime-discovered, retry would change identity):
 - Katalepsis (`/grasp`): user IS the measurement target.
 
-Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern, Prosoche compiled-condition set. Prosoche moved from floor to bounded zone with the `/attend` compile-time redefinition (rationale: `.claude/principles/project-profile-calibration.md §Scope Boundary`); enforcement-interception handoff: `.claude/rules/architectural-principles.md §Epistemic Completeness Boundary`.
+Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern, Prosoche compiled-condition set. Prosoche moved from floor to bounded zone with the `/attend` compile-time redefinition (rationale: `.claude/principles/project-profile-calibration.md §Scope Boundary`); enforcement-interception handoff: `premise/tiering-and-scope.md §Epistemic Completeness Boundary`.
 
 **Inscription-decision posture** (Emergent — outside the six profile variables): when correcting application drift, articulate the correction at the abstraction axis where it originated (response-level when sufficient), and leave rule-overlap open for model interpretation.
 

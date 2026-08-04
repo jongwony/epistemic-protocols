@@ -1,6 +1,6 @@
 # Outcome Equivalence
 
-> Demoted from `.claude/rules/derived-principles.md` on 2026-07-03, Derived tier retained.
+> Derived tier, lazy-load: an argument chain invoked at authoring/verify time, not per-turn.
 
 Derived from A4 (Semantic Autonomy) + realization-completeness assumption.
 
