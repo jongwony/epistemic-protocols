@@ -66,6 +66,18 @@ const skillCalls = (content) =>
         .filter(Boolean)
     : [];
 
+// A Skill call names its skill as `plugin:skill` or bare. The namespace is part
+// of the identity: a bound plugin admits only its own namespace or none, which
+// is the same rule invokes() applies to the user-command path — otherwise an
+// unrelated plugin's same-named skill would be recorded as this protocol.
+const resolveSkillProtocol = (called) => {
+  const sep = called.indexOf(":");
+  const ns = sep === -1 ? null : called.slice(0, sep);
+  const hit = protocolMap[`/${sep === -1 ? called : called.slice(sep + 1)}`];
+  if (!hit) return null;
+  return ns === null || hit[1] === null || ns === hit[1] ? hit[0] : null;
+};
+
 // One entry per protocol plugin command, plus the utility commands worth
 // recording. hypomnesis-write.test.mjs checks this against the plugin skill
 // directories, so a protocol rename fails the suite instead of going silent.
@@ -230,9 +242,8 @@ function parseSession(transcriptPath) {
 
     if (etype === "assistant") {
       for (const called of skillCalls(entry.message?.content)) {
-        const bare = called.includes(":") ? called.slice(called.indexOf(":") + 1) : called;
-        const hit = protocolMap[`/${bare}`];
-        if (hit) protocols.add(hit[0]);
+        const name = resolveSkillProtocol(called);
+        if (name) protocols.add(name);
       }
     }
 
@@ -1104,7 +1115,15 @@ function main() {
   }
 }
 
-export { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, skillCalls, protocolMap };
+export {
+  extractCrossRefs,
+  buildClueMd,
+  buildMarkersMd,
+  invokes,
+  skillCalls,
+  resolveSkillProtocol,
+  protocolMap,
+};
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
 try {

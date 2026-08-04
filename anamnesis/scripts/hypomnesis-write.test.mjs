@@ -7,7 +7,15 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractCrossRefs, buildClueMd, buildMarkersMd, invokes, skillCalls, protocolMap } from "./hypomnesis-write.mjs";
+import {
+  extractCrossRefs,
+  buildClueMd,
+  buildMarkersMd,
+  invokes,
+  skillCalls,
+  resolveSkillProtocol,
+  protocolMap,
+} from "./hypomnesis-write.mjs";
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -139,6 +147,18 @@ test("skillCalls extracts assistant-side Skill invocations only", () => {
   );
   assert.deepEqual(skillCalls("not an array"), []);
   assert.deepEqual(skillCalls([{ type: "tool_use", name: "Skill", input: {} }]), []);
+});
+
+// The assistant path must reject a foreign namespace exactly as invokes() does
+// on the user-command path; otherwise unrelated:apportion records as Merismos.
+test("resolveSkillProtocol honours the plugin namespace", () => {
+  assert.equal(resolveSkillProtocol("merismos:apportion"), "apportion");
+  assert.equal(resolveSkillProtocol("apportion"), "apportion");
+  assert.equal(resolveSkillProtocol("unrelated:apportion"), null);
+  assert.equal(resolveSkillProtocol("nosuchskill"), null);
+  // Commands with no plugin binding admit any namespace, mirroring invokes().
+  assert.equal(resolveSkillProtocol("anything:verify"), "verify");
+  assert.equal(invokes("<command-name>/unrelated:apportion", "/apportion", "merismos"), false);
 });
 
 // A protocol rename (e.g. prosoche/attend -> merismos/apportion) must fail here
