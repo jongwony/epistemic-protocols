@@ -82,7 +82,7 @@ const BANNED_RUNTIME_DEPENDENCIES = [
   { pattern: /\bproject-profile(?:-calibration)?\.md\b/gi, message: 'references project-profile rule from runtime contract surface', severity: 'warn' },
   { pattern: /\bediting-conventions\.md\b/gi, message: 'references editing-conventions rule from runtime contract surface', severity: 'warn' },
   { pattern: /(?<![\w/-])principles\//gm, message: 'references principles directory from runtime contract surface', severity: 'warn' },
-  { pattern: /\bA[1-7]\b(?!\.\d)/g, message: 'references contributor-only axiom identifier from runtime contract surface', severity: 'fail' },
+  { pattern: /\bA[1-7]\b(?!\.\d)/g, message: 'references contributor-only axiom identifier from runtime contract surface', severity: 'fail', scanFenced: true },
   { pattern: /(?<![\w/-])\.claude\//gm, message: 'references .claude contributor path from runtime contract surface', severity: 'fail' },
   { pattern: /(?<![\w/-])docs\//gm, message: 'references repo docs path from runtime contract surface', severity: 'fail' },
   { pattern: /\bStage [12]\b/g, message: 'references Stage 1/2 contributor concept from runtime contract surface', severity: 'warn' },
@@ -95,10 +95,13 @@ const BANNED_RUNTIME_DEPENDENCIES = [
 
 function checkSurfaceLeaks(text, fileLabel, checkName, bucket) {
   const prose = stripCodeFromText(text);
+  // Formal blocks are fenced yet runtime-normative, so a `scanFenced` rule reads them;
+  // inline code literals (a backticked spreadsheet cell) stay excluded either way.
+  const proseWithFencedBlocks = text.replace(/`[^`\n]+`/g, '');
   let anyFailMatch = false;
   for (const rule of BANNED_RUNTIME_DEPENDENCIES) {
     rule.pattern.lastIndex = 0;
-    const matches = [...prose.matchAll(rule.pattern)];
+    const matches = [...(rule.scanFenced ? proseWithFencedBlocks : prose).matchAll(rule.pattern)];
     if (matches.length > 0) {
       const severity = rule.severity || 'fail';
       if (!bucket[severity]) {
