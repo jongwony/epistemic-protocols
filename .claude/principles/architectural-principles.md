@@ -2,13 +2,13 @@
 
 Project structure decisions; independent of the axiom system.
 
-> **Demotion zone**: lazy-load, not auto-loaded by the Claude Code harness. Per-section demotion rationale is recorded in the git record (commit history / PR bodies), not restated here.
+> **Demotion zone**: load behavior for this directory is stated in `AGENTS.md` §Distinction from `.claude/rules/`, the entry document that loads alongside this file. Per-section demotion rationale is recorded in the git record (commit history / PR bodies), not restated here.
 
 ## Tier Factorization
 
 Tier-classified artifacts in this project factor into a product of two orthogonal axes: an **epistemological** axis (axis_α — derivation status, model-improvement trajectory) and an **operational** axis (axis_β — invocation frequency, load-bearing strength). Neither dimension subsumes the other; the same artifact carries both annotations independently, and movement along one axis is independent of movement along the other.
 
-The factorization is realized by complementary mechanisms. File content typically carries axis_α — a `premise/` document carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the auto-loaded T1 zone (per-turn invocation), `.claude/principles/` realizes the lazy-loaded T2–T3 zone (per-authoring or per-verify invocation). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
+The factorization is realized by complementary mechanisms. File content typically carries axis_α — a `premise/` document carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the T1 zone and `.claude/principles/` the T2–T3 zone, each through its own load mechanism (stated in `AGENTS.md` §Distinction from `.claude/rules/`). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
 
 **Observed instances**:
 - Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `### Authority Mode: Standing/Active` below.
