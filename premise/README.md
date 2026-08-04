@@ -29,20 +29,3 @@ Each document below stands on its own: it does not assume you know any particula
 | `boundaries-and-safety.md` | General safety classifications: irreversible versus reversible actions, secrets handling, a destructive-restore gate, and large-file handling discipline. |
 
 The first eight exist today; the rest are planned additions to the same collection — a document not yet present is a gap to fill later, not a broken promise.
-
-## Suggested reading order
-
-1. `recognition-and-authority.md` — start here; almost everything else assumes this distinction.
-2. `interaction-factorization.md`
-3. `gate-design.md`
-4. `tiering-and-scope.md`
-5. `calibration-methodology.md`
-6. `approach-verification.md`
-7. `verification-discipline.md`
-8. `instruction-authoring.md`
-9. `delegation-and-subagents.md`
-10. `session-and-handoff.md`
-11. `externalization-publish-mode.md`
-12. `boundaries-and-safety.md`
-
-Reading in order is not required — each document names its own prerequisites inline.
