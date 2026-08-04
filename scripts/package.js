@@ -147,9 +147,10 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
-// 510 absorbs anamnesis SKILL.md at 501 lines (after the +1 Euporia distinction row);
-// existing 525/581/591 lines in aitesis/prothesis/merismos were already over the prior 500 baseline.
-// Per-protocol grandfathered overage is acknowledged; tightening this guideline requires per-file caps.
+// 510 was set to absorb the longest SKILL.md files already over the prior 500 baseline;
+// per-protocol grandfathered overage is acknowledged and reported as a warning per file,
+// so current line counts are read from that warning rather than pinned here.
+// Tightening this guideline requires per-file caps.
 const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';

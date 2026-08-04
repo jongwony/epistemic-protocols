@@ -1,6 +1,6 @@
 ---
 name: apportion
-description: "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions before the run begins. Cuts the goal at its evidenced seams so each unit fits one execution horizon and every goal obligation lands in some unit, derives per-unit completion and invariant predicates plus the cross-unit plan conditions, and emits one resolution certificate per unit: a conjoined predicate when completion compiles, otherwise an accepted-uncovered witness that retains any invariant conjuncts; risks needing pre-action interception are declared out of scope. Pre-conduct: unit boundaries and conditions only — order, independence, reconciliation and routing stay /conduct's. Type: (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan. Alias: Merismos(μερισμός)."
+description: "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions before the run begins. Cuts the goal at its evidenced seams so each unit fits one execution horizon and every goal obligation lands in some unit, derives per-unit completion and invariant predicates plus the cross-unit plan conditions, and emits one resolution certificate per unit: a conjoined predicate when completion compiles, otherwise an accepted-uncovered witness that retains any invariant conjuncts; risks needing pre-action interception are declared out of scope. Pre-conduct: unit boundaries and conditions only — order, independence, reconciliation, termination topology and routing stay /conduct's. Type: (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan. Alias: Merismos(μερισμός)."
 ---
 
 # Merismos Protocol
@@ -34,7 +34,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
       oos ≠ ∅ → OOS(oos) (extension)                                            -- obligations needing pre-action interception: out of scope, substrate named
       ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ →
         Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]
-        Vₜ = RouteBound       → deactivate                                       -- Rerouted
+        Vₜ = RouteBound       → relay(the whole-goal acceptance criterion's definition is routed to /bound) (extension) → deactivate   -- Rerouted: the route is EMITTED, not merely exited on
         Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤
       BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, Pᵦ, oos) → Λ.invariant_status := InvariantStatus   -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ plan_conditions_topology_free
       Λ.plan_conditions_stale → StaleNotice(P) (extension)                       -- pre-gate text before Qc: Adjust to update, or Confirm to keep as recorded
@@ -127,7 +127,7 @@ Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, Ap
 plan_condition(d) = PlanCondition { scope: WholeGoalAcceptance, kind: completion, condition: [the predicate direction d states], dischargeable_when: PlanStateRequirement { predicate: λ candidate_plan. False, basis: {Evidence { source: "the DefineNow answer at the whole-goal acceptance gate", content: d }} } }   -- the placeholder predicate is False until BindPlanRequirements normalizes it against |U|; the basis is the user's own definition, which is what makes it inhabit NonEmptySet from construction rather than after a repair
 BindPlanRequirements(P, U) = { p with dischargeable_when := plan_terminal(|U|) when p.scope = WholeGoalAcceptance; p unchanged otherwise | p ∈ P }   -- scope alone, deliberately unlike acceptance_present: a whole-goal invariant is still discharged at plan-terminal — it just does not answer the acceptance question
 plan_terminal(n) = PlanStateRequirement { predicate: λ candidate_plan. |candidate_plan.units| = n ∧ ∀ r ∈ { e.resolution | e ∈ candidate_plan.units } : (r = DeterminateResolution { predicate: d, ... } ⟹ d holds) ∧ (r = AcceptedUncoveredResolution { accepted_completion_residuals: A, conjuncts: C } ⟹ A ≠ ∅ ∧ A ⊆ { a.obligation | a ∈ candidate_plan.accepted_residuals, a.kind = completion } ∧ ∀ c ∈ C : c.condition holds), basis: {Evidence { source: "the current plan's UnitResolution and accepted-residual projections", content: "expected aggregate resolution count = " + String(n) + "; all executable resolution conditions; aggregate accepted-completion record" }} }
-Rerouted       = routed_to_bound
+Rerouted       = routed_to_bound   -- produced by route_bound's relay emission, never by a bare deactivate: a declared route that no step emits would drop the continuation the user just chose
 EarlyExit      = user_esc
 Emit           = (U, K, R, P, oos, unbounded_approved) → E [Tool: TaskCreate]   -- R feeds resolve_unit's accepted arm; oos and unbounded_approved feed the envelope
 Phase          ∈ {0, 1, 2, 3}
@@ -165,7 +165,7 @@ Phase 2: U → ∀u∈U, ¬derived_already(u,K,R): Derive(u) → (Set(κ), Set(�
            oos ≠ ∅ → OOS(oos) (extension)                              -- out-of-scope declaration, substrate recorded on each OOSDeclaration
            ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ (constitution) [Tool]   -- fires at pass entry, and again after any Adjust that clears acceptance
              Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]
-             Vₜ = RouteBound       → deactivate (Rerouted)
+             Vₜ = RouteBound       → route_bound (extension) [Tool] → deactivate (Rerouted)
              Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤
            BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, Pᵦ, oos) → Λ.invariant_status := InvariantStatus (track)   -- the ONLY writer of Λ.invariant_status, which Confirm's hard_invariants_hold guard reads; normalize every WholeGoalAcceptance requirement against the current |U| BEFORE topology_free is checked; coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ plan_conditions_topology_free (track)
            Λ.plan_conditions_stale → StaleNotice(P) (extension)        -- pre-Qc surfacing: review, Adjust, or Confirm as recorded
@@ -184,7 +184,7 @@ Phase 1 → Phase 2: residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅)             
 Phase 2 → Phase 1: V = Reopen(u)                                       -- that unit's obligations return to residual; bounded by user agency exactly as Adjust is
 Phase 2 → Phase 2: V = Adjust(d)                                       -- rederive over the same apportionment; U unchanged
 Phase 2 → Phase 2: V = Confirm ∧ ¬hard_invariants_hold(Λ)              -- Qc re-presents with the violated invariant named; no state advances
-Phase 2 → deactivate: Vₜ = RouteBound                                  -- Rerouted; /bound → /apportion re-entry recompiles fresh
+Phase 2 → deactivate: Vₜ = RouteBound                                  -- Rerouted; route_bound emits the route first; /bound → /apportion re-entry recompiles fresh
 Phase 2 → Phase 3: V = Confirm ∧ hard_invariants_hold(Λ)               -- residuals accepted on record; every clause of apportioned(G) that Qc can violate holds AT THE TRANSITION
 Phase 3 → converge: emitted(E) ∧ handoff_recorded(N, C)                -- ConditionBearingUnitPlan + apportionment trace + navigation block
 Phase 1 → deactivate (ungraceful): user_esc                            -- EarlyExit: no emission, no handoff recorded
@@ -283,6 +283,7 @@ Phase 2 DerivePlan   (sense)        → Internal analysis (conditions whose subj
 Phase 2 OOS          (extension)    → TextPresent+Proceed (out-of-scope declaration per obligation, with the delegated substrate named)
 Phase 2 Qt           (constitution) → present (conditional: the whole goal has no acceptance criterion — define it now / route its definition to /bound / proceed unbounded on record; fires at pass entry and again after any Adjust that clears acceptance, always before Qc re-presents; DefineNow additionally retracts Λ.unbounded_approved when it still reads ⊤ from an earlier Qt firing on this same invocation) [Tool]
 Phase 2 ApproveUnbounded (track)    → Internal state update (record Λ.unbounded_approved, materializing the informed acceptance for the convergence predicate; does NOT touch P, so a later Qt re-fire can still reach DefineNow while this reads ⊤)
+Phase 2 route_bound  (extension) → TextPresent+Proceed (conditional: Vₜ = RouteBound — emit the route to /bound naming the whole-goal acceptance criterion as what it is to define, so the chosen continuation leaves this protocol as a stated route rather than a silent exit; mutates no Λ field, then deactivate)
 Phase 2 BindPlanRequirements (track) → Internal state replacement (immediately before every check, replace P with the same conditions except that every WholeGoalAcceptance entry carries dischargeable_when = plan_terminal(|U|); runs after DerivePlan/Qt and after every Adjust/Qt re-fire. The sole producer of the scope-owned convergence clause and its identity-free expected count)
 Phase 2 check        (track)        → Internal state update (WRITE Λ.invariant_status — invariant status: coverage, horizon fit, termination coverage, obligation derivation, oos substrate-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment; RE-RUN every time Qc is about to (re-)present, at pass entry and again after every Adjust plus any Qt re-fire it triggers)
 Phase 2 StaleNotice   (extension)   → TextPresent+Proceed (conditional: Λ.plan_conditions_stale = ⊤ — surface, as pre-gate text before Qc, that plan-level conditions were derived or last user-adjusted against a unit set a subsequent Reopen has since changed; relay only, mutates no Λ field)
