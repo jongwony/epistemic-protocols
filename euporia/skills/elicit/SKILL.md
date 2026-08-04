@@ -324,7 +324,7 @@ Read substrate channels (immutable — monotone re-projection), reverse-trace ca
 
 **Certificate basis visibility**: the certificate's deficit-fit basis (which sibling-deficit scope the projection matched, and the registered dependency edge that relates it) is cited at the projection's Phase 2 surfacing — relay (Extension), grounded in the cited deficit-scope declarations (an unclear fit returns ambiguous → defer, never a user gate). ReverseTrace and the per-projection kind capture are AI inference; the user constitutes the coordinate values at Phase 2.
 
-**Backbone discipline**: euporia's shared meta-backbone instantiation (`object_ref`, `local_value_space`, the label field's type (`Axis`), guard routing targets) — see Rule 10(e) for the canonical schema statement.
+**Backbone discipline**: One canonical KindBinding → DeficitFitCertificate → value-space schema shared across protocols; euporia's local instantiation is detailed at Rule 10(e).
 
 **Scope restriction**: Read-only investigation. No test execution or file modifications. Substrate evidence must cite a specific source.
 
