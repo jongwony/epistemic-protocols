@@ -54,7 +54,10 @@ const MAX_USER_MSGS = 150;
 // plugin-namespaced), or the assistant calls the Skill tool. A bare mention in
 // prose ("don't run /apportion") is neither, so it is not counted.
 const invokes = (text, slash, plugin) => {
-  const ns = plugin ? `(?:${plugin}:)?` : "(?:[\\w.-]+:)?";
+  // A namespace identifies the owner. A plugin-bound command admits its own
+  // namespace or none; an unbound utility command admits only the bare form,
+  // since a namespaced call of that name belongs to some other plugin.
+  const ns = plugin ? `(?:${plugin}:)?` : "";
   return new RegExp(`<command-name>\\s*/${ns}${slash.slice(1)}(?![\\w-])`, "m").test(text);
 };
 
@@ -67,15 +70,16 @@ const skillCalls = (content) =>
     : [];
 
 // A Skill call names its skill as `plugin:skill` or bare. The namespace is part
-// of the identity: a bound plugin admits only its own namespace or none, which
-// is the same rule invokes() applies to the user-command path — otherwise an
-// unrelated plugin's same-named skill would be recorded as this protocol.
+// of the identity, and this applies the same rule invokes() applies to the
+// user-command path: a bound plugin admits its own namespace or none, and an
+// unbound utility command admits only the bare form — otherwise another
+// plugin's same-named skill would be recorded as this one.
 const resolveSkillProtocol = (called) => {
   const sep = called.indexOf(":");
   const ns = sep === -1 ? null : called.slice(0, sep);
   const hit = protocolMap[`/${sep === -1 ? called : called.slice(sep + 1)}`];
   if (!hit) return null;
-  return ns === null || hit[1] === null || ns === hit[1] ? hit[0] : null;
+  return ns === null || ns === hit[1] ? hit[0] : null;
 };
 
 // One entry per protocol plugin command, plus the utility commands worth

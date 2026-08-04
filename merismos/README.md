@@ -44,7 +44,7 @@ One unit is one execution interval is one entry, with that unit's conditions con
 ## Known Limitations
 
 - **Bounded platform claim**: the `/goal` leaf-executor characterization is verified against Claude Code v2.1.140 only; re-verify on harness version change.
-- **Obligation reading is heuristic**: an obligation never uttered and never captured upstream will not be read, so coverage is hard only over what *was* read; the confirmation gate is the correction point.
+- **Obligation reading is heuristic**: an obligation never uttered and never captured upstream will not be read, so coverage is hard only over what *was* read. The confirmation gate is where the omission becomes VISIBLE, not where it is corrected: `O_G` is fixed before Phase 1, and neither `Adjust` nor `Reopen` can add an unread obligation. Correcting it means stating the obligation and re-invoking.
 - **Seam evidence is often absent**: abstract goals frequently supply no evidenced joint, and heuristic cuts can leave duplicated setup or cross-unit state leakage.
 - **Horizon fit is an estimate**: judged before the run from the goal's description; the override path exists because the user often knows better.
 - **Predicate coverage**: subjective quality bars do not derive; they surface as residuals, not prose conditions.

@@ -54,5 +54,5 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Pattern |
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
-| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each carrying its own completion condition before the run (projected from `/attend`; see the provenance caveat) |
+| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each closed before the run — by its own completion condition, or by a recorded acceptance where none compiles (projected from `/attend`; see the provenance caveat) |
 | Any built-in → `/gap` | After any execution, audit for overlooked gaps |

@@ -348,7 +348,7 @@ Same format as Targeted Path Type 3.
 #### Feedback (both paths)
 
 Immediate feedback after each question:
-- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/apportion` cuts an autonomous goal into coarse units at cited seams and derives each unit's completion condition before the run begins. `/gap` audits before action (decision quality), `/apportion` gives the run checkable finish lines, one per unit (execution structure)."
+- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/apportion` cuts an autonomous goal into coarse units at cited seams and closes each unit before the run begins. `/gap` audits before action (decision quality), `/apportion` gives the run checkable finish lines, one per unit (execution structure)."
 - **Incorrect** (reasoning inquiry → targeted correction):
   1. **Reasoning inquiry**: Present via gate interaction 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
   2. **Targeted correction**: Using the user's stated reasoning, explain the distinction through the design axis that separates the confused pair. Directly address the reasoning — e.g., "You mentioned timing — that's the right axis. The key difference is *direction*: `/inquire` catches missing context *before* execution (User→AI), while `/contextualize` checks context fit *after* (AI→User)."
@@ -394,7 +394,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
 - `/elicit` ↔ `/gap`: both surface "something wrong" but different targets — `/elicit` reverse-traces decision coordinates from substrate before action (Planning: axis-undetermined intent), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
 - `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis asks the user for facts (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
-- `/gap` ↔ `/apportion`: both about risk awareness but `/gap` audits decision quality before committing, `/apportion` cuts an autonomous goal into coarse units and derives each unit's completion condition before an autonomous run
+- `/gap` ↔ `/apportion`: both about risk awareness but `/gap` audits decision quality before committing, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, or on an acceptance you recorded when none compiles — before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)
