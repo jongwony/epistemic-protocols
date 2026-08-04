@@ -82,7 +82,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
 | [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
-| [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and give each unit its own done-condition first |
+| [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
 | [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |

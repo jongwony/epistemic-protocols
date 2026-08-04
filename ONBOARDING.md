@@ -62,7 +62,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
 - [ ] `/analogia:ground` — validate abstract-concrete mappings
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
-- [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and derives each unit's completion condition
+- [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, or on a recorded acceptance where none compiles
 - [ ] [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) — one-shot commit + push + PR + task registration. Optional convenience; lives in the external `jongwony/ClaudePanel.spoon` plugin, not this repo. Plain `git push` + `gh pr create` also works.
 
 ## Contribution Workflow

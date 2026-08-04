@@ -46,7 +46,7 @@ Under the canonical umbrella, the protocol set covers decision points across the
 - Planning: clarify intent, define goals, infer missing context
 - Analysis: frame perspectives, ground abstract advice
 - Decision: surface unnoticed gaps before commitment
-- Execution: cut an autonomous goal into units each carrying its own settled completion condition before the run begins
+- Execution: cut an autonomous goal into units each closed before the run begins — by its own settled completion condition, or by a recorded acceptance where none compiles
 - Verification: check applicability after execution
 - Cross-cutting: define epistemic boundaries, recover prior context, verify comprehension
 

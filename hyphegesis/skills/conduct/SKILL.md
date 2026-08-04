@@ -276,7 +276,7 @@ conducted(WP) = method_handed_off
                                                             alone — both frontiers: every region of S₂ completes no later than
                                                             every region of b.site under CT's resolved order; S₂ a frontier and
                                                             b.site terminal: TRUE; S₂ terminal: TRUE only when b.site is
-                                                            terminal; either side resolution_required: FALSE))))
+                                                            terminal; either side resolution_required: FALSE)))))
               ∧ (I ≠ None → ∀b ∈ unit_condition_bindings: ∃u ∈ I.units: b.unit_ref = u.unit_ref)
               ∧ (I ≠ None → ∀b ∈ plan_condition_bindings: b.plan_entry ∈ I.plan_conditions)
               ∧ (I = None → unit_condition_bindings = ∅ ∧ plan_condition_bindings = ∅)
