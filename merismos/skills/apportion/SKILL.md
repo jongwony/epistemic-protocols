@@ -48,9 +48,9 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
 ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
   → probe(goal)                        -- detect a stated autonomous goal whose unit plan and conditions are uncompiled
-  → scan(seams)                        -- read the goal's obligations for cuttable seams: dependency, deliverable, verification, ownership
   → read_obligations(goal) → O_G       -- construct the invocation-local obligation set, including an owed /conduct unit when present; G itself remains read-only
   → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is declared out of scope with the delegated substrate recorded on the declaration; computed once over O_G before packing begins, so it never enters a unit
+  → scan(seams)                        -- read the REMAINING obligations (O_G minus the out-of-scope ones) for cuttable seams: dependency, deliverable, verification, ownership. Ordered after the filter, as FLOW and PHASE TRANSITIONS run it: a pre-action-only obligation is delegated out before any cut is shaped around it
   → pack(seams, horizon) → ProposedUnit -- THE IRREDUCIBLE CORE, part one: apportion the obligations into coarse units such that each unit fits one execution horizon and every obligation lands in some unit; also reads each unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary)
   → fit(unit, horizon) → SpanFit       -- per-unit horizon-fit predicate; Indeterminate is surfaced, never silently read as Fits
   → qualify(cut) → Seam                -- Grounded when a seam is cited: a dependency, deliverable, verification or ownership seam, or another the goal evidences — the four are the scanning taxonomy, not the admissible set; Heuristic when the goal carries no such evidence — declared, not asserted as a natural joint
@@ -394,7 +394,7 @@ Heuristic signals for goal-plan-uncompiled detection (not hard gates):
 - No autonomous intent — the request is for an ordinary explanatory plan, not execution preparation
 - The goal already carries units whose completion conditions are settled — closed by a determinate predicate or by a recorded acceptance (a prior `/apportion` plan covers this goal and the goal is unchanged)
 - One self-evident leaf: the goal fits one execution horizon as a single unit and its done-criterion is already determinate
-- The user asks for ordering, independence, reconciliation or routing → `/conduct` (the units already exist)
+- The user asks for ordering, independence, reconciliation, routing, or how the run stops as a topology — how many rounds or passes a region runs, as distinct from what one unit's done means → `/conduct` (the units already exist)
 - The goal's own scope is too thin to read obligations from → `/inquire` (gather the missing pre-plan fact first)
 
 ### Cross-Session Enrichment
