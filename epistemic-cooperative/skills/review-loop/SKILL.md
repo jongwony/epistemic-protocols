@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: "Convergence-paced review-resolve loop over code/PR diffs. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase and the work-flow, auto-applies mechanical fixes and gates judgment fixes with the user, then re-reviews until the source verdict reaches approve. User-invoked via /review-loop."
+description: "Convergence-paced review-resolve loop over code/PR diffs. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase, auto-applies mechanical fixes and gates judgment fixes with the user, checks the applied edit bundle's fit against the work-flow once before handing forward, then re-reviews until the source verdict reaches approve. User-invoked via /review-loop."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
@@ -30,12 +30,13 @@ The review source is pluggable: any source satisfying the `(diff, design-intent)
                           + design-intent harvest (rules/comments for the changed surface → intent bundle)
   Phase 1  : review    — source(diff, intent) → { findings[], verdict, direction? }
                           (direction: the source's own root reading, asked when the verdict is not approve)
-  Phase 2  : verify     — per finding: /inquire (vs codebase) + /contextualize (vs work-flow);
-                          drop findings failing support-integrity / context-fit (cite basis)
+  Phase 2  : verify     — per finding: /inquire (vs codebase);
+                          drop findings failing support-integrity (cite basis)
   Phase 3  : classify  — shared-cause reading over the verified set (pre-gate analysis, fix-side only)
                           Mechanical → Extension (auto)
                           Judgment   → cluster by shared disposition → Constitution scope-gate
   Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
+                          + sweep → /contextualize once over the applied bundle (vs design-decision ledger + touched-surface conventions) → hand forward
   Phase 5  : re-review  — source(diff', intent) → verdict'
                verdict'=approve (or 0 new, no recurrence pending diagnosis) → converge ; else round k+1: these findings + this call's direction → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
@@ -89,14 +90,13 @@ The boundary is easiest to cross exactly at the moment a decision is being conve
 
 Call the designated source over the current diff — together with the design-intent bundle — and obtain `{ findings[], verdict, direction? }`. Each finding carries the form `[severity] file:line — description`; `severity ∈ critical | high | medium | low | suggestion`; `verdict ∈ approve | needs-attention`. When the verdict is not approve, the source is asked additionally for its own **root direction** — the one mechanism it reads behind the findings it just surfaced together with the observation that would break that reading, stated after the findings so the direction accounts for them rather than shaping them. The direction is optional at the interface: a source that returns none still satisfies it and the loop proceeds on findings alone. The per-source mechanics (how `codex` versus `code-review` produce this output) live in the Source Interface section below — Phase 1 only consumes the interface.
 
-## Phase 2: Verify (against codebase + work-flow)
+## Phase 2: Verify (against codebase)
 
 Before acting on any finding, verify it — a review model can hallucinate or flag a stale issue, and currency is not the same as fidelity. For each finding:
 
 - Call `/inquire` to check the finding against the current codebase: does the asserted issue actually hold against the code as it stands? This is the support-integrity / currency check — an artifact being fresh does not establish that it tracks current behavior.
-- Call `/contextualize` to check fit against the work-flow and surrounding context: is the flagged pattern intentional here, and is the proposed fix contextually appropriate for this codebase's conventions?
 
-This phase is primarily relay — read-only codebase checks with cited basis. A finding that fails verification (the issue does not hold, or the fix is contextually wrong) is **dropped**, and the drop is surfaced with its cited basis rather than silently discarded or applied. A shared-cause reading (Phase 3) is never that basis: it accounts for findings and cannot retire one, so a drop rests on what the codebase or the work-flow shows, never on the account that would be tidier without the finding. Genuine Constitution uncertainties that `/inquire` raises (where the user's judgment is genuinely needed) fold forward into the Phase 3 disposition gate rather than firing as separate in-round chat gates — keeping the in-round gate count down to the Phase 3 cluster gates.
+This phase is primarily relay — read-only codebase checks with cited basis. A finding that fails verification (the issue does not hold) is **dropped**, and the drop is surfaced with its cited basis rather than silently discarded or applied. A shared-cause reading (Phase 3) is never that basis: it accounts for findings and cannot retire one, so a drop rests on what the codebase shows, never on the account that would be tidier without the finding. Genuine Constitution uncertainties that `/inquire` raises (where the user's judgment is genuinely needed) fold forward into the Phase 3 disposition gate rather than firing as separate in-round chat gates — keeping the in-round gate count down to the Phase 3 cluster gates.
 
 ## Phase 3: Classify + Disposition Gate
 
@@ -150,7 +150,16 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    are dropping loop context the fixes need (accumulated conventions, prior fix shapes,
    adjacent invariants). De-escalate back to the low-cost tier once a re-review round
    surfaces no fix-induced follow-ups.
-3. **Hand forward to the designated source**: verify the side-effect (diff moved as
+3. **Bundle-level fit pass (once, after the sweep, before hand-forward)**: once the
+   completeness sweep has finished landing every site the write pass covers, call
+   `/contextualize` a single time over the whole applied edit bundle — never per fix —
+   checking the bundle as a set against the design-decision ledger harvested at Phase 0
+   (harvest source 4) and against the conventions of every surface the bundle touched. This
+   sits here rather than at Phase 2 because the property it checks — coherence across the
+   bundle, not any one finding's own correctness — belongs to the bundle as a whole; a
+   per-finding check has no vantage from which to see it. The pass runs after the sweep and
+   before the updated diff is handed to the designated source in step 4.
+4. **Hand forward to the designated source**: verify the side-effect (diff moved as
    briefed), then Phase 5's full re-review by the designated source re-judges the updated
    surface — the loop's own convergence check remains the final reviewer of the delegated
    writing.
@@ -260,7 +269,7 @@ At exit — converged or free — surface each ledger entry with the durable hom
 2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
 3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
 4. **FULL re-review each round** — re-call the source over the updated diff; declare convergence only after a full re-review pass over the updated diff.
-5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis; only support-integrity-passing findings proceed to apply.
+5. **Verify before apply** — a finding that fails support-integrity is dropped with its cited basis; only support-integrity-passing findings proceed to apply. Fit against the surrounding work-flow is no longer checked per finding here — it is checked once, at Phase 4, over the whole applied bundle, immediately before hand-forward.
 6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
 7. **Pass design intent upstream** — alongside the diff pointer, harvest the design intent already captured for the changed surface (the relevant `.claude/rules/*.md` + design-rationale sections of the project guide (`CLAUDE.md` or `AGENTS.md`), plus the design comments adjacent to the changed hunks) and pass it to the source as context, bounded to the changed files, as pointers not copied content. The source then pre-filters findings that an intentional documented choice already explains, so that refutation happens upstream in the review request rather than being re-derived in Phase 2 each round; Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces. Documented intent pre-filters only findings whose objection is the choice itself — it never licenses suppressing a real defect the documented choice actually causes, which the source still flags. Because Phase 4 can grow the changed surface (completeness sweep or licensed scope expansion), the bundle is re-harvested for the current changed surface before each full re-review rather than frozen at the Phase 0 harvest. The bundle additionally folds in decisions constituted at this loop's own gates (the design-decision ledger) as its one copied element — session-constituted decisions have no repository location to point at, so each is conveyed as content with its constitutive basis — and conveys the project's mission anchor with an explicit severity-calibration steer (conventions are what the source checks against; the mission anchor is how it weighs severity). Conveyance boundary: design intent only — never fix-status records, do-not-reflag lists, or verdict-conditioning instructions; the source re-verifies fixed code fresh, and its verdict is its own.
 8. **Tiered apply with a required completeness sweep, and recurrence escalation** — the
