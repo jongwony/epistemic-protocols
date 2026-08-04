@@ -111,7 +111,7 @@ N              = NavigationBlock { purpose_frame: String, canonical_locator: Han
 HandoffLocator = { record: the durable identity of the record the plan was parked in, session: the id of the session that parked it }
 DereferenceInstruction = an instruction to read the parked record at the canonical locator's record identity, within the session that locator names
 GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent grounding pass, and stop when a source is unreachable or a needed premise lacks support-integrity
-PI             = PlanInput ∈ LivePlan(IncomingPlan × Option(N)) ⊎ Navigation(N) ⊎ NoPlan
+PI             = PlanInput ∈ LivePlan(IncomingPlan × N) ⊎ Navigation(N) ⊎ NoPlan   -- the live arm carries N, never Option(N): /apportion's own terminal conjoins handoff_recorded, so a plan it emitted ALWAYS has a navigation block beside it. Admitting a plan without one would leave the emitted artifact with no pointer to carry — the substrate could not dereference the conditions, and a withdrawn unit's ref would name a record no one can reach
 I              = Option(IncomingPlan)
 
 condition_placement = for each condition the incoming plan carries, the site in the RESOLVED topology where it becomes authoritative: a unit's condition at the region its move was assigned to, taking that region's termination disposition; a plan-wide condition at the earliest point the topology completes everything that condition reads. An AI judgment over the topology, surfaced with its basis at the placement — never a re-derivation of what the condition MEANS, which stays the producer's. When no site is sound the placement is resolution_required naming the owed resolver; when several sound sites carry materially different downstream futures, the deciding axis·region re-opens instead of one being picked
@@ -132,7 +132,7 @@ Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_prospec
 AI-detected trigger          → WP = the multi-move prospect AI identified (Hybrid: user confirms at the Phase 0 guard gate)
 
 PI (bound alongside WP) = LivePlan(plan, nav) when the /apportion plan is still a live value, nav being the
-                          WHOLE navigation block it was emitted beside — the type is Option(N), not a
+                          WHOLE navigation block it was emitted beside — a navigation block, not a
                           bare locator, because a later session dereferences from the block's grounding and
                           dereference instructions, not from the record identity alone; Navigation(N) when the explicit argument,
                           colocated expression, or prior user turn carries that navigation block;
@@ -218,7 +218,7 @@ conducted(WP) = method_handed_off
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 init_state (track)           → Internal state update (seed every pass-scoped and historical Λ field once, on activation: surfaced_axes, checkpoints, residuals, degradations, move_assignment, withdrawn_units, reopened_divergences and condition_placements to ∅; plan_pointer and trace_contract to None. Phase 1's withdrawn_units read and every later empty-set read consult THIS write, never an implicit default)
-Phase 0 BindPlanInput (sense)        → Internal analysis (classify the incoming carrier as LivePlan, Navigation, or NoPlan; on the LivePlan arm also read the navigation block the carrier supplies beside the plan, None when it supplies none)
+Phase 0 BindPlanInput (sense)        → Internal analysis (classify the incoming carrier as LivePlan, Navigation, or NoPlan; on the LivePlan arm also read the navigation block the carrier supplies beside the plan — a live /apportion plan always has one, since that protocol's own terminal requires the block to have been presented, so a live plan arriving WITHOUT one is not a LivePlan carrier and classifies as NoPlan rather than binding a pointerless plan)
 Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading the record that locator names, within the session it names — honor its snapshot anchor when present, and run N.grounding_instruction over what it finds. One dereference reaches the whole plan, so nothing is reassembled from separate records or from session memory. An unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates)
 Phase 0 bind_I (track)               → Internal state update (write Λ.incoming_plan from the resolved carrier: Some(live plan), Some(the dereferenced plan), or None only for explicit NoPlan)
 Phase 0 retain_pointer (track)       → Internal state update (write Λ.plan_pointer on EVERY arm: the navigation block the live carrier supplied beside the plan, Some(N) after a successful dereference, or None on the NoPlan arm. The write is total, so an Amend re-entry never leaves a prior block standing beside a plan that no longer exists)
@@ -257,7 +257,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 
 ── MODE STATE ──
 Λ = { phase: Phase, work_prospect: Option(WP), incoming_plan: I, move_set: Option(MS), topology: Option(CT), surfaced_axes: Set(axis × MoveRegion), checkpoints: CheckpointSet, substrate_handoff: Option(SH), residuals: Set(ResidualAxis), degradations: Set(Degradation), move_assignment: Map(Move → ⟨order_position, region⟩), withdrawn_units: Set(UnitRef), reopened_divergences: Set(IncomingCondition × (axis × MoveRegion)), condition_placements: CP, plan_pointer: Option(N), trace_contract: Option(TraceContract), active: Bool, cause_tag: String }
-   -- residuals, the Phase-2 independence degradations, move_assignment, checkpoints, and both binding sets are
+   -- residuals, the Phase-2 independence degradations, move_assignment, checkpoints, and the placement set are
    --   PRODUCTS OF ONE TOPOLOGY MATERIALIZATION PASS, never cross-pass accumulators; only
    --   reopened_divergences and withdrawn_units are historical across a full pass. surfaced_axes is edited at
    --   single (axis, region) granularity by Select/Compose/Reorient and by the back-edge.
