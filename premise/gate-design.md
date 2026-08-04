@@ -41,7 +41,7 @@ Each option presented in a decision gate must occupy a decision-relevant, differ
 
 Two concrete failure modes characterize the operational scope:
 - **Cost-symmetric baggage**: options differ only on items whose inclusion leaves the downstream trajectories equivalent across options. Such options share a trajectory and should collapse to one.
-- **Meta-actions as peer options**: options whose selection produces no trajectory on the decision axis at all — pure exits, deferrals, or off-axis context-gathering that commit to no downstream action. An option whose selection triggers a structurally distinct downstream trajectory — including a cleanup trajectory triggered by an explicit withdraw option (see `premise/session-and-handoff.md`, a planned addition to this collection) — remains an on-axis peer option, not a meta-action. Meta-actions surface as free-response pathways, not as peer options.
+- **Meta-actions as peer options**: options whose selection produces no trajectory on the decision axis at all — pure exits, deferrals, or off-axis context-gathering that commit to no downstream action. An option whose selection triggers a structurally distinct downstream trajectory — including a cleanup trajectory triggered by an explicit withdraw option (see `premise/session-and-handoff.md`) — remains an on-axis peer option, not a meta-action. Meta-actions surface as free-response pathways, not as peer options.
 
 Operational test: "Do the presented options produce materially different downstream trajectories, or do some share the same trajectory while differing on incidental packaging?" Shared-trajectory options collapse to one; options producing no on-axis trajectory surface as free-response pathways instead of peer options.
 

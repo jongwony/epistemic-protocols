@@ -13,19 +13,18 @@ Each document below stands on its own: it does not assume you know any particula
 
 ## Documents
 
-| Document | Covers |
+| Document | When to read it |
 |---|---|
-| [`recognition-and-authority.md`](recognition-and-authority.md) | What an AI system may resolve on its own versus what requires the user's judgment, and why options should be presented for recognition rather than left to recall. |
-| [`interaction-factorization.md`](interaction-factorization.md) | How a user-facing interaction factors into an abstract design and its concrete realization, and the test for telling a genuine choice from a single dominant answer dressed up as options. |
-| [`gate-design.md`](gate-design.md) | The operational discipline for designing and defending a gate: keeping a mode active until convergence, guarding against an AI shortcutting its own process, taxonomy completeness, differential futures between options, and evidence that a process actually converged. |
-| [`tiering-and-scope.md`](tiering-and-scope.md) | How to classify a principle by its trajectory as models improve (axiom / derived / architectural / safeguard), and where certain structural, cost, and layering decisions belong. |
-| [`calibration-methodology.md`](calibration-methodology.md) | How a project calibrates its own default posture — how much to auto-resolve versus how much to gate for user judgment — from a small set of measurable variables. |
-| [`approach-verification.md`](approach-verification.md) | Reading a request's actual intent before acting: matching the level of the ask, proposing the minimal fix, and checking a request's premise against reality before extending it. |
-| [`verification-discipline.md`](verification-discipline.md) | What makes a check's verdict trustworthy, and how to verify a delegated agent's reported side effects rather than trusting its narration. |
-| [`instruction-authoring.md`](instruction-authoring.md) | Writing instructions and durable records that age well: stating principles instead of examples, not over-mentioning what to avoid, keeping evidence support-linked rather than merely current, audience reach, and ledger/state separation. |
-| `delegation-and-subagents.md` | When and how to hand work to another agent or worker: what context it needs restated, and how to state a self-contained brief. |
-| `session-and-handoff.md` | What belongs in a durable record across a session boundary versus what stays in working memory, and a termination taxonomy for exiting stateful work cleanly. |
-| `externalization-publish-mode.md` | How to judge, per reference point, whether to link to or inline content when publishing an artifact for a human reader. |
-| `boundaries-and-safety.md` | General safety classifications: irreversible versus reversible actions, secrets handling, a destructive-restore gate, and large-file handling discipline. |
+| [`recognition-and-authority.md`](recognition-and-authority.md) | Deciding whether to settle something yourself or put it to the person you're working with; presenting a set of options for someone to choose from; the person interrupts you mid-task; weighing advice that arrived from outside the work. |
+| [`interaction-factorization.md`](interaction-factorization.md) | Designing the options offered at a checkpoint; judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several. |
+| [`gate-design.md`](gate-design.md) | Designing or defending a checkpoint, a convergence condition, or a termination condition; checking whether a process can shortcut or skip past itself. |
+| [`tiering-and-scope.md`](tiering-and-scope.md) | Deciding which surface a principle belongs on; classifying whether a principle should matter more or less as the underlying model improves. |
+| [`calibration-methodology.md`](calibration-methodology.md) | Setting or changing how much a project resolves on its own versus routes to its user for judgment. |
+| [`approach-verification.md`](approach-verification.md) | Before deciding what to do with a request; unsure whether the conversation is at design level or implementation level; deciding how far a fix should reach; a time or date arrives without a stated zone. |
+| [`verification-discipline.md`](verification-discipline.md) | Before declaring something done; a delegated agent reports that its work is complete. |
+| [`instruction-authoring.md`](instruction-authoring.md) | Writing or revising instructions and durable records; judging whether a new rule earns its place; deciding how much to inline for a reader versus leaving as a reference. |
+| [`delegation-and-subagents.md`](delegation-and-subagents.md) | Handing work to an agent that cannot see this conversation; deciding what a coordinator keeps for itself versus delegates outward. |
+| [`session-and-handoff.md`](session-and-handoff.md) | Deferring work or crossing a session boundary; an input arrives that would pull focus off the task currently in progress. |
+| [`boundaries-and-safety.md`](boundaries-and-safety.md) | Before replacing a file or taking any other hard-to-reverse action; reading configuration text that could be executed; deciding when work needs to be made durable. |
 
-The first eight exist today; the rest are planned additions to the same collection — a document not yet present is a gap to fill later, not a broken promise.
+Every document in the table above exists today. A later addition to this collection extends the table with a further row; it does not require reworking what is already present.
