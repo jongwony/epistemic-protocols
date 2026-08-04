@@ -1,6 +1,6 @@
 # Gate Design
 
-This document covers the operational discipline for designing gates — the concrete checkpoints where a decision-making system asks its user something — once `premise/recognition-and-authority.md` and `premise/interaction-factorization.md` have established which interactions need a gate at all.
+This document covers the operational discipline for designing gates — the concrete checkpoints where a decision-making system asks its user something — once `premise/recognition-and-authority.md` and `premise/interaction-factorization.md` have established which interactions need a gate at all. It ranges over what a gate presents once one is warranted, and over the conditions under which the process surrounding it converges or terminates.
 
 ## Convergence Persistence (Axiom)
 
@@ -58,6 +58,10 @@ Convergence must be demonstrated, not asserted. At convergence, the system must 
 ## Pattern over Tool (Derived)
 
 Recognition over Recall is a content invariant — the function lies in the structured-options pattern, not in the specific tool that renders it. Structured numbered text followed by a turn yield satisfies the same epistemic function as a dedicated structured-choice tool call. The invariant: the user receives structured options with differential implications, and their response is parsed into a typed answer.
+
+## Gated Interaction Realization (Derived)
+
+Gated does not mean unstructured. A gated interaction presents AI-inferred rationale options — a small number of reasoning hypotheses grounded in context — that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond the presented options: this freedom is inherent in the structure of a conversational turn, not an explicit escape hatch bolted on afterward. A blank canvas forces recall; structured rationale enables recognition of the reasoning paths available. This extends Recognition over Recall (`premise/recognition-and-authority.md`) to gated interactions.
 
 ## Loop Continuity under Bounded Regret (Derived)
 

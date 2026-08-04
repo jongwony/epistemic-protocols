@@ -31,7 +31,7 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 **Inter-agent surface (Constitution-as-Horizontverschmelzung)** — Every Phase 2 Constitution gate is a horizon fusion point. The user's horizon merges with the AI's pre-understanding (Vorverständnis), and the gate answer becomes the productive prejudice (Produktives Vorurteil) constraining the next cycle. Formal correspondence: Detection with Authority's Constitution kind (`premise/recognition-and-authority.md`) is the gate-level realization of horizon fusion; the `Qs` gate row in the Pattern over Vocabulary table is its formal mapping.
 
-**Gated interaction realization**: full text in `premise/recognition-and-authority.md` §Gated Interaction Realization. It extends Recognition over Recall to gated interactions — the same Recognition-over-Recall move that grounds this surface's horizon-fusion point above.
+**Gated interaction realization**: full text in `premise/gate-design.md` §Gated Interaction Realization. It extends Recognition over Recall to gated interactions — the same Recognition-over-Recall move that grounds this surface's horizon-fusion point above.
 
 **Operational axis (closure / categorization)** — Hermeneutic-cycle availability acts as a closure clause in autonomous decisions. The availability is itself a profile variable: `hermeneutic_circle_availability` in `epistemic-cooperative/skills/steer/SKILL.md`.
 
