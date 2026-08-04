@@ -8,8 +8,8 @@
  *   - docs/**                     Repo documentation reports
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
  *
- * Separately, .claude/worktrees/ is pruned from the walk: those are sibling
- * checkouts of this repository, each verified from its own root.
+ * Separately, .claude/worktrees/ is pruned from the walk: sibling checkouts of
+ * this repository, each verified from its own root.
  *
  * Severity: warn (Stage 1 surface posture; fail promotion gated on Stage 2
  * retention evidence). One warn record per file with Korean lines listed.
@@ -52,22 +52,13 @@ const TEXT_EXTENSIONS = new Set([
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', '.husky']);
 
-// Directories pruned by root-relative path rather than bare name, matching the
-// SKIP_PATTERNS convention in static-checks.js. `.claude/worktrees/` holds sibling
-// checkouts of this same repository, whose nested copies escape the `^`-anchored
-// WHITELIST_PATTERNS above; each worktree is checked from its own root, where those
-// anchors resolve. Pruning by path keeps an unrelated directory merely *named*
-// `worktrees` in scope.
+// Matched against the root-relative path, not the bare directory name.
 const SKIP_PATH_PATTERNS = [
   /^\.claude\/worktrees(\/|$)/,
 ];
 
 function isWhitelisted(relPath) {
   return WHITELIST_PATTERNS.some(p => p.test(relPath));
-}
-
-function isSkippedPath(relPath) {
-  return SKIP_PATH_PATTERNS.some(p => p.test(relPath));
 }
 
 function runLanguagePurityCheck({ projectRoot }) {
@@ -88,7 +79,7 @@ function runLanguagePurityCheck({ projectRoot }) {
       const rel = path.relative(projectRoot, full).replace(/\\/g, '/');
       if (entry.isDirectory()) {
         if (SKIP_DIRS.has(entry.name)) continue;
-        if (isSkippedPath(rel)) continue;
+        if (SKIP_PATH_PATTERNS.some(p => p.test(rel))) continue;
         walk(full);
         continue;
       }
