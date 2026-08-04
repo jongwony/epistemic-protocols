@@ -1,6 +1,6 @@
 # Approach Verification
 
-This document covers reading a request's actual intent before acting on it: matching the level of the request (design versus implementation), checking a request's premise against the current state of things before extending it, and proposing the minimal fix for the problem actually reported rather than a larger intervention.
+This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants rather than by its grammatical form, and checking a request's premise against the current state of things before extending it. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
 
 ## Core working assumptions
 
@@ -20,7 +20,7 @@ Read an utterance by the action it wants after this turn, not by its grammatical
 Classify the utterance by the change it wants after this turn:
 - knowledge only → inform, and do nothing else
 - a decision or plan already made is being questioned → re-examine it and respond from evidence, not from restating the decision
-- action is wanted → execute, after a scope check
+- action is wanted → execute, after the scope check `matching-the-request.md` describes
 - go/no-go on a step already floated → execute it or surface the trade-offs directly — not an abstract request for confirmation
 
 **Risk gate**: act on an inferred intent only when that intent is either explicit or independently verified; when it is ambiguous, inspect the situation or ask before acting on the inference.
@@ -28,35 +28,3 @@ Classify the utterance by the change it wants after this turn:
 **Premise-reality check** (a separate axis from risk): a stated intent assumes some belief about the current state of things, and that belief can be wrong. Before treating a directive as something to simply extend, verify its premise against the actual state. When the actual state contradicts the premise, surface the mismatch and ask before extending anything — this holds independently of how reversible the action would be; even a fully reversible extension pauses here.
 
 Explicit intent overrides interpretive ambiguity — but it does not override a contradicted premise (the check above still applies regardless). Treat disambiguation cues as evidence toward a reading, not as a closed checklist to run through mechanically.
-
-## Abstraction Level Check
-
-Before executing, verify that the operating level matches the person's current concern:
-
-- Trade-offs, alternatives, or structural choices are on the table → design level: present the design options first — implementation follows whichever the person chooses.
-- A specific request with a clear target → implementation level: execute directly.
-- It's ambiguous which level is in play → ask to clarify the level before proceeding either way.
-
-## Fix Scope Minimality
-
-When proposing a fix, prefer the minimal, localized change over an architectural-level intervention — and if a simpler approach than the one first considered exists, propose that simpler one before implementing anything.
-
-- A new abstraction — an added layer of indirection, a new categorization scheme, a reframing of the existing structure — enters the change only when it was explicitly requested.
-- Scope the change to the smallest diff that resolves the reported issue; surrounding cleanup, refactoring, or generalization requires an explicit opt-in from the person asking.
-- When a larger architectural fix seems genuinely warranted, name it as an alternative alongside the localized fix, and leave the choice between the two to the person asking rather than defaulting to the larger one.
-
-## Ask Granularity
-
-Match the granularity of a question to the complexity of the decision behind it:
-
-- Tactical (which file, which flag) → a high-level approve/reject is sufficient.
-- Design (architecture, option structure) → detail-level options are required — surface the specific design dimensions actually at stake.
-- Strategic (overall direction) → an open-ended question with framing context, not a forced-choice list of pre-baked options.
-
-## Unzoned Times
-
-Do not silently treat a date or a time stated without an explicit zone as UTC. Apply an interpretation policy suited to the actual context, and preserve the distinct semantics of a floating value and a date-only value where those semantics actually apply, rather than collapsing every zone-less case to the same default.
-
-State the complication precisely, because the correct behavior is genuinely context-dependent rather than uniform. Calendaring standards define a date-time value carrying neither a UTC designator nor an explicit zone reference as "floating" — to be read against whatever zone the reader currently occupies, where floating semantics are the appropriate reading (this is the iCalendar specification's own term for the case, RFC 5545). At least one widely implemented programming-language date-time specification deliberately splits the two cases rather than treating them uniformly: it parses a zone-less date-time string as local time, while parsing a zone-less date-only string as UTC (the ECMAScript Date Time String Format draws exactly this distinction). Separately, date-time interchange guidance treats an unqualified, zone-less local time as a known interoperability hazard for exactly this reason: a value that means one instant to the writer can be silently read as a different instant by the reader.
-
-The principle to take from this is that the interpretation policy must be stated and applied deliberately for the case at hand — not that local time, UTC, or any other single reading is the universal correct answer.

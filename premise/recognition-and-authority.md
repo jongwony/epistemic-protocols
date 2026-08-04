@@ -39,10 +39,6 @@ Single test: "Is the AI acting as a relay, or exercising authority?" Five indica
 
 The AI makes conditions visible; the user judges them. Detection with Authority defines the structural separation of roles; Surfacing over Deciding names the operational stance that follows from it: when in doubt, surface the finding rather than making the decision silently. Silence is the primary failure mode this principle addresses.
 
-## Gated Interaction Realization (Derived)
-
-Gated does not mean unstructured. A gated interaction presents AI-inferred rationale options — a small number of reasoning hypotheses grounded in context — that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond the presented options: this freedom is inherent in the structure of a conversational turn, not an explicit escape hatch bolted on afterward. A blank canvas forces recall; structured rationale enables recognition of the reasoning paths available. This extends Recognition over Recall (above) to gated interactions.
-
 ## Decision Tiering
 
 A companion codification of the same authority split, framed by reversibility rather than by epistemic source.
@@ -59,10 +55,3 @@ A companion codification of the same authority split, framed by reversibility ra
 ### Interview Triggers
 
 **Required** (ask): irreversible actions — a harness's own risky-action categories, plus any user-specific extensions on top of them (see `premise/boundaries-and-safety.md` for the general reversible/irreversible classification).
-
-### Interruption Handling
-
-A user interruption during in-progress work indicates one of three things:
-- **Context provision**: the user supplies a value directly → incorporate immediately
-- **Direction change**: the user corrects the approach → pause, re-confirm before resuming
-- **State declaration**: the user declares a completed state → when relevant to the current task context, treat as an implicit turn yield; when ambiguous or cross-context, confirm before proceeding
