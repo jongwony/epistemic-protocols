@@ -61,7 +61,7 @@ Emergent(a) = a conduct value for axis a that the presented Gen set did not name
   Gen(termination)    ∈ {single_pass, bounded_rounds(n), until_dry_ceiling(k), until_goal_met} ∪ Emergent(termination)   -- n and k are constituted with the value at that region's termination gate; Select carries them inside the value, so no separate producer is needed
   Gen(routing)        ∈ {return_to_user, chain_to_next, handoff_to_protocol(target), deepen_on_finding, handoff_to_span} ∪ Emergent(routing)  -- handoff_to_protocol carries the protocol it routes to, constituted with the value at that region's routing gate, so the handoff is dispatchable without a second lookup; handoff_to_span: the move/region output crosses the span wall to a future span that does not share this session's context
 ResolvedValue⟨a⟩ = per-axis resolved value, axis-typed:
-   ResolvedValue⟨reconciliation⟩ = Gen(reconciliation) ⊕ Compose(RVᵣ, RVᵣ, op)
+   ResolvedValue⟨reconciliation⟩ = RVᵣ = Gen(reconciliation) ⊕ Compose(RVᵣ, RVᵣ, op)   -- RVᵣ abbreviates this same type: a composite's operands are themselves resolved reconciliation values, so composites nest
    ResolvedValue⟨order⟩ = Gen(order);  ResolvedValue⟨independence⟩ = Gen(independence);  ResolvedValue⟨termination⟩ = Gen(termination);  ResolvedValue⟨routing⟩ = Gen(routing)
 op     ∈ {⨾ sequential, ∥ parallel}             -- extensible at operator level
 CT     = ConductTopology = Map(axis → Map(MoveRegion → ResolvedValue⟨axis⟩))
@@ -198,7 +198,7 @@ During Phase 2 (Conduct Design — topology elicitation):
   Entry surface: present CT_default + basis as pre-gate relay text, then open the first AxisGate and yield. The default is a surfaced candidate, not an Extension-selected method; silence carries Stop. Selecting Sufficient at this first gate is the explicit user path that binds the remaining axes to their Gen defaults.
   Each cycle surfaces the single most decision-relevant UNSURFACED axis·region by impact/leverage — the most-constrained axis first (the one whose values most divide the downstream conduct-plans), NOT a fixed order. Every surfaced axis·region is settled at its own gate this cycle — Select, Compose, or Reorient — or left to its Gen default when the loop ends by Sufficient. A decision defers past design time only when its deciding evidence does not yet exist; such a decision never enters this loop as a Gen-typed axis, and registers through the generic Checkpoint record after topology finalization. Each move integrates one ConductMove and updates MODE STATE:
     VM = Select(value)  → record axis·region → Gen(value) in CT; surfaced_axes ∪= {(axis, region)}; auto-advance to next axis·region   -- value is a named Gen member or an Emergent(axis) one the user proposes at the gate: the presented set aids Recognition and never bounds the space, so an emergent value records exactly like a named one
-    VM = Compose(op)    → [reconciliation axis ONLY] record reconciliation → Compose(RVᵣ, RVᵣ, op) in CT; surfaced_axes ∪= {(reconciliation, region)}; auto-advance
+    VM = Compose(left, right, op) → [reconciliation axis ONLY] record reconciliation → Compose(left, right, op) in CT; surfaced_axes ∪= {(reconciliation, region)}; auto-advance   -- all three come from the well-formed composite the gate surfaced and the user adopted; the arm binds the operands rather than re-deriving them
     VM = Reorient(axis, partition) → remove the (axis, region) pair from surfaced_axes and CT[axis][region]; when partition ≠ None, replace the region keys of the four edge-local axes with it so subsequent axis·region gates are edge-local over the new cut — order's single {whole} key is untouched, so the constituted global sequence survives every re-partition; re-surface the reframed (axis, region) (does NOT auto-advance)
     VM = Sufficient     → exit elicitation → FinalizeTopology fills every unresolved axis·region with its Gen default and REPLACES Λ.residuals with exactly one DefaultBound ResidualAxis per final-CT value that remains unconstituted
     EXHAUSTION (all axis·regions surfaced ∧ ¬Sufficient) → implicit Sufficient (relay): exit with the now-complete CT → FinalizeTopology replaces Λ.residuals with ∅
@@ -435,7 +435,7 @@ Each axis has a defined downstream effect:
 
 The user's move is one of:
 - **Select(value)** — adopt a value for the axis·region; auto-advance to the next unsurfaced axis·region
-- **Compose(via op)** — combine reconciliation values via ⨾ or ∥ (reconciliation axis only); auto-advance
+- **Compose(left, right, via op)** — adopt a surfaced composite: its two reconciliation values combined by ⨾ or ∥ (reconciliation axis only); auto-advance
 - **Reorient(axis)** — reframe or replace the surfaced axis; the reoriented axis re-surfaces (no auto-advance)
 - **Sufficient** — declare the topology mission-sufficient; converge. A **move within the axis gate**, not a separate gate.
 
