@@ -1,6 +1,6 @@
 # `.claude/principles/` — Demotion Zone
 
-**Purpose**: Lazy-load location for prescriptive content demoted from `.claude/rules/`. Per Tier Factorization, this directory realizes the **o-tier** axis (operational/runtime invocation frequency) at T2-T3 — sections invoked at authoring/verify/axiom-evolution time, not per-turn.
+**Purpose**: Location for prescriptive content demoted from `.claude/rules/`. Per Tier Factorization, this directory realizes the **o-tier** axis (operational/runtime invocation frequency) at T2-T3; §Distinction from `.claude/rules/` below states the load behavior that realizes it.
 
 This directory realizes the root `AGENTS.md` `## Progressive Disclosure` policy in three stages: at session start, nothing in this directory loads; when work touches this directory, its entry document (`AGENTS.md`, aliased as `CLAUDE.md`) is picked up by directory convention, bringing this index and the placement policy below into context; a specific principle document is then fetched via Read/Grep only when the utterance or current context names it. Other AI clients can adopt the same content via their own load conventions; the content itself is substrate-agnostic.
 
