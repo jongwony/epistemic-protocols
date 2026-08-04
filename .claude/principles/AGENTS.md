@@ -6,24 +6,20 @@ This directory realizes the root `AGENTS.md` `## Progressive Disclosure` policy 
 
 ## Distinction from `.claude/rules/`
 
-| Location | o-tier | Mechanism | Invocation frequency |
-|----------|--------|-----------|----------------------|
-| `.claude/rules/` | T1 | Auto-loaded by harness at session start | Per-turn |
-| `.claude/principles/` | T2-T3 | Entry document (`AGENTS.md`/`CLAUDE.md`) loads by directory convention when work touches this directory; principle documents lazy-load via Read/Grep when named | Per-directory-visit (entry) / per-session / per-authoring (principle documents) |
+- **`.claude/rules/`** — o-tier T1. Auto-loaded by the harness at session start, so it is invoked per-turn.
+- **`.claude/principles/`** — o-tier T2-T3, with two load paths. The entry document (`AGENTS.md`, aliased `CLAUDE.md`) loads by directory convention when work touches this directory, so it is invoked once per directory visit. Each principle document lazy-loads via Read/Grep only when named, so it is invoked per-session or per-authoring.
 
-This table is the canonical statement of the load mechanism in this repository; other files point here rather than restating it. Naming this index `AGENTS.md` with the `CLAUDE.md` alias — the only file in this directory that carries that name — is what makes the directory-convention pickup happen, which is why it stays short and current.
+This section is the canonical statement of the load mechanism in this repository; other files point here rather than restating it. Naming this index `AGENTS.md` with the `CLAUDE.md` alias — the only file in this directory that carries that name — is what makes the directory-convention pickup happen, which is why it stays short and current.
 
 The split realizes the orthogonal e-tier × o-tier mapping established in this project (`.claude/principles/architectural-principles.md` §Authority Mode's A5 coordination note). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
 
 ## Index
 
-| File | Current contents |
-|------|------------------|
-| `architectural-principles.md` | Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Plugin Encapsulation, Utility Skills delegation |
-| `hermeneutic-cycle.md` | Pattern over Vocabulary (Gadamerian formal-block mapping) + 6 surface catalog (Primary / Secondary / Tertiary / Inter-version / Inter-agent / Operational axis) |
-| `safeguards.md` | Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness — all authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` |
-| `project-profile-calibration.md` | Profile Variables (six) and Calibration Rule, Scope Boundary — authoring/calibration-time reference, not per-turn |
-| `outcome-equivalence.md` | Outcome Equivalence (whole section) — Derived tier, runtime-inert argument chain |
+- **`architectural-principles.md`** — Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Plugin Encapsulation, Utility Skills delegation.
+- **`hermeneutic-cycle.md`** — Pattern over Vocabulary (Gadamerian formal-block mapping), plus the six-surface catalog: Primary, Secondary, Tertiary, Inter-version, Inter-agent, Operational axis.
+- **`safeguards.md`** — Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness. All are authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` instead.
+- **`project-profile-calibration.md`** — Profile Variables (six) and Calibration Rule, Scope Boundary. Authoring/calibration-time reference, not per-turn.
+- **`outcome-equivalence.md`** — Outcome Equivalence (whole section). Derived tier, runtime-inert argument chain.
 
 ## Philosophy
 
