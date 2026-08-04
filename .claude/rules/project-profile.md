@@ -4,7 +4,7 @@ This project's Cognitive Partnership Move calibration profile (per `.claude/prin
 
 ## Calibration Result
 
-**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `.claude/principles/project-profile-calibration.md §Scope Boundary` (aligned with `architectural-principles.md §Epistemic Completeness Boundary`).
+**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `.claude/principles/project-profile-calibration.md §Scope Boundary` (aligned with `premise/tiering-and-scope.md §Epistemic Completeness Boundary`).
 
 Floor (runtime-discovered, retry would change identity):
 - Katalepsis (`/grasp`): user IS the measurement target.
