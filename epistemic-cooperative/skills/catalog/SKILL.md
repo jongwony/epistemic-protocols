@@ -58,7 +58,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Prosoche | `/attend` | Autonomous run ahead with its boundaries not yet compiled into verifiable conditions |
+| Merismos | `/apportion` | Autonomous goal whose unit plan is uncompiled — not yet cut into units that fit one run each, or cut but with no settled done-condition per unit |
 
 ### Verification
 
@@ -75,7 +75,6 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Anamnesis | `/recollect` | A vague, ambiguous recall you can't quite pin down — resolve it into recognized context |
 | Anagoge | `/ascend` | A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept) |
 | Katalepsis | `/grasp` | AI-produced work you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it |
-| Diairesis | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage with no orphans) before conducting |
 | Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
 
 ## Detail Mode

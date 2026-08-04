@@ -25,7 +25,7 @@ AI는 한 도메인의 패턴, 모델, 유비를 다른 도메인에 적용하�
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
-| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
+| Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 

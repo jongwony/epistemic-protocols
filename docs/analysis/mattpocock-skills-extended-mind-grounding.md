@@ -182,7 +182,7 @@ protocol도 marginal attention을 점유한다고 본다. 도구가 reliable ava
 | Process가 control을 빼앗으면 안 된다 | 구성적 판단은 framework에 양도될 수 없다 | Constitution boundary |
 | Shared language가 필요하다 | 인간-AI dyad의 common ground가 필요하다 | Horismos, Anamnesis, BoundaryMap |
 | Domain languages를 연결해야 한다 | 구조 보존 번역을 위한 metalanguage가 필요하다 | TYPES, MORPHISM, Analogia, functorial mapping |
-| Feedback loop가 없으면 agent는 blind하다 | Relay는 evidence와 entropy 감소에 의존한다 | Aitesis, Prosoche, Epharmoge |
+| Feedback loop가 없으면 agent는 blind하다 | Relay는 evidence와 entropy 감소에 의존한다 | Aitesis, Merismos, Epharmoge |
 | Prototype으로 설계를 확인한다 | 추상 설계를 감각 가능한 artifact로 만든다 | Analogia, Epharmoge |
 | Skills는 small/composable해야 한다 | 확장인지 workspace의 오염을 줄인다 | Epistemic Cost Topology |
 

@@ -1104,8 +1104,8 @@ describe('package.js CLI', () => {
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
+        'apportion.zip',
         'ascend.zip',
-        'attend.zip',
         'bound.zip',
         'catalog.zip',
         'comment-review.zip',
@@ -1113,7 +1113,6 @@ describe('package.js CLI', () => {
         'contextualize.zip',
         'curses.zip',
         'dashboard.zip',
-        'delimit.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',

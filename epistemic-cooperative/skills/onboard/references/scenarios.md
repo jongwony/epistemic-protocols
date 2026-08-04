@@ -13,7 +13,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound dispatches each edit domain's boundary kind and settles its disposition"
 
 **Quiz Q (situation)**: You ask Claude to "tidy up my resume" — it rewrites your summary, swaps out job titles, and restructures bullet points. You only wanted typo fixes and better wording; the content decisions are yours.
-- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Prosoche `/attend`
+- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Merismos `/apportion`
 - Answer: B
 
 **Quiz Q (design)**: You're about to delegate a multi-step task with some sensitive decisions. How would you make explicit which steps are AI's call vs yours?
@@ -64,7 +64,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Here's my trip checklist, ready to go' and I'll show how /gap surfaces blind spots"
 
 **Quiz Q (situation)**: You're about to accept a job offer. The salary is good, the role sounds interesting, you're ready to reply. Something feels off but you can't name it.
-- A) Prosoche `/attend` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Periagoge `/induce`
+- A) Merismos `/apportion` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Periagoge `/induce`
 - Answer: B
 
 **Quiz Q (design)**: You've picked option B out of three. Before committing, how would you check if you're overlooking something the decision logic didn't cover?
@@ -98,7 +98,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Is the National Museum open next Friday afternoon?' and I'll show how /inquire grounds the answer in observable facts"
 
 **Quiz Q (situation)**: You ask Claude "can my MacBook Air run this 70B model locally?" — the answer depends on your exact spec and the model's published requirements. Claude starts recommending settings without confirming either.
-- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Prosoche `/attend`
+- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Merismos `/apportion`
 - Answer: B
 
 **Quiz Q (design)**: You want to ask "will flight KE123 be on time tomorrow?" — a verifiable external fact. How would you make sure Claude checks rather than guesses?
@@ -191,22 +191,22 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: εὕρεσις (finding, discovery) — the older, broader sense of turning up something not yet in view, prior to its later narrowing into a term of rhetorical technique. Core principle: **Divergence over Selection**. A candidate is raw material, not a selection-ready alternative — heuresis never discards, scores, or ranks what a round produces; that judgment belongs downstream, entirely out of its scope. Workflow position: Planning cluster, immediately upstream of `/preview` — heuresis widens a thin or converged field into a diverse one; `/preview` picks up only once two or more candidates already exist and need their futures contrasted. Game feel: "I've only got one idea, and it's getting stale" → frame map opens → candidates generate in parallel, untouched by ranking → you stop when the field is wide enough → a diverse set, ready for whatever comes next.
 
-## Prosoche `/attend`
+## Merismos `/apportion`
 
 **Situation**: You ask Claude to "work through my 200-photo album and build the yearbook layout" — an unattended run that will churn for an hour while you're away. You worry it might quietly declare victory halfway through, or wander into folders it was never meant to touch.
 
-**Intervention**: `/attend` reads the boundaries the job implies — which folders are fair game, what counts as done, how long it may run — and compiles each into a checkable condition (every album photo appears in the layout; nothing outside the album folder changed; at most N passes). You confirm the set, and it becomes the finish-line contract the autonomous run is held to. Anything that would need split-second blocking (like deleting originals) is named as out of its hands and left to your tool's permission prompts.
+**Intervention**: `/apportion` reads the album job's obligations and cuts it into coarse units at the seams it can cite — perhaps one unit per hundred-photo batch (a deliverable seam) or one per layout section (a verification seam) — and judges each against how much a single run can plausibly finish. For each unit it derives a completion condition where one compiles — and where none does, surfaces it for you to accept as uncovered rather than inventing a check (every photo in that batch appears somewhere in the layout; the section renders with no missing thumbnail) and any invariant the unit must preserve while it works and can still be checked once it stops (the album folder's file count matches the manifest). A boundary whose violation cannot be undone afterwards — deleting the originals — is not compiled as a stop-time check at all: `/apportion` declares it out of scope and names the substrate that must intercept it before the action runs. You confirm the cut and its conditions, and each unit leaves closed — with its own checkable finish line, or with the acceptance you recorded where none compiled. What `/apportion` produces is that plan, not the run: ordering the units is `/conduct`'s, holding the run to each condition is the completion-predicate enforcer you start separately, and anything needing split-second blocking (like deleting originals) is named out of scope and left to your tool's permission prompts.
 
-**Trial prompt**: "Let's practice: describe a task you'd hand to an unattended run and I'll show how /attend compiles its boundaries into verifiable conditions"
+**Trial prompt**: "Let's practice: describe a goal you'd hand to an unattended run and I'll show how /apportion cuts it into units and closes each one — a checkable finish line where one compiles, an acceptance you record where none does"
 
 **Quiz Q (situation)**: You're about to let Claude run unattended overnight migrating hundreds of files, and you want certainty that "done" really means done — and that it stayed inside the folders you named.
-- A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Horismos `/bound`
+- A) Aitesis `/inquire` — B) Merismos `/apportion` — C) Syneidesis `/gap` — D) Horismos `/bound`
 - Answer: B
 
 **Quiz Q (design)**: You want an autonomous run held to your boundaries without watching it work. How do you get protection that doesn't depend on supervision?
 - Hint: The answer is not watching harder — it's making each boundary checkable at the moment the run stops.
 
-**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of self-aware engagement, inscribed before autonomy begins. Core principle: **Attention over Automation**. Infer the boundaries → keep what is checkable at stop time → compile into verifiable conditions → confirm → hand off. Workflow position: Execution cluster — the compile step before an autonomous run. Game feel: "Here's the finish line and the fences — now go" → the run proceeds unattended → the stop-time check tells the truth → you trust the result.
+**Philosophy**: μερισμός (a dividing into parts, an apportionment) — cutting a whole into its constituent shares, not arranging them into a sequence. Core principle: **Apportion over Order** — deciding which units the goal runs in and what each unit's done means is separate work from ordering those units, which stays `/conduct`'s (supporting invariants: **Coverage over Convenience**, **Fit over Ambition**, **Declared Seam over Asserted Joint**). Cut the goal at its evidenced seams → judge each unit against one execution horizon → close each unit — a derived completion condition, or your recorded acceptance → confirm the apportionment → hand off. Workflow position: Execution cluster — the compile step before an autonomous run. Game feel: "Here's how the work divides, and what finishing each piece means" → the plan hands off with each unit closed — a stop-time check where one compiled, your recorded acceptance where none did → whatever runs it (once `/conduct` has settled the order and an enforcer holds the checks) finishes rather than merely stops → you trust the result.
 
 ## Epharmoge `/contextualize`
 
@@ -263,7 +263,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You're about to start a big piece of work — a framework migration, a multi-stage investigation — and the goal is clear, but *how to run it* is not. Several moves are involved: gather context, frame perspectives, verify adversarially, synthesize. In what order? Which in isolation? How do their results reconcile? When do you stop? Started without deciding, the work drifts — wrong order, perspectives contaminated before synthesis, no stopping criterion.
 
-**Intervention**: `/conduct` checks the work is genuinely multi-move and non-trivial (single-move work relays straight to the one protocol that resolves it), identifies the candidate moves, then designs a conduct topology across five axes — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. It locks the stable choices, defers the volatile ones to in-session checkpoints, surfaces which substrate can realize each part, and hands off a method plan you (or the substrate) execute.
+**Intervention**: `/conduct` checks the work is genuinely multi-move and non-trivial (single-move work relays straight to the one protocol that resolves it), identifies the candidate moves, then designs a conduct topology across five axes — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. Every axis is settled at its own gate or left on its default — none is held open as "volatile". Only a decision whose deciding evidence does not exist yet at design time defers, as an in-session checkpoint. It then surfaces which substrate can realize each part, and hands off a method plan you (or the substrate) execute.
 
 **Trial prompt**: "Let's practice: say 'I'm about to migrate this service across two framework versions — conduct how I should run the whole thing' and I'll show how /conduct designs the move topology before any object-level work starts"
 
@@ -272,26 +272,9 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - Answer: C
 
 **Quiz Q (design)**: You face a multi-move task where the order, independence, and stopping criterion all genuinely divide the plan. How would you settle the method before starting, without locking choices that depend on what you'll only learn mid-way?
-- Hint: The problem isn't which perspectives to use for one inquiry (that's `/frame`) or who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, lock what's stable, and defer the volatile choices to an in-session checkpoint.
+- Hint: The problem isn't which perspectives to use for one inquiry (that's `/frame`) or who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, let the rest bind to their defaults, and give an in-session checkpoint only to a decision whose evidence doesn't exist yet.
 
 **Philosophy**: ὑφήγησις (leading from just ahead, guiding) — conducting the method of the work, not doing the work. Core principle: **Conduction over Substrate**. How a session's moves are ordered, isolated, reconciled, and stopped is substrate-invariant — it survives deleting every runtime noun — so the conduct form is designed independently and only then matched to a substrate, declaring degradation rather than binding one it cannot realize. Workflow position: cross-cutting, Hybrid initiator — conducts the session's whole move set before object-level cognition. Game feel: "I know what I want, but how do I run this?" → confirm it's multi-move → design the topology impact-first → hand off a method plan with checkpoints.
-
-## Diairesis `/delimit`
-
-**Situation**: You have a large body of work — a Linear project, a milestone set, a sprawling issue tree — that clearly won't fit one execution span. Before you can conduct *how* to run it, you have to decide *where to cut it* into units. Cut into pieces that are too big and a single span can't finish one; too small and you fan out spans that barely do anything; across a dependency seam and two units fight over the same work. The goal is known; the granularity of the cut is not.
-
-**Intervention**: `/delimit` reads the external work-breakdown structure read-only (it never copies or owns it — the WBS stays the single source of truth), scans it for natural joints — milestone boundaries, dependency seams, deliverable edges — and searches for the cut-set whose every unit fits one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with a fit verdict (Fits / Overflows / Underfills), and you settle it: accept the cut, move it to a different joint, split a unit that overflows, or merge one that underfills. When you say the partition is complete, it cuts the rest at their natural joints, checks the three invariants — each unit fits one span, every cut on a joint, and complete coverage with no orphaned work — and emits a WorkUnitMap that flows straight into `/conduct`.
-
-**Trial prompt**: "Let's practice: say 'I've got a Linear project that's way too big for one session — delimit it into execution-sized units' and I'll show how /delimit finds the natural joints and proposes the cut-set before any conducting starts"
-
-**Quiz Q (situation)**: You have a clear goal and a big issue tree, but you can't tell where one executable chunk should end and the next begin — some candidate units look too big for a single run, others too thin to bother. You haven't started because the *cut*, not the goal or the order, is unsettled.
-- A) Hyphegesis `/conduct` — B) Horismos `/bound` — C) Diairesis `/delimit` — D) Aitesis `/inquire`
-- Answer: C
-
-**Quiz Q (design)**: You face a multi-span body of work and need to partition it into units before conducting. How do you decide where the cuts fall so each unit fits one span and no work is orphaned, without ordering the units yet?
-- Hint: The problem isn't who decides what (that's `/bound`) or how the units run in sequence (that's `/conduct`, the dual) — it's where to cut. Find the natural joints, fit each candidate unit against one span, and let the user settle each cut; ordering comes after.
-
-**Philosophy**: διαίρεσις (division, a cutting-apart) — marking where the work divides, not sequencing the pieces. Core principle: **Delimit over Order**. The cut into units is settled before the units are ordered; sequencing them is `/conduct`'s work, so the two are duals across one seam — cut, then conduct. The external WBS is referenced, never owned (**Reference over Ownership**), so the WorkUnitMap sees downstream changes instead of going stale. Workflow position: cross-cutting, Hybrid initiator — partitions a work body before its method is conducted. Game feel: "this is too big for one go — where do I cut it?" → find the joints → settle each cut → emit a WorkUnitMap for `/conduct`.
 
 ## Composition Patterns
 
@@ -303,14 +286,14 @@ When you say "find me that café we talked about — and check if it's open toda
 
 **Shape**: empty intention → recognized prior context → grounded current fact.
 
-### `/attend * /contextualize` — Guardrail-compiled execution plus context-fit check
+### `/apportion * /contextualize` — Unit-cut execution plus context-fit check
 
-When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/attend` compiles the cleanup's boundaries into verifiable conditions for the autonomous run (what counts as done, what must remain untouched), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
+When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/apportion` cuts the cleanup into units the run can finish one at a time and derives each one's completion condition (what counts as done for that unit, what it must leave untouched while it works), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
 
-**Shape**: pre-execution guardrail compilation → post-execution context-fit.
+**Shape**: pre-execution unit cut with conditions → post-execution context-fit.
 
 ### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
 
-When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, an execution boundary needing compiled guardrails → `/attend`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/attend`) precede post-execution ones (`/contextualize`).
+When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, an autonomous run whose unit plan and conditions are uncompiled → `/apportion`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/apportion`) precede post-execution ones (`/contextualize`).
 
 **Shape**: per-source antithesis → disposition → handoff routing where the deficit belongs to another protocol family.

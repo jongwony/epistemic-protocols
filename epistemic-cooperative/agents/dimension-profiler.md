@@ -57,7 +57,7 @@ These signals are extracted once and referenced by D1 and D5:
 **Signals**:
 - **exploration_ratio** (shared) → higher = more abductive
 - **goal_category_balance** (shared) → higher exploration ratio = more abductive
-- **protocol_counts** (shared) → `/frame`, `/inquire` = abductive; `/bound`, `/attend` = deductive
+- **protocol_counts** (shared) → `/frame`, `/inquire` = abductive; `/bound`, `/apportion` = deductive
 - rules/ file count and structure complexity → more rules = more deductive
 
 ### D2: Verification Depth (Trust ↔ Doubt)

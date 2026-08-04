@@ -41,7 +41,7 @@ Each suspect source resolves into one of seven named dispositions plus Emergent.
 | **Deferred(re_trigger_condition)** | Disposition pending; loop returns when the condition is met. Downstream proceeds without commitment. |
 | **Conditional(measurement)** | Disposition pending external measurement; downstream tags the source as provisional. |
 | **Bounded(external_reference)** | Authoritative answer lives outside this session; downstream cites the external reference. |
-| **Routed(downstream_protocol)** | Challenge belongs to a different protocol family — handed to `/gap`, `/attend`, `/epharmoge`, or `/bound`. |
+| **Routed(downstream_protocol)** | Challenge belongs to a different protocol family — handed to `/gap`, `/apportion`, `/contextualize`, or `/bound`. |
 
 ## Source Identification Criteria
 

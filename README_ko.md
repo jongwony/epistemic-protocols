@@ -14,7 +14,7 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 
 **명시된 미션 (Stated Mission)** — 공개 진입점: 잘못된 방향을 일찍, 특히 계획 단계에서 잡는 것. 가장 명확한 진입 스토리이며 대부분의 사용자가 프로토콜에 이르는 경로입니다.
 
-**실제 구조 (Realized Machinery)** — 실제 커버리지: 구조화된 체크포인트가 계획, 분석, 결정, 실행, 검증, 회상, 이해에 걸쳐 작동합니다. Prosoche(실행 가드레일 컴파일), Epharmoge(사후 적용성), Anamnesis(세션 회상), Katalepsis(이해 검증) 같은 프로토콜은 계획 단계 너머까지 확장됩니다.
+**실제 구조 (Realized Machinery)** — 실제 커버리지: 구조화된 체크포인트가 계획, 분석, 결정, 실행, 검증, 회상, 이해에 걸쳐 작동합니다. Merismos(목표를 조건 붙은 실행 단위로 분배), Epharmoge(사후 적용성), Anamnesis(세션 회상), Katalepsis(이해 검증) 같은 프로토콜은 계획 단계 너머까지 확장됩니다.
 
 두 층은 다른 청중을 대상으로 합니다: README는 좁은 공개 계약을 운반하고, `SKILL.md`와 `CLAUDE.md`는 전체 구조를 서술합니다. 두 층을 정합하게 유지하는 거버넌스 규칙은 [docs/mission-bridge.md](./docs/mission-bridge.md)를 참조하세요.
 
@@ -29,6 +29,15 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 ```
 
 `/onboard`를 실행하세요 — 최근 세션 기반으로 빠른 추천을 받고, 원하면 시나리오, 실행, 퀴즈를 통한 가이드 학습으로 이어갑니다.
+
+**Merismos 이전 릴리스에서 올라오는 경우**: `prosoche`(`/attend`)와 `diairesis`(`/delimit`)는 은퇴했습니다. marketplace 카탈로그에서 빠지면 목록에서는 사라지지만 이미 설치된 것이 제거되지는 않으므로, 명시적으로 지우기 전까지 기존 설치본이 계속 그 명령을 제공합니다:
+
+```
+/plugin uninstall prosoche
+/plugin uninstall diairesis
+```
+
+`/apportion`이 `/attend`를 대체합니다. `/delimit`의 외부 WBS 재단은 대체가 아니라 폐기이며, 근거는 [`merismos/skills/apportion/SKILL.md`](./merismos/skills/apportion/SKILL.md)의 granularity 항목에 있습니다.
 
 ### Codex
 
@@ -73,7 +82,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
 | [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
 | [Syneidesis](./syneidesis) | `/gap` | 실행하려는데 뭔가 빠뜨린 것 같을 때 |
-| [Prosoche](./prosoche) | `/attend` | 자율 실행에 작업을 넘기기 직전 — 경계를 검증 가능한 goal 조건으로 먼저 컴파일할 때 |
+| [Merismos](./merismos) | `/apportion` | 자율 실행에 목표를 넘기기 직전 — 한 구간에 맞는 단위로 자르고 각 단위를 먼저 닫을 때 — 컴파일되면 자기 완료 조건으로, 안 되면 기록한 수용으로 |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
 | [Elenchus](./elenchus) | `/sublate` | working context를 외부화하기 직전, 변증법적으로 검증이 필요할 때 |
 | [Horismos](./horismos) | `/bound` | 인식론적 경계가 정의되지 않았을 때 — 방향/우선순위, 범위, 유형/개념, 또는 누가 결정할지(ownership) |
@@ -81,9 +90,8 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Anagoge](./anagoge) | `/ascend` | 여러 세션에 걸친 작업 라인·토픽·개념 전체가 막연히 기억나지만 어느 한 세션이 아닐 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했고 이해한 것 같지만 정말 파악했는지 확신이 없을 때 — 승인·활용 전에 이해가 진짜인지 검증 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
-| [Diairesis](./diairesis) | `/delimit` | 큰 작업 덩어리가 여러 실행 단위에 걸쳐 있지만 어디서 적정 크기로 자를지 자명하지 않을 때 — 지휘 전에 자연스러운 joint에서 분할 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/delimit`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/conduct`)
 
 ## 유틸리티
 
@@ -147,13 +155,12 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | Analogia | ἀναλογία | 유비, 유추 |
 | Periagoge | περιαγωγή | 돌려세움, 방향 전환 |
 | Euporia | εὐπορία | 통로, 자원성 |
-| Prosoche | προσοχή | 주의 집중 |
+| Merismos | μερισμός | 부분으로 나눔 |
 | Epharmoge | ἐφαρμογή | 적용, 맞춤 |
 | Elenchus | ἔλεγχος | 반박, 교차 심문 |
 | Anamnesis | ἀνάμνησις | 상기, 회상 |
 | Anagoge | ἀναγωγή | 끌어올림 |
 | Hyphegesis | ὑφήγησις | 앞서 이끌기, 안내 |
-| Diairesis | διαίρεσις | 나눔, 분할 |
 | Proplasma | πρόπλασμα | 예비 모형, 첫 거푸집 |
 | Heuresis | εὕρεσις | 발견, 찾아냄 |
 

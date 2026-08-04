@@ -236,11 +236,11 @@ growth_items: [{
   </div>
   <div class="glance-block">
     <h4>Unstructured Decisions</h4>
-    <p>81 wrong_approach events occurred without /elicit or /inquire. Execution sessions lack /attend despite deploy/push activity in 3 of 8 sessions...</p>
+    <p>81 wrong_approach events occurred without /elicit or /inquire. 14 commits landed after 3+ edits to the same file with no /gap beforehand...</p>
   </div>
   <div class="glance-block">
     <h4>Coverage Delta</h4>
-    <p>Planning cluster (inquire, elicit): 40% adoption. Execution cluster (attend): 0% adoption in implementation sessions. Verification (grasp): not invoked...</p>
+    <p>Planning cluster (inquire, elicit): 40% adoption. Execution cluster (apportion): 0% adoption in implementation sessions. Verification (grasp): not invoked...</p>
   </div>
   <div class="glance-block">
     <h4>Highest-Impact Gap</h4>
@@ -376,8 +376,8 @@ growth_items: [{
 
 <!-- CARD: Horizon (replicate per protocol adoption opportunity) -->
 <div class="card horizon-card">
-  <div class="card-title">/attend for Autonomous Pipelines</div>
-  <p>Your work trajectory points toward autonomous PR pipelines (git ops: 84 sessions). As execution becomes less human-gated, /attend becomes critical — compiling boundaries into verifiable goal conditions before autonomous execution prevents the 81 wrong_approach events from compounding in unattended workflows...</p>
+  <div class="card-title">/gap before high-rework commits</div>
+  <p>Your edit trajectory concentrates rework in a few files (the same 3 files account for 41 of 96 edits across 84 sessions). As those files keep absorbing changes, /gap earns its place in the pre-commit step — surfacing the blind spot that drives the next edit before the commit lands, rather than after...</p>
   <div class="resume-cmd">cd ~/myproject && claude --resume a1b2c3d4</div>
 </div>
 

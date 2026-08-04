@@ -36,13 +36,12 @@ const DESCRIPTION_OVERRIDES = {
   gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
   grasp: 'Intent-scented comprehension verification — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',
-  attend: 'Compile execution guardrails into verifiable goal conditions — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
+  apportion: 'Apportion a goal into conditioned execution units — (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
   induce: 'Calibrate and crystallize abstraction — (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction',
   elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
-  delimit: 'Cut a work horizon into right-sized units — (GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap',
   conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
@@ -149,9 +148,10 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
-// 510 absorbs anamnesis SKILL.md at 501 lines (after the +1 Euporia distinction row);
-// existing 525/581/591 lines in aitesis/prothesis/prosoche were already over the prior 500 baseline.
-// Per-protocol grandfathered overage is acknowledged; tightening this guideline requires per-file caps.
+// 510 was set to absorb the longest SKILL.md files already over the prior 500 baseline;
+// per-protocol grandfathered overage is acknowledged and reported as a warning per file,
+// so current line counts are read from that warning rather than pinned here.
+// Tightening this guideline requires per-file caps.
 const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';
@@ -159,7 +159,6 @@ const CODEX_SUBMIT_DIST_DIR = path.join(DIST_DIR, 'codex-submit');
 const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'analogia', skill: 'ground' },
-  { dir: 'diairesis', skill: 'delimit' },
   { dir: 'elenchus', skill: 'sublate' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'euporia', skill: 'elicit' },
@@ -169,7 +168,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'katalepsis', skill: 'grasp' },
   { dir: 'periagoge', skill: 'induce' },
   { dir: 'proplasma', skill: 'preview' },
-  { dir: 'prosoche', skill: 'attend' },
+  { dir: 'merismos', skill: 'apportion' },
   { dir: 'prothesis', skill: 'frame' },
   { dir: 'syneidesis', skill: 'gap' },
 ]);

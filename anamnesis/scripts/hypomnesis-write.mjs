@@ -48,6 +48,57 @@ try { process.on("SIGHUP", () => {}); } catch {}
 
 const MIN_SESSION_BYTES = 1024;
 const MAX_USER_MSGS = 150;
+
+// A protocol is INVOKED in exactly two ways, and both leave a record: the user
+// types the command, which the harness wraps in <command-name> (bare or
+// plugin-namespaced), or the assistant calls the Skill tool. A bare mention in
+// prose ("don't run /apportion") is neither, so it is not counted.
+const invokes = (text, slash, plugin) => {
+  // A namespace identifies the owner. A plugin-bound command admits its own
+  // namespace or none; an unbound utility command admits only the bare form,
+  // since a namespaced call of that name belongs to some other plugin.
+  const ns = plugin ? `(?:${plugin}:)?` : "";
+  return new RegExp(`<command-name>\\s*/${ns}${slash.slice(1)}(?![\\w-])`, "m").test(text);
+};
+
+const skillCalls = (content) =>
+  Array.isArray(content)
+    ? content
+        .filter((b) => b?.type === "tool_use" && b.name === "Skill")
+        .map((b) => String(b.input?.skill ?? ""))
+        .filter(Boolean)
+    : [];
+
+// A Skill call names its skill as `plugin:skill` or bare. The namespace is part
+// of the identity, and this applies the same rule invokes() applies to the
+// user-command path: a bound plugin admits its own namespace or none, and an
+// unbound utility command admits only the bare form — otherwise another
+// plugin's same-named skill would be recorded as this one.
+const resolveSkillProtocol = (called) => {
+  const sep = called.indexOf(":");
+  const ns = sep === -1 ? null : called.slice(0, sep);
+  const hit = protocolMap[`/${sep === -1 ? called : called.slice(sep + 1)}`];
+  if (!hit) return null;
+  return ns === null || ns === hit[1] ? hit[0] : null;
+};
+
+// One entry per protocol plugin command, plus the utility commands worth
+// recording. hypomnesis-write.test.mjs checks this against the plugin skill
+// directories, so a protocol rename fails the suite instead of going silent.
+const protocolMap = {
+  "/ascend": ["ascend", "anagoge"], "/inquire": ["inquire", "aitesis"],
+  "/ground": ["ground", "analogia"], "/recollect": ["recollect", "anamnesis"],
+  "/sublate": ["sublate", "elenchus"], "/contextualize": ["contextualize", "epharmoge"],
+  "/elicit": ["elicit", "euporia"], "/ideate": ["ideate", "heuresis"],
+  "/bound": ["bound", "horismos"], "/conduct": ["conduct", "hyphegesis"],
+  "/grasp": ["grasp", "katalepsis"], "/apportion": ["apportion", "merismos"],
+  "/induce": ["induce", "periagoge"], "/preview": ["preview", "proplasma"],
+  "/frame": ["frame", "prothesis"], "/gap": ["gap", "syneidesis"],
+  "/clarify": ["clarify", null], "/goal": ["goal", null],
+  "/reflect": ["reflect", null], "/write": ["write", null],
+  "/verify": ["verify", null],
+};
+
 const MAX_ALL_CHARS = 80_000;
 const HAIKU_TIMEOUT = 120_000;
 
@@ -162,15 +213,6 @@ function parseSession(transcriptPath) {
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
-  const protocolMap = {
-    "/frame": "frame", "/gap": "gap", "/clarify": "clarify",
-    "/goal": "goal", "/bound": "bound", "/inquire": "inquire",
-    "/ground": "ground", "/attend": "attend",
-    "/contextualize": "contextualize", "/grasp": "grasp",
-    "/reflect": "reflect", "/recollect": "recollect",
-    "/write": "write", "/verify": "verify",
-  };
-
   let raw;
   try {
     raw = fs.readFileSync(transcriptPath, "utf8");
@@ -193,13 +235,20 @@ function parseSession(transcriptPath) {
     const etype = entry.type ?? "";
     if (typeof entry.cwd === "string" && entry.cwd) cwd = entry.cwd;
 
-    if (etype === "user" && userMsgs.length < MAX_USER_MSGS) {
+    if (etype === "user") {
       const text = textFromContent(entry.message?.content ?? "");
       if (!text) continue;
-      for (const [slash, name] of Object.entries(protocolMap)) {
-        if (text.includes(slash)) protocols.add(name);
+      for (const [slash, [name, plugin]] of Object.entries(protocolMap)) {
+        if (invokes(text, slash, plugin)) protocols.add(name);
       }
-      userMsgs.push({ text, ts });
+      if (userMsgs.length < MAX_USER_MSGS) userMsgs.push({ text, ts });
+    }
+
+    if (etype === "assistant") {
+      for (const called of skillCalls(entry.message?.content)) {
+        const name = resolveSkillProtocol(called);
+        if (name) protocols.add(name);
+      }
     }
 
     if (etype === "user" || etype === "assistant") {
@@ -1070,7 +1119,15 @@ function main() {
   }
 }
 
-export { extractCrossRefs, buildClueMd, buildMarkersMd };
+export {
+  extractCrossRefs,
+  buildClueMd,
+  buildMarkersMd,
+  invokes,
+  skillCalls,
+  resolveSkillProtocol,
+  protocolMap,
+};
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
 try {

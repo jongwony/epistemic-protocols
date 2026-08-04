@@ -1,6 +1,6 @@
 # Prosoche 신호탐지 기반: 위험 게이팅의 인지심리학적 근거와 충실도 분석
 
-> **[SUPERSEDED — 2026-06, prosoche 2.0.0]** 이 문서가 분석한 메커니즘(Phase 0 `Classify`, Risk Signal Taxonomy, 실행 중 fail-closed 게이팅)은 `/attend`의 compile-time-only 조건 컴파일러 재정의(#422)로 SKILL.md에서 제거되었다. 본문이 연결한 개선 이슈 #481(민감도·기준 분리 2×2)은 해당 재정의에서 drop 결정되었다. 이 문서는 제거된 메커니즘에 대한 역사적 분석으로 보존되며, 본문의 SKILL.md 줄 번호·인용은 재정의 이전 버전(1.6.x) 기준이다.
+> **[SUPERSEDED — 2026-06, prosoche 2.0.0; 프로토콜 자체가 2026-08 Merismos(`/apportion`)로 대체됨]** 이 문서가 분석한 메커니즘(Phase 0 `Classify`, Risk Signal Taxonomy, 실행 중 fail-closed 게이팅)은 `/attend`의 compile-time-only 조건 컴파일러 재정의(#422)로 SKILL.md에서 제거되었다. 본문이 연결한 개선 이슈 #481(민감도·기준 분리 2×2)은 해당 재정의에서 drop 결정되었다. 이후 Prosoche(`/attend`)는 전면 재타입되어 **Merismos(`/apportion`, `merismos/skills/apportion/SKILL.md`)** — 목표를 조건 보유 실행 단위로 분배하는 프로토콜 — 이 되었고, `prosoche/` 플러그인과 `/attend` 명령은 더 이상 존재하지 않는다. 이 문서는 제거된 메커니즘에 대한 역사적 분석으로 보존되며, 본문의 프로토콜명·명령어·SKILL.md 줄 번호·인용은 모두 재정의 이전 버전(1.6.x) 기준이다.
 
 > 이 문서는 Prosoche 프로토콜(`/attend`)의 위험 분류·게이팅 메커니즘을 신호탐지이론(Signal Detection Theory, SDT)과 그 결정이론적 후예에 비추어 검증한다.
 > Prosoche의 SKILL.md는 "fail-closed"와 "false negative"를 사용하지만 SDT의 핵심 구조(민감도와 기준의 분리, 기저율 항)는 본문에 등장하지 않는다. 이 문서는 (1) 네 학술 참조의 진위를 외부 검증하고, (2) Prosoche의 실제 메커니즘이 SDT를 *구조적으로* 구현하는지 *어휘적으로만* 차용하는지 분석하며, (3) 그 충실도 격차를 개선 이슈 #481과 연결한다.
@@ -85,7 +85,7 @@ Prosoche의 실제 메커니즘은 Phase 0 `Classify`(SKILL.md L404-433): 실행
 
 ## Cross-references
 
-- `prosoche/skills/attend/SKILL.md` (대상 프로토콜; Core Principle L232, Risk Signal Taxonomy L296-318, Phase 0 Classify L404-433, fail-closed L414·L522, Known Limitations L527-535)
+- `prosoche/skills/attend/SKILL.md` (당시 경로 — 2026-08 Merismos 대체로 현재는 존재하지 않음; 대상 프로토콜; Core Principle L232, Risk Signal Taxonomy L296-318, Phase 0 Classify L404-433, fail-closed L414·L522, Known Limitations L527-535)
 - `references/cognitive-psychology.md` §Prosoche (1줄 인덱스; 본 문서가 심층 층 — 단 인덱스의 SDT 어휘 귀속은 본 문서 충실도 분석에서 과대 귀속으로 정정)
 - Issue #481 (Prosoche: 고위험 게이트를 2×2 신호탐지 표로 형식화)
 - `references/boundaries.md` (Prosoche가 확장하는 irreversible 분류; 놓침 비용의 외부 근거)
