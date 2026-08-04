@@ -7,6 +7,8 @@ This is a reference surface, not a package. There is no install script and nothi
 - **Link to it** from your own global configuration or notes, the way you would cite any external reference.
 - **Copy the parts you want** into your own instructions, verbatim or adapted.
 
+Adoption is scoped either way. A document you adopt governs the general principles within the scope you adopted it for; a document you have not adopted governs nothing. Within that scope, your own instructions supply what the document deliberately leaves open — the concrete surface a principle binds to, the value your project has settled on — rather than restating the general principle in their own words. When a host instruction and an adopted document disagree on a general principle, the document is the one to reason from.
+
 Each document below stands on its own: it does not assume you know any particular project, tool, or vocabulary beyond what it defines itself. Where a document depends on a concept from an earlier one, it says so and names the file.
 
 ## Documents

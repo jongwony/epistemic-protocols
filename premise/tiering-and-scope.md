@@ -46,3 +46,13 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 | Verification | "Did we understand?" |
 
 Epistemic dialogue protocols occupy the first and third layers; a harness's built-in execution commands occupy the second. Do not mirror built-in execution capabilities (e.g., workspace isolation, publishing a change) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
+
+## Epistemic Completeness Boundary (Architectural)
+
+A bounded principle system governs one domain. For a system of epistemic dialogue principles that domain is the epistemic substrate — where authority, judgment, framing, and recognition are constituted between a person and an AI system. The system's completeness claim terminates at that domain's edge: physical safety, permission and credential policy, and the execution of high-stake actions belong to the enclosing execution substrate, not to the principle system. Claiming completeness past the boundary claims an authority the system has no means to discharge.
+
+The scope declaration sits one layer above the mechanics it delimits — domain-internal mechanics in the principle layer, domain-scope declarations in the architectural layer above it. A principle that absorbs its own application boundary into its body makes its own scope invisible: the stopping condition is then stated in the same voice as the principle, so a reader cannot see where the principle ceases to apply. This mirrors mathematical practice, where domain commitments sit in metatheory rather than inside the axiom system they range over.
+
+Operationally the split is between defining a boundary and enforcing it. The principle system defines and protects the visibility of what crosses; the execution substrate — system prompts, automation, permission systems — realizes the delegation. A principle system may classify and surface non-epistemic risk at a boundary crossing without thereby discharging or enforcing the substrate semantics on the other side.
+
+**Test**: if the obligation remaining after detection requires substrate enforcement rather than further judgment, the principle system records the handoff and stops. The obligation is delegated, not absorbed.
