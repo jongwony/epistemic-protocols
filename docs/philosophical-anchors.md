@@ -6,7 +6,7 @@ Cross-traditional grounding for A2's relay/constitution boundary, A5's extended-
 
 ## §A2. Relay/Constitution Boundary — Philosophical Lineage
 
-A2's relay/constitution boundary (defined in `premise/recognition-and-authority.md`; `.claude/rules/axioms.md` §A2 keeps the in-repo anchor) is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
+A2's relay/constitution boundary (defined in `premise/recognition-and-authority.md`) is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
 
 ### Husserl's passive/active synthesis
 
@@ -30,7 +30,7 @@ The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unk
 
 ## §A5. Interaction Kind Factorization — Extended Mind Ground
 
-A5 (defined in `premise/interaction-factorization.md`; `.claude/rules/axioms.md` §A5 keeps the in-repo anchor) shares the extended-cognition ground that A2's Philosophical Lineage establishes. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence; gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated.
+A5 (defined in `premise/interaction-factorization.md`) shares the extended-cognition ground that A2's Philosophical Lineage establishes. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence; gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated.
 
 ### Non-derivability from A2 (despite shared ground)
 
@@ -42,7 +42,7 @@ A5 introduces the following that A2 alone does not provide:
 
 2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is conceptually distinct from A2 at the meta/design layer. A2 classifies by authority source (AI detection vs user judgment); A5 classifies by elision consequence — the two classifications are coextensive at the runtime annotation layer (Extension implies bounded regret; Constitution typically carries unbounded regret, with A5's structural exceptions).
 
-3. **TOOL GROUNDING annotation mechanism**: The operational mechanism for annotating gate operations as `(extension)` (relay-eligible) or `(constitution)` (Constitution required) lives in A5, not A2. A2's Standing/Active authority distinction is conceptually distinguishable from A5's regret dimension at the meta/design layer; at the runtime annotation layer the two collapse to a single TOOL GROUNDING axis (A2 coordination note in `axioms.md`).
+3. **TOOL GROUNDING annotation mechanism**: The operational mechanism for annotating gate operations as `(extension)` (relay-eligible) or `(constitution)` (Constitution required) lives in A5, not A2. A2's Standing/Active authority distinction is conceptually distinguishable from A5's regret dimension at the meta/design layer; at the runtime annotation layer the two collapse to a single TOOL GROUNDING axis (A5 coordination note in `.claude/principles/architectural-principles.md` §Authority Mode).
 
 4. **Option-set-level relay test**: The test for whether constructed option sets constitute genuine gated interactions or collapse to relay (option-level entropy→0; equivalent to Extension-classification of the option set) is A5-specific. A2 does not analyze option-set structure.
 
@@ -194,8 +194,8 @@ hypothesis, not a permanent commitment.
 
 ## Cross-references
 
-- `premise/recognition-and-authority.md` (A2 principle statement; Constitution/Relay retained as operational terms in `.claude/rules/axioms.md` §A2's in-repo anchor; etymology lives here)
-- `premise/interaction-factorization.md` (A5 principle statement; `.claude/rules/axioms.md` §A5 keeps the in-repo anchor; philosophical ground lives here)
+- `premise/recognition-and-authority.md` (A2 principle statement, with Constitution/Relay as its operational terms; etymology lives here)
+- `premise/interaction-factorization.md` (A5 principle statement; philosophical ground lives here)
 - `premise/tiering-and-scope.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
 - `prothesis/skills/frame/SKILL.md` (forms the distinct interpretive lenses that `hyphegesis/skills/conduct/SKILL.md`'s synthesis checkpoint later fuses via Gadamer's Horizontverschmelzung — compiled into the CheckpointBrief, executed by the substrate; Katalepsis' `Horizon` gap is the comprehension-layer complement — see §Katalepsis Horizon Gap)

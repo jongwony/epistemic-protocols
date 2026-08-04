@@ -1,6 +1,6 @@
 # Project Profile Calibration
 
-Each project declares a profile that determines the default Cognitive Partnership Move mode (Extension or Constitution; see `.claude/rules/axioms.md` A2/A5) for ambiguous decisions. The profile is the project's calibration of how much Phase 1 entropy reduction is feasible relative to gating cost. This mechanism specializes the `.claude/principles/architectural-principles.md §Epistemic Cost Topology` meta-layer asymmetry to the project-specific calibration dimension: the meta-layer cost gradient governs *creation* decisions for new protocols, while project profile governs *gating-default* decisions for already-existing protocols.
+Each project declares a profile that determines the default Cognitive Partnership Move mode (Extension or Constitution; see `premise/recognition-and-authority.md` and `premise/interaction-factorization.md`) for ambiguous decisions. The profile is the project's calibration of how much Phase 1 entropy reduction is feasible relative to gating cost. This mechanism specializes the `.claude/principles/architectural-principles.md §Epistemic Cost Topology` meta-layer asymmetry to the project-specific calibration dimension: the meta-layer cost gradient governs *creation* decisions for new protocols, while project profile governs *gating-default* decisions for already-existing protocols.
 
 ## Profile Variables (six) and Calibration Rule
 

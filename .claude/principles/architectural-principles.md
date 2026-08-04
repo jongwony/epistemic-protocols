@@ -2,13 +2,13 @@
 
 Project structure decisions; independent of the axiom system.
 
-> **Demotion zone** (last updated 2026-07-03): lazy-load, not auto-loaded by the Claude Code harness. Originally part of `.claude/rules/architectural-principles.md`. Per-section demotion dates and rationale: `.claude/principles/README.md` Demotion Ledger.
+> **Demotion zone**: lazy-load, not auto-loaded by the Claude Code harness. Per-section demotion rationale: `.claude/principles/README.md` Demotion Ledger.
 
 ## Tier Factorization
 
 Tier-classified artifacts in this project factor into a product of two orthogonal axes: an **epistemological** axis (axis_α — derivation status, model-improvement trajectory) and an **operational** axis (axis_β — invocation frequency, load-bearing strength). Neither dimension subsumes the other; the same artifact carries both annotations independently, and movement along one axis is independent of movement along the other.
 
-The factorization is realized by complementary mechanisms. File content typically carries axis_α — `axioms.md` carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the auto-loaded T1 zone (per-turn invocation), `.claude/principles/` realizes the lazy-loaded T2–T3 zone (per-authoring or per-verify invocation). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
+The factorization is realized by complementary mechanisms. File content typically carries axis_α — a `premise/` document carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the auto-loaded T1 zone (per-turn invocation), `.claude/principles/` realizes the lazy-loaded T2–T3 zone (per-authoring or per-verify invocation). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
 
 **Observed instances**:
 - Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `### Authority Mode: Standing/Active` below.
@@ -19,7 +19,7 @@ Sibling concept to A5 (Interaction Kind Factorization): A5 factors gate operatio
 
 ### Authority Mode: Standing/Active
 
-Relocated from `.claude/rules/axioms.md` A2 (2026-07-28) — the axis_α × axis_β observed-instance example above, materialized in full.
+The axis_α × axis_β observed-instance example above, materialized in full.
 
 A2's authority extends to a second order: not only WHO exercises judgment (1st order — AI detects, User judges), but HOW authority is allocated between pre-committed rules and live judgment (2nd order).
 
@@ -32,7 +32,7 @@ The act of creating Standing authority — writing a system prompt rule, configu
 
 **A2 boundary protection at 2nd order**: A2 protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is A2-compatible — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory is A2 violation. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
 
-**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per A5's single annotation axis (see `axioms.md` A5).
+**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per A5's single annotation axis (see `premise/interaction-factorization.md`).
 
 **A5 coordination**: Standing/Active is an authority-source dimension; A5's regret dimension (bounded/unbounded) is coextensive with the operational classification, up to A5's structural exceptions (per A5's single annotation axis). The two dimensions are conceptually distinguishable at the meta/design layer (per this section's axis_α × axis_β observed instances) but collapse at the runtime annotation layer, per A5's single annotation axis.
 
@@ -62,7 +62,7 @@ Anamnesis's hypomnesis store persists session recall indices that enrich protoco
 
 ## Task Externalization Boundary
 
-Relocated from `.claude/rules/derived-principles.md` (2026-07-28, whole section) — session-boundary durable-record externalization criteria, complementing Cross-Session Knowledge Composition above.
+Session-boundary durable-record externalization criteria, complementing Cross-Session Knowledge Composition above.
 
 A1 enters through one channel only — the framing the user reasons with must be recognizable rather than recalled — and not through the re-derivation argument below, which rests on offloading cost-sensitivity, not on Recognition.
 
@@ -74,7 +74,7 @@ The two externalized items connect to the axiom basis directly. The problem-to-s
 
 **The boundary owns what crosses, not how it renders.** This principle governs what reaches the durable record. How the durable surface is then rendered to the user — a framing readout of the kind of work in play, not a progress bar, percentage, or completion tally — is realized one layer down at the Output Style, per the Epistemic Completeness Boundary's principle/realization split. The only constraint the principle itself contributes is that progress bookkeeping does not cross into the durable record; fixing the rendering vocabulary belongs to the realization layer, not here.
 
-**Convergence evidence is a terminal relay, not the in-flight surface.** The per-item transformation trace required at convergence (`.claude/rules/derived-principles.md §Convergence Evidence`) is a one-time end-of-protocol relay in session text, enumerating each resolved deficit to demonstrate the morphism completed. It is distinct from the durable status surface this boundary governs: the no-completion-tally reading applies to the in-flight surface, not to this terminal trace, so the two principles govern different moments and do not conflict.
+**Convergence evidence is a terminal relay, not the in-flight surface.** The per-item transformation trace required at convergence (`premise/gate-design.md §Convergence Evidence`) is a one-time end-of-protocol relay in session text, enumerating each resolved deficit to demonstrate the morphism completed. It is distinct from the durable status surface this boundary governs: the no-completion-tally reading applies to the in-flight surface, not to this terminal trace, so the two principles govern different moments and do not conflict.
 
 **Safety valve**: a blocker discovered mid-session that the model cannot re-derive from the substrate — a non-reconstructable external constraint, a credential gap, an irreversible state it has already entered — is included in the framing record. The boundary test is re-derivability from the substrate (codebase, branch, runtime state, and the model's own reconstruction), not the item's grain: it excludes re-derivable bookkeeping, not genuinely lost-on-interruption facts, so when a sub-step graduates into a non-re-derivable commitment it crosses into the externalized set.
 
@@ -82,7 +82,7 @@ Evidence review externalized to `docs/analysis/task-externalization-evidence.md`
 
 ## Reference over Copy
 
-Relocated from `.claude/rules/derived-principles.md` (2026-07-28, whole section) — handoff-boundary reference/copy criteria, extending Session Text Composition and Cross-Session Knowledge Composition above to tool/agent/turn boundaries.
+Handoff-boundary reference/copy criteria, extending Session Text Composition and Cross-Session Knowledge Composition above to tool/agent/turn boundaries.
 
 When context crosses a handoff boundary — a tool boundary (a CLI subprocess), an agent boundary (a subagent or teammate), a durable-record boundary (session text surviving compaction), or a turn boundary — pass a **reference** that lets the consumer re-access the live authoritative source wherever the consumer can re-derive it, and **copy** only what the consumer cannot. The partition is **re-derivability by the consumer**: context reconstructable from shared substrate (codebase, git, runtime state, the consumer's own tools) is passed by reference (a pointer the consumer dereferences); context the consumer cannot reconstruct — the constitutive WHY and framing, an output contract, a generated artifact, user-specific intent, or a snapshot whose determinism is itself the requirement — is copied so it survives the handoff intact. Both faces are first-class; which dominates is set by how much of the handoff the consumer can re-derive.
 
@@ -110,13 +110,7 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 ## Coexistence over Mirroring
 
-General principle (three-layer split, do not mirror execution capabilities into protocol definitions): `premise/tiering-and-scope.md`. This project's instance — which concrete tools occupy which layer:
-
-| Layer | Concern | Tools |
-|-------|---------|-------|
-| Epistemic | "Are we doing the right thing?" | Protocols (`/inquire`, `/gap`, `/bound`, `/frame`, ...) |
-| Execution | "Are we doing it correctly?" | Claude Code built-ins (`/batch`, `/simplify`) |
-| Verification | "Did we understand?" | Protocol (`/grasp`) |
+Protocols occupy the epistemic layer and coexist with the host harness's execution built-ins; execution capabilities are not mirrored into protocol definitions. Full text: `premise/tiering-and-scope.md`.
 
 ## Three-Tier Termination
 
@@ -130,24 +124,10 @@ Protocol exit follows a graduated taxonomy based on side-effect presence:
 
 Principle: side effects require explicit answer types, not tool-level escape. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on. Protocols without termination side effects need only `user_esc`. Circular protocol interactions (e.g., boundary redefinition loops) are healthy dialogue — `user_esc` guarantees termination at every moment.
 
-## Audience Reach
+## Plugin Encapsulation
 
-General principle (a principle has behavioral effect only when it is structurally embedded in what the target reader actually receives; audience partitioning is symmetric): `premise/instruction-authoring.md` §Audience Reach. This project's instance: CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
-
-**Session-level observer exception**: The Dual Advisory Layer principle establishes Output Style nudge as a legitimate runtime mechanism complementary to graph.json. Nudge operates as a session-level cross-cutting observer — it belongs to no single SKILL.md because it observes across all protocols. Audience Reach applies to protocol-specific runtime behavior (which must be embedded in that protocol's SKILL.md), not to session-level observation patterns that are architecturally cross-cutting. Each SKILL.md governs its own protocol's detection (e.g., Post-Convergence conditions); Output Style governs the session-level observation layer.
-
-### Amendment: Bidirectional Reach
-
-The original Audience Reach principle above addresses leakage FROM contributor-facing text INTO LLM-runtime context; the reverse direction — LLM-runtime text leaking into contributor docs — is the same partitioning symmetry (full statement: `premise/instruction-authoring.md` §Audience Reach, Bidirectional Reach).
-
-**Static-check candidate**: structural-specs can detect reverse-leakage by flagging contributor-doc sections that reference runtime-only symbols (mode state variables, protocol internal invariants).
+Each `SKILL.md` is self-contained, and a principle affects runtime protocol behavior only when it is compiled into the protocol's own `SKILL.md`. Inscribing it on an upstream instruction surface alone leaves runtime behavior unchanged.
 
 ## Utility Skills — Adversarial Anticipation (Safeguard) Delegation
 
 General principle (pure-relay utilities delegate adversarial guards to the protocols they compose; synthesis utilities inherit guards at their synthesis boundary): `premise/gate-design.md` §Utility Delegation of Adversarial Guards. This project's instance: a pure-relay utility SKILL.md may omit adversarial-guard sections and document only the composed protocol's guard inheritance; a synthesis utility must document its own adversarial-guard obligations at the synthesis boundary.
-
-## Direction over Accumulated Workload
-
-General principle (a contributor disregards accumulated workload when a direction is theoretically justified; authoring labor trends toward zero while verification labor stays bounded and must be budgeted explicitly; the operational test distinguishing accumulated-work resistance from a genuine structural-deficit signal): `premise/instruction-authoring.md` §Direction over Accumulated Workload.
-
-**Audience-scoped to contributors**: this project applies the principle only to protocol designers — end users interacting with SKILL.md are governed by the Epistemic Cost Topology formulation above (execution-layer cost → 0 for the user), not by this one.

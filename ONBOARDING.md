@@ -43,8 +43,9 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
-- [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — A1–A6 foundational principles + Gate Integrity, now in portable form; `.claude/rules/axioms.md` keeps the in-repo anchor headings other files cite by name (~10 min)
-- [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations; several sections are now stubs pointing at `premise/recognition-and-authority.md` and `premise/gate-design.md`
+- [ ] `.claude/rules/premise.md` — the adoption rule binding this repo to the `premise/` surface; start here, then read `premise/README.md` (~2 min)
+- [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the A1–A6 foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
+- [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `.claude/rules/architectural-principles.md` — Epistemic Completeness Boundary (T1, per-turn); other architectural principles live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load) and, for their portable form, in `premise/tiering-and-scope.md` / `premise/gate-design.md`
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger
@@ -67,7 +68,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ## Contribution Workflow
 
-1. **Scope** — read the rule file(s) for the area you're touching (`axioms.md` / `derived-principles.md` / `architectural-principles.md`, and their portable counterparts under `premise/`); run `/horismos:bound` if multiple domains are in play
+1. **Scope** — read the premise document(s) for the area you're touching (`premise/README.md` routes by concern), plus `.claude/rules/architectural-principles.md` and `.claude/rules/project-profile.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/syneidesis:gap` before locking in a direction; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `docs/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
@@ -90,14 +91,14 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 Two principles to internalize before your first PR:
 
-- **Audience Reach** — `CLAUDE.md` and `.claude/rules/` are contributor-facing. Runtime protocol behavior must be inscribed in SKILL.md itself; documenting something in `CLAUDE.md` alone does not affect user-facing behavior (general principle, portable form: `premise/instruction-authoring.md` §Audience Reach).
-- **Direction over Accumulated Workload** — Contributor authoring labor converges toward zero under AI-assisted editing; structural misalignment accumulates and pollutes all downstream work. When a refactor is theoretically justified, prior commits are not protection from invalidation. Verification labor remains bounded and must be budgeted explicitly (general principle, portable form: `premise/instruction-authoring.md` §Direction over Accumulated Workload).
+- **Plugin Encapsulation** — Each `SKILL.md` is self-contained, and runtime protocol behavior must be inscribed in it. Documenting something in `CLAUDE.md` or `.claude/rules/` alone does not affect user-facing behavior (`premise/instruction-authoring.md` §Audience Reach states the general form; `.claude/principles/architectural-principles.md` §Plugin Encapsulation carries this repo's binding).
+- **Direction over Accumulated Workload** — Contributor authoring labor converges toward zero under AI-assisted editing; structural misalignment accumulates and pollutes all downstream work. When a refactor is theoretically justified, prior commits are not protection from invalidation. Verification labor remains bounded and must be budgeted explicitly (`premise/instruction-authoring.md` §Direction over Accumulated Workload).
 
 ## Get Started
 
 1. Clone the repo and open it in Claude Code
 2. Read `CLAUDE.md` end-to-end
-3. Read `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises now live here); `.claude/rules/axioms.md` keeps the in-repo anchor headings
+3. Read `.claude/rules/premise.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
 4. Run `/verify` to confirm your environment
 5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
 6. Browse recent merged PRs to see the actual pattern of contribution

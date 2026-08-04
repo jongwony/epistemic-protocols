@@ -11,15 +11,15 @@ The Claude Code harness does not auto-load files in this directory. Files here a
 | `.claude/rules/` | T1 | Auto-loaded by harness at session start | Per-turn |
 | `.claude/principles/` | T2-T3 | Lazy-load via Read/Grep | Per-session / per-authoring |
 
-The split realizes the orthogonal e-tier × o-tier mapping established in this project (axioms.md A2 §A5 coordination + PR #270/#273 reclassification ⊥ compression + PR introducing this directory). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
+The split realizes the orthogonal e-tier × o-tier mapping established in this project (`architectural-principles.md` §Authority Mode's A5 coordination note + PR #270/#273 reclassification ⊥ compression + PR introducing this directory). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
 
 ## Index
 
 | File | Source | Demoted sections |
 |------|--------|------------------|
-| `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
+| `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Plugin Encapsulation, Utility Skills delegation |
 | `hermeneutic-cycle.md` | `docs/structural-specs.md` | Pattern over Vocabulary (Gadamerian formal-block mapping) + 6 surface catalog (Primary / Secondary / Tertiary / Inter-version / Inter-agent / Operational axis) |
-| `safeguards.md` | `.claude/rules/safeguards.md` (whole file relocated) | Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness — all authoring/audit/verify-time; runtime-critical Gate Integrity guards were previously inlined into `axioms.md` |
+| `safeguards.md` | `.claude/rules/safeguards.md` (whole file relocated) | Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness — all authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` |
 | `project-profile-calibration.md` | `.claude/rules/project-profile-calibration.md` (whole file relocated; §Cross-Project Corroboration deliberately deleted in transit — audit item S9, 2026-07-03 — and the Self-containment policy's historical opening clause trimmed — S11) | Profile Variables, Calibration Rule, Scope Boundary — authoring/calibration-time reference, not per-turn |
 | `outcome-equivalence.md` | `.claude/rules/derived-principles.md` | Outcome Equivalence (whole section) — Derived tier, runtime-inert argument chain |
 

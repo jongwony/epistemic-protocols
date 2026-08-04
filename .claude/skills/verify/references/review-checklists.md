@@ -56,7 +56,7 @@ You are an **Instruction Design Expert**.
 
 Analyze the protocol instructions for consistency and completeness.
 
-**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Priority sections of each, plus `.claude/rules/axioms.md`
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Priority sections of each, plus `premise/gate-design.md` (convergence persistence and priority override) and `premise/interaction-factorization.md`
 
 **Checklist**:
 
@@ -105,7 +105,7 @@ You are a **Claude Code Ecosystem Expert**.
 
 Validate protocol designs against Claude Code interaction patterns and epistemic principles.
 
-**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Rules sections of each, plus CLAUDE.md (Northstar) and `.claude/rules/axioms.md`
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Rules sections of each, plus CLAUDE.md (Northstar) and `premise/recognition-and-authority.md`
 
 **Checklist**:
 
@@ -221,12 +221,12 @@ const perspectives = [
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
   },
   {
     name: 'claude-code-ecosystem',
     prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
-    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
   }
 ];
 

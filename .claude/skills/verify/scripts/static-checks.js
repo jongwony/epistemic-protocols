@@ -3003,13 +3003,13 @@ function checkFormalBlocksRule() {
 // ============================================================
 // Check: Gate Integrity Rule
 // ============================================================
-// Compiled-copy coverage for the Gate Integrity Rules entry (axioms.md
-// "Gate Integrity (Operational Guards, Safeguard-tier)" — reclassified from
+// Compiled-copy coverage for the Gate Integrity Rules entry (premise/gate-design.md
+// "Gate Integrity" — reclassified from
 // A7/Adversarial Anticipation per audit-2026-04-11 #241 resolution). Verifies
 // each core protocol SKILL.md carries a Gate integrity rule tagged
 // "(Safeguard tier)" whose body states the invariant kernel phrase
 // ("type-preserving materialization"), so runtime enforcement of gate
-// fidelity does not depend on contributor-only axioms.md alone. The mutation
+// fidelity does not depend on a contributor-facing document alone. The mutation
 // taxonomy itself (injection/deletion/substitution) is deliberately NOT
 // word-anchored: copies specialize it in per-protocol vocabulary (e.g.
 // euporia phrases mutations as partial omission of cycle coordinates), so

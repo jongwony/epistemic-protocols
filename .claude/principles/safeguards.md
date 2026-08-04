@@ -39,7 +39,7 @@ Methodology for SKILL.md `## Rules` consolidation. Each rule is classified by so
 
 | Tier | Source | Action |
 |---|---|---|
-| 1. Axiom anchor | A1-A6 (in `.claude/rules/axioms.md`) | KEEP. 1-2 line restatement with axiom name inline; do NOT use the `(Aₙ)` label form per Plugin Encapsulation source-leak prohibition |
+| 1. Axiom anchor | A1-A6 (in `premise/`) | KEEP. 1-2 line restatement with axiom name inline; do NOT use the `(Aₙ)` label form per Plugin Encapsulation source-leak prohibition |
 | 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Pattern over Tool, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation, Zero-Shot Instruction Preference) | KEEP. Anchor reference using principle name |
 | 3. Architectural project-specific | Architectural principles or protocol Core Principle | KEEP. Paragraph-length rules migrate body to Phase prose or UX Safeguards table; invariant 1-line stays in Rules |
 | 4. Cross-protocol | Rule about distinction with another protocol | Move to "Distinction from Other Protocols" section |
@@ -82,7 +82,7 @@ This framework is the *classification methodology* for `## Rules` consolidation 
 
 ## Adversarial Anticipation
 
-Full text — rationalization paths a protocol must anticipate (premature convergence assertion, silent detection dismissal, skipping a gate interaction, collapsing a constitutive gate to acknowledgment, and the gate mutation taxonomy) plus guard consistency: `premise/gate-design.md`. This project's compiled-copy anchor: the gate mutation taxonomy and materialization boundary are canonically defined at `.claude/rules/axioms.md §Gate Integrity` (kernel phrase `type-preserving materialization`, checked by `gate-integrity-rule` in static-checks.js) for every protocol SKILL.md's compiled Rules entry.
+Full text — rationalization paths a protocol must anticipate (premature convergence assertion, silent detection dismissal, skipping a gate interaction, collapsing a constitutive gate to acknowledgment, and the gate mutation taxonomy) plus guard consistency: `premise/gate-design.md`. This project's compiled-copy binding: every protocol SKILL.md carries the gate mutation taxonomy and materialization boundary as a compiled Rules entry, anchored on the kernel phrase `type-preserving materialization` and checked by `gate-integrity-rule` in static-checks.js.
 
 **Tier note**: Classified as Safeguard per audit-2026-04-11 #241 resolution. The original Axiom-tier classification rested on the claim that Adversarial Anticipation becomes MORE important as models improve. Empirical counter-evidence: PR #270 (merged 2026-04-18, commit `26da87e` on `main`) compressed adversarial scaffolding across all 11 protocol SKILL.md Rules sections under the Opus 4.7 instruction-following premise, net −14 content lines with zero new verify warnings. The aggregate compression demonstrates the inverse trajectory (becomes LESS important with improved instruction-following). The self-referential falsifiability concern (audit Rank 5: guard-list inflation as pseudo-refutation) is resolved by honest tier reclassification rather than by adding more guards. This PR (#273) performs only the tier reclassification — the 11-protocol compression was completed in PR #270 independently.
 
