@@ -15,13 +15,13 @@ Each document below stands on its own: it does not assume you know any particula
 
 | Document | When to read it |
 |---|---|
-| [`recognition-and-authority.md`](recognition-and-authority.md) | Deciding whether to settle something yourself or put it to the person you're working with; presenting a set of options for someone to choose from; the person interrupts you mid-task; weighing advice that arrived from outside the work. |
+| [`recognition-and-authority.md`](recognition-and-authority.md) | Deciding whether to settle something yourself or put it to the person you're working with; presenting a set of options for someone to choose from; the person interrupts you mid-task. |
 | [`interaction-factorization.md`](interaction-factorization.md) | Designing the options offered at a checkpoint; judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several. |
 | [`gate-design.md`](gate-design.md) | Designing or defending a checkpoint, a convergence condition, or a termination condition; checking whether a process can shortcut or skip past itself. |
 | [`tiering-and-scope.md`](tiering-and-scope.md) | Deciding which surface a principle belongs on; classifying whether a principle should matter more or less as the underlying model improves. |
 | [`calibration-methodology.md`](calibration-methodology.md) | Setting or changing how much a project resolves on its own versus routes to its user for judgment. |
 | [`approach-verification.md`](approach-verification.md) | Before deciding what to do with a request; unsure whether the conversation is at design level or implementation level; deciding how far a fix should reach; a time or date arrives without a stated zone. |
-| [`verification-discipline.md`](verification-discipline.md) | Before declaring something done; a delegated agent reports that its work is complete. |
+| [`verification-discipline.md`](verification-discipline.md) | Before declaring something done; a delegated agent reports that its work is complete; weighing advice that arrived from outside the work, or deciding whether something warrants an independent second look. |
 | [`instruction-authoring.md`](instruction-authoring.md) | Writing or revising instructions and durable records; judging whether a new rule earns its place; deciding how much to inline for a reader versus leaving as a reference. |
 | [`delegation-and-subagents.md`](delegation-and-subagents.md) | Handing work to an agent that cannot see this conversation; deciding what a coordinator keeps for itself versus delegates outward. |
 | [`session-and-handoff.md`](session-and-handoff.md) | Deferring work or crossing a session boundary; an input arrives that would pull focus off the task currently in progress. |
