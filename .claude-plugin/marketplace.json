@@ -63,7 +63,7 @@
     {
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
-      "description": "Utility skills layered on top of the core protocols. Browse available skills via /catalog; each skill's SKILL.md carries its own contract."
+      "description": "Utility skills layered on top of the core protocols. /catalog browses the protocol handbook; each utility skill's own SKILL.md carries its contract."
     },
     {
       "name": "anamnesis",

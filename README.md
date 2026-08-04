@@ -97,7 +97,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, reference-grounded prompt-artifact formation, and scoped empirical validation |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, reference-grounded prompt-artifact formation, scoped empirical validation, and advisor-checked decision gates |
 
 **Three discovery modes coexist** (none replaces the others):
 

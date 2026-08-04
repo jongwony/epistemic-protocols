@@ -97,7 +97,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 프로젝트 프로필 재조정, 프로젝트 가이드 direction line 지평융합, 소급적 계약 위반 감지, work-unit triage, 레퍼런스-grounded prompt-artifact 형성, 그리고 scoped 실증 검증 |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 프로젝트 프로필 재조정, 프로젝트 가이드 direction line 지평융합, 소급적 계약 위반 감지, work-unit triage, 레퍼런스-grounded prompt-artifact 형성, scoped 실증 검증, 그리고 자문 검증 결정 게이트 |
 
 **세 가지 발견 모드 공존** (서로 대체하지 않음):
 

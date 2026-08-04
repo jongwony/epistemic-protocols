@@ -27,6 +27,7 @@ const {
   collectCodexSubmitFiles,
   collectReleaseFiles,
   isForbiddenCodexPath,
+  DESCRIPTION_LIMIT,
   parseFrontmatter,
   readCodexManifestVersion,
   runRelease,
@@ -37,6 +38,7 @@ const {
   generateReleaseNotes
 } = require('./package');
 const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
+const { runLanguagePurityCheck } = require('../.claude/skills/verify/scripts/language-purity');
 const { discoverPlugins } = require('./load-protocols');
 
 function writeFixtureFile(root, relativePath, content = 'fixture\n') {
@@ -328,7 +330,9 @@ describe('goal-research runtime contract', () => {
 describe('artifact-self-containment detector liveness', () => {
   const REPO_ROOT = path.join(__dirname, '..');
   const TARGET_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
-  const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md (A1)\n';
+  // The axiom identifier sits inside a fence on purpose: formal blocks are fenced yet
+  // runtime-normative, so stripping them would hide the leak the last assertion checks.
+  const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md\n\n```\n-- relay basis per A1\n```\n';
 
   it('fires when a known banned pattern is injected into a SKILL.md', () => {
     const backup = fs.readFileSync(TARGET_SKILL_MD, 'utf8');
@@ -352,6 +356,9 @@ describe('artifact-self-containment detector liveness', () => {
 
       const hasAxiomsMd = aitesisFails.some(f => /axioms?\.md/.test(f.message));
       assert.ok(hasAxiomsMd, 'axioms.md banned pattern should fire on injected content');
+
+      const hasAxiomId = aitesisFails.some(f => /axiom identifier/.test(f.message));
+      assert.ok(hasAxiomId, 'axiom-identifier pattern should fire inside a fenced formal block');
     } finally {
       try {
         fs.writeFileSync(TARGET_SKILL_MD, backup);
@@ -363,6 +370,30 @@ describe('artifact-self-containment detector liveness', () => {
         );
         throw restoreErr;
       }
+    }
+  });
+});
+
+describe('language-purity worktree prune', () => {
+  // path -> still warned? Rejects a missing prune, a bare-name prune, and a
+  // prune without the path-segment boundary; a dead detector fails all three.
+  const CASES = {
+    '.claude/worktrees/wt/x.md': false,
+    'foo/worktrees/y.md': true,
+    '.claude/worktrees-copy/w.md': true,
+  };
+
+  it('prunes .claude/worktrees/ by path, not by bare directory name', () => {
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'lp-prune-'));
+    try {
+      // Hangul by charCode so this file stays self-pure under the check it exercises.
+      for (const rel of Object.keys(CASES)) writeFixtureFile(root, rel, String.fromCharCode(0xAC00));
+      const warned = runLanguagePurityCheck({ projectRoot: root }).warn.map(w => w.file);
+      for (const [rel, expected] of Object.entries(CASES)) {
+        assert.equal(warned.includes(rel), expected, `${rel}: warned should be ${expected}. Got ${JSON.stringify(warned)}`);
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
     }
   });
 });
@@ -1087,6 +1118,7 @@ describe('package.js CLI', () => {
         'forge.zip',
         'frame.zip',
         'gap.zip',
+        'gate-check.zip',
         'goal-research.zip',
         'grasp.zip',
         'ground.zip',
@@ -1223,5 +1255,26 @@ describe('agent routing map', () => {
     assert.ok(ctx.includes('**`/grasp`**'));
     assert.ok(ctx.includes('**`/gap`**'));
     assert.ok(!ctx.includes('**`/inquire`**'));
+  });
+});
+
+describe('packaged discovery metadata', () => {
+  it('keeps every packaged description within the discovery limit', () => {
+    // The override path used to bypass the length warning entirely: the check fired
+    // only when NO override existed, so an over-limit override shipped silently.
+    // This asserts the thing that is actually statically decidable — the description a
+    // runtime reader receives, after transformation, and its length.
+    const offenders = [];
+    for (const plugin of PLUGINS) {
+      const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
+      if (!fs.existsSync(skillPath)) continue;
+      const transformed = transformSkillMd(fs.readFileSync(skillPath, 'utf8'), plugin.skill);
+      const { fields } = parseFrontmatter(transformed);
+      const desc = fields.get('description') || '';
+      if (desc.length > DESCRIPTION_LIMIT) {
+        offenders.push(`${plugin.dir}/${plugin.skill}: ${desc.length} chars`);
+      }
+    }
+    assert.deepEqual(offenders, [], `over ${DESCRIPTION_LIMIT}-char discovery limit: ${offenders.join('; ')}`);
   });
 });

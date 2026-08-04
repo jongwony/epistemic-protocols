@@ -51,6 +51,7 @@ const DESCRIPTION_OVERRIDES = {
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, externalize routed work units to substrate records a collaborator session is pointed at.',
   'comment-review': "Reviews markdown/HTML artifacts before fixation (publish/commit/merge) via a channel-first browser preview loop.",
   forge: "Reference-grounded prompt-artifact formation — surfaces under-determined contract coordinates from a reference doc and projects a ready-to-use prompt or skill recipe.",
+  'gate-check': "Advisor-checked decision gates — freezes a drafted option set, has it independently adjudicated, verifies the cited grounds, then presents, relays a settled option, or unfolds what did not clear.",
   'lens-review': "Frame-driven multi-perspective PR review — derives fitting lenses per diff, cross-verifies findings, posts one consolidated PR comment.",
   misuse: "Retrospective protocol contract-violation detector — scans past sessions and surfaces violation records for review.",
   'reduced-space-test': "Scoped empirical validation — decomposes a target↔surrogate equivalence claim, bounds a test space, captures evidence, carries the untested complement forward.",
@@ -203,8 +204,20 @@ function parseFrontmatter(content) {
   let blockList = [];
 
   const unquote = (v) => {
-    if ((v.startsWith('"') && v.endsWith('"')) ||
-        (v.startsWith("'") && v.endsWith("'"))) {
+    // Double-quoted scalars carry the escapes serializeFrontmatter writes, so stripping
+    // the quotes without undoing them is only half the inverse: parse(serialize(x)) then
+    // returns x with one more layer of backslashes than it went in with, and every
+    // packaging round-trip adds another. Undo exactly what serialize applies, in the
+    // reverse order it applied them.
+    if (v.startsWith('"') && v.endsWith('"')) {
+      return v.slice(1, -1)
+        .replace(/\\t/g, '\t')
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, '\\');
+    }
+    // Single-quoted YAML has no backslash escapes; stripping the quotes is the whole inverse.
+    if (v.startsWith("'") && v.endsWith("'")) {
       return v.slice(1, -1);
     }
     return v;
@@ -745,10 +758,18 @@ function buildSkillArtifact(
       }
       const { fields } = parseFrontmatter(content);
       const desc = fields.get('description');
-      if (desc && desc.length > DESCRIPTION_LIMIT && !DESCRIPTION_OVERRIDES[plugin.skill]) {
+      const override = DESCRIPTION_OVERRIDES[plugin.skill];
+      if (desc && desc.length > DESCRIPTION_LIMIT && !override) {
         warnings.push(
           `${plugin.dir}: description is ${desc.length} chars ` +
           `(over ${DESCRIPTION_LIMIT}-char limit, no override defined)`
+        );
+      }
+      if (override && override.length > DESCRIPTION_LIMIT) {
+        warnings.push(
+          `${plugin.dir}: description override is ${override.length} chars ` +
+          `(over ${DESCRIPTION_LIMIT}-char limit) — an override replaces the source ` +
+          `description in packaged metadata, so it answers to the same limit`
         );
       }
       data = Buffer.from(transformSkillMd(content, plugin.skill), 'utf8');
@@ -1094,6 +1115,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  DESCRIPTION_LIMIT,
   PLUGINS,
   CODEX_SUBMIT_PLUGINS,
   buildSkillArtifact,
