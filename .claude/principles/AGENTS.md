@@ -2,16 +2,16 @@
 
 **Purpose**: Lazy-load location for prescriptive content demoted from `.claude/rules/`. Per Tier Factorization, this directory realizes the **o-tier** axis (operational/runtime invocation frequency) at T2-T3 — sections invoked at authoring/verify/axiom-evolution time, not per-turn.
 
-The Claude Code harness does not auto-load files in this directory. Files here are fetched via Read/Grep when relevant. Other AI clients can adopt the same content via their own load conventions; the content itself is substrate-agnostic.
+This directory realizes the root `AGENTS.md` `## Progressive Disclosure` policy in three stages: at session start, nothing in this directory loads; when work touches this directory, its entry document (`AGENTS.md`, aliased as `CLAUDE.md`) is picked up by directory convention, bringing this index and the placement policy below into context; a specific principle document is then fetched via Read/Grep only when the utterance or current context names it. Other AI clients can adopt the same content via their own load conventions; the content itself is substrate-agnostic.
 
 ## Distinction from `.claude/rules/`
 
 | Location | o-tier | Mechanism | Invocation frequency |
 |----------|--------|-----------|----------------------|
 | `.claude/rules/` | T1 | Auto-loaded by harness at session start | Per-turn |
-| `.claude/principles/` | T2-T3 | Lazy-load via Read/Grep | Per-session / per-authoring |
+| `.claude/principles/` | T2-T3 | Entry document (`AGENTS.md`/`CLAUDE.md`) loads by directory convention when work touches this directory; principle documents lazy-load via Read/Grep when named | Per-directory-visit (entry) / per-session / per-authoring (principle documents) |
 
-This table is the canonical statement of the load mechanism in this repository; other files point here rather than restating it.
+This table is the canonical statement of the load mechanism in this repository; other files point here rather than restating it. Naming this index `AGENTS.md` with the `CLAUDE.md` alias — the only file in this directory that carries that name — is what makes the directory-convention pickup happen, which is why it stays short and current.
 
 The split realizes the orthogonal e-tier × o-tier mapping established in this project (`.claude/principles/architectural-principles.md` §Authority Mode's A5 coordination note). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
 
