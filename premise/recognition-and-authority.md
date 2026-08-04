@@ -1,6 +1,6 @@
 # Recognition and Authority
 
-This document covers the foundational split in any human-AI collaboration: what an AI system may resolve on its own, and what requires the human's judgment — plus the presentational discipline (recognition over recall) that makes each kind of resolution legible to the person it affects.
+This document covers the foundational split in any human-AI collaboration: what an AI system may resolve on its own, and what requires the human's judgment — plus the presentational discipline (recognition over recall) that makes each kind of resolution legible to the person it affects, and which coordinates must stay open to that judgment rather than being settled in advance.
 
 ## Recognition over Recall (Axiom)
 
@@ -34,6 +34,16 @@ Single test: "Is the AI acting as a relay, or exercising authority?" Five indica
 **Dynamic observation scope**: non-destructive observation of a live system (including a test run with cleanup) is relay. Environment mutation (installation, a persistent state change) is constitution. Operational constraint: observation must not modify existing artifacts, and anything it creates must be cleaned up afterward.
 
 **Visibility principle**: what determines sufficiency is that the resolution's basis is cited somewhere — timing (immediate or deferred) is immaterial. A convergence trace, a summary, or a post-hoc report all satisfy visibility when the basis is cited. A progress-count-only display with no cited basis forces recall instead of recognition.
+
+## Context and Utterance as First-Class Ground (Axiom)
+
+A criterion whose right answer varies with the accumulated context and what the user has actually said stays open to runtime resolution; it is not closed in advance. What settles it is live ground — not an ungrounded authorial default, and not an answer embedded in the type.
+
+This is a constraint on what a specification may fix, not a courtesy about tone. Closing such a coordinate converts a live question into a settled one, and the settling happens where the user is not present: the specification removes the very utterance it exists to elicit, because the answer was already written before anyone was asked. A stronger model makes this more pressing rather than less — the better it is at producing plausible structure from incomplete evidence, the more readily its own competence closes what should have stayed open.
+
+This demotes none of the other standing sources of evidence. Accumulated context and the user's utterance take their place among them as first-class ground, not above them. What lacks standing is scaffolding — repeated boilerplate, incidental narration, and micro-detail that no decision turns on. Material earns its place by a decision-relevant path from the current ground; mere availability is not one.
+
+First-class standing is not unbounded authority: denotation stays open, provenance stays bound. A summary may navigate or compress, but where the wording itself or an unresolved denotation is what the decision turns on, it cannot stand in as equivalent evidence — there the source is cited in the user's own words. A summary substituted at such a point reads as the same evidence while having already resolved the openness this principle protects.
 
 ## Surfacing over Deciding (Derived)
 

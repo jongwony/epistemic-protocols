@@ -13,7 +13,7 @@ Each document below stands on its own: it does not assume you know any particula
 
 ## Documents
 
-Read [`recognition-and-authority.md`](recognition-and-authority.md) when deciding whether to settle something yourself or put it to the person you are working with, and when presenting a set of options for someone to choose from.
+Read [`recognition-and-authority.md`](recognition-and-authority.md) when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a specification may fix a criterion's answer in advance or must leave it to resolve at runtime.
 
 Read [`interaction-factorization.md`](interaction-factorization.md) when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several.
 
