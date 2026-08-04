@@ -14,7 +14,7 @@ Conduct how a session's epistemic work will be carried out — the order, indepe
 ```
 ── FLOW ──
 Hyphegesis(WP) → BindPlanInput(WP) → PI →
-  [PI = LivePlan(plan, loc): bind_I(Some(plan)) ∧ Λ.carried_handoff := loc |
+  [PI = LivePlan(plan, nav): bind_I(Some(plan)) ∧ Λ.carried_handoff := nav |
    PI = Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) (extension) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) ∧ Λ.carried_handoff := Some(N)) |
    PI = NoPlan: bind_I(None) ∧ Λ.carried_handoff := None] → MethodBrief(WP) → guard[relay-test, anti-self-application] →
   [single-move ∨ trivial-conduct: relay-route(extension) → deactivate] |
@@ -165,8 +165,10 @@ Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_prospec
 "how should I approach..."   → WP = the work named before the trigger
 AI-detected trigger          → WP = the multi-move prospect AI identified (Hybrid: user confirms at the Phase 0 guard gate)
 
-PI (bound alongside WP) = LivePlan(plan, loc) when the /apportion plan is still a live value, loc being the
-                          locator /apportion emitted beside it; Navigation(N) when the explicit argument,
+PI (bound alongside WP) = LivePlan(plan, nav) when the /apportion plan is still a live value, nav being the
+                          WHOLE navigation block /apportion emitted beside it — the type is Option(N), not a
+                          bare locator, because a later session dereferences from the block's grounding and
+                          dereference instructions, not from the record identity alone; Navigation(N) when the explicit argument,
                           colocated expression, or prior user turn carries Merismos's navigation block;
                           NoPlan only when neither carrier is present
 I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → ReadPlan(C) → Some(plan) |
@@ -176,7 +178,7 @@ I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → 
     support-integrity check stops and deactivates; it never selects None
 
 ── PHASE TRANSITIONS ──
-Phase 0: WP → init_state(track: every pass-scoped and historical Λ field to its empty value — sets to ∅, carried_plan and trace_contract to None; runs EXACTLY ONCE on activation, before any read) → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
+Phase 0: WP → init_state(track: every pass-scoped and historical Λ field to its empty value — sets to ∅, carried_plan and trace_contract to None; runs EXACTLY ONCE on activation, before any read) → BindPlanInput(WP) → PI → [LivePlan(plan, nav): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := nav) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | C → ReadPlan(C) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
 Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
            A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' belongs to {u.unit_ref | u ∈ I.units} ∧ is stamped by exactly one move of MS' ∧ every u ∈ I.units has its unit_ref stamped in MS' or already recorded in withdrawn_units ∧ no move of MS' is stamped with a unit_ref already in withdrawn_units): re-present Sc naming the stamped refs with no plan unit behind them, the units with more than one stamped move, the units with none, and the withdrawn units still holding a move — NOT accepted | MS := MS' →
                                        [|MS| = 1 ∧ withdrawn_units = ∅: relay-route to the surviving move, deactivate
