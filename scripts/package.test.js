@@ -330,7 +330,9 @@ describe('goal-research runtime contract', () => {
 describe('artifact-self-containment detector liveness', () => {
   const REPO_ROOT = path.join(__dirname, '..');
   const TARGET_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
-  const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md (A1)\n';
+  // The axiom identifier sits inside a fence on purpose: formal blocks are fenced yet
+  // runtime-normative, so stripping them would hide the leak the last assertion checks.
+  const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md\n\n```\n-- relay basis per A1\n```\n';
 
   it('fires when a known banned pattern is injected into a SKILL.md', () => {
     const backup = fs.readFileSync(TARGET_SKILL_MD, 'utf8');
@@ -354,6 +356,9 @@ describe('artifact-self-containment detector liveness', () => {
 
       const hasAxiomsMd = aitesisFails.some(f => /axioms?\.md/.test(f.message));
       assert.ok(hasAxiomsMd, 'axioms.md banned pattern should fire on injected content');
+
+      const hasAxiomId = aitesisFails.some(f => /axiom identifier/.test(f.message));
+      assert.ok(hasAxiomId, 'axiom-identifier pattern should fire inside a fenced formal block');
     } finally {
       try {
         fs.writeFileSync(TARGET_SKILL_MD, backup);

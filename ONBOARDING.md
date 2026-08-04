@@ -44,7 +44,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
 - [ ] `premise/AGENTS.md` — what the portable premise collection is, how adoption is scoped, and what each document covers; start here (~2 min)
-- [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the A1–A6 foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
+- [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles in portable form, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins; this repo's own instances of them live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
@@ -81,7 +81,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 ## Conventions
 
 - **Notation in formal blocks**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
-- **Verb usage in TOOL GROUNDING**: `call` for tool references, `present` for gate operations (tool-agnostic per A4 Semantic Autonomy)
+- **Verb usage in TOOL GROUNDING**: `call` for tool references, `present` for gate operations (tool-agnostic per Semantic Autonomy, `premise/interaction-factorization.md`)
 - **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
 - **Release tags**: CalVer `v{YYYY}.{MM}.{DD}[.{N}]`; tag push triggers `release.yml` draft
 - **README sync**: `README.md` and `README_ko.md` must stay in sync

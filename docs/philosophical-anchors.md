@@ -1,52 +1,52 @@
 # Philosophical Anchors
 
-Cross-traditional grounding for A2's relay/constitution boundary, A5's extended-cognition framing, the Epistemic Cost Topology architectural principle, and Anamnesis's Husserlian synthesis of identification. This document provides philosophical lineage, citations, and non-derivability analyses that support the axiom, principle, and protocol system without bloating LLM-facing rules or SKILL.md files.
+Cross-traditional grounding for the relay/constitution boundary in Detection with Authority (`premise/recognition-and-authority.md`), the extended-cognition framing in Interaction Kind Factorization (`premise/interaction-factorization.md`), the Epistemic Cost Topology architectural principle, and Anamnesis's Husserlian synthesis of identification. This document provides philosophical lineage, citations, and non-derivability analyses that support the axiom, principle, and protocol system without bloating LLM-facing rules or SKILL.md files.
 
 **Audience**: Contributor-facing per Audience Reach principle (`.claude/principles/architectural-principles.md`). This document is not auto-loaded by protocols — it serves contributors who want to understand the deeper philosophical grounding of the system, while LLM-facing rules files retain only operationally relevant content.
 
-## §A2. Relay/Constitution Boundary — Philosophical Lineage
+## §Detection with Authority — Relay/Constitution Boundary
 
-A2's relay/constitution boundary (defined in `premise/recognition-and-authority.md`) is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
+The relay/constitution boundary within Detection with Authority is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
 
 ### Husserl's passive/active synthesis
 
 *Cartesian Meditations* (Husserl 1931), especially §§38-39. Passive synthesis constitutes pre-egoic, pre-reflective givenness — the mechanical transmission of sense-data without egoic judgment. Active synthesis constitutes meaning through egoic acts of attention, selection, and interpretation.
 
-Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in A2 is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical. A2's rules/ inscription retains "Constitution" and "Relay" as operational terms (self-contained via A2 body definitions); this document carries the etymological grounding separately, per the rules/ pure-formality boundary.
+Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in Detection with Authority is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical. Detection with Authority's rules/ inscription retains "Constitution" and "Relay" as operational terms (self-contained via its own body definitions); this document carries the etymological grounding separately, per the rules/ pure-formality boundary.
 
 ### Clark & Chalmers' active externalism
 
 "The Extended Mind" (Clark & Chalmers 1998, *Analysis* 58:7-19). Cognitive processes can extend beyond the biological brain when tools and environment are coupled reliably enough to function as cognitive workspace.
 
-Under this view, A2's relay/constitution boundary marks where AI-as-cognitive-tool operates within the user's extended cognition (relay: AI competent within pre-established trust, delegable) and where the user's constitutive authority resumes (constitution: novel judgment that cannot be delegated to the tool).
+Under this view, the relay/constitution boundary marks where AI-as-cognitive-tool operates within the user's extended cognition (relay: AI competent within pre-established trust, delegable) and where the user's constitutive authority resumes (constitution: novel judgment that cannot be delegated to the tool).
 
 ### Cross-traditional convergence
 
-The convergence of these lineages — phenomenological (Husserl) and analytic philosophy of mind (Clark & Chalmers) — provides A2 with cross-traditional grounding. A2 is the axiom most robustly supported by external philosophical anchors, confirmed empirically via independent dual-stream analysis.
+The convergence of these lineages — phenomenological (Husserl) and analytic philosophy of mind (Clark & Chalmers) — provides Detection with Authority with cross-traditional grounding. It is the axiom most robustly supported by external philosophical anchors, confirmed empirically via independent dual-stream analysis.
 
 ### Operational correspondence to extended-cognition labor division
 
-The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unknown-Unknowns → Human division of cognitive labor. Extension operations (entropy→0, deterministic, citable; relay in operational vocabulary) are the domain where AI extends user cognition as competent tool. Constitution operations (entropy>0, novel selection; gated in operational vocabulary) are the domain where user epistemic authority remains non-delegable. A2 does not *prescribe* this mapping — it *recognizes* a pattern already present in effective extended cognition.
+The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unknown-Unknowns → Human division of cognitive labor. Extension operations (entropy→0, deterministic, citable; relay in operational vocabulary) are the domain where AI extends user cognition as competent tool. Constitution operations (entropy>0, novel selection; gated in operational vocabulary) are the domain where user epistemic authority remains non-delegable. Detection with Authority does not *prescribe* this mapping — it *recognizes* a pattern already present in effective extended cognition.
 
-## §A5. Interaction Kind Factorization — Extended Mind Ground
+## §Interaction Kind Factorization — Extended Mind Ground
 
-A5 (defined in `premise/interaction-factorization.md`) shares the extended-cognition ground that A2's Philosophical Lineage establishes. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence; gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated.
+Interaction Kind Factorization shares the extended-cognition ground established above for Detection with Authority. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence; gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated.
 
-### Non-derivability from A2 (despite shared ground)
+### Non-derivability from Detection with Authority (despite shared ground)
 
-Despite sharing the extended-cognition ground, **A5 is not derivable from A2**. Axiom non-derivability requires that axioms introduce genuinely new structure, not merely restate consequences of existing axioms. Sharing a philosophical ground does not imply derivability.
+Despite sharing the extended-cognition ground, **Interaction Kind Factorization is not derivable from Detection with Authority**. Axiom non-derivability requires that axioms introduce genuinely new structure, not merely restate consequences of existing axioms. Sharing a philosophical ground does not imply derivability.
 
-A5 introduces the following that A2 alone does not provide:
+Interaction Kind Factorization introduces the following that Detection with Authority alone does not provide:
 
-1. **Factorization structure**: `G = R(p) ∘ A` — the gate operation factors into an abstract component A (Ep → Abs) and a preference-parameterized realization R(p) (Abs → Cl). A2's detection/authority distinction does not entail this categorical factorization; A2 states *who* judges, not *how* gate operations compose.
+1. **Factorization structure**: `G = R(p) ∘ A` — the gate operation factors into an abstract component A (Ep → Abs) and a preference-parameterized realization R(p) (Abs → Cl). Detection with Authority's detection/authority distinction does not entail this categorical factorization; it states *who* judges, not *how* gate operations compose.
 
-2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is conceptually distinct from A2 at the meta/design layer. A2 classifies by authority source (AI detection vs user judgment); A5 classifies by elision consequence — the two classifications are coextensive at the runtime annotation layer (Extension implies bounded regret; Constitution typically carries unbounded regret, with A5's structural exceptions).
+2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is conceptually distinct from Detection with Authority at the meta/design layer. Detection with Authority classifies by authority source (AI detection vs user judgment); Interaction Kind Factorization classifies by elision consequence — the two classifications are coextensive at the runtime annotation layer (Extension implies bounded regret; Constitution typically carries unbounded regret, with structural exceptions of its own).
 
-3. **TOOL GROUNDING annotation mechanism**: The operational mechanism for annotating gate operations as `(extension)` (relay-eligible) or `(constitution)` (Constitution required) lives in A5, not A2. A2's Standing/Active authority distinction is conceptually distinguishable from A5's regret dimension at the meta/design layer; at the runtime annotation layer the two collapse to a single TOOL GROUNDING axis (A5 coordination note in `.claude/principles/architectural-principles.md` §Authority Mode).
+3. **TOOL GROUNDING annotation mechanism**: The operational mechanism for annotating gate operations as `(extension)` (relay-eligible) or `(constitution)` (Constitution required) lives in Interaction Kind Factorization, not Detection with Authority. Detection with Authority's Standing/Active authority distinction is conceptually distinguishable from Interaction Kind Factorization's regret dimension at the meta/design layer; at the runtime annotation layer the two collapse to a single TOOL GROUNDING axis (the coordination note in `.claude/principles/architectural-principles.md` §Authority Mode).
 
-4. **Option-set-level relay test**: The test for whether constructed option sets constitute genuine gated interactions or collapse to relay (option-level entropy→0; equivalent to Extension-classification of the option set) is A5-specific. A2 does not analyze option-set structure.
+4. **Option-set-level relay test**: The test for whether constructed option sets constitute genuine gated interactions or collapse to relay (option-level entropy→0; equivalent to Extension-classification of the option set) is specific to Interaction Kind Factorization. Detection with Authority does not analyze option-set structure.
 
-A5 *inherits* A2's constitution properties on its gated side, but the factorization, regret analysis, and elision mechanism are A5's independent contributions. Both flow from the same extended-cognition ground, but shared ground does not imply derivability — only that the two axioms are mutually compatible and jointly necessary for the full gate theory.
+Interaction Kind Factorization *inherits* Detection with Authority's constitution properties on its gated side, but the factorization, regret analysis, and elision mechanism are its own independent contributions. Both flow from the same extended-cognition ground, but shared ground does not imply derivability — only that the two axioms are mutually compatible and jointly necessary for the full gate theory.
 
 ## §Epistemic Cost Topology — Phenomenological Vindication
 
@@ -91,9 +91,9 @@ The Husserlian terms are load-bearing in Anamnesis for two reasons:
 1. **Operation definition**: "synthesis of identification" names the morphism Anamnesis instantiates. Renaming to a generic term (e.g., "recognition synthesis") would obscure the phenomenological structure the protocol implements; the category-theoretic composition with Aitesis and Katalepsis assumes this specific constitutive pattern.
 2. **Type predicate**: `empty_intention(V)` is the activation precondition — a formal type predicate in the MORPHISM block. It distinguishes Anamnesis (empty intention seeking fulfillment) from Aitesis (no intention at all toward the domain). Operational rephrasing would erase the phenomenological distinction that underlies the protocol boundary.
 
-### Relation to A2's Husserlian lineage
+### Relation to Detection with Authority's Husserlian lineage
 
-A2's relay/constitution boundary also uses Husserlian vocabulary ("constitution" = active synthesis). Both axiom-level (A2) and protocol-level (Anamnesis) uses share the same philosophical source. The two uses are complementary: A2 addresses authority allocation (who constitutes meaning), Anamnesis addresses reference fulfillment (how recall constitutes identity). This convergence on a single philosophical lineage is not coincidental — both epistemic moments (authority allocation at gates, identity constitution in recall) are instances of the same Husserlian constitutive act.
+Detection with Authority's relay/constitution boundary also uses Husserlian vocabulary ("constitution" = active synthesis). Both axiom-level (Detection with Authority) and protocol-level (Anamnesis) uses share the same philosophical source. The two uses are complementary: Detection with Authority addresses authority allocation (who constitutes meaning), Anamnesis addresses reference fulfillment (how recall constitutes identity). This convergence on a single philosophical lineage is not coincidental — both epistemic moments (authority allocation at gates, identity constitution in recall) are instances of the same Husserlian constitutive act.
 
 ### Rules/ vs SKILL.md scope
 
@@ -194,8 +194,8 @@ hypothesis, not a permanent commitment.
 
 ## Cross-references
 
-- `premise/recognition-and-authority.md` (A2 principle statement, with Constitution/Relay as its operational terms; etymology lives here)
-- `premise/interaction-factorization.md` (A5 principle statement; philosophical ground lives here)
+- `premise/recognition-and-authority.md` (Detection with Authority's principle statement, with Constitution/Relay as its operational terms; etymology lives here)
+- `premise/interaction-factorization.md` (Interaction Kind Factorization's principle statement; philosophical ground lives here)
 - `premise/tiering-and-scope.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
 - `prothesis/skills/frame/SKILL.md` (forms the distinct interpretive lenses that `hyphegesis/skills/conduct/SKILL.md`'s synthesis checkpoint later fuses via Gadamer's Horizontverschmelzung — compiled into the CheckpointBrief, executed by the substrate; Katalepsis' `Horizon` gap is the comprehension-layer complement — see §Katalepsis Horizon Gap)
