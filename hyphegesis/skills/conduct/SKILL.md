@@ -32,7 +32,7 @@ WorkProspect × ProtocolGraph
   → guard(relay_test, anti_self_application)  -- single-move work relays to that one protocol; Hyphegesis does not conduct Hyphegesis
   → identify(moves)                           -- candidate cognitive moves over the protocol graph, presented for Recognition (Rule 2)
   → select(moves)                             -- user confirms the move set via Cognitive Partnership Move (Constitution); a deselection that would strand an incoming unit is surfaced before the selection is accepted, and withdrawing that unit removes it from the plan and creates an owed re-apportionment the emitted artifact carries as an annotation
-  → design(conduct_topology)                  -- impact/leverage-first: settle the highest-leverage axis·region first, each at its own gate; edge-local over move-regions; FinalizeTopology replaces the current pass's residual/degradation products, then checkpoint registration replaces the checkpoint set from the current CT + WP. Deferred decisions whose evidence does not exist yet register here
+  → design(conduct_topology)                  -- impact/leverage-first: settle the highest-leverage axis·region first, each at its own gate; edge-local over move-regions; FinalizeTopology replaces the current pass's residual/degradation products, and once the moves are placed by the arrow below, checkpoint registration replaces the checkpoint set from the current CT + WP. Deferred decisions whose evidence does not exist yet register there
   → assign(moves, topology) → move_assignment  -- place every selected move into a region of the resolved topology and into its slot under that topology's order; the placement is what the condition binding below reads to find each unit's region, and it is a field the emitted plan carries in its own right
   → bind(incoming_conditions, topology)       -- place every condition the incoming plan carries — BOTH kinds, the per-unit conditions read off each unit's own resolution and the plan-wide conditions — at the site the resolved topology puts it: a unit's condition binds to the region its move was assigned to and takes that region's termination disposition; a plan-wide condition binds to the earliest frontier that satisfies it. Materially divergent sound frontiers re-open the deciding axis·region instead of settling one, so a binding is committed only against a topology that decides it
   → annotate(substrate_feasibility)           -- per resolved topology, surface substrate realizability as a handoff annotation
@@ -220,7 +220,7 @@ After Phase 3 (Handoff):
   Hyphegesis conducts to the LAST checkpoint in CheckpointSet, then downstream-delegates — execution and anything past the last in-session checkpoint belong to the substrate or to the routed protocol. The span ends at the next planned /compact or /clear, which the user types; Hyphegesis does not detect or emit that wall.
   A checkpoint may re-open Constitution mid-execution.
   At a checkpoint, the substrate executes the compiled CheckpointBrief. At a synthesis checkpoint the two candidate sets carry a normative order: when both are live the output-shape decision resolves first and the fusion candidates are expressed in the selected unit. Hyphegesis compiles this contract; the substrate performs it.
-Continue until convergence: warrant=relay deactivation, ConductedMethod handed off, or user Esc key.
+Continue until convergence: warrant=relay deactivation, the conduct trace surfaced and the ConductedMethod then handed off (both events, in that order — handoff alone does not converge), or user Esc key.
 
 Convergence evidence: At handoff, present every withdrawn incoming unit with the resolver that owes its re-apportionment (∅ when none were withdrawn), and — when withdrawn_units ≠ ∅ AND the carried plan carries a WholeGoalAcceptance condition — a visible note that its count-based discharge is permanently blocked for THIS plan (absent any withdrawal the carried unit count still matches what /apportion captured at emission, so nothing is blocked and the note would be false) — and, for every OTHER retained plan condition (non-count-scoped), a caveat that its /apportion-compiled basis predates this withdrawal and this protocol's binding of it here is not a re-validation of that basis — AND the per-move trace — for each Move, show (Move → its ⟨order_position, region⟩ in CT) — AND the per-axis topology trace — for each resolved axis·region, show (axis·region → ConductMove → value, default-bound → Gen default + DefaultBound) — AND the SubstrateHandoff annotations and the exact current-pass CheckpointSet (with every checkpoint's decision-typed compiled CheckpointBrief) — AND, when I ≠ None, the condition-binding trace: each incoming unit's UnitConditionBinding shown BY ITS DISPOSITION, since only one of the two carries a ground — grounds_termination: unit_ref → move/region → the termination ground it now grounds, plus any uncited invariant conjuncts that ground carries; executor_enforced: unit_ref → move/region → the coverage limit that region's termination leaves, and that the unit's own resolution is what the executor enforces inside its interval, no topology ground existing there (the default single_pass topology takes this branch, so a ground-shaped trace clause would have to be fabricated for it) and each incoming plan condition's PlanConditionBinding (plan_entry → its resolved FiringSite, or resolution_required when no sound frontier exists) — AND the trace contract: the cross-cutting disclosure overlay (every final-pass residual, every degradation, every coverage cap the topology imposes, and every stop-parameter-bearing region's termination ground — until_goal_met, bounded_rounds(n), until_dry_ceiling(k), or an emergent value declaring needs_stop_ground — a resolution_required ground shown with its owed resolver, and marked unroutable when carried_handoff is None), never silent. Convergence is demonstrated, not asserted.
 
@@ -357,7 +357,7 @@ Phase ∈ {0, 1, 2, 3}
 
 **Pre-activation routing**: The Phase 0 relay-test guard precedes activation, deciding whether to accept a `/conduct` invocation at all.
 
-Command invocation activates mode until the conduct plan is handed off.
+Command invocation activates mode until the conduct trace has been surfaced and the plan then handed off.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/conduct` slash command or description-matching input. Always available.
@@ -397,7 +397,7 @@ When Hyphegesis is active:
 | Warrant = relay | Route to the single resolving protocol, deactivate (conduction not needed) |
 | Phase 1 selection leaves exactly one move | Route to that surviving move's protocol, surface any owed withdrawal, deactivate |
 | Phase 1 selection leaves zero moves | Surface that no move survives plus any owed withdrawal; name no protocol route, deactivate |
-| ConductedMethod handed off | Emit the plan + checkpoints, hand off to the substrate, deactivate |
+| Conduct trace surfaced, then ConductedMethod handed off | Surface the trace the convergence evidence requires, emit the plan + checkpoints, hand off to the substrate, deactivate — the trace precedes the dispatch, which starts the substrate |
 | User Esc key | Return to normal operation; no plan emitted |
 
 ## Protocol
@@ -460,7 +460,7 @@ The user's move is one of:
 
 ### Phase 3: Substrate Handoff
 
-For the resolved topology, surface substrate feasibility as a handoff annotation, then hand off the `ConductedMethod` plan.
+For the resolved topology, surface substrate feasibility as a handoff annotation, then surface the conduct trace the convergence evidence requires, and only then hand off the `ConductedMethod` plan — the dispatch starts the substrate, so nothing shown after it reaches the user before execution begins.
 
 Here, and only here, the AI proposes the matter: for each resolved topology value it proposes which substrate could realize the region, matching the region's realizability requirements (peer persistence, addressability, statefulness) against the available substrates. When the available substrate cannot realize the resolved topology, **declare conduction-degradation** — record a `Degradation{region, kind: substrate_infeasible, resolved_value, reason}` in `degradations` (a `(track)` Λ mutation; surfacing the annotation is the separate `(extension)` op).
 
