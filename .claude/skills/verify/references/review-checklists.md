@@ -56,7 +56,7 @@ You are an **Instruction Design Expert**.
 
 Analyze the protocol instructions for consistency and completeness.
 
-**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Priority sections of each, plus `.claude/rules/axioms.md`
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Priority sections of each, plus `premise/gate-design.md` (convergence persistence and priority override) and `premise/interaction-factorization.md`
 
 **Checklist**:
 
@@ -105,7 +105,7 @@ You are a **Claude Code Ecosystem Expert**.
 
 Validate protocol designs against Claude Code interaction patterns and epistemic principles.
 
-**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Rules sections of each, plus CLAUDE.md (Northstar) and `.claude/rules/axioms.md`
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Rules sections of each, plus CLAUDE.md (Northstar) and `premise/recognition-and-authority.md`
 
 **Checklist**:
 
@@ -126,12 +126,11 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE-CYCLE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Elenchus: ContextSuspect → VettedContext (User-initiated, VET)
-  - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)
+  - Merismos: GoalPlanUncompiled → ConditionBearingUnitPlan (User-initiated, APPORTION)
   - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Anagoge: RecallGranularityInsufficient → HigherGranularityUnit (AI-guided, ELEVATE)
   - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
-  - Diairesis: GranularityUnderdetermined → WorkUnitMap (Hybrid, DELIMIT)
   - Proplasma: DirectionUnrecognizable → DirectionalContrast (Hybrid, PREVIEW)
   - Heuresis: CandidateFieldUnderexpanded → DiverseCandidateField (User-initiated, DIVERGE)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
@@ -173,7 +172,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | Gate mandate | Structured presentation + turn yield in Phase 1/2 | Unstructured text bypass |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Diairesis, Proplasma) activate on user signal or with confirmation when AI-detected; Diairesis single-dominant-cut relay cycles (Rule 11) may run all-relay — confirmation shifts to the user's post-emission engagement with the emitted WorkUnitMap | Unconfirmed AI auto-activation outside Diairesis's all-relay path |
+| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Proplasma) activate on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
 
 ## Synthesis Template
 
@@ -221,12 +220,12 @@ const perspectives = [
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
   },
   {
     name: 'claude-code-ecosystem',
     prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
-    files: [...changedProtocolFiles, 'CLAUDE.md', '.claude/rules/axioms.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md', 'premise/recognition-and-authority.md', 'premise/interaction-factorization.md', 'premise/gate-design.md']
   }
 ];
 

@@ -58,7 +58,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 3+ instances with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
-| Prosoche `/attend` | Execution | Guardrail compilation — execution boundaries become verifiable goal conditions before an autonomous run | Imminent autonomous/unattended execution, stated done-criteria or budget cues, `wrong_file_edited` friction |
+| Merismos `/apportion` | Execution | An autonomous goal is stated but its unit plan is uncompiled — cut it into coarse units at cited seams and close each unit before the run begins — a derived completion condition where one compiles, a recorded acceptance where none does | An unattended-run directive ("work through", "go through all", "run until done"), a goal that plainly exceeds one execution horizon, or a stop-hook being configured — each only shows an autonomous interval is *intended*, so the deciding check is whether the goal already carries units whose completion conditions are settled — closed by a determinate predicate or by a recorded acceptance; a plan that does is out of scope |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the accumulated conversation context | Mismatch against session-built constraints (user-aware context accumulation) |
 | Elenchus `/sublate` | Verification | About to externalize a working context whose apparent sufficiency has decayed | Dialectical antithesis per source (provenance / counterfactual / cross-source consistency) before pre-execution sync |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
@@ -66,7 +66,6 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Anagoge `/ascend` | Cross-cutting | A vague recall whose right unit is supra-session — a connected line of work, topic cluster, or already-sedimented concept across many sessions | Read-time deposit-graph reconstruction (discover related deposits by shared anchors/keywords/metadata); higher-unit recognition (Recognition over Aggregation) |
 | Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for AI-completed work, reviews, plans, docs, or code changes |
 | Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, reconciliation, termination, routing | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
-| Diairesis `/delimit` | Cross-cutting | Delimiting a large body of work into right-sized execution units — where to cut so each unit fits one span, at natural joints, with complete coverage (no work orphaned) | A multi-span project / milestone set / issue tree whose cut into executable units is unclear; "how do I break this down?" partition questions before conducting |
 
 ## Phase Execution
 
@@ -104,7 +103,7 @@ Then **Gate #2**:
 - Options:
   - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview
   - Analysis/Decision — /frame, /ground, /induce, /gap
-  - Execution/Verification/Understanding — /attend, /contextualize, /sublate, /recollect, /ascend, /delimit, /conduct, /grasp
+  - Execution/Verification/Understanding — /apportion, /contextualize, /sublate, /recollect, /ascend, /conduct, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection
@@ -349,7 +348,7 @@ Same format as Targeted Path Type 3.
 #### Feedback (both paths)
 
 Immediate feedback after each question:
-- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` compiles *execution boundaries* (scope, budget, done-criteria) into verifiable conditions before an autonomous run. `/gap` audits before action (decision quality), `/attend` equips the run with guardrails (execution safety)."
+- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/apportion` cuts an autonomous goal into coarse units at cited seams and closes each unit before the run begins. `/gap` audits before action (decision quality), `/apportion` gives the run a closed unit each — a checkable finish line where one compiles, a recorded acceptance where none does (execution structure)."
 - **Incorrect** (reasoning inquiry → targeted correction):
   1. **Reasoning inquiry**: Present via gate interaction 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
   2. **Targeted correction**: Using the user's stated reasoning, explain the distinction through the design axis that separates the confused pair. Directly address the reasoning — e.g., "You mentioned timing — that's the right axis. The key difference is *direction*: `/inquire` catches missing context *before* execution (User→AI), while `/contextualize` checks context fit *after* (AI→User)."
@@ -378,7 +377,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 5. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step chain: context → decision audit → guardrail compilation (inquire → gap → attend).
+   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/apportion`, show the three-step chain: context → decision audit → unit apportionment (inquire → gap → apportion).
 
 6. **Continue exploring** (when MAP results contain unexplored protocols):
 
@@ -390,12 +389,12 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 ## Quiz Design
 
-**Difficulty progression**: Start with high-contrast pairs (e.g., `/elicit` vs `/attend`), progress to subtle distinctions (e.g., `/elicit` vs `/inquire`, `/gap` vs `/attend`).
+**Difficulty progression**: Start with high-contrast pairs (e.g., `/elicit` vs `/apportion`), progress to subtle distinctions (e.g., `/elicit` vs `/inquire`, `/gap` vs `/apportion`).
 
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
 - `/elicit` ↔ `/gap`: both surface "something wrong" but different targets — `/elicit` reverse-traces decision coordinates from substrate before action (Planning: axis-undetermined intent), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
 - `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis asks the user for facts (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
-- `/gap` ↔ `/attend`: both about risk awareness but `/gap` audits decision quality before committing, `/attend` compiles execution boundaries into verifiable goal conditions before an autonomous run
+- `/gap` ↔ `/apportion`: both about risk awareness but `/gap` audits decision quality before committing, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, or on an acceptance you recorded when none compiles — before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)
@@ -423,7 +422,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
 2. **One at a time**: Quick path shows exactly 1 recommendation, 1 evidence card, 1 trial.
-3. **Onboarding Pool**: `/elicit`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/attend`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
+3. **Onboarding Pool**: `/elicit`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/apportion`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
 4. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
 5. **Privacy**: Never transmit session data externally. All analysis runs locally.
 6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.

@@ -1,0 +1,25 @@
+# Interaction Factorization
+
+This document covers how a single user-facing interaction factors into parts, and the test for whether a constructed set of options is a genuine choice or a single answer in disguise. It assumes `premise/recognition-and-authority.md`'s Extension/Constitution distinction.
+
+## Semantic Autonomy (Axiom)
+
+Once an interaction protocol's definition is inscribed in its specification, its epistemic meaning achieves autonomy from any specific platform or tool ecosystem — it depends only on what any language model can do (generate text, yield a turn), not on platform-specific features. A protocol specification defines gate semantics (what to present, what a response constitutes), not tool mechanics. A gate is: present structured content → yield the turn → parse the response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
+
+## Interaction Kind Factorization (Axiom)
+
+Every user-facing Constitution interaction factors into two parts: an abstract interaction design — independent of any particular tool or user preference — and a concrete realization of that design for a given user's preferences and available tools. Interactions classify as Extension (auto-resolve: deterministic, citable, within-boundary, entropy→0) or Constitution (user judgment constitutes meaning: an informed selection among options with differential futures). Extension interactions have bounded regret when elided (correctable at the next Constitution interaction); Constitution interactions typically carry unbounded regret (a missed user judgment), with structural exceptions where retry semantics provide bounded correction at the next invocation. The operational test: accepting a proposal as-is may look mechanical, but informed acceptance after recognizing the differential futures is itself constitutive. A gate carries exactly one classification for this purpose, applied consistently; a case that only conditionally auto-resolves is recorded as a separate, narrower Extension entry rather than as a second, parallel axis.
+
+**Option-set-level relay test**: the relay/gated classification extends to a constructed set of options — a set can itself be classified as Extension under the same test. Before presenting gate options, apply the relay test to the options as a set: if the AI's analysis converges on a single dominant option (option-level entropy→0 — one option is analytically correct while the others serve as foils), the interaction is misclassified as gated. Present the finding directly as relay output instead of wrapping it in false options. Gates designed to test understanding rather than route a decision are excluded from this test — a 1-correct option set serves a verification purpose by design, not a decision purpose.
+
+A resolution direction already settled by an existing convention — an established pattern elsewhere in the same context, a recorded rule or overarching goal, or a prior user decision already on record, that the AI cites at the point of use — likewise collapses option-set entropy to zero, even when the finding's surface admits multiple edit shapes: the finding's *existence* may be relay while its *direction* still appears to invite judgment. Before gating, test whether such a citable convention already determines the direction; if it does, presenting it as a gate is over-gating — present the finding directly as relay, citing the convention that settles it. This collapse is a relay classification under the same single axis, not a separate regret dimension.
+
+Operational test: "Would a knowledgeable observer find each option genuinely viable under different value weightings?" If yes → gated (genuine deliberation, where the user's values determine the choice). If no → relay (present the finding directly).
+
+See `premise/gate-design.md` for the differential-future refinements this test builds on — cost-symmetric baggage and meta-action-as-peer detection — and `premise/recognition-and-authority.md` for what a gated interaction presents once it is genuinely gated.
+
+## Context-Question Separation (Axiom)
+
+Gate interactions structurally separate context (analysis, evidence, rationale) from the question itself (the essential choice and its options). All analytical content is presented as text output before the gate; the gate contains only the question and the option-specific differential implications.
+
+Formal boundary: if removing a sentence from the gate would cause the loss of an option's differential implication, it belongs in the gate; if removing it would cause the loss of analytical context, it belongs in the pre-gate text output.

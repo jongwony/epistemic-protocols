@@ -25,7 +25,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
-| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
+| Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 

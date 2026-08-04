@@ -41,9 +41,9 @@
       "description": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)"
     },
     {
-      "name": "prosoche",
-      "source": "./prosoche",
-      "description": "Compile slow/threshold execution risks into verifiable goal conditions — /attend (προσοχή: attention)"
+      "name": "merismos",
+      "source": "./merismos",
+      "description": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)"
     },
     {
       "name": "epharmoge",
@@ -79,11 +79,6 @@
       "name": "hyphegesis",
       "source": "./hyphegesis",
       "description": "Conduct the method of a session's epistemic work before object-level cognition — /conduct (ὑφήγησις: a leading-the-way)"
-    },
-    {
-      "name": "diairesis",
-      "source": "./diairesis",
-      "description": "Delimit a large body of work into right-sized execution units before its method is conducted — /delimit (διαίρεσις: a division)"
     },
     {
       "name": "proplasma",

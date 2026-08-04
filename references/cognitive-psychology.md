@@ -32,6 +32,8 @@
 
 ### Prosoche (`/attend`) — 위험 게이팅의 메커니즘
 
+> **[역사적]** Prosoche(`/attend`)는 2026-08 전면 재타입으로 Merismos(`/apportion`)가 되었고, 이 절이 분석하는 위험 게이팅 메커니즘은 그보다 앞선 2026-06 재정의(prosoche 2.0.0)에서 이미 제거되었다. 아래 서술은 당시 계약 기준이다.
+
 신호탐지이론(Green & Swets 1966)은 위험 판단에 두 독립 분리가 필요함을 보인다. (1) **민감도(d′) vs 기준(criterion)** — 탐지 능력과 경보 문턱은 별개다. (2) **기저율 증거 vs 생생한 사례 매칭** — 사람은 기저율을 무시하고 대표성에 끌린다(Kahneman & Tversky 1973; 진단에서의 기저율 효율은 Meehl & Rosen 1955). 따라서 "fail-closed"는 *위험이 존재해서*가 아니라 *비대칭 비용*(miss 비용 ≫ false-alarm 비용)으로만 정당화되는 **기준 선택**이다. 신호탐지 틀을 위험 판단에 적용할 때의 실무 지침은 Lynn & Barrett(2014)이 정리. 단, 위 두 분리는 `/attend`의 *현재 구현*이 아니라 *도달 목표*다 — 현 SKILL.md 본문은 "fail-closed"와 "false negative"만 비형식적으로 차용할 뿐 민감도(d′)·기준의 분리도 ROC도 구현하지 않는다(상세·교정: `docs/analysis/prosoche-signal-detection-grounding.md`).
 
 **설계 함의**: 모든 고위험 게이트를 2×2(hit / miss / false alarm / correct reject)로 형식화하고 `base_rate`, `miss_cost`, `false_alarm_cost`, `criterion_reason`을 요구. 이는 저기저율 위험의 과잉게이팅과 고비용 miss의 과소게이팅을 동시에 방지한다.
@@ -138,7 +140,7 @@
 
 본 매핑은 Codex(`/goal`) + Tavily 외부 검증 세션으로 도출했다. **검증 강도**:
 
-- **외부 확인됨**(Verified): Aitesis, Analogia, Syneidesis, Prosoche, Epharmoge, Elenchus, Horismos, 인지부하 핵심 문헌, Tulving & Thomson — 이번 실행에서 소스를 외부 확인.
+- **외부 확인됨**(Verified): Aitesis, Analogia, Syneidesis, Prosoche(역사적 — 2026-08 Merismos로 대체; 검증 대상이었던 §Mechanism 앵커의 위험 게이팅 메커니즘은 그 자체가 이미 2026-06 prosoche 2.0.0에서 제거되어 Merismos에 없음), Epharmoge, Elenchus, Horismos, 인지부하 핵심 문헌, Tulving & Thomson — 이번 실행에서 소스를 외부 확인.
 - **부분 확인**(Mostly): Euporia, Prothesis, Periagoge, Katalepsis — 핵심만 외부 확인, 일부는 학습지식 종합.
 - **재구성 주의**: 일부 서지의 권/호/페이지는 학습지식에서 재구성했다. **출판/공개 전 정전 항목의 정확한 pagination을 1차 출처로 spot-check 권장.**
 
@@ -148,7 +150,7 @@
 
 - `references/README.md` (Layer 2 도메인 참조 인덱스; 이 문서의 부모)
 - `docs/philosophical-anchors.md` (Anamnesis Husserl 현상학, Katalepsis Stoic grasp + 학습과학; 본 문서와 상보)
-- `aitesis/skills/inquire/SKILL.md`, `syneidesis/skills/gap/SKILL.md`, `analogia/skills/ground/SKILL.md`, `prosoche/skills/attend/SKILL.md` (심화 대상 프로토콜)
+- `aitesis/skills/inquire/SKILL.md`, `syneidesis/skills/gap/SKILL.md`, `analogia/skills/ground/SKILL.md`, `merismos/skills/apportion/SKILL.md` (2026-08 이전 `prosoche/skills/attend/SKILL.md`; 심화 대상 프로토콜)
 - `epistemic-cooperative/skills/compose/SKILL.md` (게이트 연쇄 누적 부하 — 인지부하 §의 미해결 문제와 연결)
 
 ## Note on Layer-2 purity

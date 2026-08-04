@@ -14,7 +14,7 @@ These protocols insert structured checkpoints at decision points — intent, goa
 
 **Stated Mission** — the public hook: catch wrong directions early, especially at the plan level. This is the clearest entry story and how most users reach for the protocols.
 
-**Realized Machinery** — the actual coverage: structured checkpoints span planning, analysis, decision, execution, verification, recall, and comprehension. Protocols such as Prosoche (execution guardrail compilation), Epharmoge (post-execution applicability), Anamnesis (session recall), and Katalepsis (comprehension verification) extend beyond plan-level alone.
+**Realized Machinery** — the actual coverage: structured checkpoints span planning, analysis, decision, execution, verification, recall, and comprehension. Protocols such as Merismos (goal apportionment into conditioned execution units), Epharmoge (post-execution applicability), Anamnesis (session recall), and Katalepsis (comprehension verification) extend beyond plan-level alone.
 
 The two layers serve different audiences: the README carries the narrow public contract; `SKILL.md` and `CLAUDE.md` describe the full machinery. See [docs/mission-bridge.md](./docs/mission-bridge.md) for the governance rules that keep these layers aligned.
 
@@ -29,6 +29,15 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 ```
 
 Then run `/onboard` — start with a quick recommendation based on your recent sessions, then optionally continue to guided learning with scenarios, trials, and quizzes.
+
+**Upgrading from a release before Merismos**: `prosoche` (`/attend`) and `diairesis` (`/delimit`) are retired. Removing them from the marketplace catalog delists them but does not uninstall what is already on your machine, so an existing install keeps serving those commands until you remove them explicitly:
+
+```
+/plugin uninstall prosoche
+/plugin uninstall diairesis
+```
+
+`/apportion` replaces `/attend`. `/delimit`'s external-WBS re-cutting is dropped rather than replaced — see the granularity note in [`merismos/skills/apportion/SKILL.md`](./merismos/skills/apportion/SKILL.md).
 
 ### Codex
 
@@ -73,7 +82,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
 | [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
-| [Prosoche](./prosoche) | `/attend` | About to hand work to an autonomous run — compile its boundaries into verifiable goal conditions first |
+| [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
 | [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
@@ -81,9 +90,8 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Anagoge](./anagoge) | `/ascend` | You vaguely remember a whole line of work, topic, or concept spread across many sessions — not any one session |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you nod along — but do you actually grasp them? Verify your understanding is genuine before you approve or build on it |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
-| [Diairesis](./diairesis) | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces isn't obvious — partition it at its natural joints before conducting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/delimit`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/conduct`)
 
 ## Utilities
 
@@ -147,13 +155,12 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Analogia | ἀναλογία | Proportion |
 | Periagoge | περιαγωγή | Turning-around |
 | Euporia | εὐπορία | Way through, resourcefulness |
-| Prosoche | προσοχή | Attention |
+| Merismos | μερισμός | Apportionment |
 | Epharmoge | ἐφαρμογή | Application, fitting |
 | Elenchus | ἔλεγχος | Cross-examination, refutation |
 | Anamnesis | ἀνάμνησις | Recollection |
 | Anagoge | ἀναγωγή | A leading-up |
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
-| Diairesis | διαίρεσις | Division, partition |
 | Proplasma | πρόπλασμα | Preliminary model, first mold |
 | Heuresis | εὕρεσις | Finding, discovery |
 

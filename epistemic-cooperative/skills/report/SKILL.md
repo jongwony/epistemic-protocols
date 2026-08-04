@@ -226,16 +226,15 @@ Apply the mapping tables below to match observed patterns to protocols.
 |---|---|---|---|
 | Same file edited 3+ times | Edit path frequency | **Syneidesis** `/gap` | Repeated edits without prior gap check |
 | Exploration ratio 3:1+ across multiple sessions | (Read+Grep+Glob) / (Edit+Write) threshold | **Prothesis** `/frame` | Sustained exploration without analytical framework |
-| Bash contains deploy/push/apply keywords | Bash input keyword match | **Prosoche** `/attend` | Risky execution without compiled guardrail conditions |
 | Vague first prompts ("improve", "optimize") | firstPrompt keyword match: short underspecified directives | **Euporia** `/elicit` | Goal coordinate aporia — reverse-induce endpoint from substrate |
 | Ideation-shaped first prompts ("ideas for", "brainstorm") | firstPrompt keyword match: ideation asks | **Heuresis** `/ideate` | Candidate field underexpanded — frame-parallel divergence before any selection |
 | Verification keywords in firstPrompt (user-authored text only) | firstPrompt keyword match: "explain", "what did you do", "help me understand", "verify", "check" | **Katalepsis** `/grasp` | Need to verify comprehension of results |
 
+**Merismos excluded by design**: `/apportion`'s deficit is `¬condition_bearing(G)` — whether a goal already carries units whose completion conditions are settled. No observable available to this skill (firstPrompt keywords, a configured stop-hook) can establish that negative; each only detects that an autonomous interval is *intended*, which is equally true of a goal that is already condition-bearing. A row built on either observable therefore cannot honestly claim a deficit match at any strength, so none is carried here — matching `dashboard/SKILL.md`'s coverage table, which marks Merismos `N/A` for the identical reason. `/apportion` stays discoverable through `/catalog` and `/onboard`, neither of which claims deficit detection.
+
 ### Secondary Mapping Table (Environment Patterns)
 
-| Observable Pattern | Source | Protocol | Rationale |
-|---|---|---|---|
-| Many hook configurations | settings.json hooks | **Prosoche** `/attend` (reinforcing) | User already values safety mechanisms |
+No environment pattern currently clears the accuracy bar for a protocol match (a stop-hook/completion-enforcer configuration was previously mapped to Merismos here; removed for the same reason as above — hook presence alone cannot establish `¬condition_bearing(G)`). Reserved for a future observable that can establish a deficit rather than merely a correlated setup step.
 
 ### Tertiary Mapping Table (Friction Patterns — from Facets)
 
@@ -247,7 +246,7 @@ Applied only when facets data is available (Path A). Complements Primary and Sec
 | `wrong_approach` + rework situation | **Syneidesis** `/gap` | Approach gap undetected, accompanied by rework | Primary |
 | `excessive_changes` | **Syneidesis** `/gap` | Scope boundary gap undetected | Primary |
 | `context_loss` | **Aitesis** `/inquire` | Information loss due to insufficient context | Primary |
-| `wrong_file_edited` | **Prosoche** `/attend` | Execution boundaries not compiled into verifiable conditions | Primary |
+| `wrong_file_edited` | **Syneidesis** `/gap` | Scope boundary gap undetected — the edit landed outside intent | Primary |
 | `buggy_code`, `api_errors`/`api_error`, `tool_errors`/`tool_error`/`tool_failure`/`tool_limitation`, `external_blocker`/`external_dependency`, `merge_conflict`, `minor_correction`, `excessive_verification`/`excessive_tool_calls`, `unrelated_environment_issue`/`deployment_gap`, `agent_*` | — | Infrastructure/environment friction — not epistemic deficit | Environmental |
 
 **Signal Type**: Primary = directly maps to protocol deficit. Environmental = reported only (no mapping).

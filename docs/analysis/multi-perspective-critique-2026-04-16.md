@@ -20,7 +20,7 @@
 
 - `docs/verification.md`는 `structure`, `tool-grounding`, `spec-vs-impl`, `partition-invariant`, `gate-type-soundness` 같은 정적 검증 축을 정의한다.
 - 2026-04-16에 `node .claude/skills/verify/scripts/static-checks.js .`를 실행한 결과 `fail = 0`, `warn = 7`이었다.
-- 같은 결과에서 `prothesis/skills/frame/SKILL.md`의 `AgreementStrength`, `prosoche/skills/attend/SKILL.md`의 `DetectedDeficit`가 dead type 후보로 경고되었다.
+- 같은 결과에서 `prothesis/skills/frame/SKILL.md`의 `AgreementStrength`, `prosoche/skills/attend/SKILL.md`(당시 경로 — 2026-08 Merismos 대체로 현재는 존재하지 않음)의 `DetectedDeficit`가 dead type 후보로 경고되었다.
 - 같은 결과에서 `epharmoge/skills/contextualize/SKILL.md`, `anamnesis/skills/recollect/SKILL.md`는 gate-type-soundness 경고가 남아 있다.
 - `.claude/rules/architectural-principles.md`는 inter-protocol data flow를 “Session Text Composition”으로 정의하고, structured transport를 의도적으로 채택하지 않았다고 밝힌다.
 - `prothesis/skills/frame/SKILL.md`는 Phase 3의 operational cost가 선택된 관점 수 `|Pₛ|`에 비례해 증가한다고 명시한다.

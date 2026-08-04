@@ -23,7 +23,7 @@ AI는 올바른 결과를 생성하지만, 올바름만으로는 적용 가능�
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
-| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
+| Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 

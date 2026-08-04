@@ -1,5 +1,5 @@
 {
-  "version": "2.5.0",
+  "version": "2.7.0",
   "nodes": [
     "horismos",
     "aitesis",
@@ -8,14 +8,13 @@
     "euporia",
     "prothesis",
     "syneidesis",
-    "prosoche",
+    "merismos",
     "epharmoge",
     "elenchus",
     "katalepsis",
     "anamnesis",
     "anagoge",
     "hyphegesis",
-    "diairesis",
     "proplasma",
     "heuresis"
   ],
@@ -60,15 +59,15 @@
     },
     {
       "source": "aitesis",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "추론된 컨텍스트가 경계맵 추론과 컨디션 컴파일 초점을 좁힘"
+      "satisfies": "수집된 컨텍스트가 목표 의무 읽기와 조건 도출의 초점을 좁힘"
     },
     {
-      "source": "prosoche",
+      "source": "merismos",
       "target": "epharmoge",
       "type": "advisory",
-      "satisfies": "컴파일된 가드레일 조건이 사후 적용성 검증 컨텍스트를 제공"
+      "satisfies": "단위별 완료·불변 조건이 사후 적용성 검증 컨텍스트를 제공"
     },
     {
       "source": "prothesis",
@@ -108,9 +107,9 @@
     },
     {
       "source": "horismos",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "경계 맵이 slow/threshold 컨디션 컴파일의 입력을 제공"
+      "satisfies": "경계 맵이 절단 후보 이음매와 단위가 종속되는 조건 양쪽을 좁힘"
     },
     {
       "source": "horismos",
@@ -150,9 +149,9 @@
     },
     {
       "source": "anamnesis",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "과거 위험 이력이 경계맵 추론을 강화"
+      "satisfies": "과거 초과·거짓완료 이력이 이음매 스캔과 술어 도출을 강화"
     },
     {
       "source": "anamnesis",
@@ -228,9 +227,9 @@
     },
     {
       "source": "elenchus",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "vetted context가 컨디션 컴파일 초점을 좁힘"
+      "satisfies": "vetted context가 조건 도출 초점을 좁힘"
     },
     {
       "source": "elenchus",
@@ -264,9 +263,15 @@
     },
     {
       "source": "hyphegesis",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "지휘된 방법이 situated 실행으로 핸드오프"
+      "satisfies": "지휘된 방법의 미해결 자율 구역 중 단위가 아직 조건화되지 않은 구역을 분배·조건화로 이관 — 그 구역의 토폴로지는 고정 입력이고 merismos가 재지휘하지 않음 (재진입 금지 가드). 이미 조건 보유인 계획에서 온 구역은 이 가장자리를 타지 않는다: apportion Phase 0가 relay로 즉시 비활성화하며, 그 구역의 resolution_required(/apportion) 종료 근거는 재진입이 아니라 항법 핸드오프로 이행된다. 별도로, conduct가 이동을 배치하지 못해 철회한 단위는 재분배 귀속 의무(owed re-apportionment)로 apportion에 되돌아간다 — 아래 apportion → conduct 가장자리(조건 보유 계획 유입)와는 다른, 세 번째 경로"
+    },
+    {
+      "source": "merismos",
+      "target": "hyphegesis",
+      "type": "advisory",
+      "satisfies": "조건 보유 단위 계획이 conduct의 WorkProspect로 흐름 — 단위 배열(순서·독립성·조정·종료·라우팅)이 자명하지 않을 때만. 종료가 until_goal_met으로 귀결된 구역은 DeterminateResolution인 단위의 평가 식들만 UnitConditionBinding을 통해 conduct의 stated_condition 종료 근거로 결합하고(구역에 확정 평가 식이 하나도 없으면 빈 결합 대신 /apportion을 귀속 해결자로 기록), 다른 종료값으로 귀결된 구역은 각 UnitResolution이 실제로 싣은 실행 가능한 조건(확정 평가 식 또는 수락-미발견 인증서의 invariant 공액)을 그 실행 구간 안에서 집행하고 CoverageLimit으로 기록한다. 수락된 completion 잔여는 leaf로 재구성하지 않고 증인 기록으로 유지한다 — 위상-무관 계획 조건(dischargeable_when)은 PlanConditionBinding을 통해 위상 프론티어(FiringSite)에 바인딩되며, 어느 쪽도 merismos로 되돌아오지 않음 (재진입 금지 가드); 단일 단위, 또는 순서·독립성·조정·종료·라우팅이 모두 자명한 집합은 conduct를 건너뜀."
     },
     {
       "source": "anamnesis",
@@ -285,24 +290,6 @@
       "target": "periagoge",
       "type": "advisory",
       "satisfies": "decompose-recovery 레시피가 per-cell 재형성을 위해 각 셀을 periagoge 활성화로 라우팅 (다중 CrystallizedAbstraction, 융합 아님)"
-    },
-    {
-      "source": "aitesis",
-      "target": "diairesis",
-      "type": "advisory",
-      "satisfies": "수집된 컨텍스트가 절단 가능한 WBS 범위를 충족시켜 분할을 가능케 함 (scope 부족 시 delimit이 inquire로 route-away)"
-    },
-    {
-      "source": "horismos",
-      "target": "diairesis",
-      "type": "advisory",
-      "satisfies": "경계 맵이 절단이 떨어질 joint 후보(어디서 자를 수 있는가)를 좁힘"
-    },
-    {
-      "source": "diairesis",
-      "target": "hyphegesis",
-      "type": "advisory",
-      "satisfies": "WorkUnitMap(절단된 실행 단위 집합)이 conduct의 WorkProspect로 흐름 — diairesis는 자르고, conduct는 배열·지휘 (cut, then conduct 쌍대)"
     },
     {
       "source": "anagoge",
