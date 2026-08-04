@@ -49,6 +49,10 @@ const TEXT_EXTENSIONS = new Set([
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', '.husky']);
 
+// Sibling checkouts of this repository, each verified from its own root. Matched on
+// the root-relative path so an unrelated directory named `worktrees` stays in scope.
+const WORKTREES_PATH = /^\.claude\/worktrees(\/|$)/;
+
 function isWhitelisted(relPath) {
   return WHITELIST_PATTERNS.some(p => p.test(relPath));
 }
@@ -68,15 +72,16 @@ function runLanguagePurityCheck({ projectRoot }) {
     }
     for (const entry of entries) {
       const full = path.join(dir, entry.name);
+      const rel = path.relative(projectRoot, full).replace(/\\/g, '/');
       if (entry.isDirectory()) {
         if (SKIP_DIRS.has(entry.name)) continue;
+        if (WORKTREES_PATH.test(rel)) continue;
         walk(full);
         continue;
       }
       if (!entry.isFile()) continue;
       const ext = path.extname(entry.name).toLowerCase();
       if (!TEXT_EXTENSIONS.has(ext)) continue;
-      const rel = path.relative(projectRoot, full).replace(/\\/g, '/');
       if (isWhitelisted(rel)) continue;
       scanned++;
       let content;

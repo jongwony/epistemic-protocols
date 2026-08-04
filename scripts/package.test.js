@@ -38,6 +38,7 @@ const {
   generateReleaseNotes
 } = require('./package');
 const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
+const { runLanguagePurityCheck } = require('../.claude/skills/verify/scripts/language-purity');
 const { discoverPlugins } = require('./load-protocols');
 
 function writeFixtureFile(root, relativePath, content = 'fixture\n') {
@@ -364,6 +365,30 @@ describe('artifact-self-containment detector liveness', () => {
         );
         throw restoreErr;
       }
+    }
+  });
+});
+
+describe('language-purity worktree prune', () => {
+  // path -> still warned? Rejects a missing prune, a bare-name prune, and a
+  // prune without the path-segment boundary; a dead detector fails all three.
+  const CASES = {
+    '.claude/worktrees/wt/x.md': false,
+    'foo/worktrees/y.md': true,
+    '.claude/worktrees-copy/w.md': true,
+  };
+
+  it('prunes .claude/worktrees/ by path, not by bare directory name', () => {
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'lp-prune-'));
+    try {
+      // Hangul by charCode so this file stays self-pure under the check it exercises.
+      for (const rel of Object.keys(CASES)) writeFixtureFile(root, rel, String.fromCharCode(0xAC00));
+      const warned = runLanguagePurityCheck({ projectRoot: root }).warn.map(w => w.file);
+      for (const [rel, expected] of Object.entries(CASES)) {
+        assert.equal(warned.includes(rel), expected, `${rel}: warned should be ${expected}. Got ${JSON.stringify(warned)}`);
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
     }
   });
 });
