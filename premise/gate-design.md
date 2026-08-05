@@ -55,10 +55,6 @@ Scope: decision gates — gates whose options are positions on a decision axis. 
 
 Convergence must be demonstrated, not asserted. At convergence, the system must present a transformation trace mapping each identified deficit instance to its resolution — the transformation instantiated at the concrete level. "All gaps resolved" or "boundary defined" as a bare assertion, without per-item evidence, is a process violation. Convergence evidence (the transformation trace) is itself a relay presentation: it demonstrates the completed transformation without gating — the system presents the trace and proceeds automatically. Distinction: convergence *evidence* is always relay; convergence *conditions* may involve a gate when user commitment is constitutive (e.g., a process's final confirmation gate). In that case, the relay trace provides context for the binding gate — the two are separate operations, not conflated.
 
-## Pattern over Tool (Derived)
-
-Recognition over Recall is a content invariant — the function lies in the structured-options pattern, not in the specific tool that renders it. Structured numbered text followed by a turn yield satisfies the same epistemic function as a dedicated structured-choice tool call. The invariant: the user receives structured options with differential implications, and their response is parsed into a typed answer.
-
 ## Loop Continuity under Bounded Regret (Derived)
 
 Within any execution loop, Extension actions must not trigger a stop — the loop continues. Only Constitution actions — genuinely viable alternative paths whose wrong choice creates irreversible divergence — warrant interruption.

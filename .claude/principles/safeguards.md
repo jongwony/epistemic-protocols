@@ -40,7 +40,7 @@ Methodology for SKILL.md `## Rules` consolidation. Each rule is classified by so
 | Tier | Source | Action |
 |---|---|---|
 | 1. Axiom anchor | A1-A6 (in `premise/`) | KEEP. 1-2 line restatement with axiom name inline; do NOT use the `(Aₙ)` label form per Plugin Encapsulation source-leak prohibition |
-| 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Pattern over Tool, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation) | KEEP. Anchor reference using principle name |
+| 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation) | KEEP. Anchor reference using principle name |
 | 3. Architectural project-specific | Architectural principles or protocol Core Principle | KEEP. Paragraph-length rules migrate body to Phase prose or UX Safeguards table; invariant 1-line stays in Rules |
 | 4. Cross-protocol | Rule about distinction with another protocol | Move to "Distinction from Other Protocols" section |
 | 5. Safeguard tier | This file's principles or Trajectory Candidates table match | Mark Safeguard tier explicitly + inline the Actionable revision criterion (Compiled-copy consumers pattern) |
