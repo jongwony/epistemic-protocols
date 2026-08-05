@@ -15,9 +15,9 @@ Any body of behavioral principles benefits from a tier classification that track
 
 This tiering is what lets a reader distinguish a durable axiom from a safeguard that is meant to decay as models improve. Every tiered heading in this collection carries one of these four labels.
 
-## Checkpoint Policy Stays at the Meta Layer
+## Checkpoint Policy Stays at the Meta Layer (Derived)
 
-Where a checkpoint presents the user a typed choice, the governing specification inscribes only when the checkpoint fires, what it presents, and each branch's state transition — never which branch is correct. That resolution is constituted by the user, per occasion, at runtime. A finding that such a checkpoint "lacks a default" or "should prefer branch X" resolves as relay against this principle rather than opening a gate.
+Where a checkpoint presents the user a typed choice, the governing specification inscribes only when the checkpoint fires, what it presents, and each branch's state transition — never which branch is correct. That resolution is constituted by the user, per occasion, at runtime. This is the checkpoint-shaped case of Context and Utterance as First-Class Ground (`recognition-and-authority.md`): the branch is a coordinate whose right answer varies with live ground, so a specification may fix the choice structure without selecting its occupant. A finding that such a checkpoint "lacks a default" or "should prefer branch X" resolves as relay against this principle rather than opening a gate.
 
 The accepted consequence, for such checkpoints, is that silence selects no branch: the transition halts explicitly, so an unanswered checkpoint suspends the process instead of auto-continuing — auto-selecting a branch would itself answer the question the principle reserves for the user. This bounds the *silent* default only: a default surfaced for the user to recognize and override, an option ordering within a presentation format, and a relay emit that converges on non-divergence each leave the user's answer intact and fall outside this principle.
 
