@@ -48,7 +48,7 @@ Each protocol is a single-purpose epistemic tool. Composition is bottom-up — u
 
 Data flows between interaction protocols as natural language in the shared context — not through structured data channels. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. A structured, schema-based transport was considered and rejected: structuring context loses information. If structured transport becomes necessary later, formally composing the protocols' own output/input types is the escalation path, rather than inventing an ad hoc structured channel.
 
-**Stigmergy signal constraint**: Classification artifacts that flow between protocols (e.g., BoundaryMap) carry signal only, not payload. Downstream protocols read the classification and autonomously modify their own behavior — this is behavioral stigmergy, not central prescription. Loading candidates or behavioral directives into classification entries converts the signal into payload, breaking the stigmergy pattern. Test: "Is the downstream protocol reading a signal and choosing its behavior, or following a central prescription?" Former is correct.
+**Stigmergy signal constraint**: Classification artifacts that flow between protocols carry signal only, not payload. Downstream protocols read the classification and autonomously modify their own behavior — this is behavioral stigmergy, not central prescription. Loading candidates or behavioral directives into classification entries converts the signal into payload, breaking the stigmergy pattern. Test: "Is the downstream protocol reading a signal and choosing its behavior, or following a central prescription?" Former is correct.
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through `.claude/principles/architectural-principles.md §Session Text Composition` — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
 
@@ -102,7 +102,7 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 **Advisory cycle convergence**: Bidirectional advisory edges form mutual enrichment pairs but operate under single-pass semantics — each edge fires at most once per activation. Advisory edges do not carry re-invocation semantics; the composite endomorphism converges in one pass.
 
-**Emergent boundary annotations**: Routing hints in Emergent sections of SKILL.md (e.g., `→ /gap`, `→ /inquire` in Emergent gap types or mismatch dimensions) are dialogue interaction dynamics — potential conversational routing that emerges from user-AI turn interaction. These belong to the Output Style nudge layer, not graph.json. They do not constitute structural advisory edges and must not be formalized in graph.json.
+**Emergent boundary annotations**: Routing hints in Emergent sections of SKILL.md — an arrow-and-command form naming another protocol — are dialogue interaction dynamics — potential conversational routing that emerges from user-AI turn interaction. These belong to the Output Style nudge layer, not graph.json. They do not constitute structural advisory edges and must not be formalized in graph.json.
 
 **Definitional-Observational convergence**: AI-observation concerns without constitutive user authority (runtime detection, cross-cutting commentary, session-context nudges) have repeatedly converged into Output Style rather than SKILL.md. Observed instances (N=4): Post-Convergence traversal → Output Style nudge (archived); Integration+basis runtime display → Output Style echo format; protocol nudge arrow (↗) → Output Style session observer; Basis marker → Output Style session-level citation (deliberately placed outside per-protocol TOOL GROUNDING). Definitional structure (TYPES, FLOW, PHASE TRANSITIONS, gate interactions) lives in SKILL.md; observational commentary lives in Output Style. This convergence is not a design imposition but a recurring empirical outcome of applying the Dual Advisory Layer division.
 
@@ -110,7 +110,7 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 ## Coexistence over Mirroring
 
-Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers. The epistemic layer asks whether the right thing is being done; the execution layer, whether it is being done correctly; the verification layer, whether it was understood. Protocols occupy the epistemic and verification layers, and a harness's built-in execution commands occupy the execution layer. Do not mirror built-in execution capabilities (e.g., workspace isolation, publishing a change) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
+Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers. The epistemic layer asks whether the right thing is being done; the execution layer, whether it is being done correctly; the verification layer, whether it was understood. Protocols occupy the epistemic and verification layers, and a harness's built-in execution commands occupy the execution layer. Do not mirror built-in execution capabilities into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
 
 ## Three-Tier Termination
 
@@ -122,7 +122,7 @@ Protocol exit follows a graduated taxonomy based on side-effect presence:
 | `user_withdraw` | Explicit gate option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
 | Normal convergence | Completion predicate | Full | Per-protocol |
 
-Principle: side effects require explicit answer types, not tool-level escape. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on. Protocols without termination side effects need only `user_esc`. Circular protocol interactions (e.g., boundary redefinition loops) are healthy dialogue — `user_esc` guarantees termination at every moment.
+Principle: side effects require explicit answer types, not tool-level escape. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on. Protocols without termination side effects need only `user_esc`. Circular protocol interactions are healthy dialogue — `user_esc` guarantees termination at every moment.
 
 ## Plugin Encapsulation
 
