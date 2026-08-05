@@ -110,15 +110,7 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 ## Coexistence over Mirroring
 
-Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers:
-
-| Layer | Concern |
-|-------|---------|
-| Epistemic | "Are we doing the right thing?" |
-| Execution | "Are we doing it correctly?" |
-| Verification | "Did we understand?" |
-
-Epistemic dialogue protocols occupy the first and third layers; a harness's built-in execution commands occupy the second. Do not mirror built-in execution capabilities (e.g., workspace isolation, publishing a change) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
+Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers. The epistemic layer asks whether the right thing is being done; the execution layer, whether it is being done correctly; the verification layer, whether it was understood. Protocols occupy the epistemic and verification layers, and a harness's built-in execution commands occupy the execution layer. Do not mirror built-in execution capabilities (e.g., workspace isolation, publishing a change) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
 
 ## Three-Tier Termination
 
