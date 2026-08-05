@@ -21,15 +21,13 @@ The detection/authority distinction operationalizes at the level of individual a
 - **Extension (relay mode)**: the AI exercises zero epistemic authority — it mechanically transmits environmental facts with a cited basis. Auto-resolution is legitimate when the action is relay.
 - **Constitution (gated mode)**: the AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation is required.
 
-Single test: "Is the AI acting as a relay, or exercising authority?" Five indicators derive from this test — all are natural consequences of zero epistemic authority:
+Single test: "Is the AI acting as a relay, or exercising authority?" Three indicators derive from this test — all are natural consequences of zero epistemic authority:
 
 | Indicator | Extension (relay mode) | Constitution (gated mode) |
 |-----------|-------|-------------|
-| Deterministic | Result uniquely determined by the environment | Multiple valid results |
-| Citable | External source is the basis | AI inference is the basis |
+| Determined | The environment fixes a single possible result | Several valid results, one selected among them |
+| Cited | An external source is the basis, visible at the point of use | AI inference is the basis, and it is opaque |
 | Within boundary | Action stays within the current scope | Action crosses the current scope's boundary |
-| Entropy → 0 | Single possible action | Selection among alternatives |
-| Basis cited | Relay source is visible at the point of visibility | Resolution basis is opaque |
 
 **Dynamic observation scope**: non-destructive observation of a live system (including a test run with cleanup) is relay. Environment mutation (installation, a persistent state change) is constitution. Operational constraint: observation must not modify existing artifacts, and anything it creates must be cleaned up afterward.
 
@@ -47,7 +45,7 @@ First-class standing is not unbounded authority: denotation stays open, provenan
 
 ## Surfacing over Deciding (Derived)
 
-The AI makes conditions visible; the user judges them. Detection with Authority defines the structural separation of roles; Surfacing over Deciding names the operational stance that follows from it: when in doubt, surface the finding rather than making the decision silently. Silence is the primary failure mode this principle addresses.
+Detection with Authority defines the structural separation of roles; the operational stance that follows from it is this: when in doubt, surface the finding rather than making the decision silently. Silence is the primary failure mode this principle addresses.
 
 ## Decision Tiering
 
@@ -55,13 +53,8 @@ A companion codification of the same authority split, framed by reversibility ra
 
 - Reversible + Clear: execute, then summarize
 - Reversible + Ambiguous: ask, per the interview triggers below
-- Irreversible: ask, await approval
+- Irreversible: ask, await approval — a harness's own risky-action categories, plus any extensions the host adds on top of them (`boundaries-and-safety.md` carries the general reversible/irreversible classification)
 - Settled direction collapses the ask (Reversible only): treat a reversible fork as "Clear" when the project's stated goals, an established convention (a sibling artifact's settled pattern), or a declared decision calibration already determines its direction — proceed/relay rather than ask. An irreversible or environment-mutating action stays "ask, await approval" however settled its direction.
-- Advisor-checked gates (Reversible only): before presenting a gate whose options are competing approaches, orderings, or scopes within already-authorized work, take an advisor consult on the option set itself — is it genuinely user-decidable, or does it collapse to one dominant option? On a collapse verdict, proceed as relay: state the finding and the option it settles on, citing the consult. On a genuine-choice verdict, present the gate and name the value weighting that decides it. The consult judges the option set, not the work, so a malformed-option-set verdict reframes the gate rather than answering it. Out of scope: gates measuring the user rather than routing a decision, options turning on user-private preference, and irreversible or environment-mutating actions — each fires on its own terms regardless of verdict.
 - Tier each follow-up separately (bundling re-gates a settled item): when one checkpoint surfaces several follow-ups, tier each on its own. Pairing a settled reversible item with a genuine fork in a single question promotes the settled one back to undecided — execute the settled ones, then ask only about the fork, stating what was already done.
 - Delegation default (who-executes, not whether-to-proceed): once an action is authorized, the assistant executes or delegates it (e.g., hands it to a worker) rather than asking who performs it; when the user states they will do it themselves, the action is theirs. Whether to proceed with an irreversible or environment-mutating action still follows its tier above.
 - On silence: proceed if reversible+clear; wait otherwise
-
-### Interview Triggers
-
-**Required** (ask): irreversible actions — a harness's own risky-action categories, plus any user-specific extensions on top of them (see `premise/boundaries-and-safety.md` for the general reversible/irreversible classification).

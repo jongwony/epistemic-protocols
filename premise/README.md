@@ -1,8 +1,17 @@
 # Setting up this layer
 
-[`AGENTS.md`](AGENTS.md) in this directory describes what these documents are and the two ways to
-adopt them: link to them, or copy the parts you want. This file routes to the first way, worked out
-concretely for each host — how to wire the documents in so they stand as a reference layer.
+[`AGENTS.md`](AGENTS.md) in this directory states what these documents are and indexes them by the
+moment each one is for. This file covers adopting them.
+
+They are a reference surface, not a package. There is no install script and nothing to run here —
+they are meant to be reached by URL, read, and used in one of two ways: **link to them** from your
+own global configuration or notes, the way you would cite any external reference, or **copy the
+parts you want** into your own instructions, verbatim or adapted. Each document stands on its own —
+it does not assume you know any particular project, tool, or vocabulary beyond what it defines
+itself — so a subset is a coherent adoption.
+
+The rest of this file routes to the first way, worked out concretely for each host — how to wire the
+documents in so they stand as a reference layer.
 
 **If you are an agent and someone handed you this URL**: identify the host you are running in, then
 follow that one file end to end. Each is self-contained; following both would write two setups over

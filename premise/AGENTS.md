@@ -2,14 +2,9 @@
 
 The cognitive and collaboration premises behind structured human-AI dialogue — stated so they hold on their own, independent of any specific codebase, tool, or harness that happens to implement them.
 
-This is a reference surface, not a package. There is no install script and nothing to run here — it is meant to be reached by URL, read, and used in one of two ways:
+A document you adopt governs the general principles within the scope you adopted it for; a document you have not adopted governs nothing. Within that scope, your own instructions supply what the document deliberately leaves open — the concrete surface a principle binds to, the value your project has settled on — rather than restating the general principle in their own words. When a host instruction and an adopted document disagree on a general principle, the document is the one to reason from.
 
-- **Link to it** from your own global configuration or notes, the way you would cite any external reference.
-- **Copy the parts you want** into your own instructions, verbatim or adapted.
-
-Adoption is scoped either way. A document you adopt governs the general principles within the scope you adopted it for; a document you have not adopted governs nothing. Within that scope, your own instructions supply what the document deliberately leaves open — the concrete surface a principle binds to, the value your project has settled on — rather than restating the general principle in their own words. When a host instruction and an adopted document disagree on a general principle, the document is the one to reason from.
-
-Each document below stands on its own: it does not assume you know any particular project, tool, or vocabulary beyond what it defines itself. Where a document depends on a concept from an earlier one, it says so and names the file.
+Where a document depends on a concept from another, it says so and names the file. [`README.md`](README.md) covers adopting these documents and wiring them into a setup.
 
 ## Documents
 
@@ -36,5 +31,3 @@ Read [`delegation-and-subagents.md`](delegation-and-subagents.md) when handing w
 Read [`session-and-handoff.md`](session-and-handoff.md) when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, and when someone interrupts the work mid-task.
 
 Read [`boundaries-and-safety.md`](boundaries-and-safety.md) before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable.
-
-Every document named above exists today. A later addition to this collection adds a further paragraph; it does not require reworking what is already present.
