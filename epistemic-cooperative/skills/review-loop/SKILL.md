@@ -85,7 +85,7 @@ The boundary is easiest to cross exactly at the moment a decision is being conve
 
 **Role separation — conventions vs the severity anchor.** Conveyed intent plays two distinct roles. Conventions and rules are what the source checks against; the project's stated mission (a Northstar or equivalent project-goal statement) is how the source weighs severity. Pointing a reviewer at rule files amplifies rule-enforcement findings — it reads them as checklists — while a mission statement gains no operational grip on its own. The adapter therefore conveys the mission anchor with an explicit severity-calibration steer: a defect that breaks runtime behavior ranks high — critical when it additionally corrupts silently, producing wrong results the user would act on without noticing; a defect that misbehaves only in edge conditions ranks medium; an internal-consistency mismatch with no behavioral consequence ranks low or suggestion; a wording preference the documented conventions already account for is not a finding.
 
-**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's ledger carryover).
+**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's ledger carryover). This declares an exit from review-loop itself; when a protocol called from inside a phase offers its own exit — for example, the user's Esc inside `/contextualize`'s own gate during the Phase 4 bundle-level fit pass — answering it ends only that nested call, not this loop. The two are different acts: this loop's free exit stays a separate, still-available affordance, and the phase that made the nested call proceeds per that call's own terminal-state handling (Phase 4, Apply executor step 3).
 
 ## Phase 1: Review
 
@@ -120,7 +120,7 @@ For Judgment findings whose axis remains live, **cluster by shared disposition**
 
 For every fix that is going to land — Mechanical (auto-approved) or Judgment (user-approved at the Phase 3 gate) — screen the edit for risk before applying it. A "Mechanical" edit can still be risky: it may touch an irreversibility, a security boundary, or an external / human-visible effect that the Mechanical/Judgment axis does not capture. The risk screen is orthogonal to the resolution class and gates the apply on risk grounds.
 
-The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry.
+The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry. This framing screens an edit before it lands; the bundle-level fit pass's loop-back (Apply executor step 3 below) screens an adaptation `/contextualize` has already written, and applies this same non-actuation principle to that retroactive case — see step 3 for how.
 
 **Apply executor (tiered).** Applying is execution, not judgment — the judgment already
 landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
@@ -160,25 +160,53 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    bundle, not any one finding's own correctness — belongs to the bundle as a whole; a
    per-finding check has no vantage from which to see it. The pass runs after the sweep and
    before the updated diff is handed to the designated source in step 4.
+
+   **The apply pass does not branch on how the call terminates.** `/contextualize` ends
+   either convergent (`ContextualizedExecution`, every mismatch adjudicated) or on the
+   user's own Esc inside that call (`EarlyExit` — remaining mismatches declared unresolved
+   residual and the result accepted without further applicability review within that call).
+   Whichever terminal the call reaches, once it returns, the apply pass finishes the same
+   way: the loop-back below runs over any adaptation that landed, and the bundle then
+   proceeds to step 4 and is handed forward — judging the result, including anything an
+   `EarlyExit` left as residual, is the next round's full re-review (Phase 5), not a branch
+   taken here. An Esc raised inside `/contextualize`'s own gate ends that nested call, not
+   this loop: it is a different act from the free-exit affordance this loop declares at
+   Phase 0, which ends the review loop itself — the apply pass keeps going after a nested
+   Esc exactly as it would after convergence.
+
    `/contextualize` is not read-only: a Confirm or Adapt answer at its own Phase 2 lands an
-   edit through Edit/Write, adapting the bundle rather than merely assessing it. **Loop-back**:
-   when the fit pass lands such an adaptation, that edit re-enters this apply pass at step 1 —
-   the predicate it instantiates is named, that predicate's sites are enumerated across the
-   artifact, each site is semantically verified and risk-screened per site (Rule 6), and the
-   completeness sweep runs over them — before the bundle proceeds to step 4. A Dismiss answer
-   lands no edit and triggers no loop-back: the condition is an adaptation actually having
-   landed, not the fit pass having run. The loop-back runs at most once per apply pass; the fit
-   pass is not re-invoked after it. Two grounds set that bound. First, `/contextualize`'s own
-   loop is non-monotone and re-scans internally — adapting mutates its own evaluation target
-   and can breed newly emerged mismatches, so its contract already makes re-scan mandatory
-   inside the call; by the time the call returns, its mismatch set is exhausted or every
-   remaining mismatch is explicitly recorded as routed or terminal-residual, so calling it
-   again from here would only re-detect what it has already disposed of. Second, whatever the
-   loop-back's own sweep newly introduces is exactly what Phase 5's full re-review already
-   backstops — this document takes the same position for the sweep itself, in the
-   "Completeness sweep on apply" paragraph below ("the Phase 5 full re-review is the backstop
-   for what a sweep missed rather than the reason to defer it"); a fixpoint loop here would be
-   a structure this document uses nowhere else.
+   edit through Edit/Write, adapting the bundle rather than merely assessing it — on either
+   terminal, since an `EarlyExit` can follow adaptations that already landed before the Esc.
+   **Loop-back**: when the fit pass lands such an adaptation, that edit re-enters this apply
+   pass at step 1 — the predicate it instantiates is named, that predicate's sites are
+   enumerated across the artifact, each site is semantically verified and risk-screened per
+   site (Rule 6), and the completeness sweep runs over them — before the bundle proceeds to
+   step 4. A Dismiss answer lands no edit and triggers no loop-back: the condition is an
+   adaptation actually having landed, not the fit pass having run.
+
+   **The loop-back's own risk screen is retroactive.** By the time an adaptation reaches
+   this re-entry, `/contextualize` has already written it — the step-1 risk screen is
+   judging an edit already on the artifact, not one about to land. A non-accept verdict
+   (defer or drop) is therefore recorded, not actuated: this document defines no rollback
+   or revert transition, and none is added here. The verdict rides forward as an annotation
+   on the trace (Convergence section) exactly as any other carried finding does — per the
+   risk-screen paragraph above, carrying forward does not hold a finding as live in-loop
+   state, and the next round's full re-review re-detects the condition fresh rather than the
+   annotation itself gating anything. The substrate arm of that same screen is not left
+   dangling either: `/contextualize`'s Edit/Write calls already passed through the harness
+   permission layer at the moment they ran, so substrate gating already happened at the tool
+   level — what the retroactive screen carries forward is the epistemic judgment, and that
+   is what gets recorded.
+
+   The loop-back runs at most once per apply pass; the fit pass is not re-invoked after it.
+   Two grounds set that bound. First, since the apply pass does not branch on the call's
+   terminal state, an early exit inside `/contextualize` is not a signal to call it again —
+   it is the user's decision to stop adjudicating fit in this pass, and re-invoking would
+   override that decision. Second, whatever the loop-back's own sweep newly introduces is
+   exactly what Phase 5's full re-review already backstops — this document takes the same
+   position for the sweep itself, in the "Completeness sweep on apply" paragraph below ("the
+   Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to
+   defer it"); a fixpoint loop here would be a structure this document uses nowhere else.
 4. **Hand forward to the designated source**: verify the side-effect (diff moved as
    briefed, including any loop-back edits), then Phase 5's full re-review by the designated
    source re-judges the updated surface — the loop's own convergence check remains the final
@@ -194,7 +222,7 @@ Re-call the source on the updated diff — a **FULL re-review each round**, not 
 - the re-review surfaces zero new non-refuted findings and no recurrences await diagnosis — a recurrence is not "new" and routes through the Phase 3 recurrence escalation before any convergence claim — OR
 - the user exits (free-response).
 
-Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
+Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly. The bundle-level fit pass's loop-back (Phase 4, Apply executor step 3) carries the same shape in its retroactive form: a non-accept risk-screen verdict recorded against an already-landed adaptation rides forward as its trace annotation rather than a live-held finding, and at convergence that recorded verdict surfaces as annotated residual precisely like any other carried deferral — a "zero new findings" convergence does not silently swallow it either.
 
 **Reading the loop's own trajectory.** The finding count a round reports is not itself evidence of how the loop is converging. Under the clean regime — design intent conveyed per the Conveyance boundary above, no disposition records — a round-over-round rise is ordinary, not a sign of drift: a reviewer working from documented intent can still surface more before it surfaces nothing, and a rise the round before approve is a shape convergence itself can take. Diagnose divergence the way Phase 3 diagnoses a recurrence — by regime and by re-flagging (the same defect returning on the same clause after its fix landed) — never by comparing raw counts across rounds. An impulse, mid-loop, to read a rising or non-monotonic count as evidence the loop lacks a stopping point, and respond by deriving a new stopping policy, routes back to the Conveyance boundary and the Phase 0 design-intent harvest instead: inventing a new scope restriction on the reviewer — telling it a class of finding is out of bounds — is the suppression regime under a different name, and risks the same manufactured convergence an independent re-review would overturn.
 
@@ -268,6 +296,8 @@ The slot is keyed by the loop's **interruption axis** — whether the loop acted
 
 The interruption axis — not the resolution class — places each entry. A Mechanical edit blocked on a risk screen sits under **Gated** because it needed your judgment, even though its resolution class is Extension; its Mechanical origin can ride as an inline note, and its outcome follows your decision — accept → `[applied]`, defer → `[carried: reason]`, drop → `[dropped: risk basis]`. A settled-policy auto-resolution sits under **Relay**, annotated by the prior disposition it applies — apply → `[applied]`, dismiss → `[dropped: prior-disposition basis]`, defer → `[carried: reason]`. Verify-stage drops are Relay `[dropped: verify basis]`; gated dismissals and risk-screen drops are Gated `[dropped: basis]`. An edit routed to the harness permission layer rides as a relay annotation on its entry — the harness's grant or denial is the substrate's record, not a loop gate. A `[carried: reason]` records the deferral reason, not a live-held finding: each round's full re-review re-detects the finding, so recurrence surfaces as a fresh recognition gate.
 
+The bundle-level fit pass (Phase 4, Apply executor step 3) is not itself one of the round's source-surfaced findings, so it has no pre-existing finding entry to attach to — it rides as its own **Relay** entry, labeled by what it did (`no adaptation` | `adapted: {predicate}`), since the pass and its loop-back run without a Constitution gate inside this loop (`/contextualize`'s own Confirm/Adapt/Dismiss answers are internal to that call). A non-accept verdict the loop-back's retroactive risk screen records against a landed adaptation rides inline on that same entry — `[applied; fit-pass risk: defer|drop — recorded, not actuated]` — using the same inline-annotation form the trace already carries for a side-effect, so the verdict is visible without a new slot.
+
 The per-round trace is a relay presentation — present it and proceed; it is not a gate. At convergence, the accumulated traces are the evidence that each finding reached a disposition — applied, dropped or dismissed, or explicitly surfaced as annotated residual.
 
 **Ledger carryover at exit.** An entry enters the design-decision ledger (Phase 0 harvest, source 4) precisely because it holds independently of current code state — its reach already exceeds the diff that occasioned it. The ledger is nonetheless loop-local: an entry re-enters the source's bundle at the next re-harvest and otherwise ends with the session, so the admission criterion and the lifetime disagree. The entries that lose most are the ones that redirect the work the diff was serving rather than settling it — a direction the user constituted *against* the diff, which the diff itself does not record. With the loop gone that direction is unrecoverable, and the next session to pick the work up re-derives the frame the user just rejected.
@@ -305,7 +335,13 @@ At exit — converged or free — surface each ledger entry with the durable hom
    loop. When fix-induced follow-up findings recur across consecutive rounds, the write
    tier escalates to the loop-driving session writing inline (the briefs are dropping
    loop context the fixes need); it de-escalates once a re-review round surfaces no
-   fix-induced follow-ups.
+   fix-induced follow-ups. A bundle-level fit pass (`/contextualize`, once, after the
+   sweep) then checks the whole applied bundle against the design-decision ledger and the
+   touched surfaces' conventions before hand-forward; it does not branch on which terminal
+   it reaches — convergent or the user's own Esc inside that call — and an adaptation it
+   lands loops back into this apply pass at step 1, bounded to once, with any non-accept
+   verdict from that loop-back's own retroactive risk screen recorded on the trace rather
+   than actuated.
 9. **Recurrence escalates; suppression never converges** — when a finding returns beyond
    absorption (returns = re-asserts the same defect on the same clause or invariant,
    judged semantically — never by line or wording; an uninformed return, made before the
