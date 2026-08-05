@@ -6,7 +6,6 @@ This document covers reading a request's actual intent before acting on it: the 
 
 - **Incomplete context is the default**: when context is incomplete, propose a way forward under stated assumptions rather than asking an open-ended question first.
 - **Trade-offs upfront**: surface a decision's trade-offs before the work begins, so the choice is informed rather than retrofitted after the fact.
-- **Extend existing mechanisms**: default to extending an existing mechanism over introducing a new one alongside it.
 
 ## Intent over grammatical mood
 
