@@ -6,7 +6,7 @@ This document covers the foundational split in any human-AI collaboration: what 
 
 Present structured options for user selection rather than requiring recall from memory. Each option must make the post-selection state anticipatable — differential implications visible before choice, not discovered after.
 
-The invariant: the user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions, system nudges, and any output that shapes a user decision.
+The invariant: the user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions, system nudges, and any output that shapes a user decision — including one whose subject is the reasoning itself, where the options are a few hypotheses grounded in context that the user can evaluate, extend, or replace.
 
 Future-state recognizability: recognition extends beyond "options not blanks" to "each option makes the post-selection state anticipatable." Gate options that present labels without differential futures reduce to recall-in-disguise — the user must mentally simulate consequences rather than recognize them from the presented structure.
 

@@ -59,10 +59,6 @@ Convergence must be demonstrated, not asserted. At convergence, the system must 
 
 Recognition over Recall is a content invariant — the function lies in the structured-options pattern, not in the specific tool that renders it. Structured numbered text followed by a turn yield satisfies the same epistemic function as a dedicated structured-choice tool call. The invariant: the user receives structured options with differential implications, and their response is parsed into a typed answer.
 
-## Gated Interaction Realization (Derived)
-
-Gated does not mean unstructured. A gated interaction presents AI-inferred rationale options — a small number of reasoning hypotheses grounded in context — that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond the presented options: this freedom is inherent in the structure of a conversational turn, not an explicit escape hatch bolted on afterward. A blank canvas forces recall; structured rationale enables recognition of the reasoning paths available. This extends Recognition over Recall (`premise/recognition-and-authority.md`) to gated interactions.
-
 ## Loop Continuity under Bounded Regret (Derived)
 
 Within any execution loop, Extension actions must not trigger a stop — the loop continues. Only Constitution actions — genuinely viable alternative paths whose wrong choice creates irreversible divergence — warrant interruption.

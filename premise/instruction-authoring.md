@@ -2,7 +2,7 @@
 
 This document covers writing instructions and durable records that stay accurate as they age: stating principles instead of examples, not over-mentioning what an instruction wants avoided, gating new directives against actual evidence of need, keeping a written claim support-linked rather than merely current, making sure a principle structurally reaches the reader whose behavior it targets, and routing each sentence — at the moment it is written — to the surface it belongs on. The Currency section below uses the relay/authority distinction from `recognition-and-authority.md` in one place; nothing else here depends on it.
 
-## Zero-Shot Instruction Preference (Derived)
+## Zero-Shot Instruction Preference (Architectural)
 
 LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state principles, not examples. When a rendering rule, behavioral guideline, or structural constraint can be expressed as a principle, do not append few-shot examples or category-level mapping lists. Few-shot examples create a soft-table effect — anchoring the model to specific instances rather than letting it apply the principle to novel contexts. A principle that requires examples to be understood is underspecified; fix the principle, do not patch it with examples.
 
