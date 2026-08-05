@@ -20,6 +20,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 - **`safeguards.md`** — Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness. All are authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` instead.
 - **`project-profile-calibration.md`** — Profile Variables (six) and Calibration Rule, Scope Boundary. Authoring/calibration-time reference, not per-turn.
 - **`outcome-equivalence.md`** — Outcome Equivalence (whole section). Derived tier, runtime-inert argument chain.
+- **`derived-sources.md`** — which axioms each `(Derived)` heading in `premise/` rests on. Authoring/verify-time map, runtime-inert.
 
 ## Philosophy
 
