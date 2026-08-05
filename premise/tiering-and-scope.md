@@ -27,26 +27,6 @@ This presupposes branches with materially different downstream trajectories; a b
 
 The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, principles, formal systems), an unused mechanism pollutes cognitive space — the cost of an unused mechanism exceeds the cost of a missing one. This asymmetry justifies empirical restraint as the correct posture for creating new mechanisms, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost-function difference surfaced.
 
-## Unix Philosophy Homomorphism (Architectural)
-
-Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke a protocol for a recognized cost situation, not by following a prescribed pipeline. An established default ordering for multi-activation is a logical default, not a mandatory sequence.
-
-## Session Text Composition (Architectural)
-
-Data flows between interaction protocols as natural language in the shared context — not through structured data channels. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. A structured, schema-based transport was considered and rejected: structuring context loses information. If structured transport becomes necessary later, formally composing the protocols' own output/input types is the escalation path, rather than inventing an ad hoc structured channel.
-
-## Coexistence over Mirroring (Architectural)
-
-Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers:
-
-| Layer | Concern |
-|-------|---------|
-| Epistemic | "Are we doing the right thing?" |
-| Execution | "Are we doing it correctly?" |
-| Verification | "Did we understand?" |
-
-Epistemic dialogue protocols occupy the first and third layers; a harness's built-in execution commands occupy the second. Do not mirror built-in execution capabilities (e.g., workspace isolation, publishing a change) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
-
 ## Epistemic Completeness Boundary (Architectural)
 
 A bounded principle system governs one domain. For a system of epistemic dialogue principles that domain is the epistemic substrate — where authority, judgment, framing, and recognition are constituted between a person and an AI system. The system's completeness claim terminates at that domain's edge: physical safety, permission and credential policy, and the execution of high-stake actions belong to the enclosing execution substrate, not to the principle system. Claiming completeness past the boundary claims an authority the system has no means to discharge.

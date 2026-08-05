@@ -42,11 +42,11 @@ Full text: `premise/tiering-and-scope.md`. This project's specialization: unused
 
 ## Unix Philosophy Homomorphism
 
-Each protocol is a single-purpose epistemic tool; composition is bottom-up. Full text: `premise/tiering-and-scope.md`.
+Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke a protocol for a recognized cost situation, not by following a prescribed pipeline. An established default ordering for multi-activation is a logical default, not a mandatory sequence.
 
 ## Session Text Composition
 
-Full text of the opening principle (inter-protocol data flows as natural language, not structured channels): `premise/tiering-and-scope.md`.
+Data flows between interaction protocols as natural language in the shared context — not through structured data channels. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. A structured, schema-based transport was considered and rejected: structuring context loses information. If structured transport becomes necessary later, formally composing the protocols' own output/input types is the escalation path, rather than inventing an ad hoc structured channel.
 
 **Stigmergy signal constraint**: Classification artifacts that flow between protocols (e.g., BoundaryMap) carry signal only, not payload. Downstream protocols read the classification and autonomously modify their own behavior — this is behavioral stigmergy, not central prescription. Loading candidates or behavioral directives into classification entries converts the signal into payload, breaking the stigmergy pattern. Test: "Is the downstream protocol reading a signal and choosing its behavior, or following a central prescription?" Former is correct.
 
@@ -110,7 +110,15 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 ## Coexistence over Mirroring
 
-Protocols occupy the epistemic layer and coexist with the host harness's execution built-ins; execution capabilities are not mirrored into protocol definitions. Full text: `premise/tiering-and-scope.md`.
+Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers:
+
+| Layer | Concern |
+|-------|---------|
+| Epistemic | "Are we doing the right thing?" |
+| Execution | "Are we doing it correctly?" |
+| Verification | "Did we understand?" |
+
+Epistemic dialogue protocols occupy the first and third layers; a harness's built-in execution commands occupy the second. Do not mirror built-in execution capabilities (e.g., workspace isolation, publishing a change) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
 
 ## Three-Tier Termination
 
