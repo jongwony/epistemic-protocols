@@ -82,7 +82,7 @@ O_G            = ReadObligations(G) = (G.obligations ∪ (owed_unit(G) ? owed_ob
 ProtocolOutput = prior protocol's converged output in current session
 owed_unit(G)   ≡ G.prior names a /conduct owed re-apportionment for a unit it could not place a move for — the unit's ref together with the locator of the plan record THIS protocol parked, which is what /conduct carries beside the owed set
 owed_obligations(G) = the obligations of that unit, read at the ref by dereferencing the record the owed re-apportionment's own locator names   -- the owed edge carries its own locator, so this resolves whether or not a navigation block is separately in scope for G; nothing about the unit has to travel back across the seam
-Obligation     = a stated or inferred requirement the goal must satisfy — the unit of coverage; each cites its evidence in G. A requirement the HOST attaches to every change it accepts regardless of the goal is not one (host_standing_contract below): it is an ambient invariant every unit inherits, not something this goal generated
+Obligation     = a stated or inferred requirement the goal must satisfy — the unit of coverage; each cites its evidence in G. A requirement the HOST attaches to every change it accepts regardless of the goal reaches this read as a candidate like any other, and host_standing_contract below is the judgment that keeps it out of O_G: it is an ambient invariant every unit inherits, not a goal obligation this goal generated. The exclusion is made AT the read — a judgment over candidates, as VelocityFilter's partition is — so the type does not guarantee it and a misjudgment is possible
 host_standing_contract(o) ≡ o is goal-independent in the host the work is carried out in — the same requirement would be read from ANY goal there, because the host's own standing procedural contract attaches it to every change it accepts (its version/manifest discipline, its verification command, its branch/worktree/review path, its merge authority) — AND o is not itself the outcome G states. Such an o is neither a goal obligation nor an out-of-scope delegation: an OOSDeclaration names a substrate that must intercept BEFORE an action runs, whereas this binds every emitted unit alike and the host's own process already enforces it, so ReadObligations subtracts it and nothing downstream sees it. A requirement G states AS its outcome fails the second conjunct and stays a goal obligation
 H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit; read from context, cue cited
 U              = Set(Unit)             -- the apportionment
@@ -360,7 +360,7 @@ Everything past emission belongs to non-epistemic substrates. Enforcement of the
 
 User calls `/apportion` to declare autonomous execution intent for a goal whose unit plan and conditions are uncompiled.
 
-**Goal plan uncompiled** = an autonomous run is intended for a stated goal, but the goal is not yet carried by units each bearing a compiled condition — a determinate completion predicate, or a recorded acceptance closing it.
+**Goal plan uncompiled** = an autonomous run is intended for one stated goal — one outcome, not several bundled — but the goal is not yet carried by units each bearing a compiled condition — a determinate completion predicate, or a recorded acceptance closing it.
 
 Gate predicate:
 ```
