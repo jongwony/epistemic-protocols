@@ -358,8 +358,9 @@ At exit — converged or free — surface each ledger entry with the durable hom
    loop context the fixes need); it de-escalates once a re-review round surfaces no
    fix-induced follow-ups. A bundle-level fit pass (`/contextualize`, once, after that
    verify) then checks the whole applied bundle against the design-decision ledger and the
-   touched surfaces' conventions before hand-forward — after the verify because it resolves
-   fit for a result already established as correct; it does not branch on which terminal
+   touched surfaces' conventions before hand-forward — after the verify because it takes its
+   subject as already correct, while the verify itself establishes conformance to the brief
+   and nothing wider; it does not branch on which terminal
    it reaches — convergent or the user's own Esc inside that call — and an adaptation it
    lands loops back into this apply pass at step 1, bounded to once, with a non-accept
    verdict recorded on the trace rather than actuated for the adaptation that already landed,
