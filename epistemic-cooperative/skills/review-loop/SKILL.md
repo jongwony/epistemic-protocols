@@ -154,9 +154,14 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
 3. **Verify the delegated write**: confirm each site is in the state its own disposition
    called for — every fix the brief carried and every site the completeness sweep ranged
    over, each read against what was decided for it rather than against a blanket expectation
-   that it moved. An accepted site moved as briefed; a site whose risk screen returned defer
-   or drop stands unchanged, and finding it unchanged is this step passing rather than
-   failing. This is the `verify` the sequence above names, and it stands ahead of everything
+   that it moved. The expected state is whatever that site's disposition entails once it is
+   actuated or recorded, which is a question about the disposition and not about movement:
+   where a verdict was actuated the site carries its effect, and where a verdict was recorded
+   rather than actuated the site carries the state it already had, with the verdict annotated.
+   So an accepted site moved as briefed; a site screened before anything was written there
+   and then deferred or dropped stands unchanged; an adaptation already on the artifact when
+   its screen returned defer or drop stands landed, because step 4's loop-back records that
+   verdict rather than actuating it. Each of those is this step passing, not failing. This is the `verify` the sequence above names, and it stands ahead of everything
    else that reads the bundle. What it establishes is conformance to what was decided and
    nothing wider — that the bundle is the one the dispositions called for — so a write that
    missed a site, landed the wrong edit, or moved a site that was to stay put is caught here
