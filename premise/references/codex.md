@@ -5,7 +5,8 @@ adopt them: link to them, or copy the parts you want. This file covers the first
 how to wire the documents into a Codex setup so they stand as a reference layer.
 
 Codex reaches them by pointer rather than by import. Its instruction loader reads each file's bytes
-and places the text into the instruction chain as-is; it expands no import directive. So the layer is
+and places the text into the instruction chain without interpreting it; no import directive is
+expanded, and nothing the text names is fetched on its behalf. So the layer is
 a standing instruction to read the documents at named moments, not a mechanism that loads them for
 you. Every difference below follows from that.
 
@@ -44,15 +45,25 @@ Both the clone and the file from step 3 live under that directory.
 
 ## Step 2 — confirm the documents landed
 
+Ask Codex where it put the marketplace rather than assuming a path — a marketplace added from a
+local checkout resolves to that checkout, not to the managed location a GitHub-sourced one gets:
+
 ```bash
-ls "${CODEX_HOME:-$HOME/.codex}/.tmp/marketplaces/epistemic-protocols/premise/"
+codex plugin marketplace list
 ```
 
-`AGENTS.md` should appear alongside the individual documents. Keep the absolute path this listed —
-step 3 needs it written out literally.
+Take the `ROOT` for `epistemic-protocols` from that output, and confirm the documents are under it:
 
-The `.tmp` in that path does not mean scratch. It is where Codex keeps every installed marketplace,
-its own bundled ones included; `codex plugin marketplace list` reports the same root.
+```bash
+ls <ROOT>/premise/
+```
+
+`AGENTS.md` should appear alongside the individual documents. Write out `<ROOT>/premise` in full and
+keep it — step 3 needs that absolute path literally.
+
+When the marketplace came from GitHub, that root sits under `<config-dir>/.tmp/`. The `.tmp` does not
+mean scratch: it is where Codex keeps marketplaces it manages, its own bundled ones among them, under
+sibling directories of the same parent.
 
 ## Step 3 — add a section to the global AGENTS.md
 
@@ -85,15 +96,23 @@ already settle.
 
 Four things to get right:
 
-- **Substitute every `<PREMISE_PATH>` with the absolute path from step 2**, and match the heading
-  level the file already uses. The text arrives verbatim in the instruction chain, so a path left as
-  `$CODEX_HOME` would have to be resolved by the agent at read time — which is the recall this layer
-  exists to avoid.
+- **Substitute every `<PREMISE_PATH>` with the absolute path from step 2**, and give the section the
+  same heading level the file's other top-level sections use. The text arrives verbatim in the
+  instruction chain, so a path left as `$CODEX_HOME` would have to be resolved by the agent at read
+  time — which is the recall this layer exists to avoid.
 - **Append; never replace.** That file usually already carries someone's own guidance, and it takes
   effect in every session they run.
-- **Check for `AGENTS.override.md` in the same directory first.** When it is present Codex reads it
-  instead of `AGENTS.md`, so a section added to the latter would never load. Add it to whichever file
-  Codex actually reads.
+- **Check `AGENTS.override.md` in the same directory before touching anything.** Codex loads the
+  first of `AGENTS.override.md`, `AGENTS.md` whose contents are not blank — presence alone does not
+  decide it. Three cases, and they differ:
+  - No override, or an override that is empty or whitespace only → `AGENTS.md` is what loads; add the
+    section there and leave the empty override alone. **Writing into an empty override would make it
+    non-blank and drop the whole of `AGENTS.md` out of the instruction chain** — an append that
+    silently removes everything that file was carrying.
+  - An override with content → that is what loads, and `AGENTS.md` does not. Adding the section to
+    `AGENTS.md` would load nothing.
+  - Either way, an override is meant to be temporary. Say so when the section has to go into one:
+    removing that override later takes the premise layer with it.
 - **Flag overlap rather than resolving it.** Existing guidance in that file may already restate a
   premise document's principle in its own words. Point out what overlaps and leave the removal to
   the person whose file it is.
@@ -105,12 +124,22 @@ documents that bear on every turn. The rest arrive when their moment does.
 ## Step 4 — check it took
 
 There is no import list to inspect here. Codex guarantees only that the `AGENTS.md` text reaches the
-instruction chain, not that the files it names get read — so the behavioral check is the check.
+instruction chain, not that the files it names get read — so the behavioral check is the check, and
+it has to be one the index actually settles.
 
-Start a fresh session and ask which premise document the agent would read before taking a
-hard-to-reverse action. A wired setup answers `boundaries-and-safety.md`, having read the index at
-the path the section named. An answer that does not name a document, or names one that is not in the
-index, means the pointer is not being followed and the layer is not in effect.
+Start a fresh session and ask which premise document to read **when a time or date arrives without a
+stated zone**. A wired setup answers `matching-the-request.md`. Ask for the trigger phrasing too, so
+the answer has to come from the index rather than from the filename: the entry names that moment
+alongside three others about level, fix scope, and question granularity.
+
+The point of that particular question is that it cannot be guessed. A check like "which document
+before a hard-to-reverse action" invites the answer `boundaries-and-safety.md` from the topic word
+alone, and would pass on a setup where nothing was ever read.
+
+What this establishes and what it does not: a correct answer shows the index was reached at the path
+the section named. It says nothing about whether `recognition-and-authority.md` and
+`approach-verification.md` were also read, nor about any session other than the one you asked in.
+Nothing here fails loudly, so treat a wrong answer as the layer being absent rather than as a slip.
 
 ## Keeping it current
 
