@@ -151,38 +151,30 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    are dropping loop context the fixes need (accumulated conventions, prior fix shapes,
    adjacent invariants). De-escalate back to the low-cost tier once a re-review round
    surfaces no fix-induced follow-ups.
-3. **Verify the delegated write**: confirm each site is in the state its own disposition
-   called for — every fix the brief carried and every site the completeness sweep ranged
-   over, each read against what was decided for it rather than against a blanket expectation
-   that it moved. The expected state is whatever that site's disposition entails once it is
-   actuated or recorded, which is a question about the disposition and not about movement:
-   where a verdict was actuated the site carries its effect, and where a verdict was recorded
-   rather than actuated the site carries the state it already had, with the verdict annotated.
-   So an accepted site moved as briefed; a site screened before anything was written there
-   and then deferred or dropped stands unchanged; an adaptation already on the artifact when
-   its screen returned defer or drop stands landed, because step 4's loop-back records that
-   verdict rather than actuating it. Each of those is this step passing, not failing. This is the `verify` the sequence above names, and it stands ahead of everything
-   else that reads the bundle. What it establishes is conformance to what was decided and
-   nothing wider — that the bundle is the one the dispositions called for — so a write that
-   missed a site, landed the wrong edit, or moved a site that was to stay put is caught here
-   rather than downstream. The brief's own correctness was settled earlier: each finding
-   verified at Phase 2, dispositioned at Phase 3, and scanned at step 1. What judges the
-   result's behavior independently is Phase 5's re-review, never this step. An edit that
-   re-enters this pass through the loop-back below reaches this step on its own way through.
-4. **Bundle-level fit pass (once, after the verify, before hand-forward)**: with the write
-   verified, call `/contextualize` a single time over the whole applied edit bundle — never
+3. **Verify the delegated write**: read each site against what its disposition called for —
+   every fix the brief carried and every site the completeness sweep ranged over — under the
+   rule below, so a site written on an accepted verdict is read for that effect and a site
+   whose verdict was recorded rather than actuated is read for the state it already had. What
+   this establishes is conformance to what was decided and nothing wider; the brief's own
+   correctness was settled earlier, each finding verified at Phase 2, dispositioned at Phase
+   3, and scanned at step 1, and what judges the result's behavior independently is Phase 5's
+   re-review. A discrepancy here — a site missed, a wrong edit landed, a site moved that was
+   to stay put — is recorded on the trace and carried to the next round like any other
+   finding, and does not block the pass. An apply pass does not warrant a complete or correct
+   bundle and this contract does not ask it to: repairing one that came out incomplete or
+   wrong is the loop's work. What this step buys is that the discrepancy is seen and written
+   down at the point it happened rather than rediscovered later as a symptom.
+4. **Bundle-level fit pass (once, before hand-forward)**: call `/contextualize` a single
+   time over the whole applied edit bundle — never
    per fix — checking the bundle as a set against the design-decision ledger harvested at
    Phase 0 (harvest source 4) and against the conventions of every surface the bundle
    touched. This sits here rather than at Phase 2 because the property it checks — coherence
    across the bundle, not any one finding's own correctness — belongs to the bundle as a
-   whole; a per-finding check has no vantage from which to see it. It sits after step 3
-   because `/contextualize` takes its subject as already correct — its own contract scopes it
-   to a technically correct result that may not fit its context — and step 3 removes the one
-   error class this pass can still remove on its own, a write that does not match its brief.
-   That is narrower than establishing correctness, and the fit pass runs on the
-   best-established bundle the pass can hand it rather than on a proven one; running it ahead
-   of step 3 would additionally invite adapting on top of a write error instead of catching
-   it. The pass runs before the updated diff is handed to the designated source in step 5.
+   whole; a per-finding check has no vantage from which to see it. It sits after step 3 so a
+   write discrepancy is on the record before the bundle is adapted, which keeps a later
+   symptom attributable — an ordering convenience, not a guarantee that what it receives is
+   correct, which nothing in this pass establishes. The pass runs before the updated diff is
+   handed to the designated source in step 5.
 
    **The apply pass does not branch on how the call terminates.** `/contextualize` ends
    either convergent (`ContextualizedExecution`, every mismatch adjudicated) or on the
@@ -208,16 +200,21 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    triggers no loop-back: the condition is an adaptation actually having landed, not the fit
    pass having run.
 
-   **The loop-back's risk screen is retroactive for what already landed and prospective for
-   what it newly finds.** The adaptation itself is on the artifact by the time it reaches this
-   re-entry, so for that edit the step-1 screen judges something already written rather than
-   something about to land: a non-accept verdict (defer or drop) on it is recorded, not
-   actuated — this document defines no rollback or revert transition, and none is added here.
-   The further sites the loop-back's own sweep enumerates are the other case: the predicate
-   recurs at them and nothing has been written there yet, so they take the ordinary pre-apply
-   screen with all three of its arms live — accept and the edit lands, defer or drop and it
-   does not. Record-only reaches exactly what has already landed, never what the sweep is
-   about to write. The verdict rides forward as an annotation
+   **A guard actuates where its subject has not been written, and records where it has.**
+   This is the rule the whole apply pass runs on, and it covers every guard here and every arm
+   each of them carries — a predicate that cannot be named, a site that fails semantic
+   verification, a risk verdict of defer or drop, a discrepancy step 3 reads. Where nothing
+   has been written at the site yet, a rejecting arm does what it says and the edit does not
+   land; the further sites this loop-back's sweep enumerates are that case, and their screen
+   keeps every arm live. Where the edit is already on the artifact — the adaptation itself,
+   by the time it reaches this re-entry — the same arm still produces its verdict, and the
+   verdict is recorded on the trace with the site left standing. This document defines no
+   rollback or revert transition and needs none: an apply pass is not warranted to come out
+   complete or correct, and repairing one that did not is the loop's work, which the next
+   round's full re-review does by re-detecting the condition fresh. That is the same
+   treatment the risk-screen paragraph above already gives a carried finding; what the
+   loop-back adds is that these verdicts get produced and written down at all, rather than an
+   edit reaching hand-forward with no guard having looked at it. The verdict rides forward as an annotation
    on the trace (Convergence section) exactly as any other carried finding does — per the
    risk-screen paragraph above, carrying forward does not hold a finding as live in-loop
    state, and the next round's full re-review re-detects the condition fresh rather than the
@@ -367,14 +364,14 @@ At exit — converged or free — surface each ledger entry with the durable hom
    loop context the fixes need); it de-escalates once a re-review round surfaces no
    fix-induced follow-ups. A bundle-level fit pass (`/contextualize`, once, after that
    verify) then checks the whole applied bundle against the design-decision ledger and the
-   touched surfaces' conventions before hand-forward — after the verify because it takes its
-   subject as already correct, while the verify itself establishes conformance to the brief
-   and nothing wider; it does not branch on which terminal
+   touched surfaces' conventions before hand-forward; it does not branch on which terminal
    it reaches — convergent or the user's own Esc inside that call — and an adaptation it
-   lands loops back into this apply pass at step 1, bounded to once, with a non-accept
-   verdict recorded on the trace rather than actuated for the adaptation that already landed,
-   while the further sites that loop-back's sweep enumerates take the ordinary pre-apply
-   screen with every arm live.
+   lands loops back into this apply pass at step 1, bounded to once. Throughout the pass a
+   guard actuates where its subject has not been written and records where it has, so a
+   rejecting arm stops an edit that has not landed and produces a trace-recorded verdict for
+   one that has. No step of this pass warrants a complete or correct bundle, and none blocks
+   on failing to: the next round's full re-review is what repairs a bundle that came out
+   incomplete or wrong.
 9. **Recurrence escalates; suppression never converges** — when a finding returns beyond
    absorption (returns = re-asserts the same defect on the same clause or invariant,
    judged semantically — never by line or wording; an uninformed return, made before the
