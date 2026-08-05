@@ -153,10 +153,13 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    surfaces no fix-induced follow-ups.
 3. **Verify the delegated write**: confirm the diff moved as the brief specified — every fix
    the brief carried, and every site the completeness sweep ranged over. This is the `verify`
-   the sequence above names, and it stands ahead of everything else that reads the bundle: a
-   write that missed a site or landed the wrong edit is a correctness failure, and no later
-   step in this pass settles correctness. An edit that re-enters this pass through the
-   loop-back below reaches this step on its own way through.
+   the sequence above names, and it stands ahead of everything else that reads the bundle.
+   What it establishes is conformance to the brief and nothing wider — that the bundle is the
+   one that was briefed — so a write that missed a site or landed the wrong edit is caught
+   here rather than downstream. The brief's own correctness was settled earlier: each finding
+   verified at Phase 2, dispositioned at Phase 3, and scanned at step 1. What judges the
+   result's behavior independently is Phase 5's re-review, never this step. An edit that
+   re-enters this pass through the loop-back below reaches this step on its own way through.
 4. **Bundle-level fit pass (once, after the verify, before hand-forward)**: with the write
    verified, call `/contextualize` a single time over the whole applied edit bundle — never
    per fix — checking the bundle as a set against the design-decision ledger harvested at
@@ -164,11 +167,13 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    touched. This sits here rather than at Phase 2 because the property it checks — coherence
    across the bundle, not any one finding's own correctness — belongs to the bundle as a
    whole; a per-finding check has no vantage from which to see it. It sits after step 3
-   because `/contextualize` resolves fit for a result that is already correct — its own
-   contract scopes it to a technically correct result that may not fit its context — so an
-   unverified bundle breaks the precondition the call rests on, and a write error would be
-   adapted on top of rather than caught. The pass runs before the updated diff is handed to
-   the designated source in step 5.
+   because `/contextualize` takes its subject as already correct — its own contract scopes it
+   to a technically correct result that may not fit its context — and step 3 removes the one
+   error class this pass can still remove on its own, a write that does not match its brief.
+   That is narrower than establishing correctness, and the fit pass runs on the
+   best-established bundle the pass can hand it rather than on a proven one; running it ahead
+   of step 3 would additionally invite adapting on top of a write error instead of catching
+   it. The pass runs before the updated diff is handed to the designated source in step 5.
 
    **The apply pass does not branch on how the call terminates.** `/contextualize` ends
    either convergent (`ContextualizedExecution`, every mismatch adjudicated) or on the
@@ -194,11 +199,16 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    triggers no loop-back: the condition is an adaptation actually having landed, not the fit
    pass having run.
 
-   **The loop-back's own risk screen is retroactive.** By the time an adaptation reaches
-   this re-entry, `/contextualize` has already written it — the step-1 risk screen is
-   judging an edit already on the artifact, not one about to land. A non-accept verdict
-   (defer or drop) is therefore recorded, not actuated: this document defines no rollback
-   or revert transition, and none is added here. The verdict rides forward as an annotation
+   **The loop-back's risk screen is retroactive for what already landed and prospective for
+   what it newly finds.** The adaptation itself is on the artifact by the time it reaches this
+   re-entry, so for that edit the step-1 screen judges something already written rather than
+   something about to land: a non-accept verdict (defer or drop) on it is recorded, not
+   actuated — this document defines no rollback or revert transition, and none is added here.
+   The further sites the loop-back's own sweep enumerates are the other case: the predicate
+   recurs at them and nothing has been written there yet, so they take the ordinary pre-apply
+   screen with all three of its arms live — accept and the edit lands, defer or drop and it
+   does not. Record-only reaches exactly what has already landed, never what the sweep is
+   about to write. The verdict rides forward as an annotation
    on the trace (Convergence section) exactly as any other carried finding does — per the
    risk-screen paragraph above, carrying forward does not hold a finding as live in-loop
    state, and the next round's full re-review re-detects the condition fresh rather than the
@@ -351,9 +361,10 @@ At exit — converged or free — surface each ledger entry with the durable hom
    touched surfaces' conventions before hand-forward — after the verify because it resolves
    fit for a result already established as correct; it does not branch on which terminal
    it reaches — convergent or the user's own Esc inside that call — and an adaptation it
-   lands loops back into this apply pass at step 1, bounded to once, with any non-accept
-   verdict from that loop-back's own retroactive risk screen recorded on the trace rather
-   than actuated.
+   lands loops back into this apply pass at step 1, bounded to once, with a non-accept
+   verdict recorded on the trace rather than actuated for the adaptation that already landed,
+   while the further sites that loop-back's sweep enumerates take the ordinary pre-apply
+   screen with every arm live.
 9. **Recurrence escalates; suppression never converges** — when a finding returns beyond
    absorption (returns = re-asserts the same defect on the same clause or invariant,
    judged semantically — never by line or wording; an uninformed return, made before the
