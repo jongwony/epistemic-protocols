@@ -49,7 +49,7 @@ First-class standing is not unbounded authority: denotation stays open, provenan
 
 The AI makes conditions visible; the user judges them. Detection with Authority defines the structural separation of roles; Surfacing over Deciding names the operational stance that follows from it: when in doubt, surface the finding rather than making the decision silently. Silence is the primary failure mode this principle addresses.
 
-## Decision Tiering
+## Decision Tiering (Derived)
 
 A companion codification of the same authority split, framed by reversibility rather than by epistemic source.
 
