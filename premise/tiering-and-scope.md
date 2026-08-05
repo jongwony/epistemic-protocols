@@ -9,7 +9,7 @@ Any body of behavioral principles benefits from a tier classification that track
 | Tier | Criterion |
 |------|-----------|
 | Axiom | Principles that become MORE important as models improve; foundations from which other principles derive |
-| Derived | Logically derived from axiom combinations |
+| Derived | Logically derived from axiom combinations; derivation source annotated |
 | Architectural | Structure decisions independent of the axiom system |
 | Safeguard | Principles that become LESS important as models improve; temporary guards against current model limitations |
 
