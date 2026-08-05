@@ -151,12 +151,16 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    are dropping loop context the fixes need (accumulated conventions, prior fix shapes,
    adjacent invariants). De-escalate back to the low-cost tier once a re-review round
    surfaces no fix-induced follow-ups.
-3. **Verify the delegated write**: confirm the diff moved as the brief specified — every fix
-   the brief carried, and every site the completeness sweep ranged over. This is the `verify`
-   the sequence above names, and it stands ahead of everything else that reads the bundle.
-   What it establishes is conformance to the brief and nothing wider — that the bundle is the
-   one that was briefed — so a write that missed a site or landed the wrong edit is caught
-   here rather than downstream. The brief's own correctness was settled earlier: each finding
+3. **Verify the delegated write**: confirm each site is in the state its own disposition
+   called for — every fix the brief carried and every site the completeness sweep ranged
+   over, each read against what was decided for it rather than against a blanket expectation
+   that it moved. An accepted site moved as briefed; a site whose risk screen returned defer
+   or drop stands unchanged, and finding it unchanged is this step passing rather than
+   failing. This is the `verify` the sequence above names, and it stands ahead of everything
+   else that reads the bundle. What it establishes is conformance to what was decided and
+   nothing wider — that the bundle is the one the dispositions called for — so a write that
+   missed a site, landed the wrong edit, or moved a site that was to stay put is caught here
+   rather than downstream. The brief's own correctness was settled earlier: each finding
    verified at Phase 2, dispositioned at Phase 3, and scanned at step 1. What judges the
    result's behavior independently is Phase 5's re-review, never this step. An edit that
    re-enters this pass through the loop-back below reaches this step on its own way through.
@@ -194,8 +198,8 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    **Loop-back**: when the fit pass lands such an adaptation, that edit re-enters this apply
    pass at step 1 — the predicate it instantiates is named, that predicate's sites are
    enumerated across the artifact, each site is semantically verified and risk-screened per
-   site (Rule 6), and the completeness sweep runs over them, and step 3 verifies that they
-   moved as named — before the bundle proceeds to step 5. A Dismiss answer lands no edit and
+   site (Rule 6), and the completeness sweep runs over them, and step 3 reads each against
+   the disposition its screen returned — before the bundle proceeds to step 5. A Dismiss answer lands no edit and
    triggers no loop-back: the condition is an adaptation actually having landed, not the fit
    pass having run.
 
