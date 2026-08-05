@@ -33,7 +33,7 @@ Single test: "Is the AI acting as a relay, or exercising authority?" Five indica
 
 **Dynamic observation scope**: non-destructive observation of a live system (including a test run with cleanup) is relay. Environment mutation (installation, a persistent state change) is constitution. Operational constraint: observation must not modify existing artifacts, and anything it creates must be cleaned up afterward.
 
-**Visibility principle**: what determines sufficiency is that the resolution's basis is cited somewhere — timing (immediate or deferred) is immaterial. A convergence trace, a summary, or a post-hoc report all satisfy visibility when the basis is cited. A progress-count-only display with no cited basis forces recall instead of recognition.
+**Visibility principle**: what determines sufficiency is that the resolution's basis is cited somewhere — timing (immediate or deferred) is immaterial. A convergence trace, a summary, or a post-hoc report all satisfy visibility when the basis is cited; where the cited basis is wording whose exact reading the resolution turns on, it is quoted rather than paraphrased, per Context and Utterance as First-Class Ground. A progress-count-only display with no cited basis forces recall instead of recognition.
 
 ## Context and Utterance as First-Class Ground (Axiom)
 
