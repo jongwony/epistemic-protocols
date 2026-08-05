@@ -10,6 +10,12 @@ expanded, and nothing the text names is fetched on its behalf. So the layer is
 a standing instruction to read the documents at named moments, not a mechanism that loads them for
 you. Every difference below follows from that.
 
+**Scope**: Codex running locally — the CLI and the desktop app — where the configuration directory
+and the documents sit on the machine being wired. Codex cloud runs isolated from that machine's
+files and cannot follow these steps; the layer has to be established wherever a cloud run's own
+instructions come from. Whether every local surface follows the pointer in practice has not been
+established empirically — see step 4 for what the check does and does not settle.
+
 **If you are an agent and someone handed you this URL**: the steps below are yours to run. Step 3
 writes into that person's global configuration directory, so show them the text first and get their
 go-ahead before writing it.

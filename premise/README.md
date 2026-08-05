@@ -13,6 +13,11 @@ each other.
 - **[Codex](references/codex.md)** — the documents are named by a standing instruction to read them
   at the moments that call for them, because Codex expands no import directive.
 
+Both procedures wire the machine the host is running on: each resolves a configuration directory
+there and writes an absolute path on that machine into it. A run isolated from those files — Codex
+cloud, or any remote sandbox — cannot follow either, and would have to establish the layer wherever
+its own instructions come from instead.
+
 The shape is the same in both: the index and the two documents bearing on every turn are reached
 first, and the rest arrive when their moment does. Only the mechanism differs. If your host is
 neither, that shape is what generalizes — put the index wherever your instructions always load, and
