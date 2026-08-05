@@ -88,7 +88,7 @@ Full text — rationalization paths a protocol must anticipate (premature conver
 
 ## White Bear Avoidance
 
-General principle (the base-rate condition for stating a prohibition, the ironic-process rationale, the three forms — prohibition framing, superseded-path mention, negated anchoring — the placement distinction between runtime motivating prose and diagnostic substrate, and the rewrite test): `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
+General principle (the base-rate condition for stating a prohibition, the ironic-process rationale, the forms it distinguishes — prohibition framing, superseded-path mention, negated anchoring — the placement distinction between runtime motivating prose and diagnostic substrate, and the rewrite test): `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
 
 **This project's grounding observation** (the evidence behind the prohibition form's strongest-evidenced status recorded in the Tier note below): pattern observed across multiple LLM-facing updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs. The general rule travels; this instance stays because it names this repository's own Output Style surface.
 
