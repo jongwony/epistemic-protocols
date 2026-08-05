@@ -36,7 +36,8 @@ The review source is pluggable: any source satisfying the `(diff, design-intent)
                           Mechanical → Extension (auto)
                           Judgment   → cluster by shared disposition → Constitution scope-gate
   Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
-                          + sweep → /contextualize once over the applied bundle (vs design-decision ledger + touched-surface conventions) → hand forward
+                          + sweep → /contextualize once over the applied bundle (vs design-decision ledger + touched-surface conventions)
+                          → landed adaptation loops back to scan/screen/sweep (bounded to once) → hand forward
   Phase 5  : re-review  — source(diff', intent) → verdict'
                verdict'=approve (or 0 new, no recurrence pending diagnosis) → converge ; else round k+1: these findings + this call's direction → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
@@ -159,10 +160,29 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    bundle, not any one finding's own correctness — belongs to the bundle as a whole; a
    per-finding check has no vantage from which to see it. The pass runs after the sweep and
    before the updated diff is handed to the designated source in step 4.
+   `/contextualize` is not read-only: a Confirm or Adapt answer at its own Phase 2 lands an
+   edit through Edit/Write, adapting the bundle rather than merely assessing it. **Loop-back**:
+   when the fit pass lands such an adaptation, that edit re-enters this apply pass at step 1 —
+   the predicate it instantiates is named, that predicate's sites are enumerated across the
+   artifact, each site is semantically verified and risk-screened per site (Rule 6), and the
+   completeness sweep runs over them — before the bundle proceeds to step 4. A Dismiss answer
+   lands no edit and triggers no loop-back: the condition is an adaptation actually having
+   landed, not the fit pass having run. The loop-back runs at most once per apply pass; the fit
+   pass is not re-invoked after it. Two grounds set that bound. First, `/contextualize`'s own
+   loop is non-monotone and re-scans internally — adapting mutates its own evaluation target
+   and can breed newly emerged mismatches, so its contract already makes re-scan mandatory
+   inside the call; by the time the call returns, its mismatch set is exhausted or every
+   remaining mismatch is explicitly recorded as routed or terminal-residual, so calling it
+   again from here would only re-detect what it has already disposed of. Second, whatever the
+   loop-back's own sweep newly introduces is exactly what Phase 5's full re-review already
+   backstops — this document takes the same position for the sweep itself, in the
+   "Completeness sweep on apply" paragraph below ("the Phase 5 full re-review is the backstop
+   for what a sweep missed rather than the reason to defer it"); a fixpoint loop here would be
+   a structure this document uses nowhere else.
 4. **Hand forward to the designated source**: verify the side-effect (diff moved as
-   briefed), then Phase 5's full re-review by the designated source re-judges the updated
-   surface — the loop's own convergence check remains the final reviewer of the delegated
-   writing.
+   briefed, including any loop-back edits), then Phase 5's full re-review by the designated
+   source re-judges the updated surface — the loop's own convergence check remains the final
+   reviewer of the delegated writing.
 
 **Completeness sweep on apply.** The predicate the scan named for each fix (Apply executor, step 1) is what this sweep ranges over. Where that predicate recurs across multiple sites in the artifact — a vocabulary rename, a guard that must hold at every mention of a symbol, a stale predicate repeated in several blocks — apply the fix consistently at every one of its sites in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The sweep is a required step of the apply pass, and the Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to defer it.
 
