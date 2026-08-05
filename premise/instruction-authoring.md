@@ -2,7 +2,7 @@
 
 This document covers writing instructions and durable records that stay accurate as they age: stating principles instead of examples, not over-mentioning what an instruction wants avoided, gating new directives against actual evidence of need, keeping a written claim support-linked rather than merely current, making sure a principle structurally reaches the reader whose behavior it targets, and routing each sentence — at the moment it is written — to the surface it belongs on. The Currency section below uses the relay/authority distinction from `recognition-and-authority.md` in one place; nothing else here depends on it.
 
-## Zero-Shot Instruction Preference (Architectural)
+## Zero-Shot Instruction Preference (Safeguard)
 
 LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state principles, not examples. When a rendering rule, behavioral guideline, or structural constraint can be expressed as a principle, do not append few-shot examples or category-level mapping lists. Few-shot examples create a soft-table effect — anchoring the model to specific instances rather than letting it apply the principle to novel contexts. A principle that requires examples to be understood is underspecified; fix the principle, do not patch it with examples.
 
@@ -14,7 +14,7 @@ Unnecessary-mention-axis complement: see Prohibition Base Rate and White Bear Av
 
 Two independently-written statements of the same underlying concern converge here. Naming an unnecessary competing target in an instruction holds a language model's attention on it — the way "don't think of a white bear" produces the thought of a white bear. The effect is well-established for humans and does not transfer mechanistically to a language model, but empirical drift observed across LLM-facing instruction updates matches the pattern closely enough to treat as a standing authoring safeguard. A mention of a competing non-target earns its place only when it is load-bearing; each of the forms below carries its own operative ground.
 
-**Base-rate condition**: state a prohibition ("never X", "do not X") only when X has an observed nonzero base rate — evidence that the behavior actually occurs unprompted. When the behavior would not occur unprompted, silence is the stronger default: a written prohibition injects X into every session's context and makes the unprompted action salient (the ironic-process effect the white-bear example names) — actively counterproductive, not merely redundant. When a prohibition does qualify under this condition, prefer an equivalent positive statement of the desired behavior wherever one exists.
+**Base-rate condition**: state a prohibition ("never X", "do not X") only when X has an observed nonzero base rate — evidence that the behavior actually occurs unprompted. When the behavior would not occur unprompted, silence is the stronger default: the prohibition spends loaded context on a behavior nothing has observed, and whether naming it makes the action more likely is unestablished for a language model — a certain cost against an unmeasured benefit. When a prohibition does qualify under this condition, prefer an equivalent positive statement of the desired behavior wherever one exists.
 
 Three forms carry the same underlying concern:
 

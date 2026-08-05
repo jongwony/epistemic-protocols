@@ -11,7 +11,7 @@ Any body of behavioral principles benefits from a tier classification that track
 | Axiom | Principles that become MORE important as models improve; foundations from which other principles derive |
 | Derived | Grounded in axiom combinations and adding a prescription those axioms do not themselves yield; a section whose content is fully recoverable from its sources belongs in those sources instead. Derivation source annotated |
 | Architectural | Structure decisions independent of the axiom system |
-| Safeguard | Principles that become LESS important as models improve; temporary guards against current model limitations |
+| Safeguard | A provisional guard against a failure observed on current models; a model change re-verifies it rather than retiring it, and the result keeps, compresses, or removes it |
 
 This tiering is what lets a reader distinguish a durable axiom from a safeguard that is meant to decay as models improve. Every tiered heading in this collection carries one of these four labels.
 

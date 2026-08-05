@@ -10,7 +10,7 @@ Six variables jointly determine how much of a project's ambiguous-decision surfa
 2. **Deploy fan-out** — user count / dependent-system count. Lower → broader Extension scope.
 3. **Dependency lock-in** — external dependency / contract surface. Less → broader Extension scope.
 4. **Runtime persistence** — state durability. Lower → broader Extension scope.
-5. **Correction-channel availability** — whether active use plus post-deploy correction functions as a working feedback loop: a hermeneutic circle, where interpretation is revised through repeated encounter rather than settled once. Higher → richer correction channel for Extension.
+5. **Correction-channel availability** — whether active use plus post-deploy correction functions as a working feedback loop, where interpretation is revised through repeated encounter rather than settled once. Higher → richer correction channel for Extension.
 6. **Notation maturity** — cost of cross-domain restructuring. Higher maturity → Extension-supportive.
 
 ## Calibration Rule
