@@ -4,7 +4,7 @@
 adopt them: link to them, or copy the parts you want. This file covers the first way concretely —
 how to wire the documents into a Claude Code setup so they load as a standing reference layer.
 
-**If you are an agent and someone handed you this URL**: the steps below are yours to run. Step 4
+**If you are an agent and someone handed you this URL**: the steps below are yours to run. Step 3
 writes into that person's global configuration directory, so show them the file first and get their
 go-ahead before writing it.
 
@@ -16,37 +16,37 @@ go-ahead before writing it.
   documents bearing on every turn.
 - Every other document reachable on demand, at the moment the index names for it.
 
-## Step 1 — get the documents on disk
+## Prerequisite
+
+This repository's marketplace is already added — that is what puts these documents on disk, and the
+[root README](../README.md)'s install covers it. For this reference layer alone, without any of the
+protocol plugins, adding the marketplace by itself is enough:
 
 ```bash
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 ```
 
-Adding the marketplace clones the whole repository, `premise/` included. No protocol plugin needs to
-be installed for this — install those only if you also want the protocols themselves (`/frame`,
-`/elicit`, and the rest; see the repository README).
-
-## Step 2 — resolve the configuration directory
+## Step 1 — resolve the configuration directory
 
 Claude Code's configuration directory is `$CLAUDE_CONFIG_DIR` when that variable is set, and
 `$HOME/.claude` otherwise. Resolve it once rather than assuming either:
 
 ```bash
-echo "${CLAUDE_CONFIG_DIR-$HOME/.claude}"
+echo "${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 ```
 
-Both the clone from step 1 and the rules file from step 4 live under that directory.
+Both the clone and the rules file from step 3 live under that directory.
 
-## Step 3 — confirm the documents landed
+## Step 2 — confirm the documents landed
 
 ```bash
-ls "${CLAUDE_CONFIG_DIR-$HOME/.claude}/plugins/marketplaces/epistemic-protocols/premise/"
+ls "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/marketplaces/epistemic-protocols/premise/"
 ```
 
 `AGENTS.md` should appear alongside the individual documents. Keep the absolute path this listed —
-step 4 needs it written out literally.
+step 3 needs it written out literally.
 
-## Step 4 — write the rules file
+## Step 3 — write the rules file
 
 Markdown files under `<config-dir>/rules/` load automatically. Create `rules/premise.md` there, with
 this content:
@@ -54,14 +54,15 @@ this content:
 ```markdown
 # Premise Layer
 
-The general principles behind these rules live outside this directory, at
+The general principles behind your operating rules live outside this directory, at
 `<PREMISE_PATH>` — a git clone the plugin manager keeps in sync.
 Read from it freely; never write to it.
 
-The split: files in this directory carry the operational side — when a principle fires here, what
-threshold applies, which tool or path it binds to, what this setup has settled on. The principle
-itself lives in `premise/`. When a rule here names a premise document, read that document before
-acting on a case its operational wording does not already settle.
+The split: your own rules — this directory and the rest of your configuration — carry the
+operational side: when a principle fires here, what threshold applies, which tool or path it binds
+to, what this setup has settled on. The principle itself lives in `premise/`. When one of your rules
+names a premise document, read that document before acting on a case its operational wording does
+not already settle.
 
 The index loads below. It names each document and the moment that calls for it, so the moment is
 recognized rather than recalled. The two documents that bear on every turn load with it; the rest
@@ -72,28 +73,32 @@ are read on demand when their trigger fires.
 @<PREMISE_PATH>/approach-verification.md
 ```
 
-Two things to get right:
+Three things to get right:
 
-- **Substitute every `<PREMISE_PATH>` with the absolute path from step 3.** `@` imports do not
+- **Substitute every `<PREMISE_PATH>` with the absolute path from step 2.** `@` imports do not
   expand environment variables, so `$CLAUDE_CONFIG_DIR` left in an import line will not resolve.
 - **Show the file before writing it.** It lands in a global configuration directory and takes effect
   in every session that person runs.
+- **Do not write over an existing `rules/premise.md`.** Someone who already has that file has their
+  own wiring — show them what you would add and let them decide where it goes.
 
 Why those three imports and not all of them: an always-loaded layer costs context on every turn, so
 it carries the index — which names each document and the moment that calls for it — plus the two
 documents that bear on every turn. The rest arrive when their moment does.
 
-## Step 5 — check it took
+## Step 4 — check it took
 
-Start a fresh session and ask the agent which premise document it would read before taking a
-hard-to-reverse action. A wired setup answers `boundaries-and-safety.md` from the loaded index; an
-unwired one guesses.
+Start a fresh session and run `/context`. The new rules file should be listed under **Memory
+files**. If it is missing there, it did not load and nothing above it took effect.
+
+As a second check, ask which premise document the agent would read before taking a hard-to-reverse
+action. A wired setup answers `boundaries-and-safety.md` from the loaded index.
 
 ## Keeping it current
 
 The plugin manager keeps the clone in sync with upstream, so these documents can change under a
 setup that points at it. For a copy that changes only when you say so, clone the repository yourself
-to a path you own and substitute that path in step 4 instead — the rest of the steps are unchanged.
+to a path you own and substitute that path in step 3 instead — the rest of the steps are unchanged.
 
 ## Adapting
 
