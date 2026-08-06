@@ -47,7 +47,7 @@ One unit is one execution interval is one entry, with that unit's conditions con
 - **Obligation reading is heuristic**: an obligation never uttered and never captured upstream will not be read, so coverage is hard only over what *was* read. The confirmation gate is where the omission becomes VISIBLE, not where it is corrected: `O_G` is fixed before Phase 1, and neither `Adjust` nor `Reopen` can add an unread obligation. Correcting it means stating the obligation and re-invoking.
 - **Seam evidence is often absent**: abstract goals frequently supply no evidenced joint, and heuristic cuts can leave duplicated setup or cross-unit state leakage.
 - **Horizon fit is an estimate**: judged before the run from the goal's description; the override path exists because the user often knows better.
-- **Predicate coverage**: subjective quality bars do not derive; they surface as residuals, not prose conditions.
+- **Predicate coverage**: subjective quality bars do not derive. Where sharpening could still produce a predicate, they surface as residuals rather than prose conditions; where a judgment and not a check is what settles the item, it is reserved instead — routing such an item to a residual would file a correct disposition as an accepted shortfall.
 - **No execution-time protection**: compile-time only — pre-action risks belong entirely to the harness substrate.
 
 ## Install
