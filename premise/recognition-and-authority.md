@@ -47,9 +47,9 @@ First-class standing is not unbounded authority: denotation stays open, provenan
 
 Detection with Authority defines the structural separation of roles; the operational stance that follows from it is this: when in doubt, surface the finding rather than making the decision silently. Silence is the primary failure mode this principle addresses.
 
-## Decision Tiering
+## Decision Tiering (Derived)
 
-A companion codification of the same authority split, framed by reversibility rather than by epistemic source.
+A companion codification of Detection with Authority's split, framed by reversibility rather than by epistemic source.
 
 - Reversible + Clear: execute, then summarize
 - Reversible + Ambiguous: ask, per the interview triggers below
