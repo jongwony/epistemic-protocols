@@ -14,8 +14,9 @@ The rest of this file routes to the first way, worked out concretely for each ho
 documents in so they stand as a reference layer.
 
 **If you are an agent and someone handed you this URL**: identify the host you are running in, then
-follow that one file end to end. Each is self-contained; following both would write two setups over
-each other.
+follow that one file end to end. A go-ahead checkpoint before the global write pauses that
+procedure; once the person gives it, resume the same procedure and complete the section or file
+addition. Each host file is self-contained; following both would write two setups over each other.
 
 - **[Claude Code](references/claude-code.md)** — the documents are imported into an always-loaded
   rules file, so the host itself puts them in context.
