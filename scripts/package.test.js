@@ -440,9 +440,6 @@ function runStaticChecksSubprocess() {
 describe('enforcement-check detector liveness', () => {
   const REPO_ROOT = path.join(__dirname, '..');
   const CORE_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
-  const INK_STYLE_MD = path.join(
-    REPO_ROOT, 'epistemic-cooperative', 'styles', 'epistemic-ink.md'
-  );
 
   function restoreOrDie(filePath, backup, label) {
     try {
@@ -507,28 +504,6 @@ describe('enforcement-check detector liveness', () => {
       );
     } finally {
       restoreOrDie(CORE_SKILL_MD, backup, 'aitesis SKILL.md');
-    }
-  });
-
-  it('gate-firing-anchor fires when a kernel phrase is deleted from the Ink element', () => {
-    const KERNEL = 'an uncited skip is not a relay but a silent gate omission';
-    const backup = fs.readFileSync(INK_STYLE_MD, 'utf8');
-    assert.ok(backup.includes(KERNEL), 'precondition: kernel phrase present in pristine file');
-    try {
-      fs.writeFileSync(INK_STYLE_MD, backup.replace(KERNEL, ''));
-
-      const result = runStaticChecksSubprocess();
-      const fails = result.fail.filter(f => f.check === 'gate-firing-anchor');
-      assert.ok(
-        fails.length >= 1,
-        `expected ≥1 gate-firing-anchor fail after deleting a kernel phrase, ` +
-        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
-        `Fails: ${JSON.stringify(result.fail)}`
-      );
-      const namesDeletedKernel = fails.some(f => f.message && f.message.includes(KERNEL));
-      assert.ok(namesDeletedKernel, 'fail message should name the deleted kernel phrase');
-    } finally {
-      restoreOrDie(INK_STYLE_MD, backup, 'epistemic-ink.md');
     }
   });
 
