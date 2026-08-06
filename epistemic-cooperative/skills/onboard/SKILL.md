@@ -394,7 +394,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
 - `/elicit` ↔ `/gap`: both surface "something wrong" but different targets — `/elicit` reverse-traces decision coordinates from substrate before action (Planning: axis-undetermined intent), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
 - `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis asks the user for facts (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
-- `/gap` ↔ `/apportion`: both about risk awareness but `/gap` audits decision quality before committing, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, or on an acceptance you recorded when none compiles — before an autonomous run
+- `/gap` ↔ `/apportion`: both about risk awareness but `/gap` audits decision quality before committing, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, on an acceptance you recorded when none compiles, or on a reservation where a judgment rather than a check settles it — before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)
