@@ -33,11 +33,12 @@ Horismos(T, B_prior?) → Probe(T) → Bᵢ? →
     Phase 3 (user-response: conservative parse(A) → (typed_A?, termination?, override?) — a commitment is recognized only when the whole response's decision-relevant meaning supports that reading; otherwise Phase 2 re-presents from A with the map unmutated; auto-resolved: typed_A = substrate-settled classification, no termination/override) →
       integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)                                      -- total current-cycle fold: classification updates the anchor; termination-only residualizes it and returns B' = B with the empty delta
       crystallize(Δessence, BoundaryEssence) → BoundaryEssence'                                      -- sole producer of the accumulated essence; the empty delta is the identity
+      refresh B'-snapshot with the current default_for_residual                                       -- BEFORE the branch below, on EVERY fold including a terminating one: a just-residualized anchor gets its provisional entry here, so every route below reads a complete map
       ImplicitTermination: → TERMINAL CARRIERS (Phase 3 row) → DefinedBoundary → converge
                             -- "default" is Λ.default_for_residual at entry to Phase 3 (the value Phase 2 surfaced); NOT re-derived
       ExplicitTermination: → Phase 4
       Esc:                 → ungraceful deactivate (residual untreated, BoundaryEssence finalized at current cycle_n)
-      else:                → derive(EssenceTrend, history') → default' for NEXT cycle (kind-general; count-only over the uniform disposition) → refresh B'-snapshot → cycle_n += 1, loop
+      else:                → derive(EssenceTrend, history') → default' for NEXT cycle (kind-general; count-only over the uniform disposition) → re-snapshot with default' → cycle_n += 1, loop
   Phase 4 (optional path) Qf(residual, FinalGateDisposition) → Stop → TERMINAL CARRIERS (Phase 4 row) → DefinedBoundary
                        Esc → ungraceful deactivate
 
@@ -54,8 +55,9 @@ TaskScope, B_prior?
   → classify(domain, as_inquiry) → typed_A ∈ BoundaryClassification               -- per-cycle object_ref(kind) classification by the uniform settlement disposition (the captured kind sets the content of each disposition option; the 4-value coproduct itself is kind-invariant)
   → integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)       -- total current-cycle fold; does NOT update default_for_residual
   → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'      -- sole producer of the accumulated essence; the empty delta is the identity
-  → derive(EssenceTrend, history') → default'                      -- count-based EssenceTrend → DefaultClassification for NEXT cycle's residual (runs on loop continuation; count-only over the uniform disposition, so the derivation is kind-general — it reads disposition counts, never kind-specific content)
-  → snapshot(B', residual, residual_default) → B_complete'         -- round-local complete BoundaryMap view, refreshed after EVERY fold — termination included, where it is what gives a just-residualized anchor its provisional entry: classified entries ∪ (residual ↦ residual_default), where residual_default = default' on continuation (re-derived per cycle from the disposition trend) and the current default_for_residual on termination
+  → snapshot(B', residual, default_for_residual) → B_complete'     -- refreshed after EVERY fold, termination included, and BEFORE any terminal route below: this is what gives a just-residualized anchor its provisional entry — classified entries ∪ (residual ↦ default_for_residual), at the value Phase 2 surfaced
+  → derive(EssenceTrend, history') → default'                      -- count-based EssenceTrend → DefaultClassification for NEXT cycle's residual (runs on loop continuation ONLY; count-only over the uniform disposition, so the derivation is kind-general — it reads disposition counts, never kind-specific content)
+  → snapshot(B', residual, default') → B_complete''                -- continuation only: supersedes B_complete' for the cycle about to open
   → [finalize | bulk_classify | identity] → Λ.boundary_map         -- terminal operation selected by the reachable convergence path; source, write, and final value are defined once in TERMINAL CARRIERS
   → DefinedBoundary
 requires: boundary_undefined(T)            -- runtime checkpoint (Phase 0); sole activation precondition. (certificate.status = pass is the Phase-0b value-space-BINDING gate, NOT an activation precondition — it lives in the certificate-before-binding invariant below and the Phase 0b → Phase 1 transition; route/ambiguous status routes/re-syncs inside Phase 0b rather than blocking activation.)
@@ -166,9 +168,9 @@ Phase 2: Sub-D[cycle_n], kind, BoundaryClassification, BoundaryEssence, cycle_n,
 Phase 3: (user-response: A → conservative parse(A) → (typed_A?, termination?, override?)) | (auto-resolved: typed_A = substrate-settled classification from Phase 1 step 4, no termination/override)
        → integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)                                             -- total cycle fold: a classification updates the anchor; a termination-only reading residualizes it and returns B' = B with the empty delta
        → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'                                            -- sole producer of the accumulated essence; the empty delta is the identity
-       → (only on loop continuation) derive(EssenceTrend, history') → default'                                -- next-cycle default (track + sense); EssenceTrend re-derivation is kind-general (count-only over the uniform disposition)
-       → snapshot(B', Λ.residual, default' on continuation | default_for_residual on termination) → B_complete'
-                                                                                                              -- ALWAYS, termination folds included: the round-local completeness invariant holds after EVERY fold, so a just-residualized anchor carries its provisional entry before any terminal write reads it
+       → snapshot(B', Λ.residual, default_for_residual) → B_complete'                                         -- ALWAYS, termination folds included, and BEFORE any route: the round-local completeness invariant holds after EVERY fold, so a just-residualized anchor carries its provisional entry before any terminal write reads it
+       → (only on loop continuation) derive(EssenceTrend, history') → default' → snapshot(B', Λ.residual, default') → B_complete''
+                                                                                                              -- next-cycle default (track + sense), then the snapshot that supersedes B_complete' for the cycle about to open; EssenceTrend re-derivation is kind-general (count-only over the uniform disposition)
 Phase 4 (optional): residual, BoundaryEssence → Qf(residual, FinalGateDisposition) → Stop → Λ.final_gate_answers
                                                                                                               -- final gate [Tool], reached via ExplicitTermination or Phase 1 substrate exhaustion; FinalGateDisposition = {UserSupplies, AIAutonomous}, every kind
 
