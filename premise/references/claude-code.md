@@ -1,55 +1,51 @@
-# Setting up this layer — Claude Code
+# Premise host adapter — Claude Code
 
-[`AGENTS.md`](../AGENTS.md) beside these documents describes what they are and the two ways to
-adopt them: link to them, or copy the parts you want. This file covers the first way concretely —
-how to wire the documents into a Claude Code setup so they load as a standing reference layer.
+Use this adapter with the [shared setup procedure](../README.md). If someone handed you this page
+directly, read the shared procedure first, then return here and carry the combined procedure through
+verification.
 
-**If you are an agent and someone handed you this URL**: the steps below are yours to run. Step 3
-writes into that person's global configuration directory, so show them the file first and get their
-go-ahead before writing it.
-
-## What you end up with
-
-- The premise documents on disk, kept in sync by Claude Code's plugin manager.
-- One always-loaded rules file that states the split between the general principles (these
-  documents) and the operating rules of the host setup, and that loads the document index plus the
-  documents bearing on every turn.
-- Every other document reachable on demand, at the moment the index names for it.
+**Scope**: Claude Code running locally, with its configuration directory and marketplace files on
+the same machine. An isolated run needs the layer established on its own instruction surface.
 
 ## Prerequisite
 
-This repository's marketplace is already added — that is what puts these documents on disk, and the
-[root README](../../README.md)'s install covers it. For this reference layer alone, without any of the
-protocol plugins, adding the marketplace by itself is enough:
+The repository marketplace must already be added. For the premise layer alone, adding the
+marketplace is sufficient:
 
 ```bash
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 ```
 
-## Step 1 — resolve the configuration directory
+## Host bindings
 
-Claude Code's configuration directory is `$CLAUDE_CONFIG_DIR` when that variable is set, and
-`$HOME/.claude` otherwise. Resolve it once rather than assuming either:
+### Configuration root
 
-```bash
-echo "${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-```
-
-Both the clone and the rules file from step 3 live under that directory.
-
-## Step 2 — confirm the documents landed
+Claude Code uses `$CLAUDE_CONFIG_DIR` when it is set and `$HOME/.claude` otherwise:
 
 ```bash
-ls "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/marketplaces/epistemic-protocols/premise/"
+config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+printf '%s\n' "$config_dir"
 ```
 
-`AGENTS.md` should appear alongside the individual documents. Keep the absolute path this listed —
-step 3 needs it written out literally.
+### Premise root discovery
 
-## Step 3 — write the rules file
+The managed marketplace lives under the resolved configuration root:
 
-Markdown files under `<config-dir>/rules/` load automatically. Create `rules/premise.md` there, with
-this content:
+```bash
+premise_path="$config_dir/plugins/marketplaces/epistemic-protocols/premise"
+printf '%s\n' "$premise_path"
+ls "$premise_path"
+```
+
+Use the printed `premise_path` as the literal absolute `<PREMISE_PATH>` in the template below.
+
+### Delivery mechanism and global surface
+
+Markdown files under `<config-dir>/rules/` load automatically, and `@` imports in them load the
+referenced files. Import paths are literal, so the wiring session resolves the configuration root
+before writing them. The target is `<config-dir>/rules/premise.md`.
+
+Create that file with this content after applying the shared procedure's preview and approval gate:
 
 ```markdown
 # Premise Layer
@@ -73,37 +69,11 @@ are read on demand when their trigger fires.
 @<PREMISE_PATH>/approach-verification.md
 ```
 
-Three things to get right:
+An existing `rules/premise.md` is an existing wiring decision. Show the proposed integration and
+let the person decide how it joins that file; do not replace it as though it were empty.
 
-- **Substitute every `<PREMISE_PATH>` with the absolute path from step 2.** `@` imports do not
-  expand environment variables, so `$CLAUDE_CONFIG_DIR` left in an import line will not resolve.
-- **Show the file before writing it.** It lands in a global configuration directory and takes effect
-  in every session that person runs.
-- **Do not write over an existing `rules/premise.md`.** Someone who already has that file has their
-  own wiring — show them what you would add and let them decide where it goes.
+### Verification
 
-Why those three imports and not all of them: an always-loaded layer costs context on every turn, so
-it carries the index — which names each document and the moment that calls for it — plus the two
-documents that bear on every turn. The rest arrive when their moment does.
-
-## Step 4 — check it took
-
-Start a fresh session and run `/context`. The new rules file should be listed under **Memory
-files**. If it is missing there, it did not load and nothing above it took effect.
-
-As a second check, ask which premise document the agent would read before taking a hard-to-reverse
-action. A wired setup answers `boundaries-and-safety.md` from the loaded index.
-
-## Keeping it current
-
-The plugin manager keeps the clone in sync with upstream, so these documents can change under a
-setup that points at it. For a copy that changes only when you say so, clone the repository yourself
-to a path you own and substitute that path in step 3 instead — the rest of the steps are unchanged.
-
-## Adapting
-
-The three imports above are one setup's choice, not a required set. Any subset works: a document you
-adopt governs the general principles within the scope you adopted it for, and a document you have
-not adopted governs nothing — `AGENTS.md` states that scoping rule. If your host is not Claude Code,
-the mechanism differs but the shape does not: put the index wherever your instructions always load,
-and reach the rest at the moment its entry names.
+Start a fresh session and run `/context`. The target rules file and its three imports should appear
+under **Memory files**. Then run the shared procedure's complete-entry question for
+`matching-the-request.md`.
