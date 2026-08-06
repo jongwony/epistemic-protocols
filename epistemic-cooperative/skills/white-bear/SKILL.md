@@ -11,7 +11,7 @@ A semantic audit of LLM-facing prose for the White Bear authoring principle: kee
 
 ## Purpose
 
-Surface prose that holds the model's attention on an unnecessary competing target, before it ships. Three forms of one failure: **prohibition framing** names a forbidden act, **superseded-path mention** names a retired path, **negated anchoring** names a rejected alternative — each keeps the non-target available as a competing action candidate. This drift survives deterministic structural checks — it is a meaning-level pattern, so a semantic reviewer catches what literal pattern matching cannot.
+Surface prose that holds the model's attention on an unnecessary competing target, before it ships. **Prohibition framing** names a forbidden act, **superseded-path mention** names a retired path, **negated anchoring** names a rejected alternative — each keeps the non-target available as a competing action candidate. This drift survives deterministic structural checks — it is a meaning-level pattern, so a semantic reviewer catches what literal pattern matching cannot.
 
 ## Inputs
 

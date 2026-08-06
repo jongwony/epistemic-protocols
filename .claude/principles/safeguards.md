@@ -40,7 +40,7 @@ Methodology for SKILL.md `## Rules` consolidation. Each rule is classified by so
 | Tier | Source | Action |
 |---|---|---|
 | 1. Axiom anchor | A1-A6 (in `premise/`) | KEEP. 1-2 line restatement with axiom name inline; do NOT use the `(Aₙ)` label form per Plugin Encapsulation source-leak prohibition |
-| 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Pattern over Tool, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation, Zero-Shot Instruction Preference) | KEEP. Anchor reference using principle name |
+| 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation) | KEEP. Anchor reference using principle name |
 | 3. Architectural project-specific | Architectural principles or protocol Core Principle | KEEP. Paragraph-length rules migrate body to Phase prose or UX Safeguards table; invariant 1-line stays in Rules |
 | 4. Cross-protocol | Rule about distinction with another protocol | Move to "Distinction from Other Protocols" section |
 | 5. Safeguard tier | This file's principles or Trajectory Candidates table match | Mark Safeguard tier explicitly + inline the Actionable revision criterion (Compiled-copy consumers pattern) |
@@ -88,7 +88,7 @@ Full text — rationalization paths a protocol must anticipate (premature conver
 
 ## White Bear Avoidance
 
-General principle (the base-rate condition for stating a prohibition, the ironic-process rationale, the three forms — prohibition framing, superseded-path mention, negated anchoring — the placement distinction between runtime motivating prose and diagnostic substrate, and the rewrite test): `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
+General principle (the base-rate condition for stating a prohibition, the ironic-process rationale, the forms it distinguishes — prohibition framing, superseded-path mention, negated anchoring — the placement distinction between runtime motivating prose and diagnostic substrate, and the rewrite test): `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
 
 **This project's grounding observation** (the evidence behind the prohibition form's strongest-evidenced status recorded in the Tier note below): pattern observed across multiple LLM-facing updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs. The general rule travels; this instance stays because it names this repository's own Output Style surface.
 

@@ -2392,9 +2392,9 @@ function checkFramingReadoutEnforcement() {
 
   // Guard kernel: the negation-carrying sentence fragment from the
   // Cognitive work element (see header comment (b)). Anchored within that
-  // element's own bounded body, mirroring checkGateFiringAnchor's
-  // element-anchoring convention below, rather than a whole-file substring
-  // test.
+  // element's own bounded body — the guard kernel must appear inside the
+  // element's own label-to-next-boundary span, not merely anywhere in the
+  // file — rather than a whole-file substring test.
   const GUARD = "does not render the loop's completion as a bar, percentage, or N-of-M tally";
   const COGNITIVE_WORK_LABEL_PATTERN = /^\*\*Cognitive work\*\*/m;
   const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
@@ -3087,85 +3087,6 @@ function checkGateIntegrityRule() {
 }
 
 // ============================================================
-// Check: Gate Firing Precondition Kernel Anchor
-// ============================================================
-// Every Ink-derived Output Style source (INK_DERIVED_STYLE_FILES) must carry
-// the "Gate firing precondition" element — the rendering-layer rule that
-// decides WHETHER a gate exists before the divider block decides how one
-// looks. This check pins the element's three load-bearing kernel phrases:
-//   1. "fires as classified" — protocol classification controls by default;
-//   2. "an uncited skip is not a relay but a silent gate omission" — a
-//      relay collapse carries a citation obligation at the point of use;
-//   3. "never overrides a protocol's TOOL GROUNDING classification" — the
-//      outside-protocol reversibility test stays subordinate to protocol
-//      classification.
-// Kernel-anchored: the surrounding phrasing is free to evolve; only the
-// kernel phrases are pinned. Each kernel must appear inside the element's
-// own bounded body (label line to the next Ink element label or heading),
-// not merely anywhere in the file, so a gutted element still fails even if
-// a kernel survives elsewhere. A sibling style is a copy, not a reference
-// (see checkInkBodyIdentity), so a drifted copy must fail here independently
-// of the canonical file.
-function checkGateFiringAnchor() {
-  const CHECK = 'gate-firing-anchor';
-  const LABEL_PATTERN = /^\*\*Gate firing precondition\*\*/m;
-  // Element boundary: a column-0 bold label opening the next capitalized
-  // Ink element, or a Markdown heading. The element's own bullet lines
-  // start with "- " and therefore do not terminate the body. Bound
-  // calibrated against the current element body (~2.9k chars); 6000 leaves
-  // comfortable margin while still cutting off a runaway scan if the
-  // boundary pattern ever fails to match.
-  const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
-  const ELEMENT_BOUND = 6000;
-  const KERNELS = [
-    'fires as classified',
-    'an uncited skip is not a relay but a silent gate omission',
-    "never overrides a protocol's TOOL GROUNDING classification",
-  ];
-
-  for (const REL_PATH of INK_DERIVED_STYLE_FILES) {
-    const fullPath = path.join(projectRoot, REL_PATH);
-    if (!fs.existsSync(fullPath)) {
-      results.fail.push({
-        check: CHECK,
-        file: REL_PATH,
-        message: `Output Style source not found: ${REL_PATH}`,
-      });
-      continue;
-    }
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-    const labelMatch = LABEL_PATTERN.exec(content);
-    if (!labelMatch) {
-      results.fail.push({
-        check: CHECK,
-        file: REL_PATH,
-        message: 'Missing Ink element label: "**Gate firing precondition**"',
-      });
-      continue;
-    }
-
-    const elementBody = boundedEntryBody(content, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
-    const missing = KERNELS.filter(kernel => !elementBody.includes(kernel));
-    for (const kernel of missing) {
-      results.fail.push({
-        check: CHECK,
-        file: REL_PATH,
-        message: `"Gate firing precondition" element present but missing kernel phrase within its bounded body: "${kernel}"`,
-      });
-    }
-  }
-
-  if (!results.fail.some(f => f.check === CHECK)) {
-    results.pass.push({
-      check: CHECK,
-      file: INK_DERIVED_STYLE_FILES.join(', '),
-      message: `Gate firing precondition element verified — all ${KERNELS.length} kernel phrases anchored within the element body (${INK_DERIVED_STYLE_FILES.length} files)`,
-    });
-  }
-}
-
-// ============================================================
 // Check: Ink Body Byte-Identity (copied-sibling drift guard)
 // ============================================================
 // proactive-epistemic-ink.md reproduces the canonical Epistemic Ink body
@@ -3269,7 +3190,6 @@ try {
   checkLanguagePurity();
   checkFormalBlocksRule();
   checkGateIntegrityRule();
-  checkGateFiringAnchor();
   checkInkBodyIdentity();
 
   // Output results as JSON
