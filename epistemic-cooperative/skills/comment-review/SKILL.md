@@ -109,13 +109,9 @@ To keep commenting / disposing, do not yet answer the gate — keep drag-comment
 - First gate after an `apply + scan` round with 0 new comments and ≥1 surfaced finding → `apply` is the recognizable default if the user has clear disposition intent on the sidepanel findings (typical: dispose via clicks then `apply` to translate); `apply + scan` if the user wants AI to re-evaluate after their changes — but still surface the gate.
 - Multi-artifact: each artifact has its own browser tab + JSONL + loop counter; the branch gate is **per-artifact**. Aggregating would let one artifact's pacing block another (Rule 8 multi-artifact-first-class).
 
-## Scope Differentiation (Suppression Bypass)
+## Scope Differentiation
 
-The composition relies on two protocol-local suppression guards:
-- `aitesis/skills/inquire/SKILL.md`'s **Cross-protocol fatigue** guard — Syneidesis triggered → suppress Aitesis for the same task scope
-- `epharmoge/skills/contextualize/SKILL.md`'s **Cross-protocol cooldown** guard — suppress Epharmoge when Aitesis has resolved in the same scope with overlapping domains/aspects
-
-Both fire only on same-scope co-activation. This composition keeps scopes structurally distinct:
+The four sub-protocols run in one pipeline because their scopes do not overlap. Each occupies a distinct layer and temporal zone, so no two of them are answering the same question about the artifact:
 
 **Named primary scopes (working hypotheses)**:
 - `/inquire` — factual verifiability of artifact claims (fact layer, pre-fixation temporal zone)
@@ -123,7 +119,7 @@ Both fire only on same-scope co-activation. This composition keeps scopes struct
 - `/gap` — decision quality w.r.t. fixation event D (decision layer, pre-fixation temporal zone, distinct dimension)
 - `/contextualize` — application fit of fixed artifact against `application_context` (post-fixation temporal zone)
 
-**Suppression analysis for `/sublate`**: the pipeline order `aitesis → elenchus` (collected context provides audit substrate), `elenchus → syneidesis` (vetted context sharpens gap detection), and `elenchus → epharmoge` (vetted pre-state contextualizes post-execution check) reflects this dependency directly. Neither of the two suppression guards above names Elenchus; `/sublate`'s scope (source-decay layer) does not collide with `/inquire`'s factual-presence scope, `/gap`'s decision-point scope, or `/contextualize`'s post-execution scope.
+**Scope analysis for `/sublate`**: the pipeline order `aitesis → elenchus` (collected context provides audit substrate), `elenchus → syneidesis` (vetted context sharpens gap detection), and `elenchus → epharmoge` (vetted pre-state contextualizes post-execution check) reflects this dependency directly. `/sublate`'s scope (source-decay layer) does not collide with `/inquire`'s factual-presence scope, `/gap`'s decision-point scope, or `/contextualize`'s post-execution scope.
 
 **Emergent clause**: Named scopes are working hypotheses per the Full Taxonomy Confirmation principle. Runtime boundary cases — where a finding could legitimately belong to more than one scope — resolve by **attribution priority**: Factual > Source-Vetting > Decision > Application. When a finding remains ambiguous after priority assessment, record under both scopes with `origin: ambiguous` annotation and surface at the first applicable sub-protocol surfacing gate in the pipeline. Silent attribution drift is a protocol violation; explicit dual-record preserves auditability.
 
@@ -146,7 +142,7 @@ Invoke `/sublate` over the artifact-internal sources surfaced during `/inquire` 
 - **D-binding**: caller-supplied `fixation_event D` is the pre-execution sync that warrants vetting; `/sublate`'s User-initiated activation precondition is satisfied by the user's invocation of `/comment-review` over an artifact targeting `D`
 - **Information source**: `/inquire`'s factual track output plus prior-collected sources cited by the artifact
 - **Conditional no-op**: artifacts with no high-leverage / aged / chained / contradicting source trigger a silent no-op (Phase 0 yields S_high = ∅, trivial convergence) — continue with Step 3 (gap) of the `apply + scan` round's scan step
-- **Suppression precondition**: no suppression edge fires — `/sublate` shares no scope with `/inquire`, `/gap`, or `/contextualize` (see Scope Differentiation above)
+- **Scope precondition**: `/sublate` shares no scope with `/inquire`, `/gap`, or `/contextualize` (see Scope Differentiation above)
 - **Constitution venue shift**: per-source disposition judgment moves from in-round chat to next-round sidepanel; Constitution semantics (user judges every audit-candidate source) preserved cross-round
 
 ## Scan Step 3: Decision-Quality Gap Audit (`/gap`)
@@ -164,7 +160,7 @@ Common gaps across artifact types:
 - **Scope**: decision quality w.r.t. fixation event D (decision layer)
 - **D**: caller-supplied fixation_event
 - **Stakes**: caller-supplied; default High for irreversible D, Medium otherwise
-- **Suppression precondition**: `syneidesis ⊣ aitesis` does NOT fire — distinct scope dimensions (factual layer vs decision layer)
+- **Scope precondition**: `/gap` and `/inquire` occupy distinct scope dimensions (decision layer vs factual layer)
 - **Constitution venue shift**: `/gap`'s per-gap disposition (Address / Dismiss / Probe) does not fire as an in-round chat gate; the coproduct is rendered as the disposition affordance attached to each gap finding's TaskList entry, judged by the user in the next round's sidepanel
 
 **Double-/gap composition note**: When `/comment-review` is called downstream of `/write` (i.e., `/write` produces a draft that `/comment-review` then reviews), both skills invoke `/gap` at distinct scopes — `/write`'s internal Phase 7 `/gap` audits draft-quality gaps (procedural / duplicate / consideration within the artifact), while `/comment-review`'s Scan Step 3 `/gap` audits decision-quality gaps w.r.t. fixation event `D`. The scope distinction preserves the scope-differentiation invariant; composition is not redundant.
@@ -181,7 +177,7 @@ Invoke `/contextualize` with `application_context` as `X`. Scans for Convention 
 - **Scope**: application fit of fixed artifact against application_context (post-fixation)
 - **X**: caller-supplied application_context
 - **Information source**: post-apply artifact state (after this round's apply step processed the queued JSONL) + standard post-execution applicability scan
-- **Suppression precondition**: `aitesis ⊣ epharmoge` does NOT fire — distinct temporal scopes (pre-fixation vs post-fixation)
+- **Scope precondition**: `/contextualize` and `/inquire` occupy distinct temporal scopes (post-fixation vs pre-fixation)
 - **Constitution venue shift**: `/contextualize`'s per-mismatch disposition (Confirm / Adapt / Dismiss) does not fire as an in-round chat gate; the coproduct is rendered as the disposition affordance attached to each mismatch finding's TaskList entry, judged by the user in the next round's sidepanel
 
 ## Channel Modality
@@ -321,7 +317,7 @@ Suffix-replay rules (apply within a single `apply + scan` round's scan step — 
 ## Rules
 
 1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/comment-review` orchestrates; it does not duplicate sub-protocol gate definitions.
-2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 4-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
+2. **Scope differentiation is structural** — this pipeline keeps its sub-protocols' scopes distinct via the named 4-scope + Emergent clause, so no two of them answer the same question about the artifact. Chains that collapse scopes violate this rule.
 3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
 4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered artifact is the user's first input layer (Vorverständnis); the render substrate is the artifact as it will be consumed — marked for markdown, direct Shadow-DOM render for HTML — and that rendered surface is itself a review surface, not merely a feedback collection mechanism (rendering visibility — markdown cadence, HTML layout/CSS — is where applicability mismatches become visible). Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/comment-review` without channel would be a different skill.
 5. **Feedback consumption is single-shot per comment with latest-timestamp dedup, on a fresh Read each apply** — both round modes archive consumed lines at the apply step (clear comments + disposition signals translated; ambiguous/conflicting comments deferred). The apply step's input is a fresh Read of `feedback-{slug}.jsonl` taken when the user answers the round-mode gate; any prior in-session Read of this file is informational only and does not seed consumption, since the browser may have appended lines between any earlier Read and the gate answer. `apply + scan` and `apply` archive identically at the apply-step level; the difference is whether a scan step also runs after. Each comment is consumed exactly once across the loop's lifetime. Entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp at the moment of consumption.

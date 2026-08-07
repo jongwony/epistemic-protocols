@@ -412,7 +412,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - a factual question whose codebase evidence is present and current but not provenance-coupled to the claim or not coupled to the behavior it asserts — routed to a test/observation rather than trusted as-is (and escalated with a `support_integrity:unverified` note only if that observation is blocked)
   - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
   - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
-  - a consistency question spanning multiple scopes — routed to a downstream protocol
+  - a consistency question spanning multiple scopes — outside Aitesis's resolution scope, recorded as detected but unresolved
   - a relevance question — outside Aitesis's resolution scope, flagged for the user
   - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
