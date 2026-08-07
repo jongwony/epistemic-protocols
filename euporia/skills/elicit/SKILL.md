@@ -61,12 +61,12 @@ D_surfaced     = List(DimensionProjection)     -- this cycle's surfaceable proje
 A              = UserAnswer ∈ {Provide(values), Defer(coords), Dismiss}   -- per-coordinate answer
                  values         = Map(Coordinate, Value)
                  coords         = Set(Coordinate) -- parked for a later cycle (covers ambiguous/partial/not-yet-answerable)
-no_advance(A)  ≡ A = Defer(coords) ∧ coords ⊇ surfaced_coordinates(cycle)  -- every coordinate surfaced this cycle was deferred, so integrate added nothing and I' is unchanged; a re-trace at this fixed I'-state is deterministic-identical, so the cycle would repeat
+no_advance(A)  ≡ integrate(A, I) leaves Λ.accepted_coords unchanged  -- no coordinate was answered this cycle, so I' is unchanged; a re-trace at this fixed I'-state is deterministic-identical, so the cycle would repeat
 R              = ResolvedEndpoint { intent_resolved: I', residual: Set(Axis ⊎ DeferredResidual ⊎ ParkedCoordinate) }
                  -- residual members are tagged: Axis = an unresolved axis delegated to a downstream protocol; DeferredResidual = a projection the confidence filter parked; ParkedCoordinate = a coordinate the user deferred. None is reduced to a bare axis label or silently dropped
 DeferredResidual = { projection: DimensionProjection, basis: Evidence }
                  -- a projection still in Λ.deferred at convergence, surfaced as residual with its substrate basis
-ParkedCoordinate = { coordinate: Coordinate, parked_at: cycle_n }
+ParkedCoordinate = { coordinate: Coordinate }
                  -- a coordinate the user answered Defer on: held in Λ.parked and re-surfaced as itself in later cycles, folded into residual if still unanswered at any termination.
                  -- Distinct from DeferredResidual by BOTH reason and return path: that one parks a PROJECTION the AI could not ground in the substrate and re-tries it only when I' advances; this one parks a COORDINATE the user could not answer yet and brings it back unchanged
 resolved(I')   = ∂(intent) ≈ 0 (user constitutive judgment)
