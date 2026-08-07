@@ -49,7 +49,7 @@ An always-loaded, durable instruction layer is expensive: every entry in it must
 
 ## Subtraction at Revision Time
 
-The accounting that governs what enters a durable layer binds again at a second moment: opening an always-loaded surface in order to change it puts the entries already on it back in scope, none of them exempt for having been justified once. Establish the subtraction candidates before settling what the change adds, and let the obligations the audit exposes shape what is added. The audit ranges over the surface being opened and runs against its state as opened, so a candidate it produces is not itself a further occasion.
+The accounting that governs what enters a durable layer binds again at a second moment: opening an always-loaded instruction surface in order to change it puts the entries already on it back in scope, none of them exempt for having been justified once. Establish the subtraction candidates before settling what the change adds, and let the obligations the audit exposes shape what is added. The audit ranges over the surface being opened and runs against its state as opened, so a candidate it produces is not itself a further occasion.
 
 The asymmetry this corrects is structural. An addition arrives with an author and an occasion; a removal has neither unless someone goes looking, so a surface accumulates by default and each entry carries a presumption of justification attached to the moment it was written rather than to the present one. Revision is the occasion that supplies the missing author.
 
