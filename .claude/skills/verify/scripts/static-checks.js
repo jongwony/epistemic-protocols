@@ -16,7 +16,6 @@ const { runLanguagePurityCheck } = require('./language-purity');
 const {
   discoverPlugins,
   protocolFiles,
-  CANONICAL_PRECEDENCE: CANONICAL_PRECEDENCE_ARR,
   CANONICAL_CLUSTERS,
 } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
 // __dirname-anchored require (absolute regardless of the projectRoot arg) so the
@@ -37,8 +36,6 @@ const _records = discoverPlugins({ projectRoot });
 const _protocolRecords = _records.filter(r => r.isProtocol);
 
 const PROTOCOL_FILES = protocolFiles({ projectRoot });
-
-const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
 
 // Protocol display name → {deficit, resolution}. Derived from per-protocol
 // SKILL.md description Type signature; capitalize(dir) for display name.
