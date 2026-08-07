@@ -373,7 +373,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 - User explicitly says "looks good" or "proceed" after execution
 - Trivial or mechanical execution (formatting, typo fixes, rename)
 - Read-only / exploratory task — no result to evaluate
-- Same (aspect, description) pair was closed with a **user-assigned** Keep in the current session (session immunity). A relay-assigned Keep — the AI's own retraction, `assigned_by = relay` — grants no immunity across TARGET SUCCESSION: once an Adapt advances `Λ.R`, that aspect is evaluated again against the new target and the recomputed `Λ.fit_map`
+- Same (aspect, description) pair was closed in the current session with an **accepted** Keep — `judgment ∈ {Some(Upheld), None}` (session immunity). A **retraction** — a Keep carrying `judgment = Some(Overruled)`, answered at Qc or relay-assigned alike — grants no immunity across TARGET SUCCESSION: once an Adapt advances `Λ.R`, that aspect is evaluated again against the new target and the recomputed `Λ.fit_map`
 
 ### Mode Deactivation
 
@@ -542,8 +542,8 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 |------|-----------|--------|
 | Gate specificity | `activate(Epharmoge) only if correct(R) ∧ ∃ ¬warranted(a, R, X)` | Prevents false activation on well-fitting results |
 | Mismatch cap | One mismatch per Phase 1 cycle, severity order | Prevents post-execution question overload |
-| Session immunity | (aspect, description) closed with a USER-assigned Keep → skip for session | Respects the user's acceptance |
-| Relay retraction is not immune | a relay-assigned Keep (`assigned_by = relay`) carries no user acceptance, so it grants no immunity across TARGET SUCCESSION: after an Adapt advances Λ.R, the aspect is evaluated again against the new target and the new Λ.fit_map | The correction path stays open, which is what the relay classification rests on |
+| Session immunity | (aspect, description) closed with an accepted Keep (`judgment ∈ {Some(Upheld), None}`) → skip for session | Respects the user's acceptance |
+| A retraction is not immune | a Keep carrying `judgment = Some(Overruled)` — answered at Qc or relay-assigned alike — grants no immunity across TARGET SUCCESSION: after an Adapt advances Λ.R, the aspect is evaluated again against the new target and the new Λ.fit_map | A retraction claimed fit against the earlier target, so the correction path stays open |
 | Current-mismatch framing | Phase 1 surfaces the mismatch currently in play (which applicability aspect is being judged this cycle) — a framing readout, not an `[N addressed / M]` completion count | User recognizes which aspect is being judged without parsing a progress tally; granular progress stays in session |
 | Deterministic selection | `SelectNext` orders pending mismatches by severity, FitRank, then oldest registered task | Removes unordered Set indexing from user-facing surfacing |
 | Fit-map cap | `depends`/`open` only when observable evidence could change which disposition is chosen | Prevents broad contextual caveat lists |
