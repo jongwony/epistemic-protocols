@@ -366,7 +366,7 @@ seam                 (extension)    → TextPresent+Proceed (two seams, scoped s
 -- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 Two-way advisory with /conduct, neither direction a precondition, both guarded against reentry (Rule 9). A unit
 /conduct could not place a move for travels back separately, as an owed re-apportionment — a third, distinct edge.
 This protocol is never the owed resolver for a reserved item: a re-invocation would reproduce the same reservation,

@@ -139,7 +139,7 @@ Phase ∈ {0, 1, 2, 3}
 -- no mode field (frame has no user-chosen mode): the framed output is discriminated at Phase 3 by substrate specialization need (LensReturn vs SubstrateCorrespondence), not by a Phase 0 choice. The section name is the cross-protocol structural-state slot, not a "mode" toggle.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

@@ -28,10 +28,10 @@ All protocols share this structure within `Definition` code block:
 ```
 
 **COMPOSITION block details**:
-- Coverage: present in all protocol SKILL.md files except anagoge (`anagoge/skills/ascend/SKILL.md` carries no COMPOSITION block). Files that carry it share the opening operator line (`*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. … resolution emergent via session context.`), with the resolution-domain noun worded per protocol; several protocols append protocol-specific composition rationale below the operator line
-- `*` denotes the composition operator (categorical product on deficit/resolution). Distinct from graph.json `"source": "*"` wildcard (precondition scope)
-- `registered dependency edges preserved`: precondition, advisory, and suppression edges (registered in `graph.json`) remain enforced within composite execution. DAG ordering governs dimension detection sequence; suppression prevents co-activation of overlapping pairs
-- `Dimension resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
+- Coverage: present in every core protocol `SKILL.md` except anagoge (`anagoge/skills/ascend/SKILL.md` carries no COMPOSITION block). Files that carry it share the opening operator line `*: product — (D₁ × D₂) → (R₁ × R₂).` followed by the protocol's own resolution-emergence sentence; protocol-specific composition rationale may follow
+- `*` denotes the composition operator (categorical product on deficit/resolution): `D₁ × D₂` is the composite domain and `R₁ × R₂` the composite codomain
+- The operator fixes the composite domain and codomain and nothing between them. Each participating protocol's own formal blocks supply its runtime-normative deficit-to-resolution contract during composition
+- `<X> resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
 - `*` is a runtime deficit product (Active authority, session-level), distinct from pre-committed gate-chain pipelines (Standing authority)
 
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.

@@ -126,7 +126,7 @@ seam               (extension)   → TextPresent+Proceed (fires at deactivation/
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

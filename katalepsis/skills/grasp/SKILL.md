@@ -171,7 +171,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆ Λ.routeMap.entry_point; every selected entry point has an artifact anchor in Λ.routeMap.artifact_anchor before Phase 2 materialization.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

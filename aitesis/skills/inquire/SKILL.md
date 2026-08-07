@@ -224,7 +224,7 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 --       source_choice_overrides: logged when UserTacit is selected over cheaper EvidenceSource with cited dominance basis (Cite-or-observe dominance); audit trail supports variation-stable observed use for cost-ordering
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

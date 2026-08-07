@@ -116,7 +116,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Pattern resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Pattern resolution emergent via session context.
 ```
 
 ## Core Principle

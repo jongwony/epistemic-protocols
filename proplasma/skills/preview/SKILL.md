@@ -321,7 +321,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 -- Guard at terminal: discard_declared(Λ) — every probe carries a declared Disposition
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Direction resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Direction resolution emergent via session context.
 ```
 
 ## Core Principle

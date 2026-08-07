@@ -18,7 +18,7 @@ This table names co-change targets and the conditions that trigger them; enforce
 | Precedence change | ALL SKILL.md precedence descriptions, README.md + README_ko.md (concern-cluster workflow) |
 | Initiator taxonomy change | ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Protocol nudge pattern change | Output Style nudge section, plugin.json version bumps |
-| Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), `.claude/principles/architectural-principles.md` (Dual Advisory Layer) + `premise/gate-design.md` (Full Taxonomy Confirmation, source of truth) |
+| Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), `.claude/principles/architectural-principles.md` (Inter-Protocol Guidance) + `premise/gate-design.md` (Full Taxonomy Confirmation, source of truth) |
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
 | Relay interaction pattern change | SKILL.md TOOL GROUNDING + `premise/gate-design.md` (Convergence Evidence, source of truth) + criteria.md + static-checks.js + plugin.json version bumps |
 | Derived principle addition | the premise document that owns the principle's family (`premise/gate-design.md`, `premise/instruction-authoring.md`, or `premise/recognition-and-authority.md` — source of truth, with the derivation annotated there) + SKILL.md Rules inline summary in protocols scoped-in per the principle's Scope block (self-contained inline wording; no external reference to rule or premise files) + plugin.json version bumps for affected plugins |

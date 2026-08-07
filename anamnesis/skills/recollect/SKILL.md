@@ -175,7 +175,7 @@ seam                (extension)    → TextPresent+Proceed (fires at deactivatio
       attempts: Nat, active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 *: /recollect ∘ /inquire — RecalledContext → ClueVector_prose seeds Aitesis as input substrate; on NullMatch, the accumulated recall trace seeds Aitesis to search SSOT directly (INDEX may lack entries while SSOT retains the information).
 
 ── ENTROPY EXTRACTION ──

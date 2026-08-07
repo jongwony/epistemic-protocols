@@ -111,9 +111,9 @@ To keep commenting / disposing, do not yet answer the gate — keep drag-comment
 
 ## Scope Differentiation (Suppression Bypass)
 
-The composition includes two registered suppression edges:
-- `syneidesis ⊣ aitesis` — same-scope Aitesis suppression
-- `aitesis ⊣ epharmoge` — same-scope pre+post stacking prevention
+The composition relies on two protocol-local suppression guards:
+- `aitesis/skills/inquire/SKILL.md`'s **Cross-protocol fatigue** guard — Syneidesis triggered → suppress Aitesis for the same task scope
+- `epharmoge/skills/contextualize/SKILL.md`'s **Cross-protocol cooldown** guard — suppress Epharmoge when Aitesis has resolved in the same scope with overlapping domains/aspects
 
 Both fire only on same-scope co-activation. This composition keeps scopes structurally distinct:
 
@@ -123,7 +123,7 @@ Both fire only on same-scope co-activation. This composition keeps scopes struct
 - `/gap` — decision quality w.r.t. fixation event D (decision layer, pre-fixation temporal zone, distinct dimension)
 - `/contextualize` — application fit of fixed artifact against `application_context` (post-fixation temporal zone)
 
-**Suppression analysis for `/sublate`**: The registered advisory edges are `aitesis → elenchus` (collected context provides audit substrate), `elenchus → syneidesis` (vetted context sharpens gap detection), and `elenchus → epharmoge` (vetted pre-state contextualizes post-execution check). No suppression edge involving Elenchus exists; `/sublate`'s scope (source-decay layer) does not collide with `/inquire`'s factual-presence scope, `/gap`'s decision-point scope, or `/contextualize`'s post-execution scope.
+**Suppression analysis for `/sublate`**: the pipeline order `aitesis → elenchus` (collected context provides audit substrate), `elenchus → syneidesis` (vetted context sharpens gap detection), and `elenchus → epharmoge` (vetted pre-state contextualizes post-execution check) reflects this dependency directly. Neither of the two suppression guards above names Elenchus; `/sublate`'s scope (source-decay layer) does not collide with `/inquire`'s factual-presence scope, `/gap`'s decision-point scope, or `/contextualize`'s post-execution scope.
 
 **Emergent clause**: Named scopes are working hypotheses per the Full Taxonomy Confirmation principle. Runtime boundary cases — where a finding could legitimately belong to more than one scope — resolve by **attribution priority**: Factual > Source-Vetting > Decision > Application. When a finding remains ambiguous after priority assessment, record under both scopes with `origin: ambiguous` annotation and surface at the first applicable sub-protocol surfacing gate in the pipeline. Silent attribution drift is a protocol violation; explicit dual-record preserves auditability.
 
@@ -137,7 +137,7 @@ Within each `apply + scan` round's scan step, `/inquire` runs first as Step 1 ag
 
 ## Scan Step 2: Pre-Fixation Source Vetting (`/sublate`)
 
-The dialectical vetting step that pairs with `/inquire`'s factual verification. Where `/inquire` asks "is this asserted claim verified?", `/sublate` asks "what would shake the sources the artifact relies on, and how should each source be handled?" This step runs after `/inquire` so newly verified claims enter `/sublate`'s audit-candidate set, and before `/gap` so vetted sources sharpen decision-quality gap detection. Graph.json advisory edges `aitesis → elenchus` and `elenchus → syneidesis` justify the order: collected context provides the substrate for vetting, vetted context sharpens downstream gap detection.
+The dialectical vetting step that pairs with `/inquire`'s factual verification. Where `/inquire` asks "is this asserted claim verified?", `/sublate` asks "what would shake the sources the artifact relies on, and how should each source be handled?" This step runs after `/inquire` so newly verified claims enter `/sublate`'s audit-candidate set, and before `/gap` so vetted sources sharpen decision-quality gap detection: collected context provides the substrate for vetting, vetted context sharpens downstream gap detection.
 
 Invoke `/sublate` over the artifact-internal sources surfaced during `/inquire` plus any prior-collected sources cited by the artifact (citations, named claims, attributions, external references). `/sublate` Phase 0 silently scans for high-leverage / aged / chained / contradicting sources; Phase 1 tags provenance, freshness, leverage and posits an antithesis per source. The Phase 2 per-source disposition coproduct (Confirmed / Revised / Discarded / Deferred / Conditional / Bounded / Routed) does not fire as an in-round chat gate in this pipeline — instead the coproduct is materialized as the disposition affordance attached to each finding's TaskList entry, surfaced in the next round's sidepanel for user judgment.
 

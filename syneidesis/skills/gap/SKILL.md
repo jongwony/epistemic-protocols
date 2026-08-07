@@ -96,7 +96,7 @@ seam (extension)   → TextPresent+Proceed (fires at deactivation: a user-declar
 Λ = { phase: Phase, state: Σ, pressureMapSnapshot: P, active: Bool }  -- snapshot supports audit trace only; recompute before every Sel
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

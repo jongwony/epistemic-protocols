@@ -262,7 +262,7 @@ converge                (extension)   → TextPresent+Proceed (DiverseCandidateF
 Phase ∈ {0, 1, 2, 3}
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Candidate-field resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
 ```
 
 ## Core Principle
