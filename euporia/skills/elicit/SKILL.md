@@ -20,7 +20,7 @@ Euporia(I) → Detect(I, S) → aporia? →
          filter_confidence(D[]) → (D_surfaced, Λ.deferred)                              -- concrete substrate basis retained; thin-basis projections parked
          [D_surfaced = ∅: deactivate — fold Λ.deferred into residual when non-empty]    -- nothing answerable this cycle; no re-trace at a fixed I'-state
          Qs(D_surfaced, cycle_n) → Stop → A → integrate(A, I) → I' →
-         loop until resolved(I') ∨ user_esc ∨ user_dismiss
+         loop until resolved(I') ∨ user_dismiss
   false: surface scan result; route to axis-specific protocol (axis-determined) or invite user to articulate or withdraw (substrate empty)
 
 ── MORPHISM ──
@@ -98,17 +98,16 @@ Phase 0 → deactivate: aporia(I) = false                                       
 Phase 1 → Phase 2: D_surfaced ≠ ∅                                                            -- at least one projection has concrete substrate basis → surface it
 Phase 1 → deactivate (no surfaceable projection): D_surfaced = ∅ (ReverseTrace produced nothing, or every projection was parked by the confidence filter)  -- no projection can surface for an answer this cycle. If Λ.deferred ≠ ∅, converge to a ResolvedEndpoint whose residual folds each parked projection as a DeferredResidual (surfaced, never silently dropped — the same fold as the Phase 3 → converge residual paths); if Λ.deferred = ∅ (ReverseTrace found nothing at all), deactivate WITHOUT a ResolvedEndpoint (pure no-signal exit, the in-loop analogue of Phase 0's no-signal exit). TERMINATION GUARANTEE: at a fixed I'-state the immutable substrate makes a re-trace deterministic-identical, so re-tracing a no-surface cycle cannot change any projection's confidence — there is NO cycle-local re-trace path. I' advances ONLY via a surfaced Phase-2 Provide answer (which requires D_surfaced ≠ ∅), and that re-projection is the Phase 3 → Phase 1 path. Hence a no-surface cycle deactivates immediately rather than looping; a parked projection is re-tried only when a later surfaced answer has advanced I'.
 Phase 2 → Phase 3: A received                                                                -- per-coordinate answer accepted
-Phase 3 → Phase 1: ¬user_judges_resolved(I') ∧ ¬user_dismiss ∧ ¬user_esc → cycle_n += 1      -- re-projection: re-trace immutable substrate with accumulated I'
+Phase 3 → Phase 1: ¬user_judges_resolved(I') ∧ ¬user_dismiss → cycle_n += 1                  -- re-projection: re-trace immutable substrate with accumulated I'
 Phase 3 → converge: user_judges_resolved(I')                                                 -- user constitutive judgment → ResolvedEndpoint + per-cycle coordinate trace; any projection still in Λ.deferred is folded into ResolvedEndpoint.residual and surfaced, never silently dropped
 Phase 3 → converge (residual): A = Dismiss ∧ residual ≠ ∅                                     -- ResolvedEndpoint with residual annotated for downstream delegation: unresolved axes AND any remaining Λ.deferred projections (each wrapped as a DeferredResidual) folded in and surfaced
-Phase 2 → deactivate (ungraceful): user_esc                                                  -- D_surfaced surfaced but Esc before any A → intent remains in-process, no ResolvedEndpoint
 
 ── LOOP ──
 After Phase 3: re-detect remaining aporia in I'.
 If user_judges_resolved(I'): terminate, return ResolvedEndpoint — first fold any remaining Λ.deferred projections into residual and surface them (never silently dropped).
 If A = Dismiss + residual ≠ ∅: terminate with ResolvedEndpoint(residual annotated, including any remaining Λ.deferred projections).
 Else: cycle_n += 1, return to Phase 1 (re-project: re-trace immutable substrate with accumulated I'; accepted coordinates carried forward unchanged).
-No fixed cycle cap; user esc available at every Phase 2.
+No fixed cycle cap.
 Convergence presentation (relay, extension-classified; at termination):
   (a) Intent readback — plain single-sentence form of resolved I' assembled from coordinate values, in user-facing language;
   (b) Per-cycle coordinate trace — for each recorded step, show (D[step] → A[step] → I'[step]).
@@ -117,7 +116,7 @@ Mid-cycle scope: Intent readback (a) also surfaces in Phase 2 from cycle_n ≥ 2
 
 ── CONVERGENCE ──
 resolved(I') = ∃ step ∈ history : user_judges_resolved(I'[step])  -- at this convergence, any remaining Λ.deferred projection is folded into ResolvedEndpoint.residual as a DeferredResidual (projection + basis) and surfaced (never silently dropped — Surfacing over Deciding)
-early_exit = user_esc | user_dismiss
+early_exit = user_dismiss   -- the user's own answer ending the run. The harness interrupt is NOT an early exit and is not a member here: it arrives on a different channel and settles nothing (see §Harness Interrupt)
 progress(Λ) = cycle_n (running counter; not bounded by a target)
 
 ── TOOL GROUNDING ──
@@ -128,8 +127,9 @@ Phase 1 Substrate    (observe)      → Read, Grep, Bash (read-only substrate ac
 Phase 1 Utterance    (observe)      → Internal analysis of I.utterance for in-text semantic ambiguity (citation quotes actual utterance fragments only)
 Phase 1 ReverseTrace (observe)      → Internal analysis (axis inference + coordinate construction → candidate DimensionProjections)
 Phase 1 filter_confidence (track)   → Internal state update (extension — retain projections whose substrate basis is concrete in Λ.D_surfaced; park thin-basis projections in Λ.deferred for a later cycle. Relay: the partition is grounded in whether a citable substrate basis exists, never a user gate)
-Phase 2 Qs           (constitution) → present (mandatory; cycle-emergent dimension options from D_surfaced + substrate-cited basis + cycle counter; Esc → loop termination)
+Phase 2 Qs           (constitution) → present (mandatory; cycle-emergent dimension options from D_surfaced + substrate-cited basis + cycle counter)
 Phase 3              (track)        → Internal state update (integrate ADDS coordinate determination to I'; accepted coordinates never revised)
+Harness interrupt    (channel fact) → Not a tool call, not a phase transition, not an A, and not a result. It stops the turn and yields the floor; the protocol's state is untouched and its outcome undetermined. What the protocol becomes is settled by the user's next utterance, read like any other input (see §Harness Interrupt)
 converge             (extension)    → TextPresent+Proceed (intent readback + per-cycle coordinate trace; proceed with ResolvedEndpoint)
 Seam transition to declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
@@ -163,6 +163,18 @@ This protocol does one thing: it makes implicit decision coordinates explicit so
 
 The omission is deliberate. Filtering candidate coordinates by which sibling protocol owns them adds a judgment the user did not ask for and spends attention on protocol boundaries rather than on the intent being clarified.
 
+## Harness Interrupt
+
+The harness interrupt can fire at any point. It stops the turn and yields the floor; it changes no protocol state and determines no outcome. What was accumulated stands. What the protocol becomes is settled by the user's next utterance, read the same way any other input is read.
+
+Three consequences follow, and they are why this is stated once here rather than compiled into the phases:
+
+- **It is not a phase transition.** It arrives mid-action as readily as at a surfacing, so no phase owns it and none may name it as an exit.
+- **It is not an answer.** It reaches the protocol on the harness channel, not as an `A`, so it is not a member of the answer coproduct and not a peer of `Dismiss`.
+- **It is not a result.** It settles nothing, so no result type may be predicated on it.
+
+Ending, redirecting, and arriving at a changed understanding are therefore not three exits to be typed. They are three ways the *following utterance* can read, and reading utterances is what the protocol already does.
+
 ## Coordinate Monotonicity Invariant
 
 **Invariant (Coordinate Monotonicity)**: An accepted coordinate is immutable. Once a coordinate is answered with `Provide(value)` and enters `Λ.accepted_coords`, no subsequent cycle — and no subsequent answer — may remove or overwrite it. A later answer ADDS determination to `I'`; it never REVISES an accepted coordinate. A `Defer(coords)`-ed coordinate, when later answered in a subsequent cycle, may only ADD determination — it cannot overturn a coordinate already accepted in an earlier cycle.
@@ -177,7 +189,7 @@ The omission is deliberate. Filtering candidate coordinates by which sibling pro
 
 AI detects abstract aporia OR user calls `/elicit`. Detection is silent on the aporia-confirmed path (Phase 0); dimension surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
-**Hybrid confirmation contract**: For AI-detected activation paths, the first Phase 2 surfacing (cycle_n=1) serves as the user-confirmation moment — Esc at the first surface deactivates without coordinate state change, satisfying the Hybrid initiator's "AI-detected trigger path requires user confirmation" contract via implicit-acknowledge-or-decline at the first dimension surface. Phase 1 substrate scan precedes this confirmation under the substrate read-only constraint; no externalized state is mutated before user judgment.
+**Hybrid confirmation contract**: For AI-detected activation paths, the first Phase 2 surfacing (cycle_n=1) serves as the user-confirmation moment — the user's response to that first surface is the acknowledge-or-decline, satisfying the Hybrid initiator's "AI-detected trigger path requires user confirmation" contract. A decline is something the user says, not an absence: `Dismiss`, or any utterance that reads as declining. Phase 1 substrate scan precedes this confirmation under the substrate read-only constraint; no externalized state is mutated before user judgment.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/elicit` slash command or description-matching input. Always available.
@@ -210,7 +222,7 @@ When Euporia is active:
 </system-reminder>
 
 - Euporia completes before action dependent on the resolved endpoint proceeds
-- Loaded instructions resume after resolution or Esc
+- Loaded instructions resume once the protocol terminates
 
 ### Trigger Signals
 
@@ -239,7 +251,6 @@ Euporia activates when (a) the user's intent is articulated as an utterance, (b)
 | Trigger | Effect |
 |---------|--------|
 | user_judges_resolved(I') | Return ResolvedEndpoint with per-cycle coordinate trace; any remaining Λ.deferred projection is folded into residual and surfaced |
-| User Esc | Return to normal operation; intent remains in-process |
 | Dismiss + residual | Return ResolvedEndpoint with residual annotated for downstream delegation — unresolved axes AND any remaining Λ.deferred projections folded in and surfaced, never silently dropped |
 | No aporia signal at Phase 0 (axis-determined or substrate empty) | Surface scan result without activating — routing recommendation when axis-determined, articulate-or-withdraw invitation when substrate empty |
 | No projection has a concrete substrate basis | The cycle yields no surfaceable coordinate (`D_surfaced = ∅`). If any projection sits in `Λ.deferred`, converge to a ResolvedEndpoint folding each as a DeferredResidual (surfaced, never silently dropped); if `Λ.deferred = ∅` (the trace found nothing at all), deactivate without a ResolvedEndpoint — the in-loop analogue of Phase 0's no-signal exit |
@@ -258,7 +269,7 @@ Analyze the intent seed for abstract aporia. Detection is silent on the aporia-c
    - **Intent is axis-determined**: surface a routing recommendation to the matching axis-specific protocol
    - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution or Aitesis)
 
-**Scope restriction**: Detection does NOT modify files or call external services beyond read-only substrate scan. The no-signal surface is a relay presentation — no constitutive gate.
+**Scope restriction**: Detection does not modify the substrate. The no-signal surface is a relay presentation — no constitutive gate.
 
 ### Phase 1: Substrate Access + Reverse Trace
 
@@ -270,7 +281,7 @@ Read substrate channels (immutable), reverse-trace candidate dimension projectio
 4. **Filter by confidence**: Retain in `Λ.D_surfaced` only the projections whose substrate basis is concrete; move thin-basis projections into `Λ.deferred` (re-traced when more of `I'` is determined). Only the retained projections reach Phase 2. Do not filter by which sibling protocol a coordinate might belong to — see **Scope Boundary**.
 5. Package `(D_surfaced, context)`. If `D_surfaced ≠ ∅`, proceed to Phase 2 (surface). If `D_surfaced = ∅`, take the **`Phase 1 → deactivate (no surfaceable projection)`** path: if `Λ.deferred ≠ ∅`, converge to a ResolvedEndpoint folding each parked projection as a DeferredResidual (surfaced, never silently dropped — the same fold as convergence); if `Λ.deferred = ∅`, deactivate without a ResolvedEndpoint. Do NOT re-trace at the current `I'`-state — the termination guarantee in PHASE TRANSITIONS covers why.
 
-**Scope restriction**: Read-only investigation. No test execution or file modifications. Substrate evidence must cite a specific source.
+**Scope restriction**: The substrate is read, never written. This is the protocol's own property, not a rule about which tools may run: the accumulate-without-overwrite guarantee holds because the source a re-trace re-reads has not changed under it. Substrate evidence must cite a specific source.
 
 ### Phase 2: Cycle-Emergent Dimension Surfacing (Constitution)
 
@@ -295,7 +306,6 @@ For each surfaced coordinate, provide an answer or defer.
 Or:
 - Defer specific coordinates to next cycle
 - Dismiss + delegate residual to downstream protocols
-- Esc — terminate review
 ```
 
 Design principles for this surfacing (substrate-cited basis, cycle counter visibility, coordinate-level granularity, free response) are recorded in **UX Safeguards** below.
@@ -342,14 +352,14 @@ After integration:
 | Utterance-only activation guard | Utterance evidence supplements external substrate evidence; utterance-only signals do not satisfy the activation predicate | Prevents false-positive activation when no external substrate carries implicit coordinates |
 | Convergence readback (Phase 2, cycle_n ≥ 2) | At every Phase 2 from cycle_n ≥ 2, present I' as plain single-sentence readback (readback alone, no trace) | Provides recognizable target for `user_judges_resolved`; prevents implicit resolution assertion mid-cycle |
 | Convergence readback (termination) | At termination, present I' as readback alongside the per-cycle coordinate trace | Demonstrates convergence with full history; readback materializes the resolved endpoint as a recognizable sentence |
-| User esc anytime | Esc available at every Phase 2 | No fixed cycle cap |
+| Harness interrupt is not an exit | The interrupt stops the turn and yields the floor; it changes no state and settles nothing, and the next utterance decides what follows (see **Harness Interrupt**) | No phase, answer type, or result is predicated on it, so the protocol cannot mistake a mention of it for a use of it |
 
 ## Rules
 
 1. **AI-guided substrate access, user-resolved**: AI reverse-traces dimension projections from substrate; resolution requires user answer via Cognitive Partnership Move (Constitution) (Phase 2).
 2. **Recognition over Recall**: Present structured dimension surfacing via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield.
 3. **User constitutive interaction**: User answers operate at three layers — coordinate-level (per-coordinate provide/defer/dismiss), endpoint-level (`resolved(I')` is user judgment, not AI assertion), and frame-level (user may redirect to an unsurfaced dimension or terminate; free response routes the next cycle's substrate scan).
-4. **Convergence persistence**: Mode active until user judges resolved, dismisses, or Esc.
+4. **Convergence persistence**: Mode active until the user judges resolved, dismisses, or a cycle finds nothing answerable. Each of these is something the run reaches; none of them is the harness interrupt, which ends no run — see Rule 14.
 5. **Context-Question Separation**: Output substrate evidence and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the per-coordinate answer slot; the dimension surface is pre-gate context.
 6. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant coordinate value (option-level entropy → 0), present the value directly as relay. The user answer slot remains constitutive when multiple valid coordinate values exist under different user value weightings.
 7. **Gate integrity** (Safeguard tier): The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.
@@ -359,3 +369,4 @@ After integration:
 11. **Coordinate monotonicity**: An accepted coordinate is immutable — once answered with `Provide` and entered into `Λ.accepted_coords`, no subsequent cycle or answer removes or overwrites it. `integrate(A, I)` ADDS determination to `I'`; it never REVISES an accepted coordinate. A `Defer`-ed coordinate, when later answered, may only add determination. Re-trace is read-only re-projection over the same unchanged substrate with a more-determined `I'`. A later answer that genuinely contradicts an accepted coordinate is a **frame change**, surfaced for explicit user re-opening (a fresh constitutive act), never a silent within-loop overwrite. See §Coordinate Monotonicity Invariant.
 12. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
 13. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after this protocol's convergence (ResolvedEndpoint) is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge, so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
+14. **The harness interrupt settles nothing**: it can fire at any point, stops the turn, and yields the floor. It changes no protocol state and determines no outcome; what was accumulated stands, and what the protocol becomes is settled by the user's next utterance, read like any other input. It is therefore not a phase transition, not a member of the answer coproduct, and not a result type, and nothing in this protocol may be predicated on it. Ending, redirecting, and arriving at a changed understanding are readings of the following utterance, not exits to be typed — the protocol already reads utterances, so none of them needs its own type. One consequence worth naming: because the interrupt cannot be invoked in words, a user *mentioning* it is never a use of it. See §Harness Interrupt.
