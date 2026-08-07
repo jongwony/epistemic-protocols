@@ -1,6 +1,6 @@
 # Instruction Authoring
 
-This document covers writing instructions and durable records that stay accurate as they age: stating principles instead of examples, not over-mentioning what an instruction wants avoided, gating new directives against actual evidence of need, keeping a written claim support-linked rather than merely current, making sure a principle structurally reaches the reader whose behavior it targets, and routing each sentence — at the moment it is written — to the surface it belongs on. The Currency section below uses the relay/authority distinction from `recognition-and-authority.md` in one place; nothing else here depends on it.
+This document covers writing instructions and durable records that stay accurate as they age: stating principles instead of examples, not over-mentioning what an instruction wants avoided, gating new directives against actual evidence of need, checking at revision time what the surface can shed before settling what it adds, keeping a written claim support-linked rather than merely current, making sure a principle structurally reaches the reader whose behavior it targets, and routing each sentence — at the moment it is written — to the surface it belongs on. The Currency section below uses the relay/authority distinction from `recognition-and-authority.md` in one place; nothing else here depends on it.
 
 ## Zero-Shot Instruction Preference (Safeguard)
 
@@ -46,6 +46,19 @@ Each rule lives in exactly one place. Files meant to be read together as one con
 An always-loaded, durable instruction layer is expensive: every entry in it must justify its presence against the cost it imposes on that layer. Known cost axes: update frequency (volatility — how often the entry needs revision), salience (its mere presence primes behavior, whether or not it is relevant this turn), and portability (an environment-pinned value that doesn't travel with the instructions). This set of axes stays open — an entry that feels wrong on none of the known axes signals an axis not yet named.
 
 **Pace layering** (the volatility axis): layer durable artifacts by their own rate of change — the slower content changes, the more rigid a medium it deserves (code outlasts procedure, procedure outlasts data; a stated principle outlasts an environment-specific value). Compose a fast-changing layer from a slow one at the point of need; never the reverse. Corollary — codify only deterministic logic into the rigid layer: steps with a stable, unchanging contract belong in code; fragile or heuristic steps belong in the instruction layer instead, where they can be revised without a structural change.
+
+## Re-admission at Revision Time
+
+Inscription Economics tests what enters a durable layer. The same accounting binds at a second moment: when a surface is opened in order to change it, the entries already on it are not exempt for having been justified once. Establish what the surface can shed before settling what the change adds, and let the first finding inform the second.
+
+The asymmetry this corrects is structural rather than a lapse of discipline. An addition arrives with an author and an occasion; a removal has neither unless someone goes looking. A surface therefore accumulates by default, and each entry carries a presumption of justification that attaches to the moment it was written rather than to the present one. Revision is the occasion that supplies the missing author, which is why the check belongs here and not on a separate cleanup schedule that nothing triggers.
+
+Two grounds for removal hold independently of whether an entry was ever correct, and neither is legible from reading the entry alone:
+
+- **Unexercised** — the entry governs a path that observed runs do not take. This is checkable against whatever execution record the project keeps, and it is evidence about the entry rather than about its author's reasoning.
+- **Outside a boundary the project has since settled** — the entry governs a concern the project has placed beyond its own scope. Such an entry may be locally sound and still not belong.
+
+A removal that would change behavior is surfaced as a proposal carrying its ground; an entry the surface never acts on leaves with the change that found it. Subtraction is also the form a correction often takes: where a contract is stated in several places at once, unifying it removes surface rather than adding any.
 
 ## Ledger/State Separation
 
