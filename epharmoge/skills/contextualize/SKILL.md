@@ -23,8 +23,8 @@ Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
       -- DISPOSITION HALF. The judgment half above has already run, so the carry below transfers the DISPOSITION only:
       [accepted(aspect(Mₛ)): keep_carried_forward → report the carry + why they accepted it → close Mₛ as Keep with the judgment read off judgment_state (relayed Upheld, else unjudged), relay-assigned → NO Qc, no turn yielded, Λ.R untouched → next pending, or converge]
       Qc(Mₛ scoped by the CURRENT Λ.fit_map, judgment_state) → Stop → A = (j, d) →
-      [d = Adapt(direction)] adapt → R' → Λ.R := R' → Eval(Λ.R, X) → Mₑ? → ∀m ∈ Mₑ: bind_kind(m) → certify(m, registry) → keep(status = pass) → Mₑ_passed → Register(Mₑ_passed) → AssessFit(Λ.R, X, pending) → F' → (loop: SelectNext → Qc → A → dispose → re-scan until contextualized)
-      [d = Keep] no re-scan, no Mₑ; R_final is bound at convergence, not here → (loop: SelectNext → Qc → A)
+      [d = Adapt(direction)] adapt → R' → Λ.R := R' → Eval(Λ.R, X) → Mₑ? → ∀m ∈ Mₑ: bind_kind(m) → certify(m, registry) → keep(status = pass) → Mₑ_passed → Register(Mₑ_passed) → AssessFit(Λ.R, X, pending) → F' → (loop: back to Phase 1 above — judgment half, then disposition half — until contextualized)
+      [d = Keep] no re-scan, no Mₑ; R_final is bound at convergence, not here → (loop: back to Phase 1 above)
       [d = Discard(replacement)] R_final := replacement, every mismatch REMAINING pending → unjudged Moot, no re-scan → deactivate (withdrawal convergence: the evaluated target is withdrawn; the replacement is carried, not adjudicated)
     (at any Qc, a free-response "keep the rest as-is" closes every pending mismatch with an unjudged Keep — except one whose judgment was relayed this cycle, which keeps that verdict and its cited basis — and converges: Phase 1 → keep_all_remaining)
 
