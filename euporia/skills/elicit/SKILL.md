@@ -19,7 +19,6 @@ Euporia(I) → Detect(I, S) → aporia? →
   true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → (D[], context) →
          filter_confidence(D[]) → (D_surfaced, Λ.deferred)                              -- concrete substrate basis retained; thin-basis projections held back
          resurface(Λ.parked)                                                            -- coordinates the user could not answer yet come back as themselves
-         [D_surfaced = ∅ ∧ Λ.parked = ∅: deactivate — fold Λ.deferred into residual when non-empty]  -- nothing answerable this cycle; no re-trace at a fixed I'-state
          Qs(D_surfaced, Λ.parked, cycle_n) → Stop → A → integrate(A, I) → I' →
          loop until resolved(I') ∨ user_dismiss
   false: surface scan result; route to axis-specific protocol (axis-determined) or invite user to articulate or withdraw (substrate empty)
@@ -71,7 +70,7 @@ Phase          ∈ {0, 1, 2, 3}
 Axis           = String                         -- emergent label; examples: "intent", "goal", "form", "scope", "framework"
 Initiator      ∈ {UserInvoked, AIDetected}      -- bound at activation; informs Hybrid Phase 2 first-surface semantics
 Qs             = Cycle-emergent surfacing interaction with D_surfaced + Λ.parked + cycle counter [Tool: Constitution interaction]
-ResolvedEndpoint = I' where user_judges_resolved(I') ∨ user_dismiss(I') ∨ no_surfaceable_projection(D_surfaced = ∅ ∧ Λ.parked = ∅ ∧ Λ.deferred ≠ ∅); residual folds, at EVERY one of these terminations, each projection still in Λ.deferred (as a DeferredResidual) and each coordinate still in Λ.parked (as itself) — surfaced with its basis, never silently dropped
+ResolvedEndpoint = I' where user_judges_resolved(I') ∨ user_dismiss(I'); residual folds, at EITHER termination, each projection still in Λ.deferred (as a DeferredResidual) and each coordinate still in Λ.parked (as itself) — surfaced with its basis, never silently dropped
 
 ── A-BINDING ──
 bind(I) = explicit_arg ∪ recent_intent_seed ∪ surfaced_aporia
@@ -98,8 +97,7 @@ Phase 3: A → integrate(A, I) → I'                                    -- trac
 
 Phase 0 → Phase 1: aporia(I) = true                                                          -- aporia confirmed → silent re-projection loop opens
 Phase 0 → deactivate: aporia(I) = false                                                      -- no aporia signal → surface scan result (axis-determined routing recommendation OR articulate-or-withdraw), no activation
-Phase 1 → Phase 2: D_surfaced ≠ ∅ ∨ Λ.parked ≠ ∅                                             -- something is answerable this cycle: a projection with concrete substrate basis, or a coordinate the user asked to come back to
-Phase 1 → deactivate (nothing answerable): D_surfaced = ∅ ∧ Λ.parked = ∅ (ReverseTrace produced nothing, or every projection was held back by the confidence filter, and no user-deferred coordinate is waiting)  -- nothing can surface for an answer this cycle. If Λ.deferred ≠ ∅, converge to a ResolvedEndpoint whose residual folds each held-back projection as a DeferredResidual (surfaced, never silently dropped — the same fold as the Phase 3 → converge residual paths); if Λ.deferred = ∅ (ReverseTrace found nothing at all), deactivate WITHOUT a ResolvedEndpoint (pure no-signal exit, the in-loop analogue of Phase 0's no-signal exit). TERMINATION GUARANTEE: there is NO cycle-local re-trace path — a cycle with nothing to surface deactivates here rather than re-tracing in place. Re-projection happens only on the Phase 3 → Phase 1 path, at the start of a new cycle, and a held-back projection is re-tried there.
+Phase 1 → Phase 2: always                                                                    -- every cycle hands the turn to the user, including one whose trace surfaced nothing new
 Phase 2 → Phase 3: A received                                                                -- per-coordinate answer accepted
 Phase 3 → Phase 1: ¬user_judges_resolved(I') ∧ ¬user_dismiss → cycle_n += 1                  -- re-projection: re-trace the substrate with accumulated I'; accepted coordinates carried forward unchanged, parked coordinates re-surfaced as themselves
 Phase 3 → converge: user_judges_resolved(I')                                                 -- user constitutive judgment → ResolvedEndpoint + per-cycle coordinate trace; every remaining Λ.deferred projection and Λ.parked coordinate is folded into ResolvedEndpoint.residual and surfaced, never silently dropped
@@ -244,7 +242,6 @@ Euporia activates when (a) the user's intent is articulated as an utterance, (b)
 | user_judges_resolved(I') | Return ResolvedEndpoint with per-cycle coordinate trace; every remaining `Λ.deferred` projection and `Λ.parked` coordinate folded into residual and surfaced |
 | Dismiss | Return ResolvedEndpoint with residual annotated for downstream delegation — unresolved axes, remaining `Λ.deferred` projections, and remaining `Λ.parked` coordinates folded in and surfaced, never silently dropped |
 | No aporia signal at Phase 0 (axis-determined or substrate empty) | Surface scan result without activating — routing recommendation when axis-determined, articulate-or-withdraw invitation when substrate empty |
-| Nothing answerable this cycle | No projection has a concrete substrate basis and no coordinate is waiting (`D_surfaced = ∅ ∧ Λ.parked = ∅`). If any projection sits in `Λ.deferred`, converge to a ResolvedEndpoint folding each as a DeferredResidual (surfaced, never silently dropped); if `Λ.deferred = ∅` (the trace found nothing at all), deactivate without a ResolvedEndpoint — the in-loop analogue of Phase 0's no-signal exit |
 
 ## Protocol
 
@@ -271,7 +268,7 @@ Read substrate channels (immutable), reverse-trace candidate dimension projectio
 3. **ReverseTrace**: From the intent and the substrate evidence, infer candidate dimensions whose coordinates are likely implicit in the substrate. Each `Coordinate` within the projection carries (name, default, question, basis: Evidence); each `DimensionProjection` carries (axis_inferred, coordinates, confidence).
 4. **Filter by confidence**: Retain in `Λ.D_surfaced` only the projections whose substrate basis is concrete; move thin-basis projections into `Λ.deferred` (re-traced when more of `I'` is determined). Only the retained projections reach Phase 2. Do not filter by which sibling protocol a coordinate might belong to — see **Scope Boundary**.
 5. **Bring back what the user parked**: every coordinate in `Λ.parked` re-enters this cycle's surfacing as itself, carrying the question and basis it was parked with. Do not re-derive it from the substrate and do not reword it — the user already read that question and answered "not yet", so what comes back has to be recognizable as the same question.
-6. Package `(D_surfaced, Λ.parked, context)`. If either is non-empty, proceed to Phase 2. If both are empty, take the **`Phase 1 → deactivate (nothing answerable)`** path: if `Λ.deferred ≠ ∅`, converge to a ResolvedEndpoint folding each held-back projection as a DeferredResidual (surfaced, never silently dropped — the same fold as convergence); if `Λ.deferred = ∅`, deactivate without a ResolvedEndpoint. Do NOT re-trace at the current `I'`-state — the termination guarantee in PHASE TRANSITIONS covers why.
+6. Package `(D_surfaced, Λ.parked, context)` and proceed to Phase 2 — including when both are empty.
 
 **Scope restriction**: The substrate is read, never written. This is the protocol's own property, not a rule about which tools may run. Substrate evidence must cite a specific source.
 
@@ -352,7 +349,7 @@ After integration:
 1. **AI-guided substrate access, user-resolved**: AI reverse-traces dimension projections from substrate; resolution requires user answer via Cognitive Partnership Move (Constitution) (Phase 2).
 2. **Recognition over Recall**: Present structured dimension surfacing via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield.
 3. **User constitutive interaction**: User answers operate at three layers — coordinate-level (per-coordinate provide/defer/dismiss), endpoint-level (`resolved(I')` is user judgment, not AI assertion), and frame-level (user may redirect to an unsurfaced dimension or terminate; free response routes the next cycle's substrate scan).
-4. **Convergence persistence**: Mode active until the user judges resolved, dismisses, or a cycle finds nothing answerable.
+4. **Convergence persistence**: Mode active until the user judges resolved or dismisses.
 5. **Context-Question Separation**: Output substrate evidence and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the per-coordinate answer slot; the dimension surface is pre-gate context.
 6. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant coordinate value (option-level entropy → 0), present the value directly as relay. The user answer slot remains constitutive when multiple valid coordinate values exist under different user value weightings.
 7. **Gate integrity** (Safeguard tier): The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.
