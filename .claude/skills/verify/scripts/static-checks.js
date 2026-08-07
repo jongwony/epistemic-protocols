@@ -40,9 +40,6 @@ const PROTOCOL_FILES = protocolFiles({ projectRoot });
 
 const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
 
-// Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
-const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
-
 // Protocol display name → {deficit, resolution}. Derived from per-protocol
 // SKILL.md description Type signature; capitalize(dir) for display name.
 //
@@ -350,7 +347,7 @@ function checkCrossReference() {
 // ============================================================
 // CLAUDE.md/AGENTS.md indexes the protocol catalog rather than mirroring it: it
 // must keep a "## Protocol Index" section that routes to the authoritative sources
-// (/catalog, graph.json, per-protocol SKILL.md, README) instead of re-inscribing
+// (/catalog, per-protocol SKILL.md, README) instead of re-inscribing
 // the catalog inline. This is the lightweight successor to the removed
 // CLAUDE.md-content mirror checks (checkCrossRefScan) — it enforces the routing
 // *contract* (structure + pointers), not mirrored content, so catalog drift is
@@ -391,7 +388,6 @@ function checkRoutingIndexContract() {
     const section = nextH2 === -1 ? afterHeading : afterHeading.slice(0, nextH2);
     const requiredPointers = [
       { label: '/catalog', pattern: /\/catalog/ },
-      { label: 'graph.json', pattern: /graph\.json/ },
       { label: 'per-protocol SKILL.md', pattern: /SKILL\.md/ },
       { label: 'README', pattern: /README/ },
     ];
@@ -418,7 +414,7 @@ function checkRoutingIndexContract() {
       results.warn.push({
         check,
         file: 'CLAUDE.md',
-        message: `Inline protocol catalog reintroduced (${label}) — route to /catalog, graph.json, SKILL.md, README instead of mirroring the catalog`
+        message: `Inline protocol catalog reintroduced (${label}) — route to /catalog, SKILL.md, README instead of mirroring the catalog`
       });
     }
   }
@@ -835,238 +831,6 @@ function checkVersionStaleness() {
 }
 
 // ============================================================
-// Check: Graph Integrity
-// ============================================================
-function checkGraphIntegrity() {
-  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
-
-  if (!fs.existsSync(graphPath)) {
-    results.warn.push({
-      check: 'graph-integrity',
-      file: 'graph.json',
-      message: 'graph.json not found, skipping graph integrity check'
-    });
-    return;
-  }
-
-  let graph;
-  try {
-    graph = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
-  } catch (e) {
-    results.fail.push({
-      check: 'graph-integrity',
-      file: 'graph.json',
-      message: `Invalid JSON: ${e.message}`
-    });
-    return;
-  }
-
-  // Structural validation: nodes and edges must be arrays
-  if (!Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) {
-    results.fail.push({
-      check: 'graph-integrity',
-      file: 'graph.json',
-      message: `graph.json requires "nodes" (array) and "edges" (array), got nodes=${typeof graph.nodes}, edges=${typeof graph.edges}`
-    });
-    return;
-  }
-
-  const { nodes, edges } = graph;
-  const nodeSet = new Set(nodes);
-  let subCheckFailed = false;
-
-  // Sub-check 1: edge-type
-  for (let i = 0; i < edges.length; i++) {
-    const edge = edges[i];
-    if (!edge || typeof edge !== 'object') {
-      results.fail.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `edges[${i}] is not a valid object: ${JSON.stringify(edge)}`
-      });
-      subCheckFailed = true;
-      continue;
-    }
-    if (!VALID_EDGE_TYPES.has(edge.type)) {
-      results.fail.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Invalid edge type "${edge.type}" on ${edge.source}→${edge.target}. Valid: ${[...VALID_EDGE_TYPES].join(', ')}`
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 2: edge-reference (wildcard "*" exempt from node lookup)
-  for (const edge of edges) {
-    if (!edge || typeof edge !== 'object') continue; // already reported in sub-check 1
-    if (edge.source !== '*' && !nodeSet.has(edge.source)) {
-      results.fail.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Edge source "${edge.source}" not in nodes array`
-      });
-      subCheckFailed = true;
-    }
-    if (edge.target !== '*' && !nodeSet.has(edge.target)) {
-      results.fail.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Edge target "${edge.target}" not in nodes array`
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 3: node-directory
-  for (const node of nodes) {
-    const dirPath = path.join(projectRoot, node);
-    if (!fs.existsSync(dirPath)) {
-      results.fail.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Node "${node}" has no corresponding directory at ${node}/`
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 4: orphaned-node — nodes must have a valid SKILL.md (not just a directory)
-  for (const node of nodes) {
-    const skillPaths = [
-      path.join(projectRoot, node, 'skills'),
-    ];
-    let hasSkill = false;
-    for (const sp of skillPaths) {
-      if (fs.existsSync(sp)) {
-        try {
-          const entries = fs.readdirSync(sp, { withFileTypes: true });
-          for (const entry of entries) {
-            if (entry.isDirectory()) {
-              const skillMd = path.join(sp, entry.name, 'SKILL.md');
-              if (fs.existsSync(skillMd)) {
-                hasSkill = true;
-                break;
-              }
-            }
-          }
-        } catch (e) {
-          // Auxiliary check: filesystem errors mean "could not confirm SKILL.md exists" → hasSkill stays false
-        }
-      }
-      if (hasSkill) break;
-    }
-    if (!hasSkill) {
-      results.warn.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Node "${node}" has a directory but no SKILL.md — may be orphaned`
-      });
-    }
-  }
-
-  // Sub-check 5: isolated-node — every node should participate in at least one edge
-  const connectedNodes = new Set();
-  for (const edge of edges) {
-    if (!edge || typeof edge !== 'object') continue;
-    if (edge.source === '*') {
-      // Wildcard connects all nodes except target
-      for (const n of nodes) {
-        if (n !== edge.target) connectedNodes.add(n);
-      }
-      connectedNodes.add(edge.target);
-    } else {
-      connectedNodes.add(edge.source);
-      connectedNodes.add(edge.target);
-    }
-  }
-  for (const node of nodes) {
-    if (!connectedNodes.has(node)) {
-      results.warn.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Node "${node}" is isolated — no edges connect to or from it`
-      });
-    }
-  }
-
-  // Sub-check 6: precondition-dag — verify precondition edges form a DAG (no cycles) via Kahn's topological sort
-  // Expand "*" wildcard: source "*" means all nodes except target; target "*" is rejected
-  const preconditionEdges = [];
-  for (const edge of edges) {
-    if (!edge || typeof edge !== 'object') continue;
-    if (edge.type !== 'precondition') continue;
-    if (edge.target === '*') {
-      results.fail.push({
-        check: 'graph-integrity',
-        file: 'graph.json',
-        message: `Precondition edge target cannot be "*" (source: "${edge.source}")`
-      });
-      subCheckFailed = true;
-      continue;
-    }
-    if (edge.source === '*') {
-      for (const node of nodes) {
-        if (node !== edge.target) {
-          preconditionEdges.push({ source: node, target: edge.target });
-        }
-      }
-    } else {
-      preconditionEdges.push({ source: edge.source, target: edge.target });
-    }
-  }
-
-  // Adjacency: source → target (source is precondition for target; in-degree counts preconditions)
-  const adj = new Map();
-  const inDegree = new Map();
-  for (const node of nodes) {
-    adj.set(node, []);
-    inDegree.set(node, 0);
-  }
-  for (const { source, target } of preconditionEdges) {
-    adj.get(source).push(target);
-    inDegree.set(target, inDegree.get(target) + 1);
-  }
-
-  // Kahn's algorithm
-  const queue = [];
-  for (const [node, deg] of inDegree) {
-    if (deg === 0) queue.push(node);
-  }
-
-  let processed = 0;
-  while (queue.length > 0) {
-    const node = queue.shift();
-    processed++;
-    for (const neighbor of adj.get(node)) {
-      const newDeg = inDegree.get(neighbor) - 1;
-      inDegree.set(neighbor, newDeg);
-      if (newDeg === 0) queue.push(neighbor);
-    }
-  }
-
-  if (processed !== nodes.length) {
-    const cycleNodes = [...inDegree.entries()]
-      .filter(([, deg]) => deg > 0)
-      .map(([node]) => node);
-    results.fail.push({
-      check: 'graph-integrity',
-      file: 'graph.json',
-      message: `Precondition edges form a cycle involving: ${cycleNodes.join(', ')}`
-    });
-    subCheckFailed = true;
-  }
-
-  if (!subCheckFailed) {
-    results.pass.push({
-      check: 'graph-integrity',
-      file: 'graph.json',
-      message: `Graph integrity verified (${nodes.length} nodes, ${edges.length} edges)`
-    });
-  }
-}
-
-// ============================================================
 // Check: Spec vs Impl Drift Detection
 // ============================================================
 function checkSpecVsImpl() {
@@ -1303,7 +1067,7 @@ function checkCrossRefScan() {
 
   // CLAUDE.md is a routing index, not a content mirror: its deficit → resolution
   // pairs, cluster table, and initiator taxonomy were replaced by pointers to the
-  // authoritative sources (per-protocol SKILL.md, graph.json, /catalog, README), so
+  // authoritative sources (per-protocol SKILL.md, /catalog, README), so
   // the scan enforces those sources directly and no longer reads CLAUDE.md content.
 
   // Sub-check 1: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
@@ -1361,7 +1125,7 @@ function checkCrossRefScan() {
   }
 
   // Sub-check 3: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
-  // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
+  // package.js PLUGINS, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
     // Deprecated plugins (plugin.json carries "deprecated": true) are tracked
@@ -1452,8 +1216,9 @@ function checkCrossRefScan() {
     // Publication-surface invariant: the set of (dir, skill) SKILL.md files on disk
     // must match PLUGINS exactly. This sub-check deliberately does NOT apply the
     // utilityDirs skip — utility plugin SKILL.md files must also be published.
-    // Sources 1, 2, 4 remain protocol-only (utility-skip preserved) — that's the
-    // core C7 separation between graph.json (protocols only) and publication surface.
+    // Sources 1 and 2 remain protocol-only (utility-skip preserved) — Source 3
+    // (package.js PLUGINS) and Source 4 (marketplace.json) publish across the
+    // full plugin set, protocol and utility alike.
     //
     // IMPORTANT: path.resolve (not path.join) is load-bearing here. When invoked
     // as `node .claude/skills/verify/scripts/static-checks.js .`, projectRoot is
@@ -1532,8 +1297,8 @@ function checkCrossRefScan() {
         // (publication-gap, stale-plugins-entry) compared PLUGINS against a
         // separate filesystem walk — under the helper-derived model both
         // sides share the same walk, making the diff tautological. Drift
-        // detection moves to graph.json nodes (Source 4) and marketplace.json
-        // plugins (Source 5), which remain hand-curated relative to filesystem.
+        // detection moves to marketplace.json plugins (Source 4), which
+        // remains hand-curated relative to filesystem.
         for (const p of PLUGINS) {
           if (!p || typeof p.dir !== 'string' || typeof p.skill !== 'string') {
             const serialized = util.inspect(p, { depth: 2, breakLength: 80 });
@@ -1548,42 +1313,7 @@ function checkCrossRefScan() {
       }
     }
 
-    // Source 4: graph.json nodes (protocol-only)
-    const graphPath2 = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
-    if (fs.existsSync(graphPath2)) {
-      try {
-        const graph2 = JSON.parse(fs.readFileSync(graphPath2, 'utf8'));
-        if (Array.isArray(graph2.nodes)) {
-          const graphNodeSet = new Set(graph2.nodes);
-          // Every protocol dir should appear in graph.json nodes
-          for (const dir of allPluginDirs) {
-            if (utilityDirs.has(dir)) continue;
-            if (deprecatedPluginDirs.has(dir)) continue;
-            if (!graphNodeSet.has(dir)) {
-              results.warn.push({
-                check: 'cross-ref-scan',
-                file: 'graph.json',
-                message: `Protocol directory "${dir}" exists on filesystem but missing from graph.json nodes`
-              });
-            }
-          }
-          // Every graph.json node should have a corresponding directory
-          for (const node of graph2.nodes) {
-            if (!allPluginDirs.has(node)) {
-              results.warn.push({
-                check: 'cross-ref-scan',
-                file: 'graph.json',
-                message: `graph.json node "${node}" has no corresponding plugin directory on filesystem`
-              });
-            }
-          }
-        }
-      } catch (e) {
-        // JSON parse errors already reported by checkGraphIntegrity
-      }
-    }
-
-    // Source 5: marketplace.json plugins
+    // Source 4: marketplace.json plugins
     const marketplacePath = path.join(projectRoot, '.claude-plugin', 'marketplace.json');
     if (fs.existsSync(marketplacePath)) {
       try {
@@ -1625,29 +1355,6 @@ function checkCrossRefScan() {
           message: `Could not parse marketplace.json: ${e.message}`
         });
       }
-    }
-  }
-
-  // Sub-check 4: Verify edge types in graph.json match the valid edge-type allowlist
-  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
-  if (fs.existsSync(graphPath)) {
-    try {
-      const graph = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
-      if (Array.isArray(graph.edges)) {
-        const usedEdgeTypes = new Set(graph.edges.map(e => e.type).filter(Boolean));
-        for (const edgeType of usedEdgeTypes) {
-          if (!VALID_EDGE_TYPES.has(edgeType)) {
-            results.fail.push({
-              check: 'cross-ref-scan',
-              file: 'graph.json',
-              message: `Edge type "${edgeType}" not in valid edge-type allowlist: ${[...VALID_EDGE_TYPES].join(', ')}`
-            });
-            subCheckFailed = true;
-          }
-        }
-      }
-    } catch (e) {
-      // Ordering dependency: checkGraphIntegrity runs first and reports JSON parse errors
     }
   }
 
@@ -1772,138 +1479,6 @@ function checkOnboardSync() {
       check: 'onboard-sync',
       file: 'epistemic-cooperative/',
       message: `Onboard sync — Data Sources, scenarios, and workflow verified for ${protocols.length} protocols`
-    });
-  }
-}
-
-// ============================================================
-// Check: precedence-linear-extension
-// Verify CANONICAL_PRECEDENCE total order is a valid linear extension
-// of graph.json precondition partial order
-// ============================================================
-function checkPrecedenceLinearExtension() {
-  const checkName = 'precedence-linear-extension';
-
-  // Parse CANONICAL_PRECEDENCE → ordered array (lowercase)
-  const precedenceOrder = CANONICAL_PRECEDENCE
-    .split('→')
-    .map(s => s.trim().toLowerCase());
-
-  // Build index map for O(1) position lookup
-  const positionOf = new Map();
-  precedenceOrder.forEach((name, idx) => positionOf.set(name, idx));
-
-  // Load graph.json
-  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
-  if (!fs.existsSync(graphPath)) {
-    results.warn.push({
-      check: checkName,
-      file: 'graph.json',
-      message: 'graph.json not found, skipping linear extension check'
-    });
-    return;
-  }
-
-  let graph;
-  try {
-    graph = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
-  } catch (e) {
-    results.fail.push({
-      check: checkName,
-      file: 'graph.json',
-      message: `Invalid JSON: ${e.message}`
-    });
-    return;
-  }
-
-  const { nodes, edges } = graph;
-  if (!Array.isArray(nodes) || !Array.isArray(edges)) {
-    results.fail.push({
-      check: checkName,
-      file: 'graph.json',
-      message: 'graph.json requires "nodes" and "edges" arrays'
-    });
-    return;
-  }
-
-  // Expand precondition edges (mirrors checkGraphIntegrity wildcard logic)
-  const preconditionEdges = [];
-  for (const edge of edges) {
-    if (!edge || typeof edge !== 'object') continue;
-    if (edge.type !== 'precondition') continue;
-    if (edge.target === '*') continue; // invalid — checkGraphIntegrity catches this
-    if (edge.source === '*') {
-      for (const node of nodes) {
-        if (node !== edge.target) {
-          preconditionEdges.push({ source: node, target: edge.target });
-        }
-      }
-    } else {
-      preconditionEdges.push({ source: edge.source, target: edge.target });
-    }
-  }
-
-  let violated = false;
-  let verifiedCount = 0;
-
-  for (const { source, target } of preconditionEdges) {
-    const srcPos = positionOf.get(source);
-    const tgtPos = positionOf.get(target);
-
-    // katalepsis is not in CANONICAL_PRECEDENCE (structurally last)
-    // Edges involving katalepsis: verify * → katalepsis exists (all-last guarantee)
-    if (target === 'katalepsis') {
-      // katalepsis as target is valid — it's structurally constrained to be last
-      verifiedCount++;
-      continue;
-    }
-    if (source === 'katalepsis') {
-      // katalepsis should not be a precondition source for non-katalepsis targets
-      results.fail.push({
-        check: checkName,
-        file: 'graph.json',
-        message: `katalepsis is precondition source for ${target} — violates structural last constraint`
-      });
-      violated = true;
-      continue;
-    }
-
-    if (srcPos === undefined) {
-      results.fail.push({
-        check: checkName,
-        file: 'graph.json',
-        message: `Precondition source "${source}" not found in CANONICAL_PRECEDENCE`
-      });
-      violated = true;
-      continue;
-    }
-    if (tgtPos === undefined) {
-      results.fail.push({
-        check: checkName,
-        file: 'graph.json',
-        message: `Precondition target "${target}" not found in CANONICAL_PRECEDENCE`
-      });
-      violated = true;
-      continue;
-    }
-
-    if (srcPos >= tgtPos) {
-      results.fail.push({
-        check: checkName,
-        file: 'graph.json',
-        message: `Precondition edge ${source}→${target} violates CANONICAL_PRECEDENCE order (position ${srcPos} >= ${tgtPos})`
-      });
-      violated = true;
-    } else {
-      verifiedCount++;
-    }
-  }
-
-  if (!violated) {
-    results.pass.push({
-      check: checkName,
-      file: 'graph.json',
-      message: `CANONICAL_PRECEDENCE is a valid linear extension of precondition partial order (${verifiedCount} edges verified)`
     });
   }
 }
@@ -2928,7 +2503,7 @@ function checkPackagedAgentContractSync() {
 // (Formal blocks are LLM-facing and constitutive of protocol identity).
 //
 // Exemption list: all core protocols currently carry this rule (added
-// in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
+// in the compiled-copy enforcement family (checks 23–24)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const FORMAL_BLOCKS_EXEMPTIONS = [];
 
@@ -3016,7 +2591,7 @@ function checkFormalBlocksRule() {
 // the check anchors on the kernel phrase only.
 //
 // Exemption list: all core protocols currently carry this rule (added
-// in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
+// in the compiled-copy enforcement family (checks 23–24)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const GATE_INTEGRITY_EXEMPTIONS = [];
 
@@ -3172,7 +2747,6 @@ try {
   checkVersionStaleness();
   checkCodexManifestSync();
   checkPackagedAgentContractSync();
-  checkGraphIntegrity();
   checkSpecVsImpl();
   checkMorphismAnatomy();
   checkCrossRefScan();
@@ -3180,7 +2754,6 @@ try {
   checkOnboardSync();
   checkCatalogSync();
   checkRoutingMapSync();
-  checkPrecedenceLinearExtension();
   checkPartitionInvariant();
   checkGateTypeSoundness();
   checkArtifactSelfContainment();

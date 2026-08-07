@@ -1149,7 +1149,7 @@ describe('load-protocols Type signature extraction', () => {
     assert.deepEqual(
       protocols.map(r => r.dir).sort(),
       ALL_PROTOCOLS.map(p => p.toLowerCase()).sort(),
-      'active protocol set diverges from the canonical registry (graph.json may have failed to parse)'
+      'active protocol set diverges from the canonical registry (CANONICAL_PROTOCOL_SET vs filesystem plugin dirs)'
     );
     for (const r of protocols) {
       assert.ok(r.deficit, `${r.dir}: deficit is null — SKILL.md Type signature parse failed`);
