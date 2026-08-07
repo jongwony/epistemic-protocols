@@ -477,7 +477,7 @@ Evaluate result against application context. This phase is **silent** — no use
 5. If all aspects warranted: present finding per Rule 9 before concluding (Epharmoge not activated)
 6. If certificate-passing mismatches remain: record `Mᵢ_passed` with aspect, description, evidence, severity (per Rule 12 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial`, kind_binding, certificate, and fit-map placement — proceed to Phase 1
 
-**Information source**: The result `R` compared against observable context `X` — non-circularity with Aitesis (Rule 6).
+**Information source**: The result `R` compared against observable context `X` — non-circularity (Rule 6).
 
 **Registration-time certificate**: The certificate fires per mismatch at registration, and the certify step is relay (Extension). Full account — including the elicit/bound comparison and basis-citation timing — at Rule 17(a)-(b).
 
@@ -586,8 +586,6 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 | Relay never edits | A relay closes a mismatch only where the close leaves the result untouched: a settled Upheld assigns no disposition of its own, and a settled Overruled closes with its basis reported | A settled finding never becomes silent permission to change the artifact |
 | Retraction is reported, never silent | `judgment_relay_overruled` must report the aspect and the fit evidence before closing | The user sees the retraction and its basis while the result still stands and before the close is written |
 | Each Phase 1 relay says where its correction lives | a relay-closed aspect leaves `pending(Σ)` and reaches no further Qc this run. A disputed CARRY reopens by re-entering on the same result (`accepted(a)` reads `Σ`, rebuilt at activation). A disputed RETRACTION has no such reset — `judgment_settled` reads `Λ.fit_map`, derived from `(Λ.R, X)`, so the same input reproduces the same close, and correcting it is the user's interrupt | The user is told what to reach for, rather than trying a reset that moves only one of the two guards |
-| Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.resolved_in_same_scope ∧ overlap(Aitesis.domains, Epharmoge.aspects)` | Prevents same-scope pre+post stacking |
-| Cooldown scope | Cooldown applies within recommendation chains only; direct `/contextualize` invocation is never suppressed | User authority preserved |
 | Natural integration | "Done. One thing to verify:" pattern | Fits completion flow, not interrogation |
 
 ## Rules
@@ -597,7 +595,7 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **Convergence persistence**: Mode active until every flagged aspect carries a disposition — adapted, kept, discarded, routed, residual, or moot. A run in which nothing was adapted converges exactly as fully as one in which everything was
-6. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans (independence from Aitesis)
+6. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans
 7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Context embedded in a question field is a protocol violation
 8. **Convergence evidence**: Present transformation trace before declaring `adjudicated(Λ.R, X)` over the evaluated target; per-mismatch evidence is required. Where the run ended in a withdrawal, the trace also states that the verdict's target is the replacement and that no fit claim is made about it
 9. **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation

@@ -115,7 +115,7 @@ Phase 1 Calibrate+Propose (observe) → Read, Grep (user's domain context for pe
 Phase 2 Qs         (constitution)    → present calibration map + candidate + grounding (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
 Phase 3            (track)   → Internal state update
 converge           (extension)   → TextPresent+Proceed (convergence evidence trace + open disposition; proceed with crystallized abstraction)
-seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its Analogia links are a pre-activation deferral (Rule 8) and an inbound misfit absorption (Rule 11), not post-crystallization handoffs, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
+seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol links are a pre-activation deferral (Rule 8) and an inbound misfit absorption (Rule 11), not post-crystallization handoffs, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
@@ -177,7 +177,7 @@ Heuristic evidence signals for in-process abstraction detection:
 | Instance accumulation | Concrete cases carry a shared essence signal and provide triangulation material for abstraction formation |
 | Essence intuition language | User phrases such as "something about these cases...", "the pattern I'm seeing...", "these all have...", "why do these keep happening..." |
 | Locator gap | Name, scope, or positional claim remains unsettled for the emerging abstraction |
-| Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (essence signal + `locator_absent(A)`) and nudges to `/induce` |
+| Upstream colimit-shaped-input detection | An upstream detection of colimit-shaped input (essence signal + `locator_absent(A)`) nudges toward abstraction crystallization |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
 **Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1 Fuse candidates; the constitutive judgment remains with the user.
@@ -186,8 +186,8 @@ Heuristic evidence signals for in-process abstraction detection:
 - No essence signal detectable (neither user sensing language nor AI-inferrable core pattern)
 - Abstraction already located (name + scope + position settled) — no in-process state to turn
 - User explicitly names the abstraction without in-process signals
-- `/ground` substitution is the actual need (abstract structure exists; validate against concrete target)
-- Comparative analysis between already-named candidate readings or frames — defer to Prothesis (frame selection) or Syneidesis (gap in decision); this is not colimit formation regardless of instance count
+- An existing abstract structure needs validation against a concrete target, not a new abstraction formed
+- Comparative analysis between already-named candidate readings or frames — this is not colimit formation regardless of instance count
 - Same (instance set, essence) pair was crystallized or dismissed in current session (session immunity)
 
 ### Canonical Invocation Scenarios
@@ -203,10 +203,10 @@ Periagoge's scope, stated positively by canonical use patterns:
 
 **Edge case (still valid)**: Single instance with strong phenomenological grip — e.g., "yesterday I was in a strange mode, what was that?" — qualifies when essence_sensed is active and no locator exists. Rare but legitimate.
 
-**Non-scenarios (out of scope — defer to named protocol)**:
-- Comparative analysis between already-named candidate readings/frames → Prothesis (`/frame`, frame selection)
-- Audit of decision gaps → Syneidesis (`/gap`)
-- Validating an existing abstract structure against a concrete target → Analogia (`/ground`)
+**Non-scenarios (out of scope)**:
+- Comparative analysis between already-named candidate readings/frames
+- Audit of decision gaps
+- Validating an existing abstract structure against a concrete target
 
 The operational test: "Is the user operation *forming a new abstraction from observed instances*, or is it something else (selecting, validating)?" Only the first is Periagoge.
 
@@ -228,7 +228,7 @@ Analyze conversation state for in-process abstraction. This phase is **silent** 
 2. **Check essence signal** `E`: scan for variation-stable core signal in conversation (user essence-intuition language or AI-inferred pattern). This is the primary gate — if no essence is sensed, the abstraction has nothing to turn toward
 3. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
 4. If essence_sensed ∧ ¬located: proceed to Phase 1 with `(Iᵢ, E, L?)`
-5. If Analogia misfit signal is present (colimit-shaped input forced into substitution): absorb the misfit as valid Periagoge trigger without re-confirmation
+5. If an upstream colimit-shaped-input signal is present (essence sensed, locator absent, previously read as a validation target): absorb it as a valid Periagoge trigger without re-confirmation
 
 **Scope restriction**: Detection is silent. Does NOT modify files or call external services.
 
@@ -315,7 +315,7 @@ After integration:
 | Session immunity | Crystallized or dismissed (Iᵢ, E) pair → skip for session | Respects user's crystallization or release |
 | Attempt cap | Max 5 triangulations per abstraction seed | Prevents infinite refinement; forces convergence or release |
 | Budget framing | Attempt counter in Phase 2 surfacing — a framing signal, not a progress count | User sees remaining refinement budget |
-| Analogia misfit absorption | `/ground` colimit-detection nudge routes here | Prevents source-domain confabulation in substitution path |
+| Upstream misfit absorption | A colimit-detection nudge routes here | Prevents source-domain confabulation in substitution path |
 
 ## Rules
 
@@ -327,14 +327,14 @@ After integration:
 6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind. If the user disputes the calibration map (`K`) itself, the same free-response path absorbs the correction rather than requiring a separate calibration-review constructor.
 6a. **Fuse dead-signal suppression**: Phase 2 omits the Fuse option when Phase 1 surfaces no adjacent abstraction candidates. Free response remains the channel for user-proposed fusion targets.
 7. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
-8. **Cross-protocol awareness**: Defer to Analogia when a pre-existing abstract structure needs validation against a target.
+8. **Not a validation operation**: A pre-existing abstract structure needing validation against a target falls outside Periagoge's own operation, which forms new abstractions rather than validating existing ones.
 9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Keeping context in the pre-gate text lets each option's differential implication stand alone, so the question arrives with the analysis already absorbed.
 10. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (calibration → candidate → user_move → candidate'). Per-step evidence is required.
 10a. **Open residual disposition**: `K.open` persists at convergence as `OpenTrace`: `None` for an empty open set, `Nonblocking` for open items that remain visible without blocking crystallization, and `Deferred` for open items explicitly routed to later work through free response. Bare Confirm defaults every open item to `Nonblocking`; explicit deferral requires an open-item name or unambiguous open-item reference adjacent to deferral language. `OpenTrace.status` aggregates item dispositions as `Deferred` when any item is Deferred, `Nonblocking` when all items are Nonblocking, and `None` only when `K.open = ∅`. This is terminal trace metadata, not a separate user gate.
-11. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (`essence_sensed` + `locator_absent(A)`) and nudges here, absorb the misfit as valid Periagoge trigger. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: essence_sensed(A), locator_absent(A), [N supporting instances] — redirecting to abstraction crystallization") so the user can recognize the evidence that justified the redirect; the concrete instance count makes the routing rationale verifiable rather than vague.
+11. **Absorb upstream misfit**: When an upstream detection of colimit-shaped input (`essence_sensed` + `locator_absent(A)`) nudges here, absorb it as a valid Periagoge trigger. Before Phase 1, surface the routing rationale with its cited detection basis ("colimit-shaped input detected: essence_sensed(A), locator_absent(A), [N supporting instances] — redirecting to abstraction crystallization") so the user can recognize the evidence that justified the redirect; the concrete instance count makes the routing rationale verifiable rather than vague.
 12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant move (option-level entropy → 0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options. **Exception (Periagoge-scoped)**: The Confirm/Dismiss pair is excluded from the entire preceding test (Extension resolution, cost-symmetric collapse, and off-axis pathway demotion) — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains Constitution even when only one shaping move appears analytically viable.
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction or pairing "Confirm" with "Use this" while preserving the UserMove coproduct) is distinct from mutation.
 14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 16. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
-17. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after this protocol's crystallization is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge — its Analogia links are a pre-activation deferral (Rule 8) and an inbound misfit absorption (Rule 11), not post-crystallization handoffs — so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
+17. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after this protocol's crystallization is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge — its only cross-protocol links are a pre-activation deferral (Rule 8) and an inbound misfit absorption (Rule 11), not post-crystallization handoffs — so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.

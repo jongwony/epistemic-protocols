@@ -138,7 +138,7 @@ Phase 2 → deactivate (ungraceful): user_esc                                   
 Per-cycle KIND dispatch (Phase 1, cycle-emergent — runs each cycle, NOT an up-front sync):
   Each candidate projection from ReverseTrace is bound (bind_kind → KindBinding) and certified (certify → DeficitFitCertificate, fail-closed) at projection time, BEFORE its coordinates are surfaced for answer. Only certificate-passing projections enter D_passed and reach Phase 2. status = route drops the projection (routed forward to a sibling deficit); status = ambiguous defers it to a later cycle; a non-atomic (compound) projection is split into atomic sub-projections before certify (same cycle), never deferred as a compound. This is distinct from bound's dispatch-first up-front sync: euporia's projection IS the dynamic capture, so the certificate attaches per projection per cycle rather than once before the loop.
 
-MONOTONE re-projection (the read-only side of the dual axis): the loop does NOT transform the object its own detector evaluates. Substrate reads are immutable (read-only tools, no mutation of the user's externalized cognition); `I'` accumulates across cycles (accumulate-only); an accepted coordinate value is never invalidated by re-trace or by a later answer. Re-trace is read-only RE-PROJECTION over the same immutable substrate with an updated `I'` — NOT "no re-scan" and NOT a revalidation that can breed new deficits. Because the source is never mutated, re-projection cannot create new deficit instances in already-accepted coordinates (contrast: a transformative-revalidation loop mutates its evaluated object and can regress).
+MONOTONE re-projection (the read-only side of the dual axis): the loop does NOT transform the object its own detector evaluates. Substrate reads are immutable (read-only tools, no mutation of the user's externalized cognition); `I'` accumulates across cycles (accumulate-only); an accepted coordinate value is never invalidated by re-trace or by a later answer. Re-trace is read-only RE-PROJECTION over the same immutable substrate with an updated `I'` — NOT "no re-scan" and NOT a revalidation that can breed new deficits. Because the source is never mutated, re-projection cannot create new deficit instances in already-accepted coordinates (contrast: an approach that mutates its evaluated object can regress).
 
 After Phase 3: re-detect remaining aporia in I'.
 If user_judges_resolved(I'): terminate, return ResolvedEndpoint — first fold any remaining Λ.deferred projections (unsurfaced ambiguous / low-confidence) into residual and surface them (never silently dropped).
@@ -195,7 +195,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.
-Read-only re-projection rationale: euporia sits on the read-only / monotone side of the dual axis — its detector evaluates the user's externalized substrate, which the loop never mutates (read-only tools). Re-trace is therefore RE-PROJECTION over an immutable source with an accumulated I', not a revalidation that can breed new deficits. The DeficitFitCertificate is cycle-emergent: it attaches to each projection at projection time (Phase 1), BEFORE the coordinate is surfaced — distinct from bound's dispatch-first up-front sync, which exists only because BoundaryMap is a multi-consumer router whose kind must settle once before any consumer reads it. euporia has no such multi-consumer constraint, so the certificate fires per projection per cycle. Forward under-determination (a projection a sibling deficit owns) is routed away (/inquire for a missing fact, /bound for an undefined boundary, /preview for direction candidates whose futures are unrecognizable from descriptions, the axis-specific protocol for an axis-determined projection) rather than reverse-traced, keeping a misfit coordinate out of the resolved endpoint.
+Read-only re-projection rationale: euporia sits on the read-only / monotone side of the dual axis — its detector evaluates the user's externalized substrate, which the loop never mutates (read-only tools). Re-trace is therefore RE-PROJECTION over an immutable source with an accumulated I', not a revalidation that can breed new deficits. The DeficitFitCertificate is cycle-emergent: it attaches to each projection at projection time (Phase 1), BEFORE the coordinate is surfaced. euporia has no multi-consumer constraint requiring a kind to settle once before any consumer reads it, so the certificate fires per projection per cycle. Forward under-determination (a projection a sibling deficit owns) is routed away (/inquire for a missing fact, /bound for an undefined boundary, /preview for direction candidates whose futures are unrecognizable from descriptions, the axis-specific protocol for an axis-determined projection) rather than reverse-traced, keeping a misfit coordinate out of the resolved endpoint.
 Monotonicity ∘ shared-backbone: the certificate-before-binding order and the Coordinate Monotonicity invariant compose — a coordinate only enters I' after (a) its projection passed the fail-closed certificate AND (b) the user answered Provide; once entered it is immutable, so re-projection accumulates determination without ever revalidating (and thus without ever invalidating) an accepted coordinate.
 ```
 
@@ -213,7 +213,7 @@ Euporia's loop is the **read-only re-projection** side of the dual axis: it reve
 
 **Invariant (Coordinate Monotonicity)**: An accepted coordinate is immutable. Once a coordinate is answered with `Provide(value)` and enters `Λ.accepted_coords`, no subsequent cycle — and no subsequent answer — may remove or overwrite it. A later answer ADDS determination to `I'`; it never REVISES an accepted coordinate. A `Defer(coords)`-ed coordinate, when later answered in a subsequent cycle, may only ADD determination — it cannot overturn a coordinate already accepted in an earlier cycle.
 
-**Why this holds structurally**: substrate reads are immutable (Phase 1 uses read-only tools and never mutates the user's externalized cognition), and `I'` is accumulate-only (`integrate` adds coordinate values, never deletes them). Re-projection re-reads the same unchanged substrate with a more-determined `I'`; it cannot manufacture a new value for an already-accepted coordinate because the source it reads has not changed. This is the property that distinguishes a read-only re-projection loop from a transformative-revalidation loop (which mutates its evaluated object and may therefore regress).
+**Why this holds structurally**: substrate reads are immutable (Phase 1 uses read-only tools and never mutates the user's externalized cognition), and `I'` is accumulate-only (`integrate` adds coordinate values, never deletes them). Re-projection re-reads the same unchanged substrate with a more-determined `I'`; it cannot manufacture a new value for an already-accepted coordinate because the source it reads has not changed. This is the property that distinguishes a read-only re-projection loop from one that mutates its evaluated object and may therefore regress.
 
 **Rationale / documented falsifier (the `Defer` retroactive-invalidation case)**: the risk the invariant forecloses is a `Defer`-then-answer sequence in which a deferred coordinate's later answer would imply a *different* value for a coordinate already accepted in an earlier cycle — retroactively invalidating it and breaking monotonicity. The invariant rules this out by construction: deferral parks a coordinate as still-pending (it was never accepted, so nothing about it is yet immutable), and when it is later answered the result is an ADD to `I'`, scoped to that coordinate. If a later answer genuinely contradicts an accepted coordinate, that is a **frame change**, not a within-loop revision: the user must re-open the resolved coordinate explicitly (a fresh constitutive act — equivalently a new `/elicit` pass over the changed intent), and the protocol surfaces the conflict rather than silently overwriting. The invariant is falsified if a re-projection cycle is ever observed to silently overwrite an accepted coordinate without such an explicit user re-opening; that observation would reclassify euporia's loop off the read-only/monotone side of the dual axis.
 
@@ -239,7 +239,7 @@ aporia(I) ≡ ∃ requirement(r, I) : axis_undetermined(r) ∧ substrate_implici
             -- Utterance is admissible as Evidence basis within Phase 1 dimension projections
             --   once activated, but does not by itself satisfy substrate_implicit;
             --   utterance-only aporia (axis-undetermined intent without external substrate signal)
-            --   routes to Aitesis (fact-supply layer), not Euporia.
+            --   does not satisfy substrate_implicit, so this gate does not fire.
 ```
 
 ### Priority
@@ -271,10 +271,10 @@ When Euporia is active:
 
 **Skip**:
 - Intent is fully axis-determined (a single axis-specific protocol covers it)
-- Substrate is empty (no externalized coordinates available — fall back to direct execution or Aitesis)
+- Substrate is empty (no externalized coordinates available — fall back to direct execution)
 - User explicitly requests proceed without surfacing
 - Same (utterance, substrate slice) was resolved or dismissed in current session (session immunity)
-- Wants generated candidates from a topic or fragments, not coordinates reverse-traced from externalized substrate → Heuresis (`/ideate`)
+- Wants generated candidates from a topic or fragments, not coordinates reverse-traced from externalized substrate — outside Euporia's reverse-trace scope
 
 ### Activation Conditions
 
@@ -302,7 +302,7 @@ Analyze the intent seed for abstract aporia. Detection is silent on the aporia-c
 4. If `aporia(I)` predicate satisfied: proceed to Phase 1 with `(I, S, ctx)` — silent, no user interaction
 5. If no aporia signal (predicate unsatisfied), surface the scan result and deactivate without proceeding to Phase 1:
    - **Intent is axis-determined**: surface a routing recommendation to the matching axis-specific protocol
-   - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution or Aitesis)
+   - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution)
 
 **Scope restriction**: Detection does NOT modify files or call external services beyond read-only substrate scan. The no-signal surface is a relay presentation — no constitutive gate.
 
@@ -387,7 +387,7 @@ After integration:
 | Gate specificity | `activate(Euporia) only if axis_undetermined(I) ∧ substrate_implicit(I)` | Prevents false activation on axis-determined intent or empty substrate |
 | Substrate evidence required | Phase 1 dimension projections must cite specific substrate evidence (file:line, rule reference, session id) | Prevents speculation; reverse-trace must be grounded |
 | Fail-closed deficit-fit certificate | Each projection's `certificate.status = pass` strictly precedes value-space binding and surfacing; route → drop projection (forward to sibling deficit), ambiguous → defer to a later cycle, non-atomic → split into atomic sub-projections before certify | A projection a sibling deficit owns never surfaces as an aporia coordinate; forward under-determination is routed (`/inquire`, `/bound`, `/preview`, axis-specific) rather than reverse-traced |
-| Cycle-emergent certificate (no up-front sync) | The certificate attaches per projection at projection time (Phase 1), not once before the loop | euporia's projection IS the dynamic capture; distinct from bound's dispatch-first up-front sync (which exists only for a multi-consumer router) |
+| Cycle-emergent certificate (no up-front sync) | The certificate attaches per projection at projection time (Phase 1), not once before the loop | euporia's projection IS the dynamic capture; no multi-consumer constraint requires a kind to settle up front |
 | Coordinate monotonicity | Accepted coordinates are immutable; integrate ADDS, never revises; a deferred coordinate, when later answered, only adds determination | Read-only re-projection cannot invalidate an already-accepted coordinate; resolution reached by accumulation, never regression |
 | Immutable substrate read | Phase 1 reads never mutate the substrate | Keeps re-trace a read-only re-projection (monotone), not a revalidation that can breed new deficits |
 | Cycle counter visibility | Phase 2 surfacing always shows `cycle_n` | User perceives cycle signal density and decides when to terminate |

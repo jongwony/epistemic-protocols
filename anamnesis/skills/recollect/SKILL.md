@@ -298,7 +298,7 @@ Heuristic signals for empty intention detection (not hard gates):
 **Skip**:
 - User provides specific reference (file path, session ID, issue number, exact quote)
 - Same recall target already resolved in current session (session immunity)
-- No empty intention — user is asking for new information, not recalling prior context (defers to Aitesis)
+- No empty intention — user is asking for new information, not recalling prior context
 - User explicitly declines recall assistance
 - Phase 0 determines the user's expression needs other handling, not recall
 

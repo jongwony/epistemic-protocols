@@ -155,8 +155,6 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation
 
-**Sequencing with Prothesis**: Following the default ordering, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Syneidesis → Revision → Execution]. The user can override this ordering by explicitly requesting Syneidesis first.
-
 This cycle repeats per planning phase or domain area.
 
 ### Conditions

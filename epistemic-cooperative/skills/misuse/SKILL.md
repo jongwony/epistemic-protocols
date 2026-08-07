@@ -31,19 +31,6 @@ Skip when:
 - The user wants strength-shadow analysis of behavioral patterns (use `/curses`)
 - The user is asking about a present-moment invocation, not past invocations
 
-## Distinction from Adjacent Skills
-
-| Skill | Time axis | Subject | Output |
-|-------|-----------|---------|--------|
-| `/probe` | Prospective (present situation) | Deficit recognition fit review | ProtocolRoute or FitReviewNote |
-| `/misuse` | Retrospective (past invocations) | Contract integrity audit | ViolationReview (per-invocation verdict) |
-| `/sophia` | Retrospective (behavioral patterns) | Philosophical tradition match | Philosopher profile |
-| `/curses` | Retrospective (strengths) | Strength-shadow extraction | Shadow-cost analysis |
-| `/report` | Retrospective (usage) | Growth Map | Aggregated insight integration |
-| `/dashboard` | Retrospective (coverage) | Protocol coverage analytics | Coverage statistics |
-
-The skill family coexists by phenomenology — none replaces the others. Misuse is for contract integrity; the other retrospective skills serve user-pattern questions.
-
 ## Protocol
 
 ### Phase 0: Scope Determination

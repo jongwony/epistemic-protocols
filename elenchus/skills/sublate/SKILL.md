@@ -166,7 +166,6 @@ When Elenchus is active:
 
 **Skip**:
 - Working context is empty or just-arrived (no high-leverage / aged / inferred / contradicting source)
-- User already invoked `/inquire` or `/elicit` on the same working context within the same session and no new sources have accumulated
 - The action under consideration is itself a Phase 0 silent scan (vetting before vetting recurses without termination)
 
 ### Mode Deactivation
@@ -325,7 +324,7 @@ Present transformation trace as text output, then proceed with the vetted contex
 6. **Convergence evidence**: Present transformation trace (source → antithesis → disposition) before declaring all sources vetted; per-source evidence is required, not asserted.
 7. **Source chain preservation**: W.sources is read-only across the protocol's lifetime. Antithesis and disposition annotate, never mutate, the source list. A Discarded disposition removes a source from downstream usage but preserves it in Λ.history with its withdrawal reason.
 8. **Loop continuity under bounded regret**: Deferred dispositions whose re-trigger condition has not been met let the loop continue. Only dispositions requiring genuinely viable alternative judgment paths — where the user's values determine the choice among options (Constitution-level entropy > 0) — warrant Phase 2 surfacing; relay-level operations (tagging, antithesis text construction, trace presentation) proceed inline.
-9. **Antithesis must be dialectical**: An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), counter-source (Pattern C: "X₁ and X₂ diverge at Q"), or counter-inference (Pattern D: "Y's soundness rests on a fallacy archetype that fails here"). Procedural queries ("have you checked X?") surface in `/inquire`, not here.
+9. **Antithesis must be dialectical**: An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), counter-source (Pattern C: "X₁ and X₂ diverge at Q"), or counter-inference (Pattern D: "Y's soundness rests on a fallacy archetype that fails here") — not a procedural verification query ("have you checked X?").
 10. **Closed coproduct discipline**: Disposition is a closed coproduct of seven named variants plus Emergent. The Other option permits free-response, which the AI maps to the closest variant or surfaces as a candidate Emergent variant for that source — it does not bypass the coproduct.
 11. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic disposition variant into a concrete instance with parameters while preserving the TYPES coproduct structure) is distinct from mutation.
 12. **Substrate boundary**: Post-vetting execution is delegated by handoff after Phase 3 integration.
