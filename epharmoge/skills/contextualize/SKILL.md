@@ -40,7 +40,7 @@ deficit:  ApplicationDecontextualized    -- activation precondition (Layer 1/2);
 preserves: X                             -- application context is fixed reference; morphism transforms R only
 invariant: Applicability over Correctness
 invariant: certificate-before-registration  -- DeficitFitCertificate.status = pass strictly precedes registering a mismatch into pending(Σ) (shared meta-backbone order, at registration of both Mᵢ and Mₑ)
-invariant: transformative revalidation (NON-MONOTONE) -- an Adapt disposition mutates the Eval(R, X) target into R', breeding emergent mismatches Mₑ; re-scan mandatory; progress(Λ) may regress
+invariant: transformative revalidation (NON-MONOTONE) -- an Adapt disposition mutates the Eval(R, X) target into R', breeding emergent mismatches into Mₑ; re-scan mandatory; progress(Λ) may regress
 invariant: judgment-disposition separation -- the judgment (does the aspect stand?) and the disposition (what becomes of the result) are separate answers, each relay-eligible on its own ground: the judgment on cited evidence, the disposition on the user's own prior answer for that aspect
 invariant: relay closes only what leaves the artifact unchanged -- a relay may close a mismatch only where the close changes nothing about the result
 
@@ -52,7 +52,9 @@ Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
 Mismatch = { aspect: String, description: String, evidence: String, severity: Severity, origin: Origin, kind_binding: KindBinding, certificate: DeficitFitCertificate }
                  -- object_ref: the per-mismatch anchor the certificate evaluates and the value-space binds over (epharmoge-local instantiation of the shared backbone's object_ref)
                  -- the mismatch's kind/domain is carried by kind_binding.label (Axis = String, emergent) — the single source of the kind label
-Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
+Origin ∈ {Initial, Emerged(aspect), Persisting}                -- mismatch provenance: initial scan, spawned by adapting parent aspect, or an aspect that ALREADY
+                                                               -- carried a DispositionRecord and re-registered across TARGET SUCCESSION. Persisting is a causal
+                                                               -- NEGATIVE: the aspect existed before the latest Adapt, so it is outside the Emerged chain
 Severity ∈ {Critical, Significant, Minor}                      -- Significant requires demonstrable behavioral impact (current-session task graph / downstream protocol activations); see Rule 12
 
 -- Shared meta-backbone (KIND dispatch, registration-time / cycle-emergent). One canonical schema; epharmoge-local instantiation ONLY for object_ref (= Mismatch), local_value_space (= the two-axis answer space Judgment × Disposition under well_formed), the label field's type (Axis), and guard routing targets.
@@ -103,7 +105,9 @@ SelectNext = Set(Mismatch) × F × Σ → Mₛ
            -- priority: severity(Critical > Significant > Minor), then FitRank, then oldest registered task
 Mₛ     = Selected mismatch
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial; each bind_kind'd + certified at registration (Phase 0)
-Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect); each bind_kind'd + certified at re-scan registration (Phase 2)
+Mₑ     = The re-scan registration set from Eval(R', X)         -- each bind_kind'd + certified at re-scan registration (Phase 2). ORIGIN-SPLIT at stamping time:
+                                                               --   Emerged(adapted_aspect) — the aspect carries no DispositionRecord; the latest Adapt spawned it
+                                                               --   Persisting              — the aspect already carries one and re-registered across the succession
 Register = { m ∈ Set(Mismatch) : certificate(m).status = pass } → Set(Task) [Tool: TaskCreate] -- registration of ONLY certificate-passing mismatches as tracked tasks; status ≠ pass blocks registration (fail-closed)
 pending(Σ) = Set(Mismatch) where registered task status ≠ completed  -- a routed/ambiguous mismatch never enters pending(Σ); only certificate-passing mismatches are registered
              -- every disposition completes its task, so `completed` is the single resolved status; there is no separate dismissed state (a Keep is a disposition, not a discard of the task)
@@ -213,7 +217,7 @@ After Phase 2, re-scan is disposition-keyed, not answer-keyed:
   Discard(replacement)  → the Eval target is gone; no re-scan is possible or meaningful; run terminates via Phase 2 → withdraw
   Route / Residual      → certificate-assigned, never surfaced for answer; the scan continues with the remaining mismatches
 A relay-assigned Keep never reaches Phase 2 at all: judgment_relay_overruled and keep_carried_forward each close their mismatch inside Phase 1, non-mutating, breeding no Mₑ and triggering no re-scan, and control returns directly to SelectNext over the remaining pending(Σ).
-Mₑ is the Eval output minus what already sits in pending(Σ). An aspect CLOSED earlier this session is not excluded from it: it re-registers like any other, which un-disposes it (disposed(a), CONVERGENCE) so no stale record can carry a terminal, and Phase 1 closes it by keep_carried_forward wherever the user already accepted it.
+Mₑ is the Eval output minus what already sits in pending(Σ). An aspect CLOSED earlier this session is not excluded from it: it re-registers, which un-disposes it (disposed(a), CONVERGENCE) so no stale record can carry a terminal, and Phase 1 closes it by keep_carried_forward wherever the user already accepted it. It registers with origin = Persisting, so it stays outside the Emerged chain the convergence output reads.
 Bind + certify each newly emerged mismatch at registration (fail-closed): only certificate-passing emerged mismatches (Mₑ_passed) are registered into pending(Σ); a routed mismatch is closed with Route(target) and handed to its sibling deficit (/gap, /inquire, /bound); a non-atomic compound mismatch is split into atomic sub-mismatches and re-certified; an atomic ambiguous mismatch gets its one bounded re-assessment at the fixed re-scan (R', X) → pass / route / Residual, before registration. AssessFit classifies tracked mismatches but never suppresses them.
 Recompute the fit map over pending(Σ) and re-bind Λ.fit_map to it before selecting the next surfaced mismatch, even when Mₑ_passed = ∅. FIT-MAP SUCCESSION, the counterpart of TARGET SUCCESSION: every reader takes Λ.fit_map at the moment it reads, never a fit map computed against an earlier Λ.R.
 CHECKED IN THIS ORDER:
@@ -533,7 +537,7 @@ After the user's answer `(judgment, disposition)`, **first** append the mismatch
 
 After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and `Discard` is run-terminal; neither breeds `Mₑ` nor triggers `Eval`)
 - Re-evaluate the advanced target `Λ.R` against `X` for remaining AND **newly emerged** mismatches. `Mₑ` excludes only what already sits in `pending(Σ)` — an aspect closed earlier this session re-registers, and Phase 1 closes it by `keep_carried_forward` wherever the user already accepted it
-- **Bind + certify each emerged mismatch at registration (fail-closed)** — this happens at the **Phase 2 re-scan** (AFTER the Adapt disposition has already mutated R into R'), temporally separated from the Phase-0 certification of Mᵢ: for each `m ∈ Mₑ`, set `m.kind_binding` and `m.certificate = certify(m.kind_binding, registry)` (same registry, same `pass | route | ambiguous` statuses as Phase 0). Register only certificate-passing emerged mismatches (`Mₑ_passed`) with `origin=Emerged(adapted_aspect)`; a `status = route` mismatch is closed with disposition `Route(target)` and handed to its sibling deficit (`/gap`, `/inquire`, `/bound`); a non-atomic compound mismatch is split into atomic sub-mismatches and re-certified; an atomic `status = ambiguous` mismatch gets its one bounded re-assessment at the fixed re-scan `(R', X)` → pass / `Route(target)` / `Residual`, before registration. Do not filter the certificate-passing set by fit-map category.
+- **Bind + certify each emerged mismatch at registration (fail-closed)** — this happens at the **Phase 2 re-scan** (AFTER the Adapt disposition has already mutated R into R'), temporally separated from the Phase-0 certification of Mᵢ: for each `m ∈ Mₑ`, set `m.kind_binding` and `m.certificate = certify(m.kind_binding, registry)` (same registry, same `pass | route | ambiguous` statuses as Phase 0). Register only certificate-passing members (`Mₑ_passed`), stamping `origin=Emerged(adapted_aspect)` where the aspect carries no DispositionRecord and `origin=Persisting` where it already carries one; a `status = route` mismatch is closed with disposition `Route(target)` and handed to its sibling deficit (`/gap`, `/inquire`, `/bound`); a non-atomic compound mismatch is split into atomic sub-mismatches and re-certified; an atomic `status = ambiguous` mismatch gets its one bounded re-assessment at the fixed re-scan `(R', X)` → pass / `Route(target)` / `Residual`, before registration. Do not filter the certificate-passing set by fit-map category.
 - Recompute `ApplicabilityFitMap` over all pending mismatches before selecting the next mismatch, even when `Mₑ_passed = ∅`
 - If remaining tasks non-empty: return to Phase 1 (surface next mismatch via `SelectNext`: severity, then FitRank, then oldest registered task)
 - If all tasks completed: execution complete — the verdict carries `R_final` together with every disposition
@@ -541,7 +545,7 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 
 **Re-scan trigger (transformative revalidation — NON-MONOTONE)**: An Adapt disposition MUTATES `R` into `R'`, and `Eval(R', X)` re-targets the detector at the mutated result, so changed `R'` may exhibit new mismatches not present in the original result. Always re-scan after each adaptation — any adaptation may introduce mismatches in dimensions unrelated to the original aspect; `progress(Λ)` may therefore regress (expected, not an error). Every other disposition leaves `R` unmutated as a succession target and is contextualize-internal.
 
-**Chain discovery**: When `Mₑ` emerges from an adaptation, the `origin = Emerged(parent_aspect)` field records the causal chain. This enables:
+**Chain discovery**: The `origin = Emerged(parent_aspect)` field records the causal chain, and ranges over Emerged members ALONE — a `Persisting` aspect existed before the latest Adapt, so it enters neither reading below. This enables:
 - Chain visibility: user sees which adaptations spawned new mismatches (a framing signal — which adaptation opened which follow-on, not a progress count)
 - Convergence monitoring: chains that grow beyond 3 levels suggest a structural issue worth surfacing explicitly
 
