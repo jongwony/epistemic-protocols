@@ -42,7 +42,7 @@ const DESCRIPTION_OVERRIDES = {
   elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
-  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
+  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
   ideate: 'Frame-parallel divergent candidate generation — (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField',
