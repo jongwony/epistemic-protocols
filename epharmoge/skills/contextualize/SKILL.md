@@ -470,7 +470,7 @@ Evaluate result against application context. This phase is **silent** — no use
 
 ### Phase 1: Mismatch Surfacing
 
-**Register all certificate-passing mismatches (`Mᵢ_passed`) as Tasks** (TaskCreate), then take the next pending mismatch selected by `SelectNext`. If the fit evidence has already settled its judgment as `Overruled`, report the retraction and its cited basis and close it as relay (`judgment_relay_overruled`). Otherwise **present** it via Cognitive Partnership Move (Constitution). Routed/ambiguous mismatches never enter `pending(Σ)` (fail-closed certificate).
+**Register all certificate-passing mismatches (`Mᵢ_passed`) as Tasks** (TaskCreate), then take the next pending mismatch selected by `SelectNext`. If the fit evidence has already settled its judgment as `Overruled`, report the retraction and its cited basis and close it as relay (`judgment_relay_overruled`). Failing that, if the user already answered `Keep` for this aspect (`accepted(aspect(Mₛ))`), report the carry-forward and the basis they gave and close it as relay (`keep_carried_forward`). Otherwise **present** it via Cognitive Partnership Move (Constitution). Routed/ambiguous mismatches never enter `pending(Σ)` (fail-closed certificate).
 
 **Task format**:
 ```
@@ -572,7 +572,7 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 
 ## Rules
 
-1. **AI-guided, user-judged**: AI detects the applicability mismatch; the judgment is the user's wherever it turns on what they weigh, presented via Cognitive Partnership Move (Constitution) at Phase 1. Where the evidence instead fixes one answer, the AI relays that answer with its basis cited to the user
+1. **AI-guided, user-judged**: AI detects the applicability mismatch; the judgment is the user's wherever it turns on what they weigh, presented via Cognitive Partnership Move (Constitution) at Phase 1. Where the answer is already fixed — by evidence admitting no other reading, or by the user's own earlier answer for that aspect — the AI relays it with its basis cited to the user
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
