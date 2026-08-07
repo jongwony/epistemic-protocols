@@ -245,7 +245,7 @@ disposed(a)        = (∃ r ∈ Σ.dispositions : aspect(r.mismatch) = a) ∧ a 
 adjudicated(Λ.R, X) = ∀ aspect(a, Λ.R, X) : warranted(a, Λ.R, X) ∨ disposed(a)
 contextualized(Λ.R) = adjudicated(Λ.R, X)
 trivial convergence (all-disposed at registration): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND every flagged aspect is closed with a certificate-assigned disposition, Route(target) or Residual — aspect-keyed via disposed(a) over the atomic (post-split) aspects — (no deferred-pending, pending(Σ) = ∅), adjudicated(Λ.R, X) holds by disposed(a) for every flagged aspect (and warranted for the rest) — Λ.R is unadapted, R_final := Some(Λ.R), and contextualized(Λ.R) holds. This is the Phase 0 → deactivate (all-routed) path. DEFERRED mismatches carry no ledger entry yet, so disposed(a) does not cover them and they do not satisfy this. Distinct from the no-mismatch case (Mᵢ = ∅, every aspect warranted from the start) — here aspects were flagged but all belong to sibling deficits
-retraction convergence: when judgment_relay_overruled closes the last mismatch in pending(Σ), adjudicated(Λ.R, X) follows from disposed(a) for every flagged aspect with Λ.R untouched, and R_final := Some(Λ.R) — the ordinary non-withdrawal result equation, reached without a final gate. Λ.R was never modified, so re-entering Epharmoge with the same result is the correction path for a retraction the user disputes
+retraction convergence: when judgment_relay_overruled closes the last mismatch in pending(Σ), adjudicated(Λ.R, X) follows from disposed(a) for every flagged aspect, and R_final := Some(Λ.R) — the ordinary non-withdrawal result equation, reached without a final gate. The relay close performs no adaptation, so Λ.R stands as whatever earlier Adapt dispositions left it as
 withdrawal convergence: when a Discard(replacement) disposition fires (Phase 2 → withdraw), every mismatch remaining in pending(Σ) is closed as Moot, so disposed(a) holds for every flagged aspect of Λ.R and adjudicated(Λ.R, X) follows without any re-scan. R_final := replacement records what the user is left with, and the verdict makes NO adjudication claim about it — the protocol never evaluated it. Re-entering Epharmoge with the replacement as R is how it gets checked
 certificate gate:  every registered mismatch carried certificate.status = pass (fail-closed, at registration) — routed/ambiguous mismatches never entered pending(Σ), so an adapted R' is assembled only from in-scope (ApplicationDecontextualized-owned), fit-certified adaptations; backward misfit was handed forward (/gap, /inquire, /bound), not adapted in-place
 -- stratification: applicable(Λ.R, X) ⊆ adjudicated(Λ.R, X)
@@ -279,7 +279,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 
 ── MODE STATE ──
 Λ = { phase: Phase,
-      R: Result,   -- the CURRENT EVALUATED TARGET: initialised to the result under review and re-bound to R' by each Adapt disposition
+      R: Result,   -- the CURRENT EVALUATED TARGET, re-bound to R' by each Adapt disposition
                    -- (Phase 2, TARGET SUCCESSION). Every R_final binding and every convergence predicate reads THIS field, so an Adapt
                    -- followed later by a Keep yields the adapted result
       X: Context,
@@ -291,6 +291,8 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
                  -- the SINGLE disposition ledger. Every close writes here — user-answered, certificate-assigned, or loop-assigned — so the
                  -- convergence trace ranges over one list
                  -- each Mismatch in a record carries its kind_binding + certificate (object_ref = Mismatch)
+-- INITIAL BINDING at activation: Λ.R := the result under review; Λ.deferred := ∅; Λ.withdrawn := None; Λ.reopen_focus := None;
+--   Σ := { dispositions = [], scan_count = 0 }. Λ.fit_map is bound by the Phase 0 pass (Λ.fit_map := F)
 -- judgment_state is CYCLE-LOCAL and holds no field here: produced at Phase 1 by judgment_relay_upheld, read at the Qc presentation and again
 --   at the close that follows (Phase 2 dispose, or the keep_all_remaining bulk exit), all within one cycle. Where a relayed judgment must
 --   survive a session boundary, the channel is the Task the mismatch is already registered under
