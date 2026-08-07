@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Filesystem-walk loader for protocol/utility plugin set.
  *
@@ -6,7 +5,7 @@
  * per-plugin plugin.json self-description. This module derives all
  * enumeration shapes (PLUGINS, PROTOCOL_METADATA, PROTOCOL_ORDER,
  * PROTOCOL_FILES, etc.) from the filesystem so consumers (package.js,
- * static-checks.js, agent-symlinks sync) never carry a hand-curated list.
+ * static-checks.js) never carry a hand-curated list.
  *
  * Active set = filesystem plugin dirs minus those whose plugin.json carries
  * "deprecated": true. Deprecation lives in per-plugin self-description per
@@ -109,10 +108,6 @@ function extractTypeSignature(skillMd) {
   return { deficit: null, resolution: null };
 }
 
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
 /**
  * Walk plugin directories and return enriched plugin records.
  *
@@ -211,24 +206,6 @@ function discoverPlugins(options = {}) {
 // over discoverPlugins() — recompute is cheap (per-call memoization keeps
 // reads at one per plugin.json).
 
-function pluginsTuples(options) {
-  return discoverPlugins(options).map(p => ({ dir: p.dir, skill: p.skill }));
-}
-
-function protocolMetadata(options) {
-  const records = discoverPlugins(options).filter(p => p.isProtocol);
-  const out = {};
-  for (const r of records) {
-    out[r.dir] = {
-      name: capitalize(r.dir),
-      command: `/${r.skill}`,
-      deficit: r.deficit,
-      resolution: r.resolution,
-    };
-  }
-  return out;
-}
-
 // Display order = Anamnesis (recall, session start) + canonical-precedence
 // linear extension + Katalepsis (structurally last).
 function protocolOrder(options) {
@@ -242,46 +219,13 @@ function protocolFiles(options) {
   );
 }
 
-function sourcePluginDirs(options) {
-  const records = discoverPlugins(options);
-  return [...new Set(records.map(r => r.dir))];
-}
-
 module.exports = {
   CANONICAL_PRECEDENCE,
   CANONICAL_PROTOCOL_SET,
   CANONICAL_CLUSTERS,
   discoverPlugins,
-  pluginsTuples,
-  protocolMetadata,
   protocolOrder,
   protocolFiles,
-  sourcePluginDirs,
   parseSkillFrontmatter,
   extractTypeSignature,
 };
-
-// CLI mode: shell scripts consume the active plugin/skill set via line-
-// delimited stdout. JSON-strict deprecated handling lives in this loader
-// (not in shell grep), so shell consumers inherit the same equality
-// semantics the JS code uses (PR #351 review M2).
-if (require.main === module) {
-  const arg = process.argv[2];
-  switch (arg) {
-    case '--list-plugin-dirs': {
-      const dirs = sourcePluginDirs();
-      process.stdout.write(dirs.join('\n') + '\n');
-      break;
-    }
-    case '--list-skill-tuples': {
-      const tuples = pluginsTuples().map(p => `${p.dir}/${p.skill}`);
-      process.stdout.write(tuples.join('\n') + '\n');
-      break;
-    }
-    default:
-      process.stderr.write(
-        'usage: load-protocols.js [--list-plugin-dirs|--list-skill-tuples]\n'
-      );
-      process.exit(1);
-  }
-}

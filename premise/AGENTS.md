@@ -24,7 +24,7 @@ Read [`matching-the-request.md`](matching-the-request.md) when unsure whether th
 
 Read [`verification-discipline.md`](verification-discipline.md) before declaring something done, when a delegated agent reports that its work is complete, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look.
 
-Read [`instruction-authoring.md`](instruction-authoring.md) when writing or revising instructions and durable records, when judging whether a new rule earns its place, and when deciding how much to inline for a reader versus leaving as a reference.
+Read [`instruction-authoring.md`](instruction-authoring.md) when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, and when deciding how much to inline for a reader versus leaving as a reference.
 
 Read [`delegation-and-subagents.md`](delegation-and-subagents.md) when handing work to an agent that cannot see this conversation, and when deciding what a coordinator keeps for itself versus delegates outward.
 
