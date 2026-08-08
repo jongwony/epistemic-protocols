@@ -337,7 +337,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 -- Ledger invariant: every mismatch leaving pending(Σ), and every mismatch closed at registration, appends exactly one DispositionRecord (no close without a record; no record without a close)
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Mismatch-domain resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.
 certificate-before-registration ∘ transformative-revalidation: the fail-closed certificate order composes with the NON-MONOTONE loop — when an Adapt disposition mutates R and Eval(R', X) breeds emergent mismatches Mₑ, EACH Mₑ is independently bind_kind'd + certified at re-scan registration (Phase 2) before it can enter pending(Σ). So only in-scope (ApplicationDecontextualized-owned) Mₑ_passed register, even as R mutates across cycles; the certificate gate holds under mutation-induced revalidation.
 judgment-relay ∘ disposition-gate: the two axes compose so that a relay reaches the disposition half only where that half has collapsed to a no-op. judgment_relay_upheld discharges the epistemic half at entropy → 0 with a cited basis and leaves the repair half to be routed — to Qc, or to the carry where the user already answered it. judgment_relay_overruled reaches both halves, because well_formed leaves Keep as the sole pairing and a Keep edits nothing; the retraction is reported with its cited basis while the target still stands untouched. keep_carried_forward reaches the disposition half on the OTHER ground — the user's own prior answer for that aspect, re-applied to the advanced target and reported before it writes — and reaches ONLY that half: the judgment it records is the one this cycle settled, so the two grounds stay on their own axes instead of one carrying the other along. The composite's guarantee is that Adapt and Discard stay outside relay reach. It is stable under the non-monotone loop: an emergent Mₑ re-enters at Phase 1 and is judged and disposed on the same two axes, with its own relay eligibility computed afresh against the advanced target.
 ```
@@ -477,7 +477,7 @@ Evaluate result against application context. This phase is **silent** — no use
 5. If all aspects warranted: present finding per Rule 9 before concluding (Epharmoge not activated)
 6. If certificate-passing mismatches remain: record `Mᵢ_passed` with aspect, description, evidence, severity (per Rule 12 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial`, kind_binding, certificate, and fit-map placement — proceed to Phase 1
 
-**Information source**: The result `R` compared against observable context `X` — non-circularity with Aitesis (Rule 6).
+**Information source**: The result `R` compared against observable context `X` — non-circularity (Rule 6).
 
 **Registration-time certificate**: The certificate fires per mismatch at registration, and the certify step is relay (Extension). Full account — including the bound comparison and basis-citation timing — at Rule 17(a)-(b).
 
@@ -586,8 +586,6 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 | Relay never edits | A relay closes a mismatch only where the close leaves the result untouched: a settled Upheld assigns no disposition of its own, and a settled Overruled closes with its basis reported | A settled finding never becomes silent permission to change the artifact |
 | Retraction is reported, never silent | `judgment_relay_overruled` must report the aspect and the fit evidence before closing | The user sees the retraction and its basis while the result still stands and before the close is written |
 | Each Phase 1 relay says where its correction lives | a relay-closed aspect leaves `pending(Σ)` and reaches no further Qc this run. A disputed CARRY reopens by re-entering on the same result (`accepted(a)` reads `Σ`, rebuilt at activation). A disputed RETRACTION has no such reset — `judgment_settled` reads `Λ.fit_map`, derived from `(Λ.R, X)`, so the same input reproduces the same close, and correcting it is the user's interrupt | The user is told what to reach for, rather than trying a reset that moves only one of the two guards |
-| Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.resolved_in_same_scope ∧ overlap(Aitesis.domains, Epharmoge.aspects)` | Prevents same-scope pre+post stacking |
-| Cooldown scope | Cooldown applies within recommendation chains only; direct `/contextualize` invocation is never suppressed | User authority preserved |
 | Natural integration | "Done. One thing to verify:" pattern | Fits completion flow, not interrogation |
 
 ## Rules
@@ -597,7 +595,7 @@ After an **Adapt** disposition only — **re-scan**: (`Keep` is non-mutating and
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **Convergence persistence**: Mode active until every flagged aspect carries a disposition — adapted, kept, discarded, routed, residual, or moot. A run in which nothing was adapted converges exactly as fully as one in which everything was
-6. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans (independence from Aitesis)
+6. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans
 7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Context embedded in a question field is a protocol violation
 8. **Convergence evidence**: Present transformation trace before declaring `adjudicated(Λ.R, X)` over the evaluated target; per-mismatch evidence is required. Where the run ended in a withdrawal, the trace also states that the verdict's target is the replacement and that no fit claim is made about it
 9. **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation

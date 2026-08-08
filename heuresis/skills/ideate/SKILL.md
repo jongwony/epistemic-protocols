@@ -9,7 +9,7 @@ Resolve an underexpanded candidate field through frame-parallel divergent genera
 
 ## Definition
 
-**Heuresis** (εὕρεσις): the act of finding or discovering[^1] — a dialogical act of widening a candidate field that is empty or has prematurely converged, before any selection is made. Divergent and convergent thinking are distinct cognitive operations (Runco & Acar, 2012), and no protocol in this catalog carries a typed guarantee to generate the object-level alternative set itself — the nearest neighbor, `/preview`, activates only once two or more candidates already exist and their futures are unrecognizable from description; heuresis sits upstream of that, at the point where the field itself is thin. On a blank entry, heuresis opens an abstract frame map before showing any concrete idea — early concrete examples measurably narrow independent generation (Wadinambiarachchi et al., 2024), and ideating before seeing material preserves ownership and diversity that seeing it first does not (Qin et al., 2025). Generation is frame-parallel and never eliminates, ranks, or scores: selection is a downstream act, out of this protocol's scope.
+**Heuresis** (εὕρεσις): the act of finding or discovering[^1] — a dialogical act of widening a candidate field that is empty or has prematurely converged, before any selection is made. Divergent and convergent thinking are distinct cognitive operations (Runco & Acar, 2012), and no protocol in this catalog carries a typed guarantee to generate the object-level alternative set itself — heuresis sits at the point where the candidate field itself is thin. On a blank entry, heuresis opens an abstract frame map before showing any concrete idea — early concrete examples measurably narrow independent generation (Wadinambiarachchi et al., 2024), and ideating before seeing material preserves ownership and diversity that seeing it first does not (Qin et al., 2025). Generation is frame-parallel and never eliminates, ranks, or scores: selection is a downstream act, out of this protocol's scope.
 
 [^1]: Greek εὕρεσις denotes finding, discovery, or invention/conception broadly; its later specialization as a term of rhetorical inventio is one historical narrowing among several, not the word's primary or governing sense here.
 
@@ -262,7 +262,7 @@ converge                (extension)   → TextPresent+Proceed (DiverseCandidateF
 Phase ∈ {0, 1, 2, 3}
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Candidate-field resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -305,10 +305,10 @@ When Heuresis is active:
 | Direct request for options | "give me some ideas / directions / angles" with no existing candidate field in view |
 
 **Skip**:
-- Two or more candidates already exist and their futures just need to be seen before choosing → `/preview`
-- The material to ideate from lives outside this conversation (codebase, rules, past sessions) → run the collection protocol first (e.g. `/inquire`) and name its output in the `/ideate` invocation; heuresis itself never scans
-- The ask is analytical lenses on a fixed inquiry, not idea generation → `/frame`
-- The ask is verifying understanding of completed work → `/grasp`
+- Two or more candidates already exist and their futures just need to be seen before choosing
+- The material to ideate from lives outside this conversation (codebase, rules, past sessions) — heuresis itself never scans; run a collection pass first and name its output in the `/ideate` invocation
+- The ask is analytical lenses on a fixed inquiry, not idea generation
+- The ask is verifying understanding of completed work
 
 ### Mode Deactivation
 

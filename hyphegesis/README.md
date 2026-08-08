@@ -14,7 +14,7 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 
 ### The Solution
 
-**Conduction over Substrate**: When two or more moves carry a non-trivial conduct, Hyphegesis designs the conduct topology over the protocol graph — impact/leverage-first, locking stable axes and deferring volatile ones to in-session checkpoints — and hands off a method plan. It does not execute the moves, and it never binds a substrate it cannot realize. Single-move work relays to that one protocol instead of being conducted.
+**Conduction over Substrate**: When two or more moves carry a non-trivial conduct, Hyphegesis designs the conduct topology over the moves it identifies — impact/leverage-first, locking stable axes and deferring volatile ones to in-session checkpoints — and hands off a method plan. It does not execute the moves, and it never binds a substrate it cannot realize. Single-move work relays to that one protocol instead of being conducted.
 
 ### Difference from Other Protocols
 
@@ -25,7 +25,7 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
-Prothesis frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The two share a topology algebra — the same arrangement functor Hyphegesis runs over the protocol graph also arranges the perspectives Prothesis supplies.
+Prothesis frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The two share a topology algebra — the same arrangement functor Hyphegesis runs over the moves it identifies also arranges the perspectives Prothesis supplies.
 
 ## Install
 

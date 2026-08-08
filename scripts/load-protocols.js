@@ -2,14 +2,20 @@
  * Filesystem-walk loader for protocol/utility plugin set.
  *
  * Single source of truth = per-protocol SKILL.md (definition + prose) plus
- * per-plugin plugin.json self-description. This module derives all
+ * per-plugin plugin.json self-description. This module derives the
  * enumeration shapes (PLUGINS, PROTOCOL_METADATA, PROTOCOL_ORDER,
  * PROTOCOL_FILES, etc.) from the filesystem so consumers (package.js,
- * static-checks.js) never carry a hand-curated list.
+ * static-checks.js) never carry a hand-curated list of their own.
  *
- * Active set = filesystem plugin dirs minus those whose plugin.json carries
+ * Two axes are declared here rather than inferred: protocol-vs-utility
+ * classification and display order both read CANONICAL_PROTOCOL_SET below,
+ * intersected with the discovered plugin dirs. Protocol identity is a
+ * curated fact — a directory carrying a plugin.json does not thereby become
+ * a protocol — so it is stated where it can be reviewed.
+ *
+ * Active set = the above minus plugins whose plugin.json carries
  * "deprecated": true. Deprecation lives in per-plugin self-description per
- * Plugin Encapsulation; no hardcoded allowlist here.
+ * Plugin Encapsulation.
  */
 
 const fs = require('fs');
@@ -17,8 +23,7 @@ const path = require('path');
 
 const DEFAULT_PROJECT_ROOT = path.resolve(__dirname, '..');
 
-// Linear extension of the precedence partial order, validated against
-// graph.json by checkPrecedenceLinearExtension. Hand-curated because
+// Linear extension of the precedence partial order. Hand-curated because
 // multiple valid linear extensions exist; this is the project's canonical
 // presentation order. Excludes Anamnesis (display first) and Katalepsis
 // (structurally last).
@@ -26,6 +31,17 @@ const CANONICAL_PRECEDENCE = [
   'Anagoge', 'Horismos', 'Aitesis', 'Prothesis',
   'Analogia', 'Periagoge', 'Euporia', 'Heuresis', 'Proplasma',
   'Syneidesis', 'Merismos', 'Epharmoge', 'Elenchus', 'Hyphegesis',
+];
+
+// Canonical protocol identity set = Anamnesis (display first) + the
+// CANONICAL_PRECEDENCE linear extension + Katalepsis (structurally last).
+// Single source of truth for both protocol classification (protocolNodeSet
+// below) and display order (protocolOrder), so the two derivations can
+// never drift apart.
+const CANONICAL_PROTOCOL_SET = [
+  'anamnesis',
+  ...CANONICAL_PRECEDENCE.map(s => s.toLowerCase()),
+  'katalepsis',
 ];
 
 // Canonical workflow-cluster grouping — the single source of truth for which
@@ -124,28 +140,10 @@ function discoverPlugins(options = {}) {
   const includeDeprecated = !!options.includeDeprecated;
   const readJson = makeJsonReader();
 
-  // Active protocol set = graph.json nodes (canonical for inter-morphism
-  // relations). Utility plugins are those with plugin.json but absent from
-  // graph.json nodes. This boundary is graph-derived, not hardcoded.
-  //
-  // Parse failures are surfaced loudly. The prior silent catch relied on
-  // the graph-integrity static check, but that runs only inside
-  // static-checks.js — package.js dry-run and direct loader calls would
-  // collapse every plugin to utility under a malformed graph.json without
-  // any diagnostic (PR #351 review C1).
-  let protocolNodeSet = new Set();
-  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
-  if (fs.existsSync(graphPath)) {
-    try {
-      const graph = readJson(graphPath);
-      if (Array.isArray(graph.nodes)) protocolNodeSet = new Set(graph.nodes);
-    } catch (e) {
-      process.stderr.write(
-        `[load-protocols] WARN: cannot parse graph.json (${e.message}); ` +
-        `every plugin will classify as utility — release/packaging may misbehave\n`
-      );
-    }
-  }
+  // Active protocol set = CANONICAL_PROTOCOL_SET (Anamnesis + canonical
+  // precedence + Katalepsis). Utility plugins are those with plugin.json
+  // but absent from this set.
+  const protocolNodeSet = new Set(CANONICAL_PROTOCOL_SET);
 
   const records = [];
   const dirEntries = fs.readdirSync(projectRoot, { withFileTypes: true });
@@ -217,9 +215,8 @@ function discoverPlugins(options = {}) {
 // Display order = Anamnesis (recall, session start) + canonical-precedence
 // linear extension + Katalepsis (structurally last).
 function protocolOrder(options) {
-  const order = ['anamnesis', ...CANONICAL_PRECEDENCE.map(s => s.toLowerCase()), 'katalepsis'];
   const protocolDirs = new Set(discoverPlugins(options).filter(p => p.isProtocol).map(p => p.dir));
-  return order.filter(d => protocolDirs.has(d));
+  return CANONICAL_PROTOCOL_SET.filter(d => protocolDirs.has(d));
 }
 
 function protocolFiles(options) {
@@ -230,6 +227,7 @@ function protocolFiles(options) {
 
 module.exports = {
   CANONICAL_PRECEDENCE,
+  CANONICAL_PROTOCOL_SET,
   CANONICAL_CLUSTERS,
   discoverPlugins,
   protocolOrder,

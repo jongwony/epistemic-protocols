@@ -245,7 +245,7 @@ converge            (extension)    → TextPresent+Proceed (convergence trace)
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Probe composes downstream into the recognized protocol when the user selects Recognize or Redirect — composition target is determined at runtime by user disposition, not by statically registered dependency edges.
+*: product — (D₁ × D₂) → (R₁ × R₂). Probe composes downstream into the recognized protocol when the user selects Recognize or Redirect — composition target is determined at runtime by user disposition.
 ```
 
 ## Storage Reference
@@ -271,7 +271,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug
 15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
 16. **Coexistence with /catalog and /onboard** — Probe does not replace passive reference (`/catalog`) or pattern-based recommendation (`/onboard`). The three skills occupy distinct stances.
 17. **Structural-change calibration** — When a candidate hypothesis concerns whether a structural change crosses the architectural threshold, distinguish at hypothesis construction time:
-    - **Architectural inscription**: addition of a new core protocol, addition of a `graph.json` edge, category-level promotion. Deferral pending accumulated use evidence applies.
+    - **Architectural inscription**: addition of a new core protocol, category-level promotion. Deferral pending accumulated use evidence applies.
     - **Type-level realization**: type-level realization of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope. Internal iteration; deferral framing does not apply.
     The distinction informs `evidence` / `reverse_evidence` formulation when structural-change extent (line count, file count, scope size) is the apparent signal — extent alone does not determine architectural status. Maps approximately to the surgical / design downstream-remediation classification axis carried by `docs/probe-verification-framework.md`: type-level realization ≈ surgical, architectural inscription ≈ design (`≈` denotes approximate analogical mapping between vocabulary axes; not formal type-isomorphism — `≅` is reserved for the latter, e.g., Katalepsis `P'≅R`).
 18. **Substrate-implicit disambiguation** — When constructing Phase 1 candidates, a missing-information framing (ContextInsufficient/`/inquire`, FrameworkAbsent/`/frame`) must not crowd out AbstractAporia/`/elicit` by default: include `/elicit` in the candidate set when the situation is not already committed to a single specific protocol AND its substrate — current-session evidence (Rule 3 default scope) or an external channel (codebase, project rules, environment; cross-session recall stays opt-in per Rule 4) — already carries an implicit, not-yet-articulated decision signal, per Euporia's own `aporia(I)` gate (`axis_undetermined(r) ∧ substrate_implicit(r)`, `euporia/skills/elicit/SKILL.md` Gate predicate).

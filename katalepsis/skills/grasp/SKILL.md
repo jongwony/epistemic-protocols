@@ -171,7 +171,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆ Λ.routeMap.entry_point; every selected entry point has an artifact anchor in Λ.routeMap.artifact_anchor before Phase 2 materialization.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -248,8 +248,8 @@ Comprehension gaps within each entry point:
 | **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" | Non-obvious causal chains (architecture, dependency) |
 | **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" | Cross-cutting impact (architecture, refactoring) |
 | **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" | Order-sensitive changes (initialization, dependency) |
-| **Horizon** | A co-intended but unspoken edge of the selected entry point the user did not name from within their framing, required for `P' ≅ R`; admitted only when the false-positive guard `admissible(HC)` passes | Scenario-based open probe that tests the edge without naming it | The unknown-unknown that drives the largest comprehension gains but the user cannot request; blind-spot verification inside the current entry point — not route selection (cf. `hidden_route`/`open`), not a decision gap (→ `/gap`), not direction futures unrecognizable from descriptions before a commitment (→ `/preview`) |
-| **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. decision gaps (→ `/gap`) vs. direction futures unrecognizable from descriptions before a commitment (→ `/preview`) |
+| **Horizon** | A co-intended but unspoken edge of the selected entry point the user did not name from within their framing, required for `P' ≅ R`; admitted only when the false-positive guard `admissible(HC)` passes | Scenario-based open probe that tests the edge without naming it | The unknown-unknown that drives the largest comprehension gains but the user cannot request; blind-spot verification inside the current entry point — not route selection (cf. `hidden_route`/`open`), not a decision gap, not direction futures unrecognizable from descriptions before a commitment |
+| **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. decision gaps vs. direction futures unrecognizable from descriptions before a commitment |
 
 **Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
 - User's comprehension difficulty spans multiple named types (e.g., understanding both causality and scope simultaneously in a cross-cutting change)

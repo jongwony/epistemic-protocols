@@ -1,11 +1,11 @@
 ---
 name: conduct
-description: "Conduct the method of a session's epistemic work before object-level cognition begins. When a work prospect needs multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, design a conduct topology over the protocol graph and hand off a method plan with in-session checkpoints; single-move work relays to that one protocol instead of conducting. Type: (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod. Alias: Hyphegesis(ὑφήγησις)."
+description: "Conduct the method of a session's epistemic work before object-level cognition begins. When a work prospect needs multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, design a conduct topology over the moves it identifies and hand off a method plan with in-session checkpoints; single-move work relays to that one protocol instead of conducting. Type: (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod. Alias: Hyphegesis(ὑφήγησις)."
 ---
 
 # Hyphegesis Protocol
 
-Conduct how a session's epistemic work will be carried out — the order, independence, reconciliation, termination, and routing of its cognitive moves — when that method is underdetermined before object-level cognition begins. The morphism is **design THEN hand off**: Hyphegesis designs a conduct topology over the protocol graph and emits a method plan with in-session checkpoints, then stops; the substrate executes the moves. Type: `(MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod`.
+Conduct how a session's epistemic work will be carried out — the order, independence, reconciliation, termination, and routing of its cognitive moves — when that method is underdetermined before object-level cognition begins. The morphism is **design THEN hand off**: Hyphegesis designs a conduct topology over the moves it identifies and emits a method plan with in-session checkpoints, then stops; the substrate executes the moves. Type: `(MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod`.
 
 ## Definition
 
@@ -20,17 +20,17 @@ Hyphegesis(WP) → BindPlanInput(WP) → PI →
   [single-move ∨ trivial-conduct: relay-route(extension) → deactivate] |
   [multi-move ∧ non-trivial:
     Qc(brief, warrant) → A_w → [Accept: continue | Amend(WP'): Λ.work_prospect := WP' → re-enter at BindPlanInput(WP'), rebinding PI, I and plan_pointer against the corrected prospect | Esc: deactivate] →
-    MoveId(WP × PG) → Sc(MoveSet) → A_s → [Confirm(MS'): |MS| ≥ 2 → MS | |MS| < 2 → the relay terminals PHASE TRANSITIONS enumerates, deactivate | Withdraw(units) (I ≠ None only): record the withdrawal → re-present Sc over the reduced plan | Esc: deactivate] →
+    MoveId(WP × MG) → Sc(MoveSet) → A_s → [Confirm(MS'): |MS| ≥ 2 → MS | |MS| < 2 → the relay terminals PHASE TRANSITIONS enumerates, deactivate | Withdraw(units) (I ≠ None only): record the withdrawal → re-present Sc over the reduced plan | Esc: deactivate] →
     CT_default_surface → loop( AxisGate(impact-first axis·region) → Stop → VM → update(CT) → auto-advance ) until Sufficient → FinalizeTopology(CT, surfaced_axes) → (CT, residuals, topology_degradations) → AssignMoves(MS, CT) → move_assignment → RegisterCheckpoints(WP, CT) → checkpoints →
     [I ≠ None: PlaceConditions(I, MS, move_assignment, CT) → (divergent sound sites: InvalidateTopologyProducts (clears the topology-derived products, records the re-opening in Λ.reopened_divergences, and removes the deciding axis·region from surfaced_axes/CT — that removal IS the re-opening) → back to the AxisGate loop | proceed)] →
     SubstrateFeasibility(CT) → SH → AnnotateHandoff(withdrawn_units, CT) → CarryPointer → CompileCheckpointBrief(checkpoints, WP, CT, MS) → RecordDegradation(SH, CT) → degradations → AssembleTraceContract(residuals, degradations, derived_coverage_limits(CT), derived_termination_grounds(CT, MS, move_assignment, Λ.condition_placements)) → TC → converge(conduct trace: move assignment + handoff annotations + condition placements + checkpoint briefs + trace contract, one surfacing op per element in TOOL GROUNDING) → handoff(ConductedMethod) → ConductedMethod ]
 
 ── MORPHISM ──
-WorkProspect × ProtocolGraph
+WorkProspect × MoveGround
   → resolve(plan_input)                      -- a live /apportion plan binds directly; a navigation block is dereferenced at the record its locator names and grounded there, the block itself retained for the handoff; an unreadable or ungrounded handoff stops
   → brief(method, conduction_warrant)         -- infer the work prospect's method-brief; judge whether conduction is warranted
   → guard(relay_test, anti_self_application)  -- single-move work relays to that one protocol; Hyphegesis does not conduct Hyphegesis
-  → identify(moves)                           -- candidate cognitive moves over the protocol graph, presented for Recognition (Rule 2)
+  → identify(moves)                           -- candidate cognitive moves read off the move ground, presented for Recognition (Rule 2)
   → select(moves)                             -- user confirms the move set via Cognitive Partnership Move (Constitution); a deselection that would strand an incoming unit is surfaced before the selection is accepted, and withdrawing that unit removes it from the plan and creates an owed re-apportionment the emitted artifact carries as an annotation
   → design(conduct_topology)                  -- impact/leverage-first: settle the highest-leverage axis·region first, each at its own gate; edge-local over move-regions; FinalizeTopology replaces the current pass's residual/degradation products, and once the moves are placed by the arrow below, checkpoint registration replaces the checkpoint set from the current CT + WP. Deferred decisions whose evidence does not exist yet register there
   → assign(moves, topology) → move_assignment  -- place every selected move into a region of the resolved topology and into its slot under that topology's order; the placement is what the condition placement below reads to find each unit's region, and it is a field the emitted plan carries in its own right
@@ -48,9 +48,9 @@ invariant: Conduction over Substrate
 
 ── TYPES ──
 WP     = WorkProspect: the work or goal facing object-level cognition, with its method (conduct plan) not yet determined
-PG     = ProtocolGraph: available protocols and move-neighbors (the dependency graph plus ad-hoc moves)
+MG     = MoveGround: what this session affords as candidate moves — the accumulated session context, the documented deficit/resolution declaration of each protocol available to it, and the analysis passes and delegations the session itself affords
 Move   = CognitiveMove { step: protocol invocation | analysis pass | delegation, unit_ref: Option(UnitRef) }
-MS     = MoveSet: (WP × PG) → {Move₁ … Moveₙ}  -- MoveId yields n ≥ 2 under the warrant; a Phase 1 selection may reduce it, and |MS| < 2 is what the Phase 1 relay terminals handle
+MS     = MoveSet: (WP × MG) → {Move₁ … Moveₙ}  -- MoveId yields n ≥ 2 under the warrant; a Phase 1 selection may reduce it, and |MS| < 2 is what the Phase 1 relay terminals handle
 A_s    = SelectionJudgment ∈ {Confirm(MS'), Withdraw(Set(UnitRef)), Esc} when I ≠ None; {Confirm(MS'), Esc} when I = None   -- INDEXED by whether a plan came in, not deleted at presentation: Withdraw's object is an incoming plan's units, so the planless branch has none to offer and its I-update would apply to None
 A_w    = BriefJudgment ∈ {Accept, Amend(WP'), Esc}   -- Amend carries the corrected prospect: this protocol is Hybrid, so the Phase 0 gate is where the AI-inferred WP is constituted
 MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }  -- span = invocation → the next planned /compact or /clear
@@ -146,7 +146,7 @@ I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → 
 
 ── PHASE TRANSITIONS ──
 Phase 0: WP → init_state(track: every pass-scoped and historical Λ field to its empty value — sets to ∅, plan_pointer and trace_contract to None; runs EXACTLY ONCE on activation, before any read) → BindPlanInput(WP) → PI → [LivePlan(plan, nav): bind_I(Some(plan)) → retain_pointer(track: Λ.plan_pointer := nav) | Navigation(N): DereferencePlan(N) → (unreachable ∨ grounding failure: relay(handoff unreadable) → deactivate | plan → bind_I(Some(plan)) → retain_pointer(track: Λ.plan_pointer := Some(N))) | NoPlan: bind_I(None) → retain_pointer(track: Λ.plan_pointer := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and plan_pointer against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
-Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
+Phase 1: (WP, MG) → MoveId(WP × MG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
            A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' is one the incoming plan carries ∧ is stamped by exactly one move of MS' ∧ every unit the plan carries is stamped in MS' or already recorded in withdrawn_units ∧ no move of MS' is stamped with a unit_ref already in withdrawn_units): re-present Sc naming the stamped refs with no plan unit behind them, the units with more than one stamped move, the units with none, and the withdrawn units still holding a move — NOT accepted | MS := MS' →
                                        [|MS| = 1 ∧ withdrawn_units = ∅: relay-route to the surviving move, deactivate
                                        | |MS| = 1 ∧ withdrawn_units ≠ ∅: PresentOwedReapportionment(withdrawn_units) → relay-route to the surviving move AND present {owed_reapportionment(u) | u ∈ withdrawn_units} directly in that same relay text, deactivate
@@ -226,7 +226,7 @@ Phase 0 MethodBrief (sense)           → Internal analysis (infer the work pros
 Phase 0 guard (sense)                 → Internal analysis (relay-test: single-move ∨ trivial-conduct → relay; anti-self-application; no Λ mutation)
 Phase 0 relay_route (extension)       → TextPresent+Proceed (the relay-test's two causes, both read off the Method Brief because this branch precedes MoveId and no MoveSet exists yet: a single-move resolution routes to that one protocol as the recommendation; a trivial-conduct prospect presents the brief's evident method — self-evident enough that no topology is designed — naming the protocols it runs through rather than an identified move set. Either way, deactivate)
 Phase 0 Qc (constitution)             → present (conditional: warrant=warranted only — the guard decides warrant before this gate opens; work prospect confirmation + conduction-warrant; relay-test result as pre-gate text; the response is parsed as A_w — Accept proceeds, Amend(WP') writes Λ.work_prospect and re-enters the brief and its guard over the corrected prospect, Esc → loop termination at LOOP level)
-Phase 1 MoveId (observe)              → Read, Grep, Glob (the dependency graph + session context to identify candidate moves; when I ≠ None, every move derived from an incoming unit is STAMPED with that unit's unit_ref, and a unit for which no move is identified is surfaced here)
+Phase 1 MoveId (observe)              → Read, Grep, Glob (read MG — the session context together with each available protocol's own deficit/resolution declaration — to identify candidate moves; when I ≠ None, every move derived from an incoming unit is STAMPED with that unit's unit_ref, and a unit for which no move is identified is surfaced here)
 Phase 1 Sc (constitution)            → present (MoveSet confirmation; multiSelect: true; Esc key → loop termination at LOOP level. When I ≠ None, a deselection that would leave some I.units entry with no stamped move is surfaced BEFORE the selection is accepted, naming the units it would strand. The user resolves it in the same gate via A_s: Confirm(MS') restores the move set, Withdraw(units) removes those units from I and records them in Λ.withdrawn_units as an owed re-apportionment, then re-presents over the reduced plan)
 Phase 1 single-survivor relay (extension) → TextPresent+Proceed (|MS| = 1 sub-case of A_s = Confirm: route by the survivor's own step kind — a protocol invocation routes to that protocol as the recommendation; an analysis pass or a delegation is presented as the single move to perform. Deactivate either way)
 Phase 1 no-survivor relay (extension) → TextPresent+Proceed (|MS| = 0 ∧ withdrawn_units = ∅ sub-case of A_s = Confirm: no move — and no protocol — survives to route to; present that finding directly and deactivate)
@@ -268,12 +268,12 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 Phase ∈ {0, 1, 2, 3}
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
 
-**Conduction over Substrate**: When a session's epistemic work needs several cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, the method of conducting them is underdetermined before object-level cognition begins — and that gap is substrate-invariant. Hyphegesis designs that method as a conduct topology over the protocol graph and hands off a plan; it does not execute the moves, and it never binds a substrate it cannot realize — when realizability fails it declares conduction-degradation, surfacing every relaxed guarantee, infeasibility, and coverage cap in the method's cross-cutting trace contract.
+**Conduction over Substrate**: When a session's epistemic work needs several cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, the method of conducting them is underdetermined before object-level cognition begins — and that gap is substrate-invariant. Hyphegesis designs that method as a conduct topology over the moves it identifies and hands off a plan; it does not execute the moves, and it never binds a substrate it cannot realize — when realizability fails it declares conduction-degradation, surfacing every relaxed guarantee, infeasibility, and coverage cap in the method's cross-cutting trace contract.
 
 ## Mode Activation
 
@@ -343,9 +343,9 @@ The Method Brief infers, from the work prospect:
 
 ### Phase 1: Move Identification
 
-Identify the candidate cognitive moves over the protocol graph, then **present** the move set via Cognitive Partnership Move (Constitution) as a multi-select confirmation.
+Identify the candidate cognitive moves the session affords, then **present** the move set via Cognitive Partnership Move (Constitution) as a multi-select confirmation.
 
-Read the dependency graph and the session to surface candidate moves (protocol invocations, analysis passes, delegations). Each move is an object-level step. The user confirms or edits the set. Two or more surviving moves proceed to conduct design; exactly one relay-routes to that move's protocol; zero relays that nothing survives and names no route. Any recorded withdrawal is surfaced on either sub-two exit.
+Read the move ground — the session's accumulated context together with each available protocol's own documented deficit and resolution — to surface candidate moves (protocol invocations, analysis passes, delegations). Each move is an object-level step. The user confirms or edits the set. Two or more surviving moves proceed to conduct design; exactly one relay-routes to that move's protocol; zero relays that nothing survives and names no route. Any recorded withdrawal is surfaced on either sub-two exit.
 
 **Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1's candidate move set; the constitutive judgment remains with the user.
 

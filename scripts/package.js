@@ -42,7 +42,7 @@ const DESCRIPTION_OVERRIDES = {
   elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
-  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
+  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
   ideate: 'Frame-parallel divergent candidate generation — (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField',
@@ -134,9 +134,7 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) �
 
 ### Formal Verification
 
-Static checks validate protocol integrity before every commit (run \`node .claude/skills/verify/scripts/static-checks.js .\` for the current check inventory — covering, among others, json-schema, notation, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, catalog-sync, gate-type-soundness, and artifact-self-containment).
-
-Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory edges, and suppression rules with cycle detection.
+Static checks validate protocol integrity before every commit (run \`node .claude/skills/verify/scripts/static-checks.js .\` for the current check inventory — covering, among others, json-schema, notation, xref, structure, tool-grounding, version-staleness, spec-vs-impl, cross-ref-scan, onboard-sync, catalog-sync, gate-type-soundness, and artifact-self-containment).
 
 ### Utility Skills
 

@@ -17,7 +17,7 @@ Elevate a vague recall to a higher-granularity unit through AI-guided deposit-gr
 ```
 ── FLOW ──
 Anagoge(R) → attempts := 0 → Detect(R) →                             -- attempts initialized once, at activation (preserved on Reorient re-entry)
-  single_session_suffices(R): relay(finding) → defer-to-Anamnesis → deactivate
+  single_session_suffices(R): relay(finding) → deactivate
   supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) →
     Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
       Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → U_asm → Rank(U_asm, R) → U[] → [|U[]| > 0] confirmations := Confirm(claim_source_pairs) →   -- index reads drive discovery/rank; each surfaced claim is paired with its OWN originating deposit's SSOT (not one shared SSOT) before Confirm; the per-claim verdict is recorded in Λ.confirmations, and every surfacing op renders each claim against it — never asserted from the lossy index alone
@@ -113,16 +113,16 @@ Priority: explicit_arg > colocated_expr > prev_user_turn > inbound_handoff
 /ascend "text"              → R = extract_trace("text", Σ)
 "the whole line of... "     → R = extract_trace(text before trigger, Σ)
 /ascend (alone)             → R = extract_trace(previous user message, Σ)
-inbound_handoff             → R seeded from an upstream protocol's session text (e.g. Anamnesis entry deposit, Hyphegesis synthesis checkpoint)
+inbound_handoff             → R seeded from an upstream protocol's session text
 
 Edge cases:
 - Multiple vague references: bind to first, note others
 - Re-invoke after NullMatch: fresh R, no carryover
-- Composition (/recollect → /ascend): single-session recall provides an entry deposit; /ascend traverses outward from it
+- Composition (inbound handoff): a single-session recall provides an entry deposit; /ascend traverses outward from it
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → supra_session(R)?                         -- granularity trigger (silent); attempts := 0 ONCE at activation (Λ init), preserved on Reorient re-entry to Phase 0 so the cap spans the whole elevation
-       [single_session_suffices(R)] relay(finding) → defer_to_anamnesis → deactivate    -- zero-signal: present finding, defer to /recollect, Anagoge not activated
+       [single_session_suffices(R)] relay(finding) → deactivate    -- zero-signal: present the single-session finding; Anagoge not activated
            → Classify(R, Σ) → UnitType                              -- dispatch (silent)
 Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
            Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → U_asm → Rank(U_asm, R) → U[ranked] → [|U[ranked]| > 0] confirmations := Confirm(claim_source_pairs)  -- read-time inferred-edge traversal + assembly + rank, then confirm to-be-surfaced evidential claims each against ITS OWN originating deposit's SSOT (never a single unit-wide SSOT), recording the per-claim verdict in Λ.confirmations for the surfacing ops [Tool]
@@ -155,8 +155,7 @@ elevate_complete = Recognize(u) for some u ∈ U[]                              
 NullMatch = |U[]| = 0 ∧ attempts = max ∧ presented = ∅  -- no higher unit assembles AT ALL across the whole elevation (deposits too sparse, or inferred edges resolve only to not-yet-written targets)
                                         -- `presented = ∅` is load-bearing: it means every traversal was empty, so the first empty traversal (at attempts < max) already fired a Rescope — guaranteeing ≥1 Rescope precedes any NullMatch (Rule 12), even when earlier traversals consumed the budget
                                         -- the exhausted-WITH-units path (presented ≠ ∅ ∧ attempts = max, whether reached by an empty re-traversal or a Refine/Reorient request) is NOT NullMatch: it surfaces the best prior candidate and deactivates (see ── LOOP ──)
-fallback(NullMatch) = offer Anamnesis (single-session resolution from an entry deposit)
-                    ∨ offer Aitesis (when the cases must be newly found, not traversed)
+fallback(NullMatch) = surface that no higher unit assembled; the next move is left to the user or session context
 progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
 
 ── TOOL GROUNDING ──
@@ -184,7 +183,7 @@ progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
 -- Span invariant binding: traversal issues cross-partition READS only (Read/Grep/Glob across `{config_dir}/projects/*/hypomnesis/`); it NEVER writes to any slug. Each partition still owns its own writes; Anagoge adds none.
 -- Alternative realizations (documented, not active): ⓑ persisted-edge graph — if a future substrate stores cross-slug deposit pointers as first-class records, traversal could follow them directly rather than re-inferring at read-time; ⓒ a full Open Knowledge Federation link-graph store materializing edges as first-class records. ⓐ is chosen because it requires no schema beyond what Anamnesis already deposits and adds zero write surface.
 Phase 0 Detect        (sense)        → Internal analysis (supra-session granularity; distinguish from single-session Anamnesis)
-Phase 0 relay_single_session (extension) → TextPresent+Proceed (single_session_suffices(R): present the finding, defer to /recollect, deactivate — Anagoge not activated)
+Phase 0 relay_single_session (extension) → TextPresent+Proceed (single_session_suffices(R): present the single-session finding, deactivate — Anagoge not activated)
 Phase 0 Classify      (sense)        → Internal analysis (UnitType detection from R + Σ)
 Phase 0 Dispatch      (sense)        → Internal analysis (select the traversal shape for the dispatched UnitType; deterministic indexed selection, entropy→0)
 Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit anchors + index keywords/metadata, then search cross-partition for shared anchors/keywords/metadata; read-only, read-time inference)
@@ -193,14 +192,14 @@ Phase 1 Rank          (sense)        → Internal analysis (recall alignment + i
 Phase 1 Confirm       (observe)      → Read, Grep (after Rank, before any surfacing: read the deposit's authoritative session transcript {config_dir}/projects/{slug}/{sid}.jsonl to confirm an evidential claim before it is surfaced; index-only readings stay provisional). The per-claim verdict is then recorded to Λ.confirmations (track) for the surfacing ops to consume
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
 Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate — each composing deposit with its source + resume, per Rule 19, and each of its evidential claims rendered per the claim's retained Λ.confirmations verdict — + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
-Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
+Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes, then deactivate)
 Phase 2 record        (track)        → Internal state update (presented := presented ∪ {U[top]} on entering the gate — the ever-assembled witness for NullMatch vs exhausted-with-units)
 Phase 2 Qc            (constitution) → present (narrative higher-unit candidate incl. per-deposit SourceLocator + ResumeHandle, each evidential claim rendered per its Λ.confirmations verdict; gated path — ¬SingleObvious: candidate units ≥ 2 OR confidence < high)
 Phase 2 emit          (extension)    → TextPresent+Proceed (SingleObvious path only: single densely-connected high-confidence unit emitted inline with its per-deposit SourceLocator + ResumeHandle and a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant higher unit collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of Rule 7's Safeguard-tier mandatory-gate tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate     (track)        → Internal state update
 Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose, incl. per-deposit SourceLocator + ResumeHandle)
 converge              (extension)    → TextPresent+Proceed (convergence trace)
-seam                  (extension)    → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: the /recollect → /ascend edge-case is an inbound handoff seeding this protocol's R, not an outbound continuation, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
+seam                  (extension)    → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol edge-case is inbound (a prior recall seeding this protocol's R), not an outbound continuation, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: RecallTrace, unit_type: UnitType,
@@ -241,12 +240,12 @@ externalizing it would split the user-visible contract from its semantic groundi
 SparseDeposits   : entry deposits exist but too few shared anchors/keywords/metadata infer edges connecting them to assemble any higher unit
                    -- cause: the line/topic/concept has not yet sedimented enough shared anchors/keywords across sessions
                    -- detection: |U[]| = 0 after traversal with non-empty entry deposits
-                   -- recovery: Rescope navigation (widen boundary or change unit type); if still empty → NullMatch fallback to Anamnesis single-session resolution
+                   -- recovery: Rescope navigation (widen boundary or change unit type); if still empty → NullMatch
 
 BrokenLinkChain  : inferred edges resolve to targets with no written deposit (not-yet-written knowledge dominates the path)
                    -- cause: the connecting sessions were never indexed (lifecycle gap), or the knowledge is genuinely not yet deposited
                    -- detection: traversal infers mostly missing targets; assembled units are too thin to recognize
-                   -- recovery: surface the broken-link scope as a traversal note (NOT an error); offer Aitesis when the missing cases must be newly found
+                   -- recovery: surface the broken-link scope as a traversal note (NOT an error)
 
 UnitTypeMismatch : the recall trace was dispatched to the wrong UnitType (e.g. classified as TopicCluster but the user means a ConnectedSessionChain)
                    -- detection: Qc Recognize=false with the user describing a different unit shape
@@ -254,7 +253,7 @@ UnitTypeMismatch : the recall trace was dispatched to the wrong UnitType (e.g. c
 
 SingleSessionMisfire : a single session WOULD resolve the recall — Anagoge over-activated
                    -- cause: supra_session(R) misjudged at Phase 0
-                   -- recovery: defer to Anamnesis (Phase 0 deactivation, not a loop attempt)
+                   -- recovery: Phase 0 deactivation, not a loop attempt
 
 IndexAsEvidence  : an evidential claim (origin, timing, quotation) asserted from the lossy index without confirming against the authoritative source
                    -- cause: a deposit index file (clue/narrative/coinage/…) is read as if it were the session record; the index omits or compresses what the source holds
@@ -307,13 +306,9 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 | Cross-session "where did it land" | User asks where a multi-session trajectory arrived, not what one session said |
 | Anamnesis overshoot | A `/recollect` attempt resolves one session but the user signals the real unit is larger |
 
-**Cross-deposit enrichment**: An entry deposit recognized by Anamnesis provides the starting point for Phase 1 traversal — Anagoge reconstructs connections outward from the deposit's stored anchors plus shared keywords/metadata. This is a heuristic input; constitutive judgment of the higher unit remains with the user.
+**Cross-deposit enrichment**: An entry deposit from a prior session recall provides the starting point for Phase 1 traversal — Anagoge reconstructs connections outward from the deposit's stored anchors plus shared keywords/metadata. This is a heuristic input; constitutive judgment of the higher unit remains with the user.
 
 **Skip**:
-- A single session would resolve the recall — defer to Anamnesis (`/recollect`)
-- The relevant cases must be newly found, not traversed from existing deposits — defer to Aitesis (`/inquire`)
-- The user wants to FORM a new concept from instances, not RECOGNIZE an already-sedimented one — defer to Periagoge (`/induce`)
-- The user wants to reverse-trace decision intent, not locate a remembered unit — defer to Euporia (`/elicit`)
 - Same higher unit already elevated in current session (session immunity)
 - User explicitly declines elevation assistance
 
@@ -322,9 +317,9 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | elevate_complete (Recognize, or SingleObvious inline emit) | Emit HigherUnit_prose; proceed with the recognized higher unit as past trajectory requiring re-verification against current state before commit (not confirmed current context) |
-| NullMatch (attempts exhausted, nothing ever assembled: presented = ∅) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate (≥1 Rescope already fired, since every traversal was empty) |
+| NullMatch (attempts exhausted, nothing ever assembled: presented = ∅) | Surface traversal scope + broken-link notes, deactivate (≥1 Rescope already fired, since every traversal was empty) |
 | Exhausted with units (attempts = max, presented ≠ ∅: a Refine/Reorient request, or an empty re-traversal after a prior assembly) | Surface the best prior candidate (each composing deposit with its source + resume, per Rule 19) + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
-| Single-session misfire (Phase 0) | Defer to Anamnesis without entering the loop |
+| Single-session misfire (Phase 0) | Deactivate without entering the loop |
 | User Esc key | Accept current state without further elevation assistance |
 
 ## Protocol
@@ -333,13 +328,13 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 
 Detect granularity insufficiency, bind `R`, and classify the target unit type. This phase is **silent** — no user interaction.
 
-1. **Detect supra-session granularity**: Analyze the recall trace for whole-line / topic-cluster / concept-node signals. **Decisive test**: would a single session resolve this? If yes → defer to Anamnesis (no Anagoge activation). Anagoge activates only when the right unit is above the session.
+1. **Detect supra-session granularity**: Analyze the recall trace for whole-line / topic-cluster / concept-node signals. **Decisive test**: would a single session resolve this? If yes → no Anagoge activation. Anagoge activates only when the right unit is above the session.
 2. **Bind trace + classify unit type**: `extract_trace(input, Σ)` populates `R` (keywords, temporal, associations, entry deposits); `classify(R, Σ)` assigns `UnitType` ∈ {ConnectedSessionChain, TopicCluster, SedimentedConceptNode} from the recall trace. Session context (Σ) is the strongest clue for which unit shape the user means.
 3. **Assess trace ambiguity**:
    - **Low** (clear unit-shape signal + entry deposits): proceed to Phase 1 with the dispatched traversal
    - **Moderate** (partial signal): proceed to Phase 1 with broader traversal scope
    - **High** (unit shape unclear): traverse the dispatched type first, hold Reorient ready if the shape misfits
-4. If `single_session_suffices(R)`: surface the finding (the recall resolves to one session) and defer to Anamnesis without Anagoge activation.
+4. If `single_session_suffices(R)`: surface the finding (the recall resolves to one session) without Anagoge activation.
 5. If `supra_session(R)`: record `R` with extracted trace and `UnitType` — proceed to Phase 1. `attempts` is initialized to 0 once at activation (see MODE STATE); a Reorient dimension-change re-entry to Phase 0 preserves it so the cap spans the whole elevation rather than resetting.
 
 **Scan scope**: Read-only over bound text, conversation context, and the deposit index.
@@ -356,7 +351,7 @@ Traverse the deposit graph for the dispatched `UnitType`, assemble candidate hig
    - **SedimentedConceptNode**: infer `concept`-role edges from shared concept / memory anchors to the already-sedimented concept node and the deposits that forged it (recognition only — no concept is formed here).
 4. **Rank candidate units**: order by recall-trace alignment and edge connectivity (a richly connected unit outranks a thin one). Each candidate carries its assembled shape, the edges traversed, and a confidence label.
 5. **Confirm evidential claims against the source, not the index**: the deposit index is a *lossy pointer* for discovery and ranking — it is NOT evidence. Before surfacing any claim *as evidence* to the user — an origin attribution, a coinage/temporal timing, a quoted decision or utterance — confirm it by reading the deposit's authoritative session source, not the index entry alone. An index-only reading is surfaced as *provisional*; only a source-confirmed reading is surfaced as settled fact. A load-bearing or surprising reading ("this is where it began", "first coined here") is a stop signal to read the source before asserting — the index can omit what the source holds. This mirrors the store topology the deposits come from (authoritative source ⊕ derived index): the index accelerates discovery, the source settles evidence.
-6. If `|U[]| = 0`: do NOT declare NullMatch yet. While attempts remain, present a **Rescope** navigation gate (Constitution) — structured options to widen the boundary, broaden the scope, or change the unit type — then re-traverse with the rebind. Declare NullMatch only when the attempt cap is reached **and nothing was ever assembled in this elevation** (`presented = ∅`): surface the traversal scope and broken-link notes, then offer the fallback (Anamnesis single-session resolution from an entry deposit, or Aitesis if the cases must be newly found). If a prior traversal DID assemble a candidate (`presented ≠ ∅`) but this final traversal came back empty at the cap, that is the exhausted-with-units terminal — surface the best prior candidate + scope and deactivate, not NullMatch. Because a NullMatch requires every traversal to have been empty, the first empty traversal (below the cap) always fired a Rescope first, so at least one Rescope precedes any NullMatch.
+6. If `|U[]| = 0`: do NOT declare NullMatch yet. While attempts remain, present a **Rescope** navigation gate (Constitution) — structured options to widen the boundary, broaden the scope, or change the unit type — then re-traverse with the rebind. Declare NullMatch only when the attempt cap is reached **and nothing was ever assembled in this elevation** (`presented = ∅`): surface the traversal scope and broken-link notes as NullMatch. If a prior traversal DID assemble a candidate (`presented ≠ ∅`) but this final traversal came back empty at the cap, that is the exhausted-with-units terminal — surface the best prior candidate + scope and deactivate, not NullMatch. Because a NullMatch requires every traversal to have been empty, the first empty traversal (below the cap) always fired a Rescope first, so at least one Rescope precedes any NullMatch.
 
 **Scope restriction**: Traversal uses Read, Grep, Glob exclusively. Cross-partition reads only — never cross-slug writes; Anagoge writes nothing.
 
@@ -431,7 +426,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 2. **Recognition over Aggregation**: The higher unit is recognized by reconstructing the connections between deposits at read-time from their stored anchors plus shared keywords/metadata — Anagoge never fuses, synthesizes, or forms a new whole, and writes nothing. Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient); Constitution interaction requires turn yield before proceeding.
 
-3. **Supra-session granularity gate**: Phase 0 activates Anagoge only when the right resolution unit is above a single session. If a single session would resolve the recall, defer to Anamnesis — the decisive mark is that the recognition object is an edge-supported higher unit, not one session.
+3. **Supra-session granularity gate**: Phase 0 activates Anagoge only when the right resolution unit is above a single session. If a single session would resolve the recall, Anagoge does not activate — the decisive mark is that the recognition object is an edge-supported higher unit, not one session.
 
 4. **Type-dispatched traversal and narrative**: Phase 1 dispatches the traversal by `UnitType` (chain / topic cluster / concept node) and Phase 2 presents the candidate in the shape of its type. A single generic presentation shape has structural blind spots regardless of unit type.
 
@@ -441,13 +436,13 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 7. **One higher unit per cycle; conditional recognition gate** *(Safeguard tier — revisitable as instruction-following improves)*: Present one highest-ranked candidate higher unit per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single elevation decision. The recognition gate runs as a Constitution interaction (turn yield) when 2+ candidate units are in scope OR confidence < high (¬SingleObvious); a single densely-connected unit at high confidence (SingleObvious: `|U[]| = 1 ∧ confidence(U[top]) = high`) instead **absorbs the gate into the presentation** — the higher unit is emitted inline as Extension (no turn yield) with its per-deposit source + resume handle and a divergence-only affordance, and convergence is immediate (silence / the user moving on constitutes recognition, only divergence is explicit). One dominant higher unit collapses the recognition option set to a single option (Refine/Reorient are foils), so the interaction is relay, not a gate; this absorption is the sanctioned revision of this rule's own Safeguard-tier mandatory-gate tag, motivated by observed binary-confirm abandonment friction.
 
-8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts (nothing ever assembled, presented = ∅), exhausted-with-units deactivation (attempts = max with presented ≠ ∅ — whether the final cycle is an empty re-traversal or a Refine/Reorient request — surfaces the best prior candidate and deactivates rather than re-traversing), single-session misfire deferral, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
+8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts (nothing ever assembled, presented = ∅), exhausted-with-units deactivation (attempts = max with presented ≠ ∅ — whether the final cycle is an empty re-traversal or a Refine/Reorient request — surfaces the best prior candidate and deactivates rather than re-traversing), single-session misfire deactivation, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
 9. **Convergence evidence**: Present the transformation trace (ScatteredDeposits → edges traversed → HigherUnit(recognized) → HigherUnit_prose) before declaring elevate_complete — convergence is demonstrated per-item, not asserted. The trace enumerates the edges followed and the deposits composing the unit. The SingleObvious Extension path folds this trace into its non-yielding inline emit (the edges followed and composing deposits rendered inline), satisfying this rule within the emit rather than via a separate Phase 3 step.
 
-10. **Boundary discipline (vs adjacent protocols)**: Defer to Anamnesis when one session resolves the recall; to Aitesis (`/inquire`) when the cases must be newly found rather than traversed from existing deposits; to Periagoge (`/induce`) when the user wants to FORM a new concept rather than RECOGNIZE an already-sedimented one (SedimentedConceptNode is recognition-only); to Euporia (`/elicit`) when the user wants to reverse-trace decision intent rather than locate a remembered unit. A Hyphegesis (`/conduct`) synthesis checkpoint may route INTO Anagoge to elevate scattered cross-worker results into a connected-session unit.
+10. **Scope discipline**: Anagoge's own object is an edge-supported higher unit standing above a single session — not a single-session recall, not newly-found cases (it traverses only already-deposited context), not a new concept formed from instances (SedimentedConceptNode is recognition-only, never formed here), and not a reverse-trace of decision intent. A need falling into any of these is outside what Anagoge itself does.
 
-11. **NullMatch fallback diagnosis**: On NullMatch after exhausted Rescope, surface the traversal scope (partitions reached, edges followed) and broken-link notes, then offer the fallback — Anamnesis single-session resolution from an entry deposit, or Aitesis when the missing cases must be newly found. Sparse deposits and broken-link chains are reported as scope, not framed as protocol failure.
+11. **NullMatch fallback diagnosis**: On NullMatch after exhausted Rescope, surface the traversal scope (partitions reached, edges followed) and broken-link notes. Sparse deposits and broken-link chains are reported as scope, not framed as protocol failure.
 
 12. **Rescope-first NullMatch**: At least one Rescope navigation gate precedes any NullMatch declaration. This is structurally guaranteed by the NullMatch guard `presented = ∅`: NullMatch requires that no traversal ever assembled a unit, so the first traversal was empty and — being below the cap — fired a Rescope before any NullMatch could be declared. A final empty traversal at the cap that follows a prior assembly (`presented ≠ ∅`) is the exhausted-with-units terminal, not NullMatch, so it does not need a fresh Rescope.
 
@@ -469,4 +464,4 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 21. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
 
-22. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge — the /recollect → /ascend edge-case is an inbound handoff seeding this protocol's R, not an outbound continuation — so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
+22. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge — its only cross-protocol edge-case is inbound (a prior recall seeding this protocol's R), not an outbound continuation — so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
