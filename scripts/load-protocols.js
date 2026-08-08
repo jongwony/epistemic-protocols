@@ -2,14 +2,20 @@
  * Filesystem-walk loader for protocol/utility plugin set.
  *
  * Single source of truth = per-protocol SKILL.md (definition + prose) plus
- * per-plugin plugin.json self-description. This module derives all
+ * per-plugin plugin.json self-description. This module derives the
  * enumeration shapes (PLUGINS, PROTOCOL_METADATA, PROTOCOL_ORDER,
  * PROTOCOL_FILES, etc.) from the filesystem so consumers (package.js,
- * static-checks.js) never carry a hand-curated list.
+ * static-checks.js) never carry a hand-curated list of their own.
  *
- * Active set = filesystem plugin dirs minus those whose plugin.json carries
+ * Two axes are declared here rather than inferred: protocol-vs-utility
+ * classification and display order both read CANONICAL_PROTOCOL_SET below,
+ * intersected with the discovered plugin dirs. Protocol identity is a
+ * curated fact — a directory carrying a plugin.json does not thereby become
+ * a protocol — so it is stated where it can be reviewed.
+ *
+ * Active set = the above minus plugins whose plugin.json carries
  * "deprecated": true. Deprecation lives in per-plugin self-description per
- * Plugin Encapsulation; no hardcoded allowlist here.
+ * Plugin Encapsulation.
  */
 
 const fs = require('fs');
