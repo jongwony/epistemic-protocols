@@ -197,7 +197,7 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 -- Invariant (always holds): partition_reading = Some(PartitionReading) ⟹ self_grounding. Steady-state converse (after Phase 1 computes the reading for the current F): self_grounding ⟹ partition_reading = Some(...) with verdict ∈ {Split, Trim, Hold}. Before Phase 1 computes it — Phase 0, or a Phase 1 re-entry via Adjust until recompute — partition_reading = None even under self_grounding (Pending). So None means ¬self_grounding OR not-yet-computed-for-current-F; the verdict Hold (no-misfit) stays a distinct value, never conflated with the Option None
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -251,10 +251,10 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 - Same domain pair was validated in current session (session immunity)
 - Phase 1 domain analysis confirms structural correspondence is trivial
 - No abstract framework is applied (output is purely concrete)
-- The concretization demand targets direction futures before a commitment, and no familiar-domain mapping carries those futures faithfully — `/preview` (DirectionUnrecognizable) territory: grounding validates a mapping that exists; preview materializes futures when none does
-- Colimit-shaped input detected (`essence_sensed` over concrete instances + `locator_absent(A)`) — route to `/induce` (Periagoge) for abstraction formation; Analogia's substitution interface fits mapping validation. `locator_absent(A)` is the shared cross-protocol predicate (Periagoge formal `¬located(A)`) — from Analogia's substitution-interface vantage it surfaces as a missing source abstraction Sₐ to substitute from. **Self-grounding is the complement, NOT skipped**: when `located(A)` holds (the abstraction already has a name) and the grounding target is the abstraction against its OWN instances, the input is not colimit-shaped — keep it and run the self-grounding path (wrong-fusion detection), do not route away. The "purely concrete" skip below also does not apply, because a located abstraction IS an abstract structure under validation
-- Framework selection is the primary deficit (no analytical framework chosen for the inquiry) — route to `/frame` (Prothesis); Analogia validates the mapping of an *existing* framework, Prothesis selects frameworks when none is yet chosen
-- Context insufficiency is the primary deficit (factual gaps in execution context — missing facts, missing user environment) — route to `/inquire` (Aitesis); Analogia checks *relational* correspondence between domains, Aitesis checks *factual* sufficiency for execution
+- The concretization demand targets direction futures before a commitment, and no familiar-domain mapping carries those futures faithfully — Analogia validates a mapping that exists; it does not materialize futures when none does
+- **Self-grounding is not skipped**: when `located(A)` holds (the abstraction already has a name) and the grounding target is the abstraction against its OWN instances, keep it and run the self-grounding path (wrong-fusion detection) — Analogia's own scope covers a located abstraction validated against its own instances or against a separate concrete domain. The "purely concrete" skip below also does not apply, because a located abstraction IS an abstract structure under validation
+- Framework selection is the primary deficit (no analytical framework chosen for the inquiry) — Analogia validates the mapping of an *existing* framework, not the selection of one
+- Context insufficiency is the primary deficit (factual gaps in execution context — missing facts, missing user environment) — Analogia checks *relational* correspondence between domains, not factual sufficiency for execution
 
 ### Mode Deactivation
 

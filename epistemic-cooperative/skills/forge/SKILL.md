@@ -147,7 +147,7 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 
 ## Boundary Note
 
-`/forge` forms a prompt artifact and stops. It reads a reference and surfaces intent; it does not execute the tool, run the Goal, generate the media, or open branches/PRs. Heavy intent aporia routes to `/elicit`; the reference-fetch move mirrors the `/inquire` canonical-external channel but forge owns the projection.
+`/forge` forms a prompt artifact and stops. It reads a reference and surfaces intent; it does not execute the tool, run the Goal, generate the media, or open branches/PRs. The reference-fetch move mirrors the `/inquire` canonical-external channel but forge owns the projection.
 
 ## Operational checklist (per cycle)
 

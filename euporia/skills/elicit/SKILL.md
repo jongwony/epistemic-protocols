@@ -149,7 +149,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 -- Leftover invariant: parked ∩ accepted_coords = ∅ — a coordinate is either still waiting on the user or already answered, never both. Provide moves it across; nothing moves it back
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Substrate channel resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -194,7 +194,7 @@ aporia(I) ≡ ∃ requirement(r, I) : axis_undetermined(r) ∧ substrate_implici
             -- Utterance is admissible as Evidence basis within Phase 1 dimension projections
             --   once activated, but does not by itself satisfy substrate_implicit;
             --   utterance-only aporia (axis-undetermined intent without external substrate signal)
-            --   routes to Aitesis (fact-supply layer), not Euporia.
+            --   does not satisfy substrate_implicit, so this gate does not fire.
 ```
 
 ### Priority
@@ -226,10 +226,10 @@ When Euporia is active:
 
 **Skip**:
 - Intent is fully axis-determined (a single axis-specific protocol covers it)
-- Substrate is empty (no externalized coordinates available — fall back to direct execution or Aitesis)
+- Substrate is empty (no externalized coordinates available — fall back to direct execution)
 - User explicitly requests proceed without surfacing
 - Same (utterance, substrate slice) was resolved or dismissed in current session (session immunity)
-- Wants generated candidates from a topic or fragments, not coordinates reverse-traced from externalized substrate → Heuresis (`/ideate`)
+- Wants generated candidates from a topic or fragments, not coordinates reverse-traced from externalized substrate — outside Euporia's reverse-trace scope
 
 ### Activation Conditions
 
@@ -255,7 +255,7 @@ Analyze the intent seed for abstract aporia. Detection is silent on the aporia-c
 4. If `aporia(I)` predicate satisfied: proceed to Phase 1 with `(I, S, ctx)` — silent, no user interaction
 5. If no aporia signal (predicate unsatisfied), surface the scan result and deactivate without proceeding to Phase 1:
    - **Intent is axis-determined**: surface a routing recommendation to the matching axis-specific protocol
-   - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution or Aitesis)
+   - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution)
 
 **Scope restriction**: Detection does not modify the substrate. The no-signal surface is a relay presentation — no constitutive gate.
 

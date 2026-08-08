@@ -7,7 +7,7 @@ description: "Scoped empirical validation utility. Decomposes a target↔surroga
 
 Validate an inference-uncertain proposition inside a constraint-bounded stand-in space synchronized with the user, obtain a scoped resolution ("within these conditions, whether it holds, fails, or remains inconclusive"), and carry the uncovered complement forward to a follow-up protocol. This skill does not run the experiment substrate, open branches, or create PRs. It orchestrates existing protocols around one disciplined empirical move.
 
-**This is an orchestration utility, not a runtime executor and not a new epistemic protocol.** Reduced-Space Test introduces no new interaction deficit. It realizes a known composite — decompose the target↔surrogate equivalence claim into verifiable facets, then `/bound` a synchronized test space (+ residual) ∘ `/inquire` for evidence inside it → scoped resolution + carried complement. It is sibling to `/triage` and `/forge`: a thin composition over existing protocols, kept out of the protocol graph because it owns no deficit of its own.
+**This is an orchestration utility, not a runtime executor and not a new epistemic protocol.** Reduced-Space Test introduces no new interaction deficit. It realizes a known composite — decompose the target↔surrogate equivalence claim into verifiable facets, then `/bound` a synchronized test space (+ residual) ∘ `/inquire` for evidence inside it → scoped resolution + carried complement. It is sibling to `/triage` and `/forge`: a thin composition over existing protocols, kept outside the core protocol set because it owns no deficit of its own.
 
 The core recognition act is **decomposing the equivalence claim into verifiable facets** — not "creating a reduced space." A stand-in space is only as good as the facets on which it is claimed equivalent to the target; the value lives in making those facets explicit and observable.
 
@@ -111,7 +111,7 @@ At convergence, present the pairing: the scoped resolution with its defined cond
 3. **Scoped claim only** (evidence discipline): Resolution sentences assert an updated failure probability within the defined conditions — lower on confirmation, higher on disconfirmation, open on inconclusive. Absolute claims in either direction exceed what a stand-in space supports and are reframed to the scoped form. A disconfirming or inconclusive result is a first-class resolution, never suppressed to force a confirmation.
 4. **Residual carries forward** (completeness): The uncovered complement is a first-class output routed to a follow-up protocol. A scoped resolution that omits its residual overclaims its reach.
 5. **Scope covers claim** (coverage): The bounded test space must cover the claim it licenses. Evidence from a slice narrower than its claim is under-covering: it yields no scoped resolution for the full claim and exits as a `CoverageShortfall` — re-scope to the covered slice (resolution over the slice + remainder as residual) or re-bound — never an implicit retry.
-6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). It introduces no new interaction deficit and adds no protocol-graph node.
+6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). It introduces no new interaction deficit and does not constitute a new protocol.
 
 ## Boundary Note
 
@@ -123,7 +123,7 @@ At convergence, present the pairing: the scoped resolution with its defined cond
 - **Surrogate without difference inventory**: bounding a test space without naming where it diverges from the target. The unnamed differences are exactly where the scoped resolution silently fails.
 - **Residual drop**: presenting the scoped resolution while discarding the complement. The uncovered region is the part most likely to surprise a later session.
 - **Space-creation framing**: treating "build the reduced space" as the work and skipping the facet decomposition. The equivalence claim, left implicit, becomes an assumption rather than a tested facet.
-- **New-protocol creep**: growing the utility into a standalone protocol with its own deficit and graph node. The composite is sufficient; a new mechanism would duplicate `/bound` and `/inquire`.
+- **New-protocol creep**: growing the utility into a standalone protocol with its own deficit. The composite is sufficient; a new mechanism would duplicate `/bound` and `/inquire`.
 - **Constraint sync by relay**: drawing the reduced-space boundary on the user's behalf. The boundary constitutes the claim, so it is the user's to set.
 - **Silent facet selection**: forming the facet frame and bounding the space without surfacing the frame for user recognition. Which facets count is the attention-shaping act; chosen silently, it injects the AI's bias into the very frame that licenses the claim.
 - **Confirmation-only terminal**: treating the test as complete only when it confirms, with no honest terminal for a disconfirming or inconclusive result. A validation that cannot fail validates nothing; the disconfirming outcome is first-class.

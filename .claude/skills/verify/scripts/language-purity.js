@@ -36,7 +36,6 @@ const WHITELIST_PATTERNS = [
   /^\.claude\/skills\/release(\/|$)/,
   /(^|\/)docs(\/|$)/,                     // repo and per-plugin docs
   /(^|\/)references(\/|$)/,               // plugin contributor references
-  /(^|\/)graph\.json$/,                   // satisfies field is Korean by project convention
   /^design(\/|$)/,                        // root design docs
   /^examples(\/|$)/,                      // root examples
   /^\.claude\/rules\/editing-conventions\.md$/,

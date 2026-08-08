@@ -14,7 +14,7 @@
 
 ### 해결책
 
-**기질 위의 지휘(Conduction over Substrate)**: 둘 이상의 이동이 비자명한 지휘를 요구할 때, Hyphegesis는 프로토콜 그래프 위에서 지휘 토폴로지를 설계합니다 — 영향/레버리지 우선으로, 안정 축은 잠그고 가변 축은 세션 내 체크포인트로 미루며 — 그리고 방법 계획을 핸드오프합니다. 이동을 실행하지 않으며, 실현 불가능한 기질에 결코 묶지 않습니다. 단일 이동 작업은 지휘하지 않고 그 한 프로토콜로 relay합니다.
+**기질 위의 지휘(Conduction over Substrate)**: 둘 이상의 이동이 비자명한 지휘를 요구할 때, Hyphegesis는 식별한 이동들 위에서 지휘 토폴로지를 설계합니다 — 영향/레버리지 우선으로, 안정 축은 잠그고 가변 축은 세션 내 체크포인트로 미루며 — 그리고 방법 계획을 핸드오프합니다. 이동을 실행하지 않으며, 실현 불가능한 기질에 결코 묶지 않습니다. 단일 이동 작업은 지휘하지 않고 그 한 프로토콜로 relay합니다.
 
 ### 다른 프로토콜과의 차이
 
@@ -25,7 +25,7 @@
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
-Prothesis는 한 탐구를 위한 *어떤 관점*을 프레이밍하고, Hyphegesis는 세션 전체 이동들이 *어떻게* 관계 맺는지를 지휘합니다. 두 프로토콜은 토폴로지 대수를 공유하며 — Hyphegesis가 프로토콜 그래프 위에서 인스턴스화하는 그 배열 functor가 Prothesis가 공급하는 관점도 배열합니다.
+Prothesis는 한 탐구를 위한 *어떤 관점*을 프레이밍하고, Hyphegesis는 세션 전체 이동들이 *어떻게* 관계 맺는지를 지휘합니다. 두 프로토콜은 토폴로지 대수를 공유하며 — Hyphegesis가 식별한 이동들 위에서 인스턴스화하는 그 배열 functor가 Prothesis가 공급하는 관점도 배열합니다.
 
 ## 설치
 
