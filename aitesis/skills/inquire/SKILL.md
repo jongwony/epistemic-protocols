@@ -418,7 +418,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - a factual question that could be tested, but where your knowledge is the better source (basis: dominance reason — operational context the test cannot see, or knowledge tied to a moment that cannot be reproduced)
   - a factual question that would have been tested but the test is blocked by an environmental escape condition, falling back to asking the user
   - a factual question with partial evidence — the evidence covers one part of the claim, the uncovered part is classified separately
-  - a factual question whose codebase evidence is present and current but not provenance-coupled to the claim or not coupled to the behavior it asserts — routed to a test/observation rather than trusted as-is (and escalated with a `support_integrity:unverified` note only if that observation is blocked)
+  - a factual question whose codebase evidence is present and current but not provenance-coupled to the claim or not coupled to the behavior it asserts — routed to a test/observation rather than trusted as-is (and flagged with a `support_integrity:unverified` note when that test is blocked, and equally when it runs and hits its time budget)
   - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
   - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
   - a consistency question spanning multiple scopes — routed to a downstream protocol
