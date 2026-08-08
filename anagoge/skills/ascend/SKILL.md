@@ -448,7 +448,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 13. **Substrate non-coupling**: Phase prose names epistemic operations only — tool, path, and deposit-index bindings (realization ⓐ) belong exclusively to TOOL GROUNDING; ⓑ/ⓒ are documented alternative realizations.
 
-14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
+14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language. A reader who cannot take in what was written stops reading and answers past it; the gap widens and the gate's matching passes in practice to the AI, so plain rendering is what keeps the recognition the user's own. SKILL.md formal-block vocabulary stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 
 15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 

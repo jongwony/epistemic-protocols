@@ -1,6 +1,6 @@
 {
   "name": "epistemic-cooperative",
-  "version": "4.18.8",
+  "version": "4.18.9",
   "description": "Utility skills layered on top of the core protocols. /catalog browses the protocol handbook; each utility skill's own SKILL.md carries its contract.",
   "author": {
     "name": "Jongwon Choi",
