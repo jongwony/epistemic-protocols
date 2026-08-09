@@ -96,6 +96,15 @@ TYPES blocks use three distinct type categories, each with its own definitional 
 
 The test: if PHASE TRANSITIONS handle each case differently, use coproduct. If the protocol processes uniformly regardless of input category, use natural language definition.
 
+**The volatility criterion.** The test above settles which *form* a TYPES entry takes; this one settles whether the type layer carries the category at all. `premise/instruction-authoring.md` §Pace layering and its corollary — codify only deterministic logic into the rigid layer, and leave fragile or heuristic steps to the instruction layer — bind here, with TYPES as a protocol contract's rigid layer. Which category an item falls into is a fast-layer judgment: it is made at runtime from accumulated context and the user's utterance, and it moves as that context accumulates. TYPES is the slow layer and carries only categories stable enough to be deterministic.
+
+Two consequences follow, and each has been mistaken for a gap in the type space:
+
+- **A heuristic assignment owes the type layer no terminal.** Where a category is assigned by runtime judgment, "the judgment did not converge" is not a case the coproduct must enumerate. Supplying a terminal for it codifies a non-deterministic step into the rigid layer, and the loop that appears to stay open is a gated one: `.claude/principles/architectural-principles.md` §Three-Tier Termination settles that a cycle re-entering a Constitution gate is dialogue rather than a hang.
+- **A gap inside a closed coproduct is repaired by widening the value type first.** A new constructor fixes at authoring time an answer that varies with accumulated context. Where the gap is that a field cannot *represent* a case — a singular field with no way to say "none" — widen the field so the missing case becomes a value (`Set(T)` makes it ∅) and an existing constructor's guard absorbs it. A constructor is warranted only where PHASE TRANSITIONS genuinely gains a distinct processing path.
+
+Two protocols carrying parallel machinery may still diverge here without either having a gap, where what differs is the fast layer's reach: a phase holding a Constitution gate can re-enter it and let the user's utterance settle the category, while a phase that is silent by contract cannot reach that channel and correctly bounds itself to one attempt plus an unattributable record.
+
 ## User-Facing Emit Load Disciplines
 
 Three separate rules manage cognitive load at runtime:
