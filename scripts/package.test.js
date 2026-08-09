@@ -13,7 +13,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
-const { CANONICAL_PRECEDENCE } = require('./load-protocols');
+const { CANONICAL_PRECEDENCE, CANONICAL_PROTOCOL_SET } = require('./load-protocols');
 // Full protocol registry, derived — display-first Anamnesis + canonical precedence chain +
 // structurally-last Katalepsis (same construction as load-protocols protocolOrder()).
 const ALL_PROTOCOLS = ['Anamnesis', ...CANONICAL_PRECEDENCE, 'Katalepsis'];
@@ -1155,6 +1155,36 @@ describe('load-protocols Type signature extraction', () => {
       assert.ok(r.deficit, `${r.dir}: deficit is null — SKILL.md Type signature parse failed`);
       assert.ok(r.resolution, `${r.dir}: resolution is null — SKILL.md Type signature parse failed`);
     }
+  });
+});
+
+// ============================================================
+// plugin directory registration (non-circular inventory guard)
+// ============================================================
+
+describe('plugin directory registration', () => {
+  // The comparison above filters by isProtocol, and isProtocol is defined as
+  // membership in CANONICAL_PROTOCOL_SET — so a protocol directory the set has
+  // not been told about never enters that comparison, and it passes. It catches
+  // the removal direction (a registered name whose directory is gone) and is
+  // blind to the addition direction. This guard reads the filesystem inventory
+  // instead of the registry, so neither direction can hide behind the filter.
+  const KNOWN_UTILITY_DIRS = ['epistemic-cooperative'];
+
+  it('every plugin directory on disk is registered as a protocol or a utility', () => {
+    const dirs = [...new Set(
+      discoverPlugins({ projectRoot: path.resolve(__dirname, '..') }).map(r => r.dir)
+    )].sort();
+    assert.deepEqual(
+      dirs,
+      [...CANONICAL_PROTOCOL_SET, ...KNOWN_UTILITY_DIRS].sort(),
+      'plugin directory inventory diverges from its declared registration. ' +
+      'Register a new protocol in CANONICAL_PROTOCOL_SET (scripts/load-protocols.js), ' +
+      'or declare a new utility plugin in KNOWN_UTILITY_DIRS here. ' +
+      'Note: the packaged-zip list in this file fails on a new directory too, and ' +
+      'adding the zip name there silences that assertion while leaving the directory ' +
+      'unregistered — register it here first.'
+    );
   });
 });
 
