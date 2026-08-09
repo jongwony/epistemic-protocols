@@ -78,7 +78,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Euporia](./euporia) | `/elicit` | You have intent but the decision coordinates are implicit — reverse-trace them from the externalized substrate (codebase, rules, past sessions) until intent crystallizes |
 | [Heuresis](./heuresis) | `/ideate` | The candidate field for a decision is empty or has prematurely converged — widen it into a diverse set before any selection, not after |
 | [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
-| [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
+| [Prothesis](./prothesis) | `/frame` | Need to settle which lens to look through before the analysis starts — one lens or several |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
 | [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
