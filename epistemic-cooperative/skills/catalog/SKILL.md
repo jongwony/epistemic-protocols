@@ -44,7 +44,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Prothesis | `/frame` | No framework — need analytical lenses for a multi-perspective inquiry |
+| Prothesis | `/frame` | No framework — need one or more analytical lenses placed before any perspective-requiring analysis begins |
 | Analogia | `/ground` | An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion |
 | Periagoge | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 

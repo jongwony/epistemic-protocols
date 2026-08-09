@@ -32,7 +32,7 @@ implicit premise.
 ## Analysis
 
 **`/frame`** (Prothesis) — FrameworkAbsent → FramedInquiry
-  when: No framework — need analytical lenses for a multi-perspective inquiry
+  when: No framework — need one or more analytical lenses placed before any perspective-requiring analysis begins
 
 **`/ground`** (Analogia) — MappingUncertain → ValidatedMapping
   when: An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion
