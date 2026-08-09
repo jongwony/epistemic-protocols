@@ -96,7 +96,7 @@ TYPES blocks use three distinct type categories, each with its own definitional 
 
 The test: if PHASE TRANSITIONS handle each case differently, use coproduct. If the protocol processes uniformly regardless of input category, use natural language definition.
 
-**The volatility criterion.** The test above settles which *form* a TYPES entry takes; this one settles whether the type layer carries the category at all. `premise/instruction-authoring.md` §Pace layering and its corollary — codify only deterministic logic into the rigid layer, and leave fragile or heuristic steps to the instruction layer — bind here, with TYPES as a protocol contract's rigid layer. Which category an item falls into is a fast-layer judgment: it is made at runtime from accumulated context and the user's utterance, and it moves as that context accumulates. TYPES is the slow layer and carries only categories stable enough to be deterministic.
+**The volatility criterion.** The test above settles which *form* a TYPES entry takes; this one settles whether the type layer carries the category at all. TYPES is a protocol contract's rigid layer, and a rigid layer codifies only deterministic logic — a fragile or heuristic step belongs to the instruction layer instead. Which category an item falls into is a fast-layer judgment: it is made at runtime from accumulated context and the user's utterance, and it moves as that context accumulates. TYPES is the slow layer and carries only categories stable enough to be deterministic.
 
 Two consequences follow, and each has been mistaken for a gap in the type space:
 
