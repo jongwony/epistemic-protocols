@@ -16,6 +16,12 @@ AI 시스템은 모호한 회상 신호(`RecallAmbiguous`)를 놓치기 쉽습�
 
 **검색보다 인지(Recognition over Retrieval)**: AI가 SSOT(세션 JSONL)와 hypomnesis INDEX를 Salience 차원을 따라 스캔하여, 후보를 소크라테스식 내러티브 지문(origin → direction → outcome)으로 제시하고, 사용자가 직접 매치를 인지합니다 — 또는 인접 벡터를 통해 소크라테스식 probe로 세부 조정하거나, 직교적 회상 차원으로 방향을 재설정합니다. 구조화된 literal match는 source namespace가 회상 trace의 claim kind를 인가(authorize)할 때만 ranking anchor가 됩니다. 모호한 회상을 인지된 맥락으로 변환합니다.
 
+Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고 모든 후보에 출처를 유지합니다. Raw transcript는 compact 검색과 한 번의 회상 probe가 모두 빗나간 뒤 `/recollect`가 명시적으로 선택을 요청하는 2단계 확장 범위입니다.
+
+### Codex 캡처 라이프사이클
+
+공유 플러그인 훅은 Codex의 Stop, PreCompact, SessionEnd 이벤트를 `$CODEX_HOME/hypomnesis` 아래 fire-and-forget queue에 기록합니다. 분리된 worker는 transcript revision별로 이벤트를 합치고 `gpt-5.6-luna`를 `xhigh`로 실행해 compact record 하나를 추출한 다음, immutable generation을 쓰고 session pointer를 원자적으로 전환합니다. 중첩 추출은 ephemeral이며 hooks를 비활성화합니다. `agents/openai.yaml`은 skill discovery metadata만 제공하고, 훅 등록은 `hooks/hooks.json`에 남습니다.
+
 ### 다른 프로토콜과의 차이
 
 | 프로토콜 | 개시자 | 타입 시그니처 |
@@ -64,9 +70,18 @@ Phase 3: Integrate   → 인지된 맥락을 세션 텍스트로 방출; 불일�
 
 ## 설치
 
+Claude Code:
+
 ```
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 claude plugin install anamnesis@epistemic-protocols
+```
+
+Codex:
+
+```
+codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
+codex plugin add anamnesis@epistemic-protocols
 ```
 
 ## 사용법

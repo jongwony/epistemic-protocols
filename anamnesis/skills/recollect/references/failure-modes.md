@@ -22,27 +22,29 @@ SidechainNoSSOT   : scan_entropy(Store, trace) ≠ ∅ via INDEX_substitute ∧ 
                     -- recovery: the id is not independently resumable (no top-level record of its own); read the orchestrating parent from the substitute record (backtrace_parent → parent_pointer, parent_cwd) and offer the parent as the resumable candidate; when the parent's record has aged out, mark non-resumable and surface the recoverable artifacts (substitute record + memory)
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
-                    -- cause: literal absent from SSOT/INDEX (pre-store, lifecycle gap)
-                    -- recovery: offer Aitesis handoff with accumulated trace
+                    -- cause: literal absent from the searched scope; compact-only causes include pre-store, lifecycle gap, queued/failed writer, and extractor omission
+                    -- recovery: Socratic probe, then StoreExpansion; after accepted raw exhaustion, offer Aitesis handoff with accumulated trace
 
 NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
                     -- cause: profile too vague or target session lacks distinctive markers
                     -- recovery: Socratic probe enrichment → Phase 1 re-scan
 
 MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
-                    -- structural risk: recall target genuinely absent from Store
-                    -- action: NullMatch pathway with full scope disclosure (principal failure mode)
+                    -- structural risk: recall target absent from the searched scope
+                    -- action: NullMatch pathway with source-labeled scope disclosure (principal failure mode)
 ```
 
 ## Degraded scan
 
-Read when `INDEX_semantic = ∅`. The `degraded_scan` equation and the partial-INDEX guard stay in `── STORE TOPOLOGY ──`, because the guard binds on every scan; what follows binds only once the fallback has fired.
+Read when `INDEX_semantic = ∅`. The `degraded_scan` equation and the partial-INDEX guard stay in `── STORE TOPOLOGY ──`, because the guard binds on every scan; what follows binds once the StoreExpansion checkpoint is reached.
 
 ```
 degraded_scan rationale:
-  -- SSOT guarantees semantic recall; cold start falls back to SSOT directly. INDEX_substitute is a
-     separate primary channel (not derived from INDEX_semantic), so the sidechain/derived-id match
-     persists under degraded mode — SidechainNoSSOT stays reachable when INDEX_semantic is empty
+  -- SSOT broadens semantic recall coverage, but remains outside initial scope. After probe enrichment,
+     Qx lets the user admit the slower raw scan or stop with an explicitly compact-scoped NullMatch.
+     INDEX_substitute is a separate primary channel (not derived from INDEX_semantic), so the
+     sidechain/derived-id match persists before raw expansion — SidechainNoSSOT stays reachable
+     when INDEX_semantic is empty
   -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for
      the Cold-Start invariant
 ```

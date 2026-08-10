@@ -1,12 +1,12 @@
 {
-  "description": "Hypomnesis store writer — indexes session content and substitute channel deposits for /recollect access.",
+  "description": "Cross-harness Hypomnesis dispatcher — indexes session content and substitute channel deposits for /recollect access.",
   "hooks": {
     "SessionEnd": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-dispatch.mjs\"",
             "async": true
           }
         ]
@@ -17,7 +17,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-dispatch.mjs\"",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-dispatch.mjs\"",
             "async": true
           }
         ]
@@ -28,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-subagent-hook.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-dispatch.mjs\"",
             "async": true
           }
         ]
