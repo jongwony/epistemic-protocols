@@ -12,6 +12,7 @@ import {
   enqueueCodexJob,
   isCodexTranscript,
   parseCodexRollout,
+  processJob,
   publishRecord,
   runWorker,
   spawnWorker,
@@ -166,6 +167,24 @@ test("nested extraction is ephemeral, hooks-off, Luna xhigh, and schema-bound", 
   assert.deepEqual(args.slice(args.indexOf("--model"), args.indexOf("--model") + 2), ["--model", "gpt-5.6-luna"]);
   assert.ok(args.includes('model_reasoning_effort="xhigh"'));
   assert.ok(args.includes("--output-schema"));
+});
+
+test("a session too long for bounded extraction records what was omitted", (t) => {
+  const { base, root } = fixture(t);
+  const transcript = path.join(base, "custom-codex", "sessions", "2026", "08", "10", "rollout-long.jsonl");
+  const rows = [
+    { timestamp: "2026-08-10T00:00:00Z", type: "session_meta", payload: { id: "session-long", cwd: "/repo", timestamp: "2026-08-10T00:00:00Z" } },
+    { timestamp: "2026-08-10T00:00:01Z", type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "x".repeat(90_000) }] } },
+  ];
+  fs.writeFileSync(transcript, `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
+  const queued = enqueueCodexJob({ hook_event_name: "SessionEnd", session_id: "session-long", transcript_path: transcript, cwd: "/repo" }, { root });
+  const result = processJob(root, queued.job, { extract: () => extraction() });
+  // The prompt marks its own cut for the extractor; the record is what a later
+  // recall reads, so the amount has to reach it too.
+  assert.ok(result.record.source_scan.omitted_chars > 0, "a truncated session must not publish as a whole one");
+  assert.equal(result.record.source_scan.skipped_lines, 0);
+  const catalogued = JSON.parse(fs.readFileSync(path.join(root, "catalog", "session-long.json"), "utf8"));
+  assert.equal(catalogued.source_scan.omitted_chars, result.record.source_scan.omitted_chars);
 });
 
 test("extraction runs from an isolated work directory, never the captured session's cwd", (t) => {

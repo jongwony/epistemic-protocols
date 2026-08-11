@@ -224,9 +224,20 @@ function parseCodexRollout(transcriptPath) {
   };
 }
 
+function joinTurns(session) {
+  return session.messages.map((message) => `${message.role.toUpperCase()}:\n${message.text}`).join("\n---\n");
+}
+
+// What bounded extraction drops. The prompt marks the cut for the extractor,
+// but the record is what a later recall reads, so the amount travels with it
+// too — a truncated session must not publish as a complete account of itself.
+function omittedChars(session) {
+  const length = joinTurns(session).length;
+  return length <= MAX_TEXT_CHARS ? 0 : length - MAX_TEXT_CHARS;
+}
+
 function buildExtractionPrompt(session) {
-  const turns = session.messages.map((message) => `${message.role.toUpperCase()}:\n${message.text}`);
-  const joined = turns.join("\n---\n");
+  const joined = joinTurns(session);
   const content = joined.length <= MAX_TEXT_CHARS
     ? joined
     : `${joined.slice(0, 35_000)}\n--- OMITTED MIDDLE FOR BOUNDED EXTRACTION ---\n${joined.slice(-45_000)}`;
@@ -342,6 +353,7 @@ function recordFor(job, session, extraction) {
     source_scan: {
       skipped_lines: session.skipped_lines,
       unverified_user_turns: session.unverified_user_turns,
+      omitted_chars: omittedChars(session),
     },
     evidence_modes: {
       initial_request: "attested",
@@ -349,7 +361,11 @@ function recordFor(job, session, extraction) {
       topic: "inferred",
       topics: "inferred",
       keywords: "inferred",
-      cross_refs: "observed",
+      // inferred, not observed: the Claude-side convention stamps cross_refs
+      // observed because that writer extracts them mechanically. Here they come
+      // out of the extraction schema, so the same rule — the mode follows the
+      // production path — lands on the other value.
+      cross_refs: "inferred",
       decisions: "inferred",
       narrative: "inferred",
       markers: "attested",
@@ -526,8 +542,10 @@ function acquireLock(lockDir) {
   }
 
   let stale = false;
+  let judgedOwner = null;   // the exact owner record the staleness verdict was made about
   try {
-    const owner = JSON.parse(fs.readFileSync(path.join(lockDir, "owner.json"), "utf8"));
+    judgedOwner = fs.readFileSync(path.join(lockDir, "owner.json"), "utf8");
+    const owner = JSON.parse(judgedOwner);
     // Liveness decides, and age on its own never does: a worker draining
     // several jobs can outlive any fixed age bound while still publishing, and
     // stealing its lock puts two writers on one session's catalog and pointer.
@@ -551,6 +569,20 @@ function acquireLock(lockDir) {
   const stolenDir = `${lockDir}.stale.${process.pid}.${randomUUID()}`;
   try { fs.renameSync(lockDir, stolenDir); }
   catch { return false; }
+  // ABA guard: between judging that lock stale and renaming it, another racer
+  // can have taken the same one and put its own live lock at the same path, so
+  // an atomic rename alone only proves something was taken — not that it was
+  // the thing judged. Confirm the record taken is the record the verdict was
+  // about; otherwise put it back and back off rather than displacing a live
+  // owner. Residual: if a third contender claims the path between the restore's
+  // two steps, the restore fails and the taken lock is left in place as
+  // evidence rather than removed.
+  let stolenOwner = null;
+  try { stolenOwner = fs.readFileSync(path.join(stolenDir, "owner.json"), "utf8"); } catch {}
+  if (stolenOwner !== judgedOwner) {
+    try { fs.renameSync(stolenDir, lockDir); } catch {}
+    return false;
+  }
   fs.rmSync(stolenDir, { recursive: true, force: true });
   try { return create(); }
   catch (error) {

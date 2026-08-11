@@ -12,7 +12,7 @@ Read this reference before scanning the Codex store or emitting a Codex resume h
 
 The compact catalog and the rollout spines are the initial scan surface together. Dereference `record_path` only for candidates that need richer recognition evidence. Rollout **bodies** enter scope only through the StoreExpansion checkpoint in Phase 1.
 
-Bind `Candidate.runtime = codex`; bind `session_id`, `cwd`, topic, keywords, narrative, and temporal fields directly from the catalog entry. Codex records have no substitute-channel or fork-parent realization, so `fork_marker = false`, `parent_pointer = Null`, and `parent_cwd = Null`.
+Bind `Candidate.runtime = codex`; bind `session_id`, `cwd`, topic, keywords, narrative, and temporal fields directly from the catalog entry, along with `evidence_mode` from the entry's `evidence_modes` and `source_scan` from its `source_scan` (absent in an entry written before either was captured — bind Null, which is neutral in ranking). Both must be bound here or the emit cannot qualify what it presents: `source_scan` is what Rule 18 reads to say a record was built from a partially readable source. Codex records have no substitute-channel or fork-parent realization, so `fork_marker = false`, `parent_pointer = Null`, and `parent_cwd = Null`.
 
 ## Spine tier
 

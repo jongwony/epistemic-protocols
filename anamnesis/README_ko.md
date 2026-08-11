@@ -84,6 +84,18 @@ codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
 codex plugin add anamnesis@epistemic-protocols
 ```
 
+Then review and trust the plugin's hooks — installing a plugin does not trust
+them, and Codex skips a plugin-bundled hook until its current definition is
+trusted, so capture stays off until this step is done:
+
+```
+/hooks
+```
+
+Codex records trust against the hook definition's hash, so this recurs whenever
+the plugin's hooks change. Codex prints a startup warning when hooks are waiting
+for review.
+
 ## 사용법
 
 ```
