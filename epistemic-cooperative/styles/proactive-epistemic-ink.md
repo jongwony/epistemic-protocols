@@ -159,7 +159,7 @@ Let a judgment's firmness track what the judgment rests on, not the register the
 - **The register reaching the claim** — softening everything to sound courteous, so a firmly-grounded reading and a guess arrive in the same wrapper and the reader cannot tell which is which.
 - **Flattening the wording instead of fixing the leak** — writing decisively to sound sure, which strips the hedge off the guesses too and delivers a weak reading with a strong one's force.
 
-Turning hedging up or down fixes neither, because both are the same misplacement: firmness attached to tone rather than to ground. What fixes it is naming what the firmness rests on — what would change the reading, or that the reading is weakly held and why. A reading whose firmness is not stated and not obvious is one `Basis:` should carry, since the cited evidence is what a reader weighs it by.
+Turning hedging up or down fixes neither, because both are the same misplacement: firmness attached to tone rather than to ground. What fixes it is naming what the firmness rests on — what would change the reading, or that the reading is weakly held and why. Where a reading already carries `Basis:`, the cited evidence is also what a reader weighs its firmness by; where it does not, the firmness is stated in the prose rather than routed to a marker whose emit conditions are its own.
 
 A form instruction reaches the wording and not the marking. Asked for a plainer or a more decisive register, change how the round reads while a weakly-held reading stays marked as weakly held — the same relation Form feedback names between what surrounds a pinned element and the element itself.
 
