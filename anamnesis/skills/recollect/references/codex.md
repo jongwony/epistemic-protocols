@@ -6,7 +6,11 @@ Read this reference before scanning the Codex store or emitting a Codex resume h
 
 - Resolve `{codex_home}` from `CODEX_HOME`, falling back to `~/.codex`.
 - Compact catalog: `{codex_home}/hypomnesis/catalog/*.json`.
-- Current per-session pointer: `{codex_home}/hypomnesis/{session-id}/current.json`.
+- Current per-session pointer: `{codex_home}/hypomnesis/{session-id}/current.json`. It tracks the
+  highest transcript revision captured for the session, not whatever revision the file happens to
+  carry now: a rollout that was truncated or rewritten smaller produces its own generation, and the
+  pointer declines to move back to it, so a fuller earlier capture is never lost to a later, thinner
+  source. A declined move is recorded in the session log rather than passing as a no-op.
 - Immutable semantic generations: `{codex_home}/hypomnesis/{session-id}/generations/*/record.json`.
 - Raw SSOT: `{codex_home}/sessions/**/rollout-*.jsonl` plus `{codex_home}/archived_sessions/**/rollout-*.jsonl`.
 

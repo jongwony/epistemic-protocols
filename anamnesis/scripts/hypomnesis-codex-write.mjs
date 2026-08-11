@@ -464,7 +464,8 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
 
   const existingRecord = readGenerationRecord(root, job);
   if (existingRecord) {
-    return { published: publishRecord(root, job, existingRecord), reused: true };
+    const published = publishRecord(root, job, existingRecord);
+    return { published, declined: !published, reused: true };
   }
 
   const session = parseCodexRollout(job.transcript_path);
@@ -480,7 +481,10 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
   }
   const latest = chooseLatestJob(readJobs(root, job.session_id));
   if (latest && compareRevision(latest.revision, job.revision) > 0) return { stale: true, ...parseCounts };
-  return { published: publishRecord(root, job, record), record, ...parseCounts };
+  const published = publishRecord(root, job, record);
+  // A false here is the pointer declining an older revision, which is the
+  // forward-only contract working, not a no-op — the two must not report alike.
+  return { published, declined: !published, record, ...parseCounts };
 }
 
 function runWorker(root, sessionId, options = {}) {
@@ -500,7 +504,7 @@ function runWorker(root, sessionId, options = {}) {
       if (!job) break;
       try {
         const result = processJob(root, job, options);
-        const outcome = result.published ? "published" : result.stale ? "stale" : result.empty ? "empty" : "unchanged";
+        const outcome = result.published ? "published" : result.stale ? "stale" : result.empty ? "empty" : result.declined ? "declined-older-revision" : "unchanged";
         const counts = result.skipped_lines != null
           ? ` skipped_lines=${result.skipped_lines} unverified_user_turns=${result.unverified_user_turns}`
           : "";

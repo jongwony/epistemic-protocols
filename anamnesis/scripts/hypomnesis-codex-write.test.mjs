@@ -191,6 +191,29 @@ test("a replacement that sorts below the job it replaces survives that job's cle
   );
 });
 
+// The test above starts with nothing published, so it exercises only the arm
+// where the replacement can land. This one starts with a higher revision
+// already published — the arm where the pointer must decline and say so.
+test("a replacement below an already-published current is declined rather than passing as a no-op", (t) => {
+  const { base, root } = fixture(t);
+  const seeded = { runtime: "codex", cwd: "/repo", started_at: "", last_turn_at: "", topic: "kept", topics: [], keywords: [], initial_request: "", key_utterances: [], cross_refs: [], decisions: [], narrative: {}, markers: {}, protocols_used: [] };
+  assert.equal(publishRecord(root, { session_id: "session-decline", revision: { mtime_ms: 9_999_999_999_999, size: 999_999 } }, seeded), true);
+
+  const transcript = path.join(base, "custom-codex", "sessions", "2026", "08", "10", "rollout-decline.jsonl");
+  const rows = [
+    { timestamp: "2026-08-10T00:00:00Z", type: "session_meta", payload: { id: "session-decline", cwd: "/repo", timestamp: "2026-08-10T00:00:00Z" } },
+    { timestamp: "2026-08-10T00:00:01Z", type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "a later, thinner source" }] } },
+  ];
+  fs.writeFileSync(transcript, `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
+  const queued = enqueueCodexJob({ hook_event_name: "SessionEnd", session_id: "session-decline", transcript_path: transcript, cwd: "/repo" }, { root });
+
+  const result = processJob(root, queued.job, { extract: () => extraction("thinner") });
+  assert.equal(result.published, false);
+  assert.equal(result.declined, true, "a declined pointer move must be distinguishable from an unchanged one");
+  const catalogued = JSON.parse(fs.readFileSync(path.join(root, "catalog", "session-decline.json"), "utf8"));
+  assert.equal(catalogued.topic, "kept", "the fuller earlier capture survives a later, thinner source");
+});
+
 test("a session too long for bounded extraction records what was omitted", (t) => {
   const { base, root } = fixture(t);
   const transcript = path.join(base, "custom-codex", "sessions", "2026", "08", "10", "rollout-long.jsonl");

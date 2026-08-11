@@ -45,10 +45,16 @@ function reportChildFailure(name, result) {
       process.stderr.write(`hypomnesis-dispatch: ${name} failed to spawn: ${result.error.message}\n`);
       return;
     }
+    const reported = String(result.stderr ?? "").trim();
     if (result.status !== 0) {
-      const tail = String(result.stderr ?? "").slice(-500);
-      process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${tail}\n`);
+      process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${reported.slice(-500)}\n`);
+      return;
     }
+    // Exit status alone reports nothing here: both Claude-side writers catch
+    // their own operational failures, write the diagnostic to stderr, and exit
+    // zero regardless. Forwarding a non-empty stderr is what makes an
+    // extraction, validation, or write failure visible at all.
+    if (reported) process.stderr.write(`hypomnesis-dispatch: ${name} reported: ${reported.slice(-500)}\n`);
   } catch {}
 }
 
