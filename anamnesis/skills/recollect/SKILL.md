@@ -17,7 +17,7 @@ Anamnesis(V) → Detect(V) →
   not-empty_intention(V): relay(finding) → proceed (no activation)
   empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine, attempts = 0) →
     Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) →
-    |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → incr(attempts) → re-scan
+    |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
     |C[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
       ExpandFullText: set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → continue
       StopAtSpine: NullMatch → inform(V, Σ) → deactivate
@@ -26,8 +26,8 @@ Anamnesis(V) → Detect(V) →
                SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
                ¬SingleObvious(C[]): Qc(C[top], evidence, framing) → Stop → R →
       Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
-      Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → incr(attempts) → re-scan
-      Reorient(d): rebind(V, d, Σ) → incr(attempts) → Phase 1                 -- orthogonal dimension shift
+      Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
+      Reorient(d): rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1                 -- orthogonal dimension shift
 
 ── MORPHISM ──
 VagueRecall
@@ -122,7 +122,7 @@ Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (
            → Classify(V, Σ) → InputType → Track → set(scan_scope = spine, attempts = 0)   -- dispatch + initial scope + recall-try budget (silent)
 Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- index + spine, cross-runtime scan + rank [Tool]
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
-           |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → incr(attempts) → Phase 1
+           |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X
              ExpandFullText → set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → C[ranked]
              StopAtSpine → NullMatch → inform → deactivate
@@ -132,8 +132,8 @@ Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergen
 Phase 3: R → integrate(R, V, Σ) →                                -- integration (track: Λ.history ⊕ (C[top], R)); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(c) → ClueVector_prose(c) → emit → converge
            Refine → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
-                  → enrich(V, H) → incr(attempts) → Phase 1
-           Reorient(d) → rebind(V, d, Σ) → incr(attempts) → Phase 1               -- orthogonal re-scan (sense)
+                  → enrich(V, H) → set(attempts = attempts + 1) → Phase 1
+           Reorient(d) → rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1               -- orthogonal re-scan (sense)
 
 ── LOOP ──
 Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; convergence is notional, so a next-turn divergence re-engages via fresh re-activation → Refine/Reorient)
@@ -152,7 +152,6 @@ Convergence evidence: (VagueRecall → [enrichments] → Candidate(recognized) �
 recall_complete = Recognize(c) for some c ∈ C[]                                        -- gated path (¬SingleObvious)
                ∨ SingleObvious(C[]) ∧ emitted(ClueVector_prose(C[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
 NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- zero-candidate terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: one probe cycle must have run, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered
-attempts_exhausted = |C[]| > 0 ∧ attempts = max                                -- distinct candidates-present terminal: surface best candidate → deactivate (LOOP), never NullMatch
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
