@@ -169,6 +169,28 @@ test("nested extraction is ephemeral, hooks-off, Luna xhigh, and schema-bound", 
   assert.ok(args.includes("--output-schema"));
 });
 
+test("a replacement that sorts below the job it replaces survives that job's cleanup", (t) => {
+  const { base, root } = fixture(t);
+  const transcript = path.join(base, "custom-codex", "sessions", "2026", "08", "10", "rollout-shrink.jsonl");
+  const rows = (size) => [
+    { timestamp: "2026-08-10T00:00:00Z", type: "session_meta", payload: { id: "session-shrink", cwd: "/repo", timestamp: "2026-08-10T00:00:00Z" } },
+    { timestamp: "2026-08-10T00:00:01Z", type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "y".repeat(size) }] } },
+  ];
+  fs.writeFileSync(transcript, `${rows(4000).map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
+  const before = fs.statSync(transcript);
+  enqueueCodexJob({ hook_event_name: "SessionEnd", session_id: "session-shrink", transcript_path: transcript, cwd: "/repo" }, { root });
+  // Same mtime, smaller size: the replacement sorts BELOW the job it replaces,
+  // which is the ordering cleanup would otherwise sweep it under.
+  fs.writeFileSync(transcript, `${rows(100).map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
+  fs.utimesSync(transcript, before.atime, before.mtime);
+
+  assert.equal(runWorker(root, "session-shrink", { extract: () => extraction() }), true);
+  assert.ok(
+    fs.existsSync(path.join(root, "catalog", "session-shrink.json")),
+    "a transcript that shrank must still produce a capture, not lose its replacement to cleanup",
+  );
+});
+
 test("a session too long for bounded extraction records what was omitted", (t) => {
   const { base, root } = fixture(t);
   const transcript = path.join(base, "custom-codex", "sessions", "2026", "08", "10", "rollout-long.jsonl");

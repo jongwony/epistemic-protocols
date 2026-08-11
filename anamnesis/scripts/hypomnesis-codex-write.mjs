@@ -103,8 +103,9 @@ function enqueueCodexJob(input, { root = resolveStoreRoot() } = {}) {
     queued_at: new Date().toISOString(),
   };
   const name = `${revisionKey(revision)}-${EVENT_RANK[event]}-${randomUUID()}.json`;
-  atomicWriteJson(path.join(jobDir, name), job);
-  return { root, sessionId: safeId(sessionId), job };
+  const jobPath = path.join(jobDir, name);
+  atomicWriteJson(jobPath, job);
+  return { root, sessionId: safeId(sessionId), job, path: jobPath };
 }
 
 function spawnWorker(root, sessionId, { scriptPath = SCRIPT_PATH } = {}) {
@@ -326,8 +327,13 @@ function chooseLatestJob(jobs) {
   return jobs.length === 0 ? null : [...jobs].sort(compareJobs).at(-1);
 }
 
-function removeJobsThrough(root, sessionId, job) {
+// `keep` is the replacement a mismatch just re-enqueued. Cleanup is by revision
+// order, and a replacement need not sort above what it replaces — a truncation
+// or an older-mtime rewrite sorts below — so without this it would be swept as
+// part of the batch it was queued to succeed.
+function removeJobsThrough(root, sessionId, job, keep = null) {
   for (const candidate of readJobs(root, sessionId)) {
+    if (candidate._path === keep) continue;
     if (compareJobs(candidate, job) <= 0) {
       try { fs.unlinkSync(candidate._path); } catch {}
     }
@@ -452,8 +458,8 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
   // different source than the one queued, and extracting it under the queued
   // revision would publish a partial record as that revision's own.
   if (compareRevision(before, job.revision) !== 0) {
-    enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true };
+    const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
+    return { stale: true, requeued: requeued?.path ?? null };
   }
 
   const existingRecord = readGenerationRecord(root, job);
@@ -469,8 +475,8 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
 
   const after = statRevision(job.transcript_path);
   if (compareRevision(after, job.revision) !== 0) {
-    enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true, ...parseCounts };
+    const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
+    return { stale: true, requeued: requeued?.path ?? null, ...parseCounts };
   }
   const latest = chooseLatestJob(readJobs(root, job.session_id));
   if (latest && compareRevision(latest.revision, job.revision) > 0) return { stale: true, ...parseCounts };
@@ -499,7 +505,7 @@ function runWorker(root, sessionId, options = {}) {
           ? ` skipped_lines=${result.skipped_lines} unverified_user_turns=${result.unverified_user_turns}`
           : "";
         log(root, sessionId, `processed ${job.hook_event_name} ${revisionKey(job.revision)} ${outcome}${counts}`);
-        removeJobsThrough(root, sessionId, job);
+        removeJobsThrough(root, sessionId, job, result.requeued ?? null);
       } catch (error) {
         const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
         failureCounts.set(job._path, failureCount);
