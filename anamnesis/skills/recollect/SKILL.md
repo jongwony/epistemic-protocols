@@ -15,9 +15,9 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 ── FLOW ──
 Anamnesis(V) → Detect(V) →
   not-empty_intention(V): relay(finding) → proceed (no activation)
-  empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine) →
+  empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine, attempts = 0) →
     Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) →
-    |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
+    |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → incr(attempts) → re-scan
     |C[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
       ExpandFullText: set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → continue
       StopAtSpine: NullMatch → inform(V, Σ) → deactivate
@@ -26,8 +26,8 @@ Anamnesis(V) → Detect(V) →
                SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
                ¬SingleObvious(C[]): Qc(C[top], evidence, framing) → Stop → R →
       Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
-      Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
-      Reorient(d): rebind(V, d, Σ) → Phase 1                 -- orthogonal dimension shift
+      Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → incr(attempts) → re-scan
+      Reorient(d): rebind(V, d, Σ) → incr(attempts) → Phase 1                 -- orthogonal dimension shift
 
 ── MORPHISM ──
 VagueRecall
@@ -119,10 +119,10 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
            [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
-           → Classify(V, Σ) → InputType → Track → set(scan_scope = spine)   -- dispatch + initial scope (silent)
+           → Classify(V, Σ) → InputType → Track → set(scan_scope = spine, attempts = 0)   -- dispatch + initial scope + recall-try budget (silent)
 Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- index + spine, cross-runtime scan + rank [Tool]
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
-           |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
+           |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → incr(attempts) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X
              ExpandFullText → set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → C[ranked]
              StopAtSpine → NullMatch → inform → deactivate
@@ -132,8 +132,8 @@ Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergen
 Phase 3: R → integrate(R, V, Σ) →                                -- integration (track: Λ.history ⊕ (C[top], R)); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(c) → ClueVector_prose(c) → emit → converge
            Refine → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
-                  → enrich(V, H) → Phase 1
-           Reorient(d) → rebind(V, d, Σ) → Phase 1               -- orthogonal re-scan (sense)
+                  → enrich(V, H) → incr(attempts) → Phase 1
+           Reorient(d) → rebind(V, d, Σ) → incr(attempts) → Phase 1               -- orthogonal re-scan (sense)
 
 ── LOOP ──
 Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; convergence is notional, so a next-turn divergence re-engages via fresh re-activation → Refine/Reorient)
@@ -145,14 +145,14 @@ Phase 1 spine-scope miss after probing → StoreExpansion:
   ExpandFullText: set scan_scope = full_text → scan runtime SSOT bodies → Phase 1 ranking
   StopAtSpine: NullMatch → deactivate
 
-Max 3 recall attempts. Exhausted: surface best candidate → deactivate.
+Max 3 recall attempts; `attempts` starts at 0 in Phase 0 and each Refine enrichment or Reorient rebind spends one. Exhausted with candidates in hand: surface best candidate → deactivate. A zero-candidate exhaustion terminates as NullMatch instead (CONVERGENCE).
 Convergence evidence: (VagueRecall → [enrichments] → Candidate(recognized) → ClueVector_prose).
 
 ── CONVERGENCE ──
 recall_complete = Recognize(c) for some c ∈ C[]                                        -- gated path (¬SingleObvious)
                ∨ SingleObvious(C[]) ∧ emitted(ClueVector_prose(C[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
-NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhausted)
-            ∧ (fulltext_scanned ∨ X = StopAtSpine)
+NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- zero-candidate terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: one probe cycle must have run, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered
+attempts_exhausted = |C[]| > 0 ∧ attempts = max                                -- distinct candidates-present terminal: surface best candidate → deactivate (LOOP), never NullMatch
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
@@ -424,7 +424,7 @@ After user response:
    Which direction is closer to your memory?
    ```
 
-   After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), re-enter Phase 1 with enriched context.
+   After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), increment `attempts` (one recall try spent), re-enter Phase 1 with enriched context. `rebind(V, d, Σ)` on Reorient spends a try the same way; ExpandFullText does not, since widening the scope continues the current try rather than starting a new one.
 
 3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with rebuilt trace. NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis).
 
@@ -454,7 +454,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 6. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single identity decision.
 
-7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch after exhausted attempts, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
+7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
 8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
 

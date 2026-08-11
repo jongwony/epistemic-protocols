@@ -43,7 +43,7 @@ The shared hook dispatcher recognizes Codex rollout paths on Stop, PreCompact, a
 2. coalesces queued events to the newest transcript revision;
 3. invokes an ephemeral `gpt-5.6-luna` Codex extraction at `xhigh` reasoning with hooks disabled;
 4. writes an immutable generation;
-5. atomically advances `current.json`, then refreshes the compact catalog entry.
+5. atomically refreshes the compact catalog entry, then advances `current.json` — the pointer moves last so a partial publication leaves it un-advanced and the next run republishes, rather than certifying a stale read surface.
 
 A generation never changes after publication. A later lifecycle event at the same transcript revision reuses that generation. Nested extraction runs disable hooks, preventing recursive capture.
 

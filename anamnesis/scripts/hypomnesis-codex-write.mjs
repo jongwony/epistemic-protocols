@@ -125,13 +125,18 @@ function textFromMessageContent(content) {
     .join("\n");
 }
 
+const SYNTHETIC_USER_TEXT_PREFIXES = [
+  "# AGENTS.md instructions",
+  "<environment_context>",
+  "<codex_internal_context",
+  "<skill",
+  "<turn_aborted>",
+  "<recommended_plugins>",
+];
+
 function isSyntheticUserText(text) {
   const value = text.trimStart();
-  return value.startsWith("# AGENTS.md instructions for ")
-    || value.startsWith("<environment_context>")
-    || value.startsWith("<codex_internal_context")
-    || value.startsWith("<skill")
-    || value.startsWith("<turn_aborted>");
+  return SYNTHETIC_USER_TEXT_PREFIXES.some((prefix) => value.startsWith(prefix));
 }
 
 function detectProtocols(text) {
@@ -148,14 +153,16 @@ function parseCodexRollout(transcriptPath) {
   const messages = [];
   const timestamps = [];
   const protocols = new Set();
+  const eventMsgUserTexts = new Set();
   let sessionId = "";
   let cwd = "";
   let startedAt = "";
+  let skippedLines = 0;
 
   for (const line of raw.split("\n")) {
     if (!line.trim()) continue;
     let entry;
-    try { entry = JSON.parse(line); } catch { continue; }
+    try { entry = JSON.parse(line); } catch { skippedLines += 1; continue; }
     if (entry.type === "session_meta") {
       sessionId = entry.payload?.id ?? sessionId;
       cwd = entry.payload?.cwd ?? cwd;
@@ -164,6 +171,11 @@ function parseCodexRollout(transcriptPath) {
     }
     if (entry.type === "turn_context" && typeof entry.payload?.cwd === "string") {
       cwd = entry.payload.cwd;
+      continue;
+    }
+    if (entry.type === "event_msg" && entry.payload?.type === "user_message") {
+      const eventText = String(entry.payload?.message ?? "").trim();
+      if (eventText) eventMsgUserTexts.add(eventText);
       continue;
     }
     if (entry.type !== "response_item" || entry.payload?.type !== "message") continue;
@@ -189,6 +201,10 @@ function parseCodexRollout(transcriptPath) {
     }
   }
 
+  const unverifiedUserTurns = eventMsgUserTexts.size === 0
+    ? 0
+    : userMessages.filter((message) => !eventMsgUserTexts.has(message.text)).length;
+
   return {
     session_id: sessionId,
     cwd,
@@ -198,6 +214,8 @@ function parseCodexRollout(transcriptPath) {
     user_messages: userMessages,
     assistant_messages: assistantMessages,
     protocols_used: [...protocols].sort(),
+    unverified_user_turns: unverifiedUserTurns,
+    skipped_lines: skippedLines,
   };
 }
 
@@ -368,7 +386,6 @@ function publishRecord(root, job, record) {
     generation: `generations/${generationId}/record.json`,
     updated_at: new Date().toISOString(),
   };
-  atomicWriteJson(currentPath, pointer);
   atomicWriteJson(path.join(root, "catalog", `${safeId(job.session_id)}.json`), {
     ...pointer,
     cwd: publishedRecord.cwd,
@@ -386,6 +403,7 @@ function publishRecord(root, job, record) {
     protocols_used: publishedRecord.protocols_used,
     record_path: path.join(sessionRoot, pointer.generation),
   });
+  atomicWriteJson(currentPath, pointer);
   return true;
 }
 
@@ -403,18 +421,19 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
   }
 
   const session = parseCodexRollout(job.transcript_path);
-  if (session.user_messages.length === 0) return { empty: true };
+  const parseCounts = { skipped_lines: session.skipped_lines, unverified_user_turns: session.unverified_user_turns };
+  if (session.user_messages.length === 0) return { empty: true, ...parseCounts };
   const extraction = extract(session, { root, job });
   const record = recordFor(job, session, extraction);
 
   const after = statRevision(job.transcript_path);
   if (compareRevision(after, job.revision) > 0) {
     enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true };
+    return { stale: true, ...parseCounts };
   }
   const latest = chooseLatestJob(readJobs(root, job.session_id));
-  if (latest && compareRevision(latest.revision, job.revision) > 0) return { stale: true };
-  return { published: publishRecord(root, job, record), record };
+  if (latest && compareRevision(latest.revision, job.revision) > 0) return { stale: true, ...parseCounts };
+  return { published: publishRecord(root, job, record), record, ...parseCounts };
 }
 
 function runWorker(root, sessionId, options = {}) {
@@ -423,6 +442,11 @@ function runWorker(root, sessionId, options = {}) {
   fs.mkdirSync(path.dirname(lockDir), { recursive: true });
   if (!acquireLock(lockDir)) return false;
 
+  // Bounds each job path to at most one retry before quarantine (FIX 4): a
+  // job left in the queue after its first failure is picked up again by the
+  // next chooseLatestJob call, and this map is what stops that from looping
+  // forever.
+  const failureCounts = new Map();
   try {
     for (;;) {
       const job = chooseLatestJob(readJobs(root, sessionId));
@@ -430,10 +454,19 @@ function runWorker(root, sessionId, options = {}) {
       try {
         const result = processJob(root, job, options);
         const outcome = result.published ? "published" : result.stale ? "stale" : result.empty ? "empty" : "unchanged";
-        log(root, sessionId, `processed ${job.hook_event_name} ${revisionKey(job.revision)} ${outcome}`);
+        const counts = result.skipped_lines != null
+          ? ` skipped_lines=${result.skipped_lines} unverified_user_turns=${result.unverified_user_turns}`
+          : "";
+        log(root, sessionId, `processed ${job.hook_event_name} ${revisionKey(job.revision)} ${outcome}${counts}`);
         removeJobsThrough(root, sessionId, job);
       } catch (error) {
-        log(root, sessionId, `failed ${job._path}: ${error.stack ?? error.message}`);
+        const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
+        failureCounts.set(job._path, failureCount);
+        if (failureCount < 2) {
+          log(root, sessionId, `failed ${job._path} (retry ${failureCount}): ${error.stack ?? error.message}`);
+          continue;
+        }
+        log(root, sessionId, `failed ${job._path} (quarantining after ${failureCount} attempts): ${error.stack ?? error.message}`);
         const failureDir = path.join(root, "failures", safeId(sessionId));
         fs.mkdirSync(failureDir, { recursive: true });
         try { fs.renameSync(job._path, path.join(failureDir, path.basename(job._path))); }
@@ -441,7 +474,10 @@ function runWorker(root, sessionId, options = {}) {
       }
     }
   } finally {
-    try { fs.rmSync(lockDir, { recursive: true, force: true }); } catch {}
+    try {
+      const owner = JSON.parse(fs.readFileSync(path.join(lockDir, "owner.json"), "utf8"));
+      if (owner.pid === process.pid) fs.rmSync(lockDir, { recursive: true, force: true });
+    } catch {}
   }
 
   // Close the lost-wakeup window: a hook may have queued work after the final
@@ -476,7 +512,13 @@ function acquireLock(lockDir) {
     } catch { stale = true; }
   }
   if (!stale) return false;
-  fs.rmSync(lockDir, { recursive: true, force: true });
+  // Rename-to-steal: the rename is atomic, so exactly one racer observes it
+  // succeed. A racer that loses finds lockDir already gone and backs off
+  // instead of deleting the winner's brand-new lock out from under it.
+  const stolenDir = `${lockDir}.stale.${process.pid}.${randomUUID()}`;
+  try { fs.renameSync(lockDir, stolenDir); }
+  catch { return false; }
+  fs.rmSync(stolenDir, { recursive: true, force: true });
   try { return create(); }
   catch (error) {
     if (error.code === "EEXIST") return false;
