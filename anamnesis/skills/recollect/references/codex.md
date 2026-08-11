@@ -20,7 +20,7 @@ Bind `Candidate.runtime = codex`; bind `session_id`, `cwd`, topic, keywords, nar
 
 The first line of a rollout is `{"type":"session_meta"}`, whose `payload` carries `id`, `cwd`, `timestamp`, and `originator`. One line yields the whole spine, so this tier costs less here than on Claude, where the origin label sits further into the record.
 
-First human utterance: the first `{"type":"event_msg"}` whose `payload.type` is `user_message`. Do **not** read `response_item` entries with `role == "user"` — that channel carries `AGENTS.md` injection rather than the person's turn, so it would present instruction text as something the user said.
+First human utterance: read `response_item` entries with `role == "user"` — the channel that is always present, unlike `event_msg`/`user_message`, which a `codex-tui` interactive session emits zero of even though every genuine human turn still lives in `response_item`. Skip an entry whose text (its content items joined with newlines, then trimmed of leading whitespace) begins with one of these injected-envelope prefixes: `# AGENTS.md instructions`, `<environment_context>`, `<codex_internal_context`, `<skill`, `<turn_aborted>`, `<recommended_plugins>` (kept identical to `SYNTHETIC_USER_TEXT_PREFIXES` in `hypomnesis-codex-write.mjs`). "First" means first AFTER that filtering, not first in file order — in an exec rollout the first unfiltered `response_item` user entry is typically the `<recommended_plugins>` envelope. `event_msg`/`user_message`, where present, is a cross-check only; it must never be read as the source, since interactive sessions carry none.
 
 **Spine scan.** Enumerate recency-first across live and archived rollouts, then read each record's head:
 
@@ -32,7 +32,18 @@ find "{codex_home}/sessions" "{codex_home}/archived_sessions" -name 'rollout-*.j
 ```bash
 head -1 "<rollout>" | jq -c 'select(.type=="session_meta") | .payload | {id, cwd, timestamp, originator}'
 head -n 600 "<rollout>" | jq -rs '
-  [ .[]? | select(.type=="event_msg" and .payload.type=="user_message") | .payload.message ] | .[0] // ""'
+  [ .[]?
+    | select(.type=="response_item" and .payload.type=="message" and .payload.role=="user")
+    | ([.payload.content[]? | .text? // empty] | join("\n") | sub("^\\s+";""))
+    | select(length > 0)
+    | select(
+        (startswith("# AGENTS.md instructions") or
+         startswith("<environment_context>") or
+         startswith("<codex_internal_context") or
+         startswith("<skill") or
+         startswith("<turn_aborted>") or
+         startswith("<recommended_plugins>")) | not)
+  ] | .[0] // ""'
 ```
 
 ## Writer lifecycle

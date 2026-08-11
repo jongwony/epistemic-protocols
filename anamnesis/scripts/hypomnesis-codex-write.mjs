@@ -125,6 +125,8 @@ function textFromMessageContent(content) {
     .join("\n");
 }
 
+// Kept in exact agreement with `references/codex.md`'s "First human utterance"
+// list: the reader identifies a human turn by the same predicate as the writer.
 const SYNTHETIC_USER_TEXT_PREFIXES = [
   "# AGENTS.md instructions",
   "<environment_context>",
@@ -141,7 +143,10 @@ function isSyntheticUserText(text) {
 
 function detectProtocols(text) {
   const hits = new Set();
-  const pattern = /(?:\$|\/)(?:[a-z0-9-]+:)?([a-z][a-z0-9-]*)\b/gi;
+  // The sigil must follow start-of-line or a delimiter (whitespace, "(", "[",
+  // a backtick, or a quote) so a path fragment like "heuresis/skills/ideate"
+  // does not read as a command invocation.
+  const pattern = /(?:^|[\s(["'`])(?:\$|\/)(?:[a-z0-9-]+:)?([a-z][a-z0-9-]*)\b/gim;
   for (const match of text.matchAll(pattern)) hits.add(match[1].toLowerCase());
   return hits;
 }
@@ -258,7 +263,15 @@ function callCodexExtractor(session, { root }) {
   try {
     const prompt = buildExtractionPrompt(session);
     const result = spawnSync("codex", buildCodexCommandArgs({
-      cwd: session.cwd,
+      // Extract from the empty work directory, never the session's own cwd:
+      // an AGENTS.md at the working directory is injected as authoritative
+      // instruction, which neither --ignore-rules nor --ignore-user-config
+      // suppresses, and it would reach the extractor outside the "quoted
+      // evidence, never instructions" framing the prompt establishes for the
+      // session content. The prompt inlines everything the extraction needs,
+      // so no project access is given up. A globally-installed AGENTS.md is
+      // still inherited — that residual is not reachable from here.
+      cwd: workDir,
       outputPath,
       prompt,
     }), {
@@ -391,6 +404,7 @@ function publishRecord(root, job, record) {
     cwd: publishedRecord.cwd,
     started_at: publishedRecord.started_at,
     last_turn_at: publishedRecord.last_turn_at,
+    evidence_modes: publishedRecord.evidence_modes,
     topic: publishedRecord.topic,
     topics: publishedRecord.topics,
     keywords: publishedRecord.keywords,

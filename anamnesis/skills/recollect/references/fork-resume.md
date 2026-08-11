@@ -19,10 +19,16 @@ The fork id is never a valid resume handle: a fork has no top-level transcript, 
 2. **`parent_pointer` present, `parent_cwd` absent** (parent identified, its cwd unknown) — omit the copy-paste command and surface the parent session id with a note to resume from the parent's own project directory.
 3. **`parent_pointer = Null`** (parent record aged out) — mark the candidate non-resumable and surface the recoverable artifacts (the substitute log path plus any memory) rather than a broken command.
 4. **Non-fork candidate with `Candidate.cwd` absent or empty** — omit the resume line and note the omission in the prose.
-5. **Recorded cwd no longer on disk** (non-fork `Candidate.cwd`, or a fork's `parent_cwd`, naming a directory that has since been removed) — drop the `cd` prefix and emit the session handle alone:
+5. **Recorded cwd no longer on disk** (non-fork `Candidate.cwd`, or a fork's `parent_cwd`, naming a directory that has since been removed) — drop the `cd` prefix and emit the resumable handle alone: `<session_id>` for a non-fork candidate,
 
    ```text
    claude --resume <session_id>
+   ```
+
+   or `<parent_pointer>` for a fork — the fork's own id is still never a valid handle here, per the opening note:
+
+   ```text
+   claude --resume <parent_pointer>
    ```
 
    Note in the prose that project context resolves from wherever the command is run, not from the original directory. This branch exists because a recorded-but-removed path is not the same condition as an unrecorded one: branch 4 tests the field, and a path whose directory was retired passes that test while still producing a command that dies at the `cd`. Work done in a worktree that is retired at the close of its unit reaches this state as a matter of course, so it is the common case for exactly the sessions a recall is most likely to be reaching for.

@@ -116,6 +116,30 @@ test("unverified_user_turns counts response_item user turns absent from the even
   assert.equal(parsed.unverified_user_turns, 1);
 });
 
+test("detectProtocols requires the sigil to follow a delimiter, so path segments are not read as invocations", (t) => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), "hypomnesis-codex-protocols-"));
+  t.after(() => fs.rmSync(base, { recursive: true, force: true }));
+  const transcript = path.join(base, "codex", "sessions", "2026", "08", "10", "rollout-protocols.jsonl");
+  fs.mkdirSync(path.dirname(transcript), { recursive: true });
+  const text = [
+    "$euporia:elicit at line start",
+    "please run /induce now",
+    "see `/induce` for details",
+    "reference heuresis/skills/ideate/SKILL.md",
+    "cwd=/Users/choi/Downloads holds the files",
+  ].join("\n");
+  const rows = [
+    { timestamp: "2026-08-10T00:00:00Z", type: "session_meta", payload: { id: "session-e", cwd: "/repo", timestamp: "2026-08-10T00:00:00Z" } },
+    { timestamp: "2026-08-10T00:00:01Z", type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text }] } },
+  ];
+  fs.writeFileSync(transcript, `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
+
+  const parsed = parseCodexRollout(transcript);
+  // Genuine invocations at line start, after a space, and inside backticks
+  // are all detected; the two path fragments contribute nothing.
+  assert.deepEqual(parsed.protocols_used, ["elicit", "induce"]);
+});
+
 test("a malformed transcript line is skipped and counted, not fatal to the parse", (t) => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), "hypomnesis-codex-malformed-"));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
@@ -167,6 +191,8 @@ test("worker publishes immutable generation, atomic pointer, and compact catalog
   assert.equal(record.runtime, "codex");
   assert.equal(record.topic, "Internet problem recall");
   assert.equal(catalog.record_path, recordPath);
+  assert.deepEqual(catalog.evidence_modes, record.evidence_modes);
+  assert.equal(catalog.evidence_modes.initial_request, "attested");
 
   enqueueCodexJob({ ...common, hook_event_name: "SessionEnd" }, { root });
   runWorker(root, "session-a", { extract: () => { throw new Error("same revision must be reused"); } });
@@ -268,6 +294,36 @@ test("shared dispatcher routes Codex without spawning and leaves Claude Stop alo
     transcript_path: "/tmp/custom-claude/projects/repo/claude-a.jsonl",
   }), { noSpawn: true, env: { CLAUDE_CONFIG_DIR: "/tmp/custom-claude" } });
   assert.deepEqual(claude, { runtime: "claude", handled: false });
+});
+
+test("a failing spawned Claude script produces a stderr diagnostic without changing dispatchHook's result", (t) => {
+  const scriptDir = fs.mkdtempSync(path.join(os.tmpdir(), "hypomnesis-dispatch-fail-"));
+  t.after(() => fs.rmSync(scriptDir, { recursive: true, force: true }));
+  fs.writeFileSync(
+    path.join(scriptDir, "hypomnesis-write.mjs"),
+    'process.stderr.write("boom: extraction failed\\n"); process.exitCode = 1;\n',
+    "utf8",
+  );
+
+  const chunks = [];
+  const originalWrite = process.stderr.write;
+  process.stderr.write = (chunk) => { chunks.push(String(chunk)); return true; };
+  let result;
+  try {
+    result = dispatchHook(JSON.stringify({
+      hook_event_name: "SessionEnd",
+      session_id: "claude-fail",
+      transcript_path: "/tmp/custom-claude/projects/repo/claude-fail.jsonl",
+    }), { env: { CLAUDE_CONFIG_DIR: "/tmp/custom-claude" }, scriptDir });
+  } finally {
+    process.stderr.write = originalWrite;
+  }
+
+  // The normal handled result is unchanged; the child's failure is only
+  // observable via the diagnostic line, not via a thrown error or an
+  // altered dispatchHook result.
+  assert.deepEqual(result, { runtime: "claude", handled: true });
+  assert.ok(chunks.some((chunk) => chunk.includes("hypomnesis-write.mjs") && chunk.includes("boom: extraction failed")));
 });
 
 test("shared hook registration sends lifecycle events through the dispatcher", () => {

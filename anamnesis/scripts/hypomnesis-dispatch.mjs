@@ -27,12 +27,29 @@ function isClaudeTranscript(transcriptPath, env = process.env) {
     && resolved.endsWith(".jsonl");
 }
 
-function runClaudeScript(name, raw) {
-  return spawnSync(process.execPath, [path.join(SCRIPT_DIR, name)], {
+function runClaudeScript(name, raw, { scriptDir = SCRIPT_DIR } = {}) {
+  return spawnSync(process.execPath, [path.join(scriptDir, name)], {
     input: raw,
     encoding: "utf8",
     stdio: ["pipe", "ignore", "pipe"],
   });
+}
+
+// A spawned writer's extraction/schema failures must leave a signal
+// somewhere; this is that signal. Hook-side work stays short and must not
+// fail the hook, so this never throws and never changes the caller's result.
+function reportChildFailure(name, result) {
+  try {
+    if (!result) return;
+    if (result.error) {
+      process.stderr.write(`hypomnesis-dispatch: ${name} failed to spawn: ${result.error.message}\n`);
+      return;
+    }
+    if (result.status !== 0) {
+      const tail = String(result.stderr ?? "").slice(-500);
+      process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${tail}\n`);
+    }
+  } catch {}
 }
 
 function dispatchHook(raw, options = {}) {
@@ -50,11 +67,11 @@ function dispatchHook(raw, options = {}) {
 
   if (!isClaudeTranscript(transcriptPath, options.env)) return { runtime: "unknown", handled: false };
   if (input.hook_event_name === "SessionEnd" || input.hook_event_name === "PreCompact") {
-    if (!options.noSpawn) runClaudeScript("hypomnesis-write.mjs", raw);
+    if (!options.noSpawn) reportChildFailure("hypomnesis-write.mjs", runClaudeScript("hypomnesis-write.mjs", raw, options));
     return { runtime: "claude", handled: true };
   }
   if (input.hook_event_name === "SubagentStop") {
-    if (!options.noSpawn) runClaudeScript("hypomnesis-subagent-hook.mjs", raw);
+    if (!options.noSpawn) reportChildFailure("hypomnesis-subagent-hook.mjs", runClaudeScript("hypomnesis-subagent-hook.mjs", raw, options));
     return { runtime: "claude", handled: true };
   }
   return { runtime: "claude", handled: false };
