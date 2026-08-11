@@ -16,7 +16,7 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 Anamnesis(V) → Detect(V) →
   not-empty_intention(V): relay(finding) → proceed (no activation)
   empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine, attempts = 0) →
-    Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) →
+    Scan_{Track}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), trace(V)) → Rank(C[], trace(V)) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
     |C[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
       ExpandFullText: set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → continue
@@ -121,7 +121,7 @@ Edge cases:
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
            [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
            → Classify(V, Σ) → InputType → Track → set(scan_scope = spine, attempts = 0)   -- dispatch + initial scope + recall-try budget (silent)
-Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- index + spine, cross-runtime scan + rank [Tool]
+Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- index + spine always; bodies too once ExpandFullText widened the scope, so a Refine/Reorient re-entry does not silently narrow back to spine and report a body-scoped miss [Tool]
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → Phase 1   -- Socratic probe gate [Tool]
            |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X   -- store-expansion checkpoint [Tool]
@@ -427,9 +427,9 @@ After user response:
    Which direction is closer to your memory?
    ```
 
-   After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), increment `attempts` (one recall try spent), re-enter Phase 1 with enriched context. `rebind(V, d, Σ)` on Reorient spends a try the same way; ExpandFullText does not, since widening the scope continues the current try rather than starting a new one.
+   After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), increment `attempts` (one recall try spent), re-enter Phase 1 with enriched context at whatever scope `scan_scope` currently names. `rebind(V, d, Σ)` on Reorient spends a try the same way; ExpandFullText does not, since widening the scope continues the current try rather than starting a new one. Neither re-enters once the budget is spent: at `attempts = max` the best candidate is surfaced and the mode deactivates (AttemptsExhausted).
 
-3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with rebuilt trace. NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis).
+3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with the rebuilt trace while recall tries remain; at `attempts = max` surface the best candidate and deactivate instead (AttemptsExhausted). NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis).
 
    **Refine vs Reorient test**: would the user's new description produce any overlap with the current candidate set? Overlap → Refine; disjoint → Reorient.
 
@@ -457,7 +457,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 6. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single identity decision.
 
-7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
+7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, AttemptsExhausted once the recall-try budget is spent with candidates in hand, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
 8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
 

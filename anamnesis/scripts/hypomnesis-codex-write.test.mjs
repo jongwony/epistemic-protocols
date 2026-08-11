@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   atomicWriteJson,
   buildCodexCommandArgs,
+  callCodexExtractor,
   chooseLatestJob,
   enqueueCodexJob,
   isCodexTranscript,
@@ -165,6 +166,24 @@ test("nested extraction is ephemeral, hooks-off, Luna xhigh, and schema-bound", 
   assert.deepEqual(args.slice(args.indexOf("--model"), args.indexOf("--model") + 2), ["--model", "gpt-5.6-luna"]);
   assert.ok(args.includes('model_reasoning_effort="xhigh"'));
   assert.ok(args.includes("--output-schema"));
+});
+
+test("extraction runs from an isolated work directory, never the captured session's cwd", (t) => {
+  const { root } = fixture(t);
+  fs.mkdirSync(root, { recursive: true });
+  const session = { cwd: "/repo", messages: [{ role: "user", text: "hello" }] };
+  let seenCd = null;
+  const run = (_bin, args) => {
+    seenCd = args[args.indexOf("--cd") + 1];
+    fs.writeFileSync(args[args.indexOf("--output-last-message") + 1], JSON.stringify({ topic: "t" }), "utf8");
+    return { status: 0 };
+  };
+  assert.deepEqual(callCodexExtractor(session, { root, run }), { topic: "t" });
+  // An AGENTS.md at the working directory reaches the extractor as authoritative
+  // instruction, so the captured session's own cwd must never be the one used.
+  assert.notEqual(seenCd, session.cwd);
+  assert.ok(seenCd.startsWith(path.join(root, ".work-")), `expected an isolated work dir, got ${seenCd}`);
+  assert.equal(fs.existsSync(seenCd), false, "the work directory is removed after extraction");
 });
 
 test("queue coalescing prefers event rank at the same transcript revision", (t) => {

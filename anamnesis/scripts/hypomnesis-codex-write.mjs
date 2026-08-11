@@ -257,12 +257,12 @@ function buildCodexCommandArgs({ cwd, outputPath, prompt, schemaPath = SCHEMA_PA
   ];
 }
 
-function callCodexExtractor(session, { root }) {
+function callCodexExtractor(session, { root, run = spawnSync }) {
   const workDir = fs.mkdtempSync(path.join(root, ".work-"));
   const outputPath = path.join(workDir, "result.json");
   try {
     const prompt = buildExtractionPrompt(session);
-    const result = spawnSync("codex", buildCodexCommandArgs({
+    const result = run("codex", buildCodexCommandArgs({
       // Extract from the empty work directory, never the session's own cwd:
       // an AGENTS.md at the working directory is injected as authoritative
       // instruction, which neither --ignore-rules nor --ignore-user-config
@@ -336,6 +336,13 @@ function recordFor(job, session, extraction) {
     last_turn_at: session.last_turn_at,
     extracted_at: new Date().toISOString(),
     extraction: { model: MODEL, reasoning_effort: REASONING_EFFORT, method: "codex-exec-v1" },
+    // Travels with the record, not only the log: a consumer reading this back
+    // as recalled context is the one that needs to know the source parsed
+    // incompletely, and a log line does not reach it.
+    source_scan: {
+      skipped_lines: session.skipped_lines,
+      unverified_user_turns: session.unverified_user_turns,
+    },
     evidence_modes: {
       initial_request: "attested",
       key_utterances: "attested",
@@ -405,6 +412,7 @@ function publishRecord(root, job, record) {
     started_at: publishedRecord.started_at,
     last_turn_at: publishedRecord.last_turn_at,
     evidence_modes: publishedRecord.evidence_modes,
+    source_scan: publishedRecord.source_scan,
     topic: publishedRecord.topic,
     topics: publishedRecord.topics,
     keywords: publishedRecord.keywords,
@@ -424,7 +432,10 @@ function publishRecord(root, job, record) {
 function processJob(root, job, { extract = callCodexExtractor } = {}) {
   const before = statRevision(job.transcript_path);
   if (!before) throw new Error("transcript disappeared before extraction");
-  if (compareRevision(before, job.revision) > 0) {
+  // Any difference, not only growth: a truncated or replaced transcript is a
+  // different source than the one queued, and extracting it under the queued
+  // revision would publish a partial record as that revision's own.
+  if (compareRevision(before, job.revision) !== 0) {
     enqueueCodexJob({ ...job, revision: undefined }, { root });
     return { stale: true };
   }
@@ -441,7 +452,7 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
   const record = recordFor(job, session, extraction);
 
   const after = statRevision(job.transcript_path);
-  if (compareRevision(after, job.revision) > 0) {
+  if (compareRevision(after, job.revision) !== 0) {
     enqueueCodexJob({ ...job, revision: undefined }, { root });
     return { stale: true, ...parseCounts };
   }
@@ -517,10 +528,18 @@ function acquireLock(lockDir) {
   let stale = false;
   try {
     const owner = JSON.parse(fs.readFileSync(path.join(lockDir, "owner.json"), "utf8"));
-    stale = Date.now() - Date.parse(owner.acquired_at) > WORKER_TIMEOUT_MS * 2;
+    // Liveness decides, and age on its own never does: a worker draining
+    // several jobs can outlive any fixed age bound while still publishing, and
+    // stealing its lock puts two writers on one session's catalog and pointer.
+    // A wedged owner is bounded instead by the extraction timeout each job
+    // already carries. Residual: a recycled pid reads as alive, which holds the
+    // lock rather than corrupting anything.
+    let ownerAlive = true;
     try { process.kill(owner.pid, 0); }
-    catch (error) { stale ||= error.code === "ESRCH"; }
+    catch (error) { ownerAlive = error.code !== "ESRCH"; }
+    stale = !ownerAlive;
   } catch {
+    // No readable owner record, so liveness cannot be tested — age is all there is.
     try {
       stale = Date.now() - fs.statSync(lockDir).mtimeMs > WORKER_TIMEOUT_MS * 2;
     } catch { stale = true; }
@@ -545,6 +564,7 @@ export {
   REASONING_EFFORT,
   atomicWriteJson,
   buildCodexCommandArgs,
+  callCodexExtractor,
   chooseLatestJob,
   compareRevision,
   enqueueCodexJob,
