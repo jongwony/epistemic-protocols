@@ -107,11 +107,12 @@ Two protocols carrying parallel machinery may still diverge here without either 
 
 ## User-Facing Emit Load Disciplines
 
-Three separate rules manage cognitive load at runtime:
+Separate rules manage the load a user-facing round places on its reader:
 
 - **Context-Question Separation** controls placement: analysis, evidence, and rationale appear before the gate; the gate contains only the essential question and option-specific differential implications.
 - **Plain emit discipline** controls vocabulary: user-facing text uses everyday language and keeps formal variables, Greek-rooted protocol terms, and code-style tokens inside formal specification surfaces.
 - **Round-local salience bundling** controls round composition: each user-facing round keeps the current judgment, nearest evidence, and next-move implication adjacent, while deferring background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+- **Form feedback** controls density: each round takes its density from what the current request asked for rather than carrying it over, and a reported symptom ("hard to follow", "too long") is read as a form instruction rather than answered with a question about which form is wanted. Its reach is whatever the active protocol leaves open in how a round is composed; what a protocol pins — a wording, an order, a cadence — stays pinned.
 
 These disciplines are complementary. A protocol can satisfy Context-Question Separation and Plain emit discipline while still increasing context-switch cost by scattering adjacent evidence across distant paragraphs or mixing unrelated findings into one decision round. Round-local salience bundling closes that gap without introducing measurement: the binding unit is the round-local judgment surface, not a quantified load score.
 
