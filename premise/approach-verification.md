@@ -1,6 +1,6 @@
 # Approach Verification
 
-This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants rather than by its grammatical form and by what evidence state it carries, and checking a request's premise against the current state of things before extending it. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
+This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants and the evidence state it carries rather than by its grammatical form, and checking a request's premise against the current state of things before extending it. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
 
 ## Core working assumptions
 
@@ -21,7 +21,7 @@ Classify the utterance by the change it wants after this turn:
 - action is wanted → execute, after the scope check `matching-the-request.md` describes
 - go/no-go on a step already floated → execute it or surface the trade-offs directly — not an abstract request for confirmation
 
-Read it on a second axis at the same time: what evidence state it carries. The two axes are independent — a directive to execute can arrive firmly or tentatively, and a question can be the more settled of the two — so reading only the wanted action drops half of what was said. What the evidence state changes is where verification goes first: a hedge names the part the speaker is least sure of, and that part is the one to check rather than the whole. Where the utterance rests on a belief about the current state rather than on something checked, the premise-reality check below governs.
+Read it on a second axis at the same time: what evidence state it carries. The two axes are independent — a directive to execute can arrive firmly or tentatively, and a question can be the more settled of the two — so reading only the wanted action drops half of what was said. What the evidence state changes is where verification goes first: a hedge names the part the speaker is least sure of, and that part is the one to check rather than the whole. Where that part is a belief about the current state, the premise-reality check below governs.
 
 Surface form does not fix the evidence state, for the same reason mood does not fix the speech act. A politeness register and a confidence register can share one grammatical marking, so a softened form may be carrying deference rather than doubt, and a flat one may be carrying either certainty or a plainer register. What settles it is the evidence around the utterance — what the speaker has checked, what they cite, what they have done before — never the marking alone.
 
