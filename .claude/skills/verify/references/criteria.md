@@ -37,8 +37,8 @@ Quality criteria for epistemic protocol verification, organized by severity.
 - **Phase reference**: External operations have `[Tool]` notation in PHASE TRANSITIONS
 - **Internal marking**: Internal operations marked with "no external tool"
 - **Escape semantics**: Escape behavior matches protocol context (fallback/Silence/cancel)
-- **Interaction kind annotation**: Gate operations use `(gate)`, non-stopping text presentations use `(relay)`, convergence evidence has explicit relay or gate classification
-- **Realization header**: Header distinguishes gate and relay realizations (e.g., `gate → TextPresent+Stop; relay → TextPresent+Proceed`)
+- **Interaction kind annotation**: Gate operations use `(constitution)`, non-stopping text presentations use `(extension)`, convergence evidence has explicit classification on that axis
+- **Realization header**: Header distinguishes the two realizations (e.g., `Constitution → TextPresent+Stop; Extension → TextPresent+Proceed`)
 
 ## Concern Criteria
 
