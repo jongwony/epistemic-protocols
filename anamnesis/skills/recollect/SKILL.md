@@ -15,13 +15,13 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 ── FLOW ──
 Anamnesis(V) → Detect(V) →
   not-empty_intention(V): relay(finding) → proceed (no activation)
-  empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = compact) →
-    Scan_{Track}(INDEX, trace(V)) → Rank(C[], trace(V)) →
+  empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine) →
+    Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
-    |C[]| = 0 ∧ attempts > 0 ∧ raw_unscanned: Qx(StoreExpansion) → Stop → X →
-      ExpandRaw: set(scan_scope = raw) → Scan_{Track}(SSOT, trace(V)) → Rank(C[], trace(V)) → continue
-      StopCompact: NullMatch → inform(V, Σ) → deactivate
-    |C[]| = 0 ∧ attempts > 0 ∧ raw_scanned: NullMatch → inform(V, Σ) → deactivate
+    |C[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
+      ExpandFullText: set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → continue
+      StopAtSpine: NullMatch → inform(V, Σ) → deactivate
+    |C[]| = 0 ∧ attempts > 0 ∧ fulltext_scanned: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
                SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
                ¬SingleObvious(C[]): Qc(C[top], evidence, framing) → Stop → R →
@@ -34,10 +34,10 @@ VagueRecall
   → detect(empty_intention)              -- recognize vague recall state
   → classify(input_type)                 -- InputType ∈ {StructuredIdentifier, NaturalRecall, Mixed}
   → dispatch(input_type)                 -- Track ∈ {entropy, salience, hybrid}
-  → scan(INDEX, Track, recall_trace)     -- compact, track-specific scan (see STORE TOPOLOGY)
+  → scan(INDEX ⊕ SSOT_spine, Track, recall_trace)  -- compact index + raw-record spines, track-specific (see STORE TOPOLOGY)
   → rank(candidates, recall_trace)       -- order by relevance
-  → probe(user)?                         -- required before a compact zero-result may terminate or expand
-  → expand(SSOT, user)?                  -- only after enriched compact miss and StoreExpansion
+  → probe(user)?                         -- required before a zero-result may terminate or expand
+  → expand(SSOT_body, user)?             -- only after an enriched spine-scope miss and StoreExpansion
   → rank(expanded_candidates, recall_trace)?
   → backtrace_parent(candidate)          -- when fork_marker: deterministic parent identification → parent_pointer, parent_cwd (recovered from the candidate's own record; ≠ user-described Reorient)
   → present(candidate, Socratic)         -- Socratic candidate presentation; absorbed into the emit for SingleObvious (high-confidence single candidate) — Extension, no turn yield
@@ -91,10 +91,10 @@ Rank             = (List(Candidate), RecallTrace) → List(Candidate)   -- track
 Probe            = (V, Σ) → List(SocraticQuestion)
 SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
 R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
-X                = StoreExpansion ∈ {ExpandRaw, StopCompact}
-ScanScope        ∈ {compact, raw}
-raw_unscanned    ≡ Λ.scan_scope = compact
-raw_scanned      ≡ Λ.scan_scope = raw
+X                = StoreExpansion ∈ {ExpandFullText, StopAtSpine}
+ScanScope        ∈ {spine, full_text}   -- spine = INDEX ⊕ SSOT_spine (the initial scope); full_text additionally admits SSOT_body
+fulltext_unscanned ≡ Λ.scan_scope = spine
+fulltext_scanned   ≡ Λ.scan_scope = full_text
 SingleObvious    = predicate; SingleObvious(C[]) ≡ |C[]| = 1 ∧ confidence(C[top]) = high   -- Light-only Extension guard: the one candidate is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|C[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate
 divergence_affordance = the mismatch channel folded into the non-yielding SingleObvious emit: names concrete adjacent candidates (Refine) AND offers an open free-response invitation (Reorient), keeping the full R = {Recognize, Refine, Reorient} coproduct reachable without a gate — Recognize is realized as silence-default
 emitted(x)       = predicate; the relay emit(x) has fired in session text — the Extension-path convergence witness (event predicate; satisfied by the non-yielding SingleObvious emit, no turn yield)
@@ -119,14 +119,14 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
            [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
-           → Classify(V, Σ) → InputType → Track → set(scan_scope = compact)   -- dispatch + initial scope (silent)
-Phase 1: V → Scan_{Track}(INDEX, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- compact, cross-runtime scan + rank [Tool]
+           → Classify(V, Σ) → InputType → Track → set(scan_scope = spine)   -- dispatch + initial scope (silent)
+Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- index + spine, cross-runtime scan + rank [Tool]
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
-           |C[ranked]| = 0 ∧ attempts > 0 ∧ raw_unscanned → Qx(StoreExpansion) → Stop → X
-             ExpandRaw → set(scan_scope = raw) → Scan_{Track}(SSOT, trace(V)) → Rank(C[], trace(V)) → C[ranked]
-             StopCompact → NullMatch → inform → deactivate
-           |C[ranked]| = 0 ∧ attempts > 0 ∧ raw_scanned → NullMatch → inform → deactivate
+           |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X
+             ExpandFullText → set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → C[ranked]
+             StopAtSpine → NullMatch → inform → deactivate
+           |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_scanned → NullMatch → inform → deactivate
 Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension: high-confidence single candidate, no turn yield, no [Tool] Stop; silence = Recognize
          ¬SingleObvious(C[ranked]) → C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
 Phase 3: R → integrate(R, V, Σ) →                                -- integration (track: Λ.history ⊕ (C[top], R)); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
@@ -141,9 +141,9 @@ Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 Sing
   Refine: Socratic probing → enrich → Phase 1
   Reorient: rebind V with orthogonal description → Phase 1
 
-Phase 1 compact miss after probing → StoreExpansion:
-  ExpandRaw: set scan_scope = raw → scan runtime SSOT → Phase 1 ranking
-  StopCompact: NullMatch → deactivate
+Phase 1 spine-scope miss after probing → StoreExpansion:
+  ExpandFullText: set scan_scope = full_text → scan runtime SSOT bodies → Phase 1 ranking
+  StopAtSpine: NullMatch → deactivate
 
 Max 3 recall attempts. Exhausted: surface best candidate → deactivate.
 Convergence evidence: (VagueRecall → [enrichments] → Candidate(recognized) → ClueVector_prose).
@@ -152,24 +152,25 @@ Convergence evidence: (VagueRecall → [enrichments] → Candidate(recognized) �
 recall_complete = Recognize(c) for some c ∈ C[]                                        -- gated path (¬SingleObvious)
                ∨ SingleObvious(C[]) ∧ emitted(ClueVector_prose(C[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
 NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhausted)
-            ∧ (raw_scanned ∨ X = StopCompact)
+            ∧ (fulltext_scanned ∨ X = StopAtSpine)
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
 -- Realization bindings (Claude Code and Codex substrates), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
--- Before Phase 1, read references/claude.md and references/codex.md for every runtime whose compact INDEX exists. Those references bind each harness's INDEX, SSOT, candidate fields, and resume command. Search available compact INDEX surfaces in parallel and preserve Candidate.runtime through ranking and presentation.
--- The initial scan never opens raw transcripts. After probe enrichment still yields no candidate, Qx presents the slower raw-SSOT expansion and the compact-only stop as differential futures. ExpandRaw admits the SSOT paths declared by the runtime references; StopCompact terminates without reading them.
+-- Before Phase 1, read references/claude.md and references/codex.md for every runtime that has a store at all — a runtime whose compact INDEX is absent still carries raw records, so its reference binds. Those references bind each harness's INDEX, SSOT spine and body, candidate fields, and resume command. Search the available compact INDEX surfaces and raw-record spines in parallel across runtimes, and preserve Candidate.runtime through ranking and presentation.
+-- The initial scan reads the compact INDEX and the raw-record spines together, unconditionally. A spine read is bounded per record, so it is not the cost the checkpoint exists to protect the user from; gating it would buy nothing and add a branch. Transcript bodies stay out — their per-record cost has no upper bound. After probe enrichment still yields no candidate, Qx presents the full-text expansion and the spine-scoped stop as differential futures. ExpandFullText admits the SSOT_body paths declared by the runtime references; StopAtSpine terminates without opening them.
+-- Scanning spines unconditionally is also what keeps a runtime reachable before its INDEX exists: a store whose writer has not yet produced entries is not blind, it is spine-only. Without this the first recall against a newly-added runtime would always miss and always require the checkpoint.
 -- Fork/sidechain binding exists in the Claude realization only. For a Claude fork candidate, references/claude.md routes to references/fork-resume.md before presentation.
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
-Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over the available compact INDEX surfaces; raw SSOT only after ExpandRaw)
-Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over the available compact INDEX surfaces; raw SSOT only after ExpandRaw)
+Phase 1 Scan_entropy  (observe)  → Read, Grep, Bash (literal match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText. Bash is admitted for the spine read alone — a bounded head read repeated across the whole store, issued as the one command each runtime reference declares, because per-record Read calls do not compose at store scale; it opens no transcript body and writes nothing)
+Phase 1 Scan_salience (observe)  → Read, Grep, Glob, Bash (MarkerProfile match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText; Bash bounded as above)
 Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: lightweight-model scoring for large candidate sets)
 Phase 1 backtrace_parent (observe) → Read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
-Phase 1 Qx          (constitution) → present (ExpandRaw: scan the labeled Claude/Codex raw SSOT surfaces at higher latency; StopCompact: return a compact-index-scoped NullMatch without opening raw transcripts)
+Phase 1 Qx          (constitution) → present (ExpandFullText: read the labeled Claude/Codex transcript bodies, at a per-record cost with no upper bound; StopAtSpine: return a NullMatch scoped to the indexes and spines already searched, without opening any transcript body)
 Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; gated path — ¬SingleObvious: candidates ≥ 2 OR confidence < high)
 Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single candidate emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of Rule 12's Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate   (track)    → Internal state update
@@ -209,7 +210,9 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
-  SSOT             = authoritative session record (complete, append-only)
+  SSOT             = authoritative session record (complete, append-only); read at either of two depths
+  SSOT_spine       = per-record head metadata: recency, cwd, session id, origin label, first human turn, and whatever handle the realization needs to reopen the record -- bounded read per record, so it joins the initial scan unconditionally
+  SSOT_body        = the record's full text -- read cost per record has no upper bound, so it is admitted only at ExpandFullText
   INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful semantic extraction + validation; artifacts carry evidence-mode metadata derived by construction — legacy entries lack it (Candidate.evidence_mode = Null, neutral)
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
@@ -217,15 +220,16 @@ scan_{Track} : (Store, Trace) → List(Candidate)
   scan_entropy(Store, trace)    = exact-match over IdentifierTuples where compatible_anchor(t, trace) (SSOT ∪ INDEX_semantic)
                                   ∪ literal-id match over INDEX_substitute origin ids (a sidechain/derived id carries no IdentifierTuple, so a structured id is matched against the substitute channel directly; a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition)
                                 -- structural rejection (compatible_anchor filters ALL literal matches, distinct from low-precision miss): incompatible literals do NOT anchor but are retained in the recall trace as evidence; the scan routes to the salience track (hybrid) or NullMatch₁ recovery with the incompatibility noted — never a silent zero-candidate return
-  scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- compact INDEX first; SSOT after ExpandRaw
+  scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX ⊕ SSOT_spine first; SSOT_body after ExpandFullText
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
   evidence_mode(c) = max tier over matched signals' frontmatter evidence_mode(s); frontmatter absent ⇒ Null (legacy entry, neutral — partial-INDEX normal mode, no fallback trigger)
 
-initial_scan: scan_{Track}(INDEX, trace) across every available INDEX realization; preserve Source on every candidate
-raw_expansion: X = ExpandRaw ⟹ scan_{Track}(SSOT, trace) across the Source set named at Qx
-degraded_scan: INDEX_semantic = ∅ ⟹ mark that INDEX realization unavailable and route to Qx after probe enrichment; SSOT remains outside scope until ExpandRaw
+initial_scan: scan_{Track}(INDEX ⊕ SSOT_spine, trace) across every available realization; preserve Source on every candidate
+fulltext_expansion: X = ExpandFullText ⟹ scan_{Track}(SSOT_body, trace) across the Source set named at Qx
+degraded_scan: INDEX_semantic = ∅ ⟹ mark that INDEX realization unavailable and continue on that realization's SSOT_spine; SSOT_body remains outside scope until ExpandFullText
+  -- an absent semantic INDEX no longer blinds its realization: the spine tier carries recency, cwd, origin, and first human turn, so the realization still contributes ranked candidates. This is what an INDEX-less runtime looks like in normal operation, not a failure to route around
   -- partial INDEX (e.g., MarkerProfile? = ∅ while IdentifierTuples / Coinage / narrative present) is a normal mode and does NOT trigger total fallback; scan_salience returns empty for the missing component and ranking degrades gracefully
-  -- when degraded_scan reaches Qx, read references/failure-modes.md §Degraded scan before presenting the scope choice: it states why the substitute channel remains available (so SidechainNoSSOT stays reachable) and which loss is non-recoverable
+  -- when a degraded realization's spine scan also yields nothing and Qx is reached, read references/failure-modes.md §Degraded scan before presenting the scope choice: it states why the substitute channel remains available (so SidechainNoSSOT stays reachable) and which loss is non-recoverable
 
 ── SUBSTRATE AGNOSTICISM ──
 The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
@@ -343,11 +347,11 @@ Detect empty intention and extract contextual trace. This phase is **silent** �
 
 ### Phase 1: Track-Dispatched Scan + Rank
 
-Dispatch the scan on the classified `Track`, execute the first lookup over every available compact `INDEX` realization concurrently, preserve its source label on each result, then rank candidates.
+Dispatch the scan on the classified `Track`, execute the first lookup over every available compact `INDEX` realization and its raw-record spines concurrently, preserve its source label on each result, then rank candidates.
 
 1. **Track-dispatched scan strategy**. The dispatched track decides which contract binds: read `references/entropy-track.md` before running `scan_entropy`, `references/salience-track.md` before running `scan_salience`, and both on the hybrid track. Each carries the laws and thresholds its scan executes; the untaken track's reference does not bind and is not read.
-   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over compact INDEX — literal match on `IdentifierTuple.literal`, then apply `compatible_anchor(t, trace)` before the match can anchor ranking; precision-thresholded compatible identifiers win. URL path literals, explicit references, citation tokens dominate only within their authorized source_namespace × claim_kind. A structured id with no IdentifierTuple is additionally matched literally against available `INDEX_substitute` origin ids (sidechain/derived records) — a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition (parent back-trace; see Phase 3 emission).
-   - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over compact INDEX — match against `MarkerProfile` or the realization's normalized semantic fields; session context (Σ) supplies ranking signal within this track.
+   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over the compact INDEX and the raw-record spines — literal match on `IdentifierTuple.literal`, then apply `compatible_anchor(t, trace)` before the match can anchor ranking; precision-thresholded compatible identifiers win. URL path literals, explicit references, citation tokens dominate only within their authorized source_namespace × claim_kind. A structured id with no IdentifierTuple is additionally matched literally against available `INDEX_substitute` origin ids (sidechain/derived records) — a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition (parent back-trace; see Phase 3 emission).
+   - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over the compact INDEX and the raw-record spines — match against `MarkerProfile` or the realization's normalized semantic fields, and against each spine's first human turn, which stands in for a topic where no semantic entry was ever written; session context (Σ) supplies ranking signal within this track.
    - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
    Tool realization is bound exclusively in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: source-namespace / claim-kind compatibility gates anchoring, then literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery; in both tracks, evidence_mode then composes as a secondary tie-break and confidence modulator (never a filter; Null neutral).
@@ -362,13 +366,13 @@ Dispatch the scan on the classified `Track`, execute the first lookup over every
    - Adjacent topics from the same session or time period
    - Confidence level based on trace alignment, modulated by evidence mode when present (absence neutral)
 
-4. If `|C[]| = 0`: **read `references/failure-modes.md` first and identify which mode fired**. A scan that succeeded but yielded no resumable record is not a NullMatch; that mode routes to parent back-trace. Before declaring NullMatch, attempt at least one Socratic probe enrichment. If the enriched compact scan remains empty, surface the searched runtime indexes and accumulated trace as context, then present Qx with both differential futures:
-   - **ExpandRaw** — search the labeled raw transcript surfaces; this broadens coverage at higher latency.
-   - **StopCompact** — keep raw transcripts unopened and return a NullMatch explicitly scoped to the compact indexes.
+4. If `|C[]| = 0`: **read `references/failure-modes.md` first and identify which mode fired**. A scan that succeeded but yielded no resumable record is not a NullMatch; that mode routes to parent back-trace. Before declaring NullMatch, attempt at least one Socratic probe enrichment. If the enriched scan remains empty, surface the searched runtime indexes and spines and the accumulated trace as context, then present Qx with both differential futures:
+   - **ExpandFullText** — read the labeled transcript bodies; this broadens coverage at a per-record cost with no upper bound, and it is the only tier that reaches wording the user remembers from mid-conversation rather than from a session's opening or its extracted summary.
+   - **StopAtSpine** — leave transcript bodies unopened and return a NullMatch explicitly scoped to the indexes and spines already searched.
 
-   Yield the turn. ExpandRaw admits only the raw stores named in that presentation, then returns to ranking. StopCompact deactivates. If an accepted raw scan remains empty after the attempt bound, surface the full search scope and offer Aitesis handoff with the accumulated trace.
+   Yield the turn. ExpandFullText admits only the transcript bodies named in that presentation, then returns to ranking. StopAtSpine deactivates. If an accepted full-text scan remains empty after the attempt bound, surface the full search scope and offer Aitesis handoff with the accumulated trace.
 
-**Scope restriction**: Investigation uses Read, Grep, Glob exclusively.
+**Scope restriction**: Investigation is read-only and writes nothing to the store. It uses Read, Grep, and Glob, plus the bounded spine-scan command each runtime reference declares — that command reads record heads only, and the unbounded body read stays behind the Qx checkpoint.
 
 ### Phase 2: Narrative Recognition (Constitution; Extension on a high-confidence single candidate)
 
@@ -456,9 +460,9 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 
-10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, report the source-labeled scope actually searched and enumerate actionable causes — lifecycle hook gap, pre-store session, missing or failed extractor, or PartialExtract from corrupted source. If the user accepted raw expansion and that scan also missed, offer Aitesis handoff with the accumulated trace. If the user selected StopCompact, preserve that boundary and report the result as compact-index-scoped. A successful-scan-but-no-resumable-SSOT case (the recalled id is a fork/sidechain) is not a NullMatch and routes through parent back-trace.
+10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, report the source-labeled scope actually searched — naming, per realization, the depth reached (index, spine, body), since "not found" means something different at each — and enumerate actionable causes: lifecycle hook gap, pre-store session, missing or failed extractor, or PartialExtract from corrupted source. If the user accepted full-text expansion and that scan also missed, offer Aitesis handoff with the accumulated trace. If the user selected StopAtSpine, preserve that boundary and report the result as scoped to the indexes and spines searched, not as an absence from the store. A successful-scan-but-no-resumable-SSOT case (the recalled id is a fork/sidechain) is not a NullMatch and routes through parent back-trace.
 
-11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first compact scan returning zero → probe → enriched compact re-scan → StoreExpansion checkpoint; NullMatch follows only after StopCompact or an accepted raw scan also exhausts its bound.
+11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first index-and-spine scan returning zero → probe → enriched re-scan at the same depth → StoreExpansion checkpoint; NullMatch follows only after StopAtSpine or an accepted full-text scan also exhausts its bound.
 
 12. **Conditional Qc, separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Phase 2 runs the Constitution Qc gate when candidates ≥ 2 OR confidence < high (Medium / Heavy). A high-confidence single candidate (SingleObvious) instead **absorbs Qc into the presentation**: the recognized context is emitted inline as Extension (no turn yield) with a divergence-only affordance, and convergence is immediate — silence / the user moving on constitutes recognition, only divergence is explicit. One dominant candidate collapses the recognition option set to a single option (the others are foils), so the interaction is relay, not a gate; this absorption is the sanctioned revision of this rule's own Safeguard-tier tag, motivated by observed binary-confirm abandonment friction, and it does not touch Qs. On Refine (always gated), Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second.
 
@@ -478,4 +482,4 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 22. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares (the `/recollect ∘ /inquire` COMPOSITION edge) names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named composition edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
 
-23. **Source-labeled staged scan**: Phase 1 searches every available compact INDEX realization concurrently and preserves source provenance through ranking and presentation. Raw transcript stores remain outside the initial scope. After probe enrichment still yields no candidate, Qx presents ExpandRaw and StopCompact with their coverage and latency implications, yields the turn, and applies the selected scope without silently adding a realization or raw store.
+23. **Source-labeled staged scan**: Phase 1 searches every available compact INDEX realization and its raw-record spines concurrently, and preserves source provenance through ranking and presentation. The staging is by read depth, not by store: spines are bounded per record and are always in the initial scope; transcript bodies are unbounded and are not. After probe enrichment still yields no candidate, Qx presents ExpandFullText and StopAtSpine with their coverage and cost implications, yields the turn, and applies the selected scope without silently adding a realization or a body read.
