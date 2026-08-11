@@ -52,6 +52,7 @@ The advisor is a parameter, not the identity. Any adjudicator satisfying that in
 - A gate has been drafted whose options are competing approaches, orderings, or scopes, and it is not obvious whether they are genuinely different choices
 - A decision keeps feeling like a choice while every option leads to the same place
 - A gate that already fired produced an answer that did not settle anything, suggesting the axis was wrong
+- An absence carries the option set — that no rule covers this, that nothing else fits, that it cannot be done in one pass. An absence leaves nothing behind to notice it by, so it reads as true off any summary of the ground; only the ground itself separates an absence that was checked from one that was assumed
 
 ## When NOT to Use
 
