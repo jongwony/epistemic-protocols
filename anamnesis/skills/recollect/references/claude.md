@@ -62,7 +62,7 @@ Both reads are bounded per record. Neither opens a transcript body, which stays 
 
 ## Fork candidates
 
-Claude substitute-channel records can identify a sidechain whose own ID is not resumable. For any such hit, read `fork-resume.md` before candidate presentation. It defines the deterministic parent back-trace and the four resume branches.
+Claude substitute-channel records can identify a sidechain whose own ID is not resumable. For any such hit, read `fork-resume.md` before candidate presentation. It defines the deterministic parent back-trace and the five resume branches.
 
 ## Resume
 
