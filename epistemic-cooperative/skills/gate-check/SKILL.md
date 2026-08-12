@@ -52,6 +52,7 @@ The advisor is a parameter, not the identity. Any adjudicator satisfying that in
 - A gate has been drafted whose options are competing approaches, orderings, or scopes, and it is not obvious whether they are genuinely different choices
 - A decision keeps feeling like a choice while every option leads to the same place
 - A gate that already fired produced an answer that did not settle anything, suggesting the axis was wrong
+- An absence carries the option set — that no rule covers this, that nothing else fits, that it cannot be done in one pass. An absence leaves nothing behind to notice it by, so it reads as true off any summary of the ground; only the ground itself separates an absence that was checked from one that was assumed
 
 ## When NOT to Use
 
@@ -93,7 +94,7 @@ Where the running environment carries its own standing policy about when gates g
 - the gate's question, as bound in Phase 0 — what the options are answers to. Without it an option set can only be read for internal consistency, while the judgment being asked for is whether it stands on the right axis, and an axis is only right or wrong relative to the decision the options serve
 - the frozen option set, verbatim, including each option's stated implication
 - the constraints already settled by the user that the advisor cannot re-derive from the substrate — decisions made in conversation that left no trace on disk
-- substrate pointers: paths, search patterns, and commands the advisor can dereference with its own tools
+- substrate pointers: paths, search patterns, and commands the advisor can dereference with its own tools. Where the option set rests on an absence, this is the slot that carries it: the search whose result would surface a counter-example, never the claim that none exists. An absence stated is rationale and the boundary below excludes it; an absence the adjudicator runs for itself is the only kind that reaches the adjudication, and it is the stronger one — the drafting side cannot notice what it failed to look for
 
 Ask it for four things back: a verdict (`genuine | collapse | malformed`), its reading of what axis the options actually stand on, a ground cited for every conclusion it reaches — the axis reading is one conclusion and the verdict on it is another, and each owes its own — and, stated after the rest so it accounts for what it just said rather than shaping it, the observation that would break its own reading. Grounds are asked for per conclusion rather than for the answer as a whole because conclusions rest on different evidence: what axis a set stands on and what follows for the set are separate claims, and it is the verdict, not the axis, that routes what happens next.
 

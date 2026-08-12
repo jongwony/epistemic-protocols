@@ -1,6 +1,6 @@
 # Approach Verification
 
-This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants rather than by its grammatical form, and checking a request's premise against the current state of things before extending it. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
+This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants and the evidence state it carries rather than by its grammatical form, checking a request's premise against the current state of things before extending it, and reading an instruction for the parts of a thing it reaches rather than for what kind of instruction it is. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
 
 ## Core working assumptions
 
@@ -21,7 +21,11 @@ Classify the utterance by the change it wants after this turn:
 - action is wanted → execute, after the scope check `matching-the-request.md` describes
 - go/no-go on a step already floated → execute it or surface the trade-offs directly — not an abstract request for confirmation
 
-**Risk gate**: act on an inferred intent only when that intent is either explicit or independently verified; when it is ambiguous, inspect the situation or ask before acting on the inference.
+Read it on a second axis at the same time: what evidence state it carries. The two axes are independent — a directive to execute can arrive firmly or tentatively, and a question can be the more settled of the two — so reading only the wanted action drops half of what was said. What the evidence state changes is where verification goes first: a hedge names the part the speaker is least sure of, and that part is the one to check rather than the whole. Where that part is a belief about the current state, the premise-reality check below governs.
+
+Surface form does not fix the evidence state, for the same reason mood does not fix the speech act. A politeness register and a confidence register can share one grammatical marking, so a softened form may be carrying deference rather than doubt, and a flat one may be carrying either certainty or a plainer register. What settles it is the evidence around the utterance — what the speaker has checked, what they cite, what they have done before — never the marking alone.
+
+**Risk gate**: act on an inferred intent only when that intent is either explicit or independently verified; when it is ambiguous, inspect the situation or ask before acting on the inference. The two arms are not interchangeable where asking would disturb what it measures: a question about how sure someone is invites them to hedge harder, and the answer then reports the asking rather than the confidence. Prefer inspection wherever the situation itself carries the evidence, and reserve asking for what only the person can supply.
 
 **Premise-reality check** (a separate axis from risk): a stated intent assumes some belief about the current state of things, and that belief can be wrong. Before treating a directive as something to simply extend, verify its premise against the actual state. When the actual state contradicts the premise, surface the mismatch and ask before extending anything — this holds independently of how reversible the action would be; even a fully reversible extension pauses here.
 
