@@ -1,6 +1,6 @@
 # Approach Verification
 
-This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants and the evidence state it carries rather than by its grammatical form, and checking a request's premise against the current state of things before extending it. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
+This document covers reading a request's actual intent before acting on it: the working assumptions to carry into a request whose context is incomplete, reading an utterance by the action it wants and the evidence state it carries rather than by its grammatical form, checking a request's premise against the current state of things before extending it, and reading an instruction for the parts of a thing it reaches rather than for what kind of instruction it is. Once the intent is read, `matching-the-request.md` covers fitting the response to it — the level, the scope, the question granularity, and the interpretation policy that the request itself left open.
 
 ## Core working assumptions
 
