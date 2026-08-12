@@ -69,4 +69,4 @@ Two properties are worth knowing before reading it, because neither is obvious f
 
 `artifact-self-containment` does not inspect source prose in isolation. It checks the runtime-contract view that users actually encounter: the packaged `SKILL.md`, the plugin `description` metadata, and the packaged support entries a `SKILL.md` loads or links to.
 
-The boundary this enforces — which surfaces may be depended on from a packaged runtime contract, and which are governance surfaces that may not — is stated in `AGENTS.md` §Settled Directions (Surface authority order). Claim-strength buckets for those surfaces are defined in [runtime-dependency-ledger.md](runtime-dependency-ledger.md).
+The boundary this enforces — which surfaces may be depended on from a packaged runtime contract, and which are governance surfaces that may not — is stated in `AGENTS.md` §Settled Directions (Surface authority order), and the claim-strength buckets those surfaces fall into are in `AGENTS.md` §Runtime Contract.

@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob
 
 # Encapsulation Audit
 
-The project-local instance of the **semantic-audit engine** (`docs/audit-engine.md`). The shared mechanism — read-only Claude-judge review, the scope shape, severity calibration, self-application stance, and on-demand slash invocation — is defined in that engine document; read it for the parts this skill holds in common with its published siblings. Below is this instance's principle parameter and the one place its output schema extends the engine's base.
+The project-local instance of the **semantic-audit engine** (`references/audit-engine.md`). The shared mechanism — read-only Claude-judge review, the scope shape, severity calibration, self-application stance, and on-demand slash invocation — is defined in that engine document; read it for the parts this skill holds in common with its published siblings. Below is this instance's principle parameter and the one place its output schema extends the engine's base.
 
 This instance audits LLM-facing prose for Plugin Encapsulation: the runtime contract surface (`SKILL.md` plus plugin description metadata) must be self-contained and intelligible without contributor documentation. Project-local — its principle is coupled to this repo's deterministic encapsulation check and contributor model, and so (unlike `white-bear` and `zero-shot`) it is not decouplable into a portable skill. Read-only: it emits structured findings and writes no fixes.
 

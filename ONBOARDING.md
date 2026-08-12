@@ -50,8 +50,8 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/AGENTS.md` — demotion zone overview, index of current principle files
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
-- [ ] `docs/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
-- [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
+- [ ] `.claude/skills/verify/references/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
+- [ ] `.claude/skills/verify/references/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
 
 ### Protocols to Use While Contributing
 - [ ] `/verify` — run before every commit; the checks it runs are defined in `static-checks.js`
@@ -69,7 +69,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 1. **Scope** — read the premise document(s) for the area you're touching (`premise/AGENTS.md` routes by concern), plus `.claude/rules/project-profile.md` and `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/syneidesis:gap` before locking in a direction; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
-3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `docs/co-change.md`)
+3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `.claude/skills/verify/references/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)

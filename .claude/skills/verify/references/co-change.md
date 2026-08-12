@@ -2,7 +2,7 @@
 
 Protocol modifications require synchronized edits across multiple files. Any protocol change requires `plugin.json` version bump + `/verify`.
 
-This table names co-change targets and the conditions that trigger them; enforcement coverage and commands are inventoried in [verification.md](verification.md).
+This table names co-change targets and the conditions that trigger them. Which of these couplings a static check actually guards is read from `static-checks.js` — a row here says what moves together, not that anything stops you from moving only part of it. [verification.md](verification.md) carries why the non-obvious checks exist and what to do when one fires.
 
 | Change | Files to update |
 |--------|----------------|

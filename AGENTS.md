@@ -38,7 +38,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Runtime users interact with packaged `SKILL.md` files plus plugin metadata. Discovery metadata routes; `SKILL.md` carries the normative user contract.
 - `SKILL.md` must be self-contained. Do not require runtime readers to chase contributor-only docs, axiom identifiers, rule paths, design-philosophy documents, or mission/vision prose to understand the skill contract.
 - Prescriptive changes that affect protocol behavior must be compiled into the relevant `SKILL.md` Rules sections.
-- Claim-strength boundaries for runtime surfaces are tracked in `docs/runtime-dependency-ledger.md`.
+- Claim strength differs by surface and the difference is load-bearing. The packaged `SKILL.md` is the **normative contract**. A plugin `description` is **routing metadata** written under a length budget, so it is judged for routing clarity rather than semantic completeness. How a host realizes the contract is **platform realization** and not part of it — a protocol that looks broken on another host may simply be satisfied differently there. Model judgment and soft safeguards are **advisory**, carrying no runtime guarantee for a reader to design against.
 - The formal blocks are part of the runtime-normative `SKILL.md` contract — they type the prose and constitute protocol identity, not contributor spec. Their anatomy (a contributor guide *about* the blocks, distinct from the blocks themselves) is documented in `docs/structural-specs.md`.
 
 ## Progressive Disclosure
@@ -53,7 +53,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - `.claude/rules/` is for principles that must be active at per-turn runtime.
 - `.claude/principles/` is for lazy-loaded architectural principles.
 - Grounded exposition, investigation writeups, and evidence reviews go to the ledger (issue or PR body), never to a file under `docs/` — they are then-records, and nothing on a state surface re-runs them.
-- `docs/structural-specs.md` is for editing conventions and structural requirements.
+- A contributor reference serving one skill lives in that skill's own `references/`, so it loads when the skill is triggered rather than when someone remembers it exists. `docs/` keeps what no single skill owns — a reference cited from several surfaces at once, or a contributor surface a public README reader is sent to.
 - New rule proposals require a placement judgment against the existing docs/rules surface; do not add a runtime rule just because a concept is philosophically attractive.
 
 ## Development
@@ -78,13 +78,13 @@ Do not run `scripts/package.test.js` concurrently with static protocol verificat
 
 After protocol predicate refactors, run a lexical sweep for stale vocabulary using the verification guidance rather than hardcoding predicate inventories here.
 
-Details: `docs/verification.md`.
+Details: `.claude/skills/verify/references/verification.md`.
 
 ## Editing Conventions
 
 - Git and editing rules are auto-loaded via `.claude/rules/editing-conventions.md`.
 - Any protocol change requires the relevant `plugin.json` version bump plus `/verify`.
-- Co-change patterns are tracked in `docs/co-change.md`.
+- Co-change patterns are tracked in `.claude/skills/verify/references/co-change.md`.
 - Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
