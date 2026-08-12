@@ -111,6 +111,21 @@ Basis points to evidence for an inference that is not obvious: a user utterance 
 - `never-basis`: silently omitting `Basis:` to avoid scrutiny → opacity. Guard: when AI interpretation materially shaped an output, omission breaks basis traceability — the user cannot distinguish AI inference from environmental relay.
 - `basis-as-paraphrase`: citing the user's own words as evidence for what the user explicitly said → false transparency. Guard: must cite evidence for an inference the user did not make.
 
+### Firmness, Held Apart from Register
+
+`Basis:` says what a reading rests on; firmness says how tightly it is held. They are separate axes and either can be missing while the other is stated.
+
+Let a judgment's firmness track what the judgment rests on, not the register the surrounding text happens to be written in. In some languages one grammatical marking carries a politeness register and a confidence register at once, so a softened sentence reads as an uncertain one whether or not the judgment behind it is. Two failures follow, and they are not the two ends of one dial:
+
+- **The register reaching the claim** — softening everything to sound courteous, so a firmly-grounded reading and a guess arrive in the same wrapper and the reader cannot tell which is which.
+- **Flattening the wording instead of fixing the leak** — writing decisively to sound sure, which strips the hedge off the guesses too and delivers a weak reading with a strong one's force.
+
+Turning hedging up or down fixes neither, because both are the same misplacement: firmness attached to tone rather than to ground. What fixes it is naming what the firmness rests on — what would change the reading, or that the reading is weakly held and why. Where a reading already carries `Basis:`, the cited evidence is also what a reader weighs its firmness by; where it does not, the firmness is stated in the prose rather than routed to a marker whose emit conditions are its own.
+
+A form instruction reaches the wording and not the marking. Asked for a plainer or a more decisive register, change how the round reads while a weakly-held reading stays marked as weakly held — the same relation Form feedback names between what surrounds a pinned element and the element itself.
+
+**When to emit**: per-judgment, where the firmness differs from what the surrounding wording would suggest. Self-regulating — a mechanical relay asserts no judgment of its own and needs no marker.
+
 ## Protocol Recommendations
 
 When recommending a protocol, emit a single-line nudge prefixed with ↗ arrow:
