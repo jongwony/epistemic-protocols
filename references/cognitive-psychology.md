@@ -4,7 +4,7 @@
 
 **Audience**: Contributor-facing. 런타임 자동 로드 없음. 사용자가 "왜 이 메커니즘인가?"를 물을 때, 또는 새 프로토콜 설계·기존 프로토콜 개선 시 참조.
 
-**관계**: 정당화(왜 이렇게 하는가)·기술(무엇이 일어나는가)·현상학적 근거는 `docs/philosophical-anchors.md`가 담당한다(인식론/카테고리 이론/현상학 도메인 문서는 아직 별도로 작성되지 않았다 — `references/README.md` 참조). 이 문서는 인지심리학 **작동 메커니즘** 층을 담당한다. Anamnesis의 Husserl 현상학과 Katalepsis의 Stoic grasp은 `docs/philosophical-anchors.md`에 이미 근거화되어 있어 여기서는 인지심리학 메커니즘 층만 보강하고 cross-ref한다.
+**관계**: 이 문서는 인지심리학 **작동 메커니즘** 층을 담당한다 — 각 프로토콜이 왜 그렇게 설계되었는지가 아니라, 그 설계가 기대는 인지적 메커니즘 자체의 학술적 근거를 다룬다.
 
 ---
 
@@ -34,7 +34,7 @@
 
 > **[역사적]** Prosoche(`/attend`)는 2026-08 전면 재타입으로 Merismos(`/apportion`)가 되었고, 이 절이 분석하는 위험 게이팅 메커니즘은 그보다 앞선 2026-06 재정의(prosoche 2.0.0)에서 이미 제거되었다. 아래 서술은 당시 계약 기준이다.
 
-신호탐지이론(Green & Swets 1966)은 위험 판단에 두 독립 분리가 필요함을 보인다. (1) **민감도(d′) vs 기준(criterion)** — 탐지 능력과 경보 문턱은 별개다. (2) **기저율 증거 vs 생생한 사례 매칭** — 사람은 기저율을 무시하고 대표성에 끌린다(Kahneman & Tversky 1973; 진단에서의 기저율 효율은 Meehl & Rosen 1955). 따라서 "fail-closed"는 *위험이 존재해서*가 아니라 *비대칭 비용*(miss 비용 ≫ false-alarm 비용)으로만 정당화되는 **기준 선택**이다. 신호탐지 틀을 위험 판단에 적용할 때의 실무 지침은 Lynn & Barrett(2014)이 정리. 단, 위 두 분리는 `/attend`의 *현재 구현*이 아니라 *도달 목표*다 — 현 SKILL.md 본문은 "fail-closed"와 "false negative"만 비형식적으로 차용할 뿐 민감도(d′)·기준의 분리도 ROC도 구현하지 않는다(상세·교정: `docs/analysis/prosoche-signal-detection-grounding.md`).
+신호탐지이론(Green & Swets 1966)은 위험 판단에 두 독립 분리가 필요함을 보인다. (1) **민감도(d′) vs 기준(criterion)** — 탐지 능력과 경보 문턱은 별개다. (2) **기저율 증거 vs 생생한 사례 매칭** — 사람은 기저율을 무시하고 대표성에 끌린다(Kahneman & Tversky 1973; 진단에서의 기저율 효율은 Meehl & Rosen 1955). 따라서 "fail-closed"는 *위험이 존재해서*가 아니라 *비대칭 비용*(miss 비용 ≫ false-alarm 비용)으로만 정당화되는 **기준 선택**이다. 신호탐지 틀을 위험 판단에 적용할 때의 실무 지침은 Lynn & Barrett(2014)이 정리. 단, 위 두 분리는 `/attend`의 *현재 구현*이 아니라 *도달 목표*다 — 현 SKILL.md 본문은 "fail-closed"와 "false negative"만 비형식적으로 차용할 뿐 민감도(d′)·기준의 분리도 ROC도 구현하지 않는다.
 
 **설계 함의**: 모든 고위험 게이트를 2×2(hit / miss / false alarm / correct reject)로 형식화하고 `base_rate`, `miss_cost`, `false_alarm_cost`, `criterion_reason`을 요구. 이는 저기저율 위험의 과잉게이팅과 고비용 miss의 과소게이팅을 동시에 방지한다.
 
@@ -62,8 +62,8 @@
 | Epharmoge (`/contextualize`) | 지식은 사용 맥락과 분리되지 않는다 — 기술적으로 옳아도 상황에 맞지 않으면 적용 실패 | Brown/Collins/Duguid 1989; Suchman 1987; Lave & Wenger 1991 |
 | Elenchus (`/sublate`) | 맥락은 확증편향·신념고착으로 부패한다; 반대설명 생성이 교정한다 | Nickerson 1998; Anderson/Lepper/Ross 1980; Lord/Lepper/Preston 1984 |
 | Horismos (`/bound`) | 협업은 **공통기반**을 점증 구축하며 누가 무엇을 아는지는 **분산기억**으로 분담된다 → 무엇을 알고/무엇을 AI가 알아낼지의 경계 근거 | Clark & Brennan 1991; Wegner 1987; Cannon-Bowers/Salas/Converse 1993 |
-| Anamnesis (`/recollect`) | 재인은 **부호화 특수성** — 인출단서가 부호화 맥락과 겹칠 때 회상이 성립 (현상학적 근거는 cross-ref) | Tulving & Thomson 1973 + `docs/philosophical-anchors.md` §Anamnesis |
-| Katalepsis (`/grasp`) | 생성·인출연습·사전시험이 수동 수용보다 이해를 강화 (이미 근거화됨) | cross-ref `docs/philosophical-anchors.md` §Katalepsis |
+| Anamnesis (`/recollect`) | 재인은 **부호화 특수성** — 인출단서가 부호화 맥락과 겹칠 때 회상이 성립 (현상학적 근거는 cross-ref) | Tulving & Thomson 1973 |
+| Katalepsis (`/grasp`) | 생성·인출연습·사전시험이 수동 수용보다 이해를 강화 (이미 근거화됨) | 학습과학 문헌(생성효과·인출연습·사전시험) |
 
 ---
 
@@ -149,7 +149,6 @@
 ## Cross-references
 
 - `references/README.md` (Layer 2 도메인 참조 인덱스; 이 문서의 부모)
-- `docs/philosophical-anchors.md` (Anamnesis Husserl 현상학, Katalepsis Stoic grasp + 학습과학; 본 문서와 상보)
 - `aitesis/skills/inquire/SKILL.md`, `syneidesis/skills/gap/SKILL.md`, `analogia/skills/ground/SKILL.md`, `merismos/skills/apportion/SKILL.md` (2026-08 이전 `prosoche/skills/attend/SKILL.md`; 심화 대상 프로토콜)
 - `epistemic-cooperative/skills/compose/SKILL.md` (게이트 연쇄 누적 부하 — 인지부하 §의 미해결 문제와 연결)
 

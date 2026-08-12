@@ -52,7 +52,6 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each static check enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
-- [ ] `docs/review-pipeline.md` — the skill-based review flow (`/review-loop` for code review, `/lens-review` for epistemic review)
 
 ### Protocols to Use While Contributing
 - [ ] `/verify` — run before every commit; static checks per `docs/verification.md`'s check inventory
