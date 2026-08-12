@@ -1957,7 +1957,19 @@ const INK_DERIVED_STYLE_FILES = [
 // line, next item, real ATX heading, or end of file — because a line appended
 // under the label is rule body, and a heading test loose enough to fire on
 // `#not-a-heading` cuts the body short and lets the remainder escape.
-const FORM_FEEDBACK_MENTION = /\*\*Form feedback\*\*:/;
+//
+// What identifies the rule is the bold label, not the punctuation after it,
+// so detection stops at the label. Carrying the colon here would make it part
+// of the rule's identity and open one door per punctuation variant — a
+// look-alike colon defeats detection outright, and an impostor item then
+// slips past the exactly-one requirement it should have tripped. The colon
+// still has to be there; it is validated as part of the published shape
+// below, which is where a wrong one belongs. Residue this leaves, stated
+// rather than chased: a look-alike substituted *inside* the label is not
+// detected, and cannot be — the check identifies the rule by that literal, so
+// a line not carrying it is, to any mechanical reading, not this rule. The
+// line is drawn here on purpose; past it lies a surface with no boundary.
+const FORM_FEEDBACK_MENTION = /\*\*Form feedback\*\*/;
 const PROTOCOL_LABEL_SHAPE = /^\d+\. \*\*Form feedback\*\*: /;
 const STYLE_LABEL_SHAPE = /^\*\*Form feedback\*\*: /;
 const RULE_ITEM_START = /^\d+\. /;
