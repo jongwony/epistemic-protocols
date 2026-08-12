@@ -2,13 +2,11 @@
 
 The cognitive and collaboration premises behind structured human-AI dialogue — stated so they hold on their own, independent of any specific codebase, tool, or harness that happens to implement them.
 
-A document you adopt governs the general principles within the scope you adopted it for; a document you have not adopted governs nothing. Within that scope, your own instructions supply what the document deliberately leaves open — the concrete surface a principle binds to, the value your project has settled on — rather than restating the general principle in their own words. When a host instruction and an adopted document disagree on a general principle, the document is the one to reason from.
-
-That boundary runs both ways: a sentence whose meaning depends on your own artifacts or conventions stays with your instructions rather than moving into a document here, and your instructions do not cite a document here as the ground for a claim that is theirs — a citation the document cannot support lends a local decision the standing of a general principle. Such a sentence carries a concept name rather than a path, so what finds it is reading it as someone who adopted these documents without access to your setup and asking whether it resolves; retiring one restates in general form whatever contract its wording carried that nothing else here states.
-
 Where a document depends on a concept from another, it says so and names the file. [`README.md`](README.md) covers adopting these documents and wiring them into a setup.
 
 ## Documents
+
+Each entry below names a moment rather than a subject, so what fires it is recognizing that moment in the work at hand — an inference drawn from what is actually happening, not from what the work is nominally about. A document here reaches a conversation about a contract, a summary, or a diagnosis as readily as one about code.
 
 Read [`recognition-and-authority.md`](recognition-and-authority.md) when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a specification may fix a criterion's answer in advance or must leave it to resolve at runtime.
 

@@ -90,4 +90,16 @@ clone as the premise root. The rest of the procedure is unchanged.
 The three standing documents above are one setup's choice, not a required set. A document you adopt
 governs the general principles within the scope you adopted it for; a document you do not adopt
 governs nothing. A project may bind a narrower or wider set on its own instruction surface without
-changing the global layer.
+changing the global layer. Where a host instruction and an adopted document disagree on a general
+principle, the document is the one to reason from.
+
+Your own instructions supply what an adopted document deliberately leaves open — the concrete
+surface a principle binds to, the value your project has settled on — rather than restating the
+general principle in their own words. That boundary runs both ways: a sentence whose meaning depends
+on your own artifacts or conventions stays with your instructions rather than moving into one of
+these documents, and your instructions do not cite one of them as the ground for a claim that is
+theirs — a citation the document cannot support lends a local decision the standing of a general
+principle. Such a sentence carries a concept name rather than a path, so what finds it is reading it
+as someone who adopted these documents without access to your setup and asking whether it resolves;
+retiring one restates in general form whatever contract its wording carried that no other document
+in the collection states.
