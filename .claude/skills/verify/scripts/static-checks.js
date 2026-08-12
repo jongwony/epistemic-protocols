@@ -2040,8 +2040,6 @@ function checkSingleAxisSoundness() {
   ];
 
   const SKIP_PATTERNS = [
-    /^docs\/analysis\//,
-    /^docs\/audit-/,
     /^\.claude\/skills\/audit-delta\//,
     /^\.claude\/worktrees\//,
     /^\.claude-pr\//,
