@@ -18,13 +18,13 @@ Read [`tiering-and-scope.md`](tiering-and-scope.md) when deciding which surface 
 
 Read [`calibration-methodology.md`](calibration-methodology.md) when setting or changing how much a project resolves on its own versus routes to its user for judgment.
 
-Read [`approach-verification.md`](approach-verification.md) before deciding what to do with a request, and when an utterance's grammatical form may differ from the action it actually wants.
+Read [`approach-verification.md`](approach-verification.md) before deciding what to do with a request, when an utterance's grammatical form may differ from the action it actually wants, and when an instruction reaches only part of what it lands on.
 
 Read [`matching-the-request.md`](matching-the-request.md) when unsure whether the conversation is at design level or implementation level, when deciding how far a fix should reach, when deciding how detailed a question back to the person should be, and when a time or date arrives without a stated zone.
 
 Read [`verification-discipline.md`](verification-discipline.md) before declaring something done, when a delegated agent reports that its work is complete, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look.
 
-Read [`instruction-authoring.md`](instruction-authoring.md) when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, and when deciding how much to inline for a reader versus leaving as a reference.
+Read [`instruction-authoring.md`](instruction-authoring.md) when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, when two instructions turn out to conflict, and when deciding how much to inline for a reader versus leaving as a reference.
 
 Read [`delegation-and-subagents.md`](delegation-and-subagents.md) when handing work to an agent that cannot see this conversation, and when deciding what a coordinator keeps for itself versus delegates outward.
 

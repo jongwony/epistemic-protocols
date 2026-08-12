@@ -212,6 +212,10 @@ function checkNotation() {
 
   const mdFiles = walkFiles(projectRoot, e => e.name.endsWith('.md'), 'notation');
 
+  // Track this check's own warnings against the shared array so `pass` can't
+  // assert a clean result while violations were actually found below.
+  const warnCountBefore = results.warn.length;
+
   for (const mdPath of mdFiles) {
     let content;
     try {
@@ -240,11 +244,13 @@ function checkNotation() {
     }
   }
 
-  results.pass.push({
-    check: 'notation',
-    file: 'all .md files',
-    message: 'Notation consistency check completed'
-  });
+  if (results.warn.length === warnCountBefore) {
+    results.pass.push({
+      check: 'notation',
+      file: 'all .md files',
+      message: 'Notation is consistent across all scanned .md files'
+    });
+  }
 }
 
 // ============================================================
