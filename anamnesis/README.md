@@ -16,6 +16,12 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 
 **Recognition over Retrieval**: AI scans SSOT (session JSONL) and the hypomnesis INDEX along Salience dimensions, presents ranked candidates as Socratic narrative fingerprints (origin → direction → outcome), and the user recognizes the match — or refines via Socratic probing over adjacent vectors, or reorients to an orthogonal recall dimension. Structured literal matches anchor ranking only when their source namespace authorizes the recall trace's claim kind. Transforms vague recall into recognized context.
 
+Claude Code and Codex compact indexes are searched concurrently when both are available, and every candidate keeps its source label. Raw transcripts are a second-stage expansion that `/recollect` presents as an explicit choice after the compact search and one recall probe miss.
+
+### Codex capture lifecycle
+
+The shared plugin hook records Codex Stop, PreCompact, and SessionEnd events with a fire-and-forget queue under `$CODEX_HOME/hypomnesis`. A detached worker coalesces events by transcript revision, extracts one compact record with `gpt-5.6-luna` at `xhigh`, writes an immutable generation, and atomically advances the session pointer. Nested extraction runs are ephemeral with hooks disabled. `agents/openai.yaml` provides skill discovery metadata; hook registration stays in `hooks/hooks.json`.
+
 ### Difference from Other Protocols
 
 | Protocol | Initiator | Type Signature |
@@ -64,10 +70,31 @@ The six dimensions of the `MarkerProfile` — used to rank recall candidates and
 
 ## Install
 
+Claude Code:
+
 ```
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 claude plugin install anamnesis@epistemic-protocols
 ```
+
+Codex:
+
+```
+codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
+codex plugin add anamnesis@epistemic-protocols
+```
+
+Then review and trust the plugin's hooks — installing a plugin does not trust
+them, and Codex skips a plugin-bundled hook until its current definition is
+trusted, so capture stays off until this step is done:
+
+```
+/hooks
+```
+
+Codex records trust against the hook definition's hash, so this recurs whenever
+the plugin's hooks change. Codex prints a startup warning when hooks are waiting
+for review.
 
 ## Usage
 

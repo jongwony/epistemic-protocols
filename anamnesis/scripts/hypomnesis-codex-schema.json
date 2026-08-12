@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "topic",
+    "topics",
+    "keywords",
+    "initial_request",
+    "key_utterances",
+    "cross_refs",
+    "decisions",
+    "narrative",
+    "markers"
+  ],
+  "properties": {
+    "topic": { "type": "string" },
+    "topics": {
+      "type": "array",
+      "maxItems": 5,
+      "items": { "type": "string" }
+    },
+    "keywords": {
+      "type": "array",
+      "maxItems": 12,
+      "items": { "type": "string" }
+    },
+    "initial_request": { "type": "string" },
+    "key_utterances": {
+      "type": "array",
+      "maxItems": 5,
+      "items": { "type": "string" }
+    },
+    "cross_refs": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string" }
+    },
+    "decisions": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "description", "alternatives_rejected"],
+        "properties": {
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "alternatives_rejected": { "type": "string" }
+        }
+      }
+    },
+    "narrative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin", "direction", "outcome"],
+      "properties": {
+        "origin": { "type": "string" },
+        "direction": { "type": "string" },
+        "outcome": { "type": "string" }
+      }
+    },
+    "markers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coinage", "actor", "temporal", "emotional", "cognitive", "singularity"],
+      "properties": {
+        "coinage": { "type": "array", "maxItems": 30, "items": { "type": "string" } },
+        "actor": { "type": "array", "maxItems": 30, "items": { "type": "string" } },
+        "temporal": { "type": "array", "maxItems": 30, "items": { "type": "string" } },
+        "emotional": { "type": "array", "maxItems": 30, "items": { "type": "string" } },
+        "cognitive": { "type": "array", "maxItems": 30, "items": { "type": "string" } },
+        "singularity": { "type": "array", "maxItems": 30, "items": { "type": "string" } }
+      }
+    }
+  }
+}
