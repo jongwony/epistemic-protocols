@@ -1844,17 +1844,19 @@ function checkLanguagePurity() {
 // ============================================================
 // Check: Emit Load Discipline
 // ============================================================
-// Enforces compiled-copy coverage for the user-facing cognitive-load
-// disciplines that shape runtime protocol output. Context-Question Separation
-// handles placement, Plain emit discipline handles vocabulary, and
-// Round-local salience bundling handles per-round adjacency and context-switch
-// cost. These must live in each core protocol SKILL.md because packaged
-// runtime contracts cannot depend on contributor docs or Output Style alone.
+// Enforces compiled-copy coverage for the user-facing disciplines that shape
+// runtime protocol output. Context-Question Separation handles placement, Plain
+// emit discipline handles vocabulary, Round-local salience bundling handles
+// per-round adjacency and context-switch cost, and Form feedback handles how a
+// round's density is set. These must live in each core protocol SKILL.md
+// because packaged runtime contracts cannot depend on contributor docs or
+// Output Style alone.
 function checkEmitLoadDiscipline() {
   const REQUIRED_RULES = [
     { label: 'Context-Question Separation', pattern: /\*\*Context-Question Separation\*\*/ },
     { label: 'Plain emit discipline', pattern: /\*\*Plain emit discipline\*\*/ },
     { label: 'Round-local salience bundling', pattern: /\*\*Round-local salience bundling\*\*/ },
+    { label: 'Form feedback', pattern: /\*\*Form feedback\*\*/ },
   ];
 
   let checked = 0;
@@ -1893,7 +1895,7 @@ function checkEmitLoadDiscipline() {
   }
 
   const styleContent = fs.readFileSync(stylePath, 'utf8');
-  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Drift tracking']) {
+  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Form feedback', 'Drift tracking']) {
     if (!styleContent.includes(`**${label}**`)) {
       results.fail.push({
         check: 'emit-load-discipline',
