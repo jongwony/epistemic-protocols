@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recollect"
+  short_description: "Recognize prior sessions from vague recall"
+  default_prompt: "Use $recollect to identify the prior session I vaguely remember."
