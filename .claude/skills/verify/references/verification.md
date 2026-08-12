@@ -21,6 +21,16 @@ What this page carries instead is the part the script does not: why a check exis
 - **routing-map-sync** — the routing map is injected at SessionStart, so a stale committed map does not merely go unread; it injects a wrong routing directive into every new session.
 - **gate-type-soundness** — warn level by design. Type-preserving materialization (specializing a generic axis into a concrete coordinate while the surfacing structure survives) is legitimate and must not be failed as mutation.
 - **language-purity** — warn level under a Stage 1 surface posture. Promotion to fail is gated on Stage 2 retention evidence accumulating across multiple PRs and contributors, not on a single clean run.
+- **form-feedback-body-identity** — the Form feedback rule is one rule compiled into every protocol `SKILL.md` and both Ink-derived Output Styles, so a copy edited alone changes what a runtime user reads while every other copy still says the old thing. `emit-load-discipline` only asserts the label is present, which a gutted body satisfies. Scoped to this rule alone: the other labels `emit-load-discipline` requires are meant to vary in wording per protocol.
+
+### The Markdown parse these two checks share
+
+`emit-load-discipline` and `form-feedback-body-identity` both read `## Rules` entries, and both read them through `markdown-rules.js`, which parses with CommonMark rather than matching line shapes. The reason is worth knowing before touching either: a rule inside a code fence or an HTML comment is a depiction of the rule and not the rule, so a copy whose rule moved into one has lost it from the packaged contract — and a line-shaped reading reports it present and identical. Naming the containers one at a time does not terminate, because the requirement was never "outside a fence" but "outside anything that hides content from Markdown's structure". Delegating that to a parser closes the class by construction, including the container nobody thought to name.
+
+Two consequences a repair needs:
+
+- **`npm install` is a precondition.** The parser is a devDependency. When it is absent both checks report a fail naming the install command rather than skipping — a skip would leave the assertion standing with nothing re-running it. The pre-commit hook that runs these checks already presupposes the install, since husky installs it.
+- **Identity is over what CommonMark says the rule says**, not over bytes. The per-protocol ordinal and the column a copy wraps at are outside the comparison, because the two source classes are entitled to differ there — a protocol carries the rule as a numbered list item, an Output Style as a plain paragraph. Everything that changes what is read is inside it. Two kinds of drift stay out of reach and are declared in the check's own comment rather than approximated: a sentence placed outside the rule item, and a look-alike character substituted inside the label itself.
 
 ### Repair
 
@@ -31,6 +41,7 @@ When a check fires, the fix is usually one of these:
 | `codex-manifest-sync` | Bump the Codex manifest to the Claude version in the same commit |
 | `formal-blocks-rule` | Add the missing rule statement to the protocol's `## Rules` section |
 | `gate-integrity-rule` | Add the missing tagged rule to the protocol's `## Rules` section |
+| `form-feedback-body-identity` | Bring the named copy back in line with `epistemic-cooperative/styles/epistemic-ink.md`, or — when the canonical file is itself the regression — change every copy in the same commit. A shape complaint (wrong colon, bullet instead of number, rule inside a quote or a fence) is repaired by restoring the shape that source publishes, not by loosening the check |
 | `framing-readout-enforcement` | Delete the progress-bar glyph, or restore the guard kernel within the affected Output Style's Cognitive work element |
 | `ink-body-identity` | Re-sync the sibling's reproduced body to match the canonical file exactly |
 | `packaged-agent-contract-sync` | Sync the drifted surface — agent or `SKILL.md` — named in the message |
@@ -40,10 +51,12 @@ When a check fires, the fix is usually one of these:
 ## Tests
 
 ```bash
-node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
+node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs .claude/skills/verify/scripts/markdown-rules.test.js
 ```
 
 `scripts/package.test.js` enforces the hand-maintained expected release-ZIP list; the static suite does not inspect that list, so a skill missing from it fails here and nowhere else.
+
+`markdown-rules.test.js` is the enforcement channel for the rule extraction the two `## Rules` checks share. Its cases divide in two — shapes that must fail loudly, and the variation between the two source classes that must stay green — because a check exercised only against a correct tree cannot tell those apart, and this one was breached repeatedly while it read Markdown as lines.
 
 ## Review Criteria Not Yet Static Failures
 

@@ -7,6 +7,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "commonmark": "^0.31.2",
     "husky": "^9.1.7"
   }
 }

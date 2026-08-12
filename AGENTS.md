@@ -59,9 +59,9 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 ## Development
 
 - Node.js 22+ is required; CI pins Node 22.
-- Plugin code uses Node.js standard library only.
+- Plugin code uses Node.js standard library only. Contributor tooling that never ships — `.claude/skills/verify/`, `scripts/`, the husky hooks — may take a devDependency where re-deriving the library badly is the alternative; `package.json`'s own description states the boundary, and `artifact-self-containment` is what keeps a packaged `SKILL.md` from depending on any of it. Running the static checks therefore presupposes `npm install`.
 - Static checks: see `## Verification` below for the command.
-- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs`
+- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs .claude/skills/verify/scripts/markdown-rules.test.js`
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`
 - Installer: `scripts/install.sh`; `README.md` is the source of truth for the install set.

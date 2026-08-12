@@ -14,7 +14,7 @@ fi
 
 cd "$(git rev-parse --show-toplevel)"
 echo "→ runtime-contract: tests"
-node --test scripts/package.test.js
+node --test scripts/package.test.js .claude/skills/verify/scripts/markdown-rules.test.js
 echo "→ runtime-contract: static checks"
 node .claude/skills/verify/scripts/static-checks.js .
 echo "→ runtime-contract: packaging dry-run"

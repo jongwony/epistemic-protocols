@@ -13,6 +13,7 @@ const util = require('util');
 const { execFileSync } = require('child_process');
 const { runArtifactSelfContainmentCheck } = require('./artifact-self-containment');
 const { runLanguagePurityCheck } = require('./language-purity');
+const markdownRules = require('./markdown-rules');
 const {
   discoverPlugins,
   protocolFiles,
@@ -1857,20 +1858,39 @@ function checkLanguagePurity() {
 // round's density is set. These must live in each core protocol SKILL.md
 // because packaged runtime contracts cannot depend on contributor docs or
 // Output Style alone.
+//
+// Presence is read off a CommonMark parse rather than off a raw substring
+// search: a label inside a code fence or an HTML comment is a depiction of the
+// rule, not the rule, so a copy whose rule was moved into one has lost it from
+// the packaged contract — and a substring search reports it present. Sharing
+// the parse-backed reading with form-feedback-body-identity below is what keeps
+// the two checks from disagreeing about what counts as a rule.
 function checkEmitLoadDiscipline() {
+  const CHECK = 'emit-load-discipline';
   const REQUIRED_RULES = [
-    { label: 'Context-Question Separation', pattern: /\*\*Context-Question Separation\*\*/ },
-    { label: 'Plain emit discipline', pattern: /\*\*Plain emit discipline\*\*/ },
-    { label: 'Round-local salience bundling', pattern: /\*\*Round-local salience bundling\*\*/ },
-    { label: 'Form feedback', pattern: /\*\*Form feedback\*\*/ },
+    'Context-Question Separation',
+    'Plain emit discipline',
+    'Round-local salience bundling',
+    'Form feedback',
   ];
+  const REQUIRED_STYLE_SECTIONS = [
+    'Vocabulary rendering',
+    'Round-local salience bundling',
+    'Form feedback',
+    'Drift tracking',
+  ];
+
+  if (!markdownRules.PARSER_AVAILABLE) {
+    results.fail.push({ check: CHECK, file: 'all core protocol SKILL.md files', message: markdownRules.PARSER_MISSING_MESSAGE });
+    return;
+  }
 
   let checked = 0;
   for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) {
       results.warn.push({
-        check: 'emit-load-discipline',
+        check: CHECK,
         file: relPath,
         message: `Protocol file not found: ${relPath}`
       });
@@ -1878,13 +1898,13 @@ function checkEmitLoadDiscipline() {
     }
 
     checked++;
-    const content = fs.readFileSync(fullPath, 'utf8');
-    for (const rule of REQUIRED_RULES) {
-      if (!rule.pattern.test(content)) {
+    const labels = markdownRules.boldLabels(markdownRules.parseDocument(fs.readFileSync(fullPath, 'utf8')));
+    for (const label of REQUIRED_RULES) {
+      if (!labels.has(label)) {
         results.fail.push({
-          check: 'emit-load-discipline',
+          check: CHECK,
           file: relPath,
-          message: `Missing user-facing emit load rule: ${rule.label}`,
+          message: `Missing user-facing emit load rule: ${label}`,
         });
       }
     }
@@ -1893,27 +1913,27 @@ function checkEmitLoadDiscipline() {
   const stylePath = path.join(projectRoot, 'epistemic-cooperative/styles/epistemic-ink.md');
   if (!fs.existsSync(stylePath)) {
     results.fail.push({
-      check: 'emit-load-discipline',
+      check: CHECK,
       file: 'epistemic-cooperative/styles/epistemic-ink.md',
       message: 'Missing Output Style source for runtime emit load discipline',
     });
     return;
   }
 
-  const styleContent = fs.readFileSync(stylePath, 'utf8');
-  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Form feedback', 'Drift tracking']) {
-    if (!styleContent.includes(`**${label}**`)) {
+  const styleLabels = markdownRules.boldLabels(markdownRules.parseDocument(fs.readFileSync(stylePath, 'utf8')));
+  for (const label of REQUIRED_STYLE_SECTIONS) {
+    if (!styleLabels.has(label)) {
       results.fail.push({
-        check: 'emit-load-discipline',
+        check: CHECK,
         file: 'epistemic-cooperative/styles/epistemic-ink.md',
         message: `Missing Output Style section: ${label}`,
       });
     }
   }
 
-  if (!results.fail.some(f => f.check === 'emit-load-discipline')) {
+  if (!results.fail.some(f => f.check === CHECK)) {
     results.pass.push({
-      check: 'emit-load-discipline',
+      check: CHECK,
       file: 'all core protocol SKILL.md files',
       message: `Emit load discipline compiled-copy coverage verified for ${checked} protocols`,
     });
@@ -1929,6 +1949,101 @@ const INK_DERIVED_STYLE_FILES = [
   'epistemic-cooperative/styles/epistemic-ink.md',
   'epistemic-cooperative/styles/proactive-epistemic-ink.md',
 ];
+
+// ============================================================
+// Check: Form Feedback Body Identity
+// ============================================================
+// checkEmitLoadDiscipline above verifies only that the **Form feedback** label
+// is present — a copy whose body has been gutted, reworded, or partially
+// reverted still passes that. Form feedback is a compiled copy of a single rule
+// (reach, not reaction-kind), so every protocol copy plus both Ink-derived
+// Output Styles must say the same thing, or the decisive content can drop out
+// of one copy with nothing red anywhere. Scoped to Form feedback alone: the
+// other labels emit-load-discipline requires are deliberately allowed to vary
+// in wording per protocol, and are untouched here.
+//
+// What identity means here is stated in markdown-rules.js and is worth reading
+// before repairing a failure: the comparison is over what CommonMark says the
+// rule says, so the per-protocol ordinal, the item indentation, and the column a
+// copy happens to wrap at are all outside it, while every difference in what is
+// read is inside it.
+//
+// Two kinds of drift stay out of reach, declared rather than approximated.
+// A sentence placed outside the rule item is outside the unit compared — that
+// is a scope decision, not a parsing limit, and widening it would put the
+// boundary somewhere no source publishes. And a look-alike character
+// substituted inside the label itself makes the line, to any mechanical
+// reading, not this rule: the check identifies the rule by that literal, so
+// such a copy fails as missing rather than as corrupted. The line is drawn
+// there on purpose; past it lies a surface with no boundary.
+function checkFormFeedbackBodyIdentity() {
+  const CHECK = 'form-feedback-body-identity';
+  const LABEL = 'Form feedback';
+  // epistemic-ink.md is the source this rule is compiled from. Anchoring the
+  // comparison to a fixed source rather than to whichever file happens to come
+  // first keeps a mismatch report pointing at the actual outlier, instead of
+  // flipping wholesale whenever the canonical file is itself the regression.
+  const CANONICAL_SOURCE = 'epistemic-cooperative/styles/epistemic-ink.md';
+
+  if (!markdownRules.PARSER_AVAILABLE) {
+    results.fail.push({ check: CHECK, file: 'all Form feedback sources', message: markdownRules.PARSER_MISSING_MESSAGE });
+    return;
+  }
+
+  const sources = [
+    ...PROTOCOL_FILES.map(file => ({ file, shape: 'orderedListItem' })),
+    ...INK_DERIVED_STYLE_FILES.map(file => ({ file, shape: 'topLevelParagraph' })),
+  ];
+
+  const units = [];
+  for (const { file: relPath, shape } of sources) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.fail.push({ check: CHECK, file: relPath, message: `Source file not found: ${relPath}` });
+      continue;
+    }
+    const extracted = markdownRules.extractRuleUnit(fs.readFileSync(fullPath, 'utf8'), LABEL, shape);
+    if (extracted.error) {
+      results.fail.push({ check: CHECK, file: relPath, message: extracted.error });
+      continue;
+    }
+    units.push({ file: relPath, ...extracted });
+  }
+
+  const canonical = units.find(unit => unit.file === CANONICAL_SOURCE);
+  if (!canonical) {
+    results.fail.push({
+      check: CHECK,
+      file: CANONICAL_SOURCE,
+      message: `Canonical Form feedback rule unavailable in ${CANONICAL_SOURCE} — no identity comparison was performed for the remaining sources`,
+    });
+    return;
+  }
+
+  const excerpt = (text, limit = 140) => (text.length > limit ? `${text.slice(0, limit)}…` : text);
+  const diverging = units.filter(unit => unit.canonical !== canonical.canonical);
+  if (diverging.length > 0) {
+    results.fail.push({
+      check: CHECK,
+      file: diverging.map(unit => unit.file).join(', '),
+      message: `Form feedback rule diverges from canonical (${canonical.file}) in: ${diverging.map(unit => `${unit.file}:${unit.line}`).join(', ')}. ` +
+        `Canonical reads: "${excerpt(canonical.rendering)}" — ${diverging[0].file} reads: "${excerpt(diverging[0].rendering)}"`,
+    });
+    return;
+  }
+
+  // A pass asserts every source was read and compared, so it is withheld
+  // whenever any source already failed above — a green line reported beside a
+  // fail claims coverage the run does not have.
+  if (results.fail.some(entry => entry.check === CHECK)) return;
+
+  const styleCount = INK_DERIVED_STYLE_FILES.length;
+  results.pass.push({
+    check: CHECK,
+    file: 'all core protocol SKILL.md files + both Ink-derived Output Styles',
+    message: `Form feedback rule verified identical across ${units.length} sources (${units.length - styleCount} core protocol SKILL.md files + ${styleCount} Ink-derived Output Styles)`,
+  });
+}
 
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
@@ -2761,6 +2876,7 @@ try {
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
+  checkFormFeedbackBodyIdentity();
   checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkLanguagePurity();
