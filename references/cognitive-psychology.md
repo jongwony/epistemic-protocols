@@ -62,8 +62,8 @@
 | Epharmoge (`/contextualize`) | 지식은 사용 맥락과 분리되지 않는다 — 기술적으로 옳아도 상황에 맞지 않으면 적용 실패 | Brown/Collins/Duguid 1989; Suchman 1987; Lave & Wenger 1991 |
 | Elenchus (`/sublate`) | 맥락은 확증편향·신념고착으로 부패한다; 반대설명 생성이 교정한다 | Nickerson 1998; Anderson/Lepper/Ross 1980; Lord/Lepper/Preston 1984 |
 | Horismos (`/bound`) | 협업은 **공통기반**을 점증 구축하며 누가 무엇을 아는지는 **분산기억**으로 분담된다 → 무엇을 알고/무엇을 AI가 알아낼지의 경계 근거 | Clark & Brennan 1991; Wegner 1987; Cannon-Bowers/Salas/Converse 1993 |
-| Anamnesis (`/recollect`) | 재인은 **부호화 특수성** — 인출단서가 부호화 맥락과 겹칠 때 회상이 성립 (현상학적 근거는 cross-ref) | Tulving & Thomson 1973 |
-| Katalepsis (`/grasp`) | 생성·인출연습·사전시험이 수동 수용보다 이해를 강화 (이미 근거화됨) | 학습과학 문헌(생성효과·인출연습·사전시험) |
+| Anamnesis (`/recollect`) | 재인은 **부호화 특수성** — 인출단서가 부호화 맥락과 겹칠 때 회상이 성립 | Tulving & Thomson 1973 |
+| Katalepsis (`/grasp`) | 생성·인출연습·사전시험이 수동 수용보다 이해를 강화 | 학습과학 문헌(생성효과·인출연습·사전시험) |
 
 ---
 
