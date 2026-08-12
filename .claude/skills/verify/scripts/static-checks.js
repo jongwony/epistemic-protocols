@@ -1925,6 +1925,84 @@ const INK_DERIVED_STYLE_FILES = [
 ];
 
 // ============================================================
+// Check: Form Feedback Body Identity
+// ============================================================
+// checkEmitLoadDiscipline (above) verifies only that the **Form feedback**
+// label is present in each core protocol SKILL.md — a copy whose body has
+// been gutted, reworded, or partially reverted still passes that presence
+// check. Form feedback is a compiled copy of a single rule (reach, not
+// reaction-kind), so every protocol copy plus both Ink-derived Output
+// Styles must carry byte-identical bodies or the decisive content can drop
+// out of one copy silently. Scoped to Form feedback only — the other three
+// REQUIRED_RULES labels above (Context-Question Separation, Plain emit
+// discipline, Round-local salience bundling) are deliberately allowed to
+// vary in wording per protocol and are untouched here.
+function extractFormFeedbackLine(content) {
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.trim();
+    if (/^(?:\d+\.\s*)?\*\*Form feedback\*\*:/.test(line)) {
+      return line.replace(/^\d+\.\s*/, '');
+    }
+  }
+  return null;
+}
+
+function checkFormFeedbackBodyIdentity() {
+  const CHECK = 'form-feedback-body-identity';
+  // epistemic-ink.md is the canonical source of truth this rule is compiled
+  // from (see Task-1 framing); anchoring comparison to a fixed source rather
+  // than "whichever file happens to come first" keeps a mismatch report
+  // pointing at the actual outlier instead of flipping wholesale whenever
+  // the canonical file itself is the one that regresses.
+  const CANONICAL_SOURCE = 'epistemic-cooperative/styles/epistemic-ink.md';
+  const sources = [
+    ...PROTOCOL_FILES,
+    ...INK_DERIVED_STYLE_FILES,
+  ];
+
+  const bodies = [];
+  for (const relPath of sources) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.fail.push({ check: CHECK, file: relPath, message: `Source file not found: ${relPath}` });
+      continue;
+    }
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const line = extractFormFeedbackLine(content);
+    if (line === null) {
+      results.fail.push({ check: CHECK, file: relPath, message: 'No **Form feedback**: line found to compare' });
+      continue;
+    }
+    bodies.push({ file: relPath, line });
+  }
+
+  if (bodies.length === 0) {
+    results.fail.push({ check: CHECK, file: 'all Form feedback sources', message: 'No **Form feedback**: lines could be extracted from any source' });
+    return;
+  }
+
+  const excerpt = (s, n = 120) => (s.length > n ? s.slice(0, n) + '…' : s);
+  const canonical = bodies.find(b => b.file === CANONICAL_SOURCE) || bodies[0];
+  const diverging = bodies.filter(b => b.line !== canonical.line);
+
+  if (diverging.length > 0) {
+    results.fail.push({
+      check: CHECK,
+      file: diverging.map(d => d.file).join(', '),
+      message: `Form feedback body diverges from canonical (${canonical.file}) in: ${diverging.map(d => d.file).join(', ')}. ` +
+        `Canonical excerpt: "${excerpt(canonical.line)}" — diverging excerpt (${diverging[0].file}): "${excerpt(diverging[0].line)}"`,
+    });
+    return;
+  }
+
+  results.pass.push({
+    check: CHECK,
+    file: 'all core protocol SKILL.md files + both Ink-derived Output Styles',
+    message: `Form feedback body verified byte-identical across ${bodies.length} protocol copies and both Output Styles`,
+  });
+}
+
+// ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
@@ -2757,6 +2835,7 @@ try {
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
+  checkFormFeedbackBodyIdentity();
   checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkLanguagePurity();

@@ -18,7 +18,7 @@ Read [`tiering-and-scope.md`](tiering-and-scope.md) when deciding which surface 
 
 Read [`calibration-methodology.md`](calibration-methodology.md) when setting or changing how much a project resolves on its own versus routes to its user for judgment.
 
-Read [`approach-verification.md`](approach-verification.md) before deciding what to do with a request, and when an utterance's grammatical form may differ from the action it actually wants.
+Read [`approach-verification.md`](approach-verification.md) before deciding what to do with a request, when an utterance's grammatical form may differ from the action it actually wants, and when an instruction reaches only part of what it lands on.
 
 Read [`matching-the-request.md`](matching-the-request.md) when unsure whether the conversation is at design level or implementation level, when deciding how far a fix should reach, when deciding how detailed a question back to the person should be, and when a time or date arrives without a stated zone.
 
