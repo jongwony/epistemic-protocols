@@ -10,7 +10,7 @@ The contributor-facing *prescriptive* surface is `.claude/rules/` plus `CLAUDE.m
 
 ## SKILL.md Formal Block Anatomy
 
-All protocols share this structure within `Definition` code block:
+Protocols draw their `Definition` code block from this structure:
 
 ```
 ── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
@@ -24,17 +24,17 @@ All protocols share this structure within `Definition` code block:
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
-── COMPOSITION ──       Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
+── COMPOSITION ──       (if applicable) Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
 ```
 
 **COMPOSITION block details**:
-- Coverage: present in every core protocol `SKILL.md` except anagoge (`anagoge/skills/ascend/SKILL.md` carries no COMPOSITION block). Files that carry it share the opening operator line `*: product — (D₁ × D₂) → (R₁ × R₂).` followed by the protocol's own resolution-emergence sentence; protocol-specific composition rationale may follow
+- Shape: a file carrying this block opens it with the operator line `*: product — (D₁ × D₂) → (R₁ × R₂).` followed by the protocol's own resolution-emergence sentence; protocol-specific composition rationale may follow
 - `*` denotes the composition operator (categorical product on deficit/resolution): `D₁ × D₂` is the composite domain and `R₁ × R₂` the composite codomain
 - The operator fixes the composite domain and codomain and nothing between them. Each participating protocol's own formal blocks supply its runtime-normative deficit-to-resolution contract during composition
 - `<X> resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
 - `*` is a runtime deficit product (Active authority, session-level), distinct from pre-committed gate-chain pipelines (Standing authority)
 
-Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
+New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Which parts of this anatomy a static check actually enforces is read from the check itself rather than asserted here — an enforcement-coverage claim on this surface has nothing that re-runs it, so it keeps asserting an earlier reading with present authority.
 
 ### TOOL GROUNDING Annotation Vocabulary
 
@@ -80,7 +80,7 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 | `parallel` | Concurrent execution of multiple instances | Agent/Task spawn with independent contexts |
 | `conditional` | Execution gated on runtime predicate | Operation skipped when predicate is false |
 
-**Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the 7 standard operation types while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).
+**Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the operation-type annotations while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).
 
 ### FLOW-MORPHISM Relationship
 
@@ -107,12 +107,7 @@ Two protocols carrying parallel machinery may still diverge here without either 
 
 ## User-Facing Emit Load Disciplines
 
-Separate rules manage the load a user-facing round places on its reader:
-
-- **Context-Question Separation** controls placement: analysis, evidence, and rationale appear before the gate; the gate contains only the essential question and option-specific differential implications.
-- **Plain emit discipline** controls vocabulary: user-facing text uses everyday language and keeps formal variables, Greek-rooted protocol terms, and code-style tokens inside formal specification surfaces.
-- **Round-local salience bundling** controls round composition: each user-facing round keeps the current judgment, nearest evidence, and next-move implication adjacent, while deferring background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
-- **Form feedback** controls density: each round takes its density from what the current request asked for rather than carrying it over, and a reported symptom ("hard to follow", "too long") is read as a form instruction rather than answered with a question about which form is wanted. Its reach is whatever the active protocol leaves open in how a round is composed; what a protocol pins — a wording, an order, a cadence — stays pinned.
+Separate rules manage the load a user-facing round places on its reader. Their canonical text lives in the Output Style source and is compiled into each protocol's `## Rules`, and a static check holds those two copies in sync. What this section adds is why they do not collapse into one another — restating the rules a third time here would answer to no guard and would drift away from the two copies that do.
 
 These disciplines are complementary. A protocol can satisfy Context-Question Separation and Plain emit discipline while still increasing context-switch cost by scattering adjacent evidence across distant paragraphs or mixing unrelated findings into one decision round. Round-local salience bundling closes that gap without introducing measurement: the binding unit is the round-local judgment surface, not a quantified load score.
 
@@ -197,7 +192,7 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 ## Cross-Session Tertiary Pattern
 
-**Tertiary pattern** (cross-session, both halves operative): Anamnesis hypomnesis store persists session recall indices → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → hypomnesis store deepens → spiral deepening. The storage half (Anamnesis hypomnesis write) and the consumption half (each consuming protocol's Phase 0/1 reading stored knowledge) together complete the cross-session pattern. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Consumption-half is operative across every consuming protocol as Cross-session enrichment paragraphs in SKILL.md prose. **Aitesis carries protocol-internal sophistication** — EvidenceSource fiber + `source: "memory:{path}"` tagging + staleness guard scoped to its empirical-evidence operation, grounded in the Citable axis of Detection with Authority's Cognitive Partnership Move (Extension/Relay basis = external source). **The remaining consuming protocols use the simpler heuristic-input pattern** — Phase 0/1 may bias toward accumulated domain patterns, with protocol-specific pollution resistance (halt characteristics, gate judgment) per `.claude/principles/architectural-principles.md` Cross-Session Knowledge Composition Pollution caveat. The asymmetry is intentional: applying Aitesis-style evidence-source machinery uniformly would misclassify Constitution operations (where AI inference is the basis) as Extension. Operational-fidelity monitoring (whether enrichment improves Phase 0/1 detection vs. surfaces pollution) is the ongoing observation focus.
+**Tertiary pattern** (cross-session, both halves operative): Anamnesis hypomnesis store persists session recall indices → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → hypomnesis store deepens → spiral deepening. The storage half (Anamnesis hypomnesis write) and the consumption half (each consuming protocol's Phase 0/1 reading stored knowledge) together complete the cross-session pattern. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Two consumption patterns coexist, and the asymmetry between them is intentional. A protocol whose consumption runs through an evidence-source channel can tag what it reads (`source: "memory:{path}"`) and guard it for staleness, grounded in the Citable axis of Detection with Authority's Cognitive Partnership Move (Extension/Relay basis = external source). A protocol whose Phase 0/1 merely biases toward accumulated domain patterns has no such channel and relies on protocol-specific pollution resistance (halt characteristics, gate judgment) per `.claude/principles/architectural-principles.md` Cross-Session Knowledge Composition Pollution caveat. Applying evidence-source machinery uniformly would misclassify Constitution operations (where AI inference is the basis) as Extension — which is the reason for the split, not an accident of who implemented what. Which protocol sits on which side is read from its own SKILL.md; a roster here would have nothing re-running it. Operational-fidelity monitoring (whether enrichment improves Phase 0/1 detection vs. surfaces pollution) is the ongoing observation focus.
 
 ## Extension Classification Audit Trail
 
@@ -226,11 +221,6 @@ When a phase contains a conditional gate (some runtime conditions resolve to Ext
 
 The Extension entry's condition suffix records the predicate inline. Both halves point to the same underlying phase operation; the split is realization, not phase duplication.
 
-Examples observed in current SKILL.md:
-
-- prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
-- misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_default_relay (extension)` + `Phase 0 scope_expand_confirm (constitution)` (Constitution fires on the expansion branch — cross-session / cross-project — not on the safe current-session default, which relays)
-- steer: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
-- realign: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
+To see the convention in force, grep the TOOL GROUNDING blocks for a condition suffix (`_from_arg`, `_auto`, `_resume`) — a roster of which protocols currently split would go stale the next time one is added or collapsed, and nothing re-runs a roster.
 
 Non-split (canonical) form remains the default: when no conditional specialization exists, the entry stays as the canonical label (`Phase N Qc (constitution)` or `Phase N {label} (extension)`). Split applies only when one runtime branch is genuinely Extension-eligible.

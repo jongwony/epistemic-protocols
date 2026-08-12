@@ -3,41 +3,41 @@
 ## Static Checks
 
 Run `/verify` before commits. Static checks via:
+
 ```bash
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
-**Static checks performed**:
-1. **json-schema**: plugin.json required fields (name, version, description, author), semver format, name format (`/^[a-z][a-z0-9-]*$/`)
-2. **notation**: Unicode consistency (→, ∥, ∩, ∪, ⊆, ∈, ≠ over ASCII fallbacks)
-3. **directive-verb**: `call` (not `invoke`/`use`) for tool instructions
-4. **xref**: Referenced file paths exist in expected locations
-5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
-6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
-7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level; skips during merge/rebase conflicts; ignores README, LICENSE, .gitignore)
-8. **spec-vs-impl**: TYPES definitions cross-referenced against PHASE TRANSITIONS and prose — detects rename drift, dead types, and resolution type mismatches
-9. **morphism-anatomy**: SKILL.md Definition block formal integrity — FLOW → MORPHISM → TYPES section order, MORPHISM source object distinct from canonical deficit (deficit belongs in `requires:` precondition), required clauses (`requires`/`deficit`/`preserves`/`invariant`) all present, MORPHISM chain terminates in canonical resolution, Type signature exposes `deficit → resolution` pattern
-10. **cross-ref-scan**: Protocol name and deficit → resolution pair consistency across all SKILL.md files, README concern-cluster invariant, cross-enumeration completeness (`PROTOCOL_FILES`, marketplace entries)
-11. **onboard-sync**: Onboard SKILL.md Data Sources table, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
-12. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
-13. **catalog-sync**: Catalog SKILL.md protocol coverage — all protocol names and commands present, count verified against `PROTOCOL_FILES`
-14. **gate-type-soundness**: TYPES answer coproducts matched against Phase prose option enumerations — detects gate mutation (option injection/deletion/substitution) via stem matching. Warning level (safeguard). Type-preserving materialization permitted
-15. **artifact-self-containment**: Validates the packaged runtime-contract view — transformed `SKILL.md`, plugin description metadata, and packaged support entries. Fails on contributor-doc leakage or broken packaged references; warns on weak invocation/routing cues
-16. **emit-load-discipline**: Verifies every core protocol SKILL.md carries the compiled-copy runtime rules for Context-Question Separation, Plain emit discipline, Round-local salience bundling, and Form feedback; also verifies the Output Style source contains the shared vocabulary, bundling, form-feedback, and drift-tracking sections
-17. **framing-readout-enforcement**: Couples the Epistemic Ink invariant (user-facing protocol surfacing is a framing readout, never a scalar progress meter) to an enforcement channel. Two coupled fails: (a) the unicode progress-bar glyphs ▓/░ must not appear in any core protocol SKILL.md or any Ink-derived Output Style source (`epistemic-cooperative/styles/epistemic-ink.md`, `epistemic-cooperative/styles/proactive-epistemic-ink.md`) — they only ever rendered a completion bar; (b) the guard kernel (`does not render the loop's completion as a bar, percentage, or N-of-M tally`) must appear within the Cognitive work element's bounded body (label line to the next Ink element label or heading) of each Ink-derived Output Style, not merely anywhere in the file, so the invariant cannot silently migrate into a comment, frontmatter, or an opposite instruction and still pass. Scope mirrors emit-load-discipline (core protocols + canonical Output Style only — see item 16) for the canonical file, extended to every Ink-derived sibling; utility skills that legitimately render bars (e.g. `/dashboard`) are out of scope. Repair: delete the progress-bar glyph, or restore the guard kernel within the affected Output Style's Cognitive work element
-18. **single-axis-soundness**: Enforces `TOOL GROUNDING`'s `(constitution)`/`(extension)` markers as the sole runtime annotation axis across live `*.md` files. Whitelisted paths: `docs/analysis/`, `docs/audit-*`, `.claude/skills/audit-delta/`, `.claude/worktrees/`, `.claude-pr/`, `node_modules/`, `dist/`, `.git/`. Source-of-truth banned-vocabulary list lives in the check function itself (`checkSingleAxisSoundness`)
-19. **language-purity**: Surfaces Korean characters (Hangul syllable block U+AC00–U+D7A3) in project text files at warn-level under a Stage 1 surface posture. Detection uses charCode range comparison so the verifier file remains self-pure under its own check. Whitelist preserves intentional Korean regions: `**/README_ko.md`, `**/README.md` (English README + Korean localization link), `.claude/skills/release/**`, `**/docs/` and root `docs/` (repo and per-plugin documentation), `**/references/` (plugin contributor references), `design/**`, `examples/**`, `.claude/rules/editing-conventions.md`. Separately, `.claude/worktrees/` is pruned from the walk — sibling checkouts of this repository, each checked from its own root; the prune matches the root-relative path, not the bare directory name (pinned by `scripts/package.test.js` `language-purity worktree prune`). Promotion from warn to fail is gated on Stage 2 retention evidence accumulating across multiple PRs and contributors
-20. **codex-manifest-sync**: Verifies each plugin's `.codex-plugin/plugin.json` `version` matches the canonical `.claude-plugin/plugin.json`. version-staleness inspects only the claude manifest and `walkFiles` skips dot-directories (so json-schema cannot reach the codex manifest either) — this is the codex manifest's only parse/version guard. Fail level: blocks at the same `/verify` gate the claude bump passes through, preventing the recurring "version bump missed codex-plugin" drift (PR #449 remediation pattern). Codex variant is optional; equality is enforced only when the file is present. Repair: bump the codex manifest to the claude version in the same commit
-21. **packaged-agent-contract-sync**: Verifies each packaged agent carrying a `### Realization:` verdict anchor stays in sync with its paired SKILL.md in the same plugin (paired by matching the agent's realization value set to a TYPES enumeration). Reconciles the realization set, the Advisory Disposition vocabulary (against a TYPES enumeration), and the Checklist categories (against the paired SKILL.md). For an F5 zero-memory-verdict contract (detected by an F5 marker on either side — the agent's Findings/Category-sweep verdict tables or the SKILL.md `EvidencedFinding`/`SweepTrace` records), it additionally locks the verdict-table column schema bidirectionally against those records and anchors the checklist search to the F5 contract corpus; a non-F5 pairing keeps the generic checks only. Fail level. Repair: sync the drifted surface (agent or SKILL.md) named in the message. First materialized for a packaged agent paired with its skill contract (Issue #532)
-22. **routing-index-contract**: Verifies CLAUDE.md/AGENTS.md keeps a `## Protocol Index` section that routes to the authoritative sources (`/catalog`, per-protocol `SKILL.md`, README) — pointers are matched *within* the section, so an incidental mention elsewhere (e.g. `SKILL.md` in the Runtime Contract prose) cannot satisfy the contract. Fail level for a missing section or a missing routing pointer. Also warns if the removed inline catalog is reintroduced (a `## Protocol Reference` heading or a `| Concern | Protocols |` cluster table). Lightweight successor to the removed CLAUDE.md-content mirror sub-checks in cross-ref-scan: enforces the routing contract (structure + pointers), not mirrored content, so catalog drift is caught without re-creating the co-change chain. Repair: restore the Protocol Index routing pointers, or remove the reintroduced inline catalog
-23. **formal-blocks-rule**: Verifies every core protocol SKILL.md carries the "Formal blocks are runtime-normative" rule — the compiled-copy statement that FLOW/MORPHISM/TYPES/PHASE TRANSITIONS/etc. are LLM-facing and constitutive of protocol identity (they type the prose), not contributor-only spec (see `docs/structural-specs.md`). Fail level. Repair: add the missing rule statement to the protocol's `## Rules` section
-24. **gate-integrity-rule**: Verifies every core protocol SKILL.md carries a `(Safeguard tier)`-tagged Gate integrity rule whose entry states the invariant kernel phrase `type-preserving materialization` (see `premise/gate-design.md` §Gate Integrity). The mutation taxonomy (injection/deletion/substitution) is expressed in per-protocol specialized vocabulary and is deliberately not word-anchored by the check. Fail level. Repair: add the missing tagged rule to the protocol's `## Rules` section
-25. **ink-body-identity**: Verifies that each Ink-derived sibling style (currently `epistemic-cooperative/styles/proactive-epistemic-ink.md`) reproduces the canonical Epistemic Ink body — the region from its own `# Epistemic Protocol Formatting` heading up to its closing heading (e.g. `# Per-Turn Reminder`) — byte-identical (module trailing-newline padding at the cut point) to `epistemic-cooperative/styles/epistemic-ink.md`'s `# Epistemic Protocol Formatting` heading through EOF. A per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier; this check guards that copy against silent drift. Fail level. Repair: re-sync the sibling's reproduced body to match the canonical file exactly
-26. **routing-map-sync**: Verifies `routing-map.md` (the agent-facing SessionStart routing directive) stays in sync with its canonical sources — the catalog When-to-Use triggers plus the load-protocols deficit → resolution spine. `routing-map.md` pairs entries generated from those sources with a hand-maintained preamble constant in the generator, so this check re-generates the whole file in-memory and fails on any divergence from the committed file, the same drift posture as cross-ref-scan/catalog-sync (a stale committed map would inject a wrong routing directive at SessionStart). The generator fails loudly (throws) when a protocol has no catalog row; that throw is surfaced here as a fail rather than crashing the verifier. Fail level. Repair: `node scripts/generate-routing-map.js`
+**The script is the check inventory.** What each check does, which files it walks, and what it treats as fail versus warn are read from `static-checks.js` itself. A prose inventory here would be a hand-maintained copy with nothing re-running it: correct on the day it was written, then quietly asserting an earlier reading of a file that has since moved — and a reader who trusts it stops at a contradiction the script never raised.
+
+What this page carries instead is the part the script does not: why a check exists where the reason is not obvious from its code, and what to do when one fires.
+
+### Why certain checks exist
+
+- **codex-manifest-sync** — `version-staleness` inspects only the Claude manifest, and the file walk skips dot-directories, so `json-schema` cannot reach the Codex manifest either. Without this check the Codex manifest has no parse or version guard at all, which is how the "version bump missed codex-plugin" drift kept recurring.
+- **framing-readout-enforcement** — the banned progress-bar glyphs only ever rendered a completion bar, which is the one thing the Ink framing readout is defined against. The guard kernel is anchored *inside* the Cognitive work element rather than anywhere in the file, so the invariant cannot migrate into a comment or an opposite instruction and still pass.
+- **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so catalog drift is caught without re-creating the co-change chain that mirroring the catalog into an instruction file would impose.
+- **ink-body-identity** — a per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier. This check guards that copy against silent drift.
+- **routing-map-sync** — the routing map is injected at SessionStart, so a stale committed map does not merely go unread; it injects a wrong routing directive into every new session.
+- **gate-type-soundness** — warn level by design. Type-preserving materialization (specializing a generic axis into a concrete coordinate while the surfacing structure survives) is legitimate and must not be failed as mutation.
+- **language-purity** — warn level under a Stage 1 surface posture. Promotion to fail is gated on Stage 2 retention evidence accumulating across multiple PRs and contributors, not on a single clean run.
+
+### Repair
+
+When a check fires, the fix is usually one of these:
+
+| Check | Repair |
+|---|---|
+| `codex-manifest-sync` | Bump the Codex manifest to the Claude version in the same commit |
+| `formal-blocks-rule` | Add the missing rule statement to the protocol's `## Rules` section |
+| `gate-integrity-rule` | Add the missing tagged rule to the protocol's `## Rules` section |
+| `framing-readout-enforcement` | Delete the progress-bar glyph, or restore the guard kernel within the affected Output Style's Cognitive work element |
+| `ink-body-identity` | Re-sync the sibling's reproduced body to match the canonical file exactly |
+| `packaged-agent-contract-sync` | Sync the drifted surface — agent or `SKILL.md` — named in the message |
+| `routing-index-contract` | Restore the Protocol Index routing pointers, or remove the reintroduced inline catalog |
+| `routing-map-sync` | `node scripts/generate-routing-map.js` |
 
 ## Tests
-
-Run:
 
 ```bash
 node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
@@ -47,7 +47,7 @@ node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
 
 ## Review Criteria Not Yet Static Failures
 
-Use these checks during protocol edits and reviews. Do not promote them to static failure until a pilot protocol shows the criterion is stable with low false positives.
+Use these during protocol edits and reviews. Do not promote them to static failure until a pilot protocol shows the criterion is stable with low false positives.
 
 - Canonical resolution names stay protocol-native; they should implement `DeficitResolved<D, R>` rather than be renamed to it.
 - Resolution definitions expose a completion trace: the terminal type should make the path from deficit through phase operations to resolution inspectable.
@@ -58,27 +58,15 @@ Use these checks during protocol edits and reviews. Do not promote them to stati
 
 ## Packaging Contract
 
-`scripts/package.js` uses one deterministic `SKILL.md` archive builder for both GitHub Release and Codex submission ZIPs:
+`scripts/package.js` uses one deterministic `SKILL.md` archive builder for both the GitHub Release and Codex submission ZIPs. Read the script for what it strips, includes, and overrides; the constants it defines — the description-length threshold, the line-count guideline, the submission set — are defined there and are not restated here.
 
-- Preserves `<skill>/SKILL.md` exactly and uses `.codex-plugin/plugin.json` as the version source; a differing Claude manifest version fails closed.
-- Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`.
-- Applies compact description overrides when the source description exceeds 200 characters. A description over that limit with no `DESCRIPTION_OVERRIDES` entry emits a packaging warning and the long description is preserved as-is; it is not a static failure.
-- Includes runtime support files and directly referenced plugin agents while excluding unrelated agents, commands, evals, README files, and forbidden secret/session paths.
-- The default release selects every active skill and adds the all-skills bundle plus release notes. Its support-file surface is a safe superset for utility sidecars such as `routing-map.md`, `templates/`, and `adapters/`.
-- `--profile codex-submit` selects the explicit public-core set, enforces its narrower support allowlist and full packaged-text reference closure, and emits `submission-index.json` with byte sizes and SHA-256 digests.
-- The line-count guideline is 510 lines per SKILL.md and remains warning-only.
+Two properties are worth knowing before reading it, because neither is obvious from the code alone:
+
+- **A `SKILL.md` is preserved byte-for-byte.** Everything the packaging does is subtractive or additive around the file, never a rewrite of the contract text, so what a runtime user reads is what the repository holds.
+- **A description override replaces an over-long description rather than exempting it.** The override answers to the same length limit it exists to satisfy, and `package.test.js` asserts the packaged description against it — so an override is not an escape hatch.
 
 ## Runtime Contract Surfaces
 
-`artifact-self-containment` does not inspect source prose in isolation. It checks the runtime-contract view that users actually encounter:
+`artifact-self-containment` does not inspect source prose in isolation. It checks the runtime-contract view that users actually encounter: the packaged `SKILL.md`, the plugin `description` metadata, and the packaged support entries a `SKILL.md` loads or links to.
 
-- `SKILL.md`: normative contract for protocol semantics, phases, gates, and usage
-- Plugin `description` metadata: discovery/routing hint only; intentionally weaker than `SKILL.md`
-- Packaged support entries: bundled runtime files that `SKILL.md` loads or links to
-
-Two implications follow:
-
-- Contributor/governance docs (`CLAUDE.md`, `.claude/rules/`, `docs/mission-bridge.md`, analysis docs) are not allowed runtime dependencies.
-- Plugin descriptions operate under a tight marketplace budget, so they are evaluated for routing clarity, not for full semantic completeness.
-
-Claim-strength boundaries for these surfaces are summarized in [runtime-dependency-ledger.md](runtime-dependency-ledger.md).
+The boundary this enforces — which surfaces may be depended on from a packaged runtime contract, and which are governance surfaces that may not — is stated in `AGENTS.md` §Settled Directions (Surface authority order). Claim-strength buckets for those surfaces are defined in [runtime-dependency-ledger.md](runtime-dependency-ledger.md).

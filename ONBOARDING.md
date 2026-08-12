@@ -50,11 +50,11 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/AGENTS.md` — demotion zone overview, index of current principle files
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
-- [ ] `docs/verification.md` — what each static check enforces
+- [ ] `docs/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
 
 ### Protocols to Use While Contributing
-- [ ] `/verify` — run before every commit; static checks per `docs/verification.md`'s check inventory
+- [ ] `/verify` — run before every commit; the checks it runs are defined in `static-checks.js`
 - [ ] `/syneidesis:gap` — surface gaps before committing to a design decision
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
