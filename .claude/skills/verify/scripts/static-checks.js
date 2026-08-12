@@ -1841,6 +1841,42 @@ function checkLanguagePurity() {
   results.warn.push(...purityResults.warn);
 }
 
+// A fenced code block hides its contents from Markdown's block structure: a
+// line inside one depicts a rule, it does not carry it. Both rule checks below
+// read rules by line shape, so both need this mask — without it a rule moved
+// inside a fence stops being a rule while the label check and the body check
+// each still report it present and identical, which is the packaged contract
+// losing the rule with nothing red anywhere. Shared rather than duplicated so
+// the two cannot drift on what counts as fenced.
+function fencedLineMask(lines) {
+  const mask = new Array(lines.length).fill(false);
+  let open = null;
+  for (let i = 0; i < lines.length; i++) {
+    const fence = /^\s*(`{3,}|~{3,})(.*)$/.exec(lines[i]);
+    if (open === null) {
+      // A backtick fence's info string may not itself contain a backtick.
+      if (fence && !(fence[1][0] === '`' && fence[2].includes('`'))) {
+        open = { char: fence[1][0], length: fence[1].length };
+        mask[i] = true;
+      }
+      continue;
+    }
+    mask[i] = true;
+    if (fence && fence[1][0] === open.char && fence[1].length >= open.length && fence[2].trim() === '') {
+      open = null;
+    }
+  }
+  return mask;
+}
+
+// The same content with every fenced line dropped, for checks that scan text
+// rather than walk lines.
+function contentOutsideFences(content) {
+  const lines = content.split('\n');
+  const mask = fencedLineMask(lines);
+  return lines.filter((_, i) => !mask[i]).join('\n');
+}
+
 // ============================================================
 // Check: Emit Load Discipline
 // ============================================================
@@ -1872,7 +1908,7 @@ function checkEmitLoadDiscipline() {
     }
 
     checked++;
-    const content = fs.readFileSync(fullPath, 'utf8');
+    const content = contentOutsideFences(fs.readFileSync(fullPath, 'utf8'));
     for (const rule of REQUIRED_RULES) {
       if (!rule.pattern.test(content)) {
         results.fail.push({
@@ -1894,7 +1930,7 @@ function checkEmitLoadDiscipline() {
     return;
   }
 
-  const styleContent = fs.readFileSync(stylePath, 'utf8');
+  const styleContent = contentOutsideFences(fs.readFileSync(stylePath, 'utf8'));
   for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Form feedback', 'Drift tracking']) {
     if (!styleContent.includes(`**${label}**`)) {
       results.fail.push({
@@ -1977,9 +2013,10 @@ const ATX_HEADING = /^#{1,6}(\s|$)/;
 
 function extractFormFeedbackBody(content, shape, publishedForm) {
   const lines = content.split('\n');
+  const fenced = fencedLineMask(lines);
   const found = [];
   for (let i = 0; i < lines.length; i++) {
-    if (FORM_FEEDBACK_MENTION.test(lines[i])) found.push(i);
+    if (!fenced[i] && FORM_FEEDBACK_MENTION.test(lines[i])) found.push(i);
   }
 
   if (found.length === 0) {
@@ -1999,10 +2036,32 @@ function extractFormFeedbackBody(content, shape, publishedForm) {
     };
   }
 
+  // A list item continues past a blank line when the next non-blank line is
+  // indented to the item's content column — that is a second paragraph of the
+  // same item, and stopping at the blank line would drop it from comparison.
+  // The content column is the ordinal prefix's own width; an Output Style
+  // paragraph has no ordinal and no such continuation, so for it a blank line
+  // does end the body. An unindented line following directly is Markdown's
+  // lazy continuation and is already collected below.
+  const ordinalPrefix = RULE_ITEM_START.exec(lines[start]);
+  const contentColumn = ordinalPrefix ? ordinalPrefix[0].length : null;
+  const indentOf = line => line.length - line.replace(/^\s*/, '').length;
+
   const body = [lines[start].replace(RULE_ITEM_START, '')];
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
-    if (line.trim() === '' || RULE_ITEM_START.test(line) || ATX_HEADING.test(line)) break;
+    if (RULE_ITEM_START.test(line) || ATX_HEADING.test(line)) break;
+    if (line.trim() === '') {
+      if (contentColumn === null) break;
+      let next = i + 1;
+      while (next < lines.length && lines[next].trim() === '') next++;
+      if (next >= lines.length) break;
+      const candidate = lines[next];
+      if (indentOf(candidate) < contentColumn || RULE_ITEM_START.test(candidate) || ATX_HEADING.test(candidate)) break;
+      body.push(...lines.slice(i, next));
+      i = next - 1;
+      continue;
+    }
     body.push(line);
   }
   return { body: body.join('\n') };
