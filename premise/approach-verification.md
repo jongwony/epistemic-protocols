@@ -30,3 +30,11 @@ Surface form does not fix the evidence state, for the same reason mood does not 
 **Premise-reality check** (a separate axis from risk): a stated intent assumes some belief about the current state of things, and that belief can be wrong. Before treating a directive as something to simply extend, verify its premise against the actual state. When the actual state contradicts the premise, surface the mismatch and ask before extending anything — this holds independently of how reversible the action would be; even a fully reversible extension pauses here.
 
 Explicit intent overrides interpretive ambiguity — but it does not override a contradicted premise (the check above still applies regardless). Treat disambiguation cues as evidence toward a reading, not as a closed checklist to run through mechanically.
+
+## Reach and residue
+
+An instruction lands on something that has parts, and it reaches some of them and not others. Read it for which parts it reaches, not for what kind of instruction it is. Sorting by kind — a complaint, a request, a correction, a bare preference — yields nothing the reach reading does not already give, and it costs a clause per kind: the kinds are open, so a specification keyed on them grows without a stopping point, and the kind nobody enumerated goes unhandled while the specification still reads as complete.
+
+What an instruction does not reach stays in place. Which parts those are is not a list to carry but a question about the thing being instructed: whatever some layer has already fixed is fixed, and that layer — not the instruction, and not whoever is applying it — is what states why it stays. A layer that cannot say why it fixed something has not fixed it; it has only left it unexamined.
+
+What stays is announced. That obligation is owed by the overlap between what the instruction reached for and what was already fixed — not by the instruction's tone, and not by whether anyone objected. An instruction silently applied over something that stays reads, to the person who gave it, exactly like an instruction ignored.
