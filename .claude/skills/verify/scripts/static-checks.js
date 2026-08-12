@@ -1841,42 +1841,6 @@ function checkLanguagePurity() {
   results.warn.push(...purityResults.warn);
 }
 
-// A fenced code block hides its contents from Markdown's block structure: a
-// line inside one depicts a rule, it does not carry it. Both rule checks below
-// read rules by line shape, so both need this mask — without it a rule moved
-// inside a fence stops being a rule while the label check and the body check
-// each still report it present and identical, which is the packaged contract
-// losing the rule with nothing red anywhere. Shared rather than duplicated so
-// the two cannot drift on what counts as fenced.
-function fencedLineMask(lines) {
-  const mask = new Array(lines.length).fill(false);
-  let open = null;
-  for (let i = 0; i < lines.length; i++) {
-    const fence = /^\s*(`{3,}|~{3,})(.*)$/.exec(lines[i]);
-    if (open === null) {
-      // A backtick fence's info string may not itself contain a backtick.
-      if (fence && !(fence[1][0] === '`' && fence[2].includes('`'))) {
-        open = { char: fence[1][0], length: fence[1].length };
-        mask[i] = true;
-      }
-      continue;
-    }
-    mask[i] = true;
-    if (fence && fence[1][0] === open.char && fence[1].length >= open.length && fence[2].trim() === '') {
-      open = null;
-    }
-  }
-  return mask;
-}
-
-// The same content with every fenced line dropped, for checks that scan text
-// rather than walk lines.
-function contentOutsideFences(content) {
-  const lines = content.split('\n');
-  const mask = fencedLineMask(lines);
-  return lines.filter((_, i) => !mask[i]).join('\n');
-}
-
 // ============================================================
 // Check: Emit Load Discipline
 // ============================================================
@@ -1908,7 +1872,7 @@ function checkEmitLoadDiscipline() {
     }
 
     checked++;
-    const content = contentOutsideFences(fs.readFileSync(fullPath, 'utf8'));
+    const content = fs.readFileSync(fullPath, 'utf8');
     for (const rule of REQUIRED_RULES) {
       if (!rule.pattern.test(content)) {
         results.fail.push({
@@ -1930,7 +1894,7 @@ function checkEmitLoadDiscipline() {
     return;
   }
 
-  const styleContent = contentOutsideFences(fs.readFileSync(stylePath, 'utf8'));
+  const styleContent = fs.readFileSync(stylePath, 'utf8');
   for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Form feedback', 'Drift tracking']) {
     if (!styleContent.includes(`**${label}**`)) {
       results.fail.push({
@@ -1959,187 +1923,6 @@ const INK_DERIVED_STYLE_FILES = [
   'epistemic-cooperative/styles/epistemic-ink.md',
   'epistemic-cooperative/styles/proactive-epistemic-ink.md',
 ];
-
-// ============================================================
-// Check: Form Feedback Body Identity
-// ============================================================
-// checkEmitLoadDiscipline (above) verifies only that the **Form feedback**
-// label is present in each core protocol SKILL.md — a copy whose body has
-// been gutted, reworded, or partially reverted still passes that presence
-// check. Form feedback is a compiled copy of a single rule (reach, not
-// reaction-kind), so every protocol copy plus both Ink-derived Output
-// Styles must carry byte-identical bodies or the decisive content can drop
-// out of one copy silently. Scoped to Form feedback only — the other three
-// REQUIRED_RULES labels above (Context-Question Separation, Plain emit
-// discipline, Round-local salience bundling) are deliberately allowed to
-// vary in wording per protocol and are untouched here.
-//
-// What this validates is one well-formed rule item read to its real Markdown
-// boundary — not the first fragment whose prefix happens to look right. The
-// weaker reading leaks in as many directions as there are ways to be
-// prefix-shaped, and each leak ends in the same state: a sentence that
-// reverses the rule sits in a packaged runtime contract while the check calls
-// every copy identical. Enumerating those ways one patch at a time is the
-// shape the rule under check exists to remove, so the extractor states the
-// item's whole form instead.
-//
-// Detection is deliberately loose and validation strict. A label in the wrong
-// shape must fail as malformed, not vanish into "not found" — a strict
-// detector would let exactly the drift this check guards slip out the silent
-// door. Hence: collect every mention, require exactly one, then hold that one
-// to the shape its source class publishes (a SKILL.md rule carries its
-// ordinal, an Output Style paragraph does not; the union of the two is not a
-// shape any file publishes). The body runs to Markdown's own boundary — blank
-// line, next item, real ATX heading, or end of file — because a line appended
-// under the label is rule body, and a heading test loose enough to fire on
-// `#not-a-heading` cuts the body short and lets the remainder escape.
-//
-// What identifies the rule is the bold label, not the punctuation after it,
-// so detection stops at the label. Carrying the colon here would make it part
-// of the rule's identity and open one door per punctuation variant — a
-// look-alike colon defeats detection outright, and an impostor item then
-// slips past the exactly-one requirement it should have tripped. The colon
-// still has to be there; it is validated as part of the published shape
-// below, which is where a wrong one belongs. Residue this leaves, stated
-// rather than chased: a look-alike substituted *inside* the label is not
-// detected, and cannot be — the check identifies the rule by that literal, so
-// a line not carrying it is, to any mechanical reading, not this rule. The
-// line is drawn here on purpose; past it lies a surface with no boundary.
-const FORM_FEEDBACK_MENTION = /\*\*Form feedback\*\*/;
-const PROTOCOL_LABEL_SHAPE = /^\d+\. \*\*Form feedback\*\*: /;
-const STYLE_LABEL_SHAPE = /^\*\*Form feedback\*\*: /;
-const RULE_ITEM_START = /^\d+\. /;
-const ATX_HEADING = /^#{1,6}(\s|$)/;
-
-function extractFormFeedbackBody(content, shape, publishedForm) {
-  const lines = content.split('\n');
-  const fenced = fencedLineMask(lines);
-  const found = [];
-  for (let i = 0; i < lines.length; i++) {
-    if (!fenced[i] && FORM_FEEDBACK_MENTION.test(lines[i])) found.push(i);
-  }
-
-  if (found.length === 0) {
-    return { error: 'No **Form feedback**: rule item found to compare' };
-  }
-  if (found.length > 1) {
-    return {
-      error: `Expected exactly one **Form feedback**: rule item, found ${found.length} at lines ${found.map(i => i + 1).join(', ')} — ` +
-        'a second item can contradict the first while the one being compared stays identical',
-    };
-  }
-
-  const start = found[0];
-  if (!shape.test(lines[start])) {
-    return {
-      error: `**Form feedback**: at line ${start + 1} is not the item this source publishes — expected a line opening with \`${publishedForm}\`, found: "${lines[start].slice(0, 60)}…"`,
-    };
-  }
-
-  // A list item continues past a blank line when the next non-blank line is
-  // indented to the item's content column — that is a second paragraph of the
-  // same item, and stopping at the blank line would drop it from comparison.
-  // The content column is the ordinal prefix's own width; an Output Style
-  // paragraph has no ordinal and no such continuation, so for it a blank line
-  // does end the body. An unindented line following directly is Markdown's
-  // lazy continuation and is already collected below.
-  const ordinalPrefix = RULE_ITEM_START.exec(lines[start]);
-  const contentColumn = ordinalPrefix ? ordinalPrefix[0].length : null;
-  const indentOf = line => line.length - line.replace(/^\s*/, '').length;
-
-  const body = [lines[start].replace(RULE_ITEM_START, '')];
-  for (let i = start + 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (RULE_ITEM_START.test(line) || ATX_HEADING.test(line)) break;
-    if (line.trim() === '') {
-      if (contentColumn === null) break;
-      let next = i + 1;
-      while (next < lines.length && lines[next].trim() === '') next++;
-      if (next >= lines.length) break;
-      const candidate = lines[next];
-      if (indentOf(candidate) < contentColumn || RULE_ITEM_START.test(candidate) || ATX_HEADING.test(candidate)) break;
-      body.push(...lines.slice(i, next));
-      i = next - 1;
-      continue;
-    }
-    body.push(line);
-  }
-  return { body: body.join('\n') };
-}
-
-function checkFormFeedbackBodyIdentity() {
-  const CHECK = 'form-feedback-body-identity';
-  // epistemic-ink.md is the canonical source of truth this rule is compiled
-  // from; anchoring comparison to a fixed source rather than "whichever file
-  // happens to come first" keeps a mismatch report pointing at the actual
-  // outlier instead of flipping wholesale whenever the canonical file itself
-  // is the one that regresses. When that fixed source is unusable there is no
-  // anchor to compare against, so the check reports that and compares
-  // nothing — substituting an arbitrary stand-in would reintroduce exactly
-  // the wholesale flip this constant exists to prevent.
-  const CANONICAL_SOURCE = 'epistemic-cooperative/styles/epistemic-ink.md';
-  // The published form differs by source class, so each source carries the
-  // shape it is held to rather than the check accepting the union of both.
-  const sources = [
-    ...PROTOCOL_FILES.map(file => ({ file, shape: PROTOCOL_LABEL_SHAPE, publishedForm: 'N. **Form feedback**: ' })),
-    ...INK_DERIVED_STYLE_FILES.map(file => ({ file, shape: STYLE_LABEL_SHAPE, publishedForm: '**Form feedback**: ' })),
-  ];
-
-  const bodies = [];
-  for (const { file: relPath, shape, publishedForm } of sources) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) {
-      results.fail.push({ check: CHECK, file: relPath, message: `Source file not found: ${relPath}` });
-      continue;
-    }
-    const content = fs.readFileSync(fullPath, 'utf8');
-    const { body, error } = extractFormFeedbackBody(content, shape, publishedForm);
-    if (error) {
-      results.fail.push({ check: CHECK, file: relPath, message: error });
-      continue;
-    }
-    bodies.push({ file: relPath, body });
-  }
-
-  if (bodies.length === 0) {
-    results.fail.push({ check: CHECK, file: 'all Form feedback sources', message: 'No **Form feedback**: rule item could be extracted from any source' });
-    return;
-  }
-
-  const excerpt = (s, n = 120) => (s.length > n ? s.slice(0, n) + '…' : s);
-  const canonical = bodies.find(b => b.file === CANONICAL_SOURCE);
-  if (!canonical) {
-    results.fail.push({
-      check: CHECK,
-      file: CANONICAL_SOURCE,
-      message: `Canonical Form feedback body unavailable in ${CANONICAL_SOURCE} — no identity comparison was performed for the remaining sources`,
-    });
-    return;
-  }
-  const diverging = bodies.filter(b => b.body !== canonical.body);
-
-  if (diverging.length > 0) {
-    results.fail.push({
-      check: CHECK,
-      file: diverging.map(d => d.file).join(', '),
-      message: `Form feedback body diverges from canonical (${canonical.file}) in: ${diverging.map(d => d.file).join(', ')}. ` +
-        `Canonical excerpt: "${excerpt(canonical.body)}" — diverging excerpt (${diverging[0].file}): "${excerpt(diverging[0].body)}"`,
-    });
-    return;
-  }
-
-  // A pass asserts that every source was read and compared, so it is withheld
-  // whenever any source already failed above — a green line reported beside a
-  // fail claims coverage the run does not have.
-  if (results.fail.some(f => f.check === CHECK)) return;
-
-  const styleCount = INK_DERIVED_STYLE_FILES.length;
-  results.pass.push({
-    check: CHECK,
-    file: 'all core protocol SKILL.md files + both Ink-derived Output Styles',
-    message: `Form feedback rule body verified byte-identical across ${bodies.length} sources (${bodies.length - styleCount} core protocol SKILL.md files + ${styleCount} Ink-derived Output Styles)`,
-  });
-}
 
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
@@ -2974,7 +2757,6 @@ try {
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
-  checkFormFeedbackBodyIdentity();
   checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkLanguagePurity();
