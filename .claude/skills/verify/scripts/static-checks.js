@@ -1938,31 +1938,62 @@ const INK_DERIVED_STYLE_FILES = [
 // discipline, Round-local salience bundling) are deliberately allowed to
 // vary in wording per protocol and are untouched here.
 //
-// The unit compared is the whole list item, not its first line. A rule lives
-// as a numbered list item, and Markdown continues that item across following
-// lines until a blank line, the next item, or a heading — so a line appended
-// under the label is rule body, and comparing only the label line would let
-// an appended sentence reverse the rule while the check still reported the
-// copies byte-identical. The label itself is matched against its exact
-// published shape (`N. ` ordinal for a SKILL.md rule, bare for an Output
-// Style) with no whitespace normalization: an indented or unspaced variant is
-// no longer the list item this rule is published as, so it fails as
-// unfindable rather than being normalized back into a match.
-const FORM_FEEDBACK_LABEL = /^(?:\d+\. )?\*\*Form feedback\*\*: /;
+// What this validates is one well-formed rule item read to its real Markdown
+// boundary — not the first fragment whose prefix happens to look right. The
+// weaker reading leaks in as many directions as there are ways to be
+// prefix-shaped, and each leak ends in the same state: a sentence that
+// reverses the rule sits in a packaged runtime contract while the check calls
+// every copy identical. Enumerating those ways one patch at a time is the
+// shape the rule under check exists to remove, so the extractor states the
+// item's whole form instead.
+//
+// Detection is deliberately loose and validation strict. A label in the wrong
+// shape must fail as malformed, not vanish into "not found" — a strict
+// detector would let exactly the drift this check guards slip out the silent
+// door. Hence: collect every mention, require exactly one, then hold that one
+// to the shape its source class publishes (a SKILL.md rule carries its
+// ordinal, an Output Style paragraph does not; the union of the two is not a
+// shape any file publishes). The body runs to Markdown's own boundary — blank
+// line, next item, real ATX heading, or end of file — because a line appended
+// under the label is rule body, and a heading test loose enough to fire on
+// `#not-a-heading` cuts the body short and lets the remainder escape.
+const FORM_FEEDBACK_MENTION = /\*\*Form feedback\*\*:/;
+const PROTOCOL_LABEL_SHAPE = /^\d+\. \*\*Form feedback\*\*: /;
+const STYLE_LABEL_SHAPE = /^\*\*Form feedback\*\*: /;
 const RULE_ITEM_START = /^\d+\. /;
+const ATX_HEADING = /^#{1,6}(\s|$)/;
 
-function extractFormFeedbackBody(content) {
+function extractFormFeedbackBody(content, shape, publishedForm) {
   const lines = content.split('\n');
-  const start = lines.findIndex(line => FORM_FEEDBACK_LABEL.test(line));
-  if (start === -1) return null;
+  const found = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (FORM_FEEDBACK_MENTION.test(lines[i])) found.push(i);
+  }
+
+  if (found.length === 0) {
+    return { error: 'No **Form feedback**: rule item found to compare' };
+  }
+  if (found.length > 1) {
+    return {
+      error: `Expected exactly one **Form feedback**: rule item, found ${found.length} at lines ${found.map(i => i + 1).join(', ')} — ` +
+        'a second item can contradict the first while the one being compared stays identical',
+    };
+  }
+
+  const start = found[0];
+  if (!shape.test(lines[start])) {
+    return {
+      error: `**Form feedback**: at line ${start + 1} is not the item this source publishes — expected a line opening with \`${publishedForm}\`, found: "${lines[start].slice(0, 60)}…"`,
+    };
+  }
 
   const body = [lines[start].replace(RULE_ITEM_START, '')];
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
-    if (line.trim() === '' || RULE_ITEM_START.test(line) || line.startsWith('#')) break;
+    if (line.trim() === '' || RULE_ITEM_START.test(line) || ATX_HEADING.test(line)) break;
     body.push(line);
   }
-  return body.join('\n');
+  return { body: body.join('\n') };
 }
 
 function checkFormFeedbackBodyIdentity() {
@@ -1976,29 +2007,31 @@ function checkFormFeedbackBodyIdentity() {
   // nothing — substituting an arbitrary stand-in would reintroduce exactly
   // the wholesale flip this constant exists to prevent.
   const CANONICAL_SOURCE = 'epistemic-cooperative/styles/epistemic-ink.md';
+  // The published form differs by source class, so each source carries the
+  // shape it is held to rather than the check accepting the union of both.
   const sources = [
-    ...PROTOCOL_FILES,
-    ...INK_DERIVED_STYLE_FILES,
+    ...PROTOCOL_FILES.map(file => ({ file, shape: PROTOCOL_LABEL_SHAPE, publishedForm: 'N. **Form feedback**: ' })),
+    ...INK_DERIVED_STYLE_FILES.map(file => ({ file, shape: STYLE_LABEL_SHAPE, publishedForm: '**Form feedback**: ' })),
   ];
 
   const bodies = [];
-  for (const relPath of sources) {
+  for (const { file: relPath, shape, publishedForm } of sources) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) {
       results.fail.push({ check: CHECK, file: relPath, message: `Source file not found: ${relPath}` });
       continue;
     }
     const content = fs.readFileSync(fullPath, 'utf8');
-    const line = extractFormFeedbackBody(content);
-    if (line === null) {
-      results.fail.push({ check: CHECK, file: relPath, message: 'No **Form feedback**: rule item found to compare — the label must open a list item as published (`N. **Form feedback**: ` in a SKILL.md, `**Form feedback**: ` in an Output Style), unindented and with a single space after the ordinal' });
+    const { body, error } = extractFormFeedbackBody(content, shape, publishedForm);
+    if (error) {
+      results.fail.push({ check: CHECK, file: relPath, message: error });
       continue;
     }
-    bodies.push({ file: relPath, line });
+    bodies.push({ file: relPath, body });
   }
 
   if (bodies.length === 0) {
-    results.fail.push({ check: CHECK, file: 'all Form feedback sources', message: 'No **Form feedback**: lines could be extracted from any source' });
+    results.fail.push({ check: CHECK, file: 'all Form feedback sources', message: 'No **Form feedback**: rule item could be extracted from any source' });
     return;
   }
 
@@ -2012,14 +2045,14 @@ function checkFormFeedbackBodyIdentity() {
     });
     return;
   }
-  const diverging = bodies.filter(b => b.line !== canonical.line);
+  const diverging = bodies.filter(b => b.body !== canonical.body);
 
   if (diverging.length > 0) {
     results.fail.push({
       check: CHECK,
       file: diverging.map(d => d.file).join(', '),
       message: `Form feedback body diverges from canonical (${canonical.file}) in: ${diverging.map(d => d.file).join(', ')}. ` +
-        `Canonical excerpt: "${excerpt(canonical.line)}" — diverging excerpt (${diverging[0].file}): "${excerpt(diverging[0].line)}"`,
+        `Canonical excerpt: "${excerpt(canonical.body)}" — diverging excerpt (${diverging[0].file}): "${excerpt(diverging[0].body)}"`,
     });
     return;
   }
