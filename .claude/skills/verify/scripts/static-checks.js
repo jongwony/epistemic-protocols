@@ -1937,23 +1937,44 @@ const INK_DERIVED_STYLE_FILES = [
 // REQUIRED_RULES labels above (Context-Question Separation, Plain emit
 // discipline, Round-local salience bundling) are deliberately allowed to
 // vary in wording per protocol and are untouched here.
-function extractFormFeedbackLine(content) {
-  for (const rawLine of content.split('\n')) {
-    const line = rawLine.trim();
-    if (/^(?:\d+\.\s*)?\*\*Form feedback\*\*:/.test(line)) {
-      return line.replace(/^\d+\.\s*/, '');
-    }
+//
+// The unit compared is the whole list item, not its first line. A rule lives
+// as a numbered list item, and Markdown continues that item across following
+// lines until a blank line, the next item, or a heading — so a line appended
+// under the label is rule body, and comparing only the label line would let
+// an appended sentence reverse the rule while the check still reported the
+// copies byte-identical. The label itself is matched against its exact
+// published shape (`N. ` ordinal for a SKILL.md rule, bare for an Output
+// Style) with no whitespace normalization: an indented or unspaced variant is
+// no longer the list item this rule is published as, so it fails as
+// unfindable rather than being normalized back into a match.
+const FORM_FEEDBACK_LABEL = /^(?:\d+\. )?\*\*Form feedback\*\*: /;
+const RULE_ITEM_START = /^\d+\. /;
+
+function extractFormFeedbackBody(content) {
+  const lines = content.split('\n');
+  const start = lines.findIndex(line => FORM_FEEDBACK_LABEL.test(line));
+  if (start === -1) return null;
+
+  const body = [lines[start].replace(RULE_ITEM_START, '')];
+  for (let i = start + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trim() === '' || RULE_ITEM_START.test(line) || line.startsWith('#')) break;
+    body.push(line);
   }
-  return null;
+  return body.join('\n');
 }
 
 function checkFormFeedbackBodyIdentity() {
   const CHECK = 'form-feedback-body-identity';
   // epistemic-ink.md is the canonical source of truth this rule is compiled
-  // from (see Task-1 framing); anchoring comparison to a fixed source rather
-  // than "whichever file happens to come first" keeps a mismatch report
-  // pointing at the actual outlier instead of flipping wholesale whenever
-  // the canonical file itself is the one that regresses.
+  // from; anchoring comparison to a fixed source rather than "whichever file
+  // happens to come first" keeps a mismatch report pointing at the actual
+  // outlier instead of flipping wholesale whenever the canonical file itself
+  // is the one that regresses. When that fixed source is unusable there is no
+  // anchor to compare against, so the check reports that and compares
+  // nothing — substituting an arbitrary stand-in would reintroduce exactly
+  // the wholesale flip this constant exists to prevent.
   const CANONICAL_SOURCE = 'epistemic-cooperative/styles/epistemic-ink.md';
   const sources = [
     ...PROTOCOL_FILES,
@@ -1968,9 +1989,9 @@ function checkFormFeedbackBodyIdentity() {
       continue;
     }
     const content = fs.readFileSync(fullPath, 'utf8');
-    const line = extractFormFeedbackLine(content);
+    const line = extractFormFeedbackBody(content);
     if (line === null) {
-      results.fail.push({ check: CHECK, file: relPath, message: 'No **Form feedback**: line found to compare' });
+      results.fail.push({ check: CHECK, file: relPath, message: 'No **Form feedback**: rule item found to compare — the label must open a list item as published (`N. **Form feedback**: ` in a SKILL.md, `**Form feedback**: ` in an Output Style), unindented and with a single space after the ordinal' });
       continue;
     }
     bodies.push({ file: relPath, line });
@@ -1982,7 +2003,15 @@ function checkFormFeedbackBodyIdentity() {
   }
 
   const excerpt = (s, n = 120) => (s.length > n ? s.slice(0, n) + '…' : s);
-  const canonical = bodies.find(b => b.file === CANONICAL_SOURCE) || bodies[0];
+  const canonical = bodies.find(b => b.file === CANONICAL_SOURCE);
+  if (!canonical) {
+    results.fail.push({
+      check: CHECK,
+      file: CANONICAL_SOURCE,
+      message: `Canonical Form feedback body unavailable in ${CANONICAL_SOURCE} — no identity comparison was performed for the remaining sources`,
+    });
+    return;
+  }
   const diverging = bodies.filter(b => b.line !== canonical.line);
 
   if (diverging.length > 0) {
@@ -1995,10 +2024,16 @@ function checkFormFeedbackBodyIdentity() {
     return;
   }
 
+  // A pass asserts that every source was read and compared, so it is withheld
+  // whenever any source already failed above — a green line reported beside a
+  // fail claims coverage the run does not have.
+  if (results.fail.some(f => f.check === CHECK)) return;
+
+  const styleCount = INK_DERIVED_STYLE_FILES.length;
   results.pass.push({
     check: CHECK,
     file: 'all core protocol SKILL.md files + both Ink-derived Output Styles',
-    message: `Form feedback body verified byte-identical across ${bodies.length} protocol copies and both Output Styles`,
+    message: `Form feedback rule body verified byte-identical across ${bodies.length} sources (${bodies.length - styleCount} core protocol SKILL.md files + ${styleCount} Ink-derived Output Styles)`,
   });
 }
 
