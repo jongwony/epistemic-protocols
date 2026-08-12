@@ -14,6 +14,8 @@ Citable registry of conventions whose resolution direction is already constitute
 - **Multi-skill plugin description scope**: a plugin bundling more than one skill (currently: `epistemic-cooperative` only) is not required to enumerate every skill's `/command` in its top-level plugin description to satisfy `artifact-self-containment.js`'s `hasRoutingCue` check; single-skill plugin descriptions must still name their one skill's `/command`, enforced unchanged.
 - **Checkpoint policy stays at the meta layer**: `SKILL.md` inscribes only when a checkpoint fires, what it presents, and each branch's state transition — never which branch is correct; silence therefore carries `Stop` rather than auto-selecting a branch. General form: `premise/tiering-and-scope.md` §Checkpoint Policy Stays at the Meta Layer.
 - **Conditional-load cut criterion**: what leaves a `SKILL.md` for its `references/` surface is decided by structural belonging and the earliest loading tier the clause's need requires, never by length. A clause moved without a precise pointer that reaches it just before it binds is a defect rather than an optimization.
+- **Surface authority order**: instruction surfaces rank `premise/` → `AGENTS.md` → `.claude/rules/` → `.claude/principles/` → `docs/`, and where two disagree the higher one governs while the lower one is the thing to correct. A static check is an enforcement channel rather than a surface: it can block a commit, and a block whose basis contradicts a higher surface is a defect in the check — not a reason to abandon the work it stopped. A surface below `AGENTS.md` describes and explains; none of them establishes its own tier or another's, so a tier claim written inside the surface it grades carries no authority. Contributor and governance surfaces are never runtime dependencies of a packaged `SKILL.md`; `artifact-self-containment` enforces that against the packaged runtime-contract view.
+- **Assertion needs an enforcement channel**: a state surface carries why a thing is shaped as it is, not a present-tense claim about what the repo currently contains. A coverage roster, a count, an inventory of which files carry what, a restatement of what a check enforces — each is admitted only where a channel re-runs it. Without one it keeps asserting an earlier reading with present authority, and being correct today is not the test: what fails is the day it silently stops being correct and blocks work that contradicts it. Where such a claim is worth keeping, give it a guard; otherwise state what it was guarding against and point at the source a reader can check.
 - **Ledger binding**: this project's canonical ledger is the git record — commit messages plus issue/PR bodies. "Then"-records (narrative, provenance, trade-offs, rejected alternatives) route there at write time; state surfaces carry only now-asserting operative content, strictest in always-loaded instruction files.
 - **Academic grounding**: the protocols take their motive from Stoic epistemology (*katalēpsis*), Husserlian phenomenology (synthesis of identification, horizon), Gadamerian hermeneutics (fusion of horizons), and cognitive psychology (generation effect, retrieval practice, structure-mapping). Which literature grounds which protocol — and whether that grounding ever reached a shipped surface — is a then-record and lives in the git record, not on a state surface here. When grounding a claim in literature, check the primary source rather than answering from recall, and carry the verification strength with the claim: *verified* (primary source checked in this session), *mostly* (core claim checked, surrounding detail synthesized), or *reconstructed* (volume/issue/pagination came from recall and needs a spot-check before publication). Name the weakest link explicitly. An effect that failed replication is a design warning, never a quantitative law — and an absence claim reaches exactly as far as the search that grounds it, so state the scope searched rather than concluding from a partial read.
 - **Session-handoff routing**: work crossing a session boundary is handed over as a pointer into the canonical record, never as a re-authored copy of it. The author supplies purpose/frame and entry points only; *what* to carry over is derived by the recipient from that purpose, grounded with `/inquire` where available or its equivalent grounding pass — the moment the author selects the items, the corruption a pointer avoids re-enters at small scale.
@@ -36,7 +38,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Runtime users interact with packaged `SKILL.md` files plus plugin metadata. Discovery metadata routes; `SKILL.md` carries the normative user contract.
 - `SKILL.md` must be self-contained. Do not require runtime readers to chase contributor-only docs, axiom identifiers, rule paths, design-philosophy documents, or mission/vision prose to understand the skill contract.
 - Prescriptive changes that affect protocol behavior must be compiled into the relevant `SKILL.md` Rules sections.
-- Claim-strength boundaries for runtime surfaces are tracked in `docs/runtime-dependency-ledger.md`.
+- Claim strength differs by surface and the difference is load-bearing. The packaged `SKILL.md` is the **normative contract**. A plugin `description` is **routing metadata** written under a length budget, so it is judged for routing clarity rather than semantic completeness. How a host realizes the contract is **platform realization** and not part of it — a protocol that looks broken on another host may simply be satisfied differently there. Model judgment and soft safeguards are **advisory**, carrying no runtime guarantee for a reader to design against.
 - The formal blocks are part of the runtime-normative `SKILL.md` contract — they type the prose and constitute protocol identity, not contributor spec. Their anatomy (a contributor guide *about* the blocks, distinct from the blocks themselves) is documented in `docs/structural-specs.md`.
 
 ## Progressive Disclosure
@@ -50,8 +52,8 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 - `.claude/rules/` is for principles that must be active at per-turn runtime.
 - `.claude/principles/` is for lazy-loaded architectural principles.
-- `docs/analysis/` is for grounded exposition and investigation writeups.
-- `docs/structural-specs.md` is for editing conventions and structural requirements.
+- Grounded exposition, investigation writeups, and evidence reviews go to the ledger (issue or PR body), never to a file under `docs/` — they are then-records, and nothing on a state surface re-runs them.
+- A contributor reference serving one skill lives in that skill's own `references/`, so it loads when the skill is triggered rather than when someone remembers it exists. `docs/` keeps what no single skill owns — a reference cited from several surfaces at once, or a contributor surface a public README reader is sent to.
 - New rule proposals require a placement judgment against the existing docs/rules surface; do not add a runtime rule just because a concept is philosophically attractive.
 
 ## Development
@@ -76,13 +78,13 @@ Do not run `scripts/package.test.js` concurrently with static protocol verificat
 
 After protocol predicate refactors, run a lexical sweep for stale vocabulary using the verification guidance rather than hardcoding predicate inventories here.
 
-Details: `docs/verification.md`.
+Details: `.claude/skills/verify/references/verification.md`.
 
 ## Editing Conventions
 
 - Git and editing rules are auto-loaded via `.claude/rules/editing-conventions.md`.
 - Any protocol change requires the relevant `plugin.json` version bump plus `/verify`.
-- Co-change patterns are tracked in `docs/co-change.md`.
+- Co-change patterns are tracked in `.claude/skills/verify/references/co-change.md`.
 - Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.

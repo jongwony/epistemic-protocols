@@ -8,8 +8,8 @@ SKILL.md is a realization of it.
 
 ## Why an engine
 
-The audit skills share ~80% identical scaffolding (Inputs, Scope, Output JSON schema +
-severity calibration, Distinction, confidence note, Self-application). They differ only in
+The audit skills share their scaffolding — Inputs, Scope, Output JSON schema plus
+severity calibration, Distinction, confidence note, Self-application — and differ only in
 the **principle parameter**. Naming the shared mechanism once — here — lets a contributor
 maintain the scaffolding in a single place and keep the instances aligned, instead of
 editing three near-duplicate files independently and letting them drift.
