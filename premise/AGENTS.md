@@ -28,6 +28,6 @@ Read [`instruction-authoring.md`](instruction-authoring.md) when writing or revi
 
 Read [`delegation-and-subagents.md`](delegation-and-subagents.md) when handing work to an agent that cannot see this conversation, and when deciding what a coordinator keeps for itself versus delegates outward.
 
-Read [`session-and-handoff.md`](session-and-handoff.md) when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, and when someone interrupts the work mid-task.
+Read [`session-and-handoff.md`](session-and-handoff.md) when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, when someone interrupts the work mid-task, and when attention has already moved off a commitment that is still open.
 
 Read [`boundaries-and-safety.md`](boundaries-and-safety.md) before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable.
