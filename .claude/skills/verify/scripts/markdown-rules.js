@@ -143,7 +143,12 @@ function canonicalNode(node) {
     case 'block_quote': return ['quote', kids()];
     case 'item': return ['item', kids()];
     // The ordinal a list starts at is deliberately absent: it is the coordinate
-    // the two source classes are entitled to differ on.
+    // the two source classes are entitled to differ on. Read that as a statement
+    // about this comparison and nothing wider — it does not certify that
+    // renumbering a `## Rules` section is safe. A rule can be cited by its
+    // number elsewhere in its own file, and such a citation breaks silently
+    // under a renumber while this check, correctly, stays green. Nothing here
+    // guards that; a renumber is checked by reading the file's own references.
     case 'list': return ['list', node.listType, kids()];
     case 'code_block': return ['codeblock', node.info || '', node.literal];
     case 'html_block': return ['htmlblock', node.literal];

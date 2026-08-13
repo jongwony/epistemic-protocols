@@ -31,6 +31,7 @@ Two consequences a repair needs:
 
 - **`npm install` is a precondition.** The parser is a devDependency. When it is absent both checks report a fail naming the install command rather than skipping — a skip would leave the assertion standing with nothing re-running it. The pre-commit hook that runs these checks already presupposes the install, since husky installs it.
 - **Identity is over what CommonMark says the rule says**, not over bytes. The per-protocol ordinal and the column a copy wraps at are outside the comparison, because the two source classes are entitled to differ there — a protocol carries the rule as a numbered list item, an Output Style as a plain paragraph. Everything that changes what is read is inside it. Two kinds of drift stay out of reach and are declared in the check's own comment rather than approximated: a sentence placed outside the rule item, and a look-alike character substituted inside the label itself.
+- **Ordinal-invariance is not a licence to renumber.** It says this comparison ignores the ordinal; it says nothing about what else in the file depends on it. A rule cited by number elsewhere in its own `SKILL.md` breaks silently under a renumber while this check stays correctly green, and no check reads those citations. Renumbering a `## Rules` section is verified by reading that file's own references, not by a green run.
 
 ### Repair
 
