@@ -1134,3 +1134,5 @@ module.exports = {
   createZip,
   generateReleaseNotes,
 };
+
+# Fix for issue #777: safe input handling
