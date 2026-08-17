@@ -13,6 +13,7 @@ const util = require('util');
 const { execFileSync } = require('child_process');
 const { runArtifactSelfContainmentCheck } = require('./artifact-self-containment');
 const { runLanguagePurityCheck } = require('./language-purity');
+const markdownRules = require('./markdown-rules-stdlib');
 const {
   discoverPlugins,
   protocolFiles,
@@ -1859,10 +1860,15 @@ function checkLanguagePurity() {
 // density is set and stays a separate rule. These must live in each core
 // protocol SKILL.md because packaged runtime contracts cannot depend on
 // contributor docs or Output Style alone.
+// A substring test for the bold label counted a copy moved inside a fence or an
+// HTML comment as present, which is the coverage this check asserts being lost
+// with nothing red anywhere. The reading below asks instead where a rule is
+// allowed to be — see markdown-rules-stdlib.js for what that position is and
+// what it does and does not reach.
 function checkEmitLoadDiscipline() {
   const REQUIRED_RULES = [
-    { label: 'Round composition', pattern: /\*\*Round composition\*\*/ },
-    { label: 'Form feedback', pattern: /\*\*Form feedback\*\*/ },
+    { label: 'Round composition' },
+    { label: 'Form feedback' },
   ];
 
   let checked = 0;
@@ -1880,7 +1886,7 @@ function checkEmitLoadDiscipline() {
     checked++;
     const content = fs.readFileSync(fullPath, 'utf8');
     for (const rule of REQUIRED_RULES) {
-      if (!rule.pattern.test(content)) {
+      if (!markdownRules.hasRuleAtPosition(content, rule.label)) {
         results.fail.push({
           check: 'emit-load-discipline',
           file: relPath,
@@ -1902,7 +1908,7 @@ function checkEmitLoadDiscipline() {
 
   const styleContent = fs.readFileSync(stylePath, 'utf8');
   for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Form feedback', 'Drift tracking']) {
-    if (!styleContent.includes(`**${label}**`)) {
+    if (!markdownRules.hasRuleAtPosition(styleContent, label)) {
       results.fail.push({
         check: 'emit-load-discipline',
         file: 'epistemic-cooperative/styles/epistemic-ink.md',
@@ -1929,6 +1935,81 @@ const INK_DERIVED_STYLE_FILES = [
   'epistemic-cooperative/styles/epistemic-ink.md',
   'epistemic-cooperative/styles/proactive-epistemic-ink.md',
 ];
+
+// ============================================================
+// Check: Form Feedback Body Identity
+// ============================================================
+// emit-load-discipline asserts each copy of the rule is present; presence is not
+// sameness, and a copy that keeps the label while losing a clause is a runtime
+// contract that quietly says something else. Scoped to Form feedback alone: the
+// other labels emit-load-discipline requires are deliberately allowed to vary in
+// wording per protocol, and are untouched here.
+//
+// epistemic-ink.md is the source this rule is compiled from. Anchoring the
+// comparison to a fixed source rather than to whichever file happens to come
+// first keeps a mismatch report pointing at the actual outlier, instead of
+// flipping wholesale whenever the canonical file is itself the regression. The
+// cost of that anchor is stated rather than hidden: a clause removed from every
+// copy including the canonical one leaves nothing to compare against and passes.
+function checkFormFeedbackBodyIdentity() {
+  const CHECK = 'form-feedback-body-identity';
+  const LABEL = 'Form feedback';
+  const CANONICAL_SOURCE = 'epistemic-cooperative/styles/epistemic-ink.md';
+
+  const sources = [
+    ...PROTOCOL_FILES.map(file => ({ file, shape: 'orderedListItem' })),
+    ...INK_DERIVED_STYLE_FILES.map(file => ({ file, shape: 'topLevelParagraph' })),
+  ];
+
+  const units = [];
+  for (const { file: relPath, shape } of sources) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.fail.push({ check: CHECK, file: relPath, message: `Source file not found: ${relPath}` });
+      continue;
+    }
+    const extracted = markdownRules.extractRuleUnit(fs.readFileSync(fullPath, 'utf8'), LABEL, shape);
+    if (extracted.error) {
+      results.fail.push({ check: CHECK, file: relPath, message: extracted.error });
+      continue;
+    }
+    units.push({ file: relPath, ...extracted });
+  }
+
+  const canonical = units.find(unit => unit.file === CANONICAL_SOURCE);
+  if (!canonical) {
+    results.fail.push({
+      check: CHECK,
+      file: CANONICAL_SOURCE,
+      message: `Canonical Form feedback rule unavailable in ${CANONICAL_SOURCE} — no identity comparison was performed for the remaining sources`,
+    });
+    return;
+  }
+
+  const excerpt = (text, limit = 140) => (text.length > limit ? `${text.slice(0, limit)}…` : text);
+  const diverging = units.filter(unit => unit.body !== canonical.body);
+  if (diverging.length > 0) {
+    results.fail.push({
+      check: CHECK,
+      file: diverging.map(unit => unit.file).join(', '),
+      message: `Form feedback rule diverges from canonical (${canonical.file}) in: ${diverging.map(unit => `${unit.file}:${unit.line}`).join(', ')}. ` +
+        `Canonical reads: "${excerpt(canonical.body)}" — ${diverging[0].file} reads: "${excerpt(diverging[0].body)}"`,
+    });
+    return;
+  }
+
+  // A pass asserts every source was read and compared, so it is withheld
+  // whenever any source already failed above — a green line reported beside a
+  // fail claims coverage the run does not have.
+  if (results.fail.some(entry => entry.check === CHECK)) return;
+
+  const styleCount = INK_DERIVED_STYLE_FILES.length;
+  results.pass.push({
+    check: CHECK,
+    file: 'all core protocol SKILL.md files + both Ink-derived Output Styles',
+    message: `Form feedback rule verified identical across ${units.length} sources (${units.length - styleCount} core protocol SKILL.md files + ${styleCount} Ink-derived Output Styles)`,
+  });
+}
 
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
@@ -2761,6 +2842,7 @@ try {
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
+  checkFormFeedbackBodyIdentity();
   checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkLanguagePurity();
