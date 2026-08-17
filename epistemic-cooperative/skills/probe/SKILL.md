@@ -86,7 +86,7 @@ Hypothesis N — N interpretations possible / decision point is X
   (Singleton |coverage|=1: render the single CoverageEntry as one protocol line, equivalent to prior single-protocol format)
 ```
 
-**Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (Per Rule 14, this contextual rule informs the gate decision and therefore precedes the gate options.)
+**Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (This contextual rule informs the gate decision and therefore precedes the gate options.)
 
 Present the recognition Constitution interaction as a free-response prompt:
 
@@ -99,7 +99,7 @@ Phase 3 parses the utterance into the corresponding R coproduct constructor.
 The hypothesis surface above offers a candidate horizon of the deficit space — open to your recognition, redirection, or transcendence; no typed selection is required.
 ```
 
-The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall and Rule 14 Context-Question Separation, both inscribed in this SKILL.md).
+The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall, and evidence is presented as text output before the gate rather than folded into it, both inscribed in this SKILL.md).
 
 ### Phase 3: Route Integration
 
@@ -267,7 +267,6 @@ The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug
 11. **Hypothesis form** — Each hypothesis is phrased as low-confidence dialogic: "N interpretations possible / decision point is X". Certainty framings ("clearly", "definitely", "the answer is") are forbidden.
 12. **Recognition over Recall** — Present structured hypothesis options via Cognitive Partnership Move (Constitution) and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
 13. **Detection with Authority** — AI detects candidate deficits with cited situation evidence; the user constitutes the recognition. AI never resolves the disposition.
-14. **Context-Question Separation** — All hypothesis evidence and reverse-evidence is presented as text output before the gate. The gate contains only the disposition options.
 15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
 16. **Coexistence with /catalog and /onboard** — Probe does not replace passive reference (`/catalog`) or pattern-based recommendation (`/onboard`). The three skills occupy distinct stances.
 17. **Structural-change calibration** — When a candidate hypothesis concerns whether a structural change crosses the architectural threshold, distinguish at hypothesis construction time:

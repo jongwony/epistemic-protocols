@@ -1851,17 +1851,17 @@ function checkLanguagePurity() {
 // Check: Emit Load Discipline
 // ============================================================
 // Enforces compiled-copy coverage for the user-facing disciplines that shape
-// runtime protocol output. Context-Question Separation handles placement, Plain
-// emit discipline handles vocabulary, Round-local salience bundling handles
-// per-round adjacency and context-switch cost, and Form feedback handles how a
-// round's density is set. These must live in each core protocol SKILL.md
-// because packaged runtime contracts cannot depend on contributor docs or
-// Output Style alone.
+// runtime protocol output. Round composition folds placement (context before
+// the gate, not inside it), vocabulary (plain rendering held across the
+// session), and per-round adjacency/context-switch cost into one inline rule,
+// with the occasion-bound detail moved to each skill's own
+// references/round-composition.md; Form feedback handles how a round's
+// density is set and stays a separate rule. These must live in each core
+// protocol SKILL.md because packaged runtime contracts cannot depend on
+// contributor docs or Output Style alone.
 function checkEmitLoadDiscipline() {
   const REQUIRED_RULES = [
-    { label: 'Context-Question Separation', pattern: /\*\*Context-Question Separation\*\*/ },
-    { label: 'Plain emit discipline', pattern: /\*\*Plain emit discipline\*\*/ },
-    { label: 'Round-local salience bundling', pattern: /\*\*Round-local salience bundling\*\*/ },
+    { label: 'Round composition', pattern: /\*\*Round composition\*\*/ },
     { label: 'Form feedback', pattern: /\*\*Form feedback\*\*/ },
   ];
 

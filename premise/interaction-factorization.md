@@ -17,9 +17,3 @@ A resolution direction already settled by an existing convention — an establis
 Operational test: "Would a knowledgeable observer find each option genuinely viable under different value weightings?" If yes → gated (genuine deliberation, where the user's values determine the choice). If no → relay (present the finding directly).
 
 See `premise/gate-design.md` for the differential-future refinements this test builds on — cost-symmetric baggage and meta-action-as-peer detection — and `premise/recognition-and-authority.md` for what a gated interaction presents once it is genuinely gated.
-
-## Context-Question Separation (Axiom)
-
-Gate interactions structurally separate context (analysis, evidence, rationale) from the question itself (the essential choice and its options). All analytical content is presented as text output before the gate; the gate contains only the question and the option-specific differential implications.
-
-Formal boundary: if removing a sentence from the gate would cause the loss of an option's differential implication, it belongs in the gate; if removing it would cause the loss of analytical context, it belongs in the pre-gate text output.
