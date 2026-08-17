@@ -51,6 +51,12 @@ Operational test: "Do the presented options produce materially different downstr
 
 Scope: decision gates — gates whose options are positions on a decision axis. **Structural test**: "Does accepting this option commit the agent to any downstream action beyond record-keeping?" If yes → decision-axis gate → the requirement applies. If no → pure verification → excluded. Verification-purpose gates are excluded: gates whose option structure is determined by a verification task's own requirements (e.g., a comprehension check, or a step confirming recognition of a past state) rather than by decision-axis position. The requirement applies to gates where the user's response constitutes a forward-looking choice among alternatives.
 
+## Content Placement Boundary (Axiom)
+
+A gate's own text carries the question and each option's differential implication; the analytical content — analysis, evidence, rationale — belongs in the text presented before it. Operational test: if removing a sentence from the gate would cause the loss of an option's differential implication, it belongs in the gate; if removing it would cause the loss of analytical context, it belongs in the pre-gate text output.
+
+This binds every gate, not only the decision gates the Differential Future Requirement above ranges over: a verification-purpose gate is excluded from the differential-future test because its option structure answers to a verification task rather than a decision axis, but its question still arrives after its context or the reader is left assembling both at once.
+
 ## Convergence Evidence (Derived)
 
 Convergence must be demonstrated, not asserted. At convergence, the system must present a transformation trace mapping each identified deficit instance to its resolution — the transformation instantiated at the concrete level. "All gaps resolved" or "boundary defined" as a bare assertion, without per-item evidence, is a process violation. Convergence evidence (the transformation trace) is itself a relay presentation: it demonstrates the completed transformation without gating — the system presents the trace and proceeds automatically. Distinction: convergence *evidence* is always relay; convergence *conditions* may involve a gate when user commitment is constitutive. In that case, the relay trace provides context for the binding gate — the two are separate operations, not conflated.

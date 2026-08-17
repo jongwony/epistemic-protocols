@@ -43,7 +43,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
-- [ ] `premise/AGENTS.md` — what the portable premise collection is, how adoption is scoped, and what each document covers; start here (~2 min)
+- [ ] `premise/AGENTS.md` — what the portable premise collection is and what each document covers; start here (~2 min)
 - [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins; the ones that do presuppose protocols, and this repo's own instances of the portable ones, live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
