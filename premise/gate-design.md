@@ -47,6 +47,8 @@ Operational test: "Do the presented options produce materially different downstr
 
 **False-positive collapse guard**: trajectory equivalence is itself an epistemic claim. When the equivalence assessment requires user-private knowledge, or is plausibly contested, preserve the options as distinct — collapsing under contested equivalence would exercise constitutive authority while appearing to relay.
 
+**Content placement boundary**: a gate's own text carries the question and each option's differential implication; the analytical content belongs in the text presented before it. Operational test: if removing a sentence from the gate would cause the loss of an option's differential implication, it belongs in the gate; if removing it would cause the loss of analytical context, it belongs in the pre-gate text output.
+
 **Off-axis prompt handling**: an urgent off-axis prompt — one that presses for attention while occupying no position on the decision axis — must surface through an alternative affordance — pre-gate text, a progress indicator, or a separate checkpoint gate — not by re-introducing it as a peer option.
 
 Scope: decision gates — gates whose options are positions on a decision axis. **Structural test**: "Does accepting this option commit the agent to any downstream action beyond record-keeping?" If yes → decision-axis gate → the requirement applies. If no → pure verification → excluded. Verification-purpose gates are excluded: gates whose option structure is determined by a verification task's own requirements (e.g., a comprehension check, or a step confirming recognition of a past state) rather than by decision-axis position. The requirement applies to gates where the user's response constitutes a forward-looking choice among alternatives.
