@@ -317,8 +317,7 @@ Materialize artifact basis for each selected entry point, then **call record**:
 ```
 record({
   subject: "[Grasp] Entry point label",
-  description: "Intent to verify + artifact basis used for grounding",
-  activeForm: "Verifying [entry point]"
+  description: "Intent to verify + artifact basis used for grounding"
 })
 ```
 
@@ -396,8 +395,7 @@ For each task (entry point):
      ```
      record({
        subject: "[Grasp:Proposal] Brief description",
-       description: "User proposal during [entry point]: [verbatim user text]",
-       activeForm: "Archiving user proposal"
+       description: "User proposal during [entry point]: [verbatim user text]"
      })
      ```
    - Append the created proposal to `Λ.branchArtifacts` with `kind = Proposal`, `reference = RecordId` returned by `record[Proposal]`, and `return_pointer = Λ.cursor`.

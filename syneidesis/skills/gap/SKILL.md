@@ -254,8 +254,7 @@ Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expa
 ```
 record({
   subject: "[Gap:Type] Question",
-  description: "Rationale and context for this gap",
-  activeForm: "Surfacing [Type] gap"
+  description: "Rationale and context for this gap"
 })
 ```
 

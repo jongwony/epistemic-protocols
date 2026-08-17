@@ -308,7 +308,7 @@ adapt  (transform) → Edit, Write (Adapt(direction) disposition: result adaptat
 discard (transform) → Edit, Write (Discard(replacement) disposition: withdraw the result and put the replacement in its place, or remove it outright when the withdrawal leaves nothing behind)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
 route  (extension)   → TextPresent+Proceed (certificate.status = route → emit the matched route claim's routed_deficit as a backward-misfit recommendation: decision gap → GapUnnoticed (hint /gap), missing pre-execution fact → ContextInsufficient (hint /inquire), undefined convention/dependency ownership → BoundaryUndefined (hint /bound); the deficit is read off the matched local route claim, basis cited, and the command travels only as a hint; closes the mismatch with disposition Route(routed_deficit))
-dispose (track)  → Internal state update + record update, performed as ONE step (append the DispositionRecord for the closed mismatch to Σ.dispositions — user-, relay-, certificate-, or loop-assigned — and complete its task). Every close in the protocol goes through this step, whichever phase invokes it: the record half is unconditional, and the record update half fires exactly when the mismatch was REGISTERED. A certificate-assigned close (Route, Residual) runs before registration and so has no task to complete — it appends its record and stops there. For a registered mismatch, doing both halves together is what removes the mismatch from pending(Σ) before any bulk close can reach it. This ledger is what the convergence trace ranges over, and what the terminal verdict's dispositions field is assembled from
+dispose (track)  → Internal state update + record update, performed as ONE step (append the DispositionRecord for the closed mismatch to Σ.dispositions — user-, relay-, certificate-, or loop-assigned — and complete its entry). Every close in the protocol goes through this step, whichever phase invokes it: the record half is unconditional, and the record update half fires exactly when the mismatch was REGISTERED. A certificate-assigned close (Route, Residual) runs before registration and so has no tracked entry to complete — it appends its record and stops there. For a registered mismatch, doing both halves together is what removes the mismatch from pending(Σ) before any bulk close can reach it. This ledger is what the convergence trace ranges over, and what the terminal verdict's dispositions field is assembled from
 keep_all_remaining (track) → Internal state update + record update through the dispose step above (no gate opens here: present is already open at Qc, and the declaration arrives as a FREE RESPONSE there rather than as a peer option). On arrival, dispose every m ∈ pending(Σ) with an unjudged Keep (judgment = None) whose disposition_basis is the declaration itself — EXCEPT Mₛ when judgment_state = Some((Upheld, basis)) for this cycle, which additionally carries that verdict, judgment_by = relay, and that cited basis as its judgment_basis — then deactivate. The record shape is the transition's: PHASE TRANSITIONS Phase 1 → keep_all_remaining
 Mᵢ/Mₑ (track)   → record/record update (mismatch tracking with framing visibility; only certificate-passing mismatches are registered)
 converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
@@ -333,7 +333,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 --   Σ := { dispositions = [], scan_count = 0 }. Λ.fit_map is bound by the Phase 0 pass (Λ.fit_map := F)
 -- judgment_state is CYCLE-LOCAL and holds no field here: produced at Phase 1 by judgment_relay_upheld, read at the Qc presentation and again
 --   at the close that follows (Phase 2 dispose, the keep_carried_forward close, or the keep_all_remaining bulk exit), all within one cycle. Where a relayed judgment must
---   survive a session boundary, the channel is the Task the mismatch is already registered under
+--   survive a session boundary, the channel is the entry the mismatch is already registered under
 -- Views over Σ.dispositions (derived, NOT parallel state):
 --   routed(Λ)   = { r ∈ Σ.dispositions : r.disposition = Route(_) }
 --   residual(Λ) = { r ∈ Σ.dispositions : r.disposition = Residual }
@@ -494,14 +494,13 @@ Evaluate result against application context. This phase is **silent** — no use
 
 ### Phase 1: Mismatch Surfacing
 
-**Register all certificate-passing mismatches (`Mᵢ_passed`) as Tasks** (record), then take the next pending mismatch selected by `SelectNext`. If the fit evidence has already settled its judgment as `Overruled`, report the retraction and its cited basis and close it as relay (`judgment_relay_overruled`). Failing that, settle the judgment half against the current target, then: if the user already answered `Keep` for this aspect (`accepted(aspect(Mₛ))`), report the carry-forward and the basis they gave and close it as relay (`keep_carried_forward`), recording this cycle's judgment rather than the earlier one. Otherwise **present** it via Cognitive Partnership Move (Constitution). Routed/ambiguous mismatches never enter `pending(Σ)` (fail-closed certificate).
+**Register all certificate-passing mismatches (`Mᵢ_passed`) as entries** (record), then take the next pending mismatch selected by `SelectNext`. If the fit evidence has already settled its judgment as `Overruled`, report the retraction and its cited basis and close it as relay (`judgment_relay_overruled`). Failing that, settle the judgment half against the current target, then: if the user already answered `Keep` for this aspect (`accepted(aspect(Mₛ))`), report the carry-forward and the basis they gave and close it as relay (`keep_carried_forward`), recording this cycle's judgment rather than the earlier one. Otherwise **present** it via Cognitive Partnership Move (Constitution). Routed/ambiguous mismatches never enter `pending(Σ)` (fail-closed certificate).
 
-**Task format**:
+**Entry format**:
 ```
 record({
   subject: "[Mismatch:aspect] description",
-  description: "Evidence and context for this mismatch (severity: X)",
-  activeForm: "Surfacing [aspect] mismatch"
+  description: "Evidence and context for this mismatch (severity: X)"
 })
 ```
 
@@ -546,7 +545,7 @@ This is a contextual materialization of `Adapt(direction)` — the formal dispos
 
 ### Phase 2: Disposition
 
-After the user's answer `(judgment, disposition)`, **first** append the mismatch's one `DispositionRecord` to `Σ.dispositions` and complete its task — as a single step, so it leaves `pending(Σ)` before any arm below runs — **then** act on the disposition:
+After the user's answer `(judgment, disposition)`, **first** append the mismatch's one `DispositionRecord` to `Σ.dispositions` and complete its entry — as a single step, so it leaves `pending(Σ)` before any arm below runs — **then** act on the disposition:
 
 1. **`(Overruled, Keep)`**: the flagged aspect fits after all — no adaptation, no re-scan, and the result is left exactly as it stands (`R_final` is bound once, at convergence). This pair also arrives relay-assigned from Phase 1 when the fit evidence already settled it (`judgment_relay_overruled`), in which case it never reached this gate; the trace prints the two apart
 2. **`(Upheld, Keep)`**: the mismatch stands and is accepted anyway — the result is left as whatever earlier adaptations made it; note the fitness assumption accepted, no re-scan. An accepted residual, recorded apart from arm 1
