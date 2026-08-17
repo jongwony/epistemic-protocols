@@ -287,7 +287,6 @@ The `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (writt
 10. **Recommended vocabulary** — Use "violation review", "contract integrity audit", "candidate violation", "evidence", "criterion cited". Vocabulary that frames the skill as a corrective judge (e.g., "wrong", "should have used", "user error") is replaced by the audit-and-fit-review vocabulary.
 11. **Recognition over Recall** — Each Phase 4 candidate presents structured evidence (pre-context, post-output, cited criterion) so the user recognizes the violation pattern from presented context, not from memory of the past session.
 12. **Detection with Authority** — AI detects candidate violations with cited textual evidence; the user constitutes the verdict. AI never asserts violation unilaterally (Rule 9 reinforcement at the architectural level).
-13. **Context-Question Separation** — All evidence (pre-context, post-output, cited criterion) is presented as text output before the Phase 4 Constitution interaction. The interaction contains only the verdict options.
 14. **Convergence evidence** — Phase 5 emit produces a transformation trace (scope → extracted invocations → classified candidates → user verdicts → confirmed violations) before declaring convergence.
 
 ## UX Safeguards
@@ -295,7 +294,7 @@ The `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (writt
 - **Session immunity for dismissed candidates** — A candidate dismissed in the current `/misuse` session is not re-presented in the same session unless the user re-invokes `/misuse` with explicitly different scope. Re-presenting dismissed candidates erodes the user's verdict authority (Rule 9 reinforcement).
 - **Progress opacity** — No progress counter framed as "X of Y violations confirmed" or similar. Presence of such a counter reintroduces the verdict-rate framing that Rule 8 forbids. The Phase 4 loop tracks reviewed-count internally for Rule 7 termination, but does not surface it as a quasi-score.
 - **Ephemeral verdicts** — Each `/misuse` audit is a present-tense fit review of past invocations. Verdicts produced in one audit do not bind future audits — the user can re-invoke and reach a different verdict on the same candidate if context shifts.
-- **Pre-gate evidence visibility** — All evidence is laid out before the verdict Constitution interaction. The user reads context before deciding (Rule 13 reinforcement; structural).
+- **Pre-gate evidence visibility** — All evidence is laid out before the verdict Constitution interaction. The user reads context before deciding (evidence stays out of the verdict question itself; structural).
 - **AMBIGUOUS as default tie-break** — When operation verification is uncertain, classify AMBIGUOUS, not VIOLATION. Surface AMBIGUOUS candidates only on user request after primary VIOLATION review (Rule 2 reinforcement).
 - **Vocabulary discipline** — Output uses "candidate violation", "audit", "fit review", "evidence", "criterion", "verdict". Output never frames past invocations as mistakes, errors, or culpable acts (Rule 10 reinforcement).
 
