@@ -67,10 +67,10 @@ qualifies(HC) ≡ evidence_bound(HC, B) ∧ material(HC.failure_mode) ∧ unspok
               ∧ ¬route_selection_question(HC.edge) ∧ ¬decision_gap(HC.edge)   -- the five non-scarcity guards
               -- material(HC.failure_mode): leaving HC.edge unprobed is predicted to keep the achievable understanding short of R (P' ≇ R) — a counterfactual evaluated at detection against the current P and R, before A produces the realized P'
 scarce(HC) ≡ |{ HC' : qualifies(HC') for this entry_point }| ≤ 1   -- at most one qualifying Horizon candidate per entry point; if several weak candidates compete, detect none
-Cursor = ContinuationCursor { task: TaskId, entry_point: EntryPoint, aspect: Optional(GapType), resume_target: String }
+Cursor = ContinuationCursor { task: RecordId, entry_point: EntryPoint, aspect: Optional(GapType), resume_target: String }
        -- resume_target is a short user-facing phase label, not a serialized cursor; structural position is task × entry_point × aspect
 BranchKind = {Proposal} ∪ Emergent(BranchKind)
-BranchArtifact = { kind: BranchKind, reference: TaskId, return_pointer: Cursor }
+BranchArtifact = { kind: BranchKind, reference: RecordId, return_pointer: Cursor }
 ContinuationClosure = { verified: String, status: String, branch: Optional(BranchArtifact), return_pointer: Cursor, next_moves: List<String> }
                      -- relay metadata after evaluated answers or side-branch ejection; not a new gate
 C(·) = emit ContinuationClosure (relay; → TextPresent+Proceed)
@@ -86,13 +86,13 @@ TerminalShape = { phase1_entry_selection, phase3_zero_gap_confirmation, phase3_s
 ── PHASE TRANSITIONS ──
 Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessRoute(I, E, R, U, Context) → Fᵣ  -- intent orientation + route map (silent)
 Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidden_route + open when non-empty) → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
-Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → Λ.detected[current] := Λ.detected[current] ∪ GT → P → Δ  -- comprehension check [Tool]
-       → [|GT| = 0] Qc(ZeroGapFinding) → Stop → ZeroGapConfirmation  -- zero-gap branch (Rule 10): Confirm → P' := P ; TaskUpdate(completed), next task; Reopen(desc) → Λ.detected[current] += Emergent, re-enter this Phase 3 with GT = {Emergent} [Tool]
+Phase 2: Sₑ → Materialize(Sₑ, R) → B → record[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
+Phase 3: Tᵣ → record update(current) → detect(E, B) → GT → Λ.detected[current] := Λ.detected[current] ∪ GT → P → Δ  -- comprehension check [Tool]
+       → [|GT| = 0] Qc(ZeroGapFinding) → Stop → ZeroGapConfirmation  -- zero-gap branch (Rule 10): Confirm → P' := P ; record update(completed), next task; Reopen(desc) → Λ.detected[current] += Emergent, re-enter this Phase 3 with GT = {Emergent} [Tool]
        → [|GT| > 0] Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector below; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
        → [Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅] Qc(GT_presented) → Stop → StartAspectSelection → Λ.cursor.aspect := StartAspectSelection  -- start-aspect selector: user picks the opening gap type from GT_presented = unprobed(current) \ {Horizon}; fires once per entry point (only before any probe for the current task), before the verification loop below [Tool]
        → [|GT| > 0 ∧ Λ.cursor.aspect set] probe_kind(Λ.cursor.aspect)(Δ, Λ.cursor.aspect) → Stop → A → P' → Tᵤ ; Λ.probed[current] += Λ.cursor.aspect    -- verification loop, guarded: fires only with a bound aspect (set at the start-aspect gate, or by coverage routing after a probe); unreachable on the zero-gap branch and immediately after a Horizon preemption whose coverage routing has not yet bound an aspect; probe form dispatched per gap type (probe_kind; Horizon handled by the preempting edge above) [Tool]
-       → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
+       → record[Proposal] if proposal(A)                 -- proposal ejection (detected from Other) [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
@@ -107,9 +107,9 @@ After Phase 3 verification: Evaluate comprehension per gap type.
 If |GT| = 0 for current entry point: present typed `ZeroGapFinding` with reasoning per Rule 10 → `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified) and marks task completed, proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters Phase 3 for this entry point.
 If gap detected (|GT| > 0): present `StartAspectSelection` (unless Horizon preempts) before questioning, then continue questioning within current entry point.
 If correct: emit continuation closure, then Aspect summary — show probed vs unprobed gap types.
-  User selects "sufficient" → TaskUpdate completed, next pending task.
+  User selects "sufficient" → record update completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
-  User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, emit side-branch continuation closure, resume current loop position.
+  User provides proposal via Other → detected by Step 3b, ejected via record, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
 Continue until: all selected tasks completed (VerifiedUnderstanding) OR user ESC/cancel (EarlyExit).
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
@@ -129,7 +129,7 @@ Phase 0 AssessRoute (sense) → Internal analysis (no external tool; entry-point
 Phase 1 Emit (extension) → TextPresent+Proceed (entry-point-fit distinctions, hidden routes, and bounded open questions from Fᵣ; omitted when empty)
 Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ)
 Phase 2 B   (sense) → Internal analysis (no external tool; artifact basis materialization)
-Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
+Phase 2 Tᵣ  (track)   → record (entry point tracking)
 Phase 2 Cursor (track) → Internal state update (Λ.cursor init after task registration; updated on task/entry-point/aspect/resume-label change, incl. Phase 3 Λ.cursor.aspect := StartAspectSelection)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
 Phase 3 Rec  (track)  → Internal state update (detection/probe recording: Λ.detected[current] writes at detect / zero-gap Reopen / Horizon; Λ.probed[current] writes at the Horizon probe and verification loop)
@@ -141,8 +141,8 @@ Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 �
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref (observe) → Read (source artifact, AI-determined)
-Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
-Phase 3 Prop (track)  → TaskCreate (proposal ejection)
+Phase 3 Tᵤ  (track)  → record update (progress tracking)
+Phase 3 Prop (track)  → record (proposal ejection)
 Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: verified status + side branch if any + return pointer + next moves)
 converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 esc/cancel  (extension)  → TextPresent+Proceed (partial transformation trace + unresolved-task residual declaration; terminate as EarlyExit, not VerifiedUnderstanding)
@@ -159,13 +159,13 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
   routeMap: ComprehensionRouteMap,
   selected: List<EntryPoint>,
   artifactBasis: Map<EntryPoint, ArtifactBasis>,
-  tasks: Map<TaskId, Task>,
-  current: TaskId,
+  tasks: Map<RecordId, Task>,
+  current: RecordId,
   cursor: ContinuationCursor,
   branchArtifacts: List<BranchArtifact>,
   phantasia: Understanding,
-  detected: Map<TaskId, Set<GapType>>,
-  probed: Map<TaskId, Set<GapType>>,
+  detected: Map<RecordId, Set<GapType>>,
+  probed: Map<RecordId, Set<GapType>>,
   active: Bool
 }
 State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆ Λ.routeMap.entry_point; every selected entry point has an artifact anchor in Λ.routeMap.artifact_anchor before Phase 2 materialization.
@@ -312,10 +312,10 @@ The user may also state the entry point in their own words; treat that response 
 
 ### Phase 2: Task Registration
 
-Materialize artifact basis for each selected entry point, then **call TaskCreate**:
+Materialize artifact basis for each selected entry point, then **call record**:
 
 ```
-TaskCreate({
+record({
   subject: "[Grasp] Entry point label",
   description: "Intent to verify + artifact basis used for grounding",
   activeForm: "Verifying [entry point]"
@@ -328,9 +328,9 @@ Set task dependencies only when entry points have a necessary order (e.g., under
 
 For each task (entry point):
 
-1. **TaskUpdate** to `in_progress`
+1. **record update** to `in_progress`
 
-2. **Present overview**: Brief summary of the selected intent and its artifact basis. **Zero-gap branch** — if `|GT| = 0` for the current entry point: present the typed `ZeroGapFinding` with reasoning per Rule 10 and gate on `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified), TaskUpdate(completed), proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters this Phase 3 with `GT = {Emergent}`. Otherwise, when the remaining aspect set is non-empty (`GT_presented ≠ ∅`), show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
+2. **Present overview**: Brief summary of the selected intent and its artifact basis. **Zero-gap branch** — if `|GT| = 0` for the current entry point: present the typed `ZeroGapFinding` with reasoning per Rule 10 and gate on `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified), record update(completed), proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters this Phase 3 with `GT = {Emergent}`. Otherwise, when the remaining aspect set is non-empty (`GT_presented ≠ ∅`), show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
 
    Present the detected aspects as text output:
    - What this path covers: [plain-language aspect list]
@@ -392,15 +392,15 @@ For each task (entry point):
 
 3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
    - Acknowledge briefly: "Noted — recorded as a task. Continuing verification."
-   - Call TaskCreate to eject the proposal:
+   - Call record to eject the proposal:
      ```
-     TaskCreate({
+     record({
        subject: "[Grasp:Proposal] Brief description",
        description: "User proposal during [entry point]: [verbatim user text]",
        activeForm: "Archiving user proposal"
      })
      ```
-   - Append the created proposal to `Λ.branchArtifacts` with `kind = Proposal`, `reference = TaskId` returned by `TaskCreate[Proposal]`, and `return_pointer = Λ.cursor`.
+   - Append the created proposal to `Λ.branchArtifacts` with `kind = Proposal`, `reference = RecordId` returned by `record[Proposal]`, and `return_pointer = Λ.cursor`.
    - Emit a continuation closure before resuming: side branch recorded, Katalepsis remains active, return pointer = current entry point/aspect, next move = resume the current comprehension check.
    - Return to comprehension loop immediately.
 
@@ -415,7 +415,7 @@ For each task (entry point):
 
    | Evaluation | Action | Tool |
    |------------|--------|------|
-   | Correct (P' ≅ R) | Confirm, emit continuation closure, proceed to next aspect or entry point | TaskUpdate |
+   | Correct (P' ≅ R) | Confirm, emit continuation closure, proceed to next aspect or entry point | record update |
    | Partial gap | Targeted followup probe on the gap area | Gate interaction |
    | Misconception | Reasoning inquiry → targeted correction | Gate interaction, Read (AI-determined) |
 
@@ -463,7 +463,7 @@ For each task (entry point):
    2. Resume step 3 verification with the Emergent gap type as current aspect
    3. On subsequent coverage check (3d), the Emergent type appears in probed set
 
-4. **On confirmed comprehension**: Per LOOP — TaskUpdate to `completed`, advance to next pending task.
+4. **On confirmed comprehension**: Per LOOP — record update to `completed`, advance to next pending task.
 
 5. **On gap detected**: Handle per step 3c evaluation table. Do not mark complete until user confirms.
 
@@ -484,10 +484,10 @@ Probe intensity scales with complexity: **Light** (simple change, user seems fam
 1. **User-initiated only**: Activate only when user signals desire to understand
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension intent; artifact categories remain grounding material until after the user chooses a path
-4. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
+4. **Task tracking**: Call record/record update for progress visibility
 5. **Code grounding**: Reference specific code locations
 6. **User authority**: User's "I understand" is final
-7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, record only a branch reference for continuation, and return to verification. This preserves user-generated insights without converting the proposal into a comprehension task.
+7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call record to externalize the proposal, keep only a branch reference for continuation, and return to verification. This preserves user-generated insights without converting the proposal into a comprehension task.
 7a. **Continuation cursor after side branches**: Proposal ejection and follow-up task creation do not close Katalepsis. After any side branch, emit a compact continuation closure: what was recorded, parent entry point/aspect, return pointer, and next comprehension move. Store the branch artifact outside the comprehension task set, but keep `Λ.cursor` visible enough for the user to recognize where verification resumes. Update `Λ.cursor` before every closure emission so the return pointer reflects the live resumption point.
 8. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required

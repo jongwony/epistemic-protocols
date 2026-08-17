@@ -55,14 +55,14 @@ EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G → AssessGapPressure(D, G) → P  -- checkpoint + detection + pressure map (silent)
-Phase 1: (G, P) → TaskCreate[all gaps] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, pressure-select, surface first [Tool]
-Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
+Phase 1: (G, P) → record[all gaps] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, pressure-select, surface first [Tool]
+Phase 2: J → A(J, D, Σ) → record update → Σ'           -- adjustment + task update [Tool]
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
-If new gaps: TaskCreate → add to queue.
+If new gaps: record → add to queue.
 Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
-P.queued updates Σ.deferred at TaskCreate/TaskUpdate; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
+P.queued updates Σ.deferred at record/record update; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
 Continue until: all tasks completed (AuditedDecision) OR user ESC (EarlyExit).
 Mode remains active until convergence or explicit user exit (Esc).
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
@@ -84,7 +84,7 @@ proceed(Σ) = ¬blocked(Σ)
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Qs (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
-Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
+Σ (track)      → record/record update (async gap tracking with dependencies)
 Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
 AssessGapPressure (sense) → Internal analysis (no external tool; selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
 A (track)      → Internal state update (no external tool)
@@ -252,7 +252,7 @@ Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expa
 
 **Task format**:
 ```
-TaskCreate({
+record({
   subject: "[Gap:Type] Question",
   description: "Rationale and context for this gap",
   activeForm: "Surfacing [Type] gap"

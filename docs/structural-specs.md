@@ -55,7 +55,7 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 |------------|---------|-------------------|--------------|
 | `(sense)` | Internal epistemic operation without tool dispatch | tool dispatch = false ∧ no Λ mutation | Internal analysis/operation (no external tool) |
 | `(observe)` | Read-only tool operation for evidence or context | tool dispatch = true ∧ isReadOnly | Read, Grep, Glob; WebSearch (conditional) |
-| `(track)` | Protocol state tracking or persistence | Λ(mode state) mutation | TaskCreate, TaskUpdate, TaskGet; or internal state update |
+| `(track)` | Protocol state tracking or persistence | Λ(mode state) mutation | `record`, `record update`, `record read`; or internal state update where the entry need not outlive the session |
 | `(dispatch)` | External system interaction crossing agent boundary | agent/protocol boundary crossing | SendMessage, Agent, Skill |
 | `(transform)` | Changes existing artifacts | isReadOnly = false, file tools | Edit, Write |
 
