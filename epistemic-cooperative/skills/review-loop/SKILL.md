@@ -301,9 +301,9 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`, followed — when that verdict is not approve — by a `DIRECTION:` line naming the one mechanism codex reads behind the findings it just listed, together with the observation that would break that reading. Ask for it in that order, after the findings, so the direction accounts for what was surfaced; state that it never licenses adding, reshaping, or reweighting a finding to fit, and that having no single mechanism to name is an acceptable answer.
 
    Ask also for an `EXERCISED:` line, on every verdict including approve, reporting which claims it actually reached against the artifact this call and which it did not — naming, for each unreached one, what stopped it. Reaching a claim means arriving at a judgment that claim bears on: driving the artifact under substituted conditions where that is what the claim needs, examining the code that governs it where it is not. Say plainly in the prompt that reporting a claim as unreached costs it nothing and that a guess about what it "effectively" covered is the one answer that does harm here, because the loop reads an unreached claim as unknown and a falsely-claimed one as cleared. A read-only sandbox bounds what a run can touch without fixing what it can reach: a check that resolves its inputs through an interceptable boundary can often be driven over substituted content entirely in-process, and whether a given call finds that route varies between calls made under identical constraints. So the prompt asks what this call did, never what the sandbox permits in principle.
-2. Launch it in the background and bound it with a watchdog. `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file) keeps the events file pure JSONL — the codex banner and any stderr warnings ride their own warn file. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base and head SHAs; `--sandbox read-only` is kept because `git diff` is a local read needing no network. Select `{effort}` per run by this review's reasoning demand — scale it to the diff's size and complexity — floored at `high` (never below) on the first attempt: a notably small, mechanical diff runs at `high`, a substantive or wide diff at `xhigh`, and the most demanding reviews may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy diffs). If codex's git cannot resolve those SHAs the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it.
+2. Launch it in the background. `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file) keeps the events file pure JSONL — the codex banner and any stderr warnings ride their own warn file. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base and head SHAs; `--sandbox read-only` is kept because `git diff` is a local read needing no network. Select `{effort}` per run by this review's reasoning demand — scale it to the diff's size and complexity — floored at `high` (never below): a notably small, mechanical diff runs at `high`, a substantive or wide diff at `xhigh`, and the most demanding reviews may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy diffs). If codex's git cannot resolve those SHAs the extraction comes back empty — the step-3 empty-extraction guard surfaces it.
 
-   **The budget has to be enforced by something this step runs.** A declared bound produces a timeout only if something acts when it elapses; a bound that merely names a figure leaves the Error Handling table's timeout row with nothing to fire it, and the run that never answers is then indistinguishable from one still working. The watchdog below is that producer. It is built from shell builtins alone — no external timeout utility — because such a utility is present on some platforms and absent on others, and where it is absent the command degrades to an unbounded run while still reading as bounded, which is the failure this whole step is guarding against. Set `{budget_seconds}` so it clears what the selected effort plausibly needs with margin, while staying short enough that a run which has stopped answering is caught within the review's own working span; a budget that severs healthy runs turns every retry below into waste. Pair it with the same figure on the background call's own timeout, so the two do not disagree about when the run is over.
+   **Bounding the source call is delegated to the harness.** Whether a call that stops answering is cut off, and by what, is an execution-channel decision: the loop routes it outward and does not absorb it, declaring no budget and prescribing no enforcer. What counts as a bound here is a harness-supplied execution guarantee, not a figure named in prose — a number with nothing acting on it leaves a run that never answers indistinguishable from one still working. Where the harness supplies no such guarantee, the call runs unbounded, and Rule 13 is what the loop reads its rounds by.
 
    ```bash
    codex exec --ephemeral --json --color never --skip-git-repo-check --cd "{repo_root}" \
@@ -311,18 +311,10 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
      < /tmp/review_loop_codex_${SUFFIX}.txt \
      > /tmp/review_loop_codex_events_${SUFFIX}.jsonl \
      2>/tmp/review_loop_codex_warn_${SUFFIX}.txt &
-   CODEX_PID=$!
-   ( sleep {budget_seconds}; kill -TERM $CODEX_PID 2>/dev/null ) &
-   WATCHDOG_PID=$!
-   wait $CODEX_PID; CODEX_STATUS=$?
-   kill -TERM $WATCHDOG_PID 2>/dev/null
-   echo "codex_status=${CODEX_STATUS}"
    ```
 
-   `{effort_flag}` is `--config model_reasoning_effort="{effort}"` on the first attempt and is **omitted entirely** on the retry below, which is where the `high` floor lifts. Killing the watchdog once the run returns keeps a stray sleeper from outliving the round. A `CODEX_STATUS` of 128+15 is the watchdog having fired; any other non-zero status is codex failing on its own terms, which step 3 disposes of by reading the streams.
-
-   **On watchdog expiry, retry once at a lowered grade — do not re-run the same call.** Re-issuing an identical call reproduces the combination that just failed to answer: the grade is one input to that combination and not the whole of it, so holding it fixed is holding the suspect fixed. The retry drops the grade flag and lets the model's own default stand, which is the largest single step down available and needs no judgment call about which rung to pick. If the retry answers, the round proceeds on its findings — and the expiry, the lowered grade, and which attempt produced the verdict are recorded on the round's trace, because a lower grade buys a shallower read and an approve earned at one depth is not the same evidence as an approve earned at another. If the retry also expires, the source has failed for this round and the Error Handling table disposes of it; never treat an expiry as a quiet approve.
-3. Collect on the completion notification — do not poll or sleep. Read `CODEX_STATUS` first, because it separates two outcomes that look alike at the events file and are disposed of differently: a watchdog kill (128+15) means the run never answered and routes to step 2's retry, while any other outcome means the run ended on its own terms and is read below. Conflating them sends a stalled run into the failure path that expects a finished one, and sends a genuinely broken run into a retry that will break identically. The events file is pure JSONL; extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings, the `EXERCISED:` line, and the closing `VERDICT:` line directly from the narrative. **If the run ended on its own and the extraction comes back empty, codex failed before answering** (auth / crash / a failure it reported and exited on) — read the raw events file `/tmp/review_loop_codex_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that as needs-attention; never converge on a blank. An extraction-pipeline error (e.g. `jq` missing) is an extraction failure, not a codex failure — fall back to reading the raw events file directly rather than reporting the source as failed.
+   `{effort_flag}` is `--config model_reasoning_effort="{effort}"`. Where the source adapter reports the reasoning-effort setting a round ran at, record it on the round trace as observed provenance. It is not evidence of coverage: what a round reached is carried by its exercised report, and the setting is at best a proxy for depth.
+3. Collect on the completion notification — do not poll or sleep. The events file is pure JSONL; extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings, the `EXERCISED:` line, and the closing `VERDICT:` line directly from the narrative. **An empty extraction means the call produced no verdict** — the loop reads that round per Rule 13. An extraction-pipeline error (e.g. `jq` missing) is an extraction failure, not a source failure — fall back to reading the raw events file directly rather than reporting the source as failed.
 
    ```bash
    jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/review_loop_codex_events_${SUFFIX}.jsonl
@@ -343,14 +335,14 @@ Convergence is `verdict=approve` with every surfaced finding dispositioned edit-
 Round {k} — source: {source} — verdict: {verdict}
   Exercised: {axes the source reached this call; axes it reported it did not reach}
              (omitted entirely for a source with no reach channel — that stands once at Phase 0)
-  Call:      {only when the call did not answer first time: expired, retried at lowered grade, which attempt answered}
+  Call:      {only when there is something to record about the call itself: the reasoning-effort setting the adapter reported, any cause the harness gave for a call that produced no verdict}
   Relay:   {findings the loop dispositioned autonomously — Extension}
              each entry: finding → [applied | dropped: basis | carried: reason]   (a side-effect rides inline as [side-effect: …] on an applied entry)
   Gated:   {findings that needed your judgment — Constitution, from a Judgment disposition or an orthogonal risk screen}
              each entry: finding → [applied | dropped: basis | carried: reason]
 ```
 
-The two header lines above the slots are round-level facts, not findings, and take no slot: `Exercised` carries the source's own report of which axes it reached this call and which it did not, and it is left off the trace altogether when the designated source has no channel for that report — that fact is standing, was stated at Phase 0, and returns once at convergence, so repeating it per round would only teach the reader to skip the line. `Call` appears only when the call did not answer on its first attempt, naming the expiry, the lowered grade, and which attempt produced the verdict. Both qualify how far this round's verdict reaches — something no per-finding entry below can state, since each of those speaks for one finding while these speak for the round that produced them all.
+The two header lines above the slots are round-level facts, not findings, and take no slot: `Exercised` carries the source's own report of which axes it reached this call and which it did not, and it is left off the trace altogether when the designated source has no channel for that report — that fact is standing, was stated at Phase 0, and returns once at convergence, so repeating it per round would only teach the reader to skip the line. `Call` appears only when there is something to record about the call itself — the reasoning-effort setting the source adapter reported for this round, and any cause the harness gave for a call that ended without a verdict; both are observed provenance rather than evidence of coverage, since what the round actually reached is carried by `Exercised`. Both lines qualify how this round's verdict is to be read — something no per-finding entry below can state, since each of those speaks for one finding while these speak for the round that produced them all.
 
 The slot is keyed by the loop's **interruption axis** — whether the loop acted autonomously (**Relay**, Extension) or needed your judgment (**Gated**, Constitution) — and the outcome of each finding (applied / dropped / carried) plus its cited basis rides inline as an annotation on the entry. Because the partition's first axis is interruption rather than outcome, every finding has exactly one home, and the per-round disposition reads off the slot directly.
 
@@ -370,9 +362,7 @@ At exit — converged or free — surface each ledger entry with the durable hom
 |-----------|--------|
 | Designated source unavailable in the current harness (codex CLI not found, or a built-in the harness does not provide) | Surface which source is unavailable and why, and **ask** which source the current harness can invoke to use instead — or whether to stop and make the designated source available; do not silently substitute |
 | No diff / no changes | Ask the user what to review, then stop at Phase 0 (nothing to review; the same transition as scope-detection step 4) |
-| Watchdog expiry, first attempt | Retry once with the reasoning-grade flag omitted; record the expiry, the lowered grade, and which attempt answered on the round trace |
-| Watchdog expiry, retry | The source produced no verdict this round. Report the expiry together with whatever the warn file holds, treat the round as carrying no review rather than as an approve, and put the choice to the user — continue without this round, switch source, or stop |
-| Source ended on its own but returned nothing readable | Read the raw events file for its failure events and surface that as needs-attention; never converge on a blank |
+| Source call ends without a verdict — no answer, or output the adapter cannot read | The round carries no review (Rule 13). Report what did come back, record any cause the harness supplied as provenance, and put the choice to the user — continue without this round, switch source, or stop. Never converge on a blank, and never let it stand as the full re-review Phase 5's zero-new-findings arm requires |
 | A source that can report reach returns no exercised report | Treat the round's quiet as unattributed rather than as clearance, and surface the missing report itself. A source able to report which did not is an anomaly about this round — not the standing no-channel case, which Phase 0 already settled and which never routes here |
 | Source approves with no findings | Report converged immediately — verdict=approve at round 1, no edits needed |
 
@@ -477,22 +467,18 @@ At exit — converged or free — surface each ledger entry with the durable hom
     not corroboration and is never offered as such — the loop forms its reading over the
     same findings, with any direction the source returned already in view — so agreement
     adds little and it is divergence that carries information.
-13. **A bound needs a producer, and an unanswered call is never a pass** — the source call
-    carries a time budget that something the launch step itself runs will act on, because a
-    bound with nothing to enforce it yields no timeout at all and leaves a run that stopped
-    answering indistinguishable from one still working; the disposition below then never
-    fires, however plainly it is written. Enforce it with means that are present wherever
-    the loop runs, since an enforcement mechanism that is silently absent on some platform
-    degrades the call to unbounded while it still reads as bounded. On expiry, retry once
-    with the reasoning-grade floor lifted — the grade is one input to the combination that
-    stalled rather than the whole of it, so re-issuing the call unchanged re-issues the
-    suspect — and record the expiry, the lowered grade, and which attempt produced the
-    verdict on the round trace, because an approve earned at a shallower read is not the
-    same evidence as one earned at full depth and the trace is where that difference stays
-    visible. A second expiry is a failed source for the round, disposed of as a failure.
-    The run's error stream is read whole on every outcome, never through a keyword filter:
-    a filter admits only what was enumerated and drops the rest without a sound, so what it
-    misses is reported as the absence of a problem.
+13. **A terminal outcome without a verdict is not a review** — a source call that ends
+    without producing a verdict contributes no completed review, whatever ended it. It does
+    not count as the full re-review Phase 5 requires, so it satisfies neither convergence
+    arm: not the `approve` arm, which it never reached, and not the zero-new-findings arm,
+    whose emptiness it would otherwise imitate. Report whatever did come back, treat the
+    round as carrying no review, and put the choice to the user — continue without this
+    round, switch source, or stop. What did come back is read whole on every outcome, never
+    through a keyword filter: a filter admits only what was enumerated and drops the rest
+    without a sound, so what it misses is reported as the absence of a problem. Where the
+    harness reports why the call ended, record that as diagnostic provenance on the round
+    trace; the loop does not branch on it, because the outcomes that cause would distinguish
+    make the same claim about the artifact, which is none.
 14. **A source reports what it reached, and unreached silence is residual, not
     clearance** — every source that can report at all returns a report naming which axes it
     reached against the artifact this call and which it did not; the slot admits an empty
