@@ -99,7 +99,7 @@ Phase 3 parses the utterance into the corresponding R coproduct constructor.
 The hypothesis surface above offers a candidate horizon of the deficit space — open to your recognition, redirection, or transcendence; no typed selection is required.
 ```
 
-The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall, and evidence is presented as text output before the gate rather than folded into it, both inscribed in this SKILL.md).
+The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall, inscribed in this SKILL.md; and evidence is presented as text output before the gate rather than folded into it).
 
 ### Phase 3: Route Integration
 
@@ -280,7 +280,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug
 - **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement). Realized via `Λ.dismissed_in_session`: Phase 3 Dismiss adds presented hypotheses to this set; Phase 1 Scan filters out members of this set. Clearing rules: `Narrow(Slice)` clears the set (new situation scope justifies fresh dismissals); `Narrow(CoverageSubset)` preserves the set (situation unchanged, only coverage filter applied).
 - **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (Rule 7 reinforcement).
 - **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (Rule 7 reinforcement).
-- **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (Rule 11 reinforcement; context-question separation is structural).
+- **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (Rule 11 reinforcement; evidence stays out of the disposition question itself; structural).
 - **Vocabulary discipline** — Probe output uses "hypothesis", "fit review", "evidence", "reverse-evidence", "disposition", "route". The skill never speaks of mistakes, errors, or misuse (Rule 9 + Rule 10 reinforcement).
 
 ## Trigger Signals
