@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: inquire-underspecified
+
+context:
+  # Both cases mount the same substrate on purpose. The trigger-positive case is graded on
+  # whether file-discoverable facts were read rather than asked; the trigger-negative case is
+  # graded on whether an already-specified parameter was re-asked. Different substrates would
+  # let a run pass one of them by luck.
+  scaffold_script: ../../scaffold.sh
