@@ -154,7 +154,7 @@ If the user selects "Report", generate an HTML profile card.
 
 ### Report structure
 
-Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
 
 Read the existing CSS design system from `{config_dir}/usage-data/report.html` or
 use the design tokens from the cooperative's dashboard/report templates.

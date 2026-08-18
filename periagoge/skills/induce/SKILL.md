@@ -239,11 +239,11 @@ Generate a calibration map, candidate abstraction, and personalized grounding ex
 1. **Calibrate the seed** `K`: compare `(Iᵢ, E, L?)` against the user's context and sort the concept pressure into four fields: `keeps` (supported core to preserve), `sharpens` (decision-relevant structure needing clarity), `prunes` (unsupported overextension to release), and `open` (residual uncertainty that does not block crystallization). When `L?` is absent, calibrate on `E` alone: `sharpens` and `prunes` are relative to the inferred essence rather than to a user-named concept.
 2. **Synthesize candidate** `P`: from `(Iᵢ, E, K)`, construct a named abstraction with structure and instance-to-abstraction mapping. The candidate is a working hypothesis, not a claim.
 3. **Construct personalized grounding** `G`: call artifact read/artifact search to collect evidence about the user's own domain context (codebase, configs, session history). The grounding example must be drawn from the user's domain — a scenario they recognize as theirs — not a generic textbook case.
-   - When the user's domain is outside the current codebase (external API, academic field, professional practice), extend context collection to web search (WebSearch). Tag web evidence with `source: "web:{url}"` for traceability.
+   - When the user's domain is outside the current codebase (external API, academic field, professional practice), extend context collection to web search (external fetch). Tag web evidence with `source: "web:{url}"` for traceability.
 4. **Check adjacent abstractions**: if recall (Anamnesis hypomnesis store or in-session history) surfaces neighboring abstractions, note them as Fuse candidates for Phase 2.
 5. Package `(P, G, K)` with Fuse candidates and proceed to Phase 2.
 
-**Scope restriction**: Read-only investigation (Read, Grep, WebSearch). No test execution or file modifications.
+**Scope restriction**: Read-only investigation (artifact read, artifact search, external fetch). No test execution or file modifications.
 
 ### Phase 2: Dialectical Triangulation (Constitution)
 

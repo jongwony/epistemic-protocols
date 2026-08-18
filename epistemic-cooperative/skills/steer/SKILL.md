@@ -22,7 +22,7 @@ Steer maintains a **second inscription target** alongside the profile: a **Settl
 
 Phase 3 per-cluster recognition is verification-category — the user verifies the AI's classification accuracy of an already-detected drift cluster, not a forward-trajectory selection. The Differential Future Requirement does not apply to the per-cluster verdict gate by the same logic that exempts Anamnesis Phase 2 recognition gates (past-identity synthesis, not future-trajectory commitment): a 1-correct option structure (was-drift / was-aligned) is legitimate by purpose because downstream diff assembly is a deterministic consequence of the verdict, not a user-selected trajectory. Phase 5 final approve gate IS forward-looking (write or not write) and follows the Differential Future Requirement.
 
-Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
 
 ## When to Use
 
@@ -81,7 +81,7 @@ Scan the target session for calibration moves and classify each into a drift clu
 
 Scan procedure:
 1. Read the target session transcript (`{config_dir}/projects/{slug}/{session-id}.jsonl`)
-2. Extract calibration move candidates — gate interactions (Constitution / Extension presentations per TOOL GROUNDING), auto-resolutions where AI proceeded without user gate, agent boundary actions (invoke / delegate / message actions), Standing-authority delegations
+2. Extract calibration move candidates — gate interactions (Constitution / Extension presentations per TOOL GROUNDING), auto-resolutions where AI proceeded without user gate, agent boundary actions (Skill / Agent / SendMessage invocations), Standing-authority delegations
 3. For each candidate, identify the move kind (Constitution / Extension / BoundaryAction) and the axis it implicates (which of the six profile variables it bears on, when applicable)
 
 Classification — assign each move to one cluster of the partition:
@@ -377,8 +377,8 @@ session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact | O
 Phase 0 resolve_defaults  (sense)        → Internal analysis (CWD inspection, layer inference)
 Phase 0 scope_from_arg    (extension)    → TextPresent+Proceed (when explicit_arg fully specifies scope — target_session, layer, cross_session all explicit; proceed with bound scope; Phase 5 Modify re-entry can adjust)
 Phase 0 Qc                (constitution) → present (scope confirmation; when scope partially or fully inferred)
-Phase 1 Read                       (observe)      → artifact read (existing project-profile.md at chosen layer)
-Phase 2 Read                       (observe)      → artifact read (session JSONL transcript at target session path)
+Phase 1 Read              (observe)      → Read (existing project-profile.md at chosen layer)
+Phase 2 Read              (observe)      → Read (session JSONL transcript at target session path)
 Phase 2 extract           (sense)        → Internal analysis (calibration move identification)
 Phase 2 classify          (sense)        → Internal analysis (per-move drift cluster assignment)
 Phase 3 present           (extension)    → TextPresent+Proceed (cluster evidence pre-gate)
@@ -389,10 +389,10 @@ Phase 4 assemble_delta    (sense)        → Internal analysis (settled-directio
 Phase 4 fit_shape_check   (sense)        → Internal analysis (operational-layer material detection — programmatic-trigger / layer-mixing / behavioral-enforcement signals)
 Phase 5 present           (extension)    → TextPresent+Proceed (diff + settled-directions delta + backup path(s) + mismatch_signals pre-gate)
 Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_signals is non-empty)
-Phase 5 backup            (transform)    → artifact write (timestamped backup of the existing profile; Approve disposition only; skipped on first-time induction when P_existing = P_∅)
-Phase 5 Write                      (transform)    → artifact write (proposed profile to layer path; Approve disposition only)
-Phase 5 write_registry    (transform)    → artifact write (merge Settled Directions clauses into the `## Settled Directions` section of the project guide, adjacent to the Northstar/mission section, creating the section when absent; Approve disposition only, when settled_directions_delta ≠ ∅; rollback via version control, not a .bak)
-Phase 5 append_index      (transform)    → artifact write (append TrialIndexEntry to steer-trials.md at chosen layer; Approve and RouteToOperationalLayer dispositions only; create file on first entry)
+Phase 5 backup            (transform)    → Write (timestamped backup of the existing profile; Approve disposition only; skipped on first-time induction when P_existing = P_∅)
+Phase 5 Write             (transform)    → Write (proposed profile to layer path; Approve disposition only)
+Phase 5 write_registry    (transform)    → Write (merge Settled Directions clauses into the `## Settled Directions` section of the project guide, adjacent to the Northstar/mission section, creating the section when absent; Approve disposition only, when settled_directions_delta ≠ ∅; rollback via version control, not a .bak)
+Phase 5 append_index      (transform)    → Write (append TrialIndexEntry to steer-trials.md at chosen layer; Approve and RouteToOperationalLayer dispositions only; create file on first entry)
 Phase 5 emit              (extension)    → TextPresent+Proceed (UpdatedProjectProfile or NoUpdateNote or DiffArtifact or OperationalLayerRecommendation, per disposition)
 converge                  (extension)    → TextPresent+Proceed (convergence evidence trace)
 

@@ -96,7 +96,7 @@ Phase 3: Tᵣ → record update(current) → detect(E, B) → GT → Λ.detected
        → record[Proposal] → rₚ ; Λ.branchArtifacts += BranchArtifact { kind = Proposal, reference = rₚ, return_pointer = Λ.cursor }  if proposal(A)   -- proposal ejection (detected from Other); rₚ is the RecordId that write returned, bound HERE because C(branch) below reads it off the artifact [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
-       → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
+       → Ref(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
        → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
        → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
        → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
@@ -416,13 +416,13 @@ For each task (entry point):
    |------------|--------|------|
    | Correct (P' ≅ R) | Confirm, emit continuation closure, proceed to next aspect or entry point | record update |
    | Partial gap | Targeted followup probe on the gap area | Gate interaction |
-   | Misconception | Reasoning inquiry → targeted correction | Gate interaction, Read (AI-determined) |
+   | Misconception | Reasoning inquiry → targeted correction | Gate interaction, artifact read (AI-determined) |
 
    **Misconception handling** (three-step):
 
    1. **Reasoning inquiry**: Present the detected misconception context as text output (what the user answered vs. what was expected, without revealing the correct answer). Then **present** AI-generated reasoning hypotheses via Cognitive Partnership Move (Constitution). Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
 
-   2. **Targeted correction**: Using both A and Aᵣ, address the root cause of the misconception. If Aᵣ reveals a specific mental model error, correct that model directly. Call Read for supporting reference if eval(A, Aᵣ) requires.
+   2. **Targeted correction**: Using both A and Aᵣ, address the root cause of the misconception. If Aᵣ reveals a specific mental model error, correct that model directly. Call artifact read for supporting reference if eval(A, Aᵣ) requires.
 
    3. **Resume**: Output a brief text nudge before presenting via Cognitive Partnership Move (Constitution) — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Present a fresh Constitution interaction for the same aspect.
 

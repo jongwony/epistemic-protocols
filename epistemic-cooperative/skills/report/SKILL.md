@@ -48,7 +48,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 
 ### Secondary: Configuration (Environment Context)
 
-Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
 
 | Source | Method | Extracts |
 |--------|--------|----------|
