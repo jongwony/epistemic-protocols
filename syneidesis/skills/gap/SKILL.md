@@ -54,12 +54,13 @@ GapLocator = { record: C's identity as the carrier-creating write returned it, s
 locator(C) = GapLocator { record: C's identity as the carrier-creating call returned it; session: the id of the session running that call }   -- the value Σ.carrier holds; which call creates the carrier is named in TOOL GROUNDING, so a host without that capability still types this
 registered = the gaps C carries   -- the set AuditedDecision quantifies over and the audit trace ranges over
 status(g)  = the status C carries for g ∈ registered ∈ {open, completed}
+open(registered) = { g ∈ registered : status(g) ≠ completed }   -- what a recovered carrier contributes to pressure assessment and selection. The audit trace still ranges over registered WHOLE, so a gap already judged is reachable as evidence without being put to the user a second time
 Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool, carrier: Option(GapLocator) }
 AuditedDecision = Σ' where ∀ g ∈ registered: status(g) = completed
 EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (Σ' = Σ when exit precedes the first adjustment), partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ registered) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay) [Tool]
+Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ open(registered)) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay) [Tool]
 Phase 1: (G, P) → [Σ.carrier = None: record[C ← all gaps] → Σ.carrier := Some(locator(C)) | Σ.carrier = Some(l): record update(l, add the newly detected gaps)] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register every gap into the ONE carrier, creating it on the first pass and amending the recovered one otherwise; hold the identity the creating write returned; pressure-select, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → record update(Σ.carrier, status(Gₛ[0]) := completed) → Σ'           -- adjustment + carrier amendment naming the held identity [Tool]
 Phase 0 → carrier_unreachable (relay): a locator is in scope but the record it names cannot be read  -- surface that the prior gaps were NOT recovered and which locator failed, then proceed with Σ.carrier := None and a fresh carrier at Phase 1; the run never continues silently on a partial gap set
@@ -262,11 +263,11 @@ Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expa
 ```
 record({
   subject: "[Gap carrier] decision point",
-  description: "one line per gap: [Gap:Type] question | rationale and context | status"
+  description: "one line per gap: [Gap:Type] question | rationale and context | status | once closed, the user's judgment and the adjustment it produced"
 })
 ```
 
-The creating write returns the identity `locator(C)` reads. Every later amendment and every later session's read name that identity; no second entry is written per gap.
+The judgment and adjustment ride in the carrier because the audit trace is assembled from them; a carrier holding status alone would recover which gaps are left and lose what was decided about the rest. The creating write returns the identity `locator(C)` reads. Every later amendment and every later session's read name that identity; no second entry is written per gap.
 
 ### Interactive Surfacing (Constitution)
 

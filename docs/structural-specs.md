@@ -21,7 +21,7 @@ Protocols draw their `Definition` code block from this structure:
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── CONVERGENCE ──       (if applicable) Terminal predicates making LOOP's termination claims true
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
-── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
+── TOOL GROUNDING ──    Symbol → the capability or internal operation that realizes it; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ── COMPOSITION ──       (if applicable) Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)

@@ -186,7 +186,7 @@ DispositionRecord = { mismatch: Mismatch, judgment: Option(Judgment), judgment_b
          --       the CURRENT target, so the rows above discharge on this cycle's evidence rather than on a verdict about an earlier target
          --   assigned_by = certificate ⟹ disposition ∈ {Route(_), Residual}
          --   assigned_by = loop      ⟹ disposition = Moot                                   -- withdrawal fallout
-ApplicabilityVerdict = { target: R_final, dispositions: List(DispositionRecord), scan_count: Nat }
+ApplicabilityVerdict = { target: R_final, dispositions: List(DispositionRecord), scan_count: Nat, carrier: Option(EntryLocator) }
          -- the protocol's terminal object: the result TOGETHER WITH how every flagged aspect was closed.
          -- Keep, Discard, Route, Residual and Moot are terminal exactly as Adapt is; adaptation is ONE disposition among them
          -- ASSEMBLY — every field has a producing step, and they are not the same step:
@@ -194,7 +194,8 @@ ApplicabilityVerdict = { target: R_final, dispositions: List(DispositionRecord),
          --                  keep_all_remaining, Phase 0 → confirm_no_mismatch / deactivate, or the ESC exit)
          --   dispositions := Σ.dispositions      -- the ledger as it stands at that terminal, whole; the trace ranges over this same list
          --   scan_count   := Σ.scan_count        -- the re-scan counter Phase 2's Adapt arm increments; this binding is its only reader
-         -- The last two are bound identically at EVERY terminal, so a terminal states only its own R_final and assembles the rest from Σ
+         --   carrier      := Λ.carrier           -- the locator the Phase 1 registration bound, carried out so the durable record stays reachable after the run; None wherever nothing registered. Emitting it is the whole of what this protocol does across a session boundary: Σ is bound fresh at activation BY DESIGN (accepted(a) is run-scoped, and re-entry returning an aspect to the gate is a stated property), so no step here dereferences a locator and none is owed
+         -- The last three are bound identically at EVERY terminal, so a terminal states only its own R_final and assembles the rest: dispositions and scan_count from Σ, carrier from Λ
 ContextualizedExecution = ApplicabilityVerdict where (∀ m ∈ registered: entry(m).status = completed) ∧ (Mᵢ = ∅ ⟹ zero-mismatch confirmation obtained: ZeroMismatchConfirmation = AcceptNoMismatch, or Reopen(aspect) whose focused re-scan still yields Mᵢ = ∅ → relay(finding) — Rule 9)
                  -- registered = certificate-passing mismatches only; Route/Residual mismatches are closed by disposition, not adapted in-place
 EarlyExit = ApplicabilityVerdict where user_esc  -- non-convergent early exit: R_final := Some(Λ.R) (the evaluated target as it stands, adapted or not) and dispositions closed so far; remaining pending mismatches declared as unresolved residual and left WITHOUT ledger entries, since an exit closes nothing
@@ -339,7 +340,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 --   Σ := { dispositions = [], scan_count = 0 }. Λ.fit_map is bound by the Phase 0 pass (Λ.fit_map := F)
 -- judgment_state is CYCLE-LOCAL and holds no field here: produced at Phase 1 by judgment_relay_upheld, read at the Qc presentation and again
 --   at the close that follows (Phase 2 dispose, the keep_carried_forward close, or the keep_all_remaining bulk exit), all within one cycle. Where a relayed judgment must
---   survive a session boundary, the channel is the carrier the mismatch is registered in, reached at Λ.carrier
+--   survive a session boundary, the channel is the carrier the mismatch is registered in, reached at the locator the terminal verdict carries
 -- Views over Σ.dispositions (derived, NOT parallel state):
 --   routed(Λ)   = { r ∈ Σ.dispositions : r.disposition = Route(_) }
 --   residual(Λ) = { r ∈ Σ.dispositions : r.disposition = Residual }

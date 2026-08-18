@@ -67,6 +67,7 @@ qualifies(HC) ≡ evidence_bound(HC, B) ∧ material(HC.failure_mode) ∧ unspok
               ∧ ¬route_selection_question(HC.edge) ∧ ¬decision_gap(HC.edge)   -- the five non-scarcity guards
               -- material(HC.failure_mode): leaving HC.edge unprobed is predicted to keep the achievable understanding short of R (P' ≇ R) — a counterfactual evaluated at detection against the current P and R, before A produces the realized P'
 scarce(HC) ≡ |{ HC' : qualifies(HC') for this entry_point }| ≤ 1   -- at most one qualifying Horizon candidate per entry point; if several weak candidates compete, detect none
+RecordId = the identity a record-creating write returned  -- what names that entry for every later amendment; held per registered entry point in Λ.tasks and per ejected proposal in Λ.branchArtifacts, so nothing downstream has to re-find an entry it already wrote
 Cursor = ContinuationCursor { task: RecordId, entry_point: EntryPoint, aspect: Optional(GapType), resume_target: String }
        -- resume_target is a short user-facing phase label, not a serialized cursor; structural position is task × entry_point × aspect
 BranchKind = {Proposal} ∪ Emergent(BranchKind)
@@ -86,7 +87,7 @@ TerminalShape = { phase1_entry_selection, phase3_zero_gap_confirmation, phase3_s
 ── PHASE TRANSITIONS ──
 Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessRoute(I, E, R, U, Context) → Fᵣ  -- intent orientation + route map (silent)
 Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidden_route + open when non-empty) → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
-Phase 2: Sₑ → Materialize(Sₑ, R) → B → record[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
+Phase 2: Sₑ → Materialize(Sₑ, R) → B → record[selected] → Tᵣ ; Λ.tasks := { the identity each write returned ↦ its task } ; Λ.current := the first of them  -- task registration; BIND the returned identities before anything reads them, since every later record update names one, then initialize Λ.cursor from Λ.current, its entry point, and the active aspect before Phase 3 [Tool]
 Phase 3: Tᵣ → record update(current) → detect(E, B) → GT → Λ.detected[current] := Λ.detected[current] ∪ GT → P → Δ  -- comprehension check [Tool]
        → [|GT| = 0] Qc(ZeroGapFinding) → Stop → ZeroGapConfirmation  -- zero-gap branch (Rule 10): Confirm → P' := P ; record update(completed), next task; Reopen(desc) → Λ.detected[current] += Emergent, re-enter this Phase 3 with GT = {Emergent} [Tool]
        → [|GT| > 0] Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector below; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
@@ -129,7 +130,7 @@ Phase 0 AssessRoute (sense) → Internal analysis (no external tool; entry-point
 Phase 1 Emit (extension) → TextPresent+Proceed (entry-point-fit distinctions, hidden routes, and bounded open questions from Fᵣ; omitted when empty)
 Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ)
 Phase 2 B   (sense) → Internal analysis (no external tool; artifact basis materialization)
-Phase 2 Tᵣ  (track)   → record (entry point tracking)
+Phase 2 Tᵣ  (track)   → record (entry point tracking; each write returns the RecordId that keys Λ.tasks — the binding every later record update reads)
 Phase 2 Cursor (track) → Internal state update (Λ.cursor init after task registration; updated on task/entry-point/aspect/resume-label change, incl. Phase 3 Λ.cursor.aspect := StartAspectSelection)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
 Phase 3 Rec  (track)  → Internal state update (detection/probe recording: Λ.detected[current] writes at detect / zero-gap Reopen / Horizon; Λ.probed[current] writes at the Horizon probe and verification loop)
@@ -321,7 +322,7 @@ record({
 })
 ```
 
-Set task dependencies only when entry points have a necessary order (e.g., understand the intended outcome before validating the risk surface).
+Where entry points have a necessary order — understanding the intended outcome before validating the risk surface, say — that order is the order of `Sₑ`, taken as the user selected them at Phase 1. No ordering relation between entries is recorded and none is read.
 
 ### Phase 3: Comprehension Loop
 
