@@ -53,17 +53,18 @@ C      = GapCarrier: the ONE durable entry every registered gap is written into 
 GapLocator = { record: C's identity as the carrier-creating write returned it, session: the id of the session that wrote it }   -- substrate-neutral by construction: the identity is whatever that write returned, so this type never names what performs the write
 locator(C) = GapLocator { record: C's identity as the carrier-creating call returned it; session: the id of the session running that call }   -- the value Σ.carrier holds; which call creates the carrier is named in TOOL GROUNDING, so a host without that capability still types this
 registered = the gaps C carries   -- the set AuditedDecision quantifies over and the audit trace ranges over
-status(g)  = the status C carries for g ∈ registered ∈ {open, completed}
+entry(g)   = the record C carries for g ∈ registered — the gap's question and its context, and once closed the status, the user's judgment, and the adjustment that judgment produced. The last two are there because the audit trace reads them: a carrier holding status alone recovers which gaps are left and loses what was decided about the rest
+status(g)  = entry(g).status ∈ {open, completed}
 open(registered) = { g ∈ registered : status(g) ≠ completed }   -- what a recovered carrier contributes to pressure assessment and selection. The audit trace still ranges over registered WHOLE, so a gap already judged is reachable as evidence without being put to the user a second time
 Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool, carrier: Option(GapLocator) }
 AuditedDecision = Σ' where ∀ g ∈ registered: status(g) = completed
 EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (Σ' = Σ when exit precedes the first adjustment), partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ open(registered)) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay) [Tool]
+Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: registered := ∅; Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ open(registered)) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay) [Tool]
 Phase 1: (G, P) → [Σ.carrier = None: record[C ← all gaps] → Σ.carrier := Some(locator(C)) | Σ.carrier = Some(l): record update(l, add the newly detected gaps)] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register every gap into the ONE carrier, creating it on the first pass and amending the recovered one otherwise; hold the identity the creating write returned; pressure-select, surface first [Tool]
-Phase 2: J → A(J, D, Σ) → record update(Σ.carrier, status(Gₛ[0]) := completed) → Σ'           -- adjustment + carrier amendment naming the held identity [Tool]
-Phase 0 → carrier_unreachable (relay): a locator is in scope but the record it names cannot be read  -- surface that the prior gaps were NOT recovered and which locator failed, then proceed with Σ.carrier := None and a fresh carrier at Phase 1; the run never continues silently on a partial gap set
+Phase 2: J → A(J, D, Σ) → record update(Σ.carrier, entry(Gₛ[0]) := ⟨status := completed, judgment := J, adjustment := what A produced⟩) → Σ'           -- adjustment + carrier amendment naming the held identity. All three go in together: the audit trace reads judgment and adjustment, so a carrier holding status alone recovers which gaps are left and loses what was decided about the rest [Tool]
+Phase 0 → carrier_unreachable (relay): a locator is in scope but the record it names cannot be read  -- surface that the prior gaps were NOT recovered and which locator failed, then proceed with registered := ∅ and Σ.carrier := None and a fresh carrier at Phase 1; the run never continues silently on a partial gap set
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
