@@ -30,6 +30,23 @@ const SKILL = resolve(HERE, '..');
 // .claude/skills/realize -> .claude/skills -> .claude -> repo root
 const REPO = resolve(SKILL, '..', '..', '..');
 const CFG = JSON.parse(readFileSync(join(SKILL, 'harness.config.json'), 'utf8'));
+
+// Environment overrides exist for one caller: a workflow that is dispatched by hand
+// with a narrower matrix than the file describes. Editing the committed config from
+// CI would make the run unreproducible from the checkout it claims to test.
+const csv = (v) => v.split(',').map((x) => x.trim()).filter(Boolean);
+if (process.env.REALIZE_MODELS) CFG.models = csv(process.env.REALIZE_MODELS);
+if (process.env.REALIZE_RUNS) CFG.runs = Number(process.env.REALIZE_RUNS);
+if (process.env.REALIZE_MAX_BUDGET_USD) CFG.maxBudgetUsd = Number(process.env.REALIZE_MAX_BUDGET_USD);
+if (process.env.REALIZE_CASES) CFG.cases = csv(process.env.REALIZE_CASES);
+if (process.env.REALIZE_ARMS) {
+  const keep = new Set(csv(process.env.REALIZE_ARMS));
+  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([k]) => keep.has(k)));
+}
+for (const [key, list] of [['models', CFG.models], ['cases', CFG.cases]]) {
+  if (!list.length) { console.error(`no ${key} selected`); process.exit(1); }
+}
+if (!Object.keys(CFG.arms).length) { console.error('no arms selected'); process.exit(1); }
 const CONFIG_DIR = CFG.configDir.replace(/^~/, homedir());
 const EVALS = join(SKILL, 'evals');
 const RESULTS = join(SKILL, 'results');
@@ -304,6 +321,25 @@ function report() {
     }
   }
   if (!rows.length) { console.log('No results yet. Run `node harness.mjs run` first.'); return; }
+
+  if (process.argv.includes('--markdown')) {
+    const cols = ['model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'cost'];
+    const line = (cells) => `| ${cells.join(' | ')} |`;
+    console.log(line(cols));
+    console.log(line(cols.map(() => '---')));
+    for (const r of rows) console.log(line(cols.map((c) => String(r[c]))));
+    const total = rows.reduce((s, r) => s + Number(r.cost), 0).toFixed(4);
+    console.log(`\ntotal cost: $${total}`);
+    const failed = rows.filter((r) => r.integrity !== r.n);
+    if (failed.length) {
+      console.log('\n**Treatment integrity failed** — these rows are not evidence about the protocol:');
+      console.log(line(cols));
+      console.log(line(cols.map(() => '---')));
+      for (const r of failed) console.log(line(cols.map((c) => String(r[c]))));
+    }
+    return;
+  }
+
   console.table(rows);
   const totalCost = rows.reduce((s, r) => s + Number(r.cost), 0);
   console.log(`\ntotal cost: $${totalCost.toFixed(4)}`);
@@ -340,6 +376,6 @@ else if (cmd === 'run') run();
 else if (cmd === 'report') report();
 else if (cmd === 'teardown') teardown();
 else {
-  console.log('usage: node harness.mjs <setup|run|report|teardown [--all|--purge]>');
+  console.log('usage: node harness.mjs <setup|run|report [--markdown]|teardown [--all|--purge]>');
   process.exit(1);
 }

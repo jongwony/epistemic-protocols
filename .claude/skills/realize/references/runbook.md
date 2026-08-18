@@ -91,6 +91,34 @@ harness clears volatile state before each run for this reason, and passes
 teardown alone would not have covered it: the contamination is between runs, not after
 them.
 
+## Running it from CI
+
+`.github/workflows/type-realization.yml` runs the same scripts on a dispatched
+workflow. It has no `pull_request` trigger and is not meant to grow one: every run
+spends real model budget, so binding it to pushes would charge for measurements nobody
+asked for. Dispatch it from the Actions tab against a PR's branch once the PR is open.
+
+With no `pr` input it resolves the PR for the dispatched ref and comments the report
+there; with no PR it leaves the table in the job summary. The matrix inputs — models,
+arms, cases, repetitions, budget ceiling — override the committed config for that run
+only, through environment variables the harness reads. Editing the committed config
+from CI would leave the run unreproducible from the checkout it claims to test.
+
+The workflow needs one repository secret, `CLAUDE_CODE_OAUTH_TOKEN`, holding a token
+obtained the same way as for a local run. The first step checks for it and says which
+of "absent" and "invalid" it is, because the failure that follows otherwise reads as a
+broken token rather than a missing one.
+
+Isolation is nearly free there: a fresh runner has no marketplace plugins, so the
+baseline arm is empty by construction rather than by arrangement. The isolated config
+directory is still used, so that the same code path runs in both places and
+`treatment_integrity` keeps reporting what actually loaded rather than what the
+environment was assumed to provide.
+
+Transcripts upload as an artifact. They are observations rather than a cache —
+dispatching again produces different ones — so a table that needs a second reading is
+recoverable only from that artifact.
+
 ## Reading the report
 
 Read `integrity` before anything else. It reports whether each arm's treatment

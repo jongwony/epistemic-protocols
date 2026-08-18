@@ -1,0 +1,145 @@
+name: Type Realization
+
+# Manual dispatch only, deliberately. This workflow spends real model budget on every
+# run, so binding it to `pull_request` would charge for pushes nobody asked to
+# measure. The repository has stood here before: the style-audit workflow reduced to
+# `workflow_dispatch` for the same reason before it was parked.
+#
+# Dispatch it from the Actions tab against a PR's branch after the PR is open. With no
+# `pr` input it resolves the PR for the dispatched ref and comments there.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number to comment on (blank = resolve from the dispatched branch)'
+        required: false
+        type: string
+      models:
+        description: 'Comma-separated model ids (blank = harness.config.json)'
+        required: false
+        type: string
+      arms:
+        description: 'Comma-separated arms: bare,style,protocol,protocol+style (blank = all)'
+        required: false
+        type: string
+      cases:
+        description: 'Comma-separated case names (blank = all)'
+        required: false
+        type: string
+      runs:
+        description: 'Repetitions per cell (blank = harness.config.json)'
+        required: false
+        type: string
+      max_budget_usd:
+        description: 'Per-run ceiling (blank = harness.config.json)'
+        required: false
+        type: string
+      post_comment:
+        description: 'Post the report as a PR comment'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  realize:
+    runs-on: ubuntu-latest
+    # A dispatched matrix can be widened without touching this file, so the ceiling is
+    # generous. The per-run budget is what actually bounds spend.
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Without this the first failure is "Not logged in", which reads as a broken
+      # token rather than an absent one. Say which it is before spending anything.
+      - name: Require the evaluation token
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "${CLAUDE_CODE_OAUTH_TOKEN}" ]; then
+            echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN is not set on this repository."
+            echo "::error::Create one with: CLAUDE_CONFIG_DIR=~/.claude-eval claude setup-token"
+            exit 1
+          fi
+
+      - name: Install Claude Code
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+
+      - name: Resolve PR context
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -n "${{ inputs.pr }}" ]; then
+            echo "number=${{ inputs.pr }}" >> "$GITHUB_OUTPUT"
+          elif PR_JSON=$(gh pr view "${{ github.ref_name }}" --json number 2>/dev/null); then
+            echo "number=$(echo "$PR_JSON" | jq -r '.number')" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No open PR for ${{ github.ref_name }}; the report will be in the job summary only."
+            echo "number=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up the isolated evaluation environment
+        run: .claude/skills/realize/scripts/setup.sh
+
+      # A fresh runner has no marketplace plugins, so the baseline arm is empty here by
+      # construction rather than by arrangement. The isolated config directory is kept
+      # anyway: the same code path then runs locally and in CI, and `treatment_integrity`
+      # still reports what actually loaded rather than what was assumed to.
+      - name: Run
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          REALIZE_MODELS: ${{ inputs.models }}
+          REALIZE_ARMS: ${{ inputs.arms }}
+          REALIZE_CASES: ${{ inputs.cases }}
+          REALIZE_RUNS: ${{ inputs.runs }}
+          REALIZE_MAX_BUDGET_USD: ${{ inputs.max_budget_usd }}
+        run: node .claude/skills/realize/scripts/harness.mjs run
+
+      - name: Report
+        id: report
+        env:
+          REALIZE_MODELS: ${{ inputs.models }}
+          REALIZE_ARMS: ${{ inputs.arms }}
+          REALIZE_CASES: ${{ inputs.cases }}
+          REALIZE_RUNS: ${{ inputs.runs }}
+        run: |
+          {
+            echo "## Type realization — \`${{ github.ref_name }}\` @ \`${GITHUB_SHA:0:8}\`"
+            echo
+            node .claude/skills/realize/scripts/harness.mjs report --markdown
+            echo
+            echo "[run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } > report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+
+      # Transcripts are observations: re-running produces different ones, so a failed
+      # read of the table cannot be recovered by dispatching again.
+      - name: Upload transcripts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: realize-results-${{ github.run_id }}
+          path: .claude/skills/realize/results/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Comment on the PR
+        if: inputs.post_comment && steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment "${{ steps.pr.outputs.number }}" --body-file report.md
+
+      - name: Tear down
+        if: always()
+        run: .claude/skills/realize/scripts/teardown.sh

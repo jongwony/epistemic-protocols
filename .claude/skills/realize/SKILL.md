@@ -54,6 +54,13 @@ not isolate what it appears to, a settings key that does not disable what it nam
 environment variable whose near-miss is ignored in silence, and a budget ceiling set
 below the floor. None of them announces itself.
 
+## From CI
+
+`.github/workflows/type-realization.yml` runs the same scripts on manual dispatch and
+comments the report on the PR. It carries no automatic trigger: each run spends model
+budget, so it fires when someone asks for a measurement, not when someone pushes.
+`references/runbook.md` covers the inputs and the one required secret.
+
 ## Configuration
 
 `harness.config.json` carries the matrix: models, arms, cases, repetitions, budget
