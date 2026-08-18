@@ -35,7 +35,7 @@ All prompts are English per delegation rules; search keywords in quotes are exem
 PURPOSE: Extract the user's explicitly stated preferences and constraints from their
 Claude Code configuration.
 
-Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
 
 COLLECT:
 1. Read {config_dir}/CLAUDE.md — extract all stated preferences, principles, and constraints
@@ -63,7 +63,7 @@ RETURN FORMAT:
 ```
 PURPOSE: Extract quantitative behavioral patterns from usage data.
 
-Paths below written {config_dir}/… take {config_dir} = CLAUDE_CONFIG_DIR when set, else ~/.claude. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+Paths below written {config_dir}/… take {config_dir} = CLAUDE_CONFIG_DIR when set, else ~/.claude. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
 
 COLLECT:
 1. Read {config_dir}/usage-data/report.html — extract key statistics (messages, tools,
@@ -94,7 +94,7 @@ RETURN FORMAT:
 ```
 PURPOSE: Extract qualitative behavioral patterns from recent session transcripts.
 
-Paths below written {config_dir}/… take {config_dir} = CLAUDE_CONFIG_DIR when set, else ~/.claude. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+Paths below written {config_dir}/… take {config_dir} = CLAUDE_CONFIG_DIR when set, else ~/.claude. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
 
 COLLECT:
 1. List session files in {config_dir}/projects/ (find recent, large sessions)
@@ -206,7 +206,7 @@ through an AI-delegation counter-hypothesis.
 
 ## Phase 4: Report Generation
 
-Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any artifact read/artifact search call.
 
 Generate an HTML report and save to `{config_dir}/epistemic-cooperative/introspect/`.
 

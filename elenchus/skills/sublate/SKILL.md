@@ -71,7 +71,7 @@ EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit:
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)
 Phase 0 → converge (trivial): S_high = ∅ → emit empty VettedContext (dispositions = ∅, trace = ∅) as relay, deactivate   -- trivial convergence (TYPES: cardinality 0; no audit-candidate source)
 Phase 0 → Phase 1: S_high ≠ ∅
-Phase 1: S_high → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: Read, Grep]
+Phase 1: S_high → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: artifact read, artifact search]
          Step₂ posit(antithesis per s ∈ S') → A[]                        -- per-source Pattern A ∪ B ∪ C ∪ D ∪ Emergent(Pattern) generation
 Phase 2: (A[], disposition slots) → Qs(per-source) → Stop → J            [Tool: Constitution interaction]
 Phase 3: J → integrate(J, S') → V                                        -- per-source disposition recorded
@@ -94,7 +94,7 @@ early_exit = user_esc ∨ user_cancel
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction / inference-character scan)
 Phase 0 trivial_converge (extension)   → TextPresent+Proceed (conditional: S_high = ∅ — relay the empty VettedContext, no audit-candidate source; deactivate)
-Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin, authorized claim, and downstream references)
+Phase 1 ProvenanceTag   (observe)      → artifact read, artifact search (verification of source origin, authorized claim, and downstream references)
 Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D/Emergent antithesis generation per source)
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
 Phase 3 integrate       (track)        → Internal state update (Λ.dispositions, Λ.history)

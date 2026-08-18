@@ -125,7 +125,7 @@ Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active :
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Orient (observe) → Internal analysis (Read for context if needed)
+Phase 0 Orient (observe) → Internal analysis (artifact read for context if needed)
 Phase 0 AssessRoute (sense) → Internal analysis (no external tool; entry-point adequacy; opacity-preserving — exposes selection scent, never probe answers)
 Phase 1 Emit (extension) → TextPresent+Proceed (entry-point-fit distinctions, hidden routes, and bounded open questions from Fᵣ; omitted when empty)
 Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ)
@@ -141,7 +141,7 @@ Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_k
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
-Phase 3 Ref (observe) → Read (source artifact, AI-determined)
+Phase 3 Ref (observe) → artifact read (source artifact, AI-determined)
 Phase 3 Tᵤ  (track)  → record update (progress tracking; every amendment names Λ.current, the RecordId Phase 2 bound)
 Phase 3 Prop (track)  → record (proposal ejection)
 Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: verified status + side branch if any + return pointer + next moves)
