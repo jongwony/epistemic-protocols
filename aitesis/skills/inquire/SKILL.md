@@ -146,7 +146,7 @@ Uᵢ''       = Remaining user-dependent uncertainties
              --           (e) any Factual(v) with s ∈ Emergent(EvidenceSource) (channel unvalidated by definition; awaits Phase 2 Qs_emergent_channel confirmation)
              -- Phase 2 question candidates
 Uₙ         = Non-actionable detected uncertainties  -- Fiber(Coherence) = CrossDomain or Fiber(d) = Unit; shown in classify summary as out-of-scope
-Action     = Tool call sequence (Write, Bash)
+Action     = capability call sequence (artifact write, environment run)
 EscapeCondition ∈ {EnvironmentMutation, RiskElevated}
                     -- maps to Cite-or-observe escape hatches; logged in observation_skips
                     -- pre-observation judgments only: each names a reason the observation MUST NOT run at all.
@@ -354,8 +354,8 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
     - Without citation, default to the cheaper source
   - **Routing consequence** (determines Step 3/4/Phase 2 channel):
     - `CodeDerivable` → Step 3 (Read-only verification; codebase artifact read/artifact search)
-    - `CanonicalExternal` → Step 3 with WebFetch/WebSearch (published external docs; `source: "web:{url}"` tag + determinism verification + staleness guard — see Web context below)
-    - `Instrumentation` → Step 4 (Empirical observation via Bash lifecycle)
+    - `CanonicalExternal` → Step 3 with external fetch (published external docs; `source: "web:{url}"` tag + determinism verification + staleness guard — see Web context below)
+    - `Instrumentation` → Step 4 (Empirical observation via an environment run lifecycle)
     - `UserTacit` → Phase 2 directly (user-dependent inquiry; includes reclassified Coherence/MemoryInternal items)
     - `Emergent(source)` → **always Phase 2** (Constitution per TOOL GROUNDING `Phase 2 Qs_emergent_channel`): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Within the session, the validation is recorded in Λ.channel_validations; a channel already Point-validated this session skips the re-gate only (prior in-session user decision); each later item on that channel still routes through the claim-specific Phase 1 evidence pass against the validated channel, per the Point(location) semantics (record location, resolve via next Phase 1 iteration) — base promotion itself stays cross-session. Confirmation rides the standard Phase 2 answer coproduct — `Point(location)` designates/validates the authoritative channel, `Provide(context)` supersedes it, `Dismiss` declines it (proceed-with-assumption), `Unknown(Partial)` leaves the item unresolved — no separate answer type, and no answer auto-resolves the item through the unconfirmed channel. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
 - **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
@@ -390,7 +390,7 @@ If observed or user-dependent uncertainties remain: proceed to Phase 2.
 
 **Web context** (CanonicalExternal channel, conditional): When uncertainty carries an environmental dependency signal
 (external API versions, library maintenance status, breaking changes, RFC/standard semantics, vendor documentation)
-and the information is not available in the codebase, extend context collection to WebSearch/WebFetch.
+and the information is not available in the codebase, extend context collection to external fetch.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
 
 **Determinism verification** (Extension precondition): CanonicalExternal is classified as Extension only when the source is deterministic for the claim scope. Verify one of: (a) pinned version or dated snapshot (specific RFC with publication date, vendor doc with version pin, W3C spec with date stamp), (b) tag-pinned URL (`/v1.2/`, `?version=X`), or (c) cached copy with recorded fetch timestamp. When the source is undated or versionless and the claim depends on temporal context (API behavior, deprecated features, vendor defaults), the fetch is NON-deterministic → classify as Constitution and escalate via Phase 2 classify summary before treating as evidence.
@@ -400,7 +400,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved
 - Read-only verification: Extended context lookup for verifiable facts (Read, Grep). — resolves directly
-- Empirical observation: Non-destructive observation via Bash execution, with optional Write for observation instrument setup (temp test artifacts). Observation results are evidence for Phase 2, not resolution — evidence gathering, not replacement. Design constraints — the **probe envelope**, the protocol's named observation-admissibility boundary (a stable handle for the constraint set, so a citation of it tracks revisions made here rather than freezing a member list): **Minimal** (create the smallest possible observation instrument), **Reversible** (all observation artifacts created in temp locations and cleaned up after observation), **Sandboxed** (observation must not modify existing project files), **Transparent** (log observation lifecycle in `Λ.observation_history`), **Bounded** (30-second timeout → the observation ends, `cleanup` runs, and the overrun carries forward to Phase 2 as negative evidence in `Uₑ`; the item still reaches the user, carrying what the observation established rather than empty-handed), **Risk-aware** (elevated-risk observation → reclassify as UserDependent).
+- Empirical observation: Non-destructive observation via environment run, with optional artifact write for observation instrument setup (temp test artifacts). Observation results are evidence for Phase 2, not resolution — evidence gathering, not replacement. Design constraints — the **probe envelope**, the protocol's named observation-admissibility boundary (a stable handle for the constraint set, so a citation of it tracks revisions made here rather than freezing a member list): **Minimal** (create the smallest possible observation instrument), **Reversible** (all observation artifacts created in temp locations and cleaned up after observation), **Sandboxed** (observation must not modify existing project files), **Transparent** (log observation lifecycle in `Λ.observation_history`), **Bounded** (30-second timeout → the observation ends, `cleanup` runs, and the overrun carries forward to Phase 2 as negative evidence in `Uₑ`; the item still reaches the user, carrying what the observation established rather than empty-handed), **Risk-aware** (elevated-risk observation → reclassify as UserDependent).
 
 ### Phase 2: Uncertainty Surfacing
 

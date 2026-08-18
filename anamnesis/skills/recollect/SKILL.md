@@ -378,7 +378,7 @@ Dispatch the scan on the classified `Track`, execute the first lookup over every
 
    Yield the turn. ExpandFullText admits only the transcript bodies named in that presentation, then returns to ranking. StopAtSpine deactivates. If an accepted full-text scan remains empty after the attempt bound, surface the full search scope and offer Aitesis handoff with the accumulated trace.
 
-**Scope restriction**: Investigation is read-only and writes nothing to the store. It uses Read, Grep, and Glob, plus the bounded spine-scan command each runtime reference declares — that command reads record heads only, and the unbounded body read stays behind the Qx checkpoint.
+**Scope restriction**: Investigation is read-only and writes nothing to the store. It uses artifact read and artifact search, plus the bounded spine-scan command each runtime reference declares — that command reads record heads only, and the unbounded body read stays behind the Qx checkpoint.
 
 ### Phase 2: Narrative Recognition (Constitution; Extension on a high-confidence single candidate)
 
