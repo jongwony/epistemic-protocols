@@ -1,0 +1,44 @@
+{
+  "configDir": "~/.claude-eval",
+  "pluginDir": "aitesis",
+  "styleSource": "epistemic-cooperative/styles/epistemic-ink.md",
+  "styleName": "Epistemic Ink",
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "arms": {
+    "bare": {
+      "protocol": false,
+      "style": false
+    },
+    "style": {
+      "protocol": false,
+      "style": true
+    },
+    "protocol": {
+      "protocol": true,
+      "style": false
+    },
+    "protocol+style": {
+      "protocol": true,
+      "style": true
+    }
+  },
+  "cases": [
+    "inquire-underspecified",
+    "inquire-fully-specified"
+  ],
+  "runs": 1,
+  "maxBudgetUsd": 2,
+  "allowedTools": [
+    "Read",
+    "Grep",
+    "Glob",
+    "Bash",
+    "Write",
+    "Edit"
+  ],
+  "permissionMode": "acceptEdits",
+  "protocolSkill": "inquire",
+  "invocation": "Use `/inquire` first, before any code gets written."
+}
