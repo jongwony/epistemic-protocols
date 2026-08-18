@@ -5,4 +5,4 @@ context:
   # Same substrate as the trigger-positive case, deliberately. This case is graded on whether an
   # already-specified parameter gets re-asked; if the directory differed, a pass here would not
   # be comparable with a pass there.
-  scaffold_script: ../../scaffold.sh
+  scaffold_script: ../scaffold.sh

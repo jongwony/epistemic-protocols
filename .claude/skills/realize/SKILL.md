@@ -115,12 +115,19 @@ frontmatter and the user's words, and one grader per obligation under `graders/`
 
 ## Reading results
 
-Read `integrity` first. It reports whether each arm's treatment actually applied. A row
-whose integrity falls short of its run count is not evidence about the protocol, and
-the report reprints those rows separately so they are not mistaken for findings.
+Read `integrity` first. It reports whether each arm's treatment actually applied — both
+dimensions of it, the plugin and the output style, since either can fail silently and
+leave two arms running the same treatment. A row whose integrity falls short of its run
+count is not evidence about the protocol, and the report reprints those rows separately
+so they are not mistaken for findings.
 
 `pass_k` is one only when every repetition passed. A mean hides the repetition that
-failed, and one failure in k is what a user meets.
+failed, and one failure in k is what a user meets. It reads `-` where something a
+predicate needed was missing, which is not the same as the predicate failing.
+
+`skill` says whether the protocol fired where it was available, and `n/a` where there was
+no plugin to fire. It separates a protocol that ran and behaved from one that never ran
+while the model happened to produce a similar shape.
 
 Absolute fulfilment rates are the reportable quantity here, not deltas. A baseline arm
 has no gate to stop at, so most predicates have no counterpart there to subtract.

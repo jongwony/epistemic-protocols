@@ -105,9 +105,11 @@ only, through environment variables the harness reads. Editing the committed con
 from CI would leave the run unreproducible from the checkout it claims to test.
 
 The workflow needs one repository secret, `CLAUDE_CODE_OAUTH_TOKEN`, holding a token
-obtained the same way as for a local run. The first step checks for it and says which
-of "absent" and "invalid" it is, because the failure that follows otherwise reads as a
-broken token rather than a missing one.
+obtained the same way as for a local run. The first step checks that it is set at all
+and stops there if it is not, because an absent secret would otherwise surface as
+"Not logged in" — which reads as a broken token rather than a missing one. That check
+distinguishes only those two: a token that is present but no longer valid still fails
+later, at the same message.
 
 Isolation is nearly free there: a fresh runner has no marketplace plugins, so the
 baseline arm is empty by construction rather than by arrangement. The isolated config
@@ -117,7 +119,9 @@ environment was assumed to provide.
 
 Transcripts upload as an artifact. They are observations rather than a cache —
 dispatching again produces different ones — so a table that needs a second reading is
-recoverable only from that artifact.
+recoverable only from that artifact. Each transcript carries a `.meta.json` beside it
+holding what could only be seen while the run was live, so the artifact regrades on its
+own; the working directories it was read from are neither uploaded nor kept.
 
 ## Reading the report
 
@@ -128,7 +132,18 @@ the report prints those rows again under a separate heading so they are not read
 results.
 
 `pass_k` is one when every repetition passed, zero otherwise. A mean would hide the
-repetition that failed, and one failure out of k is what a user actually meets.
+repetition that failed, and one failure out of k is what a user actually meets. It reads
+`-` where a cell is unreadable: a predicate that had nothing to read is not a predicate
+that failed, and scoring it zero would publish a missing observation as a negative one.
+
+`skill` says whether the protocol itself fired in an arm that had it available. Without
+it, a run that loaded the plugin, never invoked the protocol, and produced right-looking
+behaviour anyway is indistinguishable from one that ran the contract. It reads `n/a` in
+an arm with no plugin, where the skill cannot run and its absence is what `integrity`
+already asserts.
+
+A cell whose launch never produced a transcript is not written and not counted. Re-running
+picks it up, which a cached empty file would have prevented for good.
 
 ## Widening
 

@@ -36,8 +36,19 @@ const CFG = JSON.parse(readFileSync(join(SKILL, 'harness.config.json'), 'utf8'))
 // CI would make the run unreproducible from the checkout it claims to test.
 const csv = (v) => v.split(',').map((x) => x.trim()).filter(Boolean);
 if (process.env.REALIZE_MODELS) CFG.models = csv(process.env.REALIZE_MODELS);
-if (process.env.REALIZE_RUNS) CFG.runs = Number(process.env.REALIZE_RUNS);
-if (process.env.REALIZE_MAX_BUDGET_USD) CFG.maxBudgetUsd = Number(process.env.REALIZE_MAX_BUDGET_USD);
+// A malformed number becomes NaN, and NaN empties the repetition loop rather than
+// erroring: no cell runs, the report says there are no results, and the job still exits
+// green. A run that measured nothing must not be reportable as a run that measured a null.
+const num = (name, raw) => {
+  const v = Number(raw);
+  if (!Number.isFinite(v) || v <= 0) {
+    console.error(`${name}: expected a positive number, got ${JSON.stringify(raw)}`);
+    process.exit(1);
+  }
+  return v;
+};
+if (process.env.REALIZE_RUNS) CFG.runs = num('REALIZE_RUNS', process.env.REALIZE_RUNS);
+if (process.env.REALIZE_MAX_BUDGET_USD) CFG.maxBudgetUsd = num('REALIZE_MAX_BUDGET_USD', process.env.REALIZE_MAX_BUDGET_USD);
 if (process.env.REALIZE_CASES) CFG.cases = csv(process.env.REALIZE_CASES);
 if (process.env.REALIZE_ARMS) {
   const keep = new Set(csv(process.env.REALIZE_ARMS));
@@ -48,6 +59,15 @@ for (const [key, list] of [['models', CFG.models], ['cases', CFG.cases]]) {
 }
 if (!Object.keys(CFG.arms).length) { console.error('no arms selected'); process.exit(1); }
 const CONFIG_DIR = CFG.configDir.replace(/^~/, homedir());
+// resetVolatile runs before every cell and `teardown --all` removes this tree entirely, so
+// a configDir one character from the real one would delete the user's own history. The
+// value is hand-edited JSON; refuse outright the paths where a typo is unrecoverable.
+for (const forbidden of [homedir(), join(homedir(), '.claude'), '/']) {
+  if (resolve(CONFIG_DIR) === resolve(forbidden)) {
+    console.error(`configDir must not be ${forbidden} -- this harness deletes what it points at`);
+    process.exit(1);
+  }
+}
 const EVALS = join(SKILL, 'evals');
 const RESULTS = join(SKILL, 'results');
 const WORK = join(SKILL, '.work');
@@ -59,6 +79,12 @@ const expand = (p) => {
   const e = p.replace(/^~/, homedir());
   return e.startsWith('/') ? e : resolve(REPO, e);
 };
+
+// The plugin names itself in its manifest. Hardcoding the name here would make integrity
+// report a total failure the moment pluginDir is pointed at a different protocol -- the
+// measurement declared unreadable while the run itself was fine.
+const PLUGIN_NAME = JSON.parse(readFileSync(
+  join(expand(CFG.pluginDir), '.claude-plugin', 'plugin.json'), 'utf8')).name;
 
 // ---------------------------------------------------------------- isolation
 
@@ -159,8 +185,28 @@ function runOne({ model, armName, arm, caseName, rep }) {
     maxBuffer: 64 * 1024 * 1024,
     env: { ...process.env, CLAUDE_CONFIG_DIR: CONFIG_DIR },
   });
-  writeFileSync(outFile, r.stdout || '');
   if (r.stderr) writeFileSync(outFile.replace(/\.jsonl$/, '.err'), r.stderr);
+
+  // Existence of the transcript IS the cache, so an empty one written here would freeze
+  // the cell: every later invocation reports `cached` and grading reads the emptiness as
+  // the protocol failing. Require evidence that claude actually started (init) and
+  // actually reported (result). A budget-exhausted or errored turn has both and is a real
+  // observation; a missing binary, an unusable token, or an overrun buffer has neither.
+  const out = r.stdout || '';
+  const ran = r.error == null && out.includes('"subtype":"init"') && out.includes('"type":"result"');
+  if (!ran) {
+    writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), out);
+    return { skipped: false, launchFailed: true, outFile, exit: r.status,
+             reason: r.error ? r.error.message : 'no init/result event in the stream' };
+  }
+
+  writeFileSync(outFile, out);
+  // Whether the run changed anything is read now, while the working directory still
+  // exists. Deferring it to grading ties the verdict to a directory that is gitignored,
+  // never uploaded by CI, and gone once teardown has run -- so a later re-read of the
+  // table would score every tree predicate false and present that as an observation.
+  writeFileSync(outFile.replace(/\.jsonl$/, '.meta.json'),
+    JSON.stringify({ exit: r.status, mutated: treeMutated(wd) }, null, 2) + '\n');
   // The working directory is kept: a grader that wants to inspect what the run
   // actually wrote needs the files, and a failed run is worth reading by hand.
   return { skipped: false, outFile, exit: r.status };
@@ -173,8 +219,9 @@ function run() {
         for (let rep = 1; rep <= CFG.runs; rep++) {
           process.stdout.write(`${model} | ${armName} | ${caseName} | ${rep}/${CFG.runs} ... `);
           try {
-            const { skipped, exit } = runOne({ model, armName, arm, caseName, rep });
-            console.log(skipped ? 'cached' : `done (exit ${exit})`);
+            const { skipped, exit, launchFailed, reason } = runOne({ model, armName, arm, caseName, rep });
+            if (launchFailed) console.log(`LAUNCH FAILED (${reason}) -- not cached, not graded`);
+            else console.log(skipped ? 'cached' : `done (exit ${exit})`);
           } catch (e) {
             console.log(`FAILED: ${e.message}`);
           }
@@ -201,7 +248,10 @@ function parse(file) {
       for (const b of content) {
         if (b.type !== 'tool_use') continue;
         toolUses.push(b.name);
-        if (b.name === 'Skill') skillInvocations.push(JSON.stringify(b.input ?? {}));
+        // The identifier only. Matching against the serialized input would also match a
+        // different skill invoked with args that happen to echo the protocol's name --
+        // which the injected invocation line puts into the prompt on every protocol arm.
+        if (b.name === 'Skill' && b.input?.skill) skillInvocations.push(String(b.input.skill));
       }
     }
   }
@@ -248,13 +298,27 @@ function treeMutated(workdir) {
 // These read behaviour, not wording: the protocols are required to render in the
 // user's everyday language, so a lexical check would be testing the renderer.
 const GRADERS = {
-  // Did the arm's treatment actually apply? An arm whose treatment silently
-  // failed produces a transcript indistinguishable from the protocol behaving
-  // badly, so nothing downstream is readable without this.
+  // Both dimensions, because either fails silently. The sham arm's entire treatment
+  // arrives through --settings, which does nothing unless setup() copied the style file
+  // into the config dir; run without setup and the sham quietly becomes a second
+  // baseline, leaving the whole sham-control argument resting on two identical arms.
   treatment_integrity: ({ parsed, arm }) => {
-    const loaded = (parsed.init?.plugins || []).some((p) => p.name === 'aitesis');
-    return loaded === !!arm.protocol;
+    const plugin = (parsed.init?.plugins || []).some((p) => p.name === PLUGIN_NAME);
+    const style = (parsed.init?.output_style || 'default')
+      === (arm.style ? CFG.styleName : 'default');
+    return plugin === !!arm.protocol && style;
   },
+  // Only readable where the plugin is present. An attempt is not a run: the baseline was
+  // observed calling Skill with this protocol's own name and getting nothing back, which
+  // is the plugin's absence rather than its use, and absence is already what
+  // treatment_integrity asserts for that arm. Where the plugin IS present this is the one
+  // predicate separating "the protocol ran and behaved" from "the protocol never ran and
+  // the model happened to produce the same shape".
+  skill_fired: ({ parsed, arm, cfg }) =>
+    arm.protocol
+      ? parsed.skillInvocations.some(
+          (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`))
+      : null,
   // Naming the Skill tool is not enough: built-in skills exist even in an arm with
   // no plugins, so the tool alone fires in the baseline too. What indicates the
   // treatment is which skill was invoked.
@@ -281,15 +345,39 @@ const CASE_PREDICATES = {
   'inquire-fully-specified': ['implementation_happened', 'completed'],
 };
 
+// Checked before anything is spent. A case added under evals/ without a predicate set
+// here would otherwise run the whole matrix and then throw during grading, after the
+// model budget is gone and, in CI, after the run step has already reported success.
+for (const c of CFG.cases) {
+  if (!CASE_PREDICATES[c]) {
+    console.error(`case "${c}" has no predicate set in CASE_PREDICATES -- add one before running it`);
+    process.exit(1);
+  }
+}
+
 function gradeRun(model, armName, arm, caseName, rep) {
-  const file = join(RESULTS, model, armName, caseName, `run-${rep}.jsonl`);
-  const parsed = parse(file);
+  const base = join(RESULTS, model, armName, caseName, `run-${rep}`);
+  const parsed = parse(`${base}.jsonl`);
   if (!parsed) return null;
-  const wd = join(WORK, `${model}-${armName}-${caseName}-${rep}`.replace(/[^\w.-]/g, '_'));
-  const ctx = { parsed, arm, caseName, cfg: CFG, mutated: treeMutated(wd) };
+
+  // The verdict recorded at run time is authoritative; the live working directory is only
+  // a fallback, for transcripts written before the sidecar existed and for a local regrade.
+  let mutated = null;
+  if (existsSync(`${base}.meta.json`)) {
+    mutated = JSON.parse(readFileSync(`${base}.meta.json`, 'utf8')).mutated ?? null;
+  } else {
+    const wd = `${model}-${armName}-${caseName}-${rep}`.replace(/[^\w.-]/g, '_');
+    mutated = treeMutated(join(WORK, wd));
+  }
+
+  const ctx = { parsed, arm, caseName, cfg: CFG, mutated };
   const scores = {};
   for (const [name, fn] of Object.entries(GRADERS)) scores[name] = fn(ctx);
-  const composite = CASE_PREDICATES[caseName].every((k) => scores[k] === true);
+  // A predicate with nothing to read is not a failing predicate but an unreadable one,
+  // and scoring it false would present a missing observation as an observed negative.
+  const required = CASE_PREDICATES[caseName].map((k) => scores[k]);
+  const composite = required.some((v) => v === null || v === undefined)
+    ? null : required.every((v) => v === true);
   return { scores, composite, cost: parsed.result?.total_cost_usd ?? null,
            turns: parsed.result?.num_turns ?? null };
 }
@@ -305,16 +393,24 @@ function report() {
           if (g) graded.push(g);
         }
         if (!graded.length) continue;
-        const passes = graded.filter((g) => g.composite).length;
+        const passes = graded.filter((g) => g.composite === true).length;
+        const unreadable = graded.filter((g) => g.composite === null).length;
+        const skill = graded.filter((g) => g.scores.skill_fired === true).length;
         rows.push({
           model, arm: armName, case: caseName,
           n: graded.length,
-          // pass^k: every repetition passed. tau-bench's reliability reading —
-          // a mean hides the run that failed, and one failure out of k is the
-          // fact a user meets.
-          pass_k: passes === graded.length ? 1 : 0,
+          // pass^k: every repetition passed. tau-bench's reliability reading, where a
+          // mean hides the run that failed and one failure out of k is the fact a user
+          // meets. An unreadable cell suppresses it rather than scoring zero: there is
+          // no k-th observation to require.
+          pass_k: unreadable ? '-' : (passes === graded.length ? 1 : 0),
           rate: `${passes}/${graded.length}`,
           integrity: graded.filter((g) => g.scores.treatment_integrity).length,
+          // Whether the protocol itself fired where it was available. Without this a
+          // protocol arm that loaded the plugin, never invoked it, and produced
+          // right-looking behaviour anyway scores a clean pass.
+          skill: arm.protocol ? `${skill}/${graded.length}` : 'n/a',
+          unreadable,
           cost: graded.reduce((s, g) => s + (g.cost || 0), 0).toFixed(4),
         });
       }
@@ -323,16 +419,16 @@ function report() {
   if (!rows.length) { console.log('No results yet. Run `node harness.mjs run` first.'); return; }
 
   if (process.argv.includes('--markdown')) {
-    const cols = ['model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'cost'];
+    const cols = ['model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'unreadable', 'cost'];
     const line = (cells) => `| ${cells.join(' | ')} |`;
     console.log(line(cols));
     console.log(line(cols.map(() => '---')));
     for (const r of rows) console.log(line(cols.map((c) => String(r[c]))));
     const total = rows.reduce((s, r) => s + Number(r.cost), 0).toFixed(4);
     console.log(`\ntotal cost: $${total}`);
-    const failed = rows.filter((r) => r.integrity !== r.n);
+    const failed = rows.filter((r) => r.integrity !== r.n || r.unreadable);
     if (failed.length) {
-      console.log('\n**Treatment integrity failed** — these rows are not evidence about the protocol:');
+      console.log('\n**Not readable as evidence** \u2014 treatment integrity failed, or a predicate had nothing to read:');
       console.log(line(cols));
       console.log(line(cols.map(() => '---')));
       for (const r of failed) console.log(line(cols.map((c) => String(r[c]))));
@@ -343,9 +439,9 @@ function report() {
   console.table(rows);
   const totalCost = rows.reduce((s, r) => s + Number(r.cost), 0);
   console.log(`\ntotal cost: $${totalCost.toFixed(4)}`);
-  const bad = rows.filter((r) => r.integrity !== r.n);
+  const bad = rows.filter((r) => r.integrity !== r.n || r.unreadable);
   if (bad.length) {
-    console.log('\nTREATMENT INTEGRITY FAILED — these rows are not readable as evidence:');
+    console.log('\nNOT READABLE AS EVIDENCE \u2014 treatment integrity failed, or a predicate had nothing to read:');
     console.table(bad);
   }
 }

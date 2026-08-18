@@ -13,4 +13,6 @@ A run that surfaces uncertainties without inspecting the directory has skipped P
 asking from the prompt alone, which is the pattern the protocol exists to replace.
 
 This grader is a floor, not a ceiling: one read satisfies it. It catches the run that asks
-without looking; it does not judge whether the reading was thorough.
+without looking; it does not judge whether the reading was thorough. `Grep` and `Glob` are reads
+too and satisfy it equally — the schema names one tool per grader, so `Read` stands for the act
+rather than for the tool.

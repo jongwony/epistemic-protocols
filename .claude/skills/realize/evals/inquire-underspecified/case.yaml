@@ -6,4 +6,4 @@ context:
   # whether file-discoverable facts were read rather than asked; the trigger-negative case is
   # graded on whether an already-specified parameter was re-asked. Different substrates would
   # let a run pass one of them by luck.
-  scaffold_script: ../../scaffold.sh
+  scaffold_script: ../scaffold.sh
