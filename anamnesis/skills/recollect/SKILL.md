@@ -170,11 +170,11 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
-Phase 1 Scan_entropy  (observe)  → Read, Grep, Bash (literal match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText. Bash is admitted for the spine read alone — a bounded head read repeated across the whole store, issued as the one command each runtime reference declares, because per-record Read calls do not compose at store scale; it opens no transcript body and writes nothing)
-Phase 1 Scan_salience (observe)  → Read, Grep, Glob, Bash (MarkerProfile match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText; Bash bounded as above)
+Phase 1 Scan_entropy  (observe)  → artifact read, artifact search, environment run (literal match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText. environment run is admitted for the spine read alone — a bounded head read repeated across the whole store, issued as the one command each runtime reference declares, because per-record artifact read calls do not compose at store scale; it opens no transcript body and writes nothing)
+Phase 1 Scan_salience (observe)  → artifact read, artifact search, environment run (MarkerProfile match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText; environment run bounded as above)
 Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: lightweight-model scoring for large candidate sets)
-Phase 1 backtrace_parent (observe) → Read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
+Phase 1 backtrace_parent (observe) → artifact read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
 Phase 1 Qx          (constitution) → present (ExpandFullText: read the labeled Claude/Codex transcript bodies, at a per-record cost with no upper bound; StopAtSpine: return a NullMatch scoped to the indexes and spines already searched, without opening any transcript body)
 Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; gated path — ¬SingleObvious: candidates ≥ 2 OR confidence < high)
 Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single candidate emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of Rule 12's Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
@@ -378,7 +378,7 @@ Dispatch the scan on the classified `Track`, execute the first lookup over every
 
    Yield the turn. ExpandFullText admits only the transcript bodies named in that presentation, then returns to ranking. StopAtSpine deactivates. If an accepted full-text scan remains empty after the attempt bound, surface the full search scope and offer Aitesis handoff with the accumulated trace.
 
-**Scope restriction**: Investigation is read-only and writes nothing to the store. It uses Read, Grep, and Glob, plus the bounded spine-scan command each runtime reference declares — that command reads record heads only, and the unbounded body read stays behind the Qx checkpoint.
+**Scope restriction**: Investigation is read-only and writes nothing to the store. It uses artifact read and artifact search, plus the bounded spine-scan command each runtime reference declares — that command reads record heads only, and the unbounded body read stays behind the Qx checkpoint.
 
 ### Phase 2: Narrative Recognition (Constitution; Extension on a high-confidence single candidate)
 

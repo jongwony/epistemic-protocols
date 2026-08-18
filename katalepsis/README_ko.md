@@ -30,8 +30,8 @@ AI가 복잡한 작업을 완료했을 때, 사용자는 종종 결과를 온전
 ```
 Phase 0: 방향 잡기   → 결과와 사용자 신호에서 이해 의도 추론
 Phase 1: 진입점     → 의도 기반 경로 제시, 사용자 선택 (gate interaction)
-Phase 2: 근거화     → 산출물 근거를 연결하고 태스크 생성 (TaskCreate)
-Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + TaskUpdate)
+Phase 2: 근거화     → 산출물 근거를 연결하고 태스크 생성 (record)
+Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + record update)
 ```
 
 ## 사용 시점

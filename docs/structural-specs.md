@@ -21,7 +21,7 @@ Protocols draw their `Definition` code block from this structure:
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── CONVERGENCE ──       (if applicable) Terminal predicates making LOOP's termination claims true
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
-── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
+── TOOL GROUNDING ──    Symbol → the capability or internal operation that realizes it; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ── COMPOSITION ──       (if applicable) Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
@@ -34,7 +34,7 @@ Protocols draw their `Definition` code block from this structure:
 - `<X> resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
 - `*` is a runtime deficit product (Active authority, session-level), distinct from pre-committed gate-chain pipelines (Standing authority)
 
-New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Which parts of this anatomy a static check actually enforces is read from the check itself rather than asserted here — an enforcement-coverage claim on this surface has nothing that re-runs it, so it keeps asserting an earlier reading with present authority.
+New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with the capability or internal operation that realizes it. Which parts of this anatomy a static check actually enforces is read from the check itself rather than asserted here — an enforcement-coverage claim on this surface has nothing that re-runs it, so it keeps asserting an earlier reading with present authority.
 
 ### TOOL GROUNDING Annotation Vocabulary
 
@@ -54,10 +54,10 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 | Annotation | Meaning | Boundary criterion | Tool Pattern |
 |------------|---------|-------------------|--------------|
 | `(sense)` | Internal epistemic operation without tool dispatch | tool dispatch = false ∧ no Λ mutation | Internal analysis/operation (no external tool) |
-| `(observe)` | Read-only tool operation for evidence or context | tool dispatch = true ∧ isReadOnly | Read, Grep, Glob; WebSearch (conditional) |
-| `(track)` | Protocol state tracking or persistence | Λ(mode state) mutation | TaskCreate, TaskUpdate, TaskGet; or internal state update |
-| `(dispatch)` | External system interaction crossing agent boundary | agent/protocol boundary crossing | SendMessage, Agent, Skill |
-| `(transform)` | Changes existing artifacts | isReadOnly = false, file tools | Edit, Write |
+| `(observe)` | Read-only tool operation for evidence or context | tool dispatch = true ∧ isReadOnly | `artifact read`, `artifact search`, `record read`; `external fetch` (conditional) |
+| `(track)` | Protocol state tracking or persistence | Λ(mode state) mutation | `record`, `record update`; or internal state update where the entry need not outlive the session |
+| `(dispatch)` | External system interaction crossing agent boundary | agent/protocol boundary crossing | `message`, `delegate`, `invoke` |
+| `(transform)` | Changes existing artifacts | isReadOnly = false, artifact mutation | `artifact write` |
 
 **Boundary criteria**: Each annotation has a verifiable boundary test that determines classification:
 - `(sense)` vs `(observe)`: "Does tool dispatch occur?" Strict rule: if tool dispatch is possible (even conditional), classify as `(observe)`
@@ -71,13 +71,13 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 - `(dispatch)` subsumes former `(extern)` — use `(dispatch)` for all boundary-crossing operations
 - `(transform)` subsumes former `(modify)` — use `(transform)` for all artifact mutations
 - `(enrich)` removed — compound pattern decomposed as `(transform)` with cleanup noted in description
-- `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(dispatch)` for TeamCreate) with topology noted in the description
+- `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(dispatch)` for a peer-set creation) with topology noted in the description
 
 **Topology modifiers**:
 
 | Modifier | Meaning | Execution effect |
 |----------|---------|-----------------|
-| `parallel` | Concurrent execution of multiple instances | Agent/Task spawn with independent contexts |
+| `parallel` | Concurrent execution of multiple instances | isolated executors started with independent contexts |
 | `conditional` | Execution gated on runtime predicate | Operation skipped when predicate is false |
 
 **Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the operation-type annotations while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).

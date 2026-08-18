@@ -247,9 +247,9 @@ Phase 0 scope_from_arg       (extension)    → TextPresent+Proceed (user-specif
 Phase 0 scope_default_relay  (extension)    → TextPresent+Proceed (scope unspecified → safe default current_session ∧ ¬cross_project; surface inferred scope, relay)
 Phase 0 scope_expand_confirm (constitution) → present (resolved scope is expansion(s): cross-session ∨ cross-project widening, whether arg-hinted or user-requested; constitutive privacy authorization; decline → fall back to safe_default)
 -- Phase 0 relay basis: default_scope(s) is read-only and privacy-local (SessionHistory preserved, Rule 6); its resolution is deterministic and citable (the safe default), so it is relay-eligible (Extension) per the option-set relay test and the project Extension-default profile. The (constitution) gate is retained only for the privacy-sensitive cross-session / cross-project widening, where the user constitutes authorization to read beyond the current session.
-Phase 1 extract        (extension)     → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
-Phase 1 read_misfit    (extension)     → Read ({config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
-Phase 2 read_taxonomy  (extension)     → Read (references/violation-taxonomy.md)
+Phase 1 extract        (dispatch)      → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
+Phase 1 read_misfit    (observe)       → Read ({config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
+Phase 2 read_taxonomy  (observe)       → Read (references/violation-taxonomy.md)
 Phase 2 classify       (sense)         → Internal analysis (per-invocation 2-step check)
 Phase 3 aggregate      (sense)         → Internal analysis (clustering + ranking)
 Phase 4 Qc             (constitution)  → present (per-invocation recognition Constitution interaction; constitutive user verdict)

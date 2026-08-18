@@ -49,24 +49,32 @@ Q      = Question formation (assertion-free)
 J      = Judgment ∈ {Address(c), Dismiss, Probe}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
-Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool }
-AuditedDecision = Σ' where ∀ task ∈ registered: task.status = completed
+C      = GapCarrier: the ONE durable entry every registered gap is written into — a single dereferenceable record, so one read reconstructs the whole gap set rather than reassembling it from scattered records or from session memory
+GapLocator = { record: C's identity as the carrier-creating write returned it, session: the id of the session that wrote it }   -- substrate-neutral by construction: the identity is whatever that write returned, so this type never names what performs the write
+locator(C) = GapLocator { record: C's identity as the carrier-creating call returned it; session: the id of the session running that call }   -- the value Σ.carrier holds; which call creates the carrier is named in TOOL GROUNDING, so a host without that capability still types this
+registered = the gaps C carries   -- the set AuditedDecision quantifies over and the audit trace ranges over
+entry(g)   = the record C carries for g ∈ registered — the gap's question and its context, and once closed the status, the user's judgment, and the adjustment that judgment produced. The last two are there because the audit trace reads them: a carrier holding status alone recovers which gaps are left and loses what was decided about the rest
+status(g)  = entry(g).status ∈ {open, completed}
+open(registered) = { g ∈ registered : status(g) ≠ completed }   -- what a recovered carrier contributes to pressure assessment and selection. The audit trace still ranges over registered WHOLE, so a gap already judged is reachable as evidence without being put to the user a second time
+Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool, carrier: Option(GapLocator) }
+AuditedDecision = Σ' where ∀ g ∈ registered: status(g) = completed
 EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (Σ' = Σ when exit precedes the first adjustment), partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → committed?(D) → Scan(D) → G → AssessGapPressure(D, G) → P  -- checkpoint + detection + pressure map (silent)
-Phase 1: (G, P) → TaskCreate[all gaps] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, pressure-select, surface first [Tool]
-Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
+Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: registered := ∅; Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ open(registered)) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay). "In scope" is REACHABILITY, never ownership: whether a recovered gap bears on THIS decision is a relevance judgment, and it is made where the user is present — at Qs, which every gap passes before anything is done with it. Keying the locator to a decision would settle that at authoring time and remove the recognition the gate exists to elicit; where the relevance question turns on a fact the audit does not hold, the deficit is ContextInsufficient (/inquire), not this one [Tool]
+Phase 1: (G, P) → [Σ.carrier = None: record[C ← all gaps] → Σ.carrier := Some(locator(C)) | Σ.carrier = Some(l): record update(l, add the newly detected gaps)] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register every gap into the ONE carrier, creating it on the first pass and amending the recovered one otherwise; hold the identity the creating write returned; pressure-select, surface first [Tool]
+Phase 2: J → A(J, D, Σ) → record update(Σ.carrier, entry(Gₛ[0]) := ⟨status := completed, judgment := J, adjustment := what A produced⟩) → Σ'           -- adjustment + carrier amendment naming the held identity. All three go in together: the audit trace reads judgment and adjustment, so a carrier holding status alone recovers which gaps are left and loses what was decided about the rest [Tool]
+Phase 0 → carrier_unreachable (relay): a locator is in scope but the record it names cannot be read  -- surface that the prior gaps were NOT recovered and which locator failed, then proceed with registered := ∅ and Σ.carrier := None and a fresh carrier at Phase 1; the run never continues silently on a partial gap set
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
-If new gaps: TaskCreate → add to queue.
+If new gaps: record update(Σ.carrier, add) → add to queue.
 Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
-P.queued updates Σ.deferred at TaskCreate/TaskUpdate; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
-Continue until: all tasks completed (AuditedDecision) OR user ESC (EarlyExit).
+P.queued updates Σ.deferred at every carrier write or amendment; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
+Continue until: every registered gap is completed (AuditedDecision) OR user ESC (EarlyExit).
 Mode remains active until convergence or explicit user exit (Esc).
-Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
-On user ESC: present partial audit trace over judged gaps, then declare remaining registered gaps as unresolved residual.
+Convergence evidence: At every-registered-gap-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)) — together with Σ.carrier, so a later session reaches this run's gaps with one read. Convergence is demonstrated by the complete audit record, not asserted by carrier status.
+On user ESC: present partial audit trace over judged gaps, then declare remaining registered gaps as unresolved residual — with Σ.carrier alongside, since an exit is exactly where the gaps left unresolved most need a later session to be able to reach them.
 
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
@@ -84,8 +92,10 @@ proceed(Σ) = ¬blocked(Σ)
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Qs (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
-Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
-Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
+Σ (track)      → record/record update (gap tracking in ONE carrier entry: the creating write returns the identity locator(C) reads, and every later amendment names that identity. Per-gap entries are NOT written — a single dereferenceable record is what lets one read reconstruct the set)
+DereferenceCarrier (observe) → record read (conditional: a prior gap-carrier locator is in scope — read the carrier at that locator's record identity, within the session it names; one read yields the whole gap set, so nothing is reassembled from separate records. Unreachable → the carrier_unreachable relay, never a silent fresh start)
+carrier_unreachable (extension) → TextPresent+Proceed (conditional: a locator is in scope but the record it names cannot be read — surface that the prior gaps were NOT recovered and which locator failed, then proceed with Σ.carrier := None and a fresh carrier at Phase 1. A partial gap set is never carried silently, and the run does not stop: the gaps this scan finds are still worth surfacing, and what the user needs is to know which earlier ones are missing from them)
+Scan (observe) → artifact read, artifact search (stored knowledge extraction: context for gap identification)
 AssessGapPressure (sense) → Internal analysis (no external tool; selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
 A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
@@ -107,13 +117,13 @@ seam (extension)   → TextPresent+Proceed (fires at deactivation: a user-declar
 
 ### Activation
 
-Command invocation activates mode until convergence or Esc; deferred tasks (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation, per LOOP.
+Command invocation activates mode until convergence or Esc; deferred gaps (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation through the carrier locator, per LOOP.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Committed action detected with observable, unaddressed gaps via in-protocol heuristics.
 
-**On activation**: Check existing Tasks for deferred gaps (subject prefix `[Gap:`). Resume tracking if found.
+**On activation**: if a prior gap-carrier locator is in scope, read that carrier once to recover its gaps and resume tracking; with no locator in scope, start a fresh carrier. The protocol does not search for its own past records — one read at a held identity is the whole recovery path.
 
 ### Priority
 
@@ -250,16 +260,15 @@ Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expa
 
 ### Gap Tracking
 
-**Task format**:
+**Carrier format** — ONE entry holding every registered gap:
 ```
-TaskCreate({
-  subject: "[Gap:Type] Question",
-  description: "Rationale and context for this gap",
-  activeForm: "Surfacing [Type] gap"
+record({
+  subject: "[Gap carrier] decision point",
+  description: "one line per gap: [Gap:Type] question | rationale and context | status | once closed, the user's judgment and the adjustment it produced"
 })
 ```
 
-**Dependencies**: Use `addBlockedBy` when gaps have logical dependencies (e.g., "backup location" blocked by "backup exists?").
+The judgment and adjustment ride in the carrier because the audit trace is assembled from them; a carrier holding status alone would recover which gaps are left and lose what was decided about the rest. The creating write returns the identity `locator(C)` reads. Every later amendment and every later session's read name that identity; no second entry is written per gap.
 
 ### Interactive Surfacing (Constitution)
 
@@ -275,7 +284,7 @@ Constitution presentation yields turn for user response.
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
 
-**UX rationale**: Task list renders persistently in UI, keeping gaps visible across the session. Dependencies visible via blocking relationships.
+**Why one carrier**: every gap lives in a single durable entry, so the set stays reachable across the session and a later session reconstructs it with one read rather than searching for records it would first have to find.
 
 **Re-scan trigger**: User response may reveal new gaps (e.g., "Yes, backed up" → "Where?" precision gap). Always re-scan after each response.
 
@@ -300,7 +309,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 1. **AI-guided, user-judged** (Detection with Authority): AI surfaces gaps as questions ("was X considered?", never "you missed X"); user authority is final — dismissal terminates a gap.
 2. **Observable evidence regulation**: Surface only gaps with concrete indicators cited from D; no gap inflation merely to appear thorough — each surfaced gap cites specific context from D.
 3. **Minimal intrusion** (Surfacing over Deciding): Lightest intervention that achieves awareness; intensity follows the stakes matrix in `## Intensity`.
-4. **Gap dependencies**: Task blocking enforces logical ordering when gaps have prerequisite relationships.
+4. **Gap order is the pressure map's**: the order gaps are surfaced in is `Sel`'s alone — pressure bucket, then evidence salience, then Scan order. No prerequisite edge between gaps is recorded and none is read; where a gap only makes sense once another is settled, the question's own wording carries that rather than a stored relation.
 5. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 6. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required.
 7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.

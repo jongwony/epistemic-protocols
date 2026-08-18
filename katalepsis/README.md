@@ -30,8 +30,8 @@ When AI completes complex work, users often can't grasp the full result (`Result
 ```
 Phase 0: Orient       → Infer likely comprehension intents from the result and user signal
 Phase 1: Entry Point  → Present intent-scented paths, user selects (gate interaction)
-Phase 2: Ground       → Materialize artifact basis and create tasks (TaskCreate)
-Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction + TaskUpdate)
+Phase 2: Ground       → Materialize artifact basis and create tasks (record)
+Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction + record update)
 ```
 
 ## When to Use

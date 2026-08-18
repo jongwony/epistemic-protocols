@@ -71,7 +71,7 @@ EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit:
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)
 Phase 0 → converge (trivial): S_high = ∅ → emit empty VettedContext (dispositions = ∅, trace = ∅) as relay, deactivate   -- trivial convergence (TYPES: cardinality 0; no audit-candidate source)
 Phase 0 → Phase 1: S_high ≠ ∅
-Phase 1: S_high → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: Read, Grep]
+Phase 1: S_high → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: artifact read, artifact search]
          Step₂ posit(antithesis per s ∈ S') → A[]                        -- per-source Pattern A ∪ B ∪ C ∪ D ∪ Emergent(Pattern) generation
 Phase 2: (A[], disposition slots) → Qs(per-source) → Stop → J            [Tool: Constitution interaction]
 Phase 3: J → integrate(J, S') → V                                        -- per-source disposition recorded
@@ -94,7 +94,7 @@ early_exit = user_esc ∨ user_cancel
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction / inference-character scan)
 Phase 0 trivial_converge (extension)   → TextPresent+Proceed (conditional: S_high = ∅ — relay the empty VettedContext, no audit-candidate source; deactivate)
-Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin, authorized claim, and downstream references)
+Phase 1 ProvenanceTag   (observe)      → artifact read, artifact search (verification of source origin, authorized claim, and downstream references)
 Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D/Emergent antithesis generation per source)
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
 Phase 3 integrate       (track)        → Internal state update (Λ.dispositions, Λ.history)
@@ -249,7 +249,7 @@ Analyze the working context and select audit-candidate sources. This phase is si
 
 Generate metadata triple plus dialectical antithesis per source.
 
-**Step 1 — Tagging**: For each `s ∈ S_high`, attach ProvenanceTag (authorized claim + verification path + confidence), FreshnessTag (age, horizon, stale flag), and LeverageTag (downstream_count, branches). Use Read and Grep to verify provenance against the source's claimed origin where the source's content cites verifiable artifacts. The ProvenanceTag binds authority to the claim's referent, claim_kind, and scope; reuse of the same source as authority for a different claim must surface through Pattern A or Pattern C rather than silently carrying over. For an audit-candidate source, provenance verification also asks whether the source actually tracks the behavior its claim asserts or merely documents it — a source that is fresh yet not tied to that behavior is posited against in Pattern A on that basis, not cleared by its freshness verdict alone. When enforcement coupling cannot be determined from the available tools, posit the gap as a Pattern A antithesis candidate with basis "enforcement coupling not observable from available tools" — neither skip it silently nor assert coupling with false confidence.
+**Step 1 — Tagging**: For each `s ∈ S_high`, attach ProvenanceTag (authorized claim + verification path + confidence), FreshnessTag (age, horizon, stale flag), and LeverageTag (downstream_count, branches). Use artifact read and artifact search to verify provenance against the source's claimed origin where the source's content cites verifiable artifacts. The ProvenanceTag binds authority to the claim's referent, claim_kind, and scope; reuse of the same source as authority for a different claim must surface through Pattern A or Pattern C rather than silently carrying over. For an audit-candidate source, provenance verification also asks whether the source actually tracks the behavior its claim asserts or merely documents it — a source that is fresh yet not tied to that behavior is posited against in Pattern A on that basis, not cleared by its freshness verdict alone. When enforcement coupling cannot be determined from the available tools, posit the gap as a Pattern A antithesis candidate with basis "enforcement coupling not observable from available tools" — neither skip it silently nor assert coupling with false confidence.
 
 **Step 2 — Antithesis positing**: For each tagged source, select the most applicable pattern (A, B, C, D, or Emergent) and construct an antithesis. A source that is itself an inferred conclusion (origin `AIInference`, or a conclusion functioning as a standing premise) is a candidate for Pattern D (see Pattern D's Boundary with Pattern B for the reverse-derivation mechanism). The antithesis must:
 - Cite the source's claim verbatim, anchored to the originating sentence or artifact
