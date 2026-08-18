@@ -24,8 +24,8 @@ obligations that live in wording are routed to a judge instead.
 
 | Declared in | Obligation | Grader | Kind |
 |---|---|---|---|
-| TOOL GROUNDING | Phase 2 is present-and-stop | `no_implementation` | behaviour |
-| Phase 0 | zero-uncertainty path relays and proceeds | `implementation_happened` | behaviour |
+| TOOL GROUNDING | Phase 2 is present-and-stop | `no_implementation` | tree |
+| Phase 0 | zero-uncertainty path relays and proceeds | `implementation_happened` | tree |
 | Rule 5 / PHASE TRANSITIONS | collection precedes inquiry | `collection_first` | behaviour |
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
 | — | the protocol loaded and fired | `skill_fired` | behaviour |
@@ -35,6 +35,26 @@ obligations that live in wording are routed to a judge instead.
 | Phase 0 | sufficiency finding stated rather than skipped | `sufficiency-stated` | judged |
 | Skip conditions | no gate when context is already sufficient | `no-gate` | judged |
 | Rule 7 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | judged |
+
+## Read the tree, not the tool names
+
+Whether a run implemented something is graded by comparing the working tree against
+the scaffold it started from, not by looking for `Write` or `Edit` in the trace. Runs
+write through `Bash` as readily as through the dedicated tools, so a predicate keyed on
+tool identity misses the writes it exists to catch.
+
+The failure mode is worse than a miss. It misses them in every arm alike, so the
+predicate looks stable across the matrix while measuring nothing — which is the shape
+a broken grader takes when it is not caught.
+
+The scaffold is deterministic, so the reference tree is rebuilt on demand rather than
+stored beside the results and kept in sync with it.
+
+## Check which skill fired, not that a skill fired
+
+Built-in skills exist in an arm with no plugins at all, so the `Skill` tool fires in
+the baseline too. Only the invoked skill's identity separates the treatment from the
+tool being generally available.
 
 ## Granting a tool in order to watch it go unused
 
@@ -48,6 +68,27 @@ The trigger-negative case grants the same tools and requires that they *were* us
 The pair is what separates a protocol that gates correctly from one that gates always
 or never. Without the negative case, a run scores well by asking more, and gating on
 everything outranks gating well.
+
+## Naming the protocol belongs to the treatment
+
+Case prompts carry the task and nothing else. The line that invokes the protocol is
+supplied by the harness, and only to arms that have it.
+
+A prompt that names the command hands an arm without the plugin a second problem —
+the command is missing — and that arm then gates on the absent tool rather than on the
+task. What gets compared is no longer the protocol's effect on the work; it is one
+arm's reaction to being asked for something it does not have.
+
+## A negative case must carry no gate-worthy ambiguity
+
+The trigger-negative case only means anything if its specification is genuinely
+complete. Where it is not, a correct protocol opens a gate, the case records a
+failure, and the failure belongs to the case author.
+
+This is harder than it reads. A specification can look exhaustive and still leave a
+term underdetermined — an ordering that means one thing in the file and another at
+runtime, a name that resolves two ways in the target framework. Every clause of a
+negative case wants reading as an adversary would read it, because the protocol will.
 
 ## The arm matrix
 

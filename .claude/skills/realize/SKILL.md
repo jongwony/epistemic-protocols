@@ -93,6 +93,15 @@ Both cases mount the same scaffold, deliberately: one is graded on whether a
 file-discoverable fact was asked, the other on whether a supplied parameter was
 re-asked, and differing substrates would let a run pass one by luck.
 
+Write the prompt as the task alone. The line that invokes the protocol lives in
+`harness.config.json` and reaches only the arms that have it — a prompt naming the
+command makes an arm without the plugin gate on the missing tool instead of on the
+task.
+
+Read every clause of a negative case as an adversary would. A specification that looks
+exhaustive can still leave a term underdetermined, and a correct protocol will open a
+gate on it — recording a failure that belongs to the case author.
+
 `evals/inquire-underspecified/` and `evals/inquire-fully-specified/` are the worked
 pair for `/inquire`. Follow their shape when adding a protocol: a `prompt.md` carrying
 frontmatter and the user's words, and one grader per obligation under `graders/`.

@@ -38,5 +38,7 @@
     "Write",
     "Edit"
   ],
-  "permissionMode": "acceptEdits"
+  "permissionMode": "acceptEdits",
+  "protocolSkill": "inquire",
+  "invocation": "Use `/inquire` first, before any code gets written."
 }

@@ -19,7 +19,8 @@
 // Node stdlib only.
 
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -94,10 +95,15 @@ function setup() {
 
 // ---------------------------------------------------------------- run
 
-function promptBody(caseName) {
+function promptBody(caseName, arm) {
   const raw = readFileSync(join(EVALS, caseName, 'prompt.md'), 'utf8');
   // Frontmatter is for the plugin-eval schema; the CLI takes the body only.
-  return raw.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+  const task = raw.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+  // Naming the protocol belongs to the treatment, not to the task. A prompt that
+  // says "use /inquire" hands an arm without the plugin a second problem -- the
+  // command is missing -- and the arm then gates on the missing tool rather than
+  // on the task, which is not the behaviour under comparison.
+  return arm.protocol && CFG.invocation ? `${task}\n\n${CFG.invocation}` : task;
 }
 
 function scaffold(dir) {
@@ -128,7 +134,7 @@ function runOne({ model, armName, arm, caseName, rep }) {
     '--settings', join(SKILL, 'arms', `${armName.replace('+', '-')}.json`),
   ];
   if (arm.protocol) args.push('--plugin-dir', expand(CFG.pluginDir));
-  args.push(promptBody(caseName));
+  args.push(promptBody(caseName, arm));
 
   const r = spawnSync('claude', args, {
     cwd: wd,
@@ -171,16 +177,54 @@ function parse(file) {
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
   const result = events.find((e) => e.type === 'result');
   const toolUses = [];
+  const skillInvocations = [];
   for (const e of events) {
     const content = e?.message?.content;
     if (e.type === 'assistant' && Array.isArray(content)) {
-      for (const b of content) if (b.type === 'tool_use') toolUses.push(b.name);
+      for (const b of content) {
+        if (b.type !== 'tool_use') continue;
+        toolUses.push(b.name);
+        if (b.name === 'Skill') skillInvocations.push(JSON.stringify(b.input ?? {}));
+      }
     }
   }
   const texts = events.filter((e) => e.type === 'assistant' && Array.isArray(e?.message?.content))
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
-  return { init, result, toolUses, lastMessage: texts[texts.length - 1] || '' };
+  return { init, result, toolUses, skillInvocations, lastMessage: texts[texts.length - 1] || '' };
+}
+
+function treeDigest(dir) {
+  const out = [];
+  const walk = (d, rel) => {
+    for (const e of readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      if (e.name === '__pycache__' || e.name.startsWith('.')) continue;
+      const p = join(d, e.name); const r = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) walk(p, r);
+      else out.push(`${r}:${createHash('sha256').update(readFileSync(p)).digest('hex')}`);
+    }
+  };
+  if (existsSync(dir)) walk(dir, '');
+  return out.join('\n');
+}
+
+let REFERENCE = null;
+function referenceDigest() {
+  if (REFERENCE !== null) return REFERENCE;
+  const tmp = join(WORK, 'reference-tree');
+  rmSync(tmp, { recursive: true, force: true });
+  scaffold(tmp);
+  REFERENCE = treeDigest(tmp);
+  rmSync(tmp, { recursive: true, force: true });
+  return REFERENCE;
+}
+
+// Whether the run changed the working tree at all, against the scaffold it started
+// from. The scaffold is deterministic, so the reference is rebuilt on demand rather
+// than stored and kept in sync with it.
+function treeMutated(workdir) {
+  if (!existsSync(workdir)) return null;
+  return treeDigest(workdir) !== referenceDigest();
 }
 
 // Deterministic graders. Each returns true / false / null (not applicable).
@@ -194,15 +238,20 @@ const GRADERS = {
     const loaded = (parsed.init?.plugins || []).some((p) => p.name === 'aitesis');
     return loaded === !!arm.protocol;
   },
-  skill_fired: ({ parsed, arm }) =>
-    arm.protocol ? parsed.toolUses.includes('Skill') : !parsed.toolUses.includes('Skill'),
-  // Phase 2 is declared present-and-stop: the observable consequence is that no
-  // implementation happens. Write and Edit are granted in allowed-tools on
-  // purpose — a tool that was never available proves nothing by going unused.
-  no_implementation: ({ parsed }) =>
-    !parsed.toolUses.some((t) => t === 'Write' || t === 'Edit'),
-  implementation_happened: ({ parsed }) =>
-    parsed.toolUses.some((t) => t === 'Write' || t === 'Edit'),
+  // Naming the Skill tool is not enough: built-in skills exist even in an arm with
+  // no plugins, so the tool alone fires in the baseline too. What indicates the
+  // treatment is which skill was invoked.
+  skill_fired: ({ parsed, arm, cfg }) => {
+    const fired = parsed.skillInvocations.some((s) => s.includes(cfg.protocolSkill));
+    return arm.protocol ? fired : !fired;
+  },
+  // Phase 2 is declared present-and-stop; the observable consequence is that the
+  // working tree is unchanged. This reads the tree rather than the tool names.
+  // Runs write through Bash as readily as through Write, so a predicate keyed on
+  // tool identity misses the writes it exists to catch — and misses them in every
+  // arm alike, which makes it look stable while measuring nothing.
+  no_implementation: ({ mutated }) => mutated === false,
+  implementation_happened: ({ mutated }) => mutated === true,
   // Rule 5: collection precedes inquiry. A floor, not a ceiling — one read
   // satisfies it. It catches the run that asks without looking.
   collection_first: ({ parsed }) =>
@@ -219,7 +268,8 @@ function gradeRun(model, armName, arm, caseName, rep) {
   const file = join(RESULTS, model, armName, caseName, `run-${rep}.jsonl`);
   const parsed = parse(file);
   if (!parsed) return null;
-  const ctx = { parsed, arm, caseName };
+  const wd = join(WORK, `${model}-${armName}-${caseName}-${rep}`.replace(/[^\w.-]/g, '_'));
+  const ctx = { parsed, arm, caseName, cfg: CFG, mutated: treeMutated(wd) };
   const scores = {};
   for (const [name, fn] of Object.entries(GRADERS)) scores[name] = fn(ctx);
   const composite = CASE_PREDICATES[caseName].every((k) => scores[k] === true);
