@@ -104,6 +104,17 @@ arms, cases, repetitions, budget ceiling — override the committed config for t
 only, through environment variables the harness reads. Editing the committed config
 from CI would leave the run unreproducible from the checkout it claims to test.
 
+A locally valid YAML file is not a valid workflow. GitHub's expression parser scans
+every `run:` block for substitution syntax and tries to evaluate what it finds — including
+inside a shell comment — and rejects the whole file when it cannot. The only validator
+that catches this is a dispatch attempt, and one can be made for free: dispatch with
+`runs=three`, which the harness rejects before it launches anything, so the job exercises
+checkout, the secret check, the install and the setup without spending model budget.
+
+```bash
+gh workflow run type-realization.yml --ref <branch> -f runs=three -f post_comment=false
+```
+
 The workflow needs one repository secret, `CLAUDE_CODE_OAUTH_TOKEN`, holding a token
 obtained the same way as for a local run. The first step checks that it is set at all
 and stops there if it is not, because an absent secret would otherwise surface as

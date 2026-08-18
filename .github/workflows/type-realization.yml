@@ -83,11 +83,13 @@ jobs:
           PR_INPUT: ${{ inputs.pr }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          # Dispatch inputs reach the shell through the environment, never through ${{ }}
-          # inside the script body: GitHub substitutes the raw string before bash parses
-          # the line, so an interpolated input is executed rather than read, and a
-          # multi-line one forges the step outputs a later `gh` call consumes. The number
-          # is checked to be a number before it is written out.
+          # Dispatch inputs reach the shell through the environment above, never through an
+          # expression substitution inside this script body: GitHub substitutes the raw
+          # string before bash parses the line, so an interpolated input is executed rather
+          # than read, and a multi-line one forges the step outputs a later `gh` call
+          # consumes. The number is checked to be a number before it is written out.
+          # (The substitution syntax is not written out here even as prose -- the expression
+          # parser scans the whole block and tries to evaluate what it finds in a comment.)
           if [ -n "$PR_INPUT" ]; then
             case "$PR_INPUT" in
               ''|*[!0-9]*) echo "::error::pr input must be a number"; exit 1 ;;
