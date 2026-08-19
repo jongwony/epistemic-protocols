@@ -2,7 +2,7 @@
 
 What reaches past this loop, and the durable home each kind implies. Nothing here bears on how a round is run or how a finding is dispositioned — it binds once, at the moment the loop ends, which is where it loads. Read it at exit, converged or free, before the offer is made.
 
-What stays in `SKILL.md` is the part that governs the exit itself: the exit has already landed when the offer is made, the record is offered rather than demanded, and declining ends the loop identically.
+What governs the exit itself stays in `SKILL.md`'s Convergence section and is deliberately not restated here: a second statement of a rule is a copy, and a copy drifts from what it copies.
 
 ## Ledger carryover
 
