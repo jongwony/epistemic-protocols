@@ -22,7 +22,7 @@ That is the whole of the contribution, and it is worth making: it raises the odd
 
 A type layer doing this well is recognizable by what it does not contain — no comparison operator standing in for the judgment, no stated default for the case where it does not resolve. What it contains is the narrowed carrier and the instruction to judge.
 
-## The Scaffolding Failure (Architectural)
+## Cases in Place of a Judgment (Architectural)
 
 A specification that treats an indeterminate step as determinate does not fail at once. It fails by growing.
 
