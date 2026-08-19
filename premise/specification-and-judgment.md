@@ -20,7 +20,7 @@ Typing an indeterminate step means cutting down what the judgment looks at and g
 
 That is the whole of the contribution, and it is worth making: it raises the odds the judgment lands right without pretending to make it. The distinction is between shaping a judgment's input and supplying its output.
 
-A type layer doing this well is recognizable by what it does not contain — no comparison operator standing in for the judgment, no enumeration of the outcomes the judgment might reach, no stated default for the case where it does not resolve. What it contains is the narrowed carrier and the instruction to judge.
+A type layer doing this well is recognizable by what it does not contain — no comparison operator standing in for the judgment, no stated default for the case where it does not resolve. What it contains is the narrowed carrier and the instruction to judge.
 
 ## The Scaffolding Failure (Architectural)
 
