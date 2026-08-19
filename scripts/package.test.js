@@ -169,10 +169,10 @@ describe('parseFrontmatter', () => {
   });
 
   it('parses block list (composition skill skills: field)', () => {
-    const content = '---\nname: comment-review\nskills:\n  - aitesis:inquire\n  - syneidesis:gap\n  - epharmoge:contextualize\n---\nBody';
+    const content = '---\nname: review-loop\nskills:\n  - aitesis:inquire\n  - epharmoge:contextualize\n---\nBody';
     const { fields } = parseFrontmatter(content);
-    assert.deepEqual(fields.get('skills'), ['aitesis:inquire', 'syneidesis:gap', 'epharmoge:contextualize']);
-    assert.equal(fields.get('name'), 'comment-review');
+    assert.deepEqual(fields.get('skills'), ['aitesis:inquire', 'epharmoge:contextualize']);
+    assert.equal(fields.get('name'), 'review-loop');
   });
 
   it('parses block list followed by another field', () => {
@@ -885,14 +885,10 @@ describe('unified release artifact contract', () => {
   it('retains utility sidecars and directly referenced agents in the release superset', () => {
     const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
     assert.ok(entriesFor('epistemic-cooperative', 'catalog').includes('catalog/routing-map.md'));
-    assert.ok(entriesFor('epistemic-cooperative', 'comment-review')
-      .includes('comment-review/templates/preview.html'));
     assert.ok(entriesFor('epistemic-cooperative', 'forge')
       .includes('forge/adapters/codex-goals.md'));
     assert.ok(entriesFor('epistemic-cooperative', 'curses')
       .includes('curses/agents/dimension-profiler.md'));
-    assert.ok(!entriesFor('epistemic-cooperative', 'comment-review')
-      .includes('comment-review/evals/evals.json'));
   });
 
   it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
@@ -1083,7 +1079,6 @@ describe('package.js CLI', () => {
         'ascend.zip',
         'bound.zip',
         'catalog.zip',
-        'comment-review.zip',
         'conduct.zip',
         'contextualize.zip',
         'curses.zip',
