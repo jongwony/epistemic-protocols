@@ -118,8 +118,9 @@ Mismatch = { id: MismatchId, aspect: String, description: String, evidence: Stri
                  --   IDENTITY, whose predicate cannot move while its evidence unions; unrepaired is a monotone stamp that merge takes the
                  --   disjunction of; certificate and value_space are DERIVED and are re-run over the merged binding rather than carried
                  -- value_space is Option-valued: a mismatch closed by certificate (Route, Residual) is complete with None — never having had a space where the close came at its first certification, and having had its space replaced by None where a re-derived certificate stopped passing.
-                 --   The invariant readers depend on is narrower than the field — a mismatch IN pending always carries Some, since registration
-                 --   follows bind_value_space on both scans
+                 --   The invariant readers depend on is narrower than the field — a mismatch IN pending always carries Some wherever pending is READ. Registration
+                 --   follows bind_value_space on both scans, and on the re-scan the None and the close that takes the element out of pending are
+                 --   steps of ONE pass with no reader between them — AssessFit is the first thing to read pending again, and it runs after both
                  -- unrepaired: Bool is a STAMP, not a derived flag (CONVERGENCE, unrepaired(m)). ONE RULE PRODUCES IT ON EVERY PATH, which is what
                  --   makes the field total: unrepaired := (m reads as the same claim as Mₛ, off identity) against the Mₛ this cycle's dispose closed by adapting; at
                  --   Phase 0 there is no Mₛ, so every initial mismatch takes false from that same rule rather than from a default no step writes
@@ -386,7 +387,7 @@ Convergence is demonstrated, not asserted.
 --   replacement and Λ.R is the withdrawn result. The protocol claims fit only for the object it actually evaluated.
 applicable(Λ.R, X) = ∀ aspect(a, Λ.R, X) : warranted(a, Λ.R, X)
 warranted(a, R, X) = correct(R) ∧ fits(R, X)                -- correctness AND contextual fit required (not material conditional)
-disposed(a)        = (∃ r ∈ Σ.dispositions : aspect(r.mismatch) = a) ∧ a ∉ { aspect(m) : m ∈ pending }
+disposed(a)        = (∃ r ∈ Σ.dispositions : aspect(r.mismatch) = a) ∧ a ∉ { aspect(m) : m ∈ pending } ∧ a ∉ { aspect(m) : m ∈ Λ.deferred }
                      -- ONE disjunct covering every way a flagged aspect is closed — Adapt, Keep, Discard, Route, Residual, Moot — since all
                      -- six are members of the Disposition axis and every close writes one ledger entry
                      -- SECOND CONJUNCT: re-registration UN-DISPOSES the aspect. A record is written about the target as it stood when the
@@ -397,9 +398,11 @@ disposed(a)        = (∃ r ∈ Σ.dispositions : aspect(r.mismatch) = a) ∧ a 
                      -- binding asserts together with the evidence it stands on — and a match locates that predecessor WITHOUT transferring its
                      -- close, so the return is in pending either way — in an entry the fold opened for it, or in the entry of the
                      -- element it merged into — which is what fails the second conjunct while it is open.
-                     -- The label is safe HERE because the Ledger invariant puts every flagged mismatch in exactly one of two places — closed with
-                     -- its own record, or pending — so an empty second conjunct at this label already gives every identity flagged under it a
-                     -- record of its own. Nothing here assumes aspects stay stable or uniquely labelled across the R→R' trajectory
+                     -- THIRD CONJUNCT: an aspect is not disposed while any mismatch under it sits in Λ.deferred. The Ledger invariant puts a
+                     -- flagged mismatch in one of THREE places — closed with its own record, pending, or parked for its bounded re-assessment —
+                     -- so an empty second conjunct alone does not give every identity under this label a record: one aspect can carry a closed
+                     -- record AND a parked re-detection at once, and without this conjunct that aspect would read disposed while the parked
+                     -- attempt has not run. It costs no reachability, the attempt resolving on every arm. Nothing here assumes aspects stay stable or uniquely labelled across the R→R' trajectory
 unrepaired(m)      = m.unrepaired                              -- READS THE STAMP the re-scan wrote; it is NOT re-derived from the ledger here
                      -- A REPAIR THAT DID NOT LAND: m came back from the re-scan reading as the claim a record closed by adapting. This is what
                      -- re-scanning alone cannot say — a re-scan reports that the mismatch is there, not that an answer already given failed to
@@ -491,7 +494,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 --   routed(Λ)   = { r ∈ Σ.dispositions : r.disposition = Route(_) }
 --   residual(Λ) = { r ∈ Σ.dispositions : r.disposition = Residual }
 --   moot(Λ)     = { r ∈ Σ.dispositions : r.disposition = Moot }
--- Certificate invariant: ∀ m ∈ pending : m.certificate.status = pass (fail-closed — a routed/ambiguous mismatch never enters pending, and one whose re-derived certificate stops passing after a merge leaves it)
+-- Certificate invariant: ∀ m ∈ pending : m.certificate.status = pass, AT EVERY POINT pending IS READ (fail-closed — a routed/ambiguous mismatch never enters pending, and one whose re-derived certificate stops passing after a merge leaves it). Not asserted mid-pass: the re-scan re-certifies a registered element and closes it out in one uninterrupted pass, and AssessFit, the first reader of pending after it, runs once both have happened
 -- Ledger invariant: every mismatch leaving pending, and every mismatch closed at registration, appends exactly one DispositionRecord (no close without a record; no record without a close). PER REGISTRATION: a mismatch that registers twice leaves pending twice and appends two records, one per close, which is why every flagged mismatch is in exactly one of three places at any moment — closed with its own record, pending, or parked in Λ.deferred for its ONE bounded re-assessment. The third is transient by construction: that attempt resolves on every arm (pass, route, Residual), so nothing rests there
 
 ── COMPOSITION ──
