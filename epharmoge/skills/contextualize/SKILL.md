@@ -195,8 +195,6 @@ judgment_state = Option((Judgment, basis: String))             -- CYCLE-LOCAL: t
               -- HOLDS A FIELD IN Λ (MODE STATE): cycle-local is not turn-local. It is written at Phase 1, Qc then STOPS and yields the turn, and
               --   the close that follows reads it on the far side of that boundary — so it has to be somewhere in between
               -- written by the Phase 1 judgment dispatch on both arms, so every cycle binds it before its disposition half runs
-              -- Produced by judgment_relay_upheld, read at the Qc presentation and again at the close that follows (Phase 2 dispose, or the
-              --   keep_all_remaining bulk exit), then gone
 Disposition ∈ {Adapt(direction: String), Keep, Discard(replacement: Option(Result)), Route(routed_deficit: Deficit), Residual, Moot}
               -- REPAIR axis: what becomes of the result, and how this mismatch is closed
               -- Discard's payload is Option(Result): Some(r) when something takes the withdrawn result's place, None when the withdrawal leaves nothing behind
@@ -438,9 +436,6 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 -- INITIAL BINDING at activation: Λ.R := the result under review; Λ.X := the application context it is to be applied in; Λ.deferred := ∅;
 --   Λ.withdrawn := None; Λ.reopen_focus := None; Λ.judgment_state := None; Λ.carrier := None;
 --   Σ := { dispositions = [], scan_count = 0 }. Λ.fit_map is bound by the Phase 0 pass (Λ.fit_map := F)
--- judgment_state is CYCLE-LOCAL and holds no field here: produced at Phase 1 by judgment_relay_upheld, read at the Qc presentation and again
---   at the close that follows (Phase 2 dispose, the keep_carried_forward close, or the keep_all_remaining bulk exit), all within one cycle. Where a relayed judgment must
---   survive a session boundary, the channel is the carrier the mismatch is registered in, reached at the locator the terminal verdict carries
 -- Views over Σ.dispositions (derived, NOT parallel state):
 --   routed(Λ)   = { r ∈ Σ.dispositions : r.disposition = Route(_) }
 --   residual(Λ) = { r ∈ Σ.dispositions : r.disposition = Residual }
