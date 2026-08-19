@@ -19,7 +19,7 @@
 | `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, 기판 레코드로 외재화 후 포인터로 전달 |
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
-| `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
+| `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 — 프로젝트가 표방한 목표로 아티팩트를 수렴 | 적용된 수정 + 인계 + 수렴 trace |
 | `/place` | 배치 감사 — 지시문 산문의 절 각각을 다섯 목적지(로드 계층 셋, ledger, 삭제) 중 하나로 라우팅하고 집행 축을 설정 | 라우팅 보고서 — 라우트 블록 + 리포트 수준 발견 (읽기 전용) |
 | `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 재구성된 옵션 집합, 또는 검사가 닫지 못한 경우 수리 공간·다툼 있는 읽기·어느 쪽도 답이 아닌 두 집합 |
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |

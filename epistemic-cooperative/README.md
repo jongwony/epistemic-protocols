@@ -19,7 +19,7 @@ A utility plugin spanning epistemic protocol onboarding, analytics, work orchest
 | `/triage` | Work-unit triage from GitHub issues | Routed work units, externalized to substrate records a collaborator session is pointed at |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
-| `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
+| `/review-loop` | Source-agnostic code/PR review-resolve loop — converges the artifact on the project's stated goal | Applied fixes + handovers + convergence trace |
 | `/place` | Placement audit — routes each clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and sets its enforcement axis | Routing report — route blocks plus report-level findings (read-only) |
 | `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, a rebuilt option set, or — where the check could not close — the repair space, the contested reading, or both sets with neither presented as the answer |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
