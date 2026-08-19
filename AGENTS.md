@@ -51,7 +51,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 ## Design Placement
 
-- `.claude/rules/` is for principles that must be active at per-turn runtime.
+- `.claude/rules/` is for principles that must be active without a reader fetching them: unscoped when they bind at per-turn runtime, `paths`-scoped when they bind only while a matching file is open. Scope a rule whose moment is narrower than the session, so the surface does not charge every session for it.
 - `.claude/principles/` is for lazy-loaded architectural principles.
 - Grounded exposition, investigation writeups, and evidence reviews go to the ledger (issue or PR body), never to a file under `docs/` — they are then-records, and nothing on a state surface re-runs them.
 - A contributor reference serving one skill lives in that skill's own `references/`, so it loads when the skill is triggered rather than when someone remembers it exists. `docs/` keeps what no single skill owns — a reference cited from several surfaces at once, or a contributor surface a public README reader is sent to.
@@ -89,7 +89,7 @@ Details: `.claude/skills/verify/references/verification.md`.
 - Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
-- When changing what a TYPES block carries — adding an entry or removing one, widening or narrowing it, giving one a new constructor — apply the dispatch-structure, volatility, and openness tests in `docs/structural-specs.md` §Type Category Convention.
+- When changing what a TYPES block carries — adding an entry or removing one, widening or narrowing it, giving one a new constructor — apply the dispatch-structure, volatility, and openness tests in `.claude/rules/type-category-convention.md`, which loads itself when a protocol `SKILL.md` is read.
 
 ## Delegation Notes
 
