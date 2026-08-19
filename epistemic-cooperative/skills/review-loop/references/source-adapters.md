@@ -2,7 +2,7 @@
 
 How to drive each documented source once it has been designated. Nothing here bears on *which* source to designate — the properties that decision turns on are in the Source Interface table in `SKILL.md`, which is where the designation gate reads them. Load this after Phase 0 has settled the source, and read only the section for the source it settled on.
 
-Every adapter here answers to the contract in `SKILL.md`'s Source Interface: it accepts the design-intent bundle, yields `{ findings[], verdict, exercised, direction? }`, and observes the Conveyance boundary — design intent only, never fix-status records, do-not-reflag lists, or verdict-conditioning instructions.
+Every adapter here answers to the contract in `SKILL.md`'s Source Interface: it accepts the design-intent bundle, yields `{ findings[], verdict, exercised, direction? }` — `exercised` from every source that has a channel for it at all, `direction` where the source returns one — and observes the Conveyance boundary — design intent only, never fix-status records, do-not-reflag lists, or verdict-conditioning instructions.
 
 ## `code-review` adapter
 
