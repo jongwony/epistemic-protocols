@@ -14,7 +14,7 @@ Detect application-context mismatch after execution through AI-guided applicabil
 ```
 ── FLOW ──
 Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
-  Mᵢ = ∅: Qz(zero_mismatch_finding) → Stop → [AcceptNoMismatch: R_final := Some(Λ.R), deactivate (no aspect ¬warranted; execution stands as-is) | Reopen(aspect): reopen_focus := aspect, re-scan Eval focused on it (one attempt: still-∅ → relay finding, deactivate)]
+  Mᵢ = ∅: Qz(zero_mismatch_finding) → Stop → [AcceptNoMismatch: R_final := Some(Λ.R), deactivate (no aspect ¬warranted; execution stands as-is) | Reopen(aspect): reopen_focus := aspect, re-scan Eval focused on it (one attempt: any detection → the SAME Phase 0 pipeline as the Mᵢ ≠ ∅ arm below — bind_kind, split, absorb, certify, value space — and on to Phase 1; still-∅ → relay finding, deactivate)]
   Mᵢ ≠ ∅: bind_kind each [split where non-atomic] → absorb into ∅ (same claim → merge, new → init_occurrence) → Mᵢ → ∀m ∈ Mᵢ: certify(m, local_claims) → keep(status = pass) → Mᵢ_passed → ∀m ∈ Mᵢ_passed: m.value_space := Some(bind_value_space(m)) →
     Mᵢ_passed = ∅ ∧ no deferred-pending ∧ adjudicated(Λ.R, X) (every flagged aspect carries a certificate-assigned disposition — Route(routed_deficit) or Residual — via the typed disposed(a) predicate; deferred mismatches first get their one bounded re-assessment to pass→registered, route→Route(routed_deficit), or unattributable→Residual): → emit routing recommendations + surface any Residual (each flagged aspect either handed to a local route claim's deficit or unattributable) → R_final := Some(Λ.R) → deactivate (trivial convergence: adjudicated by disposition, Λ.R unadapted)
     Mᵢ_passed ≠ ∅: AssessFit(R, X, Mᵢ_passed) → F → Register(Mᵢ_passed) → SelectNext(pending, Λ.fit_map) → Mₛ → judgment_settled(Mₛ, Λ.fit_map)? →
@@ -66,7 +66,7 @@ absorb = HOW A SCAN'S DETECTIONS BECOME WHAT THE PROTOCOL CARRIES: Set(Mismatch)
                  --   an element → merge(carried, d) on the element the judgment named: it absorbs the detection and stays the element. THE MERGED ELEMENT IS WHAT THE NEXT DETECTION
                  --                MEETS, so several detections of one claim fold to one and nothing a detection carried is overwritten by a later one — merge
                  --                combines, and there is no last write to win. What that does NOT buy is order-independence: whichever detection opens the
-                 --                element is the one whose id and binding it keeps, and a judgment of sameness need not be transitive, so a different arrival
+                 --                element is the one whose id and whose STATEMENT of the claim it keeps — not its whole binding, since the evidence takes in every later detection's and the certificate and value space are re-derived over the result (merge) — and a judgment of sameness need not be transitive, so a different arrival
                  --                order can partition the same detections differently. That follows from sameness being judged, not from the fold
                  --   none      → init_occurrence(d): it enters the set as an element of its own
                  -- THE STAMP RIDES EVERY DETECTION, ahead of both arms: match_identity decides unrepaired for each one by the single rule (does it read as the
