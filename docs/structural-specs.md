@@ -86,14 +86,6 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 
 MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
 
-### Type Category Convention
-
-The three tests governing what a TYPES entry may carry — the dispatch-structure test, the
-volatility criterion, and the openness criterion — are in `.claude/rules/type-category-convention.md`,
-a path-scoped rule that loads on its own when a protocol `SKILL.md` is read. They moved off this
-surface because they bind at one moment rather than at read time, and a rule that loads itself at
-that moment does not depend on a reader following a pointer.
-
 ## User-Facing Emit Load Disciplines
 
 Separate rules manage the load a user-facing round places on its reader. Their canonical text lives in the Output Style source and is compiled into each protocol's `## Rules`, and a static check holds those two copies in sync. What this section adds is why they do not collapse into one another — restating the rules a third time here would answer to no guard and would drift away from the two copies that do.

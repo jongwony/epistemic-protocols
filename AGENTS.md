@@ -89,7 +89,6 @@ Details: `.claude/skills/verify/references/verification.md`.
 - Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
-- When changing what a TYPES block carries — adding an entry or removing one, widening or narrowing it, giving one a new constructor — apply the dispatch-structure, volatility, and openness tests in `.claude/rules/type-category-convention.md`, which loads itself when a protocol `SKILL.md` is read.
 
 ## Delegation Notes
 

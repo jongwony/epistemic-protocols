@@ -4,9 +4,11 @@ paths:
 ---
 
 This rule is path-scoped: it loads when a protocol `SKILL.md` is read, and stays off the
-context otherwise. It binds while a TYPES block is being written or changed. The anatomy of the
-formal blocks around it — what each block is for, how FLOW and MORPHISM relate — is contributor
-material and stays in `docs/structural-specs.md`.
+context otherwise. It binds on changing what a TYPES block carries — adding an entry or removing
+one, widening or narrowing it, giving one a new constructor. No other surface announces it: a
+TYPES block cannot be changed without reading the file that carries it, and that read is what
+brings this rule in. The anatomy of the formal blocks around it — what each block is for, how
+FLOW and MORPHISM relate — is contributor material and stays in `docs/structural-specs.md`.
 
 # Type Category Convention
 
