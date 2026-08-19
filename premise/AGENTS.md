@@ -16,6 +16,8 @@ Read [`gate-design.md`](gate-design.md) when designing or defending a checkpoint
 
 Read [`tiering-and-scope.md`](tiering-and-scope.md) when deciding which surface a principle belongs on, and when classifying whether a principle should matter more or less as the underlying model improves.
 
+Read [`specification-and-judgment.md`](specification-and-judgment.md) when writing or revising a specification for a step whose result depends on a judgment rather than following from its inputs, and when cases keep accumulating around one coordinate a specification has already tried to settle.
+
 Read [`calibration-methodology.md`](calibration-methodology.md) when setting or changing how much a project resolves on its own versus routes to its user for judgment.
 
 Read [`approach-verification.md`](approach-verification.md) before deciding what to do with a request, when an utterance's grammatical form may differ from the action it actually wants, and when an instruction reaches only part of what it lands on.
