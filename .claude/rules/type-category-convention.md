@@ -3,9 +3,10 @@ paths:
   - "**/skills/*/SKILL.md"
 ---
 
-This rule binds on creating or changing what a TYPES block carries — adding an entry or removing
-one, widening or narrowing it, giving one a new constructor — and not otherwise, so a skill file
-carrying no TYPES block leaves nothing here to apply.
+This rule binds on creating a TYPES block, or changing what an existing one carries — adding an
+entry or removing one, widening or narrowing it, giving one a new constructor. What decides that
+is the task rather than the file: a matching skill file carrying no TYPES block has nothing here
+to apply until the task is to give it one.
 
 Its `paths` scope is one host's delivery optimization, not the only route to it and not a claim
 that other routes are unnecessary. The scope is deliberately wider than the rule's reach: a file

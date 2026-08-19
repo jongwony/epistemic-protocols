@@ -88,7 +88,7 @@ MORPHISM is the image of FLOW under a forgetful functor that discards computatio
 
 ### Type Category Convention
 
-The three tests governing what a TYPES entry may carry — the dispatch-structure test, the volatility criterion, and the openness criterion — are in `.claude/rules/type-category-convention.md`. Read them before creating or changing a TYPES block.
+The convention governing what a TYPES entry may carry is in `.claude/rules/type-category-convention.md`. Read it before creating a TYPES block or changing what one carries.
 
 ## User-Facing Emit Load Disciplines
 
