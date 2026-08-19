@@ -55,7 +55,7 @@ const DESCRIPTION_OVERRIDES = {
   'lens-review': "Frame-driven multi-perspective PR review — derives fitting lenses per diff, cross-verifies findings, posts one consolidated PR comment.",
   misuse: "Retrospective protocol contract-violation detector — scans past sessions and surfaces violation records for review.",
   'reduced-space-test': "Scoped empirical validation — decomposes a target↔surrogate equivalence claim, bounds a test space, captures evidence, carries the untested complement forward.",
-  'review-loop': "Convergence-paced review-resolve loop — verifies each finding against the codebase and the base it is measured from, converges the artifact on the project's stated goal, ends in repair or handover.",
+  'review-loop': "Convergence-paced review-resolve loop — verifies each finding against the codebase and its base, converges the artifact on the project's stated goal, ends in repair, handover, drop, or residual.",
   steer: "Project-profile recalibration — audits calibration drift, presents evidence for verdict, writes an updated profile rule and Settled Directions clause.",
 };
 
