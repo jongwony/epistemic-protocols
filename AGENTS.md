@@ -51,7 +51,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 ## Design Placement
 
-- `.claude/rules/` is for principles that must be active without a reader fetching them: unscoped when they bind at per-turn runtime, `paths`-scoped when they bind only while a matching file is open. Scope a rule whose moment is narrower than the session, so the surface does not charge every session for it.
+- `.claude/rules/` is for prescriptive rules that must be active without a reader fetching them, unscoped when they bind at per-turn runtime. A `paths` scope narrows delivery to the moment a matching file is open, so a rule whose moment is narrower than the session does not charge every session for it — but that scoping is one host's optimization and never the only route: keep a platform-neutral pointer on a surface every intended reader reaches at or before the rule binds.
 - `.claude/principles/` is for lazy-loaded architectural principles.
 - Grounded exposition, investigation writeups, and evidence reviews go to the ledger (issue or PR body), never to a file under `docs/` — they are then-records, and nothing on a state surface re-runs them.
 - A contributor reference serving one skill lives in that skill's own `references/`, so it loads when the skill is triggered rather than when someone remembers it exists. `docs/` keeps what no single skill owns — a reference cited from several surfaces at once, or a contributor surface a public README reader is sent to.
@@ -89,6 +89,7 @@ Details: `.claude/skills/verify/references/verification.md`.
 - Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
+- Before creating or changing what a TYPES block carries — adding an entry or removing one, widening or narrowing it, giving one a new constructor — read and apply `.claude/rules/type-category-convention.md`. A host that loads it on the skill path delivers it without this bullet; a host that does not is why the bullet is here.
 
 ## Delegation Notes
 
