@@ -78,7 +78,7 @@ The two externalized items connect to the axiom basis directly. The problem-to-s
 
 **Safety valve**: a blocker discovered mid-session that the model cannot re-derive from the substrate — a non-reconstructable external constraint, a credential gap, an irreversible state it has already entered — is included in the framing record. The boundary test is re-derivability from the substrate (codebase, branch, runtime state, and the model's own reconstruction), not the item's grain: it excludes re-derivable bookkeeping, not genuinely lost-on-interruption facts, so when a sub-step graduates into a non-re-derivable commitment it crosses into the externalized set.
 
-Evidence review (cognitive-offloading literature, with the contested-replication caveats) is in the ledger: https://github.com/jongwony/epistemic-protocols/issues/778
+Evidence review (cognitive-offloading literature, with the contested-replication caveats) is in the ledger: commit `bd9e7e9c` — deliberated at https://github.com/jongwony/epistemic-protocols/issues/778
 
 ## Reference over Copy
 
@@ -94,7 +94,7 @@ This is the shared root of several existing positions rather than a new mechanis
 
 **Operational test**: "Can the consumer re-derive this from shared substrate with its own tools?" Yes → reference; no → copy. A copy where reference would serve pays tokens, risks staleness, and may lose fidelity; a reference where copy is required loses the non-re-derivable content outright.
 
-Falsifiability and tier analysis are in the ledger: https://github.com/jongwony/epistemic-protocols/issues/778
+Falsifiability and tier analysis are in the ledger: commit `bd9e7e9c` — deliberated at https://github.com/jongwony/epistemic-protocols/issues/778
 
 ## Inter-Protocol Guidance
 
