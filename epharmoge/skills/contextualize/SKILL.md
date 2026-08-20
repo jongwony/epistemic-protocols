@@ -451,7 +451,7 @@ certificate gate:  every registered mismatch carried certificate.status = pass (
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Eval   (sense)   → Internal analysis (no external tool)
+Eval   (sense)   → Internal analysis (no external tool: the scan RE-EXECUTES NOTHING and WRITES NOTHING — it reads the completed result and the observable context, which is also what keeps the information source non-circular, Rule 6)
 Qz / ZeroMismatchConfirm (constitution) → present (conditional: Mᵢ = ∅; zero-mismatch finding + reasoning; AcceptNoMismatch / Reopen(aspect) — Rule 9)
 reopen_relay (extension) → TextPresent+Proceed (conditional: Reopen(aspect) focused re-scan still yields Mᵢ = ∅ → relay the still-zero finding and deactivate; one attempt per aspect, basis = the focused Eval re-scan)
 reopen_focus (track) → Internal state update (set at Reopen(aspect), threads the focused Eval re-scan, cleared after the re-scan — consumed once, either arm)
@@ -631,7 +631,7 @@ This walkthrough is the RENDERING layer. It fixes what the user is shown and how
 
 Three things can still reach the user without a gate opening. Where the scan found nothing, the zero-mismatch confirmation is presented and the turn yields (Rule 9). Where mismatches were found but none passed the certificate, each routed deficit is emitted with its command hint and any `Residual` is surfaced — the run converges there with the result unadapted. Where some passed, the phase stays silent and control goes to Phase 1.
 
-**What this phase does not do**: it re-executes nothing and modifies nothing, and it never re-opens correctness — that was presupposed of the result this run received and stays presupposed after every adaptation (Rule 6, Rule 8). Fit is judged of the ASPECT, so one aspect can fail while the rest stand.
+**What this phase does not do**: nothing is re-executed and nothing is written (TOOL GROUNDING: `Eval`), and correctness is never re-opened — it was presupposed of the result this run received and stays presupposed after every adaptation (Rule 8). Fit is judged of the ASPECT, so one aspect can fail while the rest stand.
 
 ### Phase 1: Mismatch Surfacing
 
