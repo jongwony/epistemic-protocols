@@ -600,10 +600,8 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 **Revision threshold**: The mismatch's kind label is an open emergent type (Axis); the listed domains are only the illustrative example set. When accumulated mismatch detections across 3+ sessions cluster around a recurring domain outside the current examples, that domain warrants adding to the example set. When a cited example consistently mis-fires (3+ sessions of classification false negatives clustered on it), it warrants rewording or dropping from the examples. Neither move changes the type — the taxonomy stays open; only the detection scent is recalibrated.
 
 **Skip**:
-- User provided explicit, detailed specification and result follows it exactly
-- User explicitly says "looks good" or "proceed" after execution
-- Trivial or mechanical execution (formatting, typo fixes, rename)
-- Read-only / exploratory task — no result to evaluate
+- User explicitly says "looks good" or "proceed" after execution — they have judged the fit themselves
+- Read-only / exploratory task — no result to evaluate, so there is nothing for a fit judgment to range over
 
 ### Mode Deactivation
 
