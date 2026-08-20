@@ -23,7 +23,7 @@ Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
       [None: judgment_state := None — the verdict is the user's this cycle, and the reset is what stops last cycle's relayed Upheld from being read onto this mismatch] →
       -- DISPOSITION HALF. The judgment half above has already run; what becomes of the result is always the user's:
       Qc(Mₛ scoped by the CURRENT Λ.fit_map, judgment_state) → Stop → A = (j, d) →
-      [d = Adapt(direction)] adapt → R' → Λ.R := R' → close Mₛ (the act having happened, and ahead of the fold, which needs it out of pending) → Eval(Λ.R, X) → bind_kind each [split where non-atomic] → absorb into pending (same claim → merge, new → init_occurrence) → Mₑ (what the fold opened) → ∀m ∈ touched: certify(m, local_claims) → ∀m ∈ touched: m.value_space := Some(bind_value_space(m)) where status = pass, None otherwise (total on both outcomes, so a merged element that had a space and stopped passing does not keep it) → ∀m ∈ touched where status ≠ pass: route → close m as Route(routed_deficit); ambiguous → close m as Residual — and every such close completes the entry of an m registered before this fold, so it LEAVES pending, while an m that was not never enters → Mₑ_passed := the passing members of Mₑ (registration is for what the fold OPENED; an element registered before this fold has nothing to register) → Register(Mₑ_passed) → AssessFit(Λ.R, X, pending) → F' → Λ.fit_map := F' → (loop: back to Phase 1 above — judgment half, then disposition half — until control reaches a named terminal)
+      [d = Adapt(direction)] adapt → R' → Λ.R := R' → close Mₛ (the act having happened, and ahead of the fold, which needs it out of pending) → Eval(Λ.R, X) → bind_kind each [split where non-atomic] → absorb into pending (same claim → merge, new → init_occurrence) → Mₑ (what the fold opened) → ∀m ∈ touched: certify(m, local_claims) → ∀m ∈ touched: m.value_space := Some(bind_value_space(m)) where status = pass, None otherwise (total on both outcomes, so a merged element that had a space and stopped passing does not keep it) → ∀m ∈ touched where status ≠ pass: route → close m as Route(routed_deficit); ambiguous → close m as Residual — and every such close completes the entry of an m registered before this fold, so it LEAVES pending, while an m that was not never enters → Mₑ_passed := the passing members of Mₑ (registration is for what the fold OPENED; an element registered before this fold has nothing to register) → Register(Mₑ_passed) → record update(Λ.carrier: add Mₑ_passed AND bring into line the entry of every touched element ALREADY REGISTERED before this fold, whose reading, evidence, certificate, value space and stamp the fold moved — Register reaches only what the fold OPENED) → AssessFit(Λ.R, X, pending) → F' → Λ.fit_map := F' → (loop: back to Phase 1 above — judgment half, then disposition half — until control reaches a named terminal)
       [d = Keep] close Mₛ (nothing has to happen first) → no re-scan, no Mₑ; R_final is bound at convergence, not here → (pending non-empty: back to Phase 1 above; emptied by this close: the ordered terminal check)
       [d = Discard(replacement)] discard → close Mₛ as Discard (ahead of the sweep, or the mismatch the user actually withdrew is recorded Moot) → R_final := replacement, every mismatch REMAINING pending → unjudged Moot, no re-scan → deactivate (withdrawal convergence: the evaluated target is withdrawn; the replacement is carried, not adjudicated)
 
@@ -613,7 +613,7 @@ Each mismatch is characterized by:
 
 | Level | Criterion | Action |
 |-------|-----------|--------|
-| **Critical** | Result actively harmful in current context | Surface first — `SelectNext` orders by severity, so this reaches the gate ahead of the rest, WHICH PROTECTS the user from spending turns on lesser mismatches while an actively harmful result stands unreviewed; the pairing set is presented intact, this protocol having no ground to rule out accepting a harm the user judges worth accepting |
+| **Critical** | Result actively harmful in current context | Surface first — `SelectNext` orders by severity, so this reaches the gate ahead of the rest, WHICH PROTECTS the user from spending turns on lesser mismatches while an actively harmful result stands unreviewed; severity never removes a pairing, this protocol having no ground to rule out accepting a harm the user judges worth accepting — what the fit evidence may remove is Rule 10's and is severity-independent |
 | **Significant** | Result suboptimal or partially inappropriate AND mismatch carries demonstrable behavioral impact (downstream-decision impact, runtime divergence, gate-trajectory change) | Surface to user for judgment |
 | **Minor** | Result adequate but could fit better, OR mismatch lacks demonstrable behavioral impact (covers both structural-only and suboptimal-without-impact cases) | Surface with what makes it Minor stated in the presentation — no option pre-selected: the severity is this protocol's own reading of impact and settles neither whether the aspect stands nor what the user wants done about it |
 
@@ -623,15 +623,15 @@ When multiple mismatches are identified, surface in severity order (Critical →
 
 ## Protocol
 
-This walkthrough is the RENDERING layer. It fixes what the user is shown and how they are asked, and it carries no operational semantics of its own: guards, state transitions, ordering constraints, constructors and terminal equations are defined in the formal blocks above and are reached from here by pointer. Where this section and a formal block appear to disagree, the formal block governs and this section is the defect. That is also why nothing here restates a rule it could point at — a restatement is a second place for one contract to drift, and only the pointer removes it.
+This walkthrough is the RENDERING layer. It DEFINES no operational semantics: every guard, state transition, ordering constraint, constructor and terminal equation it touches is defined in a formal block above and reached from here by pointer. What it fixes is how those meet the user — what is shown, in what form, and when the turn becomes theirs — so it names an operational fact where the user-facing act is inseparable from it, and defines none of them. Where this section and a formal block appear to disagree, the formal block governs and this section is the defect. Which is also the standard for adding to it: a rule this layer could point at is pointed at, because a restatement is a second place for one contract to drift and only the pointer removes it.
 
 ### Phase 0: Applicability Checkpoint (Silent)
 
-**Nothing is shown.** The whole phase — scan, bind, split, fold, certify, value-space binding, registration, fit map — runs with no user interaction, in the strict order Rule 17 fixes (PHASE TRANSITIONS: Phase 0).
+**The work is silent; the outcome decides what the user sees.** Scan, bind, split, fold, certify, value-space binding, registration and fit map all run with no user interaction, in the strict order Rule 17 fixes (PHASE TRANSITIONS: Phase 0). Then one of three things happens.
 
-Three things can still reach the user without a gate opening. Where the scan found nothing, the zero-mismatch confirmation is presented and the turn yields (Rule 9). Where mismatches were found but none passed the certificate, each routed deficit is emitted with its command hint and any `Residual` is surfaced — the run converges there with the result unadapted. Where some passed, the phase stays silent and control goes to Phase 1.
+Where the scan found nothing, the zero-mismatch confirmation is presented and the turn yields (Rule 9) — the one gate this phase can open. Where mismatches were found but none passed the certificate, each routed deficit is emitted with its command hint and any `Residual` is surfaced as text with no turn yielded; the run converges there with the result unadapted. Where some passed, nothing is shown and control goes to Phase 1.
 
-**What this phase does not do**: nothing is re-executed and nothing is written (TOOL GROUNDING: `Eval`), and correctness is never re-opened — it was presupposed of the result this run received and stays presupposed after every adaptation (Rule 8). Fit is judged of the ASPECT, so one aspect can fail while the rest stand.
+**What this phase does not do**: the scan itself re-executes nothing and writes nothing (TOOL GROUNDING: `Eval` — the phase's own certificate-assigned closes do write their records). Correctness is not established here at any point: it was presupposed of the result this run received, is never re-established, and is not established for an adapted result either — nothing in this protocol verifies one (Rule 8). Fit is judged of the ASPECT, so one aspect can fail while the rest stand.
 
 ### Phase 1: Mismatch Surfacing
 
@@ -640,7 +640,7 @@ Registration, selection, the judgment-half dispatch and both relay guards are de
 **Report `m.unrepaired` with the mismatch** where the stamp is set — the Adapt the user directed last cycle did not land on this claim, and withholding that asks them to answer blind. The stamp gates nothing: the mismatch is surfaced on its own merits either way, and what it changes is what the user is told.
 
 **Carrier format** — ONE entry holding every registered mismatch:
-One entry, headed as the mismatch carrier for the evaluated result, carrying one line per registration, each headed by that registration's `id`: the aspect and its description, the evidence and context, the severity, the certificate, the value space, the `unrepaired` stamp, the status, and — once closed — the DispositionRecord, meaning the judgment, who settled it, the disposition, and both grounds. What kind of record that is, and what call writes it, is the host's; this contract asks only that it hold all of the above in one place a later read can reach.
+One entry, headed as the mismatch carrier for the evaluated result, carrying one line per registration, each headed by that registration's `id`: the aspect and its description, the evidence and context, the severity, the status, and — once closed — the DispositionRecord, meaning the judgment, who settled it, the disposition, and both grounds. That line is the USER-FACING PROJECTION of the entry, not its contents: what an entry must hold is the registered `Mismatch` whole, every field TYPES gives it having a reader — `identity(m)` reads `kind_binding` off an element still pending after an Adapt — together with its DispositionRecord. What kind of record that is, and what call writes it, is the host's; this contract asks only that one place a later read can reach hold all of it.
 
 The creating write hands back the handle `Λ.carrier` holds. Every later amendment names it; no second entry is written per mismatch.
 
@@ -684,7 +684,7 @@ This is a contextual materialization of `Adapt(direction)` — the formal dispos
 
 ### Phase 2: Disposition
 
-The ordering constraint on the close, each arm's state transition, the re-scan and the fold it runs, certification and value-space binding over the touched set, the carrier amendment, and the terminal check are all defined at PHASE TRANSITIONS (Phase 2, and Phase 2 → withdraw). What this section fixes is what each answer MEANS to the user who gave it.
+The ordering constraint on the close, each arm's state transition, the re-scan and the fold it runs, certification and value-space binding over the touched set, and the carrier amendment are all defined at PHASE TRANSITIONS (Phase 2, and Phase 2 → withdraw); the ordered terminal check that a close can reach is at LOOP. What this section fixes is what each answer MEANS to the user who gave it.
 
 1. **`(Overruled, Keep)`** — the flagged aspect fits after all; the result stands unchanged. This pair also arrives relay-assigned from Phase 1 without ever reaching the gate, and the trace prints the two apart so the user can tell which retractions were their own
 2. **`(Upheld, Keep)`** — the mismatch stands and the result is accepted anyway; the fitness assumption they accepted is noted with it. An accepted residual, recorded apart from arm 1
@@ -697,7 +697,7 @@ The ordering constraint on the close, each arm's state transition, the re-scan a
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor severity mismatches only | Constitution interaction with the full pairing set and no default — a lighter run presents fewer mismatches, not a pre-chosen answer to them |
+| Light | Minor severity mismatches only | Constitution interaction with no default — a lighter run presents fewer mismatches, not a pre-chosen answer to them |
 | Medium | Significant severity, evidence is clear | Structured Constitution interaction with evidence |
 | Heavy | Critical severity, multiple interacting mismatches | Detailed evidence + adaptation options |
 
