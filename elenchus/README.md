@@ -31,7 +31,7 @@ The deficit-awareness sits with the user — Elenchus does not auto-activate. AI
 
 ## Disposition Coproduct
 
-Each suspect source resolves into one of seven named dispositions plus Emergent. The full coproduct is presented per source so each judgment is recognizable, not recalled from memory.
+Each suspect source is judged per claim: the user says in their own words what they make of the claim once the antithesis has been put to it, and may add one instruction the run can act on. What is presented per claim is the material the judgment is made against — the bound claim, what makes it suspect, the evidence, the stake, and the antithesis with its cited basis — so the judgment is recognizable rather than recalled from memory, and no answer is written for the user before they are asked.
 
 | Disposition | Meaning |
 |-------------|---------|

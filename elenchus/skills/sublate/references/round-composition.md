@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
-Each source's content, tagging triple, pattern, and antithesis basis appear as text output preceding the Constitution interaction; the question contains only the source identifier and the seven disposition options with their differential implications.
+Each source's content, tagging triple, pattern, and antithesis basis appear as text output preceding the Constitution interaction; the question carries only that audit's bound narrowing whole — the claim, what makes it suspect, the evidence with its source, the stake — together with the antithesis and its cited basis, then the open question and the instruction list. No answer is offered there: the instruction list travels with its differential implications, while what the claim IS stays the user's to say in their own words.
