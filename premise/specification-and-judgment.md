@@ -14,9 +14,9 @@ The two are not ends of one scale, and an indeterminate step does not become det
 
 ## What a Type Layer Does on the Indeterminate Side (Architectural)
 
-On the determinate side a type is a guarantee: it says what a value is, and the procedure downstream may rely on that. On the indeterminate side it cannot be that, because nothing downstream is entitled to rely on how a judgment came out. What it is instead is a narrowing.
+On the determinate side a type is a guarantee: it says what a value is, and the procedure downstream may rely on that. On the indeterminate side it cannot be that, because nothing downstream is entitled to rely on the judgment being right. It may still route on which form the answer took — that form is what the specification fixed, and it is not the judgment. What it is instead is a narrowing.
 
-Typing an indeterminate step means cutting down what the judgment looks at and giving that material structure — one claim per unit rather than several bundled together, a named channel on each piece of evidence rather than undifferentiated text, a positive statement rather than a negation, and whatever is rewritten on every pass left out because it carries no signal. Two units shaped that way can be set beside one another and their overlap means something.
+Typing an indeterminate step means cutting down what the judgment looks at and giving that material structure — one claim to a unit rather than several bundled together, each piece of evidence on a named channel rather than run together as undifferentiated text, a positive statement rather than a negation, and whatever every unit restates identically left out, because what does not vary carries no signal.
 
 That is the whole of the contribution, and it is worth making: it raises the odds the judgment lands right without pretending to make it. The distinction is between shaping a judgment's input and supplying its output.
 
