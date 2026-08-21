@@ -66,7 +66,7 @@ On skill activation, before any sub-protocol runs:
 
 ## Phase L: Loop Iteration Branch Gate
 
-After channel open (Round 1 entry) and after each round completes, surface the round counter in pre-gate prose so the user always knows where they are in the loop, then present the branch gate. Termination is the user's decision and is not surfaced as a peer option.
+After channel open (Round 1 entry) and after each round completes, surface the round counter in pre-gate prose so the user always knows where they are in the loop, then what holds under either round mode, then present the branch gate. Termination is the user's decision and is not surfaced as a peer option.
 
 **Pre-gate prose** (per round) — surface BOTH the apply load (this round's queued comments) AND, when relevant, the scan delivery (findings that will land in the next round's sidepanel) so the cross-round flow is recognizable:
 ```
@@ -84,20 +84,30 @@ The sidepanel state line surfaces carryover (open findings the user can still di
 **Branch gate**:
 
 ```
-Q : Round {k+1} — Which round mode? (Answer after browser comment authoring + sidepanel disposition is complete)
-  ① apply + scan — APPLY: translate this round's queued JSONL comments into edits NOW (a response to an open-verdict protocol's finding is recorded as that judgment instead of edited — see the finding-lifecycle rule) (queued comments include both fresh drag-comments and any sidepanel disposition signals carrying [task: …] tags, which also call TaskUpdate(completed) subject to the finding-lifecycle rule's two conditions on closing).
-                    SCAN: run /inquire → /sublate → /gap → /contextualize audit; for each finding, materialize a TaskList entry with the source protocol's own judgment shape attached (no audit-finding edits this round). Findings appear in Round {k+2}'s sidepanel for user disposition.
-  ② apply        — APPLY only: translate this round's queued JSONL comments into edits NOW (same exception for an open-verdict protocol's finding). No scan, no new findings. Faster round suited for flow-state iteration after the user has already disposed prior-round findings via the sidepanel.
-                    Implicit contract: the user has performed their own cognitive scan via drag-commenting and sidepanel disposition,
-                    so the AI handles faithful translation only.
+Before the gate, as text — what holds under either mode, so the gate carries only what differs:
+  - Both modes translate this round's queued JSONL into edits now. "Queued" covers fresh
+    drag-comments AND sidepanel disposition signals carrying [task: …] tags; the latter also
+    call TaskUpdate(completed), subject to the finding-lifecycle rule's two conditions on closing.
+  - A response to an open-verdict protocol's finding is that protocol's judgment: it is recorded
+    as the judgment rather than executed as an edit (finding-lifecycle rule).
+  - Ambiguous / conflicting / audit-requiring lines are translated by NEITHER mode and archived
+    by neither. They stay in the queue for a later round.
+  The two modes differ in the scan and in nothing else.
 
-  BOTH options defer the same lines: ambiguous / conflicting / audit-requiring comments are not archived under
-  either mode → they remain in the queue for a later round. What the two differ in is the scan and nothing else.
+Q : Round {k+1} — Which round mode?
+  ① apply + scan — the edits land, then /inquire → /sublate → /gap → /contextualize audit the
+                   result. Each finding becomes a TaskList entry carrying its source protocol's
+                   own judgment shape, and reaches you in Round {k+2}'s sidepanel. Nothing is
+                   edited from those findings this round.
+  ② apply        — the edits land and the round ends. Nothing else scans this round: your own
+                   commenting and disposing was the scan.
 
   In HTML mode this gate carries NO round-mode options. The scan step has no venue there, so ① and ② translate the same queue the same way and leave it in the same state — the two are one option under two names. The round runs as ② and the gate says so; what it asks is only the round-completion signal.
 
 To keep commenting / disposing, do not yet answer the gate — keep drag-commenting and clicking sidepanel dispose buttons in the browser. The answer marks round completion; the queue is consumed at that moment, save the lines neither mode can translate, which stay for a later round.
 ```
+
+**Why the gate carries only the difference**: what both modes do identically differentiates nothing, so inside an option it is read at the moment of choosing while bearing on nothing being chosen — and it is read there again every round. It goes out as pre-gate text instead, once and ahead of the two options; each option line then carries what it does and what follows from it. Placement is what moved and not content: the invariant list is still emitted, and the fuller account of each mode stays in the Trajectory differential below, which is where an AI reader needs it and a deciding user does not.
 
 **Why 2 options, not 3 (or more)**: Termination is a *meta-action* — exit from the loop modality, not a position on the audit-presence axis. Meta-actions surface as free-response pathways rather than peer options because they do not commit to any downstream trajectory on the audit-depth axis (Differential Future Requirement: each peer option must produce a distinct downstream trajectory). The Phase 0 prose declares the exit affordance once; surfacing it at every gate would inflate the option set without differential trajectory on the loop axis. `/sublate` is similarly NOT a peer option — it joins the scan range as one of the four sub-protocols within `apply + scan`'s scan step, sharing the audit-depth axis as Steps 1–4 rather than introducing a new round-mode trajectory. In HTML mode that same requirement takes the count to 0 rather than to 2, the two trajectories being indistinguishable there — see the Trajectory differential below. The in-round chat gate count stays at exactly 1 (the round-mode gate itself); per-finding sub-protocol Constitution judgments are deferred to the next round's sidepanel disposition affordance, preserving Constitution semantics while compressing in-round chat traffic.
 
