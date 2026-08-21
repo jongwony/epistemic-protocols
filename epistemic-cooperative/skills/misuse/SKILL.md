@@ -96,7 +96,6 @@ Candidate N — [VIOLATION_TYPE]
   Pre-context (10-20 turns): <quoted excerpt or paraphrase showing absence of required framework / presence of named-candidate comparison>
   Phase 0 output: <quoted AI response showing Sₐ binding or stereotype acceptance>
   Violation criterion: <specific clause from violation-taxonomy.md that this invocation contradicts>
-  Read before deciding: Recognize holds if the cited evidence is correctly read; Dismiss holds if the framework was implicit, the context was elsewhere, or the cited evidence is misread.
 ```
 
 Then present the recognition Constitution interaction:
@@ -105,8 +104,8 @@ Then present the recognition Constitution interaction:
 Did this past invocation violate its contract?
 
 Options:
-1. Recognize — violation confirmed
-2. Dismiss — legitimate invocation
+1. Recognize — violation confirmed (the cited evidence is correctly read)
+2. Dismiss — legitimate invocation (the framework was implicit, the context was elsewhere, the cited evidence is misread)
 3. Reorient — different violation kind than presented (re-classify against taxonomy)
 4. Stop — exit /misuse without further candidates
 ```

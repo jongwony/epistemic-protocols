@@ -271,7 +271,7 @@ Options:
 1. **Confirm / Use this** — [what the crystallized abstraction enables downstream]
 2. **Widen / Broaden it** — [how upward or lateral scope expansion reshapes the candidate]
 3. **Narrow / Tighten it** — [what dimension specializes or what to exclude]
-4. **Fuse / Merge it** — [which adjacent abstraction to explicitly pull in for merge]
+4. **Fuse / Merge it** — [which adjacent abstraction to explicitly pull in for merge] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
 5. **Reorient / Change the axis** — [what orthogonal axis to pursue instead]
 6. **Dismiss / Drop this candidate** — [what assumption about this essence is released]
 ```
