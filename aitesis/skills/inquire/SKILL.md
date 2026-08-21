@@ -282,7 +282,7 @@ Heuristic signals for context insufficiency inference (not hard gates): **Novel 
 
 **Revision threshold**: When accumulated observation_skips entries across 3+ sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across 3+ sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure — promoted fibers default to Unit (detect-only) unless the pattern exhibits internal classification structure requiring a structured fiber type.
 
-**Skip**: execution context is fully specified in current message; user explicitly says "just do it" or "proceed"; same (domain, description) pair was dismissed in current session (session immunity); Phase 1 context collection resolves all identified uncertainties; read-only / exploratory task — no prospect to verify.
+**Skip**: execution context is fully specified in current message; user explicitly requests proceeding without context verification; same (domain, description) pair was dismissed in current session (session immunity); Phase 1 context collection resolves all identified uncertainties; read-only / exploratory task — no prospect to verify.
 
 ### Mode Deactivation
 
