@@ -25,7 +25,7 @@ WorkingContext
   → bind_kind(source) → [split_binding where atomicity = non-atomic] → certify(kind_binding, local_claims) → bind_value_space(audit, W.action) -- shared meta-backbone: bind each candidate to the CLAIM it is being read as authority for, SPLIT the binding where it bundles more than one claim so certify never sees a compound, certify deficit fit (fail-closed) against the claims inscribed in this SKILL.md, then derive the NARROWING its judgment will be made against — in that strict order, BEFORE any tagging, antithesis, or surfacing. ONLY status = pass CONTINUES DOWN THIS CHAIN: route and ambiguous each write a certificate-assigned record straight into the disposition table emit reads, so every step below ranges over the admitted audits alone
   → tag(provenance, freshness, leverage)        -- attach metadata triple per audit
   → posit(antithesis per audit)                 -- Pattern A ∪ Pattern B ∪ Pattern C ∪ Pattern D ∪ Emergent(Pattern)
-  → present(antitheses as text, then the question)  -- per-claim: analysis and evidence precede the gate, which carries the question and the instruction list
+  → present(antitheses as text, then the reach of a judgment, then the question)  -- per-claim material and a per-batch reach note precede the gate, which carries the question and the instruction list
   → judge(disposition per audit)                 -- over the admitted audits: an open verdict plus an optional instruction, whose members are only what this protocol can itself discharge. The certificate-assigned records are already in the table and are reported rather than judged
   → emit(VettedContext with disposition table)
   → VettedContext
@@ -145,7 +145,7 @@ Phase 0 → Phase 1: S_high ≠ ∅, Λ.pass := the refs this pass admitted     
 Phase 1: Λ.pass → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: artifact read, artifact search]
          Step₂ posit(antithesis per a ∈ S') → A[]                        -- per-audit Pattern A ∪ B ∪ C ∪ D ∪ Emergent(Pattern) generation
          Step₃ record: ∀r ∈ Λ.pass: Λ.tagged(r) := S'(r), Λ.antitheses(r) := Λ.antitheses(r) ⌢ [A[r]]   -- Λ.pass holds REFS, so each write is at a ref; WRITTEN AT THE KEY, NEVER OVER THE MAP, and the antithesis is APPENDED so an earlier cycle's stays: each audit's entry is set as that audit is processed and no entry is removed, so a cycle working one returned audit leaves every earlier entry standing. dom(Λ.antitheses) is the domain the closing trace ranges over, so a whole-map assignment would narrow that domain to the current cycle and a run that posited across several cycles would reach its terminal able to demonstrate only the last; a run that posits without recording at all reaches it with nothing to demonstrate
-Phase 2: (A[], judgment slots) → present(per-claim, Λ.tagged(a.ref) + Λ.narrowing(a.ref) + the antithesis with its cited basis) [pre-gate text] → Qs(per-claim, the open question + the instruction list, each member with its differential implication) → Stop → J            [Tool: Constitution interaction]   -- the narrowing and the antithesis are ANALYSIS AND EVIDENCE and go out before the gate; Qs carries the question and what may be instructed, and nothing else
+Phase 2: (A[], judgment slots) → present(per-claim, Λ.tagged(a.ref) + Λ.narrowing(a.ref) + the antithesis with its cited basis) [pre-gate text] → present(per-batch, the reach of a judgment — one claim, its own slot, nothing beyond it) [pre-gate text] → Qs(per-claim, the open question + the instruction list, each member with its differential implication) → Stop → J            [Tool: Constitution interaction]   -- the narrowing and the antithesis are ANALYSIS AND EVIDENCE and go out before the gate; so does the reach note, ONCE FOR THE BATCH rather than per claim, it being the same for every slot and reading nothing off Λ — it is what a scope caveat folded into an instruction line was doing, moved to where it is read before deciding rather than during; Qs carries the question and what may be instructed, and nothing else
 Phase 3: J → integrate(J, S', Λ.antitheses) → V                          -- per-audit disposition recorded, and V.trace := Λ.antitheses — the map the Phase 1 record step wrote, which is the ONLY source of the antitheses this result type declares and is why the trace's domain is every audit an antithesis was put to. Neither J nor S' carries one, so a result assembled from those two alone would declare a trace it could not fill; the certificate-assigned records written at Phase 0 are already in J, so integration adds the user-answered ones to a ledger that is already partly filled
 
 ── LOOP ──
@@ -363,7 +363,7 @@ Generate metadata triple plus dialectical antithesis per audit.
 
 ### Phase 2: Per-Claim Disposition Constitution Interaction
 
-Put the narrowings and antitheses out as text, then open the Cognitive Partnership Move (Constitution) after them carrying the open question and the instruction list. Constitution presentation yields turn for user response.
+Put the narrowings and antitheses out as text, say once for the batch how far a judgment reaches, then open the Cognitive Partnership Move (Constitution) after them carrying the open question and the instruction list. Constitution presentation yields turn for user response.
 
 **Pre-gate text output** (Round composition): For each ref in `Λ.pass`, taking that ref's audit, present as text output:
 - The source's content (verbatim or close paraphrase)
@@ -386,26 +386,38 @@ evidence:   [each item with the source it was read off]
 stake:      [what the pending action does with this claim, and what follows if it does not hold]
 antithesis: [the posited challenge]  — basis: [the ground cited for it]
 
-then ask, open: what do you make of this claim, now that the challenge has been put to it?
+then, ONCE for the batch and still as text before the gate, say how far a judgment reaches:
 
-and, if anything is to be done about it, one instruction — these being what this protocol can
-itself carry out:
-  - stop relying on this source FOR THIS CLAIM, keep it
-    in history — the same source under another claim is
-    judged separately and is untouched here            → Withdraw
-  - come back to THIS CLAIM when a named condition is
-    met, for as long as this run is still going         → Revisit, and name the condition
-  - this claim's question belongs to a different kind of
-    gap than the one this protocol treats — name that
-    gap, and the run reports it at convergence with the
-    command that addresses it where this file inscribes
-    one, by name alone where it does not. THE NAMING IS
-    ALL THAT HAPPENS HERE: nothing in this run acts
-    on it                                               → HandOff, and name it
-Saying nothing here is an answer: the run carries on with the source as it stands.
-A Revisit whose condition has not been met by the time this run ends is reported as still
-open: the condition is recorded, and nothing here watches for it after the run.
+  a judgment reaches the claim in its own slot and no further. The same source read as
+  authority for something else is its own audit with its own slot, and nothing chosen
+  here touches it.
+
+then the gate, carrying the question and the instructions and nothing else:
+
+  what do you make of this claim, now that the challenge has been put to it?
+
+  and, if anything is to be done about it, one instruction — these being what this
+  protocol can itself carry out:
+    - this claim stops being relied on downstream,
+      and stays in the history                       → Withdraw
+    - this claim comes back while this run lasts,
+      once a condition you name is met               → Revisit, and name the condition
+    - this claim's question is really a different KIND
+      of gap: name it, and it is reported at
+      convergence — nothing in this run acts on it    → HandOff, and name the gap
+  Saying nothing is an answer: the run carries on with the source as it stands.
+  A Revisit still unmet when the run ends is reported open, and nothing watches for it
+  after the run.
 ```
+
+The block has three parts and keeps them apart: the material, then how far a judgment reaches,
+then the question with its instructions. An instruction line carries what the option does and
+what follows from choosing it, and nothing else. A scope caveat or a rendering detail folded into
+an option is read at the instant of deciding, where it competes with the decision it was meant to
+protect — and it is read there again for every audit in every batch. What those clauses guard is
+real, which is why they move ahead of the gate rather than out of the run: the reach note states
+the Withdraw scope once for the batch, and how a handed-off deficit is emitted is already fixed
+where that emission is specified, rather than restated to a user who is not the one emitting it.
 
 The instruction list is closed and the judgment is not, and where each comes from is what
 separates them: each instruction names something this protocol can itself discharge, while what
