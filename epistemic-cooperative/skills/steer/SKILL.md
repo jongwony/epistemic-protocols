@@ -203,11 +203,11 @@ Then present the final approval Constitution interaction. The option set include
 How would you like to proceed with this diff?
 
 Options:
-1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first (skipped on first-time induction, when no existing profile is present); also writes the Settled Directions registry when the settled-directions delta is non-empty
+1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first (skipped on first-time induction, when no existing profile is present); also writes the Settled Directions registry when the settled-directions delta is non-empty, and appends this trial to the persistent trial index
 2. Modify — adjust specific profile variables and/or settled-direction clauses before write (specify which and how)
 3. Reject — discard the diff; the existing profile remains unchanged; emit NoUpdateNote
 4. Defer — emit the diff and any settled-directions delta as a session-text artifact without writing; the user can apply manually later
-5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged
+5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged, and this trial is appended to the persistent trial index
 ```
 
 After response:

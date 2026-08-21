@@ -247,7 +247,7 @@ Options:
 3. **Probe** — request additional verification before deciding
 ```
 
-Option 3 (Probe) is always visible. When `stakes(D) = High`, present with expanded verification rationale; otherwise, present with brief rationale. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
+Option 3 (Probe) is always visible. The verification rationale goes out BEFORE the gate and not inside option 3 — expanded when `stakes(D) = High`, brief otherwise. What the option itself carries is what choosing it does, and that does not vary with stakes; only the rationale for wanting it does, which is analysis and belongs where analysis goes. Directing the depth into the option line would refill it with exactly what was taken out of it. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
 
 Other is always available — user can respond freely beyond the listed options.
 
