@@ -276,7 +276,7 @@ An `apply`-only round skips the scan step entirely. It runs the apply step exact
 
 **Empty-queue degenerate**: `apply` selected on an empty queue with no disposition signals completes as a no-op — the round counter advances, pre-gate prose surfaces `Round {k} complete — apply (0 applied, 0 deferred)`, browser does not reload (no edits applied). Recovery is implicit: the user can drag-comment or dispose findings in the browser before answering the next gate.
 
-Apply step tools are restricted to Edit / Write + `TaskUpdate` — sub-protocol invocation belongs to the `apply + scan` mode's scan step only. The "wait without consuming" affordance is implicit in not yet answering the gate — the user may keep drag-commenting and disposing in the browser; consumption happens only when the user responds.
+Apply step tools are restricted to Edit / Write + `TaskUpdate` — sub-protocol invocation belongs to the `apply + scan` mode's scan step only. RECORDING a verdict against a task is a `TaskUpdate`, so the restriction permits it: an open-verdict protocol's response is written into the task rather than into the artifact, which is what keeps this step from performing what `/sublate` is bound not to do. The "wait without consuming" affordance is implicit in not yet answering the gate — the user may keep drag-commenting and disposing in the browser; consumption happens only when the user responds.
 
 ## Materialized View
 
@@ -285,8 +285,13 @@ On user-explicit termination (free-response exit), present the transformation tr
 ```
 Iterations: {N} loops, [apply+scan|apply] sequence: {e.g., apply+scan, apply, apply, apply+scan}
 Apply load (across all {N} rounds):
-  {C_in} queued comments processed → {E_apply} edits landed, {Df_apply} deferred to a future round
-  {D_sig} disposition signals processed → {E_dis} edits landed, {Tc} TaskList entries closed
+  {C_in} queued comments processed → {E_apply} edits landed, {V_rec} verdicts recorded (open-verdict findings, not edited), {Df_apply} deferred to a future round
+  {D_sig} disposition signals processed → {E_dis} edits landed, {Tc} TaskList entries closed,
+                                          {Ow} left OPEN as owed (a Revisit or HandOff this channel does not perform),
+                                          {Nj} recorded as an instruction given without a judgment (tag with no verdict),
+                                          {Cu} closed unanswered (a finding closed via chat with no judgment given)
+  -- the last three slots exist because the apply step is required to NAME what it did not carry out; a report
+     with only edits and closes would let an unperformed instruction leave as though it had been performed
 Scan load (across {S} apply + scan rounds):
   Step 1 (inquire):       {F_s} findings surfaced → materialized for next-round disposition
   Step 2 (sublate):       {N_s} sources surfaced → materialized for next-round disposition (open verdict + optional instruction attached)
