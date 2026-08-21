@@ -88,15 +88,13 @@ Hypothesis N — N interpretations possible / decision point is X
 
 **Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (This contextual rule informs the gate decision and therefore precedes the gate options.)
 
-Present the recognition Constitution interaction as a free-response prompt:
+The hypothesis surface above offers a candidate horizon of the deficit space — open to your recognition, redirection, or transcendence, not a settled answer. Present the recognition Constitution interaction as a free-response prompt:
 
 ```
 Which hypothesis fits your present situation?
 
 Free response — the disposition is constituted by the user's natural utterance.
-Recognition / Redirect / Dismiss / Narrow scope / Stop are all reachable via free response;
-Phase 3 parses the utterance into the corresponding R coproduct constructor.
-The hypothesis surface above offers a candidate horizon of the deficit space — open to your recognition, redirection, or transcendence; no typed selection is required.
+Recognition / Redirect / Dismiss / Narrow scope / Stop are all reachable via free response; no typed selection is required.
 ```
 
 The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall, inscribed in this SKILL.md; and evidence is presented as text output before the gate rather than folded into it).
