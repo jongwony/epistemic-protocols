@@ -60,7 +60,7 @@ Sources matching none of the criteria are not surfaced — the protocol focuses 
 
 - **Working hypothesis thresholds**: `N` (high-leverage threshold) and horizon defaults per origin are residual variables, refined through accumulated use evidence rather than fixed at inscription.
 - **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern when use evidence surfaces a dialectical operation orthogonal to the four.
-- **Single-pass per source**: A source receives one antithesis per loop iteration. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Deferred re-trigger affords cross-iteration correction.
+- **Single-pass per source**: A source receives one antithesis per loop iteration. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Revisit re-trigger affords cross-iteration correction.
 
 ## Install
 
