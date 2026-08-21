@@ -197,17 +197,17 @@ Then propose AI disposition before yielding turn for user constitution:
 
 `AI proposed disposition: <Approve | Modify | Reject | Defer | RouteToOperationalLayer>` — one-paragraph rationale referencing diff scope, fit-shape signals (mismatch_signals), backup/rollback availability, and why the proposed disposition dominates alternatives. When mismatch_signals is non-empty, the rationale must address whether prose inscription or operational-layer routing better fits the diff.
 
-Then present the final approval Constitution interaction:
+Then present the final approval Constitution interaction. The option set includes RouteToOperationalLayer only when the Phase 4 fit-shape check fired one or more mismatch_signals; otherwise present the first four options only:
 
 ```
 How would you like to proceed with this diff?
 
 Options:
-1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first (skipped on first-time induction, when no existing profile is present). When the settled-directions delta is non-empty, also write the Settled Directions registry at <registry_path> (rollback via version control)
+1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first (skipped on first-time induction, when no existing profile is present); also writes the Settled Directions registry when the settled-directions delta is non-empty
 2. Modify — adjust specific profile variables and/or settled-direction clauses before write (specify which and how)
 3. Reject — discard the diff; the existing profile remains unchanged; emit NoUpdateNote
 4. Defer — emit the diff and any settled-directions delta as a session-text artifact without writing; the user can apply manually later
-5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged. Surface this option only when Phase 4 fit-shape check fired.
+5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged
 ```
 
 After response:
