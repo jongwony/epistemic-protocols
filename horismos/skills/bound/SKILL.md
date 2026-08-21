@@ -438,9 +438,9 @@ Options:
 4. **Use the stated default** — Continue with [the default shown above].
 
 If the boundary summary above looks right, you can end this review now:
-  • Accept it in your own words. Anything still open will use the default shown above.
-    If you did not also choose one of the four options, the current decision area will use
-    that default too. You may name a different default in the same response.
+  • Accept it in your own words. If you did not also choose one of the four options, the
+    current decision area follows the default shown above too. You may name a different
+    default in the same response.
   • Ask to review the remaining decision areas together before finishing.
 ```
 
