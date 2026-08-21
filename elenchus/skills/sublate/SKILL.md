@@ -393,9 +393,15 @@ itself carry out:
   - stop relying on this source FOR THIS CLAIM, keep it
     in history — the same source under another claim is
     judged separately and is untouched here            → Withdraw
-  - come back to this claim when a named condition is
+  - come back to THIS CLAIM when a named condition is
     met, for as long as this run is still going         → Revisit, and name the condition
-  - hand the question to another deficit                → HandOff, and name it
+  - this claim's question belongs to a different kind of
+    gap than the one this protocol treats — name that
+    gap, and the run reports it at convergence with the
+    command that addresses it where this file inscribes
+    one, by name alone where it does not. THE NAMING IS
+    ALL THAT HAPPENS HERE: nothing in this run acts
+    on it                                               → HandOff, and name it
 Saying nothing here is an answer: the run carries on with the source as it stands.
 A Revisit whose condition has not been met by the time this run ends is reported as still
 open: the condition is recorded, and nothing here watches for it after the run.
