@@ -312,9 +312,16 @@ Artifact(s):                {list of paths}
 Fixation event D:           {caller-supplied D}
 Application context:        {caller-supplied context}
 Sub-protocols invoked:      {/inquire: yes|no, /sublate: yes|no, /gap: yes|no, /contextualize: yes|no}  -- if user exits before any apply + scan round, "no" is auditable
-Sub-protocol terminals:     {per invoked protocol: which terminal its OWN condition grants when evaluated against what this channel delivered, with whatever that condition leaves open named as its residual}
+Sub-protocol terminals:     {per SCAN INVOCATION — one line per protocol per apply + scan round, naming the round: which
+                             terminal that run's OWN condition grants when evaluated against what this channel delivered
+                             to it, with whatever that condition leaves open named as its residual}
                             -- what {Cu} and {F_open} amount to on each protocol's own side. A protocol is not converged
                                because the review ended, and this line is what keeps the two from being read as one
+                            -- PER INVOCATION and not per protocol NAME: each apply + scan round runs a fresh instance
+                               over a different post-apply artifact, and a sub-protocol's source list is read-only to it,
+                               so successive rounds are separate runs rather than one continuing one. Round 3's /sublate
+                               can converge while round 7's exits early with residual, and a single line per name has to
+                               pick one of those to report — which reads as the whole review having reached it
 ```
 
 ## Error Recovery
