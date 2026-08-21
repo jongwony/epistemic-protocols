@@ -59,7 +59,7 @@ Phase 0는 working context에서 audit 후보 source를 silently 선택합니다
 ## 알려진 제한 사항
 
 - **Working hypothesis 임계값**: `N`(high-leverage 임계)과 origin별 horizon 기본값은 residual 변수로, 누적 사용 evidence를 통해 정제됩니다 (inscription 시점에 고정되지 않음).
-- **Pattern set closure**: 네 패턴(A·B·C·D)이 inscribed; Emergent는 네 패턴과 직교하는 변증법적 작용이 사용 evidence로 surface될 때 추가 패턴을 허용합니다.
+- **Pattern set closure**: 네 패턴(A·B·C·D)이 inscribed; Emergent는 미리 이름 붙지 않은 추가 패턴을 허용하되, 그 도전이 곁가지 검증이 아니라 source의 claim을 직접 마주해야 합니다.
 - **감사 당 single-pass**: 각 감사 — 한 claim 아래의 한 source — 는 한 loop iteration에서 하나의 안티테제를 받고, 여러 claim의 권위로 읽힌 source는 여러 감사가 되어 각자 자기 안티테제를 받습니다. False-negative 안티테제 구성(실제 도전을 surface 못 함)은 intra-iteration 복구 없이 전파됩니다; LOOP의 Revisit re-trigger가 cross-iteration 보정을 제공합니다.
 
 ## 설치

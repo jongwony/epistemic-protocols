@@ -50,7 +50,7 @@ Phase 0 silently selects audit-candidate sources from the working context per:
 |-----------|-----------|
 | High-leverage accumulation | Single source carries downstream weight (working hypothesis: ≥ 3 dependents) |
 | Source age beyond horizon | `observed_at + horizon(origin)` < now |
-| Provenance-chain length | Belief depends on an N-step inference chain rather than direct observation or citation |
+| Provenance-chain length | Belief depends on an N-step inference chain rather than direct observation, citation, or measurement |
 | Cross-source contradiction | Two sources nominally pointing at the same referent diverge |
 | Inference-character conclusion | Source is itself a conclusion reached by inference (origin `AIInference`, or a conclusion functioning as a standing premise) |
 
@@ -59,7 +59,7 @@ Sources matching none of the criteria are not surfaced — the protocol focuses 
 ## Known Limitations
 
 - **Working hypothesis thresholds**: `N` (high-leverage threshold) and horizon defaults per origin are residual variables, refined through accumulated use evidence rather than fixed at inscription.
-- **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern when use evidence surfaces a dialectical operation orthogonal to the four.
+- **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern, not pre-named, whose challenge directly confronts the source's claim rather than standing as a side verification check.
 - **Single-pass per audit**: Each audit — a source under one claim — receives one antithesis per loop iteration, and a source read as authority for several claims is several audits, each with its own. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Revisit re-trigger affords cross-iteration correction.
 
 ## Install
