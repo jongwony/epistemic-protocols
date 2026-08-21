@@ -34,8 +34,8 @@ The caller — whether the user invoking `/comment-review` directly or a composi
 Phase 0  : channel open (browser, rendered preview)
 Phase L  : loop iteration k
              Q (branch gate) :
-               ① apply + scan — apply queued JSONL comments NOW (edits this round) + run /inquire → /sublate → /gap → /contextualize audit, materialize findings into TaskList for next round's sidepanel (no audit-finding edits this round), return to browser
-               ② apply        — apply queued JSONL comments NOW (edits this round, partial; defer ambiguous), no audit, no new findings, return to browser
+               ① apply + scan — apply queued JSONL comments NOW (edits this round, except a linked response the classifier records rather than edits) + run /inquire → /sublate → /gap → /contextualize audit, materialize findings into TaskList for next round's sidepanel (no audit-finding edits this round), return to browser
+               ② apply        — apply queued JSONL comments NOW (edits this round, partial; defer ambiguous; same classifier exception), no audit, no new findings, return to browser
              user reads preview + sidepanel state in browser, drag-comments and/or disposes prior-round findings, then next chat turn answers the gate
 free-exit : user may end the review at any time by saying so (Phase 0 prose declares this once)
 ```
@@ -247,7 +247,7 @@ Per-session structure caveat: tasks are stored under a session-UUID directory. T
 
 ### JSONL Consumption Timing
 
-Each JSONL line: `{slug, anchor, anchor_kind?, selector?, context_before, context_after, comment, timestamp, source_offset?}`. `anchor_kind` (`"text" | "selector"`, absent ⇒ `"text"`) and `selector` (the CSS selector / DOM path, present only in selector mode) form the HTML tagged-union anchor; markdown lines omit both and stay byte-identical to the legacy shape. `context_before` + `context_after` (60 chars each) disambiguate repeated text anchors (markdown). `source_offset` (optional integer) records the source-markdown byte offset when the browser can derive it — used when rendered text diverges from source (marked.js strips emphasis markers, link text drops URL parts, code block fences become `<pre>`). The `comment` field doubles as the disposition channel: comments containing `[disposition: <variant>] [task: <task-id>]` tags are treated as disposition signals against the named TaskList entry; comments without those tags are treated as plain edit intents.
+Each JSONL line: `{slug, anchor, anchor_kind?, selector?, context_before, context_after, comment, timestamp, source_offset?}`. `anchor_kind` (`"text" | "selector"`, absent ⇒ `"text"`) and `selector` (the CSS selector / DOM path, present only in selector mode) form the HTML tagged-union anchor; markdown lines omit both and stay byte-identical to the legacy shape. `context_before` + `context_after` (60 chars each) disambiguate repeated text anchors (markdown). `source_offset` (optional integer) records the source-markdown byte offset when the browser can derive it — used when rendered text diverges from source (marked.js strips emphasis markers, link text drops URL parts, code block fences become `<pre>`). The `comment` field doubles as the disposition channel: comments containing `[disposition: <variant>] [task: <task-id>]` tags are treated as disposition signals against the named TaskList entry; a comment carrying `[task: <task-id>]` without a disposition tag is a LINKED response and goes to the source-protocol classifier in the apply step — for an open-verdict protocol's finding it is the verdict itself; only a comment carrying no `[task: <task-id>]` at all is a plain edit intent.
 
 An `apply + scan` round runs **apply step first, then scan step** within a single round-mode commitment:
 
