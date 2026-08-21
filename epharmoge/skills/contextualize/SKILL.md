@@ -697,7 +697,7 @@ The ordering constraint on the close, each arm's state transition, the re-scan a
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor severity mismatches only | The mismatch stated and no more — a lighter run presents fewer mismatches, not a pre-chosen answer to them |
+| Light | Minor severity mismatches only | A lighter run presents fewer mismatches, not a pre-chosen answer to them |
 | Medium | Significant severity, evidence is clear | Structured presentation with evidence |
 | Heavy | Critical severity, multiple interacting mismatches | Detailed evidence, and the adaptation options where the presentation carries them |
 
