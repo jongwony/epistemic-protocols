@@ -40,7 +40,7 @@ The verdict itself is free text and deliberately untyped — nothing downstream 
 | *(none)* | The run carries on with the source as it stands. Saying nothing here is an answer, not a blank. |
 | **Withdraw** | The source is dropped from downstream use and kept in the run's history, with your verdict as you gave it. |
 | **Revisit(condition)** | You name the condition; the loop returns to this claim when it is met, for as long as the run is still going. A condition still unmet when the run ends is reported as still open — nothing watches for it afterwards. |
-| **HandOff(deficit)** | The question is handed to another deficit, reported at convergence with its command hint. |
+| **HandOff(deficit)** | The question is handed to another deficit, reported at convergence — with that deficit's command hint where this protocol inscribes one, and bare where you named a deficit it does not. |
 
 ## Source Identification Criteria
 
