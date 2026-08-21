@@ -296,7 +296,7 @@ When a source claims authority, the challenge asks whether that authority is act
 
 - The source's current claim: "Source X is verified for claim C in the domain it claims to ground."
 - What would shake it: "Source X's verification path authorizes a different claim, is provisional, inferred, cited but unread, or stale — or X is fresh and present yet nothing actually ties it to the behavior it claims, so it could have quietly drifted out of agreement (ask: if that behavior changed today, would X break or fail, or stay unchanged and silently wrong?). A source that only documents intended behavior, with nothing enforcing the match, is not settled by freshness alone."
-- The user judges the claim in their own words, and may add one instruction the run can act on: withdraw the source, come back when a named condition is met while this run lasts, or hand the question to another deficit. A judgment that the claim survives in some other form is recorded as the verdict; this protocol does not rewrite W.sources, which are read-only to it.
+- The user judges the claim in their own words, and may add one instruction the run can act on: stop relying on the source for that claim, come back when a named condition is met while this run lasts, or hand the question to another deficit. A judgment that the claim survives in some other form is recorded as the verdict; this protocol does not rewrite W.sources, which are read-only to it.
 
 ### Pattern B — Counterfactual Gap Forecasting
 
@@ -304,7 +304,7 @@ When a source supports a conclusion under current conditions, the challenge chan
 
 - The source's current claim: "Y holds in the current working context."
 - What would shake it: "If Z replaces a current condition, a gap opens at point P — does Y still hold?"
-- The user judges the claim in their own words, and may add one instruction: withdraw the source, come back while this run lasts if condition Z appears again, or hand the question to another deficit.
+- The user judges the claim in their own words, and may add one instruction: stop relying on the source for that claim, come back while this run lasts if condition Z appears again, or hand the question to another deficit.
 
 ### Pattern C — Cross-Source Consistency Check
 
@@ -312,7 +312,7 @@ When two sources point at the same referent but diverge, the challenge forces an
 
 - The sources' current claim: "Sources X₁ and X₂ refer to the same referent and compatible claim-kind consistently."
 - What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is authoritative for this claim, and what reconciles the divergence?"
-- The user judges each source's claim in its own audit and in their own words, and may add one instruction per audit: withdraw that source, come back when a named condition is met while this run lasts, or hand the question to another deficit.
+- The user judges each source's claim in its own audit and in their own words, and may add one instruction per audit: stop relying on that source for that audit's own claim, come back when a named condition is met while this run lasts, or hand the question to another deficit.
 
 ### Pattern D — Inference Fallacy Audit
 
@@ -320,7 +320,7 @@ When a source is itself a conclusion reached by inference — an `AIInference` o
 
 - The source's current claim: "Conclusion Y follows soundly from the basis observed."
 - What would shake it: "Y's validity rests on a reasoning archetype that does not hold." The archetype is described as a principle, not selected from a closed list: does the conclusion treat a point-in-time observation as a time-invariant law (a present coincidence read as permanent truth); generalize a standing rule from one or few observations; conclude from only the visible (surviving) sample; draw a conclusion that ignores the base rate; or read correlation as cause. These archetypes are a starting set for recognition, not an exhaustive catalog — an Emergent fallacy archetype is admitted whenever a conclusion's soundness rests on a reasoning move not named here.
-- The user judges the conclusion in their own words — including that it holds only within stated bounds — and may add one instruction: withdraw the conclusion, come back while this run lasts when a named condition settles it, or hand the question to another deficit.
+- The user judges the conclusion in their own words — including that it holds only within stated bounds — and may add one instruction: stop relying on the source for that conclusion, come back while this run lasts when a named condition settles it, or hand the question to another deficit.
 
 **Boundary with Pattern B**: Pattern B is a counterfactual the *user* frames — the user supplies condition Z and asks whether Y still holds. Pattern D is the AI *reverse-deriving* the flaw condition from a fallacy archetype, moving the discovery burden from the AI happening to pick the right counterfactual to an archetype-driven scan of the inference itself. A conclusion can pass Pattern B (no user-supplied condition shakes it) yet fail Pattern D (its soundness silently depends on treating the present as invariant).
 
