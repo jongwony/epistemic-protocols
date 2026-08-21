@@ -33,7 +33,7 @@ Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, P
 
 각 suspect source는 claim 단위로 판단됩니다: 반정립이 제기된 뒤 사용자가 그 claim을 어떻게 보는지 자기 말로 말하고, 실행이 이어서 할 일이 있으면 지시 하나를 덧붙일 수 있습니다. claim마다 제시되는 것은 그 판단이 무엇에 대고 내려지는가 하는 재료입니다 — 묶인 claim, 그것을 의심스럽게 만드는 것, 증거, stake, 그리고 근거를 인용한 반정립 — 그래서 판단이 기억에서 회상(Recall)되지 않고 인식(Recognition)됩니다. 사용자가 답하기 전에 답이 대신 쓰이는 일은 없습니다.
 
-판단(verdict) 자체는 자유 텍스트이고, 일부러 타입을 두지 않았습니다 — 판단이 어떻게 나왔는지에 하류가 기댈 자격이 없고, 여기에 타입을 두는 것은 아무도 묻기 전에 프로토콜이 답을 써 두는 일입니다. 타입이 있는 것은 선택적인 **지시** 쪽이며, 그것도 이 프로토콜의 후속 단계가 각각을 실제로 읽기 때문입니다:
+판단(verdict) 자체는 자유 텍스트이고, 일부러 타입을 두지 않았습니다 — 판단이 어떻게 나왔는지에 하류가 기댈 자격이 없고, 여기에 타입을 두는 것은 아무도 묻기 전에 프로토콜이 답을 써 두는 일입니다. 타입이 있는 것은 선택적인 **지시** 쪽이며, 그것도 이 프로토콜이 이미 생산하는 것만으로 각각을 스스로 이행할 수 있기 때문입니다 — 자기가 내보내는 원장에 붙이는 표시이거나, 자기 루프의 제어이거나:
 
 | 지시 | 실행이 그것으로 하는 일 |
 |------|------------------------|
@@ -60,7 +60,7 @@ Phase 0는 working context에서 audit 후보 source를 silently 선택합니다
 
 - **Working hypothesis 임계값**: `N`(high-leverage 임계)과 origin별 horizon 기본값은 residual 변수로, 누적 사용 evidence를 통해 정제됩니다 (inscription 시점에 고정되지 않음).
 - **Pattern set closure**: 네 패턴(A·B·C·D)이 inscribed; Emergent는 네 패턴과 직교하는 변증법적 작용이 사용 evidence로 surface될 때 추가 패턴을 허용합니다.
-- **Source 당 single-pass**: 한 source는 한 loop iteration에서 하나의 안티테제를 받습니다. False-negative 안티테제 구성(실제 도전을 surface 못 함)은 intra-iteration 복구 없이 전파됩니다; LOOP의 Revisit re-trigger가 cross-iteration 보정을 제공합니다.
+- **감사 당 single-pass**: 각 감사 — 한 claim 아래의 한 source — 는 한 loop iteration에서 하나의 안티테제를 받고, 여러 claim의 권위로 읽힌 source는 여러 감사가 되어 각자 자기 안티테제를 받습니다. False-negative 안티테제 구성(실제 도전을 surface 못 함)은 intra-iteration 복구 없이 전파됩니다; LOOP의 Revisit re-trigger가 cross-iteration 보정을 제공합니다.
 
 ## 설치
 

@@ -33,7 +33,7 @@ The deficit-awareness sits with the user — Elenchus does not auto-activate. AI
 
 Each suspect source is judged per claim: the user says in their own words what they make of the claim once the antithesis has been put to it, and may add one instruction the run can act on. What is presented per claim is the material the judgment is made against — the bound claim, what makes it suspect, the evidence, the stake, and the antithesis with its cited basis — so the judgment is recognizable rather than recalled from memory, and no answer is written for the user before they are asked.
 
-The verdict itself is free text and deliberately untyped — nothing downstream is entitled to rely on how a judgment came out, and a type there would be the protocol writing the answer before anyone was asked. What *is* typed is the optional instruction, and only because a later step in the protocol actually reads each one:
+The verdict itself is free text and deliberately untyped — nothing downstream is entitled to rely on how a judgment came out, and a type there would be the protocol writing the answer before anyone was asked. What *is* typed is the optional instruction, and only because the protocol can itself carry each one out with what it already produces — a mark on the ledger it emits, or control of its own loop:
 
 | Instruction | What the run does with it |
 |-------------|---------------------------|
@@ -60,7 +60,7 @@ Sources matching none of the criteria are not surfaced — the protocol focuses 
 
 - **Working hypothesis thresholds**: `N` (high-leverage threshold) and horizon defaults per origin are residual variables, refined through accumulated use evidence rather than fixed at inscription.
 - **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern when use evidence surfaces a dialectical operation orthogonal to the four.
-- **Single-pass per source**: A source receives one antithesis per loop iteration. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Revisit re-trigger affords cross-iteration correction.
+- **Single-pass per audit**: Each audit — a source under one claim — receives one antithesis per loop iteration, and a source read as authority for several claims is several audits, each with its own. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Revisit re-trigger affords cross-iteration correction.
 
 ## Install
 
