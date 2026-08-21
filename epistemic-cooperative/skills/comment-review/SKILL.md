@@ -294,7 +294,7 @@ Apply load (across all {N} rounds):
      with only edits and closes would let an unperformed instruction leave as though it had been performed
 Scan load (across {S} apply + scan rounds):
   Step 1 (inquire):       {F_s} findings surfaced → materialized for next-round disposition
-  Step 2 (sublate):       {N_s} sources surfaced → materialized for next-round disposition (open verdict + optional instruction attached)
+  Step 2 (sublate):       {N_s} audits surfaced (one per claim under test) → materialized for next-round disposition (open verdict + optional instruction attached)
   Step 3 (gap):           {G_s} gaps surfaced → materialized for next-round disposition
   Step 4 (contextualize): {M_s} mismatches surfaced → materialized for next-round disposition
 Cross-round disposition trace:

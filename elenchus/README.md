@@ -12,7 +12,7 @@ Vet working context by dialectical antithesis before pre-execution sync. Tests c
 
 ## What It Does
 
-Elenchus runs before you commit your working context to an external sync — a meeting, a PR for review, a deploy decision, a Slack thread. The protocol scans accumulated session context for sources whose apparent sufficiency has become suspect through age, weak provenance, downstream concentration, or cross-source contradiction, then posits a dialectical antithesis per suspect source and lets you judge each disposition. The motion is Hegelian *Aufhebung* (preserve + negate + lift up): thesis → antithesis → synthesis applied source by source.
+Elenchus runs before you commit your working context to an external sync — a meeting, a PR for review, a deploy decision, a Slack thread. The protocol scans accumulated session context for sources whose apparent sufficiency has become suspect through age, weak provenance, downstream concentration, or cross-source contradiction, then posits a dialectical antithesis per claim under test — one per source in the ordinary case, and one each where a source is read as authority for several — and lets you judge each disposition. The motion is Hegelian *Aufhebung* (preserve + negate + lift up): thesis → antithesis → synthesis applied claim by claim.
 
 **Four dialectical patterns**:
 

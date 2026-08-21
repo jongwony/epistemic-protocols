@@ -12,7 +12,7 @@
 
 ## 기능
 
-Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, PR 리뷰, 배포 결정, Slack 스레드 — 에 실행됩니다. 프로토콜은 세션 동안 누적된 맥락 중에서 age, 출처 취약성, downstream 집중, 출처 간 모순 때문에 sufficiency가 의심스러워진 source를 스캔하고, 각 suspect source에 대해 변증법적 안티테제를 posit한 뒤 사용자가 source별 disposition을 판단하도록 합니다. 동작은 헤겔의 *Aufhebung*(보존 + 부정 + 지양)입니다: 정 → 반 → 합을 source 단위로 적용합니다.
+Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, PR 리뷰, 배포 결정, Slack 스레드 — 에 실행됩니다. 프로토콜은 세션 동안 누적된 맥락 중에서 age, 출처 취약성, downstream 집중, 출처 간 모순 때문에 sufficiency가 의심스러워진 source를 스캔하고, 검증 대상 claim마다 변증법적 안티테제를 posit한 뒤 — 보통은 source 하나에 하나이고, 한 source가 여러 claim의 권위로 읽히면 각각 하나씩 — 사용자가 claim별 disposition을 판단하도록 합니다. 동작은 헤겔의 *Aufhebung*(보존 + 부정 + 지양)입니다: 정 → 반 → 합을 claim 단위로 적용합니다.
 
 **네 가지 변증법적 패턴**:
 
