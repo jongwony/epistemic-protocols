@@ -244,7 +244,7 @@ How would you like to address this gap?
 Options:
 1. **Address** — [what resolving this gap enables or changes in the decision]
 2. **Dismiss** — [what assumption holds if this gap is accepted as-is]
-3. **Probe** — request additional verification before deciding (rationale depth varies by stakes)
+3. **Probe** — request additional verification before deciding
 ```
 
 Option 3 (Probe) is always visible. When `stakes(D) = High`, present with expanded verification rationale; otherwise, present with brief rationale. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
