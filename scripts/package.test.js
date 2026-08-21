@@ -47,6 +47,19 @@ function writeFixtureFile(root, relativePath, content = 'fixture\n') {
   fs.writeFileSync(target, content);
 }
 
+// The pre-commit hook runs this suite with GIT_DIR, GIT_INDEX_FILE and the rest
+// of git's environment exported. Inherited by a subprocess, those override cwd
+// and silently redirect a fixture's git calls at the real repository — where
+// `git init` rewrites the shared config rather than building a fixture. Strip
+// the whole namespace so a temp-dir fixture is determined by its cwd alone.
+function envWithoutGitVars() {
+  const env = { ...process.env };
+  for (const key of Object.keys(env)) {
+    if (key.startsWith('GIT_')) delete env[key];
+  }
+  return env;
+}
+
 function makeCodexFixture() {
   const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'codex-submit-fixture-'));
   const plugin = { dir: 'fixture-plugin', skill: 'fixture' };
@@ -411,15 +424,21 @@ describe('language-purity worktree prune', () => {
 // concurrently with a static protocol verification run (see CLAUDE.md
 // Verification note); run them sequentially.
 
-function runStaticChecksSubprocess() {
+function runStaticChecksSubprocess(projectRoot) {
   const REPO_ROOT = path.join(__dirname, '..');
+  // Defaults to this repo; a caller may pass a throwaway fixture root instead.
+  const targetRoot = projectRoot || REPO_ROOT;
   const scriptPath = path.join(
     REPO_ROOT, '.claude', 'skills', 'verify', 'scripts', 'static-checks.js'
   );
   try {
-    const stdout = execFileSync(process.execPath, [scriptPath, REPO_ROOT], {
+    const stdout = execFileSync(process.execPath, [scriptPath, targetRoot], {
       encoding: 'utf8',
       maxBuffer: 32 * 1024 * 1024,
+      // static-checks.js shells out to git itself, so it needs the same
+      // scrubbing: an inherited GIT_DIR would aim it at the real repository
+      // no matter which root it was handed.
+      env: envWithoutGitVars(),
     });
     return JSON.parse(stdout);
   } catch (err) {
@@ -553,6 +572,128 @@ describe('enforcement-check detector liveness', () => {
       );
     } finally {
       restoreOrDie(SIBLING_STYLE_MD, backup, 'proactive-epistemic-ink.md');
+    }
+  });
+});
+
+// ============================================================
+// version-staleness conflict guard (worktree git-dir resolution)
+// ============================================================
+// Unlike the liveness tests above, this builds a throwaway repository under
+// the OS temp dir and mutates nothing live, so it carries no sequencing
+// constraint. Both checkout shapes are asserted because they differ exactly
+// where this guard once broke: `.git` is a directory in a primary checkout
+// but a gitdir: pointer file in a worktree, and the conflict heads live in
+// the per-worktree git dir rather than the shared one.
+
+function gitFixture(cwd, args, { allowFailure = false } = {}) {
+  try {
+    return execFileSync('git', args, {
+      cwd, encoding: 'utf8', stdio: 'pipe', env: envWithoutGitVars(),
+    });
+  } catch (err) {
+    if (allowFailure) return err.stdout || '';
+    throw err;
+  }
+}
+
+// Builds: a primary checkout on `trunk`, two divergent branches editing the
+// same line, and a worktree on one of them. Returns both checkout roots.
+function makeConflictFixture() {
+  const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'staleness-guard-'));
+  const primary = path.join(root, 'primary');
+  fs.mkdirSync(primary, { recursive: true });
+  gitFixture(primary, ['init', '-q', '-b', 'trunk', '.']);
+  gitFixture(primary, ['config', 'user.email', 'fixture@example.invalid']);
+  gitFixture(primary, ['config', 'user.name', 'fixture']);
+  writeFixtureFile(primary, '.claude-plugin/plugin.json', '{\n  "name": "fixture",\n  "version": "1.0.0"\n}\n');
+  writeFixtureFile(primary, 'skills/x/SKILL.md', 'base\n');
+  gitFixture(primary, ['add', '-A']);
+  gitFixture(primary, ['commit', '-qm', 'base']);
+  for (const [branch, body] of [['sideA', 'from A\n'], ['sideB', 'from B\n']]) {
+    gitFixture(primary, ['checkout', '-q', 'trunk']);
+    gitFixture(primary, ['checkout', '-q', '-b', branch]);
+    writeFixtureFile(primary, 'skills/x/SKILL.md', body);
+    gitFixture(primary, ['commit', '-qam', branch]);
+  }
+  gitFixture(primary, ['checkout', '-q', 'sideA']);
+  const worktree = path.join(root, 'wt');
+  gitFixture(primary, ['worktree', 'add', '-q', worktree, 'sideB']);
+  // Assert the isolation rather than trusting it: an inherited GIT_* variable
+  // would aim these calls at the real repository regardless of cwd, which is
+  // how a fixture can rewrite the shared config instead of building its own.
+  const realRoot = fs.realpathSync(root);
+  for (const checkout of [primary, worktree]) {
+    const resolved = gitFixture(checkout, ['rev-parse', '--absolute-git-dir']).trim();
+    assert.ok(
+      resolved.startsWith(realRoot),
+      `fixture escaped its temp root: rev-parse in ${checkout} resolved to ${resolved}`
+    );
+  }
+  return { root, primary, worktree };
+}
+
+function stalenessMessages(results) {
+  return [...results.pass, ...results.warn, ...results.fail]
+    .filter(r => r.check === 'version-staleness')
+    .map(r => r.message);
+}
+
+const SKIPPED_ON_CONFLICT = /MERGE_HEAD detected/;
+
+describe('version-staleness conflict guard', () => {
+  it('trips in a worktree, where .git is a pointer file', () => {
+    const { root, worktree } = makeConflictFixture();
+    try {
+      // Sanity-check the premise: a worktree really does carry a `.git` file,
+      // so a `<root>/.git/MERGE_HEAD` path could never have existed here.
+      assert.ok(
+        fs.statSync(path.join(worktree, '.git')).isFile(),
+        'fixture premise broken: worktree .git should be a file'
+      );
+      gitFixture(worktree, ['merge', 'sideA'], { allowFailure: true });
+      const messages = stalenessMessages(runStaticChecksSubprocess(worktree));
+      assert.ok(
+        messages.some(m => SKIPPED_ON_CONFLICT.test(m)),
+        `guard did not trip in worktree. version-staleness said: ${JSON.stringify(messages)}`
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('trips in a primary checkout, where .git is a directory', () => {
+    const { root, primary } = makeConflictFixture();
+    try {
+      gitFixture(primary, ['checkout', '-q', 'sideA']);
+      gitFixture(primary, ['merge', 'sideB'], { allowFailure: true });
+      const messages = stalenessMessages(runStaticChecksSubprocess(primary));
+      assert.ok(
+        messages.some(m => SKIPPED_ON_CONFLICT.test(m)),
+        `guard did not trip in primary checkout. version-staleness said: ${JSON.stringify(messages)}`
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('stays out of the way when there is no conflict', () => {
+    const { root, worktree } = makeConflictFixture();
+    try {
+      // An ordinary uncommitted edit — the staleness check should evaluate it
+      // rather than skip, or the fix would have disabled the check outright.
+      writeFixtureFile(worktree, 'skills/x/SKILL.md', 'edited, uncommitted\n');
+      const messages = stalenessMessages(runStaticChecksSubprocess(worktree));
+      assert.ok(
+        !messages.some(m => SKIPPED_ON_CONFLICT.test(m)),
+        `guard tripped without a conflict. version-staleness said: ${JSON.stringify(messages)}`
+      );
+      assert.ok(
+        messages.some(m => /no version bump/.test(m)),
+        `staleness check did not evaluate the edit. version-staleness said: ${JSON.stringify(messages)}`
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
     }
   });
 });
