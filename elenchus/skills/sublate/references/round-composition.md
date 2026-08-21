@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
-Each source's content, tagging triple, pattern, and antithesis basis appear as text output preceding the Constitution interaction; the question contains only the source identifier and the seven disposition options with their differential implications.
+Everything the SKILL.md's Phase 2 block places before the gate — its per-claim material and the per-batch note on how far a judgment reaches alike — appears as text output PRECEDING the Constitution interaction — the whole of it, read from there rather than from a second list kept here, since a copy drifts from what it copies and this file loads late enough that the drift would not be caught — analysis, evidence and rationale sit before the gate, never inside it. The interaction itself carries the open question and the instruction list with each instruction's differential implication, and nothing else. No answer is offered there: what the claim IS stays the user's to say in their own words.

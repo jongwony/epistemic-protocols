@@ -12,7 +12,7 @@
 
 ## 기능
 
-Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, PR 리뷰, 배포 결정, Slack 스레드 — 에 실행됩니다. 프로토콜은 세션 동안 누적된 맥락 중에서 age, 출처 취약성, downstream 집중, 출처 간 모순 때문에 sufficiency가 의심스러워진 source를 스캔하고, 각 suspect source에 대해 변증법적 안티테제를 posit한 뒤 사용자가 source별 disposition을 판단하도록 합니다. 동작은 헤겔의 *Aufhebung*(보존 + 부정 + 지양)입니다: 정 → 반 → 합을 source 단위로 적용합니다.
+Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, PR 리뷰, 배포 결정, Slack 스레드 — 에 실행됩니다. 프로토콜은 세션 동안 누적된 맥락 중에서 age, 출처 취약성, downstream 집중, 출처 간 모순 때문에 sufficiency가 의심스러워진 source를 스캔하고, 검증 대상 claim마다 변증법적 안티테제를 posit한 뒤 — 보통은 source 하나에 하나이고, 한 source가 여러 claim의 권위로 읽히면 각각 하나씩 — 사용자가 claim별 disposition을 판단하도록 합니다. 동작은 헤겔의 *Aufhebung*(보존 + 부정 + 지양)입니다: 정 → 반 → 합을 claim 단위로 적용합니다.
 
 **네 가지 변증법적 패턴**:
 
@@ -31,17 +31,16 @@ Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, P
 
 ## Disposition Coproduct
 
-각 suspect source는 7개 명명된 disposition + Emergent 중 하나로 해소됩니다. 전체 coproduct가 source 단위로 제시되어 각 판단을 기억에서 회상(Recall)하지 않고 인식(Recognition)할 수 있게 합니다.
+각 suspect source는 claim 단위로 판단됩니다: 반정립이 제기된 뒤 사용자가 그 claim을 어떻게 보는지 자기 말로 말하고, 실행이 이어서 할 일이 있으면 지시 하나를 덧붙일 수 있습니다. claim마다 제시되는 것은 그 판단이 무엇에 대고 내려지는가 하는 재료입니다 — 묶인 claim, 그것을 의심스럽게 만드는 것, 증거, stake, 그리고 근거를 인용한 반정립 — 그래서 판단이 기억에서 회상(Recall)되지 않고 인식(Recognition)됩니다. 사용자가 답하기 전에 답이 대신 쓰이는 일은 없습니다.
 
-| Disposition | 의미 |
-|-------------|------|
-| **Confirmed** | 안티테제 검토 결과 원 주장이 살아남음. Downstream 사용은 그대로 진행. |
-| **Revised(refinement)** | 안티테제가 구체적 갱신을 surface; 주장을 refined form으로 재작성. Downstream은 refined form 기준 진행. |
-| **Discarded(reason)** | 안티테제가 주장을 무너뜨림; source를 working context에서 철회. Downstream은 해당 source 없이 재유도. |
-| **Deferred(re_trigger_condition)** | Disposition 보류; 조건 충족 시 루프 복귀. Downstream은 commit 없이 진행. |
-| **Conditional(measurement)** | 외부 측정 대기 중; downstream은 provisional 태그. |
-| **Bounded(external_reference)** | 권위 있는 답은 세션 밖; downstream은 외부 reference를 인용. |
-| **Routed(downstream_protocol)** | 해당 도전은 다른 프로토콜 영역 — `/gap`, `/apportion`, `/contextualize`, `/bound`로 이양. |
+판단(verdict) 자체는 자유 텍스트이고, 일부러 타입을 두지 않았습니다 — 판단이 어떻게 나왔는지에 하류가 기댈 자격이 없고, 여기에 타입을 두는 것은 아무도 묻기 전에 프로토콜이 답을 써 두는 일입니다. 타입이 있는 것은 선택적인 **지시** 쪽이며, 그것도 이 프로토콜이 이미 생산하는 것만으로 각각을 스스로 이행할 수 있기 때문입니다 — 자기가 내보내는 원장에 붙이는 표시이거나, 자기 루프의 제어이거나:
+
+| 지시 | 실행이 그것으로 하는 일 |
+|------|------------------------|
+| *(없음)* | source를 지금 있는 그대로 두고 진행합니다. 여기서 아무 말도 안 하는 것은 빈칸이 아니라 하나의 답입니다. |
+| **Withdraw** | 그 source를 **그 주장에 한해서만** 더 이상 근거로 쓰지 않고, 당신이 준 판단 그대로 실행 이력에 보존합니다. 같은 source가 다른 주장의 근거로 읽히는 경우는 별개의 audit이라 따로 판단하며, 여기서 건드리지 않습니다. |
+| **Revisit(condition)** | 조건을 당신이 이름 붙이고, 실행이 이어지는 동안 그 조건이 충족되면 루프가 이 주장으로 돌아옵니다. 실행이 끝날 때까지 충족되지 않은 조건은 미이행으로 보고되며, 그 뒤로는 아무도 감시하지 않습니다. |
+| **HandOff(deficit)** | 그 질문을 다른 결손으로 넘기고 수렴 시 보고합니다 — 이 프로토콜이 그 결손에 대한 명령 힌트를 인각해 두었으면 힌트와 함께, 인각하지 않은 결손을 당신이 이름 댔으면 힌트 없이. |
 
 ## Source 식별 기준
 
@@ -60,8 +59,8 @@ Phase 0는 working context에서 audit 후보 source를 silently 선택합니다
 ## 알려진 제한 사항
 
 - **Working hypothesis 임계값**: `N`(high-leverage 임계)과 origin별 horizon 기본값은 residual 변수로, 누적 사용 evidence를 통해 정제됩니다 (inscription 시점에 고정되지 않음).
-- **Pattern set closure**: 네 패턴(A·B·C·D)이 inscribed; Emergent는 네 패턴과 직교하는 변증법적 작용이 사용 evidence로 surface될 때 추가 패턴을 허용합니다.
-- **Source 당 single-pass**: 한 source는 한 loop iteration에서 하나의 안티테제를 받습니다. False-negative 안티테제 구성(실제 도전을 surface 못 함)은 intra-iteration 복구 없이 전파됩니다; LOOP의 Deferred re-trigger가 cross-iteration 보정을 제공합니다.
+- **Pattern set closure**: 네 패턴(A·B·C·D)이 inscribed; Emergent는 미리 이름 붙지 않은 추가 패턴을 허용하되, 그 도전이 곁가지 검증이 아니라 source의 claim을 직접 마주해야 합니다.
+- **감사 당 single-pass**: 각 감사 — 한 claim 아래의 한 source — 는 한 loop iteration에서 하나의 안티테제를 받고, 여러 claim의 권위로 읽힌 source는 여러 감사가 되어 각자 자기 안티테제를 받습니다. False-negative 안티테제 구성(실제 도전을 surface 못 함)은 intra-iteration 복구 없이 전파됩니다; LOOP의 Revisit re-trigger가 cross-iteration 보정을 제공합니다.
 
 ## 설치
 
