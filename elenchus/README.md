@@ -33,15 +33,14 @@ The deficit-awareness sits with the user — Elenchus does not auto-activate. AI
 
 Each suspect source is judged per claim: the user says in their own words what they make of the claim once the antithesis has been put to it, and may add one instruction the run can act on. What is presented per claim is the material the judgment is made against — the bound claim, what makes it suspect, the evidence, the stake, and the antithesis with its cited basis — so the judgment is recognizable rather than recalled from memory, and no answer is written for the user before they are asked.
 
-| Disposition | Meaning |
-|-------------|---------|
-| **Confirmed** | Antithesis examined; original claim survives. Downstream usage proceeds as-is. |
-| **Revised(refinement)** | Antithesis surfaces a concrete update; claim is rewritten. Downstream proceeds against the refined form. |
-| **Discarded(reason)** | Antithesis defeats the claim; source is withdrawn from the working context. |
-| **Deferred(re_trigger_condition)** | Disposition pending; loop returns when the condition is met. Downstream proceeds without commitment. |
-| **Conditional(measurement)** | Disposition pending external measurement; downstream tags the source as provisional. |
-| **Bounded(external_reference)** | Authoritative answer lives outside this session; downstream cites the external reference. |
-| **Routed(downstream_protocol)** | Challenge belongs to a different protocol family — handed to `/gap`, `/apportion`, `/contextualize`, or `/bound`. |
+The verdict itself is free text and deliberately untyped — nothing downstream is entitled to rely on how a judgment came out, and a type there would be the protocol writing the answer before anyone was asked. What *is* typed is the optional instruction, and only because a later step in the protocol actually reads each one:
+
+| Instruction | What the run does with it |
+|-------------|---------------------------|
+| *(none)* | The run carries on with the source as it stands. Saying nothing here is an answer, not a blank. |
+| **Withdraw** | The source is dropped from downstream use and kept in the run's history, with your verdict as you gave it. |
+| **Revisit(condition)** | You name the condition; the loop returns to this claim when it is met. |
+| **HandOff(deficit)** | The question is handed to another deficit, reported at convergence with its command hint. |
 
 ## Source Identification Criteria
 

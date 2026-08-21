@@ -33,15 +33,14 @@ Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, P
 
 각 suspect source는 claim 단위로 판단됩니다: 반정립이 제기된 뒤 사용자가 그 claim을 어떻게 보는지 자기 말로 말하고, 실행이 이어서 할 일이 있으면 지시 하나를 덧붙일 수 있습니다. claim마다 제시되는 것은 그 판단이 무엇에 대고 내려지는가 하는 재료입니다 — 묶인 claim, 그것을 의심스럽게 만드는 것, 증거, stake, 그리고 근거를 인용한 반정립 — 그래서 판단이 기억에서 회상(Recall)되지 않고 인식(Recognition)됩니다. 사용자가 답하기 전에 답이 대신 쓰이는 일은 없습니다.
 
-| Disposition | 의미 |
-|-------------|------|
-| **Confirmed** | 안티테제 검토 결과 원 주장이 살아남음. Downstream 사용은 그대로 진행. |
-| **Revised(refinement)** | 안티테제가 구체적 갱신을 surface; 주장을 refined form으로 재작성. Downstream은 refined form 기준 진행. |
-| **Discarded(reason)** | 안티테제가 주장을 무너뜨림; source를 working context에서 철회. Downstream은 해당 source 없이 재유도. |
-| **Deferred(re_trigger_condition)** | Disposition 보류; 조건 충족 시 루프 복귀. Downstream은 commit 없이 진행. |
-| **Conditional(measurement)** | 외부 측정 대기 중; downstream은 provisional 태그. |
-| **Bounded(external_reference)** | 권위 있는 답은 세션 밖; downstream은 외부 reference를 인용. |
-| **Routed(downstream_protocol)** | 해당 도전은 다른 프로토콜 영역 — `/gap`, `/apportion`, `/contextualize`, `/bound`로 이양. |
+판단(verdict) 자체는 자유 텍스트이고, 일부러 타입을 두지 않았습니다 — 판단이 어떻게 나왔는지에 하류가 기댈 자격이 없고, 여기에 타입을 두는 것은 아무도 묻기 전에 프로토콜이 답을 써 두는 일입니다. 타입이 있는 것은 선택적인 **지시** 쪽이며, 그것도 이 프로토콜의 후속 단계가 각각을 실제로 읽기 때문입니다:
+
+| 지시 | 실행이 그것으로 하는 일 |
+|------|------------------------|
+| *(없음)* | source를 지금 있는 그대로 두고 진행합니다. 여기서 아무 말도 안 하는 것은 빈칸이 아니라 하나의 답입니다. |
+| **Withdraw** | source를 downstream 사용에서 내리고, 당신이 준 판단 그대로 실행 이력에 보존합니다. |
+| **Revisit(condition)** | 조건을 당신이 이름 붙이고, 그 조건이 충족되면 루프가 이 주장으로 돌아옵니다. |
+| **HandOff(deficit)** | 그 질문을 다른 결손으로 넘기고, 수렴 시 명령 힌트와 함께 보고합니다. |
 
 ## Source 식별 기준
 
