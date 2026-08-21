@@ -31,7 +31,7 @@ Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, P
 
 ## Disposition Coproduct
 
-각 suspect source는 7개 명명된 disposition + Emergent 중 하나로 해소됩니다. 전체 coproduct가 source 단위로 제시되어 각 판단을 기억에서 회상(Recall)하지 않고 인식(Recognition)할 수 있게 합니다.
+각 suspect source는 claim 단위로 판단됩니다: 반정립이 제기된 뒤 사용자가 그 claim을 어떻게 보는지 자기 말로 말하고, 실행이 이어서 할 일이 있으면 지시 하나를 덧붙일 수 있습니다. claim마다 제시되는 것은 그 판단이 무엇에 대고 내려지는가 하는 재료입니다 — 묶인 claim, 그것을 의심스럽게 만드는 것, 증거, stake, 그리고 근거를 인용한 반정립 — 그래서 판단이 기억에서 회상(Recall)되지 않고 인식(Recognition)됩니다. 사용자가 답하기 전에 답이 대신 쓰이는 일은 없습니다.
 
 | Disposition | 의미 |
 |-------------|------|
