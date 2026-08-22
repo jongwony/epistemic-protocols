@@ -245,7 +245,7 @@ Options:
 
 Option 3 (Probe) is always visible. The verification rationale goes out BEFORE the gate and not inside option 3 — expanded when `stakes(D) = High`, brief otherwise. What the option itself carries is what choosing it does, and that does not vary with stakes; only the rationale for wanting it does, which is analysis and belongs where analysis goes. Directing the depth into the option line would refill it with exactly what was taken out of it. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
 
-Other is always available — the user can respond freely beyond the listed options, and may stop or change direction at any point.
+Other is always available — the user can respond freely beyond the listed options.
 
 One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.

@@ -208,7 +208,7 @@ Trigger signals: direct request ("explain this", "help me understand", "walk me 
 
 ### Mode Deactivation
 
-User demonstrates full comprehension → early termination (Rule 6: user's "I understand" is final).
+All selected tasks completed → VerifiedUnderstanding: present the convergence trace, then deactivate.
 
 ## Entry Point Taxonomy
 
@@ -481,7 +481,6 @@ Probe intensity scales with complexity: **Light** (simple change, user seems fam
 3. **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension intent; artifact categories remain grounding material until after the user chooses a path
 4. **Task tracking**: Call record/record update for progress visibility
 5. **Code grounding**: Reference specific code locations
-6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call record to externalize the proposal, keep only a branch reference for continuation, and return to verification. This preserves user-generated insights without converting the proposal into a comprehension task.
 7a. **Continuation cursor after side branches**: Proposal ejection and follow-up task creation do not close Katalepsis. After any side branch, emit a compact continuation closure: what was recorded, parent entry point/aspect, return pointer, and next comprehension move. Store the branch artifact outside the comprehension task set, but keep `Λ.cursor` visible enough for the user to recognize where verification resumes. Update `Λ.cursor` before every closure emission so the return pointer reflects the live resumption point.
 8. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.

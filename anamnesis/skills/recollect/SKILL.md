@@ -459,7 +459,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 6. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single identity decision.
 
-7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, AttemptsExhausted once the recall-try budget is spent with candidates in hand; user recognition or rejection of a candidate is final for that candidate in the current session.
+7. **Convergence persistence**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, AttemptsExhausted once the recall-try budget is spent with candidates in hand; user recognition or rejection of a candidate is final for that candidate in the current session.
 
 8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
 

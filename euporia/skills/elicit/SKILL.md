@@ -336,7 +336,7 @@ After integration:
 | Cycle-emergent option set | Phase 2 options reflect current cycle's coordinates; no fixed dialect | Adapts to actual coordinates surfaced; respects axis-emergence |
 | Coordinate-level granularity | User answers per-coordinate; deferral per-coordinate | Permits partial progress within a cycle |
 | Deferred coordinates come back | `Defer` parks the coordinate in `Λ.parked` and every later cycle re-surfaces it in its original wording; if still unanswered at termination it is folded into residual | "Not yet" is held rather than lost, and comes back recognizable as the same question |
-| Free response honored | User may answer beyond, redirect, name an excluded dimension, or stop and change direction at any point | Full constitutive control |
+| Free response honored | User may answer beyond, redirect, or name an excluded dimension | Full constitutive control |
 | Session immunity | Resolved or dismissed (utterance, substrate slice) → skip for session | Respects user's resolution or release |
 | Substrate read-only | Phase 1 substrate access uses read-only tools only | No mutation of user's externalized cognition during scan |
 | Utterance channel discipline | Utterance evidence quotes the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel | Prevents AI from projecting unspoken user mental models as substrate evidence |

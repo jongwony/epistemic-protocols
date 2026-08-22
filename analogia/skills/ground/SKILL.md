@@ -380,7 +380,7 @@ After integration:
 | One correspondence per cycle | Present highest-priority correspondence per Phase 2 | Prevents example overload |
 | Current-correspondence framing | Phase 2 surfaces the correspondence currently being validated (which mapping is in play this cycle) — a framing readout, not an `[N validated / M]` completion count | User recognizes which mapping is in play without parsing a coverage tally; granular progress stays in session |
 | Attempt cap | Max 3 mapping attempts per domain pair | Prevents infinite refinement |
-| Early exit | User can declare the mapping sufficient at any Phase 2 as a free response; every remaining correspondence is dismissed with the declaration recorded against it, and the run terminalizes as ValidatedMapping rather than exiting. Separately from that declaration, the user may stop or change direction at any point | Full control over validation depth, with what was accepted un-judged visible in the convergence trace |
+| Sufficiency declaration | User can declare the mapping sufficient at any Phase 2 as a free response; every remaining correspondence is dismissed with the declaration recorded against it, and the run terminalizes as ValidatedMapping | Full control over validation depth, with what was accepted un-judged visible in the convergence trace |
 
 ## Rules
 

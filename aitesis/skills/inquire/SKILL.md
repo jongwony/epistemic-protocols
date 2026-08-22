@@ -177,7 +177,7 @@ After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
 New uncertainties accumulate into uncertainties (cumulative, never replace).
 If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
-User can declare the context sufficient at Phase 2 (sufficiency_declared): the remaining uncertainties are dismissed with the declaration recorded and the loop converges, rather than exiting.
+User can declare the context sufficient at Phase 2 (sufficiency_declared): the remaining uncertainties are dismissed with the declaration recorded and the loop converges.
 Continue until: informed(X').
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted. The trace additionally declares every u ∈ Λ.non_factual_detected as detected-but-outside-scope: these resolve nowhere, so no transformation pair exists for them. The declaration is unconditional and does not gate — the all-non-actionable path (actionable(Λ) = ∅) converges without reaching a Phase 2 question, so this trace is the only surface carrying the detections there.
 
@@ -479,7 +479,7 @@ After integration:
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Current-uncertainty framing | Phase 2 surfaces the uncertainty currently in play (the kind of context being resolved this cycle) — a framing readout, not an `[N resolved / M]` completion count | User recognizes which context is being resolved without parsing a progress tally; granular progress stays in session |
 | Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can exit when remaining uncertainties are marginal |
-| Early exit | User can declare sufficient at any Phase 2 as a free response; every remaining uncertainty is dismissed with the declaration recorded against it, and the run converges as InformedExecution rather than exiting. Separately from that declaration, the user may stop or change direction at any point | Full control over inquiry depth, with what was accepted unresolved visible in the convergence trace |
+| Sufficiency declaration | User can declare sufficient at any Phase 2 as a free response; every remaining uncertainty is dismissed with the declaration recorded against it, and the run converges as InformedExecution | Full control over inquiry depth, with what was accepted unresolved visible in the convergence trace |
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
 | Non-actionable transparency | Uₙ items show as out-of-scope in Phase 2 classify summary, and the convergence trace declares them again on every converging path | User sees these fall outside Aitesis's resolution rather than being silently dropped — including when nothing was actionable and no Phase 2 question ever fired |
 | Observation transparency | Log observation lifecycle in Λ.observation_history | User can audit what was tested |
