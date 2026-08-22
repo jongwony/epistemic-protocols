@@ -139,10 +139,8 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 #### False Positive Filtering
 When other experts flag these as issues, they should be filtered (not actual issues in Claude Code context):
 - [ ] "Automatic intensity reduction" — unnecessary; gate interaction provides user control
-- [ ] "Automatic deactivation" — unnecessary; user can interrupt/cancel natively (Esc)
 - [ ] "Decay function" — unnecessary; explicit deactivation triggers sufficient
 - [ ] "Topic boundary detection" — context-dependent; model judgment acceptable
-- [ ] "Exhaustive deactivation triggers" — Claude Code native interruption handles edge cases
 
 **Output format**:
 ```json
