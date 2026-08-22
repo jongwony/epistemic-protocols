@@ -168,7 +168,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 
 ## Acknowledgments
 
-- [@yolohyo](https://github.com/yolohyo) — Comment-lifecycle UX design contribution for comment-review
+- [@yolohyo](https://github.com/yolohyo) — Comment-lifecycle UX design contribution for comment-review (the skill has since moved to [cc-plugin](https://github.com/jongwony/cc-plugin) as a protocol-free substrate plugin)
 - [@zzsza](https://github.com/zzsza) — Quiz-based participatory UX design contribution for Onboard
 
 ## License
