@@ -75,7 +75,7 @@ BranchArtifact = { kind: BranchKind, reference: RecordId, return_pointer: Cursor
 ContinuationClosure = { verified: String, status: String, branch: Optional(BranchArtifact), return_pointer: Cursor, next_moves: List<String> }
                      -- relay metadata after evaluated answers or side-branch ejection; not a new gate
 C(·) = emit ContinuationClosure (relay; → TextPresent+Proceed)
-DeactivationCondition = { all_tasks_completed, user_esc, user_cancel }
+DeactivationCondition = { all_tasks_completed }
 unprobed(t) = Λ.detected[t] \ Λ.probed[t]  -- detected but not yet probed for task t
 GT_presented = unprobed(current) \ {Horizon}  -- unprobed detected relevant gap types offered at the start-aspect selector; Horizon is never surfaced as a selectable label (Socratic opacity) — probed inline at detection instead
 StartAspectSelection = user's chosen starting gap type ∈ GT_presented  -- Phase 3 step-1 answer; fires only when Horizon did not preempt (Horizon preemption always precedes this selector) and |GT| > 0
@@ -100,7 +100,6 @@ Phase 3: Tᵣ → record update(current) → detect(E, B) → GT → Λ.detected
        → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
        → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
        → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
-       → deactivate(user_esc | user_cancel) → Λ.active := false
 Turn boundary invariant: While `Λ.active = true` at turn end, the last user-facing shape must be a TerminalShape. Relay metadata `C(·)` may precede a terminal shape, but cannot be the sole final shape while active. The `converge` emission is `deactivation(all_tasks_completed)`, sets `Λ.active := false`, and is terminal without an additional gate.
 
 ── LOOP ──
@@ -112,16 +111,14 @@ If correct: emit continuation closure, then Aspect summary — show probed vs un
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via record, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
-Continue until: all selected tasks completed (VerifiedUnderstanding) OR user ESC/cancel (EarlyExit).
+Continue until: all selected tasks completed (VerifiedUnderstanding).
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
-On user ESC/cancel: present partial transformation trace over completed tasks, then declare remaining tasks as unresolved residual.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
 VerifiedUnderstanding = P' where ∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R
-EarlyExit = P' where user_esc ∨ user_cancel  -- non-convergent early exit: understanding as of exit (P' = last evaluated phantasia; P' := P over the current unprobed phantasia when exit precedes the first evaluated answer), partial trace over completed tasks, remaining tasks declared as unresolved residual
-Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active := false` and terminates as VerifiedUnderstanding; `user_esc` and `user_cancel` each set `Λ.active := false` and terminate as EarlyExit (partial trace + residual declaration), not VerifiedUnderstanding. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
+Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active := false` and terminates as VerifiedUnderstanding. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -136,8 +133,8 @@ Phase 3 detect (sense) → Internal analysis (gap type relevance detection per e
 Phase 3 Rec  (track)  → Internal state update (detection/probe recording: Λ.detected[current] writes at detect / zero-gap Reopen / Horizon; Λ.probed[current] writes at the Horizon probe and verification loop)
 Phase 3 ZeroGapConfirm (constitution) → present (conditional: |GT| = 0 for current entry point; zero-gap finding + reasoning; Confirm/Reopen(description); Rule 10)
 Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
-Phase 3 Qs(HC) (constitution) → present (conditional: Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]; preempting Horizon probe — fires once at detection, before the start-aspect selector; scenario-only open question, opacity-preserving — never a Horizon label, the edge, the answer, or the rationale; Esc key → loop termination at LOOP level, not an Answer)
-Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qs(HC) (constitution) → present (conditional: Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]; preempting Horizon probe — fires once at detection, before the start-aspect selector; scenario-only open question, opacity-preserving — never a Horizon label, the edge, the answer, or the rationale)
+Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise)
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
@@ -146,7 +143,6 @@ Phase 3 Tᵤ  (track)  → record update (progress tracking; every amendment nam
 Phase 3 Prop (track)  → record (proposal ejection)
 Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: verified status + side branch if any + return pointer + next moves)
 converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
-esc/cancel  (extension)  → TextPresent+Proceed (partial transformation trace + unresolved-task residual declaration; terminate as EarlyExit, not VerifiedUnderstanding)
 Seam transition to declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — this protocol declares no wired composition edge, so the second trigger is vacuously absent — settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 -- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
@@ -212,7 +208,7 @@ Trigger signals: direct request ("explain this", "help me understand", "walk me 
 
 ### Mode Deactivation
 
-User explicitly cancels → EarlyExit (not VerifiedUnderstanding): present partial transformation trace, declare remaining tasks as unresolved residual, then accept current understanding as of exit (see CONVERGENCE). User demonstrates full comprehension → early termination (Rule 6: user's "I understand" is final).
+User demonstrates full comprehension → early termination (Rule 6: user's "I understand" is final).
 
 ## Entry Point Taxonomy
 
@@ -491,7 +487,7 @@ Probe intensity scales with complexity: **Light** (simple change, user seems fam
 8. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required
 9a. **Post-answer closure**: Always emit verified aspect, current task status, and next available moves after a correct answer or sufficient understanding signal, before coverage routing or task completion. This is relay metadata: it keeps the active loop legible without adding a new user gate.
-9b. **Active-turn fail-closed**: While `Λ.active = true` at turn end, every response must end in one protocol-owned TerminalShape: Phase 1 entry-point selection, Phase 3 zero-gap confirmation, Phase 3 start-aspect selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or deactivation by `all_tasks_completed`, `user_esc`, or `user_cancel`. Plain summaries, file references, context, and relay metadata may ground these shapes, but they cannot be the final shape by themselves while active. This enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
+9b. **Active-turn fail-closed**: While `Λ.active = true` at turn end, every response must end in one protocol-owned TerminalShape: Phase 1 entry-point selection, Phase 3 zero-gap confirmation, Phase 3 start-aspect selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or deactivation by `all_tasks_completed`. Plain summaries, file references, context, and relay metadata may ground these shapes, but they cannot be the final shape by themselves while active. This enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
 10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for an entry point (`|GT| = 0`), present a typed `ZeroGapFinding` with reasoning and gate on `ZeroGapConfirmation` (`Confirm` marks the entry point complete; `Reopen(description)` names a missed gap, registered as Emergent) before marking the entry point self-evident
 11. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It annotates derived entry points; it does not create, filter, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` marks entries the user did not name while preserving their artifact anchors; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.

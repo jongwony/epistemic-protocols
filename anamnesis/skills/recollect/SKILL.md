@@ -332,7 +332,6 @@ Heuristic signals for empty intention detection (not hard gates):
 | recall_complete (Recognize, or SingleObvious inline emit) | Emit ClueVector_prose; proceed with the recognized context as recalled past context requiring re-verification against current state before commit (not confirmed current context) |
 | NullMatch (no candidate after probing, with the scope exhausted or the user's StopAtSpine) | Surface search scope + accumulated trace, offer Aitesis handoff for SSOT search, deactivate |
 | AttemptsExhausted (recall-try budget spent with candidates in hand) | Surface the best candidate, deactivate |
-| User Esc key | Accept current state without further recall assistance |
 
 ## Protocol
 
@@ -448,7 +447,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 ## Rules
 
-1. **AI-guided detection, user-constituted recognition**: AI detects empty intention, scans stores, and presents narrative candidates as recognition options; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the identity match. Detection, presentation, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition (Phase 2 response, not Esc). For a high-confidence single candidate (SingleObvious), recognition is constituted by non-divergence: the inline Extension emit carries a divergence-only affordance, and silence (the user moving on) realizes the identity match — the user's constitutive freedom is the divergence channel, not a forced confirm.
+1. **AI-guided detection, user-constituted recognition**: AI detects empty intention, scans stores, and presents narrative candidates as recognition options; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the identity match. Detection, presentation, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition. For a high-confidence single candidate (SingleObvious), recognition is constituted by non-divergence: the inline Extension emit carries a divergence-only affordance, and silence (the user moving on) realizes the identity match — the user's constitutive freedom is the divergence channel, not a forced confirm.
 
 2. **Recognition over Retrieval**: Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient) — Constitution interaction requires turn yield before proceeding; recognition options enable user evaluation, not blank-canvas recall.
 
@@ -460,7 +459,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 6. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single identity decision.
 
-7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, AttemptsExhausted once the recall-try budget is spent with candidates in hand, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
+7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, AttemptsExhausted once the recall-try budget is spent with candidates in hand; user recognition or rejection of a candidate is final for that candidate in the current session.
 
 8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
 

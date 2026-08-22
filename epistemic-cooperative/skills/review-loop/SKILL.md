@@ -104,7 +104,7 @@ The boundary is easiest to cross exactly at the moment a decision is being conve
 
 **The goal statement is also the loop's own criterion, and that side never travels outward.** The paragraph above settles how the goal reaches the *source*, and it holds there: a reviewer meeting the project fresh has nothing to check a mission statement against, so it goes as a severity steer rather than a checklist. That is a fact about where the source stands, not about how far the goal reaches. The loop reads the artifact from inside the project, and from there the same statement does have grip — the question it answers is where the artifact works *against* what the project says it is for. Where that question is *put* is Phase 3, over the verified set — this section settles only that the goal has the second role and that the role stays inside. What the reading produces enters as an ordinary finding and is verified like any other; what it is not is a severity adjustment applied to findings the source already returned. The two inputs stay separate by what each one does: documented intent **explains** a choice, and the goal **exposes** a conflict. A choice can be fully explained by the convention that authorized it and still run against what the project says it is for, and only the second reading reaches that case. Held as a dial alone, the goal cannot reach the defect whose every local surface is already consistent — a shared name that kept its shape and lost its meaning, where every check that compares shapes passes and nothing is left to notice it.
 
-**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's exit paragraph, and `references/exit-handover.md` for what the offer covers). This declares an exit from review-loop itself; when a protocol called from inside a phase offers its own exit — for example, the user's Esc inside `/contextualize`'s own gate during the Phase 4 bundle-level fit pass — answering it ends only that nested call, not this loop. The two are different acts: this loop's free exit stays a separate, still-available affordance, and the phase that made the nested call proceeds per that call's own terminal-state handling (Phase 4, Apply executor step 4).
+**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's exit paragraph, and `references/exit-handover.md` for what the offer covers). This declares an exit from review-loop itself.
 
 ## Phase 1: Review
 
@@ -211,22 +211,14 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    correct, which nothing in this pass establishes. The pass runs before the updated diff is
    handed to the designated source in step 5.
 
-   **The apply pass does not branch on how the call terminates.** `/contextualize` ends
-   either convergent (`ContextualizedExecution`, every mismatch adjudicated) or on the
-   user's own Esc inside that call (`EarlyExit` — remaining mismatches declared unresolved
-   residual and the result accepted without further applicability review within that call).
-   Whichever terminal the call reaches, once it returns, the apply pass finishes the same
-   way: the loop-back below runs over any adaptation that landed, and the bundle then
-   proceeds to step 5 and is handed forward — judging the result, including anything an
-   `EarlyExit` left as residual, is the next round's full re-review (Phase 5), not a branch
-   taken here. An Esc raised inside `/contextualize`'s own gate ends that nested call, not
-   this loop: it is a different act from the free-exit affordance this loop declares at
-   Phase 0, which ends the review loop itself — the apply pass keeps going after a nested
-   Esc exactly as it would after convergence.
+   **The apply pass does not branch on how the call terminates.** `/contextualize`
+   converges as `ContextualizedExecution` (every mismatch adjudicated). Once it returns,
+   the apply pass finishes the same way: the loop-back below runs over any adaptation that
+   landed, and the bundle then proceeds to step 5 and is handed forward — judging the
+   result is the next round's full re-review (Phase 5), not a branch taken here.
 
    `/contextualize` is not read-only: a Confirm or Adapt answer at its own Phase 2 lands an
-   edit through Edit/Write, adapting the bundle rather than merely assessing it — on either
-   terminal, since an `EarlyExit` can follow adaptations that already landed before the Esc.
+   edit through Edit/Write, adapting the bundle rather than merely assessing it.
    **Loop-back**: when the fit pass lands such an adaptation, that edit re-enters this apply
    pass at step 1 — the predicate it instantiates is named, that predicate's sites are
    enumerated across the artifact, each site is semantically verified and risk-screened per
@@ -260,10 +252,7 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    is what gets recorded.
 
    The loop-back runs at most once per apply pass; the fit pass is not re-invoked after it.
-   Two grounds set that bound. First, since the apply pass does not branch on the call's
-   terminal state, an early exit inside `/contextualize` is not a signal to call it again —
-   it is the user's decision to stop adjudicating fit in this pass, and re-invoking would
-   override that decision. Second, whatever the loop-back's own sweep newly introduces is
+   What sets that bound is that whatever the loop-back's own sweep newly introduces is
    exactly what Phase 5's full re-review already backstops — this document takes the same
    position for the sweep itself, in the "Completeness sweep on apply" paragraph below ("the
    Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to
@@ -378,8 +367,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
    loop context the fixes need); it de-escalates once a re-review round surfaces no
    fix-induced follow-ups. A bundle-level fit pass (`/contextualize`, once, after that
    verify) then checks the whole applied bundle against the design-decision ledger and the
-   touched surfaces' conventions before hand-forward; it does not branch on which terminal
-   it reaches — convergent or the user's own Esc inside that call — and an adaptation it
+   touched surfaces' conventions before hand-forward, and an adaptation it
    lands loops back into this apply pass at step 1, bounded to once. Throughout the pass a
    guard actuates where its subject has not been written and records where it has, so a
    rejecting arm stops an edit that has not landed and produces a trace-recorded verdict for

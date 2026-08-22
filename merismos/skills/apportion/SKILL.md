@@ -27,7 +27,6 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
       Anchor ≠ ∅:  fit(draft_unit, horizon) → SpanFit → qualify(that cut) → Seam → complete_unit(draft_unit, SpanFit, Seam) → proposed_unit →   -- the anchored path: a draft exists, so the three judgments have an operand
         SpanFit = Fits ∧ Pack's search finds no second Fits-worthy cut for Anchor: → relay(AcceptUnit) (extension) → integrate_unit → loop  -- option-set relay test
         else:                       → Qu(Anchor, proposed_unit, SpanFit, Seam, U) → Stop → Aᵤ →
-          Esc:                → ungraceful deactivate (EarlyExit — no emission, no handoff recorded)
           Aᵤ = AcceptUnit     → integrate_unit(the unit this firing presented) → loop   -- in Aᵤ's defined set iff SpanFit = Fits; that unit is proposed_unit on the anchored path, the packed unit on an autonomous_pack firing
           Aᵤ = Recut(d)       → re-derive that same unit's Anchor frame under d → loop   -- same residual, different cut
           Aᵤ = OverrideFit    → integrate_unit(the unit this firing presented) → u' → Λ.fit_overrides ∪= {u'.unit_ref} → loop  -- in Aᵤ's defined set iff SpanFit ≠ Fits
@@ -148,7 +147,6 @@ plan_condition(d) = PlanCondition { scope: WholeGoalAcceptance, kind: completion
 BindPlanRequirements(P, U) = { p with dischargeable_when := plan_terminal(|U|) when p.scope = WholeGoalAcceptance; p unchanged otherwise | p ∈ P }   -- scope alone, deliberately unlike acceptance_present: a whole-goal invariant is still discharged at plan-terminal — it just does not answer the acceptance question
 plan_terminal(n) = PlanStateRequirement { predicate: λ candidate_plan. |candidate_plan.units| = n ∧ ∀ r ∈ { e.resolution | e ∈ candidate_plan.units } : (r = DeterminateResolution { predicate: d, ... } ⟹ d holds) ∧ (r = AcceptedUncoveredResolution { accepted_completion_residuals: A, conjuncts: C } ⟹ A ≠ ∅ ∧ A ⊆ { a.obligation | a ∈ candidate_plan.accepted_residuals, a.kind = completion } ∧ ∀ c ∈ C : c.condition holds) ∧ (r = ReservedJudgmentResolution { reserved_completion_obligations: J, conjuncts: C } ⟹ J ≠ ∅ ∧ J ⊆ { o | s ∈ candidate_plan.reserved, s.subject = ReservedObligation(o), s.kind = completion } ∧ ∀ c ∈ C : c.condition holds), basis: {Evidence { source: "the current plan's UnitResolution, accepted-residual and reservation projections", content: "expected aggregate resolution count = " + String(n) + "; all executable resolution conditions; aggregate accepted-completion record; aggregate reserved-completion record" }} }
 Rerouted       = routed_to_bound   -- produced by route_bound's relay emission, never by a bare deactivate: a declared route that no step emits would drop the continuation the user just chose
-EarlyExit      = user_esc
 Emit           = (U, K, R, S, P, oos, unbounded_approved) → E [Tool: record]   -- R feeds resolve_unit's accepted arm and S its reserved arm; S, oos and unbounded_approved feed the envelope
 Phase          ∈ {0, 1, 2, 3}
 Qu             = Per-cycle apportionment interaction with (Anchor, proposed_unit: ProposedUnit, SpanFit, Seam, the cut set U as it stands at this firing) [Tool: Constitution interaction]
@@ -182,7 +180,6 @@ Phase 1: (G, residual) → Scan [Tool] → seams → Pack(seams, H) → (Anchor,
                Aᵤ = Recut(d)     → re-derive that same unit's Anchor frame under d → Phase 1
                Aᵤ = OverrideFit  → integrate(the unit this firing presented, U, residual) → u' → Λ.fit_overrides := Λ.fit_overrides ∪ {u'.unit_ref} → Phase 1   -- in Aᵤ's defined set iff SpanFit ≠ Fits
                Aᵤ = Sufficient   → autonomous_pack(residual) (track) → U'' → ∀u∈U'' with SpanFit = Fits: integrate(u) → u' → U := U ∪ {u'}, residual := residual \ u'.obligations → [nothing overflows ∧ residual = ∅: surface (extension) → Phase 2 | else Qu over the first overflowing unit, that unit standing as its own Anchor and carrying its own SpanFit and Seam → Stop → Aᵤ → the same Aᵤ dispatch] → Phase 1   -- blanket relay over the fitting units, unlike the seam-exhaustion arm: Sufficient IS the user's constitutive act
-             Esc               → deactivate (EarlyExit)
 Phase 2: U → ∀u∈U, ¬derived_already(u,K,R,S): Derive(u) → (Set(κ), Set(ρ), Set(σ)) → K:=K∪κs, R:=R∪ρs, S:=S∪σs ∥ [¬Λ.plan_conditions_derived: DerivePlan(G, U) → P; Λ.plan_conditions_derived := ⊤]   -- condition derivation (sense), scoped to units and plan conditions not yet derived this apportionment
            oos ≠ ∅ → OOS(oos) (extension)                              -- out-of-scope declaration, substrate recorded on each OOSDeclaration
            S ≠ ∅ → Reserved(S) (extension)                             -- reservation notice, ground recorded on each JudgmentReservation; no substrate is named because none is asked to intercept
@@ -203,7 +200,7 @@ Phase 3: (U, K, R, S, P, oos, unbounded_approved) → Emit → E [Tool: record] 
 Phase 0 → Phase 1: goal_plan_uncompiled(G)                             -- this edge alone performs the one-time VelocityFilter/residual init
 Phase 0 → deactivate: ¬autonomous_intent(G) ∨ ¬single_goal(G) ∨ condition_bearing(G) ∨ (locator in scope ∧ (¬dereferenceable ∨ support-integrity failure))   -- relay the scan result; no activation. "Locator in scope" is EITHER locator this phase can hold: the goal's navigation block, or the one an owed re-apportionment carries. ¬single_goal is the composite-goal termination path: it relays the constituent outcomes and deactivates, exactly as the other three non-activation arms do
 Phase 1 → deactivate: residual = ∅ ∧ U = ∅ ∧ oos = ∅                   -- nothing could be read from the goal's scope; relays rather than emitting an empty plan
-Phase 1 → Phase 1: next anchor                                         -- bounded by coverage (residual strictly shrinks on AcceptUnit/OverrideFit) and by user agency (Recut/Sufficient/Esc)
+Phase 1 → Phase 1: next anchor                                         -- bounded by coverage (residual strictly shrinks on AcceptUnit/OverrideFit) and by user agency (Recut/Sufficient)
 Phase 1 → Phase 2: residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅)                    -- every obligation apportioned or visibly delegated
 Phase 2 → Phase 1: V = Reopen(u)                                       -- that unit's obligations return to residual; bounded by user agency exactly as Adjust is
 Phase 2 → Phase 2: V = Adjust(d)                                       -- rederive over the same apportionment; U unchanged
@@ -211,8 +208,6 @@ Phase 2 → Phase 2: V = Confirm ∧ ¬hard_invariants_hold(Λ)              -- 
 Phase 2 → deactivate: Vₜ = RouteBound                                  -- Rerouted; route_bound emits the route first; /bound → /apportion re-entry recompiles fresh
 Phase 2 → Phase 3: V = Confirm ∧ hard_invariants_hold(Λ)               -- residuals accepted on record; every clause of apportioned(G) that Qc can violate holds AT THE TRANSITION
 Phase 3 → converge: emitted(E) ∧ handoff_recorded(N, C)                -- ConditionBearingUnitPlan + apportionment trace + navigation block
-Phase 1 → deactivate (ungraceful): user_esc                            -- EarlyExit: no emission, no handoff recorded
-Phase 2 → deactivate (ungraceful): user_esc                            -- EarlyExit: no emission, no handoff recorded
 
 ── LOOP ──
 Two bounded loops, one per irreducible part.
@@ -220,7 +215,7 @@ Two bounded loops, one per irreducible part.
 Apportionment loop (Phase 1): one anchor per cycle.
   AcceptUnit and OverrideFit strictly shrink residual, so the loop cannot cycle on coverage. Recut leaves
   residual unchanged — it re-frames the SAME anchor under a user direction — and is bounded by user agency, as
-  are Sufficient (which packs the remainder) and Esc. A cycle entered via Reopen (the one back-edge from
+  are Sufficient (which packs the remainder). A cycle entered via Reopen (the one back-edge from
   Phase 2) carries the reopened unit's restored obligations in residual and every other already-packed unit's
   obligations untouched.
 
@@ -247,7 +242,7 @@ Condition loop (Phase 2): Qt fires whenever the whole goal carries no acceptance
   Adjust-shaped conditions and any whole-goal conditions already on record survive the detour. Reopen also sets
   Λ.plan_conditions_stale, and the next Qc surfaces that as a notice — Adjust or Confirm as recorded — clearing
   once the user Adjusts. AcceptResiduals then accepts R and supplies the non-empty completion-residual witness
-  any AcceptedUncoveredResolution needs at Emit. Confirm or Esc terminates.
+  any AcceptedUncoveredResolution needs at Emit. Confirm terminates.
 
 Stateless: Merismos terminates at emission. No invocation-local state survives into the execution interval —
 no session approvals, no per-action classification, no mid-execution checkpoint. The emitted navigation
@@ -297,8 +292,7 @@ apportioned(G) = emitted(E) ∧ handoff_recorded(N, C)
                  ∧ plan.reserved = (the PlanEnvelopeEntry of E).reserved
                  ∧ plan.oos = (the PlanEnvelopeEntry of E).oos
                  ∧ plan.unbounded_approved = (the PlanEnvelopeEntry of E).unbounded_approved   -- the returned value READS BACK the emitted envelope rather than being re-derived beside it; produced by Phase 3 package from E
--- Rerouted (Qt RouteBound) is a deliberate non-emission exit and EarlyExit a user abort — neither claims
--- ConditionBearingUnitPlan (see TYPES): the emitted result is well-formed exactly when apportioned(G) holds.
+-- Rerouted (Qt RouteBound) is a deliberate non-emission exit — it does not claim ConditionBearingUnitPlan (see TYPES): the emitted result is well-formed exactly when apportioned(G) holds.
 -- Each Phase 0 relay (no autonomous intent, composite goal, unreadable handoff, already condition-bearing)
 -- precedes activation: init_loop_state never runs, so no clause of this predicate is entered or owed.
 -- The guarantee is compile-time and pre-conduct (see the Apportion over Order invariant).
@@ -315,7 +309,7 @@ Phase 1 fit          (sense)        → Internal analysis (per-unit horizon-fit 
 Phase 1 qualify      (sense)        → Internal analysis (seam quality: Grounded with its citation — the four named seam kinds are what this scan looks for, and any other seam the goal actually evidences qualifies the same way — or Heuristic declared when no evidence is there)
 Phase 1 relay        (extension)    → TextPresent+Proceed (no alternative Fits-worthy cut exists for this Anchor: accept the unit without a turn yield — the option-set relay test)
 Phase 1 autonomous_pack (track)     → Internal state update (extension — pack the remainder at Heuristic seams when seam evidence is exhausted or the user declares the apportionment sufficient; judges fit and records the Heuristic seam per packed unit and runs complete_unit on each draft, so what it integrates are completed ProposedUnit values — the constructor is the same one the anchored path uses, never a second inhabitant; otherwise exactly as Pack does, capability requirements and feasibility notes included; each packed unit re-checks fit and is surfaced as relay with its heuristic declaration; EVERY obligation this step touches lands in some completed unit — obligations no heuristic seam places become one final unit anchored on themselves, its fit judged like any other — so the gate downstream never receives a bare anchor standing in for a unit: a packed unit IS its own Anchor at the gate. On the seam-exhaustion trigger the option-set relay test applies per packed unit, this step being the AI's own fallback rather than a user act — a fitting cut integrates as relay only when no second Fits-worthy heuristic cut exists for it, and one with a genuinely competing sibling goes to the gate; on the Sufficient trigger every fitting unit integrates as relay, the user having constituted that path. A unit left unintegrated does NOT enter U and its obligations stay in residual, and the first such unit is presented AT Qu IN THIS SAME CYCLE with its own SpanFit and Seam, where the override or the choice between siblings is the user's to record; the remaining unintegrated units are settled one per cycle, residual strictly shrinking on each, so re-entering Scan on the same exhausted seam evidence reaches this branch with strictly less left; every Fits-worthy packed unit is routed through integrate before entering U)
-Phase 1 Qu           (constitution) → present (the anchor's proposed unit [ProposedUnit] + horizon-fit verdict + seam quality with its basis + current cut-set; the accept option is fit-complementary — AcceptUnit when the span fits, OverrideFit when it does not; every firing hands its judgment to the one Aᵤ dispatch, so an autonomously packed overflow continues the loop exactly as an anchored unit does; Esc → EarlyExit) [Tool]
+Phase 1 Qu           (constitution) → present (the anchor's proposed unit [ProposedUnit] + horizon-fit verdict + seam quality with its basis + current cut-set; the accept option is fit-complementary — AcceptUnit when the span fits, OverrideFit when it does not; every firing hands its judgment to the one Aᵤ dispatch, so an autonomously packed overflow continues the loop exactly as an anchored unit does) [Tool]
 Phase 1 complete_unit (track)       → Internal state update (write the SpanFit fit produced and the Seam qualify produced onto Pack's draft, yielding the ProposedUnit the gate presents and integrate consumes — the only step that inhabits ProposedUnit's fit and seam fields)
 Phase 1 integrate    (track)        → Internal state update (consumes a ProposedUnit and produces a Unit — the only constructor Unit has: the accepted unit enters the apportionment and its obligations leave the residual; a fresh UnitRef is assigned to the unit in that same step, stable for the remainder of the apportionment; OverrideFit records THAT fresh UnitRef into Λ.fit_overrides after assignment, never before)
 Phase 2 Derive       (sense)        → Internal analysis (per-unit completion and invariant predicates; an obligation with no verifiable predicate becomes a residual, EXCEPT where judgment_settled(o) holds — an obligation no check could settle because a judgment against the context accumulated by then and what the user has actually said by then settles it becomes a reservation instead, carrying the ground that settles it. The two are different findings: a residual says the plan leaves the obligation unguarded, a reservation says compiling it at all would fix a live answer where the user is not present. Neither is an out-of-scope delegation, which names a substrate that must intercept before an action runs, and this step writes no OOSDeclaration. The read is fallible and lands as pre-gate text at Qc, where an Adjust direction can move an item either way; scoped to units where ¬derived_already(u,K,R,S))
@@ -336,7 +330,6 @@ Phase 3 package      (track)        → Internal state update (constructs the re
 Phase 3 park_carrier   (track)      → record (write package's plan value into ONE new record C — the whole plan in one entry, so a single dereference reconstructs it; C's own write returns the record identity locator(C) reads) [Tool]
 Phase 3 record_handoff (extension)  → TextPresent+Proceed (emit N in the fixed navigation-block shape with canonical_locator = locator(C) — record half from C's write, session half this session's own id — plus a dereference instruction, the optional snapshot anchor only when exact-state determinacy is needed, and the grounding instruction, which additionally carries the plan's reservations forward as open questions with their grounds — worded to invite an answer rather than to suggest one, and declaring none of them a stop, since whether a reservation blocks is the recipient's read against the work at hand. N is entry points only, never a re-authored plan; C and this emitted block are what handoff_recorded(N, C) reads)
 converge             (extension)    → TextPresent+Proceed (apportionment trace after the navigation block has been emitted; deactivate)
-esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not ConditionBearingUnitPlan)
 seam                 (extension)    → TextPresent+Proceed (two seams, scoped separately. INBOUND activation seam (before this protocol activates): the `/bound → /apportion` and `/conduct → /apportion` legs of the `## Composition` chain relay when a user-declared chain names `/apportion` next, or an invocation follows that declared composition edge — proceed directly, citing the settling source. OUTBOUND emission seam (after this protocol emits): the `/apportion → enforcer` edge is EXCLUDED — Rule 8 (Separate activation) governs it; the `/apportion → /conduct` edge relays only under a user-declared chain naming /conduct next, never automatically, and carries the no-reentry guard of Rule 9. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
@@ -473,7 +466,6 @@ Repeated apportionment patterns and recurring failure modes accumulated in Anamn
 
 | Trigger | Effect |
 |---------|--------|
-| User Esc key | Deactivate for the remainder of the session (EarlyExit — no emission, no handoff recorded) |
 | No autonomous intent, or already condition-bearing | Relay the scan result and deactivate without activating |
 | Composite goal — several stated outcomes bundled | Relay each constituent outcome and the shared-procedure bond that made them read as one, and deactivate without activating: one apportionment per goal |
 | Prior handoff present but unreadable | Relay that the canonical record is unreachable and deactivate — the goal does not fall through to the uncompiled path |
@@ -526,7 +518,7 @@ Then present the apportionment together with its conditions as pre-gate text —
 
 What each option does follows here, and each reaches the user with its own option. Confirm accepts the residuals on record and moves to emission when the hard invariants hold; when one does not, this gate is re-presented with the violated invariant named. An Adjust direction reshapes what each condition ASSERTS. When a whole-goal acceptance criterion becomes safe to discharge is a plan-state fact this protocol computes at Confirm, not a value the user authors, so a direction phrased as timing lands on the criterion rather than on its firing point.
 
-Adjust rederives over the same apportionment and re-presents. Reopen returns exactly that unit's obligations to the residual and re-enters Phase 1. Both are bounded by user agency: Confirm or Esc terminates.
+Adjust rederives over the same apportionment and re-presents. Reopen returns exactly that unit's obligations to the residual and re-enters Phase 1. Both are bounded by user agency: Confirm terminates.
 
 ### Phase 3: Emission and Handoff
 

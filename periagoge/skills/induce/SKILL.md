@@ -20,7 +20,7 @@ Periagoge(A) → Detect(A) → in_process? →
          Propose(Iᵢ, E, K, ctx) → (P, G) →
          Qs(P, G, K, framing) → Stop → V → integrate(V, candidate) → candidate' →
          loop until crystallized(A) → declare(completion_trace, open_trace) → CrystallizedAbstraction
-         or user_esc ∨ attempts_exhausted → deactivate
+         or attempts_exhausted → deactivate
   false: deactivate
 
 ── MORPHISM ──
@@ -100,19 +100,19 @@ If V = Fuse(adjacent): candidate' = fused(candidate, adjacent) via lateral Synag
 If V = Reorient(axis): candidate' = orthogonal(axis) → return to Phase 1 (full recompute).
 If V = Dismiss: abandon candidate; if essence still sensed, return to Phase 1 with fresh candidate; else deactivate.
 Max 5 triangulation attempts per abstraction seed.
-Continue until: crystallized(A) ∨ user_esc ∨ attempts_exhausted.
+Continue until: crystallized(A) ∨ attempts_exhausted.
 Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 crystallized(A): see TYPES (V = Confirm in history)
 progress(Λ) = |history| / max_attempts
-early_exit = user_esc ∨ attempts_exhausted
+early_exit = attempts_exhausted
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
 Phase 1 Calibrate+Propose (observe) → artifact read, artifact search (user's domain context for personalized grounding); external fetch (conditional: cross-domain adjacent abstractions)
-Phase 2 Qs         (constitution)    → present calibration map + candidate + grounding (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
+Phase 2 Qs         (constitution)    → present calibration map + candidate + grounding (mandatory)
 Phase 3            (track)   → Internal state update
 converge           (extension)   → TextPresent+Proceed (convergence evidence trace + open disposition; proceed with crystallized abstraction)
 seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol link is an inbound misfit absorption (Rule 11), not a post-crystallization handoff, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
@@ -166,7 +166,7 @@ When Periagoge is active:
 </system-reminder>
 
 - Periagoge completes before output dependent on the crystallized abstraction proceeds
-- Loaded instructions resume after crystallization or Esc
+- Loaded instructions resume after crystallization.
 
 ### Trigger Signals
 
@@ -215,7 +215,6 @@ The operational test: "Is the user operation *forming a new abstraction from obs
 | Trigger | Effect |
 |---------|--------|
 | User confirms candidate | Crystallize and proceed |
-| User Esc key | Return to normal operation; abstraction remains in-process |
 | Attempt cap reached (5 triangulations) | Surface remaining candidate with explicit unresolved status, deactivate |
 
 ## Protocol
@@ -324,9 +323,9 @@ After integration:
 3. **Calibration plus candidate plus grounding required**: Every Phase 2 surfacing pairs a calibration map, candidate abstraction, and personalized grounding example drawn from the user's own domain context — recognizable to the user as theirs (codebase, configs, session history, or stated domain), not a generic textbook example.
 4. **Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: AI candidate is a working hypothesis, not a claim. Concept correction is mediated by the instance set surfaced through `K`; crystallization belongs to the user's move.
 5. **Socratic move preservation**: Phase 2 options map to recognized dialectical families (Synagoge / Diairesis / Fuse / Reorient — per-move mapping in Phase 3 Integration); the vocabulary is operational, not ornamental — each move is a recognized dialectical turn, not a free-form revision request.
-6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind. If the user disputes the calibration map (`K`) itself, the same free-response path absorbs the correction rather than requiring a separate calibration-review constructor.
+6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal, or lets the user stop and change direction at any point. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind. If the user disputes the calibration map (`K`) itself, the same free-response path absorbs the correction rather than requiring a separate calibration-review constructor.
 6a. **Fuse dead-signal suppression**: Phase 2 omits the Fuse option when Phase 1 surfaces no adjacent abstraction candidates. Free response remains the channel for user-proposed fusion targets.
-7. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
+7. **Convergence persistence**: Mode active until crystallized or attempt cap.
 8. **Not a validation operation**: A pre-existing abstract structure needing validation against a target falls outside Periagoge's own operation, which forms new abstractions rather than validating existing ones.
 9. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 10. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (calibration → candidate → user_move → candidate'). Per-step evidence is required.
