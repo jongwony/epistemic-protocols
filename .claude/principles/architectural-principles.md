@@ -117,9 +117,7 @@ Protocol exit follows a graduated taxonomy based on side-effect presence:
 | `user_withdraw` | Explicit gate option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
 | Normal convergence | Completion predicate | Full | Per-protocol |
 
-Principle: side effects require explicit answer types. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on — a gate answer yields a turn to act in, and that turn is what makes the cleanup performable at all.
-
-An interruption is not a tier here. It ends the turn outright, so nothing runs after it: no cleanup, no record, no terminal. Work resumes at the next utterance instead, and that is where anything the break left behind is taken up. A protocol therefore neither models the interruption nor leans on it having done anything — where breaking off would leave state behind, the withdrawal tier above is what carries it, never the interruption. A protocol holding no side-effect state needs no exit tier at all.
+Principle: side effects require explicit answer types. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on — a gate answer yields a turn to act in, and that turn is what makes the cleanup performable at all. A protocol holding no side-effect state needs no exit tier at all.
 
 Circular protocol interactions are healthy dialogue rather than a hang, and the gate is what makes them so: a cycle re-entering a Constitution gate yields the turn each time, so it advances only when the user answers and cannot spin on its own.
 

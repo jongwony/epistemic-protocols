@@ -671,7 +671,7 @@ This is a contextual materialization of `Adapt(direction)` — the formal dispos
 **When the judgment was relayed** (`judgment_relay_upheld`): present the cited basis as text, then drop option 1 — the judgment half is already settled, so options 2-4 fire as the gate and yield turn. There is no exception: what becomes of the result is answered about the target now in front of the user, and that answer does not exist until this gate yields.
 
 
-**When the evidence retracts the finding** (`judgment_relay_overruled`): no gate is presented at all — option 1 is the only pairing left. Report what was flagged, that it is being retracted, and the fit evidence that retracts it. **Never relay a retraction silently**: the report puts the basis in front of the user while this close is still unwritten. Stopping the run is theirs to do, wherever the host puts it.
+**When the evidence retracts the finding** (`judgment_relay_overruled`): no gate is presented at all — option 1 is the only pairing left. Report what was flagged, that it is being retracted, and the fit evidence that retracts it. **Never relay a retraction silently**: the report puts the basis in front of the user while this close is still unwritten.
 
 **Design principles**: Each option leads to a concrete next step. Evidence-grounding (Rule 4), current-mismatch framing and natural post-execution integration (UX Safeguards), and the stated fitness assumption on option 2 all apply here.
 
