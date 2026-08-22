@@ -131,7 +131,7 @@ DirectionalContrast = single record {                          -- terminal; sing
                         discard_trace:    DiscardTrace }
             -- ASSEMBLED after cleanup_verify: assemble(Harvest, DiscardTrace) → DirectionalContrast
 EarlyExit = user WITHDRAWAL at any gate — an explicit exit declared as a free response, a typed withdrawal the protocol
-            acts on (side effects require explicit answer types, not tool-level escape): partial transformation trace
+            acts on (side effects require explicit answer types): partial transformation trace
             over completed steps + cleanup_verify enforced + residual declared (direction NOT constituted)
 DissolutionExit = deficit dissolved during the Phase 1 circulation: deriving or settling the axes sharpened the description
             until the candidate futures became recognizable without probes, or the circulation collapsed the activation
