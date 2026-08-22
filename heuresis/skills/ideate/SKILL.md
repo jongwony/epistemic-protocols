@@ -211,8 +211,8 @@ result equations:
                           -- a typed terminal, never a DiverseCandidateField mislabeled empty; frames_offered and
                           --   unaddressed_signals (every extracted signal, since none was addressed) declare what was
                           --   on the table so nothing is silently dropped
-cleanup: not applicable — heuresis holds no side-effect state (no team spawned, no file artifact); the Three-Tier
-  Termination user_withdraw cleanup tier does not apply here — only Normal convergence (the user's own Stop) does.
+cleanup: not applicable — heuresis holds no side-effect state (no team spawned, no file artifact); the
+  user_withdraw cleanup tier does not apply here — only Normal convergence (the user's own Stop) does.
   Parked follow-ups live in Λ and are declared at the terminal — their
   durable externalization (a task record, an issue) is a host-side handoff AFTER convergence, per the substrate
   boundary, so no cleanup obligation ever arises mid-loop
