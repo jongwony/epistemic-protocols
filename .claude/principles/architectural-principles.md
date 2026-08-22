@@ -78,8 +78,6 @@ The two externalized items connect to the axiom basis directly. The problem-to-s
 
 **Safety valve**: a blocker discovered mid-session that the model cannot re-derive from the substrate — a non-reconstructable external constraint, a credential gap, an irreversible state it has already entered — is included in the framing record. The boundary test is re-derivability from the substrate (codebase, branch, runtime state, and the model's own reconstruction), not the item's grain: it excludes re-derivable bookkeeping, not genuinely lost-on-interruption facts, so when a sub-step graduates into a non-re-derivable commitment it crosses into the externalized set.
 
-Evidence review (cognitive-offloading literature, with the contested-replication caveats) is in the ledger: https://github.com/jongwony/epistemic-protocols/issues/778
-
 ## Reference over Copy
 
 Handoff-boundary reference/copy criteria, extending Session Text Composition and Cross-Session Knowledge Composition above to tool/agent/turn boundaries.
@@ -93,8 +91,6 @@ The reference face is favored by three forces — transcription cost (a copy spe
 This is the shared root of several existing positions rather than a new mechanism: Detection with Authority's relay mode forwards environmental facts with cited basis (a citation, not a re-constitution); the Task Externalization Boundary externalizes only the problem-to-solve and framing shifts (what the substrate cannot re-derive); Subagent Context Isolation has the coordinator point while the executor fetches its own context. On the receive side the move appears as forwarding a tool's native output unit verbatim instead of re-bucketing it into an imposed schema; on the send side as passing a pointer instead of inlining content. Both are the same move across the same boundary.
 
 **Operational test**: "Can the consumer re-derive this from shared substrate with its own tools?" Yes → reference; no → copy. A copy where reference would serve pays tokens, risks staleness, and may lose fidelity; a reference where copy is required loses the non-re-derivable content outright.
-
-Falsifiability and tier analysis are in the ledger: https://github.com/jongwony/epistemic-protocols/issues/778
 
 ## Inter-Protocol Guidance
 

@@ -12,7 +12,7 @@ Vet working context by dialectical antithesis before pre-execution sync. Tests c
 
 ## What It Does
 
-Elenchus runs before you commit your working context to an external sync — a meeting, a PR for review, a deploy decision, a Slack thread. The protocol scans accumulated session context for sources whose apparent sufficiency has become suspect through age, weak provenance, downstream concentration, or cross-source contradiction, then posits a dialectical antithesis per suspect source and lets you judge each disposition. The motion is Hegelian *Aufhebung* (preserve + negate + lift up): thesis → antithesis → synthesis applied source by source.
+Elenchus runs before you commit your working context to an external sync — a meeting, a PR for review, a deploy decision, a Slack thread. The protocol scans accumulated session context for sources whose apparent sufficiency has become suspect through age, weak provenance, downstream concentration, or cross-source contradiction, then posits a dialectical antithesis per claim under test — one per source in the ordinary case, and one each where a source is read as authority for several — and lets you judge each disposition. The motion is Hegelian *Aufhebung* (preserve + negate + lift up): thesis → antithesis → synthesis applied claim by claim.
 
 **Four dialectical patterns**:
 
@@ -31,17 +31,16 @@ The deficit-awareness sits with the user — Elenchus does not auto-activate. AI
 
 ## Disposition Coproduct
 
-Each suspect source resolves into one of seven named dispositions plus Emergent. The full coproduct is presented per source so each judgment is recognizable, not recalled from memory.
+Each suspect source is judged per claim: the user says in their own words what they make of the claim once the antithesis has been put to it, and may add one instruction the run can act on. What is presented per claim is the material the judgment is made against — the bound claim, what makes it suspect, the evidence, the stake, and the antithesis with its cited basis — so the judgment is recognizable rather than recalled from memory, and no answer is written for the user before they are asked.
 
-| Disposition | Meaning |
-|-------------|---------|
-| **Confirmed** | Antithesis examined; original claim survives. Downstream usage proceeds as-is. |
-| **Revised(refinement)** | Antithesis surfaces a concrete update; claim is rewritten. Downstream proceeds against the refined form. |
-| **Discarded(reason)** | Antithesis defeats the claim; source is withdrawn from the working context. |
-| **Deferred(re_trigger_condition)** | Disposition pending; loop returns when the condition is met. Downstream proceeds without commitment. |
-| **Conditional(measurement)** | Disposition pending external measurement; downstream tags the source as provisional. |
-| **Bounded(external_reference)** | Authoritative answer lives outside this session; downstream cites the external reference. |
-| **Routed(downstream_protocol)** | Challenge belongs to a different protocol family — handed to `/gap`, `/apportion`, `/contextualize`, or `/bound`. |
+The verdict itself is free text and deliberately untyped — nothing downstream is entitled to rely on how a judgment came out, and a type there would be the protocol writing the answer before anyone was asked. What *is* typed is the optional instruction, and only because the protocol can itself carry each one out with what it already produces — a mark on the ledger it emits, or control of its own loop:
+
+| Instruction | What the run does with it |
+|-------------|---------------------------|
+| *(none)* | The run carries on with the source as it stands. Saying nothing here is an answer, not a blank. |
+| **Withdraw** | The source stops being relied on **for that one claim**, and is kept in the run's history with your verdict as you gave it. The same source read as authority for another claim is a separate audit, judged on its own, and is untouched here. |
+| **Revisit(condition)** | You name the condition; the loop returns to this claim when it is met, for as long as the run is still going. A condition still unmet when the run ends is reported as still open — nothing watches for it afterwards. |
+| **HandOff(deficit)** | The question is handed to another deficit, reported at convergence — with that deficit's command hint where this protocol inscribes one, and bare where you named a deficit it does not. |
 
 ## Source Identification Criteria
 
@@ -51,7 +50,7 @@ Phase 0 silently selects audit-candidate sources from the working context per:
 |-----------|-----------|
 | High-leverage accumulation | Single source carries downstream weight (working hypothesis: ≥ 3 dependents) |
 | Source age beyond horizon | `observed_at + horizon(origin)` < now |
-| Provenance-chain length | Belief depends on an N-step inference chain rather than direct observation or citation |
+| Provenance-chain length | Belief depends on an N-step inference chain rather than direct observation, citation, or measurement |
 | Cross-source contradiction | Two sources nominally pointing at the same referent diverge |
 | Inference-character conclusion | Source is itself a conclusion reached by inference (origin `AIInference`, or a conclusion functioning as a standing premise) |
 
@@ -60,8 +59,8 @@ Sources matching none of the criteria are not surfaced — the protocol focuses 
 ## Known Limitations
 
 - **Working hypothesis thresholds**: `N` (high-leverage threshold) and horizon defaults per origin are residual variables, refined through accumulated use evidence rather than fixed at inscription.
-- **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern when use evidence surfaces a dialectical operation orthogonal to the four.
-- **Single-pass per source**: A source receives one antithesis per loop iteration. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Deferred re-trigger affords cross-iteration correction.
+- **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern, not pre-named, whose challenge directly confronts the source's claim rather than standing as a side verification check.
+- **Single-pass per audit**: Each audit — a source under one claim — receives one antithesis per loop iteration, and a source read as authority for several claims is several audits, each with its own. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Revisit re-trigger affords cross-iteration correction.
 
 ## Install
 

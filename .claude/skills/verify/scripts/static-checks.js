@@ -712,9 +712,28 @@ function checkVersionStaleness() {
     return;
   }
 
-  // Skip version staleness check during conflict states (diff output unreliable)
+  // Skip version staleness check during conflict states (diff output unreliable).
+  // Resolve the git dir rather than assuming a layout: in a worktree `.git` is a file
+  // holding a gitdir: pointer, so a `<root>/.git/<head>` path can never exist there.
+  // `--git-dir` and not `--git-common-dir` — the conflict heads are per-worktree and
+  // are absent from the shared dir the latter reports.
+  let gitDir;
+  try {
+    // `--git-dir` may answer relative to the git process's cwd, which is projectRoot
+    const gitDirOutput = execFileSync('git', ['rev-parse', '--git-dir'], { cwd: projectRoot, encoding: 'utf8' }).trim();
+    gitDir = path.resolve(projectRoot, gitDirOutput);
+  } catch (e) {
+    // Conflict state is now unknown, which is precisely when diff output cannot be
+    // trusted — skip visibly rather than let the guard fall silently open again.
+    results.warn.push({
+      check: 'version-staleness',
+      file: 'working tree',
+      message: `Git command failed (rev-parse --git-dir) — version staleness check skipped: ${e.message}`
+    });
+    return;
+  }
   const conflictHeads = ['MERGE_HEAD', 'REBASE_HEAD', 'CHERRY_PICK_HEAD'];
-  const activeConflict = conflictHeads.find(h => fs.existsSync(path.join(projectRoot, '.git', h)));
+  const activeConflict = conflictHeads.find(h => fs.existsSync(path.join(gitDir, h)));
   if (activeConflict) {
     results.pass.push({
       check: 'version-staleness',

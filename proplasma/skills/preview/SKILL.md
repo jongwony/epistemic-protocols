@@ -378,7 +378,7 @@ Settle the probe spec before I build anything.
 
 Options:
 1. **Approve** — generate the probes on these axes under this policy
-2. **Adjust** — revise axes, policy, which directions get probed, or tier; I re-present the spec (nothing is generated meanwhile). On a materialization re-entry the target stays your composition — the spent budget covers no other fan
+2. **Adjust** — revise axes, policy, which directions get probed, or tier; I re-present the spec (nothing is generated meanwhile). On a materialization re-entry, only axes, policy, and tier are open here — the target stays your own composition, since this round's budget is already spent on it
 ```
 This gate is the enforcement point of breach condition (1): past it, no divergence axis is ever AI-selected; the spec-revision re-entry contract (new axis, tier escalation, or revised target set) is Rule 3. The pre-gate text also names what is open to you beyond the two options — **question an axis**, **contest whether this protocol is even needed**, or **step out** — none of these settles the spec, so none is an option, but contesting the premise can dissolve the deficit outright: deriving the axes is itself description-sharpening, and when that alone makes the futures recognizable or exposes the fork as false, the protocol **stands down as a success** (Rule 12) — the preliminary clay model is skipped when the sketch turns out precise enough. An analogy offered during this circulation is commentary that must declare which axis it weights — a borrowed domain imports its own weights — and never substitutes for the contrast itself.
 
@@ -396,7 +396,7 @@ Present the contrast summary as pre-gate text; then **present** the direction ga
 ```
 Which direction do you settle?
 
-Options (one concrete Select per probe-exposed direction — type-preserving materialization of the Select constructor; the coproduct stays {Select, Synthesize}):
+Options:
 1. **Select: {direction A}** — the future probe A exposed: {its deciding axis values, as you saw them}
 2. **Select: {direction B}** — the future probe B exposed: {its deciding axis values, as you saw them}
    (… one numbered Select option per probed direction …)

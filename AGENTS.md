@@ -53,7 +53,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 - `.claude/rules/` is for prescriptive rules that must be active without a reader fetching them, unscoped when they bind at per-turn runtime. A `paths` scope narrows delivery to the moment a matching file is open, so a rule whose moment is narrower than the session does not charge every session for it — but that scoping is one host's optimization and never the only route: keep a platform-neutral pointer on a surface every intended reader reaches at or before the rule binds.
 - `.claude/principles/` is for lazy-loaded architectural principles.
-- Grounded exposition, investigation writeups, and evidence reviews go to the ledger (issue or PR body), never to a file under `docs/` — they are then-records, and nothing on a state surface re-runs them.
+- Grounded exposition, investigation writeups, and evidence reviews go to the deliberation surface (issue or PR body), never to a file under `docs/` — they are then-records, and nothing on a state surface re-runs them; what the deliberation settles reaches the ledger through the commit that lands it.
 - A contributor reference serving one skill lives in that skill's own `references/`, so it loads when the skill is triggered rather than when someone remembers it exists. `docs/` keeps what no single skill owns — a reference cited from several surfaces at once, or a contributor surface a public README reader is sent to.
 - New rule proposals require a placement judgment against the existing docs/rules surface; do not add a runtime rule just because a concept is philosophically attractive.
 

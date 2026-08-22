@@ -239,7 +239,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 |--------|-----------|
 | Abstract framework applied | AI output uses a pattern, model, or analogy without domain-specific validation |
 | Cross-domain transfer | Concept from one domain applied to a structurally different domain |
-| Grounding probe | User requests "concrete example", "how does this apply to my case", "show me in my context" |
+| Grounding probe | User asks for the abstraction to be made concrete — for an instance of it, or for how it lands in their own case |
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 | Self-grounding (abstraction vs its own instances) | A located/named abstraction is checked against the instances it claims to subsume (wrong-fusion suspicion) — Sₐ = the abstraction, Sₜ = its own members. Distinct from the colimit route-away case (locator absent → /induce); here the abstraction already has a name and is tested for whether it fuses dissimilar instances |
 
@@ -247,7 +247,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations
-- User explicitly says "I understand the mapping" or "this applies"
+- User explicitly declares the mapping already established
 - Same domain pair was validated in current session (session immunity)
 - Phase 1 domain analysis confirms structural correspondence is trivial
 - No abstract framework is applied (output is purely concrete)
