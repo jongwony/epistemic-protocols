@@ -433,7 +433,7 @@ For each task (entry point):
    Present progress as text output:
    - Verified [probed aspects] in [entry point]
    - Current position: [entry point] / [current or next aspect]
-   - Next: [coverage check, next pending task, convergence, or explicit exit]
+   - Next: [coverage check, next pending task, or convergence]
 
    Then **present**:
 
