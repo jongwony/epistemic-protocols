@@ -58,7 +58,6 @@ status(g)  = entry(g).status ∈ {open, completed}
 open(registered) = { g ∈ registered : status(g) ≠ completed }   -- what a recovered carrier contributes to pressure assessment and selection. The audit trace still ranges over registered WHOLE, so a gap already judged is reachable as evidence without being put to the user a second time
 Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool, carrier: Option(GapLocator) }
 AuditedDecision = Σ' where ∀ g ∈ registered: status(g) = completed
-EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (Σ' = Σ when exit precedes the first adjustment), partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: registered := ∅; Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ open(registered)) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay). "In scope" is REACHABILITY, never ownership: whether a recovered gap bears on THIS decision is a relevance judgment, and it is made where the user is present — at Qs, which every gap passes before anything is done with it. Keying the locator to a decision would settle that at authoring time and remove the recognition the gate exists to elicit; where the relevance question turns on a fact the audit does not hold, the deficit is ContextInsufficient (/inquire), not this one [Tool]
@@ -71,10 +70,9 @@ After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: record update(Σ.carrier, add) → add to queue.
 Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
 P.queued updates Σ.deferred at every carrier write or amendment; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
-Continue until: every registered gap is completed (AuditedDecision) OR user ESC (EarlyExit).
-Mode remains active until convergence or explicit user exit (Esc).
+Continue until: every registered gap is completed (AuditedDecision).
+Mode remains active until convergence.
 Convergence evidence: At every-registered-gap-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)) — together with Σ.carrier, so a later session reaches this run's gaps with one read. Convergence is demonstrated by the complete audit record, not asserted by carrier status.
-On user ESC: present partial audit trace over judged gaps, then declare remaining registered gaps as unresolved residual — with Σ.carrier alongside, since an exit is exactly where the gaps left unresolved most need a later session to be able to reach them.
 
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
@@ -91,7 +89,7 @@ proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Qs (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
+Qs (constitution)      → present (mandatory)
 Σ (track)      → record/record update (gap tracking in ONE carrier entry: the creating write returns the identity locator(C) reads, and every later amendment names that identity. Per-gap entries are NOT written — a single dereferenceable record is what lets one read reconstruct the set)
 DereferenceCarrier (observe) → record read (conditional: a prior gap-carrier locator is in scope — read the carrier at that locator's record identity, within the session it names; one read yields the whole gap set, so nothing is reassembled from separate records. Unreachable → the carrier_unreachable relay, never a silent fresh start)
 carrier_unreachable (extension) → TextPresent+Proceed (conditional: a locator is in scope but the record it names cannot be read — surface that the prior gaps were NOT recovered and which locator failed, then proceed with Σ.carrier := None and a fresh carrier at Phase 1. A partial gap set is never carried silently, and the run does not stop: the gaps this scan finds are still worth surfacing, and what the user needs is to know which earlier ones are missing from them)
@@ -99,7 +97,6 @@ Scan (observe) → artifact read, artifact search (stored knowledge extraction: 
 AssessGapPressure (sense) → Internal analysis (no external tool; selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
 A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
-esc (extension)   → TextPresent+Proceed (partial audit trace + unresolved-gap residual declaration; terminate as EarlyExit, not AuditedDecision)
 seam (extension)   → TextPresent+Proceed (fires at deactivation: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares, settles the next move — proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
@@ -117,7 +114,7 @@ seam (extension)   → TextPresent+Proceed (fires at deactivation: a user-declar
 
 ### Activation
 
-Command invocation activates mode until convergence or Esc; deferred gaps (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation through the carrier locator, per LOOP.
+Command invocation activates mode until convergence; deferred gaps (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation through the carrier locator, per LOOP.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
@@ -147,7 +144,6 @@ When Syneidesis is active:
 | Trigger | Effect |
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
-| User Esc key | EarlyExit (not AuditedDecision): present partial audit trace + declare remaining registered gaps as unresolved residual, then return to normal operation |
 
 ### Plan Mode Integration
 
@@ -249,7 +245,7 @@ Options:
 
 Option 3 (Probe) is always visible. The verification rationale goes out BEFORE the gate and not inside option 3 — expanded when `stakes(D) = High`, brief otherwise. What the option itself carries is what choosing it does, and that does not vary with stakes; only the rationale for wanting it does, which is analysis and belongs where analysis goes. Directing the depth into the option line would refill it with exactly what was taken out of it. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
 
-Other is always available — user can respond freely beyond the listed options.
+Other is always available — the user can respond freely beyond the listed options.
 
 One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
@@ -294,8 +290,6 @@ Constitution presentation yields turn for user response.
 |-------------|---------|---------|-------|
 | Constitution interaction | Selection | Selection | Selection |
 
-Note: Esc key → unconditional loop termination (LOOP level). Constitution interaction blocks until response or Esc.
-
 ## Intensity
 
 | Level | When | Format |
@@ -317,5 +311,5 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 9. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 12. **Protocol-native pressure map**: Phase 0 produces a GapPressureMap before gap selection. The map is a pre-gate support object for gap selection and question formation, with no terminal-status or generic-calibration authority. It classifies already-detected gaps into exactly one current-cycle pressure bucket; gap tasks are sourced exclusively from Scan output, and `AuditedDecision` is unchanged. Surfacing over Deciding — the map justifies why a gap deserves attention now while gap resolution remains the user's constitutive act. `hidden_high_impact` is the unknown-unknown surface and carries the highest over-application risk, so it is tightly capped (|hidden_high_impact| ≤ 1) and admitted only when the unknown could materially change the user's next judgment; the map must narrow the question set, never make the user inspect every possible gap.
 13. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-14. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares names the next protocol, the between-protocol seam after this protocol's convergence is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
+14. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares names the next protocol, the between-protocol seam after this protocol's convergence is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
 15. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.

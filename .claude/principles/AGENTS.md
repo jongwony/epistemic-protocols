@@ -15,7 +15,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 
 ## Index
 
-- **`architectural-principles.md`** — Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Inter-Protocol Guidance, Coexistence over Mirroring, Three-Tier Termination, Plugin Encapsulation, Utility Skills delegation.
+- **`architectural-principles.md`** — Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Inter-Protocol Guidance, Coexistence over Mirroring, Termination, Plugin Encapsulation, Utility Skills delegation.
 - **`hermeneutic-cycle.md`** — Pattern over Vocabulary (Gadamerian formal-block mapping), plus the six-surface catalog: Primary, Secondary, Tertiary, Inter-version, Inter-agent, Operational axis.
 - **`safeguards.md`** — Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness. All are authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` instead.
 - **`project-profile-calibration.md`** — Profile Variables (six) and Calibration Rule, Scope Boundary. Authoring/calibration-time reference, not per-turn.

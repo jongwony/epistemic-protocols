@@ -108,17 +108,18 @@ A **binding** routing relation — one that constrains where an activation may p
 
 Epistemic dialogue protocols coexist with a harness's built-in execution commands as orthogonal tools occupying different layers. The epistemic layer asks whether the right thing is being done; the execution layer, whether it is being done correctly; the verification layer, whether it was understood. Protocols occupy the epistemic and verification layers, and a harness's built-in execution commands occupy the execution layer. Do not mirror built-in execution capabilities into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results only at handoff points.
 
-## Three-Tier Termination
+## Termination
 
 Protocol exit follows a graduated taxonomy based on side-effect presence:
 
 | Tier | Mechanism | Cleanup | Scope |
 |------|-----------|---------|-------|
-| `user_esc` | Esc key at gate (tool-level or free-response turn) | None (ungraceful) | All protocols — universal |
 | `user_withdraw` | Explicit gate option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
 | Normal convergence | Completion predicate | Full | Per-protocol |
 
-Principle: side effects require explicit answer types, not tool-level escape. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on. Protocols without termination side effects need only `user_esc`. Circular protocol interactions are healthy dialogue — `user_esc` guarantees termination at every moment.
+Principle: side effects require explicit answer types. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on — a gate answer yields a turn to act in, and that turn is what makes the cleanup performable at all. A protocol holding no side-effect state needs no exit tier at all.
+
+Circular protocol interactions are healthy dialogue rather than a hang, and the gate is what makes them so: a cycle re-entering a Constitution gate yields the turn each time, so it advances only when the user answers and cannot spin on its own.
 
 ## Plugin Encapsulation
 
