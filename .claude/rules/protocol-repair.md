@@ -38,8 +38,5 @@ where it is already indexed on another, a grounding entry corrected to the opera
 `.claude/rules/type-category-convention.md` settles this for TYPES specifically — its
 volatility and openness criteria decide whether the type layer admits a category at all — and
 this rule puts the same question to Rules, TOOL GROUNDING, CONVERGENCE, and gate option sets.
-
-**What was set aside goes to the ledger.** An addition considered and not made is a
-then-record, so the commit message carries it together with the ground that disqualified it.
-The artifact carries the repair and the reason it is shaped that way, and nothing about the
-alternative.
+An addition considered here and not made is a rejected alternative, and the ledger binding
+`AGENTS.md` §Settled Directions states already routes it.
