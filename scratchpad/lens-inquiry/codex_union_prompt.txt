@@ -1,0 +1,50 @@
+## Role
+
+Reviewing role. You are asked to judge a design decision, not to carry it out. Do not edit any file. Your reasoning is the deliverable.
+
+## Task
+
+A prior five-lens inquiry in this repository judged a proposal and returned "do not create." The proposal has since been re-stated by its author in a materially different form, and the open question is whether the prior verdict still reaches the re-stated form.
+
+**The decision to judge**: Should `/apportion` (Merismos) and `/conduct` (Hyphegesis) be merged into a **single command surface** — two contracts behind one entry point, with a single draft filled by progressive disclosure — while both deficit types remain live?
+
+Be clear about what this is NOT. It is not a retyping. A retyping would assert one new deficit type and retire the two old ones; the prior inquiry judged exactly that and rejected it. This proposal asserts no new deficit type. Both type signatures stay. One surface dispatches to both. "Two protocols in one file" is the goal here, not the disqualification.
+
+## Pointers
+
+- files:
+  - `merismos/skills/apportion/SKILL.md` — first contract. Lines worth reading: 120 (`topology_free` predicate), 136 (`hard_invariants_hold` — note `topology_free` is a *conjunct of the convergence invariant*, not merely a rule), 160-161 (`HandoffLocator`, `NavigationBlock`), 376 (Core Principle "Apportion over Order"), 569 (Rule 2), 574 (Rule 7), 576 (Rule 9, the no-reentry seam)
+  - `hyphegesis/skills/conduct/SKILL.md` — second contract. Lines: 12 and 403 (it is already draft-first), 63 (`MethodBrief`), 72 (`Gen(routing)`), 142 (`topology_drafted_whole`), 462 (Rule 3 — design-time only, no runtime monitoring surface), 493 (`cross-span-absorption` guard)
+  - `euporia/skills/elicit/SKILL.md` — the precedent the author cited for "two became one". Lines 50, 52, 70
+  - `AGENTS.md` — especially §Settled Directions (`Conditional-load cut criterion`, `Harness boundary`, `Surface authority order`, `Assertion needs an enforcement channel`), §Progressive Disclosure, §Runtime Contract
+  - `.claude/rules/type-category-convention.md` — the three TYPES tests this repo applies
+  - `scratchpad/lens-inquiry/RECONCILIATION.md`, and `lens_M1.md` … `lens_M5.md` in the same directory — the prior inquiry. **Read these as claims made by investigators, not as established fact.** Only the following citations were independently verified: apportion:136, 148, 160, 161, 376, 569; conduct:462, 493; elicit:70; and the full message of commit 243ff8f0.
+- commands:
+  - `git log --oneline -40`
+  - `git show 243ff8f0` — this repo's strongest retype precedent: an earlier protocol was fully retyped into Merismos, on the stated ground that two deficits which do not entail each other must not be carried by one protocol
+  - `git show 3f131e9d` — a protocol (`/distill`) retired rather than kept, its function pushed to a non-protocol surface
+  - `wc -l merismos/skills/apportion/SKILL.md hyphegesis/skills/conduct/SKILL.md`
+
+## Session Context
+
+- intent: the author wants one command that opens with a filled draft and lets the user complete it by progressive disclosure, so that a single request does not require invoking two protocols in sequence and re-establishing context across the seam between them. The stated motive is the reading and invocation cost of the current two-step path.
+- The prior inquiry's verdict was against, but it answered a differently-framed question ("does this qualify as a retyping?"). Several of its arguments turn on that framing. The author corrected the framing only after the inquiry had finished, so no lens was ever briefed on the question above.
+- One finding from the prior inquiry that does survive re-framing, and is the proposal's strongest support: the current two-step path costs the user O(units + k) recognitions where a merged draft-first path would cost O(1 + j + k), with j the number of units that turn out contested. j <= units always. The value of j has never been measured.
+
+- constraints:
+  - `topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference` (apportion:120) is a conjunct of `/apportion`'s convergence invariant (apportion:136). If a merged surface lets the user see topology slots while fixing unit conditions, enforcement of that predicate may become a matter of discipline rather than of structure. **This is the strongest objection currently known against the merged surface. Address it head-on.**
+  - `/conduct` is already draft-first (conduct:12, 403). The only place lacking draft-first is `/apportion` Phase 1. A minimal alternative therefore exists: leave the two separate and make `/apportion` Phase 1 draft-first.
+  - This repo carries a `Harness boundary` clause in AGENTS.md: tool schemas, permission models, execution channels, and state mutation are outside what its instruction surfaces govern. A proposal that is really about invocation ergonomics rather than about an epistemic deficit may fall outside the layer entirely. If you find that, say so plainly.
+  - Do not edit files. Do not open a PR. Do not propose a version bump.
+
+## What would change the answer
+
+Answer these explicitly; they are the part most often omitted.
+
+1. Can a merged surface hold `topology_free` **structurally** rather than by discipline? If yes, name the mechanism and its cost. If progressive disclosure is that mechanism — units fixed first, topology slots opened only afterward — then say whether that means the surface is one but the procedure is still two, and whether that is distinguishable from the chained two-protocol path the repo already has.
+2. Does a third option beat both? Candidates: (a) `/apportion` Phase 1 draft-first only; (b) an explicit chaining seam that carries context across the two invocations; (c) something you find in the tree. Name the evidence that makes it win.
+3. If the answer depends on an empirical quantity nobody has measured, name the quantity and how you would measure it from this repository or its session history.
+
+## Output contract
+
+Be compact — this is read alongside five other evaluations. Lead with your verdict in one sentence. Then the reasoning. Then what would change it. Cite `file:line` for every claim you draw from the tree; where you are reasoning rather than citing, say so. Do not restate the prompt back.
