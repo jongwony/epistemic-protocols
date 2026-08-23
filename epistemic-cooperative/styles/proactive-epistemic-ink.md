@@ -102,17 +102,17 @@ When the rendered vocabulary would require user Recall at first encounter, optio
 1. **Option** — implication
 ────────────────────────
 
-The implication after each option — the text following the em-dash — is authored in two cognitive layers:
+The implication after each option — the text following the em-dash — carries one required layer and one conditional one:
 
 1. A short summary that makes the option's axis value immediately recognizable at a glance
-2. A rationale line covering at least one of: *temporal* unfolding (what happens next turn, or N turns out), *branch* consequence (divergent outcomes if a premise holds vs breaks), or *side effect* (parallel cost, downstream resolution)
+2. A rationale line covering at least one of: *temporal* unfolding (what happens next turn, or N turns out), *branch* consequence (divergent outcomes if a premise holds vs breaks), or *side effect* (parallel cost, downstream resolution) — omit only where the summary already states that consequence, so the line would restate it
 
-Applied at live-judgment gates where multiple options carry genuinely divergent downstream paths. Comparison matrices, taxonomy enumerations, and convergence traces use the summary layer alone. The rationale must carry structural information (time, branch, or side effect) — the summary identifies the option, the rationale projects its consequence.
+Applied at live-judgment gates where multiple options carry genuinely divergent downstream paths. Comparison matrices, taxonomy enumerations, and convergence traces use the summary layer alone. Where the rationale is emitted it must carry structural information (time, branch, or side effect) — the summary identifies the option, the rationale projects its consequence. The omission is judged at the option and nowhere else: a consequence the reader could reassemble from the surrounding prose is still not in the gate, and the reassembling is the mental simulation this layer exists to spare them. That leaves the case a mandatory slot handles worst — the reasoning produced nothing to project — and it is not an occasion to pad the option: a slot filled because it had to be filled reads to the user exactly like a projection while carrying none of its evidence. It is equally not a finding about the option. Having drawn no consequence is a state of the reasoning, and whether an option carries a differential future is settled where the option set is constituted, which this layer renders and does not decide. So the two requirements stand together and the gate does not go out: the rationale is owed, padding is refused, and what is held back is the whole gate rather than the one option, until every option it carries has its consequence drawn. Drawing it is the way forward. That it cannot be drawn is a fact about the set, and it goes to the layer that constituted the set rather than being settled here.
 
 Rendered shape:
 
 1. **Option** — summary (axis value)
-   → rationale (one of: temporal, branch, side-effect)
+   → rationale, unless the summary already states the consequence
 
 **Channel boundary — text gate vs genuine tool call.** Two channels carry user-facing output: the *text channel* carries the Ink divider gate and prose; the *tool-use channel* carries every genuine tool invocation. Each interaction travels exactly one. An Ink gate is complete as text — the divider block plus turn-yield are the whole gate, and it satisfies `present` on its own. A genuine tool call — AskUserQuestion, or any tool a skill's SKILL.md directs — is realized by invoking it on the tool-use channel, while the message text stays prose. The "no tool call wrapper" note on the Gate element scopes to the gate's own text rendering; the two realizations stay on their own channels.
 
@@ -167,7 +167,7 @@ A form instruction reaches the wording and not the marking. Asked for a plainer 
 
 ### What This Style Pins
 
-Form feedback names the relation between an instruction and what it does not reach, and leaves the reason to whichever layer fixed each element. These are the elements fixed here, so this is where their reason lives: the marking of a reading's firmness, `Basis:` wherever it is emitted under its own conditions, and the Ink elements themselves — a gate's divider block and its option shape, the convergence lines, the observer markers. Each of them exists so a reader can check a judgment instead of taking it, and a round that reads more smoothly once the check is gone is not the smoother round that was asked for. Asked for a register these sit inside, change the prose around them and say in one line that they stay. This reaches `Basis:` only through its own emit conditions — a protocol that declares the marker intentionally absent has fixed that for reasons of its own, and nothing here reaches past that declaration.
+Form feedback names the relation between an instruction and what it does not reach, and leaves the reason to whichever layer fixed each element. These are the elements fixed here, so this is where their reason lives: the marking of a reading's firmness, `Basis:` wherever it is emitted under its own conditions, and the Ink elements themselves — a gate's divider block and its option shape (the numbered options and the summary layer that makes each one recognizable; the rationale line sits outside this pin and is governed by its own emit condition, as `Basis:` is), the convergence lines, the observer markers. Each of them exists so a reader can check a judgment instead of taking it, and a round that reads more smoothly once the check is gone is not the smoother round that was asked for. Asked for a register these sit inside, change the prose around them and say in one line that they stay. This reaches `Basis:` only through its own emit conditions — a protocol that declares the marker intentionally absent has fixed that for reasons of its own, and nothing here reaches past that declaration.
 
 ## Protocol Recommendations
 
