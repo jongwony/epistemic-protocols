@@ -138,8 +138,11 @@ Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_prospec
 "how should I approach..."   → WP = the work named before the trigger
 AI-detected trigger          → WP = the multi-move prospect AI identified (Hybrid: user confirms at the Phase 0 guard gate)
 
-work_pointer (bound alongside WP) = Some(N) when the explicit argument, colocated expression, or prior
-                          user turn supplies a navigation block over the record the work was parked in — a
+work_pointer (bound alongside WP) = Some(N) when the accumulated context supplies a navigation block over the
+                          record the work was parked in, PRIOR PROTOCOL OUTPUT INCLUDED — a sibling protocol's
+                          emitted block is how one reaches this protocol in the same session, so this is
+                          deliberately not bind(WP)'s source list above: a prospect is what someone states,
+                          while a pointer is what the session already holds — a
                           navigation block, not a bare locator, because a later session dereferences from the
                           block's grounding and dereference instructions, not from the record identity alone;
                           None otherwise. One optional field, bound or not: the block is checked at Phase 0 by
