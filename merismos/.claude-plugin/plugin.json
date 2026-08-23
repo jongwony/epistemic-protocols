@@ -1,7 +1,7 @@
 {
   "name": "merismos",
   "description": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
