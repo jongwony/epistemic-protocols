@@ -96,7 +96,7 @@ DraftUnit      = ProposedUnit without its fit and seam fields — what Pack yiel
 complete_unit(d: DraftUnit, f: SpanFit, s: Seam) : ProposedUnit = d with fit := f, seam := s
 D              = Set(ProposedUnit)     -- one Phase 1 cycle's whole draft: a PARTITION of the workset drafting ran over — its cuts pairwise obligation-disjoint, together covering that workset. This is what draft's own termination bound already rests on, since a workset that shrinks strictly as each obligation lands in a completed cut cannot also hand that obligation to a second cut; a draft carrying two claims on one obligation is therefore a defect in the draft, never a choice put to the reader. Where a region admits more than one workable apportionment, drafting draws ONE and records nothing about the other — whether that second reading deserves the reader is judged live at dispatch. Phase-local: built over a COPY of residual and discarded when the cycle settles, so no Λ field holds it
 Unit           = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam, settlement: Settlement, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
-Settlement     ∈ {RelayedUncontested, AcceptedAtGate, AcceptedWithOverride, SettledUnderSufficient}   -- WHICH TRANSITION INTEGRATED THIS UNIT, written by integrate_unit from the arm that called it. Not a judgment about the unit and not inferred: the four members are exactly the four arms of Phase 1 that reach integrate_unit, so a fifth integrating arm would owe a fifth member and no arm may write a value another arm's transition produced. It is what CONVERGENCE reads for the per-unit settlement disposition, which is what makes Whole Draft over Serial Cut checkable from the trace instead of asserted by it — remove this and that clause names a field nothing produces. Invocation-local: no emitted entry carries it, since it is evidence about how THIS run settled rather than plan content a later session acts on
+Settlement     ∈ {RelayedUncontested, AcceptedAtGate, AcceptedWithOverride, SettledUnderSufficient}   -- WHICH TRANSITION INTEGRATED THIS UNIT, written by integrate_unit from the arm that called it. Not a judgment about the unit and not inferred: the four members are exactly the four arms of Phase 1 that reach integrate_unit, so a fifth integrating arm would owe a fifth member and no arm may write a value another arm's transition produced. CONVERGENCE both READS it for the per-unit settlement disposition and BINDS it: two conjuncts hold it against the fit-override record and against what the relay path could have admitted, so a run that settled a cut the draft never earned fails the result equation rather than merely rendering an odd trace. Remove this and that clause names a field nothing produces and nothing checks. Invocation-local: no emitted entry carries it, since it is evidence about how THIS run settled rather than plan content a later session acts on
 SpanFit        ∈ {Fits, Overflows, Indeterminate}
 Seam           = Grounded(Evidence) ⊎ Heuristic
 Evidence       = { source: String, content: String }
@@ -273,9 +273,10 @@ Convergence evidence (relay, at emission): present the apportionment trace —
       done means is held open to judgment — the unit's capability requirements and feasibility notes, and the
       disposition that settled it — read off the unit's own Settlement, which integrate_unit wrote from the arm that
       called it: relayed as a cut no second reading contested, accepted at the gate, accepted with a
-      recorded override, or settled under a Sufficient over the displayed draft. That last item is what makes
-      Whole Draft over Serial Cut checkable from the trace rather than asserted by it — a reader can see that
-      every unit was settled out of a draft that had already been surfaced whole;
+      recorded override, or settled under a Sufficient over the displayed draft. That last item is what a reader
+      sees Whole Draft over Serial Cut through — every unit settled out of a draft already surfaced whole — and it
+      is not left to the rendering alone: the settlement conjuncts above hold the same field to what could have
+      earned it, so a run that skipped the surfacing does not converge rather than merely reading oddly;
   (c) Plan-level conditions with the plan-state requirement that makes each safe to discharge;
   (d) Each accepted-uncovered residual with its obligation, each reserved item with the ground that settles it,
       and each out-of-scope obligation with its substrate;
@@ -289,6 +290,8 @@ Convergence is demonstrated, not asserted.
 -- plan denotes the returned ConditionBearingUnitPlan (see TYPES); E is the record-emitted goal-entry set
 apportioned(G) = emitted(E) ∧ handoff_recorded(N, C)
                  ∧ coverage_complete(U, O_G) ∧ span_fit(U)
+                 ∧ (∀u∈U: u.settlement = AcceptedWithOverride ↔ u.unit_ref ∈ Λ.fit_overrides)   -- the two records of ONE act are held to each other: span_fit above reads only the second of the pair, so without this a plan can emit an override no settlement claims, or a settlement no override backs
+                 ∧ (∀u∈U: u.settlement = RelayedUncontested → (u.fit = Fits ∧ u.seam = Grounded(_)))   -- what binds the settlement witness into the result equation. The relay path opens only over a draft whose every cut cites a seam the goal evidences, so a heuristic or overflowing unit that reached emission with no turn yield is that condition violated, and this is where such a run fails to converge. The trace RENDERS the disposition; this REQUIRES it to have been earnable — the invariant is checked here rather than asserted downstream of it
                  ∧ (U ≠ ∅ ∨ oos ≠ ∅)                                                -- a goal with nothing read from it never claims apportionment occurred
                  ∧ (∀u∈U: (∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion) ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion) ∨ (∃ σ ∈ S : σ.unit = Some(u) ∧ σ.kind = completion))   -- the three arms are exactly resolve_unit's three, in its order, so every emitted unit has a defined certificate
                  ∧ (∀u∈U: obligation_derived(u, K, R, S))
