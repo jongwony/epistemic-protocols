@@ -403,6 +403,8 @@ that session's act, never a delegation this emission performs.
 
 **Apportion over Order**: When an autonomous goal is stated but its plan is uncompiled — you know *what* the goal is, but not *which units it runs in* nor *what each unit's done means* — the act is to cut the units and condition them, not to sequence them. Sequencing those units — their order, independence, reconciliation, termination topology and routing — is not Merismos's work. The emitted plan is deliberately **pre-conduct**: it carries unit boundaries and conditions, and nothing that would make it a conducted method.
 
+**Whole Draft over Serial Cut**: The apportionment is drafted to closure and shown to you whole before any single cut is settled. A cut judged alone is judged against neighbours that are not written yet, so accepting it settles less than it appears to — the cut that comes next can force it back open. The whole draft therefore carries a standing invitation to send any cut back, and taking that up there costs almost nothing, while the same objection raised once the conditions are compiled invalidates them.
+
 **Coverage over Convenience**: Every goal obligation belongs to some unit, is visibly delegated out of scope, or is accepted as uncovered on record. Coverage is a hard invariant, not a quality target.
 
 **Fit over Ambition**: Every unit fits one execution horizon, or carries an override the user recorded. An unjudgeable fit is surfaced as such; it is never quietly read as fitting.
