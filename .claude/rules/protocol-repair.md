@@ -27,9 +27,9 @@ memory, and the question to put to a proposed addition is what it does for that 
 
 **A defect read in one block often belongs to a change made in another.** The formal blocks are
 coupled, so a block can be internally consistent and still state its rule about a subject that
-moved when a neighboring block changed. The semantic-closure sweep `AGENTS.md` requires when
-terminal conditions, state transitions, or result types change is the walk that finds this; run
-it to site the repair, not only to check one already chosen.
+moved when a neighboring block changed. The semantic-closure sweep `AGENTS.md` already requires
+is the walk that finds this, so run it to site the repair and not only to check one already
+chosen.
 
 **The carriers are already here.** Before an entry is added, ask which existing carrier holds
 the distinction: a field widened where a case cannot be represented, a rule's subject moved
