@@ -51,7 +51,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
 ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
   → probe(goal)                        -- detect ONE stated autonomous goal whose unit plan and conditions are uncompiled; a request bundling several stated outcomes bound only by the host's standing procedural contract is composite and relays here rather than activating
-  → read_obligations(goal) → O_G       -- construct the invocation-local obligation set, including an owed /conduct unit when present, and SUBTRACT the host's standing procedural contract: a requirement that host attaches to every change regardless of the goal is not a goal obligation but an ambient invariant every emitted unit inherits, so it is neither packed nor derived; G itself remains read-only
+  → read_obligations(goal) → O_G       -- construct the invocation-local obligation set and SUBTRACT the host's standing procedural contract: a requirement that host attaches to every change regardless of the goal is not a goal obligation but an ambient invariant every emitted unit inherits, so it is neither packed nor derived; G itself remains read-only
   → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is declared out of scope with the delegated substrate recorded on the declaration; computed once over O_G before packing begins, so it never enters a unit
   → scan(seams)                        -- read the REMAINING obligations (O_G minus the out-of-scope ones) for cuttable seams: dependency, deliverable, verification, ownership. Ordered after the filter, as FLOW and PHASE TRANSITIONS run it: a pre-action-only obligation is delegated out before any cut is shaped around it
   → pack(seams, horizon) → (Anchor, DraftUnit when Anchor ≠ ∅)   -- THE IRREDUCIBLE CORE, part one (completed into a ProposedUnit by complete_unit once fit and seam exist): an empty Anchor IS this step's no-cut verdict and carries no draft, so the three judgments below run on the anchored path only — a goal whose obligations were every one delegated out reaches completion without any of them ever having an operand. apportion the obligations into coarse units such that each unit fits one execution horizon and every obligation lands in some unit; also reads each unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary)
@@ -415,7 +415,7 @@ goal_plan_uncompiled(G) ≡ autonomous_intent(G) ∧ single_goal(G) ∧ ¬condit
                           and is condition-bearing, so a re-invocation over it relays rather than re-emitting.
                           A reserved unit counts as settled here even though its completion is deliberately not
                           compiled — re-invoking this protocol over it would only reproduce the same reservation,
-                          so it relays, per Rule 9 and the Composition section's owed-reapportionment limit
+                          so it relays, per Rule 9 and the Composition section's reserved-item limit
 ```
 
 **Activation layer**:
