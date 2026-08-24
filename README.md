@@ -30,15 +30,6 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 Then run `/onboard` — start with a quick recommendation based on your recent sessions, then optionally continue to guided learning with scenarios, trials, and quizzes.
 
-**Upgrading from a release before Merismos**: `prosoche` (`/attend`) and `diairesis` (`/delimit`) are retired. Removing them from the marketplace catalog delists them but does not uninstall what is already on your machine, so an existing install keeps serving those commands until you remove them explicitly:
-
-```
-/plugin uninstall prosoche
-/plugin uninstall diairesis
-```
-
-`/apportion` replaces `/attend`. `/delimit`'s external-WBS re-cutting is dropped rather than replaced — see the granularity note in [`merismos/skills/apportion/SKILL.md`](./merismos/skills/apportion/SKILL.md).
-
 ### Codex
 
 This repository is also a Codex plugin marketplace. To add it from GitHub:

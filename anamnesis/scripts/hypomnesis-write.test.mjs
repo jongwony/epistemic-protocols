@@ -165,8 +165,8 @@ test("resolveSkillProtocol honours the plugin namespace", () => {
   assert.equal(invokes("<command-name>/unrelated:apportion", "/apportion", "merismos"), false);
 });
 
-// A protocol rename (e.g. prosoche/attend -> merismos/apportion) must fail here
-// rather than silently dropping the protocol from every hypomnesis record.
+// A protocol rename, or a newly added protocol plugin, must fail here rather
+// than silently dropping the protocol from every hypomnesis record.
 test("protocolMap covers every protocol plugin command on disk", () => {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
   const skipDirs = new Set(["epistemic-cooperative", "node_modules", "scripts", "docs"]);
