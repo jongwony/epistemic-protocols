@@ -323,16 +323,72 @@ describe('goal-research runtime contract', () => {
   const REPO_ROOT = path.join(__dirname, '..');
   const skillPath = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'SKILL.md');
 
-  it('extends Tavily MCP tool-call timeout separately from the Codex session timeout', () => {
+  // This block previously REQUIRED `--config mcp_servers.tavily.tool_timeout_sec=3600`.
+  // That override cannot work: a dotted override under `mcp_servers` replaces the
+  // server's whole table instead of merging, dropping the transport field, and codex
+  // then refuses to load config at all ("invalid transport"). Reproduced on
+  // codex-cli 0.149.0 for every server and every key, including keys the config file
+  // already sets. The assertions below pin the repair so the line cannot come back.
+
+  it('carries no dotted mcp_servers config override, which would break codex config load', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // Scope to the launch command itself. The prose deliberately SHOWS the broken form
+    // while telling you not to use it, so a whole-file match would flag the warning that
+    // exists to prevent the thing being warned about.
+    const launchBlocks = (skill.match(/```bash\n([\s\S]*?)```/g) ?? []).filter((b) =>
+      b.includes('codex exec'),
+    );
+    assert.ok(launchBlocks.length > 0, 'the codex exec launch command must be present');
+    for (const block of launchBlocks) {
+      assert.ok(
+        !/--config\s+mcp_servers\./.test(block),
+        'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load',
+      );
+    }
+    assert.match(
+      skill,
+      /invalid transport/i,
+      'the skill must say why the override is absent, or a future author re-adds it',
+    );
+  });
+
+  it('documents the Codex session envelope', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
     const bashMs = Number(skill.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
-    const mcpSec = Number(skill.match(/--config mcp_servers\.tavily\.tool_timeout_sec=(\d+)/)?.[1]);
     assert.ok(Number.isFinite(bashMs), 'Bash session timeout must be documented');
-    assert.ok(Number.isFinite(mcpSec), 'Tavily MCP per-call timeout must be configured');
-    assert.ok(bashMs > mcpSec * 1000, 'Bash envelope must exceed MCP per-call budget');
-    assert.equal(mcpSec, 3600);
-    assert.match(skill, /per-call MCP\s+timeout/i);
-    assert.match(skill, /tavily_research/);
+  });
+
+  it('filters non-JSON stdout lines before jq, and never claims the events file is pure JSONL', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // codex prints plain notice lines to stdout alongside the JSONL; `jq -rs` aborts on
+    // the first one and returns empty, which the skill reads as "codex failed before
+    // answering" — turning a successful run into a reported crash.
+    const jqLines = skill.match(/^.*jq -rs.*$/gm) ?? [];
+    assert.ok(jqLines.length > 0, 'the extraction command must be present');
+    for (const line of jqLines) {
+      assert.ok(
+        /grep '\^\{'/.test(line) || /grep '\^\{'/.test(skill.slice(0, skill.indexOf(line))),
+        `jq must be fed only JSON lines: ${line.trim()}`,
+      );
+    }
+    assert.ok(
+      !/events file is pure JSONL/i.test(skill),
+      'stdout is not pure JSONL — the skill must not assert that it is',
+    );
+  });
+
+  it('requires a zero-search check before any result is presented as research', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // A codex run can complete and answer fluently from recalled knowledge when the
+    // MCP is unavailable; nothing in the narrative distinguishes that from a searched
+    // answer, so the count is the only signal.
+    assert.match(skill, /tool_call\|mcp/, 'Phase 3 must count MCP tool calls');
+    assert.match(
+      skill,
+      /no external searches/i,
+      'Phase 3 must say what to do when the count is zero',
+    );
+    assert.match(skill, /recalled-from-training/i, 'zero-search output must be marked as recalled');
   });
 });
 

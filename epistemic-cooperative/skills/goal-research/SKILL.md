@@ -52,45 +52,76 @@ Report:
 ```
 
 Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + splitting the
-streams (stdout to the events file, `2>` to a separate warn file) keeps the events
-file pure JSONL — the codex banner and any stderr warnings ride their own warn file. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
+streams (stdout to the events file, `2>` to a separate warn file) keeps stderr
+warnings out of the events file. Stdout is **not** guaranteed to be pure JSONL —
+codex may still print a plain notice line there (e.g. `Codex autostart is
+disabled.`), so every extraction below filters to lines starting with `{` before
+parsing. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
 
 ```bash
 codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.6-sol \
   --config model_reasoning_effort="{effort}" \
-  --config mcp_servers.tavily.tool_timeout_sec=3600 \
   < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl 2>/tmp/goal_research_warn_${SUFFIX}.txt
 ```
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-loop`'s codex source does not apply here.
 
-The background Bash timeout controls the delegated Codex session envelope and
-must exceed the Tavily MCP per-call budget. The
-`mcp_servers.tavily.tool_timeout_sec=3600` override controls the per-call MCP
-timeout for Tavily tools inside that delegated session, allowing long-form
-`tavily_research` calls (e.g. `pro` depth over multi-branch topics) to run for
-up to 60 minutes while still surfacing the raw timeout error if the call exceeds
-that limit. The 4,500,000 ms (75 min) session envelope exceeds this per-call
-budget with margin for additional searches and reasoning within the session.
+The background Bash timeout (4,500,000 ms / 75 min) is the delegated Codex
+session envelope.
+
+**Do NOT add a dotted `--config mcp_servers.<name>.<key>=<value>` override here.**
+A dotted override under `mcp_servers` REPLACES that server's whole table instead
+of merging into it, so the transport field (`url` or `command`) is dropped and
+codex refuses to start: `Error loading config.toml: invalid transport in
+mcp_servers.<name>`. This fails for every server and every key — including keys
+the config file already sets — so the run dies at config load with exit 1 before
+any research happens, and the events file comes back empty. Per-call MCP timeouts
+belong in `~/.codex/config.toml` itself, not on this command line. An inline
+whole-table `--config` form does load, but it would put the server URL — and any
+credential embedded in it — into the process argument list, so it is not an
+option either.
 
 ## Phase 3: Collection
 
 Wait for the background task completion notification — do not poll or sleep.
 
 When the notification arrives:
-1. The events file is pure JSONL (`--json` on stdout). Extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — and since that narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty), **forward it verbatim to the presentation step; do NOT regex-parse it**. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
+1. Extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — and since that narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty), **forward it verbatim to the presentation step; do NOT regex-parse it**. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
 
    ```bash
-   jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/goal_research_events_${SUFFIX}.jsonl
+   grep '^{' /tmp/goal_research_events_${SUFFIX}.jsonl \
+     | jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty'
    ```
 
+   The `grep '^{'` is load-bearing, not defensive tidiness: codex prints plain
+   notice lines to stdout alongside the JSONL, and `jq -rs` aborts on the first
+   one and returns nothing. Without the filter a **successful** run reads as the
+   empty extraction the next sentence tells you to treat as a crash.
+
    Reasoning items appear only if codex emits them (config-gated) — do not force them on.
+
+2. **Check that external verification actually happened before presenting anything.**
+   A codex run can complete, answer fluently, and cite sources it never opened —
+   the model falls back to recalled knowledge when the Tavily MCP is unavailable,
+   and nothing in the narrative distinguishes that from a searched answer. Count
+   the tool calls:
+
+   ```bash
+   grep '^{' /tmp/goal_research_events_${SUFFIX}.jsonl \
+     | jq -rs '[.[] | select(.item.type // "" | test("tool_call|mcp")) ] | length'
+   ```
+
+   If that count is `0`, the run performed **no external searches**. Do not
+   present its output as verified research. Say so in the first line of the
+   report, mark every claim in it as recalled-from-training, and surface the
+   warn file — an MCP that failed to start leaves its trace there, not in the
+   narrative.
 
    Some codex warnings ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the trace:
    ```bash
    grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/goal_research_warn_${SUFFIX}.txt || true
    ```
-2. Clean up the temp prompt file, the event stream, and the warn file (after the narrative is forwarded / any failure surfaced):
+3. Clean up the temp prompt file, the event stream, and the warn file (after the narrative is forwarded / any failure surfaced):
    ```bash
    rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl /tmp/goal_research_warn_${SUFFIX}.txt
    ```
