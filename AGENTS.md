@@ -89,7 +89,7 @@ Details: `.claude/skills/verify/references/verification.md`.
 - Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
-- The `.claude/rules/` files whose `paths` scope names a protocol `SKILL.md` state at their own head the moment each one binds; read that head and apply the rule at that moment. A host that loads them on the skill path delivers them without this bullet; a host that does not is why the bullet is here.
+- A `.claude/rules/` file scoped to protocol `SKILL.md` opens by stating the moment it binds, so that a reader arriving without it auto-loaded can tell when it fires; write that opening when authoring one, and read it before editing a protocol. A host that loads them on the skill path delivers them without this bullet; a host that does not is why the bullet is here.
 
 ## Delegation Notes
 
