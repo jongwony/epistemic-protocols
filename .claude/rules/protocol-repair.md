@@ -16,9 +16,8 @@ with a reader who remembered it exists.
 
 # Protocol Repair
 
-The general form — a repair derives from the problem an artifact resolves, not from the site
-its defect was noticed at — is `premise/instruction-authoring.md` §Where a Repair Lands. What
-this rule carries is what re-derivation reaches for in a file of this shape.
+The general form is `premise/instruction-authoring.md` §Where a Repair Lands; read it there.
+What this rule carries is what re-derivation reaches for in a file of this shape.
 
 **The deficit is written down.** A protocol `SKILL.md` names the interaction deficit it takes
 and the resolution type that discharges it, and it names them in the file itself — `AGENTS.md`
@@ -35,8 +34,7 @@ chosen.
 the distinction: a field widened where a case cannot be represented, a rule's subject moved
 where the morphism's unit of presentation changed, an option set indexed on one further axis
 where it is already indexed on another, a grounding entry corrected to the operation it marks.
-`.claude/rules/type-category-convention.md` settles this for TYPES specifically — its
-volatility and openness criteria decide whether the type layer admits a category at all — and
-this rule puts the same question to Rules, TOOL GROUNDING, CONVERGENCE, and gate option sets.
+`.claude/rules/type-category-convention.md` settles this for TYPES specifically; this rule puts
+the same question to Rules, TOOL GROUNDING, CONVERGENCE, and gate option sets.
 An addition considered here and not made is a rejected alternative, and the ledger binding
 `AGENTS.md` §Settled Directions states already routes it.
