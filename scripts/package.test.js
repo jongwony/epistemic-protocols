@@ -393,6 +393,83 @@ describe('goal-research runtime contract', () => {
 });
 
 // ============================================================
+// codex stdout extraction contract (review-loop, image-companion)
+// ============================================================
+
+// codex prints plain notice lines to stdout alongside its `--json` event stream —
+// `Codex autostart is disabled.` survives `2>/dev/null` on codex-cli 0.149.0 — so
+// stdout is NOT pure JSONL. `jq -rs` aborts on the first such line with
+// `parse error: Invalid numeric literal`, exits 5, and prints nothing. Both surfaces
+// below read an empty extraction as "codex failed before answering" / "the call
+// produced no verdict", so without the filter a SUCCESSFUL run is reported as a
+// failure. Both files also asserted the events file was pure JSONL, which is the
+// claim that made the missing filter look deliberate. goal-research/SKILL.md carries
+// the same repair, pinned by the block above; these assertions hold it here.
+
+describe('codex stdout extraction contract', () => {
+  const REPO_ROOT = path.join(__dirname, '..');
+  const surfaces = [
+    [
+      'review-loop codex source adapter',
+      path.join(
+        REPO_ROOT,
+        'epistemic-cooperative',
+        'skills',
+        'review-loop',
+        'references',
+        'source-adapter-codex.md',
+      ),
+    ],
+    [
+      'image-companion',
+      path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'image-companion', 'SKILL.md'),
+    ],
+  ];
+
+  for (const [label, docPath] of surfaces) {
+    it(`${label}: feeds jq only the JSON lines`, () => {
+      const doc = fs.readFileSync(docPath, 'utf8');
+      // Scope to the fenced command blocks. The prose deliberately NAMES `jq -rs` while
+      // explaining why the filter is there, so a whole-file line match would flag the
+      // warning that exists to keep the filter in place.
+      const jqBlocks = (doc.match(/```bash\n([\s\S]*?)```/g) ?? []).filter((b) =>
+        b.includes('jq -rs'),
+      );
+      assert.ok(jqBlocks.length > 0, 'the extraction command must be present');
+      for (const block of jqBlocks) {
+        assert.ok(
+          /grep '\^\{'/.test(block),
+          `jq must be fed only JSON lines, or one plain notice line empties the extraction:\n${block}`,
+        );
+      }
+    });
+
+    it(`${label}: states that stdout is not pure JSONL, and never claims it is`, () => {
+      const doc = fs.readFileSync(docPath, 'utf8');
+      const mentions = [...doc.matchAll(/pure JSONL/g)];
+      assert.ok(
+        mentions.length > 0,
+        'the correction must stay on the surface — deleting it lets the claim back in unnoticed',
+      );
+      for (const m of mentions) {
+        const preceding = doc.slice(Math.max(0, m.index - 60), m.index);
+        assert.ok(
+          /\bnot\b/.test(preceding),
+          `every mention of pure JSONL must be a denial, not an assertion: ...${preceding.trim()} ${m[0]}`,
+        );
+      }
+    });
+
+    it(`${label}: records why the filter is there`, () => {
+      const doc = fs.readFileSync(docPath, 'utf8');
+      // Without its reason recorded beside it, a future author reads `grep '^{'` as
+      // defensive noise on a stream and drops it, restoring the defect silently.
+      assert.match(doc, /load-bearing/i, 'the filter must carry its reason');
+    });
+  }
+});
+
+// ============================================================
 // artifact-self-containment detector liveness
 // ============================================================
 
