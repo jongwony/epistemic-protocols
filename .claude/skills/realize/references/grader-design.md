@@ -15,10 +15,11 @@ already met that wall once, in the byte-identity check that was written and reve
 within a single review thread: the checker was defeated repeatedly by new structural
 cases, and the class of remaining cases could not be shown to be closed.
 
-What stays decidable is behaviour. Whether a tool was called, in what order, how many
-times, and whether the session terminated cleanly are all independent of how the prose
-reads. So the deterministic graders are `tool_used` predicates over the trace, and the
-obligations that live in wording are routed to a judge instead.
+What stays decidable without semantic interpretation is narrower: whether a tool was
+called, whether the tree changed, and whether the session terminated cleanly. Tool
+existence alone does not establish its order relative to a user-facing inquiry. The
+automatic composite uses only those direct observables; obligations needing semantic
+spans are routed to named manual graders until the structured-extraction judge exists.
 
 ## Type to predicate
 
@@ -26,15 +27,16 @@ obligations that live in wording are routed to a judge instead.
 |---|---|---|---|
 | TOOL GROUNDING | Phase 2 is present-and-stop | `no_implementation` | tree |
 | Phase 0 | zero-uncertainty path relays and proceeds | `implementation_happened` | tree |
-| Rule 5 / PHASE TRANSITIONS | collection precedes inquiry | `collection_first` | behaviour |
+| Rule 5 / PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
+| Rule 5 / PHASE TRANSITIONS | collection precedes inquiry | `collection-precedes-inquiry` | manual transcript review |
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
 | — | the protocol loaded and fired | `skill_fired` | behaviour |
-| TYPES | answer set is the declared four-way coproduct | `option-coproduct` | judged |
-| TYPES / Rule 7 | classification shown per uncertainty | `classification-shown` | judged |
-| Rule 3 / Cite-or-observe | cheap evidence resolved, not asked | `cheap-evidence-not-asked` | judged |
-| Phase 0 | sufficiency finding stated rather than skipped | `sufficiency-stated` | judged |
-| Skip conditions | no gate when context is already sufficient | `no-gate` | judged |
-| Rule 7 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | judged |
+| TYPES | answer set is the declared four-way coproduct | `option-coproduct` | manual; judge specified |
+| TYPES / Rule 7 | classification shown per uncertainty | `classification-shown` | manual; judge specified |
+| Rule 3 / Cite-or-observe | cheap evidence resolved, not asked | `cheap-evidence-not-asked` | manual; judge specified |
+| Phase 0 | sufficiency finding stated rather than skipped | `sufficiency-stated` | manual; judge specified |
+| Skip conditions | no gate when context is already sufficient | `no-gate` | manual; judge specified |
+| Rule 7 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | manual; judge specified |
 
 ## Read the tree, not the tool names
 
@@ -63,7 +65,7 @@ naming the skill can close that observability gap. The Codex report therefore ma
 `skill` as `trace-unavailable`; treatment integrity comes from `codex plugin list`
 against the isolated home, while the behavioral predicates determine whether the
 loaded treatment's contract was realized. A shell read of the skill contract, when it
-appears, is excluded from `collection_first`.
+appears, is excluded from `collection_observed`.
 
 ## Granting a tool in order to watch it go unused
 

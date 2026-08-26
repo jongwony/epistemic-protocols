@@ -10,6 +10,9 @@ SKILL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 fail() { printf 'setup: %s\n' "$1" >&2; exit 1; }
 
+realize_target="${1:-${REALIZE_TARGET:-}}"
+[ -n "$realize_target" ] || fail "target skill required (for example: ./setup.sh inquire)"
+
 command -v node   >/dev/null 2>&1 || fail "node not on PATH"
 
 node_major="$(node -p 'process.versions.node.split(".")[0]')"
@@ -22,4 +25,4 @@ case "$realize_runner" in
   *) fail "runner must be claude or codex (found $realize_runner)" ;;
 esac
 
-node "$SKILL/scripts/harness.mjs" setup
+node "$SKILL/scripts/harness.mjs" setup "$realize_target"

@@ -1,6 +1,6 @@
 # Runbook
 
-The workflow, and the four ways it fails quietly.
+The workflow and its quiet failure modes.
 
 ## What a run establishes
 
@@ -9,21 +9,23 @@ operational contract. Static checks confirm that a `SKILL.md` *contains* those b
 Nothing confirms that a *run* realizes them — that the gate actually stopped, that
 collection actually preceded inquiry, that the relay actually proceeded.
 
-This suite closes that gap and nothing wider. It does not measure whether a protocol
-is worth using; that question needs a sample size this design cannot reach and a sham
-arm whose construction is discussed in `grader-design.md`.
+This suite records the run and closes only the predicates it actually executes. It also
+ships manual grader criteria for semantic obligations, but recording a transcript does
+not perform that review. It does not measure whether a protocol is worth using; that
+question needs a sample size this design cannot reach and a sham arm whose construction
+is discussed in `grader-design.md`.
 
 ## Prerequisites
 
 Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` checks the
 active runner and refuses rather than failing halfway.
 
-Claude needs one human step once: obtaining a token against the isolated config
-directory. Codex reuses an existing `codex login` by reference, or reads
-`OPENAI_API_KEY` in CI.
+Claude needs one human step once: obtaining a token against the target-specific
+isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active;
+setup neither consumes nor stores it.
 
 ```bash
-CLAUDE_CONFIG_DIR=~/.claude-eval claude setup-token
+CLAUDE_CONFIG_DIR=~/.claude-eval/inquire claude setup-token
 ```
 
 Store the result wherever secrets belong on that machine. This repository does not
@@ -34,37 +36,39 @@ record its location and `run.sh` will not guess.
 ```bash
 cd .claude/skills/realize/scripts
 
-./setup.sh                                   # fixture + isolated config dir
+./setup.sh inquire                           # fixture + isolated config dir
 
 export CLAUDE_CODE_OAUTH_TOKEN="$(...)" \
-  && ./run.sh                                # run + report
+  && ./run.sh inquire                        # run + report
 
-./teardown.sh                                # volatile state
-./teardown.sh --all                          # + config dir and scratch; setup again after
-./teardown.sh --purge                        # + results (asks first)
+./teardown.sh inquire                        # volatile state
+./teardown.sh inquire --all                  # + config dir and scratch; setup again after
+./teardown.sh inquire --purge                # + results (asks first)
 ```
 
 Fetching the token inside the same command that consumes it keeps the value out of
 files and out of shell history. Only the command's shape is visible, which is what
 makes running it inline safe.
 
-Results are cached per `(runner, model, treatment digest, arm, case, repetition)`.
+Results are cached per `(target, runner, model, treatment digest, arm, case, repetition)`.
 Widening the matrix in `harness.config.json` and re-running fills only the new cells,
 so the ladder can be climbed one model at a time.
 
 For the Codex Luna xhigh profile:
 
 ```bash
-REALIZE_RUNNER=codex ./setup.sh
-REALIZE_RUNNER=codex ./run.sh
-REALIZE_RUNNER=codex node ./harness.mjs report
-REALIZE_RUNNER=codex ./teardown.sh
+REALIZE_RUNNER=codex ./setup.sh inquire
+CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
+REALIZE_RUNNER=codex node ./harness.mjs report inquire
+REALIZE_RUNNER=codex ./teardown.sh inquire
 ```
 
-Codex setup creates disposable `bare` and `protocol` homes. It links the current
-ChatGPT login's `auth.json` rather than copying the credential; `OPENAI_API_KEY` is the
-CI alternative. The protocol home installs this checkout as a local marketplace and
-installs only the selected plugin. The bare home has no marketplace or plugin state.
+Codex setup creates disposable `bare` and `protocol` homes with no `auth.json` or login
+step. The protocol home installs this checkout as a local marketplace and installs only
+the selected plugin. The bare home has no marketplace or plugin state. `run` removes
+`OPENAI_API_KEY` and `CODEX_ACCESS_TOKEN` from child environments and supplies
+`CODEX_API_KEY` only to `codex exec`; plugin setup and integrity checks receive no
+credential.
 Codex supports only the `bare` and `protocol` arms because it has no deployed analogue
 of Claude's output-style treatment. Codex case worktrees live under the system temporary
 directory rather than below this repository, so parent `AGENTS.md` and git state cannot
@@ -129,10 +133,11 @@ them.
 
 ## Running it from CI
 
-`.github/workflows/type-realization.yml` runs the same scripts on a dispatched
-workflow. It has no `pull_request` trigger and is not meant to grow one: every run
-spends real model budget, so binding it to pushes would charge for measurements nobody
-asked for. Dispatch it from the Actions tab against a PR's branch once the PR is open.
+`.github/workflows/type-realization.yml` runs the Claude path on a dispatched workflow.
+It has no `pull_request` trigger and is not meant to grow one: every run spends real
+model budget, so binding it to pushes would charge for measurements nobody asked for.
+Dispatch it from the Actions tab against a PR's branch once the PR is open and select a
+registered target.
 
 With no `pr` input it resolves the PR for the dispatched ref and comments the report
 there; with no PR it leaves the table in the job summary. The matrix inputs — models,
@@ -151,10 +156,16 @@ checkout, the secret check, the install and the setup without spending model bud
 gh workflow run type-realization.yml --ref <branch> -f runs=three -f post_comment=false
 ```
 
-The workflow checks the secret for the selected runner: `CLAUDE_CODE_OAUTH_TOKEN` for
-Claude or `OPENAI_API_KEY` for Codex. It stops before setup when the selected secret is
-absent. A present-but-invalid credential still fails later; that remains distinct from
-a protocol finding because no complete runner start/end event pair is cached.
+The workflow checks `CLAUDE_CODE_OAUTH_TOKEN` and stops before setup when it is absent.
+A present-but-invalid credential still fails later; `run` returns non-zero, `report`
+marks every missing requested cell and also returns non-zero, and partial artifacts are
+still uploaded and commented for diagnosis.
+
+Codex is deliberately local-only here. Official OpenAI documentation requires the
+Codex GitHub Action's credential proxy when a workflow checks out or runs
+repository-controlled code; this harness does not yet have an action-backed adapter
+that preserves its per-cell JSONL contract. The workflow therefore never exposes an
+OpenAI API key to the checked-out harness.
 
 Isolation is nearly free there: a fresh runner has no marketplace plugins, so the
 baseline arm is empty by construction rather than by arrangement. The isolated config
@@ -176,10 +187,11 @@ be. A row whose integrity is short of its `n` is not evidence about the protocol
 the report prints those rows again under a separate heading so they are not read as
 results.
 
-`pass_k` is one when every repetition passed, zero otherwise. A mean would hide the
-repetition that failed, and one failure out of k is what a user actually meets. It reads
-`-` where a cell is unreadable: a predicate that had nothing to read is not a predicate
-that failed, and scoring it zero would publish a missing observation as a negative one.
+`pass_k` is one when every repetition passed the deterministic composite, zero
+otherwise. The `manual` column is separate: it counts transcript judgments whose
+grader files fix the observation criteria but which no automated judge executed.
+Constructor coverage, semantic question ordering, and user-facing classification are
+therefore never implied by an automatic pass.
 
 `skill` says whether the protocol itself fired in an arm that had it available. Without
 it, a run that loaded the plugin, never invoked the protocol, and produced right-looking
@@ -188,11 +200,12 @@ an arm with no plugin, where the skill cannot run and its absence is what `integ
 already asserts.
 
 Codex rows report token use from `turn.completed`. They leave cost blank because the
-CLI does not emit a dollar value for the ChatGPT-authenticated run. Claude rows retain
-the emitted cost. A Codex timeout is a failed launch and is not cached or graded.
+CLI does not emit a dollar value for the API-key run. Claude rows retain the emitted
+cost. A Codex timeout is a failed launch and is not cached or graded.
 
-A cell whose launch never produced a transcript is not written and not counted. Re-running
-picks it up, which a cached empty file would have prevented for good.
+A cell whose launch never produced a transcript is not written or counted. `run` and
+`report` both propagate that incompleteness as failure; re-running can still pick it up,
+which a cached empty file would have prevented for good.
 
 ## Widening
 

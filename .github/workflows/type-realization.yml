@@ -15,20 +15,19 @@ on:
         description: 'PR number to comment on (blank = resolve from the dispatched branch)'
         required: false
         type: string
-      runner:
-        description: 'Agent runner'
+      target:
+        description: 'Skill target'
         required: true
-        default: claude
+        default: inquire
         type: choice
         options:
-          - claude
-          - codex
+          - inquire
       models:
         description: 'Comma-separated model ids (blank = harness.config.json)'
         required: false
         type: string
       arms:
-        description: 'Comma-separated arms (Codex: bare,protocol; Claude also supports style arms)'
+        description: 'Comma-separated arms: bare,style,protocol,protocol+style (blank = all)'
         required: false
         type: string
       cases:
@@ -43,14 +42,6 @@ on:
         description: 'Claude per-run ceiling (blank = harness.config.json)'
         required: false
         type: string
-      reasoning_effort:
-        description: 'Codex reasoning effort (blank = harness.config.json)'
-        required: false
-        type: string
-      timeout_seconds:
-        description: 'Codex per-run timeout (blank = harness.config.json)'
-        required: false
-        type: string
       post_comment:
         description: 'Post the report as a PR comment'
         required: false
@@ -61,7 +52,7 @@ jobs:
   realize:
     runs-on: ubuntu-latest
     # A dispatched matrix can be widened without touching this file, so the ceiling is
-    # generous. The selected runner's per-run budget or timeout is the operative bound.
+    # generous. The per-run budget is the operative bound.
     timeout-minutes: 120
     permissions:
       contents: read
@@ -79,35 +70,16 @@ jobs:
       - name: Require the evaluation token
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          REALIZE_RUNNER: ${{ inputs.runner }}
         run: |
-          case "$REALIZE_RUNNER" in
-            claude)
-              if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
-                echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN is not set on this repository."
-                exit 1
-              fi
-              ;;
-            codex)
-              if [ -z "$OPENAI_API_KEY" ]; then
-                echo "::error::Secret OPENAI_API_KEY is not set on this repository."
-                exit 1
-              fi
-              ;;
-          esac
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN is not set on this repository."
+            exit 1
+          fi
 
       - name: Install Claude Code
-        if: inputs.runner == 'claude'
         run: |
           npm install -g @anthropic-ai/claude-code
           claude --version
-
-      - name: Install Codex
-        if: inputs.runner == 'codex'
-        run: |
-          npm install -g @openai/codex
-          codex --version
 
       - name: Resolve PR context
         id: pr
@@ -137,12 +109,9 @@ jobs:
 
       - name: Set up the isolated evaluation environment
         env:
-          REALIZE_RUNNER: ${{ inputs.runner }}
+          REALIZE_TARGET: ${{ inputs.target }}
           REALIZE_MODELS: ${{ inputs.models }}
-          REALIZE_REASONING_EFFORT: ${{ inputs.reasoning_effort }}
-          REALIZE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: .claude/skills/realize/scripts/setup.sh
+        run: .claude/skills/realize/scripts/setup.sh "$REALIZE_TARGET"
 
       # A fresh runner has no marketplace plugins, so the baseline arm is empty here by
       # construction rather than by arrangement. The isolated config directory is kept
@@ -151,37 +120,38 @@ jobs:
       - name: Run
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          REALIZE_RUNNER: ${{ inputs.runner }}
+          REALIZE_TARGET: ${{ inputs.target }}
           REALIZE_MODELS: ${{ inputs.models }}
           REALIZE_ARMS: ${{ inputs.arms }}
           REALIZE_CASES: ${{ inputs.cases }}
           REALIZE_RUNS: ${{ inputs.runs }}
           REALIZE_MAX_BUDGET_USD: ${{ inputs.max_budget_usd }}
-          REALIZE_REASONING_EFFORT: ${{ inputs.reasoning_effort }}
-          REALIZE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
-        run: node .claude/skills/realize/scripts/harness.mjs run
+        run: node .claude/skills/realize/scripts/harness.mjs run "$REALIZE_TARGET"
 
       - name: Report
+        if: always()
         id: report
         env:
-          REALIZE_RUNNER: ${{ inputs.runner }}
+          REALIZE_TARGET: ${{ inputs.target }}
           REALIZE_MODELS: ${{ inputs.models }}
           REALIZE_ARMS: ${{ inputs.arms }}
           REALIZE_CASES: ${{ inputs.cases }}
           REALIZE_RUNS: ${{ inputs.runs }}
-          REALIZE_REASONING_EFFORT: ${{ inputs.reasoning_effort }}
-          REALIZE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
           REF_NAME: ${{ github.ref_name }}
         run: |
+          set +e
+          node .claude/skills/realize/scripts/harness.mjs report "$REALIZE_TARGET" --markdown > report-body.md
+          report_status=$?
+          set -e
           {
-            echo "## Type realization — \`${REF_NAME}\` @ \`${GITHUB_SHA:0:8}\`"
+            echo "## Type realization — ${REALIZE_TARGET} — \`${REF_NAME}\` @ \`${GITHUB_SHA:0:8}\`"
             echo
-            node .claude/skills/realize/scripts/harness.mjs report --markdown
+            cat report-body.md
             echo
             echo "[run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } > report.md
           cat report.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$report_status"
 
       # Transcripts are observations: re-running produces different ones, so a failed
       # read of the table cannot be recovered by dispatching again.
@@ -195,7 +165,7 @@ jobs:
           retention-days: 30
 
       - name: Comment on the PR
-        if: inputs.post_comment && steps.pr.outputs.number != ''
+        if: always() && inputs.post_comment && steps.pr.outputs.number != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh pr comment "${{ steps.pr.outputs.number }}" --body-file report.md
@@ -203,5 +173,5 @@ jobs:
       - name: Tear down
         if: always()
         env:
-          REALIZE_RUNNER: ${{ inputs.runner }}
-        run: .claude/skills/realize/scripts/teardown.sh
+          REALIZE_TARGET: ${{ inputs.target }}
+        run: .claude/skills/realize/scripts/teardown.sh "$REALIZE_TARGET"

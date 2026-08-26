@@ -1,7 +1,6 @@
 {
   "runner": "claude",
   "configDir": "~/.claude-eval",
-  "pluginDir": "aitesis",
   "styleSource": "epistemic-cooperative/styles/epistemic-ink.md",
   "styleName": "Epistemic Ink",
   "models": [
@@ -13,8 +12,7 @@
       "gpt-5.6-luna"
     ],
     "reasoningEffort": "xhigh",
-    "timeoutSeconds": 420,
-    "invocation": "Use `$aitesis:inquire` first, before any code gets written."
+    "timeoutSeconds": 420
   },
   "arms": {
     "bare": {
@@ -34,10 +32,6 @@
       "style": true
     }
   },
-  "cases": [
-    "inquire-underspecified",
-    "inquire-fully-specified"
-  ],
   "runs": 1,
   "maxBudgetUsd": 2,
   "allowedTools": [
@@ -49,6 +43,18 @@
     "Edit"
   ],
   "permissionMode": "acceptEdits",
-  "protocolSkill": "inquire",
-  "invocation": "Use `/inquire` first, before any code gets written."
+  "targets": {
+    "inquire": {
+      "pluginDir": "aitesis",
+      "protocolSkill": "inquire",
+      "cases": [
+        "inquire-underspecified",
+        "inquire-fully-specified"
+      ],
+      "invocation": {
+        "claude": "Use `/inquire` first, before any code gets written.",
+        "codex": "Use `$aitesis:inquire` first, before any code gets written."
+      }
+    }
+  }
 }

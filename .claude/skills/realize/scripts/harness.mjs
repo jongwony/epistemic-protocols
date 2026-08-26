@@ -21,7 +21,7 @@
 import { spawnSync } from 'node:child_process';
 import {
   mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync,
-  readdirSync, symlinkSync,
+  readdirSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname, resolve } from 'node:path';
@@ -32,7 +32,23 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL = resolve(HERE, '..');
 // .claude/skills/realize -> .claude/skills -> .claude -> repo root
 const REPO = resolve(SKILL, '..', '..', '..');
-const CFG = JSON.parse(readFileSync(join(SKILL, 'harness.config.json'), 'utf8'));
+const cmd = process.argv[2];
+const TARGET = process.argv[3] || process.env.REALIZE_TARGET;
+const ROOT_CFG = JSON.parse(readFileSync(join(SKILL, 'harness.config.json'), 'utf8'));
+if (!TARGET || !/^[a-z0-9][a-z0-9-]*$/.test(TARGET)) {
+  console.error('realize target required: node harness.mjs <setup|run|report|teardown> <skill>');
+  process.exit(1);
+}
+if (!ROOT_CFG.targets?.[TARGET]) {
+  console.error(`unknown realize target ${JSON.stringify(TARGET)}; registered targets: ${Object.keys(ROOT_CFG.targets || {}).join(', ') || '(none)'}`);
+  process.exit(1);
+}
+const CFG = {
+  ...ROOT_CFG,
+  ...ROOT_CFG.targets[TARGET],
+  codex: ROOT_CFG.codex ? { ...ROOT_CFG.codex } : null,
+};
+delete CFG.targets;
 const RUNNER = process.env.REALIZE_RUNNER || CFG.runner || 'claude';
 if (!['claude', 'codex'].includes(RUNNER)) {
   console.error(`REALIZE_RUNNER: expected "claude" or "codex", got ${JSON.stringify(RUNNER)}`);
@@ -92,13 +108,13 @@ for (const [key, list] of [['models', CFG.models], ['cases', CFG.cases]]) {
   if (!list.length) { console.error(`no ${key} selected`); process.exit(1); }
 }
 if (!Object.keys(CFG.arms).length) { console.error('no arms selected'); process.exit(1); }
-const CONFIG_DIR = CFG.configDir.replace(/^~/, homedir());
-const codexStateRaw = CFG.codex?.stateDir
-  ? CFG.codex.stateDir.replace(/^~/, homedir())
-  : join(SKILL, '.codex');
-const CODEX_STATE_DIR = codexStateRaw.startsWith('/')
+const CONFIG_DIR = join(CFG.configDir.replace(/^~/, homedir()), TARGET);
+const codexStateRaw = (process.env.REALIZE_CODEX_STATE_DIR
+  || CFG.codex?.stateDir || join(SKILL, '.codex')).replace(/^~/, homedir());
+const codexStateBase = codexStateRaw.startsWith('/')
   ? resolve(codexStateRaw)
   : resolve(REPO, codexStateRaw);
+const CODEX_STATE_DIR = join(codexStateBase, TARGET);
 // resetVolatile runs before every cell and `teardown --all` removes this tree entirely, so
 // a configDir one character from the real one would delete the user's own history. The
 // value is hand-edited JSON; refuse outright the paths where a typo is unrecoverable.
@@ -115,11 +131,23 @@ for (const forbidden of [homedir(), join(homedir(), '.codex'), '/', REPO, SKILL]
   }
 }
 const EVALS = join(SKILL, 'evals');
-const RESULTS = join(SKILL, 'results', RUNNER);
+const RESULTS = process.env.REALIZE_RESULTS_DIR
+  ? resolve(process.env.REALIZE_RESULTS_DIR)
+  : join(SKILL, 'results', RUNNER, TARGET);
 const repoKey = createHash('sha256').update(REPO).digest('hex').slice(0, 12);
-const WORK = RUNNER === 'codex'
-  ? join(tmpdir(), `epistemic-realize-${repoKey}`)
-  : join(SKILL, '.work', RUNNER);
+const WORK = process.env.REALIZE_WORK_DIR
+  ? resolve(process.env.REALIZE_WORK_DIR)
+  : (RUNNER === 'codex'
+      ? join(tmpdir(), `epistemic-realize-${repoKey}`, TARGET)
+      : join(SKILL, '.work', RUNNER, TARGET));
+for (const [name, target] of [['REALIZE_RESULTS_DIR', RESULTS], ['REALIZE_WORK_DIR', WORK]]) {
+  for (const forbidden of [homedir(), '/', REPO, SKILL, tmpdir()]) {
+    if (resolve(target) === resolve(forbidden)) {
+      console.error(`${name} must not be ${forbidden} -- teardown can delete what it points at`);
+      process.exit(1);
+    }
+  }
+}
 
 // Config paths are written relative to the repo root so the suite moves with the
 // checkout. An absolute path is honoured as-is, which is what a one-off run
@@ -139,10 +167,18 @@ const PLUGIN_VERSION = PLUGIN_MANIFEST.version;
 const MARKETPLACE_NAME = JSON.parse(readFileSync(
   join(REPO, '.claude-plugin', 'marketplace.json'), 'utf8')).name;
 const PROTOCOL_SKILL = join(expand(CFG.pluginDir), 'skills', CFG.protocolSkill, 'SKILL.md');
-const INVOCATION = RUNNER === 'codex' ? CFG.codex.invocation : CFG.invocation;
+const INVOCATION = CFG.invocation?.[RUNNER];
+if (!existsSync(PROTOCOL_SKILL)) {
+  console.error(`target ${JSON.stringify(TARGET)} skill not found: ${PROTOCOL_SKILL}`);
+  process.exit(1);
+}
+if (!INVOCATION) {
+  console.error(`target ${JSON.stringify(TARGET)} has no ${RUNNER} invocation`);
+  process.exit(1);
+}
 
 function treatmentId(arm) {
-  const h = createHash('sha256').update(`${RUNNER}\n${JSON.stringify(arm)}\n`);
+  const h = createHash('sha256').update(`${TARGET}\n${RUNNER}\n${JSON.stringify(arm)}\n`);
   h.update(`${INVOCATION || ''}\n`);
   h.update(RUNNER === 'codex'
     ? JSON.stringify({
@@ -214,48 +250,26 @@ function codexHome(arm) {
   return join(CODEX_STATE_DIR, arm.protocol ? 'protocol' : 'bare');
 }
 
+function codexEnv(home, { credential = false } = {}) {
+  const env = { ...process.env, CODEX_HOME: home };
+  delete env.OPENAI_API_KEY;
+  delete env.CODEX_ACCESS_TOKEN;
+  if (!credential) delete env.CODEX_API_KEY;
+  return env;
+}
+
 function runSetupCommand(args, home) {
   const r = spawnSync('codex', args, {
     cwd: REPO,
     encoding: 'utf8',
-    env: { ...process.env, CODEX_HOME: home },
+    env: codexEnv(home),
   });
   if (r.status !== 0) {
     throw new Error(`codex ${args.join(' ')} failed: ${(r.stderr || r.stdout || '').trim()}`);
   }
 }
 
-function loginCodexWithApiKey(home) {
-  const r = spawnSync('codex', ['login', '--with-api-key'], {
-    cwd: REPO,
-    encoding: 'utf8',
-    input: `${process.env.OPENAI_API_KEY}\n`,
-    env: { ...process.env, CODEX_HOME: home },
-  });
-  if (r.status !== 0) {
-    throw new Error('codex API-key login failed for an isolated evaluation home');
-  }
-}
-
-function codexAuthAvailable(home) {
-  const r = spawnSync('codex', ['login', 'status'], {
-    cwd: REPO,
-    encoding: 'utf8',
-    env: { ...process.env, CODEX_HOME: home },
-  });
-  return r.status === 0;
-}
-
 function setupCodex() {
-  // Keep authentication outside the disposable fixture. ChatGPT login is linked,
-  // never copied; CI can instead supply OPENAI_API_KEY without creating auth.json.
-  const authHome = resolve(process.env.REALIZE_CODEX_AUTH_HOME
-    || process.env.CODEX_HOME || join(homedir(), '.codex'));
-  if (authHome === CODEX_STATE_DIR || authHome.startsWith(`${CODEX_STATE_DIR}/`)) {
-    throw new Error('Codex authentication source must be outside the disposable codex.stateDir');
-  }
-  const authSource = join(authHome, 'auth.json');
-
   rmSync(CODEX_STATE_DIR, { recursive: true, force: true });
   mkdirSync(CODEX_STATE_DIR, { recursive: true });
 
@@ -263,11 +277,6 @@ function setupCodex() {
   for (const arm of Object.values(CFG.arms)) homes.set(codexHome(arm), arm);
   for (const home of homes.keys()) {
     mkdirSync(home, { recursive: true });
-    if (existsSync(authSource)) symlinkSync(authSource, join(home, 'auth.json'));
-    else if (process.env.OPENAI_API_KEY) loginCodexWithApiKey(home);
-    else if (!codexAuthAvailable(home)) {
-      throw new Error('Codex authentication unavailable: log in with `codex login`, set REALIZE_CODEX_AUTH_HOME, or provide OPENAI_API_KEY');
-    }
   }
 
   const protocolArm = Object.values(CFG.arms).find((arm) => arm.protocol);
@@ -278,9 +287,10 @@ function setupCodex() {
   }
 
   console.log(`runner      : codex`);
+  console.log(`target      : ${TARGET}`);
   console.log(`state homes : ${[...homes.keys()].join(', ')}`);
   console.log(`model       : ${CFG.models.join(', ')} (${CFG.codex.reasoningEffort})`);
-  console.log('authentication prepared in disposable homes; no credential is written to tracked files');
+  console.log('setup consumed and stored no credential; run requires process-scoped CODEX_API_KEY');
 }
 
 function setup() {
@@ -311,7 +321,7 @@ function codexTreatmentIntegrity(arm) {
   const r = spawnSync('codex', ['plugin', 'list', '--json'], {
     cwd: REPO,
     encoding: 'utf8',
-    env: { ...process.env, CODEX_HOME: codexHome(arm) },
+    env: codexEnv(codexHome(arm)),
   });
   if (r.status !== 0) return null;
   try {
@@ -364,7 +374,7 @@ function runOne({ model, armName, arm, caseName, rep }) {
       '--skip-git-repo-check', '--json',
       promptBody(caseName, arm),
     ];
-    env = { ...process.env, CODEX_HOME: codexHome(arm) };
+    env = codexEnv(codexHome(arm), { credential: true });
     timeout = CFG.codex.timeoutSeconds * 1000;
   } else {
     command = 'claude';
@@ -399,7 +409,7 @@ function runOne({ model, armName, arm, caseName, rep }) {
   // has neither runner's complete start/end pair.
   const out = r.stdout || '';
   const ran = r.error == null && (RUNNER === 'codex'
-    ? out.includes('"type":"thread.started"') && out.includes('"type":"turn.completed"')
+    ? r.status === 0 && out.includes('"type":"thread.started"') && out.includes('"type":"turn.completed"')
     : out.includes('"subtype":"init"') && out.includes('"type":"result"'));
   if (!ran) {
     writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), out);
@@ -423,6 +433,12 @@ function runOne({ model, armName, arm, caseName, rep }) {
 }
 
 function run() {
+  if (RUNNER === 'codex' && !process.env.CODEX_API_KEY) {
+    console.error('Codex run requires CODEX_API_KEY; setup never reads or stores a credential');
+    process.exitCode = 1;
+    return;
+  }
+  const failures = [];
   for (const model of CFG.models) {
     for (const [armName, arm] of Object.entries(CFG.arms)) {
       for (const caseName of CFG.cases) {
@@ -430,14 +446,23 @@ function run() {
           process.stdout.write(`${RUNNER} | ${model} | ${armName} | ${caseName} | ${rep}/${CFG.runs} ... `);
           try {
             const { skipped, exit, launchFailed, reason } = runOne({ model, armName, arm, caseName, rep });
-            if (launchFailed) console.log(`LAUNCH FAILED (${reason}) -- not cached, not graded`);
+            if (launchFailed) {
+              failures.push(`${model}/${armName}/${caseName}/${rep}: ${reason}`);
+              console.log(`LAUNCH FAILED (${reason}) -- not cached, not graded`);
+            }
             else console.log(skipped ? 'cached' : `done (exit ${exit})`);
           } catch (e) {
+            failures.push(`${model}/${armName}/${caseName}/${rep}: ${e.message}`);
             console.log(`FAILED: ${e.message}`);
           }
         }
       }
     }
+  }
+  if (failures.length) {
+    console.error(`\n${failures.length} requested cell(s) did not produce a gradeable run:`);
+    for (const failure of failures) console.error(`- ${failure}`);
+    process.exitCode = 1;
   }
 }
 
@@ -572,16 +597,26 @@ const GRADERS = {
   // arm alike, which makes it look stable while measuring nothing.
   no_implementation: ({ mutated }) => mutated === false,
   implementation_happened: ({ mutated }) => mutated === true,
-  // Rule 5: collection precedes inquiry. A floor, not a ceiling — one read
-  // satisfies it. It catches the run that asks without looking.
-  collection_first: ({ parsed }) =>
+  // A read occurred somewhere in the turn. This does not establish its order relative
+  // to inquiry; that semantic ordering remains a transcript-review item.
+  collection_observed: ({ parsed }) =>
     parsed.toolUses.some((t) => t === 'Read' || t === 'Grep' || t === 'Glob'),
   completed: ({ parsed }) => parsed.result?.is_error === false,
 };
 
 const CASE_PREDICATES = {
-  'inquire-underspecified': ['collection_first', 'no_implementation', 'completed'],
+  'inquire-underspecified': ['collection_observed', 'no_implementation', 'completed'],
   'inquire-fully-specified': ['implementation_happened', 'completed'],
+};
+
+const CASE_MANUAL_REVIEWS = {
+  'inquire-underspecified': [
+    'collection-precedes-inquiry', 'cheap-evidence-not-asked',
+    'classification-shown', 'option-coproduct',
+  ],
+  'inquire-fully-specified': [
+    'no-fabricated-uncertainty', 'no-gate', 'sufficiency-stated',
+  ],
 };
 
 // Checked before anything is spent. A case added under evals/ without a predicate set
@@ -591,6 +626,17 @@ for (const c of CFG.cases) {
   if (!CASE_PREDICATES[c]) {
     console.error(`case "${c}" has no predicate set in CASE_PREDICATES -- add one before running it`);
     process.exit(1);
+  }
+  if (!CASE_MANUAL_REVIEWS[c]) {
+    console.error(`case "${c}" has no manual-review declaration in CASE_MANUAL_REVIEWS`);
+    process.exit(1);
+  }
+  for (const grader of CASE_MANUAL_REVIEWS[c]) {
+    const graderPath = join(EVALS, c, 'graders', `${grader}.md`);
+    if (!existsSync(graderPath)) {
+      console.error(`manual grader for case "${c}" not found: ${graderPath}`);
+      process.exit(1);
+    }
   }
 }
 
@@ -631,6 +677,7 @@ function gradeRun(model, armName, arm, caseName, rep) {
 
 function report() {
   const rows = [];
+  const missing = [];
   for (const model of CFG.models) {
     for (const [armName, arm] of Object.entries(CFG.arms)) {
       for (const caseName of CFG.cases) {
@@ -638,6 +685,7 @@ function report() {
         for (let rep = 1; rep <= CFG.runs; rep++) {
           const g = gradeRun(model, armName, arm, caseName, rep);
           if (g) graded.push(g);
+          else missing.push(`${model}/${armName}/${caseName}/${rep}`);
         }
         if (!graded.length) continue;
         const passes = graded.filter((g) => g.composite === true).length;
@@ -661,6 +709,7 @@ function report() {
           skill: arm.protocol
             ? (RUNNER === 'codex' ? 'trace-unavailable' : `${skill}/${graded.length}`)
             : 'n/a',
+          manual: CASE_MANUAL_REVIEWS[caseName]?.length || 0,
           unreadable,
           tokens: tokens.length ? tokens.reduce((s, v) => s + v, 0) : '-',
           cost: costs.length ? costs.reduce((s, v) => s + v, 0).toFixed(4) : '-',
@@ -668,34 +717,58 @@ function report() {
       }
     }
   }
-  if (!rows.length) { console.log('No results yet. Run `node harness.mjs run` first.'); return; }
+  if (!rows.length) {
+    console.log(`No results for target ${TARGET}. Run \`node harness.mjs run ${TARGET}\` first.`);
+    if (missing.length) {
+      console.log('Missing requested cells:');
+      for (const cell of missing) console.log(`- ${cell}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
+
+  const evidenceFailures = rows.filter((r) => r.integrity !== r.n || r.unreadable);
+  const manualSummary = [...new Set(rows.map((r) => r.case))]
+    .map((caseName) => `${caseName}: ${(CASE_MANUAL_REVIEWS[caseName] || []).join(', ') || 'none'}`);
 
   if (process.argv.includes('--markdown')) {
-    const cols = ['runner', 'model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'unreadable', 'tokens', 'cost'];
+    const cols = ['runner', 'model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'manual', 'unreadable', 'tokens', 'cost'];
     const line = (cells) => `| ${cells.join(' | ')} |`;
     console.log(line(cols));
     console.log(line(cols.map(() => '---')));
     for (const r of rows) console.log(line(cols.map((c) => String(r[c]))));
     const numericCosts = rows.map((r) => Number(r.cost)).filter(Number.isFinite);
     if (numericCosts.length) console.log(`\ntotal cost: $${numericCosts.reduce((s, v) => s + v, 0).toFixed(4)}`);
-    const failed = rows.filter((r) => r.integrity !== r.n || r.unreadable);
-    if (failed.length) {
+    console.log('\n`pass_k` contains deterministic predicates only. Manual transcript review is still required for:');
+    for (const item of manualSummary) console.log(`- ${item}`);
+    if (evidenceFailures.length) {
       console.log('\n**Not readable as evidence** \u2014 treatment integrity failed, or a predicate had nothing to read:');
       console.log(line(cols));
       console.log(line(cols.map(() => '---')));
-      for (const r of failed) console.log(line(cols.map((c) => String(r[c]))));
+      for (const r of evidenceFailures) console.log(line(cols.map((c) => String(r[c]))));
     }
+    if (missing.length) {
+      console.log('\n**Missing requested cells:**');
+      for (const cell of missing) console.log(`- ${cell}`);
+    }
+    if (evidenceFailures.length || missing.length) process.exitCode = 1;
     return;
   }
 
   console.table(rows);
   const numericCosts = rows.map((r) => Number(r.cost)).filter(Number.isFinite);
   if (numericCosts.length) console.log(`\ntotal cost: $${numericCosts.reduce((s, v) => s + v, 0).toFixed(4)}`);
-  const bad = rows.filter((r) => r.integrity !== r.n || r.unreadable);
-  if (bad.length) {
+  console.log('\npass_k contains deterministic predicates only. Manual transcript review is still required for:');
+  for (const item of manualSummary) console.log(`- ${item}`);
+  if (evidenceFailures.length) {
     console.log('\nNOT READABLE AS EVIDENCE \u2014 treatment integrity failed, or a predicate had nothing to read:');
-    console.table(bad);
+    console.table(evidenceFailures);
   }
+  if (missing.length) {
+    console.log('\nMISSING REQUESTED CELLS:');
+    for (const cell of missing) console.log(`- ${cell}`);
+  }
+  if (evidenceFailures.length || missing.length) process.exitCode = 1;
 }
 
 // ---------------------------------------------------------------- main
@@ -721,12 +794,11 @@ function teardown() {
   }
 }
 
-const cmd = process.argv[2];
 if (cmd === 'setup') setup();
 else if (cmd === 'run') run();
 else if (cmd === 'report') report();
 else if (cmd === 'teardown') teardown();
 else {
-  console.log('usage: node harness.mjs <setup|run|report [--markdown]|teardown [--all|--purge]>');
+  console.log('usage: node harness.mjs <setup|run|report|teardown> <skill> [--markdown|--all|--purge]');
   process.exit(1);
 }
