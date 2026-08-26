@@ -2,12 +2,6 @@
 
 The cognitive and collaboration premises behind structured human-AI dialogue — stated so they hold on their own, independent of any specific codebase, tool, or harness that happens to implement them.
 
-Where a document depends on a concept from another, it says so and names the file. [`README.md`](README.md) covers adopting these documents and wiring them into a setup.
-
-## Documents
-
-Each entry below names a moment rather than a subject, so what fires it is recognizing that moment in the work at hand — an inference drawn from what is actually happening, not from what the work is nominally about. A document here reaches a conversation about a contract, a summary, or a diagnosis as readily as one about code.
-
 Read [`recognition-and-authority.md`](recognition-and-authority.md) when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a specification may fix a criterion's answer in advance at all.
 
 Read [`interaction-factorization.md`](interaction-factorization.md) when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several.

@@ -50,23 +50,7 @@ Create that file with this content after applying the shared procedure's preview
 ```markdown
 # Premise Layer
 
-The general principles behind your operating rules live outside this directory, at
-`<PREMISE_PATH>` — a git clone the plugin manager keeps in sync.
-Read from it freely; never write to it.
-
-The split: your own rules — this directory and the rest of your configuration — carry the
-operational side: when a principle fires here, what threshold applies, which tool or path it binds
-to, what this setup has settled on. The principle itself lives in `premise/`. When one of your rules
-names a premise document, read that document before acting on a case its operational wording does
-not already settle.
-
-The index loads below. It names each document and the moment that calls for it, so the moment is
-recognized rather than recalled. The two documents that bear on every turn load with it; the rest
-are read on demand when their trigger fires.
-
 @<PREMISE_PATH>/AGENTS.md
-@<PREMISE_PATH>/recognition-and-authority.md
-@<PREMISE_PATH>/approach-verification.md
 ```
 
 An existing `rules/premise.md` is an existing wiring decision. Show the proposed integration and
@@ -74,6 +58,6 @@ let the person decide how it joins that file; do not replace it as though it wer
 
 ### Verification
 
-Start a fresh session and run `/context`. The target rules file and its three imports should appear
-under **Memory files**. Then run the shared procedure's complete-entry question for
+Start a fresh session and run `/context`. The target rules file and the index it imports should
+appear under **Memory files**. Then run the shared procedure's complete-entry question for
 `matching-the-request.md`.

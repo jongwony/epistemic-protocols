@@ -61,21 +61,9 @@ the section the same heading level as the target file's other top-level sections
 ```markdown
 # Premise Layer
 
-The general principles behind the rules in this file live at
-`<PREMISE_PATH>` — a git clone Codex's plugin manager keeps in sync.
-Read from it freely; never write to it.
-
 `<PREMISE_PATH>/AGENTS.md` is the index: it names each document and the moment that calls for it.
 Read it at the start of a session, before the first substantive action, so those moments are
-recognized rather than recalled. Read `<PREMISE_PATH>/recognition-and-authority.md` and
-`<PREMISE_PATH>/approach-verification.md` alongside it — those two bear on every turn. Read any
-other document at the moment the index names for it.
-
-The split: the rest of this file and the rest of your configuration carry the operational side —
-when a principle fires here, what threshold applies, which tool or path it binds to, what this setup
-has settled on. The principle itself lives in the premise documents. When one of your rules names a
-premise document, read that document before acting on a case its operational wording does not
-already settle.
+recognized rather than recalled. Read any other document at the moment the index names for it.
 ```
 
 ### Verification

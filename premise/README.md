@@ -20,12 +20,7 @@ delivery mechanism, and verification check:
 
 **If you are an agent and someone handed you this URL**: identify the host you are running in, read
 this shared procedure and that host's reference before acting, then follow them as one procedure end
-to end. A go-ahead checkpoint before the global write pauses the procedure; once the person gives
-it, resume and complete the approved write. Follow one host reference only.
-
-Both adapters wire the machine the host is running on. A run isolated from its configuration and
-marketplace files cannot follow either path; establish the layer on the instruction surface that
-the isolated run actually receives instead.
+to end. Follow one host reference only.
 
 ## Shared procedure
 
@@ -60,10 +55,6 @@ Before writing:
 The checkpoint authorizes the write it previewed. Once approval arrives, perform that write and
 continue to verification rather than treating approval as completion.
 
-The standing layer carries the index plus `recognition-and-authority.md` and
-`approach-verification.md`, the two documents that bear on every turn. The index names when to read
-every other document.
-
 ### 4. Verify in a fresh session
 
 Use the host reference's loading check, then ask the fresh session to reproduce the complete index
@@ -72,8 +63,8 @@ question granularity, and a time or date without a stated zone. Requiring all fo
 depend on the index rather than on a guess from the filename.
 
 A correct response establishes that the index was reached at the configured path in that session.
-It does not establish that the two other standing documents were also read, or that another session
-will behave the same way. Treat a wrong answer as an absent layer.
+It does not establish that another session will behave the same way. Treat a wrong answer as an
+absent layer.
 
 ## Keeping it current
 
@@ -87,11 +78,11 @@ clone as the premise root. The rest of the procedure is unchanged.
 
 ## Adapting
 
-The three standing documents above are one setup's choice, not a required set. A document you adopt
-governs the general principles within the scope you adopted it for; a document you do not adopt
-governs nothing. A project may bind a narrower or wider set on its own instruction surface without
-changing the global layer. Where a host instruction and an adopted document disagree on a general
-principle, the document is the one to reason from.
+The standing set above is one setup's choice, not a required set. A document you adopt governs the
+general principles within the scope you adopted it for; a document you do not adopt governs nothing.
+A project may bind a narrower or wider set on its own instruction surface without changing the
+global layer. Where a host instruction and an adopted document disagree on a general principle, the
+document is the one to reason from.
 
 Your own instructions supply what an adopted document deliberately leaves open — the concrete
 surface a principle binds to, the value your project has settled on — rather than restating the
