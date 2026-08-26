@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Remove what a run leaves behind, at one of three depths.
 #
-# Nothing here is irreplaceable. Authentication arrives through the environment
-# rather than the config directory -- the init event reports `apiKeySource: "none"`
-# -- so there is no credential to preserve and no re-login to schedule.
+# Nothing here is irreplaceable. Claude authentication arrives through the
+# environment. Codex either reads OPENAI_API_KEY or follows an auth.json symlink;
+# teardown removes only the disposable link, never the credential it points to.
 #
 #   (default)  volatile state only; the fixture survives, `run` works immediately
 #   --all      the config directory and scratch trees; `setup` must run again

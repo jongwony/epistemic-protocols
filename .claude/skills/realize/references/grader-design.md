@@ -56,6 +56,15 @@ Built-in skills exist in an arm with no plugins at all, so the `Skill` tool fire
 the baseline too. Only the invoked skill's identity separates the treatment from the
 tool being generally available.
 
+Codex JSONL currently exposes no distinct skill-invocation event. Some runs show a
+shell read of the installed `SKILL.md`; others receive the same skill through internal
+host loading and show no read at all. Neither prompt text nor an assistant message
+naming the skill can close that observability gap. The Codex report therefore marks
+`skill` as `trace-unavailable`; treatment integrity comes from `codex plugin list`
+against the isolated home, while the behavioral predicates determine whether the
+loaded treatment's contract was realized. A shell read of the skill contract, when it
+appears, is excluded from `collection_first`.
+
 ## Granting a tool in order to watch it go unused
 
 `Write` and `Edit` are in `allowed_tools` for the trigger-positive case even though
@@ -92,7 +101,7 @@ negative case wants reading as an adversary would read it, because the protocol 
 
 ## The arm matrix
 
-Four arms cross the protocol against the output style that ships beside it.
+Claude's four arms cross the protocol against the output style that ships beside it.
 
 | arm | protocol | style | answers |
 |---|---|---|---|
@@ -114,6 +123,11 @@ about this protocol's four constructors or its classification triple.
 `SKILL.md` to be self-contained. If the declared type is realized only when the output
 style is also loaded, that requirement is not being met, and no channel currently
 reports it.
+
+Codex runs the `bare` and `protocol` subset only. It has no deployed output-style
+treatment corresponding to Claude's `--settings` arm, so inventing one in the prompt
+would measure a new treatment rather than the shipped configuration. An explicit
+request for a Codex style arm fails closed.
 
 ## Treatment integrity comes first
 

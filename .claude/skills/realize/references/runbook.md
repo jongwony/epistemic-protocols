@@ -15,10 +15,12 @@ arm whose construction is discussed in `grader-design.md`.
 
 ## Prerequisites
 
-Node 22+, `claude` on PATH. `setup.sh` checks both and refuses rather than failing
-halfway.
+Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` checks the
+active runner and refuses rather than failing halfway.
 
-One step needs a human, once: obtaining a token against the isolated config directory.
+Claude needs one human step once: obtaining a token against the isolated config
+directory. Codex reuses an existing `codex login` by reference, or reads
+`OPENAI_API_KEY` in CI.
 
 ```bash
 CLAUDE_CONFIG_DIR=~/.claude-eval claude setup-token
@@ -46,11 +48,35 @@ Fetching the token inside the same command that consumes it keeps the value out 
 files and out of shell history. Only the command's shape is visible, which is what
 makes running it inline safe.
 
-Results are cached per `(model, arm, case, repetition)`. Widening the matrix in
-`harness.config.json` and re-running fills only the new cells, so the ladder can be
-climbed one model at a time.
+Results are cached per `(runner, model, treatment digest, arm, case, repetition)`.
+Widening the matrix in `harness.config.json` and re-running fills only the new cells,
+so the ladder can be climbed one model at a time.
 
-## Four quiet failures
+For the Codex Luna xhigh profile:
+
+```bash
+REALIZE_RUNNER=codex ./setup.sh
+REALIZE_RUNNER=codex ./run.sh
+REALIZE_RUNNER=codex node ./harness.mjs report
+REALIZE_RUNNER=codex ./teardown.sh
+```
+
+Codex setup creates disposable `bare` and `protocol` homes. It links the current
+ChatGPT login's `auth.json` rather than copying the credential; `OPENAI_API_KEY` is the
+CI alternative. The protocol home installs this checkout as a local marketplace and
+installs only the selected plugin. The bare home has no marketplace or plugin state.
+Codex supports only the `bare` and `protocol` arms because it has no deployed analogue
+of Claude's output-style treatment. Codex case worktrees live under the system temporary
+directory rather than below this repository, so parent `AGENTS.md` and git state cannot
+be mistaken for fixture evidence.
+
+Cache identity includes the runner and a digest of the actual protocol/style files.
+Editing prose for an ablation therefore creates a new cell instead of reusing the
+pre-ablation transcript. Codex also compares the installed cache's `SKILL.md` digest
+to the source immediately before spending a run; an edit made after setup fails closed
+with an instruction to rerun setup instead of measuring stale treatment bytes.
+
+## Quiet failures
 
 Each of these produces a transcript indistinguishable from the protocol behaving
 badly. They are listed because none of them announces itself.
@@ -66,6 +92,16 @@ becomes treatment against itself. Setting `enabledPlugins` to an empty object th
 The only arrangement observed to yield an empty plugin set is a `CLAUDE_CONFIG_DIR`
 pointing at a directory with nothing in it. That is why isolation lives at the config
 directory rather than in a flag.
+
+### Codex `--ignore-user-config` also removes the installed treatment
+
+For Codex, `--ignore-user-config` is not a protocol-arm isolation mechanism: an
+installed local plugin was no longer discoverable when that flag was present. The
+harness instead gives each treatment its own `CODEX_HOME` and does not pass the flag.
+Treatment integrity is checked before the run with `codex plugin list` against that
+home. Codex JSONL does not consistently emit a skill-invocation event, so the report
+marks that field `trace-unavailable`; a model merely saying the skill name is never
+counted as invocation evidence.
 
 ### The token variable name is exact
 
@@ -115,12 +151,10 @@ checkout, the secret check, the install and the setup without spending model bud
 gh workflow run type-realization.yml --ref <branch> -f runs=three -f post_comment=false
 ```
 
-The workflow needs one repository secret, `CLAUDE_CODE_OAUTH_TOKEN`, holding a token
-obtained the same way as for a local run. The first step checks that it is set at all
-and stops there if it is not, because an absent secret would otherwise surface as
-"Not logged in" — which reads as a broken token rather than a missing one. That check
-distinguishes only those two: a token that is present but no longer valid still fails
-later, at the same message.
+The workflow checks the secret for the selected runner: `CLAUDE_CODE_OAUTH_TOKEN` for
+Claude or `OPENAI_API_KEY` for Codex. It stops before setup when the selected secret is
+absent. A present-but-invalid credential still fails later; that remains distinct from
+a protocol finding because no complete runner start/end event pair is cached.
 
 Isolation is nearly free there: a fresh runner has no marketplace plugins, so the
 baseline arm is empty by construction rather than by arrangement. The isolated config
@@ -152,6 +186,10 @@ it, a run that loaded the plugin, never invoked the protocol, and produced right
 behaviour anyway is indistinguishable from one that ran the contract. It reads `n/a` in
 an arm with no plugin, where the skill cannot run and its absence is what `integrity`
 already asserts.
+
+Codex rows report token use from `turn.completed`. They leave cost blank because the
+CLI does not emit a dollar value for the ChatGPT-authenticated run. Claude rows retain
+the emitted cost. A Codex timeout is a failed launch and is not cached or graded.
 
 A cell whose launch never produced a transcript is not written and not counted. Re-running
 picks it up, which a cached empty file would have prevented for good.

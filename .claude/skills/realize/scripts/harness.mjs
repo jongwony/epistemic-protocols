@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Type-realization harness for epistemic protocol skills.
 //
-// Runs `claude -p` across (model x arm x case x repetition), captures the
-// stream-json trace, and grades the protocol's DECLARED CONTRACT from it.
+// Runs a selected agent CLI across (model x arm x case x repetition), captures
+// its JSONL trace, and grades the protocol's DECLARED CONTRACT from behaviour.
 //
 // Why the CLI rather than `claude plugin eval`: that subcommand is gated behind
 // early access. Everything it would have given us is reachable from the CLI —
@@ -10,32 +10,51 @@
 // `--max-budget-usd` for the ceiling. What we lose is reporting, which is cheap
 // to rebuild and lives in `report` below.
 //
-// Why an isolated CLAUDE_CONFIG_DIR: a normal config loads every installed
-// plugin (measured: 40 of them), so an arm without --plugin-dir still has the
-// protocol under test present via the marketplace. That is not a baseline, it is
-// the same treatment reached by another path. A config dir with nothing in it is
-// the only arrangement observed to yield an empty plugin set.
+// Both runners isolate their plugin state. Claude uses an empty
+// CLAUDE_CONFIG_DIR plus --plugin-dir on treatment arms. Codex uses one minimal
+// CODEX_HOME per treatment, with the local marketplace installed only in the
+// protocol home. Ambient plugins would turn a baseline into the treatment by a
+// second path, making every comparison unreadable.
 //
 // Node stdlib only.
 
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync, readdirSync } from 'node:fs';
+import {
+  mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync,
+  readdirSync, symlinkSync,
+} from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { homedir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL = resolve(HERE, '..');
 // .claude/skills/realize -> .claude/skills -> .claude -> repo root
 const REPO = resolve(SKILL, '..', '..', '..');
 const CFG = JSON.parse(readFileSync(join(SKILL, 'harness.config.json'), 'utf8'));
+const RUNNER = process.env.REALIZE_RUNNER || CFG.runner || 'claude';
+if (!['claude', 'codex'].includes(RUNNER)) {
+  console.error(`REALIZE_RUNNER: expected "claude" or "codex", got ${JSON.stringify(RUNNER)}`);
+  process.exit(1);
+}
+if (RUNNER === 'codex') {
+  if (!CFG.codex) { console.error('missing codex configuration'); process.exit(1); }
+  CFG.models = CFG.codex.models;
+}
 
 // Environment overrides exist for one caller: a workflow that is dispatched by hand
 // with a narrower matrix than the file describes. Editing the committed config from
 // CI would make the run unreproducible from the checkout it claims to test.
 const csv = (v) => v.split(',').map((x) => x.trim()).filter(Boolean);
 if (process.env.REALIZE_MODELS) CFG.models = csv(process.env.REALIZE_MODELS);
+if (process.env.REALIZE_REASONING_EFFORT) {
+  if (RUNNER !== 'codex') {
+    console.error('REALIZE_REASONING_EFFORT applies only to the codex runner');
+    process.exit(1);
+  }
+  CFG.codex.reasoningEffort = process.env.REALIZE_REASONING_EFFORT;
+}
 // A malformed number becomes NaN, and NaN empties the repetition loop rather than
 // erroring: no cell runs, the report says there are no results, and the job still exits
 // green. A run that measured nothing must not be reportable as a run that measured a null.
@@ -49,16 +68,37 @@ const num = (name, raw) => {
 };
 if (process.env.REALIZE_RUNS) CFG.runs = num('REALIZE_RUNS', process.env.REALIZE_RUNS);
 if (process.env.REALIZE_MAX_BUDGET_USD) CFG.maxBudgetUsd = num('REALIZE_MAX_BUDGET_USD', process.env.REALIZE_MAX_BUDGET_USD);
+if (process.env.REALIZE_TIMEOUT_SECONDS) {
+  if (RUNNER !== 'codex') {
+    console.error('REALIZE_TIMEOUT_SECONDS applies only to the codex runner');
+    process.exit(1);
+  }
+  CFG.codex.timeoutSeconds = num('REALIZE_TIMEOUT_SECONDS', process.env.REALIZE_TIMEOUT_SECONDS);
+}
 if (process.env.REALIZE_CASES) CFG.cases = csv(process.env.REALIZE_CASES);
+const requestedArms = process.env.REALIZE_ARMS ? new Set(csv(process.env.REALIZE_ARMS)) : null;
 if (process.env.REALIZE_ARMS) {
-  const keep = new Set(csv(process.env.REALIZE_ARMS));
-  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([k]) => keep.has(k)));
+  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([k]) => requestedArms.has(k)));
+}
+if (RUNNER === 'codex') {
+  const styleArms = Object.entries(CFG.arms).filter(([, arm]) => arm.style).map(([name]) => name);
+  if (requestedArms && styleArms.length) {
+    console.error(`codex runner has no output-style treatment; unsupported arms: ${styleArms.join(', ')}`);
+    process.exit(1);
+  }
+  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([, arm]) => !arm.style));
 }
 for (const [key, list] of [['models', CFG.models], ['cases', CFG.cases]]) {
   if (!list.length) { console.error(`no ${key} selected`); process.exit(1); }
 }
 if (!Object.keys(CFG.arms).length) { console.error('no arms selected'); process.exit(1); }
 const CONFIG_DIR = CFG.configDir.replace(/^~/, homedir());
+const codexStateRaw = CFG.codex?.stateDir
+  ? CFG.codex.stateDir.replace(/^~/, homedir())
+  : join(SKILL, '.codex');
+const CODEX_STATE_DIR = codexStateRaw.startsWith('/')
+  ? resolve(codexStateRaw)
+  : resolve(REPO, codexStateRaw);
 // resetVolatile runs before every cell and `teardown --all` removes this tree entirely, so
 // a configDir one character from the real one would delete the user's own history. The
 // value is hand-edited JSON; refuse outright the paths where a typo is unrecoverable.
@@ -68,9 +108,18 @@ for (const forbidden of [homedir(), join(homedir(), '.claude'), '/']) {
     process.exit(1);
   }
 }
+for (const forbidden of [homedir(), join(homedir(), '.codex'), '/', REPO, SKILL]) {
+  if (resolve(CODEX_STATE_DIR) === resolve(forbidden)) {
+    console.error(`codex.stateDir must not be ${forbidden} -- this harness deletes what it points at`);
+    process.exit(1);
+  }
+}
 const EVALS = join(SKILL, 'evals');
-const RESULTS = join(SKILL, 'results');
-const WORK = join(SKILL, '.work');
+const RESULTS = join(SKILL, 'results', RUNNER);
+const repoKey = createHash('sha256').update(REPO).digest('hex').slice(0, 12);
+const WORK = RUNNER === 'codex'
+  ? join(tmpdir(), `epistemic-realize-${repoKey}`)
+  : join(SKILL, '.work', RUNNER);
 
 // Config paths are written relative to the repo root so the suite moves with the
 // checkout. An absolute path is honoured as-is, which is what a one-off run
@@ -83,8 +132,32 @@ const expand = (p) => {
 // The plugin names itself in its manifest. Hardcoding the name here would make integrity
 // report a total failure the moment pluginDir is pointed at a different protocol -- the
 // measurement declared unreadable while the run itself was fine.
-const PLUGIN_NAME = JSON.parse(readFileSync(
-  join(expand(CFG.pluginDir), '.claude-plugin', 'plugin.json'), 'utf8')).name;
+const PLUGIN_MANIFEST = JSON.parse(readFileSync(
+  join(expand(CFG.pluginDir), '.codex-plugin', 'plugin.json'), 'utf8'));
+const PLUGIN_NAME = PLUGIN_MANIFEST.name;
+const PLUGIN_VERSION = PLUGIN_MANIFEST.version;
+const MARKETPLACE_NAME = JSON.parse(readFileSync(
+  join(REPO, '.claude-plugin', 'marketplace.json'), 'utf8')).name;
+const PROTOCOL_SKILL = join(expand(CFG.pluginDir), 'skills', CFG.protocolSkill, 'SKILL.md');
+const INVOCATION = RUNNER === 'codex' ? CFG.codex.invocation : CFG.invocation;
+
+function treatmentId(arm) {
+  const h = createHash('sha256').update(`${RUNNER}\n${JSON.stringify(arm)}\n`);
+  h.update(`${INVOCATION || ''}\n`);
+  h.update(RUNNER === 'codex'
+    ? JSON.stringify({
+        reasoningEffort: CFG.codex.reasoningEffort,
+        timeoutSeconds: CFG.codex.timeoutSeconds,
+      })
+    : JSON.stringify({
+        maxBudgetUsd: CFG.maxBudgetUsd,
+        permissionMode: CFG.permissionMode,
+        allowedTools: CFG.allowedTools,
+      }));
+  if (arm.protocol) h.update(readFileSync(PROTOCOL_SKILL));
+  if (arm.style) h.update(readFileSync(expand(CFG.styleSource)));
+  return h.digest('hex').slice(0, 12);
+}
 
 // ---------------------------------------------------------------- isolation
 
@@ -97,6 +170,7 @@ const PLUGIN_NAME = JSON.parse(readFileSync(
 const VOLATILE = ['projects', 'sessions', 'session-env', 'shell-snapshots', 'backups'];
 
 function resetVolatile() {
+  if (RUNNER === 'codex') return; // --ephemeral plus a fresh workdir carries no session state across cells.
   for (const d of VOLATILE) rmSync(join(CONFIG_DIR, d), { recursive: true, force: true });
   // .claude.json carries per-run state too. Cached feature flags are left alone:
   // refetching them every run costs a network round trip and buys nothing, since
@@ -111,7 +185,7 @@ function resetVolatile() {
 
 // ---------------------------------------------------------------- setup
 
-function setup() {
+function setupClaude() {
   mkdirSync(join(CONFIG_DIR, 'output-styles'), { recursive: true });
   cpSync(expand(CFG.styleSource), join(CONFIG_DIR, 'output-styles', 'epistemic-ink.md'));
 
@@ -136,6 +210,84 @@ function setup() {
   console.log('run then fails with "Not logged in", which reads like a setup-token problem.');
 }
 
+function codexHome(arm) {
+  return join(CODEX_STATE_DIR, arm.protocol ? 'protocol' : 'bare');
+}
+
+function runSetupCommand(args, home) {
+  const r = spawnSync('codex', args, {
+    cwd: REPO,
+    encoding: 'utf8',
+    env: { ...process.env, CODEX_HOME: home },
+  });
+  if (r.status !== 0) {
+    throw new Error(`codex ${args.join(' ')} failed: ${(r.stderr || r.stdout || '').trim()}`);
+  }
+}
+
+function loginCodexWithApiKey(home) {
+  const r = spawnSync('codex', ['login', '--with-api-key'], {
+    cwd: REPO,
+    encoding: 'utf8',
+    input: `${process.env.OPENAI_API_KEY}\n`,
+    env: { ...process.env, CODEX_HOME: home },
+  });
+  if (r.status !== 0) {
+    throw new Error('codex API-key login failed for an isolated evaluation home');
+  }
+}
+
+function codexAuthAvailable(home) {
+  const r = spawnSync('codex', ['login', 'status'], {
+    cwd: REPO,
+    encoding: 'utf8',
+    env: { ...process.env, CODEX_HOME: home },
+  });
+  return r.status === 0;
+}
+
+function setupCodex() {
+  // Keep authentication outside the disposable fixture. ChatGPT login is linked,
+  // never copied; CI can instead supply OPENAI_API_KEY without creating auth.json.
+  const authHome = resolve(process.env.REALIZE_CODEX_AUTH_HOME
+    || process.env.CODEX_HOME || join(homedir(), '.codex'));
+  if (authHome === CODEX_STATE_DIR || authHome.startsWith(`${CODEX_STATE_DIR}/`)) {
+    throw new Error('Codex authentication source must be outside the disposable codex.stateDir');
+  }
+  const authSource = join(authHome, 'auth.json');
+
+  rmSync(CODEX_STATE_DIR, { recursive: true, force: true });
+  mkdirSync(CODEX_STATE_DIR, { recursive: true });
+
+  const homes = new Map();
+  for (const arm of Object.values(CFG.arms)) homes.set(codexHome(arm), arm);
+  for (const home of homes.keys()) {
+    mkdirSync(home, { recursive: true });
+    if (existsSync(authSource)) symlinkSync(authSource, join(home, 'auth.json'));
+    else if (process.env.OPENAI_API_KEY) loginCodexWithApiKey(home);
+    else if (!codexAuthAvailable(home)) {
+      throw new Error('Codex authentication unavailable: log in with `codex login`, set REALIZE_CODEX_AUTH_HOME, or provide OPENAI_API_KEY');
+    }
+  }
+
+  const protocolArm = Object.values(CFG.arms).find((arm) => arm.protocol);
+  if (protocolArm) {
+    const home = codexHome(protocolArm);
+    runSetupCommand(['plugin', 'marketplace', 'add', REPO, '--json'], home);
+    runSetupCommand(['plugin', 'add', `${PLUGIN_NAME}@${MARKETPLACE_NAME}`, '--json'], home);
+  }
+
+  console.log(`runner      : codex`);
+  console.log(`state homes : ${[...homes.keys()].join(', ')}`);
+  console.log(`model       : ${CFG.models.join(', ')} (${CFG.codex.reasoningEffort})`);
+  console.log('authentication prepared in disposable homes; no credential is written to tracked files');
+}
+
+function setup() {
+  if (RUNNER === 'codex') setupCodex();
+  else setupClaude();
+}
+
 // ---------------------------------------------------------------- run
 
 function promptBody(caseName, arm) {
@@ -143,10 +295,10 @@ function promptBody(caseName, arm) {
   // Frontmatter is for the plugin-eval schema; the CLI takes the body only.
   const task = raw.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
   // Naming the protocol belongs to the treatment, not to the task. A prompt that
-  // says "use /inquire" hands an arm without the plugin a second problem -- the
+  // names the command hands an arm without the plugin a second problem -- the
   // command is missing -- and the arm then gates on the missing tool rather than
   // on the task, which is not the behaviour under comparison.
-  return arm.protocol && CFG.invocation ? `${task}\n\n${CFG.invocation}` : task;
+  return arm.protocol && INVOCATION ? `${task}\n\n${INVOCATION}` : task;
 }
 
 function scaffold(dir) {
@@ -155,35 +307,87 @@ function scaffold(dir) {
   if (r.status !== 0) throw new Error(`scaffold failed: ${r.stderr}`);
 }
 
+function codexTreatmentIntegrity(arm) {
+  const r = spawnSync('codex', ['plugin', 'list', '--json'], {
+    cwd: REPO,
+    encoding: 'utf8',
+    env: { ...process.env, CODEX_HOME: codexHome(arm) },
+  });
+  if (r.status !== 0) return null;
+  try {
+    const listed = JSON.parse(r.stdout);
+    const present = (listed.installed || []).some(
+      (plugin) => plugin.name === PLUGIN_NAME && plugin.enabled === true);
+    if (present !== !!arm.protocol) return false;
+    if (!arm.protocol) return true;
+    const installedSkill = join(
+      codexHome(arm), 'plugins', 'cache', MARKETPLACE_NAME, PLUGIN_NAME,
+      PLUGIN_VERSION, 'skills', CFG.protocolSkill, 'SKILL.md');
+    if (!existsSync(installedSkill)) return false;
+    return createHash('sha256').update(readFileSync(installedSkill)).digest('hex')
+      === createHash('sha256').update(readFileSync(PROTOCOL_SKILL)).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
 function runOne({ model, armName, arm, caseName, rep }) {
-  const outDir = join(RESULTS, model, armName, caseName);
+  const treatment = treatmentId(arm);
+  const outDir = join(RESULTS, model, armName, caseName, treatment);
   mkdirSync(outDir, { recursive: true });
   const outFile = join(outDir, `run-${rep}.jsonl`);
   if (existsSync(outFile)) return { skipped: true, outFile };
 
   resetVolatile();
+  const treatmentIntegrity = RUNNER === 'codex' ? codexTreatmentIntegrity(arm) : null;
+  if (RUNNER === 'codex' && treatmentIntegrity !== true) {
+    return { skipped: false, launchFailed: true, outFile, exit: null,
+             reason: 'isolated CODEX_HOME does not match the declared plugin treatment; re-run setup' };
+  }
 
-  const wd = join(WORK, `${model}-${armName}-${caseName}-${rep}`.replace(/[^\w.-]/g, '_'));
+  const wd = join(WORK, `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_'));
   if (existsSync(wd)) rmSync(wd, { recursive: true, force: true });
   scaffold(wd);
 
-  const args = [
-    '-p', '--verbose', '--no-session-persistence',
-    '--output-format', 'stream-json',
-    '--model', model,
-    '--max-budget-usd', String(CFG.maxBudgetUsd),
-    '--permission-mode', CFG.permissionMode,
-    '--allowed-tools', CFG.allowedTools.join(','),
-    '--settings', join(SKILL, 'arms', `${armName.replace('+', '-')}.json`),
-  ];
-  if (arm.protocol) args.push('--plugin-dir', expand(CFG.pluginDir));
-  args.push(promptBody(caseName, arm));
+  let command;
+  let args;
+  let env;
+  let timeout;
+  if (RUNNER === 'codex') {
+    command = 'codex';
+    args = [
+      '-a', 'never', 'exec', '--ephemeral', '--strict-config',
+      '--model', model,
+      '-c', `model_reasoning_effort=${JSON.stringify(CFG.codex.reasoningEffort)}`,
+      '--sandbox', 'workspace-write',
+      '--cd', wd,
+      '--skip-git-repo-check', '--json',
+      promptBody(caseName, arm),
+    ];
+    env = { ...process.env, CODEX_HOME: codexHome(arm) };
+    timeout = CFG.codex.timeoutSeconds * 1000;
+  } else {
+    command = 'claude';
+    args = [
+      '-p', '--verbose', '--no-session-persistence',
+      '--output-format', 'stream-json',
+      '--model', model,
+      '--max-budget-usd', String(CFG.maxBudgetUsd),
+      '--permission-mode', CFG.permissionMode,
+      '--allowed-tools', CFG.allowedTools.join(','),
+      '--settings', join(SKILL, 'arms', `${armName.replace('+', '-')}.json`),
+    ];
+    if (arm.protocol) args.push('--plugin-dir', expand(CFG.pluginDir));
+    args.push(promptBody(caseName, arm));
+    env = { ...process.env, CLAUDE_CONFIG_DIR: CONFIG_DIR };
+  }
 
-  const r = spawnSync('claude', args, {
+  const r = spawnSync(command, args, {
     cwd: wd,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
-    env: { ...process.env, CLAUDE_CONFIG_DIR: CONFIG_DIR },
+    env,
+    timeout,
   });
   if (r.stderr) writeFileSync(outFile.replace(/\.jsonl$/, '.err'), r.stderr);
 
@@ -191,13 +395,16 @@ function runOne({ model, armName, arm, caseName, rep }) {
   // the cell: every later invocation reports `cached` and grading reads the emptiness as
   // the protocol failing. Require evidence that claude actually started (init) and
   // actually reported (result). A budget-exhausted or errored turn has both and is a real
-  // observation; a missing binary, an unusable token, or an overrun buffer has neither.
+  // observation; a missing binary, unusable authentication, timeout, or overrun buffer
+  // has neither runner's complete start/end pair.
   const out = r.stdout || '';
-  const ran = r.error == null && out.includes('"subtype":"init"') && out.includes('"type":"result"');
+  const ran = r.error == null && (RUNNER === 'codex'
+    ? out.includes('"type":"thread.started"') && out.includes('"type":"turn.completed"')
+    : out.includes('"subtype":"init"') && out.includes('"type":"result"'));
   if (!ran) {
     writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), out);
     return { skipped: false, launchFailed: true, outFile, exit: r.status,
-             reason: r.error ? r.error.message : 'no init/result event in the stream' };
+             reason: r.error ? r.error.message : `no complete ${RUNNER} start/end event pair in the stream` };
   }
 
   writeFileSync(outFile, out);
@@ -206,7 +413,10 @@ function runOne({ model, armName, arm, caseName, rep }) {
   // never uploaded by CI, and gone once teardown has run -- so a later re-read of the
   // table would score every tree predicate false and present that as an observation.
   writeFileSync(outFile.replace(/\.jsonl$/, '.meta.json'),
-    JSON.stringify({ exit: r.status, mutated: treeMutated(wd) }, null, 2) + '\n');
+    JSON.stringify({
+      runner: RUNNER, model, treatment, treatmentIntegrity,
+      exit: r.status, mutated: treeMutated(wd),
+    }, null, 2) + '\n');
   // The working directory is kept: a grader that wants to inspect what the run
   // actually wrote needs the files, and a failed run is worth reading by hand.
   return { skipped: false, outFile, exit: r.status };
@@ -217,7 +427,7 @@ function run() {
     for (const [armName, arm] of Object.entries(CFG.arms)) {
       for (const caseName of CFG.cases) {
         for (let rep = 1; rep <= CFG.runs; rep++) {
-          process.stdout.write(`${model} | ${armName} | ${caseName} | ${rep}/${CFG.runs} ... `);
+          process.stdout.write(`${RUNNER} | ${model} | ${armName} | ${caseName} | ${rep}/${CFG.runs} ... `);
           try {
             const { skipped, exit, launchFailed, reason } = runOne({ model, armName, arm, caseName, rep });
             if (launchFailed) console.log(`LAUNCH FAILED (${reason}) -- not cached, not graded`);
@@ -233,11 +443,14 @@ function run() {
 
 // ---------------------------------------------------------------- grade
 
-function parse(file) {
+function readEvents(file) {
   if (!existsSync(file)) return null;
-  const events = readFileSync(file, 'utf8').split('\n').filter(Boolean)
+  return readFileSync(file, 'utf8').split('\n').filter(Boolean)
     .map((l) => { try { return JSON.parse(l); } catch { return null; } })
     .filter(Boolean);
+}
+
+function parseClaude(events) {
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
   const result = events.find((e) => e.type === 'result');
   const toolUses = [];
@@ -259,6 +472,37 @@ function parse(file) {
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
   return { init, result, toolUses, skillInvocations, lastMessage: texts[texts.length - 1] || '' };
+}
+
+function parseCodex(events) {
+  const items = events.filter((e) => e.type === 'item.completed').map((e) => e.item).filter(Boolean);
+  const commands = items.filter((item) => item.type === 'command_execution');
+  const skillNeedle = `/skills/${CFG.protocolSkill}/SKILL.md`;
+  const skillInvocations = commands
+    .filter((item) => item.command?.includes('/plugins/cache/') && item.command.includes(skillNeedle))
+    .map(() => CFG.protocolSkill);
+  // Reading the skill contract is treatment integrity, not context collection for
+  // the user's task. Require a separate read-like command against the fixture.
+  const readLike = /\b(?:rg|sed|cat|head|tail|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
+  const toolUses = commands
+    .filter((item) => !item.command?.includes('/plugins/cache/') && readLike.test(item.command || ''))
+    .map(() => 'Read');
+  const messages = items.filter((item) => item.type === 'agent_message').map((item) => item.text).filter(Boolean);
+  const completed = events.find((e) => e.type === 'turn.completed');
+  return {
+    init: { plugins: skillInvocations.length ? [{ name: PLUGIN_NAME }] : [], output_style: 'default' },
+    result: completed ? { is_error: false, total_cost_usd: null, num_turns: 1 } : null,
+    usage: completed?.usage || null,
+    toolUses,
+    skillInvocations,
+    lastMessage: messages[messages.length - 1] || '',
+  };
+}
+
+function parse(file) {
+  const events = readEvents(file);
+  if (!events) return null;
+  return RUNNER === 'codex' ? parseCodex(events) : parseClaude(events);
 }
 
 function treeDigest(dir) {
@@ -302,7 +546,8 @@ const GRADERS = {
   // arrives through --settings, which does nothing unless setup() copied the style file
   // into the config dir; run without setup and the sham quietly becomes a second
   // baseline, leaving the whole sham-control argument resting on two identical arms.
-  treatment_integrity: ({ parsed, arm }) => {
+  treatment_integrity: ({ parsed, arm, treatmentIntegrity }) => {
+    if (RUNNER === 'codex') return treatmentIntegrity;
     const plugin = (parsed.init?.plugins || []).some((p) => p.name === PLUGIN_NAME);
     const style = (parsed.init?.output_style || 'default')
       === (arm.style ? CFG.styleName : 'default');
@@ -314,17 +559,11 @@ const GRADERS = {
   // treatment_integrity asserts for that arm. Where the plugin IS present this is the one
   // predicate separating "the protocol ran and behaved" from "the protocol never ran and
   // the model happened to produce the same shape".
-  skill_fired: ({ parsed, arm, cfg }) =>
-    arm.protocol
-      ? parsed.skillInvocations.some(
-          (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`))
-      : null,
-  // Naming the Skill tool is not enough: built-in skills exist even in an arm with
-  // no plugins, so the tool alone fires in the baseline too. What indicates the
-  // treatment is which skill was invoked.
   skill_fired: ({ parsed, arm, cfg }) => {
-    const fired = parsed.skillInvocations.some((s) => s.includes(cfg.protocolSkill));
-    return arm.protocol ? fired : !fired;
+    if (!arm.protocol) return null;
+    if (RUNNER === 'codex') return null; // Codex JSONL exposes no skill-invocation event.
+    return parsed.skillInvocations.some(
+      (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`));
   },
   // Phase 2 is declared present-and-stop; the observable consequence is that the
   // working tree is unchanged. This reads the tree rather than the tool names.
@@ -356,21 +595,25 @@ for (const c of CFG.cases) {
 }
 
 function gradeRun(model, armName, arm, caseName, rep) {
-  const base = join(RESULTS, model, armName, caseName, `run-${rep}`);
+  const treatment = treatmentId(arm);
+  const base = join(RESULTS, model, armName, caseName, treatment, `run-${rep}`);
   const parsed = parse(`${base}.jsonl`);
   if (!parsed) return null;
 
   // The verdict recorded at run time is authoritative; the live working directory is only
   // a fallback, for transcripts written before the sidecar existed and for a local regrade.
   let mutated = null;
+  let treatmentIntegrity = null;
   if (existsSync(`${base}.meta.json`)) {
-    mutated = JSON.parse(readFileSync(`${base}.meta.json`, 'utf8')).mutated ?? null;
+    const meta = JSON.parse(readFileSync(`${base}.meta.json`, 'utf8'));
+    mutated = meta.mutated ?? null;
+    treatmentIntegrity = meta.treatmentIntegrity ?? null;
   } else {
-    const wd = `${model}-${armName}-${caseName}-${rep}`.replace(/[^\w.-]/g, '_');
+    const wd = `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_');
     mutated = treeMutated(join(WORK, wd));
   }
 
-  const ctx = { parsed, arm, caseName, cfg: CFG, mutated };
+  const ctx = { parsed, arm, caseName, cfg: CFG, mutated, treatmentIntegrity };
   const scores = {};
   for (const [name, fn] of Object.entries(GRADERS)) scores[name] = fn(ctx);
   // A predicate with nothing to read is not a failing predicate but an unreadable one,
@@ -378,8 +621,12 @@ function gradeRun(model, armName, arm, caseName, rep) {
   const required = CASE_PREDICATES[caseName].map((k) => scores[k]);
   const composite = required.some((v) => v === null || v === undefined)
     ? null : required.every((v) => v === true);
+  const usage = parsed.usage;
+  const tokens = usage
+    ? (usage.input_tokens || 0) + (usage.output_tokens || 0)
+    : null;
   return { scores, composite, cost: parsed.result?.total_cost_usd ?? null,
-           turns: parsed.result?.num_turns ?? null };
+           tokens, turns: parsed.result?.num_turns ?? null };
 }
 
 function report() {
@@ -396,8 +643,10 @@ function report() {
         const passes = graded.filter((g) => g.composite === true).length;
         const unreadable = graded.filter((g) => g.composite === null).length;
         const skill = graded.filter((g) => g.scores.skill_fired === true).length;
+        const costs = graded.map((g) => g.cost).filter((v) => typeof v === 'number');
+        const tokens = graded.map((g) => g.tokens).filter((v) => typeof v === 'number');
         rows.push({
-          model, arm: armName, case: caseName,
+          runner: RUNNER, model, arm: armName, case: caseName,
           n: graded.length,
           // pass^k: every repetition passed. tau-bench's reliability reading, where a
           // mean hides the run that failed and one failure out of k is the fact a user
@@ -409,9 +658,12 @@ function report() {
           // Whether the protocol itself fired where it was available. Without this a
           // protocol arm that loaded the plugin, never invoked it, and produced
           // right-looking behaviour anyway scores a clean pass.
-          skill: arm.protocol ? `${skill}/${graded.length}` : 'n/a',
+          skill: arm.protocol
+            ? (RUNNER === 'codex' ? 'trace-unavailable' : `${skill}/${graded.length}`)
+            : 'n/a',
           unreadable,
-          cost: graded.reduce((s, g) => s + (g.cost || 0), 0).toFixed(4),
+          tokens: tokens.length ? tokens.reduce((s, v) => s + v, 0) : '-',
+          cost: costs.length ? costs.reduce((s, v) => s + v, 0).toFixed(4) : '-',
         });
       }
     }
@@ -419,13 +671,13 @@ function report() {
   if (!rows.length) { console.log('No results yet. Run `node harness.mjs run` first.'); return; }
 
   if (process.argv.includes('--markdown')) {
-    const cols = ['model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'unreadable', 'cost'];
+    const cols = ['runner', 'model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'unreadable', 'tokens', 'cost'];
     const line = (cells) => `| ${cells.join(' | ')} |`;
     console.log(line(cols));
     console.log(line(cols.map(() => '---')));
     for (const r of rows) console.log(line(cols.map((c) => String(r[c]))));
-    const total = rows.reduce((s, r) => s + Number(r.cost), 0).toFixed(4);
-    console.log(`\ntotal cost: $${total}`);
+    const numericCosts = rows.map((r) => Number(r.cost)).filter(Number.isFinite);
+    if (numericCosts.length) console.log(`\ntotal cost: $${numericCosts.reduce((s, v) => s + v, 0).toFixed(4)}`);
     const failed = rows.filter((r) => r.integrity !== r.n || r.unreadable);
     if (failed.length) {
       console.log('\n**Not readable as evidence** \u2014 treatment integrity failed, or a predicate had nothing to read:');
@@ -437,8 +689,8 @@ function report() {
   }
 
   console.table(rows);
-  const totalCost = rows.reduce((s, r) => s + Number(r.cost), 0);
-  console.log(`\ntotal cost: $${totalCost.toFixed(4)}`);
+  const numericCosts = rows.map((r) => Number(r.cost)).filter(Number.isFinite);
+  if (numericCosts.length) console.log(`\ntotal cost: $${numericCosts.reduce((s, v) => s + v, 0).toFixed(4)}`);
   const bad = rows.filter((r) => r.integrity !== r.n || r.unreadable);
   if (bad.length) {
     console.log('\nNOT READABLE AS EVIDENCE \u2014 treatment integrity failed, or a predicate had nothing to read:');
@@ -452,11 +704,14 @@ function teardown() {
   const all = process.argv.includes('--all');
   const purge = process.argv.includes('--purge');
   resetVolatile();
-  console.log(`reset volatile state in ${CONFIG_DIR}`);
+  if (RUNNER === 'claude') console.log(`reset volatile state in ${CONFIG_DIR}`);
+  else console.log('codex runs are ephemeral; no session rollout state to reset');
   if (all || purge) {
-    rmSync(CONFIG_DIR, { recursive: true, force: true });
+    if (RUNNER === 'codex') rmSync(CODEX_STATE_DIR, { recursive: true, force: true });
+    else rmSync(CONFIG_DIR, { recursive: true, force: true });
     rmSync(WORK, { recursive: true, force: true });
-    console.log(`removed ${CONFIG_DIR} and ${WORK} -- re-run \`setup\` before \`run\``);
+    const state = RUNNER === 'codex' ? CODEX_STATE_DIR : CONFIG_DIR;
+    console.log(`removed ${state} and ${WORK} -- re-run \`setup\` before \`run\``);
   }
   if (purge) {
     // Results are graded evidence, not regenerable state: re-running produces

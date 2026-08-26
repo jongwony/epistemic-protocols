@@ -15,8 +15,8 @@ GROUNDING and the Rules type the prose and carry the operational contract. Stati
 checks establish that a `SKILL.md` contains those blocks and that they are internally
 coherent. Nothing establishes that a run honours them.
 
-This skill closes that gap. It drives `claude -p` across a matrix of models and
-configurations, captures the streamed trace, and grades the contract from what the run
+This skill closes that gap. It drives Claude Code or Codex across a matrix of models
+and treatments, captures the JSONL trace, and grades the contract from what the run
 did — whether the gate stopped, whether collection preceded inquiry, whether the
 zero-uncertainty path relayed and proceeded.
 
@@ -39,34 +39,39 @@ free, and it runs on every commit.
 ```bash
 cd .claude/skills/realize/scripts
 
-./setup.sh                                   # isolated config dir + per-arm settings
+./setup.sh                                   # default Claude runner
 export CLAUDE_CODE_OAUTH_TOKEN="$(...)" && ./run.sh
-./teardown.sh                                # volatile state between sessions
+
+REALIZE_RUNNER=codex ./setup.sh              # isolated Codex treatment homes
+REALIZE_RUNNER=codex ./run.sh                 # GPT-5.6 Luna, xhigh by default
+REALIZE_RUNNER=codex ./teardown.sh
+
+./teardown.sh                                # Claude volatile state
 ```
 
-`setup.sh` prints the one interactive step — obtaining a token against the isolated
-config directory — and refuses to proceed if `claude` or a recent enough Node is
-missing. `run.sh` refuses to guess where that token lives.
+For Claude, `setup.sh` prints the one interactive step — obtaining a token against the
+isolated config directory. For Codex, it creates disposable bare/protocol homes, links
+the existing ChatGPT login without copying it (or uses `OPENAI_API_KEY`), and installs
+the local protocol plugin only into the protocol home.
 
-Read `references/runbook.md` before the first run. It records four failures that each
-produce a transcript indistinguishable from the protocol misbehaving: a flag that does
-not isolate what it appears to, a settings key that does not disable what it names, an
-environment variable whose near-miss is ignored in silence, and a budget ceiling set
-below the floor. None of them announces itself.
+Read `references/runbook.md` before the first run. It records runner and isolation
+failures that each produce a transcript indistinguishable from the protocol
+misbehaving. None of them announces itself.
 
 ## From CI
 
 `.github/workflows/type-realization.yml` runs the same scripts on manual dispatch and
 comments the report on the PR. It carries no automatic trigger: each run spends model
 budget, so it fires when someone asks for a measurement, not when someone pushes.
-`references/runbook.md` covers the inputs and the one required secret.
+`references/runbook.md` covers the inputs and the selected runner's required secret.
 
 ## Configuration
 
-`harness.config.json` carries the matrix: models, arms, cases, repetitions, budget
-ceiling, permitted tools. Results are cached per cell, so widening the matrix and
-re-running fills only what is new — climb the model ladder one rung at a time rather
-than committing to it up front.
+`harness.config.json` carries the matrix: runner, models, arms, cases, repetitions,
+Claude budget ceiling, Codex reasoning effort and timeout, and permitted tools where
+the runner exposes that control. `REALIZE_RUNNER=codex` selects the committed Luna
+xhigh profile. Results are keyed by runner and a hash of the actual protocol/style
+treatment, so a prose ablation cannot silently reuse its pre-ablation cache.
 
 Prefer a capable model for the primary measurement. The weakest available one
 exercises the safeguards but not the protocol, so a failure there cannot separate a
@@ -74,7 +79,7 @@ defect in the contract from a limit of the model.
 
 ## Arms
 
-Four arms cross the protocol against the output style shipped beside it:
+Claude has four arms crossing the protocol against the output style shipped beside it:
 
 | arm | protocol | style | answers |
 |---|---|---|---|
@@ -88,6 +93,14 @@ found random rules helping as much as curated ones, which makes "a long structur
 instruction is present" a live alternative explanation for any positive result. The
 output style is that alternative made available as a control: it fixes gate shape and
 observer markers while fixing none of a protocol's own obligations.
+
+Codex has `bare` and `protocol` arms. Codex has no equivalent of Claude's shipped
+output-style treatment, so requesting `style` or `protocol+style` fails rather than
+simulating a different deployment condition. The Codex protocol treatment is present
+only when `codex plugin list` reports that plugin installed and enabled in the isolated
+protocol home while the bare home reports it absent. Codex JSONL currently exposes no
+separate skill-invocation event, so its `skill` report cell states that limitation
+rather than inferring invocation from the model's prose.
 
 ## Cases
 
@@ -125,16 +138,21 @@ so they are not mistaken for findings.
 failed, and one failure in k is what a user meets. It reads `-` where something a
 predicate needed was missing, which is not the same as the predicate failing.
 
-`skill` says whether the protocol fired where it was available, and `n/a` where there was
-no plugin to fire. It separates a protocol that ran and behaved from one that never ran
-while the model happened to produce a similar shape.
+On Claude, `skill` says whether the protocol fired where it was available, and `n/a`
+where there was no plugin to fire. Codex reports `trace-unavailable` for that column and
+keeps plugin installation integrity separate from behavioral fulfillment.
 
 Absolute fulfilment rates are the reportable quantity here, not deltas. A baseline arm
 has no gate to stop at, so most predicates have no counterpart there to subtract.
 
+For Codex, the report records token use rather than inventing a dollar amount the CLI
+did not emit. A complete `thread.started → turn.completed` pair is required before a
+transcript is cached or graded; timeout and authentication failures remain failed
+launches rather than protocol findings.
+
 ## Additional Resources
 
-- **`references/runbook.md`** — the workflow, the four quiet failures, how to widen the
+- **`references/runbook.md`** — the workflow, quiet failure modes, how to widen the
   matrix, how to read the report.
 - **`references/grader-design.md`** — why the deterministic axis is behaviour rather
   than wording, the obligation-to-predicate mapping, what the arms answer, and the

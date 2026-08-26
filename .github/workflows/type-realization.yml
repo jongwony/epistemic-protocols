@@ -15,12 +15,20 @@ on:
         description: 'PR number to comment on (blank = resolve from the dispatched branch)'
         required: false
         type: string
+      runner:
+        description: 'Agent runner'
+        required: true
+        default: claude
+        type: choice
+        options:
+          - claude
+          - codex
       models:
         description: 'Comma-separated model ids (blank = harness.config.json)'
         required: false
         type: string
       arms:
-        description: 'Comma-separated arms: bare,style,protocol,protocol+style (blank = all)'
+        description: 'Comma-separated arms (Codex: bare,protocol; Claude also supports style arms)'
         required: false
         type: string
       cases:
@@ -32,7 +40,15 @@ on:
         required: false
         type: string
       max_budget_usd:
-        description: 'Per-run ceiling (blank = harness.config.json)'
+        description: 'Claude per-run ceiling (blank = harness.config.json)'
+        required: false
+        type: string
+      reasoning_effort:
+        description: 'Codex reasoning effort (blank = harness.config.json)'
+        required: false
+        type: string
+      timeout_seconds:
+        description: 'Codex per-run timeout (blank = harness.config.json)'
         required: false
         type: string
       post_comment:
@@ -45,7 +61,7 @@ jobs:
   realize:
     runs-on: ubuntu-latest
     # A dispatched matrix can be widened without touching this file, so the ceiling is
-    # generous. The per-run budget is what actually bounds spend.
+    # generous. The selected runner's per-run budget or timeout is the operative bound.
     timeout-minutes: 120
     permissions:
       contents: read
@@ -58,23 +74,40 @@ jobs:
         with:
           node-version: '22'
 
-      # An absent secret would otherwise surface as "Not logged in" on the first run,
-      # which reads as a broken token rather than a missing one. This distinguishes only
-      # those two: a present-but-invalid token still fails later, at the same message.
+      # An absent secret would otherwise surface as an authentication failure on the first
+      # run, which reads like a broken runner rather than a missing credential.
       - name: Require the evaluation token
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REALIZE_RUNNER: ${{ inputs.runner }}
         run: |
-          if [ -z "${CLAUDE_CODE_OAUTH_TOKEN}" ]; then
-            echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN is not set on this repository."
-            echo "::error::Create one with: CLAUDE_CONFIG_DIR=~/.claude-eval claude setup-token"
-            exit 1
-          fi
+          case "$REALIZE_RUNNER" in
+            claude)
+              if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+                echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN is not set on this repository."
+                exit 1
+              fi
+              ;;
+            codex)
+              if [ -z "$OPENAI_API_KEY" ]; then
+                echo "::error::Secret OPENAI_API_KEY is not set on this repository."
+                exit 1
+              fi
+              ;;
+          esac
 
       - name: Install Claude Code
+        if: inputs.runner == 'claude'
         run: |
           npm install -g @anthropic-ai/claude-code
           claude --version
+
+      - name: Install Codex
+        if: inputs.runner == 'codex'
+        run: |
+          npm install -g @openai/codex
+          codex --version
 
       - name: Resolve PR context
         id: pr
@@ -103,6 +136,12 @@ jobs:
           fi
 
       - name: Set up the isolated evaluation environment
+        env:
+          REALIZE_RUNNER: ${{ inputs.runner }}
+          REALIZE_MODELS: ${{ inputs.models }}
+          REALIZE_REASONING_EFFORT: ${{ inputs.reasoning_effort }}
+          REALIZE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: .claude/skills/realize/scripts/setup.sh
 
       # A fresh runner has no marketplace plugins, so the baseline arm is empty here by
@@ -112,20 +151,27 @@ jobs:
       - name: Run
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REALIZE_RUNNER: ${{ inputs.runner }}
           REALIZE_MODELS: ${{ inputs.models }}
           REALIZE_ARMS: ${{ inputs.arms }}
           REALIZE_CASES: ${{ inputs.cases }}
           REALIZE_RUNS: ${{ inputs.runs }}
           REALIZE_MAX_BUDGET_USD: ${{ inputs.max_budget_usd }}
+          REALIZE_REASONING_EFFORT: ${{ inputs.reasoning_effort }}
+          REALIZE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
         run: node .claude/skills/realize/scripts/harness.mjs run
 
       - name: Report
         id: report
         env:
+          REALIZE_RUNNER: ${{ inputs.runner }}
           REALIZE_MODELS: ${{ inputs.models }}
           REALIZE_ARMS: ${{ inputs.arms }}
           REALIZE_CASES: ${{ inputs.cases }}
           REALIZE_RUNS: ${{ inputs.runs }}
+          REALIZE_REASONING_EFFORT: ${{ inputs.reasoning_effort }}
+          REALIZE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
           REF_NAME: ${{ github.ref_name }}
         run: |
           {
@@ -156,4 +202,6 @@ jobs:
 
       - name: Tear down
         if: always()
+        env:
+          REALIZE_RUNNER: ${{ inputs.runner }}
         run: .claude/skills/realize/scripts/teardown.sh

@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Run the suite. Everything except authentication is already set up by setup.sh.
 #
-# Authentication is deliberately not fetched here. The token's location is a
-# property of whoever is running this, not of the repository, so this script
-# refuses to guess: export it from wherever it lives and invoke.
+# Authentication is deliberately not fetched here. Claude requires its token in
+# the environment. Codex setup has already linked the existing ChatGPT login into
+# disposable homes, or the caller supplies OPENAI_API_KEY.
 set -euo pipefail
 
 SKILL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+realize_runner="${REALIZE_RUNNER:-$(node -p "require('$SKILL/harness.config.json').runner || 'claude'")}"
+
+if [ "$realize_runner" = "claude" ] && [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
   cat >&2 <<'MSG'
 run: CLAUDE_CODE_OAUTH_TOKEN is not set.
 
@@ -27,6 +29,11 @@ reads like a broken setup-token rather than a misspelled variable.
 MSG
   exit 1
 fi
+
+case "$realize_runner" in
+  claude|codex) ;;
+  *) printf 'run: runner must be claude or codex (found %s)\n' "$realize_runner" >&2; exit 1 ;;
+esac
 
 node "$SKILL/scripts/harness.mjs" run
 node "$SKILL/scripts/harness.mjs" report

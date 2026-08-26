@@ -31,3 +31,4 @@ docs/audit-delta-*.md
 .claude/skills/realize/arms/
 .claude/skills/realize/results/
 .claude/skills/realize/.work/
+.claude/skills/realize/.codex/
