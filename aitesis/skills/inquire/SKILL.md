@@ -231,237 +231,31 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Evidence over Inference over Detection**: Aitesis operates on an epistemic hierarchy with two boundaries. The lower boundary (Inference > Detection): infer context insufficiency from requirements rather than detecting via fixed taxonomy — the protocol dynamically identifies what context is missing, not mechanically checking against a preset list. The upper boundary (Evidence > Inference): gather evidence through direct environmental observation rather than substituting inference from reasoning alone — when a fact is observable, observe it. Corollary: admissibility of found evidence on the direct-resolve path has two axes — **coverage** (does the evidence span the whole claim?) and **support_integrity** (does the evidence actually track the behavior it asserts, or is it silently desynced?). Support-integrity includes provenance coupling: the evidence's referent, source-kind, and scope must authorize the claim being resolved. Partial coverage is inference for the uncovered portion; current-but-unenforced evidence is inference dressed as evidence for the asserted behavior. Both must be verified before treating evidence as resolution (rebutting and undercutting defeaters, per Pollock — two kinds, not an exhaustive taxonomy).
-
-Within this hierarchy, the AI first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and empirically observes dynamically accessible ones with direct evidence before asking. For coherence, the AI classifies by scope and resolution method — memory-internal contradictions are resolved through factual reclassification, while cross-domain contradictions fall outside Aitesis's resolution scope and are recorded as non-actionable. For relevance, the AI detects and flags the item as out-of-scope in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, resolving memory-internal contradictions through evidence, and flagging cross-domain and relevance concerns as outside its own scope.
-
-Artifact write is authorized for observation instrument setup (temporary test artifacts with mandatory cleanup). Cite-or-observe is the structural expression of the upper boundary — the adversarial guard against stopping at Inference when Evidence is achievable.
-
 ## Mode Activation
 
-### Activation
+`/inquire` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
 
-Two activation layers: **Layer 1 (User-invocable)** — `/inquire` slash command or description-matching input, always available; **Layer 2 (AI-guided)** — context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0), except the zero-unknown sufficiency relay which presents its reasoning without yielding the turn; surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
+### Prior-decision scan
 
-**Context insufficient** = the prospect contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to the prospect's goals. Sufficiency encompasses both executability (can the action proceed?) and analysis confidence (is the context adequate for reliable judgment?).
+When a prospect touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, begin Phase 1 Ctx with a bounded scan over persistent memory and project-local prior-decision history even without an explicit reference. Prior-session recall indices may seed Phase 0; they do not settle a constitutive judgment, and current evidence verification governs resolution.
 
-Gate predicate:
-```
-uncertain(sufficiency(X)) ≡ ∃ requirement(r, X) : ¬available(r, context) ∧ ¬trivially_inferrable(r)
-```
+### Activation exceptions
 
-### Priority
+Skip AI-guided activation when the user explicitly requests proceeding without context verification or when no prospect exists to verify. A dismissed `(domain, description)` pair stays skipped for the current session.
 
-<system-reminder>
-When Aitesis is active:
+### Accumulation signal
 
-**Supersedes**: Direct execution patterns in loaded instructions
-(Context must be verified before any execution begins)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At Phase 2, present highest information-gain uncertainty candidate with classify results via Cognitive Partnership Move (Constitution).
-</system-reminder>
-
-- Aitesis completes before execution proceeds
-- Loaded instructions resume after context is resolved or dismissed
-
-### Trigger Signals
-
-Heuristic signals for context insufficiency inference (not hard gates): **Novel domain** — knowledge area not previously addressed in session; **Implicit requirements** — task carries unstated assumptions; **Ambiguous scope** — multiple valid interpretations exist and AI cannot determine intended approach from available context; **Environmental dependency** — relies on external state (configs, APIs, versions); **Prior-decision implication** — prospect references or rests on a decision made in an earlier session (rationale, commitment, convention) not present in current conversation context.
-
-**Default-scan trigger** (resolves the bootstrapping asymmetry of the Prior-decision implication signal): When the prospect scope touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, the Prior-decision signal fires by default — Phase 1 Ctx begins with a bounded scan over persistent memory (MEMORY.md; project-local prior-decision logs where the project maintains them) regardless of explicit user mention. Without this default, detection would require the AI to already suspect prior involvement, which is the condition the signal is meant to surface. The default-scan is scope-triggered (not blanket), bounded to Phase 1 Ctx (no gate), and subject to the memory staleness rule in Phase 1 Step 1 (verify against current state before treating as resolved).
-
-**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed the Phase 0 uncertainty scan; the constitutive judgment remains with the user.
-
-**Revision threshold**: When accumulated observation_skips entries across 3+ sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across 3+ sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure — promoted fibers default to Unit (detect-only) unless the pattern exhibits internal classification structure requiring a structured fiber type.
-
-**Skip**: execution context is fully specified in current message; user explicitly requests proceeding without context verification; same (domain, description) pair was dismissed in current session (session immunity); Phase 1 context collection resolves all identified uncertainties; read-only / exploratory task — no prospect to verify.
-
-### Mode Deactivation
-
-All uncertainties resolved (context, read-only, observed, or user) → proceed with updated prospect. All remaining uncertainties dismissed → proceed with original prospect + defaults. User declares the context sufficient at any Phase 2 → every remaining uncertainty is dismissed with the declaration recorded against it → proceed with updated prospect (InformedExecution): a declaration of sufficiency accepts the residual rather than abandoning the inquiry, so it lands where the per-item Dismiss it generalizes already lands.
-
-## Uncertainty Identification
-
-Uncertainties are identified dynamically per task — no fixed taxonomy. Each uncertainty is characterized by **domain** (the knowledge area where context is missing — e.g., "deployment config", "API versioning", "user auth model"), **description** (what specifically is missing or uncertain), and **context** (evidence collected during Phase 1 that enriches question quality).
-
-### Priority
-
-Priority reflects information gain — how much resolving this uncertainty would narrow the remaining uncertainty space.
-
-| Level | Criterion | Action |
-|-------|-----------|--------|
-| **Critical** | Resolution maximally narrows remaining uncertainty space | Must resolve before execution |
-| **Significant** | Resolution narrows uncertainty but alternatives partially compensate | Surface to user for context |
-| **Marginal** | Reasonable default exists; resolution provides incremental improvement | Surface with pre-selected Dismiss option |
-
-Priority is relational, not intrinsic: the same uncertainty may be Critical in one context and Marginal in another, depending on what other uncertainties exist and what context is already available.
-
-When multiple uncertainties are identified, surface in priority order (Critical → Significant → Marginal). Only one uncertainty surfaced per Phase 2 cycle.
+When `observation_skips` across at least three sessions cluster around one `EscapeCondition` with a consistent rationale, revisit the Verifiability boundary. Apply the same threshold to a recurring non-factual `Emergent(Dimension)`; a promoted fiber defaults to `Unit` unless the observations establish internal classification structure.
 
 ## Protocol
 
-### Phase 0: Context Sufficiency Gate (Silent)
+### User-facing realization
 
-Analyze prospect requirements against available context across multiple dimensions. This phase is **silent** — no user interaction.
+At Phase 2, render the current uncertainty cluster in everyday language. Place each judgment beside its cited basis, the evidence collected, what remains uncertain, and the implication that matters for the next move. Keep the classification open to free-response correction. Present the materialized `A` options with anticipatable differential futures, state the assumption carried by `Dismiss`, then yield the turn.
 
-1. **Scan prospect** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
-2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
-3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), relevance (information not relevant to goal)
-4. If all requirements satisfied: present the sufficiency finding with reasoning before proceeding, then Aitesis is not activated
-5. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
+Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
 
-**Scan scope**: Current prospect context, conversation history, observable environment. Does NOT modify files or call external services.
-
-### Phase 1: Context Collection + Classification + Empirical Observation
-
-Collect contextual evidence, classify each uncertainty by dimension and verifiability, and empirically observe accessible uncertainties with direct evidence.
-
-**Step 1 — Context collection**: For each uncertainty in `Uᵢ`:
-- **Call artifact read/artifact search** to search for relevant information in codebase, configs, documentation
-- If definitive answer found: mark as context-resolved (`Uᵣ`), integrate into execution context
-- If partial evidence found: enrich uncertainty with collected evidence (`Uᵢ'`), retain for classification
-- If conflicting evidence found: enrich uncertainty with conflicting findings (`Uᵢ'`), retain for classification
-- If no evidence found: retain in `Uᵢ'` with empty context
-- **Cross-session state consultation is in-scope**: When a prospect implicates prior decisions, rationale, or committed state from earlier sessions, artifact read/artifact search over persistent memory files (MEMORY.md; project-local prior-decision logs where present) and version-control history scans (commit-content pickaxe, message search, temporal range queries — when the substrate provides version control) are part of Phase 1 Ctx — not a separate protocol. Consulting past state at the current decision moment is context collection. Evidence from memory is tagged `source: "memory:{path}"`; evidence from version-control history is tagged `source: "history:{ref}"` (commit hash / tag / branch ref) for traceability. **Support-integrity guard** (general axis): evidence is eligible for ReadOnly direct resolution only when it is *support-linked* — its referent, source-kind, and scope authorize the exact claim being resolved, and its claim is coupled to (enforced by) actual behavior, not merely present. A current-but-unenforced codebase artifact (a comment or doc that asserts behavior with no enforcement channel) is fresh yet fails support_integrity, so it is routed to EmpiricallyObservable rather than auto-resolved: currency is necessary but not sufficient. **Staleness is the temporal sub-case** of this axis: memory- and version-control-sourced evidence is temporally decoupled from the current environment — the referenced decision may have been superseded, the referenced file may have been renamed, the convention may have been revised — which is one way the evidence→behavior link goes unverified. **History ref currency by ref-type**: full commit hashes (40-char SHA) are immutable content addresses — the commit's content snapshot is stable; mutable refs (branches, tags, partial-hash refs) may be amended/rebased/force-pushed and require currency verification. Even immutable commit-hash evidence may be *interpretively superseded* by later commits (the cited change may no longer reflect current convention). Such temporally-decoupled evidence is therefore NOT eligible for the Factual/ReadOnly direct-resolve path: classify memory- or history-sourced evidence as Factual/EmpiricallyObservable (verify against current codebase/environment state before treating as resolved) or escalate to user confirmation via the classify summary with the explicit `staleness:unverified` tag (the temporal sub-case of the general `support_integrity:unverified` tag). This is discovery of what the AI already committed to, not pattern discovery across sessions.
-
-**Step 2 — Epistemic classification** (core act): For each remaining uncertainty in `Uᵢ'`:
-- **Dimension assessment** (Layer 1): Is this factual, coherence, or relevance?
-  - Factual: a fact is missing from context and required for execution
-  - Coherence: collected facts are mutually inconsistent
-  - Relevance: collected facts are not relevant to the execution goal
-- **Verifiability assessment** (Layer 2, Factual dimension — Observability sub-modes guide classification):
-  - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools, AND both admissibility axes pass — **coverage** (evidence scope ⊇ claim scope) AND **support_integrity** (the evidence's referent/source-kind/scope authorizes the claim, and the evidence→behavior link is verified, not silently desynced) → resolve directly via extended context lookup
-    - support_integrity operational test: first normalize the claim and evidence through `Claim(u)` and `EvidenceRef(e)`, then verify `provenance_coupled(u,e)` and ask: *"If the behavior this evidence asserts changed right now, would the evidence break or fail — or would it silently drift (no enforcement mechanism surfaces the divergence)?"* Breaks-on-change → support-linked (admissible); silently drifts → support_integrity fails. Currency (freshness) is the temporal sub-case: a current artifact still fails this test when nothing couples it to the behavior it claims.
-    - When **coverage** fails (evidence scope ⊊ claim scope): split — covered portion proceeds to Step 3 (ReadOnly resolution), uncovered portion is classified separately and enters the appropriate verifiability path
-    - When **support_integrity** fails determinably at Step 2 (the evidence is current/present but visibly not coupled to the asserted behavior): reclassify directly within this step as EmpiricallyObservable and observe the behavior rather than trusting the artifact — this codebase support-integrity failure self-resolves through observation, requiring no classify-summary escalation. If bounded, non-destructive observation is blocked (an escape condition), it routes onward to user inquiry per the standard EmpiricallyObservable path, escalating via the classify summary with the `support_integrity:unverified` tag (the general tag of which `staleness:unverified` is the temporal sub-case). When the observation instead runs and exhausts its budget, the same tag rides the `Uₑ` evidence record: the support stayed unverified, so the overrun is shown carrying that tag rather than reading as merely inconclusive. When support_integrity cannot be determined from the collected evidence at Step 2, classify tentatively as ReadOnlyVerifiable; discovery of the failure at resolution time is handled by the Step 3 backward arc (PHASE TRANSITIONS), not at classification time
-  - EmpiricallyObservable: fact requires DynamicObservation — does not exist statically but is observable through non-destructive, reversible execution → empirical observation. Duration does not enter this criterion: the budget bounds the attempt, not the class. An observation that runs and exhausts its budget resolves as the budget-exhausted outcome in Step 4, not as a classification error
-  - UserDependent: neither read-only verifiable nor empirically observable → Phase 2 directly
-- **EvidenceSource selection** (Layer 2, Factual dimension — `Fiber(Factual) = Σ(v: Verifiability). {s | s ∈ ValidSources(v)}`):
-  - For each Factual(v) uncertainty, select a single EvidenceSource from `ValidSources(v)` (function body in TYPES).
-  - **Default**: lowest-cost valid source per cost-ordering in TYPES (ascending: `CodeDerivable < CanonicalExternal < Instrumentation < UserTacit`).
-  - **External-dependency preference** (cost-ordering adjustment): when the uncertainty carries an environmental-dependency signal (external API version, vendor behavior, RFC/standard semantics), prefer `CanonicalExternal` over `CodeDerivable` unless an authority-override basis is cited (e.g., internal fork supersedes upstream, vendor behavior already reverse-engineered in-repo). Log override to `Λ.source_choice_overrides`.
-  - **Override — Cite-or-observe rule** (extended): choosing `UserTacit` over a cheaper source requires cited dominance basis and is logged to `Λ.source_choice_overrides`:
-    - `UserTacit` over `Instrumentation` (EmpiricallyObservable): cite (a) operational context absent from instrumentation, or (b) temporally-scoped knowledge not reproducible statically. An expectation that the observation would be slow is NOT an admissible basis — the budget already caps that cost, and an observation that runs and exhausts it returns evidence the forecast would have forgone
-    - `UserTacit` over `CodeDerivable`/`CanonicalExternal` (ReadOnlyVerifiable): cite (a) tacit domain knowledge not captured in source/external doc, (b) interpretive judgment over canonical text, or (c) authority-override rationale
-    - Without citation, default to the cheaper source
-  - **Routing consequence** (determines Step 3/4/Phase 2 channel):
-    - `CodeDerivable` → Step 3 (Read-only verification; codebase artifact read/artifact search)
-    - `CanonicalExternal` → Step 3 with external fetch (published external docs; `source: "web:{url}"` tag + determinism verification + staleness guard — see Web context below)
-    - `Instrumentation` → Step 4 (Empirical observation via an environment run lifecycle)
-    - `UserTacit` → Phase 2 directly (user-dependent inquiry; includes reclassified Coherence/MemoryInternal items)
-    - `Emergent(source)` → **always Phase 2** (Constitution per TOOL GROUNDING `Phase 2 Qs_emergent_channel`): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Within the session, the validation is recorded in Λ.channel_validations; a channel already Point-validated this session skips the re-gate only (prior in-session user decision); each later item on that channel still routes through the claim-specific Phase 1 evidence pass against the validated channel, per the Point(location) semantics (record location, resolve via next Phase 1 iteration) — base promotion itself stays cross-session. Confirmation rides the standard Phase 2 answer coproduct — `Point(location)` designates/validates the authoritative channel, `Provide(context)` supersedes it, `Dismiss` declines it (proceed-with-assumption), `Unknown(Partial)` leaves the item unresolved — no separate answer type, and no answer auto-resolves the item through the unconfirmed channel. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
-- **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
-  - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
-  - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
-    - **EvidenceSource inheritance procedure**: reclassified MemoryInternal items enter EvidenceSource selection identically to directly-classified Factual(v) items — the same cost-ordering default, external-dependency preference, and Cite-or-observe rule override requirements apply; `source_choice_overrides` logging applies identically
-  - Cross scope + structure-requiring → CrossDomain → outside Aitesis's resolution scope, recorded non-actionable (`Uₙ`)
-  - Off-diagonal (Scope ≠ Resolution): present both assessments with evidence via conditional gate; user classifies as MemoryInternal or CrossDomain
-    - (Same, Structure): same-scope contradiction where factual verification is insufficient — resolution requires understanding structural relationships within the scope
-    - (Cross, Evidence): cross-scope contradiction where evidence comparison can determine which scope's claim is current — despite scope difference, factual verification suffices
-  - MemoryInternal → actionable (proceeds to resolution); CrossDomain → record as `Uₙ` (non_factual_detected), out-of-scope
-- **Other non-actionable dimensions**: Relevance and Emergent → detect and record as `Uₙ` (non_factual_detected); shown as out-of-scope in classify summary, not Phase 2 question
-  - Relevance → outside Aitesis's factual/coherence resolution scope, recorded non-actionable
-  - Emergent(_) → recorded non-actionable; deficit condition detected but unresolved by Aitesis
-- Store all results in `Λ.classify_results`
-
-**Step 3 — Read-only verification**: For the ReadOnlyVerifiable-classified candidate set (`Uᵣ'_candidates`, including items whose support_integrity was undetermined at Step 2). Step 3 enforces both admissibility axes *during* resolution — items confirmed to pass coverage ∧ support_integrity resolve directly (these survivors constitute ReadOnlyAdmissible, marked `Uᵣ'` / read_only_resolved); items discovered to fail either axis at resolution time are reclassified to EmpiricallyObservable via the backward arc and re-enter Step 2 (support_integrity failures already determinable at Step 2 were kicked there and never reach Step 3):
-- Targeted context lookup via artifact read/artifact search — classification narrows search scope to specific files/locations that Step 1's broad sweep did not cover (e.g., spec files, config schemas identified by classify)
-- Static cross-checks over proxy evidence resolve by collecting the proxy's enforced source, normalizing it through `EvidenceRef(e)`, then re-entering classify on that source; this is the existing collect + classify + Step 3 path, not a distinct observation channel
-- Scope and provenance re-verification: if targeted lookup reveals evidence scope ⊊ claim scope not detected at Step 2 (subtle coverage gap), or a referent/source-kind mismatch between evidence and claim, apply the same split or backward-arc reclassification — covered coupled portion resolved, uncoupled portion reclassified separately
-- Resolved: mark as `Uᵣ'` (read_only_resolved), skip Phase 2
-
-**Step 4 — Empirical observation**: For EmpiricallyObservable uncertainties:
-- **Pre-observation escape check**: If Cite-or-observe escape conditions apply BEFORE execution (environmental constraint prevents bounded, non-destructive observation), reclassify as UserDependent and log `(uncertainty, condition, rationale)` to `Λ.observation_skips` — the skip rationale must cite the triggering escape condition and the empirical basis that established it. Skip remaining Step 4 execution for this uncertainty. This branch covers only the case where the observation MUST NOT run — environment mutation or elevated risk. An expectation that the observation would be slow is not such a reason and does not belong here: the budget caps that cost, and an observation that runs and exhausts it is the third outcome below, carrying evidence that declining to run would have forgone.
-- **Execution** (if no pre-observation escape): Construct ObservationSpec: { setup, execute, observe, cleanup }; execute lifecycle (setup → execute → observe → cleanup → record)
-- **Outcome — differentiating evidence found**: Attach evidence to `Uₑ` → proceeds to Phase 2 with positive evidence
-- **Outcome — no differentiating signal**: Observation executed but no state change distinguishes candidate answers. Attach the null-signal finding as negative evidence to `Uₑ` → proceeds to Phase 2 with observation record. This is NOT an escape or reclassification; the observation output itself is the evidence. Phase 2 surfaces the observed null-signal to the user for judgment, not AI-internal categorical dismissal.
-- **Outcome — budget exhausted before an answer**: Observation executed but did not produce a differentiating result within its execution budget. Attach the overrun finding — *this path does not resolve within the budget* — as negative evidence to `Uₑ` → proceeds to Phase 2 with observation record. This is NOT an escape or reclassification; the observation ran, and the overrun is a fact it produced. The exhausted attempt still runs `cleanup` before recording — the instrument is torn down on this path exactly as on a completed one, so the probe envelope's Reversible and Sandboxed constraints hold for an observation cut short. Record the lifecycle in `Λ.observation_history`; do NOT log to `Λ.observation_skips` — nothing was skipped. Phase 2 surfaces the overrun to the user as evidence about the resolution path, not as an empty-handed fallback. The budget's value is set and enforced by the execution channel; what this protocol fixes is that exceeding it is an observation outcome.
-
-If all uncertainties context-resolved or read-only-resolved (no observed or user-dependent remaining): proceed with execution (no user interruption).
-If observed or user-dependent uncertainties remain: proceed to Phase 2.
-
-**Web context** (CanonicalExternal channel, conditional): When uncertainty carries an environmental dependency signal
-(external API versions, library maintenance status, breaking changes, RFC/standard semantics, vendor documentation)
-and the information is not available in the codebase, extend context collection to external fetch.
-Web evidence is tagged with `source: "web:{url}"` for traceability.
-
-**Determinism verification** (Extension precondition): CanonicalExternal is classified as Extension only when the source is deterministic for the claim scope. Verify one of: (a) pinned version or dated snapshot (specific RFC with publication date, vendor doc with version pin, W3C spec with date stamp), (b) tag-pinned URL (`/v1.2/`, `?version=X`), or (c) cached copy with recorded fetch timestamp. When the source is undated or versionless and the claim depends on temporal context (API behavior, deprecated features, vendor defaults), the fetch is NON-deterministic → classify as Constitution and escalate via Phase 2 classify summary before treating as evidence.
-
-**Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, the guard requires BOTH: (1) `staleness:unverified` tag (the temporal sub-case of the general `support_integrity:unverified` tag) attached to the evidence record, AND (2) surfacing to the user in Phase 2 classify summary regardless of whether EmpiricallyObservable reclassification subsequently resolves the uncertainty — no silent escalation path (no "or" fallback). The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating, and always cite the authority source when its temporal alignment cannot be independently verified (see TOOL GROUNDING `Phase 2 Qs_staleness` Constitution entry).
-
-**Scope restriction**:
-- Context collection: Read-only investigation (artifact read, artifact search, external fetch). — core preserved
-- Read-only verification: Extended context lookup for verifiable facts (artifact read, artifact search). — resolves directly
-- Empirical observation: Non-destructive observation via environment run, with optional artifact write for observation instrument setup (temp test artifacts). Observation results are evidence for Phase 2, not resolution — evidence gathering, not replacement. Design constraints — the **probe envelope**, the protocol's named observation-admissibility boundary (a stable handle for the constraint set, so a citation of it tracks revisions made here rather than freezing a member list): **Minimal** (create the smallest possible observation instrument), **Reversible** (all observation artifacts created in temp locations and cleaned up after observation), **Sandboxed** (observation must not modify existing project files), **Transparent** (log observation lifecycle in `Λ.observation_history`), **Bounded** (30-second timeout → the observation ends, `cleanup` runs, and the overrun carries forward to Phase 2 as negative evidence in `Uₑ`; the item still reaches the user, carrying what the observation established rather than empty-handed), **Risk-aware** (elevated-risk observation → reclassify as UserDependent).
-
-### Phase 2: Uncertainty Surfacing
-
-**Present** the highest-priority remaining uncertainty with classify results via Cognitive Partnership Move (Constitution).
-
-**Classification transparency** (Always show): Phase 2 always includes classify results for remaining uncertainties. This is informational — no approval required. Users can override classification by stating objection. When only one uncertainty remains, inline the classification with the uncertainty description rather than showing a separate summary block.
-
-**Surfacing format**:
-
-Present the classification results, uncertainty description, and evidence as text output:
-- **Classification summary** (each remaining uncertainty shows how the AI plans to resolve it, with the basis cited; each line is one case the user may see):
-  - a factual question whose answer can be looked up in the codebase, where the source is actually coupled to the behavior it describes (basis: evidence summary + a check that the source would break/fail if that behavior changed)
-  - a factual question whose answer comes from a published external document (basis: doc url + codebase version cross-check)
-  - a factual question that can be checked by running a test (basis: evidence summary)
-  - a factual question that could be tested, but where your knowledge is the better source (basis: dominance reason — operational context the test cannot see, or knowledge tied to a moment that cannot be reproduced)
-  - a factual question that would have been tested but the test is blocked by an environmental escape condition, falling back to asking the user
-  - a factual question with partial evidence — the evidence covers one part of the claim, the uncovered part is classified separately
-  - a factual question whose codebase evidence is present and current but not provenance-coupled to the claim or not coupled to the behavior it asserts — routed to a test/observation rather than trusted as-is (and flagged with a `support_integrity:unverified` note when that test is blocked, and equally when it runs and hits its time budget)
-  - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
-  - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
-  - a consistency question spanning multiple scopes — outside Aitesis's resolution scope, recorded as detected but unresolved
-  - a relevance question — outside Aitesis's resolution scope, flagged for the user
-  - Any of these classifications to revise?
-- **[Specific uncertainty description — highest priority]**
-- **Evidence**: [Evidence collected during context collection and observation, if any]
-
-Then **present**:
-
-```
-How would you like to resolve this uncertainty?
-
-Options:
-1. **[Provide X]** — [what this context enables]
-2. **[Point me to...]** — tell me where to find this information
-3. **Dismiss** — proceed with [stated default/assumption]
-4. **Unknown / Partial** — I don't know, or I only have partial context; the AI will try the next-preferred way of finding the answer and re-classify
-```
-
-Option 4 is the typed `Unknown(Partial)` constructor (TYPES `A`): Phase 3 auto-promotes to the next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via the backward arc (PHASE TRANSITIONS). This is a type-preserving materialization — not gate mutation — since the TYPES coproduct already admits `Unknown(Partial)` as a constructor.
-
-**Design principles**:
-- **Classification transparent**: Show classify results (dimension + verifiability) for all uncertainties — "visible by default, ask only on exception"
-- **Context collection transparent**: Show what evidence was collected and what remains uncertain
-- **Current uncertainty framed**: Surface the uncertainty currently in play as framing — the kind of context being resolved this cycle — rather than a completion count across all uncertainties
-- **Actionable options**: Each option leads to a concrete next step
-- **Dismiss with default**: Always state what assumption will be used if dismissed
-
-**Selection criterion**: Choose the uncertainty whose resolution would maximally narrow the remaining uncertainty space (information gain). When priority is equal, prefer the uncertainty with richer collected context (more evidence to present).
-
-### Phase 3: Prospect Update
-
-After user response:
-
-1. **Provide(context)**: Integrate user-provided context into prospect `X'`
-2. **Point(location)**: Record location, resolve via next Phase 1 iteration
-3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
-4. **Unknown(Partial)**: Promote the uncertainty to the next-preferred untried EvidenceSource in `ValidSources(v)` and re-enter Phase 1 classification via the backward arc; when none is untried, keep it in `remaining` and mark it spent for the user to dispose of
-
-After integration:
-- Re-scan `X'` for remaining or newly emerged uncertainties
-- If uncertainties remain: return to Phase 1 (collect context for new uncertainties first)
-- If all resolved/dismissed: proceed with execution
-- Log `(Uncertainty, A)` to history
-
-## Intensity
+### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
@@ -469,44 +263,11 @@ After integration:
 | Medium | Significant priority uncertainties, context collection partially resolved | Structured Constitution interaction framing the current uncertainty |
 | Heavy | Critical priority, multiple unresolved uncertainties | Detailed evidence + collection results + classify results + resolution paths |
 
-## UX Safeguards
-
-| Rule | Structure | Effect |
-|------|-----------|--------|
-| Gate specificity | `activate(Aitesis) only if ∃ requirement(r) : ¬available(r) ∧ ¬trivially_inferrable(r)` | Prevents false activation on clear tasks |
-| Context collection first | Phase 1 before Phase 2 | Enriches question quality before asking |
-| Uncertainty cap | One coherent cluster per Phase 2 cycle (size ≤ 4, default), priority order, per-item non-overlapping information-gain leverage; cluster size > 1 requires `Clustering basis: [decision frame] — per-item gain rationale: [item₁: reason₁; item₂: reason₂; ...]` cite (auditable parallel to Cite-or-observe); yields to Divergence-bounding when frame-first triggers fire — items whose answers depend on other cluster items form a compound question (forbidden — collapses decision space into 2ⁿ implicit states) | Prevents question overload while permitting shared-frame clusters |
-| Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
-| Current-uncertainty framing | Phase 2 surfaces the uncertainty currently in play (the kind of context being resolved this cycle) — a framing readout, not an `[N resolved / M]` completion count | User recognizes which context is being resolved without parsing a progress tally; granular progress stays in session |
-| Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can declare the context sufficient when remaining uncertainties are marginal |
-| Sufficiency declaration | User can declare sufficient at any Phase 2 as a free response; every remaining uncertainty is dismissed with the declaration recorded against it, and the run converges as InformedExecution | Full control over inquiry depth, with what was accepted unresolved visible in the convergence trace |
-| Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
-| Non-actionable transparency | Uₙ items show as out-of-scope in Phase 2 classify summary, and the convergence trace declares them again on every converging path | User sees these fall outside Aitesis's resolution rather than being silently dropped — including when nothing was actionable and no Phase 2 question ever fired |
-| Observation transparency | Log observation lifecycle in Λ.observation_history | User can audit what was tested |
-| Skip transparency | Log escape hatch usage in Λ.observation_skips with condition + rationale (pre-observation escapes only; an observation that ran and overran its budget is logged in Λ.observation_history instead) | User can audit why observation was skipped, and a skipped observation stays distinguishable from one that ran without resolving |
-| Observation cleanup | All test artifacts removed after observation | No residual files |
-| Observation timeout | 30s limit → observation ends, cleanup runs; the overrun attaches to `Uₑ` as negative evidence and surfaces at Phase 2 | Prevents hanging, and the overrun itself reaches the user as evidence about the resolution path rather than as a silent skip |
-| Observation risk gate | Elevated-risk observation → reclassify as UserDependent | Safety preserved |
-| Free-response escape | Phase 2 Constitution interaction accepts `Unknown(Partial)` as typed answer constructor (TYPES `A`) — Phase 3 auto-promotes uncertainty to next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via backward arc (PHASE TRANSITIONS) | User need not simulate certainty for unknowns; routing degrades gracefully through typed, formally-tracked arc |
-| Cost-ordering tiebreaker | Default ascending cost-ordering defined in TYPES (`CodeDerivable < CanonicalExternal < Instrumentation < UserTacit`). **External-dependency preference**: when uncertainty carries environmental-dependency signal, prefer `CanonicalExternal` over `CodeDerivable` unless authority-override basis cited. Override logged to `Λ.source_choice_overrides` | Minimizes user-interrupt cost; preserves external authority when relevant; Cite-or-observe basis required for UserTacit preference |
-| EvidenceSource transparency | Factual uncertainty classify summary shows `EvidenceSource: {selected}` with basis citation when override applied; `Λ.source_choice_overrides` preserves cite audit across sessions for variation-stable observed use | Cite-or-observe rule audit visibility |
-
 ## Rules
 
-1. **AI-guided, user-resolved** (Cognitive Partnership Move): AI infers context insufficiency; resolution requires user choice via Cognitive Partnership Move (Constitution) at Phase 2 — present options with differential futures, yield turn, parse typed answer.
-2. **Recognition over Recall**: Present structured options with anticipatable post-selection states; Constitution interaction requires turn yield before proceeding.
-3. **Evidence over Inference over Detection** (Aitesis Core Principle): Three-level hierarchy. Lower boundary (Inference > Detection): infer the highest-gain question rather than detecting via fixed checklist. Upper boundary (Evidence > Inference): when a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone — Cite-or-observe is the structural guard. Direct-resolve admissibility has two axes: **coverage** (verify scope ⊇ claim) and **support_integrity** (verify provenance_coupled(source × claim) and the evidence→behavior link, not silently desynced). Partial coverage is inference for the uncovered portion; present evidence with the wrong referent/source-kind/scope is inference dressed as evidence for a different claim; current-but-unenforced evidence is inference dressed as evidence for the behavior it asserts. Verify both before treating as resolved, and reclassify a failing portion separately (coverage gap → split; support-unlinked or provenance-uncoupled → EmpiricallyObservable). **Inquiry above Evidence in cost**: facts discoverable by AI through Evidence (codebase, memory, observation, canonical external) are resolved at Phase 1; Phase 2 surfaces only judgment-requiring uncertainties.
-4. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically per prospect requirements; every surfaced uncertainty cites specific observable evidence or collection results, not speculation.
-5. **Context collection precedes classification precedes inquiry**: Phase 1 Step 1 (codebase + memory + history collection) → Step 2 (dimension + verifiability + EvidenceSource classification) → Step 3 (read-only verification) → Step 4 (empirical observation) before Phase 2 inquiry. Memory and version-control evidence is staleness-guarded — tagged `source: "memory:{path}"` or `source: "history:{ref}"` and NOT eligible for Factual/ReadOnly direct-resolve; verify against current state or escalate via classify summary with the `staleness:unverified` flag (the temporal sub-case of the general `support_integrity:unverified` tag). Procedural detail in Phase 1 Step 1-2.
-6. **Convergence persistence**: Mode active until one of the termination paths is reached — all identified uncertainties resolved (context, read-only, observed, user-responded) or dismissed, converging as InformedExecution; the user declaring the context sufficient, which dismisses every remaining uncertainty with the declaration recorded and likewise converges as InformedExecution. Convergence demonstrated via per-uncertainty transformation trace before declaring remaining = ∅.
-7. **Always show classification**: Phase 2 surfacing always includes classify results (dimension + verifiability + EvidenceSource); free response can override classification — visible by default, ask only on exception.
-8. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-9. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
-10. **One coherent cluster**: Surface one coherent cluster per Phase 2 cycle (size ≤ 4 default); cluster admissible when items share decision frame, have non-overlapping information-gain rationale, and are independently answerable — compound questions (where one item's answer depends on another) collapse the decision space into 2ⁿ implicit states, degrading Recognition. Clustering-basis cite required when cluster size > 1. Yields to Divergence-bounding (frame-first) when divergence triggers fire — frame first, then cluster within selected frame. Procedural detail in UX Safeguards (Uncertainty cap entry).
-11. **Divergence-bounding (frame-first)**: Compute per-uncertainty `branching_factor(u)` during Phase 1 Ctx. When `|Uᵢ| × max branching_factor(u) ≥ 16` OR `Σᵤ branching_factor(u) ≥ 16`, present a decision frame option set before per-branch detail; supersedes One coherent cluster when both apply. Exception (full enumeration without frame-first) requires BOTH `|Uᵢ| ≤ 3` AND each `branching_factor(u) ≤ 2` AND cited per-uncertainty counts (silent self-assessment "uniformly low" forbidden). `branching_factor` definition in TYPES.
-12. **Cite-or-observe** (Evidence-Inquiry boundary structural guard): When a Factual uncertainty has a cheaper EvidenceSource available than UserTacit, resolve via cheaper source OR cite explicit dominance basis (logged to `Λ.source_choice_overrides`). Reclassification of EmpiricallyObservable to UserDependent is legitimate only under empirically verifiable escape conditions evaluated BEFORE observation (env mutation / elevated risk; logged to `Λ.observation_skips`) — each names a reason the observation MUST NOT run, which an expected duration is not. Observation outputs always proceed to Phase 2 via `Uₑ` — positive (differentiating evidence) or negative (null-signal, or budget exhausted before an answer); pre-observation categorical classification is not a substitute. A budget overrun is one of those observation outcomes, not an escape: the observation ran, so the overrun is evidence about the resolution path and is recorded in `Λ.observation_history`, never in `Λ.observation_skips`. Escapes are pre-observation; outcomes come from observations that ran. The budget's value is set and enforced by the execution channel, not fixed by this rule. On the ReadOnly direct-resolve path, support_integrity is the structural test for the same upper boundary: evidence that is present (and current) but not coupled to the source × claim pair or behavior it asserts (`support_integrity_unverified`) is inference, not evidence, and reclassifies to EmpiricallyObservable rather than auto-resolving; admissibility on this path requires confirming provenance coupling and evidence→behavior coupling, beyond freshness. Verifiability-tier dominance basis detail in Phase 1 Step 2.
-13. **No pre-filter rationalization** (Cite-or-observe dual): Pre-filter (Coherence coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying genuine cross-domain structural contradiction as "rule-resolvable" = pre-filter misuse.
-14. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-17. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-18. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-19. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+1. **Recognition over Recall**: Present structured options with anticipatable post-selection states.
+2. **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
+3. **Option-set relay test**: Present a single dominant trajectory as Extension. Constitution options remain genuinely viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+4. **One coherent cluster**: Items in a multi-item cluster share a decision frame, have non-overlapping information-gain leverage, and are independently answerable. When the cluster has more than one item, cite the clustering basis and each item's gain rationale.
+5. **No pre-filter rationalization**: Coherence coexistence is available only when an explicit scope hierarchy or documented precedence ordering resolves the apparent contradiction.
+6. **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

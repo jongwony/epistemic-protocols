@@ -29,8 +29,6 @@ When a check fires, the fix is usually one of these:
 | Check | Repair |
 |---|---|
 | `codex-manifest-sync` | Bump the Codex manifest to the Claude version in the same commit |
-| `formal-blocks-rule` | Add the missing rule statement to the protocol's `## Rules` section |
-| `gate-integrity-rule` | Add the missing tagged rule to the protocol's `## Rules` section |
 | `framing-readout-enforcement` | Delete the progress-bar glyph, or restore the guard kernel within the affected Output Style's Cognitive work element |
 | `ink-body-identity` | Re-sync the sibling's reproduced body to match the canonical file exactly |
 | `packaged-agent-contract-sync` | Sync the drifted surface — agent or `SKILL.md` — named in the message |

@@ -458,7 +458,6 @@ function runStaticChecksSubprocess(projectRoot) {
 
 describe('enforcement-check detector liveness', () => {
   const REPO_ROOT = path.join(__dirname, '..');
-  const CORE_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
 
   function restoreOrDie(filePath, backup, label) {
     try {
@@ -472,59 +471,6 @@ describe('enforcement-check detector liveness', () => {
       throw restoreErr;
     }
   }
-
-  it('formal-blocks-rule fires when the rule label is mangled in a core SKILL.md', () => {
-    const LABEL = '**Formal blocks are runtime-normative**';
-    const backup = fs.readFileSync(CORE_SKILL_MD, 'utf8');
-    assert.ok(backup.includes(LABEL), 'precondition: rule label present in pristine file');
-    try {
-      fs.writeFileSync(
-        CORE_SKILL_MD,
-        backup.replace(LABEL, '**Formal blocks are runtime-MANGLED**')
-      );
-
-      const result = runStaticChecksSubprocess();
-      const fails = result.fail.filter(
-        f => f.check === 'formal-blocks-rule' && /aitesis/.test(f.file)
-      );
-      assert.ok(
-        fails.length >= 1,
-        `expected ≥1 formal-blocks-rule fail for aitesis after mangling the rule label, ` +
-        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
-        `Fails: ${JSON.stringify(result.fail)}`
-      );
-    } finally {
-      restoreOrDie(CORE_SKILL_MD, backup, 'aitesis SKILL.md');
-    }
-  });
-
-  it('gate-integrity-rule fires when the mutation-taxonomy kernel is mangled in its entry', () => {
-    // The Gate integrity Rules entry states the kernel with a capital T
-    // ("Type-preserving materialization"); the earlier prose occurrence is
-    // lowercase, so this exact-case replace targets the entry body only.
-    const ENTRY_KERNEL = 'Type-preserving materialization';
-    const backup = fs.readFileSync(CORE_SKILL_MD, 'utf8');
-    assert.ok(backup.includes(ENTRY_KERNEL), 'precondition: entry kernel present in pristine file');
-    try {
-      fs.writeFileSync(
-        CORE_SKILL_MD,
-        backup.replace(ENTRY_KERNEL, 'Type-MANGLED materialization')
-      );
-
-      const result = runStaticChecksSubprocess();
-      const fails = result.fail.filter(
-        f => f.check === 'gate-integrity-rule' && /aitesis/.test(f.file)
-      );
-      assert.ok(
-        fails.length >= 1,
-        `expected ≥1 gate-integrity-rule fail for aitesis after mangling the kernel phrase, ` +
-        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
-        `Fails: ${JSON.stringify(result.fail)}`
-      );
-    } finally {
-      restoreOrDie(CORE_SKILL_MD, backup, 'aitesis SKILL.md');
-    }
-  });
 
   it('ink-body-identity fires when the reproduced Ink body drifts in the sibling style', () => {
     const SIBLING_STYLE_MD = path.join(
