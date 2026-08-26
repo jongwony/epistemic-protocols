@@ -152,210 +152,40 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 *: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Reverse Induction over Axis-Fixed Extraction**: When intent is articulated but its decision coordinates are implicit in the user's externalized substrate (codebase, rules, past sessions, user environment), neither AI alone nor user alone can resolve the endpoint. AI reverse-traces from the substrate to surface candidate dimension projections; the user's answers explicate which coordinates were already implicit in their externalized cognition. The resolution emerges through cycle iteration, not through axis-fixed extraction along a single pre-committed dimension. The dimension options surface per cycle from that cycle's substrate trace.
-
 ## Scope Boundary
 
-This protocol does one thing: it makes implicit decision coordinates explicit so that intent crystallizes.
-
-**It does not adjudicate which protocol a question belongs to.** When a surfaced coordinate turns out to want a missing fact, an undefined boundary, or a direction whose future cannot be recognized from a description, the protocol does not classify it, gate on it, or route it away — it surfaces the coordinate with its substrate basis and lets the user decide what to reach for next. Composition across protocols is the user's act, not this protocol's.
-
-The omission is deliberate. Filtering candidate coordinates by which sibling protocol owns them adds a judgment the user did not ask for and spends attention on protocol boundaries rather than on the intent being clarified.
+Euporia surfaces grounded decision coordinates without adjudicating which sibling protocol owns them. A coordinate that exposes a missing fact, undefined boundary, or unrecognizable direction remains a coordinate with its substrate basis; the user decides what to reach for next.
 
 ## Coordinate Monotonicity Invariant
 
-**Invariant (Coordinate Monotonicity)**: An accepted coordinate is immutable. Once a coordinate is answered with `Provide(value)` and enters `Λ.accepted_coords`, no subsequent cycle — and no subsequent answer — may remove or overwrite it. A later answer ADDS determination to `I'`; it never REVISES an accepted coordinate. A `Defer(coords)`-ed coordinate, when later answered in a subsequent cycle, may only ADD determination — it cannot overturn a coordinate already accepted in an earlier cycle.
-
-**Why this holds structurally**: `I'` is accumulate-only — `integrate` adds coordinate values, never deletes them.
-
-**Rationale / documented falsifier (the `Defer` retroactive-invalidation case)**: the risk the invariant forecloses is a `Defer`-then-answer sequence in which a deferred coordinate's later answer would imply a *different* value for a coordinate already accepted in an earlier cycle — retroactively invalidating it and breaking monotonicity. The invariant rules this out by construction: deferral parks a coordinate as still-pending (it was never accepted, so nothing about it is yet immutable), and when it is later answered the result is an ADD to `I'`, scoped to that coordinate. If a later answer genuinely contradicts an accepted coordinate, that is a **frame change**, not a within-loop revision: the user must re-open the resolved coordinate explicitly (a fresh constitutive act — equivalently a new `/elicit` pass over the changed intent), and the protocol surfaces the conflict rather than silently overwriting. The invariant is falsified if a re-projection cycle is ever observed to silently overwrite an accepted coordinate without such an explicit user re-opening.
+An accepted coordinate is immutable. `integrate` only adds determinations to `I'`; a later contradiction is surfaced as a frame change requiring the user to reopen that coordinate through a fresh constitutive act.
 
 ## Mode Activation
 
-### Activation
+`/elicit` remains directly invocable. AI-guided activation requires an axis-undetermined intent backed by an external substrate signal from Codebase, Rules, Session, or Environment. Utterance evidence may ground a projection after activation, but cannot activate Euporia by itself.
 
-AI detects abstract aporia OR user calls `/elicit`. Detection is silent on the aporia-confirmed path (Phase 0); dimension surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
-
-**Hybrid confirmation contract**: For AI-detected activation paths, the first Phase 2 surfacing (cycle_n=1) serves as the user-confirmation moment — the user's response to that first surface is the acknowledge-or-decline, satisfying the Hybrid initiator's "AI-detected trigger path requires user confirmation" contract. A decline is something the user says, not an absence: `Dismiss`, or any utterance that reads as declining. Phase 1 substrate scan precedes this confirmation under the substrate read-only constraint; no externalized state is mutated before user judgment.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/elicit` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Abstract aporia detected via in-protocol heuristics (axis-undetermined intent + substrate-implicit coordinates). Detection is silent on the aporia-confirmed path.
-
-**Abstract aporia** = intent is articulated as utterance but its decision coordinates are not axis-determined; the substrate carries implicit values that can be reverse-traced into surfaceable dimensions.
-
-Gate predicate:
-```
-aporia(I) ≡ ∃ requirement(r, I) : axis_undetermined(r) ∧ substrate_implicit(r)
-            -- substrate_implicit ranges over external SubstrateChannels
-            --   {Codebase, Rules, Session, Environment} for activation purposes.
-            -- Utterance is admissible as Evidence basis within Phase 1 dimension projections
-            --   once activated, but does not by itself satisfy substrate_implicit;
-            --   utterance-only aporia (axis-undetermined intent without external substrate signal)
-            --   does not satisfy substrate_implicit, so this gate does not fire.
-```
-
-### Priority
-
-<system-reminder>
-When Euporia is active:
-
-**Supersedes**: Direct execution patterns that proceed without surfacing implicit coordinates
-(Coordinates must be reverse-traced and explicated through Cognitive Partnership Move (Constitution), not assumed silently)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At Phase 2, present the cycle-emergent dimension projections with substrate-cited basis and cycle counter via Cognitive Partnership Move (Constitution).
-</system-reminder>
-
-- Euporia completes before action dependent on the resolved endpoint proceeds
-- Loaded instructions resume once the protocol terminates
-
-### Trigger Signals
-
-| Signal | Detection |
-|--------|-----------|
-| Axis-undetermined intent | utterance carries action verb without specifying *which* axis (intent / goal / form / scope / framework / ...) is the relevant decision dimension |
-| Substrate implicit coordinates | user's codebase / rules / past sessions / environment contain decision values that the intent does not surface |
-| Multi-axis dependency | intent's resolution depends on coordinates spanning multiple axes that no single axis-specific protocol covers |
-| Aporia language | utterance such as "I want to ... but I'm not sure how to ..." or open-ended action statements without endpoint constraint |
-
-**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed the substrate scan; the constitutive judgment remains with the user.
-
-**Skip**:
-- Intent is fully axis-determined (a single axis-specific protocol covers it)
-- Substrate is empty (no externalized coordinates available — fall back to direct execution)
-- User explicitly requests proceed without surfacing
-- Same (utterance, substrate slice) was resolved or dismissed in current session (session immunity)
-- Wants generated candidates from a topic or fragments, not coordinates reverse-traced from externalized substrate — outside Euporia's reverse-trace scope
-
-### Activation Conditions
-
-Euporia activates when (a) the user's intent is articulated as an utterance, (b) the utterance does not commit to a single axis-specific protocol, (c) the user's externalized substrate carries implicit decision coordinates relevant to the intent's resolution, and (d) the substrate is reachable through read-only tools. The gate is the conjunction of axis-undetermined intent and substrate-implicit coordinates, not instance count or scenario template.
-
-### Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| user_judges_resolved(I') | Return ResolvedEndpoint with per-cycle coordinate trace; every remaining `Λ.deferred` projection and `Λ.parked` coordinate folded into residual and surfaced |
-| Dismiss | Return ResolvedEndpoint with residual annotated for downstream delegation — unresolved axes, remaining `Λ.deferred` projections, and remaining `Λ.parked` coordinates folded in and surfaced, never silently dropped |
-| No aporia signal at Phase 0 (axis-determined or substrate empty) | Surface scan result without activating — routing recommendation when axis-determined, articulate-or-withdraw invitation when substrate empty |
+On the AI-guided path, the immutable Phase 1 scan may precede confirmation; the first Phase 2 response confirms or declines the run. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance and substrate slice was resolved or dismissed in this session.
 
 ## Protocol
 
-### Phase 0: Aporia Detection Checkpoint
+### Phase 2 surfacing format
 
-Analyze the intent seed for abstract aporia. Detection is silent on the aporia-confirmed path — it proceeds to Phase 1 with no user interaction; on no signal it surfaces the scan result before deactivating.
+At Phase 2, render the cycle counter and, from cycle 2 onward, a plain one-sentence readback of current `I'`. For each surfaced projection, show its inferred axis, coordinate questions, cited substrate basis, and any substrate-derived default. Mark each parked coordinate as returning in the same wording and with the same basis. Let the listed coordinates establish what is currently in play without a derived count or resolved/total tally, then present per-coordinate provide-or-defer slots plus Dismiss-with-residual and yield the turn.
 
-1. Bind seed `I` per A-BINDING priority
-2. Check axis determination: scan utterance for axis-specific markers (intent verbs / goal nouns / abstraction signals / boundary phrases)
-3. Check substrate availability: confirm read-only access to codebase / rules / session history / environment
-4. If `aporia(I)` predicate satisfied: proceed to Phase 1 with `(I, S, ctx)` — silent, no user interaction
-5. If no aporia signal (predicate unsatisfied), surface the scan result and deactivate without proceeding to Phase 1:
-   - **Intent is axis-determined**: surface a routing recommendation to the matching axis-specific protocol
-   - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution)
+Utterance evidence quotes the user's actual fragment; it does not attribute an unstated mental model. Only projections with concrete substrate basis reach the surface. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
 
-**Scope restriction**: Detection does not modify the substrate. The no-signal surface is a relay presentation — no constitutive gate.
-
-### Phase 1: Substrate Access + Reverse Trace
-
-Read substrate channels (immutable), reverse-trace candidate dimension projections, and retain the ones with a concrete substrate basis for surfacing.
-
-1. **Substrate scan** (external channels): artifact read/artifact search over the user's codebase, rules, recent sessions; environment run for read-only Environment queries (machine-setup metadata only: uname, pwd, tool versions, git config public fields). Tag each evidence record with its substrate channel (Codebase / Rules / Session / Environment). Reads are immutable — the substrate is never mutated.
-2. **Utterance analysis** (Utterance channel): Internal analysis of `I.utterance` for in-text semantic ambiguity. Citations quote the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel. Utterance evidence supplements external substrate evidence within Phase 1 dimension projections — it does not by itself trigger activation (see Gate predicate).
-3. **ReverseTrace**: From the intent and the substrate evidence, infer candidate dimensions whose coordinates are likely implicit in the substrate. Each `Coordinate` within the projection carries (name, default, question, basis: Evidence); each `DimensionProjection` carries (axis_inferred, coordinates, confidence).
-4. **Filter by confidence**: Retain in `Λ.D_surfaced` only the projections whose substrate basis is concrete; move thin-basis projections into `Λ.deferred` (re-traced when more of `I'` is determined). Only the retained projections reach Phase 2. Do not filter by which sibling protocol a coordinate might belong to — see **Scope Boundary**.
-5. **Bring back what the user parked**: every coordinate in `Λ.parked` re-enters this cycle's surfacing as itself, carrying the question and basis it was parked with. Do not re-derive it from the substrate and do not reword it — the user already read that question and answered "not yet", so what comes back has to be recognizable as the same question.
-6. Package `(D_surfaced, Λ.parked, context)` and proceed to Phase 2 — including when both are empty.
-
-**Scope restriction**: The substrate is read, never written. This is the protocol's own property, not a rule about which tools may run. Substrate evidence must cite a specific source.
-
-### Phase 2: Cycle-Emergent Dimension Surfacing (Constitution)
-
-**Present** dimension projections with substrate-cited basis and cycle counter via Cognitive Partnership Move (Constitution).
-
-**Surfacing format**:
-
-Present dimension projections as text output:
-- **Cycle**: `cycle_n` (always visible)
-- **Intent readback** (cycle_n ≥ 2): plain single-sentence form of current I' assembled from resolved coordinates; provides the user a recognizable target for `user_judges_resolved` judgment without adding a separate gate
-- For each `DimensionProjection` in `Λ.D_surfaced`:
-  - **Axis**: [axis_inferred]
-  - **Coordinates**: [coordinate names + question per coordinate]
-  - **Substrate basis**: [evidence cited from substrate channels, including Utterance fragments when applicable]
-  - **Default** (when substrate-derivable): [default value with citation]
-- **Brought back** (when `Λ.parked ≠ ∅`): each coordinate the user deferred earlier, in its original wording, marked as returning rather than new
-- **In play this cycle**: [the coordinates still pending in the current cycle] — a framing readout of what remains open this cycle, not a resolved/total tally
-
-Then present per-coordinate answer slots (cycle-emergent — no fixed dialect; the slots reflect the actual coordinates of the current cycle):
-
-```
-For each surfaced coordinate, provide an answer or defer.
-Or:
-- Defer specific coordinates — they come back next cycle as themselves
-- Dismiss + delegate residual to downstream protocols
-```
-
-Design principles for this surfacing (substrate-cited basis, cycle counter visibility, coordinate-level granularity, free response) are recorded in **UX Safeguards** below.
-
-### Phase 3: Integration
-
-After user response. `integrate(A, I)` is **monotone**: it ADDS coordinate determination to `I'` and never revises a previously accepted coordinate (see §Coordinate Monotonicity Invariant).
-
-1. **Provide(values)**: Update I' with provided coordinate values; enter the answered coordinates into `Λ.accepted_coords` and remove each from `Λ.parked` if it was waiting there.
-2. **Defer(coords)**: Put each deferred coordinate into `Λ.parked` (covers ambiguous/partial/not-yet-answerable). It stays there, re-surfaced as itself every cycle, until answered with `Provide` or folded into residual at termination — it is never dropped for having gone unanswered.
-3. **Dismiss**: Mark intent as dismissed-with-residual; collect unresolved axes, any remaining `Λ.deferred` projections, and any remaining `Λ.parked` coordinates (each with its basis) into `residual`. Terminate.
-
-**Conflict handling**: a later answer contradicting an accepted coordinate is a frame change requiring explicit user re-opening, never a silent overwrite — see §Coordinate Monotonicity Invariant.
-
-After integration:
-- Re-detect remaining aporia in I'
-- If `user_judges_resolved(I')`: terminate with ResolvedEndpoint + per-cycle trace; fold every remaining `Λ.deferred` projection and `Λ.parked` coordinate into `residual` and surface them (never silently dropped)
-- Else: increment `cycle_n`, return to Phase 1 to re-project (see LOOP)
-
-## Intensity
+### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Single dimension, substrate evidence concrete | Brief surface + per-coordinate answer slot |
-| Medium | Multiple dimensions per cycle, partial substrate evidence | Full dimension surface + coordinate-level granularity |
-| Heavy | Multi-axis intent, weak substrate basis, multiple cycles expected | Full surface + substrate evidence per coordinate + explicit residual axes |
-
-## UX Safeguards
-
-| Rule | Structure | Effect |
-|------|-----------|--------|
-| Gate specificity | `activate(Euporia) only if axis_undetermined(I) ∧ substrate_implicit(I)` | Prevents false activation on axis-determined intent or empty substrate |
-| Substrate evidence required | Phase 1 dimension projections must cite specific substrate evidence (file:line, rule reference, session id) | Prevents speculation; reverse-trace must be grounded |
-| Confidence filter | Only projections with a concrete substrate basis reach Phase 2; thin-basis projections are held back in `Λ.deferred`, and whatever remains there at termination surfaces as residual | Prevents asking a coordinate the substrate cannot ground |
-| Composition left to the user | No filtering by which sibling protocol owns a coordinate; surfaced coordinates carry their basis and the user decides what to reach for next | Keeps attention on the intent rather than on protocol boundaries (see **Scope Boundary**) |
-| Coordinate monotonicity | Accepted coordinates are immutable; integrate ADDS, never revises | Re-projection cannot invalidate an already-accepted coordinate; resolution reached by accumulation, never regression |
-| Cycle counter visibility | Phase 2 surfacing always shows `cycle_n` | User perceives cycle signal density and decides when to terminate |
-| Cycle-emergent option set | Phase 2 options reflect current cycle's coordinates; no fixed dialect | Adapts to actual coordinates surfaced; respects axis-emergence |
-| Coordinate-level granularity | User answers per-coordinate; deferral per-coordinate | Permits partial progress within a cycle |
-| Deferred coordinates come back | `Defer` parks the coordinate in `Λ.parked` and every later cycle re-surfaces it in its original wording; if still unanswered at termination it is folded into residual | "Not yet" is held rather than lost, and comes back recognizable as the same question |
-| Free response honored | User may answer beyond the presented options, or name an excluded dimension | Full constitutive control |
-| Session immunity | Resolved or dismissed (utterance, substrate slice) → skip for session | Respects user's resolution or release |
-| Substrate read-only | Phase 1 substrate access uses read-only tools only | No mutation of user's externalized cognition during scan |
-| Utterance channel discipline | Utterance evidence quotes the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel | Prevents AI from projecting unspoken user mental models as substrate evidence |
-| Utterance-only activation guard | Utterance evidence supplements external substrate evidence; utterance-only signals do not satisfy the activation predicate | Prevents false-positive activation when no external substrate carries implicit coordinates |
-| Convergence readback (Phase 2, cycle_n ≥ 2) | At every Phase 2 from cycle_n ≥ 2, present I' as plain single-sentence readback (readback alone, no trace) | Provides recognizable target for `user_judges_resolved`; prevents implicit resolution assertion mid-cycle |
-| Convergence readback (termination) | At termination, present I' as readback alongside the per-cycle coordinate trace | Demonstrates convergence with full history; readback materializes the resolved endpoint as a recognizable sentence |
+| Light | One grounded dimension | Brief surface and per-coordinate slots |
+| Medium | Several dimensions or partial evidence | Full surface at coordinate granularity |
+| Heavy | Multi-axis, weak-basis, multi-cycle prospect | Full surface with per-coordinate evidence and explicit residuals |
 
 ## Rules
 
-1. **AI-guided substrate access, user-resolved**: AI reverse-traces dimension projections from substrate; resolution requires user answer via Cognitive Partnership Move (Constitution) (Phase 2).
-2. **Recognition over Recall**: Present structured dimension surfacing via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield.
-3. **User constitutive interaction**: User answers operate at three layers — coordinate-level (per-coordinate provide/defer), endpoint-level (`resolved(I')` is user judgment, not AI assertion), and frame-level (user may name a dimension the scan did not surface; free response routes the next cycle's substrate scan).
-4. **Convergence persistence**: Mode active until the user judges resolved or dismisses.
-5. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-6. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant coordinate value (option-level entropy → 0), present the value directly as relay. The user answer slot remains constitutive when multiple valid coordinate values exist under different user value weightings.
-7. **Gate integrity** (Safeguard tier): The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.
-10. **Composition is the user's**: This protocol surfaces implicit decision coordinates; it does not adjudicate which protocol a coordinate belongs to. A coordinate that turns out to want a missing fact, an undefined boundary, or an unrecognizable direction is surfaced with its substrate basis like any other — not classified, not gated on, not routed away. The only Phase 1 filter is whether a projection has a concrete substrate basis (thin-basis projections are held back in `Λ.deferred`, and whatever remains there at termination surfaces as residual). Leaving composition open is deliberate: classifying coordinates by sibling-protocol ownership spends the user's attention on protocol boundaries instead of on the intent being clarified. See **Scope Boundary**.
-11. **Coordinate monotonicity**: An accepted coordinate is immutable — once answered with `Provide` and entered into `Λ.accepted_coords`, no subsequent cycle or answer removes or overwrites it. `integrate(A, I)` ADDS determination to `I'`; it never REVISES an accepted coordinate. A `Defer`-ed coordinate, when later answered, may only add determination. Re-trace is read-only re-projection with a more-determined `I'`. A later answer that genuinely contradicts an accepted coordinate is a **frame change**, surfaced for explicit user re-opening (a fresh constitutive act), never a silent within-loop overwrite. See §Coordinate Monotonicity Invariant.
-12. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-13. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after this protocol's convergence (ResolvedEndpoint) is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge, so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-14. **A deferred coordinate is parked, not dropped**: `Defer(coords)` puts each coordinate into `Λ.parked`, and every later cycle re-surfaces it as itself — same question, same basis — because the user already read that question and answered "not yet"; re-deriving or rewording it would present a different question and lose the answer they gave. It leaves `Λ.parked` only when answered with `Provide`, and at every termination whatever remains folds into `residual` as itself and is surfaced. This is kept distinct from `Λ.deferred`, which holds projections the confidence filter could not ground in the substrate: different reason, different return path.
-15. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+1. **Recognition over Recall**: Present structured dimension projections with anticipatable post-answer states.
+2. **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
+3. **Option-set relay test**: Present a single dominant coordinate value as Extension. Keep the answer slot constitutive when different user value weightings sustain multiple values.
+4. **Parked-coordinate identity**: A deferred coordinate returns each cycle as the same question with the same basis, marked as returning; it leaves `Λ.parked` only through Provide or termination residual folding.
+5. **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
