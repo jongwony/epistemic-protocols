@@ -196,210 +196,46 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Structural Correspondence over Abstract Assertion**: When text contains abstract frameworks applied to a user's domain, validate that structure-preserving mappings exist between the abstract and concrete domains through explicit correspondences and concrete instantiations, rather than asserting that the abstraction applies. The purpose is to verify mapping adequacy, not to simplify the abstraction.
-
 ## Mode Activation
 
-### Activation
+`/ground` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
 
-See the `── R-BINDING ──` section for grounding target binding and **Rule 1** for the core principle: AI detects mapping uncertainty; validation always requires user choice via Cognitive Partnership Move (Constitution) (Phase 2). Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
+### Activation heuristics and exceptions
 
-Gate predicate:
-```
-uncertain(mapping(Sₐ, Sₜ)) ≡ ∃ structure(s, Sₐ) : ¬established(correspondence(s, Sₜ))
-```
+Treat an abstract framework applied across domains, a request to make an abstraction concrete, a possible structural mismatch, or a located abstraction tested against its own members as mapping-uncertainty signals. Prior-session recall indices may seed domain decomposition; they do not settle a constitutive judgment.
 
-### Priority
+Skip AI-guided activation when the mapping is already established in the current context, the output is purely concrete, or no abstract framework is being applied. Route an unlocated, merely sensed essence over accumulated instances to `/induce`; retain a located abstraction tested against its own members as self-grounding. A request for commitment futures routes elsewhere when no faithful familiar-domain mapping exists. Framework selection and factual context insufficiency remain their own primary deficits rather than mapping validation.
 
-<system-reminder>
-When Analogia is active:
+### Evidence loading
 
-**Supersedes**: Direct output patterns that assume mapping validity
-(Structural correspondence must be validated before proceeding)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At Phase 2, present concrete instantiation for user validation of mapping adequacy via Cognitive Partnership Move (Constitution).
-</system-reminder>
-
-- Analogia completes before output dependent on mapping validity proceeds
-- Loaded instructions resume after mapping status is made explicit
-
-### Trigger Signals
-
-Heuristic signals for mapping uncertainty detection (not hard gates):
-
-| Signal | Detection |
-|--------|-----------|
-| Abstract framework applied | AI output uses a pattern, model, or analogy without domain-specific validation |
-| Cross-domain transfer | Concept from one domain applied to a structurally different domain |
-| Grounding probe | User asks for the abstraction to be made concrete — for an instance of it, or for how it lands in their own case |
-| Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
-| Self-grounding (abstraction vs its own instances) | A located/named abstraction is checked against the instances it claims to subsume (wrong-fusion suspicion) — Sₐ = the abstraction, Sₜ = its own members. Distinct from the colimit route-away case (locator absent → /induce); here the abstraction already has a name and is tested for whether it fuses dissimilar instances |
-
-**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1 domain decomposition; the constitutive judgment remains with the user.
-
-**Skip**:
-- Output is already domain-specific with concrete instantiations
-- User explicitly declares the mapping already established
-- Same domain pair was validated in current session (session immunity)
-- Phase 1 domain analysis confirms structural correspondence is trivial
-- No abstract framework is applied (output is purely concrete)
-- The concretization demand targets direction futures before a commitment, and no familiar-domain mapping carries those futures faithfully — Analogia validates a mapping that exists; it does not materialize futures when none does
-- **Self-grounding is not skipped**: when `located(A)` holds (the abstraction already has a name) and the grounding target is the abstraction against its OWN instances, keep it and run the self-grounding path (wrong-fusion detection) — Analogia's own scope covers a located abstraction validated against its own instances or against a separate concrete domain. The "purely concrete" skip below also does not apply, because a located abstraction IS an abstract structure under validation
-- Framework selection is the primary deficit (no analytical framework chosen for the inquiry) — Analogia validates the mapping of an *existing* framework, not the selection of one
-- Context insufficiency is the primary deficit (factual gaps in execution context — missing facts, missing user environment) — Analogia checks *relational* correspondence between domains, not factual sufficiency for execution
-
-### Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| All correspondences addressed (confirmed or dismissed) | Proceed with validated mapping |
-| User declares the mapping sufficient at any Phase 2 | Proceed with validated mapping: every remaining correspondence is dismissed with the declaration recorded against it, so all correspondences are addressed and the run terminalizes as ValidatedMapping |
-| Attempt cap reached | AttemptExhausted (not ValidatedMapping): present partial transformation trace over already-addressed correspondences, then declare remaining correspondences as unresolved residual, accept current output without further grounding |
+Read code, configuration, documentation, and other available artifacts when the target domain is recorded there. When the relevant source or target structure exists primarily in external APIs, standards, scholarship, or industry material, fetch that evidence and keep its source address visible in the mapping trace.
 
 ## Protocol
 
-### Phase 0: Mapping Uncertainty Checkpoint (Silent)
+### User-facing realization
 
-Analyze text for mapping uncertainty. This phase is **silent** — no user interaction, except the conditional zero-gap confirmation gate (Rule 11) when no mapping uncertainty is detected.
+Present the current correspondence in everyday language: the settled mapping focus, the abstract and concrete structures, the fit judgment with its evidence, one concrete scenario, and any mismatch or open fact that could change validation. Frame the correspondence in play rather than emitting a completion tally.
 
-1. **Bind output** `R`: use explicit argument or the current/most recent output under discussion
-2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
-3. **Colimit-shape detection**: assess whether `R` is a colimit-shaped input — `essence_sensed` over concrete instances plus `locator_absent(A)` (Periagoge formal `¬located(A)`; from Analogia's substitution-interface vantage this surfaces as no source abstraction Sₐ available). Instance accumulation contributes evidence strength for the essence signal. When both criteria hold, route to `/induce` (Periagoge) for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
-3b. **Self-grounding recognition**: if `located(Sₐ)` holds AND the grounding target is the abstraction against its OWN member instances (`Sₜ` = the instances `Sₐ` claims to subsume), set `self_grounding = true`. This is the complement of the colimit case (locator present, not absent): the abstraction already has a name and is being checked for wrong fusion against its members, not formed from scratch. Self-grounding does not route away — it proceeds through the normal mapping-validation phases, and the derived partition reading is computed in Phase 1.
-4. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
-5. If all mappings trivially established: present finding per Rule 11 before proceeding (Analogia not activated)
-6. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
+For self-grounding, render the derived partition reading beside the mapping as relay evidence. A split names every rival cell, the genuinely fitting core, and all unclustered outliers so no member disappears; a trim distinguishes scattered removal from one-cell reorientation; a hold states that the members preserve the abstraction. Keep this reading outside the validation question.
 
-**Scan scope**: Bound text R, conversation context, observable domain signals. Does NOT modify files or call external services.
+Then present `Confirm`, `Adjust`, and `Dismiss` with their distinct downstream consequences and yield the turn. Free response may supply a missing correspondence or declare the mapping sufficient; sufficiency is not promoted into a peer option.
 
-### Phase 1: Domain Decomposition + Mapping Construction
+Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
 
-Decompose abstract and concrete domains, then construct structural correspondences.
-
-1. **Identify source domain** `Sₐ`: Extract abstract structures from R — components, relationships, constraints, assumptions
-2. **Identify target domain** `Sₜ`: Determine user's concrete application context — environment, constraints, existing structures
-   - **Call artifact read/artifact search** to collect evidence about target domain from codebase, configs, documentation
-2b. **Derive and settle the mapping focus** `φ`: Before constructing any correspondence, surface plausible `MappingFocus` candidates (`source_scope`, `target_scope`, `relation`, `purpose`) from `R` and session context.
-   - Check `focus_settled(φ)` **per field, across all four axes** — `source_scope`, `target_scope`, `relation`, and `purpose` must each be independently determined, or forced to a single citable value. Any axis you would otherwise pick among viable alternatives is a selection, and one such axis fires the gate
-   - If settled by explicit user language or a citable standing rule: relay the focus via `FocusReadback` (Extension) — no gate
-   - Otherwise: present the candidate focuses via `FocusSelector` (Constitution). `Select` carries the chosen `MappingFocus`; `Reframe(description)` carries no focus at all — it runs `reframe_basis`, which re-decomposes `(Sₐ, Sₜ)` and, when the domain pair actually changed, parks the leaving pair's attempt count, resumes the arriving pair's, re-classifies `self_grounding`, and invalidates the assessed evidence — the mapping, the fit map and the partition reading, all of which `Map`/`AssessFit` produced from the pair being left. The un-judged remainder stays: `carry_over` rebuilds it at the next non-empty `Map`, and until then it is what the exits report as unresolved. The same invalidation runs when the focus itself changed. It is placed immediately before the focus-change checkpoint and touches none of the sets that checkpoint writes. It then sets `Λ.basis_dirty` by comparing the current pair against the pair the standing judgments were made under — not against the pair this one step left. Refuted focuses are never cleared here: a refutation is recorded against the domain pair as well as the focus. A focus-level `Adjust` from the validation loop runs the same transition, so the two cannot drift apart
-   - Do not write `Λ.focus` here. The successor focus stays uncommitted until the focus-change checkpoint below has resolved the fate of any judgments already standing
-   - **Focus-change checkpoint** (conditional): when judgments already stand and the comparison basis is about to change — a different focus, or the same focus after a re-decomposed domain pair — present `ParkPriorJudgments` / `RevalidatePriorJudgments` (Constitution) before anything is committed. Show both sides of what actually moved: the outgoing and incoming focus, and the outgoing and incoming domain pair. Only after the checkpoint resolves does `Λ.focus := φ'` run
-3. **Construct mapping** `M`: For each abstract component, identify the candidate concrete correspondent along the settled focus `φ`
-   - If correspondence is clear: add to confirmed candidates
-   - If structural mismatch detected: flag as uncertain — include evidence
-   - If no correspondent exists: flag as gap — the abstract structure may not apply
-   - On a rebuild, carry the standing judgments over: correspondences the new mapping still contains keep whatever status they already had, correspondences it drops leave both the terminal sets and the record list, and genuinely new correspondences arrive unjudged. Dropping the records alongside the correspondences is what keeps the convergence trace to the mapping that actually converged
-4. **Assess fit** `F`: Sort the correspondence adequacy into preserved, partial, missing, overextended, and open
-   - `preserved`, `partial`, and `overextended` partition the constructed correspondences `M`
-   - `missing` tracks source components that do not yet have evidenced target correspondents
-   - `open` is limited to structural questions whose answer could change validation of the mapping
-   - Do not include general analogy ideas, background caveats, or future exploration horizons
-   - When `Λ.reopen_seed` is set (the zero-gap gate returned `Reopen(q)`): `F.open := F.open ∪ {reopen_seed}`. Keep the seed set until Phase 2 is actually entered
-4b. **Derive the partition reading** (self-grounding case only): when `self_grounding` holds, compute `partition_reading(F, Sₜ)` over the misfit members — the `misfit_instances(F, Sₜ)` projection: members `m ∈ Sₜ` implicated by `F.overextended` (members that violate an overextended facet's added constraint) or by `F.missing` (members lacking a facet the abstraction asserts of all members). The reading is **derived** from `F` (relay, no gate) and classifies the misfit set:
-   - **Split** — the partition yields **≥2 non-empty cells** (the core cell plus rival cell(s), or ≥2 rival cells): the misfit members cluster into coherent rival essence(s), not just isolated outliers. The reading partitions `Sₜ` into three pairwise-disjoint groups: `rival_essences` (the InstanceClusters, each = member instances + the essence they support — pairwise disjoint), `core_remainder` (the members the original abstraction *genuinely fits* — `Sₜ` minus *all* misfits, so never a misfit), and `trim_outliers` (scattered/ambiguous misfits in no rival cell). The cell-candidate partition handed to `/conduct` is the rival cells **plus** the core cell (covering every fitting member); `trim_outliers` is surfaced for the checkpoint to narrow-out or place, never folded into the core. This is wrong fusion — the member set carries ≥2 essences forced under one form, so the recovery is **decompose** (the ≥2-cell count satisfies `/conduct`'s ≥2-move warrant). Route recommendation: the `/conduct` decompose-recovery recipe. Analogia *evidences* the split boundary and the full candidate partition; it does **not** constitute the cell assignment — that is the user's constitutive judgment at the recipe's boundary-checkpoint.
-   - **Trim** — the partition yields **at most one non-empty cell**: either scattered misfits around an otherwise-sound core (narrow the outliers out), or a single coherent cell with an empty core (the abstraction is wholly the wrong essence and re-forms into one). The recovery is a **single-move** `/induce` (Narrow or Reorient), not a decompose — a single move does not warrant `/conduct`.
-   - **Hold** — no significant misfit (`misfit_instances(F, Sₜ) = ∅`); the fusion holds, no partition action. (Distinct from `Λ.partition_reading = None`, which means the reading was never computed because the case is not self-grounding.)
-   The split-vs-trim distinction is the signal the `/conduct` recipe consumes to route decompose vs leave it to `/induce` Narrow; surface it in Phase 2 and the convergence trace, never constitute it here.
-5. Branch on what the reconstruction left, rather than entering Phase 2 unconditionally:
-   - **`M` is empty** — construction produced no correspondence along this focus. Relay that finding with `F.missing` as its basis, mark the focus refuted so it cannot be relayed straight back, seed the next candidate derivation with `F.missing`, and — after testing the attempt cap — re-enter focus settlement, exiting as `AttemptExhausted` when the cap is already reached. Do not reset the attempt count here. Set `Λ.mappings` to the empty mapping this construction actually produced, so the fit map and the mapping describe the same build. Do not run the carry-over, though — the empty case takes a peer branch instead.
-   - **`M` is non-empty and nothing remains** — the rebuilt mapping is entirely made of judgments that still stand (a Park carried them). Run the output update against the *current* fit map to produce this run's `D_f` and `R'` — including the current partition reading in the self-grounding case — then terminalize. Do not carry a prior-focus result forward, and do not re-present an already-addressed correspondence just to reach Phase 3
-   - **Otherwise** — proceed to Phase 2 with the mapping candidates and fit map
-
-**Web context** (conditional): When source or target domain knowledge exists primarily outside the codebase (external APIs, academic domains, industry standards), extend context collection to web search.
-Web evidence is tagged with `source: "web:{url}"` for traceability.
-
-**Scope restriction**: Read-only investigation only (artifact read, artifact search, external fetch). No test execution or file modifications.
-
-### Phase 2: Instantiation + Validation
-
-**Present** concrete instantiations for user validation via Cognitive Partnership Move (Constitution).
-
-**Selection criterion**: Choose the correspondence whose validation would maximally narrow the remaining mapping uncertainty using `F`. Prioritize partial, overextended, missing-adjacent, or open-adjacent correspondences before already-preserved ones. When priority is equal, prefer the correspondence with richer structural evidence.
-
-**Surfacing format**:
-
-Present the mapping details as text output:
-- **Mapping focus** (relay, settled at Phase 1): [source scope] compared against [target scope] along [relation], for [purpose] — the comparison basis this instantiation is constructed along
-- **Abstract**: [component from Sₐ with structural description]
-- **Concrete**: [proposed correspondence in Sₜ with evidence]
-- **Fit**: [preserved / partial / missing / overextended / open issue, in plain language]
-- **Example**: [concrete scenario demonstrating the mapping]
-- [If structural mismatch detected: flag and explain]
-- [If open issue could change validation: name the missing evidence or user-known fact]
-- [If self-grounding: **Partition reading** (relay) — the split-vs-trim verdict in plain language: whether the misfitting cases cluster into a separate coherent kind (split → the cases carry a rival essence; recovery is to decompose into multiple abstractions via the `/conduct` recovery recipe) or are scattered outliers (trim → recovery is to narrow the one abstraction via `/induce`). When split, name the rival-essence cluster(s) and the cases in each, the core cases the original abstraction genuinely fits, and any scattered outliers in no rival (narrow-out candidates) — so the full three-way split (rival cells + core cell + outliers) is visible and no case is dropped. This is a relay reading surfaced alongside the mapping, not part of the validation question]
-
-Then **present**:
-
-```
-Does [abstract concept] map correctly to your context?
-
-Options:
-1. **Confirm** — [what this validated mapping enables for downstream work]
-2. **Adjust** — [what aspect of the mapping diverges and how refinement would change the correspondence]
-3. **Dismiss** — [what assumption about contextual fit is accepted without grounding]
-```
-
-Other is always available — user can propose an alternative mapping or describe a structural correspondence not captured by the presented options.
-
-### Phase 3: Integration
-
-After user response:
-
-1. **Confirm**: Mark correspondence as validated, record the current fit classification with the validation, declare `D_f`, and update output `R'` to include explicit mapping status
-2. **Adjust(feedback)**: Incorporate feedback, reconstruct mapping — return to Phase 1
-3. **Dismiss**: Mark correspondence as not requiring further grounding in this session, record the current fit classification with the dismissal, declare `D_f`, and keep current output
-
-`D_f` is declared during Phase 3 from the Phase 2 surface: `None` when `residual_issues(F)` is empty, otherwise `Bounded` with the missing/open issues that were visible before the gate. This is trace metadata, not a separate user gate.
-
-When `self_grounding` holds, `R'` also carries the relay `partition_reading` and its routing recommendation (Split → the `/conduct` decompose-recovery recipe; Trim → `/induce` Narrow; Hold → no partition action). Like `D_f`, this is relay trace metadata folded into the output, not a separate user gate — when the verdict is Split, the cell assignment is constituted later at the `/conduct` recipe's boundary-checkpoint, not here (Analogia evidences the split boundary; it does not constitute the cells).
-
-After integration:
-- Check remaining unvalidated correspondences
-- If correspondences remain: return to Phase 2 (present next correspondence)
-- If all correspondences are addressed and `D_f` is declared: proceed with updated output
-- On `Confirm` or `Dismiss` — never on `Adjust`, which ends no judgment — move the correspondence into the matching terminal set and log a `ValidationRecord` to validations, recording `basis_snapshot := ((Sₐ, Sₜ), φ)` for the focus `φ` in `Λ.focus` — the whole comparison basis, not the focus alone — and the judged `correspondence` at judgment time alongside the existing fit-label snapshot, so convergence traces use the fit label and comparison focus that were active when the user judged the correspondence. Adjustment feedback is not stored as a record; storing it would let superseded feedback appear in the trace as terminal validation evidence
-
-## Intensity
+### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Single obvious correspondence | Brief example + Constitution interaction with Confirm default |
-| Medium | Multiple correspondences, partial structural match | Mapping table + concrete examples |
-| Heavy | Complex cross-domain mapping, structural mismatches detected | Full domain decomposition + multiple instantiations + gap analysis |
-
-## UX Safeguards
-
-| Rule | Structure | Effect |
-|------|-----------|--------|
-| Gate specificity | `activate(Analogia) only if ∃ structure(s, Sₐ) : ¬established(correspondence(s, Sₜ))` | Prevents false activation on domain-specific output |
-| One correspondence per cycle | Present highest-priority correspondence per Phase 2 | Prevents example overload |
-| Current-correspondence framing | Phase 2 surfaces the correspondence currently being validated (which mapping is in play this cycle) — a framing readout, not an `[N validated / M]` completion count | User recognizes which mapping is in play without parsing a coverage tally; granular progress stays in session |
-| Attempt cap | Max 3 mapping attempts per domain pair | Prevents infinite refinement |
-| Sufficiency declaration | User can declare the mapping sufficient at any Phase 2 as a free response; every remaining correspondence is dismissed with the declaration recorded against it, and the run terminalizes as ValidatedMapping | Full control over validation depth, with what was accepted un-judged visible in the convergence trace |
+| Light | Single obvious correspondence | Brief example and validation options |
+| Medium | Multiple or partial correspondences | Mapping structure and concrete evidence |
+| Heavy | Complex transfer or structural mismatch | Domain decomposition, instantiations, and bounded gaps |
 
 ## Rules
 
-1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via Cognitive Partnership Move (Constitution) (Phase 2)
-2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
-3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1) — ensures the mapping is structurally grounded rather than assumed
-3b. **Mapping focus precedes construction, settled per field**: Before `Map` constructs any correspondence, Phase 1 derives candidate `MappingFocus` options (`source_scope`, `target_scope`, `relation`, `purpose`) and checks `focus_settled(φ)` **per field**, never as a whole-object test. `focus_settled(φ)` requires every axis — `source_scope`, `target_scope`, `relation`, `purpose` — to be determined or forced to a single citable value; any one of them being determined is not sufficient. When `focus_settled(φ)` holds — from explicit user language or a citable standing rule — relay via `FocusReadback` (Extension); otherwise gate via `FocusSelector` (Constitution) — this initial focus SELECTION fires once per domain pair, before construction — and once more within the same pair whenever a construction came back empty and its focus was refuted, which is a retry rather than a second initial selection; a separate focus-CHANGE disposition checkpoint fires later, conditionally, whenever a focus revision would strand judgments already terminal under the outgoing focus.
-4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
-5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
-6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains
-7. **Validation respected**: User validation or dismissal is final for that correspondence while it stands, unless the user withdraws that standing at the focus-change checkpoint. A judgment's recorded basis_snapshot says which comparison basis — domain pair and focus — it was made under and is what the convergence trace reports; it does not by itself expire the judgment when the focus changes — only the user's choice at that checkpoint does
-8. **Convergence persistence**: Mode active until all identified correspondences are addressed, the user declares the mapping sufficient (dismissing every remaining correspondence with the declaration recorded and terminalizing as `ValidatedMapping`), the per-domain-pair attempt cap is reached (terminating as `AttemptExhausted` with the remaining correspondences declared unresolved, not as a validated mapping)
-9. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-10. **Convergence evidence**: Present transformation trace before declaring terminalized(R', F, D_f); per-correspondence evidence is required
-11. **Zero-gap surfacing**: If the Phase 0 scan finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
-12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
-13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-16. **Protocol-native pressure map**: Phase 1 produces a CorrespondenceFitMap before validation. The map is a pre-gate support object for correspondence adequacy, not a terminal status and not generic calibration. `open` may surface bounded discovery pressure only when the missing evidence could change the user's validation of the current mapping. Missing/open residuals are declared through Phase 3 fit disposition metadata without adding a user gate.
-16a. **Self-grounding and the split-vs-trim partition reading**: When the grounding target is a located abstraction against its own member instances (`self_grounding`), Analogia recognizes the case and derives a `PartitionReading` over the misfit instances. The reading is **derived from the fit map** (relay, never a gate) and is **second-order** — over the misfit instance set, not a partition of correspondences `M`. It classifies by the **non-empty cell count** of the induced partition: **Split** (≥2 non-empty cells — core + rival(s), or ≥2 rivals → wrong fusion → route to the `/conduct` decompose-recovery recipe) vs **Trim** (≤1 non-empty cell — scattered misfits around a core, or one coherent cell with empty core → single-move `/induce` Narrow/Reorient) vs **Hold** (no misfit; distinct from `Λ.partition_reading = None`, which means not-self-grounding so the reading was never computed). Analogia *evidences* the split boundary and surfaces the rival-essence cluster candidates; it does **not** constitute the cell assignment — that is the user's constitutive judgment at the `/conduct` recipe's boundary-checkpoint.
-17. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-18. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares (the self-grounding PartitionReading routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow) names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named routing edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-19. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+1. **Recognition over Recall**: Present structured options with anticipatable post-selection states.
+2. **Round composition**: Keep each judgment beside its nearest evidence and next-move implication; place analytical context before the gate so the gate carries the question and differential options.
+3. **Option-set relay test**: Present a single dominant trajectory as Extension. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+4. **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation.
+5. **Self-grounding visibility**: Surface the full member partition and its fit basis before routing split to the `/conduct` decompose-recovery recipe or trim to `/induce`; Analogia supplies the partition evidence while the downstream checkpoint constitutes cell membership.
+6. **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+11. **Zero-gap surfacing**: Present a zero-gap finding with its reasoning for user confirmation before deactivation.
