@@ -20,12 +20,7 @@ delivery mechanism, and verification check:
 
 **If you are an agent and someone handed you this URL**: identify the host you are running in, read
 this shared procedure and that host's reference before acting, then follow them as one procedure end
-to end. A go-ahead checkpoint before the global write pauses the procedure; once the person gives
-it, resume and complete the approved write. Follow one host reference only.
-
-Both adapters wire the machine the host is running on. A run isolated from its configuration and
-marketplace files cannot follow either path; establish the layer on the instruction surface that
-the isolated run actually receives instead.
+to end. Follow one host reference only.
 
 ## Shared procedure
 
