@@ -15,6 +15,10 @@ not perform that review. It does not measure whether a protocol is worth using; 
 question needs a sample size this design cannot reach and a sham arm whose construction
 is discussed in `grader-design.md`.
 
+The judgment ends at the formal `Stop | Proceed` branch described in `SKILL.md`. Files,
+plans, or messages produced after `Proceed` are branch witnesses, not quality targets.
+Read them only far enough to establish that the transition occurred.
+
 ## Prerequisites
 
 Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` checks the
@@ -187,8 +191,8 @@ be. A row whose integrity is short of its `n` is not evidence about the protocol
 the report prints those rows again under a separate heading so they are not read as
 results.
 
-`pass_k` is one when every repetition passed the deterministic composite, zero
-otherwise. The `manual` column is separate: it counts transcript judgments whose
+`pass_k` is one when every repetition passed the deterministic transition composite,
+zero otherwise. The `manual` column is separate: it counts transcript judgments whose
 grader files fix the observation criteria but which no automated judge executed.
 Constructor coverage, semantic question ordering, and user-facing classification are
 therefore never implied by an automatic pass.

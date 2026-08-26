@@ -1,6 +1,6 @@
 ---
 name: realize
-description: This skill should be used when the user asks to "run the eval", "test whether the protocol actually works at runtime", "check type realization", "measure protocol fulfillment", "run the type-realization suite", "does the gate actually stop", or wants runtime evidence that a protocol's declared contract is honoured during an actual run rather than merely present in its file. Invoke explicitly with /realize and a skill argument.
+description: This skill should be used when the user asks to "run the eval", "test whether the protocol actually works at runtime", "check type realization", "measure protocol fulfillment", "run the type-realization suite", "does the gate actually stop", or wants runtime evidence that a protocol's formal transition contract is realized rather than an assessment of downstream artifact quality. Invoke explicitly with /realize and a skill argument.
 allowed-tools: Read, Grep, Glob, Bash
 ---
 
@@ -14,19 +14,32 @@ registered `inquire` cases and graders. An unknown or omitted target fails befor
 
 A protocol's formal blocks are runtime-normative: TYPES, PHASE TRANSITIONS, TOOL
 GROUNDING and the Rules type the prose and carry the operational contract. Static
-checks establish that a `SKILL.md` contains those blocks and that they are internally
-coherent. Nothing establishes that a run honours them.
+checks establish that a `SKILL.md` contains those blocks and enforce a bounded set of
+structural invariants. Nothing establishes that a run follows their transitions.
 
 This skill supplies evidence for that gap. It drives Claude Code or Codex across a
 matrix of models and treatments, captures the JSONL trace, grades the deterministically
 observable subset, and names the transcript judgments still owed. A complete automatic
-cell can establish that collection occurred, the gate stopped before implementation,
-or the zero-uncertainty path proceeded; semantic ordering and rendered type coverage
-remain manual until their specified judges are built.
+cell can establish that collection occurred, the declared branch reached `Stop`, or
+the zero-uncertainty branch reached `Proceed`; semantic ordering and rendered type
+coverage remain manual until their specified judges are built.
 
-Scope stops there. Whether a protocol is *worth using* is a different measurement,
-needing a sample size this design cannot reach; `references/grader-design.md` states
-why and what a credible version would require.
+## Judgment boundary
+
+The object of judgment is the formal transition trace:
+
+```text
+X → context sufficiency → evidence collection as needed → residual deficit
+  → formal branch → Stop | Proceed
+```
+
+Every score attaches to a node or edge in that trace. Once the selected branch is
+observable, judgment ends. A plan, implementation, analysis, or other downstream
+artifact is evidence that `Proceed` occurred; its quality, correctness, completeness,
+and usefulness are outside `/realize`. Likewise, an unchanged substrate is evidence of
+`Stop` only where the case granted the capability to proceed and the formal branch
+required stopping. `references/grader-design.md` carries the witness design and the
+separate oracle that artifact-quality evaluation would require.
 
 ## When it applies
 
@@ -113,9 +126,9 @@ Each registered target needs at least a trigger-positive case, where its obligat
 must fire, and a trigger-negative case, where firing is the failure. `inquire` is the
 only registered target today; no result is implied for an unregistered protocol.
 
-Both cases mount the same scaffold, deliberately: one is graded on whether a
-file-discoverable fact was asked, the other on whether a supplied parameter was
-re-asked, and differing substrates would let a run pass one by luck.
+Both cases mount the same scaffold, deliberately: one observes whether a
+file-discoverable fact was asked, the other whether a supplied parameter was re-asked,
+and differing substrates would let a run pass one by luck.
 
 Write the prompt as the task alone. The line that invokes the protocol lives in
 `harness.config.json` and reaches only the arms that have it — a prompt naming the
@@ -138,8 +151,8 @@ leave two arms running the same treatment. A row whose integrity falls short of 
 count is not evidence about the protocol, and the report reprints those rows separately
 so they are not mistaken for findings.
 
-`pass_k` is one only when every repetition passed its deterministic predicates. The
-`manual` column counts scenario-specific transcript judgments excluded from that
+`pass_k` is one only when every repetition passed its deterministic transition
+predicates. The `manual` column counts scenario-specific transcript judgments excluded from that
 composite; the report names them. For `inquire`, constructor coverage, classification,
 collection-before-inquiry order, sufficiency rendering, and no-gate judgments remain
 manual observations grounded by the grader files.
@@ -148,9 +161,9 @@ On Claude, `skill` says whether the protocol fired where it was available, and `
 where there was no plugin to fire. Codex reports `trace-unavailable` for that column and
 keeps plugin installation integrity separate from behavioral fulfillment.
 
-Absolute deterministic-fulfilment rates are the reportable automatic quantity here,
-not deltas. A baseline arm has no gate to stop at, so most predicates have no
-counterpart there to subtract.
+Absolute transition-fulfilment rates are the reportable automatic quantity here, not
+deltas. A baseline arm has no gate to stop at, so most predicates have no counterpart
+there to subtract.
 
 For Codex, the report records token use rather than inventing a dollar amount the CLI
 did not emit. Every requested cell must produce a complete

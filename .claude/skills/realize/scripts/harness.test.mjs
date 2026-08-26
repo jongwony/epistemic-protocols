@@ -40,6 +40,10 @@ if (kind === 'plugin') {
 if (kind === 'exec') {
   console.log(JSON.stringify({ type: 'thread.started', thread_id: 'test-thread' }));
   if (process.env.FAKE_CODEX_MODE === 'incomplete') process.exit(9);
+  if (process.env.FAKE_CODEX_MODE === 'mutate') {
+    const cd = args.indexOf('--cd');
+    appendFileSync(args[cd + 1] + '/app/main.py', '\\nthis is not valid Python\\n');
+  }
   console.log(JSON.stringify({
     type: 'item.completed',
     item: { type: 'command_execution', command: 'pwd', status: 'completed' },
@@ -167,7 +171,7 @@ test('run and report fail closed when a requested Codex cell does not complete',
   }
 });
 
-test('a complete requested cell reports deterministic and manual scopes separately', () => {
+test('a complete requested cell reports transition and manual scopes separately', () => {
   const { root, env } = fixture();
   env.CODEX_API_KEY = 'codex-secret';
   env.FAKE_CODEX_MODE = 'complete';
@@ -179,8 +183,29 @@ test('a complete requested cell reports deterministic and manual scopes separate
     const report = invoke(env, 'report', 'inquire', '--markdown');
     assert.equal(report.status, 0, report.stderr || report.stdout);
     assert.match(report.stdout, /\| manual \|/);
-    assert.match(report.stdout, /pass_k.*deterministic predicates only/);
+    assert.match(report.stdout, /pass_k.*deterministic transition predicates only/);
     assert.match(report.stdout, /option-coproduct/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('Proceed is scored from its witness without grading artifact quality', () => {
+  const { root, env } = fixture();
+  env.CODEX_API_KEY = 'codex-secret';
+  env.FAKE_CODEX_MODE = 'mutate';
+  env.REALIZE_CASES = 'inquire-fully-specified';
+  try {
+    assert.equal(invoke(env, 'setup', 'inquire').status, 0);
+    const run = invoke(env, 'run', 'inquire');
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+
+    const report = invoke(env, 'report', 'inquire', '--markdown');
+    assert.equal(report.status, 0, report.stderr || report.stdout);
+    assert.match(
+      report.stdout,
+      /\| codex \| gpt-5\.6-luna \| bare \| inquire-fully-specified \| 1 \| 1 \| 1\/1 \|/
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

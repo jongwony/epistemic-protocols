@@ -590,13 +590,15 @@ const GRADERS = {
     return parsed.skillInvocations.some(
       (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`));
   },
-  // Phase 2 is declared present-and-stop; the observable consequence is that the
-  // working tree is unchanged. This reads the tree rather than the tool names.
+  // Phase 2 is declared present-and-stop; the unchanged tree is this case's witness
+  // that Stop occurred. The bytes are not inspected for artifact quality.
   // Runs write through Bash as readily as through Write, so a predicate keyed on
   // tool identity misses the writes it exists to catch — and misses them in every
   // arm alike, which makes it look stable while measuring nothing.
-  no_implementation: ({ mutated }) => mutated === false,
-  implementation_happened: ({ mutated }) => mutated === true,
+  stop_observed: ({ mutated }) => mutated === false,
+  // Phase 0 declares relay-and-proceed; mutation witnesses that this implementation
+  // prospect crossed Proceed. Correctness and completeness of the change are out of scope.
+  proceed_observed: ({ mutated }) => mutated === true,
   // A read occurred somewhere in the turn. This does not establish its order relative
   // to inquiry; that semantic ordering remains a transcript-review item.
   collection_observed: ({ parsed }) =>
@@ -605,8 +607,8 @@ const GRADERS = {
 };
 
 const CASE_PREDICATES = {
-  'inquire-underspecified': ['collection_observed', 'no_implementation', 'completed'],
-  'inquire-fully-specified': ['implementation_happened', 'completed'],
+  'inquire-underspecified': ['collection_observed', 'stop_observed', 'completed'],
+  'inquire-fully-specified': ['proceed_observed', 'completed'],
 };
 
 const CASE_MANUAL_REVIEWS = {
@@ -626,6 +628,14 @@ for (const c of CFG.cases) {
   if (!CASE_PREDICATES[c]) {
     console.error(`case "${c}" has no predicate set in CASE_PREDICATES -- add one before running it`);
     process.exit(1);
+  }
+  for (const predicate of CASE_PREDICATES[c].filter((name) => name !== 'completed')) {
+    const grader = predicate.replaceAll('_', '-');
+    const graderPath = join(EVALS, c, 'graders', `${grader}.md`);
+    if (!existsSync(graderPath)) {
+      console.error(`automatic grader for case "${c}" not found: ${graderPath}`);
+      process.exit(1);
+    }
   }
   if (!CASE_MANUAL_REVIEWS[c]) {
     console.error(`case "${c}" has no manual-review declaration in CASE_MANUAL_REVIEWS`);
@@ -739,7 +749,7 @@ function report() {
     for (const r of rows) console.log(line(cols.map((c) => String(r[c]))));
     const numericCosts = rows.map((r) => Number(r.cost)).filter(Number.isFinite);
     if (numericCosts.length) console.log(`\ntotal cost: $${numericCosts.reduce((s, v) => s + v, 0).toFixed(4)}`);
-    console.log('\n`pass_k` contains deterministic predicates only. Manual transcript review is still required for:');
+    console.log('\n`pass_k` contains deterministic transition predicates only. Manual transcript review is still required for:');
     for (const item of manualSummary) console.log(`- ${item}`);
     if (evidenceFailures.length) {
       console.log('\n**Not readable as evidence** \u2014 treatment integrity failed, or a predicate had nothing to read:');
@@ -758,7 +768,7 @@ function report() {
   console.table(rows);
   const numericCosts = rows.map((r) => Number(r.cost)).filter(Number.isFinite);
   if (numericCosts.length) console.log(`\ntotal cost: $${numericCosts.reduce((s, v) => s + v, 0).toFixed(4)}`);
-  console.log('\npass_k contains deterministic predicates only. Manual transcript review is still required for:');
+  console.log('\npass_k contains deterministic transition predicates only. Manual transcript review is still required for:');
   for (const item of manualSummary) console.log(`- ${item}`);
   if (evidenceFailures.length) {
     console.log('\nNOT READABLE AS EVIDENCE \u2014 treatment integrity failed, or a predicate had nothing to read:');

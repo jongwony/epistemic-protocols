@@ -21,12 +21,25 @@ existence alone does not establish its order relative to a user-facing inquiry. 
 automatic composite uses only those direct observables; obligations needing semantic
 spans are routed to named manual graders until the structured-extraction judge exists.
 
+## Judge the transition, not its downstream artifact
+
+The evaluated object ends at the formal branch's `Stop` or `Proceed`. A downstream
+artifact is read only as a witness that the selected transition happened. Its content
+does not enter the score: plan quality, implementation correctness, completeness, and
+usefulness require a different oracle and belong to a different evaluation.
+
+The witness must fit the case. A `Proceed` branch is established by the first
+observable action that advances the supplied prospect; a `Stop` branch is established
+by the absence of that downstream action where the capability was available. This
+keeps a case from silently substituting an artifact-quality rubric for the formal
+transition it was built to observe.
+
 ## Type to predicate
 
 | Declared in | Obligation | Grader | Kind |
 |---|---|---|---|
-| TOOL GROUNDING | Phase 2 is present-and-stop | `no_implementation` | tree |
-| Phase 0 | zero-uncertainty path relays and proceeds | `implementation_happened` | tree |
+| TOOL GROUNDING | Phase 2 reaches `Stop` | `stop_observed` | tree witness |
+| Phase 0 | zero-uncertainty path reaches `Proceed` | `proceed_observed` | tree witness |
 | Rule 5 / PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
 | Rule 5 / PHASE TRANSITIONS | collection precedes inquiry | `collection-precedes-inquiry` | manual transcript review |
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
@@ -38,19 +51,21 @@ spans are routed to named manual graders until the structured-extraction judge e
 | Skip conditions | no gate when context is already sufficient | `no-gate` | manual; judge specified |
 | Rule 7 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | manual; judge specified |
 
-## Read the tree, not the tool names
+## Read the branch witness, not the tool names
 
-Whether a run implemented something is graded by comparing the working tree against
-the scaffold it started from, not by looking for `Write` or `Edit` in the trace. Runs
-write through `Bash` as readily as through the dedicated tools, so a predicate keyed on
-tool identity misses the writes it exists to catch.
+The current implementation prospect uses the working tree only as a branch witness.
+The grader compares it with the starting scaffold rather than looking for `Write` or
+`Edit`, because runs write through `Bash` as readily as through dedicated tools. It
+does not inspect the changed bytes for quality or correctness.
 
 The failure mode is worse than a miss. It misses them in every arm alike, so the
 predicate looks stable across the matrix while measuring nothing — which is the shape
 a broken grader takes when it is not caught.
 
 The scaffold is deterministic, so the reference tree is rebuilt on demand rather than
-stored beside the results and kept in sync with it.
+stored beside the results and kept in sync with it. In a target whose requested
+prospect is a plan, delivery of the requested plan would be the corresponding witness;
+a statement of intent to plan would not. The plan's merits remain outside the score.
 
 ## Check which skill fired, not that a skill fired
 
@@ -143,8 +158,8 @@ anything to do with the protocol.
 
 ## Not built yet
 
-**The structured-extraction pass.** The judged graders above should not ask a model for
-a verdict. The intended shape asks it only to extract semantic units with an evidence
+**The structured-extraction pass.** The manual semantic graders above should not ask a
+model for a verdict. The intended shape asks it only to extract semantic units with an evidence
 span for each — which sentence realizes which constructor, which classification axis a
 phrase carries — and leaves counting, universal quantification and duplicate detection
 to code. A model asked "are all four present?" is doing arithmetic it has no reason to
