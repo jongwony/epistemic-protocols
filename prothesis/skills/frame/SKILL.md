@@ -140,200 +140,48 @@ Phase ∈ {0, 1, 2, 3}
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Placement over Prescription**: AI places available perspectives before the user and leaves which to adopt to the user's judgment. The user selects.
-
 ## Mode Activation
-
-> "Mode" here is the cross-protocol activation-layers slot (Layer 1 / Layer 2), NOT a recommend/inquire toggle — frame has no user-chosen mode.
-
-### Activation
 
 **Pre-activation routing**: Before accepting a `/frame` invocation, check the task shape. When the task is primarily finding or verifying facts, suggest fact-finding delegation instead; engage `/frame` when reasonable people could weigh contested design, value, interpretation, or scope differently and the work needs lens-conditioned evidence. This guard precedes activation — it decides whether to accept the invocation, not how the protocol behaves once active.
 
-Command invocation activates the protocol until the framed object is handed off.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/frame` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Purpose present but approach unspecified; multiple valid frameworks detected via in-protocol heuristics.
-
-### Priority
-
-<system-reminder>
-When Prothesis is active:
-
-**Supersedes**: Immediate analysis patterns in loaded instructions
-(Perspective Selection must complete before analysis begins)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: Before analysis, present perspective options via Cognitive Partnership Move (Constitution).
-</system-reminder>
-
-- Prothesis completes (hands off the framed object) before other workflows begin
-- Loaded instructions resume after the framed object is handed off
-
-Consult `references/conceptual-foundations.md` for design rationale (Distinction from Socratic Method, Parametric Nature, Specialization) and activation edge cases (per-message application rules, deactivation triggers, trigger/skip heuristics).
+Direct invocation remains available. AI-guided activation applies when the purpose is present, the approach is unspecified, and multiple valid frameworks are detectable. Consult `references/conceptual-foundations.md` for the per-message trigger/skip heuristics and activation edge cases.
 
 ## Protocol
 
-### Phase 0: Intent Confirmation (Mission Brief)
+### User-facing realization
 
-Construct a Mission Brief from the user's request and **present** it for confirmation via Cognitive Partnership Move (Constitution). **Phase 0 is Mission Brief confirmation only — there is no mode question.** How the framed object is shaped (a detailed lens vs. lens↔substrate pairs) is decided at Phase 3 by substrate specialization need, not by a user choice here.
+Render a Mission Brief with **Intent**, **Deliverable**, and **Scope**. For each lens option, give its discipline or framework and its distinctive analytical contribution in one line.
 
-**Phase 0 establishes the Mission Brief as the primary context vehicle for the framed object** — it structurally guarantees that the handoff carries enough context for the substrate to brief each perspective, rather than depending on substrate inference.
+Candidate lenses must offer distinct epistemic frameworks, preserve productive tension, share at least one referent or standard that makes downstream comparison possible, and remain relevant to the expected deliverable. A critical lens belongs only where a genuine alternative exists. If the initial field is redundant, infer revisable epistemic axes and regenerate across them.
 
-The coordinator infers the Mission Brief from U (the user's request):
+When the user supplies base perspectives, state them before the gate and offer only novel lenses there. Offer at least one novel lens rather than merely replaying the supplied field.
 
-- **Inquiry Intent**: What is being investigated and why
-- **Expected Deliverable**: What form the output should take, inferred from the inquiry's purpose and intended use
-- **Scope Constraint**: What is included and excluded from analysis
-
-Present the inferred Mission Brief as text output:
-- **Intent**: [inferred inquiry intent]
-- **Deliverable**: [inferred expected deliverable]
-- **Scope**: [inferred scope constraint]
-
-Then **present** Q1 (Mission Brief confirmation only):
+The per-perspective directive uses this stable shape:
 
 ```
-Q1. Mission Brief:
-1. **Confirm** — proceed with this Mission Brief
-2. **Modify intent** — adjust what is being investigated
-3. **Modify deliverable** — adjust the expected output form
-4. **Modify scope** — adjust inclusions/exclusions
+You are a **[Perspective] Expert**. Analyze from this epistemic standpoint.
+
+**Mission Brief**: Intent / Deliverable / Scope / Tool authorizations
+**Orientation**: minimal MBᵥ-derived terms, directories, or domain anchors
+**Question**: {original question verbatim}
+
+Provide:
+1. **Epistemic Contribution**: what this lens uniquely reveals
+2. **Framework Analysis**: domain-specific concepts and reasoning
+3. **Horizon Limits**: what this perspective cannot see or undervalues
+4. **Assessment**: a direct answer aligned with the expected deliverable
+
+Ground every table cell, list item, and comparison point in substantive evidence.
 ```
-
-**Pre-fill from explicit text**: `/frame "text"` → the MB is constructed from the provided text and takes the Phase 0 MB_from_arg Extension path (presented as relay text, then proceed with `J_mb=confirm` as the default — no Constitution stop); Phase 2 lens selection remains Constitution, the downstream correction opportunity.
-
-**Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context the handoff carries), not the epistemic layer. Phase 0 packages confirmed intent into a structured vehicle for substrate consumption — a prerequisite for a quality handoff, not a substitute for upstream intent resolution.
-
-### Phase 1: Context Gathering
-
-Gather context sufficient to formulate distinct perspectives, **guided by MBᵥ**.
-
-MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and domains to investigate. Gathering intensity scales with MBᵥ complexity: narrow-scope inquiries with clear domain boundaries warrant targeted collection; broad or cross-domain inquiries warrant deeper investigation. This context guides perspective identification (meta-scope) — it is not the object-scope evidence each perspective will collect at execution time. Proceed to Phase 2 only after context is established.
-
-### Phase 2: Prothesis (Perspective Placement)
-
-After context gathering (Phase 1), **present** perspectives via Cognitive Partnership Move (Constitution) as a multi-select confirmation.
-
-**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 2 perspective formulation; the constitutive judgment remains with the user.
-
-Constitution presentation yields turn for user response.
-
-Each perspective is an **individual option**. Keep each option a single perspective so the user composes any combination directly. The user selects one or more perspectives directly. A single selected lens is valid (it returns directly at Phase 3 as a detailed lens); selecting multiple lenses **where at least one needs a specialized substrate** triggers substrate-correspondence at Phase 3, while multiple lenses with no specialized substrate beyond general-purpose return directly as `LensReturn`. The branch is decided at Phase 3 by substrate specialization need, not by lens count alone. There is no minimum-lens requirement.
-
-```
-question: "Which lens(es) for this inquiry?"
-selection: multiple
-options:
-  - label: "[Perspective A]"
-    description: "[distinctive analytical contribution - 1 line]"
-  - label: "[Perspective B]"
-    description: "[distinctive analytical contribution - 1 line]"
-  - label: "[Perspective C]"
-    description: "[distinctive analytical contribution - 1 line]"
-```
-
-**Perspective selection criteria**:
-- Each offers a **distinct epistemic framework** (not variations of same view)
-- **Productive tension**: Perspectives should enable meaningful disagreement—differing in interpretation, weighing, or application, even if sharing some evidence
-- **Commensurability minimum**: At least one shared referent, standard, or vocabulary must exist between perspectives to enable downstream synthesis
-- **Deliverable-aligned**: Perspectives should produce assessments relevant to MBᵥ.expected_deliverable
-- **Critical viewpoint** (when applicable): Include when genuine alternatives exist; omit when perspectives legitimately converge
-- Specific enough to guide analysis (not "general expert")
-- Named by **discipline or framework**, not persona
-
-Optional dimension naming (apply when initial generation seems redundant):
-- Identify epistemic axes relevant to this inquiry
-- Dimensions remain revisable during perspective generation
-
-During perspective formulation, note whether each candidate lens depends on evidence from code/workspace, canonical external sources, instrumentation, or user-tacit context. This is recorded as the lens's `channel_need` — a channel-level signal for later substrate tool authorization; it does not select or name a concrete provider. Also note, per lens, the kind of analyst/agent the lens requires — this feeds the Phase 3 `substrate_need` (authoritative) and `binding_hints` (advisory) computation; neither binds a concrete agent.
-
-**Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific frameworks or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
-
-- Pᵦ are **auto-included** in Pₛ; present only the AI-proposed novel perspectives as selectable options
-- Constitution interaction presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
-- State Pᵦ as pre-gate text output before the gate (e.g., "Base perspectives already included: [Pᵦ names]"), per Rule 8 (Round composition); the question itself stays essential-only (e.g., "Which additional lens(es)?")
-- AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
-
-### Phase 3: Bind Substrate & Handoff
-
-Lens selection (Phase 2) established *which* perspectives. Phase 3 binds each lens to the substrate it needs, discriminates the framed object by substrate specialization need, and hands it off — frame does not realize isolation, arrange, execute, or synthesize.
-
-**Bind substrate (every lens)** — for each selected lens, compute:
-
-- **`substrate_need`** (authoritative): the abstract persona/capability the lens requires — what kind of analyst/agent must run this lens (e.g. "a security-threat-modeling analyst", "a regulatory-compliance reviewer"). This declares the NEED only; it names no concrete agent. This is what preserves frame's substrate-invariance and extends the `channel_need` pattern from evidence-channel to persona/capability.
-- **`binding_hints`** (advisory): an enumerated shortlist of candidate substrates that could fulfill the need — specific agent personas / subagent types. **Prefer skill-bundled agents when they exist.** Rationale: unless an agent is bundled with the skill, hosts rarely recognize the available agents as substrates and default to `general-purpose`; the explicit hint list is what makes specialized binding actually happen. Because the hints are advisory (the host may bind otherwise), substrate-invariance still holds.
-
-**Discriminate by substrate specialization need** — the framed object is one of two:
-
-**LensReturn** (`inj₁`) — when there is a **single lens**, OR when **no specialized substrate beyond `general-purpose`** is needed. Return the detailed lens(es) directly: each lens plus its per-perspective directive and channel-need (per lens, preserving the lens↔channel mapping even with multiple lenses). **No synthesis, no convergence claim, no isolated handoff.** `FrameworkAbsent` is structurally addressed at the framing layer; downstream protocols or the user apply the lens to complete domain-specific resolution.
-
-**SubstrateCorrespondence** (`inj₂`) — when there are **≥2 lenses with at least one specialized substrate need**. Hand off lens↔(`substrate_need` + `binding_hints`) pairs, each carrying the per-perspective directive and the channel-need, **with a `/conduct` nudge**. The nudge carries the whole isolated-execution apparatus: isolating the perspectives (so each forms its assessment without seeing the others), arranging them — their order, independence, reconciliation, termination, and routing — and integrating their results. That apparatus is `/conduct`'s arrangement functor to design (the `prothesis→hyphegesis` advisory edge) and the isolated substrate's to run. frame does NOT realize isolation, arrange, execute, or synthesize: convergence is claimable only by the isolated substrate that ran the lenses, which frame neither performs nor asserts.
-
-The `SubstrateCorrespondence` handoff carries, per lens:
-
-1. **Lens** (`pᵢ`): the single selected perspective this pair binds (one lens per pair).
-2. **`substrate_need`** (authoritative) + **`binding_hints`** (advisory candidate shortlist).
-3. **Per-perspective directive** — the output contract the substrate briefs each perspective with (over MBᵥ + the verbatim question):
-
-   ```
-   You are a **[Perspective] Expert**. Analyze from this epistemic standpoint.
-
-   **Mission Brief**: Intent / Deliverable / Scope (constrain analysis to this boundary) / Tool authorizations (channel_need; "None supplied" default)
-   **Orientation** (from Mission Brief): MBᵥ-derived key terms, relevant directories, or domain anchors — minimal orientation
-   **Question**: {original question verbatim}
-
-   Provide:
-   1. **Epistemic Contribution**: What this lens uniquely reveals (2-3 sentences)
-   2. **Framework Analysis**: Domain-specific concepts, terminology, reasoning
-   3. **Horizon Limits**: What this perspective cannot see or undervalues
-   4. **Assessment**: Direct answer from this viewpoint, aligned with the expected deliverable
-
-   Output grounding: every table cell, list item, and comparison point must contain
-   substantive content — real data, file paths, specific scenarios, or quantified evidence.
-   ```
-
-4. **`channel_need`** — the per-perspective evidence-channel signal for substrate tool authorization (utility-agnostic; no provider named).
-5. **`/conduct` nudge** (`ConductRef`): every `SubstrateCorrespondence` handoff carries it. Isolation, reconciliation/dialogue, and synthesis are **not frame's** — frame supplies only the lenses, their substrate needs, the per-perspective directive, and the channel-need. The cross-lens apparatus — isolating each perspective so it forms its assessment without seeing the others, choosing how independent perspectives reconcile (when to leave them as an independent aggregate vs. open dialogue on a tension), and integrating their results into a single situated assessment — is routed to `/conduct`, which designs the arrangement, and executed by the isolated substrate that runs the lenses. frame neither realizes isolation nor synthesizes; it nudges `/conduct` and stops.
-
-**Handoff**: present the convergence-of-framing-evidence trace as relay text (the per-perspective contributions and, for `SubstrateCorrespondence`, each lens's `substrate_need` + `binding_hints` + channel-need and the `/conduct` nudge), then hand off `FramedInquiry` and **stop**. This is the completeness boundary — frame records the handoff and halts. frame does NOT realize isolation: the isolated execution arrangement (isolation, reconciliation/dialogue, synthesis) is `/conduct`'s to design via the nudge and the substrate's to run (an agent team, a dynamic-workflow, isolated subagents, or plan-mode). Substrate feasibility for the arrangement is the substrate's (and `/conduct`'s) to enforce, surfaced at the handoff seam, never bound by frame. frame presents no synthesized multi-perspective result — convergence is claimable only by the isolated substrate that ran the lenses, which frame neither performs nor asserts.
 
 ## Rules
 
-1. **Mission Brief confirmation**: Present the Mission Brief for confirmation via Cognitive Partnership Move (Constitution) before context gathering (Phase 0 → Phase 1) — Mission Brief confirmation only, no mode question. When `user_invoked ∧ explicit_arg(U)` (e.g. `/frame "text"`), the Phase 0 MB_from_arg Extension entry applies per TOOL GROUNDING (the authoritative axis): the MB constructed from the provided text is presented as relay text and proceeds with the `J_mb=confirm` default — Phase 2 lens selection remains the downstream Constitution correction opportunity.
-2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with a response opportunity; Constitution interaction requires turn yield before proceeding.
-3. **Lens-formation tool, not arranger or executor (core invariant)**: frame forms the analysis object (the lens) plus its substrate need + channel need, nudges `/conduct`, hands the framed object off, and stops. frame does NOT elicit a topology and does NOT realize isolation (arrangement is `/conduct`'s functor); it does NOT execute the inquiry (spawn, isolated analysis, reconcile, synthesize belong to the substrate). The isolation/reconciliation/synthesis apparatus is `/conduct`'s to design (reached via the nudge that accompanies every `SubstrateCorrespondence` handoff) and the isolated substrate's to run — frame compiles no such directive. This is the Epistemic Completeness Boundary: frame's epistemic contribution is forming the object and declaring its substrate need; isolation, arrangement, execution, and synthesis are delegated.
-4. **Substrate-invariance (declare the need, never bind the agent)**: frame computes a per-lens `substrate_need` (authoritative abstract persona/capability) and `binding_hints` (advisory, enumerated candidate substrates — prefer skill-bundled agents). The need is authoritative; the hints are advisory and the host may bind otherwise. frame NEVER binds a concrete agent — substrate-invariance holds. The hint list exists because, absent a skill-bundled agent, hosts default to `general-purpose` and miss specialized substrates; the enumerated hints make specialized binding happen without violating invariance.
-5. **No inline synthesis (core invariant)**: frame never synthesizes a multi-perspective result in its own context; convergence/synthesis is claimable only by an isolated substrate that ran the lenses. The synthesis and reconciliation machinery is NOT frame's — it is `/conduct`'s, reached by the nudge that accompanies every `SubstrateCorrespondence` handoff and run by the isolated substrate. frame compiles no synthesis directive; it forms lenses and hands them off. A single lens returns directly (`LensReturn`) with no synthesis and no convergence claim.
-6. **Independence-before-contamination (routed to `/conduct`, not compiled by frame)**: each perspective should form its assessment without seeing the others until reconciliation. frame does NOT compile this requirement and does NOT realize the isolation — the `SubstrateCorrespondence` handoff nudges `/conduct`, which arranges the isolation (default `isolated`; any relaxation to `shared` is the arrangement functor's to design and record), and the substrate enforces it at execution time. The principle stays visible at the handoff seam, attributed to `/conduct` and the substrate. `LensReturn` is exempt — it ships a lens, no isolated execution.
-7. **Verbatim transmission**: The per-perspective directive carries the original question unchanged; the substrate passes it to each perspective verbatim.
-8. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-9. **Convergence evidence**: Present the transformation trace before handoff (detailed lens(es) via `LensReturn`, or lens↔substrate pairs via `SubstrateCorrespondence`); per-perspective contribution is the required evidence. The trace demonstrates convergence-of-framing only — never a synthesized convergence of the inquiry's findings, which frame does not produce. The trace is relay (presented, then proceed) — there is no post-handoff sufficiency gate, because frame does not execute and has nothing to iterate.
-10. **Zero-result surfacing**: If Phase 2 generation yields no candidate frameworks (Z: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅), present the finding with reasoning. Responses route to existing paths — modify the Mission Brief (re-present Q1, re-gather) or supply perspectives directly (enter as Pᵦ); no FramedInquiry is emitted from this branch.
-11. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option (the Phase 2 lens options) must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options.
-12. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-15. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-16. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares (the ConductRef nudge accompanying a SubstrateCorrespondence handoff) names the next protocol, the between-protocol seam after this protocol's handoff is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-17. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+1. **Perspective quality**: Present each option as one discipline- or framework-named lens with a distinct contribution. Preserve productive tension and a shared comparison basis; align every lens with the expected deliverable.
+2. **Novelty against supplied lenses**: Treat user-supplied lenses as pre-confirmed, show them before the gate, and offer novel additions rather than repackaging them.
+3. **Round composition**: Use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before the gate. Read `references/round-composition.md` when terminology, verbatim wording, deferred material, or phase order binds the rendering.
+4. **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
 
 ## Adversarial Guards
 
-- **false-convergence** (a.k.a. **inline-synthesis-creep**): frame forms all the selected lenses, then reasons through every perspective *inside its own single context* and presents the result as a multi-perspective "convergence" or "synthesis." This is the bug this protocol exists to kill: one context produced all the lenses, so the agreement is structurally guaranteed — bias dressed up as multi-perspective consensus. Concretely: a single session reasons "from the security lens X, from the cost lens Y, from the UX lens Z — these converge on W" without ever running each lens in a separate isolated context. Guard: frame NEVER synthesizes a multi-perspective result in its own context AND never realizes isolation — it does not even carry the synthesis machinery (that apparatus is `/conduct`'s, reached via the nudge). With ≥2 lenses where at least one carries a specialized substrate need, frame emits `SubstrateCorrespondence` (lens↔substrate pairs) with the `/conduct` nudge and stops — convergence/synthesis is claimable only by the isolated substrate that ran the lenses, which frame neither performs nor asserts. A single lens returns as `LensReturn` with no convergence claim. Any "convergence"/"synthesis"/"the perspectives agree" sentence authored in frame's own context is the failure.
-- **arranger-creep**: frame slides into eliciting a deliberation topology (an axis-by-axis arrangement of the perspectives) or realizing isolation itself, instead of nudging `/conduct`. Guard: frame carries no arrangement and no isolation/reconciliation/synthesis directive — the whole apparatus (isolation, independence, dialogue, dependency ordering, synthesis) is `/conduct`'s, routed by the nudge that accompanies every `SubstrateCorrespondence` handoff. Eliciting a topology or realizing isolation inside frame is the failure.
-- **executor-creep**: frame begins executing the inquiry — creating a team, spawning perspectives, awaiting completion, isolating, synthesizing — instead of handing the framed object off. Guard: frame stops at handoff; isolation, execution, and synthesis belong to the substrate (and `/conduct` designs the arrangement) — Epistemic Completeness Boundary. The deliverable is the framed object (detailed lens(es) or lens↔substrate pairs ⊕ `/conduct` nudge), not a synthesis.
-- **binding-overreach**: frame binds a concrete agent instead of declaring the abstract `substrate_need`, or presents `binding_hints` as mandatory rather than advisory. Guard: `substrate_need` is authoritative but abstract (persona/capability, no concrete agent); `binding_hints` is an advisory shortlist the host may override. frame names the need and suggests candidates — it never binds the agent. Substrate-invariance is the invariant.
-- **lens-redundancy**: proposed perspectives collapse to variations of one framing, so the option set offers no productive tension. Guard: each lens must offer a distinct epistemic framework; surface the redundancy as an epistemic signal and re-propose with genuine tension rather than padding the option space.
-
-## Known Limitations
-
-**Substrate execution out of scope**: The framed object's realization — isolation fidelity, dialogue mechanics, synthesis quality — depends on the executing substrate's capabilities and the arrangement `/conduct` designs. frame surfaces the per-lens `substrate_need` + `binding_hints`, the per-perspective channel-need, and the `/conduct` nudge as handoff annotations, but does not enforce realizability and does not realize isolation; when a substrate cannot realize the arrangement (e.g. plan-mode cannot host a dialectical arrangement with no persistent addressable peers), the substrate — or `/conduct` at arrangement time — declares the degradation. This is a non-epistemic substrate boundary: frame's contract ends at the handoff. Isolation is `/conduct`'s to arrange and the substrate's to enforce; frame neither compiles nor verifies it. When `/conduct` designs the arrangement, it owns the isolation/reconciliation/synthesis apparatus and supplements the per-perspective directive with the arrangement's peer mechanics before the substrate briefs perspectives — frame supplies only the per-lens output contract, not the cross-lens machinery.
-
-**Binding hints are advisory, not a registry**: `binding_hints` is frame's best enumerated guess at candidate substrates (preferring skill-bundled agents); it is not an authoritative agent registry and may name a substrate the host lacks or omit one the host has. The host binds against its actual available agents, using the hints to avoid the `general-purpose` default — the authoritative contract is the abstract `substrate_need`, not any concrete hint.
-
-**SubstrateCorrespondence handoff completes the morphism, not the inquiry**: `FramedInquiry` is emitted at handoff — the framing-layer deficit (`FrameworkAbsent`) is resolved by the framed object, while the object-level inquiry remains open until the isolated substrate executes it. An unexecuted handoff is a completed frame morphism and an unrealized inquiry, by design (the same layering as `LensReturn` partial resolution below).
-
-**LensReturn partial resolution**: `LensReturn` ships a lens (or lenses with no specialized substrate), not a resolved inquiry. `FrameworkAbsent` is addressed at the framing layer, but domain-specific resolution requires a downstream protocol or the user applying the lens. There is no inline synthesis even when multiple lenses return this way — frame ran none of them in isolation, so it makes no convergence claim.
+- **false-convergence**: Treat an agreement or synthesis authored by the framing context itself as failure evidence; genuine cross-lens convergence requires the isolated executions the handoff routes onward.
+- **lens-redundancy**: Treat lenses that differ only in wording as a failed candidate field; regenerate across distinct epistemic frameworks instead of padding the option set.
