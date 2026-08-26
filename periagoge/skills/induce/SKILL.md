@@ -129,210 +129,28 @@ seam               (extension)   → TextPresent+Proceed (fires at deactivation/
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI first shows how the instance set calibrates the user's in-process concept — what it preserves, sharpens, prunes, and leaves open — then proposes a candidate paired with a personalized grounding example drawn from the user's own domain. The user shapes the candidate through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI correction.
-
 ## Mode Activation
 
-### Activation
+`/induce` remains directly invocable. AI-guided activation requires a sensed essence whose name, scope, or position is still unsettled; detection stays silent. Existing abstractions awaiting comparison or validation route elsewhere, and a crystallized or dismissed `(instance set, essence)` pair stays inactive for the session.
 
-AI detects in-process abstraction OR user calls `/induce`. Detection is silent (Phase 0); candidate proposal plus triangulation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/induce` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: In-process abstraction detected via in-protocol heuristics (essence intuition signal + locator gap; instance cluster contributes evidence strength). Detection is silent (Phase 0).
-
-**In-process abstraction** = an essence is sensed toward which an abstraction is forming, with locator gap active (name, scope, or positional claim remains unsettled). Concrete instances supply evidence for the sensed essence; richer instance sets provide stronger triangulation material.
-
-Gate predicate:
-```
-in_process(A) ≡ essence_sensed(A) ∧ ¬located(A)
-```
-
-Periagoge's scope is specified by **operation**: colimit formation — constructing a new abstraction from an instance cocone when essence is sensed and locator gap is active. Instance cardinality is an evidence signal (see Trigger Signals table): stronger accumulation offers richer triangulation material. The operation distinguishes Periagoge from adjacent protocols (see Non-scenarios below); only colimit formation is Periagoge territory.
-
-### Priority
-
-<system-reminder>
-When Periagoge is active:
-
-**Supersedes**: Direct output patterns that assert a label without triangulation
-(Abstraction must be crystallized through dialectical exchange, not unilaterally proposed)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At Phase 2, present calibration map plus candidate abstraction and personalized grounding example via Cognitive Partnership Move (Constitution).
-</system-reminder>
-
-- Periagoge completes before output dependent on the crystallized abstraction proceeds
-- Loaded instructions resume after crystallization.
-
-### Trigger Signals
-
-Heuristic evidence signals for in-process abstraction detection:
-
-| Signal | Detection |
-|--------|-----------|
-| Instance accumulation | Concrete cases carry a shared essence signal and provide triangulation material for abstraction formation |
-| Essence intuition language | User phrases such as "something about these cases...", "the pattern I'm seeing...", "these all have...", "why do these keep happening..." |
-| Locator gap | Name, scope, or positional claim remains unsettled for the emerging abstraction |
-| Upstream colimit-shaped-input detection | An upstream detection of colimit-shaped input (essence signal + `locator_absent(A)`) nudges toward abstraction crystallization |
-| Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
-
-**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1 Fuse candidates; the constitutive judgment remains with the user.
-
-**Skip**:
-- No essence signal detectable (neither user sensing language nor AI-inferrable core pattern)
-- Abstraction already located (name + scope + position settled) — no in-process state to turn
-- User explicitly names the abstraction without in-process signals
-- An existing abstract structure needs validation against a concrete target, not a new abstraction formed
-- Comparative analysis between already-named candidate readings or frames — this is not colimit formation regardless of instance count
-- Same (instance set, essence) pair was crystallized or dismissed in current session (session immunity)
-
-### Canonical Invocation Scenarios
-
-Periagoge's scope, stated positively by canonical use patterns:
-
-| # | Scenario | Prototype | Structure |
-|---|----------|-----------|-----------|
-| S1 | **Review-time pattern accumulation** — multiple observations accumulating during ongoing review/work feel coherent but lack a name | PR-review session recognizing a recurring deficit pattern; multi-sprint retro finding common success factors | accumulated observations + review/reflection context |
-| S2 | **Terminology crystallization** — several loose phrases are being used interchangeably and need consolidation into a single precise term | "eidetic variation" settling a previously loose terminological space; informal "we keep saying X-ish" → settled term | lexical colimit |
-| S3 | **Cross-domain structural sensing** — parallel structures observed across different domains; user wants to name the shared essence | same pattern across multiple projects/codebases; "these pipelines feel structurally similar" | cross-domain colimit |
-| S4 | **Meta-pattern in own recurring work** — reflection on a recurring cognitive/behavioral move in one's own practice → naming | "I keep doing X in different contexts" → formalization as a principle | self-reflective colimit |
-
-**Edge case (still valid)**: Single instance with strong phenomenological grip — e.g., "yesterday I was in a strange mode, what was that?" — qualifies when essence_sensed is active and no locator exists. Rare but legitimate.
-
-**Non-scenarios (out of scope)**:
-- Comparative analysis between already-named candidate readings/frames
-- Audit of decision gaps
-- Validating an existing abstract structure against a concrete target
-
-The operational test: "Is the user operation *forming a new abstraction from observed instances*, or is it something else (selecting, validating)?" Only the first is Periagoge.
-
-### Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| User confirms candidate | Crystallize and proceed |
-| Attempt cap reached (5 triangulations) | Surface remaining candidate with explicit unresolved status, deactivate |
+If an explicit invocation has no detectable essence signal, surface that scan result and invite the user to name what feels in process or withdraw. Prior-session recall may seed neighboring abstractions but never settles crystallization.
 
 ## Protocol
 
-### Phase 0: In-Process Detection Checkpoint (Silent)
+### User-facing realization
 
-Analyze conversation state for in-process abstraction. This phase is **silent** — no user interaction.
+At Phase 2, render `K` as Keeps / Sharpens / Prunes / Open, then present the candidate, instance map, personalized grounding, surfaced neighbors, and remaining refinement budget in prose. Ground the example in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
 
-1. **Bind seed** `A`: use explicit argument or the most recent instance cluster surfaced in session (any cardinality qualifies when essence is sensed — single case strong-grip, paired comparison, or accumulated set)
-2. **Check essence signal** `E`: scan for variation-stable core signal in conversation (user essence-intuition language or AI-inferred pattern). This is the primary gate — if no essence is sensed, the abstraction has nothing to turn toward
-3. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
-4. If essence_sensed ∧ ¬located: proceed to Phase 1 with `(Iᵢ, E, L?)`
-5. If an upstream colimit-shaped-input signal is present (essence sensed, locator absent, previously read as a validation target): absorb it as a valid Periagoge trigger without re-confirmation
+Materialize the `V` constructors as everyday-language options with anticipatable differential futures. Omit Fuse when no adjacent candidate surfaced, while keeping free response available for user-supplied fusion, calibration correction, or an unlisted shape. Confirm and Dismiss remain constitutive even when analysis favors one shaping trajectory.
 
-**Scope restriction**: Detection is silent. Does NOT modify files or call external services.
-
-### Phase 1: Calibration + Candidate Proposal + Grounding Construction
-
-Generate a calibration map, candidate abstraction, and personalized grounding example.
-
-1. **Calibrate the seed** `K`: compare `(Iᵢ, E, L?)` against the user's context and sort the concept pressure into four fields: `keeps` (supported core to preserve), `sharpens` (decision-relevant structure needing clarity), `prunes` (unsupported overextension to release), and `open` (residual uncertainty that does not block crystallization). When `L?` is absent, calibrate on `E` alone: `sharpens` and `prunes` are relative to the inferred essence rather than to a user-named concept.
-2. **Synthesize candidate** `P`: from `(Iᵢ, E, K)`, construct a named abstraction with structure and instance-to-abstraction mapping. The candidate is a working hypothesis, not a claim.
-3. **Construct personalized grounding** `G`: call artifact read/artifact search to collect evidence about the user's own domain context (codebase, configs, session history). The grounding example must be drawn from the user's domain — a scenario they recognize as theirs — not a generic textbook case.
-   - When the user's domain is outside the current codebase (external API, academic field, professional practice), extend context collection to web search (external fetch). Tag web evidence with `source: "web:{url}"` for traceability.
-4. **Check adjacent abstractions**: if recall (Anamnesis hypomnesis store or in-session history) surfaces neighboring abstractions, note them as Fuse candidates for Phase 2.
-5. Package `(P, G, K)` with Fuse candidates and proceed to Phase 2.
-
-**Scope restriction**: Read-only investigation (artifact read, artifact search, external fetch). No test execution or file modifications.
-
-### Phase 2: Dialectical Triangulation (Constitution)
-
-**Present** the calibration map, candidate, and grounding example via Cognitive Partnership Move (Constitution).
-
-**Surfacing format**:
-
-Present the calibration map and candidate as text output:
-- **Keeps**: [what the instance set repeatedly supports and the candidate preserves]
-- **Sharpens**: [what must become clearer for the abstraction to be usable]
-- **Prunes**: [what the instance set does not support or overextends]
-- **Open**: [what remains unresolved without blocking crystallization]
-- **Candidate**: [name] — [structural description]
-- **Instance map**: [how Iᵢ maps to the candidate's structure]
-- **Grounding example**: [scenario drawn from user's domain, with mapping to the candidate]
-- [If Fuse candidates exist: list adjacent abstractions with brief relation]
-- **Budget**: how many refinement tries remain before the cap — the budget you reason with, stated as prose, not a numeric attempt fraction
-
-Then **present**:
-
-```
-Does this crystallize the concept enough to use?
-
-Options:
-1. **Confirm / Use this** — [what the crystallized abstraction enables downstream]
-2. **Widen / Broaden it** — [how upward or lateral scope expansion reshapes the candidate]
-3. **Narrow / Tighten it** — [what dimension specializes or what to exclude]
-4. **Fuse / Merge it** — [which adjacent abstraction to explicitly pull in for merge]
-5. **Reorient / Change the axis** — [what orthogonal axis to pursue instead]
-6. **Dismiss / Drop this candidate** — [what assumption about this essence is released]
-```
-
-When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead signal suppression. Free response is always available — the user may name an adjacent abstraction for fusion, propose an alternative abstraction, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
-
-### Phase 3: Integration
-
-After user response:
-
-1. **Confirm**: Record `crystallized(P)` in Λ, derive `CompletionTrace` from `Λ.history` with `A` sourced from `Λ.A` and `candidate'` computed from the post-move candidate state, derive `OpenTrace` from `K.open` and the Confirm response, assign both traces in Λ, terminate with convergence evidence trace.
-   - If `K.open = ∅`: `OpenTrace.status = None`, `OpenTrace.items = ∅`.
-   - If `K.open ≠ ∅` and the Confirm response has no explicit deferral signal for an open item: every open item defaults to `Nonblocking`, and `OpenTrace.status = Nonblocking`.
-   - If the Confirm response explicitly names or unambiguously points to an open item with deferral markers such as "defer", "later", "next", or "come back to": classify that item as `Deferred`; all other open items default to `Nonblocking`; `OpenTrace.status = Deferred` if any item is Deferred.
-   - Ambiguous or unnamed deferral text does not classify an item as Deferred; the item remains `Nonblocking` unless the response instead routes the candidate through an existing shaping move.
-2. **Widen(direction)**: Apply Synagoge — for `direction = upward`, generalize the candidate's scope; for `direction = lateral`, broaden sibling coverage. Return to Phase 2 with widened candidate (grounding may persist).
-3. **Narrow(specializer)**: Apply Diairesis — constrain the candidate along the specified dimension, excluding instances that fall outside. Return to Phase 2 with narrowed candidate.
-4. **Fuse(adjacent)**: Lateral Synagoge — merge candidate with named adjacent abstraction. Return to Phase 1 (grounding must be recomputed for fused structure).
-5. **Reorient(axis)**: Abandon current axis, restart along orthogonal dimension. Return to Phase 1 (full recompute).
-6. **Dismiss**: Release the candidate. If essence is still sensed, return to Phase 1 with fresh candidate proposal; else deactivate.
-
-After integration:
-- Log `(P, G, K, V)` to history
-- Increment attempts counter
-- Check attempt cap (max 5) — if exceeded, surface unresolved candidate with explicit status and deactivate
-
-## Intensity
-
-| Level | When | Format |
-|-------|------|--------|
-| Light | Small instance set (3-4), clear essence | Brief candidate + one grounding example |
-| Medium | Moderate instance set (5-8), essence present but ambiguous | Candidate + grounding + fuse candidates if recall surfaces them |
-| Heavy | Large instance set, multiple plausible axes, adjacent abstractions compete | Full candidate decomposition + grounding + fuse candidates + orthogonal probes |
-
-## UX Safeguards
-
-| Rule | Structure | Effect |
-|------|-----------|--------|
-| Gate specificity | `activate(Periagoge) only if essence_sensed ∧ ¬located` | Prevents false activation on settled abstractions or essence-less inputs; instance count is evidence-for-essence, not a gate |
-| Calibration map | Phase 1 sorts concept pressure into Keeps / Sharpens / Prunes / Open, surfaced before the candidate | Lets instances correct the concept without AI overriding the user; keeps evaluation on concept pressure, not just an AI label |
-| Session immunity | Crystallized or dismissed (Iᵢ, E) pair → skip for session | Respects user's crystallization or release |
-| Attempt cap | Max 5 triangulations per abstraction seed | Prevents infinite refinement; forces convergence or release |
-| Budget framing | Attempt counter in Phase 2 surfacing — a framing signal, not a progress count | User sees remaining refinement budget |
-| Upstream misfit absorption | A colimit-detection nudge routes here | Prevents source-domain confabulation in substitution path |
+Frame the abstraction currently being shaped rather than a progress fraction. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order determines placement relative to the gate.
 
 ## Rules
 
-1. **AI-guided, user-triangulated**: AI detects in-process abstraction and proposes candidates; crystallization requires user move via Cognitive Partnership Move (Constitution) (Phase 2).
-2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield before proceeding.
-3. **Calibration plus candidate plus grounding required**: Every Phase 2 surfacing pairs a calibration map, candidate abstraction, and personalized grounding example drawn from the user's own domain context — recognizable to the user as theirs (codebase, configs, session history, or stated domain), not a generic textbook example.
-4. **Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: AI candidate is a working hypothesis, not a claim. Concept correction is mediated by the instance set surfaced through `K`; crystallization belongs to the user's move.
-5. **Socratic move preservation**: Phase 2 options map to recognized dialectical families (Synagoge / Diairesis / Fuse / Reorient — per-move mapping in Phase 3 Integration); the vocabulary is operational, not ornamental — each move is a recognized dialectical turn, not a free-form revision request.
-6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind. If the user disputes the calibration map (`K`) itself, the same free-response path absorbs the correction rather than requiring a separate calibration-review constructor.
-6a. **Fuse dead-signal suppression**: Phase 2 omits the Fuse option when Phase 1 surfaces no adjacent abstraction candidates. Free response remains the channel for user-proposed fusion targets.
-7. **Convergence persistence**: Mode active until crystallized or attempt cap.
-8. **Not a validation operation**: A pre-existing abstract structure needing validation against a target falls outside Periagoge's own operation, which forms new abstractions rather than validating existing ones.
-9. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-10. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (calibration → candidate → user_move → candidate'). Per-step evidence is required.
-10a. **Open residual disposition**: `K.open` persists at convergence as `OpenTrace`: `None` for an empty open set, `Nonblocking` for open items that remain visible without blocking crystallization, and `Deferred` for open items explicitly routed to later work through free response. Bare Confirm defaults every open item to `Nonblocking`; explicit deferral requires an open-item name or unambiguous open-item reference adjacent to deferral language. `OpenTrace.status` aggregates item dispositions as `Deferred` when any item is Deferred, `Nonblocking` when all items are Nonblocking, and `None` only when `K.open = ∅`. This is terminal trace metadata, not a separate user gate.
-11. **Absorb upstream misfit**: When an upstream detection of colimit-shaped input (`essence_sensed` + `locator_absent(A)`) nudges here, absorb it as a valid Periagoge trigger. Before Phase 1, surface the routing rationale with its cited detection basis ("colimit-shaped input detected: essence_sensed(A), locator_absent(A), [N supporting instances] — redirecting to abstraction crystallization") so the user can recognize the evidence that justified the redirect; the concrete instance count makes the routing rationale verifiable rather than vague.
-12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant move (option-level entropy → 0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options. **Exception (Periagoge-scoped)**: The Confirm/Dismiss pair is excluded from the entire preceding test (Extension resolution, cost-symmetric collapse, and off-axis pathway demotion) — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains Constitution even when only one shaping move appears analytically viable.
-13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction or pairing "Confirm" with "Use this" while preserving the UserMove coproduct) is distinct from mutation.
-16. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-17. **Seam relay on declared continuation**: when a user-declared chain names the next protocol, the between-protocol seam after this protocol's crystallization is relay (Extension) — proceed directly, citing the settling source (the chain declaration). This protocol declares no wired outbound continuation edge — its only cross-protocol link is an inbound misfit absorption (Rule 11), not a post-crystallization handoff — so the second trigger is vacuously absent. This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-18. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+1. **Recognition over Recall**: Present structured options with anticipatable post-selection states and yield for the user's shaping move.
+2. **Calibration authority**: Treat the candidate as a working hypothesis. The instance-grounded calibration remains open to correction through the same free-response path as candidate shaping.
+3. **Personalized grounding**: Pair every candidate with evidence from the user's own domain and keep external provenance visible.
+4. **Periagoge boundary**: Form an abstraction around a sensed but unlocated essence. Comparison or validation of an already located abstraction remains outside this operation.
+5. **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the gate.
+11. **Upstream misfit absorption**: Accept a routed colimit-shaped signal as activation ground and show its cited essence-and-locator basis before Phase 1.
+18. **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
