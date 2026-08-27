@@ -108,7 +108,7 @@ D  = Direction gate answer ∈ {Select(direction), Synthesize(composition)}
        --   a response naming an UNPROBED candidate is never parsed as Select — it enters the unprobed-candidate
        --   free-response pathway (probed first within budget, or stand-down)
        -- Synthesize: user composes/recombines the presented probes → opens micro-gate Gs
-       -- interrogation is NOT a D constructor: it settles no direction, and surfaces as a free-response pathway (Rule 8)
+       -- interrogation is NOT a D constructor: it settles no direction, and surfaces as a free-response pathway (`Direction-gate response discipline`)
 Gs = Synthesis micro-gate answer ∈ {Confirm} ∪ {Materialize | refan_budget > 0}
        -- Confirm: settle the synthesized direction as-is, now
        -- Materialize: re-fan the synthesis into new probes (consumes the shared re-fan budget)
@@ -119,13 +119,13 @@ Disposition ∈ {FileDestroyed, NoFileArtifact, DiscardFailed(reason)}
   -- DiscardFailed: destruction attempted (with one retry) and still present; declared, never silent
 ProbeRef = minimal identity carrier { index: ℕ (ordinal in Λ.probes — uniqueness key), direction: String, artifact_ref: ArtifactRef }
             -- what was destroyed and where it lived; axis values, probe content, and cleanup actions stay
-            --   session-local (Rule 10)
+            --   session-local (`Harvest before discard`)
 DiscardTrace = List<(ProbeRef, Disposition)>  -- one entry per instantiated probe (re-fanned probes included)
 RefanKind ∈ {Gap, Materialization}   -- what the single shared budget was spent on; decides the still-insufficient branch
 Harvest = { direction: UserDecision (⊕ optional GroundTag), deciding_rows: ContrastMap, unknowns: Set(ExposedUnknown) }
             -- recorded BEFORE discard; carries no discard_trace — cleanup produces it
 DirectionalContrast = single record {                          -- terminal; single-record codomain (no bare plural)
-                        contrast_map:     ContrastMap,         --   restricted to the DECIDING rows at harvest (Rule 10)
+                        contrast_map:     ContrastMap,         --   restricted to the DECIDING rows at harvest (`Harvest before discard`)
                         exposed_unknowns: Set(ExposedUnknown), --   each tagged with its DownstreamRoute
                         direction:        UserDecision (⊕ optional GroundTag),
                         discard_trace:    DiscardTrace }
@@ -228,7 +228,7 @@ Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only wher
 ── LOOP ──
 Probe target set 2–4 for a contrast fan (settled at the spec gate; when candidates exceed 4, the gate settles which are probed).
 Re-fan bound: at most 1 re-fan per activation — contrast-insufficiency re-fan and synthesis materialization SHARE this
-  single budget (no separate budgets), and what it was spent on decides the still-insufficient branch (Rule 9).
+  single budget (no separate budgets), and what it was spent on decides the still-insufficient branch (`One shared re-fan`).
 Interrogation, contrast-insufficiency declaration, and Adjust do not consume the re-fan budget (they generate no probes).
 User can withdraw at any gate (an explicit exit, free response): EarlyExit — cleanup_verify runs; partial trace
   presented; residual declared.
@@ -391,7 +391,7 @@ Options:
 1…N. **Select: {probed direction}** — {the deciding axis values its probe exposed}
 N+1. **Synthesize** — compose from the probes; then confirm, or materialize when the shared budget permits
 ```
-Name the free-response paths from Rule 8 before this gate; they are not numbered direction options.
+Name the free-response paths from `Direction-gate response discipline` before this gate; they are not numbered direction options.
 
 ### Phase 5: Harvest → Discard (in this order)
 
@@ -403,8 +403,8 @@ Keep placeholder status visible in every probe and contrast. A Mockup is sandbox
 
 ## Rules
 
-8. **Direction-gate response discipline**: `Select` accepts only an accumulated probe direction; an unprobed candidate follows the typed free-response branch. Name probe questions, insufficiency, withdrawal, and unprobed candidates before `Qdir`, not as peer options. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route a pre-commit check to `/gap` when the direction becomes committed; attach `/ground` as a tag on a familiar-domain direction.
-9. **One shared re-fan**: gap repair and synthesis materialization consume the same budget. Its recorded `RefanKind` determines the exhausted-budget ending exactly as LOOP and PHASE TRANSITIONS specify; a materialized synthesis remains among the accumulated selectable probes.
-10. **Harvest before discard**: retain only the constituted direction, deciding contrast rows, and routed unknowns before cleanup. Cleanup produces the discard trace; assemble the durable record afterward, leaving probe detail session-local.
-13. **Round composition**: use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
-20. **Form feedback**: choose each round's density from the current request; carry an explicit form preference until countermanded. Change the open aspects of form directly, preserve content, order, cadence, and turn boundaries fixed elsewhere, and state both the adjustment and any overlapping constraint that remains.
+- **Direction-gate response discipline**: `Select` accepts only an accumulated probe direction; an unprobed candidate follows the typed free-response branch. Name probe questions, insufficiency, withdrawal, and unprobed candidates before `Qdir`, not as peer options. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route a pre-commit check to `/gap` when the direction becomes committed; attach `/ground` as a tag on a familiar-domain direction.
+- **One shared re-fan**: gap repair and synthesis materialization consume the same budget. Its recorded `RefanKind` determines the exhausted-budget ending exactly as LOOP and PHASE TRANSITIONS specify; a materialized synthesis remains among the accumulated selectable probes.
+- **Harvest before discard**: retain only the constituted direction, deciding contrast rows, and routed unknowns before cleanup. Cleanup produces the discard trace; assemble the durable record afterward, leaving probe detail session-local.
+- **Round composition**: use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
+- **Form feedback**: choose each round's density from the current request; carry an explicit form preference until countermanded. Change the open aspects of form directly, preserve content, order, cadence, and turn boundaries fixed elsewhere, and state both the adjustment and any overlapping constraint that remains.
