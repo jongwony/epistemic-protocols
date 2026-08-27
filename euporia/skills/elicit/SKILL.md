@@ -184,8 +184,8 @@ Utterance evidence quotes the user's actual fragment; it does not attribute an u
 
 ## Rules
 
-1. **Recognition over Recall**: Present structured dimension projections with anticipatable post-answer states.
-2. **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
-3. **Option-set relay test**: Present a single dominant coordinate value as Extension. Keep the answer slot constitutive when different user value weightings sustain multiple values.
-4. **Parked-coordinate identity**: A deferred coordinate returns each cycle as the same question with the same basis, marked as returning; it leaves `Λ.parked` only through Provide or termination residual folding.
-5. **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Recognition over Recall**: Present structured dimension projections with anticipatable post-answer states.
+- **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
+- **Option-set relay test**: Present a single dominant coordinate value as Extension. Keep the answer slot constitutive when different user value weightings sustain multiple values.
+- **Parked-coordinate identity**: A deferred coordinate returns each cycle as the same question with the same basis, marked as returning; it leaves `Λ.parked` only through Provide or termination residual folding.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
