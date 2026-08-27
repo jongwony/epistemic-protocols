@@ -109,24 +109,31 @@ codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   > /tmp/image_companion_events_${SUFFIX}.jsonl 2>/tmp/image_companion_warn_${SUFFIX}.txt
 ```
 
-`--color never` + splitting the streams keeps the events file pure JSONL (stdout) and the codex
-banner — where the warnings ride — in its own warn file (stderr). For multiple images, launch one
-background call per image in the same turn so they run in parallel — each with its own `${SUFFIX}`,
-so parallel streams never collide. Each completion sends a notification — then read that call's
+`--color never` + splitting the streams keeps stderr warnings out of the events file. Stdout is
+**not** pure JSONL — codex prints plain notice lines there as well (e.g. `Codex autostart is
+disabled.`, which survives `2>/dev/null`), so the extraction below filters to lines starting with
+`{` before parsing. For multiple images, launch one background call per image in the same turn so
+they run in parallel — each with its own `${SUFFIX}`, so parallel streams never collide. Each completion sends a notification — then read that call's
 events file and clean up its three temp files:
 `rm -f /tmp/image_companion_${SUFFIX}.txt /tmp/image_companion_events_${SUFFIX}.jsonl /tmp/image_companion_warn_${SUFFIX}.txt`.
 Wait for the completion notification before reading output.
 
-The events file is pure JSONL. Extract the **final** codex `agent_message` narrative verbatim with the
-line below — codex streams progress messages before the final answer, so the line takes the last
-`agent_message` — and forward it to Step 4 — the PNG-confirmation and any in-message notes you surface
-there are read from this narrative, not regex-parsed. **If the extraction is empty, codex failed before
+Extract the **final** codex `agent_message` narrative verbatim with the line below — codex streams
+progress messages before the final answer, so the line takes the last `agent_message` — and forward
+it to Step 4 — the PNG-confirmation and any in-message notes you surface there are read from this
+narrative, not regex-parsed. **If the extraction is empty, codex failed before
 answering** — read the raw events file `/tmp/image_companion_events_${SUFFIX}.jsonl` for the error
 and surface that instead of reporting a successful generation:
 
 ```bash
-jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/image_companion_events_${SUFFIX}.jsonl
+grep '^{' /tmp/image_companion_events_${SUFFIX}.jsonl \
+  | jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty'
 ```
+
+The `grep '^{'` is load-bearing, not defensive tidiness: codex prints plain notice lines to stdout
+alongside the JSONL, and `jq -rs` aborts on the first one with a parse error and returns nothing at
+all. Without the filter a **successful** generation produces exactly the empty extraction the
+paragraph above tells you to report as a failure before answering.
 
 Some codex warnings ride the
 **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to
