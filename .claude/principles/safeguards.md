@@ -98,4 +98,6 @@ General principle (the base-rate condition for stating a prohibition, the ironic
 
 ## Gate Type Soundness
 
-TYPES coproduct must match Phase prose options; becomes less critical as models improve. Enforced as warning-level static check (see `.claude/skills/verify/scripts/static-checks.js` → `gate-type-soundness`).
+A gate's answer must be typed and the options it names must be constructors the TYPES vocabulary declares; becomes less critical as models improve. Enforced as warning-level static check (see `.claude/skills/verify/scripts/static-checks.js` → `gate-type-soundness`).
+
+**Anchor**: the Definition alone — TYPES read against PHASE TRANSITIONS/LOOP and TOOL GROUNDING. Prose is where a gate is *realized* for a reader and varies with how much of the Definition a protocol chooses to restate; anchoring the check there made it lapse silently the moment that restatement was cut. The formal blocks are the surface the contract is fixed on, so a check reading them stays live under any prose revision.

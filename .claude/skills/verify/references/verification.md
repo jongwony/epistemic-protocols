@@ -19,7 +19,7 @@ What this page carries instead is the part the script does not: why a check exis
 - **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so catalog drift is caught without re-creating the co-change chain that mirroring the catalog into an instruction file would impose.
 - **ink-body-identity** — a per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier. This check guards that copy against silent drift.
 - **routing-map-sync** — the routing map is injected at SessionStart, so a stale committed map does not merely go unread; it injects a wrong routing directive into every new session.
-- **gate-type-soundness** — warn level by design. Type-preserving materialization (specializing a generic axis into a concrete coordinate while the surfacing structure survives) is legitimate and must not be failed as mutation.
+- **gate-type-soundness** — warn level by design. Type-preserving materialization (specializing a generic axis into a concrete coordinate while the surfacing structure survives) is legitimate and must not be failed as mutation. Reads the Definition only, so a prose revision cannot move what it asserts; `static-checks.test.mjs` guards the extraction against going inert, which is how the previous prose anchor failed.
 - **language-purity** — warn level under a Stage 1 surface posture. Promotion to fail is gated on Stage 2 retention evidence accumulating across multiple PRs and contributors, not on a single clean run.
 
 ### Repair

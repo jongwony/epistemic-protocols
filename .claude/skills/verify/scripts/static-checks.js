@@ -1732,9 +1732,53 @@ function stemMatch(a, b) {
 
 // ============================================================
 // Check: Gate Type Soundness (Safeguard — warning only)
-// Verifies TYPES answer coproducts match Phase prose option enumerations.
+// Anchored on the Definition alone: TYPES against PHASE TRANSITIONS/LOOP and
+// TOOL GROUNDING. A gate's answer must be typed, and the options a Constitution
+// gate names must be constructors the TYPES vocabulary declares.
 // Type-preserving materialization is permitted; gate mutation is flagged.
 // ============================================================
+
+// Drop every parenthesised argument list, however deeply nested:
+// Reorient(axis, partition: Option(Set(MoveRegion))) → Reorient
+function stripTypeArgs(text) {
+  let out = '';
+  let depth = 0;
+  for (const ch of text) {
+    if (ch === '(') depth += 1;
+    else if (ch === ')') depth = Math.max(0, depth - 1);
+    else if (depth === 0) out += ch;
+  }
+  return out.trim();
+}
+
+// Split a coproduct body on its top-level separators, respecting nesting.
+function splitCoproduct(body) {
+  const parts = [];
+  let cur = '';
+  let depth = 0;
+  for (const ch of body) {
+    if ('({⟨'.includes(ch)) depth += 1;
+    else if (')}⟩'.includes(ch)) depth = Math.max(0, depth - 1);
+    if (depth === 0 && (ch === ',' || ch === '|' || ch === '∪')) {
+      parts.push(cur);
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  parts.push(cur);
+  return parts
+    .map((p) => stripTypeArgs(p))
+    .filter((p) => /^[A-Za-z][A-Za-z0-9_'-]*$/.test(p));
+}
+
+const GATE_SYMBOL = /^[A-ZΛ_][\w'’]*$|^[A-Za-z][\w'’]*_[\w'’]*$|^[\p{L}][\p{L}\p{N}'’ᵃ-ᵪ₀-ₜ]{0,2}$/u;
+
+// A bare lowercase English word after `Stop →` is prose continuation, not a symbol.
+function isGateSymbol(token) {
+  return GATE_SYMBOL.test(token);
+}
+
 function checkGateTypeSoundness() {
   for (const file of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, file);
@@ -1743,111 +1787,106 @@ function checkGateTypeSoundness() {
       content = fs.readFileSync(fullPath, 'utf-8');
     } catch { continue; }
 
-    // 1. Extract TYPES section from Definition code block
     const typesSection = extractFormalSection(content, 'TYPES');
     if (!typesSection) continue;
 
-    // 2. Parse coproducts: lines with ∈ {X, Y, Z} pattern
+    // 1. Coproducts: `Name ∈ {A, B, C}`, `Name = {A, B, C}`, `Name = A ∪ B`, `Name = A | B`
     const coproducts = [];
-    const coprodRegex = /^(\w+)\s.*?∈\s*\{([^}]+)\}/gm;
-    let m;
-    while ((m = coprodRegex.exec(typesSection)) !== null) {
-      const typeName = m[1];
-      const constructors = m[2].split(',').map(c => {
-        const trimmed = c.trim();
-        const name = trimmed.replace(/\([^)]*\)/g, '').trim();
-        return { raw: trimmed, name };
-      }).filter(c => c.name.length > 0);
-      if (constructors.length >= 2) {
-        coproducts.push({ typeName, constructors });
-      }
+    const declared = new Set();
+    for (const m of typesSection.matchAll(/^\s*([A-Za-zΛ][\w'’]*)\s*([^\n]*?)(?:∈|=)\s*\{([^{}]*[,|][^{}]*)\}/gmu)) {
+      declared.add(m[1]);
+      for (const alias of m[2].matchAll(/[A-Za-zΛ][\w'’]*/gu)) declared.add(alias[0]);
+      const constructors = splitCoproduct(m[3]);
+      if (constructors.length >= 2) coproducts.push({ typeName: m[1], constructors });
     }
+    for (const m of typesSection.matchAll(/^\s*([A-Za-zΛ][\w'’]*)\s*=\s*([A-Z][\w'’]*(?:\([^\n]*?\))?(?:\s*[|∪]\s*[A-Z][\w'’]*(?:\([^\n]*?\))?)+)/gmu)) {
+      declared.add(m[1]);
+      const constructors = splitCoproduct(m[2]);
+      if (constructors.length >= 2) coproducts.push({ typeName: m[1], constructors });
+    }
+    for (const m of typesSection.matchAll(/^\s*([A-Za-zΛ][\w'’]*)\s*(?:=|∈|:)/gmu)) declared.add(m[1]);
+    for (const cp of coproducts) for (const c of cp.constructors) declared.add(c);
 
-    // 3. Extract Options blocks from prose (outside Definition code block)
-    const proseStart = content.indexOf('## Mode Activation');
-    if (proseStart === -1) {
+    // Every bare token TYPES mentions — a symbol named there is typed there, even
+    // when its type arrives through a field or a signature rather than its own line.
+    const mentioned = new Set(typesSection.match(/[\p{L}_][\p{L}\p{N}_'’]*/gu) ?? []);
+
+    // 2. Rule A — a gate's answer is typed.
+    const transitions = [
+      extractFormalSection(content, 'PHASE TRANSITIONS'),
+      extractFormalSection(content, 'LOOP')
+    ].filter(Boolean).join('\n');
+    let untypedAnswers = 0;
+    let typedAnswers = 0;
+    for (const m of transitions.matchAll(/→\s*Stop\s*→\s*([^\s→[\]|(){}]+)(\s*∈)?/gu)) {
+      const symbol = m[1].replace(/[.,;:]+$/, '');
+      if (m[2]) { typedAnswers += 1; continue; }  // typed inline at the site: `X ∈ T`
+      if (!isGateSymbol(symbol)) continue;      // prose continuation, not a symbol
+      if (declared.has(symbol) || mentioned.has(symbol)) { typedAnswers += 1; continue; }
+      untypedAnswers += 1;
       results.warn.push({
         check: 'gate-type-soundness',
         file,
-        message: 'No "## Mode Activation" header found — gate prose extraction skipped'
+        message: `PHASE TRANSITIONS gate answer \`${symbol}\` has no TYPES declaration — type the answer or name its type inline at the Stop site`
       });
-      continue;
-    }
-    const prose = content.substring(proseStart);
-
-    const optionsBlocks = [];
-    // Match Options: followed by numbered bold items until block end
-    const optBlockRegex = /Options:\n((?:\s*\d+\.\s+\*\*[^\n]+\n?)+)/g;
-    while ((m = optBlockRegex.exec(prose)) !== null) {
-      const block = m[1];
-      const labels = [];
-      const labelRegex = /^\s*\d+\.\s+\*\*\[?([^\]*\n]+?)\]?\*\*/gm;
-      let lm;
-      while ((lm = labelRegex.exec(block)) !== null) {
-        const raw = lm[1].trim();
-        // Extract first word as canonical label; skip pure template placeholders
-        const firstWord = raw.split(/[\s,—]/)[0];
-        if (firstWord && (!/^[A-Z][a-z]+\s/.test(raw) || /^[A-Z][a-z]+$/.test(firstWord))) {
-          labels.push(firstWord);
-        }
-      }
-      if (labels.length >= 2) {
-        optionsBlocks.push(labels);
-      }
     }
 
-    // 4. Match coproducts to Options blocks and compare
+    // 3. Rule B — a Constitution gate's named options are constructors of the type it answers into.
+    const grounding = extractFormalSection(content, 'TOOL GROUNDING');
+    const gateEntries = [];
+    let current = null;
+    for (const line of (grounding ?? '').split('\n')) {
+      if (/\((?:constitution|extension|track|sense|observe|reason|derive|verify|act)\)/.test(line)) {
+        if (current) gateEntries.push(current);
+        const head = /^\s*(.*?)\s*\(constitution\)/.exec(line);
+        current = head && !head[1].startsWith('--')
+          ? { name: head[1], body: line }
+          : null;
+      } else if (current) {
+        current.body += `\n${line}`;
+      }
+    }
+    if (current) gateEntries.push(current);
+
+    const allConstructors = [...new Set(coproducts.flatMap((cp) => cp.constructors))];
     let analysed = 0;
-    for (const cp of coproducts) {
-      const cNames = cp.constructors.map(c => c.name.toLowerCase());
-
-      // Find best matching Options block by stem overlap
-      let bestBlock = null;
-      let bestScore = 0;
-      for (const labels of optionsBlocks) {
-        const lLower = labels.map(l => l.toLowerCase());
-        const score = cNames.filter(cn =>
-          lLower.some(ln => stemMatch(cn, ln))
-        ).length;
-        if (score > bestScore) {
-          bestScore = score;
-          bestBlock = labels;
-        }
+    for (const gate of gateEntries) {
+      const presented = gate.body.slice(Math.max(0, gate.body.indexOf('present')));
+      const runs = [];
+      for (const m of presented.matchAll(/\{([^{}]*\|[^{}]*)\}/g)) runs.push(splitCoproduct(m[1]));
+      for (const m of presented.matchAll(/\b([A-Z][A-Za-z]*(?:\([^()]*\))?(?:\s*\/\s*[A-Z][A-Za-z]*(?:\([^()]*\))?)+)/g)) {
+        runs.push(m[1].split('/').map((p) => stripTypeArgs(p)).filter(Boolean));
       }
 
-      // Require ≥40% constructor match to consider it a paired block
-      if (!bestBlock || bestScore < Math.max(2, Math.ceil(cNames.length * 0.4))) continue;
-      analysed++;
-
-      const lLower = bestBlock.map(l => l.toLowerCase());
-
-      // Check for constructors missing from prose options (potential deletion)
-      const missing = cp.constructors.filter(c =>
-        !lLower.some(ln => stemMatch(c.name.toLowerCase(), ln)) &&
-        !new RegExp(escapeRegex(c.raw)).test(prose)
-      );
-
-      // Check for prose options missing from constructors (potential injection)
-      const extra = bestBlock.filter(l =>
-        !cNames.some(cn => stemMatch(cn, l.toLowerCase()))
-      );
-
-      if (missing.length > 0 || extra.length > 0) {
-        const parts = [];
-        if (missing.length > 0) parts.push(`TYPES constructors not in prose: ${missing.map(c => c.raw).join(', ')}`);
-        if (extra.length > 0) parts.push(`prose options not in TYPES: ${extra.join(', ')}`);
-        results.warn.push({
-          check: 'gate-type-soundness',
-          file,
-          message: `${cp.typeName} ∈ {${cp.constructors.map(c => c.raw).join(', ')}} — ${parts.join('; ')}. Verify: type-preserving materialization or gate mutation?`
-        });
+      for (const run of runs) {
+        if (run.length < 2) continue;
+        // Pair the run to the coproduct it overlaps most; an unanchored run is prose.
+        let best = null;
+        let bestScore = 0;
+        for (const cp of coproducts) {
+          const score = run.filter((o) => cp.constructors.some((c) => stemMatch(o.toLowerCase(), c.toLowerCase()))).length;
+          if (score > bestScore) { bestScore = score; best = cp; }
+        }
+        if (!best || bestScore === 0) continue;
+        analysed += 1;
+        // An option may be a constructor of a sibling coproduct — a gate presenting a
+        // (judgment, disposition) pairing spans two types legitimately. What has no type
+        // anywhere in TYPES is the injection this check is for.
+        const injected = run.filter((o) => !allConstructors.some((c) => stemMatch(o.toLowerCase(), c.toLowerCase())));
+        if (injected.length > 0) {
+          results.warn.push({
+            check: 'gate-type-soundness',
+            file,
+            message: `${gate.name} names options with no TYPES constructor (nearest: ${best.typeName} ∈ {${best.constructors.join(', ')}}): ${injected.join(', ')}. Verify: type-preserving materialization or gate mutation?`
+          });
+        }
       }
     }
 
     results.pass.push({
       check: 'gate-type-soundness',
       file,
-      message: `Gate type soundness check completed (${coproducts.length} coproducts, ${analysed} matched to prose)`
+      message: `Gate type soundness check completed (${coproducts.length} coproducts, ${gateEntries.length} Constitution gates, ${typedAnswers} typed gate answers, ${analysed} option runs matched to TYPES, ${untypedAnswers} untyped gate answers)`
     });
   }
 }

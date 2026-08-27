@@ -63,6 +63,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Plugin code uses Node.js standard library only.
 - Static checks: see `## Verification` below for the command.
 - Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs .claude/skills/realize/scripts/harness.test.mjs`
+  - `.claude/skills/verify/scripts/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation for the same reason `/verify` does — see the concurrency note under `## Verification`.
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`
 - Installer: `scripts/install.sh`; `README.md` is the source of truth for the install set.
