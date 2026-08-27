@@ -265,9 +265,9 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 
 ## Rules
 
-1. **Recognition over Recall**: Present structured options with anticipatable post-selection states.
-2. **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
-3. **Option-set relay test**: Present a single dominant trajectory as Extension. Constitution options remain genuinely viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
-4. **One coherent cluster**: Items in a multi-item cluster share a decision frame, have non-overlapping information-gain leverage, and are independently answerable. When the cluster has more than one item, cite the clustering basis and each item's gain rationale.
-5. **No pre-filter rationalization**: Coherence coexistence is available only when an explicit scope hierarchy or documented precedence ordering resolves the apparent contradiction.
-6. **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Recognition over Recall**: Present structured options with anticipatable post-selection states.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
+- **Option-set relay test**: Present a single dominant trajectory as Extension. Constitution options remain genuinely viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **One coherent cluster**: Items in a multi-item cluster share a decision frame, have non-overlapping information-gain leverage, and are independently answerable. When the cluster has more than one item, cite the clustering basis and each item's gain rationale.
+- **No pre-filter rationalization**: Coherence coexistence is available only when an explicit scope hierarchy or documented precedence ordering resolves the apparent contradiction.
+- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
