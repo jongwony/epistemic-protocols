@@ -135,8 +135,8 @@ When `Scan(D)` finds no gaps, present the scan scope and zero-gap finding direct
 
 ## Rules
 
-1. **Evidence-bound, user-judged**: Surface only gaps with concrete indicators cited from `D`, phrase each as a question, and treat the user's judgment as final for that gap.
-2. **Assumption and alternative audit**: Confirm an inferred assumption rather than asserting it. Surface an omitted alternative only when its absence is observable and taking it would materially change the decision; keep emergent gap forms available when the named taxonomy does not fit.
-3. **Minimal intrusion**: Let the pressure map narrow what reaches the user, and scale the supporting explanation without changing the judgment set.
-4. **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
-5. **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and what overlapping fixed element remains.
+- **Evidence-bound, user-judged**: Surface only gaps with concrete indicators cited from `D`, phrase each as a question, and treat the user's judgment as final for that gap.
+- **Assumption and alternative audit**: Confirm an inferred assumption rather than asserting it. Surface an omitted alternative only when its absence is observable and taking it would materially change the decision; keep emergent gap forms available when the named taxonomy does not fit.
+- **Minimal intrusion**: Let the pressure map narrow what reaches the user, and scale the supporting explanation without changing the judgment set.
+- **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and what overlapping fixed element remains.
