@@ -106,133 +106,19 @@ seam (extension)   → TextPresent+Proceed (fires at deactivation: a user-declar
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Surfacing over Deciding**: AI makes visible; user judges.
-
 ## Mode Activation
 
-### Activation
+`/gap` remains directly invocable. AI-guided activation is limited to a committed decision with concrete evidence of an unaddressed gap. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
 
-Command invocation activates mode until convergence; deferred gaps (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation through the carrier locator, per LOOP.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Committed action detected with observable, unaddressed gaps via in-protocol heuristics.
-
-**On activation**: if a prior gap-carrier locator is in scope, read that carrier once to recover its gaps and resume tracking; with no locator in scope, start a fresh carrier. The protocol does not search for its own past records — one read at a held identity is the whole recovery path.
-
-### Priority
-
-<system-reminder>
-When Syneidesis is active:
-
-**Supersedes**: Risk assessment and decision gating rules in loaded instructions
-(e.g., verification tiers, reversibility checks, approval requirements)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At decision points, present potential gaps via Cognitive Partnership Move (Constitution).
-</system-reminder>
-
-- Stakes Assessment replaces tier-based gating
-- All decision points become candidates for interactive confirmation
-- Loaded instructions resume after mode deactivation
-
-### Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| Task completion | Auto-deactivate after final resolution |
-
-### Plan Mode Integration
-
-When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
-
-| Phase Transition | Gap Check Focus |
-|------------------|-----------------|
-| Planning → Implementation | Scope completeness, missing requirements |
-| Phase N → Phase N+1 | Previous phase completion, dependency satisfaction |
-| Implementation → Commit | Changed assumptions, deferred decisions |
-
-**Cycle**: [Deliberation → Gap → Revision → Execution]
-1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis supplies multi-perspective lenses when active)
-2. **Gap**: Syneidesis surfaces unconfirmed assumptions via Cognitive Partnership Move (Constitution)
-3. **Revision**: Integrate user response, re-evaluate if needed
-4. **Execution**: Only after explicit scope confirmation
-
-This cycle repeats per planning phase or domain area.
-
-### Conditions
-
-#### Essential (all must hold)
-
-| Condition | Predicate | Test |
-|-----------|-----------|------|
-| **Committed action** | `committed(D)` | `∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)` |
-| **Observable gap** | `∃ G : observable(G)` | Concrete indicator exists in context (not speculation) |
-| **Unaddressed** | `¬mentioned(G, context)` | Gap not already raised or resolved in session |
-
-**Scope limitation**: `committed(D)` captures *execution commitment* (actions with immediate effects). It does not capture *direction commitment* — decisions that constrain future work without immediate state change (e.g., "let's use PostgreSQL", "refactor auth to OAuth2"). Direction commitment is partially covered by Plan Mode Integration, which applies Gap at phase boundaries where such decisions materialize into execution plans.
-
-#### Modulating Factors (adjust intensity, not applicability)
-
-| Factor | Effect | Heuristic signals |
-|--------|--------|-------------------|
-| **Irreversibility** | stakes ↑ | "delete", "push", "deploy", "migrate" |
-| **Impact scope** | stakes ↑ | "all", "every", "entire", production, security |
-| **Time pressure** | stakes ↑ (gap miss probability increases) | "quickly", "just", "right now" |
-| **Uncertainty** | scan range ↑ | "maybe", "probably", "I think" |
-
-#### Skip
-
-- `¬committed(D)`: read-only, informational, exploratory actions
-- User explicitly confirmed in current session
-- Mechanical task (no judgment involved)
-- User already mentioned the gap category
-
-## Gap Taxonomy
-
-| Type | Detection | Question Form |
-|------|-----------|---------------|
-| **Procedural** | Expected step absent from user's stated plan | "Was [step] completed?" |
-| **Consideration** | Relevant factor not mentioned in decision | "Was [factor] considered?" |
-| **Assumption** | Unstated premise inferred from framing | "Are you assuming [X]?" |
-| **Alternative** | Known option not referenced | "Was [alternative] considered?" |
-
-**Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
-- The unaddressed gap spans multiple named types (e.g., a procedural absence driven by an unstated assumption)
-- User dismisses all named-type gaps but the committed action still exhibits observable risk
-- The decision context involves domain-specific considerations that resist classification into four generic types
-
-Emergent gaps must satisfy morphism `GapUnnoticed → AuditedDecision` and use adapted question forms.
+An already judged gap stays settled for the current session unless new evidence changes it. Prior-session recall indices may weight scanning, but never settle the user's judgment. A direction-only commitment enters the scan when it materializes at a plan-to-execution boundary.
 
 ## Protocol
 
-### Detection (Silent)
+### User-facing realization
 
-Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
-- Irreversible + High impact → High stakes
-- Irreversible + Low impact → Medium stakes
-- Reversible + Any impact → Low stakes
-- Time pressure → stakes ↑ one level
+Render the selected gap as an assertion-free question. A procedural omission asks whether the step was completed; a missing consideration or alternative asks whether it was considered; an inferred assumption asks whether that premise holds. Precede the question with its concrete indicator, a plain-language pressure assessment, and the consequence for the decision.
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed gap type weighting during scanning; the constitutive judgment remains with the user.
-
-**Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
-
-### Pressure Assessment (Silent)
-
-Per Phase 0 formal block (`AssessGapPressure` → `P`; bucket definitions in the TYPES block above) and Rule 12: after Scan and before selection, classify the already-detected gaps `G` into a GapPressureMap `P` — one bucket per gap for the current cycle.
-
-### Surfacing
-
-Present the gap as text output:
-- **Gap**: [Specific gap description with evidence]
-- **Pressure**: [load-bearing / cheap-to-settle / hidden high-impact, in plain language — why this gap deserves attention now]
-- (rationale: [1-line why this gap matters for this decision])
-
-Then **present**:
+Then materialize the judgment set with differential futures and yield:
 
 ```
 How would you like to address this gap?
@@ -243,73 +129,14 @@ Options:
 3. **Probe** — request additional verification before deciding
 ```
 
-Option 3 (Probe) is always visible. The verification rationale goes out BEFORE the gate and not inside option 3 — expanded when `stakes(D) = High`, brief otherwise. What the option itself carries is what choosing it does, and that does not vary with stakes; only the rationale for wanting it does, which is analysis and belongs where analysis goes. Directing the depth into the option line would refill it with exactly what was taken out of it. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
+Keep `Probe` visible and free-response correction open. Put the verification rationale before the gate, brief at low stakes and more detailed as stakes rise. Surface one selected gap per turn; a second high-stakes selection remains independently answerable in its own round.
 
-Other is always available — the user can respond freely beyond the listed options.
-
-One gap per decision point.
-Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
-
-### Resolution
-
-Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expanded scope, surfacing additional gaps the user wants verified before committing.
-
-### Gap Tracking
-
-**Carrier format** — ONE entry holding every registered gap:
-```
-record({
-  subject: "[Gap carrier] decision point",
-  description: "one line per gap: [Gap:Type] question | rationale and context | status | once closed, the user's judgment and the adjustment it produced"
-})
-```
-
-The judgment and adjustment ride in the carrier because the audit trace is assembled from them; a carrier holding status alone would recover which gaps are left and lose what was decided about the rest. The creating write returns the identity `locator(C)` reads. Every later amendment and every later session's read name that identity; no second entry is written per gap.
-
-### Interactive Surfacing (Constitution)
-
-When Syneidesis is active, **present** via Cognitive Partnership Move (Constitution) for:
-
-Constitution presentation yields turn for user response.
-
-| Trigger | Action |
-|---------|--------|
-| Any confirmation needed | Present as structured options |
-| High-stakes + multiple gaps | Present priority choices |
-| Assumption gap | Always confirm (inference may be wrong) |
-| Interpretive uncertainty | Ask whether gap exists before surfacing |
-| Naming/structure decisions | Offer alternatives with rationale |
-
-**Why one carrier**: every gap lives in a single durable entry, so the set stays reachable across the session and a later session reconstructs it with one read rather than searching for records it would first have to find.
-
-**Re-scan trigger**: User response may reveal new gaps (e.g., "Yes, backed up" → "Where?" precision gap). Always re-scan after each response.
-
-### UI Mapping
-
-| Environment | Address | Dismiss | Probe |
-|-------------|---------|---------|-------|
-| Constitution interaction | Selection | Selection | Selection |
-
-## Intensity
-
-| Level | When | Format |
-|-------|------|--------|
-| Light | Reversible, low impact | Constitution interaction with Dismiss as default option |
-| Medium | Reversible + high impact, OR Irreversible + low impact | Constitution interaction with rationale context |
-| Heavy | Irreversible + high impact | Detailed rationale + Constitution interaction with explicit options |
+When `Scan(D)` finds no gaps, present the scan scope and zero-gap finding directly. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 
 ## Rules
 
-1. **AI-guided, user-judged** (Detection with Authority): AI surfaces gaps as questions ("was X considered?", never "you missed X"); user authority is final — dismissal terminates a gap.
-2. **Observable evidence regulation**: Surface only gaps with concrete indicators cited from D; no gap inflation merely to appear thorough — each surfaced gap cites specific context from D.
-3. **Minimal intrusion** (Surfacing over Deciding): Lightest intervention that achieves awareness; intensity follows the stakes matrix in `## Intensity`.
-4. **Gap order is the pressure map's**: the order gaps are surfaced in is `Sel`'s alone — pressure bucket, then evidence salience, then Scan order. No prerequisite edge between gaps is recorded and none is read; where a gap only makes sense once another is settled, the question's own wording carries that rather than a stored relation.
-5. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-6. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required.
-7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.
-8. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
-9. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-12. **Protocol-native pressure map**: Phase 0 produces a GapPressureMap before gap selection. The map is a pre-gate support object for gap selection and question formation, with no terminal-status or generic-calibration authority. It classifies already-detected gaps into exactly one current-cycle pressure bucket; gap tasks are sourced exclusively from Scan output, and `AuditedDecision` is unchanged. Surfacing over Deciding — the map justifies why a gap deserves attention now while gap resolution remains the user's constitutive act. `hidden_high_impact` is the unknown-unknown surface and carries the highest over-application risk, so it is tightly capped (|hidden_high_impact| ≤ 1) and admitted only when the unknown could materially change the user's next judgment; the map must narrow the question set, never make the user inspect every possible gap.
-13. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-14. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares names the next protocol, the between-protocol seam after this protocol's convergence is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-15. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+- **Evidence-bound, user-judged**: Surface only gaps with concrete indicators cited from `D`, phrase each as a question, and treat the user's judgment as final for that gap.
+- **Assumption and alternative audit**: Confirm an inferred assumption rather than asserting it. Surface an omitted alternative only when its absence is observable and taking it would materially change the decision; keep emergent gap forms available when the named taxonomy does not fit.
+- **Minimal intrusion**: Let the pressure map narrow what reaches the user, and scale the supporting explanation without changing the judgment set.
+- **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and what overlapping fixed element remains.
