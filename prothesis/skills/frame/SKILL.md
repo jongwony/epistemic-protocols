@@ -176,10 +176,10 @@ Ground every table cell, list item, and comparison point in substantive evidence
 
 ## Rules
 
-1. **Perspective quality**: Present each option as one discipline- or framework-named lens with a distinct contribution. Preserve productive tension and a shared comparison basis; align every lens with the expected deliverable.
-2. **Novelty against supplied lenses**: Treat user-supplied lenses as pre-confirmed, show them before the gate, and offer novel additions rather than repackaging them.
-3. **Round composition**: Use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before the gate. Read `references/round-composition.md` when terminology, verbatim wording, deferred material, or phase order binds the rendering.
-4. **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Perspective quality**: Present each option as one discipline- or framework-named lens with a distinct contribution. Preserve productive tension and a shared comparison basis; align every lens with the expected deliverable.
+- **Novelty against supplied lenses**: Treat user-supplied lenses as pre-confirmed, show them before the gate, and offer novel additions rather than repackaging them.
+- **Round composition**: Use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before the gate. Read `references/round-composition.md` when terminology, verbatim wording, deferred material, or phase order binds the rendering.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
 
 ## Adversarial Guards
 
