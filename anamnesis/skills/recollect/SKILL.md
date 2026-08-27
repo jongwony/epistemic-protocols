@@ -66,7 +66,7 @@ MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
                      cognitive: Set(Marker), singularity: Set(Event) }  -- salience-track profile
 DateAnchor       = String   -- ISO 8601 date; reference point for salience-track temporal normalization (e.g., session start). Optionality is carried at the use site (DateAnchor?)
 EvidenceMode     = {user_constituted, attested, observed, inferred}   -- totally ordered tier of the content's evidential STANDING (who stands behind it: user-authored verbatim > party-asserted with verbatim witness > mechanically present without assertion > LLM-synthesized) — NOT extractor reliability (that is extraction_method's concern). Assigned at write time by construction of each artifact's production path (deterministic metadata, never LLM-judged). Ranks recall weight only — NEVER suppresses/excludes; introduces no automatic effectivity (any downstream status change stays user-gated).
-SourceScan       = { skipped_lines: Nat, unverified_user_turns: Nat, omitted_chars: Nat }   -- how completely the record's own source reached the extractor: transcript lines that failed to parse, human turns absent from the runtime's own cross-check channel, and characters a bounded extraction dropped from the middle of a long session. Any count non-zero ⇒ the record was built from less than its whole source, so the emit says so (Rule 18)
+SourceScan       = { skipped_lines: Nat, unverified_user_turns: Nat, omitted_chars: Nat }   -- how completely the record's own source reached the extractor: transcript lines that failed to parse, human turns absent from the runtime's own cross-check channel, and characters a bounded extraction dropped from the middle of a long session. Any count non-zero ⇒ the record was built from less than its whole source, so the emit says so (`Recalled context currency is not fidelity`)
 Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
 Scan             = (Store, Track, RecallTrace) → List(Candidate)
 Candidate        = { session_id: Optional(SessionId),
@@ -177,7 +177,7 @@ Phase 1 Rank        (sense)    → Internal analysis (conditional: lightweight-m
 Phase 1 backtrace_parent (observe) → artifact read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
 Phase 1 Qx          (constitution) → present (ExpandFullText: read the labeled Claude/Codex transcript bodies, at a per-record cost with no upper bound; StopAtSpine: return a NullMatch scoped to the indexes and spines already searched, without opening any transcript body)
 Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; gated path — ¬SingleObvious: candidates ≥ 2 OR confidence < high)
-Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single candidate emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of Rule 12's Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
+Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single candidate emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of `Conditional Qc; separate Qs and Qc`'s Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate   (track)    → Internal state update
 Phase 3 Probe       (sense)    → Internal (gap detection)
 Phase 1/3 Qs        (constitution)     → present (Socratic probing with structured navigation; one realization reached from two branches — the Phase 1 zero-candidate probe and the Phase 3 Refine probe run the same `Probe → Qs → Stop → H → enrich` sequence; mandatory on Refine)
@@ -271,219 +271,53 @@ MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
                     -- structural risk: recall target genuinely absent from Store (principal failure mode)
 ```
 
-## Core Principle
-
-**Recognition over Retrieval**: When a user has a vague memory of prior discussion or decision, verify the match between their recalled context and historical context through cognitive assistance — presenting narrative candidates for user recognition, rather than returning search results. The protocol function is context identity verification (Husserl's synthesis of identification: empty intention meets fulfilled re-presentation), not information retrieval; identity verification is not current-reality verification (Rule 18 carries the full currency≠fidelity distinction).
-
-The scan finds candidates; the narrative Qc enables recognition; the user constitutes the identity match. Three constitutive distinctions from search/retrieval — input-typed dispatch, narrative presentation, and guided recall orientation on Refine — are detailed as Rules 3-5.
-
 ## Mode Activation
 
-### Activation
+`/recollect` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind. When a direct invocation supplies no recoverable target in current or recent context, ask for the recall target before Phase 0.
 
-AI detects empty intention in user expression (Layer 2, silent Phase 0) OR user calls `/recollect` (Layer 1, always available). Recognition requires user interaction at the Phase 2 gate, except for a high-confidence single candidate — there the gate is absorbed into an inline Extension emit with a divergence-only affordance, and non-divergence (silence) constitutes recognition. On direct `/recollect`, bind `V` from current/recent context; if none recoverable, request the recall target before Phase 0.
+### Activation heuristics and exceptions
 
-**Empty intention** — user has vague memory of prior context but cannot locate/specify it (knows-that ∃ something, not what/where).
+Treat vague temporal references, existence claims without a locator, uncertain self-reference, failed recall, and visible recall effort as evidence of empty intention rather than hard gates. Prior recall indices may seed the scan but never constitute recognition.
 
-```
-empty_intention(V) ≡ ∃ context(c, prior) : knows_exists(user, c) ∧ ¬can_locate(user, c)
-```
-
-### Priority
-
-<system-reminder>
-When Anamnesis is active:
-
-**Supersedes**: Direct execution patterns that bypass recall verification
-(Vague recall must be resolved before context-dependent work proceeds)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At Phase 2, present the narrative candidate for user recognition — a Constitution gate when candidates ≥ 2 or confidence < high; for a high-confidence single candidate, an Extension inline emit with a divergence-only affordance (silence constitutes recognition).
-</system-reminder>
-
-Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
-
-### Trigger Signals
-
-Heuristic signals for empty intention detection (not hard gates):
-
-| Signal | Detection |
-|--------|-----------|
-| Vague temporal reference | Past-tense hedging about prior sessions or discussions without an exact pointer |
-| Existence without specification | User asserts prior context exists but cannot name it specifically |
-| Self-referential recall markers | Verbs of remembering paired with uncertainty markers |
-| Failed self-recall | User attempts to reference prior context but trails off, hedges, or uses approximation language |
-| Cognitive effort signals | User pauses mid-reference, self-corrects, or expresses frustration at not finding a prior discussion |
-
-**Cross-session enrichment**: Prior recall indices persisted in the hypomnesis store (prior-session recall indices) provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
-
-**Skip**:
-- User provides specific reference (file path, session ID, issue number, exact quote)
-- Same recall target already resolved in current session (session immunity)
-- No empty intention — user is asking for new information, not recalling prior context
-- User explicitly declines recall assistance
-- Phase 0 determines the user's expression needs other handling, not recall
-
-### Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| recall_complete (Recognize, or SingleObvious inline emit) | Emit ClueVector_prose; proceed with the recognized context as recalled past context requiring re-verification against current state before commit (not confirmed current context) |
-| NullMatch (no candidate after probing, with the scope exhausted or the user's StopAtSpine) | Surface search scope + accumulated trace, offer Aitesis handoff for SSOT search, deactivate |
-| AttemptsExhausted (recall-try budget spent with candidates in hand) | Surface the best candidate, deactivate |
+Skip AI-guided activation when the user gives an exact reference, the same target is already resolved in this session, the request seeks new information, the user declines recall assistance, or Phase 0 identifies a different handling need.
 
 ## Protocol
 
-### Phase 0: Recall Trigger Detection (Silent)
+### Reference loading
 
-Detect empty intention and extract contextual trace. This phase is **silent** — no user interaction.
+Before scanning a runtime store, read its realization reference (`references/claude.md` or `references/codex.md`). Before an entropy, salience, or hybrid scan, read the corresponding track reference; read both for hybrid. When a known failure mode is suspected, read `references/failure-modes.md` before acting on it.
 
-1. **Detect empty intention**: Analyze user expression for vague recall markers — self-referential past tense, existence claims without specification, temporal references without anchors
-2. **Extract trace + classify input type**: `extract_trace(input, Σ)` populates `RecallTrace` (keywords, temporal, associations, identifiers); `classify(V, Σ)` assigns `InputType` ∈ {StructuredIdentifier, NaturalRecall, Mixed} → binds `Track` ∈ {entropy, salience, hybrid}. Session context (Σ) — the current conversation's structure and direction — is the strongest clue for narrowing search space; user keywords are heuristic hints, not definitive queries.
-3. **Assess trace ambiguity**:
-   - **Low** (3+ specific signals across keywords, temporal, associations): proceed to Phase 1 with targeted scan
-   - **Moderate** (1-2 signals): proceed to Phase 1 with broader scan scope and semantic similarity
-   - **High** (0-1 signals, vague expression): consider presenting hypomnesis store overview first (Phase 1 adaptive path)
-4. If `not-empty_intention(V)`: present the activation finding to the user (e.g., user provided a specific reference, or no recall gap was detected) and proceed without Anamnesis activation.
-5. If `empty_intention(V)`: record V with extracted trace — proceed to Phase 1
+### User-facing realization
 
-**Scan scope**: Read-only over bound text, conversation context, and session history.
+Render a candidate as the story of the discussion, not a result-only hit:
 
-### Phase 1: Track-Dispatched Scan + Rank
+- locate it in time and source, preserving the realization label;
+- state the origin, direction, and outcome;
+- identify the session and emit only the resume handle the realization reference validates;
+- name adjacent topics that make Refine recognizable;
+- on gated presentations and Refine probes, state the remaining recall-try budget and candidate space in ordinary prose.
 
-Dispatch the scan on the classified `Track`, execute the first lookup over every available compact `INDEX` realization and its raw-record spines concurrently, preserve its source label on each result, then rank candidates.
+Emit `ClueVector_prose` with the source, narrative, cross-references, and validated resume handle. State that recognition establishes historical identity rather than current truth. When `source_scan` reports incomplete source coverage, name the non-zero counts so downstream readers can weigh the record accordingly.
 
-1. **Track-dispatched scan strategy**. The dispatched track decides which contract binds: read `references/entropy-track.md` before running `scan_entropy`, `references/salience-track.md` before running `scan_salience`, and both on the hybrid track. Each carries the laws and thresholds its scan executes; the untaken track's reference does not bind and is not read.
-   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over the compact INDEX and the raw-record spines — literal match on `IdentifierTuple.literal`, then apply `compatible_anchor(t, trace)` before the match can anchor ranking; precision-thresholded compatible identifiers win. URL path literals, explicit references, citation tokens dominate only within their authorized source_namespace × claim_kind. A structured id with no IdentifierTuple is additionally matched literally against available `INDEX_substitute` origin ids (sidechain/derived records) — a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition (parent back-trace; see Phase 3 emission).
-   - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over the compact INDEX and the raw-record spines — match against `MarkerProfile` or the realization's normalized semantic fields, and against each spine's first human turn, which stands in for a topic where no semantic entry was ever written; session context (Σ) supplies ranking signal within this track.
-   - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
+On Refine, present concrete adjacent directions with brief narratives. Keep the narrative form and prior adjacent vectors across later cycles, explaining how each new candidate differs from those already rejected.
 
-   Tool realization is bound exclusively in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: source-namespace / claim-kind compatibility gates anchoring, then literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery; in both tracks, evidence_mode then composes as a secondary tie-break and confidence modulator (never a filter; Null neutral).
+On NullMatch, report the source-labeled depth actually searched for each realization. Name actionable causes supported by the observed failure mode. Preserve a `StopAtSpine` boundary as an index-and-spine-scoped miss; after an accepted full-text miss, offer the declared Aitesis handoff with the accumulated trace.
 
-2. **Adaptive behavior based on trace ambiguity**:
-   - **High ambiguity**: Present hypomnesis store overview as orientation text (extension) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
-   - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood.
-   - **Low ambiguity**: Direct targeted scan using the dispatched track.
-
-3. **Rank candidates**: Ranking is track-internal. On the entropy track, compatible anchors are ranked by precision (low occurrence in corpus); incompatible literal matches remain evidence in the trace but do not become anchors. On the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. When the matched INDEX artifacts carry evidence-mode frontmatter, the mode acts as a secondary signal: it orders candidates whose track-primary relevance is equal and informs the confidence label. It never excludes a candidate; entries without the field (pre-capture) rank on track-primary signals alone — at no disadvantage: absence of the field is neutral, never a penalty (a legacy candidate is never ranked below an otherwise-equal mode-carrying candidate by mere absence). Each candidate carries:
-   - Its core topic and narrative summary
-   - Adjacent topics from the same session or time period
-   - Confidence level based on trace alignment, modulated by evidence mode when present (absence neutral)
-
-4. If `|C[]| = 0`: **read `references/failure-modes.md` first and identify which mode fired**. A scan that succeeded but yielded no resumable record is not a NullMatch; that mode routes to parent back-trace. Before declaring NullMatch, attempt at least one Socratic probe enrichment. If the enriched scan remains empty, surface the searched runtime indexes and spines and the accumulated trace as context, then present Qx with both differential futures:
-   - **ExpandFullText** — read the labeled transcript bodies; this broadens coverage at a per-record cost with no upper bound, and it is the only tier that reaches wording the user remembers from mid-conversation rather than from a session's opening or its extracted summary.
-   - **StopAtSpine** — leave transcript bodies unopened and return a NullMatch explicitly scoped to the indexes and spines already searched.
-
-   Yield the turn. ExpandFullText admits only the transcript bodies named in that presentation, then returns to ranking. StopAtSpine deactivates. If an accepted full-text scan remains empty after the attempt bound, surface the full search scope and offer Aitesis handoff with the accumulated trace.
-
-**Scope restriction**: Investigation is read-only and writes nothing to the store. It uses artifact read and artifact search, plus the bounded spine-scan command each runtime reference declares — that command reads record heads only, and the unbounded body read stays behind the Qx checkpoint.
-
-### Phase 2: Narrative Recognition (Constitution; Extension on a high-confidence single candidate)
-
-**Present** the highest-priority candidate as a discussion narrative for user recognition. Branch on the candidate set: a **high-confidence single candidate** (`|C[]| = 1` at high confidence — `SingleObvious`) absorbs the gate into the presentation — emit the recognized context inline as **Extension** (no turn yield, converge immediately): essential output first (narrative + `Resume` handle + currency≠fidelity caveat), then a **divergence-only affordance** that names the concrete adjacent candidates (Refine) and invites an open redescription of the target (Reorient), keeping the full Recognize / Refine / Reorient set reachable. Silence (the user moving on) constitutes recognition; only divergence is explicit. Convergence here is notional — the inline skill prose persists as a standing instruction, so a next-turn divergence re-engages the protocol through fresh empty-intention re-detection (Layer 1/2 activation), which routes to the existing Refine / Reorient handling — there is no encoded transition out of the converged state, and no dedicated re-activation machinery is added. One dominant candidate collapses the option set to a single option, so this is relay, not a gate. **Otherwise** (candidates ≥ 2, or confidence < high) the recognition gate runs as a Constitution interaction (turn yield). Both branches share the narrative format below.
-
-**Selection criterion**: Choose the candidate whose recognition would maximally resolve the user's empty intention. When priority is equal, prefer the candidate with richer narrative context and adjacent vectors.
-
-**Narrative presentation format**:
-
-Present the candidate as narrative text — the discussion's story, not just its result:
-- **When/Where**: Temporal and spatial context — when the discussion happened, expressed as temporal distance from the current session, plus which session or document. Use short session reference in narrative for readability.
-- **Source**: Labeled realization provenance plus whether the context was user-inscribed or hook-generated
-- **Origin**: What prompted the discussion — the question or situation that started it
-- **Direction**: How the discussion developed — what path was taken, what was explored
-- **Outcome**: What was decided, produced, or concluded
-- **Session**: Full session ID for identification and realization-specific resume verification. Narrative uses a short reference. For a fork candidate the id identifies the recognized sidechain but is not itself resumable; its resumable handle is the back-traced parent.
-- **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID, built from the realization binding in TOOL GROUNDING. Omit a command whose required cwd or resumable parent is absent and surface that limitation instead.
-- **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
-- **Framing**: how many recall tries remain before the cap, and the size of the candidate space still in scope — stated as the budget you reason with, not a numeric attempt fraction
-
-For the **SingleObvious** path the inline emit renders the narrative format above as plain session text — the convergence trace folded in (narrative + `Resume` handle + currency≠fidelity caveat) — and ends with the divergence-only affordance (named adjacents + open channel), no gate. **Gated path** (`¬SingleObvious`) — then **present**:
-
-```
-Does this match the discussion you are recalling?
-
-Options:
-1. **Recognize** — this is the discussion I was thinking of
-2. **Refine** — the adjacent topics listed above may be closer to your memory
-```
-
-Other is always available — maps to `Reorient`: user describes a fundamentally different recall dimension that neither Recognize nor Refine captures (e.g., recalling a concept rather than a discussion, an external reference rather than a session). The protocol re-characterizes V with the new description and re-scans from the orthogonal angle.
-
-### Phase 3: Integration
-
-After user response:
-
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: labeled source realization, session reference (short form in narrative, full session ID for resume verification), topic summary with narrative, key cross-references, and the resume handle prescribed by TOOL GROUNDING. A fork additionally follows the realization's parent-backtrace binding. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition. ClueVector_prose carries a currency≠fidelity caveat: it states that the context was recognized as a past discussion or decision, not that the recalled content is verified against current reality — downstream consumers (e.g., Aitesis composition) treat it as recalled-and-requiring-re-verification, not as confirmed current context. When any of the candidate's `source_scan` counts is non-zero — lines that failed to parse, turns the cross-check could not confirm, or characters a bounded extraction dropped — the prose additionally states that the record was built from less than its whole source and which counts were non-zero, so a downstream consumer weighs an incomplete account as incomplete rather than as the whole session (Rule 18).
-
-2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
-
-   **Probe(V, Sigma)**: Analyze what the user rejected and what the stored adjacent vectors suggest they might be seeking. Generate structured navigation through the memory space — concrete options, not open-ended questions:
-
-   **Present** Socratic probe via Cognitive Partnership Move (Constitution) (Qs, mandatory on Refine):
-   ```
-   Adjacent areas from this time period and context:
-   1. [Topic A] — [brief narrative: what was discussed and why]
-   2. [Topic B] — [brief narrative]
-   3. [Topic C] — [brief narrative]
-   Which direction is closer to your memory?
-   ```
-
-   After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), increment `attempts` (one recall try spent), re-enter Phase 1 with enriched context at whatever scope `scan_scope` currently names. `rebind(V, d, Σ)` on Reorient spends a try the same way; ExpandFullText does not, since widening the scope continues the current try rather than starting a new one. Neither re-enters once the budget is spent: at `attempts = max` the best candidate is surfaced and the mode deactivates (AttemptsExhausted).
-
-3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with the rebuilt trace while recall tries remain; at `attempts = max` surface the best candidate and deactivate instead (AttemptsExhausted). NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis).
-
-   **Refine vs Reorient test**: would the user's new description produce any overlap with the current candidate set? Overlap → Refine; disjoint → Reorient.
-
-After integration: `recall_complete` → present convergence evidence trace (VagueRecall → [enrichments applied] → Candidate(recognized) → ClueVector_prose emitted), proceed. Refine → Phase 1 with enriched trace. Reorient → Phase 1 with rebuilt trace (orthogonal re-scan). Log `(Candidate, R)` to history.
-
-## Intensity
+### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | High specificity trace, single obvious candidate (high confidence) | Recognized context folded inline — narrative (origin → outcome) + resume handle + currency≠fidelity caveat — in one non-yielding (Extension) emit, then converge immediately; divergence-only affordance (named adjacents + open channel), no confirmation gate |
-| Medium | Moderate specificity, 2-3 candidates in scope | Full narrative + adjacent vectors in Refine option |
-| Heavy | Low specificity, Refine path expected, high ambiguity trace | Full narrative + adjacent vectors + Socratic probing with structured navigation + hypomnesis overview on initial scan |
+| Light | One high-confidence candidate | Inline narrative, validated resume handle, fidelity caveat, and divergence affordance |
+| Medium | Several plausible candidates | Full narrative with adjacent directions |
+| Heavy | High ambiguity or repeated refinement | Narrative, store orientation, and structured Socratic navigation |
 
 ## Rules
 
-1. **AI-guided detection, user-constituted recognition**: AI detects empty intention, scans stores, and presents narrative candidates as recognition options; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the identity match. Detection, presentation, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition. For a high-confidence single candidate (SingleObvious), recognition is constituted by non-divergence: the inline Extension emit carries a divergence-only affordance, and silence (the user moving on) realizes the identity match — the user's constitutive freedom is the divergence channel, not a forced confirm.
-
-2. **Recognition over Retrieval**: Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient) — Constitution interaction requires turn yield before proceeding; recognition options enable user evaluation, not blank-canvas recall.
-
-3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: source_namespace × claim_kind compatibility before literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track. Single-signal execution has structural blind spots regardless of track. Evidence mode composes as a track-internal secondary signal (tie-break + confidence), never as a filter; its absence is neutral.
-
-4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Result-only presentation defeats recognition by forcing additional investigation.
-
-5. **Guided recall orientation in Refine**: On Refine, present structured navigation through adjacent memory vectors with brief narratives — structured alternatives enable recognition in recall-deepening; open-ended questions shift cognitive burden back to the user.
-
-6. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single identity decision.
-
-7. **Convergence persistence**: Mode active until recall_complete, NullMatch once probing has run and the scope is exhausted or the user elected StopAtSpine, AttemptsExhausted once the recall-try budget is spent with candidates in hand; user recognition or rejection of a candidate is final for that candidate in the current session.
-
-8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
-
-9. **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-
-10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, report the source-labeled scope actually searched — naming, per realization, the depth reached (index, spine, body), since "not found" means something different at each — and enumerate actionable causes: lifecycle hook gap, pre-store session, missing or failed extractor, or PartialExtract from corrupted source. If the user accepted full-text expansion and that scan also missed, offer Aitesis handoff with the accumulated trace. If the user selected StopAtSpine, preserve that boundary and report the result as scoped to the indexes and spines searched, not as an absence from the store. A successful-scan-but-no-resumable-SSOT case (the recalled id is a fork/sidechain) is not a NullMatch and routes through parent back-trace.
-
-11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first index-and-spine scan returning zero → probe → enriched re-scan at the same depth → StoreExpansion checkpoint; NullMatch follows only after StopAtSpine or an accepted full-text scan also exhausts its bound.
-
-12. **Conditional Qc, separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Phase 2 runs the Constitution Qc gate when candidates ≥ 2 OR confidence < high (Medium / Heavy). A high-confidence single candidate (SingleObvious) instead **absorbs Qc into the presentation**: the recognized context is emitted inline as Extension (no turn yield) with a divergence-only affordance, and convergence is immediate — silence / the user moving on constitutes recognition, only divergence is explicit. One dominant candidate collapses the recognition option set to a single option (the others are foils), so the interaction is relay, not a gate; this absorption is the sanctioned revision of this rule's own Safeguard-tier tag, motivated by observed binary-confirm abandonment friction, and it does not touch Qs. On Refine (always gated), Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second.
-
-13. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
-
-14. **Framing-signal visibility**: Every gated Phase 2 presentation and Refine probe states the remaining recall-try budget and the candidate space still in scope as framing prose — the budget the user reasons with, not a numeric attempt fraction. The SingleObvious inline emit converges immediately, so attempt-budget framing is moot there; its only forward branch is the divergence affordance.
-
-15. **Substrate non-coupling**: Phase prose names epistemic operations only — tool and path bindings belong exclusively to TOOL GROUNDING.
-
-18. **Recalled context currency is not fidelity**: Recall constitutes identity (this WAS discussed or decided), not current-reality agreement (it still HOLDS). A candidate that is current in the store and correctly recognized may still be desynced from current reality — the recognition gate verifies identity, not fidelity. ClueVector_prose emits with a currency≠fidelity caveat; RecalledContext is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context. Currency is the temporal sub-case of fidelity, not a substitute. A candidate any of whose `source_scan` counts is non-zero was built from less than its whole source, which is a third thing again — not identity, not currency, but how much of the source the record even saw — so the emit states it alongside the caveat rather than presenting the record as a complete account of its session. `source_scan` never adjusts ranking; a partially parsed record competes on its merits and is qualified when it is emitted.
-19. **Fork/sidechain resume integrity**: When a recalled id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT — the scan succeeds on the substitute channel but no resumable main transcript ever existed), its own id is never offered as a `--resume` handle, because a fork `--resume` fails. The protocol back-traces the orchestrating parent (`backtrace_parent` → `parent_pointer`, `parent_cwd` — read deterministically from the fork's own capture, distinct from user-described Reorient) and offers the parent as the resumable candidate; when the parent's resumable record has aged out, the candidate is marked non-resumable and its recoverable artifacts (substitute log + memory) are surfaced instead of a broken command. Detection and back-trace are substrate-coupled and live in TOOL GROUNDING; the protocol essence names only the epistemic operation (Rule 15).
-20. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Round composition).
-
-21. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-
-22. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares (the `/recollect ∘ /inquire` COMPOSITION edge) names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named composition edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged.
-
-23. **Source-labeled staged scan**: Phase 1 searches every available compact INDEX realization and its raw-record spines concurrently, and preserves source provenance through ranking and presentation. The staging is by read depth, not by store: spines are bounded per record and are always in the initial scope; transcript bodies are unbounded and are not. After probe enrichment still yields no candidate, Qx presents ExpandFullText and StopAtSpine with their coverage and cost implications, yields the turn, and applies the selected scope without silently adding a realization or a body read.
-24. **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
+- **Narrative recognition**: Present candidates as discussion narratives whose origin, direction, and outcome make identity recognizable.
+- **Guided recall orientation**: Refine offers structured adjacent directions with brief narratives, preserving user recognition rather than shifting reconstruction back to the user.
+- **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before the gate. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
+- **Cross-cycle rendering**: Preserve narrative form and adjacent-vector context across recall attempts; distinguish a new candidate from prior candidates.
+- **NullMatch diagnosis**: Report only the source-labeled coverage actually searched and the failure causes its evidence supports.
+- **Conditional Qc; separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Qc remains mandatory outside `SingleObvious`; that relay specialization is the sanctioned exception. Qs remains a separate mandatory Constitution interaction on Refine.
+- **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, require current-state re-verification before commitment, and disclose every non-zero `source_scan` count without changing ranking.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
