@@ -1,6 +1,6 @@
 # Runbook
 
-The workflow, and the four ways it fails quietly.
+The workflow, and the constraints that shape how a run is set up and read.
 
 ## What a run establishes
 
@@ -9,19 +9,27 @@ operational contract. Static checks confirm that a `SKILL.md` *contains* those b
 Nothing confirms that a *run* realizes them — that the gate actually stopped, that
 collection actually preceded inquiry, that the relay actually proceeded.
 
-This suite closes that gap and nothing wider. It does not measure whether a protocol
-is worth using; that question needs a sample size this design cannot reach and a sham
-arm whose construction is discussed in `grader-design.md`.
+This suite records the run and closes only the predicates it actually executes. It also
+ships manual grader criteria for semantic obligations, but recording a transcript does
+not perform that review. It does not measure whether a protocol is worth using; that
+question needs a sample size this design cannot reach and a sham arm whose construction
+is discussed in `grader-design.md`.
+
+The judgment ends at the formal `Stop | Proceed` branch described in `SKILL.md`. Files,
+plans, or messages produced after `Proceed` are branch witnesses, not quality targets.
+Read them only far enough to establish that the transition occurred.
 
 ## Prerequisites
 
-Node 22+, `claude` on PATH. `setup.sh` checks both and refuses rather than failing
-halfway.
+Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` checks the
+active runner and refuses rather than failing halfway.
 
-One step needs a human, once: obtaining a token against the isolated config directory.
+Claude needs one human step once: obtaining a token against the target-specific
+isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active;
+setup neither consumes nor stores it.
 
 ```bash
-CLAUDE_CONFIG_DIR=~/.claude-eval claude setup-token
+CLAUDE_CONFIG_DIR=~/.claude-eval/inquire claude setup-token
 ```
 
 Store the result wherever secrets belong on that machine. This repository does not
@@ -32,95 +40,97 @@ record its location and `run.sh` will not guess.
 ```bash
 cd .claude/skills/realize/scripts
 
-./setup.sh                                   # fixture + isolated config dir
+./setup.sh inquire                           # fixture + isolated config dir
 
 export CLAUDE_CODE_OAUTH_TOKEN="$(...)" \
-  && ./run.sh                                # run + report
+  && ./run.sh inquire                        # run + report
 
-./teardown.sh                                # volatile state
-./teardown.sh --all                          # + config dir and scratch; setup again after
-./teardown.sh --purge                        # + results (asks first)
+./teardown.sh inquire                        # volatile state
+./teardown.sh inquire --all                  # + config dir and scratch; setup again after
+./teardown.sh inquire --purge                # + results (asks first)
 ```
 
 Fetching the token inside the same command that consumes it keeps the value out of
 files and out of shell history. Only the command's shape is visible, which is what
 makes running it inline safe.
 
-Results are cached per `(model, arm, case, repetition)`. Widening the matrix in
-`harness.config.json` and re-running fills only the new cells, so the ladder can be
-climbed one model at a time.
+Results are cached per `(target, runner, model, treatment digest, arm, case, repetition)`.
+Widening the matrix in `harness.config.json` and re-running fills only the new cells,
+so the ladder can be climbed one model at a time.
 
-## Four quiet failures
+For the Codex Luna xhigh profile:
 
-Each of these produces a transcript indistinguishable from the protocol behaving
-badly. They are listed because none of them announces itself.
+```bash
+REALIZE_RUNNER=codex ./setup.sh inquire
+CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
+REALIZE_RUNNER=codex node ./harness.mjs report inquire
+REALIZE_RUNNER=codex ./teardown.sh inquire
+```
 
-### `--bare` does not exclude installed plugins
+Codex setup creates disposable `bare` and `protocol` homes with no `auth.json` or login
+step. The protocol home installs this checkout as a local marketplace and installs only
+the selected plugin. The bare home has no marketplace or plugin state. `run` removes
+`OPENAI_API_KEY` and `CODEX_ACCESS_TOKEN` from child environments and supplies
+`CODEX_API_KEY` only to `codex exec`; plugin setup and integrity checks receive no
+credential.
+Codex supports only the `bare` and `protocol` arms because it has no deployed analogue
+of Claude's output-style treatment. Codex case worktrees live under the system temporary
+directory rather than below this repository, so parent `AGENTS.md` and git state cannot
+be mistaken for fixture evidence.
 
-`--bare` skips hooks, LSP, plugin *sync*, auto-memory and `CLAUDE.md` discovery. It
-does not unload plugins already installed from a marketplace. An arm that simply omits
-`--plugin-dir` therefore still has the protocol under test present, and the comparison
-becomes treatment against itself. Setting `enabledPlugins` to an empty object through
-`--settings` does not remove them either.
+Cache identity includes the runner and a digest of the actual protocol/style files.
+Editing prose for an ablation therefore creates a new cell instead of reusing the
+pre-ablation transcript. Codex also compares the installed cache's `SKILL.md` digest
+to the source immediately before spending a run; an edit made after setup fails closed
+with an instruction to rerun setup instead of measuring stale treatment bytes.
 
-The only arrangement observed to yield an empty plugin set is a `CLAUDE_CONFIG_DIR`
-pointing at a directory with nothing in it. That is why isolation lives at the config
-directory rather than in a flag.
+## Where isolation lives
 
-### The token variable name is exact
+Arm isolation is a property of the config directory rather than of a flag: an empty
+`CLAUDE_CONFIG_DIR` is the arrangement observed to yield an empty plugin set, which is
+what `setup.sh` builds per target. Codex takes the same shape through a separate
+`CODEX_HOME` per arm, with `codex plugin list` confirming what that home holds before a
+run is spent. The harness clears volatile state before each run and passes
+`--no-session-persistence`, so a re-run reads its own environment.
 
-`CLAUDE_CODE_OAUTH_TOKEN` is read. `CLAUDE_OAUTH_TOKEN` is ignored without comment,
-and every run then fails with `Not logged in`, which reads as a broken `setup-token`
-rather than a misspelled variable. `run.sh` guards this.
-
-### A budget below the cache-creation cost fails every run identically
-
-The first turn of a session pays to create the system-prompt cache; later turns read
-it cheaply. A `maxBudgetUsd` set below that one-time cost exhausts the budget before
-any work happens, every run terminates as `budget_exhausted`, and the `completed`
-grader fails across the board — which reads as the protocol failing rather than the
-ceiling being set under the floor. Raise the budget rather than interpreting the
-result.
-
-### Residue crosses runs unless it is cleared
-
-Working directory names are stable across invocations, so a re-run lands on the same
-project slug inside the config directory and can read what the previous run left. The
-harness clears volatile state before each run for this reason, and passes
-`--no-session-persistence` so less accumulates in the first place. A suite-level
-teardown alone would not have covered it: the contamination is between runs, not after
-them.
+Set `maxBudgetUsd` above the one-time system-prompt cache creation that a session's
+first turn pays; later turns read that cache cheaply, so the floor is per session
+rather than per turn.
 
 ## Running it from CI
 
-`.github/workflows/type-realization.yml` runs the same scripts on a dispatched
-workflow. It has no `pull_request` trigger and is not meant to grow one: every run
-spends real model budget, so binding it to pushes would charge for measurements nobody
-asked for. Dispatch it from the Actions tab against a PR's branch once the PR is open.
+`.github/workflows/type-realization.yml` runs the Claude path on a dispatched workflow.
+It has no `pull_request` trigger and is not meant to grow one: every run spends real
+model budget, so binding it to pushes would charge for measurements nobody asked for.
+Dispatch it from the Actions tab against a PR's branch once the PR is open and select a
+registered target.
 
 With no `pr` input it resolves the PR for the dispatched ref and comments the report
 there; with no PR it leaves the table in the job summary. The matrix inputs — models,
 arms, cases, repetitions, budget ceiling — override the committed config for that run
-only, through environment variables the harness reads. Editing the committed config
-from CI would leave the run unreproducible from the checkout it claims to test.
+only, through environment variables the harness reads, so the run stays reproducible
+from the checkout it claims to test.
 
-A locally valid YAML file is not a valid workflow. GitHub's expression parser scans
-every `run:` block for substitution syntax and tries to evaluate what it finds — including
-inside a shell comment — and rejects the whole file when it cannot. The only validator
-that catches this is a dispatch attempt, and one can be made for free: dispatch with
-`runs=three`, which the harness rejects before it launches anything, so the job exercises
-checkout, the secret check, the install and the setup without spending model budget.
+Validate a workflow edit by dispatching it — the dispatch is what exercises GitHub's
+own expression parsing of every `run:` block, including inside shell comments. One
+dispatch is free: `runs=three` is rejected by the harness before it launches anything,
+so the job covers checkout, the secret check, the install and the setup without
+spending model budget.
 
 ```bash
 gh workflow run type-realization.yml --ref <branch> -f runs=three -f post_comment=false
 ```
 
-The workflow needs one repository secret, `CLAUDE_CODE_OAUTH_TOKEN`, holding a token
-obtained the same way as for a local run. The first step checks that it is set at all
-and stops there if it is not, because an absent secret would otherwise surface as
-"Not logged in" — which reads as a broken token rather than a missing one. That check
-distinguishes only those two: a token that is present but no longer valid still fails
-later, at the same message.
+The workflow checks `CLAUDE_CODE_OAUTH_TOKEN` and stops before setup when it is absent.
+A present-but-invalid credential still fails later; `run` returns non-zero, `report`
+marks every missing requested cell and also returns non-zero, and partial artifacts are
+still uploaded and commented for diagnosis.
+
+Codex is deliberately local-only here. Official OpenAI documentation requires the
+Codex GitHub Action's credential proxy when a workflow checks out or runs
+repository-controlled code; this harness does not yet have an action-backed adapter
+that preserves its per-cell JSONL contract. The workflow therefore never exposes an
+OpenAI API key to the checked-out harness.
 
 Isolation is nearly free there: a fresh runner has no marketplace plugins, so the
 baseline arm is empty by construction rather than by arrangement. The isolated config
@@ -142,19 +152,24 @@ be. A row whose integrity is short of its `n` is not evidence about the protocol
 the report prints those rows again under a separate heading so they are not read as
 results.
 
-`pass_k` is one when every repetition passed, zero otherwise. A mean would hide the
-repetition that failed, and one failure out of k is what a user actually meets. It reads
-`-` where a cell is unreadable: a predicate that had nothing to read is not a predicate
-that failed, and scoring it zero would publish a missing observation as a negative one.
+`pass_k` is one when every repetition passed the deterministic transition composite,
+zero otherwise. The `manual` column is separate: it counts transcript judgments whose
+grader files fix the observation criteria but which no automated judge executed.
+Constructor coverage, semantic question ordering, and user-facing classification are
+therefore never implied by an automatic pass.
 
-`skill` says whether the protocol itself fired in an arm that had it available. Without
-it, a run that loaded the plugin, never invoked the protocol, and produced right-looking
-behaviour anyway is indistinguishable from one that ran the contract. It reads `n/a` in
-an arm with no plugin, where the skill cannot run and its absence is what `integrity`
-already asserts.
+`skill` says whether the protocol itself fired in an arm that had it available — the one
+field separating a run that executed the contract from behaviour that merely resembles
+it. It reads `n/a` in an arm with no plugin, where `integrity` already asserts the
+absence, and `trace-unavailable` for Codex, whose JSONL carries no skill-invocation
+event; a model naming the skill counts as invocation evidence nowhere.
 
-A cell whose launch never produced a transcript is not written and not counted. Re-running
-picks it up, which a cached empty file would have prevented for good.
+Codex rows report token use from `turn.completed`. They leave cost blank because the
+CLI does not emit a dollar value for the API-key run. Claude rows retain the emitted
+cost. A Codex timeout is a failed launch and is not cached or graded.
+
+A cell whose launch never produced a transcript is not written or counted. `run` and
+`report` both propagate that incompleteness, so a re-run still picks the cell up.
 
 ## Widening
 
@@ -163,6 +178,5 @@ each run pays its own cache creation, so the cost scales with the cell count rat
 than with the work done. Start narrow enough to confirm the graders discriminate,
 then climb.
 
-Avoid the weakest available model as the primary measurement. It exercises the
-safeguards but not the protocol, so a failure there does not separate a defect in the
+Pick a primary measurement model strong enough that a failure separates a defect in the
 contract from a limit of the model.

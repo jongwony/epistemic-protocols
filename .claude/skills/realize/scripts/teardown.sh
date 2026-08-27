@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Remove what a run leaves behind, at one of three depths.
 #
-# Nothing here is irreplaceable. Authentication arrives through the environment
-# rather than the config directory -- the init event reports `apiKeySource: "none"`
-# -- so there is no credential to preserve and no re-login to schedule.
+# Nothing here is irreplaceable. Authentication arrives only through the run
+# process environment; neither runner's disposable state holds a credential.
 #
 #   (default)  volatile state only; the fixture survives, `run` works immediately
 #   --all      the config directory and scratch trees; `setup` must run again
@@ -15,6 +14,13 @@
 set -euo pipefail
 
 SKILL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+realize_target="${1:-${REALIZE_TARGET:-}}"
+
+if [ -z "$realize_target" ]; then
+  printf 'teardown: target skill required (for example: ./teardown.sh inquire)\n' >&2
+  exit 1
+fi
+if [ "$#" -gt 0 ]; then shift; fi
 
 if [ "${1:-}" = "--purge" ]; then
   printf 'teardown --purge discards recorded runs under %s/results.\n' "$SKILL" >&2
@@ -24,4 +30,4 @@ if [ "${1:-}" = "--purge" ]; then
   [ "$reply" = "PURGE" ] || { printf 'teardown: aborted\n' >&2; exit 1; }
 fi
 
-node "$SKILL/scripts/harness.mjs" teardown "${@}"
+node "$SKILL/scripts/harness.mjs" teardown "$realize_target" "${@}"

@@ -15,6 +15,13 @@ on:
         description: 'PR number to comment on (blank = resolve from the dispatched branch)'
         required: false
         type: string
+      target:
+        description: 'Skill target'
+        required: true
+        default: inquire
+        type: choice
+        options:
+          - inquire
       models:
         description: 'Comma-separated model ids (blank = harness.config.json)'
         required: false
@@ -32,7 +39,7 @@ on:
         required: false
         type: string
       max_budget_usd:
-        description: 'Per-run ceiling (blank = harness.config.json)'
+        description: 'Claude per-run ceiling (blank = harness.config.json)'
         required: false
         type: string
       post_comment:
@@ -45,7 +52,7 @@ jobs:
   realize:
     runs-on: ubuntu-latest
     # A dispatched matrix can be widened without touching this file, so the ceiling is
-    # generous. The per-run budget is what actually bounds spend.
+    # generous. The per-run budget is the operative bound.
     timeout-minutes: 120
     permissions:
       contents: read
@@ -58,16 +65,14 @@ jobs:
         with:
           node-version: '22'
 
-      # An absent secret would otherwise surface as "Not logged in" on the first run,
-      # which reads as a broken token rather than a missing one. This distinguishes only
-      # those two: a present-but-invalid token still fails later, at the same message.
+      # An absent secret would otherwise surface as an authentication failure on the first
+      # run, which reads like a broken runner rather than a missing credential.
       - name: Require the evaluation token
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          if [ -z "${CLAUDE_CODE_OAUTH_TOKEN}" ]; then
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
             echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN is not set on this repository."
-            echo "::error::Create one with: CLAUDE_CONFIG_DIR=~/.claude-eval claude setup-token"
             exit 1
           fi
 
@@ -103,7 +108,10 @@ jobs:
           fi
 
       - name: Set up the isolated evaluation environment
-        run: .claude/skills/realize/scripts/setup.sh
+        env:
+          REALIZE_TARGET: ${{ inputs.target }}
+          REALIZE_MODELS: ${{ inputs.models }}
+        run: .claude/skills/realize/scripts/setup.sh "$REALIZE_TARGET"
 
       # A fresh runner has no marketplace plugins, so the baseline arm is empty here by
       # construction rather than by arrangement. The isolated config directory is kept
@@ -112,30 +120,38 @@ jobs:
       - name: Run
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          REALIZE_TARGET: ${{ inputs.target }}
           REALIZE_MODELS: ${{ inputs.models }}
           REALIZE_ARMS: ${{ inputs.arms }}
           REALIZE_CASES: ${{ inputs.cases }}
           REALIZE_RUNS: ${{ inputs.runs }}
           REALIZE_MAX_BUDGET_USD: ${{ inputs.max_budget_usd }}
-        run: node .claude/skills/realize/scripts/harness.mjs run
+        run: node .claude/skills/realize/scripts/harness.mjs run "$REALIZE_TARGET"
 
       - name: Report
+        if: always()
         id: report
         env:
+          REALIZE_TARGET: ${{ inputs.target }}
           REALIZE_MODELS: ${{ inputs.models }}
           REALIZE_ARMS: ${{ inputs.arms }}
           REALIZE_CASES: ${{ inputs.cases }}
           REALIZE_RUNS: ${{ inputs.runs }}
           REF_NAME: ${{ github.ref_name }}
         run: |
+          set +e
+          node .claude/skills/realize/scripts/harness.mjs report "$REALIZE_TARGET" --markdown > report-body.md
+          report_status=$?
+          set -e
           {
-            echo "## Type realization — \`${REF_NAME}\` @ \`${GITHUB_SHA:0:8}\`"
+            echo "## Type realization — ${REALIZE_TARGET} — \`${REF_NAME}\` @ \`${GITHUB_SHA:0:8}\`"
             echo
-            node .claude/skills/realize/scripts/harness.mjs report --markdown
+            cat report-body.md
             echo
             echo "[run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } > report.md
           cat report.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$report_status"
 
       # Transcripts are observations: re-running produces different ones, so a failed
       # read of the table cannot be recovered by dispatching again.
@@ -149,11 +165,13 @@ jobs:
           retention-days: 30
 
       - name: Comment on the PR
-        if: inputs.post_comment && steps.pr.outputs.number != ''
+        if: always() && inputs.post_comment && steps.pr.outputs.number != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh pr comment "${{ steps.pr.outputs.number }}" --body-file report.md
 
       - name: Tear down
         if: always()
-        run: .claude/skills/realize/scripts/teardown.sh
+        env:
+          REALIZE_TARGET: ${{ inputs.target }}
+        run: .claude/skills/realize/scripts/teardown.sh "$REALIZE_TARGET"

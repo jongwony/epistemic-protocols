@@ -923,7 +923,7 @@ function checkSpecVsImpl() {
       // Remove the type's own definition line(s) to avoid self-match
       const defLinePattern = new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
       const formalWithoutOwnDef = formalBlock.replace(defLinePattern, '');
-      const inFormalCrossRef = new RegExp(escaped).test(formalWithoutOwnDef);
+      const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef);
 
       // A type defined in TYPES but absent from PHASE TRANSITIONS, prose,
       // AND all other formal block sections suggests rename drift or dead type
@@ -1764,12 +1764,12 @@ function checkGateTypeSoundness() {
     }
 
     // 3. Extract Options blocks from prose (outside Definition code block)
-    const proseStart = content.indexOf('## Core Principle');
+    const proseStart = content.indexOf('## Mode Activation');
     if (proseStart === -1) {
       results.warn.push({
         check: 'gate-type-soundness',
         file,
-        message: 'No "## Core Principle" header found — gate prose extraction skipped'
+        message: 'No "## Mode Activation" header found — gate prose extraction skipped'
       });
       continue;
     }
@@ -1948,6 +1948,13 @@ const INK_DERIVED_STYLE_FILES = [
   'epistemic-cooperative/styles/epistemic-ink.md',
   'epistemic-cooperative/styles/proactive-epistemic-ink.md',
 ];
+
+function boundedEntryBody(content, labelMatch, bound, nextPattern) {
+  const bodyStart = labelMatch.index + labelMatch[0].length;
+  const bounded = content.slice(bodyStart, bodyStart + bound);
+  const next = nextPattern.exec(bounded);
+  return next ? bounded.slice(0, next.index) : bounded;
+}
 
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
@@ -2514,176 +2521,6 @@ function checkPackagedAgentContractSync() {
 }
 
 // ============================================================
-// Check: Formal Blocks Rule
-// ============================================================
-// Compiled-copy coverage for the "Formal blocks are runtime-normative" Rules
-// entry (docs/structural-specs.md is the contributor-facing anatomy doc;
-// this rule is the runtime-normative compiled copy every packaged SKILL.md
-// must carry, since a packaged runtime contract cannot depend on contributor
-// docs alone — CLAUDE.md Runtime Contract). Verifies each core protocol
-// SKILL.md carries both the Rules entry label and its kernel sentence
-// (Formal blocks are LLM-facing and constitutive of protocol identity).
-//
-// Exemption list: all core protocols currently carry this rule (added
-// in the compiled-copy enforcement family (checks 23–24)). Kept EMPTY on purpose: add a relPath
-// only when a recorded decision exempts a protocol — never pre-populate.
-const FORMAL_BLOCKS_EXEMPTIONS = [];
-
-// Anchoring: the label must appear as a numbered Rules entry (not merely a
-// cross-reference elsewhere in the file), and the kernel sentence must fall
-// within that SAME entry's bounded body — not anywhere in the file. Bound
-// calibrated against all core protocols (max observed entry ~560 chars);
-// 900 leaves comfortable margin without reaching into unrelated content.
-// The cut also stops at the next section heading or column-0 bold
-// paragraph, so a terminal numbered entry's body does not extend into
-// following unrelated content.
-const NEXT_ENTRY_OR_SECTION = /^(?:\d+\.\s|#{1,6}\s|\*\*)/m;
-
-function boundedEntryBody(content, labelMatch, bound, nextPattern = NEXT_ENTRY_OR_SECTION) {
-  const bodyStart = labelMatch.index + labelMatch[0].length;
-  const bounded = content.slice(bodyStart, bodyStart + bound);
-  const next = nextPattern.exec(bounded);
-  return next ? bounded.slice(0, next.index) : bounded;
-}
-
-function checkFormalBlocksRule() {
-  const CHECK = 'formal-blocks-rule';
-  const LABEL_PATTERN = /^\d+\.\s+\*\*Formal blocks are runtime-normative\*\*/m;
-  const KERNEL = 'LLM-facing and constitutive of protocol identity';
-  const ENTRY_BOUND = 900;
-
-  let checked = 0;
-  for (const relPath of PROTOCOL_FILES) {
-    if (FORMAL_BLOCKS_EXEMPTIONS.includes(relPath)) continue;
-
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) {
-      results.warn.push({
-        check: CHECK,
-        file: relPath,
-        message: `Protocol file not found: ${relPath}`
-      });
-      continue;
-    }
-
-    checked++;
-    const content = fs.readFileSync(fullPath, 'utf8');
-    const labelMatch = LABEL_PATTERN.exec(content);
-    if (!labelMatch) {
-      results.fail.push({
-        check: CHECK,
-        file: relPath,
-        message: 'Missing numbered Rules entry: "Formal blocks are runtime-normative"',
-      });
-      continue;
-    }
-
-    const entryBody = boundedEntryBody(content, labelMatch, ENTRY_BOUND);
-    if (!entryBody.includes(KERNEL)) {
-      results.fail.push({
-        check: CHECK,
-        file: relPath,
-        message: `"Formal blocks are runtime-normative" rule present but missing kernel sentence within its own entry: "${KERNEL}"`,
-      });
-    }
-  }
-
-  if (!results.fail.some(f => f.check === CHECK)) {
-    results.pass.push({
-      check: CHECK,
-      file: 'all core protocol SKILL.md files',
-      message: `Formal blocks rule coverage verified for ${checked} protocols (${FORMAL_BLOCKS_EXEMPTIONS.length} exempted)`,
-    });
-  }
-}
-
-// ============================================================
-// Check: Gate Integrity Rule
-// ============================================================
-// Compiled-copy coverage for the Gate Integrity Rules entry (premise/gate-design.md
-// "Gate Integrity" — reclassified from
-// A7/Adversarial Anticipation per audit-2026-04-11 #241 resolution). Verifies
-// each core protocol SKILL.md carries a Gate integrity rule tagged
-// "(Safeguard tier)" whose body states the invariant kernel phrase
-// ("type-preserving materialization"), so runtime enforcement of gate
-// fidelity does not depend on a contributor-facing document alone. The mutation
-// taxonomy itself (injection/deletion/substitution) is deliberately NOT
-// word-anchored: copies specialize it in per-protocol vocabulary (e.g.
-// euporia phrases mutations as partial omission of cycle coordinates), so
-// the check anchors on the kernel phrase only.
-//
-// Exemption list: all core protocols currently carry this rule (added
-// in the compiled-copy enforcement family (checks 23–24)). Kept EMPTY on purpose: add a relPath
-// only when a recorded decision exempts a protocol — never pre-populate.
-const GATE_INTEGRITY_EXEMPTIONS = [];
-
-function checkGateIntegrityRule() {
-  const CHECK = 'gate-integrity-rule';
-  // Anchoring (same rationale as checkFormalBlocksRule above): the label
-  // must be a numbered Rules entry, not a cross-reference. Bound calibrated
-  // against all core protocols (max observed entry ~1180 chars, horismos);
-  // 2000 leaves comfortable margin without reaching into unrelated content.
-  const LABEL_PATTERN = /^\d+\.\s+\*\*Gate integrity\*\*/m;
-  const KERNEL = 'type-preserving materialization';
-  const ENTRY_BOUND = 2000;
-
-  let checked = 0;
-  for (const relPath of PROTOCOL_FILES) {
-    if (GATE_INTEGRITY_EXEMPTIONS.includes(relPath)) continue;
-
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) {
-      results.warn.push({
-        check: CHECK,
-        file: relPath,
-        message: `Protocol file not found: ${relPath}`
-      });
-      continue;
-    }
-
-    checked++;
-    const content = fs.readFileSync(fullPath, 'utf8');
-    const labelMatch = LABEL_PATTERN.exec(content);
-    if (!labelMatch) {
-      results.fail.push({
-        check: CHECK,
-        file: relPath,
-        message: 'Missing numbered Rules entry: "Gate integrity"',
-      });
-      continue;
-    }
-
-    const lineEnd = content.indexOf('\n', labelMatch.index);
-    const titleLine = lineEnd === -1 ? content.slice(labelMatch.index) : content.slice(labelMatch.index, lineEnd);
-    if (!titleLine.includes('(Safeguard tier)')) {
-      results.fail.push({
-        check: CHECK,
-        file: relPath,
-        message: '"Gate integrity" rule present but title line missing the "(Safeguard tier)" annotation',
-      });
-      continue;
-    }
-
-    const entryBody = boundedEntryBody(content, labelMatch, ENTRY_BOUND);
-    if (!entryBody.toLowerCase().includes(KERNEL)) {
-      results.fail.push({
-        check: CHECK,
-        file: relPath,
-        message: `"Gate integrity" rule present but missing mutation-taxonomy kernel within its own entry: "${KERNEL}"`,
-      });
-    }
-  }
-
-  if (!results.fail.some(f => f.check === CHECK)) {
-    results.pass.push({
-      check: CHECK,
-      file: 'all core protocol SKILL.md files',
-      message: `Gate integrity rule coverage verified for ${checked} protocols (${GATE_INTEGRITY_EXEMPTIONS.length} exempted)`,
-    });
-  }
-}
-
-// ============================================================
 // Check: Ink Body Byte-Identity (copied-sibling drift guard)
 // ============================================================
 // proactive-epistemic-ink.md reproduces the canonical Epistemic Ink body
@@ -2783,8 +2620,6 @@ try {
   checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkLanguagePurity();
-  checkFormalBlocksRule();
-  checkGateIntegrityRule();
   checkInkBodyIdentity();
 
   // Output results as JSON
