@@ -115,7 +115,7 @@ Phase 1 Calibrate+Propose (observe) → artifact read, artifact search (user's d
 Phase 2 Qs         (constitution)    → present calibration map + candidate + grounding (mandatory)
 Phase 3            (track)   → Internal state update
 converge           (extension)   → TextPresent+Proceed (convergence evidence trace + open disposition; proceed with crystallized abstraction)
-seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol link is an inbound misfit absorption (Rule 11), not a post-crystallization handoff, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
+seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol link is an inbound misfit absorption (`Upstream misfit absorption`), not a post-crystallization handoff, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
@@ -147,10 +147,10 @@ Frame the abstraction currently being shaped rather than a progress fraction. Re
 
 ## Rules
 
-1. **Recognition over Recall**: Present structured options with anticipatable post-selection states and yield for the user's shaping move.
-2. **Calibration authority**: Treat the candidate as a working hypothesis. The instance-grounded calibration remains open to correction through the same free-response path as candidate shaping.
-3. **Personalized grounding**: Pair every candidate with evidence from the user's own domain and keep external provenance visible.
-4. **Periagoge boundary**: Form an abstraction around a sensed but unlocated essence. Comparison or validation of an already located abstraction remains outside this operation.
-5. **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the gate.
-11. **Upstream misfit absorption**: Accept a routed colimit-shaped signal as activation ground and show its cited essence-and-locator basis before Phase 1.
-18. **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Recognition over Recall**: Present structured options with anticipatable post-selection states and yield for the user's shaping move.
+- **Calibration authority**: Treat the candidate as a working hypothesis. The instance-grounded calibration remains open to correction through the same free-response path as candidate shaping.
+- **Personalized grounding**: Pair every candidate with evidence from the user's own domain and keep external provenance visible.
+- **Periagoge boundary**: Form an abstraction around a sensed but unlocated essence. Comparison or validation of an already located abstraction remains outside this operation.
+- **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the gate.
+- **Upstream misfit absorption**: Accept a routed colimit-shaped signal as activation ground and show its cited essence-and-locator basis before Phase 1.
+- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
