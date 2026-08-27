@@ -1,6 +1,6 @@
 # Runbook
 
-The workflow and its quiet failure modes.
+The workflow, and the constraints that shape how a run is set up and read.
 
 ## What a run establishes
 
@@ -84,56 +84,18 @@ pre-ablation transcript. Codex also compares the installed cache's `SKILL.md` di
 to the source immediately before spending a run; an edit made after setup fails closed
 with an instruction to rerun setup instead of measuring stale treatment bytes.
 
-## Quiet failures
+## Where isolation lives
 
-Each of these produces a transcript indistinguishable from the protocol behaving
-badly. They are listed because none of them announces itself.
+Arm isolation is a property of the config directory rather than of a flag: an empty
+`CLAUDE_CONFIG_DIR` is the arrangement observed to yield an empty plugin set, which is
+what `setup.sh` builds per target. Codex takes the same shape through a separate
+`CODEX_HOME` per arm, with `codex plugin list` confirming what that home holds before a
+run is spent. The harness clears volatile state before each run and passes
+`--no-session-persistence`, so a re-run reads its own environment.
 
-### `--bare` does not exclude installed plugins
-
-`--bare` skips hooks, LSP, plugin *sync*, auto-memory and `CLAUDE.md` discovery. It
-does not unload plugins already installed from a marketplace. An arm that simply omits
-`--plugin-dir` therefore still has the protocol under test present, and the comparison
-becomes treatment against itself. Setting `enabledPlugins` to an empty object through
-`--settings` does not remove them either.
-
-The only arrangement observed to yield an empty plugin set is a `CLAUDE_CONFIG_DIR`
-pointing at a directory with nothing in it. That is why isolation lives at the config
-directory rather than in a flag.
-
-### Codex `--ignore-user-config` also removes the installed treatment
-
-For Codex, `--ignore-user-config` is not a protocol-arm isolation mechanism: an
-installed local plugin was no longer discoverable when that flag was present. The
-harness instead gives each treatment its own `CODEX_HOME` and does not pass the flag.
-Treatment integrity is checked before the run with `codex plugin list` against that
-home. Codex JSONL does not consistently emit a skill-invocation event, so the report
-marks that field `trace-unavailable`; a model merely saying the skill name is never
-counted as invocation evidence.
-
-### The token variable name is exact
-
-`CLAUDE_CODE_OAUTH_TOKEN` is read. `CLAUDE_OAUTH_TOKEN` is ignored without comment,
-and every run then fails with `Not logged in`, which reads as a broken `setup-token`
-rather than a misspelled variable. `run.sh` guards this.
-
-### A budget below the cache-creation cost fails every run identically
-
-The first turn of a session pays to create the system-prompt cache; later turns read
-it cheaply. A `maxBudgetUsd` set below that one-time cost exhausts the budget before
-any work happens, every run terminates as `budget_exhausted`, and the `completed`
-grader fails across the board — which reads as the protocol failing rather than the
-ceiling being set under the floor. Raise the budget rather than interpreting the
-result.
-
-### Residue crosses runs unless it is cleared
-
-Working directory names are stable across invocations, so a re-run lands on the same
-project slug inside the config directory and can read what the previous run left. The
-harness clears volatile state before each run for this reason, and passes
-`--no-session-persistence` so less accumulates in the first place. A suite-level
-teardown alone would not have covered it: the contamination is between runs, not after
-them.
+Set `maxBudgetUsd` above the one-time system-prompt cache creation that a session's
+first turn pays; later turns read that cache cheaply, so the floor is per session
+rather than per turn.
 
 ## Running it from CI
 
@@ -146,15 +108,14 @@ registered target.
 With no `pr` input it resolves the PR for the dispatched ref and comments the report
 there; with no PR it leaves the table in the job summary. The matrix inputs — models,
 arms, cases, repetitions, budget ceiling — override the committed config for that run
-only, through environment variables the harness reads. Editing the committed config
-from CI would leave the run unreproducible from the checkout it claims to test.
+only, through environment variables the harness reads, so the run stays reproducible
+from the checkout it claims to test.
 
-A locally valid YAML file is not a valid workflow. GitHub's expression parser scans
-every `run:` block for substitution syntax and tries to evaluate what it finds — including
-inside a shell comment — and rejects the whole file when it cannot. The only validator
-that catches this is a dispatch attempt, and one can be made for free: dispatch with
-`runs=three`, which the harness rejects before it launches anything, so the job exercises
-checkout, the secret check, the install and the setup without spending model budget.
+Validate a workflow edit by dispatching it — the dispatch is what exercises GitHub's
+own expression parsing of every `run:` block, including inside shell comments. One
+dispatch is free: `runs=three` is rejected by the harness before it launches anything,
+so the job covers checkout, the secret check, the install and the setup without
+spending model budget.
 
 ```bash
 gh workflow run type-realization.yml --ref <branch> -f runs=three -f post_comment=false
@@ -197,19 +158,18 @@ grader files fix the observation criteria but which no automated judge executed.
 Constructor coverage, semantic question ordering, and user-facing classification are
 therefore never implied by an automatic pass.
 
-`skill` says whether the protocol itself fired in an arm that had it available. Without
-it, a run that loaded the plugin, never invoked the protocol, and produced right-looking
-behaviour anyway is indistinguishable from one that ran the contract. It reads `n/a` in
-an arm with no plugin, where the skill cannot run and its absence is what `integrity`
-already asserts.
+`skill` says whether the protocol itself fired in an arm that had it available — the one
+field separating a run that executed the contract from behaviour that merely resembles
+it. It reads `n/a` in an arm with no plugin, where `integrity` already asserts the
+absence, and `trace-unavailable` for Codex, whose JSONL carries no skill-invocation
+event; a model naming the skill counts as invocation evidence nowhere.
 
 Codex rows report token use from `turn.completed`. They leave cost blank because the
 CLI does not emit a dollar value for the API-key run. Claude rows retain the emitted
 cost. A Codex timeout is a failed launch and is not cached or graded.
 
 A cell whose launch never produced a transcript is not written or counted. `run` and
-`report` both propagate that incompleteness as failure; re-running can still pick it up,
-which a cached empty file would have prevented for good.
+`report` both propagate that incompleteness, so a re-run still picks the cell up.
 
 ## Widening
 
@@ -218,6 +178,5 @@ each run pays its own cache creation, so the cost scales with the cell count rat
 than with the work done. Start narrow enough to confirm the graders discriminate,
 then climb.
 
-Avoid the weakest available model as the primary measurement. It exercises the
-safeguards but not the protocol, so a failure there does not separate a defect in the
+Pick a primary measurement model strong enough that a failure separates a defect in the
 contract from a limit of the model.

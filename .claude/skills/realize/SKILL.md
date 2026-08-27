@@ -72,9 +72,8 @@ and installs the local protocol plugin only into the protocol home without readi
 writing a credential. `run.sh` requires `CODEX_API_KEY` and forwards it only to each
 `codex exec` child; `codex login` is never called.
 
-Read `references/runbook.md` before the first run. It records runner and isolation
-failures that each produce a transcript indistinguishable from the protocol
-misbehaving. None of them announces itself.
+Read `references/runbook.md` before the first run. It records where runner isolation
+lives, where the budget floor sits, and what each column of the report asserts.
 
 ## From CI
 
@@ -173,7 +172,7 @@ preserving partial transcripts for inspection.
 
 ## Additional Resources
 
-- **`references/runbook.md`** — the workflow, quiet failure modes, how to widen the
+- **`references/runbook.md`** — the workflow, where isolation lives, how to widen the
   matrix, how to read the report.
 - **`references/grader-design.md`** — why the deterministic axis is behaviour rather
   than wording, the obligation-to-predicate mapping, what the arms answer, and the
