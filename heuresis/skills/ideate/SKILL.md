@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "Heuresis (εὕρεσις): widen an empty or prematurely converged idea field; reads only the invocation. Type: (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField"
+description: "Widen an empty or prematurely converged idea field; reads only the invocation. Type: (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField"
 ---
 
 # Heuresis Protocol

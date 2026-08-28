@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "Euporia (εὐπορία): reverse-trace decision coordinates for axis-undetermined intent. Type: (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint"
+description: "Reverse-trace decision coordinates for axis-undetermined intent. Type: (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint"
 ---
 
 # Euporia Protocol

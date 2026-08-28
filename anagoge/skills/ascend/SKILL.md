@@ -1,6 +1,6 @@
 ---
 name: ascend
-description: "Anagoge (ἀναγωγή): elevate a vague recall to the supra-session unit it belongs to. Type: (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit"
+description: "Elevate a vague recall to the supra-session unit it belongs to. Type: (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit"
 user_invocable: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: induce
-description: "Periagoge (περιαγωγή): crystallize a shared but unnamed concept from the concrete cases at hand. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction"
+description: "Crystallize a shared but unnamed concept from the concrete cases at hand. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction"
 ---
 
 # Periagoge Protocol
