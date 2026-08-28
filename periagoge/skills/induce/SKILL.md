@@ -45,18 +45,22 @@ E              = EssenceIntuition                           -- variation-stable 
 L              = Option(TentativeLabel)                     -- user-provided provisional name or concept, if any
 ctx            = DomainContext                              -- user's domain context gathered via artifact read, artifact search, and a conditional external fetch in Phase 1
 Calibrate      = (Iᵢ, E, L?, ctx) → K
-K              = CalibrationMap { keeps, sharpens, prunes, open }
-                 keeps     = supported core to preserve
-                 sharpens  = under-specified decision-relevant structure
-                 prunes    = overextended or unsupported scope to release
-                 open      = residual uncertainty that does not block crystallization
+K              = CalibrationMap { keeps, sharpens, prunes, open, label_basis }
+                 keeps       = supported core to preserve
+                 sharpens    = under-specified decision-relevant structure
+                 prunes      = overextended or unsupported scope to release
+                 open        = residual uncertainty that does not block crystallization
+                 label_basis = Option(L) as the user gave it, carried with its provenance
+                               -- the naming ground Propose reads through K; it grounds P.name and P.provenance
+                               -- without determining them, so what the label survives as stays a run-time judgment
 OpenDisposition ∈ {None, Nonblocking, Deferred}
                  None        = no open calibration pressure remains; explicitly declared
                  Nonblocking = open item remains visible but does not block Confirm
                  Deferred    = user routes an open item to later work via free response
-OpenItemDisposition ∈ {Nonblocking, Deferred}
+OpenItemDisposition = OpenDisposition \ {None}             -- per-item value space; None is a whole-trace verdict only
 OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
                  -- terminal disposition for K.open; empty open sets declare status None
+                 -- invariant: dom(items) = K.open — every open item carries exactly one disposition, which is what makes status(O) total
 status(O)      = None if K.open = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
                  -- O is the OpenTrace value (Λ.open_trace); K is the CalibrationMap this trace terminates (Λ.calibration)
 P              = CandidateAbstraction { name, structure, instance_map, provenance }
@@ -93,10 +97,10 @@ Phase 3: V → integrate(V, candidate) → candidate'                          -
 ── LOOP ──
 After Phase 3: evaluate user move.
 If V = Confirm: crystallize(candidate), Λ.completion_trace := derive(Λ.history, Λ.A, candidate'), Λ.open_trace := derive(K.open, V, free_response), declare(Λ.completion_trace, Λ.open_trace), terminate.
-If V = Widen(direction): candidate' = widened(candidate, direction) via Synagoge → return to Phase 2.
-If V = Narrow(specializer): candidate' = narrowed(candidate, specializer) via Diairesis → return to Phase 2.
-If V = Fuse(adjacent): candidate' = fused(candidate, adjacent) via lateral Synagoge → return to Phase 1 (grounding recomputed).
-If V = Reorient(axis): candidate' = orthogonal(axis) → return to Phase 1 (full recompute).
+If V = Widen(direction): return to Phase 2.
+If V = Narrow(specializer): return to Phase 2.
+If V = Fuse(adjacent): return to Phase 1 (grounding recomputed).
+If V = Reorient(axis): return to Phase 1 (full recompute).
 If V = Dismiss: abandon candidate; if essence still sensed, return to Phase 1 with fresh candidate; else deactivate.
 Max 5 triangulation attempts per abstraction seed.
 Continue until: crystallized(Λ) ∨ attempts_exhausted.
@@ -104,7 +108,7 @@ Convergence evidence: At crystallized(Λ), present transformation trace — for 
 
 ── CONVERGENCE ──
 crystallized(Λ): see TYPES (V = Confirm in Λ.history)
-progress(Λ) = |history| / max_attempts
+progress(Λ) = |Λ.history| / max_attempts                    -- max_attempts is the LOOP cap; one history step per triangulation attempt
 early_exit = attempts_exhausted
 
 ── TOOL GROUNDING ──
@@ -119,7 +123,7 @@ seam               (extension)   → TextPresent+Proceed (fires at deactivation/
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
       calibration: Option(K), candidate: Option(P), grounding: Option(G),
-      history: List<(P, G, K, V)>, attempts: Nat, crystallized: Option(P),
+      history: List<(P, G, K, V)>, crystallized: Option(P),
       completion_trace: Option(CompletionTrace),
       open_trace: Option(OpenTrace),
       active: Bool, cause_tag: String }
