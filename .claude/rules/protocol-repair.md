@@ -30,6 +30,17 @@ moved when a neighboring block changed. The semantic-closure sweep `AGENTS.md` a
 is the walk that finds this, so run it to site the repair and not only to check one already
 chosen.
 
+**The morphism is the ablation ground.** When coupled blocks disagree, first read each affected
+clause against the declared deficit-to-resolution path and the block's own structural role. A
+clause carries an independent obligation when its removal would leave an execution order,
+judgment boundary, state transition, termination path, grounding, or invariant that the morphism
+and the remaining carriers do not represent. Keep and repair only those clauses whose obligations
+the re-derived path actually reaches. Content recoverable without loss from the written morphism
+and remaining carriers is redundant; remove it rather than synchronizing another copy. Treat that
+removal as the ablation in
+`premise/instruction-authoring.md` §Subtraction at Revision Time: exercise the obligations in a
+bounded, recoverable trial and restore only what failed.
+
 **The carriers are already here.** Before an entry is added, ask which existing carrier holds
 the distinction: a field widened where a case cannot be represented, a rule's subject moved
 where the morphism's unit of presentation changed, an option set indexed on one further axis
