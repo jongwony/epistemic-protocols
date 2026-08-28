@@ -4,6 +4,10 @@ Widen an underexpanded candidate field through frame-parallel divergent generati
 
 > [한국어](./README_ko.md)
 
+## Name
+
+Greek εὕρεσις denotes finding, discovery, or invention/conception broadly; its later specialization as a term of rhetorical *inventio* is one historical narrowing among several, not the word's primary or governing sense here.
+
 ## What is Heuresis?
 
 A protocol for the moment **before any selection is made, when the candidate field itself is thin** — empty, or already narrowed onto one option before the underlying goal called for it. It infers whether you're starting blank or already hold a few fragments from the invocation alone (no entry questions), opens abstract frames for you to pick before showing any concrete idea on a blank start, then generates candidates in parallel across the frames you open — never eliminating, ranking, or choosing among them. You stop it whenever you've seen enough.

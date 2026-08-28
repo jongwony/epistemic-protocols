@@ -15,7 +15,9 @@ The protocol stands in directional dual relation to Periagoge (`/induce`) — Pe
   → ResolvedEndpoint
 ```
 
-Greek εὐπορία ("good passage / way through") names the resourcefulness toward resolution that emerges from aporia (ἀπορία, "no way through"). Plato's later dialectic threads aporia and euporia as paired moments of inquiry.
+## Name
+
+Greek εὐπορία — literally "good passage" (εὖ "well" + πόρος "way") — names the resourcefulness toward resolution that emerges from aporia (ἀπορία, "no way through"). Plato's later dialectic threads aporia and euporia as paired moments of inquiry; the protocol borrows the resolving-passage structure.
 
 ## When to invoke
 

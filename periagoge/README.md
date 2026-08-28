@@ -1,0 +1,33 @@
+# Periagoge (περιαγωγή)
+
+Calibrate and crystallize in-process abstraction — `/induce`.
+
+> [한국어](./README_ko.md)
+
+## Overview
+
+Periagoge turns an in-process abstraction toward its crystallized form. When an instance set has converged toward an essence the user senses but has not yet named, the protocol calibrates that in-process concept against the instances, proposes a candidate abstraction paired with a grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept, broaden, narrow along a dimension, fuse with an adjacent abstraction, or redirect onto an orthogonal axis — until the abstraction locates itself.
+
+The protocol stands in directional dual relation to Euporia (`/elicit`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent through substrate to coordinates (top-down direction). The two compose as orthogonal directions of the same dialectic substrate. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
+
+## Type
+
+```
+(AbstractionInProcess, AI, INDUCE, A)
+  → CrystallizedAbstraction
+```
+
+## Name
+
+The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. Synagoge (συναγωγή, collection) and Diairesis (διαίρεσις, division) are the twin dialectical moves described in *Phaedrus* 265d–266a; here they name user response families, not a claim to Platonic method.
+
+## When to invoke
+
+Activate when an instance set has converged toward an essence whose name, scope, or position is still unsettled — the user senses that the cases share something, but the shared thing has no locator yet.
+
+An abstraction that already exists and merely awaits comparison or validation routes elsewhere. When the user's intent is articulated but its decision coordinates are implicit in the externalized substrate, defer to Euporia (`/elicit`). When the concept already exists in prior work and only needs to be recognized rather than formed, defer to Anagoge (`/ascend`).
+
+## Components
+
+- `skills/induce/SKILL.md` — protocol definition (formal blocks, prose, rules)
+- `.claude-plugin/plugin.json` — plugin manifest
