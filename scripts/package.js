@@ -30,33 +30,20 @@ const _records = discoverPlugins({ projectRoot });
 const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 
 // Compact description overrides for packaged discovery metadata.
-// Protocol overrides use Type-only format for Layer 0 reference.
-const DESCRIPTION_OVERRIDES = {
-  frame: 'Multi-perspective framing — (FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry',
-  gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
-  grasp: 'Intent-scented comprehension verification — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
-  inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',
-  apportion: 'Apportion a goal into conditioned execution units — (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan',
-  ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
-  induce: 'Calibrate and crystallize abstraction — (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction',
-  elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint',
-  bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
-  contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
-  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod',
-  ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
-  preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
-  ideate: 'Frame-parallel divergent candidate generation — (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField',
-  onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
-  catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
-  triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, externalize routed work units to substrate records a collaborator session is pointed at.',
-  forge: "Reference-grounded prompt-artifact formation — surfaces under-determined contract coordinates from a reference doc and projects a ready-to-use prompt or skill recipe.",
-  'gate-check': "Advisor-checked decision gates — freezes a drafted option set, has it independently adjudicated, verifies the cited grounds, then presents, relays a settled option, or unfolds what did not clear.",
-  'lens-review': "Frame-driven multi-perspective PR review — derives fitting lenses per diff, cross-verifies findings, posts one consolidated PR comment.",
-  misuse: "Retrospective protocol contract-violation detector — scans past sessions and surfaces violation records for review.",
-  'reduced-space-test': "Scoped empirical validation — decomposes a target↔surrogate equivalence claim, bounds a test space, captures evidence, carries the untested complement forward.",
-  'review-loop': "Convergence-paced review-resolve loop — verifies each finding against the codebase and its base, converges the artifact on the project's stated goal, ends in repair, handover, drop, or residual.",
-  steer: "Project-profile recalibration — audits calibration drift, presents evidence for verdict, writes an updated profile rule and Settled Directions clause.",
-};
+//
+// An entry fires only while its source description exceeds DESCRIPTION_LIMIT,
+// and it replaces that description in the packaged artifact. The replacement is
+// silent, which is what let authored and shipped descriptions diverge unnoticed:
+// a skill could carry one description in its SKILL.md and ship another. So an
+// entry whose source already fits the limit is deleted rather than kept as a
+// dormant safety net, and the table is empty at present — every packaged skill
+// ships the description its SKILL.md actually carries.
+//
+// An over-limit description with no entry here is caught twice: the build-time
+// warning below, and the `packaged discovery metadata` test in package.test.js,
+// which measures the post-transform description. Shorten the source rather than
+// adding an entry back.
+const DESCRIPTION_OVERRIDES = {};
 
 const EXCLUDE_NAMES = new Set([
   '.DS_Store', '__MACOSX', '.claude-plugin', 'plugin.json',
@@ -1113,6 +1100,7 @@ if (require.main === module) {
 
 module.exports = {
   DESCRIPTION_LIMIT,
+  DESCRIPTION_OVERRIDES,
   PLUGINS,
   CODEX_SUBMIT_PLUGINS,
   buildSkillArtifact,
