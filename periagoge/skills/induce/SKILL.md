@@ -17,7 +17,7 @@ Periagoge(A) → Detect(A) → in_process? →
   true:  (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K →
          Propose(Iᵢ, E, K, ctx) → (P, G) →
          Qs(P, G, K, framing) → Stop → V → integrate(V, candidate) → candidate' →
-         loop until crystallized(A) → declare(completion_trace, open_trace) → CrystallizedAbstraction
+         loop until crystallized(Λ) → declare(completion_trace, open_trace) → CrystallizedAbstraction
          or attempts_exhausted → deactivate
   false: deactivate
 
@@ -38,7 +38,7 @@ invariant: Calibrative Induction through Dialectical Triangulation over Unilater
 
 ── TYPES ──
 A              = AbstractionSeed (in-process state: instances + essence intuition + optional user concept label)
-Detect         = A → (Bool, (Iᵢ, E, L?) if true)
+Detect         = A → (Bool, Option((Iᵢ, E, L?)))         -- payload is Some(...) exactly when the Bool is true
 Iᵢ             = Set(Instance)                             -- instance set observed; cardinality unconstrained (any N ≥ 1 qualifies when essence is sensed; richer sets provide stronger triangulation material)
 Instance       = { content: String, context: String }       -- concrete case observed
 E              = EssenceIntuition                           -- variation-stable core signal from conversation
@@ -57,7 +57,8 @@ OpenDisposition ∈ {None, Nonblocking, Deferred}
 OpenItemDisposition ∈ {Nonblocking, Deferred}
 OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
                  -- terminal disposition for K.open; empty open sets declare status None
-status(OpenTrace) = None if K.open = ∅; Deferred if ∃ item : items(item) = Deferred; otherwise Nonblocking
+status(O)      = None if K.open = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
+                 -- O is the OpenTrace value (Λ.open_trace); K is the CalibrationMap this trace terminates (Λ.calibration)
 P              = CandidateAbstraction { name, structure, instance_map, provenance }
 G              = GroundingExample { scenario: String, domain: String, mapping: String }
                                                              -- personalized to user's own domain context
@@ -68,7 +69,7 @@ V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), F
                  adjacent     = neighboring abstraction ref  -- lateral Synagoge with user-named reference (user Production mode)
                  axis         = orthogonal dimension         -- full redirection
 Qs             = Shaping interaction with candidate + grounding [Tool: Constitution interaction]
-crystallized(A) = ∃ step ∈ history : V(step) = Confirm
+crystallized(Λ) = ∃ step ∈ Λ.history : V(step) = Confirm
 CompletionTrace = List<(A, K, P, V, candidate')>
                  -- derived from Λ.history with A sourced from Λ.A and candidate' computed from each step's post-move candidate state
 CrystallizedAbstraction = P where confirmed(P) via Confirm move ∧ completion_trace_declared(CompletionTrace) ∧ open_disposition_declared(OpenTrace)
@@ -98,11 +99,11 @@ If V = Fuse(adjacent): candidate' = fused(candidate, adjacent) via lateral Synag
 If V = Reorient(axis): candidate' = orthogonal(axis) → return to Phase 1 (full recompute).
 If V = Dismiss: abandon candidate; if essence still sensed, return to Phase 1 with fresh candidate; else deactivate.
 Max 5 triangulation attempts per abstraction seed.
-Continue until: crystallized(A) ∨ attempts_exhausted.
-Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
+Continue until: crystallized(Λ) ∨ attempts_exhausted.
+Convergence evidence: At crystallized(Λ), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-crystallized(A): see TYPES (V = Confirm in history)
+crystallized(Λ): see TYPES (V = Confirm in Λ.history)
 progress(Λ) = |history| / max_attempts
 early_exit = attempts_exhausted
 
