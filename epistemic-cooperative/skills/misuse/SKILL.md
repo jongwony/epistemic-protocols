@@ -1,6 +1,6 @@
 ---
 name: misuse
-description: "Retrospective protocol contract violation detector. Scan past sessions for /ground (Sₐ confabulation) and /induce (stereotype misconflation) contract violations and surface structured violation records for user-constituted review. Use this skill whenever the user asks to 'audit my misuse', 'check protocol misuse', 'scan past invocations', 'misuse history', wants retrospective audit of past /ground or /induce calls, or suspects silent contract violations in prior sessions."
+description: "Retrospective protocol contract-violation detector. Scans past sessions for /ground and /induce contract violations and surfaces structured violation records for user-constituted review."
 user_invocable: true
 ---
 

@@ -4,6 +4,10 @@ Elevate a vague recall to a higher-granularity unit (ἀναγωγή: a leading-
 
 > [한국어](./README_ko.md)
 
+## Name
+
+ἀναγωγή ("a leading-up") is the deliberate sibling of ἀνάμνησις: ana-mnesis recalls *one* prior context, ana-goge leads that recall *up* to the connected unit above it. The medieval anagogical sense — the reading that lifts the literal toward an ultimate unity — supplies the structural figure: the deposits are the literal, the higher unit is the unity they point to. The protocol borrows the leading-up structure; it claims no exegetical doctrine.
+
 ## What is Anagoge?
 
 A deliberate sibling of Anamnesis (ἀνάμνησις) — where ana-mnesis *recalls* one prior context, ana-goge *leads it up* to the connected unit above it. Anagoge is a protocol that **reconstructs the deposit graph at read-time — reading each deposit's stored anchors and discovering related deposits across sessions by shared anchors, keywords, and metadata — and recognizes the higher unit the scattered deposits already imply — a connected line of work, a topic cluster, or an already-sedimented concept — rather than resolving the recall to any single session**.

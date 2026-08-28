@@ -1,6 +1,6 @@
 ---
 name: inquire
-description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry when AI infers areas of context insufficiency, producing informed execution. Type: (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution. Alias: Aitesis(αἴτησις)."
+description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry. Type: (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution"
 ---
 
 # Aitesis Protocol

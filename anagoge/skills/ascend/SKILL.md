@@ -1,6 +1,6 @@
 ---
 name: ascend
-description: "Elevate a vague recall whose right resolution unit is not any single session but a connected-session chain, a topic cluster, or an already-sedimented concept. AI traverses the deposit graph by reconstructing cross-partition connections at read-time from stored anchors and shared keywords/metadata, recognizes the higher unit the deposits already imply, and presents it as a narrative for user recognition — without fusing a new whole or writing anything. Type: (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit. Alias: Anagoge(ἀναγωγή)."
+description: "Elevate a vague recall to the supra-session unit it belongs to. Type: (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit"
 user_invocable: true
 ---
 
@@ -10,9 +10,7 @@ Elevate a vague recall to a higher-granularity unit through AI-guided deposit-gr
 
 ## Definition
 
-**Anagoge** (ἀναγωγή): A dialogical act of leading a vague recall up from session granularity to the higher unit its scattered deposits already imply — a connected line of work across sessions, a topic cluster, or an already-sedimented concept node — where AI detects that the right resolution unit is supra-session, traverses the deposit graph by reconstructing cross-partition connections at read-time from each deposit's stored anchors plus shared keywords and session metadata, assembles candidate higher units of the dispatched type, and presents one as a narrative for Socratic recognition. The higher unit is recognized, not synthesized: Anagoge reconstructs the connections from what the deposits already store and writes nothing.[^1]
-
-[^1]: ἀναγωγή ("a leading-up") is the deliberate sibling of ἀνάμνησις: ana-mnesis recalls *one* prior context, ana-goge leads that recall *up* to the connected unit above it. The medieval anagogical sense — the reading that lifts the literal toward an ultimate unity — supplies the structural figure: the deposits are the literal, the higher unit is the unity they point to. The protocol borrows the leading-up structure; it claims no exegetical doctrine.
+**Anagoge** (ἀναγωγή): A dialogical act of leading a vague recall up from session granularity to the higher unit its scattered deposits already imply — a connected line of work across sessions, a topic cluster, or an already-sedimented concept node — where AI detects that the right resolution unit is supra-session, traverses the deposit graph by reconstructing cross-partition connections at read-time from each deposit's stored anchors plus shared keywords and session metadata, assembles candidate higher units of the dispatched type, and presents one as a narrative for Socratic recognition. The higher unit is recognized, not synthesized: Anagoge reconstructs the connections from what the deposits already store and writes nothing.
 
 ```
 ── FLOW ──

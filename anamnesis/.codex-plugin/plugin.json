@@ -1,7 +1,7 @@
 {
   "name": "anamnesis",
-  "version": "1.0.0",
-  "description": "Resolve vague recall into recognized context — /recollect",
+  "version": "1.0.1",
+  "description": "Resolve vague recall into recognized context — /recollect (ἀνάμνησις: a recollecting)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

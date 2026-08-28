@@ -28,6 +28,7 @@ const {
   collectReleaseFiles,
   isForbiddenCodexPath,
   DESCRIPTION_LIMIT,
+  DESCRIPTION_OVERRIDES,
   parseFrontmatter,
   readCodexManifestVersion,
   runRelease,
@@ -270,11 +271,19 @@ describe('transformSkillMd', () => {
   });
 
   it('overrides long descriptions when override exists', () => {
+    // Installs its own fixture entry rather than naming a live skill: the table is
+    // empty whenever every source description fits the limit, and this test is about
+    // the override path, not about which skills happen to need one.
     const longDesc = 'A'.repeat(201);
-    const content = `---\nname: frame\ndescription: ${longDesc}\n---\nBody`;
-    const result = transformSkillMd(content, 'frame');
-    const { fields } = parseFrontmatter(result);
-    assert.ok(fields.get('description').length <= 200);
+    DESCRIPTION_OVERRIDES['__fixture-skill'] = 'Short override';
+    try {
+      const content = `---\nname: __fixture-skill\ndescription: ${longDesc}\n---\nBody`;
+      const result = transformSkillMd(content, '__fixture-skill');
+      const { fields } = parseFrontmatter(result);
+      assert.equal(fields.get('description'), 'Short override');
+    } finally {
+      delete DESCRIPTION_OVERRIDES['__fixture-skill'];
+    }
   });
 
   it('preserves long descriptions when no override defined', () => {

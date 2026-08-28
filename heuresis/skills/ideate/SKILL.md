@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "Divergent candidate-field generation before any selection is made. When the object-level candidate field is empty or has prematurely converged, infers seed vs. blank entry from the invocation utterance alone — zero entry questions. A blank entry opens an abstract frame map for user selection before any concrete idea is shown, mitigating early-example fixation and preserving ownership; a seeded entry expands directly from the user's own fragments. Generates candidates in parallel across open frames with no elimination, ranking, or scoring — every candidate carries origin User or AI. The user's own stop is the constitutive act that bounds the field, available at any time; a stop before any candidate exists returns a typed withdrawal, never a mislabeled empty field. A wish to go deeper on an already-open frame parks as a typed follow-up for later chaining — the live loop only widens — and the assembled field is an endpoint-neutral contract (topic, tagged candidates, explored/unexplored frames, parked follow-ups, unaddressed signals) ready for any downstream unfolding. Reads only the invocation utterance plus a prior protocol's output the user explicitly names — never the wider session, codebase, or rules. Type: (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField. Alias: Heuresis(εὕρεσις: finding/invention)."
+description: "Widen an empty or prematurely converged idea field; reads only the invocation. Type: (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField"
 ---
 
 # Heuresis Protocol
@@ -9,9 +9,7 @@ Resolve an underexpanded candidate field through frame-parallel divergent genera
 
 ## Definition
 
-**Heuresis** (εὕρεσις): the act of finding or discovering[^1] — a dialogical act of widening a candidate field that is empty or has prematurely converged, before any selection is made. Divergent and convergent thinking are distinct cognitive operations (Runco & Acar, 2012), and no protocol in this catalog carries a typed guarantee to generate the object-level alternative set itself — heuresis sits at the point where the candidate field itself is thin. On a blank entry, heuresis opens an abstract frame map before showing any concrete idea — early concrete examples measurably narrow independent generation (Wadinambiarachchi et al., 2024), and ideating before seeing material preserves ownership and diversity that seeing it first does not (Qin et al., 2025). Generation is frame-parallel and never eliminates, ranks, or scores: selection is a downstream act, out of this protocol's scope.
-
-[^1]: Greek εὕρεσις denotes finding, discovery, or invention/conception broadly; its later specialization as a term of rhetorical inventio is one historical narrowing among several, not the word's primary or governing sense here.
+**Heuresis** (εὕρεσις): the act of finding or discovering — a dialogical act of widening a candidate field that is empty or has prematurely converged, before any selection is made. Divergent and convergent thinking are distinct cognitive operations (Runco & Acar, 2012), and no protocol in this catalog carries a typed guarantee to generate the object-level alternative set itself — heuresis sits at the point where the candidate field itself is thin. On a blank entry, heuresis opens an abstract frame map before showing any concrete idea — early concrete examples measurably narrow independent generation (Wadinambiarachchi et al., 2024), and ideating before seeing material preserves ownership and diversity that seeing it first does not (Qin et al., 2025). Generation is frame-parallel and never eliminates, ranks, or scores: selection is a downstream act, out of this protocol's scope.
 
 ```
 ── FLOW ──

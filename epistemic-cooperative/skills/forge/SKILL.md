@@ -1,6 +1,6 @@
 ---
 name: forge
-description: "Reference-grounded prompt-artifact formation. Reads a target reference document (vendor prompt guide, Codex Goals spec), surfaces the user's under-determined contract coordinates, and projects a ready-to-use prompt artifact — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Use when the user asks to 'forge a prompt', 'turn this guide into a usable prompt', 'make a Higgsfield prompt', 'draft a /goal from this', or has latent intent that must be grounded in an external reference before a tool can run it."
+description: "Reference-grounded prompt-artifact formation. Reads a target reference doc, surfaces the under-determined contract coordinates, and projects a ready-to-use prompt or standing skill recipe."
 ---
 
 # Forge: Reference-Grounded Prompt-Artifact Formation

@@ -1,6 +1,6 @@
 ---
 name: sublate
-description: "Vet working context by dialectical antithesis before action. Type: (ContextSuspect, User, VET, WorkingContext) → VettedContext. Alias: Elenchus(ἔλεγχος)."
+description: "Vet working context by dialectical antithesis before action. Type: (ContextSuspect, User, VET, WorkingContext) → VettedContext"
 ---
 
 # Elenchus Protocol

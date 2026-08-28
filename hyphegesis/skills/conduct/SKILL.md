@@ -1,6 +1,6 @@
 ---
 name: conduct
-description: "Conduct the method of a session's epistemic work before object-level cognition begins. When a work prospect needs multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, design a conduct topology over the moves it identifies and hand off a method plan with in-session checkpoints; single-move work relays to that one protocol instead of conducting. Type: (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod. Alias: Hyphegesis(ὑφήγησις)."
+description: "Conduct method before object-level work. Fires when the work needs several moves in non-trivial order. Type: (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod"
 ---
 
 # Hyphegesis Protocol

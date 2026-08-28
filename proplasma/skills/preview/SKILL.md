@@ -1,6 +1,6 @@
 ---
 name: preview
-description: "Divergent-discard instantiation before direction commitment. When direction candidates cannot be recognized from descriptions alone, materialize 2-4 placeholder probes that diverge on user-settled axes, present the per-axis contrast, and constitute the direction decision on recognition rather than simulation — probes are discarded, never evidence. Type: (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast. Alias: Proplasma(πρόπλασμα)."
+description: "Divergent-discard instantiation. Fires when direction candidates cannot be recognized from descriptions. Type: (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast"
 ---
 
 # Proplasma Protocol

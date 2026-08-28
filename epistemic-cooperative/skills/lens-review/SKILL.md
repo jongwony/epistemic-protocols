@@ -1,6 +1,6 @@
 ---
 name: lens-review
-description: "One-pass multi-perspective PR review that posts findings as a single consolidated PR comment. /frame derives the review lenses that fit the diff, plus a gap scan, over only the files changed in a PR; each lens analyzes in isolation, then the findings are adversarially cross-verified before the survivors are posted. Composes prothesis:frame and syneidesis:gap. User-invoked via /lens-review."
+description: "One-pass multi-perspective PR review. Derives the lenses that fit the diff plus a gap scan, analyzes each in isolation, cross-verifies, and posts survivors as one consolidated PR comment."
 skills:
   - prothesis:frame
   - syneidesis:gap

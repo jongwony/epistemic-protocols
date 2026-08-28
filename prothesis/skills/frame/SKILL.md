@@ -1,6 +1,6 @@
 ---
 name: frame
-description: "Multi-perspective framing — a pure lens-formation tool. When the right framework is absent, places analytical lenses before the user, then for each selected lens declares the substrate it needs (an abstract persona/capability) with advisory binding hints and a channel need, and hands lens↔substrate pairs off — without executing, isolating, arranging, or synthesizing. A single lens returns directly; multiple lenses where at least one needs a specialized substrate become a substrate-correspondence handoff that nudges /conduct for the isolation + arrangement + reconciliation + synthesis apparatus, which the isolated substrate runs. frame never synthesizes a multi-perspective result in its own context and never realizes isolation — convergence is claimable only by a substrate that ran the lenses in genuine isolation. Factual lookup or verification routes to fact-finding delegation; contested design, value, interpretation, or scope judgment routes to lens-conditioned inquiry. Type: (FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry. Alias: Prothesis(πρόθεσις)."
+description: "Multi-perspective framing. Fires when the right framework is absent: places analytical lenses, hands off lens↔substrate pairs. Type: (FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry"
 ---
 
 # Prothesis Protocol

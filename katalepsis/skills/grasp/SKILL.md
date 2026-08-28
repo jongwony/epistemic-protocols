@@ -1,6 +1,6 @@
 ---
 name: grasp
-description: "Verify understanding after AI work through intent-scented entry points. Type: (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding. Alias: Katalepsis(κατάληψις)."
+description: "Verify understanding after AI work through intent-scented entry points. Type: (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding"
 ---
 
 # Katalepsis Protocol

@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: "Convergence-paced review-resolve loop over a change and the surfaces that govern it — closing the defects a change introduced and converging the artifact on the project's stated goal alike. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase and against the base it is measured from, auto-applies mechanical fixes, gates judgment calls, unfolds a conflict between governing surfaces for the user's own direction, checks the applied bundle's fit once, then re-reviews until every finding has reached a disposition — closed by a landed repair, a handover, or a drop on its cited basis, or left open as declared residual. User-invoked via /review-loop."
+description: "Convergence-paced review-resolve loop over a change and its governing surfaces. Verifies each finding against the codebase and the base it is measured from, then re-reviews until each is disposed of."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
