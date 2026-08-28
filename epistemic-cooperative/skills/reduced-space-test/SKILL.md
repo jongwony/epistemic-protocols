@@ -1,6 +1,6 @@
 ---
 name: reduced-space-test
-description: "Scoped empirical validation utility. Decomposes a target↔surrogate equivalence claim into verifiable facets, bounds a user-synchronized test space, captures evidence inside it, and carries the uncovered complement forward. Use when an inference-uncertain proposition (does it behave / perform / transfer / hold value) needs evidence in a smaller stand-in space, and you want the claim scoped to the conditions actually tested rather than asserted absolutely."
+description: "Scoped empirical validation. Decomposes a target↔surrogate equivalence claim into facets, bounds a test space, captures evidence inside it, and carries the untested complement forward."
 ---
 
 # Reduced-Space Test: Scoped Empirical Validation

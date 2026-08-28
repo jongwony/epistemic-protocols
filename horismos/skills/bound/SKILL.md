@@ -1,6 +1,6 @@
 ---
 name: bound
-description: "Define epistemic boundaries per decision. Dispatches the boundary kind up-front (direction/priority, scope, type/concept, ownership, or emergent) through a fail-closed deficit-fit certificate, then classifies each boundary by a uniform settlement disposition — user-supplies, AI-proposes, AI-autonomous, or dismiss — into a BoundaryMap. The captured kind sets WHAT is bounded; the disposition sets HOW it is settled downstream (ownership is the degenerate kind where the two coincide). Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary. Alias: Horismos(ὁρισμός)."
+description: "Define epistemic boundaries per decision. Fires when a decision's direction, scope, type, or ownership is undefined. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary"
 ---
 
 # Horismos Protocol

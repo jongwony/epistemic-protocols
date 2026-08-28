@@ -1,6 +1,6 @@
 ---
 name: triage
-description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each group with the AGENTS.md northstar in session, and externalizes each routed work unit to a substrate record a collaborator session is pointed at."
+description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each group with the AGENTS.md northstar, and externalizes each routed unit to a substrate record a collaborator session is pointed at."
 ---
 
 # Triage: Work-Unit Formation

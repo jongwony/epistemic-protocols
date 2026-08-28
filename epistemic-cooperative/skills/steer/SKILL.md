@@ -1,6 +1,6 @@
 ---
 name: steer
-description: "Project profile recalibration via session calibration drift audit. Scan session calibration moves for Constitution overapplication, Extension misapplication, and existing profile drift, present per-cluster evidence for user-constituted verdict, then write an updated user-global or project-local project-profile rule file via Circular Return — and, when a direction has settled, inscribe a citable clause into the Settled Directions registry adjacent to the project Northstar. Use this skill whenever the user wants to 'recalibrate project profile', 'audit calibration drift', 'reinduce Cognitive Partnership Move defaults', 'steer project profile', or invokes /steer. Periagoge family — extends /induce with a writable rule inscription step for ProjectProfile and the Settled Directions registry."
+description: "Project-profile recalibration. Audits session calibration drift, presents per-cluster evidence for a user verdict, writes the updated project-profile rule, and inscribes a settled-direction clause."
 user_invocable: true
 ---
 

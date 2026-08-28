@@ -1,6 +1,6 @@
 ---
 name: gate-check
-description: "Advisor-checked decision gates. Freezes a drafted gate, sends its option set to an independent external advisor for a genuine / collapse / malformed verdict, or for the repair space where none of the three fits, records its own expectations before the answer arrives, then verifies the advisor's cited grounds against the substrate before anything reaches the user. User-invoked via /gate-check; stays armed for the rest of the session."
+description: "Advisor-checked decision gates. Freezes a drafted option set, has an independent external advisor rule it genuine / collapsed / malformed, then verifies the cited grounds before it reaches the user."
 ---
 
 # Gate Check

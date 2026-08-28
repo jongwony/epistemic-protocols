@@ -1,6 +1,6 @@
 ---
 name: ground
-description: "Validate structural mapping between abstract and concrete domains. Constructs domain correspondences and presents concrete instantiations when mapping uncertainty is detected, producing validated mapping. Also recognizes self-grounding (an abstraction validated against its own instances) and derives a split-vs-trim partition reading that routes wrong-fusion recovery. Type: (MappingUncertain, AI, GROUND, R) → ValidatedMapping. Alias: Analogia(ἀναλογία)."
+description: "Validate structural mapping between abstract and concrete domains. Presents concrete instantiations when mapping uncertainty is detected. Type: (MappingUncertain, AI, GROUND, R) → ValidatedMapping"
 ---
 
 # Analogia Protocol

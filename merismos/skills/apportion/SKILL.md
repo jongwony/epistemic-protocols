@@ -1,6 +1,6 @@
 ---
 name: apportion
-description: "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions before the run begins. Cuts the goal at its evidenced seams so each unit fits one execution horizon and every goal obligation lands in some unit, derives per-unit completion and invariant predicates plus the cross-unit plan conditions, and emits one resolution certificate per unit: a conjoined predicate when completion compiles, otherwise an accepted-uncovered or reserved-judgment witness that retains any invariant conjuncts. An item only a judgment can settle is reserved with the ground that settles it, kept apart from an accepted shortfall; risks needing pre-action interception are declared out of scope. Pre-conduct: unit boundaries and conditions only — order, independence, reconciliation, termination topology and routing are out of scope. Type: (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan. Alias: Merismos(μερισμός)."
+description: "Apportion an autonomous goal into execution units carrying their own completion conditions. Type: (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan"
 ---
 
 # Merismos Protocol

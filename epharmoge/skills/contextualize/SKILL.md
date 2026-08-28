@@ -1,6 +1,6 @@
 ---
 name: contextualize
-description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, registering each mismatch through a fail-closed deficit-fit certificate before disposition, producing contextualized execution. Judgment (does the aspect stand?) and disposition (adapt, keep, or withdraw the result) are separate axes: the judgment is relay-eligible on cited evidence, the disposition is the user's answer about the target in front of them, and a relay may close a mismatch only where the close leaves the result untouched. The transformative revalidation loop is non-monotone — an adapt disposition mutates the evaluation target and can breed emergent mismatches; re-scan is mandatory. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution. Alias: Epharmoge(ἐφαρμογή)."
+description: "Detect application-context mismatch after execution. Fires when correct output may not fit the actual context. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution"
 ---
 
 # Epharmoge Protocol
