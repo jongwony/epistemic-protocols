@@ -83,7 +83,7 @@ describe('gate-answer-reference', () => {
     );
   });
 
-  it('rejects dangling TYPES and MODE STATE references', () => {
+  it('rejects dangling TYPES, MODE STATE, and inline type references', () => {
     const root = copyWorkingTree();
     try {
       const aitesisPath = path.join(root, 'aitesis/skills/inquire/SKILL.md');
@@ -94,9 +94,12 @@ describe('gate-answer-reference', () => {
       const horismosPath = path.join(root, 'horismos/skills/bound/SKILL.md');
       const horismos = readFileSync(horismosPath, 'utf-8');
       assert.ok(horismos.includes('→ Stop → Λ.final_gate_answers'), 'Horismos mutation anchor moved');
+      assert.ok(horismos.includes('→ Stop → confirmed_intent ∈ J'), 'Horismos inline type anchor moved');
       writeFileSync(
         horismosPath,
-        horismos.replace('→ Stop → Λ.final_gate_answers', '→ Stop → Λ.missing_gate_answers')
+        horismos
+          .replace('→ Stop → Λ.final_gate_answers', '→ Stop → Λ.missing_gate_answers')
+          .replace('→ Stop → confirmed_intent ∈ J', '→ Stop → confirmed_intent ∈ Zeta')
       );
 
       const mutated = run(root);
@@ -105,6 +108,7 @@ describe('gate-answer-reference', () => {
         .map((result) => `${result.file}: ${result.message}`);
       assert.ok(failures.some((message) => message.includes('`Zeta`')), failures.join('\n'));
       assert.ok(failures.some((message) => message.includes('`Λ.missing_gate_answers`')), failures.join('\n'));
+      assert.ok(failures.some((message) => message.includes('inline gate answer type `Zeta`')), failures.join('\n'));
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

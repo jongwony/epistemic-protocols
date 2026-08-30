@@ -1714,9 +1714,9 @@ function checkRoutingMapSync() {
 // ============================================================
 // Check: Gate Answer Reference
 // Exact Definition-internal reference resolution only: a formal answer after
-// `Stop` must resolve to a TYPES declaration, a MODE STATE field, or an inline
-// type declaration. Runtime option materialization depends on live context and
-// belongs to /realize or review.
+// `Stop` must resolve to a TYPES or transition-local declaration, a MODE STATE
+// field, or a locally enumerated inline type. Runtime option materialization
+// depends on live context and belongs to /realize or review.
 // ============================================================
 
 const FORMAL_IDENTIFIER = /^(?:[\p{Lu}Λ_][\p{L}\p{N}_'’]*|[\p{L}][\p{L}\p{N}'’]*_[\p{L}\p{N}_'’]+)$/u;
@@ -1746,12 +1746,25 @@ function checkGateAnswerReference() {
       extractFormalSection(content, 'PHASE TRANSITIONS'),
       extractFormalSection(content, 'LOOP')
     ].filter(Boolean).join('\n');
+    const transitionDeclarations = new Set(
+      [...transitions.matchAll(new RegExp(`^\\s*(${identifier})\\s*(?:=|∈|:)`, 'gmu'))]
+        .map((m) => m[1])
+    );
     let resolvedAnswers = 0;
     let unresolvedAnswers = 0;
-    for (const m of transitions.matchAll(/→\s*Stop\s*→\s*([^\s→[\]|(){}]+)(\s*∈)?/gu)) {
+    for (const m of transitions.matchAll(/→\s*Stop\s*→\s*([^\s→[\]|(){}]+)(?:\s*∈\s*(\{|[\p{L}_][\p{L}\p{N}_'’]*))?/gu)) {
       const symbol = m[1].replace(/[.,;:]+$/, '');
       if (m[2]) {
-        resolvedAnswers += 1;
+        if (m[2] === '{' || typeDeclarations.has(m[2]) || transitionDeclarations.has(m[2])) {
+          resolvedAnswers += 1;
+          continue;
+        }
+        unresolvedAnswers += 1;
+        results.fail.push({
+          check: 'gate-answer-reference',
+          file,
+          message: `inline gate answer type \`${m[2]}\` does not resolve to a TYPES or transition-local declaration`
+        });
         continue;
       }
       const stateReference = STATE_REFERENCE.exec(symbol);
@@ -1762,7 +1775,7 @@ function checkGateAnswerReference() {
         }
       } else if (!FORMAL_IDENTIFIER.test(symbol)) {
         continue; // prose continuation after Stop, not a formal reference
-      } else if (typeDeclarations.has(symbol) || stateFields.has(symbol)) {
+      } else if (typeDeclarations.has(symbol) || transitionDeclarations.has(symbol) || stateFields.has(symbol)) {
         resolvedAnswers += 1;
         continue;
       }
@@ -1771,7 +1784,7 @@ function checkGateAnswerReference() {
       results.fail.push({
         check: 'gate-answer-reference',
         file,
-        message: `formal gate answer \`${symbol}\` does not resolve to a TYPES declaration, MODE STATE field, or inline type declaration`
+        message: `formal gate answer \`${symbol}\` does not resolve to a TYPES or transition-local declaration, MODE STATE field, or locally enumerated inline type`
       });
     }
 
