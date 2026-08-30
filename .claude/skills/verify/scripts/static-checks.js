@@ -1773,11 +1773,11 @@ function checkGateAnswerReference() {
           resolvedAnswers += 1;
           continue;
         }
-      } else if (!FORMAL_IDENTIFIER.test(symbol)) {
-        continue; // prose continuation after Stop, not a formal reference
       } else if (typeDeclarations.has(symbol) || transitionDeclarations.has(symbol) || stateFields.has(symbol)) {
         resolvedAnswers += 1;
         continue;
+      } else if (!FORMAL_IDENTIFIER.test(symbol)) {
+        continue; // prose continuation after Stop, not a formal reference
       }
 
       unresolvedAnswers += 1;
