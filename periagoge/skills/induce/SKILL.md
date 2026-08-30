@@ -98,7 +98,7 @@ If no essence signal is detectable (neither user sensing language nor AI-inferra
 Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess               -- detection checkpoint (silent)
 Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G); carry (P, G, K)  -- calibration + candidate + grounding construction [Tool]
 Phase 2: (P, G, K) → Qs(P, G, K, framing) → Stop → V                      -- triangulation Constitution interaction [Tool]
-Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
+Phase 3: V → integrate(V, candidate) → candidate' ; Λ.history := Λ.history ++ [(P, G, K, V)]   -- candidate update + round record (track)
 
 ── LOOP ──
 After Phase 3: evaluate user move.
@@ -159,7 +159,6 @@ Frame the abstraction currently being shaped rather than a progress fraction. Re
 - **Recognition over Recall**: Present structured options with anticipatable post-selection states and yield for the user's shaping move.
 - **Calibration authority**: Treat the candidate as a working hypothesis. The instance-grounded calibration remains open to correction through the same free-response path as candidate shaping.
 - **Label as ground, not verdict**: Read the user's tentative label as the naming ground the proposal works from. It grounds the candidate's name and its provenance without fixing either, so what the label survives as stays a judgment made in the run.
-- **Move-typed shaping**: Apply each shaping move on its own terms — broaden the candidate along the direction given, constrain it along the named dimension, fold in the adjacent abstraction the user named, or redirect onto the named orthogonal axis. Which move arrived, not a generic update, is what determines the shape the next candidate takes.
 - **Personalized grounding**: Pair every candidate with evidence from the user's own domain and keep external provenance visible.
 - **Periagoge boundary**: Form an abstraction around a sensed but unlocated essence. Comparison or validation of an already located abstraction remains outside this operation.
 - **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the gate.
