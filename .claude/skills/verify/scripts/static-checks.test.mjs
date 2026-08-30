@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Non-inertness guard for gate-type-soundness.
+ * Known-pass / known-fail proof for gate-answer-reference.
  *
- * The check this guards was previously anchored on prose `Options:` blocks. When the
- * prose ablation removed those blocks the check kept reporting pass while matching
- * nothing — a green result asserting an invariant it had stopped testing. These tests
- * assert the two rules reach real sites, so the same silence fails loudly next time.
+ * The former gate-type-soundness check went inert when its prose anchor was
+ * ablated. This test establishes that the replacement reaches every protocol
+ * and rejects exact dangling references without asking a static parser to judge
+ * context-dependent gate semantics.
  *
  * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
  */
@@ -13,65 +13,100 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(here, '../../../..');
-const checker = path.join(here, 'static-checks.js');
+const checkerRelative = '.claude/skills/verify/scripts/static-checks.js';
+const require = createRequire(import.meta.url);
+const { protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
+const CHECK = 'gate-answer-reference';
 
-const results = JSON.parse(
-  execFileSync('node', [checker, projectRoot], { encoding: 'utf-8', maxBuffer: 1 << 28 })
-);
+function run(root) {
+  try {
+    return JSON.parse(execFileSync('node', [path.join(root, checkerRelative), root], {
+      encoding: 'utf-8',
+      maxBuffer: 1 << 28
+    }));
+  } catch (error) {
+    assert.equal(error.status, 1, `verifier failed without a check verdict: ${error.stderr}`);
+    return JSON.parse(error.stdout);
+  }
+}
 
-const CHECK = 'gate-type-soundness';
-const passes = results.pass.filter((r) => r.check === CHECK);
-const warns = results.warn.filter((r) => r.check === CHECK);
-
-// "(12 coproducts, 4 Constitution gates, 2 typed gate answers, 0 option runs matched to TYPES, 0 untyped gate answers)"
 function counts(message) {
   const read = (label) => {
-    const m = new RegExp(`(\\d+) ${label}`).exec(message);
-    assert.ok(m, `pass message lost its "${label}" count: ${message}`);
-    return Number(m[1]);
+    const match = new RegExp(`(\\d+) ${label}`).exec(message);
+    assert.ok(match, `pass message lost its "${label}" count: ${message}`);
+    return Number(match[1]);
   };
   return {
-    coproducts: read('coproducts'),
-    gates: read('Constitution gates'),
-    typedAnswers: read('typed gate answers'),
-    optionRuns: read('option runs matched to TYPES'),
-    untypedAnswers: read('untyped gate answers')
+    resolved: read('resolved formal answers'),
+    unresolved: read('unresolved formal answers')
   };
 }
 
-describe('gate-type-soundness', () => {
-  it('reports on every protocol', () => {
-    assert.ok(passes.length > 0, 'check produced no results at all');
-  });
-
-  it('reads a typed vocabulary and at least one Constitution gate out of every protocol', () => {
-    for (const p of passes) {
-      const c = counts(p.message);
-      assert.ok(c.coproducts > 0, `${p.file}: no TYPES coproduct parsed — extraction is inert here`);
-      assert.ok(c.gates > 0, `${p.file}: no Constitution gate parsed — extraction is inert here`);
+function copyWorkingTree() {
+  const root = mkdtempSync(path.join(tmpdir(), 'gate-answer-reference-'));
+  cpSync(projectRoot, root, {
+    recursive: true,
+    filter: (source) => {
+      const relative = path.relative(projectRoot, source);
+      return relative !== '.git'
+        && !relative.startsWith(`.git${path.sep}`)
+        && relative !== 'node_modules'
+        && !relative.startsWith(`node_modules${path.sep}`)
+        && relative !== '.claude/worktrees'
+        && !relative.startsWith(`.claude${path.sep}worktrees${path.sep}`);
     }
   });
+  return root;
+}
 
-  it('exercises both rules somewhere in the repo', () => {
-    const total = passes.reduce(
-      (acc, p) => {
-        const c = counts(p.message);
-        acc.typedAnswers += c.typedAnswers;
-        acc.optionRuns += c.optionRuns;
-        return acc;
-      },
-      { typedAnswers: 0, optionRuns: 0 }
+const clean = run(projectRoot);
+const cleanPasses = clean.pass.filter((result) => result.check === CHECK);
+const cleanFailures = clean.fail.filter((result) => result.check === CHECK);
+
+describe('gate-answer-reference', () => {
+  it('reports a clean known-pass result for every canonical protocol', () => {
+    const expected = protocolFiles({ projectRoot }).sort();
+    const actual = cleanPasses.map((result) => result.file).sort();
+    assert.deepEqual(actual, expected);
+    assert.deepEqual(cleanFailures, []);
+    assert.ok(
+      cleanPasses.some((result) => counts(result.message).resolved > 0),
+      'no formal gate answer was resolved — extraction is inert'
     );
-    assert.ok(total.typedAnswers > 0, 'no gate answer was resolved against TYPES — the answer-typing rule matches nothing');
-    assert.ok(total.optionRuns > 0, 'no gate option run was paired to TYPES — the option-soundness rule matches nothing');
   });
 
-  it('holds clean on the committed protocols', () => {
-    assert.deepEqual(warns.map((w) => `${w.file}: ${w.message}`), []);
+  it('rejects dangling TYPES and MODE STATE references', () => {
+    const root = copyWorkingTree();
+    try {
+      const aitesisPath = path.join(root, 'aitesis/skills/inquire/SKILL.md');
+      const aitesis = readFileSync(aitesisPath, 'utf-8');
+      assert.ok(aitesis.includes('→ Stop → A '), 'Aitesis mutation anchor moved');
+      writeFileSync(aitesisPath, aitesis.replace('→ Stop → A ', '→ Stop → Zeta '));
+
+      const horismosPath = path.join(root, 'horismos/skills/bound/SKILL.md');
+      const horismos = readFileSync(horismosPath, 'utf-8');
+      assert.ok(horismos.includes('→ Stop → Λ.final_gate_answers'), 'Horismos mutation anchor moved');
+      writeFileSync(
+        horismosPath,
+        horismos.replace('→ Stop → Λ.final_gate_answers', '→ Stop → Λ.missing_gate_answers')
+      );
+
+      const mutated = run(root);
+      const failures = mutated.fail
+        .filter((result) => result.check === CHECK)
+        .map((result) => `${result.file}: ${result.message}`);
+      assert.ok(failures.some((message) => message.includes('`Zeta`')), failures.join('\n'));
+      assert.ok(failures.some((message) => message.includes('`Λ.missing_gate_answers`')), failures.join('\n'));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

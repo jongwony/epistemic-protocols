@@ -1711,75 +1711,18 @@ function checkRoutingMapSync() {
   });
 }
 
-// Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSupplies/User-supplies
-function stemMatch(a, b) {
-  // Normalize: remove hyphens, case-insensitive
-  const normA = a.replace(/-/g, '');
-  const normB = b.replace(/-/g, '');
-  if (normA === normB) return true;
-  // Prefix match requires short side >= 70% of long side length
-  const minRatio = 0.7;
-  if (normA.startsWith(normB) && normB.length >= normA.length * minRatio) return true;
-  if (normB.startsWith(normA) && normA.length >= normB.length * minRatio) return true;
-  // Handle verb inflection: X/Xes, X/Xed
-  const stemA = normA.replace(/(es|ed|s)$/, '');
-  const stemB = normB.replace(/(es|ed|s)$/, '');
-  if (stemA === stemB) return true;
-  if (stemA.startsWith(stemB) && stemB.length >= stemA.length * minRatio) return true;
-  if (stemB.startsWith(stemA) && stemA.length >= stemB.length * minRatio) return true;
-  return false;
-}
-
 // ============================================================
-// Check: Gate Type Soundness (Safeguard — warning only)
-// Anchored on the Definition alone: TYPES against PHASE TRANSITIONS/LOOP and
-// TOOL GROUNDING. A gate's answer must be typed, and the options a Constitution
-// gate names must be constructors the TYPES vocabulary declares.
-// Type-preserving materialization is permitted; gate mutation is flagged.
+// Check: Gate Answer Reference
+// Exact Definition-internal reference resolution only: a formal answer after
+// `Stop` must resolve to a TYPES declaration, a MODE STATE field, or an inline
+// type declaration. Runtime option materialization depends on live context and
+// belongs to /realize or review.
 // ============================================================
 
-// Drop every parenthesised argument list, however deeply nested:
-// Reorient(axis, partition: Option(Set(MoveRegion))) → Reorient
-function stripTypeArgs(text) {
-  let out = '';
-  let depth = 0;
-  for (const ch of text) {
-    if (ch === '(') depth += 1;
-    else if (ch === ')') depth = Math.max(0, depth - 1);
-    else if (depth === 0) out += ch;
-  }
-  return out.trim();
-}
+const FORMAL_IDENTIFIER = /^(?:[\p{Lu}Λ_][\p{L}\p{N}_'’]*|[\p{L}][\p{L}\p{N}'’]*_[\p{L}\p{N}_'’]+)$/u;
+const STATE_REFERENCE = /^Λ\.([\p{L}_][\p{L}\p{N}_'’]*)$/u;
 
-// Split a coproduct body on its top-level separators, respecting nesting.
-function splitCoproduct(body) {
-  const parts = [];
-  let cur = '';
-  let depth = 0;
-  for (const ch of body) {
-    if ('({⟨'.includes(ch)) depth += 1;
-    else if (')}⟩'.includes(ch)) depth = Math.max(0, depth - 1);
-    if (depth === 0 && (ch === ',' || ch === '|' || ch === '∪')) {
-      parts.push(cur);
-      cur = '';
-      continue;
-    }
-    cur += ch;
-  }
-  parts.push(cur);
-  return parts
-    .map((p) => stripTypeArgs(p))
-    .filter((p) => /^[A-Za-z][A-Za-z0-9_'-]*$/.test(p));
-}
-
-const GATE_SYMBOL = /^[A-ZΛ_][\w'’]*$|^[A-Za-z][\w'’]*_[\w'’]*$|^[\p{L}][\p{L}\p{N}'’ᵃ-ᵪ₀-ₜ]{0,2}$/u;
-
-// A bare lowercase English word after `Stop →` is prose continuation, not a symbol.
-function isGateSymbol(token) {
-  return GATE_SYMBOL.test(token);
-}
-
-function checkGateTypeSoundness() {
+function checkGateAnswerReference() {
   for (const file of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, file);
     let content;
@@ -1787,107 +1730,58 @@ function checkGateTypeSoundness() {
       content = fs.readFileSync(fullPath, 'utf-8');
     } catch { continue; }
 
-    const typesSection = extractFormalSection(content, 'TYPES');
-    if (!typesSection) continue;
+    const typesSection = extractFormalSection(content, 'TYPES') ?? '';
+    const modeStateSection = extractFormalSection(content, 'MODE STATE') ?? '';
+    const identifier = "[\\p{L}_][\\p{L}\\p{N}_'’]*";
+    const typeDeclarations = new Set(
+      [...typesSection.matchAll(new RegExp(`^\\s*(${identifier})\\s*(?:=|∈|:)`, 'gmu'))]
+        .map((m) => m[1])
+    );
+    const stateFields = new Set(
+      [...modeStateSection.matchAll(new RegExp(`(?:^|[,{])\\s*(${identifier})\\s*:`, 'gmu'))]
+        .map((m) => m[1])
+    );
 
-    // 1. Coproducts: `Name ∈ {A, B, C}`, `Name = {A, B, C}`, `Name = A ∪ B`, `Name = A | B`
-    const coproducts = [];
-    const declared = new Set();
-    for (const m of typesSection.matchAll(/^\s*([A-Za-zΛ][\w'’]*)\s*([^\n]*?)(?:∈|=)\s*\{([^{}]*[,|][^{}]*)\}/gmu)) {
-      declared.add(m[1]);
-      for (const alias of m[2].matchAll(/[A-Za-zΛ][\w'’]*/gu)) declared.add(alias[0]);
-      const constructors = splitCoproduct(m[3]);
-      if (constructors.length >= 2) coproducts.push({ typeName: m[1], constructors });
-    }
-    for (const m of typesSection.matchAll(/^\s*([A-Za-zΛ][\w'’]*)\s*=\s*([A-Z][\w'’]*(?:\([^\n]*?\))?(?:\s*[|∪]\s*[A-Z][\w'’]*(?:\([^\n]*?\))?)+)/gmu)) {
-      declared.add(m[1]);
-      const constructors = splitCoproduct(m[2]);
-      if (constructors.length >= 2) coproducts.push({ typeName: m[1], constructors });
-    }
-    for (const m of typesSection.matchAll(/^\s*([A-Za-zΛ][\w'’]*)\s*(?:=|∈|:)/gmu)) declared.add(m[1]);
-    for (const cp of coproducts) for (const c of cp.constructors) declared.add(c);
-
-    // Every bare token TYPES mentions — a symbol named there is typed there, even
-    // when its type arrives through a field or a signature rather than its own line.
-    const mentioned = new Set(typesSection.match(/[\p{L}_][\p{L}\p{N}_'’]*/gu) ?? []);
-
-    // 2. Rule A — a gate's answer is typed.
     const transitions = [
       extractFormalSection(content, 'PHASE TRANSITIONS'),
       extractFormalSection(content, 'LOOP')
     ].filter(Boolean).join('\n');
-    let untypedAnswers = 0;
-    let typedAnswers = 0;
+    let resolvedAnswers = 0;
+    let unresolvedAnswers = 0;
     for (const m of transitions.matchAll(/→\s*Stop\s*→\s*([^\s→[\]|(){}]+)(\s*∈)?/gu)) {
       const symbol = m[1].replace(/[.,;:]+$/, '');
-      if (m[2]) { typedAnswers += 1; continue; }  // typed inline at the site: `X ∈ T`
-      if (!isGateSymbol(symbol)) continue;      // prose continuation, not a symbol
-      if (declared.has(symbol) || mentioned.has(symbol)) { typedAnswers += 1; continue; }
-      untypedAnswers += 1;
-      results.warn.push({
-        check: 'gate-type-soundness',
+      if (m[2]) {
+        resolvedAnswers += 1;
+        continue;
+      }
+      const stateReference = STATE_REFERENCE.exec(symbol);
+      if (stateReference) {
+        if (stateFields.has(stateReference[1])) {
+          resolvedAnswers += 1;
+          continue;
+        }
+      } else if (!FORMAL_IDENTIFIER.test(symbol)) {
+        continue; // prose continuation after Stop, not a formal reference
+      } else if (typeDeclarations.has(symbol) || stateFields.has(symbol)) {
+        resolvedAnswers += 1;
+        continue;
+      }
+
+      unresolvedAnswers += 1;
+      results.fail.push({
+        check: 'gate-answer-reference',
         file,
-        message: `PHASE TRANSITIONS gate answer \`${symbol}\` has no TYPES declaration — type the answer or name its type inline at the Stop site`
+        message: `formal gate answer \`${symbol}\` does not resolve to a TYPES declaration, MODE STATE field, or inline type declaration`
       });
     }
 
-    // 3. Rule B — a Constitution gate's named options are constructors of the type it answers into.
-    const grounding = extractFormalSection(content, 'TOOL GROUNDING');
-    const gateEntries = [];
-    let current = null;
-    for (const line of (grounding ?? '').split('\n')) {
-      if (/\((?:constitution|extension|track|sense|observe|reason|derive|verify|act)\)/.test(line)) {
-        if (current) gateEntries.push(current);
-        const head = /^\s*(.*?)\s*\(constitution\)/.exec(line);
-        current = head && !head[1].startsWith('--')
-          ? { name: head[1], body: line }
-          : null;
-      } else if (current) {
-        current.body += `\n${line}`;
-      }
+    if (unresolvedAnswers === 0) {
+      results.pass.push({
+        check: 'gate-answer-reference',
+        file,
+        message: `Gate answer reference check completed (${resolvedAnswers} resolved formal answers, ${unresolvedAnswers} unresolved formal answers)`
+      });
     }
-    if (current) gateEntries.push(current);
-
-    const allConstructors = [...new Set(coproducts.flatMap((cp) => cp.constructors))];
-    let analysed = 0;
-    for (const gate of gateEntries) {
-      const presented = gate.body.slice(Math.max(0, gate.body.indexOf('present')));
-      const runs = [];
-      for (const m of presented.matchAll(/\{([^{}]*\|[^{}]*)\}/g)) runs.push(splitCoproduct(m[1]));
-      for (const m of presented.matchAll(/\b([A-Z][A-Za-z]*(?:\([^()]*\))?(?:\s*\/\s*[A-Z][A-Za-z]*(?:\([^()]*\))?)+)/g)) {
-        runs.push(m[1].split('/').map((p) => stripTypeArgs(p)).filter(Boolean));
-      }
-
-      for (const run of runs) {
-        if (run.length < 2) continue;
-        // Pair the run to the coproduct it overlaps most; an unanchored run is prose.
-        let best = null;
-        let bestScore = 0;
-        for (const cp of coproducts) {
-          const score = run.filter((o) => cp.constructors.some((c) => stemMatch(o.toLowerCase(), c.toLowerCase()))).length;
-          if (score > bestScore) { bestScore = score; best = cp; }
-        }
-        if (!best || bestScore === 0) continue;
-        analysed += 1;
-        // An option may be a constructor of a sibling coproduct — a gate presenting a
-        // (judgment, disposition) pairing spans two types legitimately. What has no type
-        // anywhere in TYPES is the injection this check is for.
-        const injected = run.filter((o) => !allConstructors.some((c) => stemMatch(o.toLowerCase(), c.toLowerCase())));
-        if (injected.length > 0) {
-          results.warn.push({
-            check: 'gate-type-soundness',
-            file,
-            message: `${gate.name} names options with no TYPES constructor (nearest: ${best.typeName} ∈ {${best.constructors.join(', ')}}): ${injected.join(', ')}. Verify: type-preserving materialization or gate mutation?`
-          });
-        }
-      }
-    }
-
-    results.pass.push({
-      check: 'gate-type-soundness',
-      file,
-      message: `Gate type soundness check completed (${coproducts.length} coproducts, ${gateEntries.length} Constitution gates, ${typedAnswers} typed gate answers, ${analysed} option runs matched to TYPES, ${untypedAnswers} untyped gate answers)`
-    });
   }
 }
 
@@ -2653,7 +2547,7 @@ try {
   checkCatalogSync();
   checkRoutingMapSync();
   checkPartitionInvariant();
-  checkGateTypeSoundness();
+  checkGateAnswerReference();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
   checkFramingReadoutEnforcement();
