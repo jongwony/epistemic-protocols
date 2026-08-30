@@ -13,13 +13,13 @@ Calibrate and crystallize in-process abstraction through AI-proposed candidate p
 
 ```
 ── FLOW ──
-Periagoge(A) → Detect(A) → in_process? →
-  true:  (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K →
+Periagoge(A) → Detect(A) →
+  InProcess(Iᵢ, E, L?): Calibrate(Iᵢ, E, L?, ctx) → K →
          Propose(Iᵢ, E, K, ctx) → (P, G) →
          Qs(P, G, K, framing) → Stop → V → integrate(V, candidate) → candidate' →
          loop until crystallized(Λ) → declare(completion_trace, open_trace) → CrystallizedAbstraction
-         or attempts_exhausted → deactivate
-  false: deactivate
+         or attempts_exhausted(Λ) → deactivate
+  NotInProcess: deactivate
 
 ── MORPHISM ──
 A
@@ -38,7 +38,10 @@ invariant: Calibrative Induction through Dialectical Triangulation over Unilater
 
 ── TYPES ──
 A              = AbstractionSeed (in-process state: instances + essence intuition + optional user concept label)
-Detect         = A → (Bool, Option((Iᵢ, E, L?)))         -- payload is Some(...) exactly when the Bool is true
+Detect         = A → DetectResult
+DetectResult   ∈ {InProcess(Iᵢ, E, L?), NotInProcess}
+                 -- closed: Phase 0's two exits; the payload rides the InProcess branch, so no verdict and payload
+                 -- can disagree, and InProcess is what witnesses requires: in_process(A)
 Iᵢ             = Set(Instance)                             -- instance set observed; cardinality unconstrained (any N ≥ 1 qualifies when essence is sensed; richer sets provide stronger triangulation material)
 Instance       = { content: String, context: String }       -- concrete case observed
 E              = EssenceIntuition                           -- variation-stable core signal from conversation
@@ -51,8 +54,6 @@ K              = CalibrationMap { keeps, sharpens, prunes, open, label_basis }
                  prunes      = overextended or unsupported scope to release
                  open        = residual uncertainty that does not block crystallization
                  label_basis = Option(L) as the user gave it, carried with its provenance
-                               -- the naming ground Propose reads through K; it grounds P.name and P.provenance
-                               -- without determining them, so what the label survives as stays a run-time judgment
 OpenDisposition ∈ {None, Nonblocking, Deferred}
                  None        = no open calibration pressure remains; explicitly declared
                  Nonblocking = open item remains visible but does not block Confirm
@@ -74,6 +75,11 @@ V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), F
                  axis         = orthogonal dimension         -- full redirection
 Qs             = Shaping interaction with candidate + grounding [Tool: Constitution interaction]
 crystallized(Λ) = ∃ step ∈ Λ.history : V(step) = Confirm
+max_attempts   = the triangulation cap LOOP fixes per abstraction seed
+attempts_exhausted(Λ) = |Λ.history| ≥ max_attempts ∧ ¬crystallized(Λ)
+                 -- Λ.history appends exactly one step per triangulation attempt, so |Λ.history| is the attempt count
+                 -- and the cap is read after Phase 3's append; a Confirm on the capped attempt crystallizes rather
+                 -- than exhausting, which is what keeps the two LOOP exits mutually exclusive
 CompletionTrace = List<(A, K, P, V, candidate')>
                  -- derived from Λ.history with A sourced from Λ.A and candidate' computed from each step's post-move candidate state
 CrystallizedAbstraction = P where confirmed(P) via Confirm move ∧ completion_trace_declared(CompletionTrace) ∧ open_disposition_declared(OpenTrace)
@@ -89,7 +95,7 @@ Priority: explicit_arg > recent_instance_cluster > surfaced_essence
 If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw.
 
 ── PHASE TRANSITIONS ──
-Phase 0: A → Detect(A) → in_process?                                       -- detection checkpoint (silent)
+Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess               -- detection checkpoint (silent)
 Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G); carry (P, G, K)  -- calibration + candidate + grounding construction [Tool]
 Phase 2: (P, G, K) → Qs(P, G, K, framing) → Stop → V                      -- triangulation Constitution interaction [Tool]
 Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
@@ -102,14 +108,14 @@ If V = Narrow(specializer): return to Phase 2.
 If V = Fuse(adjacent): return to Phase 1 (grounding recomputed).
 If V = Reorient(axis): return to Phase 1 (full recompute).
 If V = Dismiss: abandon candidate; if essence still sensed, return to Phase 1 with fresh candidate; else deactivate.
-Max 5 triangulation attempts per abstraction seed.
-Continue until: crystallized(Λ) ∨ attempts_exhausted.
+Cap: max_attempts = 5 triangulation attempts per abstraction seed.
+Continue until: crystallized(Λ) ∨ attempts_exhausted(Λ).
 Convergence evidence: At crystallized(Λ), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 crystallized(Λ): see TYPES (V = Confirm in Λ.history)
-progress(Λ) = |Λ.history| / max_attempts                    -- max_attempts is the LOOP cap; one history step per triangulation attempt
-early_exit = attempts_exhausted
+progress(Λ) = |Λ.history| / max_attempts                    -- both terms per TYPES; LOOP fixes the max_attempts value
+early_exit = attempts_exhausted(Λ)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -152,6 +158,8 @@ Frame the abstraction currently being shaped rather than a progress fraction. Re
 
 - **Recognition over Recall**: Present structured options with anticipatable post-selection states and yield for the user's shaping move.
 - **Calibration authority**: Treat the candidate as a working hypothesis. The instance-grounded calibration remains open to correction through the same free-response path as candidate shaping.
+- **Label as ground, not verdict**: Read the user's tentative label as the naming ground the proposal works from. It grounds the candidate's name and its provenance without fixing either, so what the label survives as stays a judgment made in the run.
+- **Move-typed shaping**: Apply each shaping move on its own terms — broaden the candidate along the direction given, constrain it along the named dimension, fold in the adjacent abstraction the user named, or redirect onto the named orthogonal axis. Which move arrived, not a generic update, is what determines the shape the next candidate takes.
 - **Personalized grounding**: Pair every candidate with evidence from the user's own domain and keep external provenance visible.
 - **Periagoge boundary**: Form an abstraction around a sensed but unlocated essence. Comparison or validation of an already located abstraction remains outside this operation.
 - **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the gate.
