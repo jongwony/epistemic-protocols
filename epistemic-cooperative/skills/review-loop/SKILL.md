@@ -15,22 +15,25 @@ What the artifact converges *on* is the project's own stated goal — a mission 
 ## Caller Signature
 
 ```
-/review-loop [source?] [scope?]
+/review-loop [source?] [scope?] [landing?]
 
-source : { codex | code-review }                     -- optional; review source behind the (diff, design-intent) → { findings[], verdict } interface
+source  : { codex | code-review }                    -- optional; review source behind the (diff, design-intent) → { findings[], verdict } interface
                                                      --   absent → Phase 0 asks which source to use (no default; one invokable source relays, zero stops)
-scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
+scope   : PR number | (implicit)                     -- optional; PR number, or implicit current-PR / working-tree detection
+landing : { head | stacked }                         -- optional; PR scope only — where this invocation's repairs land
+                                                     --   absent → Phase 0 asks; a working-tree scope has nowhere to stack, so it never asks
 ```
 
-The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default; with exactly one invokable source it relays the designation, with none it stops). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
+The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default; with exactly one invokable source it relays the designation, with none it stops). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree). When `landing` is omitted on a PR scope, Phase 0 asks that too. All three read the invocation as it arrived rather than only a parsed flag: a designation carried in the request's own words is the ordinary form, and a slot that only matches its own spelling leaves the loop asking a question the user has already answered.
 
 ## Pipeline Overview
 
 ```
 /review-loop [source?] [scope?]
   Phase 0  : source designation (arg → relay | absent → ask, cardinality-guarded) + scope detect (PR diff | working tree)
-                          + landing path, PR scope only (ask: commits on the reviewed head | a layer stacked above it;
-                            settled once per invocation; it moves where repairs land, not the review base)
+                          + landing path, PR scope only (named → relay | absent → ask: commits on the reviewed
+                            head | a layer stacked above it; settled once per invocation; it moves where repairs
+                            land, not the review base)
                           + design-intent harvest (rules/comments for the changed surface → intent bundle,
                             carrying the project's declared order of authority among those surfaces where it declares one)
   Phase 1  : review    — source(diff, intent) → { findings[], verdict, exercised, direction? }
@@ -85,7 +88,7 @@ The loop is the skill's identity; the review source is a parameter behind it. Th
 
 Capture the **resolved base SHA** (the merge-base or PR base commit the diff is taken against; for a working-tree scope, the `HEAD` SHA at capture time) and, for either PR scope (explicit number or detected current-branch PR), the **PR head SHA** (`gh pr view [{N}] --json headRefOid`), plus the changed-files list: this base SHA + head + file list is the **pointer** every source receives — the codex prompt carries it, and the `code-review` call passes it as its scope; the source re-derives the diff locally with its own git (codex: read-only sandbox, no network), so the full diff content is not inlined. PR review runs on a **checkout of that PR head**: when local `HEAD` differs from the PR head SHA (a stale or unrelated checkout), reconcile first — sync or check out the head (a worktree works) — or surface the mismatch and stop; merely fetching the SHA is not enough, because the source reads the artifact and design-intent files from the working tree, and the apply phase must write onto the same head it reviewed. A stacked layer carries a second head, and reaching it takes two more reads than the capture above: the reviewed PR's `baseRefName`, and — where a PR exists on that branch — its `headRefOid`, fetched so the two heads can actually be compared locally. Where no PR sits on the base branch there is no lower layer and nothing further to check. What is being checked is not that the lower head moved: an ordinary advance leaves the cut point an ancestor of it, so the captured base still resolves and the review is unaffected. It is that the lower branch was **rewritten** — the cut point is no longer an ancestor of its head — which leaves this layer standing on a base the layer below no longer has, and which the diff pointer cannot show. That case surfaces and stops, carrying the three values that make it judgeable: the cut point, the lower PR's head as it stands now, and what lies between them. What follows is constituted then rather than fixed here, because whether the layer rebases onto the rewritten base, reviews as it stands, or something else depends on what moved and why — which is what those three show and no rule written here can know. The checkout must also be clean: dirty local edits make the source read content the diff pointer does not address, and the fix commits the re-review requires could fold unrelated same-file edits in — surface dirty state that overlaps the changed surface and stop until it is stowed or adopted. Also capture diff stats for context.
 
-**Where this round's repairs land.** A PR scope gives an apply two places to put its commits: onto the head just reviewed, or onto a branch cut from it that opens its own PR above the first. The difference is not in the code but in what a reader of the PR sees — one grows the unit under review, the other leaves that unit's own commits where they were and stacks the repair above them — and which one fits depends on how the work is being picked up, which the diff does not show. What the second does not do is leave the reviewed PR separately approved: the verdict is formed against the base and the head the round actually ran on, so once repairs sit on a layer the approve covers the two together and neither alone. **Ask**: present both with that difference and let the user constitute it; the loop does not pick on the user's behalf, and silence stops rather than selecting. A working-tree scope has nothing to stack onto, so the gate does not open there.
+**Where this round's repairs land.** A PR scope gives an apply two places to put its commits: onto the head just reviewed, or onto a branch cut from it that opens its own PR above the first. The difference is not in the code but in what a reader of the PR sees — one grows the unit under review, the other leaves that unit's own commits where they were and stacks the repair above them — and which one fits depends on how the work is being picked up, which the diff does not show. What the second does not do is leave the reviewed PR separately approved: the verdict is formed against the base and the head the round actually ran on, so once repairs sit on a layer the approve covers the two together and neither alone. **A landing the invocation already named relays**, exactly as a named source does: the user has decided, and the gate has nothing left for them to constitute. It counts however the invocation carried it — a `landing` argument, or the request's own words naming where the repairs go — because reading it only in the formal slot misses the ordinary case, where someone who says where the work should land says it plainly and does not expect it back as a question. **Otherwise ask**: present both with that difference and let the user constitute it; the loop does not pick on the user's behalf, and silence stops rather than selecting. A working-tree scope has nothing to stack onto, so the gate does not open there whichever way this went.
 
 The answer is taken once per invocation (Rule 15), and it settles **where commits land, not what gets reviewed**. The base captured above stays this invocation's review base whichever way the gate goes: every round types its findings against that base and Phase 5 re-reviews the whole surface it covers, so a finding left unfixed in the reviewed PR keeps returning on every round exactly as it would have. A stacked layer is cut from the head just reviewed and takes the repair commits; the surface beneath it stays in view because the base did not move with it.
 
@@ -523,7 +526,8 @@ The per-round trace is a relay presentation — present it and proceed; it is no
     the gap as a clearance.
 15. **The landing path is settled once and the rounds inherit it** — where a PR scope's
     repairs land, on the head just reviewed or on a layer stacked above it, is constituted at
-    Phase 0 and holds for the whole invocation. It does not move the review base: the Phase 0
+    Phase 0 — by relay where the invocation already named it, by the gate where it did not — and
+    holds for the whole invocation. It does not move the review base: the Phase 0
     capture fixes that, every round types against it (Rule 5), and Phase 5 re-reviews the whole
     surface it covers (Rule 4) whichever way the landing went. What it fixes is where this
     invocation's repairs accumulate, and no round re-opens it, because a mid-loop switch would
