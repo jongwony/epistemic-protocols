@@ -343,3 +343,57 @@ tracking the lenses' methods rather than the artifact until that point.
   `colimit-shaped` one of only two genuine vocabulary defects (with `:87`) because it sits
   inside a runtime-normative Rule, names no diagram, and — unlike `periagoge/README.md:11`,
   which the project already gets right — carries no informality disclaimer.
+
+---
+
+## 7. Relation to PR #871 — checked after the debate closed
+
+`bb42d63a` is the **direct parent** of `feat/periagoge-alignment-first` (PR #871,
+`feat(periagoge)!: 정렬 우선 구조로 재설계 (2.0.0)`). Two commits sit on top of the reviewed
+tree — `f6a14612` and `e975c00b` — and they replace the protocol wholesale:
+`Propose`/`triangulate`/`integrate` are gone, replaced by
+`Pair`/`Align`/`Extract`/`Probe`/`narrow`/`Name`.
+
+This was checked **after** the four lenses reported and the debate closed, so it did not shape
+any finding. What it does is split the review's output in two.
+
+### 7a. What #871 already fixes — and the review independently validates
+
+Every one of the three items §1 decomposed is resolved at #871's head, by structure rather
+than by patch:
+
+| §1 item | Status at #871 | Where |
+|---|---|---|
+| (i) `propose` arity disagreement | Moot — `propose` no longer exists | MORPHISM replaced |
+| (ii) move payloads reach no argument position | **Fixed** — LOOP now routes every operand explicitly: `Repartner(ref)` → Phase 1 *with ref as the partner*; `AxisMissing(description)` → Phase 2 *over the extended language*; `NotYet(gap)` → Phase 3 *with gap seeding the next Probe* | LOOP `:141-142`, `:152` |
+| (iii) `neighbors` gates the constructor set | Moot — no conditional constructor omission remains | `Fuse` removed |
+
+Also resolved: the non-crystallizing exit now has a **named result type carrying what the run
+established** (`AlignmentSuspended`, `:113`) — the review's finding #3, fixed. `Λ`'s fields
+now have explicit writers at Phases 2, 4, and 5 — finding #2, fixed. `progress(Λ)` is gone
+from CONVERGENCE — finding #14, fixed. `direction`'s enumeration, `triangulate`, and
+`framing` are all gone. `early_exit` is now a real disjunction
+(`budget_spent(Λ) ∨ unalignable(Λ)`, `:160`) rather than an alias.
+
+**The epistemic weight of this is the point.** Four lenses, isolated from each other and from
+#871, converged on defects the author had independently already decided to fix by redesign.
+That is convergent evidence for the redesign's direction from a source that could not have
+been influenced by it.
+
+### 7b. What survives into #871 — actionable there now
+
+All five sit in the open-item/declaration machinery, which #871 carried forward largely
+unchanged. Line numbers are against `feat/periagoge-alignment-first`:
+
+1. **`free_response` is consumed and never produced** — now on **two** terminals (`:143`
+   Abandon, `:149` Confirm), so the surface grew. `Deferred` (`:101`) is still reachable only
+   through it.
+2. **`OpenTrace.status` is stored (`:106`) and derived (`:108`)** with nothing binding them —
+   still making representable the disagreement `:49-50` designs against.
+3. **`status(O)` is written unary but reads `OpenItems(Λ)`**, which is not a component of `O`.
+   Same shape as before, new external term.
+4. **`alignment_trace_declared(AlignmentTrace)` takes a type name** (`:112`), and #871
+   duplicates the pattern onto `AlignmentSuspended` (`:113`).
+5. **`OpenItemDisposition = OpenDisposition \ {None}`** (`:102`) — dependency still inverted.
+
+These belong as review comments on #871, not as a defect report against `main`.
