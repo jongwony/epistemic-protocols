@@ -95,8 +95,8 @@ Phase 3: Tᵣ → record update(current) → detect(E, B) → GT → Λ.detected
        → [|GT| > 0 ∧ Λ.cursor.aspect set] probe_kind(Λ.cursor.aspect)(Δ, Λ.cursor.aspect) → Stop → A → P' → Tᵤ ; Λ.probed[current] += Λ.cursor.aspect    -- verification loop, guarded: fires only with a bound aspect (set at the start-aspect gate, or by coverage routing after a probe); unreachable on the zero-gap branch and immediately after a Horizon preemption whose coverage routing has not yet bound an aspect; probe form dispatched per gap type (probe_kind; Horizon handled by the preempting edge above) [Tool]
        → record[Proposal] → rₚ ; Λ.branchArtifacts += BranchArtifact { kind = Proposal, reference = rₚ, return_pointer = Λ.cursor }  if proposal(A)   -- proposal ejection (detected from Other); rₚ is the RecordId that write returned, bound HERE because C(branch) below reads it off the artifact [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
-       → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
-       → Ref(excerpt) if misconception(A)               -- basis attachment, fired at the same guard the reasoning inquiry above takes, which is this contract's condition for adjudicating against an answer: the correction carries the target material it was adjudicated from, quoted in place at the narrowest span that supports it, so the user can rebut the adjudication rather than only receive it [Tool]
+       → Qᵣs(Aᵣ) → Stop if contested(A)                  -- reasoning inquiry, where contested(A) ≡ the AI raises an adjudication against A, in whole or in part. uncontested(A) below is its exact complement, so every answer takes one arm or the other [Tool]
+       → Ref(excerpt) if contested(A)                    -- basis attachment, on the same guard the reasoning inquiry above takes: the correction carries the target material it was adjudicated from, quoted in place at the narrowest span that supports it, so the user can rebut the adjudication rather than only receive it [Tool]
        → C(correct) if uncontested(A)                     -- continuation closure, where uncontested(A) ≡ the AI raised no adjudication against A: either it found nothing to correct, or it had nothing to check A against and so reached no verdict. `verified` states which of the two, since only the first is a demonstrated aspect [Tool]
        → Qc(coverage) → Stop if uncontested(A)           -- aspect summary [Tool]
        → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
@@ -112,7 +112,7 @@ If the answer is uncontested — the AI found nothing to correct, or it had noth
   User provides proposal via Other → detected by Step 3b, ejected via record, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
 Continue until: all selected tasks completed (VerifiedUnderstanding).
-Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
+Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show ResultUngrasped(t) → its aspects detected and which of them were probed, with the comprehension each probe demonstrated. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
@@ -137,7 +137,7 @@ Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive gua
 Phase 3 Qs(HC) (constitution) → present (conditional: Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]; preempting Horizon probe — fires once at detection, before the start-aspect selector; scenario-only open question, opacity-preserving — never a Horizon label, the edge, the answer, or the rationale)
 Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise)
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
-Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
+Phase 3 Qᵣs (constitution)  → present (reasoning inquiry on a contested answer, whole or partial)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref (observe) → artifact read + excerpt attachment (fires with an adjudication against the user's answer; reads the target whatever it is — code, prose, data, a document — and quotes in place the narrowest span the adjudication rests on. A locator the user must go open is not an attachment, and a span wider than the adjudication buries what the verdict turned on)
 Phase 3 Tᵤ  (track)  → record update (progress tracking; every amendment names Λ.current, the RecordId Phase 2 bound)
@@ -188,7 +188,7 @@ Derive up to three first-turn labels from the user's likely comprehension intent
 
 Present the selected artifact context and a concrete scenario before each probe. For non-Horizon classificatory probes, render recognizable correct, partial, and misconception trajectories with domain-specific consequences; constitutive probes invite the user's own reasoning, and every probe preserves a free-response path.
 
-Keep an admissible Horizon internal: show only its everyday scenario, never its label, suspected edge, expected answer, or rationale before the answer. A misconception first opens a reasoning inquiry grounded in the user's actual answer, then targets the correction at the disclosed mental model and re-probes the same aspect.
+Keep an admissible Horizon internal: show only its everyday scenario, never its label, suspected edge, expected answer, or rationale before the answer. A contested answer first opens a reasoning inquiry grounded in the user's actual answer, then targets the correction at what the adjudication actually reaches — the disclosed mental model where that is what is wrong, the part it bears on where the rest of the answer stood — and re-probes that aspect.
 
 Treat a response as a proposal side branch only when it suggests a system change and either introduces matter outside `R` or directs action at the system; explanation, navigation, and clarification requests remain in the comprehension loop. Record a proposal verbatim, preserve the live cursor, emit the continuation closure, and resume without turning the proposal into a comprehension task.
 
@@ -210,7 +210,7 @@ When grounding an explanation or correction, cite concrete locations in the targ
 
 - **User-initiated only**: Activate only on the user's wish to understand a result or artifact in play, whatever produced it; an explicit decline withdraws that invitation.
 - **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension outcome; artifact categories remain grounding material.
-- **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again; the trace distinguishes demonstrated aspects from user-attested ones.
+- **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again.
 - **Rebuttable adjudication**: When you adjudicate against the user's answer, attach the target material you adjudicated from — quoted in place, at the narrowest span that supports the correction, never a locator they must open and never wider than the verdict. Where that material admits another reading, say which one you took, beside it. Where you have nothing to attach, do not adjudicate: take the answer, say you cannot check it, and name what you would have needed; what follows is attested or set aside, never demonstrated.
 - **Proposal ejection and continuation**: Externalize a qualifying proposal without closing Katalepsis. Keep its record reference outside the task set, snapshot and expose the current cursor, then resume the named comprehension move.
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
