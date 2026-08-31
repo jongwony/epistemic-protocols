@@ -1,15 +1,15 @@
 ---
 name: grasp
-description: "Verify understanding after AI work through intent-scented entry points. Type: (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding"
+description: "Verify understanding of a result or artifact through intent-scented entry points. Type: (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding"
 ---
 
 # Katalepsis Protocol
 
-Achieve certain comprehension of AI work through structured verification, enabling the user to grasp ungrasped results. Type: `(ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding`.
+Achieve certain comprehension of a result or artifact through structured verification, enabling the user to grasp what stands ungrasped. Type: `(ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding`.
 
 ## Definition
 
-**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving ungrasped AI-generated results into verified user understanding through intent-scented entry points and progressive verification.
+**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped result or artifact into verified user understanding through intent-scented entry points and progressive verification.
 
 ```
 ── FLOW ──
@@ -17,22 +17,22 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ── MORPHISM ──
 Result
-  → orient(result, user_signal)        -- infer likely comprehension intents from AI work and user's wording
+  → orient(target, user_signal)        -- infer likely comprehension intents from the target and the user's wording
   → derive_entries(intent)             -- transform inferred intent into high-scent entry points
   → assess_route(intents, entries, R, U, context) -- annotate entry-point adequacy before user selection
   → select(intent_entry_point, route_map) -- user chooses the closest intent-scented entry point
   → materialize(artifact_basis)        -- derive concrete artifact anchors for the chosen intent
   → register(tasks)                   -- track selected entry points as tasks
-  → verify(comprehension)             -- Socratic probing per gap type
+  → verify(comprehension)             -- Socratic probing per gap type, each adjudication against an answer attaching the material it was drawn from
   → confirm(coverage)                 -- aspect coverage check per entry point
   → VerifiedUnderstanding
-requires: result_exists(R)              -- AI work output must exist in context
+requires: result_exists(R)              -- the comprehension target must exist in context; its provenance is unconstrained
 deficit:  ResultUngrasped               -- activation precondition (Layer 1)
 preserves: R                            -- read-only throughout; morphism acts on user understanding only
 invariant: Comprehension over Explanation
 
 ── TYPES ──
-R  = AI's result (the work output)
+R  = The comprehension target — the result or artifact whose understanding is sought. Provenance is unconstrained: AI-authored work is the special case in which the material an adjudication would attach is already in context, because the session produced it
 U  = User signal about what feels ungrasped; may be ∅ on bare `/grasp`
 I  = ComprehensionIntent inferred from R and U; I ∈ {Orientation, Rationale, Impact, Approval, Transfer} ∪ Emergent
 E  = Intent-scented entry points derived from I
@@ -54,7 +54,7 @@ P  = User's phantasia (current representation/understanding)
 Δ  = Detected comprehension gap
 Q  = Verification question (via Cognitive Partnership Move (Constitution))
 A  = User's answer
-Aᵣ = User's reasoning behind misconception (via Cognitive Partnership Move (Constitution))
+Aᵣ = User's reasoning behind a conflicting answer (via Cognitive Partnership Move (Constitution)) — weighed against the material the adjudication attaches, which the user reads and can argue with
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
@@ -72,7 +72,7 @@ Cursor = ContinuationCursor { task: RecordId, entry_point: EntryPoint, aspect: O
        -- resume_target is a short user-facing phase label, not a serialized cursor; structural position is task × entry_point × aspect
 BranchKind = {Proposal} ∪ Emergent(BranchKind)
 BranchArtifact = { kind: BranchKind, reference: RecordId, return_pointer: Cursor }
-ContinuationClosure = { verified: String, status: String, branch: Optional(BranchArtifact), return_pointer: Cursor, next_moves: List<String> }
+ContinuationClosure = { outcome: String, status: String, branch: Optional(BranchArtifact), return_pointer: Cursor, next_moves: List<String> }
                      -- relay metadata after evaluated answers or side-branch ejection; not a new gate
 C(·) = emit ContinuationClosure (relay; → TextPresent+Proceed)
 DeactivationCondition = { all_tasks_completed }
@@ -90,15 +90,15 @@ Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidde
 Phase 2: Sₑ → Materialize(Sₑ, R) → B → record[selected] → Tᵣ ; Λ.tasks := { the identity each write returned ↦ its task } ; Λ.current := the first of them  -- task registration; BIND the returned identities before anything reads them, since every later record update names one, then initialize Λ.cursor from Λ.current, its entry point, and the active aspect before Phase 3 [Tool]
 Phase 3: Tᵣ → record update(current) → detect(E, B) → GT → Λ.detected[current] := Λ.detected[current] ∪ GT → P → Δ  -- comprehension check [Tool]
        → [|GT| = 0] Qc(ZeroGapFinding) → Stop → ZeroGapConfirmation  -- zero-gap branch (`Zero-gap surfacing`): Confirm → P' := P ; record update(Λ.current, completed), next task; Reopen(desc) → Λ.detected[current] += Emergent, re-enter this Phase 3 with GT = {Emergent} [Tool]
-       → [|GT| > 0] Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector below; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
+       → [|GT| > 0] Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector below; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then TAKEN rather than adjudicated against — this probe exists to surface an edge the user never named, and a verdict on it could be neither re-tested (`Horizon boundary` probes Horizon once, and probe_kind maps no form for it) nor rebutted (Horizon is not offered at the coverage selector), so the contract does not reach one. No objection arises for it, `unadjudicated(A)` therefore holds, and it routes through the closure below to coverage, never a return to the start selector [Tool]
        → [Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅] Qc(GT_presented) → Stop → StartAspectSelection → Λ.cursor.aspect := StartAspectSelection  -- start-aspect selector: user picks the opening gap type from GT_presented = unprobed(current) \ {Horizon}; fires once per entry point (only before any probe for the current task), before the verification loop below [Tool]
        → [|GT| > 0 ∧ Λ.cursor.aspect set] probe_kind(Λ.cursor.aspect)(Δ, Λ.cursor.aspect) → Stop → A → P' → Tᵤ ; Λ.probed[current] += Λ.cursor.aspect    -- verification loop, guarded: fires only with a bound aspect (set at the start-aspect gate, or by coverage routing after a probe); unreachable on the zero-gap branch and immediately after a Horizon preemption whose coverage routing has not yet bound an aspect; probe form dispatched per gap type (probe_kind; Horizon handled by the preempting edge above) [Tool]
        → record[Proposal] → rₚ ; Λ.branchArtifacts += BranchArtifact { kind = Proposal, reference = rₚ, return_pointer = Λ.cursor }  if proposal(A)   -- proposal ejection (detected from Other); rₚ is the RecordId that write returned, bound HERE because C(branch) below reads it off the artifact [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
-       → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
-       → Ref(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
-       → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
-       → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
+       → Qᵣs(Aᵣ) → Stop if objection(A)                  -- reasoning inquiry, where objection(A) is read BEFORE the inquiry and once: the AI has an objection to A, in whole or in part, that it has ground to raise — material it could attach — and has NOT settled. It is not a verdict and nothing downstream reads it as one; the inquiry exists to hear Aᵣ before anything is settled, and Aᵣ may defeat it. An objection the AI has nothing to attach is not one it has ground to raise, so it does not reach this arm and takes the third case below [Tool]
+       → Ref(excerpt) if adjudicated(A)                  -- basis attachment, where adjudicated(A) is read AFTER Aᵣ where the inquiry ran and at the answer where none did: an adjudication against A stands, together with the material it was drawn from. What is quoted is that material, at the narrowest span supporting it, so the user can rebut the adjudication rather than only receive it [Tool]
+       → C(unadjudicated) if unadjudicated(A)             -- continuation closure, where unadjudicated(A) is the exact complement of adjudicated(A) READ AT THAT SAME MOMENT: the AI found nothing to object to, or its objection did not survive Aᵣ, or it had nothing to check A against and so reached no verdict — three ways it arises for an answer this protocol adjudicates, beside which a Horizon answer is unadjudicated by the edge that produced it. Because the two are read at one moment, every answer that stays in the comprehension loop takes one arm or the other; a proposal is ejected above and reaches neither. `outcome` states which of these four, since neither the third nor the Horizon case leaves a demonstrated aspect — which is why this closure is not named for correctness [Tool]
+       → Qc(coverage) → Stop if unadjudicated(A)         -- aspect summary [Tool]
        → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
 Turn boundary invariant: While `Λ.active = true` at turn end, the last user-facing shape must be a TerminalShape. Relay metadata `C(·)` may precede a terminal shape, but cannot be the sole final shape while active. The `converge` emission is `deactivation(all_tasks_completed)`, sets `Λ.active := false`, and is terminal without an additional gate.
 
@@ -106,18 +106,19 @@ Turn boundary invariant: While `Λ.active = true` at turn end, the last user-fac
 After Phase 3 verification: Evaluate comprehension per gap type.
 If |GT| = 0 for current entry point: present typed `ZeroGapFinding` with reasoning per `Zero-gap surfacing` → `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified) and marks task completed, proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters Phase 3 for this entry point.
 If gap detected (|GT| > 0): present `StartAspectSelection` (unless Horizon preempts) before questioning, then continue questioning within current entry point.
-If correct: emit continuation closure, then Aspect summary — show probed vs unprobed gap types.
+If no adjudication against the answer stands once the inquiry has run, or none was opened — the AI found nothing to object to, or its objection did not survive the user's reasoning, or it had nothing to check the answer against and so reached no verdict, or the answer came from the Horizon edge, which takes it rather than adjudicating it: emit continuation closure naming which, then Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → record update(Λ.current, completed), next pending task.
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via record, emit side-branch continuation closure, resume current loop position.
-Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
+Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes — the Horizon preemption is such a moment: it binds no aspect, so its resume label names the coverage routing that answer is headed to, which is what a proposal ejected there returns to. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
 Continue until: all selected tasks completed (VerifiedUnderstanding).
-Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
+Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show ResultUngrasped(t) → its status, with the aspects detected for it and which of them were probed. That is what the run still holds at this point; which probes ended demonstrated and which ended unadjudicated does not, having been said in the closure of the round that produced it, which is where it was settled. What this trace demonstrates is the traversal itself — that the loop ran out over the aspects that were in play, each entry point closing where the user judged it sufficient. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
-           ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where ∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R
+           -- the terminal condition, and the whole of it: every selected entry point was carried to where the user closed it. `P' ≅ R` is not a conjunct evaluated here. Each probe settled it for its own aspect where it settled at all — in the round that ran that probe, with the answer and the adjudication both in front of the user; where no adjudication was reached, that round's closure said so and nothing here converts it into one. Convergence neither re-evaluates any of that nor has the means to, since what a round settled was said in that round's closure and does not travel here. What convergence establishes is that the loop ran out over the aspects that were in play — those the user selected, and an admissible Horizon, which is probed before any selection and never offered at one
+           -- ≅, in the round that settles it, is evaluated against the AI's READING of R, which coincides with R only as far as that reading is grounded. Where the AI authored R and the session still holds the reasoning that produced it, the two coincide; where the reading came from reading the artifact, it is the AI's inference and can be wrong — which is why an adjudication against the user's answer attaches the material it was drawn from, so the user weighs that material rather than the AI's account of it
+VerifiedUnderstanding = P' as the completed tasks left it — carrying exactly what the rounds established and no more. An aspect the user closed with `sufficient` at the coverage gate was closed on the user's judgment rather than by a demonstration, and an answer no adjudication reached was never demonstrated at all; each round's closure said which, and this value asserts nothing those rounds did not. The name is the deficit's resolution type, fixed outside this protocol, and it is the transformation's endpoint rather than a verdict re-issued here
 Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active := false` and terminates as VerifiedUnderstanding. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──
@@ -136,15 +137,15 @@ Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive gua
 Phase 3 Qs(HC) (constitution) → present (conditional: Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]; preempting Horizon probe — fires once at detection, before the start-aspect selector; scenario-only open question, opacity-preserving — never a Horizon label, the edge, the answer, or the rationale)
 Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise)
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
-Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
+Phase 3 Qᵣs (constitution)  → present (reasoning inquiry on an objection to the answer, whole or partial; opened before anything is settled, never after)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
-Phase 3 Ref (observe) → artifact read (source artifact, AI-determined)
+Phase 3 Ref (observe) → artifact read + excerpt attachment (fires with an adjudication against the user's answer; reads whatever the adjudication was actually drawn from — the target itself, or a source the user cited that can be read now — whatever its form, code or prose or data or a document, and quotes in place the narrowest span the adjudication rests on. A locator the user must go open is not an attachment, and a span wider than the adjudication buries what the verdict turned on. The answer, the objection, and what it rested on ride the round across the reasoning inquiry's Stop — that continuity is supplied by the execution channel this protocol hands off to, and Λ carries what must outlive the round rather than what the round itself is still holding)
 Phase 3 Tᵤ  (track)  → record update (progress tracking; every amendment names Λ.current, the RecordId Phase 2 bound)
 Phase 3 Prop (track)  → record (proposal ejection)
-Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: verified status + side branch if any + return pointer + next moves)
+Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: the aspect's `outcome` + side branch if any + return pointer + next moves)
 converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 Seam transition to declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — this protocol declares no wired composition edge, so the second trigger is vacuously absent — settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
--- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
+-- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity. Attaching the material an adjudication was drawn from is a SEPARATE axis and is not suppressed by that declaration: it fires only after an answer, only where the AI adjudicated against it, and it carries the material adjudicated from rather than the reasoning path that selected it. Stated cost, taken rather than solved: an excerpt attached at one aspect can contain what a later probe on another aspect would have asked for. The narrowest span reduces that and nothing removes it — withholding the basis for a verdict against the user is the worse failure, and this protocol takes that trade deliberately
 
 ── MODE STATE ──
 Λ = {
@@ -173,7 +174,7 @@ State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆
 
 ## Mode Activation
 
-`/grasp` is user-invoked only: activate when the user signals a wish to understand a recent AI result, including a bare command over the current result. Do not activate for an unrelated general question, an accurate account that already demonstrates understanding, an explicit decline, or a trivial formatting-only result.
+`/grasp` is user-invoked only: activate when the user signals a wish to understand a result or artifact in play — AI-produced work, code or a document someone else wrote, or material the session has put on the table — including a bare command over the current one. Do not activate for an unrelated general question, an accurate account that already demonstrates understanding, an explicit decline, or a trivial formatting-only result.
 
 Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Katalepsis is active.
 
@@ -187,11 +188,15 @@ Derive up to three first-turn labels from the user's likely comprehension intent
 
 Present the selected artifact context and a concrete scenario before each probe. For non-Horizon classificatory probes, render recognizable correct, partial, and misconception trajectories with domain-specific consequences; constitutive probes invite the user's own reasoning, and every probe preserves a free-response path.
 
-Keep an admissible Horizon internal: show only its everyday scenario, never its label, suspected edge, expected answer, or rationale before the answer. A misconception first opens a reasoning inquiry grounded in the user's actual answer, then targets the correction at the disclosed mental model and re-probes the same aspect.
+Keep an admissible Horizon internal: show only its everyday scenario, never its label, suspected edge, expected answer, or rationale before the answer. An answer you have an objection to first opens a reasoning inquiry grounded in the user's actual answer. Where that reasoning defeats the objection, nothing is corrected and the round closes as any other unadjudicated one does. Where an adjudication stands after it, target the correction at what that adjudication actually reaches — the disclosed mental model where that is what is wrong, the part it bears on where the rest of the answer stood — and re-probe that aspect.
 
 Treat a response as a proposal side branch only when it suggests a system change and either introduces matter outside `R` or directs action at the system; explanation, navigation, and clarification requests remain in the comprehension loop. Record a proposal verbatim, preserve the live cursor, emit the continuation closure, and resume without turning the proposal into a comprehension task.
 
-When grounding an explanation or correction in code, cite concrete file locations. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
+When you adjudicate against the user's answer, attach what you adjudicated from. Quote that material in place, at the narrowest span that actually supports the correction — enough that they can read it where they are and argue with it, and no wider, since a dump costs them the reading and buries what the verdict turned on. A pointer they have to go open is not an attachment. The accumulated context and what the user says steer which reading is in play; they are not what you adjudicate from. An ordinary assertion about the target does not license you to adjudicate that same assertion, and something the session said earlier does not stand as the measure against what the target says now. What does stand is the target itself, or a source they cited that you can read now. A ground you cannot attach is not a ground you can adjudicate from here — this instrument admits exactly what it can quote.
+
+Where the attached material admits more than one reading, say which one you took and that it could go another way — beside the excerpt, so they weigh your reading against the same material rather than against your confidence in it. Where you have nothing to attach, do not adjudicate at all: take the answer, say you have no ground to check it against, and name what you would have needed. They may let the aspect stand on their own account, or move on to another; neither is a demonstrated aspect and the closure says so.
+
+When grounding an explanation or correction, cite concrete locations in the target — file and line where it is code, the equivalent anchor where it is not. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
 
 ### Intensity
 
@@ -203,12 +208,13 @@ When grounding an explanation or correction in code, cite concrete file location
 
 ## Rules
 
-- **User-initiated only**: Activate only on the user's wish to understand a recent AI result; an explicit decline withdraws that invitation.
+- **User-initiated only**: Activate only on the user's wish to understand a result or artifact in play, whatever produced it; an explicit decline withdraws that invitation.
 - **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension outcome; artifact categories remain grounding material.
-- **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again; the trace distinguishes demonstrated aspects from user-attested ones.
+- **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again.
+- **Rebuttable adjudication**: When you adjudicate against the user's answer, attach the material you adjudicated from — the target itself, or a source they cited that you can read now — quoted in place, at the narrowest span that supports the correction, never a locator they must open and never wider than the verdict. Where that material admits another reading, say which one you took, beside it. Where you have nothing to attach, do not adjudicate: take the answer, say you cannot check it, and name what you would have needed; what follows is attested or set aside, never demonstrated.
 - **Proposal ejection and continuation**: Externalize a qualifying proposal without closing Katalepsis. Keep its record reference outside the task set, snapshot and expose the current cursor, then resume the named comprehension move.
-- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before its gate.
-9a. **Post-answer closure**: After a correct answer or sufficient-understanding signal, emit the verified aspect, current task status, return pointer, and next available moves before coverage routing or completion.
+- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
+9a. **Post-answer closure**: After an answer the comprehension loop kept and no adjudication stands against — an ejected proposal takes the continuation closure named above instead — emit the aspect's outcome as the closure records it, with current task status, return pointer, and next available moves before coverage routing.
 9b. **Active-turn fail-closed**: While `Λ.active = true`, end every turn in one `TerminalShape`; relay context and continuation metadata may precede that shape but never replace it.
 - **Zero-gap surfacing**: A `ZeroGapFinding` carries its reasoning to `ZeroGapConfirmation`; only `Confirm` completes the entry, while `Reopen(description)` registers the named Emergent gap and resumes verification.
 14a. **Horizon boundary**: Horizon is an evidence-bound comprehension edge inside the selected entry point, not route selection, a decision gap, reframing, or perspective fusion. Admit it only through `admissible(HC)`, probe it opaquely once, and demote or revise the instrumentation after repeated applicable opportunities if detections remain absent, speculative, or unhelpful.
