@@ -55,7 +55,8 @@ L              = Option(TentativeLabel)                     -- user-provided pro
 ctx            = DomainContext                              -- user's domain context gathered via artifact read, artifact search, and a conditional external fetch
 Pair           = (Iᵢ, E) → (i₁, i₂)                        -- the readiest alignment, not the most distant; distance is what Probe is for
 Slot           = { role: String, in_first: String, in_second: Option(String) }
-                 -- in_second is left open where the AI declines to fill it, which is the position the user corresponds into
+                 -- in_second is None exactly where the second case carries no counterpart, and that role joins M.unmatched;
+                 -- filling it reads off the cases rather than choosing between readings, which is what H.live and Probe carry
 M              = Correspondence { slots: List(Slot), unmatched: Set(String) }
                  -- unmatched holds what one case carries and the other does not; it is evidence, not failure
 Align          = (i₁, i₂, ctx) → M                          -- constructed at the Phase 1 gate; the user fills or corrects the slots
@@ -121,7 +122,7 @@ Priority: explicit_arg > recent_instance_cluster > surfaced_essence
 /induce (alone)              → A = most recent instance cluster in session
 "the pattern across..."      → A = instance cluster under discussion
 
-If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw. If |Iᵢ| < 2, surface that a correspondence needs two cases and invite the user to supply a second before Phase 1.
+If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw. If |Iᵢ| < 2, scan the accumulated session context and the user's artifacts for cases that could correspond with the one in hand, and present what the scan found as candidates to recognize or replace before Phase 1. Where it finds nothing, say what was searched and invite a second case.
 
 ── PHASE TRANSITIONS ──
 Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess               -- detection checkpoint (silent)
@@ -161,7 +162,7 @@ early_exit = budget_spent(Λ) ∨ unalignable(Λ)
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
-Phase 1 Pair+Align (constitution) → present the two cases side by side with the correspondence slots, some left open (mandatory); artifact read, artifact search for the cases' own context
+Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such (mandatory); artifact read, artifact search for the cases' own context
 Phase 2 Extract    (track)   → Internal state update: writes Λ.relation and Λ.space, so Phase 3 has a space to probe and the terminal has a relation to name
 Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
 Phase 4            (track)   → Internal state update: writes Λ.space and appends Λ.probes, so the cap can advance and the alignment trace has per-probe material to build from
@@ -192,7 +193,7 @@ If an explicit invocation has no detectable essence signal, surface that scan re
 
 ### User-facing realization
 
-At Phase 1, put the two cases side by side and render the correspondence as slots, filling what the cases themselves supply and leaving the load-bearing ones open for the user. Say which slots you left open and why. Ground both cases in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
+At Phase 1, put the two cases side by side and render the correspondence with every slot filled from what the cases themselves carry, marking any role the second case has no counterpart for. The user corrects a filling that is wrong rather than supplying one that is missing; which reading the correspondence supports is separated at Phase 3, never by an unfilled slot here. Ground both cases in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
 
 At Phase 3, present the probe case together with every axis still live and which of them this probe tells apart. Materialize the `W` constructors as everyday-language options with anticipatable differential futures. A probe that separates nothing is not presented — draw another.
 
