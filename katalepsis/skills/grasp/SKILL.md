@@ -80,7 +80,7 @@ unprobed(t) = Λ.detected[t] \ Λ.probed[t]  -- detected but not yet probed for 
 GT_presented = unprobed(current) \ {Horizon}  -- unprobed detected relevant gap types offered at the start-aspect selector; Horizon is never surfaced as a selectable label (Socratic opacity) — probed inline at detection instead
 StartAspectSelection = user's chosen starting gap type ∈ GT_presented  -- Phase 3 step-1 answer; fires only when Horizon did not preempt (Horizon preemption always precedes this selector) and |GT| > 0
 probe_kind = GapType → {Qc, Qs}   -- per the Gap type → probe kind mapping table: Qc for Expectation/Sequence (classificatory), Qs for Causality/Scope/Emergent (open)
-ZeroGapFinding = { entry_point: EntryPoint, reasoning: String }  -- the finding surfaced when |GT| = 0 for the current entry point (`Zero-gap surfacing`). Two cases reach it and the reasoning is what tells them apart: the entry point is self-evident, or the AI has no evidence about R to adjudicate it. The second is a state of the AI's ground, never a claim about the entry point, and a Confirm over it is the user attesting rather than a comprehension demonstrated — a distinction `User authority` already draws and the trace already carries
+ZeroGapFinding = { entry_point: EntryPoint, reasoning: String }  -- the finding surfaced when |GT| = 0 for the current entry point (`Zero-gap surfacing`). Two cases reach it and the reasoning is what tells them apart: the entry point is self-evident, or the AI has no evidence about R to adjudicate it. The second is a state of the AI's ground, never a claim about the entry point, and a Confirm over it is the user attesting rather than a comprehension demonstrated — a distinction `User authority` already draws
 ZeroGapConfirmation = user's answer to a ZeroGapFinding ∈ {Confirm, Reopen(description)}  -- Confirm marks the entry point complete; Reopen names a gap the detection missed, registered as Emergent in Λ.detected[current] (mirrors step 3e), re-entering the comprehension loop for that aspect
 TerminalShape = { phase1_entry_selection, phase3_zero_gap_confirmation, phase3_start_aspect_selection, phase3_verification_probe, coverage_routing, deactivation(DeactivationCondition) }
 
@@ -112,7 +112,7 @@ If correct: emit continuation closure, then Aspect summary — show probed vs un
   User provides proposal via Other → detected by Step 3b, ejected via record, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
 Continue until: all selected tasks completed (VerifiedUnderstanding).
-Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence), and a zero-gap entry confirmed over an absent-evidence finding shown as attested rather than demonstrated, per `User authority`. Convergence is demonstrated, not asserted.
+Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
