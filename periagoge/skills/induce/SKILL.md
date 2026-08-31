@@ -33,7 +33,7 @@ A
   → align(pair, slots)                    -- user constructs the correspondence; AI supplies the slots
   → extract(correspondence)               -- invariant relation, plus the axes that correspondence leaves live
   → probe(space, instances)               -- select the case that separates live axes rather than confirming the leading one
-  → narrow(space, answer)                 -- rule an axis out, extend the language, or repartner, per the user's judgment
+  → narrow(space, answer)                 -- per axis: rule it out, bound it, or leave it undecided; or, for the run, extend the language or repartner
   → name(surviving, relation, label)      -- AI proposes name + rule, after the space has narrowed and not before
   → declare(trace, open_trace)            -- terminal evidence trace + open-item disposition
   → CrystallizedAbstraction
@@ -73,11 +73,26 @@ Probe          = (H, Iᵢ, ctx) → p
 p              = ProbeCase { content: String, kind: ProbeKind, separates: Set(Axis) }
                  -- separates names which live axes this probe tells apart; a probe separating none is not a probe
 ProbeKind      ∈ {DistantInstance, NearNonInstance, UserSupplied}
-W              = ProbeAnswer ∈ {Holds, Fails(ground), NotAnInstance(ground), AxisMissing(description), Repartner(ref), Abandon}
-                 ground       = the user's reason, recorded verbatim as the Ground for whatever it rules out
+V              = AxisVerdict ∈ {Refutes(ground), Bounds(ground), Undecided}
+                 -- one axis judged against one probe case. Refutes rules the axis out; Bounds places the case outside
+                 -- what that axis claims, so the axis survives and the case records against it; Undecided settles
+                 -- neither and leaves the axis live. The three are the axis-local judgments; the rest of W is run-level
+Vs             = AxisVerdicts = Map(Axis, V)
+                 -- invariant: dom(Vs) = p.separates — every axis the probe tells apart carries exactly one verdict,
+                 -- which is what makes narrow total over the probe's separating set
+W              = ProbeAnswer ∈ {Judged(Vs), AxisMissing(description), Repartner(ref), Abandon}
+                 ground       = the user's reason, recorded verbatim as the Ground for whatever it rules out or bounds
                  description  = a dimension the live set does not contain -- extends the language rather than editing a candidate
                  ref          = another instance or a neighbouring abstraction to align against instead
-narrow         = (H, W) → H'                                -- Holds/Fails/NotAnInstance move axes from live to ruled_out;
+all_bounded(Vs)      = ∀ a ∈ dom(Vs) : Vs(a) = Bounds       -- the round kept every axis by scoping the case out of it
+settles(Vs, H)       = |H.live \ {a : Vs(a) = Refutes}| = 1 -- applying these verdicts would leave exactly one axis live
+consequential(Vs, H) = all_bounded(Vs) ∨ settles(Vs, H)     -- the two outcomes a cross-axis re-read is spent on:
+                                                            -- nothing ruled out, or the space closing to one
+ProbeRecord    = { case: ProbeCase, answer: W, superseded: Option(W) }
+                 -- superseded holds the verdict set a cross-axis re-read replaced, so a reversal stays visible in the
+                 -- trace instead of being overwritten by the answer that replaced it
+narrow         = (H, W) → H'                                -- Judged(Vs): each Refutes axis moves to ruled_out with its ground,
+                                                            -- each Bounds verdict records its case against that axis, each Undecided axis stays live;
                                                             -- AxisMissing adds a UserSupplied axis to live; Repartner and Abandon leave H unchanged
 settled(H)     = |H.live| = 1
 unalignable(Λ) = H.live = ∅                                 -- every axis ruled out and none supplied; the seed did not carry one
@@ -85,7 +100,8 @@ unalignable(Λ) = H.live = ∅                                 -- every axis rul
 Name           = (H, R, L?) → (N, Rule)
 N              = AbstractionName { name: String, label_basis: Option(L) }
 Rule           = { statement: String, boundary: List((ProbeCase, Ground)) }
-                 -- boundary is built from the NotAnInstance answers, so what the abstraction excludes is shown, not asserted
+                 -- boundary is built from the Bounds verdicts recorded against the surviving axis, so what the
+                 -- abstraction excludes is shown, not asserted
 Nₐ             = NameAnswer ∈ {Confirm, Rename(name), RuleWrong(correction), NotYet(gap), Abandon}
                  gap          = what the user says is still missing; seeds the next Probe
 Qp             = Probe judgment interaction [Tool: Constitution interaction]
@@ -106,9 +122,10 @@ OpenItems(Λ)   = (H.live \ {chosen}) ∪ ⋃{M.unmatched : M ∈ Λ.corresponde
 OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
                  -- invariant: dom(items) = OpenItems(Λ) — every open item carries exactly one disposition, which makes status(O) total
 status(O)      = None if OpenItems(Λ) = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
-AlignmentTrace = List<(Slot | (ProbeCase, W) | (N, Rule))>
-                 -- the run in the order it happened: the correspondence the user built, each probe with its judgment,
-                 -- and the naming it terminated on. Derived from Λ.correspondences, Λ.probes, and Λ.naming
+AlignmentTrace = List<(Slot | ProbeRecord | (N, Rule))>
+                 -- the run in the order it happened: the correspondence the user built, each probe with the verdict
+                 -- every separated axis received and any verdict a re-read replaced, and the naming it terminated on.
+                 -- Derived from Λ.correspondences, Λ.probes, and Λ.naming
 CrystallizedAbstraction = (N, Rule) where confirmed via Nₐ = Confirm ∧ alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
 AlignmentSuspended = (R?, H) where alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
                  -- the non-crystallizing terminal. It carries what the run established so a later run resumes from it
@@ -130,14 +147,14 @@ Phase 1: (Iᵢ, E) → Pair(Iᵢ, E) → (i₁, i₂) → Align(i₁, i₂, ctx)
          -- on re-entry from Repartner(ref), ref is the second term and Pair is skipped: the user already chose the partner
 Phase 2: (M, Iᵢ) → Extract(M, Iᵢ) → (R, H) ; Λ.relation := Some(R) ; Λ.space := Some(H)   -- relation + live-axis derivation (track)
 Phase 3: H → Probe(H, Iᵢ, ctx) → p → Qp(p, H) → Stop → W                   -- probe Constitution interaction [Tool]
-Phase 4: W → narrow(H, W) → H' ; Λ.space := Some(H') ; Λ.probes := Λ.probes ++ [(p, W)]   -- space update + probe record (track)
+Phase 4: W → narrow(H, W) → H' ; Λ.space := Some(H') ; Λ.probes := Λ.probes ++ [ProbeRecord(p, W)]   -- space update + probe record (track)
 Phase 5: (H, R, L?) → Name(H, R, L?) → (N, Rule) → Qn → Stop → Nₐ ; Λ.naming := Some(Nₐ)   -- naming Constitution interaction [Tool]
 
 ── LOOP ──
+After Phase 3, before Phase 4: if W = Judged(Vs) ∧ consequential(Vs, H), show the verdicts together with what applying them would do to H, and re-present at Phase 3 within the same round so any verdict can be revised against the others. A revision does not spend the budget, and the verdict set it replaced is kept in the ProbeRecord rather than overwritten. Where consequential(Vs, H) is false, Phase 4 follows directly.
+
 After Phase 4: evaluate the probe answer.
-If W = Holds: the axes this probe would have separated against are ruled out; return to Phase 3.
-If W = Fails(ground): the axis that predicted the probe is ruled out with ground; return to Phase 3.
-If W = NotAnInstance(ground): the probe joins Rule.boundary with ground; return to Phase 3.
+If W = Judged(Vs): each Refutes axis is ruled out with its ground, each Bounds verdict records its case against that axis, each Undecided axis stays live; return to Phase 3. If all_bounded(Vs), say that this round ruled nothing out and that every axis was kept by scoping the case out of its claim, before drawing the next probe.
 If W = AxisMissing(description): a UserSupplied axis enters H.live; return to Phase 2 (relation re-extracted over the extended language).
 If W = Repartner(ref): return to Phase 1 with ref as the alignment partner and Pair skipped; H and its ruled_out survive the repartnering, and the correspondence already built stays in Λ.correspondences.
 If W = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended.
@@ -152,7 +169,7 @@ If Nₐ = RuleWrong(correction): Rule.statement := correction, re-present at Pha
 If Nₐ = NotYet(gap): return to Phase 3 with gap seeding the next Probe; the budget is spent by this round like any other.
 If Nₐ = Abandon: declare as AlignmentSuspended.
 Cap: max_probes = 5 probes per abstraction seed. This bounds user attention; it is not a claim that five probes suffice to form an abstraction, and reaching it never converts a run into a crystallized one.
-Convergence evidence: At crystallized(Λ), present the alignment trace — the correspondence the user built slot by slot, then each probe with the judgment it received, then the name and rule that survived — plus the boundary drawn from the NotAnInstance answers, plus the OpenTrace. Show every axis that was ruled out beside the ground that ruled it out, so the surviving axis is seen to have won rather than asserted to have. OpenTrace status is None when nothing stayed open, Deferred when any item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
+Convergence evidence: At crystallized(Λ), present the alignment trace — the correspondence the user built slot by slot, then each probe with the verdict every separated axis received and any verdict a re-read replaced, then the name and rule that survived — plus the boundary drawn from the Bounds verdicts on the surviving axis, plus the OpenTrace. Show every axis that was ruled out beside the ground that ruled it out, so the surviving axis is seen to have won rather than asserted to have. OpenTrace status is None when nothing stayed open, Deferred when any item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 crystallized(Λ): see TYPES (Λ.naming = Some(Confirm))
@@ -164,7 +181,7 @@ early_exit = budget_spent(Λ) ∨ unalignable(Λ)
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
 Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such (mandatory); artifact read, artifact search for the cases' own context
 Phase 2 Extract    (track)   → Internal state update: writes Λ.relation and Λ.space, so Phase 3 has a space to probe and the terminal has a relation to name
-Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
+Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates on screen together, each axis's support and the case that breaks it beside that axis's own verdict slot (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
 Phase 4            (track)   → Internal state update: writes Λ.space and appends Λ.probes, so the cap can advance and the alignment trace has per-probe material to build from
 Phase 5 Name+Qn    (constitution) → present name, rule, boundary, and whatever stayed live (mandatory)
 converge           (extension)   → TextPresent+Proceed (alignment trace + open disposition; proceed with the crystallized abstraction)
@@ -173,7 +190,7 @@ seam               (extension)   → TextPresent+Proceed (fires at deactivation/
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
       correspondences: List(M), relation: Option(R), space: Option(H),
-      probes: List<(ProbeCase, W)>, naming: Option(Nₐ),
+      probes: List(ProbeRecord), naming: Option(Nₐ),
       crystallized: Option((N, Rule)),
       alignment_trace: Option(AlignmentTrace),
       open_trace: Option(OpenTrace),
@@ -195,7 +212,7 @@ If an explicit invocation has no detectable essence signal, surface that scan re
 
 At Phase 1, put the two cases side by side and render the correspondence with every slot filled from what the cases themselves carry, marking any role the second case has no counterpart for. The user corrects a filling that is wrong rather than supplying one that is missing; which reading the correspondence supports is separated at Phase 3, never by an unfilled slot here. Ground both cases in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
 
-At Phase 3, present the probe case together with every axis still live and which of them this probe tells apart. Materialize the `W` constructors as everyday-language options with anticipatable differential futures. A probe that separates nothing is not presented — draw another.
+At Phase 3, put every live axis the probe separates on screen at once, each row carrying that axis, what supports it, the case that breaks it, and its own verdict slot — refutes it, bounds it, or settles neither. Say that the rows are answered against each other rather than top to bottom, since what one axis makes of the case turns on how the others take it. Materialize `V` and the run-level `W` constructors as everyday-language options with anticipatable differential futures. A probe that separates nothing is not presented — draw another. A correction to the probe case itself is absorbed and the probe redrawn, which spends no budget and leaves H unchanged.
 
 At Phase 5, present the name, the rule, the boundary the near-misses drew, and anything still live. Materialize the `Nₐ` constructors the same way. `Confirm` and `Abandon` remain constitutive even when analysis favours one reading.
 
