@@ -1906,18 +1906,28 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
-// framing readout, never a scalar progress meter) to an enforcement channel:
-//   (a) the unicode progress-bar glyphs ▓/░ must not appear in any core
-//       protocol SKILL.md or any Ink-derived Output Style — they only ever
-//       rendered a completion bar;
+// framing readout of the work in play) to an enforcement channel:
+//   (a) a glyph denylist: the unicode block glyphs ▓/░ are held out of core
+//       protocol SKILL.md files and Ink-derived Output Styles. This is a
+//       regression guard over the surfaces where completion bars were
+//       observed, not a claim that the glyph can only mean one thing there —
+//       file category cannot establish a glyph's meaning. §Rendering Judgment
+//       does sanction a drawn length for an independently measured quantity;
+//       a surface that needs one sits outside this denylist's range, as
+//       skills/sophia's dimension profile does. Widening the range is a
+//       decision with its own basis, not something this check settles.
 //   (b) each Ink-derived Output Style's **Cognitive work** element must
-//       retain the categorical-ban guard kernel within its own bounded
-//       body (label line to the next Ink element label or heading) — not
-//       merely anywhere in the file — so the guard cannot silently migrate
-//       into a comment, frontmatter, or an opposite instruction and still
-//       pass.
+//       retain its guard kernel within its own bounded body (label line to
+//       the next Ink element label or heading) — not merely anywhere in the
+//       file — so the kernel cannot silently migrate into a comment or
+//       frontmatter and still pass.
 // Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
 // skills (e.g. /dashboard) may legitimately render bars and are out of scope.
+// This comment is diagnostic substrate, so it names the failure case directly;
+// the Output Style body it guards is runtime motivating prose, which is why the
+// kernel pinned below is the positive statement of the invariant rather than a
+// prohibition (premise/instruction-authoring.md §Prohibition Base Rate and
+// White Bear Avoidance, placement distinction; CLAUDE.md §Editing Conventions).
 function checkFramingReadoutEnforcement() {
   const BAR_GLYPH = /[▓░]/;
   const CHECK = 'framing-readout-enforcement';
@@ -1942,12 +1952,14 @@ function checkFramingReadoutEnforcement() {
     });
   }
 
-  // Guard kernel: the negation-carrying sentence fragment from the
-  // Cognitive work element (see header comment (b)). Anchored within that
+  // Guard kernel: the sentence fragment in which the Cognitive work element
+  // states what it is (see header comment (b)). Anchored within that
   // element's own bounded body — the guard kernel must appear inside the
   // element's own label-to-next-boundary span, not merely anywhere in the
-  // file — rather than a whole-file substring test.
-  const GUARD = "does not render the loop's completion as a bar, percentage, or N-of-M tally";
+  // file — rather than a whole-file substring test. The kernel is the
+  // positive statement of the invariant: an element that stopped being a
+  // framing readout would have to drop this sentence to say so.
+  const GUARD = 'a framing readout — the kind of work currently in play, a statusline';
   const COGNITIVE_WORK_LABEL_PATTERN = /^\*\*Cognitive work\*\*/m;
   const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
   const ELEMENT_BOUND = 6000;
@@ -1983,7 +1995,7 @@ function checkFramingReadoutEnforcement() {
       results.fail.push({
         check: CHECK,
         file: stylePath,
-        message: `Missing categorical-ban guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
+        message: `Missing guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
       });
     }
   }
