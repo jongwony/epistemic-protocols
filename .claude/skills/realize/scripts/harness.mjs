@@ -687,6 +687,13 @@ const GRADERS = {
 const CASE_PREDICATES = {
   'inquire-underspecified': ['collection_observed', 'stop_observed', 'completed'],
   'inquire-fully-specified': ['proceed_observed', 'completed'],
+  // Both grasp cases take the same automatic set, and that is the point: the attachment
+  // obligation and its suppression are transcript judgments, so what is deterministically
+  // decidable here is only their shared precondition -- the target was read, and the run
+  // left it alone. `preserves: R` makes stop_observed apply to BOTH cases; unlike the
+  // inquire pair, neither grasp case ever crosses Proceed.
+  'grasp-adjudicable': ['collection_observed', 'stop_observed', 'completed'],
+  'grasp-unattachable': ['collection_observed', 'stop_observed', 'completed'],
 };
 
 const CASE_MANUAL_REVIEWS = {
@@ -696,6 +703,16 @@ const CASE_MANUAL_REVIEWS = {
   ],
   'inquire-fully-specified': [
     'no-fabricated-uncertainty', 'no-gate', 'sufficiency-stated',
+  ],
+  // Whether an adjudication carried what it was drawn from, and whether one was withheld
+  // where the tree records no ground, are readings of the exchange. No tree state and no
+  // tool identity witnesses them, which is why they sit here rather than above.
+  'grasp-adjudicable': [
+    'adjudication-attaches-material', 'excerpt-is-narrow',
+  ],
+  'grasp-unattachable': [
+    'no-adjudication-without-ground', 'names-what-was-needed',
+    'closure-states-undemonstrated',
   ],
 };
 
