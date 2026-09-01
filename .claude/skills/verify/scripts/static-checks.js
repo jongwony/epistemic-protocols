@@ -1902,18 +1902,14 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
   return next ? bounded.slice(0, next.index) : bounded;
 }
 
-// Markdown regions the reader never receives as an instruction: HTML comments
-// (closed, or left open through the end of the span) and fenced code blocks.
-// A presence test over raw bytes counts those as satisfied, which lets the
-// live prose say the opposite while the check passes — so a test asking
-// whether something is *inscribed as an instruction* runs over this instead.
-// The two forms handled here are the ones drift produces: a commented-out
-// draft, and a sentence quoted into an example block. Markdown affords many
-// more, and a byte-presence test reaches none of them once the placement is
-// deliberate — what the kernel test guards is drift, per references/
-// verification.md; a deliberate rewrite is caught by review, not here.
+// The two shapes drift actually produces: a kernel commented out, and a kernel
+// quoted into an example block. Both leave the bytes present while the reader
+// receives no instruction, so a presence test runs over this rather than the
+// raw span. It reads Markdown by line rather than parsing it, which bounds what
+// it can claim — it catches those two shapes and stops there. A deliberate
+// placement is review's to catch, per references/verification.md.
 function liveProse(span) {
-  const uncommented = span.replace(/<!--[\s\S]*?-->/g, '').replace(/<!--[\s\S]*$/, '');
+  const uncommented = span.replace(/<!--[\s\S]*?-->/g, '');
   let fenced = false;
   return uncommented
     .split('\n')
@@ -1932,20 +1928,12 @@ function liveProse(span) {
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
 // framing readout of the work in play) to an enforcement channel:
-//   (a) a glyph denylist: the unicode block glyphs ▓/░ are held out of core
-//       protocol SKILL.md files and Ink-derived Output Styles — a regression
-//       guard over the surfaces where completion bars were observed, scoped
-//       by decision rather than by what a file category could establish
-//       about a glyph's meaning.
-//   (b) each Ink-derived Output Style's **Cognitive work** element must
-//       retain its guard kernel as live prose within its own bounded body
-//       (label line to the next Ink element label or heading), so the kernel
-//       cannot be relocated out of the reader's path and still pass.
-// Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
-// skills (e.g. /dashboard) may legitimately render bars and are out of scope.
-// Why the kernel is a positive statement rather than a prohibition, and why
-// this comment may name the failure case while the body it guards may not:
-// references/verification.md, framing-readout-enforcement.
+// The glyph denylist is scoped by decision, not by what a file category could
+// establish about a glyph's meaning: utility skills (e.g. /dashboard) may
+// legitimately render bars and are out of it, and the scope otherwise mirrors
+// checkEmitLoadDiscipline. Why a guard exists here at all, and why its kernel
+// is a positive statement rather than a prohibition: references/verification.md,
+// framing-readout-enforcement.
 function checkFramingReadoutEnforcement() {
   const BAR_GLYPH = /[▓░]/;
   const CHECK = 'framing-readout-enforcement';
