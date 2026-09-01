@@ -1,6 +1,6 @@
 # Katalepsis — /grasp (κατάληψις)
 
-Achieve certain comprehension of AI work (κατάληψις: grasping firmly)
+Achieve certain comprehension of a result or artifact (κατάληψις: grasping firmly)
 
 > [한국어](./README_ko.md)
 

@@ -79,7 +79,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Anagoge](./anagoge) | `/ascend` | You vaguely remember a whole line of work, topic, or concept spread across many sessions — not any one session |
-| [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you nod along — but do you actually grasp them? Verify your understanding is genuine before you approve or build on it |
+| [Katalepsis](./katalepsis) | `/grasp` | You nod along to code, a paper, or a big change — but do you actually grasp it? Verify your understanding is genuine before you approve or build on it |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 
 Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/conduct`)

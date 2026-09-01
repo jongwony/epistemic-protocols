@@ -1,7 +1,7 @@
 {
   "name": "katalepsis",
-  "version": "3.1.1",
-  "description": "Verify understanding after AI work through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
+  "version": "3.1.2",
+  "description": "Verify understanding of a result or artifact through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Katalepsis",
-    "shortDescription": "Verify understanding after AI work through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
-    "longDescription": "Verify understanding after AI work through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
+    "shortDescription": "Verify understanding of a result or artifact through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
+    "longDescription": "Verify understanding of a result or artifact through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
