@@ -102,7 +102,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 **프로젝트 가이드 direction-line 융합** (3-horizon Horizontverschmelzung):
 
-- `/realign` — 세 horizon(프로젝트 가이드 현 inscribed direction line · 설정된 channel set 으로부터의 외부 direction signals · 별도 sub-step 으로 elicit 되는 사용자의 현 pre-understanding)을 surface, 각 horizon 의 보존 / 변환 / 탈락을 표시한 per-horizon trace 와 함께 fusion candidate 를 합성, `/induce` 의 widen / narrow / fuse / reorient / confirm / dismiss 어휘로 dialectical shaping, 사용자 confirm 시 fused line 을 프로젝트 가이드 direction line 으로 write (rollback 은 프로젝트 버전관리)
+- `/realign` — 세 horizon(프로젝트 가이드 현 inscribed direction line · 설정된 channel set 으로부터의 외부 direction signals · 별도 sub-step 으로 elicit 되는 사용자의 현 pre-understanding)을 surface, 각 horizon 의 보존 / 변환 / 탈락을 표시한 per-horizon trace 와 함께 fusion candidate 를 합성, 자체 widen / narrow / fuse / reorient / confirm / dismiss 어휘로 dialectical shaping, 사용자 confirm 시 fused line 을 프로젝트 가이드 direction line 으로 write (rollback 은 프로젝트 버전관리)
 
 **Work-unit triage**:
 

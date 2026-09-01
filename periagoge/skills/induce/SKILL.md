@@ -17,13 +17,13 @@ Periagoge(A) → Detect(A) →
   InProcess(Iᵢ, E, L?): Pair(Iᵢ, E) → (i₁, i₂) →
          Align(i₁, i₂, ctx) → Stop → M →
          Extract(M, Iᵢ, H?) → (R, H) →
-         Probe(H, Iᵢ, ctx) → p → Qp(p, H) → Stop → W → narrow(H, W) → H' →
+         Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W → narrow(H, W) → H' →
          loop until settled(H) ∨ budget_spent(Λ) →
          Name(H, R, L?, Λ) → Qn → Stop → Nₐ →
          (Confirm: declare(alignment_trace, open_trace) → CrystallizedAbstraction
           | NotYet(gap): re-enter Probe with gap seeded
-          | Abandon: declare(partial_trace, open_trace) → AlignmentSuspended)
-         or unalignable(Λ) → declare(partial_trace, open_trace) → AlignmentSuspended
+          | Abandon: declare(alignment_trace, open_trace) → AlignmentSuspended)
+         or unalignable(Λ) → declare(alignment_trace, open_trace) → AlignmentSuspended
   NotInProcess: deactivate
 
 ── MORPHISM ──
@@ -71,7 +71,7 @@ R              = InvariantRelation { statement: String, carried_by: List(Slot) }
 Extract        = (M, Iᵢ, H?) → (R, H')                      -- internal; no gate. On re-entry H is the space already
                  -- built: ruled_out carries over untouched and axes already supplied stay live, so re-extraction
                  -- extends the language rather than resetting it. Absent H, H' is derived from the correspondence alone
-Probe          = (H, Iᵢ, ctx) → p
+Probe          = (H, Iᵢ, ctx, gap?) → p               -- gap? is the NotYet payload on re-entry from Phase 5, seeding the draw; absent on every other entry
 p              = ProbeCase { content: String, kind: ProbeKind, separates: Set(Axis) }
                  -- separates names which live axes this probe tells apart; a probe separating none is not a probe
 ProbeKind      ∈ {DistantInstance, NearNonInstance, UserSupplied}
@@ -109,7 +109,7 @@ narrow         = (H, W) → H'                                -- Judged(Vs): eac
 settled(H)     = |H.live| = 1
 unalignable(Λ) = H.live = ∅                                 -- every axis ruled out and none supplied; the seed did not carry one
                  -- settled(H) is false whenever live is empty, so no second conjunct is doing work here
-Name           = (H, R, L?, Λ) → (N, Rule)                  -- Λ is what boundary(Λ, H) is read from
+Name           = (H, R, L?, Λ) → (N, Rule)                  -- Λ is what boundary(Λ, H) is read from; the rule is read off one live axis, which named(Λ) cites
 N              = AbstractionName { name: String, label_basis: Option(L) }
 Rule           = { statement: String, boundary: List((ProbeCase, Ground)) }
                  -- boundary = boundary(Λ, H), so what the abstraction excludes is shown, not asserted
@@ -127,7 +127,9 @@ OpenDisposition ∈ {None, Nonblocking, Deferred}
                  Nonblocking = an item remains visible but does not block Confirm
                  Deferred    = user routes an item to later work via free response
 OpenItemDisposition = OpenDisposition \ {None}             -- per-item value space; None is a whole-trace verdict only
-OpenItems(Λ)   = (H.live \ {chosen}) ∪ ⋃{M.unmatched : M ∈ Λ.correspondences}
+named(Λ)       = {the live axis Rule.statement was read off} when Λ.crystallized = Some(_); ∅ otherwise
+                 -- so at AlignmentSuspended every live axis is open, and at Confirm only the axes the rule did not take are
+OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{M.unmatched : M ∈ Λ.correspondences}
                  -- what a run can still owe at its terminal, from both carriers; the union runs over every
                  -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it
 OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
@@ -157,7 +159,7 @@ Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess              
 Phase 1: (Iᵢ, E) → Pair(Iᵢ, E) → (i₁, i₂) → Align(i₁, i₂, ctx) → Stop → M ; Λ.correspondences := Λ.correspondences ++ [M]   -- correspondence Constitution interaction [Tool]
          -- on re-entry from Repartner(ref), ref is the second term and Pair is skipped: the user already chose the partner
 Phase 2: (M, Iᵢ, Λ.space) → Extract(M, Iᵢ, Λ.space) → (R, H') ; Λ.relation := Some(R) ; Λ.space := Some(H')   -- relation + live-axis derivation (track)
-Phase 3: H → Probe(H, Iᵢ, ctx) → p → Qp(p, H) → Stop → W                   -- probe Constitution interaction [Tool]
+Phase 3: H → Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W                   -- probe Constitution interaction [Tool]
          -- the re-read below is a re-entry to this phase, so the answer it replaces is moved to Λ.superseded before
          -- re-presenting; Phase 3 itself never writes that slot, which is what keeps the replaced answer from being
          -- overwritten by the answer replacing it

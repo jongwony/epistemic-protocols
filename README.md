@@ -102,7 +102,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 **Project guide direction-line fusion** (three-horizon Horizontverschmelzung):
 
-- `/realign` — surface three horizons (the project guide's currently inscribed direction line, externally surfaced direction signals from a configured channel set, and the user's present pre-understanding elicited as a separate sub-step), compose a fusion candidate with a per-horizon transformation trace marking what was preserved / transformed / dropped in each horizon, shape the candidate through the dialectical widen / narrow / fuse / reorient / confirm / dismiss vocabulary inherited from `/induce`, and on user confirmation write the fused line back to the project guide direction line (rollback through the project's version control)
+- `/realign` — surface three horizons (the project guide's currently inscribed direction line, externally surfaced direction signals from a configured channel set, and the user's present pre-understanding elicited as a separate sub-step), compose a fusion candidate with a per-horizon transformation trace marking what was preserved / transformed / dropped in each horizon, shape the candidate through its own dialectical widen / narrow / fuse / reorient / confirm / dismiss vocabulary, and on user confirmation write the fused line back to the project guide direction line (rollback through the project's version control)
 
 **Work-unit triage**:
 
