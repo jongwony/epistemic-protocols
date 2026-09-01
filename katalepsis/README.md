@@ -1,16 +1,16 @@
 # Katalepsis — /grasp (κατάληψις)
 
-Achieve certain comprehension of AI work (κατάληψις: grasping firmly)
+Achieve certain comprehension of a result or artifact (κατάληψις: grasping firmly)
 
 > [한국어](./README_ko.md)
 
 ## What is Katalepsis?
 
-A modern reinterpretation of Stoic κατάληψις (firm grasp, certain comprehension) — a protocol that **enables users to follow along and achieve verified understanding of AI-generated work**.
+A modern reinterpretation of Stoic κατάληψις (firm grasp, certain comprehension) — a protocol that **enables users to follow along and achieve verified understanding of a result or artifact, whoever produced it**.
 
 ### The Core Problem
 
-When AI completes complex work, users often can't grasp the full result (`ResultUngrasped`). They may think they understand, or feel overwhelmed by changes without a clear entry point.
+When a result is complex — a large change, code someone else wrote, a dense paper — users often can't grasp it in full (`ResultUngrasped`). They may think they understand, or feel overwhelmed without a clear entry point.
 
 ### The Solution
 
@@ -37,7 +37,7 @@ Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction 
 ## When to Use
 
 **Use**:
-- After AI completes significant code changes
+- After significant code changes land, whoever made them
 - When user asks "what did you do?", "explain this", "help me understand"
 - Complex refactoring, new features, architectural changes
 
