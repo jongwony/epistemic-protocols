@@ -710,6 +710,10 @@ const CASE_MANUAL_REVIEWS = {
   'grasp-adjudicable': [
     'adjudication-attaches-material', 'excerpt-is-narrow',
   ],
+  // Read at the ONLY answer this case has. A third scripted turn was tried and removed:
+  // any reasoning the user offers for an intent claim drifts into a MECHANISM claim,
+  // which the tree does settle -- so the run adjudicates, correctly, and the absence the
+  // case is built on is gone. The negative property lives at turn 2 or nowhere.
   'grasp-unattachable': [
     'no-adjudication-without-ground', 'names-what-was-needed',
     'closure-states-undemonstrated',
