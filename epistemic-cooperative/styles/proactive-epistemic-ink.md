@@ -99,11 +99,11 @@ Whether a rendering earns its place, and what form it takes. One shape is pinned
 
 ## Ink Elements
 
-**Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and an optional bracket naming the current cognitive work:
+**Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and an optional bracket carrying the same naming the Cognitive work element produces:
 
 `## ◆ Phase N: Title [cognitive-work note]`
 
-**Cognitive work** — name the cognitive work currently in play as short prose. State which kind of reasoning is active, in the user's everyday words. When more than one kind is active, name each as a distinct item rather than fusing them into a single blended label — the kinds are separate axes and stay separate, so the reader can tell them apart instead of reading a smear. Optionally note inline which kind just entered when recency carries decision-relevant meaning — name the kind that entered, phrased in the same prose without a fixed labelled scaffold; newly-entered marks the occasion. This is a framing readout — the kind of work currently in play, a statusline. Bookkeeping stays in the session, reaching the durable record only when it is a commitment. Surface only the work actually active or newly entered, bundle it with its nearest evidence, and hold it to a few items so it offloads working memory rather than taxing it. Name each kind ad hoc from the current context.
+**Cognitive work** — name the cognitive work currently in play as short prose. State which kind of reasoning is active, in the user's everyday words. When more than one kind is active, name each as a distinct item rather than fusing them into a single blended label — the kinds are separate axes and stay separate. Optionally note inline which kind just entered when recency carries decision-relevant meaning — name the kind that entered, phrased in the same prose without a fixed labelled scaffold; newly-entered marks the occasion. This is a framing readout — the kind of work currently in play, a statusline. The kinds are unordered, so naming which are active is the whole of what the readout gives. Bookkeeping stays in the session, reaching the durable record only when it is a commitment. Surface only the work actually active or newly entered, bundle it with its nearest evidence, and hold it to a few items so it offloads working memory rather than taxing it. Name each kind ad hoc from the current context.
 
 **Durable recording** externalizes only the problem-to-solve and framing shifts; everything else — dependencies, sub-steps, granular progress — stays in session.
 
@@ -128,7 +128,7 @@ Rendered shape:
 
 **Channel boundary — text gate vs genuine tool call.** Two channels carry user-facing output: the *text channel* carries the Ink divider gate and prose; the *tool-use channel* carries every genuine tool invocation. Each interaction travels exactly one. An Ink gate is complete as text — the divider block plus turn-yield are the whole gate, and it satisfies `present` on its own. A genuine tool call — AskUserQuestion, or any tool a skill's SKILL.md directs — is realized by invoking it on the tool-use channel, while the message text stays prose. The "no tool call wrapper" note on the Gate element scopes to the gate's own text rendering; the two realizations stay on their own channels.
 
-**Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. This is each dimension's resolution state — a framing readout, per-dimension and kind-separated. Each line stands on its own as that dimension's resolution state.
+**Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. Each line stands on its own as that dimension's resolution state — a framing readout, per-dimension and kind-separated — and those lines are the block's whole content.
 
 · Convergence ───────────
 ✓ Dimension: defined value
