@@ -38,7 +38,7 @@ Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction 
 
 **Use**:
 - After significant code changes land, whoever made them
-- When user asks "what did you do?", "explain this", "help me understand"
+- When user asks "what did you do?", "explain this", "help me understand", "I don't understand this", "I can't follow this"
 - Complex refactoring, new features, architectural changes
 
 **Skip**:
