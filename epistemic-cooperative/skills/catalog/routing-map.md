@@ -70,7 +70,7 @@ implicit premise.
   when: A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept)
 
 **`/grasp`** (Katalepsis) — ResultUngrasped → VerifiedUnderstanding
-  when: A result or artifact you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it
+  when: A result or artifact you need to actually understand — you can't follow it yet, or you think you can and haven't checked; confirm your understanding is genuine before you approve, explain, or build on it
 
 **`/conduct`** (Hyphegesis) — MethodUnderdetermined → ConductedMethod
   when: Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins
