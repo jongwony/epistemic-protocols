@@ -15,7 +15,11 @@ Crystallize in-process abstraction by aligning concrete cases first and naming l
 ── FLOW ──
 Periagoge(A) → Detect(A) →
   InProcess(Iᵢ, E, L?): Pair(Iᵢ, E) → (i₁, i₂) →
-         Align(i₁, i₂, ctx) → Stop → M →
+         Align(i₁, i₂, ctx) → Stop → Aₐ →
+         (AsShown: M committed
+          | Correct(slot, value): re-present Align
+          | Repartner(ref): re-enter Align with ref as partner
+          | Abandon: declare(alignment_trace, open_trace) → AlignmentSuspended) →
          Extract(M, Iᵢ, H?) → (R, H) →
          Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W → narrow(H, W) → H' →
          loop until settled(H) ∨ budget_spent(Λ) →
@@ -30,7 +34,7 @@ Periagoge(A) → Detect(A) →
 A
   → detect(instances, essence, locator)   -- verify in-process abstraction exists
   → pair(instances, essence)              -- select the two cases that align most readily
-  → align(pair, slots)                    -- user constructs the correspondence; AI supplies the slots
+  → align(pair, slots)                    -- user constructs the correspondence; AI supplies the slots; the answer keeps it, corrects a slot, repartners, or abandons
   → extract(correspondence)               -- invariant relation, plus the axes that correspondence leaves live, over the space already built
   → probe(space, instances)               -- select the case that separates live axes rather than confirming the leading one
   → narrow(space, answer)                 -- per axis: rule it out, bound it, or leave it undecided; or, for the run, redraw the case, extend the language, or repartner
@@ -60,6 +64,11 @@ Slot           = { role: String, in_first: String, in_second: Option(String) }
 M              = Correspondence { slots: List(Slot), unmatched: Set(String) }
                  -- unmatched holds what one case carries and the other does not; it is evidence, not failure
 Align          = (i₁, i₂, ctx) → M                          -- constructed at the Phase 1 gate; the user fills or corrects the slots
+Aₐ             = AlignAnswer ∈ {AsShown, Correct(slot, value), Repartner(ref), Abandon}
+                 value        = what the user says the cases carry in that slot -- the filling is replaced, no reading is chosen
+                 -- the Phase 1 answer. AsShown commits M; Correct re-presents with the slot replaced; Repartner and Abandon
+                 -- are the run-level moves W also carries, reachable here so a wrong pairing or a withdrawal need not wait
+                 -- for a probe. ref is as defined under W
 Axis           = { relation: String, provenance: AxisProvenance }
 AxisProvenance ∈ {AlignmentDerived, ContrastDerived, UserSupplied}
 H              = HypothesisSpace { live: Set(Axis), ruled_out: Map(Axis, Ground) }
@@ -131,7 +140,8 @@ named(Λ)       = {the live axis Rule.statement was read off} when Λ.crystalliz
                  -- so at AlignmentSuspended every live axis is open, and at Confirm only the axes the rule did not take are
 OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{M.unmatched : M ∈ Λ.correspondences}
                  -- what a run can still owe at its terminal, from both carriers; the union runs over every
-                 -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it
+                 -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it.
+                 -- H.live reads as ∅ while Λ.space is None, so a run abandoned at Phase 1 owes nothing but declares that
 OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
                  -- invariant: dom(items) = OpenItems(Λ) — every open item carries exactly one disposition, which makes status(O) total
 status(O)      = None if OpenItems(Λ) = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
@@ -140,9 +150,10 @@ AlignmentTrace = List<(Slot | ProbeRecord | (N, Rule))>
                  -- every separated axis received and any verdict a re-read replaced, and the naming it terminated on.
                  -- Derived from Λ.correspondences, Λ.probes, and Λ.naming
 CrystallizedAbstraction = (N, Rule) where confirmed via Nₐ = Confirm ∧ alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
-AlignmentSuspended = (R?, H) where alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
+AlignmentSuspended = (R?, H?) where alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
                  -- the non-crystallizing terminal. It carries what the run established so a later run resumes from it
-                 -- rather than restarting; R is absent only when Phase 2 was never reached
+                 -- rather than restarting; R and H are absent only when Phase 2 was never reached, which is what
+                 -- Abandon at Phase 1 produces
 
 ── A-BINDING ──
 bind(A) = explicit_arg ∪ recent_instance_cluster ∪ surfaced_essence
@@ -156,7 +167,7 @@ If no essence signal is detectable (neither user sensing language nor AI-inferra
 
 ── PHASE TRANSITIONS ──
 Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess               -- detection checkpoint (silent)
-Phase 1: (Iᵢ, E) → Pair(Iᵢ, E) → (i₁, i₂) → Align(i₁, i₂, ctx) → Stop → M ; Λ.correspondences := Λ.correspondences ++ [M]   -- correspondence Constitution interaction [Tool]
+Phase 1: (Iᵢ, E) → Pair(Iᵢ, E) → (i₁, i₂) → Align(i₁, i₂, ctx) → Stop → Aₐ ; on AsShown, Λ.correspondences := Λ.correspondences ++ [M]   -- correspondence Constitution interaction [Tool]
          -- on re-entry from Repartner(ref), ref is the second term and Pair is skipped: the user already chose the partner
 Phase 2: (M, Iᵢ, Λ.space) → Extract(M, Iᵢ, Λ.space) → (R, H') ; Λ.relation := Some(R) ; Λ.space := Some(H')   -- relation + live-axis derivation (track)
 Phase 3: H → Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W                   -- probe Constitution interaction [Tool]
@@ -168,6 +179,12 @@ Phase 4: W → narrow(H, W) → H' ; Λ.space := Some(H') ; Λ.probes := Λ.prob
 Phase 5: (H, R, L?, Λ) → Name(H, R, L?, Λ) → (N, Rule) → Qn → Stop → Nₐ ; Λ.naming := Some(Nₐ)   -- naming Constitution interaction [Tool]
 
 ── LOOP ──
+After Phase 1: evaluate the alignment answer.
+If Aₐ = AsShown: M is committed; proceed to Phase 2.
+If Aₐ = Correct(slot, value): replace that slot's filling with value and re-present at Phase 1 within the same round; the correspondence M then carries is the corrected one.
+If Aₐ = Repartner(ref): re-enter Phase 1 with ref as the alignment partner and Pair skipped; the pairing left behind commits nothing.
+If Aₐ = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended with R and H absent.
+
 After Phase 3, before Phase 4: if W = Judged(Vs) ∧ consequential(Vs, H), show the verdicts together with what applying them would do to H, and re-present at Phase 3 within the same round so any verdict can be revised against the others. This runs at most once per round — never twice, and not at all on a round answered with any other constructor. Before re-presenting, the answer just given is moved to Λ.superseded, which Phase 4 then records; the re-entry is a return to Phase 3 and Phase 3 writes no such slot, so the replaced answer survives the answer replacing it. A revision spends no probe from the cap. Where consequential(Vs, H) is false, Phase 4 follows directly.
 
 After Phase 4: evaluate the probe answer.
@@ -197,7 +214,7 @@ early_exit = budget_spent(Λ) ∨ unalignable(Λ)
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
-Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such (mandatory); artifact read, artifact search for the cases' own context
+Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such, and the four ways the answer can go (mandatory); artifact read, artifact search for the cases' own context
 Phase 2 Extract    (track)   → Internal state update: writes Λ.relation and Λ.space, so Phase 3 has a space to probe and the terminal has a relation to name
 Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates on screen together, each axis's support and the case that breaks it beside that axis's own verdict slot (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
 Phase 4            (track)   → Internal state update: writes Λ.space and appends Λ.probes, so the cap can advance and the alignment trace has per-probe material to build from
@@ -228,7 +245,7 @@ If an explicit invocation has no detectable essence signal, surface that scan re
 
 ### User-facing realization
 
-At Phase 1, put the two cases side by side and render the correspondence with every slot filled from what the cases themselves carry, marking any role the second case has no counterpart for. The user corrects a filling that is wrong rather than supplying one that is missing; which reading the correspondence supports is separated at Phase 3, never by an unfilled slot here. Ground both cases in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
+At Phase 1, put the two cases side by side and render the correspondence with every slot filled from what the cases themselves carry, marking any role the second case has no counterpart for. The user corrects a filling that is wrong rather than supplying one that is missing; which reading the correspondence supports is separated at Phase 3, never by an unfilled slot here. Materialize the `Aₐ` constructors as everyday-language options with anticipatable differential futures: go on with the correspondence as shown, correct one slot, align against a different partner, or stop here with nothing committed. `AsShown` and `Abandon` remain constitutive even when analysis favours the pairing. Ground both cases in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
 
 At Phase 3, put every live axis the probe separates on screen at once, each row carrying that axis, what supports it, the case that breaks it, and its own verdict slot — refutes it, bounds it, or settles neither. Say that the rows are answered against each other rather than top to bottom, since what one axis makes of the case turns on how the others take it. Materialize `V` and the run-level `W` constructors as everyday-language options with anticipatable differential futures. A probe that separates nothing is not presented — draw another. A correction to the probe case itself is `Redraw` — the case is drawn again with the correction taken up, which spends no probe from the cap and leaves H unchanged.
 
