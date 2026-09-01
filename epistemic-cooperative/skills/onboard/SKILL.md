@@ -64,7 +64,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
 | Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions | Cross-session state recovery via narrative recognition (Recognition over Retrieval) |
 | Anagoge `/ascend` | Cross-cutting | A vague recall whose right unit is supra-session — a connected line of work, topic cluster, or already-sedimented concept across many sessions | Read-time deposit-graph reconstruction (discover related deposits by shared anchors/keywords/metadata); higher-unit recognition (Recognition over Aggregation) |
-| Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for AI-completed work, reviews, plans, docs, or code changes |
+| Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for a result or artifact, whoever produced it — reviews, plans, papers, docs, or code changes |
 | Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, reconciliation, termination, routing | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
 
 ## Phase Execution

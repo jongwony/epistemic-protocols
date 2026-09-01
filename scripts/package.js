@@ -120,7 +120,7 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) â
 
 ### Formal Verification
 
-Static checks validate protocol integrity before every commit (run \`node .claude/skills/verify/scripts/static-checks.js .\` for the current check inventory â€” covering, among others, json-schema, notation, xref, structure, tool-grounding, version-staleness, spec-vs-impl, cross-ref-scan, onboard-sync, catalog-sync, gate-type-soundness, and artifact-self-containment).
+Static checks validate protocol integrity before every commit. Run \`node .claude/skills/verify/scripts/static-checks.js .\`; the script itself is the current check inventory.
 
 ### Utility Skills
 

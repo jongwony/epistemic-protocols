@@ -15,11 +15,11 @@ What this page carries instead is the part the script does not: why a check exis
 ### Why certain checks exist
 
 - **codex-manifest-sync** — `version-staleness` inspects only the Claude manifest, and the file walk skips dot-directories, so `json-schema` cannot reach the Codex manifest either. Without this check the Codex manifest has no parse or version guard at all, which is how the "version bump missed codex-plugin" drift kept recurring.
-- **framing-readout-enforcement** — the banned progress-bar glyphs only ever rendered a completion bar, which is the one thing the Ink framing readout is defined against. The guard kernel is anchored *inside* the Cognitive work element rather than anywhere in the file, so the invariant cannot migrate into a comment or an opposite instruction and still pass.
+- **framing-readout-enforcement** — when this fires on the guard kernel, the Cognitive work element has lost the sentence stating what the readout is. Restore it as a positive statement rather than a prohibition: the body is injected every turn, which puts it under `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
 - **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so catalog drift is caught without re-creating the co-change chain that mirroring the catalog into an instruction file would impose.
 - **ink-body-identity** — a per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier. This check guards that copy against silent drift.
 - **routing-map-sync** — the routing map is injected at SessionStart, so a stale committed map does not merely go unread; it injects a wrong routing directive into every new session.
-- **gate-type-soundness** — warn level by design. Type-preserving materialization (specializing a generic axis into a concrete coordinate while the surfacing structure survives) is legitimate and must not be failed as mutation.
+- **gate-answer-reference** — resolves formal answers after `Stop` exactly against TYPES or transition-local declarations, MODE STATE fields, or a locally enumerated inline type. It reads the Definition only and fails on a dangling reference; context-dependent option materialization and semantic type realization belong to `/realize` or review under `AGENTS.md`'s static-verification boundary. `static-checks.test.mjs` proves the resolver with known-pass and known-fail runs rather than treating an empty match set as success.
 - **language-purity** — warn level under a Stage 1 surface posture. Promotion to fail is gated on Stage 2 retention evidence accumulating across multiple PRs and contributors, not on a single clean run.
 
 ### Repair
@@ -37,9 +37,8 @@ When a check fires, the fix is usually one of these:
 
 ## Tests
 
-```bash
-node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
-```
+The command is in `CLAUDE.md` §Development, with the note on why the
+static-check test takes its own invocation.
 
 `scripts/package.test.js` enforces the hand-maintained expected release-ZIP list; the static suite does not inspect that list, so a skill missing from it fails here and nowhere else.
 
@@ -60,7 +59,7 @@ Use these during protocol edits and reviews. Do not promote them to static failu
 
 Two properties are worth knowing before reading it, because neither is obvious from the code alone:
 
-- **A `SKILL.md` is preserved byte-for-byte.** Everything the packaging does is subtractive or additive around the file, never a rewrite of the contract text, so what a runtime user reads is what the repository holds.
+- **A `SKILL.md`'s body is preserved verbatim; its frontmatter is not.** `transformSkillMd()` parses the frontmatter, drops the strip-fields, and reserializes it, so the packaged file is not byte-identical to the source. Everything below the frontmatter is passed through unchanged — the packaging never rewrites the contract text — so what a runtime user reads there is what the repository holds.
 - **A description override replaces an over-long description rather than exempting it.** The override answers to the same length limit it exists to satisfy, and `package.test.js` asserts the packaged description against it — so an override is not an escape hatch.
 
 ## Runtime Contract Surfaces

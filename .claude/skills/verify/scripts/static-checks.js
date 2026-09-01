@@ -1711,31 +1711,18 @@ function checkRoutingMapSync() {
   });
 }
 
-// Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSupplies/User-supplies
-function stemMatch(a, b) {
-  // Normalize: remove hyphens, case-insensitive
-  const normA = a.replace(/-/g, '');
-  const normB = b.replace(/-/g, '');
-  if (normA === normB) return true;
-  // Prefix match requires short side >= 70% of long side length
-  const minRatio = 0.7;
-  if (normA.startsWith(normB) && normB.length >= normA.length * minRatio) return true;
-  if (normB.startsWith(normA) && normA.length >= normB.length * minRatio) return true;
-  // Handle verb inflection: X/Xes, X/Xed
-  const stemA = normA.replace(/(es|ed|s)$/, '');
-  const stemB = normB.replace(/(es|ed|s)$/, '');
-  if (stemA === stemB) return true;
-  if (stemA.startsWith(stemB) && stemB.length >= stemA.length * minRatio) return true;
-  if (stemB.startsWith(stemA) && stemA.length >= stemB.length * minRatio) return true;
-  return false;
-}
+// ============================================================
+// Check: Gate Answer Reference
+// Exact Definition-internal reference resolution only: a formal answer after
+// `Stop` must resolve to a TYPES or transition-local declaration, a MODE STATE
+// field, or a locally enumerated inline type. Runtime option materialization
+// depends on live context and belongs to /realize or review.
+// ============================================================
 
-// ============================================================
-// Check: Gate Type Soundness (Safeguard — warning only)
-// Verifies TYPES answer coproducts match Phase prose option enumerations.
-// Type-preserving materialization is permitted; gate mutation is flagged.
-// ============================================================
-function checkGateTypeSoundness() {
+const FORMAL_IDENTIFIER = /^(?:[\p{Lu}Λ_][\p{L}\p{N}_'’]*|[\p{L}][\p{L}\p{N}'’]*_[\p{L}\p{N}_'’]+)$/u;
+const STATE_REFERENCE = /^Λ\.([\p{L}_][\p{L}\p{N}_'’]*)$/u;
+
+function checkGateAnswerReference() {
   for (const file of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, file);
     let content;
@@ -1743,112 +1730,71 @@ function checkGateTypeSoundness() {
       content = fs.readFileSync(fullPath, 'utf-8');
     } catch { continue; }
 
-    // 1. Extract TYPES section from Definition code block
-    const typesSection = extractFormalSection(content, 'TYPES');
-    if (!typesSection) continue;
+    const typesSection = extractFormalSection(content, 'TYPES') ?? '';
+    const modeStateSection = extractFormalSection(content, 'MODE STATE') ?? '';
+    const identifier = "[\\p{L}_][\\p{L}\\p{N}_'’]*";
+    const typeDeclarations = new Set(
+      [...typesSection.matchAll(new RegExp(`^\\s*(${identifier})\\s*(?:=|∈|:)`, 'gmu'))]
+        .map((m) => m[1])
+    );
+    const stateFields = new Set(
+      [...modeStateSection.matchAll(new RegExp(`(?:^|[,{])\\s*(${identifier})\\s*:`, 'gmu'))]
+        .map((m) => m[1])
+    );
 
-    // 2. Parse coproducts: lines with ∈ {X, Y, Z} pattern
-    const coproducts = [];
-    const coprodRegex = /^(\w+)\s.*?∈\s*\{([^}]+)\}/gm;
-    let m;
-    while ((m = coprodRegex.exec(typesSection)) !== null) {
-      const typeName = m[1];
-      const constructors = m[2].split(',').map(c => {
-        const trimmed = c.trim();
-        const name = trimmed.replace(/\([^)]*\)/g, '').trim();
-        return { raw: trimmed, name };
-      }).filter(c => c.name.length > 0);
-      if (constructors.length >= 2) {
-        coproducts.push({ typeName, constructors });
-      }
-    }
-
-    // 3. Extract Options blocks from prose (outside Definition code block)
-    const proseStart = content.indexOf('## Mode Activation');
-    if (proseStart === -1) {
-      results.warn.push({
-        check: 'gate-type-soundness',
-        file,
-        message: 'No "## Mode Activation" header found — gate prose extraction skipped'
-      });
-      continue;
-    }
-    const prose = content.substring(proseStart);
-
-    const optionsBlocks = [];
-    // Match Options: followed by numbered bold items until block end
-    const optBlockRegex = /Options:\n((?:\s*\d+\.\s+\*\*[^\n]+\n?)+)/g;
-    while ((m = optBlockRegex.exec(prose)) !== null) {
-      const block = m[1];
-      const labels = [];
-      const labelRegex = /^\s*\d+\.\s+\*\*\[?([^\]*\n]+?)\]?\*\*/gm;
-      let lm;
-      while ((lm = labelRegex.exec(block)) !== null) {
-        const raw = lm[1].trim();
-        // Extract first word as canonical label; skip pure template placeholders
-        const firstWord = raw.split(/[\s,—]/)[0];
-        if (firstWord && (!/^[A-Z][a-z]+\s/.test(raw) || /^[A-Z][a-z]+$/.test(firstWord))) {
-          labels.push(firstWord);
+    const transitions = [
+      extractFormalSection(content, 'PHASE TRANSITIONS'),
+      extractFormalSection(content, 'LOOP')
+    ].filter(Boolean).join('\n');
+    const transitionDeclarations = new Set(
+      [...transitions.matchAll(new RegExp(`^\\s*(${identifier})\\s*(?:=|∈|:)`, 'gmu'))]
+        .map((m) => m[1])
+    );
+    let resolvedAnswers = 0;
+    let unresolvedAnswers = 0;
+    for (const m of transitions.matchAll(/→\s*Stop\s*→\s*([^\s→[\]|(){}]+)(?:\s*∈\s*(\{|[\p{L}_][\p{L}\p{N}_'’]*))?/gu)) {
+      const symbol = m[1].replace(/[.,;:]+$/, '');
+      if (m[2]) {
+        if (m[2] === '{' || typeDeclarations.has(m[2]) || transitionDeclarations.has(m[2])) {
+          resolvedAnswers += 1;
+          continue;
         }
-      }
-      if (labels.length >= 2) {
-        optionsBlocks.push(labels);
-      }
-    }
-
-    // 4. Match coproducts to Options blocks and compare
-    let analysed = 0;
-    for (const cp of coproducts) {
-      const cNames = cp.constructors.map(c => c.name.toLowerCase());
-
-      // Find best matching Options block by stem overlap
-      let bestBlock = null;
-      let bestScore = 0;
-      for (const labels of optionsBlocks) {
-        const lLower = labels.map(l => l.toLowerCase());
-        const score = cNames.filter(cn =>
-          lLower.some(ln => stemMatch(cn, ln))
-        ).length;
-        if (score > bestScore) {
-          bestScore = score;
-          bestBlock = labels;
-        }
-      }
-
-      // Require ≥40% constructor match to consider it a paired block
-      if (!bestBlock || bestScore < Math.max(2, Math.ceil(cNames.length * 0.4))) continue;
-      analysed++;
-
-      const lLower = bestBlock.map(l => l.toLowerCase());
-
-      // Check for constructors missing from prose options (potential deletion)
-      const missing = cp.constructors.filter(c =>
-        !lLower.some(ln => stemMatch(c.name.toLowerCase(), ln)) &&
-        !new RegExp(escapeRegex(c.raw)).test(prose)
-      );
-
-      // Check for prose options missing from constructors (potential injection)
-      const extra = bestBlock.filter(l =>
-        !cNames.some(cn => stemMatch(cn, l.toLowerCase()))
-      );
-
-      if (missing.length > 0 || extra.length > 0) {
-        const parts = [];
-        if (missing.length > 0) parts.push(`TYPES constructors not in prose: ${missing.map(c => c.raw).join(', ')}`);
-        if (extra.length > 0) parts.push(`prose options not in TYPES: ${extra.join(', ')}`);
-        results.warn.push({
-          check: 'gate-type-soundness',
+        unresolvedAnswers += 1;
+        results.fail.push({
+          check: 'gate-answer-reference',
           file,
-          message: `${cp.typeName} ∈ {${cp.constructors.map(c => c.raw).join(', ')}} — ${parts.join('; ')}. Verify: type-preserving materialization or gate mutation?`
+          message: `inline gate answer type \`${m[2]}\` does not resolve to a TYPES or transition-local declaration`
         });
+        continue;
       }
+      const stateReference = STATE_REFERENCE.exec(symbol);
+      if (stateReference) {
+        if (stateFields.has(stateReference[1])) {
+          resolvedAnswers += 1;
+          continue;
+        }
+      } else if (typeDeclarations.has(symbol) || transitionDeclarations.has(symbol) || stateFields.has(symbol)) {
+        resolvedAnswers += 1;
+        continue;
+      } else if (!FORMAL_IDENTIFIER.test(symbol)) {
+        continue; // prose continuation after Stop, not a formal reference
+      }
+
+      unresolvedAnswers += 1;
+      results.fail.push({
+        check: 'gate-answer-reference',
+        file,
+        message: `formal gate answer \`${symbol}\` does not resolve to a TYPES or transition-local declaration, MODE STATE field, or locally enumerated inline type`
+      });
     }
 
-    results.pass.push({
-      check: 'gate-type-soundness',
-      file,
-      message: `Gate type soundness check completed (${coproducts.length} coproducts, ${analysed} matched to prose)`
-    });
+    if (unresolvedAnswers === 0) {
+      results.pass.push({
+        check: 'gate-answer-reference',
+        file,
+        message: `Gate answer reference check completed (${resolvedAnswers} resolved formal answers, ${unresolvedAnswers} unresolved formal answers)`
+      });
+    }
   }
 }
 
@@ -1956,22 +1902,27 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
   return next ? bounded.slice(0, next.index) : bounded;
 }
 
+// Drift leaves the kernel's bytes in place while the reader receives no
+// instruction, and the shape it takes is a kernel commented out. Removing
+// closed comment regions before the presence test catches that shape, and
+// that is the whole of what this filter claims. Classifying Markdown further
+// is a parser, which this is not; a kernel placed inertly on purpose is
+// review's to catch.
+function liveProse(span) {
+  return span.replace(/<!--[\s\S]*?-->/g, '');
+}
+
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
-// framing readout, never a scalar progress meter) to an enforcement channel:
-//   (a) the unicode progress-bar glyphs ▓/░ must not appear in any core
-//       protocol SKILL.md or any Ink-derived Output Style — they only ever
-//       rendered a completion bar;
-//   (b) each Ink-derived Output Style's **Cognitive work** element must
-//       retain the categorical-ban guard kernel within its own bounded
-//       body (label line to the next Ink element label or heading) — not
-//       merely anywhere in the file — so the guard cannot silently migrate
-//       into a comment, frontmatter, or an opposite instruction and still
-//       pass.
-// Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
-// skills (e.g. /dashboard) may legitimately render bars and are out of scope.
+// framing readout of the work in play) to an enforcement channel:
+// The glyph denylist is scoped by decision, not by what a file category could
+// establish about a glyph's meaning: utility skills (e.g. /dashboard) may
+// legitimately render bars and are out of it, and the scope otherwise mirrors
+// checkEmitLoadDiscipline. Why a guard exists here at all, and why its kernel
+// is a positive statement rather than a prohibition: references/verification.md,
+// framing-readout-enforcement.
 function checkFramingReadoutEnforcement() {
   const BAR_GLYPH = /[▓░]/;
   const CHECK = 'framing-readout-enforcement';
@@ -1996,12 +1947,14 @@ function checkFramingReadoutEnforcement() {
     });
   }
 
-  // Guard kernel: the negation-carrying sentence fragment from the
-  // Cognitive work element (see header comment (b)). Anchored within that
-  // element's own bounded body — the guard kernel must appear inside the
-  // element's own label-to-next-boundary span, not merely anywhere in the
-  // file — rather than a whole-file substring test.
-  const GUARD = "does not render the loop's completion as a bar, percentage, or N-of-M tally";
+  // Guard kernel: the sentence fragment in which the Cognitive work element
+  // states what it is. Anchored within that element's own bounded body — the
+  // kernel must appear inside the element's own label-to-next-boundary span,
+  // rather than anywhere in the file. It is the positive statement of the
+  // invariant, which is what the element is asked to keep when it is
+  // rewritten: an element that stopped being a framing readout would have to
+  // drop this sentence to say so.
+  const GUARD = 'a framing readout — the kind of work currently in play, a statusline';
   const COGNITIVE_WORK_LABEL_PATTERN = /^\*\*Cognitive work\*\*/m;
   const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
   const ELEMENT_BOUND = 6000;
@@ -2023,7 +1976,11 @@ function checkFramingReadoutEnforcement() {
       }
     });
 
-    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleContent);
+    // Comments come out of the whole document before the element is located:
+    // one can open before the kernel and close past the element boundary, and
+    // a span sliced first would carry the opener without its closer.
+    const styleProse = liveProse(styleContent);
+    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleProse);
     if (!labelMatch) {
       results.fail.push({
         check: CHECK,
@@ -2032,12 +1989,12 @@ function checkFramingReadoutEnforcement() {
       });
       continue;
     }
-    const elementBody = boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
+    const elementBody = boundedEntryBody(styleProse, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
     if (!elementBody.includes(GUARD)) {
       results.fail.push({
         check: CHECK,
         file: stylePath,
-        message: `Missing categorical-ban guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
+        message: `Missing guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
       });
     }
   }
@@ -2614,7 +2571,7 @@ try {
   checkCatalogSync();
   checkRoutingMapSync();
   checkPartitionInvariant();
-  checkGateTypeSoundness();
+  checkGateAnswerReference();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
   checkFramingReadoutEnforcement();
