@@ -16,7 +16,7 @@ Crystallize in-process abstraction by aligning concrete cases first and naming l
 Periagoge(A) → Detect(A) →
   InProcess(Iᵢ, E, L?): Pair(Iᵢ, E) → (i₁, i₂) →
          Align(i₁, i₂, ctx) → Stop → M →
-         Extract(M, Iᵢ, H?) → (R, H') →
+         Extract(M, Iᵢ, H?) → (R, H) →
          Probe(H, Iᵢ, ctx) → p → Qp(p, H) → Stop → W → narrow(H, W) → H' →
          loop until settled(H) ∨ budget_spent(Λ) →
          Name(H, R, L?, Λ) → Qn → Stop → Nₐ →
@@ -34,7 +34,7 @@ A
   → extract(correspondence)               -- invariant relation, plus the axes that correspondence leaves live, over the space already built
   → probe(space, instances)               -- select the case that separates live axes rather than confirming the leading one
   → narrow(space, answer)                 -- per axis: rule it out, bound it, or leave it undecided; or, for the run, redraw the case, extend the language, or repartner
-  → name(surviving, relation, label)      -- AI proposes name + rule, after the space has narrowed and not before
+  → name(space, relation, label, record)  -- AI proposes name + rule, reading the boundary off the probe record, after the space has narrowed and not before
   → declare(trace, open_trace)            -- terminal evidence trace + open-item disposition
   → CrystallizedAbstraction
 requires: in_process(A)                    -- runtime checkpoint (Phase 0)
@@ -96,11 +96,10 @@ consequential(Vs, H) = |dom(Vs)| ≥ 2 ∧ (narrowed_none(Vs) ∨ closes(Vs, H))
                  -- what a cross-axis re-read is spent on. Two axes are what make it a cross-axis read at all;
                  -- on one there is nothing to read the verdict against
 ProbeRecord    = { case: ProbeCase, answer: W, superseded: Option(W) }
-                 -- superseded holds the answer a cross-axis re-read replaced, read off Λ.pending at Phase 4, and None
+                 -- superseded holds the answer a cross-axis re-read replaced, read off Λ.superseded at Phase 4, and None
                  -- where the round was answered once. A reversal stays in the trace instead of being overwritten by
                  -- what replaced it, which is what makes a destroyed interaction observable rather than silent
-replaced(Λ)    = Some(w) where a cross-axis re-read revised the answer w that Λ.pending held; None otherwise
-boundary(Λ, H) = [(r.case, g) : r ∈ Λ.probes, r.answer = Judged(Vs), a ∈ H.live, Vs(a) = Bounds(g)]
+boundary(Λ, H) = [(r.case, g) : r ∈ Λ.probes, r.answer = Judged(Vs), a ∈ H.live ∩ dom(Vs), Vs(a) = Bounds(g)]
                  -- every case the user placed outside a surviving axis's claim, read back from the probe record where
                  -- the case and its ground both survive. No field carries a boundary, so narrow writes none, and the
                  -- derivation is total whether Phase 5 fired on settled(H) or on budget_spent with several axes live
@@ -158,12 +157,16 @@ Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess              
 Phase 1: (Iᵢ, E) → Pair(Iᵢ, E) → (i₁, i₂) → Align(i₁, i₂, ctx) → Stop → M ; Λ.correspondences := Λ.correspondences ++ [M]   -- correspondence Constitution interaction [Tool]
          -- on re-entry from Repartner(ref), ref is the second term and Pair is skipped: the user already chose the partner
 Phase 2: (M, Iᵢ, Λ.space) → Extract(M, Iᵢ, Λ.space) → (R, H') ; Λ.relation := Some(R) ; Λ.space := Some(H')   -- relation + live-axis derivation (track)
-Phase 3: H → Probe(H, Iᵢ, ctx) → p → Qp(p, H) → Stop → W ; Λ.pending := Some((p, W))   -- probe Constitution interaction [Tool]
-Phase 4: W → narrow(H, W) → H' ; Λ.space := Some(H') ; Λ.probes := Λ.probes ++ [ProbeRecord(p, W, replaced(Λ))] ; Λ.pending := None   -- space update + probe record (track)
+Phase 3: H → Probe(H, Iᵢ, ctx) → p → Qp(p, H) → Stop → W                   -- probe Constitution interaction [Tool]
+         -- the re-read below is a re-entry to this phase, so the answer it replaces is moved to Λ.superseded before
+         -- re-presenting; Phase 3 itself never writes that slot, which is what keeps the replaced answer from being
+         -- overwritten by the answer replacing it
+Phase 4: W → narrow(H, W) → H' ; Λ.space := Some(H') ; Λ.probes := Λ.probes ++ [ProbeRecord(p, W, Λ.superseded)] where W ≠ Redraw(_) ; Λ.superseded := None   -- space update + probe record (track)
+         -- the append is what budget_spent counts, so a constructor that declares it spends no probe must not reach it
 Phase 5: (H, R, L?, Λ) → Name(H, R, L?, Λ) → (N, Rule) → Qn → Stop → Nₐ ; Λ.naming := Some(Nₐ)   -- naming Constitution interaction [Tool]
 
 ── LOOP ──
-After Phase 3, before Phase 4: if W = Judged(Vs) ∧ consequential(Vs, H), show the verdicts together with what applying them would do to H, and re-present at Phase 3 within the same round so any verdict can be revised against the others. This runs at most once per round — never twice, and not at all on a round answered with any other constructor. A revision spends no probe from the cap, and the answer it replaced stays in Λ.pending so Phase 4 records it as superseded rather than overwriting it. Where consequential(Vs, H) is false, Phase 4 follows directly.
+After Phase 3, before Phase 4: if W = Judged(Vs) ∧ consequential(Vs, H), show the verdicts together with what applying them would do to H, and re-present at Phase 3 within the same round so any verdict can be revised against the others. This runs at most once per round — never twice, and not at all on a round answered with any other constructor. Before re-presenting, the answer just given is moved to Λ.superseded, which Phase 4 then records; the re-entry is a return to Phase 3 and Phase 3 writes no such slot, so the replaced answer survives the answer replacing it. A revision spends no probe from the cap. Where consequential(Vs, H) is false, Phase 4 follows directly.
 
 After Phase 4: evaluate the probe answer.
 If W = Judged(Vs): each Refutes axis is ruled out with its ground, each Bounds and each Undecided axis stays live; return to Phase 3. If narrowed_none(Vs), say that this round ruled no axis out, and which axes were kept by scoping the case out of their claim and which were left undecided, before drawing the next probe.
@@ -203,7 +206,7 @@ seam               (extension)   → TextPresent+Proceed (fires at deactivation/
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
       correspondences: List(M), relation: Option(R), space: Option(H),
-      probes: List(ProbeRecord), pending: Option((ProbeCase, W)), naming: Option(Nₐ),
+      probes: List(ProbeRecord), superseded: Option(W), naming: Option(Nₐ),
       crystallized: Option((N, Rule)),
       alignment_trace: Option(AlignmentTrace),
       open_trace: Option(OpenTrace),
