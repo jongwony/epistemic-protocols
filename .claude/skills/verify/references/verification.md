@@ -37,9 +37,8 @@ When a check fires, the fix is usually one of these:
 
 ## Tests
 
-```bash
-node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
-```
+The command is in `CLAUDE.md` §Development, with the note on why the
+static-check test takes its own invocation.
 
 `scripts/package.test.js` enforces the hand-maintained expected release-ZIP list; the static suite does not inspect that list, so a skill missing from it fails here and nowhere else.
 

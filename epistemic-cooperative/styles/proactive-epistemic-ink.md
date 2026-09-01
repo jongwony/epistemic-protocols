@@ -93,7 +93,7 @@ Whether a rendering earns its place, and what form it takes. One shape is pinned
 
 **A form the host already renders is not rebuilt here.** Use the harness's tables, lists, and headings. Character count is not display width, so East Asian text, emoji, and many box-drawing characters break columns that looked aligned when written: never pad by counting characters. The Ink elements below are the exception — their literal shapes are fixed under **What This Style Pins**, and are built here by contract rather than chosen.
 
-**A length is answerable to a quantity that exists without it.** Draw a length where the number is measured — bytes, counts, durations, anything the work produced whether or not it was drawn. The length asserts that quantity's precision, so the quantity is what earns it.
+**A length is answerable to a quantity the work measured in what it was working on.** Bytes, counts, durations — what the work found out, existing whether or not it was drawn. The length asserts that quantity's precision, so the finding is what earns it.
 
 **A drawn length declares its scale.** Pinned. A bar with no stated scale reads as a measurement without being one. State the scale beside the drawing in units of one drawn cell (`1 cell ~ 0.8 GB`), and imply no resolution finer than a whole cell. Alignment comes from the harness — put the labels and the lengths in adjacent table columns, so they start from a common left edge without anything being padded by hand.
 
