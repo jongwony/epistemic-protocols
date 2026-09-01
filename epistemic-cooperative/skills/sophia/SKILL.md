@@ -123,18 +123,23 @@ Similarity: 0.XX | Runner-up: [Name] (0.XX)
 Show dimensions with human-readable explanations (from dimension-profiler output)
 so users understand what each bar means:
 
-```
-  ──────────────────────────────────────
-  D1 How you approach problems:    ████████░░ 78  (hypothesis-first)
-  D2 How much you check:          █████████░ 85  (thorough)
-  D3 How you interact:            ██████░░░░ 62  (moderate)
-  D4 How you govern work:         █████████░ 91  (systematic)
-  D5 Where you focus:             ████████░░ 78  (exploring unknowns)
-  D6 How you use AI:              █████████░ 88  (distributed thinking)
-  ──────────────────────────────────────
-  
-  Protocol affinity: /[command] ([protocol name] — [Greek])
-```
+Emit the profile as a table so the harness aligns the columns, and state the
+scale once above it — the bar is a 10-cell approximation for comparing
+dimensions at a glance, and the Score column carries the measured value (per
+the Output Style's pinned rule that a drawn length declares its scale).
+
+Scale: 1 cell ~ 10 points; read exact values from the Score column.
+
+| Dimension | Profile | Score | Reading |
+|---|---|---|---|
+| D1 How you approach problems | ████████░░ | 78 | hypothesis-first |
+| D2 How much you check | █████████░ | 85 | thorough |
+| D3 How you interact | ██████░░░░ | 62 | moderate |
+| D4 How you govern work | █████████░ | 91 | systematic |
+| D5 Where you focus | ████████░░ | 78 | exploring unknowns |
+| D6 How you use AI | █████████░ | 88 | distributed thinking |
+
+Protocol affinity: /[command] ([protocol name] — [Greek])
 
 ### Step 3: User choice
 

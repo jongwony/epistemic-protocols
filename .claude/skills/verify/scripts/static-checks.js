@@ -1902,22 +1902,27 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
   return next ? bounded.slice(0, next.index) : bounded;
 }
 
+// Drift leaves the kernel's bytes in place while the reader receives no
+// instruction, and the shape it takes is a kernel commented out. Removing
+// closed comment regions before the presence test catches that shape, and
+// that is the whole of what this filter claims. Classifying Markdown further
+// is a parser, which this is not; a kernel placed inertly on purpose is
+// review's to catch.
+function liveProse(span) {
+  return span.replace(/<!--[\s\S]*?-->/g, '');
+}
+
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
-// framing readout, never a scalar progress meter) to an enforcement channel:
-//   (a) the unicode progress-bar glyphs ▓/░ must not appear in any core
-//       protocol SKILL.md or any Ink-derived Output Style — they only ever
-//       rendered a completion bar;
-//   (b) each Ink-derived Output Style's **Cognitive work** element must
-//       retain the categorical-ban guard kernel within its own bounded
-//       body (label line to the next Ink element label or heading) — not
-//       merely anywhere in the file — so the guard cannot silently migrate
-//       into a comment, frontmatter, or an opposite instruction and still
-//       pass.
-// Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
-// skills (e.g. /dashboard) may legitimately render bars and are out of scope.
+// framing readout of the work in play) to an enforcement channel:
+// The glyph denylist is scoped by decision, not by what a file category could
+// establish about a glyph's meaning: utility skills (e.g. /dashboard) may
+// legitimately render bars and are out of it, and the scope otherwise mirrors
+// checkEmitLoadDiscipline. Why a guard exists here at all, and why its kernel
+// is a positive statement rather than a prohibition: references/verification.md,
+// framing-readout-enforcement.
 function checkFramingReadoutEnforcement() {
   const BAR_GLYPH = /[▓░]/;
   const CHECK = 'framing-readout-enforcement';
@@ -1942,12 +1947,14 @@ function checkFramingReadoutEnforcement() {
     });
   }
 
-  // Guard kernel: the negation-carrying sentence fragment from the
-  // Cognitive work element (see header comment (b)). Anchored within that
-  // element's own bounded body — the guard kernel must appear inside the
-  // element's own label-to-next-boundary span, not merely anywhere in the
-  // file — rather than a whole-file substring test.
-  const GUARD = "does not render the loop's completion as a bar, percentage, or N-of-M tally";
+  // Guard kernel: the sentence fragment in which the Cognitive work element
+  // states what it is. Anchored within that element's own bounded body — the
+  // kernel must appear inside the element's own label-to-next-boundary span,
+  // rather than anywhere in the file. It is the positive statement of the
+  // invariant, which is what the element is asked to keep when it is
+  // rewritten: an element that stopped being a framing readout would have to
+  // drop this sentence to say so.
+  const GUARD = 'a framing readout — the kind of work currently in play, a statusline';
   const COGNITIVE_WORK_LABEL_PATTERN = /^\*\*Cognitive work\*\*/m;
   const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
   const ELEMENT_BOUND = 6000;
@@ -1969,7 +1976,11 @@ function checkFramingReadoutEnforcement() {
       }
     });
 
-    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleContent);
+    // Comments come out of the whole document before the element is located:
+    // one can open before the kernel and close past the element boundary, and
+    // a span sliced first would carry the opener without its closer.
+    const styleProse = liveProse(styleContent);
+    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleProse);
     if (!labelMatch) {
       results.fail.push({
         check: CHECK,
@@ -1978,12 +1989,12 @@ function checkFramingReadoutEnforcement() {
       });
       continue;
     }
-    const elementBody = boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
+    const elementBody = boundedEntryBody(styleProse, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
     if (!elementBody.includes(GUARD)) {
       results.fail.push({
         check: CHECK,
         file: stylePath,
-        message: `Missing categorical-ban guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
+        message: `Missing guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
       });
     }
   }

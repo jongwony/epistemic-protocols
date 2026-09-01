@@ -46,13 +46,25 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 When the rendered vocabulary would require user Recall at first encounter, optionally extend the plain-language expression with a brief substrate-cited situational anchor drawn from the user's codebase, configs, or prior session. Self-regulating — emit only when Recall would otherwise occur, not on every term; the anchor's substrate citation follows the Basis Marker discipline.
 
+## Rendering Judgment
+
+Whether a rendering earns its place, and what form it takes. One shape is pinned, where getting it wrong would make the rendering lie.
+
+**The reader's task governs; the form follows.** Ask what the reader has to do with what is on screen before choosing a shape — pulling out one discrete value is a table's task, taking in a set of relations at once is a picture's.
+
+**A form the host already renders is not rebuilt here.** Use the harness's tables, lists, and headings. Character count is not display width, so East Asian text, emoji, and many box-drawing characters break columns that looked aligned when written: never pad by counting characters. The Ink elements below are the exception — their literal shapes are fixed under **What This Style Pins**, and are built here by contract rather than chosen.
+
+**A length is answerable to a quantity the work measured in what it was working on.** Bytes, counts, durations — what the work found out, existing whether or not it was drawn. The length asserts that quantity's precision, so the finding is what earns it.
+
+**A drawn length declares its scale.** Pinned. A bar with no stated scale reads as a measurement without being one. State the scale beside the drawing in units of one drawn cell (`1 cell ~ 0.8 GB`), and imply no resolution finer than a whole cell. Alignment comes from the harness — put the labels and the lengths in adjacent table columns, so they start from a common left edge without anything being padded by hand.
+
 ## Ink Elements
 
-**Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and an optional bracket naming the current cognitive work (never a completion ratio):
+**Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and an optional bracket carrying the same naming the Cognitive work element produces:
 
 `## ◆ Phase N: Title [cognitive-work note]`
 
-**Cognitive work** — when a protocol would otherwise show a progress ratio, name the cognitive work currently in play as short prose instead. State which kind of reasoning is active, in the user's everyday words. When more than one kind is active, name each as a distinct item rather than fusing them into a single blended label — the kinds are separate axes and stay separate, so the reader can tell them apart instead of reading a smear. Optionally note inline which kind just entered when recency carries decision-relevant meaning — name the kind that entered, phrased in the same prose without a fixed labelled scaffold; newly-entered marks the occasion, not a position in a sequence, so never render it as a round ordinal or turn count. This is a framing readout — the kind of work currently in play, a statusline not a progress meter. It does not render the loop's completion as a bar, percentage, or N-of-M tally; a protocol loop is non-linear, so a ratio would falsify it, and a soft judgment shown as a precise number is false precision. Progress bookkeeping is not emitted here — it stays in the session, reaching the durable record only when it is a commitment. Surface only the work actually active or newly entered, bundle it with its nearest evidence, and hold it to a few items so it offloads working memory rather than taxing it. Name each kind ad hoc from the current context — do not inscribe or reference a fixed catalog of kinds.
+**Cognitive work** — name the cognitive work currently in play as short prose. State which kind of reasoning is active, in the user's everyday words. When more than one kind is active, name each as a distinct item rather than fusing them into a single blended label — the kinds are separate axes and stay separate. Optionally note inline which kind just entered when recency carries decision-relevant meaning — name the kind that entered, phrased in the same prose without a fixed labelled scaffold; newly-entered marks the occasion. This is a framing readout — the kind of work currently in play, a statusline. The kinds are unordered, so naming which are active is the whole of what the readout gives. Bookkeeping stays in the session, reaching the durable record only when it is a commitment. Surface only the work actually active or newly entered, bundle it with its nearest evidence, and hold it to a few items so it offloads working memory rather than taxing it. Name each kind ad hoc from the current context.
 
 **Durable recording** externalizes only the problem-to-solve and framing shifts; everything else — dependencies, sub-steps, granular progress — stays in session.
 
@@ -77,7 +89,7 @@ Rendered shape:
 
 **Channel boundary — text gate vs genuine tool call.** Two channels carry user-facing output: the *text channel* carries the Ink divider gate and prose; the *tool-use channel* carries every genuine tool invocation. Each interaction travels exactly one. An Ink gate is complete as text — the divider block plus turn-yield are the whole gate, and it satisfies `present` on its own. A genuine tool call — AskUserQuestion, or any tool a skill's SKILL.md directs — is realized by invoking it on the tool-use channel, while the message text stays prose. The "no tool call wrapper" note on the Gate element scopes to the gate's own text rendering; the two realizations stay on their own channels.
 
-**Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. This is each dimension's resolution state — a framing readout, not a tally to sum. It is per-dimension and kind-separated; do not collapse it into a score or an "N/M done" fraction. Each line stands on its own as that dimension's resolution state.
+**Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. Each line stands on its own as that dimension's resolution state — a framing readout, per-dimension and kind-separated — and those lines are the block's whole content.
 
 · Convergence ───────────
 ✓ Dimension: defined value
@@ -128,7 +140,7 @@ A form instruction reaches the wording and not the marking. Asked for a plainer 
 
 ### What This Style Pins
 
-Form feedback names the relation between an instruction and what it does not reach, and leaves the reason to whichever layer fixed each element. These are the elements fixed here, so this is where their reason lives: the marking of a reading's firmness, `Basis:` wherever it is emitted under its own conditions, and the Ink elements themselves — a gate's divider block and its option shape (the numbered options and the summary layer that makes each one recognizable; the rationale line sits outside this pin and is governed by its own emit condition, as `Basis:` is), the convergence lines, the observer markers. Each of them exists so a reader can check a judgment instead of taking it, and a round that reads more smoothly once the check is gone is not the smoother round that was asked for. Asked for a register these sit inside, change the prose around them and say in one line that they stay. This reaches `Basis:` only through its own emit conditions — a protocol that declares the marker intentionally absent has fixed that for reasons of its own, and nothing here reaches past that declaration.
+Form feedback names the relation between an instruction and what it does not reach, and leaves the reason to whichever layer fixed each element. These are the elements fixed here, so this is where their reason lives: the marking of a reading's firmness, `Basis:` wherever it is emitted under its own conditions, and the Ink elements themselves — a gate's divider block and its option shape (the numbered options and the summary layer that makes each one recognizable; the rationale line sits outside this pin and is governed by its own emit condition, as `Basis:` is), the convergence lines, the observer markers, and the scale a drawn length declares. Each of them exists so a reader can check a judgment instead of taking it, and a round that reads more smoothly once the check is gone is not the smoother round that was asked for. Asked for a register these sit inside, change the prose around them and say in one line that they stay. This reaches `Basis:` only through its own emit conditions — a protocol that declares the marker intentionally absent has fixed that for reasons of its own, and nothing here reaches past that declaration.
 
 ## Protocol Recommendations
 
