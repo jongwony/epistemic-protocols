@@ -1905,10 +1905,9 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
 // Drift leaves the kernel's bytes in place while the reader receives no
 // instruction, and the shape it takes is a kernel commented out. Removing
 // closed comment regions before the presence test catches that shape, and
-// that is the whole of what this filter claims. Classifying Markdown beyond
-// it is a parser: the fence walker that tried produced a false failure on
-// correct prose and then two toggle defects of its own, all inside the scope
-// it claimed. A kernel placed inertly on purpose is review's to catch.
+// that is the whole of what this filter claims. Classifying Markdown further
+// is a parser, which this is not; a kernel placed inertly on purpose is
+// review's to catch.
 function liveProse(span) {
   return span.replace(/<!--[\s\S]*?-->/g, '');
 }
@@ -1977,7 +1976,11 @@ function checkFramingReadoutEnforcement() {
       }
     });
 
-    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleContent);
+    // Comments come out of the whole document before the element is located:
+    // one can open before the kernel and close past the element boundary, and
+    // a span sliced first would carry the opener without its closer.
+    const styleProse = liveProse(styleContent);
+    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleProse);
     if (!labelMatch) {
       results.fail.push({
         check: CHECK,
@@ -1986,9 +1989,7 @@ function checkFramingReadoutEnforcement() {
       });
       continue;
     }
-    const elementBody = liveProse(
-      boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING),
-    );
+    const elementBody = boundedEntryBody(styleProse, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
     if (!elementBody.includes(GUARD)) {
       results.fail.push({
         check: CHECK,
