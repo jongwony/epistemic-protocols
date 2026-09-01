@@ -6,11 +6,11 @@ Detect application-context mismatch after execution (ἐφαρμογή: applicat
 
 ## What is Epharmoge?
 
-A modern reinterpretation of Greek ἐφαρμογή (application/fitting) — a protocol that **detects when technically correct AI output may not fit the actual application context**, surfacing mismatches with evidence for user judgment rather than assuming correctness implies fitness.
+A modern reinterpretation of Greek ἐφαρμογή (application/fitting) — a protocol that **detects when a technically correct result may not fit the actual application context**, surfacing mismatches with evidence for user judgment rather than assuming correctness implies fitness.
 
 ### The Core Problem
 
-AI produces correct results, but correctness alone doesn't guarantee applicability (`ApplicationDecontextualized`). Environment assumptions, convention mismatches, or scope overflow can make technically correct output inappropriate for the target context. Without post-execution applicability verification, users inherit hidden context gaps.
+A result can be correct and still not apply, because correctness alone doesn't guarantee applicability (`ApplicationDecontextualized`). Environment assumptions, convention mismatches, or scope overflow can make technically correct output inappropriate for the target context. Without post-execution applicability verification, users inherit hidden context gaps.
 
 ### The Solution
 
@@ -59,7 +59,7 @@ Phase 2: Result Adaptation  → Apply user-directed adaptation
 ## When to Use
 
 **Use**:
-- After AI execution when applicability to your context is uncertain
+- After a result is produced — by AI, by analysis, by a decision already taken — when applicability to your context is uncertain
 - When environment assumptions may not match your target
 - When convention mismatches are suspected
 - When output scope may overflow the original request
