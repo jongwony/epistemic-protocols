@@ -1990,7 +1990,11 @@ function checkFramingReadoutEnforcement() {
       });
       continue;
     }
-    const elementBody = boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
+    // Strip HTML comments before the kernel test: a commented-out kernel is
+    // inert at runtime, so counting it would let the live prose say the
+    // opposite while the check still passes.
+    const elementBody = boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING)
+      .replace(/<!--[\s\S]*?-->/g, '');
     if (!elementBody.includes(GUARD)) {
       results.fail.push({
         check: CHECK,
