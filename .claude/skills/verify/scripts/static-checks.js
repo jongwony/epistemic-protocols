@@ -1902,32 +1902,45 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
   return next ? bounded.slice(0, next.index) : bounded;
 }
 
+// Markdown regions the reader never receives as an instruction: HTML comments
+// (closed, or left open through the end of the span) and fenced code blocks.
+// A presence test over raw bytes counts those as satisfied, which lets the
+// live prose say the opposite while the check passes — so a test asking
+// whether something is *inscribed as an instruction* runs over this instead.
+function liveProse(span) {
+  const uncommented = span.replace(/<!--[\s\S]*?-->/g, '').replace(/<!--[\s\S]*$/, '');
+  let fenced = false;
+  return uncommented
+    .split('\n')
+    .filter((line) => {
+      if (/^\s*(?:```|~~~)/.test(line)) {
+        fenced = !fenced;
+        return false;
+      }
+      return !fenced;
+    })
+    .join('\n');
+}
+
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
 // framing readout of the work in play) to an enforcement channel:
 //   (a) a glyph denylist: the unicode block glyphs ▓/░ are held out of core
-//       protocol SKILL.md files and Ink-derived Output Styles. This is a
-//       regression guard over the surfaces where completion bars were
-//       observed, not a claim that the glyph can only mean one thing there —
-//       file category cannot establish a glyph's meaning. §Rendering Judgment
-//       does sanction a drawn length for an independently measured quantity;
-//       a surface that needs one sits outside this denylist's range, as
-//       skills/sophia's dimension profile does. Widening the range is a
-//       decision with its own basis, not something this check settles.
+//       protocol SKILL.md files and Ink-derived Output Styles — a regression
+//       guard over the surfaces where completion bars were observed, scoped
+//       by decision rather than by what a file category could establish
+//       about a glyph's meaning.
 //   (b) each Ink-derived Output Style's **Cognitive work** element must
-//       retain its guard kernel within its own bounded body (label line to
-//       the next Ink element label or heading) — not merely anywhere in the
-//       file — so the kernel cannot silently migrate into a comment or
-//       frontmatter and still pass.
+//       retain its guard kernel as live prose within its own bounded body
+//       (label line to the next Ink element label or heading), so the kernel
+//       cannot be relocated out of the reader's path and still pass.
 // Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
 // skills (e.g. /dashboard) may legitimately render bars and are out of scope.
-// This comment is diagnostic substrate, so it names the failure case directly;
-// the Output Style body it guards is runtime motivating prose, which is why the
-// kernel pinned below is the positive statement of the invariant rather than a
-// prohibition (premise/instruction-authoring.md §Prohibition Base Rate and
-// White Bear Avoidance, placement distinction; CLAUDE.md §Editing Conventions).
+// Why the kernel is a positive statement rather than a prohibition, and why
+// this comment may name the failure case while the body it guards may not:
+// references/verification.md, framing-readout-enforcement.
 function checkFramingReadoutEnforcement() {
   const BAR_GLYPH = /[▓░]/;
   const CHECK = 'framing-readout-enforcement';
@@ -1990,11 +2003,9 @@ function checkFramingReadoutEnforcement() {
       });
       continue;
     }
-    // Strip HTML comments before the kernel test: a commented-out kernel is
-    // inert at runtime, so counting it would let the live prose say the
-    // opposite while the check still passes.
-    const elementBody = boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING)
-      .replace(/<!--[\s\S]*?-->/g, '');
+    const elementBody = liveProse(
+      boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING),
+    );
     if (!elementBody.includes(GUARD)) {
       results.fail.push({
         check: CHECK,
