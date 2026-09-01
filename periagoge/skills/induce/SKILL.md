@@ -60,18 +60,18 @@ L              = Option(TentativeLabel)                     -- user-provided pro
 ctx            = DomainContext                              -- user's domain context gathered via artifact read, artifact search, and a conditional external fetch
 Pair           = (Iᵢ, E) → (i₁, i₂)                        -- the readiest alignment, not the most distant; distance is what Probe is for
 Slot           = { role: String, in_first: String, in_second: Option(String) }
-                 -- in_second is None exactly where the second case carries no counterpart, and that role joins M.unmatched;
+                 -- in_second is None exactly where the second case carries no counterpart, which is what unmatched(M) collects;
                  -- filling it reads off the cases rather than choosing between readings, which is what H.live and Probe carry
-M              = Correspondence { slots: List(Slot), unmatched: Set(String) }
-                 -- unmatched holds what one case carries and the other does not; it is evidence, not failure
+M              = Correspondence { slots: List(Slot) }
+unmatched(M)   = {s.role : s ∈ M.slots, s.in_second = None}
+                 -- what one case carries and the other does not, read off the slots rather than kept beside them; it is evidence, not failure
 Align          = (i₁, i₂, ctx) → M                          -- constructed at the Phase 1 gate; the user fills or corrects the slots
 Aₐ             = AlignAnswer ∈ {AsShown, Correct(slot, value), Repartner(ref), Abandon}
                  value        = what the user says the cases carry in that slot -- the filling is replaced, no reading is chosen
                  -- the Phase 1 answer. AsShown commits M; Correct re-presents with the slot replaced; Repartner and Abandon
                  -- are the run-level moves W also carries, reachable here so a wrong pairing or a withdrawal need not wait
                  -- for a probe. ref is as defined under W
-Axis           = { relation: String, provenance: AxisProvenance }
-AxisProvenance ∈ {AlignmentDerived, ContrastDerived, UserSupplied}
+Axis           = { relation: String }                       -- one reading of what the correspondence carries
 H              = HypothesisSpace { live: Set(Axis), ruled_out: Map(Axis, Ground) }
                  -- live is what the correspondence has not yet decided between; ruled_out records why each was dropped
                  -- invariant: live ∩ dom(ruled_out) = ∅ — an axis is in exactly one of them, which is what makes settled(H) total
@@ -82,9 +82,8 @@ Extract        = (M, Iᵢ, H?) → (R, H')                      -- internal; no 
                  -- built: ruled_out carries over untouched and axes already supplied stay live, so re-extraction
                  -- extends the language rather than resetting it. Absent H, H' is derived from the correspondence alone
 Probe          = (H, Iᵢ, ctx, gap?) → p               -- gap? is the NotYet payload on re-entry from Phase 5, seeding the draw; absent on every other entry
-p              = ProbeCase { content: String, kind: ProbeKind, separates: Set(Axis) }
+p              = ProbeCase { content: String, separates: Set(Axis) }
                  -- separates names which live axes this probe tells apart; a probe separating none is not a probe
-ProbeKind      ∈ {DistantInstance, NearNonInstance, UserSupplied}
 V              = AxisVerdict ∈ {Refutes(ground), Bounds(ground), Undecided}
                  ground       = the user's reason, recorded verbatim as the Ground for whatever it rules out or bounds
                  -- one axis judged against one probe case. Refutes rules the axis out; Bounds places the case outside
@@ -108,17 +107,18 @@ boundary(Λ, H) = [(r.case, g) : r ∈ Λ.probes, r.answer = Judged(Vs), a ∈ H
                  -- derivation is total whether Phase 5 fired on settled(H) or on budget_spent with several axes live
 narrow         = (H, W) → H'                                -- Judged(Vs): each Refutes axis moves to ruled_out with its ground,
                                                             -- each Bounds and each Undecided axis stays live;
-                                                            -- AxisMissing adds a UserSupplied axis to live, and where the description names an axis in ruled_out
+                                                            -- AxisMissing adds the axis the user described to live, and where the description names an axis in ruled_out
                                                             -- that axis moves back to live with its earlier ground kept beside it; Redraw, Repartner and Abandon leave H unchanged
 settled(H)     = |H.live| = 1
 probed(Λ)      = |Λ.probes| ≥ 1                             -- Phase 5 opens on settled(H) only past this floor: a space that arrives settled from
-                 -- Extract is still probed once against a near non-instance, so the rule has a boundary to show rather than assert
+                 -- Extract is still probed once, so the rule is named against at least one case the user judged rather than
+                 -- against the correspondence alone
 unalignable(Λ) = H.live = ∅                                 -- every axis ruled out and none supplied; the seed did not carry one
                  -- settled(H) is false whenever live is empty, so no second conjunct is doing work here
 Name           = (H, R, L?, Λ) → (N, Rule)                  -- Λ is what boundary(Λ, H) is read from; the rule is read off one live axis, which named(Λ) cites
 N              = AbstractionName { name: String, label_basis: Option(L) }
-Rule           = { statement: String, boundary: List((ProbeCase, Ground)) }
-                 -- boundary = boundary(Λ, H), so what the abstraction excludes is shown, not asserted
+Rule           = { statement: String }                      -- presented together with boundary(Λ, H), so what the abstraction excludes is shown, not asserted;
+                 -- no field carries it, so none can drift from the probe record it is read from
 Nₐ             = NameAnswer ∈ {Confirm, Rename(name), RuleWrong(correction), NotYet(gap), Abandon}
                  gap          = what the user says is still missing; seeds the next Probe while the budget holds, and at budget_spent
                                 is recorded as a Deferred open item instead, so no answer at the cap draws another probe
@@ -128,7 +128,7 @@ max_probes     = the probe cap LOOP fixes per abstraction seed
 budget_spent(Λ) = |Λ.probes| ≥ max_probes
                  -- a resource bound on user attention, not a sufficiency criterion: reaching it says the run stopped,
                  -- never that the abstraction formed. Phase 4 still fires, and whatever stayed live goes to the open trace
-crystallized(Λ) = Λ.naming = Some(Confirm)
+crystallized(Λ) = Λ.crystallized ≠ None                     -- written at Confirm and nowhere else
 OpenDisposition ∈ {None, Nonblocking, Deferred}
                  None        = no live axis, no unmatched slot, and no gap remains; explicitly declared
                  Nonblocking = an item remains visible but does not block Confirm
@@ -136,7 +136,7 @@ OpenDisposition ∈ {None, Nonblocking, Deferred}
 OpenItemDisposition = OpenDisposition \ {None}             -- per-item value space; None is a whole-trace verdict only
 named(Λ)       = {the live axis Rule.statement was read off} when Λ.crystallized = Some(_); ∅ otherwise
                  -- so at AlignmentSuspended every live axis is open, and at Confirm only the axes the rule did not take are
-OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{M.unmatched : M ∈ Λ.correspondences} ∪ {gap : Λ.naming = Some(NotYet(gap)) ∧ budget_spent(Λ)}
+OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{unmatched(M) : M ∈ Λ.correspondences} ∪ {gap : Λ.naming = Some(NotYet(gap)) ∧ budget_spent(Λ)}
                  -- what a run can still owe at its terminal, from all three carriers; the gap enters with disposition Deferred
                  -- by construction, since the run it would have seeded is the one the cap stopped; the union runs over every
                  -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it.
@@ -184,7 +184,7 @@ If Aₐ = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(Ope
 After Phase 4: evaluate the probe answer.
 If W = Judged(Vs): each Refutes axis is ruled out with its ground, each Bounds and each Undecided axis stays live; return to Phase 3. If narrowed_none(Vs), say that this round ruled no axis out, and which axes were kept by scoping the case out of their claim and which were left undecided, before drawing the next probe.
 If W = Redraw(correction): the probe is drawn again with the correction taken up; H is unchanged, no ProbeRecord is appended, and no probe is spent from the cap since no axis was judged; return to Phase 3.
-If W = AxisMissing(description): a UserSupplied axis enters H.live; where the description names an axis ruled out earlier, that axis returns to live by the user's word with the ground that ruled it out shown beside it; return to Phase 2 (relation re-extracted over the extended language).
+If W = AxisMissing(description): the axis the user described enters H.live; where the description names an axis ruled out earlier, that axis returns to live by the user's word with the ground that ruled it out shown beside it; return to Phase 2 (relation re-extracted over the extended language).
 If W = Repartner(ref): return to Phase 1 with ref as the alignment partner and Pair skipped; H and its ruled_out survive the repartnering, and the correspondence already built stays in Λ.correspondences.
 If W = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended.
 Continue Phase 3 until: (settled(H) ∧ probed(Λ)) ∨ budget_spent(Λ) ∨ unalignable(Λ).
@@ -202,9 +202,8 @@ Cap: max_probes = 5 probes per abstraction seed. This bounds user attention; it 
 Convergence evidence: At crystallized(Λ), present the alignment trace — the correspondence the user built slot by slot, then each probe with the verdict every separated axis received, then the name and rule that survived — plus the boundary derived from the Bounds verdicts standing against the axes still live, plus the OpenTrace. Show every axis that was ruled out beside the ground that ruled it out, so the surviving axis is seen to have won rather than asserted to have. OpenTrace status is None when nothing stayed open, Deferred when any item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-crystallized(Λ): see TYPES (Λ.naming = Some(Confirm))
+crystallized(Λ): see TYPES (Λ.crystallized ≠ None, written at Confirm)
 settled(H) ∧ probed(Λ): see TYPES (exactly one live axis, at least one probe recorded) — Phase 5's fire condition, not a terminal on its own
-early_exit = budget_spent(Λ) ∨ unalignable(Λ)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
