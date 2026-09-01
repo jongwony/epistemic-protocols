@@ -1,7 +1,7 @@
 {
   "name": "periagoge",
-  "description": "Calibrate and crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
-  "version": "1.0.2",
+  "description": "Align concrete cases first, then name what they share — /induce (περιαγωγή: turning-around)",
+  "version": "2.5.2",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

@@ -1,12 +1,12 @@
 # Periagoge (περιαγωγή)
 
-Calibrate and crystallize in-process abstraction — `/induce`.
+Align concrete cases first, then name what they share — `/induce`.
 
 > [한국어](./README_ko.md)
 
 ## Overview
 
-Periagoge turns an in-process abstraction toward its crystallized form. When an instance set has converged toward an essence the user senses but has not yet named, the protocol calibrates that in-process concept against the instances, proposes a candidate abstraction paired with a grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept, broaden, narrow along a dimension, fuse with an adjacent abstraction, or redirect onto an orthogonal axis — until the abstraction locates itself.
+Periagoge turns an in-process abstraction toward its crystallized form. When an instance set has converged toward an essence the user senses but has not yet named, the protocol puts the two most alignable cases side by side for the user to correspond, extracts the invariant relation that correspondence carries together with the readings it leaves open, probes those readings apart against further cases and near-misses the user judges, and only then proposes a name and rule for what survived — so the abstraction is located by the correspondences the user built rather than steered from a candidate offered ahead of them.
 
 The protocol stands in directional dual relation to Euporia (`/elicit`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent through substrate to coordinates (top-down direction). The two compose as orthogonal directions of the same dialectic substrate. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
 
@@ -19,7 +19,7 @@ The protocol stands in directional dual relation to Euporia (`/elicit`) — Peri
 
 ## Name
 
-The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. Synagoge (συναγωγή, collection) and Diairesis (διαίρεσις, division) are the twin dialectical moves described in *Phaedrus* 265d–266a; here they name user response families, not a claim to Platonic method.
+The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. The dialectical vocabulary of *Phaedrus* 265d–266a — collection and division — supplies the source terms for the correspondence-and-probe movement; the borrowing is terminological, not a claim to Platonic method.
 
 ## When to invoke
 
