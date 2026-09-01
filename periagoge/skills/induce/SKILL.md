@@ -22,10 +22,11 @@ Periagoge(A) → Detect(A) →
           | Abandon: declare(alignment_trace, open_trace) → AlignmentSuspended) →
          Extract(M, Iᵢ, H?) → (R, H) →
          Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W → narrow(H, W) → H' →
-         loop until settled(H) ∨ budget_spent(Λ) →
+         loop until (settled(H) ∧ probed(Λ)) ∨ budget_spent(Λ) →
          Name(H, R, L?, Λ) → Qn → Stop → Nₐ →
          (Confirm: declare(alignment_trace, open_trace) → CrystallizedAbstraction
-          | NotYet(gap): re-enter Probe with gap seeded
+          | NotYet(gap) ∧ ¬budget_spent(Λ): re-enter Probe with gap seeded
+          | NotYet(gap) ∧ budget_spent(Λ): declare(alignment_trace, open_trace) → AlignmentSuspended with gap Deferred
           | Abandon: declare(alignment_trace, open_trace) → AlignmentSuspended)
          or unalignable(Λ) → declare(alignment_trace, open_trace) → AlignmentSuspended
   NotInProcess: deactivate
@@ -110,6 +111,8 @@ narrow         = (H, W) → H'                                -- Judged(Vs): eac
                                                             -- AxisMissing adds a UserSupplied axis to live, and where the description names an axis in ruled_out
                                                             -- that axis moves back to live with its earlier ground kept beside it; Redraw, Repartner and Abandon leave H unchanged
 settled(H)     = |H.live| = 1
+probed(Λ)      = |Λ.probes| ≥ 1                             -- Phase 5 opens on settled(H) only past this floor: a space that arrives settled from
+                 -- Extract is still probed once against a near non-instance, so the rule has a boundary to show rather than assert
 unalignable(Λ) = H.live = ∅                                 -- every axis ruled out and none supplied; the seed did not carry one
                  -- settled(H) is false whenever live is empty, so no second conjunct is doing work here
 Name           = (H, R, L?, Λ) → (N, Rule)                  -- Λ is what boundary(Λ, H) is read from; the rule is read off one live axis, which named(Λ) cites
@@ -117,7 +120,8 @@ N              = AbstractionName { name: String, label_basis: Option(L) }
 Rule           = { statement: String, boundary: List((ProbeCase, Ground)) }
                  -- boundary = boundary(Λ, H), so what the abstraction excludes is shown, not asserted
 Nₐ             = NameAnswer ∈ {Confirm, Rename(name), RuleWrong(correction), NotYet(gap), Abandon}
-                 gap          = what the user says is still missing; seeds the next Probe
+                 gap          = what the user says is still missing; seeds the next Probe while the budget holds, and at budget_spent
+                                is recorded as a Deferred open item instead, so no answer at the cap draws another probe
 Qp             = Probe judgment interaction [Tool: Constitution interaction]
 Qn             = Naming interaction with name + rule + boundary [Tool: Constitution interaction]
 max_probes     = the probe cap LOOP fixes per abstraction seed
@@ -126,14 +130,15 @@ budget_spent(Λ) = |Λ.probes| ≥ max_probes
                  -- never that the abstraction formed. Phase 4 still fires, and whatever stayed live goes to the open trace
 crystallized(Λ) = Λ.naming = Some(Confirm)
 OpenDisposition ∈ {None, Nonblocking, Deferred}
-                 None        = no live axis and no unmatched slot remains; explicitly declared
+                 None        = no live axis, no unmatched slot, and no gap remains; explicitly declared
                  Nonblocking = an item remains visible but does not block Confirm
                  Deferred    = user routes an item to later work via free response
 OpenItemDisposition = OpenDisposition \ {None}             -- per-item value space; None is a whole-trace verdict only
 named(Λ)       = {the live axis Rule.statement was read off} when Λ.crystallized = Some(_); ∅ otherwise
                  -- so at AlignmentSuspended every live axis is open, and at Confirm only the axes the rule did not take are
-OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{M.unmatched : M ∈ Λ.correspondences}
-                 -- what a run can still owe at its terminal, from both carriers; the union runs over every
+OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{M.unmatched : M ∈ Λ.correspondences} ∪ {gap : Λ.naming = Some(NotYet(gap)) ∧ budget_spent(Λ)}
+                 -- what a run can still owe at its terminal, from all three carriers; the gap enters with disposition Deferred
+                 -- by construction, since the run it would have seeded is the one the cap stopped; the union runs over every
                  -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it.
                  -- H.live reads as ∅ while Λ.space is None, so a run abandoned at Phase 1 owes nothing but declares that
 OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
@@ -182,7 +187,7 @@ If W = Redraw(correction): the probe is drawn again with the correction taken up
 If W = AxisMissing(description): a UserSupplied axis enters H.live; where the description names an axis ruled out earlier, that axis returns to live by the user's word with the ground that ruled it out shown beside it; return to Phase 2 (relation re-extracted over the extended language).
 If W = Repartner(ref): return to Phase 1 with ref as the alignment partner and Pair skipped; H and its ruled_out survive the repartnering, and the correspondence already built stays in Λ.correspondences.
 If W = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended.
-Continue Phase 3 until: settled(H) ∨ budget_spent(Λ) ∨ unalignable(Λ).
+Continue Phase 3 until: (settled(H) ∧ probed(Λ)) ∨ budget_spent(Λ) ∨ unalignable(Λ).
 If unalignable(Λ): declare as AlignmentSuspended — every axis was ruled out and none supplied, which is a finding about the seed and is reported as one.
 Otherwise proceed to Phase 5.
 
@@ -190,14 +195,15 @@ After Phase 5: evaluate the naming answer.
 If Nₐ = Confirm: Λ.crystallized := Some((N, Rule)), Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as CrystallizedAbstraction.
 If Nₐ = Rename(name): N.name := name, re-present at Phase 5 within the same round.
 If Nₐ = RuleWrong(correction): Rule.statement := correction, re-present at Phase 5 within the same round.
-If Nₐ = NotYet(gap): return to Phase 3 with gap seeding the next Probe; the budget is spent by this round like any other.
+If Nₐ = NotYet(gap) ∧ ¬budget_spent(Λ): return to Phase 3 with gap seeding the next Probe; the budget is spent by this round like any other.
+If Nₐ = NotYet(gap) ∧ budget_spent(Λ): Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response) with gap Deferred, declare both, terminate as AlignmentSuspended; the gap is what the next activation resumes from.
 If Nₐ = Abandon: declare as AlignmentSuspended.
-Cap: max_probes = 5 probes per abstraction seed. This bounds user attention; it is not a claim that five probes suffice to form an abstraction, and reaching it never converts a run into a crystallized one.
+Cap: max_probes = 5 probes per abstraction seed. This bounds user attention; it is not a claim that five probes suffice to form an abstraction, and reaching it never converts a run into a crystallized one. What makes it a bound is that no answer at budget_spent draws another probe: Confirm crystallizes, NotYet suspends with the gap on record, Abandon suspends.
 Convergence evidence: At crystallized(Λ), present the alignment trace — the correspondence the user built slot by slot, then each probe with the verdict every separated axis received, then the name and rule that survived — plus the boundary derived from the Bounds verdicts standing against the axes still live, plus the OpenTrace. Show every axis that was ruled out beside the ground that ruled it out, so the surviving axis is seen to have won rather than asserted to have. OpenTrace status is None when nothing stayed open, Deferred when any item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 crystallized(Λ): see TYPES (Λ.naming = Some(Confirm))
-settled(H): see TYPES (exactly one live axis) — Phase 5's fire condition, not a terminal on its own
+settled(H) ∧ probed(Λ): see TYPES (exactly one live axis, at least one probe recorded) — Phase 5's fire condition, not a terminal on its own
 early_exit = budget_spent(Λ) ∨ unalignable(Λ)
 
 ── TOOL GROUNDING ──
@@ -207,7 +213,7 @@ Phase 1 Pair+Align (constitution) → present the two cases side by side with ev
 Phase 2 Extract    (track)   → Internal state update: writes Λ.relation and Λ.space, so Phase 3 has a space to probe and the terminal has a relation to name
 Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates on screen together, each axis's support and the case that breaks it beside that axis's own verdict slot with what each verdict does to that axis, and before the gate what the live set becomes on each way the round can close (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
 Phase 4            (track)   → Internal state update: writes Λ.space and appends Λ.probes, so the cap can advance and the alignment trace has per-probe material to build from
-Phase 5 Name+Qn    (constitution) → present name, rule, boundary, and whatever stayed live (mandatory)
+Phase 5 Name+Qn    (constitution) → present name, rule, boundary, whatever stayed live, and whether the budget is spent (mandatory)
 converge           (extension)   → TextPresent+Proceed (alignment trace + open disposition; proceed with the crystallized abstraction)
 seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol link is an inbound misfit absorption (`Upstream misfit absorption`), not a post-crystallization handoff, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
@@ -238,7 +244,7 @@ At Phase 1, put the two cases side by side and render the correspondence with ev
 
 At Phase 3, put every live axis the probe separates on screen at once, each row carrying that axis, what supports it, the case that breaks it, and its own verdict slot — refutes it, bounds it, or settles neither. Say that the rows are answered against each other rather than top to bottom, since what one axis makes of the case turns on how the others take it. Beside each verdict slot, state what that verdict does: refuting drops the axis to the ruled-out record with the user's ground and it is not proposed again; bounding places the case outside the axis and the axis survives; undecided leaves it live. Before the gate, state what the live set becomes on each way the round can close — how many axes are live now, that leaving one live moves the run to naming, and that refuting all of them suspends it — so the post-selection state is anticipatable before the verdicts are given rather than shown after them. Materialize `V` and the run-level `W` constructors as everyday-language options with anticipatable differential futures. A probe that separates nothing is not presented — draw another. A correction to the probe case itself is `Redraw` — the case is drawn again with the correction taken up, which spends no probe from the cap and leaves H unchanged.
 
-At Phase 5, present the name, the rule, the boundary the near-misses drew, and anything still live. Materialize the `Nₐ` constructors the same way. `Confirm` and `Abandon` remain constitutive even when analysis favours one reading.
+At Phase 5, present the name, the rule, the boundary the near-misses drew, and anything still live. Materialize the `Nₐ` constructors the same way. When Phase 5 opened on the spent budget, say so before the gate: the probe budget is spent, and `NotYet` here records the gap and suspends the run rather than drawing another probe. `Confirm` and `Abandon` remain constitutive even when analysis favours one reading.
 
 Frame the correspondence currently being built or the reading currently being separated, rather than a progress fraction. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order determines placement relative to the gate.
 
