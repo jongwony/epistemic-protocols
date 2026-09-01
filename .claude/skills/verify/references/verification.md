@@ -60,7 +60,7 @@ Use these during protocol edits and reviews. Do not promote them to static failu
 
 Two properties are worth knowing before reading it, because neither is obvious from the code alone:
 
-- **A `SKILL.md` is preserved byte-for-byte.** Everything the packaging does is subtractive or additive around the file, never a rewrite of the contract text, so what a runtime user reads is what the repository holds.
+- **A `SKILL.md`'s body is preserved verbatim; its frontmatter is not.** `transformSkillMd()` parses the frontmatter, drops the strip-fields, and reserializes it, so the packaged file is not byte-identical to the source. Everything below the frontmatter is passed through unchanged — the packaging never rewrites the contract text — so what a runtime user reads there is what the repository holds.
 - **A description override replaces an over-long description rather than exempting it.** The override answers to the same length limit it exists to satisfy, and `package.test.js` asserts the packaged description against it — so an override is not an escape hatch.
 
 ## Runtime Contract Surfaces
