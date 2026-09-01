@@ -55,6 +55,18 @@
         "claude": "Use `/inquire` first, before any code gets written.",
         "codex": "Use `$aitesis:inquire` first, before any code gets written."
       }
+    },
+    "grasp": {
+      "pluginDir": "katalepsis",
+      "protocolSkill": "grasp",
+      "cases": [
+        "grasp-adjudicable",
+        "grasp-unattachable"
+      ],
+      "invocation": {
+        "claude": "Use `/grasp` for this.",
+        "codex": "Use `$katalepsis:grasp` for this."
+      }
     }
   }
 }

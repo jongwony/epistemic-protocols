@@ -24,7 +24,7 @@ import {
   readdirSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir, tmpdir } from 'node:os';
 
@@ -311,10 +311,43 @@ function promptBody(caseName, arm) {
   return arm.protocol && INVOCATION ? `${task}\n\n${INVOCATION}` : task;
 }
 
-function scaffold(dir) {
+// A protocol whose obligation fires only AFTER the user answers is unreachable by a
+// single-turn run: the observation ends at the first Stop, and there is nothing to
+// adjudicate against until a turn arrives. `followup.md` supplies that turn as scripted
+// text so the stretch past the gate becomes observable. It is a scripted answer, not a
+// user: what it buys is reach, never the judgment of a real one.
+function followupBodies(caseName) {
+  const bodies = [];
+  for (const name of ['followup.md', 'followup-2.md', 'followup-3.md']) {
+    const file = join(EVALS, caseName, name);
+    if (!existsSync(file)) break;   // contiguous from the first; a gap ends the sequence
+    const raw = readFileSync(file, 'utf8');
+    const body = raw.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+    if (!body) throw new Error(`${caseName}/${name} is empty; a scripted turn must carry text`);
+    bodies.push(body);
+  }
+  return bodies;
+}
+
+function scaffoldScript(caseName) {
+  const caseFile = join(EVALS, caseName, 'case.yaml');
+  if (existsSync(caseFile)) {
+    const declared = /^\s*scaffold_script:\s*(\S+)\s*$/m.exec(readFileSync(caseFile, 'utf8'));
+    // join normalises the leading `../`, so the value stays written relative to the case
+    // directory it is declared in -- which is where a reader of case.yaml expects it to be.
+    if (declared) return join(EVALS, caseName, declared[1]);
+  }
+  return join(EVALS, 'scaffold.sh');
+}
+
+function scaffold(dir, caseName) {
+  const script = scaffoldScript(caseName);
+  if (!existsSync(script)) {
+    throw new Error(`${caseName} declares a scaffold script that does not exist: ${script}`);
+  }
   mkdirSync(dir, { recursive: true });
-  const r = spawnSync('bash', [join(EVALS, 'scaffold.sh')], { cwd: dir, encoding: 'utf8' });
-  if (r.status !== 0) throw new Error(`scaffold failed: ${r.stderr}`);
+  const r = spawnSync('bash', [script], { cwd: dir, encoding: 'utf8' });
+  if (r.status !== 0) throw new Error(`scaffold failed (${script}): ${r.stderr}`);
 }
 
 function codexTreatmentIntegrity(arm) {
@@ -357,12 +390,18 @@ function runOne({ model, armName, arm, caseName, rep }) {
 
   const wd = join(WORK, `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_'));
   if (existsSync(wd)) rmSync(wd, { recursive: true, force: true });
-  scaffold(wd);
+  scaffold(wd, caseName);
 
   let command;
   let args;
   let env;
   let timeout;
+  const followups = followupBodies(caseName);
+  if (followups.length && RUNNER === 'codex') {
+    return { skipped: false, launchFailed: true, outFile, exit: null,
+             reason: `${caseName} scripts ${followups.length} follow-up turn(s); the Codex path has no resume wired, and running it single-turn would report a differently-scoped observation under the same cell` };
+  }
+
   if (RUNNER === 'codex') {
     command = 'codex';
     args = [
@@ -379,7 +418,10 @@ function runOne({ model, armName, arm, caseName, rep }) {
   } else {
     command = 'claude';
     args = [
-      '-p', '--verbose', '--no-session-persistence',
+      '-p', '--verbose',
+      // Persistence is what --resume reaches. Kept off wherever nothing resumes, so a
+      // single-turn cell leaves the same volatile state it always did.
+      ...(followups.length ? [] : ['--no-session-persistence']),
       '--output-format', 'stream-json',
       '--model', model,
       '--max-budget-usd', String(CFG.maxBudgetUsd),
@@ -417,7 +459,36 @@ function runOne({ model, armName, arm, caseName, rep }) {
              reason: r.error ? r.error.message : `no complete ${RUNNER} start/end event pair in the stream` };
   }
 
-  writeFileSync(outFile, out);
+  let stream = out;
+  if (followups.length) {
+    const initLine = out.split('\n').find((l) => l.includes('"subtype":"init"'));
+    let sessionId = null;
+    try { sessionId = JSON.parse(initLine).session_id || null; } catch { sessionId = null; }
+    if (!sessionId) {
+      writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), stream);
+      return { skipped: false, launchFailed: true, outFile, exit: r.status,
+               reason: 'first turn carried no session_id on its init event, so no scripted turn can reach it' };
+    }
+    for (const [i, body] of followups.entries()) {
+      const followArgs = args.slice(0, -1).concat(['--resume', sessionId, body]);
+      const fr = spawnSync(command, followArgs, {
+        cwd: wd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, env, timeout,
+      });
+      const fout = fr.stdout || '';
+      if (fr.stderr) writeFileSync(outFile.replace(/\.jsonl$/, `.turn${i + 2}.err`), fr.stderr);
+      const fran = fr.error == null
+        && fout.includes('"subtype":"init"') && fout.includes('"type":"result"');
+      if (!fran) {
+        writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), stream + fout);
+        return { skipped: false, launchFailed: true, outFile, exit: fr.status,
+                 reason: fr.error ? fr.error.message
+                   : `scripted turn ${i + 2} produced no complete claude start/end event pair` };
+      }
+      stream += fout;
+    }
+  }
+
+  writeFileSync(outFile, stream);
   // Whether the run changed anything is read now, while the working directory still
   // exists. Deferring it to grading ties the verdict to a directory that is gitignored,
   // never uploaded by CI, and gone once teardown has run -- so a later re-read of the
@@ -425,7 +496,7 @@ function runOne({ model, armName, arm, caseName, rep }) {
   writeFileSync(outFile.replace(/\.jsonl$/, '.meta.json'),
     JSON.stringify({
       runner: RUNNER, model, treatment, treatmentIntegrity,
-      exit: r.status, mutated: treeMutated(wd),
+      exit: r.status, mutated: treeMutated(wd, caseName),
     }, null, 2) + '\n');
   // The working directory is kept: a grader that wants to inspect what the run
   // actually wrote needs the files, and a failed run is worth reading by hand.
@@ -477,7 +548,10 @@ function readEvents(file) {
 
 function parseClaude(events) {
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
-  const result = events.find((e) => e.type === 'result');
+  // LAST, not first: a multi-turn cell concatenates one result per turn, and the run's
+  // outcome is the final one. Identical to `find` on a single-turn stream.
+  const results = events.filter((e) => e.type === 'result');
+  const result = results[results.length - 1];
   const toolUses = [];
   const skillInvocations = [];
   for (const e of events) {
@@ -544,23 +618,27 @@ function treeDigest(dir) {
   return out.join('\n');
 }
 
-let REFERENCE = null;
-function referenceDigest() {
-  if (REFERENCE !== null) return REFERENCE;
-  const tmp = join(WORK, 'reference-tree');
+const REFERENCE = new Map();
+function referenceDigest(caseName) {
+  // Keyed by the script, not the case: two cases sharing one fixture -- which the pairing
+  // discipline requires of every target -- share the reference and build it once.
+  const script = scaffoldScript(caseName);
+  if (REFERENCE.has(script)) return REFERENCE.get(script);
+  const tmp = join(WORK, `reference-tree-${basename(script, '.sh')}`);
   rmSync(tmp, { recursive: true, force: true });
-  scaffold(tmp);
-  REFERENCE = treeDigest(tmp);
+  scaffold(tmp, caseName);
+  const digest = treeDigest(tmp);
   rmSync(tmp, { recursive: true, force: true });
-  return REFERENCE;
+  REFERENCE.set(script, digest);
+  return digest;
 }
 
 // Whether the run changed the working tree at all, against the scaffold it started
 // from. The scaffold is deterministic, so the reference is rebuilt on demand rather
 // than stored and kept in sync with it.
-function treeMutated(workdir) {
+function treeMutated(workdir, caseName) {
   if (!existsSync(workdir)) return null;
-  return treeDigest(workdir) !== referenceDigest();
+  return treeDigest(workdir) !== referenceDigest(caseName);
 }
 
 // Deterministic graders. Each returns true / false / null (not applicable).
