@@ -1907,6 +1907,11 @@ function boundedEntryBody(content, labelMatch, bound, nextPattern) {
 // A presence test over raw bytes counts those as satisfied, which lets the
 // live prose say the opposite while the check passes — so a test asking
 // whether something is *inscribed as an instruction* runs over this instead.
+// The two forms handled here are the ones drift produces: a commented-out
+// draft, and a sentence quoted into an example block. Markdown affords many
+// more, and a byte-presence test reaches none of them once the placement is
+// deliberate — what the kernel test guards is drift, per references/
+// verification.md; a deliberate rewrite is caught by review, not here.
 function liveProse(span) {
   const uncommented = span.replace(/<!--[\s\S]*?-->/g, '').replace(/<!--[\s\S]*$/, '');
   let fenced = false;
