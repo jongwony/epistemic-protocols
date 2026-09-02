@@ -52,6 +52,7 @@ Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
 Q        = Inquiry (Constitution interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss, Unknown(Partial)}
+             Partial      = what the user does say they know
              -- Unknown(Partial) = user declines certainty; Phase 3 auto-promotes via Cite-or-observe tiebreaker (UserTacit → next-preferred
              -- untried EvidenceSource in ValidSources(v)) and re-enters Phase 1 for reclassification; both arcs formalized in PHASE TRANSITIONS
 Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc gate answer type
@@ -60,8 +61,6 @@ InformedExecution = X' where remaining = ∅
 -- Layer 1 (epistemic)
 Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
-Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
-               -- exists(fact, env) sub-modes
 -- Layer 2 (tool implementation, Factual and Coherence/MemoryInternal fibers — fibration structure)
 Verifiability  ∈ {ReadOnlyVerifiable, EmpiricallyObservable, UserDependent}
 EvidenceSource ∈ {UserTacit, Instrumentation, CodeDerivable, CanonicalExternal}
@@ -77,7 +76,6 @@ EvidenceRef(e) = { source: String, source_kind: EvidenceSource, referent: String
 provenance_coupled(u, e) =
   referent(EvidenceRef(e)) = referent(Claim(u))
   ∧ authorizes(source_kind(EvidenceRef(e)), expected_source_kind(Claim(u)))   -- grantor = evidence's source_kind; claim side = expected_source_kind
-  ∧ scope_subsumes(scope(EvidenceRef(e)), scope(Claim(u)))
 authorizes : EvidenceSource × EvidenceSource → Bool   -- self-contained (no shared cross-protocol relation)
   authorizes(s, expected) ≡ s = expected
                -- reflexive base: a source-kind authorizes a claim expecting that same kind.
@@ -108,25 +106,17 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              -- Coherence fiber classifies into CoherenceType, where MemoryInternal instances enter the Factual resolution path
              --   (and inherit EvidenceSource via Factual reclassification)
              -- CrossDomain/Relevance/Emergent → detect + show as out-of-scope in classify summary (no EvidenceSource tag)
-             -- ReadOnlyVerifiable direct-resolve admissibility = coverage ∧ support_integrity (both required):
-             --   coverage         : scope_subsumes(scope(evidence), scope(claim))   -- rebutting axis: is the whole claim covered?
-             --   support_integrity: ∃ e ∈ context(u): provenance_coupled(u,e)
-             --                      ∧ link(evidence → asserted behavior/current reality) is verified, not silently desynced
-             --                      -- undercutting axis: does this source-kind/referent/scope authorize this claim?
-             --   currency ⊂ support_integrity (temporal sub-case): freshness is necessary, not sufficient — a current-but-unenforced
-             --     artifact (comment/doc asserting behavior with no enforcement channel) is current yet support-unlinked → fails support_integrity
-             --   failure of either axis (¬coverage = coverage_gap; ¬support_integrity = support_integrity_unverified) → reclassify EmpiricallyObservable
-             --   (rebutting/undercutting framing per Pollock: two kinds of defeater — not asserted exhaustive)
-support_integrity(u) ≡ (∃ e ∈ context(u): provenance_coupled(u, e)) ∧ evidence_behavior_linked(u)    -- undercutting axis; formal predicate (was comment-only)
+             -- ReadOnlyVerifiable direct-resolve admissibility = coverage(u) ∧ support_integrity(u), two axes defined below and enforced at Step₃ (ReadOnlyAdmissible);
+             --   the T4 arc reads their failures as coverage_gap(u) = ¬coverage(u) and support_integrity_unverified(u) = ¬support_integrity(u)
+coverage(u)          ≡ ∃ e ∈ context(u): scope_subsumes(scope(EvidenceRef(e)), scope(Claim(u)))    -- rebutting axis: is the whole claim covered?
+support_integrity(u) ≡ (∃ e ∈ context(u): provenance_coupled(u, e)) ∧ evidence_behavior_linked(u)    -- undercutting axis: does this source-kind/referent authorize this claim?
                -- context(u) = evidence accessor over base Uncertainty.context: Set(Evidence) (existing field, not new)
                -- evidence_behavior_linked(u): evidence→behavior link verified (breaks-on-change), not silently desynced; currency ⊂ this (temporal sub-case)
+               -- (rebutting/undercutting framing per Pollock: two kinds of defeater — not asserted exhaustive)
 ReadOnlyAdmissible = { u : ReadOnlyVerifiable | coverage(u) ∧ support_integrity(u) }
-                   -- refinement over ReadOnlyVerifiable (NOT a new Verifiability constructor): the subset of ReadOnlyVerifiable
-                   --   items admissible for Step 3 direct resolution. coverage(u) ≡ ¬coverage_gap(u); support_integrity(u) ≡ ¬support_integrity_unverified(u)
-                   --   where support_integrity(u) now requires ∃ e: provenance_coupled(u,e) ∧ link-verified — a refinement INTO support_integrity (not a third conjunct): a value's authority is bound to the source × claim pair it actually supports.
-                   --   Failure of either predicate → reclassify EmpiricallyObservable (backward arc T4). Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
+                   -- Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
-EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
+EmpiricalObservation = (Uₑ_candidates, ObservationSpec) → Uₑ  -- dynamic evidence gathering
 Uᵣ'_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (ReadOnlyVerifiable, s)) ∧ s ≠ UserTacit ∧ s ∉ Emergent(EvidenceSource) }  -- Step 2 output → Step 3 input
                -- includes support_integrity-undetermined items pending resolution-time enforcement; symmetric with Uₑ_candidates (transient set, NOT a MODE STATE partition bucket)
                -- Step 3 partitions this set: survivors → Uᵣ' (read_only_resolved); admissibility failures → backward arc → EmpiricallyObservable
@@ -151,18 +141,13 @@ EscapeCondition ∈ {EnvironmentMutation, RiskElevated}
                     -- pre-observation judgments only: each names a reason the observation MUST NOT run at all.
                     --   Duration is not such a reason and is not a member: running and hitting the budget yields
                     --   evidence (the budget-exhausted outcome in Step 4), while declining to run yields none
-branching_factor : Uncertainty → ℕ
-  branching_factor(u) = |distinct_resolution_paths(u) ∪ distinct_side_effect_branches(u)|
-    -- counts mutually-exclusive resolution postures (e.g., in-place fix / redesign / offload / defer)
-    -- UNION side-effect branch count (e.g., N downstream mutations per posture); both flavors summed
-    -- per-uncertainty count must be citable in Phase 2 classify summary when Divergence-bounding exception is invoked
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency checkpoint (silent)
        [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed          -- zero-signal: present the sufficiency finding as relay text; trivial InformedExecution (remaining = ∅), Aitesis not activated
 Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- Step 1: context collection [Tool]
-         Step₂ classify(Uᵢ', dimension) → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable
-         [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
+         Step₂ classify(Uᵢ', dimension) → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable [Tool]
+         [if off_diagonal(scope_assessment, resolution_assessment)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
          -- evaluation order: Qc resolves before Uₑ_candidates computation; reclassified MemoryInternal/EmpiricallyObservable enters Uₑ_candidates
          Step₃ ReadOnlyVerify(Uᵣ'_candidates) →     -- Step 3: read-only verification (CodeDerivable + CanonicalExternal); enforces admissibility (coverage ∧ support_integrity) at resolution time over the candidate set (incl. support_integrity-undetermined items) — survivors = ReadOnlyAdmissible = Uᵣ' (resolve directly, read_only_resolved); failures take the backward arc below [Tool]
            [if support_integrity_unverified(u) ∨ coverage_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
@@ -175,7 +160,7 @@ Phase 3: A → integrate(A, X) → X'                               -- prospect 
 ── LOOP ──
 After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
 New uncertainties accumulate into uncertainties (cumulative, never replace).
-If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
+If Uᵢ ≠ ∅: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can declare the context sufficient at Phase 2 (sufficiency_declared): the remaining uncertainties are dismissed with the declaration recorded and the loop converges.
 Continue until: informed(X').
@@ -184,15 +169,13 @@ Convergence evidence: At remaining = ∅, present transformation trace — for e
 ── CONVERGENCE ──
 actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) + Fiber(Coherence)=MemoryInternal uncertainties
 informed(X') = remaining = ∅                                -- non_factual_detected does not block convergence
-progress(Λ) = 1 if |actionable(Λ)| = 0 else 1 - |remaining| / |actionable(Λ)|   -- |actionable| = 0 (zero-signal or all-nonactionable trivial convergence) is fully converged, not undefined; denominator excludes non-actionable (CrossDomain + detect-only dimensions)
-narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining(after)) ⊃ context(remaining(before))
-sufficiency_declared = user_declares_sufficient   -- consumed by the sufficiency transition in TOOL GROUNDING: every u ∈ Λ.remaining moves to Λ.dismissed with the declaration recorded, so remaining = ∅ and informed(X') holds. A success-flavoured event lands on the SUCCESS terminal, which is where the per-item Dismiss it generalizes already lands
+sufficiency_declared = the user's Phase 2 free response declaring the context sufficient   -- consumed by LOOP
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
 Phase 0 sufficiency_relay (extension) → TextPresent+Proceed (Uᵢ = ∅: present the sufficiency finding with reasoning; proceed with X unchanged, trivial InformedExecution)
-Phase 1 Ctx     (observe)     → artifact read, artifact search (stored knowledge extraction: codebase, memory, references); external fetch, external fetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check); environment run (conditional: VersionControlHistory channel — read-only commit-log queries via subprocess (content pickaxe, message search, temporal range); `source: "history:{ref}"` tag; collection-only — ref-type staleness classification handled per Phase 1 Step 1 staleness rule)
+Phase 1 Ctx     (observe)     → artifact read, artifact search (stored knowledge extraction: codebase, memory, references); external fetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check); environment run (conditional: VersionControlHistory channel — read-only commit-log queries via subprocess (content pickaxe, message search, temporal range); `source: "history:{ref}"` tag; collection-only — ref-type staleness is classified at Step 3 as the temporal sub-case of support_integrity (T4))
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); artifact read, artifact search (stored knowledge cross-reference analysis)
 Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment; user classifies coherence type as MemoryInternal or CrossDomain)
 Phase 2 Qs_emergent_channel (constitution) → present (specialization of Phase 2 Qs: channel unvalidated by definition; regardless of parent Verifiability, the classify summary records the observed channel description and awaits user confirmation before proceeding; confirmation rides the parent A coproduct — Point(location) designates/validates the authoritative channel, Provide(context) supersedes it, Dismiss declines it (proceed-with-assumption), Unknown(Partial) leaves the item unresolved — no answer auto-resolves the item through the unconfirmed channel; the answer is recorded in Λ.channel_validations — a channel already Point-validated this session skips this gate only (prior in-session user decision); each later item on that channel still takes the claim-specific Phase 1 evidence pass against the validated channel, per the Point(location) semantics (record location, resolve via next Phase 1 iteration) — never blanket-resolved as user-responded)
@@ -206,7 +189,6 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
-      dimensions_detected: Set(Dimension),                           -- π₁ image of classify_results
       classify_results: Map(Uncertainty, Σ(d: Dimension). Fiber(d)), -- fibration-typed classification
       context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
       read_only_resolved: Set(Uncertainty), -- Uᵣ' from TYPES
@@ -214,7 +196,7 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
       non_factual_detected: Set(Uncertainty), -- Uₙ from TYPES; Fiber(Coherence) = CrossDomain or Fiber(d) = Unit, classify summary display
       user_responded: Set(Uncertainty),
       remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
-      history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Result, Evidence)>,
+      history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Evidence)>,
       observation_skips: List<(Uncertainty, EscapeCondition, String)>,  -- audit trail for Cite-or-observe escape hatches (pre-observation only — an observation that ran and overran its budget is recorded in observation_history, never here)
       source_choice_overrides: List<(Uncertainty, EvidenceSource, String)>,  -- audit trail for Cite-or-observe cite-based UserTacit overrides
       channel_validations: List<(Uncertainty, EvidenceSource, A)>,  -- Qs_emergent_channel answers recorded at Phase 3; audit trail feeds variation-stable observed use for (cross-session) base promotion; a channel Point-validated this session does not re-enter the gate this session
