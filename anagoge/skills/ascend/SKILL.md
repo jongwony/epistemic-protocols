@@ -16,9 +16,9 @@ Elevate a vague recall to a higher-granularity unit through AI-guided deposit-gr
 ── FLOW ──
 Anagoge(R) → attempts := 0 → Detect(R) →                             -- attempts initialized once, at activation (preserved on Reorient re-entry)
   single_session_suffices(R): relay(finding) → deactivate
-  supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) →
+  supra_session(R): Classify(R, Σ) → UnitType →
     Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
-      Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → U_asm → Rank(U_asm, R) → U[] → [|U[]| > 0] confirmations := Confirm(claim_source_pairs) →   -- index reads drive discovery/rank; each surfaced claim is paired with its OWN originating deposit's SSOT (not one shared SSOT) before Confirm; the per-claim verdict is recorded in Λ.confirmations, and every surfacing op renders each claim against it — never asserted from the lossy index alone
+      Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → U_asm → Rank(U_asm, R) → U[] → [|U[]| > 0] confirmations := Confirm(surfaced_claims(U[top])) →   -- index reads drive discovery/rank; each surfaced claim is checked by Confirm against its OWN originating deposit's SSOT (not one shared SSOT); the per-claim verdict is recorded in Λ.confirmations, and every surfacing op renders each claim against it — never asserted from the lossy index alone
       |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
       |U[]| = 0 ∧ attempts = max ∧ presented = ∅: NullMatch → inform(R, Σ) → fallback → deactivate   -- no unit ever assembled; the first empty traversal (attempts < max) already fired ≥1 Rescope
       |U[]| = 0 ∧ attempts = max ∧ presented ≠ ∅: surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units: a prior traversal assembled, so this is NOT NullMatch
@@ -27,18 +27,17 @@ Anagoge(R) → attempts := 0 → Detect(R) →                             -- at
         ¬SingleObvious(U[]): Qc(U[top], narrative, framing) → Stop → A →
           Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
           Refine ∧ attempts < max: adjust(boundary ∨ traversal_scope) → Phase 1
-          Reorient(d) ∧ attempts < max: rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0
+          Reorient(d) ∧ attempts < max: rebind(UnitType ∨ R, d, Σ) → Phase 1 / Phase 0
           (Refine ∨ Reorient) ∧ attempts = max: surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
 
 ── MORPHISM ──
 ScatteredDeposits × DepositGraph
   → detect(supra_session)              -- recognize granularity insufficiency: right unit is above one session
   → classify(unit_type)                -- UnitType ∈ {ConnectedSessionChain, TopicCluster, SedimentedConceptNode}
-  → dispatch(unit_type)                -- select traversal shape for the dispatched type
   → traverse(Deposits, infer_edges)    -- INFER cross-partition edges at read-time from stored anchors + shared keywords/metadata; broken-link-tolerant
   → assemble(connected_subgraph)       -- compose higher units of the dispatched type from the inferred-edge-connected deposits
   → rank(units, recall_trace)          -- order by recall alignment + connectivity
-  → confirm(claim_source_pairs)        -- INDEX reads drive discovery/rank (provisional); each claim SURFACED as evidence (origin, timing, quoted decision/utterance) gets a per-claim verdict against ITS OWN originating deposit's authoritative source (never a single unit-wide SSOT), recorded in Λ.confirmations for the surfacing ops — never asserted from the lossy index alone
+  → confirm(surfaced_claims)           -- INDEX reads drive discovery/rank (provisional); each claim SURFACED as evidence (origin, timing, quoted decision/utterance) gets a per-claim verdict against ITS OWN originating deposit's authoritative source (never a single unit-wide SSOT), recorded in Λ.confirmations for the surfacing ops — never asserted from the lossy index alone
   → present(unit, Socratic)            -- narrative presentation of one candidate higher unit; absorbed into the emit for SingleObvious (single densely-connected high-confidence unit) — Extension, no turn yield
   → recognize(unit, user)              -- user-constituted identification at the higher granularity; for SingleObvious, realized as silence-default behind a divergence-only affordance (non-divergence constitutes recognition)
   → emit(HigherUnit_prose)             -- NL rendering to session text
@@ -52,7 +51,7 @@ invariant: Recognition over Aggregation
 ── TYPES ──
 R                = RecallTrace { keywords: Set(String), temporal: Optional(String),
                                  associations: Set(String), entry_deposits: Set(DepositRef) }
-DepositRef       = { slug: String, sid: String, anchor: Optional(String) }   -- a partition-local deposit pointer
+DepositRef       = { slug: String, sid: String }   -- a partition-local deposit pointer
 ScatteredDeposits = Set(Deposit)        -- deposits the recall trace touches; distributed across slugs, no central aggregator
 Anchor           = StructuredAnchor | LegacyAnchor   -- what a deposit STORES in cross_refs (mirrors what Anamnesis writes)
 StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, channel: ∈ {user, transcript} }
@@ -63,10 +62,8 @@ Deposit          = { slug: String, sid: String, cwd: Optional(String), date: Opt
                   -- cwd, date are STORED in the deposit's own frontmatter (the same fields Anamnesis writes): cwd pairs with sid to build the resume handle, date dates the source. Optional ⇒ absent in deposits written before the field was captured (cwd-absent ⇒ source surfaced but non-resumable)
 SSOT             = the deposit's authoritative session record (complete, append-only) the INDEX entry is DERIVED FROM   -- a Deposit is a LOSSY INDEX projection of its SSOT; evidential claims resolve against SSOT, never the deposit files alone. A cross-deposit higher unit spans MULTIPLE deposits, each with its OWN SSOT — there is no single suite-wide SSOT
 EvidentialClaim  = { content: a reading SURFACED to the user as fact (origin attribution, coinage/temporal timing, a quoted decision or utterance), source_deposit: DepositRef }   -- source_deposit names the ONE deposit the claim originates from — index-only ⇒ provisional; settled only once Confirm-ed against that deposit's OWN SSOT
-ClaimSourcePair  = (claim: EvidentialClaim, ssot: SSOT)   -- one claim paired with the authoritative source of ITS OWN originating deposit (ssot = SSOT(claim.source_deposit)); a cross-deposit unit's claim set carries one pair per claim, never one shared SSOT across the whole set
 surfaced_claims  = HigherUnit → Set(EvidentialClaim)   -- the evidential claims the unit's narrative will surface
-claim_source_pairs = { (c, SSOT(c.source_deposit)) : c ∈ surfaced_claims(U[top]) }   -- one pair per claim of the candidate unit U[top], each bound to its OWN deposit's SSOT
-Confirm          = Set(ClaimSourcePair) → List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} })   -- per-claim-source-pair confirmation: each claim is checked against its OWN deposit's authoritative source before surfacing, never a single unit-wide SSOT; codomain is exactly Λ.confirmations, so `confirmations := Confirm(…)` is type-consistent; the verdict governs how each claim surfaces: confirmed ⇒ assert as settled fact; corrected ⇒ assert the SSOT value, discard the index reading; unattested ⇒ never assert as fact — surface provisional or omit. Index-only (unconfirmed) stays provisional.
+Confirm          = Set(EvidentialClaim) → List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} })   -- each claim checked against SSOT(claim.source_deposit), its OWN deposit's authoritative source, before surfacing, never a single unit-wide SSOT; codomain is exactly Λ.confirmations, so `confirmations := Confirm(…)` is type-consistent; the verdict governs how each claim surfaces: confirmed ⇒ assert as settled fact; corrected ⇒ assert the SSOT value, discard the index reading; unattested ⇒ never assert as fact — surface provisional or omit. Index-only (unconfirmed) stays provisional.
 DepositGraph     = (Set(Deposit), Set(TraversalEdge))    -- STRUCTURAL TYPE; the edge set is RECONSTRUCTED at read-time, not pre-materialized; invariants in ── GRAPH INVARIANTS ──
 TraversalEdge    = { from: DepositRef, to: DepositRef, kind: ∈ {chain, topic, concept, plain} }
                   -- `kind` and `to` are INFERRED at traversal time from stored anchors + shared keywords/session metadata + Σ — NEVER read from a stored field
@@ -82,12 +79,12 @@ SedimentedConceptNode = { concept: String, forged_by: Set(Deposit), node: Deposi
                   -- an already-sedimented concept node + which deposits forged it (recognition-only; never formed here)
 infer_edges      = (Set(Deposit), Σ) → Set(TraversalEdge)        -- read-time edge inference from stored anchors + shared keywords/session metadata; output is reconstructed, never read from a stored field
 Traverse         = (Set(Deposit), Set(TraversalEdge)) → (Set(Deposit), Set(TraversalEdge))   -- UnitType-dispatched read-time traversal: follow inferred edges to the connected sub-graph reachable from the entry deposits
+traversal_scope  = the (Set(Deposit), Set(TraversalEdge)) Traverse returned, with each skipped broken-link edge noted
 Assemble         = (Set(Deposit), Set(TraversalEdge)) → List(HigherUnit)  -- compose the inferred-edge-connected deposits of the traversed sub-graph into typed higher units
 Rank             = (List(HigherUnit), R) → List(HigherUnit)      -- recall-alignment (against the recall trace R) + inferred-edge-connectivity dominate
 Rescope          = (R, Σ) → List(RescopeOption)                  -- structured re-traversal navigation on empty assembly
 RescopeOption    = { dimension: ∈ {boundary, scope, unit_type}, option: String }
-ScopeHint        = RescopeOption  -- the dimension+option the user selects at the Rescope gate to re-navigate traversal
-S                = ScopeHint      -- user navigation answer from Rescope gate (Qc-rescope)
+S                = RescopeOption   -- user navigation answer from the Rescope gate (Qc-rescope)
 A                = Recognition ∈ {Recognize(HigherUnit), Refine, Reorient(description)}
 confidence       = HigherUnit → {low < medium < high}   -- Rank-assigned label (recall-trace alignment + inferred-edge connectivity strength); grounds the SingleObvious confidence = high guard and the confidence < high gate
 SingleObvious    = predicate; SingleObvious(U[]) ≡ |U[]| = 1 ∧ confidence(U[top]) = high   -- Light-only Extension guard: the one densely-connected unit is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|U[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate
@@ -101,7 +98,7 @@ HigherGranularityUnit = session text containing HigherUnit_prose
                -- elevation establishes the UNIT (these deposits form THIS higher whole), not current-reality FIDELITY:
                -- a recognized chain/cluster/concept describes a PAST trajectory; downstream consumers re-verify against
                -- current state before commit rather than treating the elevated unit as confirmed current context
-NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
+max              = the traversal cap LOOP fixes   -- a bound on user attention, not a sufficiency criterion
 Phase            ∈ {0, 1, 2, 3}
 
 ── R-BINDING ──
@@ -123,7 +120,7 @@ Phase 0: R → Detect(R) → supra_session(R)?                         -- granul
        [single_session_suffices(R)] relay(finding) → deactivate    -- zero-signal: present the single-session finding; Anagoge not activated
            → Classify(R, Σ) → UnitType                              -- dispatch (silent)
 Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
-           Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → U_asm → Rank(U_asm, R) → U[ranked] → [|U[ranked]| > 0] confirmations := Confirm(claim_source_pairs)  -- read-time inferred-edge traversal + assembly + rank, then confirm to-be-surfaced evidential claims each against ITS OWN originating deposit's SSOT (never a single unit-wide SSOT), recording the per-claim verdict in Λ.confirmations for the surfacing ops [Tool]
+           Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → U_asm → Rank(U_asm, R) → U[ranked] → [|U[ranked]| > 0] confirmations := Confirm(surfaced_claims(U[top]))  -- read-time inferred-edge traversal + assembly + rank, then confirm to-be-surfaced evidential claims each against ITS OWN originating deposit's SSOT (never a single unit-wide SSOT), recording the per-claim verdict in Λ.confirmations for the surfacing ops [Tool]
            |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1   -- empty traversal always Rescopes while budget remains
            |U[ranked]| = 0 ∧ attempts = max ∧ presented = ∅ → NullMatch → inform → fallback → deactivate   -- nothing ever assembled; ≥1 Rescope already fired (`Rescope-first diagnosis` holds structurally)
            |U[ranked]| = 0 ∧ attempts = max ∧ presented ≠ ∅ → surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units (a prior traversal assembled) — NOT NullMatch
@@ -133,7 +130,7 @@ Phase 2: SingleObvious(U[ranked]) → emit(HigherUnit_prose(U[top]) ⊕ per-depo
 Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates; after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(u) → HigherUnit_prose(u) → emit → converge   -- HigherUnit_prose carries each composing deposit's SourceLocator + ResumeHandle
            Refine ∧ attempts < max → adjust(boundary ∨ traversal_scope) → Phase 1    -- boundary/scope adjustment (sense)
-           Reorient(d) ∧ attempts < max → rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0   -- orthogonal re-dispatch (sense)
+           Reorient(d) ∧ attempts < max → rebind(UnitType ∨ R, d, Σ) → Phase 1 / Phase 0   -- orthogonal re-dispatch (sense)
            (Refine ∨ Reorient) ∧ attempts = max → surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
 
 ── LOOP ──
@@ -183,7 +180,6 @@ progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
 Phase 0 Detect        (sense)        → Internal analysis (supra-session granularity; distinguish from single-session Anamnesis)
 Phase 0 relay_single_session (extension) → TextPresent+Proceed (single_session_suffices(R): present the single-session finding, deactivate — Anagoge not activated)
 Phase 0 Classify      (sense)        → Internal analysis (UnitType detection from R + Σ)
-Phase 0 Dispatch      (sense)        → Internal analysis (select the traversal shape for the dispatched UnitType; deterministic indexed selection, entropy→0)
 Phase 1 Traverse      (observe)      → artifact read, artifact search (read entry-deposit anchors + index keywords/metadata, then search cross-partition for shared anchors/keywords/metadata; read-only, read-time inference)
 Phase 1 Assemble      (sense)        → Internal analysis (compose inferred-edge-connected deposits into typed higher units)
 Phase 1 Rank          (sense)        → Internal analysis (recall alignment + inferred-edge connectivity; conditional haiku scoring for large unit sets)
@@ -202,10 +198,8 @@ seam                  (extension)    → TextPresent+Proceed (fires at deactivat
 ── MODE STATE ──
 Λ = { phase: Phase, R: RecallTrace, unit_type: UnitType,
       units: List(HigherUnit),
-      confirmations: List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} }),   -- per-claim Confirm verdicts written at Phase 1 (`confirmations := Confirm(claim_source_pairs)`, each claim checked against its OWN deposit's SSOT); consumed by every surfacing op (Phase 2 emit/Qc, Phase 3 emit, the exhausted-with-units terminal surface) so each claim renders per its verdict — confirmed/corrected ⇒ settled (corrected substitutes the SSOT value), unattested ⇒ provisional or omitted
+      confirmations: List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} }),   -- per-claim Confirm verdicts written at Phase 1 (`confirmations := Confirm(surfaced_claims(U[top]))`, each claim checked against its OWN deposit's SSOT); consumed by every surfacing op (Phase 2 emit/Qc, Phase 3 emit, the exhausted-with-units terminal surface) so each claim renders per its verdict — confirmed/corrected ⇒ settled (corrected substitutes the SSOT value), unattested ⇒ provisional or omitted
       presented: Set(HigherUnit),   -- updated `presented := presented ∪ {U[top]}` on every Phase 1 → Phase 2 edge (a candidate reaching the gate); serves as the "ever-assembled" witness that discriminates NullMatch (presented = ∅) from the exhausted-with-units terminal (presented ≠ ∅), and supplies presented_best for that terminal's surface
-      recognized: Optional(HigherUnit),
-      rescopes: List(RescopeOption),
       attempts: Nat,   -- initialized 0 ONCE at activation (Λ init), preserved across Reorient re-entry to Phase 0; incremented once per traversal at Phase 1 start; cap (max 3) bounds the traversal count (empty-branch Rescope-vs-NullMatch and Phase 3 re-traversal-vs-surface both gate on it)
       history: List<(HigherUnit, A)>,   -- appended at Phase 3 integration: Log (HigherUnit, A) to history
       active: Bool, cause_tag: String }
@@ -246,7 +240,7 @@ BrokenLinkChain  : inferred edges resolve to targets with no written deposit (no
                    -- recovery: surface the broken-link scope as a traversal note (NOT an error)
 
 UnitTypeMismatch : the recall trace was dispatched to the wrong UnitType (e.g. classified as TopicCluster but the user means a ConnectedSessionChain)
-                   -- detection: Qc Recognize=false with the user describing a different unit shape
+                   -- detection: A = Reorient(d), d describing a different unit shape
                    -- recovery: Reorient → re-dispatch UnitType → Phase 1
 
 SingleSessionMisfire : a single session WOULD resolve the recall — Anagoge over-activated
