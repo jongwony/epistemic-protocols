@@ -108,7 +108,8 @@ boundary(Λ, H) = [(r.case, g) : r ∈ Λ.probes, r.answer = Judged(Vs), a ∈ H
 narrow         = (H, W) → H'                                -- Judged(Vs): each Refutes axis moves to ruled_out with its ground,
                                                             -- each Bounds and each Undecided axis stays live;
                                                             -- AxisMissing adds the axis the user described to live, and where the description names an axis in ruled_out
-                                                            -- that axis moves back to live with its earlier ground kept beside it; Redraw, Repartner and Abandon leave H unchanged
+                                                            -- that axis moves back to live, and the ground that ruled it out is read from the probe record that carried the Refutes
+                                                            -- and shown at its return; Redraw, Repartner and Abandon leave H unchanged
 settled(H)     = |H.live| = 1
 probed(Λ)      = |Λ.probes| ≥ 1                             -- Phase 5 opens on settled(H) only past this floor: a space that arrives settled from
                  -- Extract is still probed once, so the rule is named against at least one case the user judged rather than
@@ -141,9 +142,9 @@ OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{unmatched(M) : M ∈ Λ.correspon
                  -- by construction, since the run it would have seeded is the one the cap stopped; the union runs over every
                  -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it.
                  -- H.live reads as ∅ while Λ.space is None, so a run abandoned at Phase 1 owes nothing but declares that
-OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
+OpenTrace      = { items: Map(String, OpenItemDisposition) }
                  -- invariant: dom(items) = OpenItems(Λ) — every open item carries exactly one disposition, which makes status(O) total
-status(O)      = None if OpenItems(Λ) = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
+status(O)      = None if dom(O.items) = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
 AlignmentTrace = List<(Slot | ProbeRecord | (N, Rule))>
                  -- the run in the order it happened: the correspondence the user built, each probe with the verdict
                  -- every separated axis received, and the naming it terminated on.
@@ -179,7 +180,7 @@ After Phase 1: evaluate the alignment answer.
 If Aₐ = AsShown: M is committed; proceed to Phase 2.
 If Aₐ = Correct(slot, value): replace that slot's filling with value and re-present at Phase 1 within the same round; the correspondence M then carries is the corrected one.
 If Aₐ = Repartner(ref): re-enter Phase 1 with ref as the alignment partner and Pair skipped; the pairing left behind commits nothing.
-If Aₐ = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended with R and H absent.
+If Aₐ = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended with R and H as Λ carries them (absent when Phase 2 was never reached).
 
 After Phase 4: evaluate the probe answer.
 If W = Judged(Vs): each Refutes axis is ruled out with its ground, each Bounds and each Undecided axis stays live; return to Phase 3. If narrowed_none(Vs), say that this round ruled no axis out, and which axes were kept by scoping the case out of their claim and which were left undecided, before drawing the next probe.
@@ -208,7 +209,7 @@ settled(H) ∧ probed(Λ): see TYPES (exactly one live axis, at least one probe 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
-Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such, and the four ways the answer can go (mandatory); artifact read, artifact search for the cases' own context
+Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such, and the four ways the answer can go (mandatory); artifact read, artifact search for the cases' own context; external fetch (conditional: the cases' domain lies outside the user's artifacts)
 Phase 2 Extract    (track)   → Internal state update: writes Λ.relation and Λ.space, so Phase 3 has a space to probe and the terminal has a relation to name
 Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates on screen together, each axis's support and the case that breaks it beside that axis's own verdict slot with what each verdict does to that axis, and before the gate what the live set becomes on each way the round can close (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
 Phase 4            (track)   → Internal state update: writes Λ.space and appends Λ.probes, so the cap can advance and the alignment trace has per-probe material to build from
