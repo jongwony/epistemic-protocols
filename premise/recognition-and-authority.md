@@ -52,7 +52,7 @@ Detection with Authority defines the structural separation of roles; the operati
 A companion codification of Detection with Authority's split, framed by reversibility rather than by epistemic source.
 
 - Reversible + Clear: execute, then summarize
-- Reversible + Ambiguous: ask, per the interview triggers below
+- Reversible + Ambiguous: ask
 - Irreversible: ask, await approval — a harness's own risky-action categories, plus any extensions the host adds on top of them (`boundaries-and-safety.md` carries the general reversible/irreversible classification)
 - Settled direction collapses the ask (Reversible only): treat a reversible fork as "Clear" when the project's stated goals, an established convention (a sibling artifact's settled pattern), or a declared decision calibration already determines its direction — proceed/relay rather than ask. An irreversible or environment-mutating action stays "ask, await approval" however settled its direction.
 - Tier each follow-up separately (bundling re-gates a settled item): when one checkpoint surfaces several follow-ups, tier each on its own. Pairing a settled reversible item with a genuine fork in a single question promotes the settled one back to undecided — execute the settled ones, then ask only about the fork, stating what was already done.

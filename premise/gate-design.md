@@ -63,7 +63,7 @@ Convergence must be demonstrated, not asserted. At convergence, the system must 
 
 ## Loop Continuity under Bounded Regret (Derived)
 
-Within any execution loop, Extension actions must not trigger a stop — the loop continues. Only Constitution actions — genuinely viable alternative paths whose wrong choice creates irreversible divergence — warrant interruption.
+Within any execution loop, Extension actions must not trigger a stop — the loop continues. Only Constitution actions warrant interruption.
 
 **Plan-level aggregation**: compound unbounded regret is superadditive — multiple irreversible decisions within one plan interact, and their aggregate regret exceeds the sum of the individual gate-level risks. When compound regret crosses a plan-direction threshold, the user should judge the plan's shape, not just its individual items. The specific threshold is an implementation-level detail.
 

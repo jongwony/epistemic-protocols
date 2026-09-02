@@ -23,9 +23,9 @@ Anamnesis(V) → Detect(V) →
       StopAtSpine: NullMatch → inform(V, Σ) → deactivate
     |C[]| = 0 ∧ attempts > 0 ∧ fulltext_scanned: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
-               SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
+               SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
                ¬SingleObvious(C[]): Qc(C[top], evidence, framing) → Stop → R →
-      Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
+      Recognize(c): recall_complete → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
       (Refine ∨ Reorient(d)) ∧ attempts = max: surface(C[top]) → deactivate      -- AttemptsExhausted: recall-try budget spent with candidates in hand
       Refine ∧ attempts < max: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
       Reorient(d) ∧ attempts < max: rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1                 -- orthogonal dimension shift
@@ -68,7 +68,6 @@ DateAnchor       = String   -- ISO 8601 date; reference point for salience-track
 EvidenceMode     = {user_constituted, attested, observed, inferred}   -- totally ordered tier of the content's evidential STANDING (who stands behind it: user-authored verbatim > party-asserted with verbatim witness > mechanically present without assertion > LLM-synthesized) — NOT extractor reliability (that is extraction_method's concern). Assigned at write time by construction of each artifact's production path (deterministic metadata, never LLM-judged). Ranks recall weight only — NEVER suppresses/excludes; introduces no automatic effectivity (any downstream status change stays user-gated).
 SourceScan       = { skipped_lines: Nat, unverified_user_turns: Nat, omitted_chars: Nat }   -- how completely the record's own source reached the extractor: transcript lines that failed to parse, human turns absent from the runtime's own cross-check channel, and characters a bounded extraction dropped from the middle of a long session. Any count non-zero ⇒ the record was built from less than its whole source, so the emit says so (`Recalled context currency is not fidelity`)
 Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
-Scan             = (Store, Track, RecallTrace) → List(Candidate)
 Candidate        = { session_id: Optional(SessionId),
                      runtime: Source,
                      cwd: Optional(String),
@@ -81,8 +80,7 @@ Candidate        = { session_id: Optional(SessionId),
                      source_scan: Optional(SourceScan),           -- capture-time integrity of the record's own source, published by the writer; Null ⇒ the entry predates integrity capture. NEUTRAL in ranking exactly as evidence_mode is: it qualifies what the emit says about a candidate, never what the candidate scores
                      fork_marker: Bool,                          -- true ⇒ the id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT); its own id is not a valid resume handle. Invariants: fork_marker = false ⇒ parent_pointer = Null ∧ parent_cwd = Null ; parent_pointer = Null ⇒ parent_cwd = Null (parent_cwd requires parent_pointer; parent_pointer present with parent_cwd = Null is valid — parent identified but its cwd is unknown)
                      parent_pointer: Optional(SessionId),        -- orchestrating parent session for a fork candidate, read directly from the fork's own record; the resumable handle when the parent's top-level SSOT still exists (Null ⇒ parent record absent → non-resumable)
-                     parent_cwd: Optional(String),               -- parent session's working directory, paired with parent_pointer to build the parent resume handle (Null ⇒ parent record absent, OR parent identified but its cwd metadata is unknown — parent transcript predates cwd capture)
-                     resumption_hint: Optional(String) }
+                     parent_cwd: Optional(String) }              -- parent session's working directory, paired with parent_pointer to build the parent resume handle (Null ⇒ parent record absent, OR parent identified but its cwd metadata is unknown — parent transcript predates cwd capture)
 Anchor           = StructuredAnchor | LegacyAnchor      -- Candidate.cross_refs element; extends-edge sediment (context-adding annotation)
 StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, channel: ∈ {user, transcript} }
                   -- the stored form tells a later reader WHAT kind of reference and from WHICH utterance channel; it confers NO effectivity — a structured anchor is never authoritative by form, it remains a recall clue requiring the same re-verification as any recalled context
@@ -108,6 +106,7 @@ RecalledContext  = session text containing ClueVector_prose
 NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
 AttemptsExhausted = predicate; canonical definition in ── CONVERGENCE ──   -- the candidates-present terminal, distinct from NullMatch's zero-candidate one
 Phase            ∈ {0, 1, 2, 3}
+max              = the recall-try cap LOOP fixes   -- a bound on user attention, not a sufficiency criterion
 
 ── V-BINDING ──
 bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn   -- priority: explicit_arg > colocated_expr > prev_user_turn
@@ -131,7 +130,7 @@ Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? S
              ExpandFullText → set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → C[ranked]
              StopAtSpine → NullMatch → inform → deactivate
            |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_scanned → NullMatch → inform → deactivate
-Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension: high-confidence single candidate, no turn yield, no [Tool] Stop; silence = Recognize
+Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete → converge   -- Extension: high-confidence single candidate, no turn yield, no [Tool] Stop; silence = Recognize
          ¬SingleObvious(C[ranked]) → C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
 Phase 3: R → integrate(R, V, Σ) →                                -- integration (track: Λ.history ⊕ (C[top], R)); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(c) → ClueVector_prose(c) → emit → converge
@@ -179,7 +178,7 @@ Phase 1 Qx          (constitution) → present (ExpandFullText: read the labeled
 Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; gated path — ¬SingleObvious: candidates ≥ 2 OR confidence < high)
 Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single candidate emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of `Conditional Qc; separate Qs and Qc`'s Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate   (track)    → Internal state update
-Phase 3 Probe       (sense)    → Internal (gap detection)
+Phase 1/3 Probe     (sense)    → Internal (gap detection)
 Phase 1/3 Qs        (constitution)     → present (Socratic probing with structured navigation; one realization reached from two branches — the Phase 1 zero-candidate probe and the Phase 3 Refine probe run the same `Probe → Qs → Stop → H → enrich` sequence; mandatory on Refine)
 Phase 3 emit        (extension)    → TextPresent+Proceed (ClueVector_prose)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
@@ -188,8 +187,7 @@ seam                (extension)    → TextPresent+Proceed (fires at deactivatio
 ── MODE STATE ──
 Λ = { phase: Phase, V: VagueRecall,
       candidates: List(Candidate), presented: Set(Candidate),
-      recognized: Optional(Candidate),
-      probes: List(SocraticQuestion), history: List<(Candidate, R)>,   -- history appended at Phase 3 integration: Log (Candidate, R) to history
+      history: List<(Candidate, R)>,   -- history appended at Phase 3 integration: Log (Candidate, R) to history
       attempts: Nat, scan_scope: ScanScope, active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
@@ -221,16 +219,16 @@ Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-
   INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful semantic extraction + validation; artifacts carry evidence-mode metadata derived by construction — legacy entries lack it (Candidate.evidence_mode = Null, neutral)
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
-scan_{Track} : (Store, Trace) → List(Candidate)
+Scan_{Track} : (Store, RecallTrace) → List(Candidate)
   scan_entropy(Store, trace)    = exact-match over IdentifierTuples where compatible_anchor(t, trace) (SSOT ∪ INDEX_semantic)
                                   ∪ literal-id match over INDEX_substitute origin ids (a sidechain/derived id carries no IdentifierTuple, so a structured id is matched against the substitute channel directly; a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition)
                                 -- structural rejection (compatible_anchor filters ALL literal matches, distinct from low-precision miss): incompatible literals do NOT anchor but are retained in the recall trace as evidence; the scan routes to the salience track (hybrid) or NullMatch₁ recovery with the incompatibility noted — never a silent zero-candidate return
   scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX ⊕ SSOT_spine first; SSOT_body after ExpandFullText
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
-  evidence_mode(c) = max tier over matched signals' frontmatter evidence_mode(s); frontmatter absent ⇒ Null (legacy entry, neutral — partial-INDEX normal mode, no fallback trigger)
+  evidence_mode(c) = highest tier over matched signals' frontmatter evidence_mode(s); frontmatter absent ⇒ Null (legacy entry, neutral — partial-INDEX normal mode, no fallback trigger)
 
-initial_scan: scan_{Track}(INDEX ⊕ SSOT_spine, trace) across every available realization; preserve Source on every candidate
-fulltext_expansion: X = ExpandFullText ⟹ scan_{Track}(SSOT_body, trace) across the Source set named at Qx
+initial_scan: Scan_{Track}(INDEX ⊕ SSOT_spine, trace) across every available realization; preserve Source on every candidate
+fulltext_expansion: X = ExpandFullText ⟹ Scan_{Track}(SSOT_body, trace) across the Source set named at Qx
 degraded_scan: INDEX_semantic = ∅ ⟹ mark that INDEX realization unavailable and continue on that realization's SSOT_spine; SSOT_body remains outside scope until ExpandFullText
   -- an absent semantic INDEX no longer blinds its realization: the spine tier carries recency, cwd, origin, and first human turn, so the realization still contributes ranked candidates. This is what an INDEX-less runtime looks like in normal operation, not a failure to route around
   -- partial INDEX (e.g., MarkerProfile? = ∅ while IdentifierTuples / Coinage / narrative present) is a normal mode and does NOT trigger total fallback; scan_salience returns empty for the missing component and ranking degrades gracefully

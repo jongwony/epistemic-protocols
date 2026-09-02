@@ -13,7 +13,7 @@ Surface unnoticed gaps at decision points through questions, enabling user to re
 
 ```
 ── FLOW ──
-Syneidesis(D, Σ) → Scan(D) → G → AssessGapPressure(D, G) → P → Sel(P, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
+Syneidesis(D, Σ) → Scan(D) → G → AssessGapPressure(D, G) → P → Sel(P, D) → Gₛ → Qs(Gₛ) → J → A(J, D, Σ) → Σ'
 
 ── MORPHISM ──
 Decision
@@ -30,7 +30,7 @@ invariant: Surfacing over Deciding
 
 ── TYPES ──
 D      = Decision point ∈ Committed × Stakes × Context
-Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)
+Committed = committed(D) ≡ ∃ a : mutates_state(a) ∨ externally_visible(a) ∨ consumes_resource(a)
 Stakes = {Low, Med, High}
 G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative} ∪ Emergent(G)
 Scan   = Detection: D → Set(G)                      -- gap identification
@@ -41,51 +41,47 @@ partition(P, G) = G = P.load_bearing ⊔ P.cheap_to_settle ⊔ P.hidden_high_imp
 load_bearing = Set(G) whose resolution materially changes the decision
 cheap_to_settle = Set(G) settleable with one low-cost confirmation
 hidden_high_impact = Set(G) ⊆ G that Scan flagged low-confidence but decision-changing if real -- tightly capped (|hidden_high_impact| ≤ 1); admitted only when it could materially change the user's next judgment
-nonblocking = Set(G) compatible with proceed(Σ) this cycle
-queued = Set(G) routed to Σ.deferred for later review
+nonblocking = Set(G) the decision can proceed past this cycle without judging
+queued = Set(G) held for reclassification in a later cycle
 Sel    = Selection: P × D → Gₛ                     -- prioritize by pressure and stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
-Q      = Question formation (assertion-free)
+Qs     = Question formation (assertion-free), presented as the constitution gate
 J      = Judgment ∈ {Address(c), Dismiss, Probe}
-c      = Clarification (user-provided response to Q)
+c      = Clarification (user-provided response to Qs)
 A      = Adjustment: J × D × Σ → Σ'
 C      = GapCarrier: the ONE durable entry every registered gap is written into — a single dereferenceable record, so one read reconstructs the whole gap set rather than reassembling it from scattered records or from session memory
 GapLocator = { record: C's identity as the carrier-creating write returned it, session: the id of the session that wrote it }   -- substrate-neutral by construction: the identity is whatever that write returned, so this type never names what performs the write
-locator(C) = GapLocator { record: C's identity as the carrier-creating call returned it; session: the id of the session running that call }   -- the value Σ.carrier holds; which call creates the carrier is named in TOOL GROUNDING, so a host without that capability still types this
+locator(C) = the GapLocator the carrier-creating write returned for C   -- the value Σ.carrier holds
 registered = the gaps C carries   -- the set AuditedDecision quantifies over and the audit trace ranges over
 entry(g)   = the record C carries for g ∈ registered — the gap's question and its context, and once closed the status, the user's judgment, and the adjustment that judgment produced. The last two are there because the audit trace reads them: a carrier holding status alone recovers which gaps are left and loses what was decided about the rest
 status(g)  = entry(g).status ∈ {open, completed}
 open(registered) = { g ∈ registered : status(g) ≠ completed }   -- what a recovered carrier contributes to pressure assessment and selection. The audit trace still ranges over registered WHOLE, so a gap already judged is reachable as evidence without being put to the user a second time
-Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool, carrier: Option(GapLocator) }
+Σ      = State { carrier: Option(GapLocator) }
 AuditedDecision = Σ' where ∀ g ∈ registered: status(g) = completed
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → [locator in scope: DereferenceCarrier → registered; Σ.carrier := Some(that locator) | none in scope: registered := ∅; Σ.carrier := None] → Scan(D) → G → AssessGapPressure(D, G ∪ open(registered)) → P  -- checkpoint + carrier recovery + detection + pressure map (silent apart from the unreachable-carrier relay). "In scope" is REACHABILITY, never ownership: whether a recovered gap bears on THIS decision is a relevance judgment, and it is made where the user is present — at Qs, which every gap passes before anything is done with it. Keying the locator to a decision would settle that at authoring time and remove the recognition the gate exists to elicit; where the relevance question turns on a fact the audit does not hold, the deficit is ContextInsufficient (/inquire), not this one [Tool]
-Phase 1: (G, P) → [Σ.carrier = None: record[C ← all gaps] → Σ.carrier := Some(locator(C)) | Σ.carrier = Some(l): record update(l, add the newly detected gaps)] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register every gap into the ONE carrier, creating it on the first pass and amending the recovered one otherwise; hold the identity the creating write returned; pressure-select, surface first [Tool]
+Phase 1: (G, P) → [Σ.carrier = None: record[C ← all gaps] → Σ.carrier := Some(locator(C)) | Σ.carrier = Some(l): record update(l, add the newly detected gaps)] → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register every gap into the ONE carrier, creating it on the first pass and amending the recovered one otherwise; hold the identity the creating write returned; pressure-select, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → record update(Σ.carrier, entry(Gₛ[0]) := ⟨status := completed, judgment := J, adjustment := what A produced⟩) → Σ'           -- adjustment + carrier amendment naming the held identity. All three go in together: the audit trace reads judgment and adjustment, so a carrier holding status alone recovers which gaps are left and loses what was decided about the rest [Tool]
 Phase 0 → carrier_unreachable (relay): a locator is in scope but the record it names cannot be read  -- surface that the prior gaps were NOT recovered and which locator failed, then proceed with registered := ∅ and Σ.carrier := None and a fresh carrier at Phase 1; the run never continues silently on a partial gap set
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
-If new gaps: record update(Σ.carrier, add) → add to queue.
-Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
-P.queued updates Σ.deferred at every carrier write or amendment; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
+If new gaps: record update(Σ.carrier, add).
+Each cycle reclassifies open(registered) through AssessGapPressure(D, open(registered)) before Sel.
 Continue until: every registered gap is completed (AuditedDecision).
 Mode remains active until convergence.
 Convergence evidence: At every-registered-gap-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)) — together with Σ.carrier, so a later session reaches this run's gaps with one read. Convergence is demonstrated by the complete audit record, not asserted by carrier status.
 
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
-A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ[0]} }
+A(Dismiss, _, σ)    = σ   -- nothing adjusts; Phase 2's carrier amendment records the Dismiss judgment
 A(Probe, _, σ)      = σ { re-scan(expanded) }        -- additional verification round (depth varies by stakes)
 
 ── SELECTION RULE ──
 Sel(P, d) = take(priority_sort(P.load_bearing ∪ P.cheap_to_settle ∪ P.hidden_high_impact, d), min(|P.load_bearing ∪ P.cheap_to_settle ∪ P.hidden_high_impact|, stakes(d) = High ? 2 : 1))
 priority_sort(S, d) = bucket order load_bearing → cheap_to_settle → hidden_high_impact; intra-bucket order follows evidence salience in d, then original Scan order
 -- pressure-ordered: load_bearing and cheap_to_settle lead; hidden_high_impact only within its tight cap; nonblocking and queued are carried outside this cycle's surfaced set
-
-── CONTINUATION ──
-proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -100,7 +96,7 @@ converge (extension)   → TextPresent+Proceed (convergence evidence trace; proc
 seam (extension)   → TextPresent+Proceed (fires at deactivation: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares, settles the next move — proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
-Λ = { phase: Phase, state: Σ, pressureMapSnapshot: P, active: Bool }  -- snapshot supports audit trace only; recompute before every Sel
+Λ = { phase: Phase, state: Σ, active: Bool }
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

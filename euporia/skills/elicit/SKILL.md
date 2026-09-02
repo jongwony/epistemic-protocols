@@ -14,11 +14,11 @@ Resolve abstract aporia through Extended-Mind reverse induction. Type: `(Abstrac
 ```
 ── FLOW ──
 Euporia(I) → Detect(I, S) → aporia? →
-  true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → (D[], context) →
+  true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → D[] →
          filter_confidence(D[]) → (D_surfaced, Λ.deferred)                              -- concrete substrate basis retained; thin-basis projections held back
          resurface(Λ.parked)                                                            -- coordinates the user could not answer yet come back as themselves
          Qs(D_surfaced, Λ.parked, cycle_n) → Stop → A → integrate(A, I) → I' →
-         loop until resolved(I') ∨ user_dismiss
+         loop until resolved(I') ∨ A = Dismiss
   false: surface scan result; route to axis-specific protocol (axis-determined) or invite user to articulate or withdraw (substrate empty)
 
 ── MORPHISM ──
@@ -46,7 +46,7 @@ S              = ExternalizedSubstrate { codebase, rules, sessions, environment 
                  -- read-only view of user's externalized cognition
                  -- environment: machine-setup metadata (uname, pwd, tool versions, git config public fields)
 D[]            = List(DimensionProjection)     -- cycle-emergent; no fixed taxonomy
-DimensionProjection = { axis_inferred: String, coordinates: List(Coordinate), confidence: Float }
+DimensionProjection = { axis_inferred: String, coordinates: List(Coordinate) }
 Coordinate     = { name: String, default: Optional(Value), question: String, basis: Evidence }
 Evidence       = { source: SubstrateChannel, content: String }
 SubstrateChannel ∈ {Codebase, Rules, Session, Environment, Utterance}
@@ -62,13 +62,11 @@ R              = ResolvedEndpoint { intent_resolved: I', residual: Set(Axis ⊎ 
                  -- residual members are tagged: Axis = an unresolved axis delegated to a downstream protocol; DeferredResidual = a projection the confidence filter held back; Coordinate = a coordinate the user deferred. None is reduced to a bare axis label or silently dropped
 DeferredResidual = { projection: DimensionProjection, basis: Evidence }
                  -- a projection still in Λ.deferred at convergence, surfaced as residual with its substrate basis
-resolved(I')   = ∂(intent) ≈ 0 (user constitutive judgment)
 cycle_n        = Nat                            -- current cycle counter; surfaced at every Phase 2
 Phase          ∈ {0, 1, 2, 3}
 Axis           = String                         -- emergent label; examples: "intent", "goal", "form", "scope", "framework"
 Initiator      ∈ {UserInvoked, AIDetected}      -- bound at activation; informs Hybrid Phase 2 first-surface semantics
 Qs             = Cycle-emergent surfacing interaction with D_surfaced + Λ.parked + cycle counter [Tool: Constitution interaction]
-ResolvedEndpoint = I' where user_judges_resolved(I') ∨ user_dismiss(I'); residual folds, at EITHER termination, each projection still in Λ.deferred (as a DeferredResidual) and each coordinate still in Λ.parked (as itself) — surfaced with its basis, never silently dropped
 
 ── A-BINDING ──
 bind(I) = explicit_arg ∪ recent_intent_seed ∪ surfaced_aporia
@@ -88,7 +86,7 @@ Phase 0: I → Detect(I, S) → aporia?                                  -- dete
 Phase 1: (I, S, ctx) → Substrate access [Tool] → ReverseTrace [Internal] → D[] (candidate projections)
        → filter_confidence(D[]) → (D_surfaced, Λ.deferred)
        → resurface(Λ.parked)                                         -- coordinates the user deferred earlier are brought back as themselves, not re-derived
-       → (D_surfaced, Λ.parked, context)
+       → (D_surfaced, Λ.parked)
 Phase 2: (D_surfaced, Λ.parked, cycle_n, initiator) → Qs(D_surfaced, Λ.parked, cycle_n) → Stop → A   -- Constitution; cycle counter visible
                                                                        -- Hybrid contract: cycle_n=1 ∧ initiator=AIDetected → first surfacing = implicit confirm-or-decline
 Phase 3: A → integrate(A, I) → I'                                    -- track, residual identification; integrate ADDS only
@@ -97,12 +95,11 @@ Phase 0 → Phase 1: aporia(I) = true                                           
 Phase 0 → deactivate: aporia(I) = false                                                      -- no aporia signal → surface scan result (axis-determined routing recommendation OR articulate-or-withdraw), no activation
 Phase 1 → Phase 2: always                                                                    -- every cycle hands the turn to the user, including one whose trace surfaced nothing new
 Phase 2 → Phase 3: A received                                                                -- per-coordinate answer accepted
-Phase 3 → Phase 1: ¬user_judges_resolved(I') ∧ ¬user_dismiss → cycle_n += 1                  -- re-projection: re-trace the substrate with accumulated I'; accepted coordinates carried forward unchanged, parked coordinates re-surfaced as themselves
-Phase 3 → converge: user_judges_resolved(I')                                                 -- user constitutive judgment → ResolvedEndpoint + per-cycle coordinate trace; every remaining Λ.deferred projection and Λ.parked coordinate is folded into ResolvedEndpoint.residual and surfaced, never silently dropped
-Phase 3 → converge (residual): A = Dismiss                                     -- ResolvedEndpoint with residual annotated for downstream delegation: unresolved axes, remaining Λ.deferred projections (as DeferredResidual), and remaining Λ.parked coordinates (as themselves) folded in and surfaced; the residual may be empty
+Phase 3 → Phase 1: ¬user_judges_resolved(I') ∧ A ≠ Dismiss → cycle_n += 1                    -- re-projection: re-trace the substrate with accumulated I'; accepted coordinates carried forward unchanged, parked coordinates re-surfaced as themselves
+Phase 3 → converge: user_judges_resolved(I')                                                 -- user constitutive judgment → ResolvedEndpoint + per-cycle coordinate trace; residual folded per LOOP
+Phase 3 → converge (residual): A = Dismiss                                                   -- ResolvedEndpoint with residual annotated for downstream delegation (unresolved axes; residual folded per LOOP; it may be empty)
 
 ── LOOP ──
-After Phase 3: re-detect remaining aporia in I'.
 Every termination below folds the same two leftovers into residual before returning: each projection still in Λ.deferred (as a DeferredResidual) and each coordinate still in Λ.parked (as itself). Neither is ever silently dropped.
 If user_judges_resolved(I'): terminate, return ResolvedEndpoint.
 If A = Dismiss: terminate with ResolvedEndpoint (residual annotated; it may be empty).
@@ -115,9 +112,7 @@ Convergence is demonstrated, not asserted; the readback materializes I' as a rec
 Mid-cycle scope: Intent readback (a) also surfaces in Phase 2 from cycle_n ≥ 2 (see Phase 2 surfacing format); the per-cycle coordinate trace (b) is termination-only.
 
 ── CONVERGENCE ──
-resolved(I') = user_judges_resolved(I')  -- at this convergence, every remaining Λ.deferred projection (as DeferredResidual) and every remaining Λ.parked coordinate (as itself) is folded into ResolvedEndpoint.residual and surfaced (never silently dropped — Surfacing over Deciding)
-early_exit = user_dismiss   -- the user's own answer ending the run
-progress(Λ) = cycle_n (running counter; not bounded by a target)
+resolved(I') = user_judges_resolved(I')  -- residual folded per LOOP
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -142,7 +137,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
       accepted_coords: Set(Coordinate),                -- monotone accumulator — once a coordinate is answered (Provide), it enters here and is NEVER removed or revised
       initiator: Initiator,
       residual: Set(Axis ⊎ DeferredResidual ⊎ Coordinate),   -- Axis members = delegated unresolved axes; DeferredResidual members = projections the confidence filter held back; Coordinate members = user-deferred coordinates. All three folded in at every termination
-      resolved: Bool, active: Bool, cause_tag: String }
+      active: Bool, cause_tag: String }
 -- Monotonicity invariant: accepted_coords is accumulate-only across cycles — integrate(A, I) may ADD to accepted_coords, never remove or overwrite an entry (full statement in §Coordinate Monotonicity Invariant)
 -- Leftover invariant: parked ∩ accepted_coords = ∅ — a coordinate is either still waiting on the user or already answered, never both. Provide moves it across; nothing moves it back
 

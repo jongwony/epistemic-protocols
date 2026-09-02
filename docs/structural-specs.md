@@ -181,7 +181,7 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 ## Extension Classification Audit Trail
 
-When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and auto-resolved, the justification should be traceable to the five relay indicators defined in Detection with Authority's Relay/Constitution Boundary table (deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing indicators there.
+When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and auto-resolved, the justification should be traceable to the relay indicators the premise layer already defines: the three in Detection with Authority's Extension/Constitution table (determined, cited, within boundary) and its Visibility principle (basis cited), in `premise/recognition-and-authority.md`, plus entropy→0 from Interaction Kind Factorization in `premise/interaction-factorization.md`. This is not a new principle but an audit format surfacing those existing indicators.
 
 ### Extension Justification Format
 
