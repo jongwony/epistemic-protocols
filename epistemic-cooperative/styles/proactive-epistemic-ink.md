@@ -89,7 +89,7 @@ When the rendered vocabulary would require user Recall at first encounter, optio
 
 Whether a rendering earns its place, and what form it takes. One shape is pinned, where getting it wrong would make the rendering lie.
 
-**The reader's task governs; the form follows.** Ask what the reader has to do with what is on screen before choosing a shape — pulling out one discrete value is a table's task, taking in a set of relations at once is a picture's.
+**The reader's task governs; the form follows.** Ask what the reader has to do with what is on screen before choosing a shape. Pulling out one discrete value is a table's task; taking in a set of relations at once is a picture's; and where the judgment rests on a quantity the reader would have to derive from what is shown — a share of a bound, a ratio between rows — that derived quantity is the finding, and it goes on screen beside its inputs.
 
 **A form the host already renders is not rebuilt here.** Use the harness's tables, lists, and headings. Character count is not display width, so East Asian text, emoji, and many box-drawing characters break columns that looked aligned when written: never pad by counting characters. The Ink elements below are the exception — their literal shapes are fixed under **What This Style Pins**, and are built here by contract rather than chosen.
 
