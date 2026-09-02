@@ -106,14 +106,17 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              -- Coherence fiber classifies into CoherenceType, where MemoryInternal instances enter the Factual resolution path
              --   (and inherit EvidenceSource via Factual reclassification)
              -- CrossDomain/Relevance/Emergent → detect + show as out-of-scope in classify summary (no EvidenceSource tag)
-             -- ReadOnlyVerifiable direct-resolve admissibility = coverage(u) ∧ support_integrity(u), two axes defined below and enforced at Step₃ (ReadOnlyAdmissible);
-             --   the T4 arc reads their failures as coverage_gap(u) = ¬coverage(u) and support_integrity_unverified(u) = ¬support_integrity(u)
-coverage(u)          ≡ ∃ e ∈ context(u): scope_subsumes(scope(EvidenceRef(e)), scope(Claim(u)))    -- rebutting axis: is the whole claim covered?
-support_integrity(u) ≡ (∃ e ∈ context(u): provenance_coupled(u, e)) ∧ evidence_behavior_linked(u)    -- undercutting axis: does this source-kind/referent authorize this claim?
+             -- ReadOnlyVerifiable direct-resolve admissibility = admissible(u): ONE witness e carrying both axes defined below, enforced at Step₃ (ReadOnlyAdmissible);
+             --   the T4 arc fires on ¬admissible(u) and names the axis the witnesses failed on — coverage_gap(u) = ¬∃ e: coverage(u, e);
+             --   support_integrity_unverified(u) = ¬∃ e: support_integrity(u, e); when each axis has a witness but no single e carries both, both labels are surfaced
+coverage(u, e)          ≡ scope_subsumes(scope(EvidenceRef(e)), scope(Claim(u)))    -- rebutting axis: does THIS evidence cover the whole claim?
+support_integrity(u, e) ≡ provenance_coupled(u, e) ∧ evidence_behavior_linked(u, e)    -- undercutting axis: does THIS evidence's source-kind/referent authorize the claim, and does its link to behavior hold?
+admissible(u)           ≡ ∃ e ∈ context(u): coverage(u, e) ∧ support_integrity(u, e)
+               -- the two axes are judged on the same witness: a broad-scope but unrelated e and a well-sourced but narrow e do not combine into admissibility
                -- context(u) = evidence accessor over base Uncertainty.context: Set(Evidence) (existing field, not new)
-               -- evidence_behavior_linked(u): evidence→behavior link verified (breaks-on-change), not silently desynced; currency ⊂ this (temporal sub-case)
+               -- evidence_behavior_linked(u, e): e's evidence→behavior link verified (breaks-on-change), not silently desynced; currency ⊂ this (temporal sub-case)
                -- (rebutting/undercutting framing per Pollock: two kinds of defeater — not asserted exhaustive)
-ReadOnlyAdmissible = { u : ReadOnlyVerifiable | coverage(u) ∧ support_integrity(u) }
+ReadOnlyAdmissible = { u : ReadOnlyVerifiable | admissible(u) }
                    -- Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uₑ_candidates, ObservationSpec) → Uₑ  -- dynamic evidence gathering
@@ -149,8 +152,8 @@ Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- 
          Step₂ classify(Uᵢ', dimension) → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable [Tool]
          [if off_diagonal(scope_assessment, resolution_assessment)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
          -- evaluation order: Qc resolves before Uₑ_candidates computation; reclassified MemoryInternal/EmpiricallyObservable enters Uₑ_candidates
-         Step₃ ReadOnlyVerify(Uᵣ'_candidates) →     -- Step 3: read-only verification (CodeDerivable + CanonicalExternal); enforces admissibility (coverage ∧ support_integrity) at resolution time over the candidate set (incl. support_integrity-undetermined items) — survivors = ReadOnlyAdmissible = Uᵣ' (resolve directly, read_only_resolved); failures take the backward arc below [Tool]
-           [if support_integrity_unverified(u) ∨ coverage_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
+         Step₃ ReadOnlyVerify(Uᵣ'_candidates) →     -- Step 3: read-only verification (CodeDerivable + CanonicalExternal); enforces admissible(u) (one witness for both axes) at resolution time over the candidate set (incl. support_integrity-undetermined items) — survivors = ReadOnlyAdmissible = Uᵣ' (resolve directly, read_only_resolved); failures take the backward arc below [Tool]
+           [if ¬admissible(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], framing) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (track: mutates Λ.X)

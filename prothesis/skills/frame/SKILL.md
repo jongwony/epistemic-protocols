@@ -13,7 +13,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q1(MB(U)) → J_mb → [confirm: MBᵥ | modify(field): MB' → re-present Q1(MB') → J_mb (loop until confirm)] → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → Sc → Pₛ → LensEstablished →
+Prothesis(U) → Q1(MB(U)) → J_mb → [confirm: MBᵥ | modify(field): MB' → re-present Q1(MB') → J_mb (loop until confirm)] → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → Sc({P₁...Pₙ}, Pᵦ) → Pₛ → LensEstablished →
   bind_substrate(Pₛ) → {⟨pᵢ, substrate_needᵢ, binding_hintsᵢ, channel_needᵢ⟩} →
   [single lens ∨ no specialized substrate: package(detailed lens) → LensReturn] |
   [≥2 lenses with at least one specialized substrate need: pair(lens ↔ substrate_need + binding_hints) ⊕ nudge(ConductRef) → SubstrateCorrespondence] →
@@ -79,7 +79,7 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Q1(MB) → Stop → J_mb → [confirm: derive MBᵥ | modify(field): MB' → re-present Q1(MB') → Stop → J_mb]   -- Mission Brief confirmation ONLY (no mode question); MBᵥ is derived on confirm, not Q1's direct return [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
-Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; single lens is valid; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply)
+Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ), Pᵦ) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; single lens is valid; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply)
 Phase 3:  LensEstablished → bind_substrate(Pₛ) → discriminate(substrate_specialization_need) → [single lens ∨ no specialized substrate: LensReturn | ≥2 lenses with at least one specialized substrate need: SubstrateCorrespondence(lens↔substrate pairs) ⊕ nudge(ConductRef)] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- bind each lens's substrate, discriminate by substrate specialization need, emit the framed object as the terminal relay with the /conduct nudge, then halt (no gate, no dispatch, NO isolation, NO synthesis; isolation + arrangement + synthesis is /conduct's to design and the isolated substrate's to run downstream)
 
 ── LOOP ──

@@ -194,7 +194,8 @@ Convergence evidence: at DiverseCandidateField, present the transformation trace
   and the trace materializes the full result type, nothing more, nothing less.
 
 ── CONVERGENCE ──
-resolved(Λ) = (FrameSelection = Stop) ∨ (D = Stop)   -- the user's own Stop IS the completion predicate — not a separate judgment layered on
+resolved ≡ a Stop answer was returned at Qframes (FrameSelection = Stop; Blank path only) or at a Qround (D = Stop)
+  -- an event predicate over the gate answers, not a field of Λ: the user's own Stop IS the completion predicate — not a separate judgment layered on
   top of an already-built object; this is what keeps termination-at-any-time from reading as pre-convergence abandonment
 unaddressed(Λ) = { s ∈ Λ.signals | no c ∈ Λ.candidates responds to s }   -- derived, binary, source-traceable coverage
   observation, recomputed every round from current Λ.candidates — never a stored partition, and never a quality score,
@@ -205,8 +206,8 @@ unaddressed(Λ) = { s ∈ Λ.signals | no c ∈ Λ.candidates responds to s }   
   signal is the consumer's own judgment at selection time, downstream of this protocol
 frames_unexplored(Λ) = Λ.frames_candidate \ Λ.frames_open   -- derived each round; opening a frame removes it, so no frame is ever reported explored AND unexplored
 result equations:
-  DiverseCandidateField ⇔ resolved(Λ) ∧ Λ.candidates ≠ ∅
-  EarlyExit             ⇔ resolved(Λ) ∧ Λ.candidates = ∅
+  DiverseCandidateField ⇔ resolved ∧ Λ.candidates ≠ ∅
+  EarlyExit             ⇔ resolved ∧ Λ.candidates = ∅
                           -- a typed terminal, never a DiverseCandidateField mislabeled empty; frames_offered and
                           --   unaddressed_signals (every extracted signal, since none was addressed) declare what was
                           --   on the table so nothing is silently dropped
