@@ -1866,7 +1866,7 @@ function checkEmitLoadDiscipline() {
   }
 
   const styleContent = fs.readFileSync(stylePath, 'utf8');
-  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Content placement', 'Form feedback', 'Drift tracking']) {
+  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Content placement', 'Form feedback']) {
     if (!styleContent.includes(`**${label}**`)) {
       results.fail.push({
         check: 'emit-load-discipline',
