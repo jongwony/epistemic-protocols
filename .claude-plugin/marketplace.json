@@ -93,7 +93,7 @@
     {
       "name": "route",
       "source": "./route",
-      "description": "Experimental — route the accumulated session context to the core protocol whose deficit it shows: /route (per-prompt hook directive; opt-in)"
+      "description": "Route the accumulated session context to the core protocol whose deficit it shows — /route (per-prompt hook directive)"
     }
   ]
 }

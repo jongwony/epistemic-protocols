@@ -1,7 +1,7 @@
 {
   "name": "route",
-  "version": "0.1.0",
-  "description": "Experimental — route the accumulated session context to the core protocol whose deficit it shows: /route (a per-prompt hook directive triggers it; install is opt-in)",
+  "version": "0.1.1",
+  "description": "Route the accumulated session context to the core protocol whose deficit it shows — /route (a per-prompt hook directive triggers it)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Route",
-    "shortDescription": "Experimental — route accumulated context to the matching core protocol — /route",
-    "longDescription": "Experimental — route the accumulated session context to the core protocol whose deficit it shows: /route (a per-prompt hook directive triggers it; install is opt-in)",
+    "shortDescription": "Route accumulated context to the matching core protocol — /route",
+    "longDescription": "Route the accumulated session context to the core protocol whose deficit it shows — /route (a per-prompt hook directive triggers it)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
