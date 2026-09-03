@@ -1,5 +1,6 @@
 #!/bin/bash
-# Install all epistemic protocol plugins for Claude Code
+# Install every plugin in the epistemic-protocols marketplace for Claude Code,
+# except the opt-in set named in SKIP_PLUGINS below.
 # Idempotent: safe to re-run when new plugins are added
 #
 # Usage:
@@ -10,6 +11,13 @@ set -eo pipefail
 REPO="jongwony/epistemic-protocols"
 MARKETPLACE="epistemic-protocols"
 MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/marketplace.json"
+
+# Opt-in plugins the default installer leaves out. The plugin list itself is
+# derived from the manifest; this is the one hand-maintained exclusion, guarded
+# by scripts/package.test.js against naming a plugin the manifest no longer has.
+#   route — carries a per-prompt hook; install it deliberately:
+#           claude plugin install route@epistemic-protocols
+SKIP_PLUGINS="route"
 
 command -v claude >/dev/null 2>&1 || { echo "Error: claude CLI not found. Install Claude Code first." >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found." >&2; exit 1; }
@@ -23,8 +31,13 @@ plugins=$(curl -fsSL "$MANIFEST_URL" \
 
 installed=0
 skipped=0
+opted_out=""
 
 for p in $plugins; do
+  if [[ " $SKIP_PLUGINS " == *" $p "* ]]; then
+    opted_out="$opted_out $p"
+    continue
+  fi
   if claude plugin install "$p@$MARKETPLACE" < /dev/null 2>/dev/null; then
     installed=$((installed + 1))
   else
@@ -36,4 +49,7 @@ done
 echo ""
 echo "Installed $installed plugin(s)."
 [[ $skipped -gt 0 ]] && echo "$skipped skipped (already installed or unavailable)."
+for p in $opted_out; do
+  echo "Not installed (opt-in): $p — add it with: claude plugin install $p@$MARKETPLACE"
+done
 echo "Run /onboard to get started."

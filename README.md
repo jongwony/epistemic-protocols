@@ -22,10 +22,16 @@ The two layers serve different audiences: the README carries the narrow public c
 
 ### Claude Code
 
-Install all protocols and utilities:
+Install every protocol plus the `epistemic-cooperative` utility plugin:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
+```
+
+`route` is opt-in — it carries a per-prompt hook, so the one-liner leaves it out. Add it on its own:
+
+```bash
+claude plugin install route@epistemic-protocols
 ```
 
 Then run `/onboard` — start with a quick recommendation based on your recent sessions, then optionally continue to guided learning with scenarios, trials, and quizzes.
