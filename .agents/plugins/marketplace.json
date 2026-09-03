@@ -161,6 +161,18 @@
       "category": "Productivity"
     },
     {
+      "name": "route",
+      "source": {
+        "source": "local",
+        "path": "./route"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "anagoge",
       "source": {
         "source": "local",

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Route"
+  short_description: "Route accumulated context to the matching epistemic protocol"
+  default_prompt: "Use $route to invoke the epistemic protocol this context calls for."

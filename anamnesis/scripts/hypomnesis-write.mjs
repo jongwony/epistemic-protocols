@@ -94,6 +94,7 @@ const protocolMap = {
   "/grasp": ["grasp", "katalepsis"], "/apportion": ["apportion", "merismos"],
   "/induce": ["induce", "periagoge"], "/preview": ["preview", "proplasma"],
   "/frame": ["frame", "prothesis"], "/gap": ["gap", "syneidesis"],
+  "/route": ["route", "route"],
   "/clarify": ["clarify", null], "/goal": ["goal", null],
   "/reflect": ["reflect", null], "/write": ["write", null],
   "/verify": ["verify", null],

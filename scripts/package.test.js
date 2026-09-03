@@ -1337,6 +1337,7 @@ describe('package.js CLI', () => {
         'reduced-space-test.zip',
         'report.zip',
         'review-loop.zip',
+        'route.zip',
         'sophia.zip',
         'steer.zip',
         'sublate.zip',
@@ -1393,7 +1394,7 @@ describe('plugin directory registration', () => {
   // the removal direction (a registered name whose directory is gone) and is
   // blind to the addition direction. This guard reads the filesystem inventory
   // instead of the registry, so neither direction can hide behind the filter.
-  const KNOWN_UTILITY_DIRS = ['epistemic-cooperative'];
+  const KNOWN_UTILITY_DIRS = ['epistemic-cooperative', 'route'];
 
   it('every plugin directory on disk is registered as a protocol or a utility', () => {
     const dirs = [...new Set(

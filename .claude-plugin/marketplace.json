@@ -89,6 +89,11 @@
       "name": "heuresis",
       "source": "./heuresis",
       "description": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)"
+    },
+    {
+      "name": "route",
+      "source": "./route",
+      "description": "Route the accumulated session context to the core protocol whose deficit it shows — /route (per-prompt hook directive)"
     }
   ]
 }

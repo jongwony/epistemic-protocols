@@ -1,0 +1,15 @@
+{
+  "description": "Per-prompt routing directive — carries the firing conditions for /route; the directive text lives in scripts/route-prompt.mjs.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-prompt.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}
