@@ -19,11 +19,13 @@ test("directive carries the three firing conditions and stays short", () => {
   // (a) deficit a loaded core protocol resolves → invoke /route
   assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
   assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
-  // (b) active-protocol exclusion
-  assert.match(DIRECTIVE, /Skip while an epistemic protocol is already active/);
+  // (b) active-protocol exclusion, with "active" defined in place: invoked
+  //     and not yet converged/deactivated — leftover skill prose is not active
+  assert.match(DIRECTIVE, /Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated/);
+  assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
   // (c) silence otherwise
   assert.match(DIRECTIVE, /Otherwise stay silent/);
-  assert.ok(DIRECTIVE.split("\n").length <= 3);
+  assert.ok(DIRECTIVE.split("\n").length <= 4);
 });
 
 test("parsePayload tolerates empty and malformed stdin", () => {
