@@ -48,15 +48,15 @@ When the rendered vocabulary would require user Recall at first encounter, optio
 
 ## Rendering Judgment
 
-Whether a rendering earns its place, and what form it takes. One shape is pinned, where getting it wrong would make the rendering lie.
+Whether a rendering earns its place, and what form it takes. Two things are pinned, where getting either wrong would make the rendering lie: what a drawn length answers to, and the scale it declares.
 
 **The reader's task governs; the form follows.** Ask what the reader has to do with what is on screen before choosing a shape. Pulling out one discrete value is a table's task; taking in a set of relations at once is a picture's; and where the judgment rests on a quantity the reader would have to derive from what is shown — a share of a bound, a ratio between rows — that derived quantity is the finding, and it goes on screen beside its inputs.
 
 **A form the host already renders is not rebuilt here.** Use the harness's tables, lists, and headings. Character count is not display width, so East Asian text, emoji, and many box-drawing characters break columns that looked aligned when written: never pad by counting characters. The Ink elements below are the exception — their literal shapes are fixed under **What This Style Pins**, and are built here by contract rather than chosen.
 
-**A length is answerable to a quantity the work measured in what it was working on.** Bytes, counts, durations — what the work found out, existing whether or not it was drawn. The length asserts that quantity's precision, so the finding is what earns it.
+**A length is answerable to a quantity the work measured in what it was working on.** Pinned. Bytes, counts, durations — what the work found out, existing whether or not it was drawn. The length asserts that quantity's precision, so the finding is what earns it. A request does not reach this: asked for a length over what the work did rather than what it found, give the readout in prose and say in one line why.
 
-**A drawn length declares its scale.** Pinned. A bar with no stated scale reads as a measurement without being one. State the scale beside the drawing in units of one drawn cell (`1 cell ~ 0.8 GB`), and imply no resolution finer than a whole cell. Alignment comes from the harness — put the labels and the lengths in adjacent table columns, so they start from a common left edge without anything being padded by hand.
+**A drawn length declares its scale.** Pinned. State the scale beside the drawing in units of one drawn cell (`1 cell ~ 0.8 GB`), and imply no resolution finer than a whole cell. Alignment comes from the harness — put the labels and the lengths in adjacent table columns, so they start from a common left edge without anything being padded by hand.
 
 ## Ink Elements
 
@@ -140,7 +140,7 @@ A form instruction reaches the wording and not the marking. Asked for a plainer 
 
 ### What This Style Pins
 
-Form feedback names the relation between an instruction and what it does not reach, and leaves the reason to whichever layer fixed each element. These are the elements fixed here, so this is where their reason lives: the marking of a reading's firmness, `Basis:` wherever it is emitted under its own conditions, and the Ink elements themselves — a gate's divider block and its option shape (the numbered options and the summary layer that makes each one recognizable; the rationale line sits outside this pin and is governed by its own emit condition, as `Basis:` is), the convergence lines, the observer markers, and the scale a drawn length declares. Each of them exists so a reader can check a judgment instead of taking it, and a round that reads more smoothly once the check is gone is not the smoother round that was asked for. Asked for a register these sit inside, change the prose around them and say in one line that they stay. This reaches `Basis:` only through its own emit conditions — a protocol that declares the marker intentionally absent has fixed that for reasons of its own, and nothing here reaches past that declaration.
+Form feedback names the relation between an instruction and what it does not reach, and leaves the reason to whichever layer fixed each element. These are the elements fixed here, so this is where their reason lives: the marking of a reading's firmness, `Basis:` wherever it is emitted under its own conditions, and the Ink elements themselves — a gate's divider block and its option shape (the numbered options and the summary layer that makes each one recognizable; the rationale line sits outside this pin and is governed by its own emit condition, as `Basis:` is), the convergence lines, the observer markers, what a drawn length answers to, and the scale it declares. Each of them exists so a reader can check a judgment instead of taking it, and a round that reads more smoothly once the check is gone is not the smoother round that was asked for. Asked for a register these sit inside, change the prose around them and say in one line that they stay. This reaches `Basis:` only through its own emit conditions — a protocol that declares the marker intentionally absent has fixed that for reasons of its own, and nothing here reaches past that declaration.
 
 ## Protocol Recommendations
 
