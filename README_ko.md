@@ -22,10 +22,16 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 
 ### Claude Code
 
-모든 프로토콜과 유틸리티를 설치합니다:
+모든 프로토콜과 `epistemic-cooperative` 유틸리티 플러그인을 설치합니다:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
+```
+
+`route`는 opt-in입니다 — 매 프롬프트 훅을 동봉하므로 위 한 줄은 이 플러그인을 건너뜁니다. 따로 추가하세요:
+
+```bash
+claude plugin install route@epistemic-protocols
 ```
 
 `/onboard`를 실행하세요 — 최근 세션 기반으로 빠른 추천을 받고, 원하면 시나리오, 실행, 퀴즈를 통한 가이드 학습으로 이어갑니다.

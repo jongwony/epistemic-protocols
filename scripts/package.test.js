@@ -1417,6 +1417,33 @@ describe('plugin directory registration', () => {
 // agent routing map (generate-routing-map + session-context)
 // ============================================================
 
+describe('default installer skip list', () => {
+  // scripts/install.sh derives its plugin list from the marketplace manifest;
+  // SKIP_PLUGINS is the one hand-maintained exclusion. A name left there after
+  // its plugin leaves the manifest would keep asserting an exclusion of nothing,
+  // so this guard re-runs the claim: every skipped name is a manifest plugin.
+  const installSh = fs.readFileSync(path.resolve(__dirname, 'install.sh'), 'utf8');
+  const manifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '..', '.claude-plugin', 'marketplace.json'), 'utf8')
+  );
+
+  it('every name in SKIP_PLUGINS is a plugin present in the marketplace manifest', () => {
+    const match = installSh.match(/^SKIP_PLUGINS="([^"]*)"$/m);
+    assert.ok(match, 'scripts/install.sh must declare SKIP_PLUGINS="..." on its own line');
+    const skipped = match[1].split(/\s+/).filter(Boolean);
+    const manifestNames = new Set(manifest.plugins.map(p => p.name));
+    for (const name of skipped) {
+      assert.ok(
+        manifestNames.has(name),
+        `SKIP_PLUGINS names "${name}", which is not a plugin in .claude-plugin/marketplace.json — ` +
+        'remove the stale exclusion or restore the plugin'
+      );
+    }
+  });
+});
+
+// ============================================================
+
 describe('agent routing map', () => {
   const REPO_ROOT = path.resolve(__dirname, '..');
   const {
