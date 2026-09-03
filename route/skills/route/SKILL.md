@@ -1,7 +1,6 @@
 ---
 name: route
 description: "Route the accumulated session context to the loaded core protocol whose deficit it shows — /route. Invokes the one dominant match, nudges when several fit, stays silent when none."
-user_invocable: true
 ---
 
 # Route Skill
