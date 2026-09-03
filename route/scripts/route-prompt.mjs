@@ -7,6 +7,12 @@
  * short directive beside each user prompt carrying the firing conditions:
  * invoke /route when the accumulated context shows a deficit a loaded core
  * protocol resolves, skip while a protocol is active, otherwise stay silent.
+ * "Active" is defined in the directive itself: a protocol invoked this
+ * session that has not yet converged or deactivated. A protocol's skill
+ * prose stays in context after it converges, and without the definition the
+ * agent reads that leftover prose as an active protocol and skips /route for
+ * the rest of the session. /route carries no active-protocol detection of
+ * its own, so the exclusion stays here rather than moving into the skill.
  * The hook decides when; the /route skill decides what.
  *
  * Output shape is the hook wire format both Claude Code and Codex accept for
@@ -25,7 +31,8 @@ import { fileURLToPath } from "node:url";
 // time. It is injected every turn — keep it to a few short lines.
 const DIRECTIVE = [
   "[route] When the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
-  "Skip while an epistemic protocol is already active.",
+  "Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated.",
+  "A converged protocol's prose still in context does not make it active.",
   "Otherwise stay silent.",
 ].join("\n");
 
