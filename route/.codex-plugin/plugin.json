@@ -1,0 +1,34 @@
+{
+  "name": "route",
+  "version": "0.1.0",
+  "description": "Experimental — route the accumulated session context to the core protocol whose deficit it shows: /route (a per-prompt hook directive triggers it; install is opt-in)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "route"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Route",
+    "shortDescription": "Experimental — route accumulated context to the matching core protocol — /route",
+    "longDescription": "Experimental — route the accumulated session context to the core protocol whose deficit it shows: /route (a per-prompt hook directive triggers it; install is opt-in)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use route to invoke the epistemic protocol this context calls for"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

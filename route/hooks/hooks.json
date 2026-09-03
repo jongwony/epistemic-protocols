@@ -1,0 +1,15 @@
+{
+  "description": "Per-prompt routing directive — tells the agent on the loop to invoke /route when the accumulated context shows a deficit a loaded epistemic protocol resolves.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-prompt.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -89,12 +89,17 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
 | [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 프로젝트 프로필 재조정, 프로젝트 가이드 direction line 지평융합, 소급적 계약 위반 감지, work-unit triage, 레퍼런스-grounded prompt-artifact 형성, scoped 실증 검증, 그리고 자문 검증 결정 게이트 |
+| [Route](./route) (실험적, opt-in) | `/route` | 컨텍스트 기반 프로토콜 라우팅 — 매 프롬프트 훅 지시문이 에이전트로 하여금 쌓인 컨텍스트가 드러내는 결핍에 맞는 코어 프로토콜 하나를 호출하게 함 |
 
 **세 가지 발견 모드 공존** (서로 대체하지 않음):
 
 - `/catalog` — 패시브 레퍼런스 핸드북 (브라우징 / 룩업; 이미 질문을 알고 있을 때)
 - `/onboard` — 패턴 기반 추천 + 선택적 trial (세션 히스토리 기반; 자신의 패턴에 맞는 프로토콜을 학습하고 싶을 때)
 - `/probe` — AI 가설 기반 결핍 인식 (어떤 결핍이 맞는지 아직 명명하지 못할 때 multi-hypothesis fit review)
+
+**컨텍스트 기반 라우팅** (실험적; 별도 opt-in 플러그인):
+
+- `/route` — 플러그인의 `UserPromptSubmit` 훅이 매 프롬프트 옆에 짧은 지시문을 놓고, 쌓인 컨텍스트가 로드된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출(첫 게이트는 그 프로토콜 자신이 쥠), 여럿이 맞으면 넛지, 없으면 침묵. `/probe`의 대체 후보; 기본 설치 세트에는 포함되지 않음
 
 **소급적 감사** (위 발견 트리오와 별도 카테고리):
 

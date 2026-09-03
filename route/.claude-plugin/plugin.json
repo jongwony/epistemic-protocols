@@ -1,0 +1,9 @@
+{
+  "name": "route",
+  "description": "Experimental — route the accumulated session context to the core protocol whose deficit it shows: /route (a per-prompt hook directive triggers it; install is opt-in)",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}
