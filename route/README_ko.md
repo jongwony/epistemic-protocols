@@ -8,7 +8,7 @@
 
 루프 위의 에이전트는 이미 로드된 모든 epistemic 프로토콜의 description을 들고 있고, 각 description은 그 프로토콜이 해소하는 상호작용 결핍을 명명합니다. 빠져 있는 것은 계기입니다 — 수동적인 description은 에이전트가 멈춰서 컨텍스트가 그 결핍 중 하나로 흘러갔는지 확인하게 만들지 못합니다.
 
-Route가 그 계기를 공급합니다. `UserPromptSubmit` 훅이 매 프롬프트 옆에 짧은 지시문을 놓습니다 — *쌓인 컨텍스트가 로드된 프로토콜 하나가 해소하는 상호작용 결핍을 보이면 `/route`를 호출하라; 아니면 침묵하라; 프로토콜이 이미 활성 상태면 건너뛰라.* 그러면 `/route` 스킬이 로드된 description을 컨텍스트에 대조하고, 정확히 하나의 프로토콜 결핍이 컨텍스트가 보여주는 것일 때 그 프로토콜을 호출합니다. 호출된 프로토콜 자신의 Phase 0 감지와 첫 게이트가 사용자 판단의 자리로 남고, Route는 자기 게이트를 추가하지 않습니다.
+Route가 그 계기를 둘로 나눠 공급합니다: **언제는 훅이 정하고, 무엇은 스킬이 정합니다.** `UserPromptSubmit` 훅이 매 프롬프트 옆에 발동 조건을 담은 짧은 지시문을 놓습니다. `/route` 스킬은 호출되고 나면 로드된 코어 프로토콜 description을 쌓인 컨텍스트에 대조하고, 정확히 하나의 프로토콜 결핍이 컨텍스트가 보여주는 것일 때 그 프로토콜을 호출합니다. 호출된 프로토콜 자신의 Phase 0 감지와 첫 게이트가 사용자 판단의 자리로 남고, Route는 자기 게이트를 추가하지 않습니다.
 
 | 결과 | 조건 |
 |------|------|
@@ -18,7 +18,7 @@ Route가 그 계기를 공급합니다. `UserPromptSubmit` 훅이 매 프롬프�
 
 ## 훅이 주입하는 것
 
-`hooks/hooks.json`은 `UserPromptSubmit` command 훅 하나, `scripts/route-prompt.mjs`를 등록합니다. 매 프롬프트마다 위 지시문을 `hookSpecificOutput.additionalContext`로 씁니다 — Claude Code와 Codex가 이 이벤트에 공통으로 받는 훅 wire 형태 — 그리고 0으로 종료합니다. stdin의 훅 payload는 읽지만 필수가 아닙니다; 비어 있거나 잘못된 payload여도 지시문은 나옵니다. 파일을 쓰지 않고, 네트워크를 건드리지 않으며, 세션 내용이 프로세스 밖으로 나가지 않습니다.
+`hooks/hooks.json`은 `UserPromptSubmit` command 훅 하나, `scripts/route-prompt.mjs`를 등록합니다. 매 프롬프트마다 발동 조건(지시문 본문은 그 스크립트에 있습니다)을 `hookSpecificOutput.additionalContext`로 씁니다 — Claude Code와 Codex가 이 이벤트에 공통으로 받는 훅 wire 형태 — 그리고 0으로 종료합니다. stdin의 훅 payload는 읽지만 필수가 아닙니다; 비어 있거나 잘못된 payload여도 지시문은 나옵니다. 파일을 쓰지 않고, 네트워크를 건드리지 않으며, 세션 내용이 프로세스 밖으로 나가지 않습니다.
 
 Codex는 같은 `hooks/hooks.json`을 읽고, `UserPromptSubmit` 이벤트와 같은 `additionalContext` 출력 필드를 지원합니다. Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뜁니다 (설치 참조).
 

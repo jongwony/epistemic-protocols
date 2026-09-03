@@ -15,8 +15,14 @@ function runHook(input) {
   return spawnSync(process.execPath, [SCRIPT], { input, encoding: "utf8" });
 }
 
-test("directive names /route and stays short", () => {
-  assert.ok(DIRECTIVE.includes("/route"));
+test("directive carries the three firing conditions and stays short", () => {
+  // (a) deficit a loaded core protocol resolves → invoke /route
+  assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
+  assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
+  // (b) active-protocol exclusion
+  assert.match(DIRECTIVE, /Skip while an epistemic protocol is already active/);
+  // (c) silence otherwise
+  assert.match(DIRECTIVE, /Otherwise stay silent/);
   assert.ok(DIRECTIVE.split("\n").length <= 3);
 });
 

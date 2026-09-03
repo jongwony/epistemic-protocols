@@ -4,8 +4,10 @@
  *
  * The agent on the loop already holds every loaded protocol's description,
  * yet a passive description does not trigger invocation. This hook puts one
- * short directive beside each user prompt so the agent checks the accumulated
- * context for a deficit and invokes /route when one protocol resolves it.
+ * short directive beside each user prompt carrying the firing conditions:
+ * invoke /route when the accumulated context shows a deficit a loaded core
+ * protocol resolves, skip while a protocol is active, otherwise stay silent.
+ * The hook decides when; the /route skill decides what.
  *
  * Output shape is the hook wire format both Claude Code and Codex accept for
  * UserPromptSubmit: hookSpecificOutput.additionalContext. The payload on
@@ -18,9 +20,13 @@
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
+// The firing conditions live here and nowhere else: SKILL.md loads only after
+// the skill is invoked, so this directive is the surface present at decision
+// time. It is injected every turn — keep it to a few short lines.
 const DIRECTIVE = [
-  "[route] If the accumulated context now shows an interaction deficit that one loaded epistemic protocol resolves, invoke /route.",
-  "Stay silent otherwise. Skip while an epistemic protocol is already active.",
+  "[route] When the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
+  "Skip while an epistemic protocol is already active.",
+  "Otherwise stay silent.",
 ].join("\n");
 
 function parsePayload(raw) {

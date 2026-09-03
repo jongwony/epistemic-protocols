@@ -8,7 +8,7 @@ Route the accumulated session context to the core epistemic protocol whose defic
 
 The agent on the loop already holds every loaded epistemic protocol's description, and each description names the interaction deficit that protocol resolves. What is missing is the moment: a passive description does not make the agent stop and check whether the context has drifted into one of those deficits.
 
-Route supplies the moment. Its `UserPromptSubmit` hook places a short directive beside each prompt — *if the accumulated context now shows an interaction deficit that one loaded protocol resolves, invoke `/route`; stay silent otherwise; skip while a protocol is active.* The `/route` skill then reads the loaded descriptions against the context and, when exactly one protocol's deficit is what the context shows, invokes that protocol. The invoked protocol's own opening detection and first gate remain where the user's judgment lives; Route adds no gate of its own.
+Route supplies the moment, split in two: **the hook decides when, the skill decides what.** The `UserPromptSubmit` hook places a short directive beside each prompt carrying the firing conditions. The `/route` skill, once invoked, reads the loaded core protocol descriptions against the accumulated context and, when exactly one protocol's deficit is what the context shows, invokes that protocol. The invoked protocol's own opening detection and first gate remain where the user's judgment lives; Route adds no gate of its own.
 
 | Outcome | When |
 |---------|------|
@@ -18,7 +18,7 @@ Route supplies the moment. Its `UserPromptSubmit` hook places a short directive 
 
 ## What the hook injects
 
-`hooks/hooks.json` registers one `UserPromptSubmit` command hook, `scripts/route-prompt.mjs`. On every prompt it writes the directive above as `hookSpecificOutput.additionalContext` — the hook wire shape both Claude Code and Codex accept for this event — and exits 0. The hook payload on stdin is read but not required; an empty or malformed payload still yields the directive. No file is written, no network is touched, and no session content leaves the process.
+`hooks/hooks.json` registers one `UserPromptSubmit` command hook, `scripts/route-prompt.mjs`. On every prompt it writes the firing conditions (the directive text lives in that script) as `hookSpecificOutput.additionalContext` — the hook wire shape both Claude Code and Codex accept for this event — and exits 0. The hook payload on stdin is read but not required; an empty or malformed payload still yields the directive. No file is written, no network is touched, and no session content leaves the process.
 
 Codex reads the same `hooks/hooks.json` and supports the `UserPromptSubmit` event with the same `additionalContext` output field. Codex skips a plugin-bundled hook until its current definition is trusted (see Install).
 
