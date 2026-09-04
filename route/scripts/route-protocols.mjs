@@ -114,6 +114,17 @@ function readProtocol(skillFile) {
 }
 
 /**
+ * The selection predicate on its own: a plugin directory is a core protocol
+ * when it holds exactly one skill and that skill declares a deficit. Takes
+ * no install record, so the repo tree can be checked against the canonical
+ * registry with the same rule the hook applies to installed plugins.
+ */
+function selectProtocol(pluginDir) {
+  const skill = soleSkill(pluginDir);
+  return skill ? readProtocol(skill) : null;
+}
+
+/**
  * Every enabled plugin of this marketplace that is a single-skill protocol
  * declaring a deficit — Route itself excluded, since it never routes to
  * itself. Returns [] on any shortfall.
@@ -143,9 +154,7 @@ function deriveProtocols(env = {}) {
       .map((e) => e && e.installPath)
       .find((p) => typeof p === "string" && fs.existsSync(path.join(p, "skills")));
     if (!at) continue;
-    const skill = soleSkill(at);
-    if (!skill) continue;
-    const protocol = readProtocol(skill);
+    const protocol = selectProtocol(at);
     if (protocol) protocols.push(protocol);
   }
   return protocols;
@@ -181,4 +190,4 @@ function isMain(moduleUrl) {
   }
 }
 
-export { TABLE_HEADER, deriveProtocols, isMain, parsePayload, renderTable };
+export { TABLE_HEADER, deriveProtocols, isMain, parsePayload, renderTable, selectProtocol };
