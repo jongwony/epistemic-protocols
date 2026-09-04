@@ -217,7 +217,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Help me understand what I need to approve in this AI-generated plan' and I'll show how /grasp routes through an intent entry point before verifying comprehension"
 
 **Quiz Q (situation)**: You skimmed a long article and nodded along. A colleague asks you to summarize the main argument in one sentence and you freeze — you realize skimming wasn't the same as grasping.
-- A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Anagoge `/ascend`
+- A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Anamnesis `/recollect`
 - Answer: C
 
 **Quiz Q (design)**: After quickly consuming a complex explanation, how would you verify you actually grasped the core — rather than that you could nod along?
