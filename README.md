@@ -86,18 +86,45 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 ## Utilities
 
-Two plugins sit beside the protocols. Both are opt-in for the Claude Code one-liner; each plugin's own README carries its full skill list and contract.
+Two plugins sit beside the protocols. Both are opt-in for the Claude Code one-liner:
 
-| Plugin | Purpose | Install |
-|--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | Utility skills layered on the protocols: protocol learning and lookup, deficit recognition, project-profile calibration, work-unit triage, prompt-artifact formation, review loops and prose audits, and Codex-delegated research and images | `claude plugin install epistemic-cooperative@epistemic-protocols` |
-| [Route](./route) | Context-driven protocol routing — a per-prompt hook directive has the agent invoke the one core protocol whose deficit the accumulated context shows | `claude plugin install route@epistemic-protocols` |
+```bash
+claude plugin install epistemic-cooperative@epistemic-protocols
+claude plugin install route@epistemic-protocols
+```
 
-Three ways to find the protocol you need, all in Epistemic Cooperative (none replaces the others):
+### [Epistemic Cooperative](./epistemic-cooperative)
 
-- `/catalog` — passive reference handbook; you already know the question
-- `/onboard` — recommendation from your recent sessions, with an optional trial
-- `/probe` — AI-hypothesized deficit recognition; something feels off but you cannot yet name which deficit fits
+Skills that act at their own decision points — around the protocols, on the work itself, and on the prose that steers the agent.
+
+| Command | When to use |
+|---------|-------------|
+| **Finding the protocol** | |
+| `/onboard` | New here — get one recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
+| `/catalog` | You already know the question — browse the handbook by cluster or look a command up |
+| `/probe` | Something feels off but you cannot name which deficit it is — several hypotheses, routed by your recognition |
+| **Shaping the work** | |
+| `/triage` | A pile of GitHub issues needs to become focused work units, each fused with the project's northstar and handed to a session by pointer |
+| `/forge` | You need a prompt or a standing skill recipe grounded in a vendor reference (a model prompt guide, the Codex Goals spec), not one written from memory |
+| `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
+| `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
+| **Reviewing a change** | |
+| `/review-loop` | Drive a change through review until every finding is verified against the codebase and disposed of, re-reviewing each round |
+| `/lens-review` | One consolidated PR comment from several analytical lenses plus a gap scan, each analyzed in isolation and cross-verified |
+| **Auditing instruction prose** | |
+| `/place` | An instruction file keeps growing — route each clause to where it belongs (a load tier, the ledger, or deletion) |
+| `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
+| `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
+| **Steering the project** | |
+| `/steer` | Your rules and the agent's actual behavior have drifted apart — audit the drift, give per-cluster verdicts, and rewrite the project profile |
+| `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
+| **Delegating to Codex** | |
+| `/goal-research` | A factual research question you want scoped and externally verified in a background Codex session, with the full trace returned |
+| `/image-companion` | A slide-ready symbolic image for a passage, visually consistent with the document's other images |
+
+### [Route](./route)
+
+Context-driven protocol routing. A per-prompt hook places a short directive beside each prompt; when the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
 
 ## Design
 

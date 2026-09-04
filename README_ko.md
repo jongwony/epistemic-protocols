@@ -86,18 +86,45 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 ## 유틸리티
 
-프로토콜 옆에 플러그인 둘이 있습니다. 둘 다 Claude Code 한 줄 설치에서는 opt-in이며, 전체 스킬 목록과 계약은 각 플러그인의 README가 담습니다.
+프로토콜 옆에 플러그인 둘이 있습니다. 둘 다 Claude Code 한 줄 설치에서는 opt-in입니다:
 
-| 플러그인 | 용도 | 설치 |
-|----------|------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | 프로토콜 위에 얹는 유틸리티 스킬: 프로토콜 학습·조회, 결핍 인식, 프로젝트 프로필 조정, work-unit triage, prompt-artifact 형성, 리뷰 루프와 프로즈 감사, Codex 위임 리서치·이미지 | `claude plugin install epistemic-cooperative@epistemic-protocols` |
-| [Route](./route) | 컨텍스트 기반 프로토콜 라우팅 — 매 프롬프트 훅 지시문이 에이전트로 하여금 쌓인 컨텍스트가 드러내는 결핍에 맞는 코어 프로토콜 하나를 호출하게 함 | `claude plugin install route@epistemic-protocols` |
+```bash
+claude plugin install epistemic-cooperative@epistemic-protocols
+claude plugin install route@epistemic-protocols
+```
 
-필요한 프로토콜을 찾는 세 가지 길, 모두 Epistemic Cooperative 안에 있습니다 (서로 대체하지 않음):
+### [Epistemic Cooperative](./epistemic-cooperative)
 
-- `/catalog` — 패시브 레퍼런스 핸드북; 이미 질문을 알고 있을 때
-- `/onboard` — 최근 세션 기반 추천 + 선택적 trial
-- `/probe` — AI 가설 기반 결핍 인식; 뭔가 어긋났는데 어떤 결핍인지 아직 명명하지 못할 때
+각자의 결정 지점에서 작동하는 스킬들 — 프로토콜 주변에서, 작업 자체에서, 그리고 에이전트를 움직이는 산문 위에서.
+
+| 명령어 | 사용 시점 |
+|--------|----------|
+| **프로토콜 찾기** | |
+| `/onboard` | 처음 왔을 때 — 최근 세션에서 추천 하나를 받고, 원하면 시나리오·실행·퀴즈로 학습 |
+| `/catalog` | 이미 질문을 알고 있을 때 — 클러스터별로 핸드북을 훑거나 명령어를 조회 |
+| `/probe` | 뭔가 어긋났는데 어떤 결핍인지 이름 붙일 수 없을 때 — 가설 여럿을 제시하고 당신의 인식으로 라우팅 |
+| **작업 빚기** | |
+| `/triage` | 쌓인 GitHub 이슈를 프로젝트 northstar와 융합한 focused work unit으로 만들고, 각 unit을 포인터로 세션에 넘겨야 할 때 |
+| `/forge` | 기억이 아니라 벤더 레퍼런스(모델 prompt guide, Codex Goals 스펙)에 grounding된 prompt나 상주 skill recipe가 필요할 때 |
+| `/reduced-space-test` | 대리물이 실제 대상처럼 동작한다는 주장 — bounded 공간 안에서 검증하고 검증 안 된 나머지를 명시적으로 이월 |
+| `/gate-check` | 옵션 집합이 당신에게 제시되기 직전 — 독립 advisor가 genuine / collapsed / malformed를 판정하고 인용 근거를 먼저 검증 |
+| **변경 리뷰** | |
+| `/review-loop` | 모든 finding이 코드베이스에 대해 검증되고 처분될 때까지 매 라운드 재리뷰하며 변경을 리뷰로 끌고 갈 때 |
+| `/lens-review` | 여러 분석 렌즈 + gap scan을 각각 격리 분석하고 교차 검증해 통합 PR 코멘트 하나로 |
+| **지시문 산문 감사** | |
+| `/place` | 지시문 파일이 계속 불어날 때 — 절 각각을 있어야 할 자리(로드 계층, ledger, 삭제)로 라우팅 |
+| `/white-bear` | 에이전트에게 하지 말 것을 말하는 산문 — 잘못된 대상을 계속 시야에 두는 금지 프레이밍과 부정 앵커링을 찾기 |
+| `/zero-shot` | 원칙이면 일반화될 자리에 예시로 앵커링한 산문 — 그 자리를 찾아 명명 |
+| **프로젝트 조타** | |
+| `/steer` | 규칙과 에이전트의 실제 행동이 벌어졌을 때 — drift를 감사하고 클러스터별 verdict를 내려 프로젝트 프로필을 다시 쓰기 |
+| `/realign` | 프로젝트 가이드의 direction line이 작업 방향과 더는 맞지 않을 때 — inscribed line, 외부 신호, 당신의 현재 이해를 융합 |
+| **Codex 위임** | |
+| `/goal-research` | 백그라운드 Codex 세션에서 범위를 잡고 외부 검증까지 받고 싶은 사실 리서치 질문 — 전체 trace를 되돌려 받음 |
+| `/image-companion` | 문서의 한 passage를 위한 슬라이드용 상징 이미지, 다른 companion 이미지와 시각적으로 일관되게 |
+
+### [Route](./route)
+
+컨텍스트 기반 프로토콜 라우팅. 매 프롬프트 훅이 프롬프트 옆에 짧은 지시문을 놓고, 쌓인 컨텍스트가 설치된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출하고, 여럿이 맞으면 넛지하고, 없으면 침묵합니다. 호출된 프로토콜의 첫 게이트가 당신의 판단을 그 자리에 그대로 둡니다.
 
 ## 설계
 
