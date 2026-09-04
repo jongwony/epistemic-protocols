@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * SessionStart hook — inject the installed-protocol deficit table once per
- * context epoch, with an opener conditioned on how the epoch began.
+ * context epoch, under an opener on the sources where context is thin.
  *
  * A host's loaded-skills listing may carry each skill's description, or it
  * may carry the command identifiers alone; where it rations that listing
@@ -18,32 +18,35 @@
  * directive alone. Injected here, the table sits at the head of context,
  * inside the cached prefix.
  *
- * The opener states a condition, never a protocol, and the two hooks divide
- * by where the instability sits. Most deficits show in accumulated context —
- * the context or the utterance already carries them, and the per-prompt
- * directive reads them off. The other kind sits in the request itself:
- * intent or context only the user holds, which accumulated context cannot
- * yet show, so it surfaces by asking rather than by observing. That kind is
- * what session start is for — the per-prompt hook would have to detect thin
- * context, while this one already knows it from `source`. So at startup or
- * after /clear the opener points at that locus; after resume or compaction,
- * at what the session had settled but no longer holds in view.
+ * One opener, and only on thin sources. The two hooks divide by where the
+ * instability sits. Most deficits show in accumulated context — the context
+ * or the utterance already carries them, and the per-prompt directive reads
+ * them off. The other kind sits in the request itself: intent or context
+ * only the user holds, which accumulated context cannot yet show, so it
+ * surfaces by asking rather than by observing. That kind is what session
+ * start is for — the per-prompt hook would have to detect thin context,
+ * while this one already knows it from `source`. So at startup or after
+ * /clear the opener points at that locus. After resume or compaction there
+ * is no opener: the deficits that follow trimming — what the session had
+ * settled and no longer holds in view — show in the utterance, and the
+ * per-prompt directive already routes them. Those sources carry the catalog
+ * alone.
  *
- * Both openers end in the same action as the per-prompt directive: invoke
+ * The opener ends in the same action as the per-prompt directive: invoke
  * /route. Two triggers, one router. The directive's condition — the
  * accumulated context shows a deficit — excludes request-held deficits by
  * construction, so the opener is the trigger for that kind; but the match
  * itself, and the relay test that decides invoke, nudge or silence, live
  * inside /route (Rule #1: routing is the whole turn). An opener that told
  * the model to match against the table itself would skip that, and naming
- * which protocol fits either condition would be the hand-kept routing table
- * Rule #2 refuses. The table below the opener shares the directive's own
- * referent — loaded core epistemic protocols — so the two injections read
- * as one catalog.
+ * which protocol fits the condition would be the hand-kept routing table
+ * Rule #2 refuses. The table shares the directive's own referent — loaded
+ * core epistemic protocols — so the two injections read as one catalog.
  *
- * Every failure path is open: an unreadable payload reads as startup, and a
- * derivation shortfall sends the opener alone. A hook that blocks a session
- * is worse than one that routes less. Zero external dependencies: Node.js
+ * Every failure path is open: an unreadable payload reads as startup, a
+ * derivation shortfall on a thin source sends the opener alone, and on a
+ * trimmed source it sends nothing. A hook that blocks a session is worse
+ * than one that routes less. Zero external dependencies: Node.js
  * standard library only.
  */
 
@@ -56,23 +59,23 @@ import { deriveProtocols, isMain, parsePayload, renderTable } from "./route-prot
 // and the action is to invoke /route, not to match here.
 // Anything else — including a missing or unknown source — reads as thin,
 // because a wrong "thin" costs one unneeded check and a wrong "trimmed"
-// hides a fresh start behind a recall prompt.
+// hides a fresh start behind silence.
 const THIN_OPENER = [
   "[route] Context is thin at this point in the session.",
   "The deficit to check first sits in the request itself — intent or context only the user can supply, which accumulated context cannot yet show. When a request is not fully explicit, invoke /route before object-level work.",
 ].join("\n");
 
 // Sources on which the session already holds settled context that this
-// epoch does not carry: a resumed session, or one whose context was compacted.
-const TRIMMED_OPENER = [
-  "[route] Prior context was trimmed at this point in the session.",
-  "What the session had already settled may no longer be in view — recall-shaped deficits are the usual first thing here. Before building on what the session seems to hold, invoke /route.",
-].join("\n");
-
+// epoch does not carry: a resumed session, or one whose context was
+// compacted. No opener here — the deficits that follow trimming show in the
+// utterance, and the per-prompt directive routes them. The catalog still
+// goes out: compaction has dropped the earlier injection, and on resume
+// whether it survived cannot be read off the payload, so re-emitting is the
+// fail-safe choice.
 const TRIMMED_SOURCES = new Set(["resume", "compact"]);
 
 function opener(source) {
-  return TRIMMED_SOURCES.has(source) ? TRIMMED_OPENER : THIN_OPENER;
+  return TRIMMED_SOURCES.has(source) ? "" : THIN_OPENER;
 }
 
 function buildContext(source, env) {
@@ -83,7 +86,7 @@ function buildContext(source, env) {
   } catch {
     // Fail open: a derivation fault must not cost the opener.
   }
-  return table ? `${head}\n${table}` : head;
+  return [head, table].filter(Boolean).join("\n");
 }
 
 function render(raw, env) {
@@ -101,7 +104,7 @@ function render(raw, env) {
   });
 }
 
-export { THIN_OPENER, TRIMMED_OPENER, buildContext, opener, render };
+export { THIN_OPENER, TRIMMED_SOURCES, buildContext, opener, render };
 
 if (isMain(import.meta.url)) {
   let raw = "";

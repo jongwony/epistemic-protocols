@@ -1,6 +1,6 @@
 // Tests for route-session.mjs — the SessionStart injection of the derived
-// deficit table, with its source-conditioned opener — and for the derivation
-// in route-protocols.mjs it carries.
+// deficit table, under an opener on thin sources only — and for the
+// derivation in route-protocols.mjs it carries.
 // Run with: node --test
 // Repo precedent: anamnesis/scripts/hypomnesis-write.test.mjs (node:test + node:assert).
 
@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { TABLE_HEADER, deriveProtocols, renderTable } from "./route-protocols.mjs";
 import {
   THIN_OPENER,
-  TRIMMED_OPENER,
+  TRIMMED_SOURCES,
   buildContext,
   opener,
   render,
@@ -113,11 +113,13 @@ test("startup and clear open on thin context", () => {
   assert.match(THIN_OPENER, /accumulated context cannot yet show/);
 });
 
-test("resume and compact open on trimmed context", () => {
-  assert.equal(opener("resume"), TRIMMED_OPENER);
-  assert.equal(opener("compact"), TRIMMED_OPENER);
-  assert.match(TRIMMED_OPENER, /^\[route\] Prior context was trimmed/);
-  assert.match(TRIMMED_OPENER, /recall-shaped deficits are the usual first thing here/);
+test("resume and compact carry no opener — the catalog alone", () => {
+  // Recall-shaped deficits show in the utterance, so they are the
+  // per-prompt directive's kind; only request-held deficits need a
+  // session-start nudge, and only where context is thin.
+  assert.deepEqual([...TRIMMED_SOURCES].sort(), ["compact", "resume"]);
+  assert.equal(opener("resume"), "");
+  assert.equal(opener("compact"), "");
 });
 
 test("a missing or unknown source reads as thin", () => {
@@ -126,23 +128,19 @@ test("a missing or unknown source reads as thin", () => {
   assert.equal(opener("something-new"), THIN_OPENER);
 });
 
-test("both openers end in the directive's own action — invoke /route", () => {
+test("the opener ends in the directive's own action — invoke /route", () => {
   // Two triggers, one router: the match and the relay test live inside
   // /route (Rule #1), so an opener that matched on its own would skip them.
-  for (const text of [THIN_OPENER, TRIMMED_OPENER]) {
-    assert.match(text, /invoke \/route/);
-    assert.doesNotMatch(text, /match (that|it) against/);
-  }
+  assert.match(THIN_OPENER, /invoke \/route/);
+  assert.doesNotMatch(THIN_OPENER, /match (that|it) against/);
 });
 
-test("neither opener names a protocol — the condition is stated, /route matches", () => {
+test("the opener names no protocol — the condition is stated, /route matches", () => {
   // A protocol named here would be the hand-kept routing table Rule #2
-  // refuses. `/route` itself is the one command an opener may carry.
-  for (const text of [THIN_OPENER, TRIMMED_OPENER]) {
-    const commands = text.match(/\/[a-z-]+/g) ?? [];
-    assert.deepEqual(commands.filter((c) => c !== "/route"), []);
-    assert.ok(text.split("\n").length <= 2);
-  }
+  // refuses. `/route` itself is the one command the opener may carry.
+  const commands = THIN_OPENER.match(/\/[a-z-]+/g) ?? [];
+  assert.deepEqual(commands.filter((c) => c !== "/route"), []);
+  assert.ok(THIN_OPENER.split("\n").length <= 2);
 });
 
 test("the table header carries the directive's referent", () => {
@@ -285,12 +283,13 @@ test("missing settings or install record yields the opener alone, never an error
   }
 });
 
-test("malformed settings yields the opener alone, never an error", () => {
+test("malformed settings yields the opener alone on a thin source, nothing on a trimmed one", () => {
   const fixture = makeFixture(SUITE);
   try {
     fs.writeFileSync(path.join(fixture.configDir, "settings.json"), "{ not json");
     assert.deepEqual(deriveProtocols(fixture.env), []);
-    assert.equal(buildContext("compact", fixture.env), TRIMMED_OPENER);
+    assert.equal(buildContext("clear", fixture.env), THIN_OPENER);
+    assert.equal(buildContext("compact", fixture.env), "");
   } finally {
     cleanup(fixture);
   }
@@ -307,10 +306,11 @@ test("an unrecognized plugin layout yields no table", () => {
   }
 });
 
-test("no derived protocol means the opener goes out alone", () => {
+test("no derived protocol means the opener goes out alone, or nothing at all", () => {
   const fixture = makeFixture({ self: "route", plugins: [] });
   try {
     assert.equal(buildContext("startup", fixture.env), THIN_OPENER);
+    assert.equal(buildContext("resume", fixture.env), "");
   } finally {
     cleanup(fixture);
   }
@@ -337,14 +337,18 @@ test("the table stays compressed — command and deficit name only", () => {
   }
 });
 
-test("the same table follows the trimmed opener after compaction", () => {
+test("resume and compact carry the same table with no opener line", () => {
   const fixture = makeFixture(SUITE);
   try {
     const startup = buildContext("startup", fixture.env);
-    const compact = buildContext("compact", fixture.env);
-    const tableOf = (ctx, head) => ctx.slice(head.length);
-    assert.ok(compact.startsWith(TRIMMED_OPENER));
-    assert.equal(tableOf(compact, TRIMMED_OPENER), tableOf(startup, THIN_OPENER));
+    const table = startup.slice(THIN_OPENER.length + 1);
+    for (const source of ["resume", "compact"]) {
+      const trimmed = buildContext(source, fixture.env);
+      assert.ok(trimmed.startsWith(TABLE_HEADER), `${source} must begin at the header`);
+      assert.doesNotMatch(trimmed, /^\[route\]/m);
+      assert.equal(trimmed, table);
+      assert.equal(trimmed.split("\n").length, 1 + 3);
+    }
   } finally {
     cleanup(fixture);
   }
@@ -386,6 +390,17 @@ test("hook process exits 0 on empty stdin", () => {
   assert.ok(out.hookSpecificOutput.additionalContext.startsWith("[route]"));
 });
 
+test("hook process exits 0 with empty context on a trimmed source with nothing to derive", () => {
+  const result = runHook(JSON.stringify({ hook_event_name: "SessionStart", source: "compact" }), {
+    CLAUDE_CONFIG_DIR: "/nonexistent",
+    CLAUDE_PLUGIN_ROOT: "/nonexistent",
+  });
+  assert.equal(result.status, 0);
+  const out = JSON.parse(result.stdout);
+  assert.equal(out.hookSpecificOutput.hookEventName, "SessionStart");
+  assert.equal(out.hookSpecificOutput.additionalContext, "");
+});
+
 test("hook process exits 0 and derives from the fixture through the environment", () => {
   const fixture = makeFixture(SUITE);
   try {
@@ -397,7 +412,8 @@ test("hook process exits 0 and derives from the fixture through the environment"
     }), { CLAUDE_CONFIG_DIR: fixture.configDir, CLAUDE_PLUGIN_ROOT: fixture.pluginRoot });
     assert.equal(result.status, 0);
     const out = JSON.parse(result.stdout);
-    assert.ok(out.hookSpecificOutput.additionalContext.startsWith(TRIMMED_OPENER));
+    assert.ok(out.hookSpecificOutput.additionalContext.startsWith(TABLE_HEADER));
+    assert.doesNotMatch(out.hookSpecificOutput.additionalContext, /^\[route\]/m);
     assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined$/m);
   } finally {
     cleanup(fixture);
