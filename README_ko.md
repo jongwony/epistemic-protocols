@@ -22,19 +22,22 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 
 ### Claude Code
 
-모든 프로토콜과 `epistemic-cooperative` 유틸리티 플러그인을 설치합니다:
+모든 프로토콜을 설치합니다:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route`는 opt-in입니다 — 매 프롬프트 훅을 동봉하므로 위 한 줄은 이 플러그인을 건너뜁니다. 따로 추가하세요:
+그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 방향을 확정하기 전에 `/gap`, AI에게 작업을 넘기기 전에 `/inquire`.
+
+유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·조회(`/onboard`, `/catalog`, `/probe`)와 컨트리뷰터 도구를, `route`는 매 프롬프트 훅을 담습니다. 필요한 쪽을 따로 추가하세요:
 
 ```bash
+claude plugin install epistemic-cooperative@epistemic-protocols
 claude plugin install route@epistemic-protocols
 ```
 
-`/onboard`를 실행하세요 — 최근 세션 기반으로 빠른 추천을 받고, 원하면 시나리오, 실행, 퀴즈를 통한 가이드 학습으로 이어갑니다.
+`epistemic-cooperative`를 설치했다면 `/onboard`가 최근 세션 기반으로 빠른 추천을 주고, 원하면 시나리오·실행·퀴즈를 통한 가이드 학습으로 이어갑니다.
 
 ### Codex
 
@@ -50,16 +53,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
-Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니다: 각 프로토콜은 독립 플러그인이고, `epistemic-cooperative`가 유틸리티 스킬을 담습니다. 빠른 추천은 `onboard`부터 시작하고, 프로토콜 변경을 개발 중이라면 로컬 checkout을 추가하세요.
-
-<details>
-<summary>참고</summary>
-
-- Codex marketplace는 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있습니다.
-- 각 플러그인은 기존 Claude manifest 옆에 Codex manifest를 둡니다: `<plugin>/.codex-plugin/plugin.json`.
-- marketplace에는 모든 프로토콜 플러그인과 `epistemic-cooperative`가 포함됩니다.
-
-</details>
+Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니다: 각 프로토콜은 독립 플러그인이고, `epistemic-cooperative`가 유틸리티 스킬을 담습니다. marketplace는 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있고, 각 플러그인은 Claude manifest 옆에 Codex manifest를 `<plugin>/.codex-plugin/plugin.json`으로 둡니다.
 
 ### 기타 에이전트 도구
 
@@ -92,49 +86,45 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 ## 유틸리티
 
-| 플러그인 | 명령어 | 용도 |
-|----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/steer`, `/realign`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check`, `/review-loop`, `/lens-review`, `/place`, `/white-bear`, `/zero-shot`, `/goal-research`, `/image-companion` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 프로젝트 프로필 재조정, 프로젝트 가이드 direction line 지평융합, work-unit triage, 레퍼런스-grounded prompt-artifact 형성, scoped 실증 검증, 자문 검증 결정 게이트, 리뷰 루프와 multi-lens PR 리뷰, 지시문 산문 배치·감사, 그리고 Codex 위임 리서치·companion 이미지 |
-| [Route](./route) | `/route` | 컨텍스트 기반 프로토콜 라우팅 — 매 프롬프트 훅 지시문이 에이전트로 하여금 쌓인 컨텍스트가 드러내는 결핍에 맞는 코어 프로토콜 하나를 호출하게 함 |
+프로토콜 옆에 플러그인 둘이 있습니다. 둘 다 Claude Code 한 줄 설치에서는 opt-in입니다:
 
-**세 가지 발견 모드 공존** (서로 대체하지 않음):
+```bash
+claude plugin install epistemic-cooperative@epistemic-protocols
+claude plugin install route@epistemic-protocols
+```
 
-- `/catalog` — 패시브 레퍼런스 핸드북 (브라우징 / 룩업; 이미 질문을 알고 있을 때)
-- `/onboard` — 패턴 기반 추천 + 선택적 trial (세션 히스토리 기반; 자신의 패턴에 맞는 프로토콜을 학습하고 싶을 때)
-- `/probe` — AI 가설 기반 결핍 인식 (어떤 결핍이 맞는지 아직 명명하지 못할 때 multi-hypothesis fit review)
+### [Epistemic Cooperative](./epistemic-cooperative)
 
-**컨텍스트 기반 라우팅** (별도 플러그인):
+각자의 결정 지점에서 작동하는 스킬들 — 프로토콜 주변에서, 작업 자체에서, 그리고 에이전트를 움직이는 산문 위에서.
 
-- `/route` — 플러그인의 `UserPromptSubmit` 훅이 매 프롬프트 옆에 짧은 지시문을 놓고, 쌓인 컨텍스트가 로드된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출(첫 게이트는 그 프로토콜 자신이 쥠), 여럿이 맞으면 넛지, 없으면 침묵
+| 명령어 | 사용 시점 |
+|--------|----------|
+| **프로토콜 찾기** | |
+| `/onboard` | 처음 왔을 때 — 최근 세션에서 추천 하나를 받고, 원하면 시나리오·실행·퀴즈로 학습 |
+| `/catalog` | 이미 질문을 알고 있을 때 — 클러스터별로 핸드북을 훑거나 명령어를 조회 |
+| `/probe` | 뭔가 어긋났는데 어떤 결핍인지 이름 붙일 수 없을 때 — 가설 여럿을 제시하고 당신의 인식으로 라우팅 |
+| **작업 빚기** | |
+| `/triage` | 쌓인 GitHub 이슈를 프로젝트 northstar와 융합한 focused work unit으로 만들고, 각 unit을 포인터로 세션에 넘겨야 할 때 |
+| `/forge` | 기억이 아니라 벤더 레퍼런스(모델 prompt guide, Codex Goals 스펙)에 grounding된 prompt나 상주 skill recipe가 필요할 때 |
+| `/reduced-space-test` | 대리물이 실제 대상처럼 동작한다는 주장 — bounded 공간 안에서 검증하고 검증 안 된 나머지를 명시적으로 이월 |
+| `/gate-check` | 옵션 집합이 당신에게 제시되기 직전 — 독립 advisor가 genuine / collapsed / malformed를 판정하고 인용 근거를 먼저 검증 |
+| **변경 리뷰** | |
+| `/review-loop` | 모든 finding이 코드베이스에 대해 검증되고 처분될 때까지 매 라운드 재리뷰하며 변경을 리뷰로 끌고 갈 때 |
+| `/lens-review` | 여러 분석 렌즈 + gap scan을 각각 격리 분석하고 교차 검증해 통합 PR 코멘트 하나로 |
+| **지시문 산문 감사** | |
+| `/place` | 지시문 파일이 계속 불어날 때 — 절 각각을 있어야 할 자리(로드 계층, ledger, 삭제)로 라우팅 |
+| `/white-bear` | 에이전트에게 하지 말 것을 말하는 산문 — 잘못된 대상을 계속 시야에 두는 금지 프레이밍과 부정 앵커링을 찾기 |
+| `/zero-shot` | 원칙이면 일반화될 자리에 예시로 앵커링한 산문 — 그 자리를 찾아 명명 |
+| **프로젝트 조타** | |
+| `/steer` | 규칙과 에이전트의 실제 행동이 벌어졌을 때 — drift를 감사하고 클러스터별 verdict를 내려 프로젝트 프로필을 다시 쓰기 |
+| `/realign` | 프로젝트 가이드의 direction line이 작업 방향과 더는 맞지 않을 때 — inscribed line, 외부 신호, 당신의 현재 이해를 융합 |
+| **Codex 위임** | |
+| `/goal-research` | 백그라운드 Codex 세션에서 범위를 잡고 외부 검증까지 받고 싶은 사실 리서치 질문 — 전체 trace를 되돌려 받음 |
+| `/image-companion` | 문서의 한 passage를 위한 슬라이드용 상징 이미지, 다른 companion 이미지와 시각적으로 일관되게 |
 
-**프로젝트 가이드 direction-line 융합** (3-horizon Horizontverschmelzung):
+### [Route](./route)
 
-- `/realign` — 세 horizon(프로젝트 가이드 현 inscribed direction line · 설정된 channel set 으로부터의 외부 direction signals · 별도 sub-step 으로 elicit 되는 사용자의 현 pre-understanding)을 surface, 각 horizon 의 보존 / 변환 / 탈락을 표시한 per-horizon trace 와 함께 fusion candidate 를 합성, 자체 widen / narrow / fuse / reorient / confirm / dismiss 어휘로 dialectical shaping, 사용자 confirm 시 fused line 을 프로젝트 가이드 direction line 으로 write (rollback 은 프로젝트 버전관리)
-
-**Work-unit triage**:
-
-- `/triage` — scoped GitHub `RawIssueSet`을 읽고, 관련 이슈를 묶고, 각 그룹을 problem frame으로 normalize한 뒤, 현재 세션에서 `AGENTS.md` northstar와 융합해 focused work unit을 형성하고, 사용자가 route를 선택하면 각 unit을 기판 소유 레코드로 외재화하고 수신 span이 그 레코드를 가리키게
-
-**레퍼런스-grounded prompt 형성**:
-
-- `/forge` — 대상 레퍼런스(벤더 모델 prompt guide, Codex Goals 스펙)를 읽고, 사용자의 미명세 의도를 modality-aware IR로 역귀납한 뒤, canonical-external 동적 fetch + staleness guard로 레퍼런스에 grounding하고, 후속 세션/도구용 prompt artifact(후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe)를 projection; 벤더-무관 core + 인자화 adapter seam(Higgsfield, gpt-image, codex-goals, claude-session, dia), 교차-adapter 추상은 의도적으로 유예된 colimit
-
-**Scoped 실증 검증**:
-
-- `/reduced-space-test` — target↔surrogate 등가 주장을 검증 가능한 facet으로 분해하고, residual 여집합과 함께 사용자-동기화된 대리 테스트 공간을 bound(`/bound` compose)한 뒤, 그 안에서 증거를 포착(`/inquire` compose)하고, 미커버 여집합을 후속으로 carry; 절대 등가를 주장하는 대신 결과 주장을 테스트된 조건으로 scoping하는 오케스트레이션 유틸리티로, 새 프로토콜이나 graph node를 추가하지 않음
-
-**리뷰와 프로즈 감사**:
-
-- `/review-loop` — 변경과 그 governing surface 위를 도는 수렴 페이스의 리뷰-resolve 루프: 교체 가능한 리뷰 소스(`codex` 또는 `code-review`)를 구동하고, 각 finding 을 코드베이스와 측정 기준 base 에 대해 검증하고, 기계적 수정은 자동 적용·판단이 필요한 것은 게이트한 뒤, 모든 finding 이 처분될 때까지 재리뷰
-- `/lens-review` — 원패스 multi-perspective PR 리뷰: `/frame` 이 diff 에 맞는 lens 와 gap scan 을 도출하고, lens 별로 격리 분석한 뒤 교차 검증해 살아남은 finding 을 하나의 통합 PR 코멘트로 게시
-- `/place` — 지시문 산문의 절 각각을 다섯 목적지(로드 계층 셋, ledger, 삭제) 중 하나로 라우팅하고 집행 축을 설정하는 읽기 전용 배치 감사
-- `/white-bear` — 불필요한 경쟁-대상 언급(금지 프레이밍, 대체된-경로 언급, 부정 앵커링)에 대한 읽기 전용 프로즈 감사
-- `/zero-shot` — 앵커링 예시 대신 원칙 진술을 보는 읽기 전용 프로즈 감사
-
-**Codex 위임 유틸리티**:
-
-- `/goal-research` — 리서치 질문을 백그라운드 Codex CLI 세션에 위임: Codex 내장 `goal` 로 범위를 잡고 Aitesis(`$inquire`)로 외부 검증한 뒤 전체 trace 를 되돌려 받음
-- `/image-companion` — 문서의 한 passage 를 위한 슬라이드용 상징 이미지를, 그 아티팩트의 다른 companion 이미지와 시각적으로 일관되게 생성; grounding 은 `/forge`, 생성은 Codex 에 compose
+컨텍스트 기반 프로토콜 라우팅. 매 프롬프트 훅이 프롬프트 옆에 짧은 지시문을 놓고, 쌓인 컨텍스트가 설치된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출하고, 여럿이 맞으면 넛지하고, 없으면 침묵합니다. 호출된 프로토콜의 첫 게이트가 당신의 판단을 그 자리에 그대로 둡니다.
 
 ## 설계
 
