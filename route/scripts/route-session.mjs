@@ -18,12 +18,19 @@
  * directive alone. Injected here, the table sits at the head of context,
  * inside the cached prefix.
  *
- * The opener states a condition, never a protocol. At startup or after
- * /clear, context is thin and an inexplicit request usually shows a deficit
- * before it shows a task; after resume or compaction, what the session had
- * settled may be out of view. Naming which protocol fits each condition
- * would be the hand-kept routing table Rule #2 refuses; the model matches
- * the condition against the derived table in the same injection.
+ * The opener states a condition, never a protocol, and the two hooks divide
+ * by where the instability sits. Most deficits show in accumulated context —
+ * the context or the utterance already carries them, and the per-prompt
+ * directive reads them off. The other kind sits in the request itself:
+ * intent or context only the user holds, which accumulated context cannot
+ * yet show, so it surfaces by asking rather than by observing. That kind is
+ * what session start is for — the per-prompt hook would have to detect thin
+ * context, while this one already knows it from `source`. So at startup or
+ * after /clear the opener points at that locus; after resume or compaction,
+ * at what the session had settled but no longer holds in view. Naming which
+ * protocol fits either condition would be the hand-kept routing table Rule
+ * #2 refuses; the model matches the condition against the derived table in
+ * the same injection.
  *
  * Every failure path is open: an unreadable payload reads as startup, and a
  * derivation shortfall sends the opener alone. A hook that blocks a session
@@ -35,12 +42,14 @@ import fs from "node:fs";
 import { deriveProtocols, isMain, parsePayload, renderTable } from "./route-protocols.mjs";
 
 // Sources on which prior context is not in view: the session is new, or it
-// was reset. Anything else — including a missing or unknown source — reads
-// as thin, because a wrong "thin" costs one unneeded check and a wrong
-// "trimmed" hides a fresh start behind a recall prompt.
+// was reset. The deficit this opener points at sits in the request, not in
+// the context — there is no accumulated context yet to read one off of.
+// Anything else — including a missing or unknown source — reads as thin,
+// because a wrong "thin" costs one unneeded check and a wrong "trimmed"
+// hides a fresh start behind a recall prompt.
 const THIN_OPENER = [
   "[route] Context is thin at this point in the session.",
-  "A request that is not fully explicit usually shows an interaction deficit before it shows a task — match it against the installed protocols below before object-level work.",
+  "The deficit to check first sits in the request itself — intent or context only the user can supply, which accumulated context cannot yet show. When a request is not fully explicit, match that against the installed protocols below before object-level work.",
 ].join("\n");
 
 // Sources on which the session already holds settled context that this

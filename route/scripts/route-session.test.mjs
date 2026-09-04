@@ -109,7 +109,8 @@ test("startup and clear open on thin context", () => {
   assert.equal(opener("startup"), THIN_OPENER);
   assert.equal(opener("clear"), THIN_OPENER);
   assert.match(THIN_OPENER, /^\[route\] Context is thin/);
-  assert.match(THIN_OPENER, /not fully explicit usually shows an interaction deficit before it shows a task/);
+  assert.match(THIN_OPENER, /sits in the request itself — intent or context only the user can supply/);
+  assert.match(THIN_OPENER, /accumulated context cannot yet show/);
 });
 
 test("resume and compact open on trimmed context", () => {
