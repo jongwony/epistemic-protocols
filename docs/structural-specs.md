@@ -126,7 +126,7 @@ The `Qs` gate's formal correspondence to Horizontverschmelzung (horizon fusion) 
 
 ## Resolution Meta-Contract
 
-Canonical protocol resolution names remain protocol-native: `ValidatedMapping`, `AuditedDecision`, `CrystallizedAbstraction`, `ResolvedEndpoint`, and peer names are not renamed to a generic terminal type. `DeficitResolved<D, R>` is a meta-contract that those canonical resolution types should satisfy when their formal surface is edited:
+Canonical protocol resolution names remain protocol-native: `ValidatedMapping`, `DefinedBoundary`, `CrystallizedAbstraction`, `ResolvedEndpoint`, and peer names are not renamed to a generic terminal type. `DeficitResolved<D, R>` is a meta-contract that those canonical resolution types should satisfy when their formal surface is edited:
 
 ```
 DeficitResolved<D, R> =

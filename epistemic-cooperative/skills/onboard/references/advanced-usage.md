@@ -10,7 +10,7 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 
 | Chain | Frequency | Pattern |
 |-------|-----------|---------|
-| `/inquire` → `/gap` | Common | Inquire gathers missing context → Gap audits the decision now that context is complete |
+| `/frame` → `/conduct` | Common | Frame derives the lenses → Conduct runs them as the session's method |
 
 ## Multi-Protocol Sessions
 
@@ -55,4 +55,3 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
 | `/batch` → `/apportion` | Batch operations planned, then apportioned into units each closed before the run — by its own completion condition, by a recorded acceptance where none compiles, or by a recorded reservation where a judgment settles it (projected; see the provenance caveat) |
-| Any built-in → `/gap` | After any execution, audit for overlooked gaps |

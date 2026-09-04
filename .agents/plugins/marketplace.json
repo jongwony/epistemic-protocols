@@ -17,18 +17,6 @@
       "category": "Productivity"
     },
     {
-      "name": "syneidesis",
-      "source": {
-        "source": "local",
-        "path": "./syneidesis"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "katalepsis",
       "source": {
         "source": "local",

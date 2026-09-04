@@ -56,7 +56,6 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ### Protocols to Use While Contributing
 - [ ] `/verify` — run before every commit; the checks it runs are defined in `static-checks.js`
-- [ ] `/syneidesis:gap` — surface gaps before committing to a design decision
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
@@ -69,7 +68,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 ## Contribution Workflow
 
 1. **Scope** — read the premise document(s) for the area you're touching (`premise/AGENTS.md` routes by concern), plus `.claude/rules/project-profile.md` and `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
-2. **Design** — `/syneidesis:gap` before locking in a direction; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
+2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `.claude/skills/verify/references/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`

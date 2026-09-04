@@ -14,8 +14,8 @@
  *
  * Usage (SessionStart hook, type "command"):
  *   node <plugin>/skills/catalog/scripts/session-context.js
- *   node .../session-context.js --only=/grasp,/gap
- *   node .../session-context.js --cluster=Analysis,Decision
+ *   node .../session-context.js --only=/grasp,/bound
+ *   node .../session-context.js --cluster=Analysis,Verification
  *
  * Filters (inject only the parts a project needs; the preamble directive is
  * always kept). With no filter, the full map is emitted. When both filters are
@@ -34,7 +34,7 @@ const path = require('path');
 // layout and the packaged skill layout (catalog/routing-map.md).
 const ROUTING_MAP_PATH = path.join(__dirname, '..', 'routing-map.md');
 
-/** Parse a comma-separated CLI filter value (e.g. --only=/grasp,/gap). */
+/** Parse a comma-separated CLI filter value (e.g. --only=/grasp,/bound). */
 function parseListArg(args, name) {
   const prefix = `--${name}=`;
   const arg = args.find(a => a.startsWith(prefix));

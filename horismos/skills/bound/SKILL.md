@@ -101,7 +101,6 @@ status(c)      = pass if c.claimed_by = {BoundaryUndefined}; route if c.claimed_
 RouteClaim     = (route_if_predicate: String, routed_deficit: Deficit)
                  -- bound-local route claims — the sibling deficits a boundary-misfit kind is handed to. routed_deficit is the BINDING field; the command in parentheses is a non-binding hint for the user, not the relation this guard composes on:
                  --   missing pre-execution fact            → ContextInsufficient       (hint: /inquire)
-                 --   unnoticed decision gap (not a boundary-kind settlement) → GapUnnoticed             (hint: /gap)
                  --   framework absent for the decision      → FrameworkAbsent           (hint: /frame)
                  --   cross-domain mapping uncertain         → MappingUncertain          (hint: /ground)
                  --   direction candidates' futures unrecognizable from description → DirectionUnrecognizable  (hint: /preview)

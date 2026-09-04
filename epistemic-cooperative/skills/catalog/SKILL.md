@@ -50,7 +50,6 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Syneidesis | `/gap` | About to act — potential gaps unexamined |
 
 ### Execution
 
@@ -129,7 +128,7 @@ node scripts/generate-routing-map.js
 
 Inject only the parts a project needs (the routing-directive preamble is always kept):
 
-- `--only=/grasp,/gap` — include only the listed commands (comma-separated).
-- `--cluster=Analysis,Decision` — include only the listed clusters (comma-separated).
+- `--only=/grasp,/bound` — include only the listed commands (comma-separated).
+- `--cluster=Analysis,Verification` — include only the listed clusters (comma-separated).
 
 With no filter, the full map is injected; when both filters are given they combine as a union.

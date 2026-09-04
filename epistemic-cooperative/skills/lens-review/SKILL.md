@@ -3,7 +3,6 @@ name: lens-review
 description: "One-pass multi-perspective PR review. Derives the lenses that fit the diff plus a gap scan, analyzes each in isolation, cross-verifies, and posts survivors as one consolidated PR comment."
 skills:
   - prothesis:frame
-  - syneidesis:gap
 ---
 
 # Lens Review
@@ -27,7 +26,7 @@ When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tre
 /lens-review [scope?]
   Phase 0  : scope detect (PR number | current-branch PR | working tree) + free-exit — no SHA pinning, tools fetch live
   Phase 1  : diff prep   — fetch diff live (gh pr diff {N} | git diff HEAD); read file fate (A/M/D/R) from diff headers; state diff-reading conventions
-  Phase 2  : framed-lens review (isolated → adversarial) — /frame derives the lenses fitting the diff + /gap; substrate described in-skill (not /conduct)
+  Phase 2  : framed-lens review (isolated → adversarial) — /frame derives the lenses fitting the diff + the gap lens fixed in-skill; substrate described in-skill (not /conduct)
               2a isolated per-lens analysis (independence) — each finding: file:line + lens tag + severity + evidence-grounded rationale, confidence ≥ 80%
               2b adversarial cross-verification — refute each finding; survive → Phase 3, defeated → recorded in the Phase 4 comment as refuted (relay drop w/ basis)
   Phase 3  : direction-error guard (verify) — cross-check review text vs diff-header fate; Added-but-described-as-deleted → warning augment (relay)
@@ -73,7 +72,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 `/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. Review **only the changed files**.
 
-**Lens framing.** Call `/frame` (prothesis) to derive the review perspectives that fit the changed files, and `/gap` (syneidesis) for the gap audit. `/frame` selects the lenses appropriate to the diff — for a formally-structured change these are often morphism-coherence, type-soundness, and evaluation-order lenses, but the panel is `/frame`'s to determine, not a fixed list baked into this skill. Each derived lens is one isolated perspective; the gap dimensions audited by `/gap` are:
+**Lens framing.** Call `/frame` (prothesis) to derive the review perspectives that fit the changed files; the gap audit is one further lens this skill fixes itself. `/frame` selects the lenses appropriate to the diff — for a formally-structured change these are often morphism-coherence, type-soundness, and evaluation-order lenses, but the panel is `/frame`'s to determine, not a fixed list baked into this skill. Each derived lens is one isolated perspective; the gap lens audits four dimensions:
 
 - **Procedural** — missing steps or incomplete workflows
 - **Consideration** — unaddressed trade-offs

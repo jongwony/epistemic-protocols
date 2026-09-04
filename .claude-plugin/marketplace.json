@@ -11,11 +11,6 @@
       "description": "Multi-perspective framing — /frame (πρόθεσις: a placing before)"
     },
     {
-      "name": "syneidesis",
-      "source": "./syneidesis",
-      "description": "Surface potential gaps at decision points — /gap (συνείδησις: knowing-together)"
-    },
-    {
       "name": "katalepsis",
       "source": "./katalepsis",
       "description": "Verify understanding of a result or artifact through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)"
