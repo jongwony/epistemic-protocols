@@ -7,9 +7,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { register } from "./route.ts";
-import { DIRECTIVE } from "../scripts/route-prompt.mjs";
-import { THIN_OPENER } from "../scripts/route-session.mjs";
-import { TABLE_HEADER } from "../scripts/route-protocols.mjs";
+import { DIRECTIVE } from "../../route/scripts/route-prompt.mjs";
+import { THIN_OPENER } from "../../route/scripts/route-session.mjs";
+import { TABLE_HEADER } from "../../route/scripts/route-protocols.mjs";
 
 const TABLE = `${TABLE_HEADER}\n/induce FrameworkAbsent\n/inquire IntentUnknown`;
 
@@ -19,10 +19,10 @@ const TABLE = `${TABLE_HEADER}\n/induce FrameworkAbsent\n/inquire IntentUnknown`
 function fakeEngine({ table = TABLE, turns = 10, exitCode = 0, store = new Map() } = {}) {
   const touched = new Set();
   const impl = {
-    "plugin.root": "/plugins/route",
+    "plugin.root": "/plugins/route-module",
     "process.run": async (argv) => {
       assert.equal(argv[0], "node");
-      assert.match(argv[1], /\/plugins\/route\/scripts\/route-protocols\.mjs$/);
+      assert.match(argv[1], /\/plugins\/route-module\/scripts\/catalog\.mjs$/);
       return { exitCode, stdout: `${table}\n`, stderr: "" };
     },
     "session.id": async () => "sess-1",
@@ -63,6 +63,13 @@ test("registers exactly the four events the trigger and the catalog need", () =>
   const events = [];
   register((event) => events.push(event), {});
   assert.deepEqual(events.sort(), ["prompt.context", "prompt.submit", "session.start", "skill.prompt"]);
+});
+
+test("the directive and the opener are the same text route's command hooks emit", () => {
+  // Two realizations, one wording: a drift here would make the two hosts
+  // read different firing conditions.
+  assert.match(DIRECTIVE, /invoke \/route\./);
+  assert.match(THIN_OPENER, /invoke \/route before object-level work\./);
 });
 
 test("catalog: session.start derives the table on the host, prompt.context appends it as one block", async () => {

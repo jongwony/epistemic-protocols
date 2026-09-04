@@ -30,11 +30,8 @@ function runHook(input, env = {}) {
   });
 }
 
-test("hook process yields — exit 0, empty stdout — where the function-hooks module carries the table", () => {
-  const r = runHook(JSON.stringify({ source: "startup" }), { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "1" });
-  assert.equal(r.status, 0);
-  assert.equal(r.stdout, "");
-});
+// Whether the hook yields to the route-module plugin's hooks module is
+// covered in route-yield.test.mjs, against a fixture config directory.
 
 // ---------------------------------------------------------------------------
 // Fixture tree: a marketplace of plugins laid out the way installed_plugins

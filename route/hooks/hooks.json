@@ -1,8 +1,5 @@
 {
-  "description": "Trigger and catalog, on two realizations. Where the host runs hooks modules (Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1) `modules` loads hooks/route.ts, which carries both, and the command hooks yield. Elsewhere: SessionStart injects the derived deficit table once per context epoch with an opener conditioned on the source — scripts/route-session.mjs; UserPromptSubmit carries the per-prompt firing conditions for /route — scripts/route-prompt.mjs.",
-  "modules": [
-    "./route.ts"
-  ],
+  "description": "SessionStart injects the derived deficit table once per context epoch with an opener conditioned on the source — scripts/route-session.mjs. UserPromptSubmit carries the per-prompt firing conditions for /route — scripts/route-prompt.mjs. Both yield where the route-module plugin is enabled and the host runs hooks modules (CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1), since that module then carries both.",
   "hooks": {
     "SessionStart": [
       {

@@ -1,0 +1,12 @@
+{
+  "name": "route-module",
+  "description": "Route's hooks module — the function-hook realization of its trigger and catalog: watches the session and calls /route. Claude Code only, behind CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "dependencies": [
+    "route"
+  ]
+}

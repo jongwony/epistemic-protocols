@@ -1,15 +1,19 @@
 /**
- * Route's function-hooks module — the trigger and the catalog, realized on
- * the engine interface instead of on command hooks. Loaded only where the
- * host runs hooks modules (Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS
- * set); the command hooks in hooks.json yield when it is, and remain the
- * path everywhere else.
+ * Route's hooks module — the trigger and the catalog, realized on the
+ * engine interface instead of on command hooks. This is its own plugin,
+ * route-module, because a hooks.json that names a `modules` entry is not a
+ * file every host reads (Codex rejects the key and drops the whole file), so
+ * Route's own hooks.json stays host-neutral and this one is Claude Code's.
+ * Loaded only where the host runs hooks modules (Claude Code with
+ * CLAUDE_CODE_ENABLE_FUNCTION_HOOKS set); Route's command hooks yield while
+ * this plugin is enabled there, and remain the path everywhere else.
  *
  * The division is unchanged: the hooks decide when, the /route skill decides
  * what. Nothing here matches context against a protocol.
  *
  * Catalog — `session.start` derives the installed-protocol table by running
- * scripts/route-protocols.mjs on the host (the module's own file access stops
+ * scripts/catalog.mjs on the host, which finds Route's install and runs
+ * Route's own scripts/route-protocols.mjs (a module's own file access stops
  * at the working directory; the install record sits under the config
  * directory, which that script already knows how to read). `prompt.context`
  * then carries the table as one block of the first user message's context:
@@ -33,11 +37,16 @@
  * $.plugin, $.process.run (node, this plugin's own script), $.session,
  * $.store. No $.http, no $.model, no $.fs — `claude plugin validate` lists
  * the calls, so the claim is checkable rather than asserted.
+ *
+ * The API this is written against is early access: it is absent from the
+ * official hooks and plugins references, and the build-generated
+ * claude-code.d.ts it is typed against says it may change between releases.
+ * A module the engine cannot load is skipped with a line in the debug log.
  */
 
 import type { Register } from "claude-code";
 
-// The firing conditions, verbatim from scripts/route-prompt.mjs.
+// The firing conditions, verbatim from route's scripts/route-prompt.mjs.
 const DIRECTIVE = [
   "[route] When the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
   "Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated.",
@@ -45,7 +54,7 @@ const DIRECTIVE = [
   "Otherwise stay silent.",
 ].join("\n");
 
-// The thin-context opener, verbatim from scripts/route-session.mjs.
+// The thin-context opener, verbatim from route's scripts/route-session.mjs.
 const THIN_OPENER = [
   "[route] Context is thin at this point in the session.",
   "The deficit to check first sits in the request itself — intent or context only the user can supply, which accumulated context cannot yet show. When a request is not fully explicit, invoke /route before object-level work.",
@@ -87,7 +96,7 @@ export const register: Register = (on) => {
   on("session.start", async ($, e, next) => {
     try {
       const { exitCode, stdout } = await $.process.run(
-        ["node", `${$.plugin.root}/scripts/route-protocols.mjs`],
+        ["node", `${$.plugin.root}/scripts/catalog.mjs`],
         { timeoutMs: 10_000 },
       );
       table = exitCode === 0 ? stdout.trim() : "";

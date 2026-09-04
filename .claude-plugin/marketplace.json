@@ -94,6 +94,11 @@
       "name": "route",
       "source": "./route",
       "description": "Route the accumulated session context to the core protocol whose deficit it shows — /route (per-prompt hook directive)"
+    },
+    {
+      "name": "route-module",
+      "source": "./route-module",
+      "description": "Route's hooks module — the function-hook realization of its trigger and catalog: watches the session and calls /route. Claude Code only, behind CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1"
     }
   ]
 }

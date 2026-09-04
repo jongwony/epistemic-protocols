@@ -27,7 +27,7 @@
  */
 
 import fs from "node:fs";
-import { functionHooksOn, isMain, parsePayload } from "./route-protocols.mjs";
+import { hooksModuleCarries, isMain, parsePayload } from "./route-protocols.mjs";
 
 // The firing conditions live here and nowhere else: SKILL.md loads only after
 // the skill is invoked, so this directive is the surface present at decision
@@ -56,9 +56,10 @@ function render(raw) {
 export { DIRECTIVE, parsePayload, render };
 
 if (isMain(import.meta.url)) {
-  // The function-hooks module (hooks/route.ts) carries this when the host
-  // runs it; emitting here too would inject the same text twice.
-  if (functionHooksOn()) process.exit(0);
+  // The route-module plugin's hooks module carries this where the host runs
+  // it and that plugin is enabled; emitting here too would inject the same
+  // text twice.
+  if (hooksModuleCarries()) process.exit(0);
   let raw = "";
   try { raw = fs.readFileSync(0, "utf8"); } catch {}
   process.stdout.write(render(raw) + "\n");

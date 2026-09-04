@@ -1,0 +1,6 @@
+{
+  "description": "Route's trigger and catalog as a hooks module. hooks/route.ts registers on session.start, prompt.context, prompt.submit and skill.prompt; it derives the catalog by running route's own scripts/route-protocols.mjs on the host (scripts/catalog.mjs finds it) and calls /route through the model, never matching context itself. No command hooks here — those stay in route, and they yield while this plugin is enabled and the host runs hooks modules.",
+  "modules": [
+    "./route.ts"
+  ]
+}

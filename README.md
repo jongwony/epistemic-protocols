@@ -34,6 +34,8 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 claude plugin install route@epistemic-protocols
 ```
 
+`route-module` is the same trigger as a Claude Code hooks module — early access, behind `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, and not for Codex. It pulls `route` in as a dependency; see [route-module](./route-module).
+
 Then run `/onboard` — start with a quick recommendation based on your recent sessions, then optionally continue to guided learning with scenarios, trials, and quizzes.
 
 ### Codex

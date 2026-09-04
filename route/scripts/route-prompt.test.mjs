@@ -22,13 +22,8 @@ function runHook(input, env = {}) {
   });
 }
 
-test("hook process yields — exit 0, empty stdout — where the function-hooks module carries the directive", () => {
-  const r = runHook(JSON.stringify({ hook_event_name: "UserPromptSubmit", prompt: "x" }), { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "1" });
-  assert.equal(r.status, 0);
-  assert.equal(r.stdout, "");
-  const off = runHook(JSON.stringify({ hook_event_name: "UserPromptSubmit", prompt: "x" }), { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "0" });
-  assert.equal(JSON.parse(off.stdout).hookSpecificOutput.additionalContext, DIRECTIVE);
-});
+// Whether the hook yields to the route-module plugin's hooks module is
+// covered in route-yield.test.mjs, against a fixture config directory.
 
 test("directive carries the three firing conditions and stays short", () => {
   // (a) deficit a loaded core protocol resolves → invoke /route; the table

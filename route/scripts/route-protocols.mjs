@@ -184,13 +184,56 @@ function parseTable(text) {
   return rows;
 }
 
+// The plugin that carries Route's hooks module, installed from the same
+// marketplace as Route itself.
+const MODULE_PLUGIN = "route-module";
+
 /**
- * True when the host runs this plugin's function-hooks module, which then
- * carries the trigger and the catalog itself: the command hooks yield so the
- * same text is not injected twice. Settings `env` reaches hook processes.
+ * True when the host runs hooks modules and the route-module plugin — the
+ * function-hook realization of the trigger and the catalog — is enabled
+ * from this plugin's own marketplace. The command hooks then yield, so the
+ * same text is not injected twice. Either condition alone is not enough:
+ * the flag without the module would leave Route silent, so the hooks keep
+ * running until the plugin that replaces them is actually there. Settings
+ * `env` reaches hook processes, and the install record names the
+ * marketplace. Any shortfall reads as "not carried": one injection more,
+ * never one fewer.
  */
-function functionHooksOn(env = process.env) {
-  return env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS === "1";
+function hooksModuleCarries(env = process.env, opts = {}) {
+  if (env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS !== "1") return false;
+  const dir = opts.configDir || configDir();
+  const root = opts.pluginRoot || pluginRoot();
+  const installed = readJson(path.join(dir, "plugins", "installed_plugins.json"));
+  const settings = readJson(path.join(dir, "settings.json"));
+  if (!installed || !settings) return false;
+  const records = installed.plugins;
+  const enabled = settings.enabledPlugins;
+  if (!records || typeof records !== "object") return false;
+  if (!enabled || typeof enabled !== "object") return false;
+  const self = identify(root, records);
+  if (!self) return false;
+  return enabled[`${MODULE_PLUGIN}@${self.marketplace}`] === true;
+}
+
+/**
+ * Where a sibling plugin of this marketplace is installed, by name — the
+ * install record's path for `<name>@<marketplace>`, with `marketplace`
+ * read off this plugin's own record. Null when either record is missing.
+ */
+function siblingInstallPath(name, opts = {}) {
+  const dir = opts.configDir || configDir();
+  const root = opts.pluginRoot || pluginRoot();
+  const installed = readJson(path.join(dir, "plugins", "installed_plugins.json"));
+  const records = installed && installed.plugins;
+  if (!records || typeof records !== "object") return null;
+  const self = identify(root, records);
+  if (!self) return null;
+  const entries = records[`${name}@${self.marketplace}`];
+  if (!Array.isArray(entries)) return null;
+  const at = entries
+    .map((e) => e && e.installPath)
+    .find((p) => typeof p === "string" && fs.existsSync(p));
+  return at || null;
 }
 
 function parsePayload(raw) {
@@ -213,20 +256,24 @@ function isMain(moduleUrl) {
 }
 
 export {
+  MODULE_PLUGIN,
   TABLE_HEADER,
   deriveProtocols,
-  functionHooksOn,
+  hooksModuleCarries,
+  identify,
   isMain,
   parsePayload,
   parseTable,
   renderTable,
   selectProtocol,
+  siblingInstallPath,
 };
 
-// Run directly, print the table: the function-hooks module derives the
-// catalog by running this file on the host, since the module's own file
-// access stops at the working directory and the install record sits under
-// the config directory. Empty output on every shortfall.
+// Run directly, print the table: the route-module plugin's hooks module
+// derives the catalog by running this file on the host (through its
+// scripts/catalog.mjs), since a module's own file access stops at the
+// working directory and the install record sits under the config directory.
+// Empty output on every shortfall.
 if (isMain(import.meta.url)) {
   const table = renderTable(deriveProtocols());
   if (table) process.stdout.write(table + "\n");

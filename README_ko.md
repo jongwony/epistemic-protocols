@@ -34,6 +34,8 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 claude plugin install route@epistemic-protocols
 ```
 
+`route-module`은 같은 트리거를 Claude Code 훅 모듈로 실은 것입니다 — 얼리 액세스, `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` 뒤에서만, Codex용은 아닙니다. `route`를 의존으로 끌어옵니다. [route-module](./route-module)을 보세요.
+
 `/onboard`를 실행하세요 — 최근 세션 기반으로 빠른 추천을 받고, 원하면 시나리오, 실행, 퀴즈를 통한 가이드 학습으로 이어갑니다.
 
 ### Codex
