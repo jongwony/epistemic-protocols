@@ -16,8 +16,6 @@ Invoke this skill when:
 
 Skip when:
 - Guided learning with practice and quizzes (use `/onboard`)
-- Session analytics and growth analysis (use `/report`)
-- Full coverage dashboard (use `/dashboard`)
 
 ## Argument Handling
 

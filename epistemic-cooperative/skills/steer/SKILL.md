@@ -38,7 +38,6 @@ Skip when:
 - The audit target is past protocol contract integrity rather than calibration drift in Cognitive Partnership Move
 - The session contains too few calibration moves to support audit (Phase 0 deactivates with no-op note)
 - The user wants in-conversation abstraction crystallization without rule inscription (use `/induce` directly)
-- The user wants accumulated session analytics without profile-update focus (use `/report` or `/dashboard`)
 
 ## Distinction from Adjacent Skills
 

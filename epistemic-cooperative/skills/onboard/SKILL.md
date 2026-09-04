@@ -17,7 +17,6 @@ Invoke this skill when:
 - Re-onboarding after new protocols are added or workflow changes
 
 Skip when:
-- User wants analytical report with evidence and HTML artifact (use `/report`)
 - User already knows which protocol to use (direct invocation)
 - Quick single-protocol question (answer directly)
 
@@ -42,11 +41,11 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 | 4→Q. Next | Main | Gate | Quick path: simplified navigation |
 | 4→5 LOOP | Main | Gate | Targeted path: post-trial navigation |
 | 5. Quiz | Main | Gate | Targeted path: Socratic protocol recognition quiz |
-| 6. Guide | Main | Gate | Targeted path: summary + /report CTA |
+| 6. Guide | Main | Gate | Targeted path: summary + next protocol suggestion |
 
 ## Data Sources
 
-Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with detection methods and rationale, refer to `/report` SKILL.md.
+Compact mapping for inline use.
 
 | Protocol | Cluster | When to Use | Key Patterns |
 |----------|---------|-------------|-------------|
@@ -135,7 +134,7 @@ From collected metadata, infer:
 
 If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/gap`, `/frame`).
 
-**Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
+**Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization.
 
 ### Phase 2a: Pick-1 (Quick Path — Single Recommendation)
 
@@ -194,8 +193,6 @@ Branch: Try it now → Phase 4 (quick trial), Learn more about this recommendati
 1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/elicit`, `/gap`, `/frame`).
 2. **Targeted sub-path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
 3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/elicit`, `/gap`, `/frame`). Proceed immediately without blocking the onboarding flow.
-
-For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
 
 ### Phase 3: Scenario (Targeted Path — Intervention Point)
 
@@ -264,7 +261,7 @@ Present via gate interaction:
   - Try a different protocol
   - Continue to full onboarding
 
-Branch: That's enough for today → end session with brief closing (include text mention: For deeper analysis, try `/report`.), Try a different protocol → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (all 3 recommended in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
+Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (all 3 recommended in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
@@ -371,15 +368,13 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
    Present the Epistemic Concern Clusters from `references/workflow.md`. Highlight protocols the user experienced with emphasis (e.g., bold or `★`).
 
-3. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
+3. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring related protocols in the same cluster.
 
-4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring related protocols in the same cluster.
-
-5. **Advanced Usage** (bonus tips after main guide):
+4. **Advanced Usage** (bonus tips after main guide):
 
    Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/apportion`, show the three-step chain: context → decision audit → unit apportionment (inquire → gap → apportion).
 
-6. **Continue exploring** (when MAP results contain unexplored protocols):
+5. **Continue exploring** (when MAP results contain unexplored protocols):
 
    Present via gate interaction:
    - Text: "Want to experience another protocol?"
@@ -423,9 +418,9 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
 2. **One at a time**: Quick path shows exactly 1 recommendation, 1 evidence card, 1 trial.
 3. **Onboarding Pool**: `/elicit`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/apportion`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
-4. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
+4. **Experience over analysis**: This skill teaches through doing; its output is the trial and the terminal summary.
 5. **Privacy**: Never transmit session data externally. All analysis runs locally.
-6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.
+6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan.
 7. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
 8. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
 9. **No auto-install**: Guide installation but never install plugins automatically.

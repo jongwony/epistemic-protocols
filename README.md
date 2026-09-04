@@ -94,7 +94,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, reference-grounded prompt-artifact formation, scoped empirical validation, and advisor-checked decision gates |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/steer`, `/realign`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check`, `/review-loop`, `/lens-review`, `/place`, `/white-bear`, `/zero-shot`, `/goal-research`, `/image-companion` | Protocol learning, deficit recognition fit review, handbook reference, project profile recalibration, project guide direction-line fusion, work-unit triage, reference-grounded prompt-artifact formation, scoped empirical validation, advisor-checked decision gates, review loops and multi-lens PR review, instruction-prose placement and audit, and Codex-delegated research and companion images |
 | [Route](./route) | `/route` | Context-driven protocol routing — a per-prompt hook directive has the agent invoke the one core protocol whose deficit the accumulated context shows |
 
 **Three discovery modes coexist** (none replaces the others):
@@ -106,10 +106,6 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 **Context-driven routing** (separate plugin):
 
 - `/route` — the plugin's `UserPromptSubmit` hook places a short directive beside each prompt; when the accumulated context shows a deficit exactly one loaded core protocol resolves, the agent invokes that protocol (its own first gate holds the user's judgment), nudges when several fit, and stays silent when none
-
-**Retrospective audit** (separate category from the discovery trio above):
-
-- `/misuse` — retrospective contract violation scan (detects past `/ground` and `/induce` protocol violations; surfaces structured violation records for user-constituted review)
 
 **Project guide direction-line fusion** (three-horizon Horizontverschmelzung):
 
@@ -126,6 +122,19 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 **Scoped empirical validation**:
 
 - `/reduced-space-test` — decompose a target↔surrogate equivalence claim into verifiable facets, bound a user-synchronized stand-in test space with its residual complement (composes `/bound`), capture evidence inside it (composes `/inquire`), and carry the uncovered complement forward; an orchestration utility that scopes the resulting claim to the tested conditions rather than asserting absolute equivalence, with no new protocol or graph node
+
+**Review and prose audit**:
+
+- `/review-loop` — convergence-paced review-resolve loop over a change and its governing surfaces: drives a pluggable review source (`codex` or `code-review`), verifies each finding against the codebase and the base it is measured from, auto-applies mechanical fixes, gates the judgment calls, and re-reviews until every finding is disposed of
+- `/lens-review` — one-pass multi-perspective PR review: `/frame` derives the lenses that fit the diff plus a gap scan, each lens is analyzed in isolation, findings are cross-verified, and the survivors are posted as one consolidated PR comment
+- `/place` — read-only placement audit routing each clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and setting its enforcement axis
+- `/white-bear` — read-only prose audit for unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring)
+- `/zero-shot` — read-only prose audit for principle statement over anchoring examples
+
+**Codex-delegated utilities**:
+
+- `/goal-research` — delegate a research question to a background Codex CLI session that scopes it with Codex's builtin `goal` and verifies externally through Aitesis (`$inquire`), surfacing the full trace back
+- `/image-companion` — a symbolic slide-ready image for a passage in a document, kept visually consistent with the artifact's other companion images; composes `/forge` for grounding and Codex for generation
 
 ## Design
 

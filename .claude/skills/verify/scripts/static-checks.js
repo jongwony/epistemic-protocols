@@ -1918,7 +1918,7 @@ function liveProse(span) {
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
 // framing readout of the work in play) to an enforcement channel:
 // The glyph denylist is scoped by decision, not by what a file category could
-// establish about a glyph's meaning: utility skills (e.g. /dashboard) may
+// establish about a glyph's meaning: utility skills may
 // legitimately render bars and are out of it, and the scope otherwise mirrors
 // checkEmitLoadDiscipline. Why a guard exists here at all, and why its kernel
 // is a positive statement rather than a prohibition: references/verification.md,
