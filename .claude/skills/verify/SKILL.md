@@ -134,10 +134,6 @@ Consult `references/review-checklists.md` for:
 
 Verification may trigger perspective selection if findings require analysis approach decision.
 
-### With Syneidesis
-
-Critical findings surface as high-stakes gaps. Syneidesis gap detection may augment verification.
-
 ### Standalone Usage
 
 Most common pattern: invoke `/verify` before `/commit` command.

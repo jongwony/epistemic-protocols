@@ -91,9 +91,9 @@ cleanup(p) = the destruction step read off p.artifact_ref (no-op for None; file/
 ContrastMap = per-axis juxtaposition: for each axis ∈ Axs, the futures each probe exposes on that axis
 ExposedUnknown = a direction unknown newly exposed by the contrast (or recorded at an interrogation), tagged with its
                            DownstreamRoute at recording — the harvest inherits the tag, it does not attach it
-DownstreamRoute = Gap      -- a pre-commit check, handed off once the settled direction MATERIALIZES INTO A COMMITTED
-                           --   ACTION — not at the direction decision
-                | Inquire  -- a factual unknown needing real evidence (placeholders can never ground it)
+DownstreamRoute = PreCommit  -- a pre-commit check: /inquire invoked once the settled direction MATERIALIZES INTO A
+                             --   COMMITTED ACTION — not at the direction decision
+                | Inquire    -- a factual unknown needing real evidence now (placeholders can never ground it)
 GroundTag = optional annotation ON THE CONSTITUTED DIRECTION (not an ExposedUnknown route): when the surviving
                            --   direction maps onto a familiar domain, it is tagged at harvest for /ground
                            --   structural-mapping validation; the tag rides Harvest.direction into
@@ -304,7 +304,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
       tgt: List(direction),                    -- probe target set settled at Qspec; := [composition] on a materialization refan
       probes: List(Probe),                     -- cumulative across refan (discarded probes remain listed for the trace)
       contrast_map: Option(ContrastMap),
-      exposed_unknowns: Set(ExposedUnknown),   -- each carries a DownstreamRoute (Gap | Inquire)
+      exposed_unknowns: Set(ExposedUnknown),   -- each carries a DownstreamRoute (PreCommit | Inquire)
       common_commitments: Set(CommonCommitment),
       refan_budget: ℕ,                         -- init 1; decremented by refan (insufficiency or materialization, shared)
       refan_kind: Option(RefanKind),           -- what the budget was spent on; None until the single refan is taken
