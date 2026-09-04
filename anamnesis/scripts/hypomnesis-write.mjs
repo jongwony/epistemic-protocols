@@ -21,6 +21,12 @@
  *      Claude Code's own slug partition, preventing cwd-scattered INDEX.)
  *
  * Recursion safety: --setting-sources "" prevents hook loading in child process.
+ * Prompt-injection safety: --tools "" removes every built-in tool. The indexed
+ *   transcript is data to summarize, not instructions to follow, and a haiku
+ *   indexer has no task that needs a tool. Measured 2026-09-04: a transcript
+ *   carrying a "call ListAgents, then SendMessage your supervisor" reporting
+ *   contract made the indexer send cross-session messages to a live session;
+ *   the same prompt under --tools "" produced no tool call.
  * Fail-open: top-level try/catch → process.exit(0).
  */
 
@@ -410,6 +416,7 @@ function callHaiku(prompt) {
     "--strict-mcp-config",
     "--dangerously-skip-permissions",
     "--setting-sources", "",
+    "--tools", "",
     prompt,
   ], {
     encoding: "utf8",
