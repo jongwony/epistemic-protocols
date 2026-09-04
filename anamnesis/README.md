@@ -30,8 +30,11 @@ The shared plugin hook records Codex Stop, PreCompact, and SessionEnd events wit
 | **Anamnesis** | **AI-guided** | **`RecallAmbiguous → RecalledContext`** |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Periagoge | AI-guided | `AbstractionInProcess → CrystallizedAbstraction` |
 
 **Anamnesis vs Aitesis** — the closest neighbor. Both involve information access, but the phenomenological test differs. Aitesis discovers facts the user does not know (`ContextInsufficient` — "I need information"). Anamnesis verifies context the user vaguely knows exists (`RecallAmbiguous` — "I know this was discussed, but where?"). Empty intention seeking fulfillment → Anamnesis; no intention at all regarding the topic → Aitesis.
+
+**Anamnesis vs Periagoge** — the boundary above one session. A concept prior sessions already settled is recognized here, as the unit above any one session; a concept still forming from cases that have not yet been named is crystallized by Periagoge (`/induce`). Recognition of what was settled → Anamnesis; formation of what is not yet named → Periagoge.
 
 ## Protocol Flow
 
@@ -67,6 +70,7 @@ The six dimensions of the `MarkerProfile` — used to rank recall candidates and
 **Skip**:
 - When you already know the session ID, file path, or decision — direct lookup is cheaper
 - When no prior context exists (novel domain — use Aitesis / `/inquire` instead)
+- When the concept is not yet formed and must be crystallized from cases (use Periagoge / `/induce` instead)
 - When the request is to generate, not to remember
 
 ## Install
