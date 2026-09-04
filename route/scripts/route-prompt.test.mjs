@@ -12,9 +12,23 @@ import { TABLE_HEADER } from "./route-protocols.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-prompt.mjs");
 
-function runHook(input) {
-  return spawnSync(process.execPath, [SCRIPT], { input, encoding: "utf8" });
+// The flag is pinned off unless a test sets it: a shell that runs the
+// function-hooks module would otherwise make every spawned hook yield.
+function runHook(input, env = {}) {
+  return spawnSync(process.execPath, [SCRIPT], {
+    input,
+    encoding: "utf8",
+    env: { ...process.env, CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "", ...env },
+  });
 }
+
+test("hook process yields — exit 0, empty stdout — where the function-hooks module carries the directive", () => {
+  const r = runHook(JSON.stringify({ hook_event_name: "UserPromptSubmit", prompt: "x" }), { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "1" });
+  assert.equal(r.status, 0);
+  assert.equal(r.stdout, "");
+  const off = runHook(JSON.stringify({ hook_event_name: "UserPromptSubmit", prompt: "x" }), { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "0" });
+  assert.equal(JSON.parse(off.stdout).hookSpecificOutput.additionalContext, DIRECTIVE);
+});
 
 test("directive carries the three firing conditions and stays short", () => {
   // (a) deficit a loaded core protocol resolves → invoke /route; the table

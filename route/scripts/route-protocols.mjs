@@ -171,6 +171,28 @@ function renderTable(protocols) {
   return `${TABLE_HEADER}\n${rows}`;
 }
 
+/**
+ * Rows of a rendered table, `{ command, deficit }` each; the header is
+ * skipped and a line that is not a `/command Deficit` row is ignored.
+ */
+function parseTable(text) {
+  const rows = [];
+  for (const line of String(text ?? "").split("\n")) {
+    const m = /^\/([A-Za-z0-9_-]+)[ \t]+(\w+)$/.exec(line.trim());
+    if (m) rows.push({ command: m[1], deficit: m[2] });
+  }
+  return rows;
+}
+
+/**
+ * True when the host runs this plugin's function-hooks module, which then
+ * carries the trigger and the catalog itself: the command hooks yield so the
+ * same text is not injected twice. Settings `env` reaches hook processes.
+ */
+function functionHooksOn(env = process.env) {
+  return env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS === "1";
+}
+
 function parsePayload(raw) {
   try {
     const parsed = JSON.parse(String(raw ?? "").trim());
@@ -190,4 +212,23 @@ function isMain(moduleUrl) {
   }
 }
 
-export { TABLE_HEADER, deriveProtocols, isMain, parsePayload, renderTable, selectProtocol };
+export {
+  TABLE_HEADER,
+  deriveProtocols,
+  functionHooksOn,
+  isMain,
+  parsePayload,
+  parseTable,
+  renderTable,
+  selectProtocol,
+};
+
+// Run directly, print the table: the function-hooks module derives the
+// catalog by running this file on the host, since the module's own file
+// access stops at the working directory and the install record sits under
+// the config directory. Empty output on every shortfall.
+if (isMain(import.meta.url)) {
+  const table = renderTable(deriveProtocols());
+  if (table) process.stdout.write(table + "\n");
+  process.exit(0);
+}

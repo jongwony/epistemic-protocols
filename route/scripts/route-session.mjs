@@ -51,7 +51,7 @@
  */
 
 import fs from "node:fs";
-import { deriveProtocols, isMain, parsePayload, renderTable } from "./route-protocols.mjs";
+import { deriveProtocols, functionHooksOn, isMain, parsePayload, renderTable } from "./route-protocols.mjs";
 
 // Sources on which prior context is not in view: the session is new, or it
 // was reset. The deficit this opener points at sits in the request, not in
@@ -107,6 +107,9 @@ function render(raw, env) {
 export { THIN_OPENER, TRIMMED_SOURCES, buildContext, opener, render };
 
 if (isMain(import.meta.url)) {
+  // The function-hooks module (hooks/route.ts) carries this when the host
+  // runs it; emitting here too would inject the same text twice.
+  if (functionHooksOn()) process.exit(0);
   let raw = "";
   try { raw = fs.readFileSync(0, "utf8"); } catch {}
   process.stdout.write(render(raw) + "\n");

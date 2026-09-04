@@ -26,9 +26,15 @@ function runHook(input, env = {}) {
   return spawnSync(process.execPath, [SCRIPT], {
     input,
     encoding: "utf8",
-    env: { ...process.env, ...env },
+    env: { ...process.env, CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "", ...env },
   });
 }
+
+test("hook process yields — exit 0, empty stdout — where the function-hooks module carries the table", () => {
+  const r = runHook(JSON.stringify({ source: "startup" }), { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "1" });
+  assert.equal(r.status, 0);
+  assert.equal(r.stdout, "");
+});
 
 // ---------------------------------------------------------------------------
 // Fixture tree: a marketplace of plugins laid out the way installed_plugins
