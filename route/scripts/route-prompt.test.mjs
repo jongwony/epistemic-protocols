@@ -15,17 +15,30 @@ function runHook(input) {
   return spawnSync(process.execPath, [SCRIPT], { input, encoding: "utf8" });
 }
 
-test("directive carries the three firing conditions and stays short", () => {
-  // (a) deficit a loaded core protocol resolves → invoke /route
-  assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
-  assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
-  // (b) active-protocol exclusion, with "active" defined in place: invoked
+test("directive carries the firing conditions and stays short", () => {
+  // (a) the screen is catalog-free: symptoms of the interaction falling
+  //     short, readable off the turn without any protocol's deficit in hand
+  assert.match(DIRECTIVE, /Invoke \/route when this turn shows the interaction itself falling short/);
+  assert.match(DIRECTIVE, /neither side has defined/);
+  assert.match(DIRECTIVE, /not yet partitioned/);
+  // (b) matching by protocol is /route's, not the screen's — a screen that
+  //     asks which protocol resolves it needs a catalog the agent may lack
+  assert.match(DIRECTIVE, /Which protocol resolves it is \/route's to decide; do not screen by protocol yourself/);
+  // (c) active-protocol exclusion, with "active" defined in place: invoked
   //     and not yet converged/deactivated — leftover skill prose is not active
   assert.match(DIRECTIVE, /Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated/);
   assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
-  // (c) silence otherwise
+  // (d) silence otherwise
   assert.match(DIRECTIVE, /Otherwise stay silent/);
-  assert.ok(DIRECTIVE.split("\n").length <= 4);
+  assert.ok(DIRECTIVE.split("\n").length <= 5);
+});
+
+test("directive does not screen on a catalog the agent may not hold", () => {
+  // The falsified premise: a host's listing may carry bare identifiers, so a
+  // condition phrased over "a deficit a loaded protocol resolves" asks for a
+  // match against a catalog absent at prompt time. Guard the old phrasing out.
+  assert.doesNotMatch(DIRECTIVE, /accumulated context shows an interaction deficit/);
+  assert.doesNotMatch(DIRECTIVE, /loaded core epistemic protocol resolves, invoke/);
 });
 
 test("parsePayload tolerates empty and malformed stdin", () => {

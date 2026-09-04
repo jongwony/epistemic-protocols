@@ -2,11 +2,20 @@
 /**
  * UserPromptSubmit hook — emit the per-prompt routing directive.
  *
- * The agent on the loop already holds every loaded protocol's description,
- * yet a passive description does not trigger invocation. This hook puts one
- * short directive beside each user prompt carrying the firing conditions:
- * invoke /route when the accumulated context shows a deficit a loaded core
- * protocol resolves, skip while a protocol is active, otherwise stay silent.
+ * A host's loaded-skills listing may carry each skill's description, or it
+ * may carry the command identifiers alone. Where it carries identifiers
+ * alone, the agent on the loop holds no statement of what deficit any
+ * protocol resolves, so a screen phrased as "does the context show a deficit
+ * a loaded core protocol resolves" asks for a judgment against a catalog
+ * that is not in context at prompt time, and never evaluates true.
+ * Where a host rations that listing under a size budget, the descriptions it
+ * drops first belong to the skills the user has not been invoking — the set
+ * Route exists to reach — so the shortfall is worst exactly where it costs
+ * most, and it is silent and partial rather than all-or-nothing.
+ * The screen here is therefore catalog-free: symptoms that the interaction
+ * itself is falling short, which the agent reads off the turn it just had.
+ * Which protocol resolves the symptom is /route's to work out, after
+ * invocation, where the candidates' own descriptions can be resolved.
  * "Active" is defined in the directive itself: a protocol invoked this
  * session that has not yet converged or deactivated. A protocol's skill
  * prose stays in context after it converges, and without the definition the
@@ -30,7 +39,8 @@ import { fileURLToPath } from "node:url";
 // the skill is invoked, so this directive is the surface present at decision
 // time. It is injected every turn — keep it to a few short lines.
 const DIRECTIVE = [
-  "[route] When the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
+  "[route] Invoke /route when this turn shows the interaction itself falling short — a term in play that neither side has defined, an option set over a space not yet partitioned, a misfit or mismatch you just named, the same ground being re-covered.",
+  "Which protocol resolves it is /route's to decide; do not screen by protocol yourself.",
   "Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated.",
   "A converged protocol's prose still in context does not make it active.",
   "Otherwise stay silent.",
