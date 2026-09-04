@@ -15,42 +15,37 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 ── FLOW ──
 Anamnesis(V) → Detect(V) →
   not-empty_intention(V): relay(finding) → proceed (no activation)
-  empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine, attempts = 0) →
-    Scan_{Track}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), trace(V)) → Rank(C[], trace(V)) →
-    |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
-    |C[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
-      ExpandFullText: set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → continue
+  empty_intention(V): Classify(V, Σ) → InputType, Unit → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} → set(scan_scope = spine, attempts = 0) →
+    Scan_{Track,Unit}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → Rank(O[], trace(V)) →
+    |O[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
+    |O[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
+      ExpandFullText: set(scan_scope = full_text) → Scan_{Track,Unit}(SSOT_body, V) → Rank(O[], trace(V)) → continue
       StopAtSpine: NullMatch → inform(V, Σ) → deactivate
-    |C[]| = 0 ∧ attempts > 0 ∧ fulltext_scanned: NullMatch → inform(V, Σ) → deactivate
-    |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
-               O[] := supra ? compose(C[], Σ) : C[]   -- the Phase 2 object (Recognizable): the candidates as scanned, or the units they compose into (── SUPRA-SESSION COMPOSITION ──)
-               supra ∧ |O[]| = 0 ∧ attempts < max: Probe(V, Σ) → Qs(rescope) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan   -- composed-empty: candidates present, no unit joins them; the probe's dimensions are boundary, scope, unit shape
-               supra ∧ |O[]| = 0 ∧ attempts = max ∧ presented_units ≠ ∅: surface(best(presented_units)) → deactivate   -- AttemptsExhausted, composed-empty form: a unit was presented earlier, so the best one in hand is surfaced
-               supra ∧ |O[]| = 0 ∧ attempts = max ∧ presented_units = ∅: NullMatch → inform(V, Σ) → deactivate   -- composed-empty NullMatch: no unit ever joined the candidates across the budget
-               |O[]| > 0: [O[top] : HigherUnit] confirmations := Confirm(surfaced_claims(O[top])) → presented := presented ∪ {O[top]} →   -- Confirm before any Phase 2 output; presented is the ever-presented witness
-               SingleObvious(O[]): emit(render(O[top]) ⊕ divergence_affordance) → recall_complete → converge   -- Extension (relay): high-confidence single recognizable, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
+    |O[]| = 0 ∧ attempts > 0 ∧ fulltext_scanned: NullMatch → inform(V, Σ) → deactivate
+    |O[]| > 0: backtrace_parent(c) ∀ c ∈ members(O[]) : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork member's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
+               Confirm(O[top])   -- each claim O[top]'s narrative asserts as fact, read against the member record it originates from, before any Phase 2 output; no claim at session scope, so no read
+               SingleObvious(O[]): emit(ClueVector_prose(O[top]) ⊕ divergence_affordance) → recall_complete → converge   -- Extension (relay): high-confidence single recognizable, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
                ¬SingleObvious(O[]): Qc(O[top], evidence, framing) → Stop → R →
-      Recognize(o): recall_complete → emit(render(o)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
-      (Refine ∨ Reorient(d)) ∧ attempts = max: surface(O[top]) → deactivate      -- AttemptsExhausted: recall-try budget spent with a recognizable in hand
+      Recognize(o): recall_complete → emit(ClueVector_prose(o)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
+      (Refine ∨ Reorient(d)) ∧ attempts = max: surface(O[top]) → deactivate      -- AttemptsExhausted: recall-try budget spent with recognizables in hand
       Refine ∧ attempts < max: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → re-scan
-      Reorient(d) ∧ attempts < max: rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1                 -- orthogonal dimension shift
+      Reorient(d) ∧ attempts < max: rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1                 -- orthogonal dimension shift; a description naming a different whole re-classifies V.unit
 
 ── MORPHISM ──
 VagueRecall
   → detect(empty_intention)              -- recognize vague recall state
-  → classify(input_type)                 -- InputType ∈ {StructuredIdentifier, NaturalRecall, Mixed}
+  → classify(input_type, unit)           -- InputType ∈ {StructuredIdentifier, NaturalRecall, Mixed}; Unit ∈ {session, line, topic, concept} — the granularity the intention names
   → dispatch(input_type)                 -- Track ∈ {entropy, salience, hybrid}
-  → scan(INDEX ⊕ SSOT_spine, Track, recall_trace)  -- compact index + raw-record spines, track-specific (see STORE TOPOLOGY)
-  → rank(candidates, recall_trace)       -- order by relevance
+  → scan(INDEX ⊕ SSOT_spine, Track, Unit, recall_trace)  -- compact index + raw-record spines, track-specific (see STORE TOPOLOGY); above session scope the candidates are joined into recognizables by read-time inferred edges (── SCAN ABOVE SESSION SCOPE ──)
+  → rank(recognizables, recall_trace)    -- order by relevance; assigns confidence
   → probe(user)?                         -- required before a zero-result may terminate or expand
   → expand(SSOT_body, user)?             -- only after an enriched spine-scope miss and StoreExpansion
-  → rank(expanded_candidates, recall_trace)?
-  → backtrace_parent(candidate)          -- when fork_marker: deterministic parent identification → parent_pointer, parent_cwd (recovered from the candidate's own record; ≠ user-described Reorient)
-  → compose(candidates)?                 -- when supra_session: the candidates compose into the units above one session (── SUPRA-SESSION COMPOSITION ──); the object presented is then a unit
-  → confirm(surfaced_claims)?            -- when the object is a unit: each claim its narrative will assert, checked against its originating candidate's own record before surfacing
-  → present(recognizable, Socratic)      -- Socratic presentation of a candidate or a composed unit; absorbed into the emit for SingleObvious (high-confidence single recognizable) — Extension, no turn yield
+  → rank(expanded_recognizables, recall_trace)?
+  → backtrace_parent(member)             -- when fork_marker: deterministic parent identification → parent_pointer, parent_cwd (recovered from the member's own record; ≠ user-described Reorient)
+  → confirm(recognizable)                -- each claim the narrative asserts as fact, read against the member record it originates from; no read at session scope
+  → present(recognizable, Socratic)      -- Socratic presentation; absorbed into the emit for SingleObvious (high-confidence single recognizable) — Extension, no turn yield
   → recognize(recognizable, user)        -- synthesis of identification (Husserl CM §§38-39); for SingleObvious, realized as silence-default behind a divergence-only affordance (non-divergence constitutes recognition)
-  → emit(render(recognizable))           -- NL rendering to session text: ClueVector_prose for a candidate, HigherUnit_prose for a unit
+  → emit(ClueVector_prose)               -- NL rendering to session text
   → RecalledContext
 requires: empty_intention(V)              -- phenomenological trigger
 deficit:  RecallAmbiguous                 -- activation precondition (Layer 1/2)
@@ -58,12 +53,13 @@ preserves: Store                          -- SSOT ⊕ INDEX are read-only; V is 
 invariant: Recognition over Retrieval
 
 ── TYPES ──
-V                = VagueRecall { trace: RecallTrace, enrichments: List(Hint), input_type: InputType }
+V                = VagueRecall { trace: RecallTrace, enrichments: List(Hint), input_type: InputType, unit: Unit }
 RecallTrace      = { keywords: Set(String), temporal: Optional(String),
                      associations: Set(String), identifiers: Set(IdentifierTuple) }
 Hint             = String   -- user recall context from Socratic probe
 InputType        ∈ {StructuredIdentifier, NaturalRecall, Mixed}      -- classified from V + Σ
 Track            ∈ {entropy, salience, hybrid}                       -- dispatched from InputType
+Unit             ∈ {session, line, topic, concept}                   -- the granularity the intention names, classified from V + Σ alongside InputType; rebound by a granularity answer (Qs) or Reorient(d). Closed on a stated premise: the three values above session are the three ways candidates join — succession, shared topic, a settled concept — and a recall matching none of them is at session scope
 Source           = String   -- opaque: store location identifier (substrate-agnostic)
 IdentifierTuple  = { literal: String, source: Source, source_namespace: String, precision: ℝ[0,1] } -- entropy-track anchor
                   -- source_namespace determines which claim kinds it can authorize (via the registry); a literal anchors ranking only when its namespace authorizes the recall trace's claim kind
@@ -82,7 +78,7 @@ Candidate        = { session_id: Optional(SessionId),
                      keywords: Set(String),
                      fingerprint: Prose,
                      cross_refs: List(Anchor),
-                     confidence: ∈ {low < medium < high},   -- totally ordered tier (cf. EvidenceMode); grounds the SingleObvious confidence = high guard and the confidence < high gate
+                     confidence: ∈ {low < medium < high},   -- totally ordered tier (cf. EvidenceMode); at session scope it is the recognizable's confidence, so it grounds the SingleObvious confidence = high guard and the confidence < high gate
                      evidence_mode: Optional(EvidenceMode),       -- highest tier among the signals that matched this candidate at scan time; Null ⇒ INDEX entry predates evidence-mode capture — Null is NEUTRAL in ranking (no contribution), never a penalty
                      source_scan: Optional(SourceScan),           -- capture-time integrity of the record's own source, published by the writer; Null ⇒ the entry predates integrity capture. NEUTRAL in ranking exactly as evidence_mode is: it qualifies what the emit says about a candidate, never what the candidate scores
                      fork_marker: Bool,                          -- true ⇒ the id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT); its own id is not a valid resume handle. Invariants: fork_marker = false ⇒ parent_pointer = Null ∧ parent_cwd = Null ; parent_pointer = Null ⇒ parent_cwd = Null (parent_cwd requires parent_pointer; parent_pointer present with parent_cwd = Null is valid — parent identified but its cwd is unknown)
@@ -95,32 +91,33 @@ StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, c
                   -- ref stores the canonicalized literal (issue/PR numbers normalized to "#N", memory paths prefixed "memory/"); canonical-form grep over INDEX is form-invariant (a search for "#309" hits ref: "#309") — the canonical form is the dedup key, so raw surface variants ("PR 309") collapse into it
 LegacyAnchor     = String   -- opaque: memory path, URL, session ID, doc path — entries written before structured anchors; read as kind-unknown extends edges, never rejected, no migration
 Prose            = String   -- source-agnostic NL description
-Rank             = (List(Candidate), RecallTrace) → List(Candidate)   -- track-primary signal dominates; evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
+Recognizable     = { unit: Unit, members: NonEmpty(Candidate), narrative: Prose,
+                     confidence: ∈ {low < medium < high},   -- assigned by Rank: the member's own Candidate.confidence at session scope; recall-trace alignment and edge connectivity above it; capped at medium by Confirm while any claim stays unattested. Grounds the SingleObvious guard at every scope
+                     claims: Set(Claim × Verdict) }          -- the Phase 2/3 object at every scope; unit = session ⟺ |members| = 1. At session scope the narrative is the member's fingerprint and claims = ∅; above it the members are joined by read-time inferred edges and the narrative is in the unit's shape (── SCAN ABOVE SESSION SCOPE ──)
+Claim            = { content: Prose, source: Candidate }   -- a reading the narrative asserts as fact beyond any one member's own index entry (origin attribution, coinage timing, a quoted decision), sourced to the ONE member it originates from; written unattested by the scan, so a claim is never asserted before its record is read
+Verdict          ∈ {confirmed, corrected, unattested}   -- confirmed ⇒ assert as settled; corrected ⇒ assert the record's value and discard the index reading; unattested ⇒ provisional or omitted, never asserted as fact
+Confirm          = Recognizable → Recognizable   -- opens each claim's source record through its runtime reference and writes the verdict on the claim; |claims| reads, bounded by what the narrative will assert, never by the store; a member with no record locator leaves its claims unattested; then confidence := min(confidence, medium) while any claim is unattested. Idempotent: a claim already read is not re-read
+O[]              = List(Recognizable)   -- the scan's ranked result at V.unit; O[top] is its head; members(O[]) the candidates across it
+Rank             = (List(Recognizable), RecallTrace) → List(Recognizable)   -- track-primary signal dominates; above session scope edge connectivity joins it (references/supra-session.md); evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
 Probe            = (V, Σ) → List(SocraticQuestion)
-SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
-supra_session    = predicate; supra_session(V, C[], Σ) ≡ the recall names a whole above one session (a line of work, a topic, a settled concept) ∨ C[] falls on one line across sessions   -- judged from V + Σ + the scan result; the binding condition of ── SUPRA-SESSION COMPOSITION ──, abbreviated `supra` in guards
-HigherUnit       = a unit composed over Candidate — ConnectedSessionChain | TopicCluster | SedimentedConceptNode, typed in ── SUPRA-SESSION COMPOSITION ── (references/supra-session.md)
-Recognizable     = Candidate | HigherUnit   -- the Phase 2/3 object. Both are processed uniformly — same gate, same answers, same budget, one rendering contract — so this is a carrier widening, not a dispatch
-O[]              = List(Recognizable)   -- O[ranked] = supra ? compose(C[ranked], Σ) : C[ranked]
-confidence       = Recognizable → {low < medium < high}   -- Candidate.confidence; lifted to a unit per references/supra-session.md
-render           = Recognizable → String   -- ClueVector_prose for a Candidate, HigherUnit_prose for a HigherUnit; the one rendering contract every emit site inherits, each surfaced claim rendered per its retained Λ.confirmations verdict
-Confirmations    = List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} })   -- Confirm's codomain (Confirm, EvidentialClaim, surfaced_claims typed in ── SUPRA-SESSION COMPOSITION ──); ∅ when the object is a Candidate. Retained in Λ.confirmations so every surfacing site — Phase 2 emit and Qc, Phase 3 emit, the exhausted surface — renders each claim per its verdict
-presented_units  ≡ { o ∈ Λ.presented : o : HigherUnit }   -- the ever-composed witness the composed-empty terminals discriminate on
-best             = Set(HigherUnit) → HigherUnit   -- highest confidence, then most recently presented
+SocraticQuestion = { dimension: ∈ {temporal, associative, contextual, granularity}, question: String }   -- granularity asks which whole is meant: one session, or the line, topic, or concept above it
+enrich           = (V, H) → V   -- H extends V.enrichments and the trace; an answer on the granularity dimension rebinds V.unit
+rebind           = (V, description, Σ) → V   -- orthogonal re-extraction of the trace; a description naming a different whole re-classifies V.unit
+traversal_scope  = the sub-graph Traverse returned with each skipped broken-link edge noted (references/supra-session.md); ∅ at session scope; reported by the NullMatch diagnosis
 R                = Recognition ∈ {Recognize(Recognizable), Refine, Reorient(description)}
 X                = StoreExpansion ∈ {ExpandFullText, StopAtSpine}
 ScanScope        ∈ {spine, full_text}   -- spine = INDEX ⊕ SSOT_spine (the initial scope); full_text additionally admits SSOT_body
 fulltext_unscanned ≡ Λ.scan_scope = spine
 fulltext_scanned   ≡ Λ.scan_scope = full_text
-SingleObvious    = predicate; SingleObvious(O[]) ≡ |O[]| = 1 ∧ confidence(O[top]) = high   -- Light-only Extension guard: the one recognizable is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|O[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate
-divergence_affordance = the mismatch channel folded into the non-yielding SingleObvious emit: names concrete adjacent recognizables (Refine — for a unit, its boundary and scope adjustments) AND offers an open free-response invitation (Reorient), keeping the full R = {Recognize, Refine, Reorient} coproduct reachable without a gate — Recognize is realized as silence-default
+SingleObvious    = predicate; SingleObvious(O[]) ≡ |O[]| = 1 ∧ confidence(O[top]) = high   -- Light-only Extension guard: the one recognizable is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|O[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate. Confirm runs first, so a recognizable resting on an unread claim is never relayed
+divergence_affordance = the mismatch channel folded into the non-yielding SingleObvious emit: names concrete adjacent recognizables (Refine — above session scope, boundary and traversal-scope adjustments) AND offers an open free-response invitation (Reorient), keeping the full R = {Recognize, Refine, Reorient} coproduct reachable without a gate — Recognize is realized as silence-default
 emitted(x)       = predicate; the relay emit(x) has fired in session text — the Extension-path convergence witness (event predicate; satisfied by the non-yielding SingleObvious emit, no turn yield)
 H                = Hint     -- answer from Socratic probe gate (Qs)
-ClueVector_prose = String
-RecalledContext  = session text containing render(o) for the recognized o   -- ClueVector_prose or HigherUnit_prose
+ClueVector_prose = String   -- the rendering of a recognizable, one contract at every emit site: the narrative in the unit's shape, each member with the source locator and resume handle its runtime reference validates, each claim per its verdict (a claim not yet read renders as unattested)
+RecalledContext  = session text containing ClueVector_prose
                -- recall establishes IDENTITY (this WAS discussed/decided), not current-reality FIDELITY (it still HOLDS). Store-currency (the INDEX entry is fresh) ⊂ fidelity-to-current-reality: a recalled decision may be superseded, a recalled path renamed, a recalled convention revised. RecalledContext describes a PAST state; downstream consumers re-verify against current state before commit rather than treating it as confirmed current context.
 NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
-AttemptsExhausted = predicate; canonical definition in ── CONVERGENCE ──   -- the recognizable-in-hand terminal, distinct from NullMatch's nothing-in-hand one
+AttemptsExhausted = predicate; canonical definition in ── CONVERGENCE ──   -- the recognizables-present terminal, distinct from NullMatch's zero-result one
 Phase            ∈ {0, 1, 2, 3}
 max              = the recall-try cap LOOP fixes   -- a bound on user attention, not a sufficiency criterion
 
@@ -138,50 +135,43 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
            [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
-           → Classify(V, Σ) → InputType → Track → set(scan_scope = spine, attempts = 0)   -- dispatch + initial scope + recall-try budget (silent)
-Phase 1: V → Scan_{Track}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- index + spine always; bodies too once ExpandFullText widened the scope, so a Refine/Reorient re-entry does not silently narrow back to spine and report a body-scoped miss [Tool]
-           backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
-           O[ranked] := supra ? compose(C[ranked], Σ) : C[ranked]   -- Phase 2 object: candidates as scanned, or the units they compose into; on the supra path compose issues read-only traversal reads across partitions [Tool]
-           supra ∧ |O[ranked]| = 0 ∧ attempts < max → Probe(V, Σ) → Qs(rescope) → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → Phase 1   -- composed-empty rescope: the same probe gate, its dimensions boundary / scope / unit shape [Tool]
-           supra ∧ |O[ranked]| = 0 ∧ attempts = max ∧ presented_units ≠ ∅ → surface(best(presented_units)) → deactivate   -- AttemptsExhausted, composed-empty form (CONVERGENCE)
-           supra ∧ |O[ranked]| = 0 ∧ attempts = max ∧ presented_units = ∅ → NullMatch → inform → deactivate   -- composed-empty NullMatch (CONVERGENCE): report traversal_scope and the broken-link notes
-           |O[ranked]| > 0 → [O[top] : HigherUnit] confirmations := Confirm(surfaced_claims(O[top])) → presented := presented ∪ {O[top]} → Phase 2   -- Confirm reads each claim's originating record before any Phase 2 output [Tool]; presented records the object reaching Phase 2
-           |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → Phase 1   -- Socratic probe gate [Tool]
-           |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X   -- store-expansion checkpoint [Tool]
-             ExpandFullText → set(scan_scope = full_text) → Scan_{Track}(SSOT_body, trace(V)) → Rank(C[], trace(V)) → C[ranked]
+           → Classify(V, Σ) → InputType, Unit → Track → set(scan_scope = spine, attempts = 0)   -- dispatch + granularity + initial scope + recall-try budget (silent)
+Phase 1: V → Scan_{Track,Unit}(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → Rank(O[], trace(V)) → O[ranked]  -- index + spine always; bodies too once ExpandFullText widened the scope, so a Refine/Reorient re-entry does not silently narrow back to spine and report a body-scoped miss; above session scope the scan joins its candidates into recognizables by read-time inferred edges (── SCAN ABOVE SESSION SCOPE ──) [Tool]
+           backtrace_parent(c) ∀ c ∈ members(O[ranked]) : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the member's own record [Tool]
+           |O[ranked]| > 0 → Confirm(O[top]) → Phase 2   -- each claim O[top]'s narrative asserts as fact, read against the member record it originates from, before any Phase 2 output; no claim at session scope, so no read [Tool]
+           |O[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → set(attempts = attempts + 1) → Phase 1   -- Socratic probe gate [Tool]
+           |O[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X   -- store-expansion checkpoint [Tool]
+             ExpandFullText → set(scan_scope = full_text) → Scan_{Track,Unit}(SSOT_body, V) → Rank(O[], trace(V)) → O[ranked]
              StopAtSpine → NullMatch → inform → deactivate
-           |C[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_scanned → NullMatch → inform → deactivate
-Phase 2: SingleObvious(O[ranked]) → emit(render(O[top]) ⊕ divergence_affordance) → recall_complete → converge   -- Extension: high-confidence single recognizable, no turn yield, no [Tool] Stop; silence = Recognize
-         ¬SingleObvious(O[ranked]) → O[top] → Qc(O[top], evidence, framing) → Stop → R    -- recognition gate [Tool]; a unit's evidence carries its edges, traversal_scope, and each claim's verdict
+           |O[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_scanned → NullMatch → inform → deactivate
+Phase 2: SingleObvious(O[ranked]) → emit(ClueVector_prose(O[top]) ⊕ divergence_affordance) → recall_complete → converge   -- Extension: high-confidence single recognizable, no turn yield, no [Tool] Stop; silence = Recognize
+         ¬SingleObvious(O[ranked]) → O[top] → Qc(O[top], evidence, framing) → Stop → R    -- recognition gate [Tool]; the evidence is ClueVector_prose's content — each member's locator and handle, each claim's verdict, and above session scope the edges and traversal_scope
 Phase 3: R → integrate(R, V, Σ) →                                -- integration (track: Λ.history ⊕ (O[top], R)); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
-           Recognize(o) → render(o) → emit → converge
-           (Refine ∨ Reorient(d)) ∧ attempts = max → surface(O[top]) → deactivate   -- AttemptsExhausted (CONVERGENCE): budget spent with a recognizable in hand, no further Phase 1 re-entry
+           Recognize(o) → ClueVector_prose(o) → emit → converge
+           (Refine ∨ Reorient(d)) ∧ attempts = max → surface(O[top]) → deactivate   -- AttemptsExhausted (CONVERGENCE): budget spent with recognizables in hand, no further Phase 1 re-entry
            Refine ∧ attempts < max → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
                   → enrich(V, H) → set(attempts = attempts + 1) → Phase 1
-           Reorient(d) ∧ attempts < max → rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1               -- orthogonal re-scan (sense)
+           Reorient(d) ∧ attempts < max → rebind(V, d, Σ) → set(attempts = attempts + 1) → Phase 1               -- orthogonal re-scan (sense); re-classifies V.unit when d names a different whole
 
 ── LOOP ──
 Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; convergence is notional, so a next-turn divergence re-engages via fresh re-activation → Refine/Reorient)
   Recognize: converge
-  Refine: Socratic probing → enrich → Phase 1   -- for a unit: adjust its boundary or traversal scope
-  Reorient: rebind V with orthogonal description → Phase 1   -- for a unit: a different unit shape or recall dimension
-  composed-empty (supra, candidates present, no unit): the same Socratic probing as a rescope → enrich → Phase 1
+  Refine: Socratic probing → enrich → Phase 1   -- a granularity answer rebinds V.unit; above session scope the adjacent directions are boundary and traversal scope
+  Reorient: rebind V with orthogonal description → Phase 1   -- a different recall dimension, or a different whole (V.unit)
 
 Phase 1 spine-scope miss after probing → StoreExpansion:
   ExpandFullText: set scan_scope = full_text → scan runtime SSOT bodies → Phase 1 ranking
   StopAtSpine: NullMatch → deactivate
 
-Max 3 recall attempts; `attempts` starts at 0 in Phase 0 and each Refine enrichment, Reorient rebind, or composed-empty rescope spends one. The initial composition is the scan's own result and spends nothing — the same accounting as a single candidate (intentional: the retired supra-session contract counted its first traversal; this one counts re-tries only). Exhausted with a recognizable in hand: AttemptsExhausted — surface the best one → deactivate; on the supra path that is O[top], or the best unit presented earlier when the final re-composition is empty. A nothing-in-hand exhaustion terminates as NullMatch instead (both in CONVERGENCE).
-Convergence evidence: (VagueRecall → [enrichments] → Recognizable(recognized) → render).
+Max 3 recall attempts; `attempts` starts at 0 in Phase 0 and each Refine enrichment or Reorient rebind spends one; the scan's own result, at any scope, spends nothing. Exhausted with recognizables in hand: AttemptsExhausted — surface O[top] → deactivate. A zero-result exhaustion terminates as NullMatch instead (both in CONVERGENCE).
+Convergence evidence: (VagueRecall → [enrichments] → Recognizable(recognized) → ClueVector_prose).
 
 ── CONVERGENCE ──
 recall_complete = Recognize(o) for some o ∈ O[]                                        -- gated path (¬SingleObvious)
-               ∨ SingleObvious(O[]) ∧ emitted(render(O[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
-NullMatch = (|C[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine))   -- zero-candidate terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: one probe cycle must have run, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered
-          ∨ (supra ∧ |O[]| = 0 ∧ attempts = max ∧ presented_units = ∅)           -- composed-empty terminal: candidates exist but no unit ever joined them across the budget; the store is not empty, so the inform reports traversal_scope and the broken-link notes rather than a searched-depth miss
-AttemptsExhausted = (|O[]| > 0 ∧ attempts = max ∧ R ∈ {Refine, Reorient(d)})      -- recognizable-in-hand terminal: surface O[top] → deactivate, never NullMatch. The answer is part of the predicate, matching the branch guard in FLOW and PHASE TRANSITIONS — without it the predicate would already hold the moment a final re-scan returns candidates, terminating before Phase 2 offers the recognition the budget was spent to reach
-                  ∨ (supra ∧ |O[]| = 0 ∧ attempts = max ∧ presented_units ≠ ∅)   -- composed-empty form: the final re-composition is empty but a unit was presented earlier; surface best(presented_units) → deactivate
-progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N, units_composed: N
+               ∨ SingleObvious(O[]) ∧ emitted(ClueVector_prose(O[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
+NullMatch = |O[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- zero-result terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: one probe cycle must have run, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered. Above session scope a zero result may leave candidates in hand that no recognizable joined; the inform then reports traversal_scope beside the coverage searched
+AttemptsExhausted = |O[]| > 0 ∧ attempts = max ∧ R ∈ {Refine, Reorient(d)}      -- recognizables-present terminal: surface O[top] → deactivate, never NullMatch. The answer is part of the predicate, matching the branch guard in FLOW and PHASE TRANSITIONS — without it the predicate would already hold the moment a final re-scan returns recognizables, terminating before Phase 2 offers the recognition the budget was spent to reach
+progress(Σ) = attempts: N/max, enrichments: N, presented: N
 
 ── TOOL GROUNDING ──
 -- Realization bindings (Claude Code and Codex substrates), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
@@ -190,35 +180,32 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N, units_c
 -- The initial scan reads the compact INDEX and the raw-record spines together, unconditionally. A spine read is bounded per record, so it is not the cost the checkpoint exists to protect the user from; gating it would buy nothing and add a branch. Transcript bodies stay out — their per-record cost has no upper bound. After probe enrichment still yields no candidate, Qx presents the full-text expansion and the spine-scoped stop as differential futures. ExpandFullText admits the SSOT_body paths declared by the runtime references; StopAtSpine terminates without opening them.
 -- Scanning spines unconditionally is also what keeps a runtime reachable before its INDEX exists: a store whose writer has not yet produced entries is not blind, it is spine-only. Without this the first recall against a newly-added runtime would always miss and always require the checkpoint.
 -- Fork/sidechain binding exists in the Claude realization only. For a Claude fork candidate, references/claude.md routes to references/fork-resume.md before presentation.
--- When the recall's unit is above one session (supra_session), the Phase 2 object is O[ranked] = compose(C[ranked], Σ) — see ── SUPRA-SESSION COMPOSITION ── and read references/supra-session.md before composing. The composed-empty rescope, its two terminals, and the Confirm transition are typed in PHASE TRANSITIONS and CONVERGENCE above; the gate, its answers, and the recall-try budget are the same as for a single candidate.
+-- When V.unit is above session, Scan_{Track,Unit} joins the candidates Scan_{Track} returns into recognizables by read-time inferred edges — see ── SCAN ABOVE SESSION SCOPE ── and read references/supra-session.md before scanning at that scope. Nothing else changes: the gate, its answers, the recall-try budget, and both terminals are those typed above.
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
-Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
+Phase 0 Classify    (sense)    → Internal analysis (InputType and Unit detection from V + Σ)
 Phase 1 Scan_entropy  (observe)  → artifact read, artifact search, environment run (literal match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText. environment run is admitted for the spine read alone — a bounded head read repeated across the whole store, issued as the one command each runtime reference declares, because per-record artifact read calls do not compose at store scale; it opens no transcript body and writes nothing)
 Phase 1 Scan_salience (observe)  → artifact read, artifact search, environment run (MarkerProfile match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText; environment run bounded as above)
 Phase 1 Scan_hybrid   (observe)  → union of above
-Phase 1 Rank        (sense)    → Internal analysis (conditional: lightweight-model scoring for large candidate sets)
-Phase 1 backtrace_parent (observe) → artifact read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
-Phase 1 Traverse    (observe)  → artifact read, artifact search (supra path only: read the entry candidates' cross_refs, keywords, topic, cwd, and the recency the spine read declares, then search across partitions for records sharing them; edges are inferred at read time and never written; read-only — per references/supra-session.md)
-Phase 1 compose     (sense)    → Internal analysis (supra path only: classify the unit shape, assemble units over the traversed sub-graph, rank them by recall-trace alignment and connectivity)
-Phase 1 Confirm     (observe)  → artifact read (supra path only, after compose and before any Phase 2 output: for each claim O[top]'s narrative will assert as fact, open the originating candidate's own record at the path its runtime reference declares and record the verdict to Λ.confirmations. Bounded to the composing records and the claims to be surfaced, so it is not the store-wide body scan Qx governs. A member with no record locator yields unattested by construction; read-only)
-Phase 1 mark_presented (track) → Internal state update (presented := presented ∪ {O[top]} on the Phase 1 → Phase 2 edge; presented_units is the witness the composed-empty terminals discriminate on)
+Phase 1 Traverse    (observe)  → artifact read, artifact search (above session scope only: read the entry candidates' cross_refs, keywords, topic, cwd, and the recency the spine read declares, then search across partitions for records sharing them; edges are inferred at read time and never written; read-only — per references/supra-session.md)
+Phase 1 Assemble    (sense)    → Internal analysis (above session scope only: join the traversed sub-graph into recognizables in V.unit's shape, each claim the narrative will assert written unattested)
+Phase 1 Rank        (sense)    → Internal analysis (conditional: lightweight-model scoring for large candidate sets; assigns each recognizable's confidence)
+Phase 1 backtrace_parent (observe) → artifact read (fork member only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
+Phase 1 Confirm     (observe)  → artifact read (before any Phase 2 output: for each claim O[top]'s narrative asserts as fact, open the member record it originates from at the path its runtime reference declares and write the verdict on the claim. |claims(O[top])| reads — bounded by what will be rendered, never by the traversed sub-graph, so it is not the store-wide body scan Qx governs. No claim at session scope, so no read; a member with no record locator leaves its claims unattested; read-only)
 Phase 1 Qx          (constitution) → present (ExpandFullText: read the labeled Claude/Codex transcript bodies, at a per-record cost with no upper bound; StopAtSpine: return a NullMatch scoped to the indexes and spines already searched, without opening any transcript body)
-Phase 2 Qc          (constitution)     → present (narrative Socratic candidate or composed unit, each surfaced claim per its retained verdict; gated path — ¬SingleObvious: recognizables ≥ 2 OR confidence < high)
+Phase 2 Qc          (constitution)     → present (narrative Socratic recognizable, each claim per its verdict; gated path — ¬SingleObvious: recognizables ≥ 2 OR confidence < high)
 Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single recognizable emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of `Conditional Qc; separate Qs and Qc`'s Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate   (track)    → Internal state update
 Phase 1/3 Probe     (sense)    → Internal (gap detection)
-Phase 1/3 Qs        (constitution)     → present (Socratic probing with structured navigation; one realization reached from three branches — the Phase 1 zero-candidate probe, the Phase 1 composed-empty rescope (dimensions: boundary, scope, unit shape), and the Phase 3 Refine probe run the same `Probe → Qs → Stop → H → enrich` sequence; mandatory on Refine)
-Phase 1/3 surface   (extension)    → TextPresent+Proceed (AttemptsExhausted: O[top], or best(presented_units) on the composed-empty form — rendered by render, each claim per its retained Λ.confirmations verdict, then deactivate)
-Phase 3 emit        (extension)    → TextPresent+Proceed (render(o): ClueVector_prose or HigherUnit_prose, each surfaced claim per its retained Λ.confirmations verdict)
+Phase 1/3 Qs        (constitution)     → present (Socratic probing with structured navigation over the dimensions temporal, associative, contextual, granularity; one realization reached from two branches — the Phase 1 zero-result probe and the Phase 3 Refine probe run the same `Probe → Qs → Stop → H → enrich` sequence; mandatory on Refine)
+Phase 3 surface     (extension)    → TextPresent+Proceed (AttemptsExhausted: ClueVector_prose(O[top]), then deactivate)
+Phase 3 emit        (extension)    → TextPresent+Proceed (ClueVector_prose)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
 seam                (extension)    → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — the `/recollect ∘ /inquire` COMPOSITION edge — settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
 Λ = { phase: Phase, V: VagueRecall,
-      candidates: List(Candidate), units: List(HigherUnit),   -- units = compose's last result (∅ off the supra path)
-      presented: Set(Recognizable),   -- presented := presented ∪ {O[top]} on every Phase 1 → Phase 2 edge; presented_units derives from it
-      confirmations: Confirmations,   -- written by Confirm after compose (∅ when O[top] is a Candidate); consumed by every surfacing site
+      recognizables: List(Recognizable), presented: Set(Recognizable),   -- O[ranked], and the ever-presented set cross-cycle rendering distinguishes against
       history: List<(Recognizable, R)>,   -- history appended at Phase 3 integration: Log (O[top], R) to history
       attempts: Nat, scan_scope: ScanScope, active: Bool, cause_tag: String }
 
@@ -243,18 +230,16 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 -- count as salient. On Track = hybrid, read references/entropy-track.md as well — the union scan
 -- runs both, so both track contracts bind.
 
-── SUPRA-SESSION COMPOSITION ──
-compose : List(Candidate) × Σ → List(HigherUnit)     -- unit shapes, read-time edge inference, graph invariants, Confirm / EvidentialClaim / surfaced_claims: read references/supra-session.md
-binding: supra_session(V, C[ranked], Σ) ⟹ O[ranked] = compose(C[ranked], Σ)   -- the Phase 2 object is the units the candidates compose into; render(HigherUnit) = HigherUnit_prose, so RecalledContext is unchanged
-paths the binding adds — typed in FLOW, PHASE TRANSITIONS, CONVERGENCE, MODE STATE above, not here:
-  composed-empty (candidates present, no unit joins them) → the Probe → Qs rescope while attempts < max; at the cap, best(presented_units) (AttemptsExhausted) or, none ever presented, NullMatch
-  Confirm after compose, before any Phase 2 output → Λ.confirmations, rendered at every surfacing site
-budget: the initial composition is the scan's own result and spends nothing; each rescope, Refine, or Reorient re-composition spends one recall try — the single-candidate accounting, kept intentionally (LOOP)
--- Before composing, read references/supra-session.md: it types the three unit shapes over Candidate
--- (no second element type), the edges inferred at read time from stored anchors and metadata, the
--- four graph invariants (read-only across partitions, edge-following, broken-link-tolerant), and
--- Confirm — each claim the unit surfaces checked against its own record before it is asserted.
--- Gate and answers stay as typed above; this block adds no gate and no budget.
+── SCAN ABOVE SESSION SCOPE ──
+Scan_{Track,Unit} : (Store, V) → List(Recognizable)     -- the one scan at every granularity; Scan_{Track} in ── STORE TOPOLOGY ── is its candidate step
+  V.unit = session : each c ∈ Scan_{Track}(Store, trace(V)) ↦ { unit: session, members: [c], narrative: c.fingerprint, confidence: c.confidence, claims: ∅ }   -- the candidates as scanned
+  V.unit ≠ session : Assemble_{V.unit}(Traverse(C, infer_edges(C, Σ))) where C = Scan_{Track}(Store, trace(V))   -- the same candidate step, then the recognizables its candidates join into: shapes, edge inference, traversal, assembly, the connectivity term Rank adds, traversal_scope, and the four graph invariants are typed in references/supra-session.md
+binding: the gate, its answers, the recall-try budget, and both terminals are those typed above; this block adds none. A zero result at this scope — candidates found, no recognizable joined them — is |O[]| = 0 as for any scan: the probe asks granularity and boundary before any NullMatch, and the NullMatch diagnosis reports traversal_scope
+-- Before scanning above session scope, read references/supra-session.md: it types the three
+-- shapes over Candidate (no second element type), the edges inferred at read time from stored
+-- anchors and metadata, Traverse and Assemble, the connectivity term Rank adds, traversal_scope,
+-- and the four graph invariants (no-central-aggregator, edge-based, isolation-preserving,
+-- broken-link-tolerant).
 
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
@@ -281,7 +266,7 @@ degraded_scan: INDEX_semantic = ∅ ⟹ mark that INDEX realization unavailable 
 
 ── SUBSTRATE AGNOSTICISM ──
 The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
-formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / SUPRA-SESSION COMPOSITION / STORE TOPOLOGY / KNOWN FAILURE MODES.
+formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / SCAN ABOVE SESSION SCOPE / STORE TOPOLOGY / KNOWN FAILURE MODES.
 The essence makes no reference to specific tools, agents, platforms, schedulers, or storage
 media. Any realization (matter) satisfying the entropy extraction laws, salience semantic
 invariants, and store topology realizes Anamnesis.
@@ -312,6 +297,7 @@ NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = Structure
 NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
 MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
                     -- structural risk: recall target genuinely absent from Store (principal failure mode)
+                    -- the modes of the scan above session scope (sparse edges, broken links, a misjudged whole, index taken as evidence) are typed in references/supra-session.md, loaded at that scope
 ```
 
 ## Mode Activation
@@ -328,30 +314,30 @@ Skip AI-guided activation when the user gives an exact reference, the same targe
 
 ### Reference loading
 
-Before scanning a runtime store, read its realization reference (`references/claude.md` or `references/codex.md`). Before an entropy, salience, or hybrid scan, read the corresponding track reference; read both for hybrid. When a known failure mode is suspected, read `references/failure-modes.md` before acting on it. When the unit the user means stands above one session — a line of work, a topic, or a settled concept spread across several — read `references/supra-session.md` before presenting.
+Before scanning a runtime store, read its realization reference (`references/claude.md` or `references/codex.md`). Before an entropy, salience, or hybrid scan, read the corresponding track reference; read both for hybrid. When a known failure mode is suspected, read `references/failure-modes.md` before acting on it. When the unit the user means stands above one session — a line of work, a topic, or a settled concept spread across several — read `references/supra-session.md` before scanning at that scope.
 
 ### User-facing realization
 
-Render a candidate as the story of the discussion, not a result-only hit:
+Render a recognizable as the story of the discussion, not a result-only hit:
 
 - locate it in time and source, preserving the realization label;
-- state the origin, direction, and outcome;
-- identify the session and emit only the resume handle the realization reference validates;
+- state the origin, direction, and outcome — above one session, in the unit's shape;
+- identify each session and emit only the resume handle the realization reference validates;
 - name adjacent topics that make Refine recognizable;
 - on gated presentations and Refine probes, state the remaining recall-try budget and candidate space in ordinary prose.
 
-Emit `ClueVector_prose` with the source, narrative, cross-references, and validated resume handle — or, for a composed unit, `HigherUnit_prose` with each composing candidate's source and handle and each surfaced claim rendered per its retained verdict. State that recognition establishes historical identity rather than current truth. When `source_scan` reports incomplete source coverage, name the non-zero counts so downstream readers can weigh the record accordingly.
+Emit `ClueVector_prose` with the source, narrative, cross-references, and validated resume handle; above one session, each member's own source and handle, and each claim the narrative asserts as fact rendered per its verdict. State that recognition establishes historical identity rather than current truth. When `source_scan` reports incomplete source coverage, name the non-zero counts so downstream readers can weigh the record accordingly.
 
 On Refine, present concrete adjacent directions with brief narratives. Keep the narrative form and prior adjacent vectors across later cycles, explaining how each new candidate differs from those already rejected.
 
-On NullMatch, report the source-labeled depth actually searched for each realization. Name actionable causes supported by the observed failure mode. Preserve a `StopAtSpine` boundary as an index-and-spine-scoped miss; after an accepted full-text miss, offer the declared Aitesis handoff with the accumulated trace.
+On NullMatch, report the source-labeled depth actually searched for each realization; above one session, the traversal scope as well. Name actionable causes supported by the observed failure mode. Preserve a `StopAtSpine` boundary as an index-and-spine-scoped miss; after an accepted full-text miss, offer the declared Aitesis handoff with the accumulated trace.
 
 ### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | One high-confidence candidate | Inline narrative, validated resume handle, fidelity caveat, and divergence affordance |
-| Medium | Several plausible candidates | Full narrative with adjacent directions |
+| Light | One high-confidence recognizable | Inline narrative, validated resume handle, fidelity caveat, and divergence affordance |
+| Medium | Several plausible recognizables | Full narrative with adjacent directions |
 | Heavy | High ambiguity or repeated refinement | Narrative, store orientation, and structured Socratic navigation |
 
 ## Rules
@@ -360,7 +346,7 @@ On NullMatch, report the source-labeled depth actually searched for each realiza
 - **Guided recall orientation**: Refine offers structured adjacent directions with brief narratives, preserving user recognition rather than shifting reconstruction back to the user.
 - **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before the gate. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-vector context across recall attempts; distinguish a new candidate from prior candidates.
-- **Supra-session recall**: When the unit the user means stands above one session, present `compose(C[ranked], Σ)` as typed in `references/supra-session.md` — units built over `Candidate` by following read-time inferred edges, each surfaced claim carrying the `Confirm` verdict retained in `Λ.confirmations`, every composing candidate carrying its own source and resume handle — and recognize it through the same gate, answers, and budget as a single candidate. A composed-empty result runs the Socratic probe as a rescope before any NullMatch.
+- **Granularity is a dimension of the recall**: The unit the user means — one session, or the line of work, topic, or settled concept above it — is classified with the input type and rebound by a granularity answer or Reorient, never guessed from the scan. Above one session the scan joins candidates into recognizables by read-time inferred edges as typed in `references/supra-session.md`, and each is recognized through the same gate, answers, and budget as one session. A claim the narrative asserts as fact carries its `Confirm` verdict, and each member carries its own source locator and resume handle.
 - **NullMatch diagnosis**: Report only the source-labeled coverage actually searched and the failure causes its evidence supports.
 - **Conditional Qc; separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Qc remains mandatory outside `SingleObvious`; that relay specialization is the sanctioned exception. Qs remains a separate mandatory Constitution interaction on Refine.
 - **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, require current-state re-verification before commitment, and disclose every non-zero `source_scan` count without changing ranking.
