@@ -166,7 +166,7 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- The initial scan reads the compact INDEX and the raw-record spines together, unconditionally. A spine read is bounded per record, so it is not the cost the checkpoint exists to protect the user from; gating it would buy nothing and add a branch. Transcript bodies stay out — their per-record cost has no upper bound. After probe enrichment still yields no candidate, Qx presents the full-text expansion and the spine-scoped stop as differential futures. ExpandFullText admits the SSOT_body paths declared by the runtime references; StopAtSpine terminates without opening them.
 -- Scanning spines unconditionally is also what keeps a runtime reachable before its INDEX exists: a store whose writer has not yet produced entries is not blind, it is spine-only. Without this the first recall against a newly-added runtime would always miss and always require the checkpoint.
 -- Fork/sidechain binding exists in the Claude realization only. For a Claude fork candidate, references/claude.md routes to references/fork-resume.md before presentation.
--- When the recall's unit is above one session — the user names a whole line of work, topic, or settled concept, or the ranked candidates fall on one line across sessions — read references/supra-session.md before Phase 2. It binds how the candidates compose into that unit (connections inferred at read time from what deposits already store, read-only), how each claim the unit surfaces is confirmed against its own deposit's record, and how the unit is presented with every composing deposit's source and resume handle. The gate, its answers, and the recall-try budget stay as typed here.
+-- When the recall's unit is above one session, the Phase 2 object is U[] = compose(C[ranked], Σ) — see ── SUPRA-SESSION COMPOSITION ── and read references/supra-session.md before composing. The gate, its answers, and the recall-try budget stay as typed here.
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
@@ -212,6 +212,16 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 -- count as salient. On Track = hybrid, read references/entropy-track.md as well — the union scan
 -- runs both, so both track contracts bind.
 
+── SUPRA-SESSION COMPOSITION ──
+compose : List(Candidate) × Σ → List(HigherUnit)     -- unit shapes, read-time edge inference, graph invariants, per-claim Confirm: read references/supra-session.md
+binding: the recall names a whole above one session (a line of work, a topic, a settled concept), or C[ranked] falls on one line across sessions
+         ⟹ U[] = compose(C[ranked], Σ) stands in for C[ranked] as the Phase 2 object; HigherUnit ⊂ RecalledContext, so the result type is unchanged
+-- Before composing, read references/supra-session.md: it types the three unit shapes over Candidate
+-- (no second element type), the edges inferred at read time from stored anchors and metadata, the
+-- four graph invariants (read-only across partitions, edge-following, broken-link-tolerant), and
+-- Confirm — each claim the unit surfaces checked against its own record before it is asserted.
+-- Gate, answers, budget, and terminals stay as typed above; this block adds no state or transition.
+
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
   SSOT             = authoritative session record (complete, append-only); read at either of two depths
@@ -237,7 +247,7 @@ degraded_scan: INDEX_semantic = ∅ ⟹ mark that INDEX realization unavailable 
 
 ── SUBSTRATE AGNOSTICISM ──
 The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
-formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / STORE TOPOLOGY / KNOWN FAILURE MODES.
+formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / SUPRA-SESSION COMPOSITION / STORE TOPOLOGY / KNOWN FAILURE MODES.
 The essence makes no reference to specific tools, agents, platforms, schedulers, or storage
 media. Any realization (matter) satisfying the entropy extraction laws, salience semantic
 invariants, and store topology realizes Anamnesis.
@@ -316,7 +326,7 @@ On NullMatch, report the source-labeled depth actually searched for each realiza
 - **Guided recall orientation**: Refine offers structured adjacent directions with brief narratives, preserving user recognition rather than shifting reconstruction back to the user.
 - **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before the gate. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-vector context across recall attempts; distinguish a new candidate from prior candidates.
-- **Supra-session recall**: When the unit the user means stands above one session, compose it from the candidates as `references/supra-session.md` binds — connections inferred at read time from what deposits already store, each surfaced claim confirmed against its own deposit's record, every composing deposit carrying its own source and resume handle — and recognize it through the same gate, answers, and budget as a single candidate.
+- **Supra-session recall**: When the unit the user means stands above one session, present `compose(C[ranked], Σ)` as typed in `references/supra-session.md` — units built over `Candidate` by following read-time inferred edges, each surfaced claim carrying its `Confirm` verdict, every composing candidate carrying its own source and resume handle — and recognize it through the same gate, answers, and budget as a single candidate.
 - **NullMatch diagnosis**: Report only the source-labeled coverage actually searched and the failure causes its evidence supports.
 - **Conditional Qc; separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Qc remains mandatory outside `SingleObvious`; that relay specialization is the sanctioned exception. Qs remains a separate mandatory Constitution interaction on Refine.
 - **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, require current-state re-verification before commitment, and disclose every non-zero `source_scan` count without changing ranking.

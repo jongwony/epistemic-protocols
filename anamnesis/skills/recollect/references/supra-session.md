@@ -1,45 +1,62 @@
-# Supra-Session Recall — When the Unit Is Above One Session
+# Supra-session composition — unit shapes, edge inference, per-claim confirmation
 
-Anamnesis resolves a recall to one candidate by default. This reference binds when the recall's right unit is not any one session but the whole its deposits already imply: a connected line of work across sessions, a topic worked out in scattered pieces, or a concept prior work already settled. The protocol is unchanged — same store, same scan, same recognition gate, same recall-try budget. What changes is the recognized object: it is composed from several candidates instead of picked from among them.
+Read when the recall's right unit stands above one session — the user names a whole line of work, a topic worked out in scattered pieces, or a concept prior sessions already settled, or `C[ranked]` falls on one line across sessions. This is the `── SUPRA-SESSION COMPOSITION ──` formal block: runtime-normative contract, not commentary. It adds no state, gate, terminal, or budget; the recognized object is composed from candidates instead of picked from among them, and everything else is the protocol as typed in SKILL.md.
 
-## When to read this
+Not this reference: a single session would answer (the default path); the cases must be newly found (`/inquire`); the concept is not yet formed and must be crystallized (`/induce`); the recall is of decision intent to be reverse-traced (`/elicit`).
 
-- The user names a whole rather than an occasion: "that whole thread we kept coming back to", "everything we worked out about X", "the concept we ended up calling Y".
-- Ranked candidates fall on one line: several deposits share anchors, keywords, or a working directory across sessions, and no single one is the answer.
-- A single-session candidate was presented and the user says it is one piece of something larger — a Refine or Reorient that asks for the unit above the session.
-- Not this reference: a single session would answer (the default path); the cases must be newly found (`/inquire`); the concept is not yet formed and must be crystallized (`/induce`); the recall is of decision intent to be reverse-traced (`/elicit`).
+```
+── SUPRA-SESSION COMPOSITION ──
+compose : List(Candidate) × Σ → List(HigherUnit)
+compose(C[], Σ) = RankUnits(Assemble(Traverse(C[], infer_edges(C[], Σ))), V.trace)
 
-## Unit shapes
+Deposit          ↦ Candidate       -- the composing element IS Anamnesis's Candidate (session_id, runtime, cwd, topic, keywords, fingerprint, cross_refs, confidence): no second type
+DepositRef       = { runtime: Source, session_id: SessionId }   -- pointer to a Candidate; dereferenced to its record through the runtime reference (references/claude.md, references/codex.md)
+UnitType         ∈ {ConnectedSessionChain, TopicCluster, SedimentedConceptNode}   -- classified from V.trace + Σ; Reorient(d) naming a different shape re-dispatches
+HigherUnit       = ConnectedSessionChain | TopicCluster | SedimentedConceptNode
+ConnectedSessionChain = { origin: Candidate, line: List(Candidate), arrival: Candidate }   -- where it began → how it developed across sessions → where it arrived
+TopicCluster     = { topic: String, fragments: Set(Candidate), standing: Prose }             -- the fragments on one topic + where the records attest the topic last stood
+SedimentedConceptNode = { concept: String, forged_by: Set(Candidate), node: DepositRef }      -- recognized only, never formed here: absent a candidate already carrying the concept as settled, the recall is not this shape (formation → /induce)
 
-Classify the shape from the recall trace and context. A Reorient that describes a different shape re-dispatches.
+TraversalEdge    = { from: DepositRef, to: DepositRef, kind: ∈ {chain, topic, concept, plain} }
+                  -- kind and to are INFERRED at read time from stored anchors (cross_refs) + shared keywords + session metadata (cwd, date, topic); never read from a stored field
+                  -- the store holds {memory, github_issue, github_pr} anchors only (StructuredAnchor); chain/topic/concept/plain are traversal ROLES, not stored kinds
+                  -- to may resolve to no written record: not-yet-written knowledge, skipped, never an error
+DepositGraph     = (Set(Candidate), Set(TraversalEdge))   -- STRUCTURAL TYPE: the edge set is reconstructed by traversal, never pre-materialized; invariants in ── GRAPH INVARIANTS ──
+infer_edges      = (Set(Candidate), Σ) → Set(TraversalEdge)
+Traverse         = (Set(Candidate), Set(TraversalEdge)) → (Set(Candidate), Set(TraversalEdge))   -- UnitType-dispatched: follow inferred edges outward to the sub-graph reachable from the entry candidates
+traversal_scope  = the pair Traverse returned, with each skipped broken-link edge noted
+Assemble         = (Set(Candidate), Set(TraversalEdge)) → List(HigherUnit)   -- compose typed units from the edge-connected sub-graph, never from a global join over the store
+RankUnits        = (List(HigherUnit), RecallTrace) → List(HigherUnit)         -- recall-trace alignment + edge connectivity dominate
+confidence       = HigherUnit → {low < medium < high}   -- the Candidate.confidence tier lifted to the unit; grounds SingleObvious exactly as for one candidate
 
-- **Connected-session chain** — the origin deposit, the line of deposits it developed through, the arrival deposit. Presented as where it began, how it moved, where it landed.
-- **Topic cluster** — the topic, the deposits that carry fragments of it, and where the deposits attest it last stood. Presented as fragments plus standing.
-- **Sedimented concept** — the concept, the deposits that forged it, and the deposit where it settled. Recognized only, never formed here: if no deposit already carries the concept as settled, the recall is not this shape.
+EvidentialClaim  = { content: a reading the narrative will surface as fact (origin attribution, coinage timing, a quoted decision or utterance), source: DepositRef }   -- names the ONE candidate the claim originates from
+surfaced_claims  = HigherUnit → Set(EvidentialClaim)
+Confirm          = Set(EvidentialClaim) → List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} })
+                  -- each claim checked against SSOT(claim.source) — its OWN record, opened through the runtime reference — before it is surfaced; a unit spans several records and there is no single record for the whole
+                  -- the verdict governs surfacing: confirmed ⇒ assert as settled; corrected ⇒ assert the record's value, discard the index reading; unattested ⇒ never assert as fact — provisional or omitted. Index-only stays provisional
+                  -- `Recalled context currency is not fidelity` applied per record: the unit establishes that these candidates form THIS whole, not that its outcome still holds
+HigherUnit_prose = String   -- one narrative in the unit's shape (origin → development → arrival; topic → fragments → standing; concept → forged by → settled at), put first; each surfaced claim rendered per its Confirm verdict; each composing candidate carries the source locator and the resume handle its runtime reference validates (fork ⇒ references/fork-resume.md; cwd absent ⇒ non-resumable note); then the supporting edges, traversal_scope, and the gaps left by missing records
+RecalledContext  ⊇ session text containing HigherUnit_prose   -- the result type is unchanged: a HigherUnit is a RecalledContext whose object is composed; downstream re-verifies against current state as for any recall
 
-## Assembling the unit
+mapping onto the protocol as typed (no new state, gate, terminal, or budget):
+  entry candidates   ↦ C[ranked] from Phase 1                        -- the scan is the same; compose runs on its result
+  Phase 2 object     ↦ U[] = compose(C[ranked], Σ) in place of C[ranked]; SingleObvious(U[]) ≡ |U[]| = 1 ∧ confidence(U[top]) = high → the same inline emit ⊕ divergence_affordance, no turn yield; otherwise Qc(U[top], evidence, framing)
+  R                  ↦ Recognize(u) | Refine (adjust the unit's boundary or traversal_scope) | Reorient(d) (a different UnitType or recall dimension)
+  rescope            ↦ Phase 1/3 Probe → Qs when entry candidates are present but Assemble = ∅: the probe's dimensions are boundary, scope, unit shape; it runs before any NullMatch, since the store is not empty
+  attempts           ↦ each re-composition spends one recall try; AttemptsExhausted surfaces the best unit in hand
+  NullMatch          ↦ only after a rescoped Assemble is also empty; report traversal_scope and the broken-link notes, per `NullMatch diagnosis`
 
-- Start from the ranked candidates as entry deposits. Read each one's stored anchors (`cross_refs`), keywords, and session metadata (cwd, date, topic).
-- Discover related deposits across partitions by shared anchors, keywords, and metadata, over the read-only store paths the runtime reference declares (`references/claude.md`, `references/codex.md`). Connections are inferred at read time from what the deposits already store; no cross-session graph is stored, and nothing is written.
-- Compose the unit by following those connections outward from the entry deposits, never by a global join over the whole store.
-- A connection whose target has no written deposit is not-yet-written knowledge: skip it, and carry it into the presentation as a scope note. It is never an error.
-- Rank assembled units by alignment with the recall trace and by how densely their deposits connect. `Candidate.confidence` carries over to the unit: one densely connected unit at high confidence is `SingleObvious`; two or more units, or a thinly connected one, keep the gate.
+── GRAPH INVARIANTS ──
+DepositGraph is a STRUCTURAL TYPE (sourced from partitioned stores + lifecycle churn, not a knowledge-federation ontology). Four invariants hold:
+  no-central-aggregator : no central index; the graph exists only as the inferred union of per-candidate read-time connections, reconstructed by traversal
+  edge-based            : a unit is assembled by FOLLOWING inferred edges between candidates, never by a global join over a flat store
+  isolation-preserving  : each partition owns its own writes; traversal reads across partitions (in the Claude realization, the per-project hypomnesis directories references/claude.md declares) and writes to none
+  broken-link-tolerant  : an edge to a missing record is not-yet-written knowledge — skipped, surfaced as a traversal-scope note, never a failure
 
-## Confirming before surfacing
-
-- A unit spans several deposits, each with its own authoritative record; there is no single record for the whole. Every claim the narrative will surface as fact — where it began, when a term was coined, a quoted decision — is checked against the record of the one deposit it originates from before it is asserted.
-- An index-only reading stays provisional and is said to be provisional. A claim the record corrects is asserted with the record's value. A claim the record does not attest is not asserted as fact.
-- This is `Recalled context currency is not fidelity` applied per deposit: the unit establishes that these deposits form this whole, not that its outcome still holds.
-
-## Presenting the unit
-
-- Render one narrative in the unit's shape (origin → development → arrival; topic → fragments → standing; concept → forged by → settled at), and put it first.
-- Every composing deposit carries its own source locator and the resume handle its runtime reference validates — the non-resumable note when cwd is absent, the parent's handle for a fork (`references/fork-resume.md`).
-- State the connections that support the assembly, the scope covered, and the gaps left by missing deposits.
-- The recognition gate and its answers are the protocol's own: Recognize; Refine adjusts the unit's boundary or the scope traversed; Reorient names a different shape or recall dimension. `SingleObvious` emits inline with the divergence affordance and no turn yield, exactly as for one candidate.
-- Each re-assembly spends one recall try. At the cap with a unit in hand, surface the best one and deactivate (AttemptsExhausted).
-
-## When nothing assembles
-
-- Entry deposits exist but no connections join them: the line has not yet sedimented enough shared anchors or keywords. Run the Refine probe as a rescope — widen the boundary, or change the unit shape — before any NullMatch; the deposits are present, so the store is not empty.
-- NullMatch follows only when the rescoped assembly is also empty. Report the scope actually traversed and the gaps noted, as the NullMatch rule requires.
+── KNOWN FAILURE MODES (composition) ──
+SparseDeposits       : entry candidates exist but too few shared anchors/keywords/metadata infer edges connecting them; Assemble = ∅ with non-empty entry — rescope via Probe → Qs (widen boundary, change unit shape); NullMatch only if still empty
+BrokenLinkChain      : inferred edges resolve mostly to records never written (lifecycle gap) — surface traversal_scope as a note, not an error; assembled units may be too thin to recognize
+UnitTypeMismatch     : dispatched to the wrong UnitType — detected as Reorient(d) describing a different shape; re-dispatch and re-compose
+SingleSessionMisfire : one candidate answers and composition was applied anyway — present the single candidate; composition is not a loop attempt
+IndexAsEvidence      : a load-bearing claim ("this is where it began", "first coined here") rests only on INDEX files — read the originating record before asserting; index-only readings surface as provisional
+```
