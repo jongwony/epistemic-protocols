@@ -45,7 +45,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |-------|-------------|
 | 0. Entry | Choose path: quick recommendation / targeted learning / browse all |
 | 1. Quick Scan | Collect recent session metadata inline (Glob + Read) |
-| 2a. Pick-1 | Quick path: select 1 recommendation from `/gap`, `/frame` |
+| 2a. Pick-1 | Quick path: select 1 recommendation from `/elicit`, `/inquire`, `/frame` |
 | 2b. Evidence | Quick path: show 1 evidence card (max 2 lines) |
 | 2. Map | Targeted path: match patterns to protocols via compact mapping |
 | 3. Scenario | Targeted path: present intervention point with preset scenarios |
@@ -56,7 +56,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 Key features:
 - **Value before learning**: quick path proves value in under 3 minutes
 - **One at a time**: 1 recommendation, 1 evidence card, 1 trial — no catalog required
-- **Onboarding Pool**: `/gap`, `/frame` — unified for Quick and Targeted fallback
+- **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
 

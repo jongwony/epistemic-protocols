@@ -21,7 +21,6 @@
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
@@ -42,7 +41,7 @@
 ## 프로토콜 흐름
 
 ```
-Phase 0: Applicability Gate → 결과를 맥락 대비 평가 (비표시)
+Phase 0: Applicability Gate → 결과를 맥락 대비 평가 (비표시; 인증서가 귀속하지 못한 불일치는 사용자에게 묻는다)
 Phase 1: Mismatch Surfacing → 근거 제시 (gate interaction)
 Phase 2: Result Adaptation  → 사용자 지시에 따른 적응 적용
 ```

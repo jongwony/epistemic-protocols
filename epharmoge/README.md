@@ -21,7 +21,6 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
@@ -42,7 +41,7 @@ Same axis (context fitness), opposite timing, opposite direction. Aitesis asks "
 ## Protocol Flow
 
 ```
-Phase 0: Applicability Gate → Evaluate result against context (silent)
+Phase 0: Applicability Gate → Evaluate result against context (silent; a mismatch the certificate cannot place is put to the user)
 Phase 1: Mismatch Surfacing → Present evidence (gate interaction)
 Phase 2: Result Adaptation  → Apply user-directed adaptation
 ```

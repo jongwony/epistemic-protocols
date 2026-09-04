@@ -21,7 +21,6 @@
 | 프로토콜 | 시작자 | 타입 시그니처 |
 |----------|--------|---------------|
 | Prothesis | AI 주도 | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI 주도 | `GapUnnoticed → AuditedDecision` |
 | **Horismos** | **AI 주도** | **`BoundaryUndefined → DefinedBoundary`** |
 | Aitesis | AI 주도 | `ContextInsufficient → InformedExecution` |
 | Proplasma | 하이브리드 | `DirectionUnrecognizable → DirectionalContrast` |

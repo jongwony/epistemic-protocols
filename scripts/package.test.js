@@ -203,11 +203,11 @@ describe('parseFrontmatter', () => {
   });
 
   it('preserves block list through parse → serialize round-trip', () => {
-    const content = '---\nname: rt\nskills:\n  - aitesis:inquire\n  - syneidesis:gap\n---\nBody';
+    const content = '---\nname: rt\nskills:\n  - aitesis:inquire\n  - elenchus:sublate\n---\nBody';
     const { fields, body } = parseFrontmatter(content);
     const rebuilt = serializeFrontmatter(fields) + '\n' + body;
     const reparsed = parseFrontmatter(rebuilt);
-    assert.deepEqual(reparsed.fields.get('skills'), ['aitesis:inquire', 'syneidesis:gap']);
+    assert.deepEqual(reparsed.fields.get('skills'), ['aitesis:inquire', 'elenchus:sublate']);
     assert.equal(reparsed.fields.get('name'), 'rt');
   });
 });
@@ -1213,7 +1213,7 @@ describe('generateReleaseNotes', () => {
 
   it('shows dash for protocols not in buildResults', () => {
     const notes = generateReleaseNotes(mockResults);
-    // syneidesis is not in mockResults, should show —
+    // elenchus is not in mockResults, should show —
     assert.ok(notes.includes('| — |'));
   });
 
@@ -1245,7 +1245,7 @@ describe('generateReleaseNotes', () => {
     const changelog = {
       groups: {
         prothesis: [{ hash: 'abc1234', type: 'feat', message: 'Two-mode redesign' }],
-        syneidesis: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
+        elenchus: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
       },
       ungrouped: [],
     };
@@ -1312,7 +1312,6 @@ describe('package.js CLI', () => {
         'epistemic-protocols-bundle.zip',
         'forge.zip',
         'frame.zip',
-        'gap.zip',
         'gate-check.zip',
         'goal-research.zip',
         'grasp.zip',
@@ -1497,12 +1496,12 @@ describe('agent routing map', () => {
   });
 
   it('session-context.js --only filters to the requested commands (preamble kept)', () => {
-    const out = execFileSync(process.execPath, [SESSION_CONTEXT, '--only=/grasp,/gap'], { encoding: 'utf8' });
+    const out = execFileSync(process.execPath, [SESSION_CONTEXT, '--only=/grasp,/bound'], { encoding: 'utf8' });
     const ctx = JSON.parse(out).hookSpecificOutput.additionalContext;
     assert.match(ctx, /Route from the deficit, not the summary\./);
     assert.equal((ctx.match(/\*\*`\//g) || []).length, 2, 'only the two requested commands');
     assert.ok(ctx.includes('**`/grasp`**'));
-    assert.ok(ctx.includes('**`/gap`**'));
+    assert.ok(ctx.includes('**`/bound`**'));
     assert.ok(!ctx.includes('**`/inquire`**'));
   });
 });

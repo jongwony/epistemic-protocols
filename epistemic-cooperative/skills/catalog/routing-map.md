@@ -40,11 +40,6 @@ implicit premise.
 **`/induce`** (Periagoge) — AbstractionInProcess → CrystallizedAbstraction
   when: One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction
 
-## Decision
-
-**`/gap`** (Syneidesis) — GapUnnoticed → AuditedDecision
-  when: About to act — potential gaps unexamined
-
 ## Execution
 
 **`/apportion`** (Merismos) — GoalPlanUncompiled → ConditionBearingUnitPlan

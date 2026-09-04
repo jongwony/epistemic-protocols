@@ -56,5 +56,5 @@ echo "Installed $installed plugin(s)."
 for p in $opted_out; do
   echo "Not installed (opt-in): $p — add it with: claude plugin install $p@$MARKETPLACE"
 done
-echo "Get started by invoking a protocol, e.g. /gap before you commit to a decision."
+echo "Get started by invoking a protocol, e.g. /inquire before you hand work to the AI."
 echo "For a guided start, install epistemic-cooperative and run /onboard."

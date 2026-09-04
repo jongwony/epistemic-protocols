@@ -13,7 +13,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound dispatches each edit domain's boundary kind and settles its disposition"
 
 **Quiz Q (situation)**: You ask Claude to "tidy up my resume" — it rewrites your summary, swaps out job titles, and restructures bullet points. You only wanted typo fixes and better wording; the content decisions are yours.
-- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Merismos `/apportion`
+- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Euporia `/elicit` — D) Merismos `/apportion`
 - Answer: B
 
 **Quiz Q (design)**: You're about to delegate a multi-step task with some sensitive decisions. How would you make explicit which steps are AI's call vs yours?
@@ -55,23 +55,6 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ἀναγωγή (a leading-up) — the deliberate sibling of ἀνάμνησις: ana-mnesis recalls one prior context; ana-goge leads that recall *up* to the connected unit above it. Core principle: **Recognition over Aggregation**. The higher unit is recognized by reconstructing the connections at read-time from the anchors and keywords the deposits already carry, never fused or synthesized anew. Workflow position: cross-cutting — invoked when single-session recall keeps returning a fragment while you mean the larger unit. Game feel: "the whole thing we kept circling back to..." → the connected line/cluster/concept assembles from read-time inference → you recognize the unit → grounded continuation.
 
-## Syneidesis `/gap`
-
-**Situation**: Claude gives you a neat checklist for "things to bring on the Busan trip." The list looks complete — clothes, toiletries, charger. You're about to close the tab, but you haven't thought about: medication, local transit card top-up, reservation confirmations saved offline, or weather contingencies.
-
-**Intervention**: `/gap` audits the decision point by surfacing procedural gaps (missed steps), consideration gaps (unexamined dimensions), assumption gaps (implicit beliefs), and alternative gaps (unexplored options) — before you commit to the plan.
-
-**Trial prompt**: "Let's practice: say 'Here's my trip checklist, ready to go' and I'll show how /gap surfaces blind spots"
-
-**Quiz Q (situation)**: You're about to accept a job offer. The salary is good, the role sounds interesting, you're ready to reply. Something feels off but you can't name it.
-- A) Merismos `/apportion` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Periagoge `/induce`
-- Answer: B
-
-**Quiz Q (design)**: You've picked option B out of three. Before committing, how would you check if you're overlooking something the decision logic didn't cover?
-- Hint: The issue isn't execution risk — it's unnoticed blind spots at the decision point.
-
-**Philosophy**: συνείδησις (shared knowing, conscience) — the Stoic inner witness. Core principle: **Surfacing over Deciding**. AI illuminates what you haven't considered; you judge whether it matters. Workflow position: Decision cluster — after perspectives are set, before committing. Game feel: "About to commit? Let me check your blind spots" → 4 gap types surface → you address or dismiss → decide with awareness.
-
 ## Prothesis `/frame`
 
 **Situation**: You drafted a tough email to send — asking your manager for time off during a busy season. You think it reads fine, but you're not sure how it lands. "Fine to me" doesn't tell you how a tired manager or a peer in HR might read it.
@@ -81,7 +64,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Review this email draft for me' and I'll show how /frame recommends audience perspectives"
 
 **Quiz Q (situation)**: You're writing a group chat message announcing a decision. It seems clear to you, but the chat has coworkers, close friends, and your partner. Some will read it as casual, some as formal. You're unsure which lens to evaluate through.
-- A) Horismos `/bound` — B) Prothesis `/frame` — C) Syneidesis `/gap` — D) Aitesis `/inquire`
+- A) Horismos `/bound` — B) Prothesis `/frame` — C) Analogia `/ground` — D) Aitesis `/inquire`
 - Answer: B
 
 **Quiz Q (design)**: You're about to publish a blog post but only checked it from your own reading angle. How would you structure the review to surface how different readers receive it?
@@ -132,7 +115,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: describe 3-4 cases you're noticing a pattern across, and I'll show how /induce proposes a candidate abstraction you can shape"
 
 **Quiz Q (situation)**: You keep running into the same feeling across unrelated tasks — a bug fix that bloated into a refactor, a meeting that drifted into planning, a PR review that turned into a redesign. You sense a pattern but don't have the word for it yet.
-- A) Analogia `/ground` — B) Periagoge `/induce` — C) Syneidesis `/gap` — D) Aitesis `/inquire`
+- A) Analogia `/ground` — B) Periagoge `/induce` — C) Prothesis `/frame` — D) Aitesis `/inquire`
 - Answer: B
 
 **Quiz Q (design)**: You have three examples of a phenomenon but no name for it. How would you get a candidate abstraction proposed — one you can test, widen, narrow, or discard — rather than staring at the cases until something clicks?
@@ -166,7 +149,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: name a direction decision you keep deferring because the options read fine but you can't picture them — I'll show how /preview contrasts discard-committed probes before you commit"
 
 **Quiz Q (situation)**: You're choosing between three onboarding flows. Each is clearly described, yet you keep stalling and finally say "honestly I'd have to see them side by side."
-- A) Prothesis `/frame` — B) Euporia `/elicit` — C) Proplasma `/preview` — D) Syneidesis `/gap`
+- A) Prothesis `/frame` — B) Euporia `/elicit` — C) Proplasma `/preview` — D) Heuresis `/ideate`
 - Answer: C
 
 **Quiz Q (design)**: The candidate directions are known and no real evidence is needed — the futures just don't come through in words. How do you make them recognizable without committing to any direction or leaving artifacts behind?
@@ -183,7 +166,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: name a topic where your options feel thin or you keep circling the same one or two ideas — I'll show how /ideate opens a frame map and generates across it"
 
 **Quiz Q (situation)**: You have one idea for your team's offsite theme and you keep refining it — better name, better schedule, nicer venue — but you haven't actually generated a genuinely different second idea to compare it against.
-- A) Prothesis `/frame` — B) Proplasma `/preview` — C) Heuresis `/ideate` — D) Syneidesis `/gap`
+- A) Prothesis `/frame` — B) Proplasma `/preview` — C) Heuresis `/ideate` — D) Euporia `/elicit`
 - Answer: C
 
 **Quiz Q (design)**: You want a wide field of genuinely different ideas without your own first instinct anchoring everything that follows. How do you get divergence without narrowing too soon?
@@ -200,7 +183,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: describe a goal you'd hand to an unattended run and I'll show how /apportion cuts it into units and closes each one — a checkable finish line where one compiles, an acceptance you record where none does, a reservation where a judgment settles it"
 
 **Quiz Q (situation)**: You're about to let Claude run unattended overnight migrating hundreds of files, and you want certainty that "done" really means done — and that it stayed inside the folders you named.
-- A) Aitesis `/inquire` — B) Merismos `/apportion` — C) Syneidesis `/gap` — D) Horismos `/bound`
+- A) Aitesis `/inquire` — B) Merismos `/apportion` — C) Hyphegesis `/conduct` — D) Horismos `/bound`
 - Answer: B
 
 **Quiz Q (design)**: You want an autonomous run held to your boundaries without watching it work. How do you get protection that doesn't depend on supervision?
@@ -217,7 +200,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: after a long dietary conversation, tell Claude the lunch suggestion felt off, and I'll show how /contextualize checks accumulated-context fit"
 
 **Quiz Q (situation)**: You've been discussing "beginner-level Python for a 10-year-old" with Claude for 20 minutes. You ask for a "small starter project." Claude returns a project using metaclasses and async generators — technically beginner-friendly in general, but completely detached from the accumulated context.
-- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Syneidesis `/gap` — D) Analogia `/ground`
+- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Elenchus `/sublate` — D) Analogia `/ground`
 - Answer: B
 
 **Quiz Q (design)**: After a long conversation where you established many specific constraints, Claude answers a new question correctly-in-general but ignores the accumulated context. How would you systematically check for context fit?
@@ -234,7 +217,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: tell me you're about to share an accumulated plan in 15 minutes and want to vet the context first, and I'll show how /sublate dialectically tests each source."
 
 **Quiz Q (situation)**: You've spent the afternoon building a context about a teammate's preferences from three different conversations and one inferred guess. You're about to make a decision based on the synthesis. Something feels off but you can't name which source decayed.
-- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Elenchus `/sublate` — D) Syneidesis `/gap`
+- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Elenchus `/sublate` — D) Horismos `/bound`
 - Answer: C
 
 **Quiz Q (design)**: After hours of context accumulation, before an external sync, how would you stress-test which sources still hold and which have decayed — without re-collecting everything from scratch?
@@ -251,7 +234,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Help me understand what I need to approve in this AI-generated plan' and I'll show how /grasp routes through an intent entry point before verifying comprehension"
 
 **Quiz Q (situation)**: You skimmed a long article and nodded along. A colleague asks you to summarize the main argument in one sentence and you freeze — you realize skimming wasn't the same as grasping.
-- A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Syneidesis `/gap`
+- A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Anagoge `/ascend`
 - Answer: C
 
 **Quiz Q (design)**: After quickly consuming a complex explanation, how would you verify you actually grasped the core — rather than that you could nod along?
@@ -294,6 +277,6 @@ When you say "run the inbox cleanup while I'm out, and check it actually fits my
 
 ### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
 
-When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each claim a source is read as authority for via dialectical antithesis (provenance / counterfactual / cross-source); you judge each claim in your own words, and where the surfaced concern belongs to a different protocol family the instruction you add is **HandOff** — the judgment still happens here, and the handoff is what you ask the run to do with it — `/sublate` never rewrites a source, its source list being read-only to it. Typical handoffs: a gap surfaced in the user's decision → `/gap`, an autonomous run whose unit plan and conditions are uncompiled → `/apportion`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/apportion`) precede post-execution ones (`/contextualize`).
+When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each claim a source is read as authority for via dialectical antithesis (provenance / counterfactual / cross-source); you judge each claim in your own words, and where the surfaced concern belongs to a different protocol family the instruction you add is **HandOff** — the judgment still happens here, and the handoff is what you ask the run to do with it — `/sublate` never rewrites a source, its source list being read-only to it. Typical handoffs: a missing pre-execution fact → `/inquire`, an autonomous run whose unit plan and conditions are uncompiled → `/apportion`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/inquire`, `/apportion`) precede post-execution ones (`/contextualize`).
 
 **Shape**: per-claim antithesis → disposition → handoff routing where the deficit belongs to another protocol family.

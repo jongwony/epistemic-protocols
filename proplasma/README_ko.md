@@ -25,7 +25,6 @@
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Proplasma** | **Hybrid** | **`DirectionUnrecognizable → DirectionalContrast`** |
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
-| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 **삼분법**: 이해 부족 → `/grasp` (내가 이해했는지 검증); 경계 부족 → `/bound` (어디까지인지 확정); **미래 인식 불가 → `/preview` (어느 방향인지 보고 판단)**.
@@ -55,7 +54,7 @@ claude plugin install proplasma@epistemic-protocols
 /preview [지금 확정하려는 방향 결정]
 ```
 
-Proplasma는 후보들이 실제로 갈리는 축을 도출하고, 축과 placeholder 정책을 사용자가 확정하게 한 뒤, 확정된 축 위에서 서로 다른 값을 커밋하는 probe 2–4개를 만들어 대비 지도보다 먼저 하나씩 제시합니다. 사용자는 probe가 노출한 방향을 선택하거나, probe들을 조합해 자기 방향을 종합하거나(잔여 재-팬 1회 내 재물질화 가능), 결정 전에 probe를 심문합니다. 수확이 폐기보다 먼저입니다: 방향, 결정을 가른 대비 행, 상속 unknowns(`/gap` · `/inquire`로 이관)만 남고 probe는 남지 않습니다.
+Proplasma는 후보들이 실제로 갈리는 축을 도출하고, 축과 placeholder 정책을 사용자가 확정하게 한 뒤, 확정된 축 위에서 서로 다른 값을 커밋하는 probe 2–4개를 만들어 대비 지도보다 먼저 하나씩 제시합니다. 사용자는 probe가 노출한 방향을 선택하거나, probe들을 조합해 자기 방향을 종합하거나(잔여 재-팬 1회 내 재물질화 가능), 결정 전에 probe를 심문합니다. 수확이 폐기보다 먼저입니다: 방향, 결정을 가른 대비 행, 상속 unknowns(`/inquire`로 이관)만 남고 probe는 남지 않습니다.
 
 ## Author
 

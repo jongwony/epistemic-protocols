@@ -25,7 +25,6 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Proplasma** | **Hybrid** | **`DirectionUnrecognizable → DirectionalContrast`** |
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
-| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 **The trichotomy**: understanding lacking → `/grasp` (verify that I understood); boundary lacking → `/bound` (settle how far); **future unrecognizable → `/preview` (see the directions, then judge)**.
@@ -55,7 +54,7 @@ claude plugin install proplasma@epistemic-protocols
 /preview [the direction decision you are about to commit to]
 ```
 
-Proplasma derives the axes on which your candidates genuinely diverge, has you settle the axes and the placeholder policy, builds 2–4 probes (each committing different values on the settled axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/gap` and `/inquire`) survive; the probes do not.
+Proplasma derives the axes on which your candidates genuinely diverge, has you settle the axes and the placeholder policy, builds 2–4 probes (each committing different values on the settled axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
 
 ## Author
 

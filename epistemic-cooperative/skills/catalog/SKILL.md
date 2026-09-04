@@ -46,12 +46,6 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Analogia | `/ground` | An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion |
 | Periagoge | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 
-### Decision
-
-| Protocol | Command | When to Use |
-|----------|---------|-------------|
-| Syneidesis | `/gap` | About to act — potential gaps unexamined |
-
 ### Execution
 
 | Protocol | Command | When to Use |
@@ -82,7 +76,7 @@ When a cluster name or protocol command/name is provided as argument:
 1. Normalize the argument:
    - Strip leading `/` if present
    - Match case-insensitively against protocol names (Aitesis, Euporia, etc.) and commands (inquire, elicit, etc.)
-   - Match cluster names: planning, analysis, decision, execution, verification, cross-cutting
+   - Match cluster names: planning, analysis, execution, verification, cross-cutting
 
 2. For **cluster** arguments: display all protocol cards in that cluster with expanded "When to Use" descriptions from the tables above.
 
@@ -129,7 +123,7 @@ node scripts/generate-routing-map.js
 
 Inject only the parts a project needs (the routing-directive preamble is always kept):
 
-- `--only=/grasp,/gap` — include only the listed commands (comma-separated).
-- `--cluster=Analysis,Decision` — include only the listed clusters (comma-separated).
+- `--only=/grasp,/bound` — include only the listed commands (comma-separated).
+- `--cluster=Analysis,Verification` — include only the listed clusters (comma-separated).
 
 With no filter, the full map is injected; when both filters are given they combine as a union.

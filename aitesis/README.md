@@ -20,11 +20,10 @@ AI systems often proceed with execution despite insufficient context (`ContextIn
 
 | Protocol | Mode | Type Signature |
 |----------|------|---------------|
-| Syneidesis | SURFACE | `GapUnnoticed → AuditedDecision` |
 | **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
 | Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-**Key distinction**: Syneidesis surfaces gaps at decision points for the user to judge — information flows AI→user (metacognitive). Aitesis infers what context the AI lacks before execution — information flows user→AI (heterocognitive: "do I have enough context?").
+**Key distinction**: Aitesis infers what context the AI lacks before execution — information flows user→AI (heterocognitive: "do I have enough context?").
 
 Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Aitesis supplies missing facts before execution; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
 
@@ -50,10 +49,10 @@ Uncertainties are identified dynamically per task — no fixed taxonomy:
 ## Protocol Precedence
 
 ```
-Aitesis → Prothesis → Analogia → Syneidesis → Katalepsis
+Aitesis → Prothesis → Analogia → Katalepsis
 ```
 
-Aitesis runs early: verify execution context is sufficient before perspective framing (Prothesis), mapping validation (Analogia), and gap auditing (Syneidesis).
+Aitesis runs early: verify execution context is sufficient before perspective framing (Prothesis) and mapping validation (Analogia).
 
 ## When to Use
 
@@ -65,7 +64,6 @@ Aitesis runs early: verify execution context is sufficient before perspective fr
 
 **Skip**:
 - When execution context is fully specified (use Prothesis — /frame for perspective)
-- When gaps are at decision points, not execution context (use Syneidesis — /gap)
 - When delegation scope is unclear
 
 ## Install
