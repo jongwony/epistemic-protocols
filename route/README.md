@@ -32,6 +32,27 @@ The table is derived, never maintained. `installed_plugins.json` gives each enab
 
 Codex reads the same `hooks/hooks.json`; its support is verified for `UserPromptSubmit` with the same `additionalContext` output field, and not for `SessionStart`. On a host that does not run the `SessionStart` hook the table does not arrive, and Route runs as the directive plus the skill's own resolution of each candidate's deficit. Codex skips a plugin-bundled hook until its current definition is trusted (see Install).
 
+## Function hooks
+
+Claude Code is trialling a second kind of hook: a TypeScript module the host loads beside `hooks.json`, whose functions run on the engine interface instead of as shell commands. Route carries both realizations of the same two pieces. Where the host runs hooks modules — `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` in the environment or in `settings.json`'s `env` — `hooks/route.ts` carries the trigger and the catalog, and the two command hooks yield (exit 0, nothing written), so nothing is injected twice. Everywhere else the command hooks are the path, unchanged.
+
+What moved, and where it now travels:
+
+| Piece | Command hooks | Hooks module |
+|-------|---------------|--------------|
+| Catalog | `SessionStart`, once per epoch, keyed on `source` | `session.start` runs `scripts/route-protocols.mjs` on the host; `prompt.context` carries the table as one block of the first message's context, which the engine re-reads after compaction and `/clear` |
+| Directive | `UserPromptSubmit`, every prompt | `prompt.submit`, every prompt, as context the model reads beside the prompt and the user never sees |
+| Opener | on `startup` and `clear` | while the session has had fewer than a few user turns, read from the real turn count |
+| One-turn skip | — | `skill.prompt` on a catalog protocol sets a flag in the plugin store; the next `prompt.submit` consumes it and sends no directive. A prompt that itself invokes a catalog protocol gets none either |
+
+What did not move: the match. `/route` still resolves each candidate's deficit and decides invoke, nudge or silence; the module never reads the transcript against the table. The per-prompt cost is the directive alone, as before, and the table is paid once per context epoch.
+
+The trust claim becomes checkable. A hooks module reaches the world only through the engine interface, and `claude plugin validate route/` lists what it hooks and what it calls — `$.process.run` (node, on this plugin's own script), `$.session`, `$.store`. No network, no model, no file access.
+
+Developing it: `claude --plugin-dir route --debug`. The debug log names the module when it loads, each event as it settles, and anything the engine refused. `/plugin-types` writes the build's declarations to `.claude/types`; the module is typed against `Register` from them. The API is early access and moves between releases, so regenerate rather than edit. A plugin loaded from disk this way derives an empty table unless its directory is the one the install record points at, and the module fails open on that as on every other shortfall.
+
+Codex support for a `modules` entry is not verified; there the command hooks remain the path.
+
 ## Install
 
 Claude Code:
