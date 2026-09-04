@@ -30,7 +30,7 @@ Route가 둘 다를 나눠 공급합니다: **언제는 훅들이 정하고, 무
 
 **`UserPromptSubmit` → `scripts/route-prompt.mjs`** 는 `/route`의 발동 조건을 매 프롬프트 옆에 실어 나릅니다 — 네 줄짜리 지시문, 그리고 그것뿐입니다. 매 프롬프트 비용은 지시문 하나이고, 테이블은 에포크당 한 번 지불됩니다.
 
-Codex는 같은 `hooks/hooks.json`을 읽습니다. 지원이 확인된 것은 `UserPromptSubmit` 이벤트와 같은 `additionalContext` 출력 필드까지입니다. `SessionStart`는 Codex가 공개한 훅 스키마(`codex-rs/hooks/schema/generated/session-start.command.*`)에는 있지만 여기서 실행해 보지는 않았습니다. `SessionStart` 훅을 돌리지 않는 호스트에서는 테이블이 도착하지 않고, Route는 지시문과 스킬 자신의 후보별 결핍 해소로 동작합니다. Codex는 `hooks/hooks.json`을 엄격하게 파싱합니다. `HooksFile`(`codex-rs/config/src/hook_config.rs`, `#[serde(deny_unknown_fields)]`)은 `description`과 `hooks`만 받고, 다른 키가 하나라도 있으면 "failed to parse hooks config"를 기록한 뒤 그 파일의 훅을 하나도 등록하지 않습니다 — 그래서 이 파일에는 그 둘 외에 아무것도 넣지 않습니다. Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뜁니다 (설치 참조).
+Codex는 같은 `hooks/hooks.json`을 읽고 두 훅을 모두 돌립니다 — Codex CLI 0.153.2에서 `codex exec`로 확인했습니다: `SessionStart`는 첫 턴 시작에 `source: startup`으로 발화하고, `UserPromptSubmit`은 프롬프트 옆에서 발화하며, 각 훅의 `additionalContext`는 같은 출력 형태 그대로 읽혀 프롬프트 앞에 developer 메시지로 모델 컨텍스트에 들어갑니다. 그 실행이 거친 source는 `startup`이고, Codex의 payload 스키마는 같은 네 source를 적고 있습니다. Codex에서 도착하지 않는 것은 테이블입니다. 유도는 Claude Code의 설치 기록(Claude 설정 디렉터리의 `installed_plugins.json`)을 읽는데 Codex의 플러그인 캐시 루트는 거기에 없어 유도가 fail-open 경로를 타므로, 여는 문장만 나가고 Codex에서의 Route는 여는 문장, 지시문, 그리고 스킬 자신의 후보별 결핍 해소로 동작합니다. Codex는 `hooks/hooks.json`을 엄격하게 파싱합니다. `HooksFile`(`codex-rs/config/src/hook_config.rs`, `#[serde(deny_unknown_fields)]`)은 `description`과 `hooks`만 받고, 다른 키가 하나라도 있으면 "failed to parse hooks config"를 기록한 뒤 그 파일의 훅을 하나도 등록하지 않습니다 — 그래서 이 파일에는 그 둘 외에 아무것도 넣지 않습니다. Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뛰며, 그 건너뜀은 조용합니다 — 아무 로그도 남지 않고 `codex exec --json`에는 훅 이벤트가 실리지 않으므로, 돌지 않는 것처럼 보이는 훅은 신뢰 상태부터 확인합니다 (설치 참조).
 
 ## 설치
 
@@ -48,13 +48,13 @@ codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
 codex plugin add route@epistemic-protocols
 ```
 
-그 다음 플러그인의 훅을 검토하고 신뢰하세요 — 플러그인 설치가 훅을 신뢰하는 것은 아니며, Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뛰므로, 이 단계 전까지 매 프롬프트 지시문은 꺼져 있습니다:
+그 다음 플러그인의 훅을 검토하고 신뢰하세요 — 플러그인 설치가 훅을 신뢰하는 것은 아니며, Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뛰므로, 이 단계 전까지 두 훅 모두 꺼져 있습니다:
 
 ```
 /hooks
 ```
 
-Codex는 훅 정의의 해시에 대해 신뢰를 기록하므로, 플러그인의 훅이 바뀔 때마다 이 단계가 반복됩니다.
+Codex는 `hooks/hooks.json`에 적힌 훅 항목의 해시 — 이벤트와 명령줄이며, 그 명령이 실행하는 스크립트는 아닙니다 — 에 대해 신뢰를 기록하므로, 그 항목이 바뀔 때마다 이 단계가 반복됩니다.
 
 ## 사용법
 
