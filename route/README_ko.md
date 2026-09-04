@@ -30,7 +30,7 @@ Route가 둘 다를 나눠 공급합니다: **언제는 훅들이 정하고, 무
 
 **`UserPromptSubmit` → `scripts/route-prompt.mjs`** 는 `/route`의 발동 조건을 매 프롬프트 옆에 실어 나릅니다 — 네 줄짜리 지시문, 그리고 그것뿐입니다. 매 프롬프트 비용은 지시문 하나이고, 테이블은 에포크당 한 번 지불됩니다.
 
-Codex는 같은 `hooks/hooks.json`을 읽습니다. 지원이 확인된 것은 `UserPromptSubmit` 이벤트와 같은 `additionalContext` 출력 필드까지이고, `SessionStart`는 확인되지 않았습니다. `SessionStart` 훅을 돌리지 않는 호스트에서는 테이블이 도착하지 않고, Route는 지시문과 스킬 자신의 후보별 결핍 해소로 동작합니다. Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뜁니다 (설치 참조).
+Codex는 같은 `hooks/hooks.json`을 읽습니다. 지원이 확인된 것은 `UserPromptSubmit` 이벤트와 같은 `additionalContext` 출력 필드까지입니다. `SessionStart`는 Codex가 공개한 훅 스키마(`codex-rs/hooks/schema/generated/session-start.command.*`)에는 있지만 여기서 실행해 보지는 않았습니다. `SessionStart` 훅을 돌리지 않는 호스트에서는 테이블이 도착하지 않고, Route는 지시문과 스킬 자신의 후보별 결핍 해소로 동작합니다. Codex는 `hooks/hooks.json`을 엄격하게 파싱합니다. `HooksFile`(`codex-rs/config/src/hook_config.rs`, `#[serde(deny_unknown_fields)]`)은 `description`과 `hooks`만 받고, 다른 키가 하나라도 있으면 "failed to parse hooks config"를 기록한 뒤 그 파일의 훅을 하나도 등록하지 않습니다 — 그래서 이 파일에는 그 둘 외에 아무것도 넣지 않습니다. Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뜁니다 (설치 참조).
 
 ## 설치
 

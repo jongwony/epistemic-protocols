@@ -30,7 +30,7 @@ The table is derived, never maintained. `installed_plugins.json` gives each enab
 
 **`UserPromptSubmit` → `scripts/route-prompt.mjs`** carries the firing conditions for `/route` beside every prompt — the four-line directive, and nothing else. The per-prompt cost is the directive alone; the table is paid once per epoch.
 
-Codex reads the same `hooks/hooks.json`; its support is verified for `UserPromptSubmit` with the same `additionalContext` output field, and not for `SessionStart`. On a host that does not run the `SessionStart` hook the table does not arrive, and Route runs as the directive plus the skill's own resolution of each candidate's deficit. Codex skips a plugin-bundled hook until its current definition is trusted (see Install).
+Codex reads the same `hooks/hooks.json`; its support is verified for `UserPromptSubmit` with the same `additionalContext` output field. `SessionStart` appears in Codex's published hook schemas (`codex-rs/hooks/schema/generated/session-start.command.*`) but has not been exercised here. On a host that does not run the `SessionStart` hook the table does not arrive, and Route runs as the directive plus the skill's own resolution of each candidate's deficit. Codex parses `hooks/hooks.json` strictly: its `HooksFile` (`codex-rs/config/src/hook_config.rs`, `#[serde(deny_unknown_fields)]`) accepts only `description` and `hooks`, and on any other key it logs "failed to parse hooks config" and registers none of the file's hooks — so nothing else goes in that file. Codex skips a plugin-bundled hook until its current definition is trusted (see Install).
 
 ## Install
 
