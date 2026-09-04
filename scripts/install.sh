@@ -1,6 +1,6 @@
 #!/bin/bash
-# Install every plugin in the epistemic-protocols marketplace for Claude Code,
-# except the opt-in set named in SKIP_PLUGINS below.
+# Install every core protocol plugin in the epistemic-protocols marketplace for
+# Claude Code. Utility plugins are opt-in — see SKIP_PLUGINS below.
 # Idempotent: safe to re-run when new plugins are added
 #
 # Usage:
@@ -15,9 +15,13 @@ MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/market
 # Opt-in plugins the default installer leaves out. The plugin list itself is
 # derived from the manifest; this is the one hand-maintained exclusion, guarded
 # by scripts/package.test.js against naming a plugin the manifest no longer has.
+#   epistemic-cooperative — utility skills (/onboard, /catalog, /probe, review
+#                           and audit tooling) layered on the protocols, not a
+#                           protocol itself; install it when you want them:
+#                           claude plugin install epistemic-cooperative@epistemic-protocols
 #   route — carries a per-prompt hook; install it deliberately:
 #           claude plugin install route@epistemic-protocols
-SKIP_PLUGINS="route"
+SKIP_PLUGINS="epistemic-cooperative route"
 
 command -v claude >/dev/null 2>&1 || { echo "Error: claude CLI not found. Install Claude Code first." >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found." >&2; exit 1; }
@@ -52,4 +56,5 @@ echo "Installed $installed plugin(s)."
 for p in $opted_out; do
   echo "Not installed (opt-in): $p — add it with: claude plugin install $p@$MARKETPLACE"
 done
-echo "Run /onboard to get started."
+echo "Get started by invoking a protocol, e.g. /gap before you commit to a decision."
+echo "For a guided start, install epistemic-cooperative and run /onboard."

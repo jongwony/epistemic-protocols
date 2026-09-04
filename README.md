@@ -22,19 +22,22 @@ The two layers serve different audiences: the README carries the narrow public c
 
 ### Claude Code
 
-Install every protocol plus the `epistemic-cooperative` utility plugin:
+Install every protocol:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route` is opt-in — it carries a per-prompt hook, so the one-liner leaves it out. Add it on its own:
+Then invoke a protocol at the decision point you are at — for example `/gap` before committing to a direction, or `/inquire` before handing work to the AI.
+
+The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and lookup (`/onboard`, `/catalog`, `/probe`) plus contributor tooling; `route` carries a per-prompt hook. Add either on its own:
 
 ```bash
+claude plugin install epistemic-cooperative@epistemic-protocols
 claude plugin install route@epistemic-protocols
 ```
 
-Then run `/onboard` — start with a quick recommendation based on your recent sessions, then optionally continue to guided learning with scenarios, trials, and quizzes.
+With `epistemic-cooperative` installed, `/onboard` gives a quick recommendation from your recent sessions and can continue into guided learning with scenarios, trials, and quizzes.
 
 ### Codex
 
@@ -50,16 +53,7 @@ For local development from a checkout:
 codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
-The Codex marketplace preserves the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. Start with `onboard` for a quick recommendation, or add the local checkout when you are developing protocol changes.
-
-<details>
-<summary>Notes</summary>
-
-- The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
-- Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
-- The marketplace includes every protocol plugin plus `epistemic-cooperative`.
-
-</details>
+The Codex marketplace keeps the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. The marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json); each plugin keeps its Codex manifest beside its Claude manifest at `<plugin>/.codex-plugin/plugin.json`.
 
 ### Other agent tools
 
@@ -92,49 +86,18 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 ## Utilities
 
-| Plugin | Command | Purpose |
+Two plugins sit beside the protocols. Both are opt-in for the Claude Code one-liner; each plugin's own README carries its full skill list and contract.
+
+| Plugin | Purpose | Install |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/steer`, `/realign`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check`, `/review-loop`, `/lens-review`, `/place`, `/white-bear`, `/zero-shot`, `/goal-research`, `/image-companion` | Protocol learning, deficit recognition fit review, handbook reference, project profile recalibration, project guide direction-line fusion, work-unit triage, reference-grounded prompt-artifact formation, scoped empirical validation, advisor-checked decision gates, review loops and multi-lens PR review, instruction-prose placement and audit, and Codex-delegated research and companion images |
-| [Route](./route) | `/route` | Context-driven protocol routing — a per-prompt hook directive has the agent invoke the one core protocol whose deficit the accumulated context shows |
+| [Epistemic Cooperative](./epistemic-cooperative) | Utility skills layered on the protocols: protocol learning and lookup, deficit recognition, project-profile calibration, work-unit triage, prompt-artifact formation, review loops and prose audits, and Codex-delegated research and images | `claude plugin install epistemic-cooperative@epistemic-protocols` |
+| [Route](./route) | Context-driven protocol routing — a per-prompt hook directive has the agent invoke the one core protocol whose deficit the accumulated context shows | `claude plugin install route@epistemic-protocols` |
 
-**Three discovery modes coexist** (none replaces the others):
+Three ways to find the protocol you need, all in Epistemic Cooperative (none replaces the others):
 
-- `/catalog` — passive reference handbook (browse / lookup; you already know the question)
-- `/onboard` — pattern-based recommendation + optional trial (session-history-driven; you want to learn what fits your patterns)
-- `/probe` — active AI-hypothesized deficit recognition (multi-hypothesis fit review when you feel something is off but cannot yet name which deficit fits)
-
-**Context-driven routing** (separate plugin):
-
-- `/route` — the plugin's `UserPromptSubmit` hook places a short directive beside each prompt; when the accumulated context shows a deficit exactly one loaded core protocol resolves, the agent invokes that protocol (its own first gate holds the user's judgment), nudges when several fit, and stays silent when none
-
-**Project guide direction-line fusion** (three-horizon Horizontverschmelzung):
-
-- `/realign` — surface three horizons (the project guide's currently inscribed direction line, externally surfaced direction signals from a configured channel set, and the user's present pre-understanding elicited as a separate sub-step), compose a fusion candidate with a per-horizon transformation trace marking what was preserved / transformed / dropped in each horizon, shape the candidate through its own dialectical widen / narrow / fuse / reorient / confirm / dismiss vocabulary, and on user confirmation write the fused line back to the project guide direction line (rollback through the project's version control)
-
-**Work-unit triage**:
-
-- `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, form focused work units, and — once the user picks a route — externalize each unit to a substrate-owned record the receiving span is pointed at
-
-**Reference-grounded prompt formation**:
-
-- `/forge` — read a target reference (vendor model prompt guide, Codex Goals spec), reverse-induce the user's under-determined intent into a modality-aware IR, ground it against the reference via canonical-external dynamic fetch with a staleness guard, and project a ready-to-use prompt artifact (an initial prompt for a follow-up session/tool, or a standing custom-skill recipe); vendor-agnostic core + parameterized adapter seam (Higgsfield, gpt-image, codex-goals, claude-session, dia), with the cross-adapter abstraction held as a deliberately deferred colimit
-
-**Scoped empirical validation**:
-
-- `/reduced-space-test` — decompose a target↔surrogate equivalence claim into verifiable facets, bound a user-synchronized stand-in test space with its residual complement (composes `/bound`), capture evidence inside it (composes `/inquire`), and carry the uncovered complement forward; an orchestration utility that scopes the resulting claim to the tested conditions rather than asserting absolute equivalence, with no new protocol or graph node
-
-**Review and prose audit**:
-
-- `/review-loop` — convergence-paced review-resolve loop over a change and its governing surfaces: drives a pluggable review source (`codex` or `code-review`), verifies each finding against the codebase and the base it is measured from, auto-applies mechanical fixes, gates the judgment calls, and re-reviews until every finding is disposed of
-- `/lens-review` — one-pass multi-perspective PR review: `/frame` derives the lenses that fit the diff plus a gap scan, each lens is analyzed in isolation, findings are cross-verified, and the survivors are posted as one consolidated PR comment
-- `/place` — read-only placement audit routing each clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and setting its enforcement axis
-- `/white-bear` — read-only prose audit for unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring)
-- `/zero-shot` — read-only prose audit for principle statement over anchoring examples
-
-**Codex-delegated utilities**:
-
-- `/goal-research` — delegate a research question to a background Codex CLI session that scopes it with Codex's builtin `goal` and verifies externally through Aitesis (`$inquire`), surfacing the full trace back
-- `/image-companion` — a symbolic slide-ready image for a passage in a document, kept visually consistent with the artifact's other companion images; composes `/forge` for grounding and Codex for generation
+- `/catalog` — passive reference handbook; you already know the question
+- `/onboard` — recommendation from your recent sessions, with an optional trial
+- `/probe` — AI-hypothesized deficit recognition; something feels off but you cannot yet name which deficit fits
 
 ## Design
 
