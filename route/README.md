@@ -30,7 +30,7 @@ The table is derived, never maintained. `installed_plugins.json` gives each enab
 
 **`UserPromptSubmit` → `scripts/route-prompt.mjs`** carries the firing conditions for `/route` beside every prompt — the four-line directive, and nothing else. The per-prompt cost is the directive alone; the table is paid once per epoch.
 
-Codex reads the same `hooks/hooks.json`; its support is verified for `UserPromptSubmit` with the same `additionalContext` output field, and not for `SessionStart`. On a host that does not run the `SessionStart` hook the table does not arrive, and Route runs as the directive plus the skill's own resolution of each candidate's deficit. Codex skips a plugin-bundled hook until its current definition is trusted (see Install).
+Codex reads the same `hooks/hooks.json` and runs both hooks. The table stays empty there, since the derivation reads Claude Code's install record, so Route on Codex is the opener, the directive, and the skill's own resolution of each candidate's deficit.
 
 ## Install
 
@@ -50,14 +50,15 @@ codex plugin add route@epistemic-protocols
 
 Then review and trust the plugin's hooks — installing a plugin does not trust
 them, and Codex skips a plugin-bundled hook until its current definition is
-trusted, so the per-prompt directive stays off until this step is done:
+trusted, so both hooks stay off until this step is done:
 
 ```
 /hooks
 ```
 
-Codex records trust against the hook definition's hash, so this recurs whenever
-the plugin's hooks change.
+Codex records trust against a hash of the hook's entry in `hooks/hooks.json` —
+the event and the command line, not the script the command runs — so this
+recurs whenever that entry changes.
 
 ## Usage
 

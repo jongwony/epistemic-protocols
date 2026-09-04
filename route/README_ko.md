@@ -30,7 +30,7 @@ Route가 둘 다를 나눠 공급합니다: **언제는 훅들이 정하고, 무
 
 **`UserPromptSubmit` → `scripts/route-prompt.mjs`** 는 `/route`의 발동 조건을 매 프롬프트 옆에 실어 나릅니다 — 네 줄짜리 지시문, 그리고 그것뿐입니다. 매 프롬프트 비용은 지시문 하나이고, 테이블은 에포크당 한 번 지불됩니다.
 
-Codex는 같은 `hooks/hooks.json`을 읽습니다. 지원이 확인된 것은 `UserPromptSubmit` 이벤트와 같은 `additionalContext` 출력 필드까지이고, `SessionStart`는 확인되지 않았습니다. `SessionStart` 훅을 돌리지 않는 호스트에서는 테이블이 도착하지 않고, Route는 지시문과 스킬 자신의 후보별 결핍 해소로 동작합니다. Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뜁니다 (설치 참조).
+Codex는 같은 `hooks/hooks.json`을 읽고 두 훅을 모두 돌립니다. 유도가 Claude Code의 설치 기록을 읽으므로 Codex에서는 테이블이 비어 있고, Codex에서의 Route는 여는 문장, 지시문, 그리고 스킬 자신의 후보별 결핍 해소로 동작합니다.
 
 ## 설치
 
@@ -48,13 +48,13 @@ codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
 codex plugin add route@epistemic-protocols
 ```
 
-그 다음 플러그인의 훅을 검토하고 신뢰하세요 — 플러그인 설치가 훅을 신뢰하는 것은 아니며, Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뛰므로, 이 단계 전까지 매 프롬프트 지시문은 꺼져 있습니다:
+그 다음 플러그인의 훅을 검토하고 신뢰하세요 — 플러그인 설치가 훅을 신뢰하는 것은 아니며, Codex는 플러그인 동봉 훅을 현재 정의가 신뢰될 때까지 건너뛰므로, 이 단계 전까지 두 훅 모두 꺼져 있습니다:
 
 ```
 /hooks
 ```
 
-Codex는 훅 정의의 해시에 대해 신뢰를 기록하므로, 플러그인의 훅이 바뀔 때마다 이 단계가 반복됩니다.
+Codex는 `hooks/hooks.json`에 적힌 훅 항목의 해시 — 이벤트와 명령줄이며, 그 명령이 실행하는 스크립트는 아닙니다 — 에 대해 신뢰를 기록하므로, 그 항목이 바뀔 때마다 이 단계가 반복됩니다.
 
 ## 사용법
 
