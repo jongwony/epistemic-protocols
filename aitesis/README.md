@@ -23,7 +23,7 @@ AI systems often proceed with execution despite insufficient context (`ContextIn
 | **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
 | Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-**Key distinction**: Aitesis infers what context the AI lacks before execution — information flows user→AI (heterocognitive: "do I have enough context?"). Invoked right before a decision is committed, the same scan surfaces what that decision has not yet considered.
+**Key distinction**: Aitesis infers what context the AI lacks before execution — information flows user→AI (heterocognitive: "do I have enough context?").
 
 Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Aitesis supplies missing facts before execution; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
 

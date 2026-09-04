@@ -23,7 +23,7 @@ AI 시스템은 맥락이 불충분한 상태(`ContextInsufficient`)에서도 �
 | **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
 | Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-**핵심 구분**: Aitesis는 실행 전에 AI 자체의 맥락 부족을 추론합니다 — 정보 흐름 사용자→AI (이타인지: "내가 충분한 맥락을 가지고 있는가?"). 결정을 확정하기 직전에 부르면 같은 스캔이 그 결정이 아직 고려하지 않은 것을 드러냅니다.
+**핵심 구분**: Aitesis는 실행 전에 AI 자체의 맥락 부족을 추론합니다 — 정보 흐름 사용자→AI (이타인지: "내가 충분한 맥락을 가지고 있는가?").
 
 Proplasma(`/preview`)는 방향 축의 Planning 클러스터 형제입니다: Aitesis는 실행 전 부족한 사실을 공급하고, Proplasma는 후보가 이미 알려져 있으나 서술로 인식되지 않을 때 폐기 전제의 placeholder 대비로 방향의 미래를 물질화합니다.
 
