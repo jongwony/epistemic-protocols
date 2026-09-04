@@ -46,11 +46,6 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Analogia | `/ground` | An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion |
 | Periagoge | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 
-### Decision
-
-| Protocol | Command | When to Use |
-|----------|---------|-------------|
-
 ### Execution
 
 | Protocol | Command | When to Use |
@@ -81,7 +76,7 @@ When a cluster name or protocol command/name is provided as argument:
 1. Normalize the argument:
    - Strip leading `/` if present
    - Match case-insensitively against protocol names (Aitesis, Euporia, etc.) and commands (inquire, elicit, etc.)
-   - Match cluster names: planning, analysis, decision, execution, verification, cross-cutting
+   - Match cluster names: planning, analysis, execution, verification, cross-cutting
 
 2. For **cluster** arguments: display all protocol cards in that cluster with expanded "When to Use" descriptions from the tables above.
 
