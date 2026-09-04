@@ -1,6 +1,16 @@
 {
-  "description": "Per-prompt routing directive — carries the firing conditions for /route; the directive text lives in scripts/route-prompt.mjs.",
+  "description": "Two hooks. SessionStart injects the derived deficit table once per context epoch (startup, resume, clear, compact) with an opener conditioned on the source — scripts/route-session.mjs. UserPromptSubmit carries the per-prompt firing conditions for /route — scripts/route-prompt.mjs.",
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs\""
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
