@@ -146,7 +146,7 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 | Protocol | Signal patterns | Priority |
 |----------|----------------|----------|
 | `/elicit` | Vague first prompts ("improve", "optimize", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates. An ideation ask ("ideas for", "brainstorm") routes to `/ideate` (Heuresis), which is user-initiated and therefore outside this proactive pool | Highest (also fallback) |
-| `/inquire` | Hand-off or finalization language ("go ahead", "just do it", "ready", "ship", "merge") — the AI is about to execute on the context it has; tasks with implicit requirements or environment dependencies in summary | Medium |
+| `/inquire` | Hand-off or finalization language ("go ahead", "just do it", "ready", "ship", "merge") — the AI is about to execute on the context it has; tasks with implicit requirements or environment dependencies in summary. It checks what the imminent execution rests on (assumptions, missing facts, environment dependencies); it does not audit the decision for unconsidered trade-offs, alternatives, or omitted steps | Medium |
 | `/frame` | Exploration/comparison language ("approach", "options", "tradeoffs", "compare", "architecture", "which way") | Medium |
 
 **Decision logic**:

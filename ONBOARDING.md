@@ -68,7 +68,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 ## Contribution Workflow
 
 1. **Scope** — read the premise document(s) for the area you're touching (`premise/AGENTS.md` routes by concern), plus `.claude/rules/project-profile.md` and `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
-2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
+2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first — its assumptions and missing facts, not whether every alternative or trade-off was considered, which stays yours to raise; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `.claude/skills/verify/references/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`

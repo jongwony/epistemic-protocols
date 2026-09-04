@@ -91,8 +91,10 @@ cleanup(p) = the destruction step read off p.artifact_ref (no-op for None; file/
 ContrastMap = per-axis juxtaposition: for each axis ∈ Axs, the futures each probe exposes on that axis
 ExposedUnknown = a direction unknown newly exposed by the contrast (or recorded at an interrogation), tagged with its
                            DownstreamRoute at recording — the harvest inherits the tag, it does not attach it
-DownstreamRoute = PreCommit  -- a pre-commit check: /inquire invoked once the settled direction MATERIALIZES INTO A
-                             --   COMMITTED ACTION — not at the direction decision
+DownstreamRoute = PreCommit  -- a pre-commit check the USER carries once the settled direction MATERIALIZES INTO A
+                             --   COMMITTED ACTION — not at the direction decision. /inquire at that moment surfaces only what
+                             --   the action rests on (unstated assumptions, missing facts); an unconsidered trade-off,
+                             --   alternative, or step is the user's to raise, and this tag is what reminds them the check is theirs
                 | Inquire    -- a factual unknown needing real evidence now (placeholders can never ground it)
 GroundTag = optional annotation ON THE CONSTITUTED DIRECTION (not an ExposedUnknown route): when the surviving
                            --   direction maps onto a familiar domain, it is tagged at harvest for /ground
