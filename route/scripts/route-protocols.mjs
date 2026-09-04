@@ -19,7 +19,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const TABLE_HEADER = "Installed protocols, each with the deficit it resolves:";
+const TABLE_HEADER = "Loaded core epistemic protocols, each with the deficit it resolves:";
 
 function readJson(file) {
   try {

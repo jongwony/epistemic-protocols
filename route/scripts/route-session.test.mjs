@@ -117,7 +117,7 @@ test("resume and compact open on trimmed context", () => {
   assert.equal(opener("resume"), TRIMMED_OPENER);
   assert.equal(opener("compact"), TRIMMED_OPENER);
   assert.match(TRIMMED_OPENER, /^\[route\] Prior context was trimmed/);
-  assert.match(TRIMMED_OPENER, /recall-shaped deficits are the usual first thing to check/);
+  assert.match(TRIMMED_OPENER, /recall-shaped deficits are the usual first thing here/);
 });
 
 test("a missing or unknown source reads as thin", () => {
@@ -126,7 +126,16 @@ test("a missing or unknown source reads as thin", () => {
   assert.equal(opener("something-new"), THIN_OPENER);
 });
 
-test("neither opener names a protocol — the condition is stated, the table matches", () => {
+test("both openers end in the directive's own action — invoke /route", () => {
+  // Two triggers, one router: the match and the relay test live inside
+  // /route (Rule #1), so an opener that matched on its own would skip them.
+  for (const text of [THIN_OPENER, TRIMMED_OPENER]) {
+    assert.match(text, /invoke \/route/);
+    assert.doesNotMatch(text, /match (that|it) against/);
+  }
+});
+
+test("neither opener names a protocol — the condition is stated, /route matches", () => {
   // A protocol named here would be the hand-kept routing table Rule #2
   // refuses. `/route` itself is the one command an opener may carry.
   for (const text of [THIN_OPENER, TRIMMED_OPENER]) {
@@ -134,6 +143,12 @@ test("neither opener names a protocol — the condition is stated, the table mat
     assert.deepEqual(commands.filter((c) => c !== "/route"), []);
     assert.ok(text.split("\n").length <= 2);
   }
+});
+
+test("the table header carries the directive's referent", () => {
+  // The per-prompt directive says "a loaded core epistemic protocol"; the
+  // header must use the same words so the two injections read as one catalog.
+  assert.match(TABLE_HEADER, /^Loaded core epistemic protocols/);
 });
 
 // ---------------------------------------------------------------------------

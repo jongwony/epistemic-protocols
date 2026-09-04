@@ -27,10 +27,19 @@
  * what session start is for — the per-prompt hook would have to detect thin
  * context, while this one already knows it from `source`. So at startup or
  * after /clear the opener points at that locus; after resume or compaction,
- * at what the session had settled but no longer holds in view. Naming which
- * protocol fits either condition would be the hand-kept routing table Rule
- * #2 refuses; the model matches the condition against the derived table in
- * the same injection.
+ * at what the session had settled but no longer holds in view.
+ *
+ * Both openers end in the same action as the per-prompt directive: invoke
+ * /route. Two triggers, one router. The directive's condition — the
+ * accumulated context shows a deficit — excludes request-held deficits by
+ * construction, so the opener is the trigger for that kind; but the match
+ * itself, and the relay test that decides invoke, nudge or silence, live
+ * inside /route (Rule #1: routing is the whole turn). An opener that told
+ * the model to match against the table itself would skip that, and naming
+ * which protocol fits either condition would be the hand-kept routing table
+ * Rule #2 refuses. The table below the opener shares the directive's own
+ * referent — loaded core epistemic protocols — so the two injections read
+ * as one catalog.
  *
  * Every failure path is open: an unreadable payload reads as startup, and a
  * derivation shortfall sends the opener alone. A hook that blocks a session
@@ -43,20 +52,21 @@ import { deriveProtocols, isMain, parsePayload, renderTable } from "./route-prot
 
 // Sources on which prior context is not in view: the session is new, or it
 // was reset. The deficit this opener points at sits in the request, not in
-// the context — there is no accumulated context yet to read one off of.
+// the context — there is no accumulated context yet to read one off of —
+// and the action is to invoke /route, not to match here.
 // Anything else — including a missing or unknown source — reads as thin,
 // because a wrong "thin" costs one unneeded check and a wrong "trimmed"
 // hides a fresh start behind a recall prompt.
 const THIN_OPENER = [
   "[route] Context is thin at this point in the session.",
-  "The deficit to check first sits in the request itself — intent or context only the user can supply, which accumulated context cannot yet show. When a request is not fully explicit, match that against the installed protocols below before object-level work.",
+  "The deficit to check first sits in the request itself — intent or context only the user can supply, which accumulated context cannot yet show. When a request is not fully explicit, invoke /route before object-level work.",
 ].join("\n");
 
 // Sources on which the session already holds settled context that this
 // epoch does not carry: a resumed session, or one whose context was compacted.
 const TRIMMED_OPENER = [
   "[route] Prior context was trimmed at this point in the session.",
-  "What the session had already settled may no longer be in view — recall-shaped deficits are the usual first thing to check against the installed protocols below.",
+  "What the session had already settled may no longer be in view — recall-shaped deficits are the usual first thing here. Before building on what the session seems to hold, invoke /route.",
 ].join("\n");
 
 const TRIMMED_SOURCES = new Set(["resume", "compact"]);
