@@ -1,7 +1,7 @@
 {
   "name": "anamnesis",
-  "version": "1.1.1",
-  "description": "Resolve vague recall into recognized context — /recollect (ἀνάμνησις: a recollecting)",
+  "version": "1.1.2",
+  "description": "Resolve vague recall into recognized context — one session, or a line of work, topic, or settled concept across several — /recollect (ἀνάμνησις: a recollecting)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Anamnesis",
     "shortDescription": "Resolve vague recall into recognized context — /recollect",
-    "longDescription": "Resolve vague recall into recognized context — /recollect",
+    "longDescription": "Resolve vague recall into recognized context — one session, or a line of work, topic, or settled concept across several — /recollect",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
