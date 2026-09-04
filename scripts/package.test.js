@@ -1111,13 +1111,11 @@ describe('unified release artifact contract', () => {
     }
   });
 
-  it('retains utility sidecars and directly referenced agents in the release superset', () => {
+  it('retains utility sidecars in the release superset', () => {
     const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
     assert.ok(entriesFor('epistemic-cooperative', 'catalog').includes('catalog/routing-map.md'));
     assert.ok(entriesFor('epistemic-cooperative', 'forge')
       .includes('forge/adapters/codex-goals.md'));
-    assert.ok(entriesFor('epistemic-cooperative', 'curses')
-      .includes('curses/agents/dimension-profiler.md'));
   });
 
   it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
@@ -1310,8 +1308,6 @@ describe('package.js CLI', () => {
         'catalog.zip',
         'conduct.zip',
         'contextualize.zip',
-        'curses.zip',
-        'dashboard.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',
@@ -1325,9 +1321,7 @@ describe('package.js CLI', () => {
         'image-companion.zip',
         'induce.zip',
         'inquire.zip',
-        'introspect.zip',
         'lens-review.zip',
-        'misuse.zip',
         'onboard.zip',
         'place.zip',
         'preview.zip',
@@ -1335,10 +1329,8 @@ describe('package.js CLI', () => {
         'realign.zip',
         'recollect.zip',
         'reduced-space-test.zip',
-        'report.zip',
         'review-loop.zip',
         'route.zip',
-        'sophia.zip',
         'steer.zip',
         'sublate.zip',
         'triage.zip',

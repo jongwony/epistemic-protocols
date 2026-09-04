@@ -27,7 +27,6 @@ Skip when:
 - The deficit is already named with confidence (invoke the matching protocol directly)
 - The user wants a passive reference handbook (use `/catalog`)
 - The user wants pattern-based recommendation from session history with optional trial (use `/onboard`)
-- The user wants accumulated session analytics (use `/report` or `/dashboard`)
 
 ## Distinction from /catalog and /onboard
 
@@ -295,5 +294,4 @@ Skip Probe when:
 - The user has already named the deficit with confidence
 - The user requests a passive handbook reference (`/catalog`)
 - The user requests pattern-based recommendation from session history (`/onboard`)
-- The user requests accumulated analytics (`/report`, `/dashboard`)
 

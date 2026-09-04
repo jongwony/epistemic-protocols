@@ -94,7 +94,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, reference-grounded prompt-artifact formation, scoped empirical validation, and advisor-checked decision gates |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/steer`, `/realign`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | Protocol learning, deficit recognition fit review, handbook reference, project profile recalibration, project guide direction-line fusion, work-unit triage, reference-grounded prompt-artifact formation, scoped empirical validation, and advisor-checked decision gates |
 | [Route](./route) | `/route` | Context-driven protocol routing — a per-prompt hook directive has the agent invoke the one core protocol whose deficit the accumulated context shows |
 
 **Three discovery modes coexist** (none replaces the others):
@@ -106,10 +106,6 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 **Context-driven routing** (separate plugin):
 
 - `/route` — the plugin's `UserPromptSubmit` hook places a short directive beside each prompt; when the accumulated context shows a deficit exactly one loaded core protocol resolves, the agent invokes that protocol (its own first gate holds the user's judgment), nudges when several fit, and stays silent when none
-
-**Retrospective audit** (separate category from the discovery trio above):
-
-- `/misuse` — retrospective contract violation scan (detects past `/ground` and `/induce` protocol violations; surfaces structured violation records for user-constituted review)
 
 **Project guide direction-line fusion** (three-horizon Horizontverschmelzung):
 

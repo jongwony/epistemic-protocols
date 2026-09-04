@@ -94,7 +94,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 프로젝트 프로필 재조정, 프로젝트 가이드 direction line 지평융합, 소급적 계약 위반 감지, work-unit triage, 레퍼런스-grounded prompt-artifact 형성, scoped 실증 검증, 그리고 자문 검증 결정 게이트 |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/steer`, `/realign`, `/triage`, `/forge`, `/reduced-space-test`, `/gate-check` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 프로젝트 프로필 재조정, 프로젝트 가이드 direction line 지평융합, work-unit triage, 레퍼런스-grounded prompt-artifact 형성, scoped 실증 검증, 그리고 자문 검증 결정 게이트 |
 | [Route](./route) | `/route` | 컨텍스트 기반 프로토콜 라우팅 — 매 프롬프트 훅 지시문이 에이전트로 하여금 쌓인 컨텍스트가 드러내는 결핍에 맞는 코어 프로토콜 하나를 호출하게 함 |
 
 **세 가지 발견 모드 공존** (서로 대체하지 않음):
@@ -106,10 +106,6 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 **컨텍스트 기반 라우팅** (별도 플러그인):
 
 - `/route` — 플러그인의 `UserPromptSubmit` 훅이 매 프롬프트 옆에 짧은 지시문을 놓고, 쌓인 컨텍스트가 로드된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출(첫 게이트는 그 프로토콜 자신이 쥠), 여럿이 맞으면 넛지, 없으면 침묵
-
-**소급적 감사** (위 발견 트리오와 별도 카테고리):
-
-- `/misuse` — 소급적 계약 위반 스캔 (과거 `/ground`·`/induce` 프로토콜 계약 위반을 감지; 사용자 구성 리뷰를 위한 위반 레코드 제시)
 
 **프로젝트 가이드 direction-line 융합** (3-horizon Horizontverschmelzung):
 

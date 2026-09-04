@@ -126,9 +126,7 @@ Static checks validate protocol integrity before every commit. Run \`node .claud
 
 - \`/catalog\` — instant protocol handbook and reference
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
-- \`/probe\` — deficit recognition fit review (multi-hypothesis surfacing before protocol commitment)
-- \`/report\` — Growth Map with epistemic analysis from session patterns
-- \`/dashboard\` — full-session coverage analytics`;
+- \`/probe\` — deficit recognition fit review (multi-hypothesis surfacing before protocol commitment)`;
 
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
