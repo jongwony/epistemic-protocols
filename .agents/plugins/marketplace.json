@@ -161,18 +161,6 @@
       "category": "Productivity"
     },
     {
-      "name": "anagoge",
-      "source": {
-        "source": "local",
-        "path": "./anagoge"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "hyphegesis",
       "source": {
         "source": "local",

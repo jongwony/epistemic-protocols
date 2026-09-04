@@ -92,7 +92,7 @@ const resolveSkillProtocol = (called) => {
 // recording. hypomnesis-write.test.mjs checks this against the plugin skill
 // directories, so a protocol rename fails the suite instead of going silent.
 const protocolMap = {
-  "/ascend": ["ascend", "anagoge"], "/inquire": ["inquire", "aitesis"],
+  "/inquire": ["inquire", "aitesis"],
   "/ground": ["ground", "analogia"], "/recollect": ["recollect", "anamnesis"],
   "/sublate": ["sublate", "elenchus"], "/contextualize": ["contextualize", "epharmoge"],
   "/elicit": ["elicit", "euporia"], "/ideate": ["ideate", "heuresis"],

@@ -64,8 +64,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
 | Horismos | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
-| Anamnesis | `/recollect` | A vague, ambiguous recall you can't quite pin down — resolve it into recognized context |
-| Anagoge | `/ascend` | A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept) |
+| Anamnesis | `/recollect` | A vague, ambiguous recall you can't quite pin down — resolve it into recognized context, whether one session or a line of work, topic, or settled concept spread across several |
 | Katalepsis | `/grasp` | A result or artifact you need to actually understand — you can't follow it yet, or you think you can and haven't checked; confirm your understanding is genuine before you approve, explain, or build on it |
 | Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
 

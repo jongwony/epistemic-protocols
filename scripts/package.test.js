@@ -1054,7 +1054,7 @@ describe('codex-submit artifact profile', () => {
       CODEX_SUBMIT_PLUGINS
     );
     assert.ok(!first.results.some(result =>
-      ['anamnesis', 'anagoge', 'epistemic-cooperative', 'bundle'].includes(result.plugin)
+      ['anamnesis', 'epistemic-cooperative', 'bundle'].includes(result.plugin)
     ));
     assert.ok(!first.results.some(result => /bundle|release-notes/.test(result.filename)));
     for (const artifact of first.results) {
@@ -1303,7 +1303,6 @@ describe('package.js CLI', () => {
       result.results.map(entry => entry.zip).sort(),
       [
         'apportion.zip',
-        'ascend.zip',
         'bound.zip',
         'catalog.zip',
         'conduct.zip',

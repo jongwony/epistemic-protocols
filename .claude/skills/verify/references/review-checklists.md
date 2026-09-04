@@ -128,7 +128,6 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Merismos: GoalPlanUncompiled → ConditionBearingUnitPlan (User-initiated, APPORTION)
   - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
-  - Anagoge: RecallGranularityInsufficient → HigherGranularityUnit (AI-guided, ELEVATE)
   - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
   - Proplasma: DirectionUnrecognizable → DirectionalContrast (Hybrid, PREVIEW)
   - Heuresis: CandidateFieldUnderexpanded → DiverseCandidateField (User-initiated, DIVERGE)

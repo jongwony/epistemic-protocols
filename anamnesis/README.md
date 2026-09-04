@@ -62,6 +62,7 @@ The six dimensions of the `MarkerProfile` — used to rank recall candidates and
 - When keyword search over memory returns too much or too little
 - When the hook is phenomenological ("that time we talked about…") rather than structured
 - When the right next step depends on recognizing which prior thread to resume
+- When what you remember is a whole line of work, a topic worked out in scattered pieces, or a concept prior sessions already settled — the same recall, resolved to the unit above any one session
 
 **Skip**:
 - When you already know the session ID, file path, or decision — direct lookup is cheaper

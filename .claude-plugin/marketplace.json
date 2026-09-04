@@ -66,11 +66,6 @@
       "description": "Resolve vague recall into recognized context — /recollect (ἀνάμνησις: recollection)"
     },
     {
-      "name": "anagoge",
-      "source": "./anagoge",
-      "description": "Elevate a vague recall to a higher-granularity unit — /ascend (ἀναγωγή: a leading-up)"
-    },
-    {
       "name": "hyphegesis",
       "source": "./hyphegesis",
       "description": "Conduct the method of a session's epistemic work before object-level cognition — /conduct (ὑφήγησις: a leading-the-way)"

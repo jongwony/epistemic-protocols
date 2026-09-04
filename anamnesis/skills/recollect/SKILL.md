@@ -1,6 +1,6 @@
 ---
 name: recollect
-description: "Resolve vague recall into recognized context through AI-guided contextual scan and user-validated recognition."
+description: "Resolve vague recall into recognized context through AI-guided contextual scan and user-validated recognition — one session, or the line of work, topic, or settled concept spread across several."
 ---
 
 # Anamnesis Protocol
@@ -166,6 +166,7 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- The initial scan reads the compact INDEX and the raw-record spines together, unconditionally. A spine read is bounded per record, so it is not the cost the checkpoint exists to protect the user from; gating it would buy nothing and add a branch. Transcript bodies stay out — their per-record cost has no upper bound. After probe enrichment still yields no candidate, Qx presents the full-text expansion and the spine-scoped stop as differential futures. ExpandFullText admits the SSOT_body paths declared by the runtime references; StopAtSpine terminates without opening them.
 -- Scanning spines unconditionally is also what keeps a runtime reachable before its INDEX exists: a store whose writer has not yet produced entries is not blind, it is spine-only. Without this the first recall against a newly-added runtime would always miss and always require the checkpoint.
 -- Fork/sidechain binding exists in the Claude realization only. For a Claude fork candidate, references/claude.md routes to references/fork-resume.md before presentation.
+-- When the recall's unit is above one session — the user names a whole line of work, topic, or settled concept, or the ranked candidates fall on one line across sessions — read references/supra-session.md before Phase 2. It binds how the candidates compose into that unit (connections inferred at read time from what deposits already store, read-only), how each claim the unit surfaces is confirmed against its own deposit's record, and how the unit is presented with every composing deposit's source and resume handle. The gate, its answers, and the recall-try budget stay as typed here.
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
@@ -275,7 +276,7 @@ MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
 
 ### Activation heuristics and exceptions
 
-Treat vague temporal references, existence claims without a locator, uncertain self-reference, failed recall, and visible recall effort as evidence of empty intention rather than hard gates. Prior recall indices may seed the scan but never constitute recognition.
+Treat vague temporal references, existence claims without a locator, uncertain self-reference, failed recall, and visible recall effort as evidence of empty intention rather than hard gates. A recall that names a whole line of work, topic, or settled concept across sessions is empty intention at a higher granularity, not a different deficit. Prior recall indices may seed the scan but never constitute recognition.
 
 Skip AI-guided activation when the user gives an exact reference, the same target is already resolved in this session, the request seeks new information, the user declines recall assistance, or Phase 0 identifies a different handling need.
 
@@ -283,7 +284,7 @@ Skip AI-guided activation when the user gives an exact reference, the same targe
 
 ### Reference loading
 
-Before scanning a runtime store, read its realization reference (`references/claude.md` or `references/codex.md`). Before an entropy, salience, or hybrid scan, read the corresponding track reference; read both for hybrid. When a known failure mode is suspected, read `references/failure-modes.md` before acting on it.
+Before scanning a runtime store, read its realization reference (`references/claude.md` or `references/codex.md`). Before an entropy, salience, or hybrid scan, read the corresponding track reference; read both for hybrid. When a known failure mode is suspected, read `references/failure-modes.md` before acting on it. When the unit the user means stands above one session — a line of work, a topic, or a settled concept spread across several — read `references/supra-session.md` before presenting.
 
 ### User-facing realization
 
@@ -315,6 +316,7 @@ On NullMatch, report the source-labeled depth actually searched for each realiza
 - **Guided recall orientation**: Refine offers structured adjacent directions with brief narratives, preserving user recognition rather than shifting reconstruction back to the user.
 - **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before the gate. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-vector context across recall attempts; distinguish a new candidate from prior candidates.
+- **Supra-session recall**: When the unit the user means stands above one session, compose it from the candidates as `references/supra-session.md` binds — connections inferred at read time from what deposits already store, each surfaced claim confirmed against its own deposit's record, every composing deposit carrying its own source and resume handle — and recognize it through the same gate, answers, and budget as a single candidate.
 - **NullMatch diagnosis**: Report only the source-labeled coverage actually searched and the failure causes its evidence supports.
 - **Conditional Qc; separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Qc remains mandatory outside `SingleObvious`; that relay specialization is the sanctioned exception. Qs remains a separate mandatory Constitution interaction on Refine.
 - **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, require current-state re-verification before commitment, and disclose every non-zero `source_scan` count without changing ranking.

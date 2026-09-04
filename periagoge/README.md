@@ -25,7 +25,7 @@ The name draws a structural analogy from Plato *Republic* VII.518d, where περ
 
 Activate when an instance set has converged toward an essence whose name, scope, or position is still unsettled — the user senses that the cases share something, but the shared thing has no locator yet.
 
-An abstraction that already exists and merely awaits comparison or validation routes elsewhere. When the user's intent is articulated but its decision coordinates are implicit in the externalized substrate, defer to Euporia (`/elicit`). When the concept already exists in prior work and only needs to be recognized rather than formed, defer to Anagoge (`/ascend`).
+An abstraction that already exists and merely awaits comparison or validation routes elsewhere. When the user's intent is articulated but its decision coordinates are implicit in the externalized substrate, defer to Euporia (`/elicit`). When the concept already exists in prior work and only needs to be recognized rather than formed, defer to Anamnesis (`/recollect`).
 
 ## Components
 
