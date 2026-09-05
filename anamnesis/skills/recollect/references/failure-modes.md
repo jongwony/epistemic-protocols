@@ -53,3 +53,24 @@ degraded_scan rationale:
   -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for
      the Cold-Start invariant
 ```
+
+## Ungroundable
+
+Read when `Find` returned candidates but `Ground` opened no member's record for the top recognizable (`¬grounded(O[top])`).
+
+```
+cause      -- the records the candidates point at are gone, rotated out, or were never written: the
+              INDEX or the spine indexed a session whose transcript no longer exists at Candidate.record.
+              This is a store-lifecycle gap, not a miss — the find was right and the evidence is absent
+detection  -- after Ground, every Excerpt in O[top] carries text = ∅. At session scope one member is
+              every member, so a single missing transcript is the whole of it
+recovery   -- drop O[top] from O[ranked] and ground the next; the ordering Rank produced is exactly
+              the order to try. When none is left the |O[ranked]| = 0 guards receive it: at attempts = 0
+              the open question, then the checkpoint, then NullMatch. Whichever of them emits names the
+              records that could not be opened, because "found nothing" and "found it and could not
+              open it" are different answers and only the second tells the user their store lost a record
+      -- never present the recognizable anyway. The narrative is composed FROM the excerpts, so with
+         none there is nothing it may assert; presenting the INDEX gist instead is exactly IndexAsEvidence
+      -- nothing is carried: the drop, the re-ground, and whatever guard receives the empty list all
+         run in the turn the Find ran in, so the list of unopenable records needs no carrier
+```

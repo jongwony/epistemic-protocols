@@ -22,7 +22,9 @@ Anamnesis(V) → Detect(V) →
       ExpandFullText: set(scan_scope = full_text) → Find
       StopAtSpine: NullMatch → inform(V, Σ) → deactivate
     |O[]| = 0 ∧ attempts > 0 ∧ fulltext_scanned: NullMatch → inform(V, Σ) → deactivate
-    |O[]| > 0: O[top] := Ground(O[top]) → set(presented = O[top]) → Present(Λ.presented) → Stop → U →
+    |O[]| > 0: O[top] := Ground(O[top]) →
+      ¬grounded(O[top]): O[] := O[] \ {O[top]} → Ground the new head, or fall to the |O[]| = 0 branches above when none is left   -- no member's record opened: nothing to present from
+      grounded(O[top]): set(presented = O[top]) → Present(Λ.presented) → Stop → U →
       Identified: emit(RecalledContext(Λ.presented)) → converge
       Corrected(c) ∧ attempts < max: recue(V, c) → set(attempts = attempts + 1) → Find
       Corrected(c) ∧ attempts = max: surface(Λ.presented) → deactivate   -- AttemptsExhausted: the closest grounded candidate, no identification claimed
@@ -66,12 +68,13 @@ SourceScan       = { skipped_lines: Nat, unverified_user_turns: Nat, omitted_cha
 Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
 Candidate        = { session_id: Optional(SessionId),
                      runtime: Source,
+                     record: Optional(Source),                    -- the path to THIS candidate's own record, as the spine read declared it (── STORE TOPOLOGY ──: SSOT_spine yields "whatever handle the realization needs to reopen the record"). Ground opens this and never a path re-resolved at grounding time: the spine scan is not partition-scoped, so the active session's partition does not locate a candidate found in another one. Null ⇒ no record can be opened for this member — Ground yields an empty excerpt and the prose says so
+                     recency: DateAnchor,                         -- the record's own last-activity time, as the spine read declares it (Claude: the file's modification time; Codex: the rollout's session_meta timestamp). Read by Rank for ordering, and above session scope by edge inference — which is what makes references/supra-session.md's "reads only these fields" true of a field Candidate actually has
                      cwd: Optional(String),
                      topic: String,
                      keywords: Set(String),
                      fingerprint: Prose,                          -- the INDEX gist: a cue, never evidence
                      cross_refs: List(Anchor),
-                     confidence: ∈ {low < medium < high},         -- the index writer's tier; read by Rank for ordering only — no gate or relay reads it
                      evidence_mode: Optional(EvidenceMode),       -- highest tier among the signals that matched this candidate at scan time; Null ⇒ INDEX entry predates evidence-mode capture — Null is NEUTRAL in ranking (no contribution), never a penalty
                      source_scan: Optional(SourceScan),           -- capture-time integrity of the record's own source, published by the writer; Null ⇒ the entry predates integrity capture. NEUTRAL in ranking exactly as evidence_mode is: it qualifies what the emit says about a candidate, never what the candidate scores
                      fork_marker: Bool,                          -- true ⇒ the id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT); its own id is not a valid resume handle. Invariants: fork_marker = false ⇒ parent_pointer = Null ∧ parent_cwd = Null ; parent_pointer = Null ⇒ parent_cwd = Null (parent_cwd requires parent_pointer; parent_pointer present with parent_cwd = Null is valid — parent identified but its cwd is unknown)
@@ -84,14 +87,16 @@ StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, c
                   -- ref stores the canonicalized literal (issue/PR numbers normalized to "#N", memory paths prefixed "memory/"); canonical-form grep over INDEX is form-invariant (a search for "#309" hits ref: "#309") — the canonical form is the dedup key, so raw surface variants ("PR 309") collapse into it
 LegacyAnchor     = String   -- opaque: memory path, URL, session ID, doc path — entries written before structured anchors; read as kind-unknown extends edges, never rejected, no migration
 Prose            = String   -- source-agnostic NL description
-Recognizable     = { unit: Unit, members: NonEmpty(Candidate), narrative: Prose, excerpts: List(Excerpt) }
+Recognizable     = { unit: Unit, members: NonEmpty(Candidate), narrative: Prose, excerpts: List(Excerpt), assembly: Optional(Assembly) }
                   -- the one object at every scope; unit = session ⟺ |members| = 1. As Find returns it, narrative is the members' index gist and excerpts = ∅ — enough to order, never to assert. After Ground, excerpts holds one entry per member and narrative is composed FROM them, in the unit's shape (one session: origin → direction → outcome; a line: origin → development → arrival; a topic: fragments → standing; a concept: forged by → settled at); nothing the excerpts do not carry is asserted
+Assembly         = { joined: the inferred edges that joined this recognizable's members, skipped: the links that resolved to no written record }   -- references/supra-session.md TYPES: Edge. Null at unit = session, where one member joins nothing. Carried on the object rather than in Λ so that surface(Λ.presented) at AttemptsExhausted still has the coverage after the yield — the recognizable is already the thing that crosses it
 Excerpt          = { member: Candidate, text: Prose, locator: Source, handle: Optional(ResumeHandle) }   -- the record's own words at the span the cue reaches, where that record is, and the resume command the runtime reference validates (Null ⇒ non-resumable, stated in the prose). A member whose record cannot be opened yields text = ∅ and contributes nothing the narrative may assert
 ResumeHandle     = String   -- the literal command the runtime reference emits (references/claude.md, references/codex.md; fork members per references/fork-resume.md)
 O[]              = List(Recognizable)   -- Find's ranked result at V.unit; O[top] is its head
 Find             = (Store, V) → List(Recognizable)   -- Scan_{Track} over the compact INDEX and the record spines (── STORE TOPOLOGY ──), joined above session scope (── FIND ABOVE SESSION SCOPE ──), ordered by Rank
-Rank             = (List(Recognizable), RecallTrace) → List(Recognizable)   -- ordering only: track-primary signal dominates, evidence_mode is a secondary tie-break (never a filter; Null neutral), edge connectivity joins it above session scope. No gate reads the order; it decides only which recognizable Ground opens first
-Ground           = Recognizable → Recognizable   -- one read per member of O[top]: open the member's own record through its runtime reference, take the excerpt the cue reaches, bind its locator and handle (a fork member per references/fork-resume.md), then compose the narrative from the excerpts. Bounded by |members(O[top])|, never by the store — it opens named records, it does not scan bodies. Idempotent: a member already read is not re-read
+Rank             = (List(Recognizable), RecallTrace) → List(Recognizable)   -- ordering only, computed from how well each recognizable matches the cue — no stored tier is read, because no writer publishes one: track-primary signal dominates, evidence_mode is a secondary tie-break (never a filter; Null neutral), edge connectivity joins it above session scope. No gate reads the order; it decides only which recognizable Ground opens first
+Ground           = Recognizable → Recognizable   -- one read per member of O[top]: open the member's own record at member.record, resolved by its runtime reference, take the excerpt the cue reaches, bind its locator and handle (a fork member per references/fork-resume.md), then compose the narrative from the excerpts. Bounded by |members(O[top])|, never by the store — it opens named records, it does not scan bodies. Idempotent: a member already read is not re-read
+grounded         = predicate; grounded(o) ≡ ∃ e ∈ o.excerpts : e.text ≠ ∅   -- at least one member's record opened. A recognizable no member's record could be opened for carries no evidence at all, and since the narrative is composed FROM the excerpts there is nothing it may assert — so it is never presented
 Ask              = V → Question   -- one open question when Find returns nothing: what else the user remembers, in their own words; no dimension taxonomy, no candidate to regenerate
 Question         = String
 H                = Cue      -- the answer to the open question
@@ -125,7 +130,9 @@ Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (
            [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
            → Cue(V, Σ) → V.trace, V.unit → set(scan_scope = spine, attempts = 0)   -- the cue and the whole it names; Find's dispatch (InputType → Track) is read here too; initial scope + recall-try budget (silent)
 Phase 1: V → Find(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → O[ranked]   -- index + spine always; bodies too once ExpandFullText widened the scope, so a re-entry after a correction does not narrow back to spine and report a body-scoped miss; above session scope Find joins its candidates into recognizables (── FIND ABOVE SESSION SCOPE ──) [Tool]
-           |O[ranked]| > 0 → O[top] := Ground(O[top]) → Phase 2   -- one read per member of O[top]: excerpt, locator, handle; the narrative is composed from the excerpts before anything is presented [Tool]
+           |O[ranked]| > 0 → O[top] := Ground(O[top]) →   -- one read per member of O[top]: excerpt, locator, handle; the narrative is composed from the excerpts before anything is presented [Tool]
+             grounded(O[top]) → Phase 2
+             ¬grounded(O[top]) → O[ranked] := O[ranked] \ {O[top]} → Ground the new head; when none is left the |O[ranked]| = 0 guards below receive it, and the records that could not be opened are named in whatever those guards emit — the open question's framing, Qx's pre-gate text, or the NullMatch diagnosis. All of them fire in this same turn, so the list needs no carrier
            |O[ranked]| = 0 ∧ attempts = 0 → Ask(V) → Stop → H → recue(V, H) → set(attempts = attempts + 1) → Phase 1   -- one open question [Tool]
            |O[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned → Qx(StoreExpansion) → Stop → X   -- store-expansion checkpoint; its pre-gate text reports the coverage searched, above session scope the traversal too [Tool]
              ExpandFullText → set(scan_scope = full_text) → Phase 1   -- re-enters Find with the widened scope: index, spines, and bodies together, so a spine candidate can still join a body one
@@ -153,7 +160,7 @@ Convergence evidence: (VagueRecall → [cues] → Recognizable(grounded) → Ide
 
 ── CONVERGENCE ──
 recall_complete = U = Identified ∧ emitted(RecalledContext(Λ.presented))   -- the user's observable identification of the presented recognizable, read from the carrier Phase 2 wrote before the yield; never inferred from silence
-NullMatch = |O[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- nothing-found terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: the open question must have been asked, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered. The inform reports exactly the coverage searched
+NullMatch = |O[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- nothing-found terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: the open question must have been asked, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered. The inform reports exactly the coverage searched, and — where candidates were found but no member's record could be opened — names those records, since that is a different miss from finding nothing
 AttemptsExhausted = |O[]| > 0 ∧ attempts = max ∧ U = Corrected(c)   -- candidate-in-hand terminal: surface Λ.presented as the closest found → deactivate, never NullMatch. The answer is part of the predicate — without it the predicate would hold the moment a final Find returns candidates, terminating before Present offers the identification the budget was spent to reach
 progress(Σ) = attempts: N/max, presented: N
 
@@ -175,7 +182,7 @@ Phase 1 Traverse    (observe)  → artifact read, artifact search (above session
 Phase 1 Assemble    (sense)    → Internal analysis (above session scope only: join the traversed sub-graph into recognizables in V.unit's shape)
 Phase 1 Rank        (sense)    → Internal analysis (ordering only; conditional: lightweight-model scoring for large candidate sets)
 Phase 1 backtrace_parent (observe) → artifact read (fork member only, inside Ground: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
-Phase 1 Ground      (observe)  → artifact read (one read per member of O[top]: open the member's own record at the path its runtime reference declares, take the excerpt the cue reaches — the record's words, not the index's — bind the locator and the validated resume handle, then compose the narrative from the excerpts. Bounded by the members of the one recognizable about to be presented; it opens named records and never scans the store, so it is not the body scan Qx governs. A member with no record yields an empty excerpt and the prose says so; read-only)
+Phase 1 Ground      (observe)  → artifact read (one read per member of O[top]: open the member's own record at member.record, the path the spine read declared and its runtime reference resolves, take the excerpt the cue reaches — the record's words, not the index's — bind the locator and the validated resume handle, then compose the narrative from the excerpts. Bounded by the members of the one recognizable about to be presented; it opens named records and never scans the store, so it is not the body scan Qx governs. A member with no record yields an empty excerpt and the prose says so; where NO member's record opens, the recognizable is dropped and the next is grounded; read-only)
 Phase 1 Ask         (constitution) → present (one open question in everyday words — what else do you remember? — after the cue found nothing; the answer is the next cue)
 Phase 1 Qx          (constitution) → present (ExpandFullText: scan the labeled Claude/Codex transcript bodies, at a per-record cost with no upper bound; StopAtSpine: return a NullMatch scoped to the indexes and spines already searched, without scanning any transcript body. The pre-gate text states the coverage searched so far, above session scope the traversal too)
 Phase 2 set_presented (track)  → Internal state update (Λ.presented := O[top], written before Present yields the turn: Phase 3 resumes with only Λ, so the grounded recognizable has to be in it already)
@@ -278,6 +285,7 @@ NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = Structure
 NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
 MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
                     -- structural risk: recall target genuinely absent from Store (principal failure mode)
+Ungroundable      : Find returned candidates but no member's record of the top recognizable could be opened (¬grounded) — the records are gone, rotated, or never written
 IndexAsEvidence   : a presented narrative asserts what only the INDEX gist carried — a claim no excerpt supports
                     -- structural guard: Ground composes the narrative from the excerpts, so the mode can only arise where Ground was skipped or an excerpt was read past; recovery is to re-ground, never to hedge the gist
                     -- the modes of Find above session scope (sparse edges, broken links, a misjudged whole) are typed in references/supra-session.md, loaded at that scope

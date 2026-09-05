@@ -11,7 +11,7 @@ Read this reference before scanning the Claude Code store or emitting a Claude r
 - Raw SSOT: `{config_dir}/projects/{slug}/*.jsonl`.
 - `memory/` is a user-curated adjunct and is outside the scan store.
 
-Bind `Candidate.runtime = claude`. Bind the remaining candidate fields from INDEX frontmatter: `session_id`, optional `cwd`, `cross_refs`, and the highest evidence tier over matched artifacts. Legacy entries without evidence metadata remain neutral in ranking.
+Bind `Candidate.runtime = claude`. Bind the remaining candidate fields from INDEX frontmatter: `session_id`, optional `cwd`, `cross_refs`, and the highest evidence tier over matched artifacts. Bind `Candidate.record` to the record's own path, `{config_dir}/projects/{slug}/{session_id}.jsonl`, using the slug of the partition the candidate was FOUND in — not the active transcript's, since the spine scan below is not slug-partitioned and the two differ exactly when the recall is hardest. Legacy entries without evidence metadata remain neutral in ranking.
 
 Claude partitions INDEX by project slug. A cross-cwd scan reaches the canonical partition selected by the session transcript rather than searching cwd-scattered copies.
 
@@ -23,7 +23,7 @@ A session record sits directly inside a project directory. Anything nested deepe
 
 Per record, bind:
 
-- recency from the file's modification time;
+- `recency` from the file's modification time, and `record` from the file's own path — both are what makes this candidate openable later, since nothing re-resolves the path at grounding time;
 - `session_id` from the filename, `cwd` from the record;
 - the origin label from the **first** `entrypoint` value within the record's leading window — first match wins, which is how the runtime itself classifies the record, so a later value in the same file does not reclassify it;
 - `bridgeSessionId` when a `{"type":"bridge-session"}` line is present;
@@ -66,7 +66,7 @@ Claude substitute-channel records can identify a sidechain whose own ID is not r
 
 ## Ground and resume
 
-Ground opens the member's record at `{config_dir}/projects/{slug}/{session_id}.jsonl` (a fork member: its substitute capture, per `fork-resume.md`) and takes the excerpt the cue reaches — the human and assistant turns at that span, under the human-turn filter above — with the record path as `Excerpt.locator`.
+Ground opens the member's record at `Candidate.record` (a fork member: its substitute capture, per `fork-resume.md`) and takes the excerpt the cue reaches — the human and assistant turns at that span, under the human-turn filter above — with the record path as `Excerpt.locator`.
 
 For a non-fork candidate whose `cwd` is recorded **and still present on disk**, emit the literal handle:
 
