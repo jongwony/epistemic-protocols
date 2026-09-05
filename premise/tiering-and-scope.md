@@ -13,7 +13,7 @@ Any body of behavioral principles benefits from a tier classification that track
 | Architectural | Structure decisions independent of the axiom system |
 | Safeguard | A provisional guard against a failure observed on current models; a model change re-verifies it rather than retiring it, and the result keeps, compresses, or removes it |
 
-This tiering is what lets a reader distinguish a durable axiom from a safeguard that is meant to decay as models improve. Every tiered heading in this collection carries one of these four labels.
+This tiering is what lets a reader distinguish a durable axiom from a safeguard that is meant to decay as models improve.
 
 ## Checkpoint Policy Stays at the Meta Layer (Derived)
 

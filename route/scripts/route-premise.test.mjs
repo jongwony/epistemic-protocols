@@ -10,11 +10,15 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
-  PREMISE_INTRO,
+  TOOL_HEADER,
+  bindsAt,
+  isInstructionSurface,
   premiseRoot,
   renderPremise,
+  renderToolPremise,
 } from "./route-premise.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -55,6 +59,7 @@ function cleanup(host) {
 }
 
 const FIRST = PREMISE_INDEX[0].file;
+const TOOL = PREMISE_INDEX.filter((e) => e.at);
 
 // ---------------------------------------------------------------------------
 // Resolution
@@ -110,16 +115,15 @@ test("no document anywhere resolves to null, never an error", () => {
 // Rendering
 // ---------------------------------------------------------------------------
 
-test("renders header, intro, and one line per document with its absolute path", () => {
+test("renders the header and one line per document with its absolute path", () => {
   const host = makeHost();
   try {
     const root = premiseRoot(host.env);
     const lines = renderPremise(root).split("\n");
     assert.equal(lines[0], PREMISE_HEADER);
-    assert.equal(lines[1], PREMISE_INTRO);
-    assert.equal(lines.length, 2 + PREMISE_INDEX.length);
+    assert.equal(lines.length, 1 + PREMISE_INDEX.length);
     PREMISE_INDEX.forEach((e, i) => {
-      assert.equal(lines[2 + i], `Read \`${path.join(root, e.file)}\` ${e.when}`);
+      assert.equal(lines[1 + i], `Read \`${path.join(root, e.file)}\` ${e.when}`);
     });
     // Every path is absolute and under the root; no relative link survives.
     for (const m of lines.join("\n").matchAll(/`([^`]+)`/g)) {
@@ -134,7 +138,7 @@ test("an entry whose document is absent is left out; the rest go out", () => {
   const host = makeHost({ checkoutFiles: [FIRST] });
   try {
     const out = renderPremise(premiseRoot(host.env));
-    assert.equal(out.split("\n").length, 3);
+    assert.equal(out.split("\n").length, 2);
     assert.match(out, new RegExp(`Read \`[^\`]*${FIRST.replace(".", "\\.")}\``));
   } finally {
     cleanup(host);
@@ -144,6 +148,42 @@ test("an entry whose document is absent is left out; the rest go out", () => {
 test("a null or empty root renders as nothing", () => {
   assert.equal(renderPremise(null), "");
   assert.equal(renderPremise("/nonexistent/premise"), "");
+  const call = { event: "PreToolUse", tool: "Edit", files: ["/p/CLAUDE.md"] };
+  assert.equal(renderToolPremise(null, call), "");
+  assert.equal(renderToolPremise("/nonexistent/premise", call), "");
+});
+
+test("the tool channel renders the entries whose moment the call is, under its header", () => {
+  const host = makeHost();
+  try {
+    const root = premiseRoot(host.env);
+    const out = renderToolPremise(root, { event: "PreToolUse", tool: "Edit", files: ["/p/src/a.js", "/p/CLAUDE.md"] }).split("\n");
+    assert.equal(out[0], TOOL_HEADER);
+    const surface = TOOL.filter((e) => e.at.moment === "instruction-surface-change");
+    assert.deepEqual(out.slice(1), surface.map((e) => `Read \`${path.join(root, e.file)}\` ${e.at.when}`));
+    assert.equal(renderToolPremise(root, { event: "PreToolUse", tool: "Edit", files: ["/p/src/a.js"] }), "");
+    assert.equal(renderToolPremise(root, { event: "PostToolUse", tool: "Agent", files: [] }), "");
+  } finally {
+    cleanup(host);
+  }
+});
+
+test("an instruction surface is recognized by path shape, on any host", () => {
+  for (const f of [
+    "CLAUDE.md", "/h/.claude/CLAUDE.md", "/p/AGENTS.md", "/p/AGENTS.override.md", "/p/CLAUDE.local.md",
+    "/p/.claude/rules/r.md", "/p/.claude/rules/deep/r.md", "/p/.claude/principles/p.md",
+    "/p/plug/skills/x/SKILL.md", "/p/plug/agents/a.md", "/p/plug/agents/review/security.md",
+    "C:\\p\\.claude\\rules\\r.md",
+  ]) assert.ok(isInstructionSurface(f), f);
+  for (const f of [
+    "/p/README.md", "/p/docs/rules.md", "/p/src/agents/a.js", "/p/.claude/settings.json",
+    "/p/premise/instruction-authoring.md", "/p/agents-notes.md",
+    // A path that leaves the rules directory is judged where it resolves.
+    "/p/.claude/rules/../../docs/notes.md",
+  ]) assert.ok(!isInstructionSurface(f), f);
+  const call = { event: "PreToolUse", tool: "Edit", files: ["/p/CLAUDE.md"] };
+  assert.ok(bindsAt(TOOL.find((e) => e.at.moment === "instruction-surface-change"), call));
+  assert.ok(!bindsAt(PREMISE_INDEX.find((e) => !e.at), call));
 });
 
 // ---------------------------------------------------------------------------
@@ -162,6 +202,15 @@ test("the index and the premise directory name the same documents", () => {
   assert.deepEqual(indexed, shipped);
   for (const e of PREMISE_INDEX) {
     assert.match(e.when, /^(when|before) /, `${e.file}: an entry states the moment it is for`);
+    if (e.at) {
+      assert.ok(MOMENTS[e.at.moment], `${e.file}: names a moment the matcher can decide`);
+      assert.match(e.at.when, /^(when|before) /, `${e.file}: the tool clause states the moment it is for`);
+    }
   }
   assert.equal(new Set(indexed).size, indexed.length, "no document is indexed twice");
+  assert.ok(TOOL.length > 0, "the tool channel carries at least one entry");
+  // Every observable moment the hook defines is some document's moment.
+  for (const m of Object.keys(MOMENTS)) {
+    assert.ok(TOOL.some((e) => e.at.moment === m), `${m}: a moment no entry names is dead`);
+  }
 });
