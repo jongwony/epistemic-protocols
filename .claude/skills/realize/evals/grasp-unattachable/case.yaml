@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: grasp-unattachable
+
+context:
+  # Same substrate as grasp-adjudicable, deliberately. The absence this case turns on --
+  # no record anywhere of WHY fixed-window was chosen -- has to sit inside the same tree
+  # the other case reads from, or the pair would be testing file presence rather than
+  # whether the protocol notices it has nothing to adjudicate from.
+  scaffold_script: ../scaffold-grasp.sh
