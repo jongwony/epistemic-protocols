@@ -10,6 +10,16 @@
  * deficits, and this directive beside each prompt is what does. It is
  * injected every turn — keep it to a few short lines.
  *
+ * The condition covers both places a deficit can sit. One is the accumulated
+ * context — what the session has settled, drifted from, or lost from view —
+ * which the directive reads off as it stands. The other is the request
+ * itself: intent or context only the user holds, which accumulated context
+ * cannot show and which surfaces by asking rather than by observing. That
+ * kind arrives at any turn, not only the first, so the directive carries it
+ * here rather than leaving it to a session-start line that goes out once.
+ * Both halves end in the same action, invoke /route; the match and the relay
+ * test that decides invoke, nudge or silence live inside the skill.
+ *
  * "Active" is defined in the directive itself: a protocol invoked this
  * session that has not yet converged or deactivated. A protocol's skill
  * prose stays in context after it converges, and without the definition the
@@ -33,10 +43,9 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // the skill is invoked, so this directive is the surface present at decision
 // time.
 const DIRECTIVE = [
-  "[route] When the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
+  "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
   "Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated.",
   "A converged protocol's prose still in context does not make it active.",
-  "Otherwise stay silent.",
 ].join("\n");
 
 function render(raw) {
