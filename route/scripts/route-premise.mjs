@@ -18,9 +18,17 @@
  * the plugin root is the same directory. An entry whose document is not
  * there is left out; a root holding none of them is no root.
  *
+ * Two delivery channels, by the kind of moment an entry names. A moment
+ * that arrives in conversation — deciding, presenting, declaring — is only
+ * recognizable by the reader, so its entry goes out at session start and
+ * the reader carries it. A moment that is a file operation is observable
+ * by the host, so its entry goes out at that operation instead, through the
+ * PreToolUse hook (route-edit.mjs): an `edit` field on the entry names the
+ * surfaces whose change is the moment.
+ *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
- * exists, and every document has an entry.
+ * exists, every document has an entry, and each entry has one channel.
  *
  * Every shortfall yields "" so the caller can fail open. Zero external
  * dependencies: Node.js standard library only.
@@ -34,6 +42,12 @@ import { configDir, identify, pluginRoot, readJson } from "./route-protocols.mjs
 // do with it, and the entries carry the rest.
 const PREMISE_HEADER =
   "Premise — the collaboration premises behind these protocols, indexed by the moment each document is for. Read a document at the moment its entry names:";
+
+// Heads the edit-channel injection: it names the moment the host observed,
+// so the line beneath reads as arriving at that moment rather than as a
+// standing instruction.
+const EDIT_HEADER =
+  "Premise — this change touches an instruction surface, the moment the entry below names. Read the document before writing the change:";
 
 const PREMISE_INTRO =
   "The cognitive and collaboration premises behind structured human-AI dialogue — stated so they hold on their own, independent of any specific codebase, tool, or harness that happens to implement them.";
@@ -50,7 +64,7 @@ const PREMISE_INDEX = [
   { file: "approach-verification.md", when: "before deciding what to do with a request, when an utterance's grammatical form may differ from the action it actually wants, and when an instruction reaches only part of what it lands on." },
   { file: "matching-the-request.md", when: "when unsure whether the conversation is at design level or implementation level, when deciding how far a fix should reach, when deciding how detailed a question back to the person should be, and when a time or date arrives without a stated zone." },
   { file: "verification-discipline.md", when: "before declaring something done, when a delegated agent reports that its work is complete, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look." },
-  { file: "instruction-authoring.md", when: "when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, when a defect has been found and the repair is about to be written, when two instructions turn out to conflict, and when deciding how much to inline for a reader versus leaving as a reference." },
+  { file: "instruction-authoring.md", edit: "instruction-surface", when: "when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, when a defect has been found and the repair is about to be written, when two instructions turn out to conflict, and when deciding how much to inline for a reader versus leaving as a reference." },
   { file: "delegation-and-subagents.md", when: "when handing work to an agent that cannot see this conversation, and when deciding what a coordinator keeps for itself versus delegates outward." },
   { file: "session-and-handoff.md", when: "when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, when someone interrupts the work mid-task, when attention has already moved off a commitment that is still open, and when the way the work is understood has been replaced since a commitment was written down." },
   { file: "boundaries-and-safety.md", when: "before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable." },
@@ -80,9 +94,37 @@ function marketplaceRoot(dir, root) {
   return typeof at === "string" ? at : null;
 }
 
+// The edit channels an entry can name, each a predicate over a file path.
+// "instruction-surface": a durable instruction file a host loads for an
+// agent — the project instruction file, a rule, a principle, a skill, an
+// agent definition. Matched on path shape alone, so it holds on any host and
+// on a path that does not exist yet.
+const EDIT_SURFACES = {
+  "instruction-surface": (file) => {
+    const p = String(file).replace(/\\/g, "/");
+    if (!p.endsWith(".md")) return false;
+    const base = path.posix.basename(p);
+    if (["CLAUDE.md", "CLAUDE.local.md", "AGENTS.md", "SKILL.md"].includes(base)) return true;
+    const dir = path.posix.dirname(p);
+    if (/(^|\/)\.claude\/(rules|principles)(\/|$)/.test(dir)) return true;
+    return /(^|\/)agents$/.test(dir);
+  },
+};
+
+/** True when changing `file` is the moment `entry` names. */
+function bindsOnEdit(entry, file) {
+  const match = entry.edit && EDIT_SURFACES[entry.edit];
+  return !!(match && file && match(file));
+}
+
 /** The indexed documents present under `root`. */
 function present(root) {
   return PREMISE_INDEX.filter((e) => isFile(path.join(root, e.file)));
+}
+
+/** The entries delivered at session start: every present entry. */
+function sessionEntries(root) {
+  return present(root);
 }
 
 /**
@@ -100,16 +142,41 @@ function premiseRoot(env = {}) {
   return candidates.find((c) => present(c).length > 0) ?? null;
 }
 
+function line(root, e) {
+  return `Read \`${path.join(root, e.file)}\` ${e.when}`;
+}
+
 /**
- * The header, the intro, and one line per indexed document present under
- * `root`, each with its absolute path. Nothing when no document is there.
+ * The header, the intro, and one line per session-channel document present
+ * under `root`, each with its absolute path. Nothing when no document is
+ * there.
  */
 function renderPremise(root) {
   if (!root) return "";
-  const entries = present(root);
+  const entries = sessionEntries(root);
   if (entries.length === 0) return "";
-  const lines = entries.map((e) => `Read \`${path.join(root, e.file)}\` ${e.when}`);
-  return [PREMISE_HEADER, PREMISE_INTRO, ...lines].join("\n");
+  return [PREMISE_HEADER, PREMISE_INTRO, ...entries.map((e) => line(root, e))].join("\n");
 }
 
-export { PREMISE_HEADER, PREMISE_INDEX, PREMISE_INTRO, premiseRoot, renderPremise };
+/**
+ * One line per edit-channel document present under `root` whose moment is
+ * a change to any of `files`. Nothing when none binds.
+ */
+function renderEditPremise(root, files) {
+  if (!root) return "";
+  const entries = present(root).filter((e) => files.some((f) => bindsOnEdit(e, f)));
+  if (entries.length === 0) return "";
+  return [EDIT_HEADER, ...entries.map((e) => line(root, e))].join("\n");
+}
+
+export {
+  EDIT_HEADER,
+  EDIT_SURFACES,
+  PREMISE_HEADER,
+  PREMISE_INDEX,
+  PREMISE_INTRO,
+  bindsOnEdit,
+  premiseRoot,
+  renderEditPremise,
+  renderPremise,
+};

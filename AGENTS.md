@@ -63,7 +63,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Node.js 22+ is required; CI pins Node 22.
 - Plugin code uses Node.js standard library only.
 - Static checks: see `## Verification` below for the command.
-- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs route/scripts/route-protocols.test.mjs route/scripts/route-session.test.mjs route/scripts/route-premise.test.mjs .claude/skills/realize/scripts/harness.test.mjs`
+- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs route/scripts/route-protocols.test.mjs route/scripts/route-session.test.mjs route/scripts/route-premise.test.mjs route/scripts/route-edit.test.mjs .claude/skills/realize/scripts/harness.test.mjs`
   - `.claude/skills/verify/scripts/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation for the same reason `/verify` does — see the concurrency note under `## Verification`.
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`

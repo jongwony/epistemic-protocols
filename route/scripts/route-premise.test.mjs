@@ -10,10 +10,14 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  EDIT_HEADER,
+  EDIT_SURFACES,
   PREMISE_HEADER,
   PREMISE_INDEX,
   PREMISE_INTRO,
+  bindsOnEdit,
   premiseRoot,
+  renderEditPremise,
   renderPremise,
 } from "./route-premise.mjs";
 
@@ -55,6 +59,8 @@ function cleanup(host) {
 }
 
 const FIRST = PREMISE_INDEX[0].file;
+const SESSION = PREMISE_INDEX.filter((e) => !e.edit);
+const EDIT = PREMISE_INDEX.filter((e) => e.edit);
 
 // ---------------------------------------------------------------------------
 // Resolution
@@ -144,6 +150,36 @@ test("an entry whose document is absent is left out; the rest go out", () => {
 test("a null or empty root renders as nothing", () => {
   assert.equal(renderPremise(null), "");
   assert.equal(renderPremise("/nonexistent/premise"), "");
+  assert.equal(renderEditPremise(null, ["/p/CLAUDE.md"]), "");
+  assert.equal(renderEditPremise("/nonexistent/premise", ["/p/CLAUDE.md"]), "");
+});
+
+test("the edit channel renders the entries whose surface the changed file is", () => {
+  const host = makeHost();
+  try {
+    const root = premiseRoot(host.env);
+    const out = renderEditPremise(root, ["/p/src/a.js", "/p/CLAUDE.md"]).split("\n");
+    assert.equal(out[0], EDIT_HEADER);
+    assert.deepEqual(out.slice(1), EDIT.map((e) => `Read \`${path.join(root, e.file)}\` ${e.when}`));
+    assert.equal(renderEditPremise(root, ["/p/src/a.js"]), "");
+  } finally {
+    cleanup(host);
+  }
+});
+
+test("an instruction surface is recognized by path shape, on any host", () => {
+  const is = EDIT_SURFACES["instruction-surface"];
+  for (const f of [
+    "CLAUDE.md", "/h/.claude/CLAUDE.md", "/p/AGENTS.md", "/p/CLAUDE.local.md",
+    "/p/.claude/rules/r.md", "/p/.claude/rules/deep/r.md", "/p/.claude/principles/p.md",
+    "/p/plug/skills/x/SKILL.md", "/p/plug/agents/a.md", "C:\\p\\.claude\\rules\\r.md",
+  ]) assert.ok(is(f), f);
+  for (const f of [
+    "/p/README.md", "/p/docs/rules.md", "/p/src/agents/a.js", "/p/.claude/settings.json",
+    "/p/premise/instruction-authoring.md", "/p/agents-notes.md",
+  ]) assert.ok(!is(f), f);
+  assert.ok(bindsOnEdit(EDIT[0], "/p/CLAUDE.md"));
+  assert.ok(!bindsOnEdit(SESSION[0], "/p/CLAUDE.md"));
 });
 
 // ---------------------------------------------------------------------------
@@ -164,4 +200,8 @@ test("the index and the premise directory name the same documents", () => {
     assert.match(e.when, /^(when|before) /, `${e.file}: an entry states the moment it is for`);
   }
   assert.equal(new Set(indexed).size, indexed.length, "no document is indexed twice");
+  for (const e of PREMISE_INDEX) {
+    if (e.edit) assert.ok(EDIT_SURFACES[e.edit], `${e.file}: names an edit channel that exists`);
+  }
+  assert.ok(EDIT.length > 0, "the edit channel carries at least one entry");
 });
