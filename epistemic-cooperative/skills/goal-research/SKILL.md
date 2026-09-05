@@ -59,7 +59,7 @@ disabled.`), so every extraction below filters to lines starting with `{` before
 parsing. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
 
 ```bash
-codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.6-sol \
+codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-6-astra \
   --config model_reasoning_effort="{effort}" \
   < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl 2>/tmp/goal_research_warn_${SUFFIX}.txt
 ```

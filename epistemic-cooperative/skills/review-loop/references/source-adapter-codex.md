@@ -43,7 +43,7 @@ The contract this adapter answers to — what it accepts, what it yields, and th
 
    ```bash
    codex exec --ephemeral --json --color never --skip-git-repo-check --cd "{repo_root}" \
-     -m gpt-5.6-sol {effort_flag} --sandbox read-only \
+     -m gpt-6-astra {effort_flag} --sandbox read-only \
      < /tmp/review_loop_codex_${SUFFIX}.txt \
      > /tmp/review_loop_codex_events_${SUFFIX}.jsonl \
      2>/tmp/review_loop_codex_warn_${SUFFIX}.txt &
