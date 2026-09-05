@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` before a refactor that crosses several domains.
 
-The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and deficit recognition (`/onboard`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, at session start the installed-protocol deficit table with the [premise](./premise) index beneath it, and at the tool calls that are a premise document's moment — an instruction surface about to change, a question about to be put, work handed to an agent, an irreversible action — that document's entry. Add either on its own:
+The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and deficit recognition (`/onboard`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, at session start the installed-protocol deficit table with the [premise](./premise) index beneath it, and at the tool calls the matcher decides are a premise document's moment — an instruction surface about to change, work handed to an agent and its report coming back — that document's entry. Add either on its own:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols

@@ -1,5 +1,5 @@
 // Tests for route-tool.mjs — the PreToolUse / PostToolUse delivery of
-// premise entries at the tool calls that are their moments.
+// premise entries at the tool calls the matcher decides are their moments.
 // Run with: node --test
 
 import { test } from "node:test";
@@ -44,46 +44,57 @@ function expectLines(host, entries) {
 }
 
 // ---------------------------------------------------------------------------
-// Reading the changed paths off a call
+// Reading the named paths off a call
 // ---------------------------------------------------------------------------
 
-test("a file tool names its path outright", () => {
+test("a file tool names its path in its input", () => {
   assert.deepEqual(changedPaths({ tool_name: "Edit", tool_input: { file_path: "/p/CLAUDE.md" } }), ["/p/CLAUDE.md"]);
   assert.deepEqual(changedPaths({ tool_name: "Write", tool_input: { file_path: "/p/x/SKILL.md" } }), ["/p/x/SKILL.md"]);
+  assert.deepEqual(changedPaths({ tool_name: "NotebookEdit", tool_input: { notebook_path: "/p/n.ipynb" } }), ["/p/n.ipynb"]);
   assert.deepEqual(changedPaths({ tool_name: "Edit", tool_input: {} }), []);
 });
 
-test("a shell command yields its .md tokens only when it carries a write marker", () => {
-  const write = "sed -i 's/a/b/' AGENTS.md";
-  assert.deepEqual(changedPaths({ tool_name: "Bash", tool_input: { command: write } }), ["AGENTS.md"]);
-  const heredoc = "python3 - <<'PY'\np='.claude/rules/x.md'; open(p,'w').write(s)\nPY";
-  assert.deepEqual(changedPaths({ tool_name: "Bash", tool_input: { command: heredoc } }), [".claude/rules/x.md"]);
-  const read = "cat AGENTS.md | grep -n foo";
-  assert.deepEqual(changedPaths({ tool_name: "Bash", tool_input: { command: read } }), []);
-  const devnull = "cat AGENTS.md > /dev/null";
-  assert.deepEqual(changedPaths({ tool_name: "Bash", tool_input: { command: devnull } }), []);
+test("an apply_patch names each file on a header line, and nothing else in the patch", () => {
+  const patch = [
+    "*** Begin Patch",
+    "*** Update File: docs/a.md",
+    "@@",
+    "-see CLAUDE.md for the rules",
+    "+see AGENTS.md for the rules",
+    "*** Add File: .claude/rules/new.md",
+    "+# new",
+    "*** Delete File: old/SKILL.md",
+    "*** Update File: src/x.js",
+    "*** Move to: src/y.js",
+    "*** End Patch",
+  ].join("\n");
+  assert.deepEqual(
+    changedPaths({ tool_name: "apply_patch", tool_input: { command: patch } }),
+    ["docs/a.md", ".claude/rules/new.md", "old/SKILL.md", "src/x.js", "src/y.js"],
+  );
+  assert.deepEqual(changedPaths({ tool_name: "apply_patch", tool_input: {} }), []);
 });
 
-test("an apply_patch names every .md in the patch, marker or not", () => {
-  const patch = "*** Begin Patch\n*** Update File: docs/a.md\n*** Update File: CLAUDE.md\n*** End Patch";
-  assert.deepEqual(changedPaths({ tool_name: "apply_patch", tool_input: { command: patch } }), ["docs/a.md", "CLAUDE.md"]);
+test("a shell command is not read for paths", () => {
+  assert.deepEqual(changedPaths({ tool_name: "Bash", tool_input: { command: "sed -i 's/a/b/' AGENTS.md" } }), []);
+  assert.deepEqual(changedPaths({ tool_name: "Bash", tool_input: { command: "cat CLAUDE.md > /dev/null" } }), []);
 });
 
-test("a tool that changes nothing yields nothing", () => {
+test("a tool that names no file yields nothing", () => {
   assert.deepEqual(changedPaths({ tool_name: "Read", tool_input: { file_path: "/p/CLAUDE.md" } }), []);
   assert.deepEqual(changedPaths({ tool_name: "Grep", tool_input: { pattern: "CLAUDE.md" } }), []);
   assert.deepEqual(changedPaths({}), []);
 });
 
-test("a call is described by its event, tool, input and changed paths; other events are not calls", () => {
+test("a call is described by its event, tool, and named paths; other events are not calls", () => {
   const c = describeCall({ hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/p/a.md" } });
-  assert.deepEqual(c, { event: "PreToolUse", tool: "Edit", input: { file_path: "/p/a.md" }, files: ["/p/a.md"] });
+  assert.deepEqual(c, { event: "PreToolUse", tool: "Edit", files: ["/p/a.md"] });
   assert.equal(describeCall({ hook_event_name: "SessionStart", tool_name: "Edit" }), null);
   assert.equal(describeCall({ hook_event_name: "PreToolUse" }), null);
 });
 
 // ---------------------------------------------------------------------------
-// Each observable moment, rendered
+// Each matcher-decided moment, rendered
 // ---------------------------------------------------------------------------
 
 test("changing an instruction surface delivers the instruction-surface entry, and only that", () => {
@@ -92,19 +103,9 @@ test("changing an instruction surface delivers the instruction-surface entry, an
     const out = lines(render(payload("Edit", { file_path: "/p/.claude/rules/r.md" }), host.env));
     assert.equal(out[0], TOOL_HEADER_BEFORE);
     assert.deepEqual(out.slice(1), expectLines(host, byMoment("instruction-surface-change")));
-    assert.equal(JSON.parse(render(payload("Edit", { file_path: "/p/CLAUDE.md" }), host.env)).hookSpecificOutput.hookEventName, "PreToolUse");
-  } finally {
-    cleanup(host);
-  }
-});
-
-test("putting a question to the person delivers the option-presentation entries", () => {
-  const host = makeHost();
-  try {
-    const out = lines(render(payload("AskUserQuestion", { questions: [] }), host.env));
-    assert.equal(out[0], TOOL_HEADER_BEFORE);
-    assert.deepEqual(out.slice(1), expectLines(host, byMoment("option-presentation")));
-    assert.ok(out.length >= 3, "more than one document names this moment");
+    assert.equal(JSON.parse(render(payload("Write", { file_path: "/p/CLAUDE.md" }), host.env)).hookSpecificOutput.hookEventName, "PreToolUse");
+    const patch = "*** Begin Patch\n*** Update File: CLAUDE.md\n*** End Patch";
+    assert.deepEqual(lines(render(payload("apply_patch", { command: patch }), host.env)).slice(1), expectLines(host, byMoment("instruction-surface-change")));
   } finally {
     cleanup(host);
   }
@@ -125,47 +126,15 @@ test("handing work to an agent delivers the delegation entry before, and the rep
   }
 });
 
-test("scheduling a later turn delivers the deferral entry", () => {
-  const host = makeHost();
-  try {
-    for (const tool of ["mcp__Claude_Code_Remote__send_later", "CronCreate", "ScheduleWakeup", "mcp__Claude_Code_Remote__create_trigger"]) {
-      const out = lines(render(payload(tool, {}), host.env));
-      assert.deepEqual(out.slice(1), expectLines(host, byMoment("deferral")), tool);
-    }
-  } finally {
-    cleanup(host);
-  }
-});
-
-test("replacing an existing file, or a destructive shell command, delivers the irreversible-action entry", () => {
-  const host = makeHost();
-  try {
-    const existing = path.join(host.root, "notes.txt");
-    fs.writeFileSync(existing, "x");
-    const over = lines(render(payload("Write", { file_path: existing }), host.env));
-    assert.deepEqual(over.slice(1), expectLines(host, byMoment("irreversible-action")));
-    // A Write that creates a file replaces nothing.
-    assert.equal(render(payload("Write", { file_path: path.join(host.root, "new.txt") }), host.env), "");
-    for (const cmd of ["rm -rf build/", "git push --force origin main", "git push -f", "git reset --hard HEAD~1", "git clean -fd", "git branch -D old", "psql -c 'DROP TABLE users'"]) {
-      const out = lines(render(payload("Bash", { command: cmd }), host.env));
-      assert.deepEqual(out.slice(1), expectLines(host, byMoment("irreversible-action")), cmd);
-    }
-    for (const cmd of ["rm build/a.o", "git push -u origin feat", "git reset --soft HEAD~1", "git clean -n", "git branch -d merged", "ls -rf"]) {
-      assert.equal(render(payload("Bash", { command: cmd }), host.env), "", cmd);
-    }
-  } finally {
-    cleanup(host);
-  }
-});
-
 test("a call that is no document's moment renders nothing", () => {
   const host = makeHost();
   try {
     assert.equal(render(payload("Edit", { file_path: "/p/src/index.js" }), host.env), "");
     assert.equal(render(payload("Write", { file_path: "/p/docs/notes.md" }), host.env), "");
-    assert.equal(render(payload("Bash", { command: "cat CLAUDE.md" }), host.env), "");
+    assert.equal(render(payload("Bash", { command: "sed -i 's/a/b/' CLAUDE.md" }), host.env), "");
     assert.equal(render(payload("Read", { file_path: "/p/CLAUDE.md" }), host.env), "");
-    assert.equal(render(payload("AskUserQuestion", {}, "PostToolUse"), host.env), "");
+    assert.equal(render(payload("AskUserQuestion", {}), host.env), "");
+    assert.equal(render(payload("Edit", { file_path: "/p/CLAUDE.md" }, "PostToolUse"), host.env), "");
   } finally {
     cleanup(host);
   }

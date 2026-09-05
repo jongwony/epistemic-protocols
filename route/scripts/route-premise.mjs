@@ -22,21 +22,31 @@
  * Two delivery channels, by the kind of moment. A moment that arrives in
  * conversation — deciding, presenting, declaring — is only recognizable by
  * the reader, so it goes out at session start under `when`, and the reader
- * carries it. A moment that is a tool call — a file about to change, a
- * question about to be put, work about to be handed off, an action that
- * cannot be undone — is observable by the host, so it goes out at that call
- * instead, through the PreToolUse and PostToolUse hooks (route-tool.mjs):
- * an `at` field on the entry names the observable moment and the clause
- * that describes it. Each moment is delivered on one channel: a document's
- * `when` carries only the moments no tool call shows, and an entry whose
+ * carries it. A moment the host's tool matcher determines exactly — a
+ * named file tool about to touch a path of a given shape, a named agent
+ * tool about to run or just returned — goes out at that call instead,
+ * through the PreToolUse and PostToolUse hooks (route-tool.mjs): an `at`
+ * field on the entry names the observable moment and the clause that
+ * describes it. Each moment is delivered on one channel: a document's
+ * `when` carries only the moments no matcher shows, and an entry whose
  * moments are all observable has no `when` and leaves the session-start
  * index — a pointer delivered many turns before its moment was found not
  * to be followed at the moment.
  *
+ * What qualifies for the tool channel is what the matcher decides without
+ * reading the call's content: a tool name, a path shape. A moment that
+ * needs the content read — whether a command's intent is to write, whether
+ * a set of options genuinely diverges, whether an action can be undone —
+ * stays on the session channel, because that reading is the reader's own
+ * reasoning; a hook that did it would couple the premise to one harness's
+ * tool set and move the judgment out of the reasoning it belongs to. The
+ * tool channel is therefore the fast layer here: bound to a harness, and
+ * expected to shrink as readers follow the session index unaided.
+ *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
  * exists, every document has an entry, and every `at` names a moment the
- * hook can observe.
+ * matcher can decide.
  *
  * Every shortfall yields "" so the caller can fail open. Zero external
  * dependencies: Node.js standard library only.
@@ -63,16 +73,13 @@ const PREMISE_INTRO =
   "The cognitive and collaboration premises behind structured human-AI dialogue — stated so they hold on their own, independent of any specific codebase, tool, or harness that happens to implement them.";
 
 // One entry per document. `when` is the clause for the session-start line —
-// the moments only the reader can recognize. `at` names an observable
+// the moments only the reader can recognize. `at` names a matcher-decided
 // moment (a key of MOMENTS) and the clause for the line delivered at it.
 // A document has `when`, `at`, or both; the two never describe the same
 // moment.
 const PREMISE_INDEX = [
-  { file: "recognition-and-authority.md",
-    when: "when deciding whether to settle something yourself or put it to the person you are working with, and when deciding whether a specification may fix a criterion's answer in advance at all.",
-    at: { moment: "option-presentation", when: "before presenting a set of options for someone to choose from." } },
-  { file: "interaction-factorization.md",
-    at: { moment: "option-presentation", when: "when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several." } },
+  { file: "recognition-and-authority.md", when: "when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a specification may fix a criterion's answer in advance at all." },
+  { file: "interaction-factorization.md", when: "when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several." },
   { file: "gate-design.md", when: "when designing or defending a checkpoint, when deciding what that checkpoint should present, when setting a convergence condition or a termination condition, and when checking whether a process can shortcut or skip past itself." },
   { file: "tiering-and-scope.md", when: "when deciding which surface a principle belongs on, and when classifying whether a principle should matter more or less as the underlying model improves." },
   { file: "specification-and-judgment.md", when: "when a criterion has to stay open to the run and the question is what the specification carries in place of the answer, and when cases keep accumulating around one coordinate a specification has already tried to settle." },
@@ -87,16 +94,14 @@ const PREMISE_INDEX = [
   { file: "delegation-and-subagents.md",
     when: "when deciding what a coordinator keeps for itself versus delegates outward.",
     at: { moment: "delegation", when: "when handing work to an agent that cannot see this conversation." } },
-  { file: "session-and-handoff.md",
-    when: "when an input arrives that would pull focus off the task currently in progress, when someone interrupts the work mid-task, when attention has already moved off a commitment that is still open, and when the way the work is understood has been replaced since a commitment was written down.",
-    at: { moment: "deferral", when: "when deferring work or crossing a session boundary." } },
-  { file: "boundaries-and-safety.md",
-    when: "when reading configuration text that could be executed, and when deciding when work needs to be made durable.",
-    at: { moment: "irreversible-action", when: "before replacing a file or taking any other hard-to-reverse action." } },
+  { file: "session-and-handoff.md", when: "when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, when someone interrupts the work mid-task, when attention has already moved off a commitment that is still open, and when the way the work is understood has been replaced since a commitment was written down." },
+  { file: "boundaries-and-safety.md", when: "before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable." },
 ];
 
 // ---------------------------------------------------------------------------
-// Observable moments: what a tool call has to look like to be one.
+// Observable moments: what a tool call has to look like to be one. Each is
+// decided from the tool name and, for a file tool, the shape of the path —
+// never from reading the call's content.
 // ---------------------------------------------------------------------------
 
 // A durable instruction file a host loads for an agent — the project
@@ -113,42 +118,23 @@ function isInstructionSurface(file) {
   return /(^|\/)agents$/.test(dir);
 }
 
-// A shell command that discards work in a way no later command restores:
-// a recursive forced delete, a forced push, a hard reset, a forced clean,
-// a forced branch delete, a table or database dropped or truncated.
-const DESTRUCTIVE_SHELL = /\brm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\b|\bgit\s+push\b[^|;&]*(--force\b|\s-f\b)|\bgit\s+reset\s+--hard\b|\bgit\s+clean\b[^|;&]*\s-[a-zA-Z]*f|\bgit\s+branch\s+-D\b/;
-const DESTRUCTIVE_SQL = /\bDROP\s+(TABLE|DATABASE|SCHEMA)\b|\bTRUNCATE\s+TABLE\b/i;
-const isDestructive = (command) => DESTRUCTIVE_SHELL.test(command) || DESTRUCTIVE_SQL.test(command);
-
-// Tool names as the hosts this plugin ships for currently give them. An
-// unmatched name costs nothing, so a host's rename shows as a missed
-// delivery rather than a fault.
-const OPTION_TOOLS = new Set(["AskUserQuestion", "request_user_input"]);
-const AGENT_TOOLS = new Set(["Agent", "Task", "spawn_agent"]);
-const DEFERRAL_TOOL = /send_later|create_trigger|CronCreate|ScheduleWakeup/;
+// The tools that hand work to an agent which cannot see this conversation,
+// as the host names them. An unmatched name costs nothing, so a host's
+// rename shows as a missed delivery rather than a fault.
+const AGENT_TOOLS = new Set(["Agent", "Task"]);
 
 /**
  * Each observable moment, as a predicate over the call: the hook event
- * ("PreToolUse" or "PostToolUse"), the tool name, its input, and the paths
- * the call is about to change (read off the input by route-tool.mjs).
+ * ("PreToolUse" or "PostToolUse"), the tool name, and the paths the call
+ * names (read off the input by route-tool.mjs).
  */
 const MOMENTS = {
   "instruction-surface-change": ({ event, files }) =>
     event === "PreToolUse" && files.some(isInstructionSurface),
-  "option-presentation": ({ event, tool }) =>
-    event === "PreToolUse" && OPTION_TOOLS.has(tool),
   "delegation": ({ event, tool }) =>
     event === "PreToolUse" && AGENT_TOOLS.has(tool),
   "delegate-report": ({ event, tool }) =>
     event === "PostToolUse" && AGENT_TOOLS.has(tool),
-  "deferral": ({ event, tool }) =>
-    event === "PreToolUse" && DEFERRAL_TOOL.test(String(tool)),
-  "irreversible-action": ({ event, tool, input, files }) => {
-    if (event !== "PreToolUse") return false;
-    if (tool === "Write") return files.some((f) => isFile(f));
-    if (tool === "Bash") return isDestructive(String(input.command ?? ""));
-    return false;
-  },
 };
 
 function isFile(file) {
@@ -230,6 +216,7 @@ function renderToolPremise(root, call) {
 }
 
 export {
+  AGENT_TOOLS,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
@@ -237,7 +224,6 @@ export {
   TOOL_HEADER_AFTER,
   TOOL_HEADER_BEFORE,
   bindsAt,
-  isDestructive,
   isInstructionSurface,
   premiseRoot,
   renderPremise,

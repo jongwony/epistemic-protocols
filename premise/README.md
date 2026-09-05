@@ -3,9 +3,9 @@
 These documents are the collaboration premises behind structured human-AI dialogue, stated so they
 hold on their own. Their index — each document and the moment that calls for it — is carried by the
 [`route`](../route) plugin's hooks, which are also how they reach a session: at session start for
-the moments only the reader can recognize, and at the tool call for the moments the host can
-observe — an instruction surface about to change, a question about to be put, work handed to an
-agent, an irreversible action. This file covers adopting them.
+the moments only the reader can recognize, and at the tool call for the moments the host's tool
+matcher decides — an instruction surface about to change, work handed to an agent and its report
+coming back. This file covers adopting them.
 
 They are a reference surface, not a package: nothing here runs. Adopt them in one of two ways.
 

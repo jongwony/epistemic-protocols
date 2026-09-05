@@ -16,4 +16,4 @@ A resolution direction already settled by an existing convention — an establis
 
 Operational test: "Would a knowledgeable observer find each option genuinely viable under different value weightings?" If yes → gated (genuine deliberation, where the user's values determine the choice). If no → relay (present the finding directly).
 
-See `premise/gate-design.md` for the differential-future refinements this test builds on — cost-symmetric baggage and meta-action-as-peer detection.
+See `premise/gate-design.md` for the differential-future refinements this test builds on — cost-symmetric baggage and meta-action-as-peer detection — and `premise/recognition-and-authority.md` for what a gated interaction presents once it is genuinely gated.
