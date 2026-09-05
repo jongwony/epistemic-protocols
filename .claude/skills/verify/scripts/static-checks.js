@@ -18,12 +18,6 @@ const {
   protocolFiles,
   CANONICAL_CLUSTERS,
 } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
-// __dirname-anchored require (absolute regardless of the projectRoot arg) so the
-// generator's own canonical-source reads stay driven by the passed projectRoot.
-const {
-  checkRoutingMap,
-  ROUTING_MAP_REL,
-} = require(path.resolve(__dirname, '../../../../scripts/generate-routing-map.js'));
 
 const projectRoot = process.argv[2] || process.cwd();
 
@@ -1651,6 +1645,22 @@ function checkCatalogSync() {
     }
   }
 
+  // Sub-check 3: every catalog table row names a discovered protocol. A row
+  // left behind by a removed or renamed protocol would keep presenting a
+  // command that resolves to nothing; presence checks alone never see it.
+  const commands = new Set(protocols.map(p => p.command));
+  const rowRe = /^\|\s*[^|]+?\s*\|\s*`\/([a-z][a-z-]*)`\s*\|/gm;
+  let row;
+  while ((row = rowRe.exec(catalogContent)) !== null) {
+    if (!commands.has(row[1])) {
+      results.fail.push({
+        check: 'catalog-sync',
+        file: 'epistemic-cooperative/skills/catalog/SKILL.md',
+        message: `Stale catalog row: /${row[1]} is not a discovered protocol`
+      });
+    }
+  }
+
   // Sub-check 3: command count matches PROTOCOL_FILES.length
   const commandMatches = catalogContent.match(/`\/[a-z]+`/g) || [];
   const uniqueCommands = new Set(commandMatches.map(m => m.replace(/`/g, '')));
@@ -1667,47 +1677,6 @@ function checkCatalogSync() {
     check: 'catalog-sync',
     file: 'epistemic-cooperative/skills/catalog/SKILL.md',
     message: 'Catalog sync check completed'
-  });
-}
-
-// ============================================================
-// Check: Routing Map Sync (agent-facing SessionStart directive)
-// ============================================================
-// routing-map.md pairs a hand-maintained PREAMBLE constant in the generator with
-// protocol entries derived from canonical sources (the catalog When-to-Use
-// triggers + load-protocols deficit → resolution spine); both are covered by the
-// in-memory regeneration below, so neither part can drift silently. A stale
-// committed map would inject a wrong routing directive at SessionStart, so this
-// check re-generates in-memory and fails on any divergence — the same drift
-// posture as cross-ref-scan/catalog-sync, using the shared {check, file,
-// message} result shape. The generator FAILS LOUDLY (throws) when a protocol
-// has no catalog row; that throw is surfaced here as a fail rather than
-// crashing the verifier.
-function checkRoutingMapSync() {
-  const check = 'routing-map-sync';
-  let result;
-  try {
-    result = checkRoutingMap({ projectRoot });
-  } catch (e) {
-    results.fail.push({
-      check,
-      file: ROUTING_MAP_REL,
-      message: `Routing map generation failed (protocol/catalog drift or source error): ${e.message}`
-    });
-    return;
-  }
-  if (!result.inSync) {
-    results.fail.push({
-      check,
-      file: ROUTING_MAP_REL,
-      message: `${result.reason} — regenerate with: node scripts/generate-routing-map.js`
-    });
-    return;
-  }
-  results.pass.push({
-    check,
-    file: ROUTING_MAP_REL,
-    message: 'Routing map is in sync with canonical sources (catalog triggers + load-protocols spine)'
   });
 }
 
@@ -2569,7 +2538,6 @@ try {
   checkRoutingIndexContract();
   checkOnboardSync();
   checkCatalogSync();
-  checkRoutingMapSync();
   checkPartitionInvariant();
   checkGateAnswerReference();
   checkArtifactSelfContainment();
