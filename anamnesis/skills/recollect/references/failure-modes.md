@@ -23,7 +23,7 @@ SidechainNoSSOT   : scan_entropy(Store, trace) ≠ ∅ via INDEX_substitute ∧ 
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
                     -- cause: literal absent from the searched scope. A miss confined to the index-and-spine depth points at pre-store, lifecycle gap, queued/failed writer, or extractor omission — but note the spine tier survives all four, since it reads the record itself, so a spine miss narrows the cause to the literal never appearing in a record head
-                    -- recovery: the open question, then StoreExpansion; after accepted full-text exhaustion, offer Aitesis handoff with accumulated trace
+                    -- recovery: the open question on a first miss (a correction already counts as the round-trip), then StoreExpansion; after accepted full-text exhaustion, offer Aitesis handoff with accumulated trace
 
 NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
                     -- cause: profile too vague or target session lacks distinctive markers
@@ -43,7 +43,7 @@ degraded_scan rationale:
   -- an empty INDEX_semantic no longer empties the realization: SSOT_spine is already in the initial
      scope, so recency, cwd, origin, and the first human turn still reach ranking. What is lost is the
      extracted semantics, not the realization
-  -- SSOT_body broadens coverage further but stays outside initial scope. After the open question,
+  -- SSOT_body broadens coverage further but stays outside initial scope. After one round-trip — the open question's answer or a correction —
      Qx lets the user admit the unbounded body scan or stop with a NullMatch scoped to the indexes
      and spines already searched. Ground opens one named record per member at any scope; that
      bounded read is not what the checkpoint governs.

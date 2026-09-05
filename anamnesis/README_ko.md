@@ -16,7 +16,7 @@ AI 시스템은 모호한 회상 신호(`RecallAmbiguous`)를 놓치기 쉽습�
 
 **출처로 근거 지어진 인지(Source-grounded recognition)**: AI가 발화와 쌓인 맥락에서 단서를 읽고, hypomnesis INDEX와 세션 기록의 머리(spine)를 Salience 차원을 따라 뒤져 후보를 찾은 뒤, 1순위 후보의 원기록을 — 구성 세션마다 한 번씩 — 열어 단서가 닿는 발췌를 뽑습니다. 그 논의의 이야기를 기록의 말로(origin → direction → outcome; 한 세션 위에서는 라인·토픽·개념의 형태로), 발췌마다 출처와 resume 핸들을 붙여 보여 주고 턴을 넘깁니다. 사용자가 식별하거나, 자기 말로 단서를 고치면 검색이 다시 돕니다. INDEX의 서사는 회상을 깨우는 단서일 뿐 증거가 아니며, 증거는 발췌이고, 식별은 사용자의 것입니다. 구조화된 literal match는 source namespace가 회상 trace의 claim kind를 인가(authorize)할 때만 ranking anchor가 됩니다.
 
-Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고 모든 후보에 출처를 유지합니다. 저장소 전체의 raw transcript를 훑는 것은 compact 검색과 열린 질문 하나가 모두 빗나간 뒤 `/recollect`가 명시적으로 선택을 요청하는 2단계 확장이고, 제시할 후보가 가리키는 기록 하나를 여는 것은 유한하므로 그런 선택이 필요 없습니다.
+Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고 모든 후보에 출처를 유지합니다. 저장소 전체의 raw transcript를 훑는 것은 compact 검색이 빗나가고 사용자 왕복 한 번 — 열린 질문의 답, 또는 제시된 후보에 대한 교정 — 으로도 풀리지 않은 뒤 `/recollect`가 명시적으로 선택을 요청하는 2단계 확장이고, 제시할 후보가 가리키는 기록 하나를 여는 것은 유한하므로 그런 선택이 필요 없습니다.
 
 ### Codex 캡처 라이프사이클
 

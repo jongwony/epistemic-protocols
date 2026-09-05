@@ -35,8 +35,8 @@ VagueRecall
   → detect(empty_intention)              -- recognize vague recall state
   → cue(trace, unit)                     -- what is meant, and at which whole: one session, or the line, topic, or concept above it
   → find(Store, cue)                     -- INDEX gist and record spines as cues (see STORE TOPOLOGY); above session scope the candidates are joined by read-time inferred edges (── FIND ABOVE SESSION SCOPE ──)
-  → ask(user)?                           -- one open question before a zero result may expand or terminate
-  → expand(SSOT_body, user)?             -- only after the question and a spine-scope miss, at the user's election
+  → ask(user)?                           -- one open question when the first find returns nothing; a zero result expands or terminates only after at least one user round-trip — that question's answer or a correction, either of which is new cue information
+  → expand(SSOT_body, user)?             -- only after a round-trip and a spine-scope miss, at the user's election
   → ground(recognizable)                 -- open each member's own record: the excerpt the cue reaches, its locator, its handle; the narrative is composed from the excerpts
   → present(recognizable)                -- one shape at every scope; the turn yields
   → identify(recognizable, user)         -- synthesis of identification (Husserl CM §18) fulfilling the empty horizon (CM §19): the user's observable act, never inferred from silence
@@ -109,6 +109,7 @@ recue            = (V, Cue) → V   -- folds the cue into V.trace and V.cues; a 
 emitted(x)       = predicate; the emit(x) has fired in session text
 RecalledContext  = session text carrying the identified Recognizable: its narrative, each member's excerpt with locator and handle, and the currency caveat below
                -- recall establishes IDENTITY (this WAS discussed/decided), not current-reality FIDELITY (it still HOLDS). Store-currency (the INDEX entry is fresh) ⊂ fidelity-to-current-reality: a recalled decision may be superseded, a recalled path renamed, a recalled convention revised. RecalledContext describes a PAST state; downstream consumers re-verify against current state before commit rather than treating it as confirmed current context.
+find_empty       = predicate; find_empty ≡ |O[ranked]| = 0 at the Phase 1 branch point   -- the guard that reaches Ask, Qx, and NullMatch; a predicate over it is evaluated where the guard holds, in the same pass as the empty Find, never reconstructed after a yield
 NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
 AttemptsExhausted = predicate; canonical definition in ── CONVERGENCE ──   -- the candidate-in-hand terminal, distinct from NullMatch's nothing-found one
 Phase            ∈ {0, 1, 2, 3}
@@ -151,17 +152,17 @@ Phase 1 → Phase 2 → Phase 3 →
   Corrected: recue → Phase 1   -- the user's words are the new cue; above session scope a correction may narrow the whole, widen it, or name a different one
   Withdrawn: stand down, nothing claimed
 
-Phase 1 zero result: Ask once → recue → Phase 1; a second miss at spine scope → StoreExpansion:
+Phase 1 zero result before any round-trip (attempts = 0): Ask once → recue → Phase 1; a zero result after a round-trip — the question's answer or a correction — at spine scope → StoreExpansion:
   ExpandFullText: set scan_scope = full_text → Phase 1 with index, spines, and bodies
   StopAtSpine: NullMatch → deactivate
 
-Max 3 recall attempts; `attempts` starts at 0 in Phase 0, the open question's answer and each correction spends one, and a Find's own result — at any scope — spends nothing. Exhausted with a candidate in hand: AttemptsExhausted — surface O[top] as the closest found, without claiming identification → deactivate. A nothing-found exhaustion terminates as NullMatch instead (both in CONVERGENCE).
+Max 3 recall attempts; `attempts` starts at 0 in Phase 0, the open question's answer and each correction spends one, and a Find's own result — at any scope — spends nothing. Exhausted with a candidate in hand: AttemptsExhausted — surface O[top] as the closest found, without claiming identification → deactivate. A nothing-found exhaustion terminates as NullMatch instead (both in CONVERGENCE). The counter witnesses round-trips, not questions: a correction carries new cue information exactly as an answer to the open question does, so a zero result may expand or terminate after either, and the open question is owed only while no round-trip has happened.
 Convergence evidence: (VagueRecall → [cues] → Recognizable(grounded) → Identified → RecalledContext).
 
 ── CONVERGENCE ──
 recall_complete = U = Identified ∧ emitted(RecalledContext(Λ.presented))   -- the user's observable identification of the presented recognizable, read from the carrier Phase 2 wrote before the yield; never inferred from silence
-NullMatch = |O[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- nothing-found terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: the open question must have been asked, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered. The inform reports exactly the coverage searched, and — where candidates were found but no member's record could be opened — names those records, since that is a different miss from finding nothing
-AttemptsExhausted = |O[]| > 0 ∧ attempts = max ∧ U = Corrected(c)   -- candidate-in-hand terminal: surface Λ.presented as the closest found → deactivate, never NullMatch. The answer is part of the predicate — without it the predicate would hold the moment a final Find returns candidates, terminating before Present offers the identification the budget was spent to reach
+NullMatch = (X = StopAtSpine) ∨ (find_empty ∧ attempts > 0 ∧ fulltext_scanned)   -- nothing-found terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches. Evaluated at the Phase 1 branch point where find_empty holds — the same pass as the empty Find — never reconstructed after a yield; the checkpoint's answer X is the one post-yield witness. attempts > 0 witnesses at least one user round-trip (the open question's answer or a correction) before the scope is called exhausted. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered. The inform reports exactly the coverage searched, and — where candidates were found but no member's record could be opened — names those records, since that is a different miss from finding nothing
+AttemptsExhausted = Λ.presented ≠ Null ∧ U = Corrected(c) ∧ attempts = max   -- candidate-in-hand terminal, evaluated at Phase 3 over what survives the yield: Λ.presented was written at Phase 2 in this pass and Corrected is the answer to that presentation, so both are current. surface Λ.presented as the closest found → deactivate, never NullMatch. The answer is part of the predicate — without it the predicate would hold the moment a final Find returns candidates, terminating before Present offers the identification the budget was spent to reach
 progress(Σ) = attempts: N/max, presented: N
 
 ── TOOL GROUNDING ──
@@ -223,7 +224,7 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 Find(Store, V) :
   V.unit = session : each c ∈ Scan_{Track}(Store, trace(V)) ↦ { unit: session, members: [c], narrative: c.fingerprint, excerpts: ∅ }   -- the candidates as scanned
   V.unit ≠ session : Assemble_{V.unit}(Traverse(C, infer_edges(C, Σ))) where C = Scan_{Track}(Store, trace(V))   -- the same candidate step, then the recognizables its candidates join into: shapes, edge inference, traversal, assembly, and the connectivity term Rank adds are typed in references/supra-session.md
-binding: Ground, Present, the answers, the budget, and both terminals are those typed above; this block adds none. A zero result at this scope — candidates found, no recognizable joined them — is |O[]| = 0 as for any Find: the open question, then the checkpoint, and the coverage each reports includes what was traversed
+binding: Ground, Present, the answers, the budget, and both terminals are those typed above; this block adds none. A zero result at this scope — candidates found, no recognizable joined them — is |O[]| = 0 as for any Find: the open question while no round-trip has happened, then the checkpoint, and the coverage each reports includes what was traversed
 -- Before finding above session scope, read references/supra-session.md: it types the three
 -- shapes over Candidate (no second element type), the edges inferred at read time from stored
 -- anchors and metadata, Traverse and Assemble, the connectivity term Rank adds, and the four
@@ -321,7 +322,7 @@ Read the next utterance as identification, correction, or withdrawal. Identifica
 
 Emit `RecalledContext` with the narrative, each member's excerpt, locator, and validated resume handle. State that recognition establishes historical identity rather than current truth. When `source_scan` reports incomplete source coverage, name the non-zero counts so downstream readers can weigh the record accordingly.
 
-When the cue finds nothing, ask one open question in everyday words — what else the user remembers — and take the answer as the next cue. On the store-expansion checkpoint, state what has been searched so far, above one session including what was traversed and which links led nowhere, then present scanning the transcript bodies and stopping at the spine as the two futures. On NullMatch, report the source-labeled depth actually searched for each realization and name actionable causes supported by the observed failure mode; preserve a `StopAtSpine` boundary as an index-and-spine-scoped miss; after an accepted full-text miss, offer the declared Aitesis handoff with the accumulated trace.
+When the cue finds nothing and no round-trip has happened yet, ask one open question in everyday words — what else the user remembers — and take the answer as the next cue; after a correction has already supplied new cue information, a miss goes to the checkpoint instead. On the store-expansion checkpoint, state what has been searched so far, above one session including what was traversed and which links led nowhere, then present scanning the transcript bodies and stopping at the spine as the two futures. On NullMatch, report the source-labeled depth actually searched for each realization and name actionable causes supported by the observed failure mode; preserve a `StopAtSpine` boundary as an index-and-spine-scoped miss; after an accepted full-text miss, offer the declared Aitesis handoff with the accumulated trace.
 
 ## Rules
 
