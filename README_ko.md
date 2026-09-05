@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 여러 영역에 걸친 리팩터링 전에 `/bound`.
 
-유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·결핍 인식(`/onboard`, `/probe`)과 컨트리뷰터 도구를, `route`는 세션 훅들 — 매 프롬프트 라우팅 지시문, 그리고 세션 시작에 설치된 프로토콜의 결핍 테이블과 그 아래 [premise](./premise) 색인 — 을 담습니다. 필요한 쪽을 따로 추가하세요:
+유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·결핍 인식(`/onboard`, `/probe`)과 컨트리뷰터 도구를, `route`는 세션 훅들 — 매 프롬프트 라우팅 지시문, 세션 시작에 설치된 프로토콜의 결핍 테이블과 그 아래 [premise](./premise) 색인, 그리고 매처가 premise 문서의 순간이라고 판정하는 도구 호출 — 바뀌려는 지시 표면, 에이전트에게 넘기는 일과 돌아오는 보고 — 시점에 그 문서의 항목 — 을 담습니다. 필요한 쪽을 따로 추가하세요:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
