@@ -23,7 +23,7 @@ A session record sits directly inside a project directory. Anything nested deepe
 
 Per record, bind:
 
-- `recency` from the file's modification time, and `record` from the file's own path — both are what makes this candidate openable later, since nothing re-resolves the path at grounding time;
+- `recency` from the file's modification time, and `record` from the file's own path — both are what makes this candidate openable later, since nothing re-resolves the path at grounding time. Where the INDEX entry survives a transcript already deleted, bind `record` to the path the entry names anyway and take `recency` from the entry's own timestamp; bind Null only where neither carries one. Such a candidate is still constructed and still ranked — it is the one Ground cannot open, which is what the Ungroundable path receives;
 - `session_id` from the filename, `cwd` from the record;
 - the origin label from the **first** `entrypoint` value within the record's leading window — first match wins, which is how the runtime itself classifies the record, so a later value in the same file does not reclassify it;
 - `bridgeSessionId` when a `{"type":"bridge-session"}` line is present;

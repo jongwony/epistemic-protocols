@@ -17,7 +17,7 @@ shape by Unit    -- Recognizable.narrative is composed from the members' excerpt
   concept  : the members that forged the concept, then the member carrying it as settled   -- recognized only, never formed here: absent a member whose record carries the concept as settled, the recall is not this shape (formation → /induce)
 
 Edge             = { from: Candidate, to: Candidate | Locator, kind: ∈ {succession, topic, concept, plain} }
-                  -- kind and to are INFERRED at read time from stored anchors (cross_refs) + shared keywords/topic + cwd + Candidate.recency; never read from a stored field — the inputs are candidate fields, the edge is not
+                  -- kind and to are INFERRED at read time from stored anchors (cross_refs) + shared keywords/topic + cwd + Candidate.recency; never read from a stored field — the inputs are candidate fields, the edge is not. recency = Null contributes nothing to succession ordering and is never a penalty, the same way it is neutral in ranking
                   -- cross_refs hold StructuredAnchor {memory, github_issue, github_pr} and LegacyAnchor strings (SKILL.md TYPES: Anchor); a legacy string extends an edge as kind-unknown, never rejected. succession/topic/concept/plain are traversal ROLES, not stored kinds
                   -- to is a Locator when the anchor points at no written record: not-yet-written knowledge, skipped, never an error
 Graph            = (Set(Candidate), Set(Edge))   -- STRUCTURAL TYPE: the edge set is reconstructed by traversal, never pre-materialized; invariants in ── GRAPH INVARIANTS ──
