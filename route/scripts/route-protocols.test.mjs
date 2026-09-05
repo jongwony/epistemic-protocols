@@ -53,7 +53,25 @@ test("the selection rule over the repo tree matches the canonical registry exact
   for (const [name, protocol] of selected) {
     assert.match(protocol.command, /^[a-z][a-z-]*$/, `${name}: command shape`);
     assert.match(protocol.deficit, /^[A-Z]\w+$/, `${name}: deficit shape`);
+    // Every protocol in the suite carries a Type clause somewhere in its
+    // SKILL.md; a row without a resolution would mean that clause moved.
+    assert.match(String(protocol.resolution), /^[A-Z]\w+$/, `${name}: resolution shape`);
   }
+});
+
+test("a Type clause in the body supplies the resolution when the description carries none", () => {
+  const dir = copyProtocol(CANONICAL_PROTOCOL_SET[0]);
+  const skillDir = fs.readdirSync(path.join(dir, "skills"))[0];
+  const file = path.join(dir, "skills", skillDir, "SKILL.md");
+  const before = selectProtocol(dir);
+  assert.ok(before.resolution, "the copy resolves before the change");
+  const text = fs.readFileSync(file, "utf8");
+  // Strip every Type clause: the row survives, with the deficit alone.
+  fs.writeFileSync(file, text.replace(/Type:\s*[`"]?\([^)]*\)\s*→\s*[A-Z][A-Za-z]+/g, "Type: absent"));
+  const after = selectProtocol(dir);
+  assert.ok(after, "a protocol without a Type clause keeps its row");
+  assert.equal(after.deficit, before.deficit);
+  assert.equal(after.resolution, null);
 });
 
 // What the assertion above would fail on, shown on fixtures rather than on

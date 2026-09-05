@@ -1,13 +1,15 @@
 # Setting up this layer
 
-[`AGENTS.md`](AGENTS.md) in this directory states what these documents are and indexes them by the
-moment each one is for. This file covers adopting them.
+These documents are the collaboration premises behind structured human-AI dialogue, stated so they
+hold on their own. Their index — each document and the moment that calls for it — is carried by the
+[`route`](../route) plugin's session-start hook, which is also how they reach a session. This file
+covers adopting them.
 
 They are a reference surface, not a package: nothing here runs. Adopt them in one of two ways.
 
 - **Install the [`route`](../route) plugin.** Its session-start hook resolves this directory
   through the host's own plugin records and injects the index into every context epoch with each
-  entry's path made absolute, so a document is read by that path at the moment its entry names.
+  entry's path absolute, so a document is read by that path at the moment its entry names.
   Nothing is wired by hand, and the host's plugin manager keeps the marketplace checkout the paths
   point into current; a marketplace added from a local clone resolves to that clone, which is how
   to hold a copy that changes only when you say so. The install and the mechanism are in
