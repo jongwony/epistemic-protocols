@@ -1,7 +1,7 @@
 {
   "name": "anamnesis",
   "description": "Resolve vague recall into recognized context — one session, or a line of work, topic, or settled concept across several — /recollect (ἀνάμνησις: a recollecting)",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

@@ -29,7 +29,7 @@ Per record, bind:
 - `bridgeSessionId` when a `{"type":"bridge-session"}` line is present;
 - the topic from the first human turn, under the filter below.
 
-**Human-turn filter.** A turn is the session's own human when `type` is `user`, `isMeta` and `isCompactSummary` are both absent, and the text neither opens with `<` nor is a bare control marker such as `[Request interrupted by user]`. Hook injections and cross-session envelopes arrive in that same `user` stream while being written by something other than the person; without the filter the spine attributes machine text to them, and the candidate presented for recognition is one the user never said.
+**Human-turn filter.** A turn is the session's own human when `type` is `user`, `isMeta` and `isCompactSummary` are both absent, and the text neither opens with `<` nor is a bare control marker such as `[Request interrupted by user]`. Hook injections and cross-session envelopes arrive in that same `user` stream while being written by something other than the person; without the filter the spine attributes machine text to them, and the candidate presented for recognition is one the user never said. One turn is the person's despite failing that test: a **relayed turn**, where `origin.kind` is `channel`. A transport carrying the person's words into the session wraps them and marks the record `isMeta`, because the envelope is machine-written even though its contents are not — so the `isMeta` rejection above discards it unread. Admit it on that field rather than on its text: `origin.server` merely names which transport carried it, so keying on `origin.kind` admits every transport without enumerating any. The utterance is what remains once the envelope and the machine-written context blocks nested inside it are set aside, and that remainder is what the spine takes as the topic and what Ground takes as the excerpt span.
 
 **Bridge handle.** `cse_…` and `session_…` are one identifier in two spellings. A recorded `bridgeSessionId` therefore yields the session's web address by prefix substitution:
 
@@ -50,11 +50,13 @@ grep -m1 '"type":"bridge-session"' "<record>"
 head -n 400 "<record>" | jq -rs '
   [ .[]?
     | select(.type=="user")
-    | select((.isMeta // false) | not)
     | select((.isCompactSummary // false) | not)
+    | select((.origin.kind == "channel") or ((.isMeta // false) | not))
+    | (.origin.kind == "channel") as $relayed
     | ( .message.content
         | if type=="string" then . else ([ .[]? | select(.type=="text") | .text ] | join(" ")) end )
-    | select(type=="string" and (startswith("<") | not))
+    | select(type=="string" and ($relayed or (startswith("<") | not)))
+    | select(length > 0)
   ] | .[0] // ""'
 ```
 
