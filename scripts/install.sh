@@ -44,6 +44,12 @@ for p in $plugins; do
   fi
   if claude plugin install "$p@$MARKETPLACE" < /dev/null 2>/dev/null; then
     installed=$((installed + 1))
+    # Install does not guarantee activation: a plugin that was already
+    # installed and later disabled (via /plugin, or a project-scope
+    # `enabledPlugins: false`) reports "already installed" and stays off.
+    # `enable` auto-detects the scope that disabled it; it exits non-zero
+    # when the plugin is already enabled, which is the common case.
+    claude plugin enable "$p@$MARKETPLACE" < /dev/null 2>/dev/null || true
   else
     echo "  Skipped: $p"
     skipped=$((skipped + 1))
