@@ -12,7 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { PREMISE_HEADER, PREMISE_INDEX, PREMISE_INTRO } from "./route-premise.mjs";
+import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
 import { TABLE_HEADER, deriveProtocols, renderTable } from "./route-protocols.mjs";
 import {
   THIN_OPENER,
@@ -366,7 +366,6 @@ test("the premise index follows the table on every source, its paths absolute", 
   try {
     const expected = [
       PREMISE_HEADER,
-      PREMISE_INTRO,
       `Read \`${path.join(fixture.checkout, "premise", PREMISE_INDEX[0].file)}\` ${PREMISE_INDEX[0].when}`,
     ].join("\n");
     const startup = buildContext("startup", fixture.env);

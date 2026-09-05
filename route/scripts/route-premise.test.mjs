@@ -13,7 +13,6 @@ import {
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
-  PREMISE_INTRO,
   TOOL_HEADER,
   bindsAt,
   isInstructionSurface,
@@ -116,16 +115,15 @@ test("no document anywhere resolves to null, never an error", () => {
 // Rendering
 // ---------------------------------------------------------------------------
 
-test("renders header, intro, and one line per document with its absolute path", () => {
+test("renders the header and one line per document with its absolute path", () => {
   const host = makeHost();
   try {
     const root = premiseRoot(host.env);
     const lines = renderPremise(root).split("\n");
     assert.equal(lines[0], PREMISE_HEADER);
-    assert.equal(lines[1], PREMISE_INTRO);
-    assert.equal(lines.length, 2 + PREMISE_INDEX.length);
+    assert.equal(lines.length, 1 + PREMISE_INDEX.length);
     PREMISE_INDEX.forEach((e, i) => {
-      assert.equal(lines[2 + i], `Read \`${path.join(root, e.file)}\` ${e.when}`);
+      assert.equal(lines[1 + i], `Read \`${path.join(root, e.file)}\` ${e.when}`);
     });
     // Every path is absolute and under the root; no relative link survives.
     for (const m of lines.join("\n").matchAll(/`([^`]+)`/g)) {
@@ -140,7 +138,7 @@ test("an entry whose document is absent is left out; the rest go out", () => {
   const host = makeHost({ checkoutFiles: [FIRST] });
   try {
     const out = renderPremise(premiseRoot(host.env));
-    assert.equal(out.split("\n").length, 3);
+    assert.equal(out.split("\n").length, 2);
     assert.match(out, new RegExp(`Read \`[^\`]*${FIRST.replace(".", "\\.")}\``));
   } finally {
     cleanup(host);
