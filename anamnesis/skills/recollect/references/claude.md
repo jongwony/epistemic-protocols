@@ -58,13 +58,15 @@ head -n 400 "<record>" | jq -rs '
   ] | .[0] // ""'
 ```
 
-Both reads are bounded per record. Neither opens a transcript body, which stays behind the Phase 1 checkpoint.
+Both reads are bounded per record. Neither opens a transcript body: a body is opened by Ground, one named record per member of the recognizable about to be presented, and scanned across the store only after ExpandFullText.
 
 ## Fork candidates
 
 Claude substitute-channel records can identify a sidechain whose own ID is not resumable. For any such hit, read `fork-resume.md` before candidate presentation. It defines the deterministic parent back-trace and the five resume branches.
 
-## Resume
+## Ground and resume
+
+Ground opens the member's record at `{config_dir}/projects/{slug}/{session_id}.jsonl` (a fork member: its substitute capture, per `fork-resume.md`) and takes the excerpt the cue reaches — the human and assistant turns at that span, under the human-turn filter above — with the record path as `Excerpt.locator`.
 
 For a non-fork candidate whose `cwd` is recorded **and still present on disk**, emit the literal handle:
 
