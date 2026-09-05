@@ -752,7 +752,7 @@ function report() {
     console.log('\n`pass_k` contains deterministic transition predicates only. Manual transcript review is still required for:');
     for (const item of manualSummary) console.log(`- ${item}`);
     if (evidenceFailures.length) {
-      console.log('\n**Not readable as evidence** \u2014 treatment integrity failed, or a predicate had nothing to read:');
+      console.log('\n**Not readable as evidence** — treatment integrity failed, or a predicate had nothing to read:');
       console.log(line(cols));
       console.log(line(cols.map(() => '---')));
       for (const r of evidenceFailures) console.log(line(cols.map((c) => String(r[c]))));
@@ -771,7 +771,7 @@ function report() {
   console.log('\npass_k contains deterministic transition predicates only. Manual transcript review is still required for:');
   for (const item of manualSummary) console.log(`- ${item}`);
   if (evidenceFailures.length) {
-    console.log('\nNOT READABLE AS EVIDENCE \u2014 treatment integrity failed, or a predicate had nothing to read:');
+    console.log('\nNOT READABLE AS EVIDENCE — treatment integrity failed, or a predicate had nothing to read:');
     console.table(evidenceFailures);
   }
   if (missing.length) {
