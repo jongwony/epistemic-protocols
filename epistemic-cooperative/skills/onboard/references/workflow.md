@@ -9,6 +9,6 @@ Protocols grouped by primary concern. Clusters are non-directional — they repr
 | Execution | /apportion | What must verifiably hold when the autonomous run stops? |
 | Verification | /contextualize, /sublate | Does this fit where it's going? Has the working context held up? |
 
-**Cross-cutting**: /bound (boundary — narrows scope for many downstream protocols), /recollect (vague recall resolution — surfaces prior context for recognition), /ascend (recall elevation — leads a vague recall up to the supra-session higher unit the deposits already imply), /conduct (session conduction — how the session's multi-move epistemic work is conducted before object-level cognition), /grasp (comprehension — always last)
+**Cross-cutting**: /bound (boundary — narrows scope for many downstream protocols), /recollect (vague recall resolution — surfaces prior context for recognition, as one session or as the line of work, topic, or settled concept above it), /conduct (session conduction — how the session's multi-move epistemic work is conducted before object-level cognition), /grasp (comprehension — always last)
 
 **Cluster activation sequence** (multi-activation only): Planning → Analysis → Execution → Verification (cross-cutting protocols interleave per their own preconditions; Katalepsis structurally last — `requires: result_exists(R)` per `katalepsis/skills/grasp/SKILL.md`)

@@ -1,6 +1,6 @@
 # Fork/sidechain resume — detection, back-trace, and handle construction
 
-Read when a candidate carries `fork_marker = true`, when `Candidate.cwd` is absent, or when a recorded `cwd` no longer exists on disk — the three cases where the plain `cd <cwd> && claude --resume <session_id>` handle does not apply. Carries the `── TOOL GROUNDING ──` substrate binding that sets `fork_marker` / `parent_pointer` / `parent_cwd`, and the five-branch handle rule both emission sites (Phase 2 `Resume`, Phase 3 `Recognize`) reach.
+Read when a candidate carries `fork_marker = true`, when `Candidate.cwd` is absent, or when a recorded `cwd` no longer exists on disk — the three cases where the plain `cd <cwd> && claude --resume <session_id>` handle does not apply. Carries the `── TOOL GROUNDING ──` substrate binding that sets `fork_marker` / `parent_pointer` / `parent_cwd`, and the five-branch handle rule Ground applies when it binds a member's `Excerpt.handle` — the one handle Present and Resolve both emit.
 
 ## Substrate binding (Claude Code realization)
 

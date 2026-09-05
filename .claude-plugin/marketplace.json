@@ -63,12 +63,7 @@
     {
       "name": "anamnesis",
       "source": "./anamnesis",
-      "description": "Resolve vague recall into recognized context — /recollect (ἀνάμνησις: recollection)"
-    },
-    {
-      "name": "anagoge",
-      "source": "./anagoge",
-      "description": "Elevate a vague recall to a higher-granularity unit — /ascend (ἀναγωγή: a leading-up)"
+      "description": "Resolve vague recall into recognized context — one session, or a line of work, topic, or settled concept across several — /recollect (ἀνάμνησις: recollection)"
     },
     {
       "name": "hyphegesis",
