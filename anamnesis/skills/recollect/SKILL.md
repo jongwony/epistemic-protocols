@@ -22,10 +22,10 @@ Anamnesis(V) → Detect(V) →
       ExpandFullText: set(scan_scope = full_text) → Find
       StopAtSpine: NullMatch → inform(V, Σ) → deactivate
     |O[]| = 0 ∧ attempts > 0 ∧ fulltext_scanned: NullMatch → inform(V, Σ) → deactivate
-    |O[]| > 0: O[top] := Ground(O[top]) → Present(O[top]) → Stop → U →
-      Identified: emit(RecalledContext(O[top])) → converge
+    |O[]| > 0: O[top] := Ground(O[top]) → set(presented = O[top]) → Present(Λ.presented) → Stop → U →
+      Identified: emit(RecalledContext(Λ.presented)) → converge
       Corrected(c) ∧ attempts < max: recue(V, c) → set(attempts = attempts + 1) → Find
-      Corrected(c) ∧ attempts = max: surface(O[top]) → deactivate   -- AttemptsExhausted: the closest grounded candidate, no identification claimed
+      Corrected(c) ∧ attempts = max: surface(Λ.presented) → deactivate   -- AttemptsExhausted: the closest grounded candidate, no identification claimed
       Withdrawn: deactivate                                         -- the user moved on; no terminal claimed
 
 ── MORPHISM ──
@@ -131,11 +131,11 @@ Phase 1: V → Find(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body
              ExpandFullText → set(scan_scope = full_text) → Phase 1   -- re-enters Find with the widened scope: index, spines, and bodies together, so a spine candidate can still join a body one
              StopAtSpine → NullMatch → inform → deactivate
            |O[ranked]| = 0 ∧ attempts > 0 ∧ fulltext_scanned → NullMatch → inform → deactivate
-Phase 2: O[top] → Present(O[top]) → Stop → U    -- the one presentation shape [Tool]: narrative from the excerpts, each member's excerpt with its locator and handle, the adjacent candidates named when |O[ranked]| > 1, the remaining budget, the currency caveat; the turn yields and the next utterance is read as U
-Phase 3: U → integrate(U, V, Σ) →                                -- integration (track: Λ.presented := O[top])
-           Identified → emit(RecalledContext(O[top])) → converge
+Phase 2: O[top] → set(presented = O[top]) → Present(Λ.presented) → Stop → U    -- the one presentation shape [Tool]: narrative from the excerpts, each member's excerpt with its locator and handle, the adjacent candidates named when |O[ranked]| > 1, the remaining budget, the currency caveat; the turn yields and the next utterance is read as U. The grounded recognizable is written to Λ BEFORE the yield — it is the only thing Phase 3 still needs and the yield is what it has to survive
+Phase 3: U → integrate(U, V, Σ) →                                -- integration reads Λ.presented, written at Phase 2 before the yield
+           Identified → emit(RecalledContext(Λ.presented)) → converge
            Corrected(c) ∧ attempts < max → recue(V, c) → set(attempts = attempts + 1) → Phase 1   -- the correction is the next cue; a cue naming a different whole re-reads V.unit
-           Corrected(c) ∧ attempts = max → surface(O[top]) → deactivate   -- AttemptsExhausted (CONVERGENCE): name the closest grounded candidate and the coverage searched, claim no identification
+           Corrected(c) ∧ attempts = max → surface(Λ.presented) → deactivate   -- AttemptsExhausted (CONVERGENCE): name the closest grounded candidate and the coverage searched, claim no identification
            Withdrawn → deactivate                                          -- no terminal claimed; a later recall starts fresh
 
 ── LOOP ──
@@ -152,9 +152,9 @@ Max 3 recall attempts; `attempts` starts at 0 in Phase 0, the open question's an
 Convergence evidence: (VagueRecall → [cues] → Recognizable(grounded) → Identified → RecalledContext).
 
 ── CONVERGENCE ──
-recall_complete = U = Identified ∧ emitted(RecalledContext(O[top]))   -- the user's observable identification of the presented recognizable; never inferred from silence
+recall_complete = U = Identified ∧ emitted(RecalledContext(Λ.presented))   -- the user's observable identification of the presented recognizable, read from the carrier Phase 2 wrote before the yield; never inferred from silence
 NullMatch = |O[]| = 0 ∧ attempts > 0 ∧ (fulltext_scanned ∨ X = StopAtSpine)   -- nothing-found terminal, matching the FLOW/PHASE TRANSITIONS/LOOP branches: the open question must have been asked, and the scope must be either exhausted or closed by the user's StopAtSpine election. StopAtSpine is terminal on its own — gating it on a budget would make the equation refuse a stop the checkpoint already offered. The inform reports exactly the coverage searched
-AttemptsExhausted = |O[]| > 0 ∧ attempts = max ∧ U = Corrected(c)   -- candidate-in-hand terminal: surface O[top] as the closest found → deactivate, never NullMatch. The answer is part of the predicate — without it the predicate would hold the moment a final Find returns candidates, terminating before Present offers the identification the budget was spent to reach
+AttemptsExhausted = |O[]| > 0 ∧ attempts = max ∧ U = Corrected(c)   -- candidate-in-hand terminal: surface Λ.presented as the closest found → deactivate, never NullMatch. The answer is part of the predicate — without it the predicate would hold the moment a final Find returns candidates, terminating before Present offers the identification the budget was spent to reach
 progress(Σ) = attempts: N/max, presented: N
 
 ── TOOL GROUNDING ──
@@ -178,17 +178,18 @@ Phase 1 backtrace_parent (observe) → artifact read (fork member only, inside G
 Phase 1 Ground      (observe)  → artifact read (one read per member of O[top]: open the member's own record at the path its runtime reference declares, take the excerpt the cue reaches — the record's words, not the index's — bind the locator and the validated resume handle, then compose the narrative from the excerpts. Bounded by the members of the one recognizable about to be presented; it opens named records and never scans the store, so it is not the body scan Qx governs. A member with no record yields an empty excerpt and the prose says so; read-only)
 Phase 1 Ask         (constitution) → present (one open question in everyday words — what else do you remember? — after the cue found nothing; the answer is the next cue)
 Phase 1 Qx          (constitution) → present (ExpandFullText: scan the labeled Claude/Codex transcript bodies, at a per-record cost with no upper bound; StopAtSpine: return a NullMatch scoped to the indexes and spines already searched, without scanning any transcript body. The pre-gate text states the coverage searched so far, above session scope the traversal too)
+Phase 2 set_presented (track)  → Internal state update (Λ.presented := O[top], written before Present yields the turn: Phase 3 resumes with only Λ, so the grounded recognizable has to be in it already)
 Phase 2 Present     (constitution) → present (the one presentation shape at every scope: the narrative composed from the excerpts, each member's excerpt with its locator and handle, the adjacent candidates named when more than one was found, the remaining recall-try budget, and the currency caveat — then the turn yields. No option list: the next utterance is read as Identified, Corrected, or Withdrawn)
-Phase 3 integrate   (track)    → Internal state update (Λ.presented := O[top]; the last presented recognizable is what cross-cycle rendering distinguishes the next one from)
-Phase 3 Resolve     (extension)    → TextPresent+Proceed (Identified: emit RecalledContext — narrative, excerpts, locators, handles, caveat)
-Phase 3 surface     (extension)    → TextPresent+Proceed (AttemptsExhausted: name O[top] as the closest found and the coverage searched; claim no identification; then deactivate)
+Phase 3 integrate   (track)    → Internal state update (reads Λ.presented — the last presented recognizable, which is what cross-cycle rendering distinguishes the next one from)
+Phase 3 Resolve     (extension)    → TextPresent+Proceed (Identified: emit RecalledContext from Λ.presented — narrative, excerpts, locators, handles, caveat)
+Phase 3 surface     (extension)    → TextPresent+Proceed (AttemptsExhausted: name Λ.presented as the closest found and the coverage searched; claim no identification; then deactivate)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
 seam                (extension)    → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — the `/recollect ∘ /inquire` COMPOSITION edge — settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
 Λ = { phase: Phase, V: VagueRecall,
       attempts: Nat, scan_scope: ScanScope,
-      presented: Optional(Recognizable) }   -- the last recognizable presented; everything else a later step reads is on the recognizable itself (excerpts, locators, handles) or in V (the cues)
+      presented: Optional(Recognizable) }   -- the grounded recognizable, written at Phase 2 before Present yields the turn; everything else a later step reads is on the recognizable itself (excerpts, locators, handles) or in V (the cues). Written before the yield rather than after it, because the yield is the boundary it exists to cross
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
