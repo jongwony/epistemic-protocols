@@ -1314,7 +1314,6 @@ describe('package.js CLI', () => {
         'ideate.zip',
         'induce.zip',
         'inquire.zip',
-        'lens-review.zip',
         'onboard.zip',
         'place.zip',
         'preview.zip',

@@ -19,7 +19,6 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop — converges the artifact on the project's stated goal | Applied fixes + handovers + convergence trace |
-| `/lens-review` | One-pass multi-perspective PR review — `/frame` derives the lenses per diff plus a gap scan, cross-verified | One consolidated PR comment |
 | `/place` | Placement audit — routes each clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and sets its enforcement axis | Routing report — route blocks plus report-level findings (read-only) |
 | `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, a rebuilt option set, or — where the check could not close — the repair space, the contested reading, or both sets with neither presented as the answer |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
@@ -119,7 +118,6 @@ epistemic-cooperative/
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop convergence-paced review-resolve loop
-    ├── lens-review/SKILL.md      # /lens-review one-pass multi-perspective PR review
     ├── place/SKILL.md            # /place instruction-prose placement audit
     ├── gate-check/SKILL.md       # /gate-check advisor-checked decision gates
     ├── white-bear/SKILL.md       # /white-bear competing-target prose audit
@@ -141,7 +139,6 @@ epistemic-cooperative/
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 | Something feels off but the deficit is not yet named | `/probe` |
 | Driving a change through review until every finding is disposed of | `/review-loop` |
-| One consolidated multi-perspective review comment on a PR | `/lens-review` |
 | Deciding where a clause of instruction prose belongs | `/place` |
 | Checking a drafted option set before it reaches the user | `/gate-check` |
 | Auditing prose for prohibition framing or anchoring examples | `/white-bear`, `/zero-shot` |
@@ -165,7 +162,6 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /triage
 /triage #41 #52 #60
 /review-loop codex 123
-/lens-review 123
 /place path/to/SKILL.md
 /goal-research <question>
 ```

@@ -8,11 +8,11 @@ skills:
 
 # Formal Lens Review
 
-A one-pass review of a PR diff through a **fixed formal lens panel** — Category Theory ∥ Type Theory ∥ Operational Semantics — plus a gap scan, posted back to the PR as a single consolidated comment for human reviewers. This is the project-local specialization of the general, frame-driven `/lens-review` (epistemic-cooperative): that skill lets `/frame` derive whatever lenses fit the diff, whereas this skill **pins** the formal triple on every run so a formally-structured protocol change gets a meticulous, complete formal review on the same three axes each time.
+A one-pass review of a PR diff through a **fixed formal lens panel** — Category Theory ∥ Type Theory ∥ Operational Semantics — plus a gap scan, posted back to the PR as a single consolidated comment for human reviewers. The panel is **pinned** at definition time rather than derived from the diff, so a formally-structured protocol change gets a meticulous, complete formal review on the same three axes every run.
 
 ## Why this is a project skill
 
-The formal triple (morphism coherence, type soundness, evaluation-order consistency) is **this repository's** standing review axis — protocol `SKILL.md` files carry category-theoretic formal blocks, `TYPES` / `PHASE TRANSITIONS`, and operational-semantics state machines. `/frame`, run generically, is unlikely to select all three formal lenses at once on a given diff; pinning them here guarantees the formal partial review is exhaustive every run. The fixed panel is therefore project-specific and belongs in the project skill layer, while the general frame-driven pipeline stays in the `/lens-review` plugin. This skill is self-contained — it composes `/frame` and carries the gap lens itself, and does not depend on the `/lens-review` plugin skill being installed.
+The formal triple (morphism coherence, type soundness, evaluation-order consistency) is **this repository's** standing review axis — protocol `SKILL.md` files carry category-theoretic formal blocks, `TYPES` / `PHASE TRANSITIONS`, and operational-semantics state machines. `/frame`, run generically, is unlikely to select all three formal lenses at once on a given diff; pinning them here guarantees the formal partial review is exhaustive every run. The fixed panel is therefore project-specific and belongs in the project skill layer. This skill is self-contained — it composes `/frame`, carries the gap lens itself, and describes its own isolated-then-adversarial substrate; `prothesis` is its one plugin dependency.
 
 ## Caller Signature
 
@@ -23,7 +23,7 @@ scope : PR number | (implicit)                       -- optional; PR number, or 
                                                      --   absent → Phase 0 detects it
 ```
 
-When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tree). The lens panel is fixed in this skill — Category Theory, Type Theory, Operational Semantics, plus gap scanning — and is not a runtime parameter; the scope is the only argument. (For a diff-derived, non-fixed panel, use the general `/lens-review` instead.)
+When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tree). The lens panel is fixed in this skill — Category Theory, Type Theory, Operational Semantics, plus gap scanning — and is not a runtime parameter; the scope is the only argument.
 
 ## Pipeline Overview
 
@@ -76,7 +76,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 `/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. Review **only the changed files**.
 
-**Lens framing.** Call `/frame` (prothesis) to frame the perspectives; the gap audit is one further lens this skill fixes itself. Unlike the general `/lens-review`, this skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, never a diff-derived selection. The fixed lenses and gap dimensions are:
+**Lens framing.** Call `/frame` (prothesis) to frame the perspectives; the gap audit is one further lens this skill fixes itself. This skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses and gap dimensions are:
 
 - **Category Theory** — morphism coherence, composition laws, functor consistency
 - **Type Theory** — type-signature soundness, variance, type safety
@@ -121,7 +121,7 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 
 ## Rules
 
-1. **Fixed formal panel** — the lenses are pinned to Category Theory, Type Theory, and Operational Semantics every run; `/frame` is framed onto this triple, not a diff-derived selection. A diff-derived panel is the general `/lens-review`, not this skill.
+1. **Fixed formal panel** — the lenses are pinned to Category Theory, Type Theory, and Operational Semantics every run; `/frame` is framed onto this triple, so the panel stays the same whatever the diff contains.
 2. **Changed files only** — review the files in the Phase 1 diff and nothing else; the diff headers are authoritative for file fate, the hunks for line-level evidence.
 3. **Isolated lenses, then adversarial cross-verification** — each lens forms its findings in isolation (independence-before-contamination); the aggregated findings then pass a single adversarial refutation pass before posting. Surviving findings proceed; defeated findings are recorded in the consolidated comment as refuted with cited basis. The isolated-then-adversarial substrate is described in this skill directly.
 4. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
