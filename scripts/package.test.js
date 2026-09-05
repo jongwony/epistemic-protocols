@@ -1299,7 +1299,6 @@ describe('package.js CLI', () => {
       [
         'apportion.zip',
         'bound.zip',
-        'catalog.zip',
         'conduct.zip',
         'contextualize.zip',
         'elicit.zip',

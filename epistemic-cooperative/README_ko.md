@@ -14,7 +14,6 @@
 |------|------|------|
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/probe` | 결핍 인식 fit review — 역증거 조건이 붙은 복수의 결핍 가설을 제시하고 사용자 인식으로 라우팅 | 프로토콜 route |
-| `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
 | `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, 기판 레코드로 외재화 후 포인터로 전달 |
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
@@ -57,10 +56,6 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 - **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` — Quick 추천 + Targeted 폴백 통합
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
-
-### /catalog — 프로토콜 핸드북
-
-모든 프로토콜을 탐색하고, 관심 클러스터별로 비교하며, 상세 시나리오를 확인한다. 텍스트 출력 전용, 프로토콜별 시나리오 상세 모드 제공.
 
 ### /triage — Work-Unit Formation
 
@@ -113,7 +108,6 @@ epistemic-cooperative/
 └── skills/
     ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
     ├── probe/SKILL.md            # /probe 결핍 인식 fit review
-    ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
     ├── triage/SKILL.md           # /triage work-unit formation
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
@@ -134,7 +128,6 @@ epistemic-cooperative/
 | 인식론적 프로토콜이 처음일 때 | `/onboard` |
 | 체험을 통한 프로토콜 학습 | `/onboard` |
 | 워크플로우 변경 후 재평가할 때 | `/onboard` |
-| 빠른 프로토콜 참조 | `/catalog` |
 | 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
 | 뭔가 어긋났는데 어떤 결핍인지 아직 이름 붙이지 못할 때 | `/probe` |
@@ -150,7 +143,6 @@ epistemic-cooperative/
 ```
 /onboard
 /probe
-/catalog
 /triage
 /triage #41 #52 #60
 /review-loop codex 123

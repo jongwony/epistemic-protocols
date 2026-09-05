@@ -2,7 +2,7 @@
 
 ## About This Project
 
-Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue — protocols that structure specific decision points in human–AI interaction. Run `/catalog` for the protocol handbook (browse by cluster, command lookup); see `CLAUDE.md` for architecture.
+Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue — protocols that structure specific decision points in human–AI interaction. The protocol table in `README.md` is the handbook (browse by cluster, command lookup); see `CLAUDE.md` for architecture.
 
 Contributors here design, refine, and verify the protocols themselves. This guide is for you.
 
@@ -34,7 +34,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] **Node.js 22+** — CI pins Node 22; `zlib.crc32` is used in packaging
 - [ ] **gh CLI** authenticated — required for PR, CI, and release workflows
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
-- [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` and `/catalog` — it is opt-in for the default installer: `claude plugin install epistemic-cooperative@epistemic-protocols`
+- [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` — it is opt-in for the default installer: `claude plugin install epistemic-cooperative@epistemic-protocols`
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
 
 ### Repository
@@ -125,7 +125,7 @@ standard flow afterwards:
 - Already has a personal Claude Code workflow and wants this project mapped
   onto it → `/ground` (analogia), with their existing usage as the concrete
   domain and this project's protocols as the abstract domain being validated
-- Needs a fast when-to-use-which-protocol reference → `/catalog`
+- Needs a fast when-to-use-which-protocol reference → the protocol table in `README.md`, or the `route` plugin's session-start table
   (epistemic-cooperative)
 - Prefers to go straight to environment setup → skip routing, proceed to
   Setup Checklist

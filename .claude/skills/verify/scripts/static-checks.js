@@ -344,8 +344,8 @@ function checkCrossReference() {
 // ============================================================
 // CLAUDE.md/AGENTS.md indexes the protocol catalog rather than mirroring it: it
 // must keep a "## Protocol Index" section that routes to the authoritative sources
-// (/catalog, per-protocol SKILL.md, README) instead of re-inscribing
-// the catalog inline. This is the lightweight successor to the removed
+// (the route plugin's derived table, per-protocol SKILL.md, README) instead of
+// re-inscribing the catalog inline. This is the lightweight successor to the removed
 // CLAUDE.md-content mirror checks (checkCrossRefScan) — it enforces the routing
 // *contract* (structure + pointers), not mirrored content, so catalog drift is
 // caught without re-creating the co-change chain the mirror checks imposed.
@@ -384,7 +384,7 @@ function checkRoutingIndexContract() {
     const nextH2 = afterHeading.search(/\n##[ \t]/);
     const section = nextH2 === -1 ? afterHeading : afterHeading.slice(0, nextH2);
     const requiredPointers = [
-      { label: '/catalog', pattern: /\/catalog/ },
+      { label: 'route/README.md', pattern: /route\/README\.md/ },
       { label: 'per-protocol SKILL.md', pattern: /SKILL\.md/ },
       { label: 'README', pattern: /README/ },
     ];
@@ -411,7 +411,7 @@ function checkRoutingIndexContract() {
       results.warn.push({
         check,
         file: 'CLAUDE.md',
-        message: `Inline protocol catalog reintroduced (${label}) — route to /catalog, SKILL.md, README instead of mirroring the catalog`
+        message: `Inline protocol catalog reintroduced (${label}) — route to route/README.md, SKILL.md, README instead of mirroring the catalog`
       });
     }
   }
@@ -1083,7 +1083,7 @@ function checkCrossRefScan() {
 
   // CLAUDE.md is a routing index, not a content mirror: its deficit → resolution
   // pairs, cluster table, and initiator taxonomy were replaced by pointers to the
-  // authoritative sources (per-protocol SKILL.md, /catalog, README), so
+  // authoritative sources (per-protocol SKILL.md, the route table, README), so
   // the scan enforces those sources directly and no longer reads CLAUDE.md content.
 
   // Sub-check 1: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
@@ -1596,88 +1596,6 @@ function checkPartitionInvariant() {
       }
     }
   }
-}
-
-// ============================================================
-// Check: Catalog Sync (Protocol coverage in catalog SKILL.md)
-// ============================================================
-function checkCatalogSync() {
-  const catalogSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/catalog/SKILL.md');
-  if (!fs.existsSync(catalogSkillPath)) {
-    results.warn.push({
-      check: 'catalog-sync',
-      file: 'epistemic-cooperative/skills/catalog/SKILL.md',
-      message: 'Catalog SKILL.md not found, skipping catalog sync check'
-    });
-    return;
-  }
-
-  const catalogContent = fs.readFileSync(catalogSkillPath, 'utf8');
-
-  // Build protocol metadata from PROTOCOL_FILES
-  const protocols = PROTOCOL_FILES.map(relPath => {
-    const parts = relPath.split('/');
-    return {
-      name: parts[0].charAt(0).toUpperCase() + parts[0].slice(1),
-      command: parts[2]
-    };
-  });
-
-  // Sub-check 1: every /{command} present in catalog SKILL.md
-  for (const { command } of protocols) {
-    if (!catalogContent.includes(`/${command}`)) {
-      results.fail.push({
-        check: 'catalog-sync',
-        file: 'epistemic-cooperative/skills/catalog/SKILL.md',
-        message: `Missing protocol command: /${command}`
-      });
-    }
-  }
-
-  // Sub-check 2: every protocol name present in catalog SKILL.md
-  for (const { name } of protocols) {
-    if (!catalogContent.includes(name)) {
-      results.fail.push({
-        check: 'catalog-sync',
-        file: 'epistemic-cooperative/skills/catalog/SKILL.md',
-        message: `Missing protocol name: ${name}`
-      });
-    }
-  }
-
-  // Sub-check 3: every catalog table row names a discovered protocol. A row
-  // left behind by a removed or renamed protocol would keep presenting a
-  // command that resolves to nothing; presence checks alone never see it.
-  const commands = new Set(protocols.map(p => p.command));
-  const rowRe = /^\|\s*[^|]+?\s*\|\s*`\/([a-z][a-z-]*)`\s*\|/gm;
-  let row;
-  while ((row = rowRe.exec(catalogContent)) !== null) {
-    if (!commands.has(row[1])) {
-      results.fail.push({
-        check: 'catalog-sync',
-        file: 'epistemic-cooperative/skills/catalog/SKILL.md',
-        message: `Stale catalog row: /${row[1]} is not a discovered protocol`
-      });
-    }
-  }
-
-  // Sub-check 3: command count matches PROTOCOL_FILES.length
-  const commandMatches = catalogContent.match(/`\/[a-z]+`/g) || [];
-  const uniqueCommands = new Set(commandMatches.map(m => m.replace(/`/g, '')));
-  const expectedCount = protocols.length;
-  if (uniqueCommands.size < expectedCount) {
-    results.warn.push({
-      check: 'catalog-sync',
-      file: 'epistemic-cooperative/skills/catalog/SKILL.md',
-      message: `Command count (${uniqueCommands.size}) less than protocol count (${expectedCount})`
-    });
-  }
-
-  results.pass.push({
-    check: 'catalog-sync',
-    file: 'epistemic-cooperative/skills/catalog/SKILL.md',
-    message: 'Catalog sync check completed'
-  });
 }
 
 // ============================================================
@@ -2537,7 +2455,6 @@ try {
   checkCrossRefScan();
   checkRoutingIndexContract();
   checkOnboardSync();
-  checkCatalogSync();
   checkPartitionInvariant();
   checkGateAnswerReference();
   checkArtifactSelfContainment();

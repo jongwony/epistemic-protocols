@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` before a refactor that crosses several domains.
 
-The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and lookup (`/onboard`, `/catalog`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, and at session start the installed-protocol deficit table with the [premise](./premise) index beneath it. Add either on its own:
+The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and deficit recognition (`/onboard`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, and at session start the installed-protocol deficit table with the [premise](./premise) index beneath it. Add either on its own:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -99,7 +99,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 |---------|-------------|
 | **Finding the protocol** | |
 | `/onboard` | New here — get one recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
-| `/catalog` | You already know the question — browse the handbook by cluster or look a command up |
 | `/probe` | Something feels off but you cannot name which deficit it is — several hypotheses, routed by your recognition |
 | **Shaping the work** | |
 | `/triage` | A pile of GitHub issues needs to become focused work units, each fused with the project's northstar and handed to a session by pointer |
@@ -135,7 +134,7 @@ Entry-point routing happens up front, so you can experience the protocols while 
 - **First encounter, no prior context** → `/onboard` (epistemic-cooperative) for a quick recommendation plus scenario/trial/quiz walkthrough
 - **Want comprehension of the project itself verified** → `/grasp` (katalepsis) over `CLAUDE.md` or a specific `SKILL.md`
 - **Already have a personal Claude Code workflow and want this project mapped onto it** → `/ground` (analogia), with your existing usage as the concrete domain
-- **Need a fast when-to-use-which reference** → `/catalog` (epistemic-cooperative)
+- **Need a fast when-to-use-which reference** → the protocol table above, or the `route` plugin's session-start table
 
 For the architecture and principles behind the protocols themselves, read [CLAUDE.md](./CLAUDE.md) and the axiom files under [`.claude/rules/`](./.claude/rules/).
 

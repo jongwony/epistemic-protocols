@@ -16,7 +16,7 @@ What this page carries instead is the part the script does not: why a check exis
 
 - **codex-manifest-sync** — `version-staleness` inspects only the Claude manifest, and the file walk skips dot-directories, so `json-schema` cannot reach the Codex manifest either. Without this check the Codex manifest has no parse or version guard at all, which is how the "version bump missed codex-plugin" drift kept recurring.
 - **framing-readout-enforcement** — when this fires on the guard kernel, the Cognitive work element has lost the sentence stating what the readout is. Restore it as a positive statement rather than a prohibition: the body is injected every turn, which puts it under `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
-- **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so catalog drift is caught without re-creating the co-change chain that mirroring the catalog into an instruction file would impose.
+- **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so protocol drift is caught without re-creating the co-change chain that mirroring the protocol table into an instruction file would impose.
 - **ink-body-identity** — a per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier. This check guards that copy against silent drift.
 - **emit-load-discipline** — a protocol's round-composition rules are compiled copies of Output Style sections, since a packaged `SKILL.md` cannot reach the style at runtime. The check guards that both ends exist: the source sections in `epistemic-ink.md` and the restatement labels `REQUIRED_RULES` names in every core protocol. Whether a restatement still agrees with its source is a semantic reading the check does not make; that audit is the "Ink emit-load source wording change" row in [co-change.md](co-change.md), and it binds when the source is edited, not on every turn — which is why the obligation lives there rather than in the per-turn style body.
 - **gate-answer-reference** — resolves formal answers after `Stop` exactly against TYPES or transition-local declarations, MODE STATE fields, or a locally enumerated inline type. It reads the Definition only and fails on a dangling reference; context-dependent option materialization and semantic type realization belong to `/realize` or review under `AGENTS.md`'s static-verification boundary. `static-checks.test.mjs` proves the resolver with known-pass and known-fail runs rather than treating an empty match set as success.
@@ -32,7 +32,7 @@ When a check fires, the fix is usually one of these:
 | `framing-readout-enforcement` | Delete the progress-bar glyph, or restore the guard kernel within the affected Output Style's Cognitive work element |
 | `ink-body-identity` | Re-sync the sibling's reproduced body to match the canonical file exactly |
 | `packaged-agent-contract-sync` | Sync the drifted surface — agent or `SKILL.md` — named in the message |
-| `routing-index-contract` | Restore the Protocol Index routing pointers, or remove the reintroduced inline catalog |
+| `routing-index-contract` | Restore the Protocol Index routing pointers (`route/README.md`, `SKILL.md`, `README`), or remove the reintroduced inline catalog |
 
 ## Tests
 
