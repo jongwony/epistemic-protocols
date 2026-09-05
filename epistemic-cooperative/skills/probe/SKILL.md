@@ -25,18 +25,16 @@ Invoke this skill when:
 
 Skip when:
 - The deficit is already named with confidence (invoke the matching protocol directly)
-- The user wants a passive reference handbook (use `/catalog`)
 - The user wants pattern-based recommendation from session history with optional trial (use `/onboard`)
 
-## Distinction from /catalog and /onboard
+## Distinction from /onboard
 
 | Skill | Stance | Input | Output |
 |-------|--------|-------|--------|
-| `/catalog` | Passive reference | Browse / lookup | Static handbook entries |
 | `/onboard` | Pattern-based recommendation + optional trial | Session history patterns | Recommended protocol + scenario + trial |
 | `/probe` | Active AI-hypothesized deficit recognition | Current user situation | At minimum two hypothesis candidates + user-constituted route |
 
-The three coexist by design — none replaces the others. Probe is for experienced users with frame-binding uncertainty; `/catalog` is for users who already know the question; `/onboard` is for users who want pattern-based learning.
+The two coexist by design — neither replaces the other. Probe is for experienced users with frame-binding uncertainty; `/onboard` is for users who want pattern-based learning.
 
 ## Protocol
 
@@ -264,7 +262,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug
 12. **Recognition over Recall** — Present structured hypothesis options via Cognitive Partnership Move (Constitution) and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
 13. **Detection with Authority** — AI detects candidate deficits with cited situation evidence; the user constitutes the recognition. AI never resolves the disposition.
 15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
-16. **Coexistence with /catalog and /onboard** — Probe does not replace passive reference (`/catalog`) or pattern-based recommendation (`/onboard`). The three skills occupy distinct stances.
+16. **Coexistence with /onboard** — Probe does not replace pattern-based recommendation (`/onboard`). The two skills occupy distinct stances.
 17. **Structural-change calibration** — When a candidate hypothesis concerns whether a structural change crosses the architectural threshold, distinguish at hypothesis construction time:
     - **Architectural inscription**: addition of a new core protocol, category-level promotion. Deferral pending accumulated use evidence applies.
     - **Type-level realization**: type-level realization of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope. Internal iteration; deferral framing does not apply.
@@ -291,6 +289,5 @@ Invoke `/probe` when:
 
 Skip Probe when:
 - The user has already named the deficit with confidence
-- The user requests a passive handbook reference (`/catalog`)
 - The user requests pattern-based recommendation from session history (`/onboard`)
 

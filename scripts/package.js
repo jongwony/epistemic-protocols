@@ -124,7 +124,6 @@ Static checks validate protocol integrity before every commit. Run \`node .claud
 
 ### Utility Skills
 
-- \`/catalog\` — instant protocol handbook and reference
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
 - \`/probe\` — deficit recognition fit review (multi-hypothesis surfacing before protocol commitment)`;
 

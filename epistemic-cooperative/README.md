@@ -14,7 +14,6 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/probe` | Deficit recognition fit review — multiple deficit hypotheses with reverse-evidence conditions, routed by user recognition | Protocol route |
-| `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
 | `/triage` | Work-unit triage from GitHub issues | Routed work units, externalized to substrate records a collaborator session is pointed at |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
@@ -57,10 +56,6 @@ Key features:
 - **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
-
-### /catalog — Protocol Handbook
-
-Browse all protocols, compare by concern cluster, and view detailed scenarios. Text-only output with optional detail mode for per-protocol scenarios.
 
 ### /triage — Work-Unit Formation
 
@@ -113,7 +108,6 @@ epistemic-cooperative/
 └── skills/
     ├── onboard/SKILL.md          # /onboard quest-based protocol learning
     ├── probe/SKILL.md            # /probe deficit recognition fit review
-    ├── catalog/SKILL.md          # /catalog protocol handbook
     ├── triage/SKILL.md           # /triage work-unit formation
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
@@ -134,7 +128,6 @@ epistemic-cooperative/
 | New to epistemic protocols | `/onboard` |
 | Want hands-on protocol learning | `/onboard` |
 | Re-evaluating protocol fit after workflow changes | `/onboard` |
-| Quick protocol reference | `/catalog` |
 | Turning related GitHub issues into focused work units | `/triage` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 | Something feels off but the deficit is not yet named | `/probe` |
@@ -158,7 +151,6 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 ```
 /onboard
 /probe
-/catalog
 /triage
 /triage #41 #52 #60
 /review-loop codex 123

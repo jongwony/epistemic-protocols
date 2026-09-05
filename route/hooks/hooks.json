@@ -1,5 +1,5 @@
 {
-  "description": "Two hooks. SessionStart injects the derived deficit table once per context epoch (startup, resume, clear, compact) with an opener conditioned on the source — scripts/route-session.mjs. UserPromptSubmit carries the per-prompt firing conditions for /route — scripts/route-prompt.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
+  "description": "Two hooks. SessionStart injects the derived deficit \u2192 resolution table once per context epoch (startup, resume, clear, compact) with an opener conditioned on the source, and the premise index beneath it with every path absolute \u2014 scripts/route-session.mjs. UserPromptSubmit carries the per-prompt firing conditions for /route \u2014 scripts/route-prompt.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
   "hooks": {
     "SessionStart": [
       {

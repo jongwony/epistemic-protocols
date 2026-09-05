@@ -1,6 +1,7 @@
 /**
  * Derive the installed-protocol deficit table — shared by the SessionStart
- * hook (which injects it) and by tests. Nothing here is maintained by hand:
+ * hook (which injects it) and by tests — and the install-record readers the
+ * premise resolution (route-premise.mjs) shares with it. Nothing here is maintained by hand:
  * installed_plugins.json supplies each enabled plugin's install path, and
  * each protocol's own SKILL.md supplies the deficit it resolves. A protocol
  * that is not installed cannot appear, and a protocol added to the suite
@@ -8,7 +9,8 @@
  *
  * Selection keys on the MORPHISM `deficit:` line rather than the frontmatter
  * `Type: (...)` clause, because that clause is not uniform across the suite
- * and keying on it drops a protocol silently.
+ * and keying on it drops a protocol silently. The clause still supplies the
+ * resolution where it is present, from the description or the body.
  *
  * Every shortfall returns [] so the caller can fail open. Zero external
  * dependencies: Node.js standard library only.
@@ -19,7 +21,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const TABLE_HEADER = "Loaded core epistemic protocols, each with the deficit it resolves:";
+const TABLE_HEADER = "Loaded core epistemic protocols, each as the deficit it resolves → the resolution it yields:";
 
 function readJson(file) {
   try {
@@ -96,7 +98,10 @@ function soleSkill(dir) {
 /**
  * A core protocol declares its command in frontmatter `name:` and the deficit
  * it resolves in the MORPHISM block's `deficit:` line. A skill missing either
- * is not one, and is left out rather than guessed at.
+ * is not one, and is left out rather than guessed at. The resolution the
+ * protocol yields comes from its `Type: (Deficit, …) → Resolution` clause,
+ * wherever the SKILL.md carries it — description or body; a protocol without
+ * one keeps its row, with the deficit alone.
  */
 function readProtocol(skillFile) {
   let text;
@@ -110,7 +115,9 @@ function readProtocol(skillFile) {
   const deficit = /^deficit:[ \t]+(\w+)/m.exec(text);
   if (!command || !deficit) return null;
   const name = command[1].trim().replace(/^["']|["']$/g, "");
-  return name ? { command: name, deficit: deficit[1] } : null;
+  if (!name) return null;
+  const type = /Type:\s*[`"]?\([A-Z][A-Za-z]+\s*,[^)]*\)\s*→\s*([A-Z][A-Za-z]+)/.exec(text);
+  return { command: name, deficit: deficit[1], resolution: type ? type[1] : null };
 }
 
 /**
@@ -161,13 +168,19 @@ function deriveProtocols(env = {}) {
 }
 
 /**
- * Command and deficit name only. The table's job is to trigger, not to
- * match — matching happens inside /route, which resolves each candidate's
- * full description there — so the prose each name abbreviates stays out.
+ * Command, deficit and resolution names only — the morphism's two ends, and
+ * nothing between them. The table's job is to trigger, not to match —
+ * matching happens inside /route, which resolves each candidate's full
+ * description there — so the prose the names abbreviate stays out. The
+ * resolution is on the row because a deficit reads more sharply against the
+ * state it resolves into: the pair names the transition, the deficit alone
+ * only its start.
  */
 function renderTable(protocols) {
   if (!protocols || protocols.length === 0) return "";
-  const rows = protocols.map((p) => `/${p.command} ${p.deficit}`).join("\n");
+  const rows = protocols
+    .map((p) => (p.resolution ? `/${p.command} ${p.deficit} → ${p.resolution}` : `/${p.command} ${p.deficit}`))
+    .join("\n");
   return `${TABLE_HEADER}\n${rows}`;
 }
 
@@ -190,4 +203,15 @@ function isMain(moduleUrl) {
   }
 }
 
-export { TABLE_HEADER, deriveProtocols, isMain, parsePayload, renderTable, selectProtocol };
+export {
+  TABLE_HEADER,
+  configDir,
+  deriveProtocols,
+  identify,
+  isMain,
+  parsePayload,
+  pluginRoot,
+  readJson,
+  renderTable,
+  selectProtocol,
+};

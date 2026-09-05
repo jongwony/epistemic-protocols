@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 여러 영역에 걸친 리팩터링 전에 `/bound`.
 
-유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·조회(`/onboard`, `/catalog`, `/probe`)와 컨트리뷰터 도구를, `route`는 매 프롬프트 훅을 담습니다. 필요한 쪽을 따로 추가하세요:
+유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·결핍 인식(`/onboard`, `/probe`)과 컨트리뷰터 도구를, `route`는 세션 훅들 — 매 프롬프트 라우팅 지시문, 그리고 세션 시작에 설치된 프로토콜의 결핍 테이블과 그 아래 [premise](./premise) 색인 — 을 담습니다. 필요한 쪽을 따로 추가하세요:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -99,7 +99,6 @@ claude plugin install route@epistemic-protocols
 |--------|----------|
 | **프로토콜 찾기** | |
 | `/onboard` | 처음 왔을 때 — 최근 세션에서 추천 하나를 받고, 원하면 시나리오·실행·퀴즈로 학습 |
-| `/catalog` | 이미 질문을 알고 있을 때 — 클러스터별로 핸드북을 훑거나 명령어를 조회 |
 | `/probe` | 뭔가 어긋났는데 어떤 결핍인지 이름 붙일 수 없을 때 — 가설 여럿을 제시하고 당신의 인식으로 라우팅 |
 | **작업 빚기** | |
 | `/triage` | 쌓인 GitHub 이슈를 프로젝트 northstar와 융합한 focused work unit으로 만들고, 각 unit을 포인터로 세션에 넘겨야 할 때 |
@@ -120,7 +119,7 @@ claude plugin install route@epistemic-protocols
 
 ### [Route](./route)
 
-컨텍스트 기반 프로토콜 라우팅. 매 프롬프트 훅이 프롬프트 옆에 짧은 지시문을 놓고, 쌓인 컨텍스트가 설치된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출하고, 여럿이 맞으면 넛지하고, 없으면 침묵합니다. 호출된 프로토콜의 첫 게이트가 당신의 판단을 그 자리에 그대로 둡니다.
+컨텍스트 기반 프로토콜 라우팅. 세션 시작 훅이 설치된 프로토콜의 결핍 테이블과 [premise](./premise) 색인을 컨텍스트 머리에, 컨텍스트 에포크마다 한 번 놓고, 매 프롬프트 훅이 프롬프트 옆에 짧은 지시문을 놓습니다. 쌓인 컨텍스트가 설치된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출하고, 여럿이 맞으면 넛지하고, 없으면 침묵합니다. 호출된 프로토콜의 첫 게이트가 당신의 판단을 그 자리에 그대로 둡니다.
 
 ## 설계
 
@@ -135,7 +134,7 @@ claude plugin install route@epistemic-protocols
 - **이 프로토콜 자체가 처음, 사전 컨텍스트 없음** → `/onboard` (epistemic-cooperative) — 빠른 추천 + 시나리오/실행/퀴즈 가이드
 - **프로젝트 자체에 대한 이해를 검증하고 싶음** → `/grasp` (katalepsis) — `CLAUDE.md` 또는 특정 `SKILL.md` 대상
 - **이미 나만의 Claude Code 워크플로우가 있고 이 프로젝트를 그 위에 매핑하고 싶음** → `/ground` (analogia) — 본인의 사용 패턴을 concrete domain 으로
-- **어떤 프로토콜을 언제 쓰는지 빠른 레퍼런스가 필요** → `/catalog` (epistemic-cooperative)
+- **어떤 프로토콜을 언제 쓰는지 빠른 레퍼런스가 필요** → 위의 프로토콜 표, 또는 `route` 플러그인의 세션 시작 테이블
 
 프로토콜 자체의 아키텍처와 원칙은 [CLAUDE.md](./CLAUDE.md)와 [`.claude/rules/`](./.claude/rules/) 아래의 axiom 파일들을 참고하세요.
 

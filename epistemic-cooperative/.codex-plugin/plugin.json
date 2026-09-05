@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
-  "version": "4.32.0",
-  "description": "Utility skills layered on top of the core protocols. /catalog browses the protocol handbook; each utility skill's own SKILL.md carries its contract.",
+  "version": "5.0.0",
+  "description": "Utility skills layered on top of the core protocols; each utility skill's own SKILL.md carries its contract.",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Epistemic Cooperative",
-    "shortDescription": "Utility skills layered on top of the core protocols. /catalog browses the protocol handbook; each utility skill's own SKILL.md carries its contract.",
-    "longDescription": "Utility skills layered on top of the core protocols. /catalog browses the protocol handbook; each utility skill's own SKILL.md carries its contract.",
+    "shortDescription": "Utility skills layered on top of the core protocols; each utility skill's own SKILL.md carries its contract.",
+    "longDescription": "Utility skills layered on top of the core protocols; each utility skill's own SKILL.md carries its contract.",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

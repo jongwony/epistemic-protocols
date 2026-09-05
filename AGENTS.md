@@ -31,7 +31,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 | To route to | Source |
 |---|---|
-| Which protocol fits a situation; command and when-to-use lookup; browse by cluster | `/catalog` (protocol handbook — browse view; canonical clusters live in README / `scripts/load-protocols.js`) |
+| Which protocol fits a situation; command lookup; browse by cluster | the `route` plugin's session-start table, one row per installed protocol as deficit → resolution (`route/README.md`); the canonical protocol table and clusters in README / `scripts/load-protocols.js` |
 | A protocol's normative contract, deficit → resolution type, and initiator classification (AI-guided / Hybrid / User-initiated) | that protocol's `skills/*/SKILL.md` (distinction table + Rule #1) |
 | Public navigation hub, canonical protocol table, concern-cluster workflow | `README.md` / `README_ko.md` |
 
@@ -63,7 +63,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Node.js 22+ is required; CI pins Node 22.
 - Plugin code uses Node.js standard library only.
 - Static checks: see `## Verification` below for the command.
-- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs route/scripts/route-protocols.test.mjs .claude/skills/realize/scripts/harness.test.mjs`
+- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs route/scripts/route-protocols.test.mjs route/scripts/route-session.test.mjs route/scripts/route-premise.test.mjs .claude/skills/realize/scripts/harness.test.mjs`
   - `.claude/skills/verify/scripts/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation for the same reason `/verify` does — see the concurrency note under `## Verification`.
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`

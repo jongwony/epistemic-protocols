@@ -40,7 +40,7 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 }
 ```
 
-**Checks performed**: Structural conformance (JSON schema, Unicode notation, directive verbs, required sections, morphism anatomy, gate-type soundness), cross-reference and routing integrity (cross-reference integrity and scan, routing-index contract, onboard/catalog sync, partition invariant), drift prevention (version staleness, codex-manifest sync, spec-vs-impl drift, single-axis soundness, emit-load discipline, framing-readout enforcement, language purity), and packaging/contract sync (artifact self-containment, packaged-agent contract sync). The check inventory is the script itself (`scripts/static-checks.js`); `references/verification.md` carries why the non-obvious checks exist and what to do when one fires.
+**Checks performed**: Structural conformance (JSON schema, Unicode notation, directive verbs, required sections, morphism anatomy, gate-type soundness), cross-reference and routing integrity (cross-reference integrity and scan, routing-index contract, onboard sync, partition invariant), drift prevention (version staleness, codex-manifest sync, spec-vs-impl drift, single-axis soundness, emit-load discipline, framing-readout enforcement, language purity), and packaging/contract sync (artifact self-containment, packaged-agent contract sync). The check inventory is the script itself (`scripts/static-checks.js`); `references/verification.md` carries why the non-obvious checks exist and what to do when one fires.
 
 ### Phase 2: Expert Review
 

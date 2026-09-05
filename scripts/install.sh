@@ -15,11 +15,13 @@ MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/market
 # Opt-in plugins the default installer leaves out. The plugin list itself is
 # derived from the manifest; this is the one hand-maintained exclusion, guarded
 # by scripts/package.test.js against naming a plugin the manifest no longer has.
-#   epistemic-cooperative — utility skills (/onboard, /catalog, /probe, review
+#   epistemic-cooperative — utility skills (/onboard, /probe, review
 #                           and audit tooling) layered on the protocols, not a
 #                           protocol itself; install it when you want them:
 #                           claude plugin install epistemic-cooperative@epistemic-protocols
-#   route — carries a per-prompt hook; install it deliberately:
+#   route — carries the session hooks (per-prompt routing directive;
+#           protocol deficit table and premise index at session start);
+#           install it deliberately:
 #           claude plugin install route@epistemic-protocols
 SKIP_PLUGINS="epistemic-cooperative route"
 

@@ -1,6 +1,7 @@
 // Tests for route-session.mjs — the SessionStart injection of the derived
-// deficit table, under an opener on thin sources only — and for the
-// derivation in route-protocols.mjs it carries.
+// deficit table, under an opener on thin sources only, with the premise
+// index beneath it — and for the derivation in route-protocols.mjs it
+// carries.
 // Run with: node --test
 // Repo precedent: anamnesis/scripts/hypomnesis-write.test.mjs (node:test + node:assert).
 
@@ -11,6 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { PREMISE_HEADER, PREMISE_INDEX, PREMISE_INTRO } from "./route-premise.mjs";
 import { TABLE_HEADER, deriveProtocols, renderTable } from "./route-protocols.mjs";
 import {
   THIN_OPENER,
@@ -66,16 +68,31 @@ function makeFixture(spec = {}) {
     JSON.stringify({ enabledPlugins }),
   );
 
+  // The premise layer, where the fixture asks for it: premise/ under the
+  // marketplace checkout the host records, apart from the cache entries.
+  const checkout = path.join(root, "checkout");
+  if (spec.premise) {
+    fs.mkdirSync(path.join(checkout, "premise"), { recursive: true });
+    fs.writeFileSync(path.join(checkout, "premise", PREMISE_INDEX[0].file), "# doc\n");
+    fs.writeFileSync(
+      path.join(configDir, "plugins", "known_marketplaces.json"),
+      JSON.stringify({ mp: { source: { source: "git" }, installLocation: checkout } }),
+    );
+  }
+
   const selfRoot = path.join(cache, spec.self ?? "route", "1.0.0");
-  return { root, configDir, pluginRoot: selfRoot, env: { configDir, pluginRoot: selfRoot } };
+  return { root, configDir, checkout, pluginRoot: selfRoot, env: { configDir, pluginRoot: selfRoot } };
 }
 
-function protocolSkill(name, deficit, extra = "") {
+
+function protocolSkill(name, deficit, resolution, extra = "") {
   return [
     "---",
     `name: ${name}`,
     `description: "Does a thing.${extra}"`,
     "---",
+    "",
+    ...(resolution ? [`Type: (${deficit}, AI, DO, Thing) → ${resolution}`] : []),
     "",
     "```",
     "── MORPHISM ──",
@@ -90,10 +107,10 @@ function protocolSkill(name, deficit, extra = "") {
 const SUITE = {
   self: "route",
   plugins: [
-    { name: "route", skills: [{ dir: "route", body: protocolSkill("route", "DeficitUnrouted") }] },
-    { name: "periagoge", skills: [{ dir: "induce", body: protocolSkill("induce", "AbstractionInProcess") }] },
-    { name: "horismos", skills: [{ dir: "bound", body: protocolSkill("bound", "BoundaryUndefined") }] },
-    { name: "anamnesis", skills: [{ dir: "recollect", body: protocolSkill("recollect", "RecallAmbiguous") }] },
+    { name: "route", skills: [{ dir: "route", body: protocolSkill("route", "DeficitUnrouted", "ProtocolInvocation") }] },
+    { name: "periagoge", skills: [{ dir: "induce", body: protocolSkill("induce", "AbstractionInProcess", "CrystallizedAbstraction") }] },
+    { name: "horismos", skills: [{ dir: "bound", body: protocolSkill("bound", "BoundaryUndefined", "DefinedBoundary") }] },
+    { name: "anamnesis", skills: [{ dir: "recollect", body: protocolSkill("recollect", "RecallAmbiguous", "RecalledContext") }] },
   ],
 };
 
@@ -149,6 +166,13 @@ test("the table header carries the directive's referent", () => {
   assert.match(TABLE_HEADER, /^Loaded core epistemic protocols/);
 });
 
+test("a row carries both ends of the morphism, and survives a missing resolution", () => {
+  assert.equal(
+    renderTable([{ command: "x", deficit: "A", resolution: "B" }, { command: "y", deficit: "C", resolution: null }]),
+    `${TABLE_HEADER}\n/x A → B\n/y C`,
+  );
+});
+
 // ---------------------------------------------------------------------------
 // Derivation
 // ---------------------------------------------------------------------------
@@ -158,9 +182,9 @@ test("derives one row per installed single-skill protocol, route excluded", () =
   try {
     const rows = deriveProtocols(fixture.env);
     assert.deepEqual(rows, [
-      { command: "recollect", deficit: "RecallAmbiguous" },
-      { command: "bound", deficit: "BoundaryUndefined" },
-      { command: "induce", deficit: "AbstractionInProcess" },
+      { command: "recollect", deficit: "RecallAmbiguous", resolution: "RecalledContext" },
+      { command: "bound", deficit: "BoundaryUndefined", resolution: "DefinedBoundary" },
+      { command: "induce", deficit: "AbstractionInProcess", resolution: "CrystallizedAbstraction" },
     ]);
     // Route never routes to itself.
     assert.ok(!rows.some((r) => r.command === "route"));
@@ -177,8 +201,8 @@ test("a multi-skill plugin is a utility bundle, not a core protocol", () => {
       {
         name: "cooperative",
         skills: [
-          { dir: "catalog", body: protocolSkill("catalog", "DeficitUnrecognized") },
-          { dir: "steer", body: protocolSkill("steer", "CalibrationDriftOpaque") },
+          { dir: "catalog", body: protocolSkill("catalog", "DeficitUnrecognized", "X") },
+          { dir: "steer", body: protocolSkill("steer", "CalibrationDriftOpaque", "Y") },
         ],
       },
     ],
@@ -227,7 +251,7 @@ test("selection keys on the deficit line, not the frontmatter Type clause", () =
     assert.ok(recollect, "a protocol without a Type clause must still be derived");
     assert.equal(recollect.deficit, "RecallAmbiguous");
     const bodies = SUITE.plugins.map((p) => p.skills[0].body).join("");
-    assert.doesNotMatch(bodies, /Type:\s*\(/);
+    assert.ok(bodies.includes("Type: ("), "the fixture carries Type clauses only in the body");
   } finally {
     cleanup(fixture);
   }
@@ -255,7 +279,7 @@ test("a plugin from another marketplace does not appear", () => {
       {
         name: "stranger",
         marketplace: "other",
-        skills: [{ dir: "wander", body: protocolSkill("wander", "SomethingElse") }],
+        skills: [{ dir: "wander", body: protocolSkill("wander", "SomethingElse", "Z") }],
       },
     ],
   });
@@ -320,18 +344,60 @@ test("no derived protocol means the opener goes out alone, or nothing at all", (
 // Emitted context
 // ---------------------------------------------------------------------------
 
-test("the table stays compressed — command and deficit name only", () => {
+test("the table stays compressed — command, deficit and resolution names only", () => {
   const fixture = makeFixture(SUITE);
   try {
     const context = buildContext("startup", fixture.env);
     assert.ok(context.startsWith(THIN_OPENER));
     assert.match(context, new RegExp(`^${TABLE_HEADER}$`, "m"));
-    assert.match(context, /^\/induce AbstractionInProcess$/m);
-    // No prose: every table row is exactly "/command Deficit".
+    assert.match(context, /^\/induce AbstractionInProcess → CrystallizedAbstraction$/m);
+    // No prose: every table row is exactly "/command Deficit → Resolution".
     const rows = context.split("\n").slice(THIN_OPENER.split("\n").length + 1);
     assert.equal(rows.length, 3);
-    for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+$/);
+    for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+ → [A-Za-z]+$/);
     assert.doesNotMatch(context, /Does a thing/);
+  } finally {
+    cleanup(fixture);
+  }
+});
+
+test("the premise index follows the table on every source, its paths absolute", () => {
+  const fixture = makeFixture({ ...SUITE, premise: true });
+  try {
+    const expected = [
+      PREMISE_HEADER,
+      PREMISE_INTRO,
+      `Read \`${path.join(fixture.checkout, "premise", PREMISE_INDEX[0].file)}\` ${PREMISE_INDEX[0].when}`,
+    ].join("\n");
+    const startup = buildContext("startup", fixture.env);
+    assert.ok(startup.startsWith(THIN_OPENER));
+    assert.match(startup, new RegExp(`^${TABLE_HEADER}$`, "m"));
+    assert.ok(startup.endsWith(`\n${expected}`), "the index closes the injection");
+    // The table sits between opener and index, unchanged by the index.
+    assert.equal(startup.indexOf(TABLE_HEADER) < startup.indexOf(PREMISE_HEADER), true);
+    for (const source of ["resume", "compact"]) {
+      const trimmed = buildContext(source, fixture.env);
+      assert.ok(trimmed.startsWith(TABLE_HEADER), `${source} begins at the table`);
+      assert.ok(trimmed.endsWith(`\n${expected}`), `${source} carries the index`);
+    }
+  } finally {
+    cleanup(fixture);
+  }
+});
+
+test("the premise index goes out even where no protocol resolved", () => {
+  // The two companions fail independently: an install record that yields no
+  // protocol does not cost the index, and a missing index does not cost the
+  // table.
+  const fixture = makeFixture({ self: "route", plugins: [], premise: true });
+  try {
+    fs.writeFileSync(
+      path.join(fixture.configDir, "plugins", "installed_plugins.json"),
+      JSON.stringify({ version: 2, plugins: { "route@mp": [{ scope: "user", installPath: fixture.pluginRoot }] } }),
+    );
+    const context = buildContext("compact", fixture.env);
+    assert.ok(context.startsWith(PREMISE_HEADER));
+    assert.doesNotMatch(context, new RegExp(TABLE_HEADER));
   } finally {
     cleanup(fixture);
   }
@@ -414,7 +480,7 @@ test("hook process exits 0 and derives from the fixture through the environment"
     const out = JSON.parse(result.stdout);
     assert.ok(out.hookSpecificOutput.additionalContext.startsWith(TABLE_HEADER));
     assert.doesNotMatch(out.hookSpecificOutput.additionalContext, /^\[route\]/m);
-    assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined$/m);
+    assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined → DefinedBoundary$/m);
   } finally {
     cleanup(fixture);
   }

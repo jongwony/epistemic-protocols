@@ -1,80 +1,37 @@
 # Setting up this layer
 
-[`AGENTS.md`](AGENTS.md) in this directory states what these documents are and indexes them by the
-moment each one is for. This file covers adopting them.
+These documents are the collaboration premises behind structured human-AI dialogue, stated so they
+hold on their own. Their index — each document and the moment that calls for it — is carried by the
+[`route`](../route) plugin's session-start hook, which is also how they reach a session. This file
+covers adopting them.
 
-They are a reference surface, not a package. There is no install script and nothing to run here —
-they are meant to be reached by URL, read, and used in one of two ways: **link to them** from your
-own global configuration or notes, the way you would cite any external reference, or **copy the
-parts you want** into your own instructions, verbatim or adapted. Each premise document stands on
-its own, so adopting a subset is coherent.
+They are a reference surface, not a package: nothing here runs. Adopt them in one of two ways.
 
-The rest of this file defines the shared procedure for the first way. A host reference binds that
-procedure to one configuration root, marketplace-discovery mechanism, instruction surface,
-delivery mechanism, and verification check:
+- **Install the [`route`](../route) plugin.** Its session-start hook resolves this directory
+  through the host's own plugin records and injects the index into every context epoch with each
+  entry's path absolute, so a document is read by that path at the moment its entry names.
+  Nothing is wired by hand, and the host's plugin manager keeps the marketplace checkout the paths
+  point into current; a marketplace added from a local clone resolves to that clone, which is how
+  to hold a copy that changes only when you say so. The install and the mechanism are in
+  [`route/README.md`](../route/README.md).
+- **Copy the parts you want** into your own instructions, verbatim or adapted. Each premise
+  document stands on its own, so adopting a subset is coherent.
 
-- **[Claude Code](references/claude-code.md)** — an always-loaded rules file imports the standing
-  documents.
-- **[Codex](references/codex.md)** — a global instruction section points an agent to the standing
-  documents because Codex expands no import directive.
+A global rules file importing the index, or an instruction-file pointer to it, was the earlier way
+to link to this layer. Beside the `route` hook it delivers the same index twice, so remove it when
+installing `route`.
 
-**If you are an agent and someone handed you this URL**: identify the host you are running in, read
-this shared procedure and that host's reference before acting, then follow them as one procedure end
-to end. Follow one host reference only.
+## Verifying
 
-## Shared procedure
+Ask a fresh session to reproduce the complete index entry for `matching-the-request.md`. That entry
+names four triggers: design level, fix scope, question granularity, and a time or date without a
+stated zone. Requiring all four makes the answer depend on the index rather than on a guess from the
+filename.
 
-### 1. Resolve the configuration root
-
-Use the selected host reference's resolver. Resolve the host's environment override and fallback
-once; do not assume the fallback is active.
-
-### 2. Discover the premise root
-
-Use the host reference's discovery mechanism and confirm that `AGENTS.md` appears beside the
-individual premise documents. The configuration root and premise root are separate coordinates: a
-marketplace sourced from a local checkout may live outside the configuration root.
-
-Keep the premise root as a literal absolute path. The global write in step 3 must point to the
-location the host actually reported, rather than leaving an environment variable or placeholder
-for a future session to resolve.
-
-### 3. Prepare and complete the global write
-
-Use the host reference's target, precedence rules, and template. Substitute every
-`<PREMISE_PATH>` with the absolute premise root from step 2.
-
-Before writing:
-
-- inspect the target and any host-specific file that can supersede it;
-- preserve all existing guidance;
-- show the person the exact text and destination;
-- flag existing guidance that overlaps a premise principle without resolving the overlap; and
-- get their go-ahead because the write affects every local session for that host.
-
-The checkpoint authorizes the write it previewed. Once approval arrives, perform that write and
-continue to verification rather than treating approval as completion.
-
-### 4. Verify in a fresh session
-
-Use the host reference's loading check, then ask the fresh session to reproduce the complete index
-entry for `matching-the-request.md`. That entry names four triggers: design level, fix scope,
-question granularity, and a time or date without a stated zone. Requiring all four makes the answer
-depend on the index rather than on a guess from the filename.
-
-A correct response establishes that the index was reached at the configured path in that session.
-It does not establish that another session will behave the same way. Treat a wrong answer as an
-absent layer.
-
-## Keeping it current
-
-The host's plugin manager keeps its own marketplace clone in sync with upstream. Claude Code and
-Codex maintain separate clones, so they can temporarily carry different revisions even when both
-point to this repository. Removing or replacing a marketplace can make its recorded path disappear
-without a loud failure; repeat step 4 after either event.
-
-For a copy that changes only when you say so, clone the repository to a path you own and use that
-clone as the premise root. The rest of the procedure is unchanged.
+A correct response establishes that the index reached that session. It does not establish that
+another session will behave the same way. Treat a wrong answer as an absent layer: the hook leaves
+the index out rather than failing loudly when it cannot resolve this directory, so check that
+`route` is installed and its hooks are trusted (`/hooks`).
 
 ## Adapting
 
