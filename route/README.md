@@ -28,9 +28,11 @@ The table triggers; it does not match. Deficit names alone are enough to notice 
 
 The table is derived, never maintained. `installed_plugins.json` gives each enabled plugin's install path, and a plugin is a core protocol when it carries exactly one skill and that skill's `SKILL.md` declares a `deficit:` in its MORPHISM block — Route itself excluded, since it never routes to itself. So a protocol that is not installed cannot appear, a protocol added to the suite needs no edit here, and no list is kept in sync by hand. Selection keys on the `deficit:` line rather than the frontmatter `Type: (...)` clause, because that clause is not uniform across the suite and keying on it drops a protocol without saying so. The selection rule is checked against the canonical protocol registry in tests, so a protocol that stops matching it — a second skill added, a `deficit:` line reshaped — fails the suite rather than vanishing from the table. Every failure path is open: an unreadable payload reads as `startup`, and unreadable settings, an unrecognized install layout, or no protocol resolved send the opener alone on a thin source and nothing on a trimmed one.
 
+**The premise index rides the same hook.** The premise documents — the collaboration premises the protocols rest on — are a reference surface that ships beside the plugins in this marketplace, under [`premise/`](../premise), and their index names each document and the moment that calls for it. Reaching that index used to be a setup of its own: a global rules file importing it on one host, an instruction-file pointer on the other, each holding an absolute path the host had to be asked for. The hook resolves that path at every epoch instead — `known_marketplaces.json` records where the host keeps the checkout this plugin was installed from, and `premise/` under it is the layer; where no record reaches a checkout, `premise/` beside the plugin root is the same directory — and injects the index beneath the table with every entry's path made absolute, so a document is read by that path at the moment its entry names. Installing Route is the whole setup. The index goes out on every source for the reason the table does: compaction dropped it. An index that cannot be resolved is left out while the opener and table go out as before — the two companions fail independently.
+
 **`UserPromptSubmit` → `scripts/route-prompt.mjs`** carries the firing conditions for `/route` beside every prompt — the four-line directive, and nothing else. The per-prompt cost is the directive alone; the table is paid once per epoch.
 
-Codex reads the same `hooks/hooks.json` and runs both hooks. The table stays empty there, since the derivation reads Claude Code's install record, so Route on Codex is the opener, the directive, and the skill's own resolution of each candidate's deficit.
+Codex reads the same `hooks/hooks.json` and runs both hooks. The table stays empty there, since the derivation reads Claude Code's install record, and the premise index goes out only where `premise/` sits beside the plugin root — so Route on Codex is the opener, the directive, the skill's own resolution of each candidate's deficit, and the index where the plugin root is inside a checkout of this repository.
 
 ## Install
 
@@ -59,6 +61,11 @@ trusted, so both hooks stay off until this step is done:
 Codex records trust against a hash of the hook's entry in `hooks/hooks.json` —
 the event and the command line, not the script the command runs — so this
 recurs whenever that entry changes.
+
+Installing Route also delivers the premise layer: the index under
+[`premise/`](../premise) is injected at session start, with nothing to wire by
+hand. A `rules/premise.md` import or an instruction-file pointer wired under
+the earlier setup now delivers the same index twice — remove it.
 
 ## Usage
 

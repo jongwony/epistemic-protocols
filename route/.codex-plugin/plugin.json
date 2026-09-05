@@ -1,6 +1,6 @@
 {
   "name": "route",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Route the accumulated session context to the core protocol whose deficit it shows — /route (a per-prompt hook directive triggers it)",
   "author": {
     "name": "Jongwon Choi",

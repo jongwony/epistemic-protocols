@@ -1,6 +1,7 @@
 /**
  * Derive the installed-protocol deficit table — shared by the SessionStart
- * hook (which injects it) and by tests. Nothing here is maintained by hand:
+ * hook (which injects it) and by tests — and the install-record readers the
+ * premise resolution (route-premise.mjs) shares with it. Nothing here is maintained by hand:
  * installed_plugins.json supplies each enabled plugin's install path, and
  * each protocol's own SKILL.md supplies the deficit it resolves. A protocol
  * that is not installed cannot appear, and a protocol added to the suite
@@ -190,4 +191,15 @@ function isMain(moduleUrl) {
   }
 }
 
-export { TABLE_HEADER, deriveProtocols, isMain, parsePayload, renderTable, selectProtocol };
+export {
+  TABLE_HEADER,
+  configDir,
+  deriveProtocols,
+  identify,
+  isMain,
+  parsePayload,
+  pluginRoot,
+  readJson,
+  renderTable,
+  selectProtocol,
+};

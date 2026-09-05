@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * SessionStart hook — inject the installed-protocol deficit table once per
- * context epoch, under an opener on the sources where context is thin.
+ * context epoch, under an opener on the sources where context is thin, and
+ * the premise index beneath it.
  *
  * A host's loaded-skills listing may carry each skill's description, or it
  * may carry the command identifiers alone; where it rations that listing
@@ -43,14 +44,26 @@
  * Rule #2 refuses. The table shares the directive's own referent — loaded
  * core epistemic protocols — so the two injections read as one catalog.
  *
+ * The premise index rides the same epoch. The premise documents are the
+ * collaboration premises the protocols rest on, a reference surface that
+ * ships beside them in this marketplace; their index names each document
+ * and the moment that calls for it. Before this hook carried it, reaching
+ * that index took a global rules file or an instruction-file pointer wired
+ * by hand per host, resolved to an absolute path the host had to be asked
+ * for. Here it is resolved from the host's own install records at every
+ * epoch (see route-premise.mjs) and injected with every path absolute, so
+ * installing Route is the whole setup, and it goes out on every source for
+ * the same reason the table does: compaction dropped it.
+ *
  * Every failure path is open: an unreadable payload reads as startup, a
  * derivation shortfall on a thin source sends the opener alone, and on a
- * trimmed source it sends nothing. A hook that blocks a session is worse
- * than one that routes less. Zero external dependencies: Node.js
- * standard library only.
+ * trimmed source it sends nothing; an index that cannot be resolved is left
+ * out. A hook that blocks a session is worse than one that routes less.
+ * Zero external dependencies: Node.js standard library only.
  */
 
 import fs from "node:fs";
+import { premiseRoot, renderPremise } from "./route-premise.mjs";
 import { deriveProtocols, isMain, parsePayload, renderTable } from "./route-protocols.mjs";
 
 // Sources on which prior context is not in view: the session is new, or it
@@ -86,7 +99,13 @@ function buildContext(source, env) {
   } catch {
     // Fail open: a derivation fault must not cost the opener.
   }
-  return [head, table].filter(Boolean).join("\n");
+  let premise = "";
+  try {
+    premise = renderPremise(premiseRoot(env));
+  } catch {
+    // Fail open: the index is a companion to the routing, never a condition of it.
+  }
+  return [head, table, premise].filter(Boolean).join("\n");
 }
 
 function render(raw, env) {

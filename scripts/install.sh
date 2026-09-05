@@ -19,7 +19,9 @@ MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/market
 #                           and audit tooling) layered on the protocols, not a
 #                           protocol itself; install it when you want them:
 #                           claude plugin install epistemic-cooperative@epistemic-protocols
-#   route — carries a per-prompt hook; install it deliberately:
+#   route — carries the session hooks (per-prompt routing directive;
+#           protocol deficit table and premise index at session start);
+#           install it deliberately:
 #           claude plugin install route@epistemic-protocols
 SKIP_PLUGINS="epistemic-cooperative route"
 

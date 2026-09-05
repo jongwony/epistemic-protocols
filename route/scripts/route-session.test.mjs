@@ -1,6 +1,7 @@
 // Tests for route-session.mjs — the SessionStart injection of the derived
-// deficit table, under an opener on thin sources only — and for the
-// derivation in route-protocols.mjs it carries.
+// deficit table, under an opener on thin sources only, with the premise
+// index beneath it — and for the derivation in route-protocols.mjs it
+// carries.
 // Run with: node --test
 // Repo precedent: anamnesis/scripts/hypomnesis-write.test.mjs (node:test + node:assert).
 
@@ -11,6 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
 import { TABLE_HEADER, deriveProtocols, renderTable } from "./route-protocols.mjs";
 import {
   THIN_OPENER,
@@ -66,9 +68,30 @@ function makeFixture(spec = {}) {
     JSON.stringify({ enabledPlugins }),
   );
 
+  // The premise layer, where the fixture asks for it: premise/ under the
+  // marketplace checkout the host records, apart from the cache entries.
+  const checkout = path.join(root, "checkout");
+  if (spec.premise) {
+    fs.mkdirSync(path.join(checkout, "premise"), { recursive: true });
+    fs.writeFileSync(path.join(checkout, "premise", PREMISE_INDEX), PREMISE_TEXT);
+    fs.writeFileSync(
+      path.join(configDir, "plugins", "known_marketplaces.json"),
+      JSON.stringify({ mp: { source: { source: "git" }, installLocation: checkout } }),
+    );
+  }
+
   const selfRoot = path.join(cache, spec.self ?? "route", "1.0.0");
-  return { root, configDir, pluginRoot: selfRoot, env: { configDir, pluginRoot: selfRoot } };
+  return { root, configDir, checkout, pluginRoot: selfRoot, env: { configDir, pluginRoot: selfRoot } };
 }
+
+const PREMISE_TEXT = [
+  "# Premise",
+  "",
+  "The premises behind the dialogue.",
+  "",
+  "Read [`alpha.md`](alpha.md) when the first moment comes.",
+  "",
+].join("\n");
 
 function protocolSkill(name, deficit, extra = "") {
   return [
@@ -332,6 +355,48 @@ test("the table stays compressed — command and deficit name only", () => {
     assert.equal(rows.length, 3);
     for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+$/);
     assert.doesNotMatch(context, /Does a thing/);
+  } finally {
+    cleanup(fixture);
+  }
+});
+
+test("the premise index follows the table on every source, its paths absolute", () => {
+  const fixture = makeFixture({ ...SUITE, premise: true });
+  try {
+    const expected = [
+      PREMISE_HEADER,
+      "The premises behind the dialogue.",
+      `Read \`${path.join(fixture.checkout, "premise", "alpha.md")}\` when the first moment comes.`,
+    ].join("\n");
+    const startup = buildContext("startup", fixture.env);
+    assert.ok(startup.startsWith(THIN_OPENER));
+    assert.match(startup, new RegExp(`^${TABLE_HEADER}$`, "m"));
+    assert.ok(startup.endsWith(`\n${expected}`), "the index closes the injection");
+    // The table sits between opener and index, unchanged by the index.
+    assert.equal(startup.indexOf(TABLE_HEADER) < startup.indexOf(PREMISE_HEADER), true);
+    for (const source of ["resume", "compact"]) {
+      const trimmed = buildContext(source, fixture.env);
+      assert.ok(trimmed.startsWith(TABLE_HEADER), `${source} begins at the table`);
+      assert.ok(trimmed.endsWith(`\n${expected}`), `${source} carries the index`);
+    }
+  } finally {
+    cleanup(fixture);
+  }
+});
+
+test("the premise index goes out even where no protocol resolved", () => {
+  // The two companions fail independently: an install record that yields no
+  // protocol does not cost the index, and a missing index does not cost the
+  // table.
+  const fixture = makeFixture({ self: "route", plugins: [], premise: true });
+  try {
+    fs.writeFileSync(
+      path.join(fixture.configDir, "plugins", "installed_plugins.json"),
+      JSON.stringify({ version: 2, plugins: { "route@mp": [{ scope: "user", installPath: fixture.pluginRoot }] } }),
+    );
+    const context = buildContext("compact", fixture.env);
+    assert.ok(context.startsWith(PREMISE_HEADER));
+    assert.doesNotMatch(context, new RegExp(TABLE_HEADER));
   } finally {
     cleanup(fixture);
   }

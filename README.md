@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` before a refactor that crosses several domains.
 
-The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and lookup (`/onboard`, `/catalog`, `/probe`) plus contributor tooling; `route` carries a per-prompt hook. Add either on its own:
+The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and lookup (`/onboard`, `/catalog`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, and at session start the installed-protocol deficit table with the [premise](./premise) index beneath it. Add either on its own:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -120,7 +120,7 @@ Skills that act at their own decision points — around the protocols, on the wo
 
 ### [Route](./route)
 
-Context-driven protocol routing. A per-prompt hook places a short directive beside each prompt; when the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
+Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
 
 ## Design
 
