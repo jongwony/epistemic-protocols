@@ -1,5 +1,5 @@
-// Tests for route-tool.mjs — the PreToolUse / PostToolUse delivery of
-// premise entries at the tool calls the matcher decides are their moments.
+// Tests for route-tool.mjs — the PreToolUse delivery of premise entries at
+// the tool calls the matcher decides are their moments.
 // Run with: node --test
 
 import { test } from "node:test";
@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { PREMISE_INDEX, TOOL_HEADER_AFTER, TOOL_HEADER_BEFORE } from "./route-premise.mjs";
+import { PREMISE_INDEX, TOOL_HEADER } from "./route-premise.mjs";
 import { changedPaths, describeCall, render } from "./route-tool.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-tool.mjs");
@@ -101,7 +101,7 @@ test("changing an instruction surface delivers the instruction-surface entry, an
   const host = makeHost();
   try {
     const out = lines(render(payload("Edit", { file_path: "/p/.claude/rules/r.md" }), host.env));
-    assert.equal(out[0], TOOL_HEADER_BEFORE);
+    assert.equal(out[0], TOOL_HEADER);
     assert.deepEqual(out.slice(1), expectLines(host, byMoment("instruction-surface-change")));
     assert.equal(JSON.parse(render(payload("Write", { file_path: "/p/CLAUDE.md" }), host.env)).hookSpecificOutput.hookEventName, "PreToolUse");
     const patch = "*** Begin Patch\n*** Update File: CLAUDE.md\n*** End Patch";
@@ -111,16 +111,15 @@ test("changing an instruction surface delivers the instruction-surface entry, an
   }
 });
 
-test("handing work to an agent delivers the delegation entry before, and the report entry after", () => {
+test("handing work to an agent delivers the delegation entry, and nothing after the call", () => {
   const host = makeHost();
   try {
     const before = lines(render(payload("Agent", { prompt: "..." }), host.env));
-    assert.equal(before[0], TOOL_HEADER_BEFORE);
+    assert.equal(before[0], TOOL_HEADER);
     assert.deepEqual(before.slice(1), expectLines(host, byMoment("delegation")));
-    const after = lines(render(payload("Agent", { prompt: "..." }, "PostToolUse"), host.env));
-    assert.equal(after[0], TOOL_HEADER_AFTER);
-    assert.deepEqual(after.slice(1), expectLines(host, byMoment("delegate-report")));
-    assert.equal(JSON.parse(render(payload("Task", {}, "PostToolUse"), host.env)).hookSpecificOutput.hookEventName, "PostToolUse");
+    assert.deepEqual(lines(render(payload("Task", { prompt: "..." }), host.env)).slice(1), expectLines(host, byMoment("delegation")));
+    // The return is a report or a launch notice, which only the reader can tell apart.
+    assert.equal(render(payload("Agent", { prompt: "..." }, "PostToolUse"), host.env), "");
   } finally {
     cleanup(host);
   }
@@ -135,6 +134,7 @@ test("a call that is no document's moment renders nothing", () => {
     assert.equal(render(payload("Read", { file_path: "/p/CLAUDE.md" }), host.env), "");
     assert.equal(render(payload("AskUserQuestion", {}), host.env), "");
     assert.equal(render(payload("Edit", { file_path: "/p/CLAUDE.md" }, "PostToolUse"), host.env), "");
+    assert.equal(render(payload("Edit", { file_path: "/p/.claude/rules/../../docs/notes.md" }), host.env), "");
   } finally {
     cleanup(host);
   }

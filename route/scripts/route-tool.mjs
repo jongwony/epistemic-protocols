@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 /**
- * PreToolUse / PostToolUse hook — deliver a premise entry at the tool call
- * the matcher decides is its moment.
+ * PreToolUse hook — deliver a premise entry again at the tool call the
+ * matcher decides is its moment.
  *
  * The session-start index (route-session.mjs) names each premise document
  * and the moment that calls for it, and leaves recognizing the moment to
  * the reader. For a moment the host's matcher can decide — a named file
- * tool about to touch a path of a given shape, a named agent tool about to
- * run or just returned — the host does the recognizing: the call carries
- * its tool name and path, and this hook fires around it. So such an entry
- * goes out here, once, at that call. Which calls are which moments is
- * defined beside the index (route-premise.mjs, MOMENTS); this hook supplies
- * the call, read off the payload.
+ * tool touching a path of a given shape, a named agent tool being called —
+ * the host recognizes it too: the call carries its tool name and path, and
+ * this hook fires on it. So such an entry goes out here a second time, at
+ * that call. A hook's context reaches the model on the request after the
+ * call, so this is a reinforcement at the moment rather than a gate before
+ * it; the line asks for the document before the result is built on. Which
+ * calls are which moments is defined beside the index (route-premise.mjs,
+ * MOMENTS); this hook supplies the call, read off the payload.
  *
  * The paths a call names are read without interpreting the call. A file
  * tool (Edit, Write, MultiEdit, NotebookEdit) names its path in its input.
@@ -38,7 +40,7 @@ const FILE_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
 // The header lines by which an apply_patch names a file it touches.
 const PATCH_FILE = /^\*\*\* (?:Add|Update|Delete) File: (.+?)\s*$|^\*\*\* Move to: (.+?)\s*$/gm;
 
-const EVENTS = new Set(["PreToolUse", "PostToolUse"]);
+const EVENTS = new Set(["PreToolUse"]);
 
 /** The paths a tool call names as the files it changes, or none. */
 function changedPaths(payload) {
@@ -55,7 +57,7 @@ function changedPaths(payload) {
   return [];
 }
 
-/** The call as the moment predicates read it, or null off a hook event. */
+/** The call as the moment predicates read it, or null off the hook event. */
 function describeCall(payload) {
   const event = typeof payload.hook_event_name === "string" ? payload.hook_event_name : "PreToolUse";
   if (!EVENTS.has(event)) return null;

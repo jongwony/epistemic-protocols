@@ -1,6 +1,6 @@
 /**
- * The premise index, rendered for injection at session start and at the
- * tool calls that are its moments.
+ * The premise index, rendered for injection at session start and again at
+ * the tool calls the matcher can see are its moments.
  *
  * The premise documents are a reference surface that ships beside the plugins
  * in this marketplace, under `premise/` — the collaboration premises the
@@ -19,25 +19,25 @@
  * the plugin root is the same directory. An entry whose document is not
  * there is left out; a root holding none of them is no root.
  *
- * Two delivery channels, by the kind of moment. A moment that arrives in
- * conversation — deciding, presenting, declaring — is only recognizable by
- * the reader, so it goes out at session start under `when`, and the reader
- * carries it. A moment the host's tool matcher determines exactly — a
- * named file tool about to touch a path of a given shape, a named agent
- * tool about to run or just returned — goes out at that call instead,
- * through the PreToolUse and PostToolUse hooks (route-tool.mjs): an `at`
- * field on the entry names the observable moment and the clause that
- * describes it. Each moment is delivered on one channel: a document's
- * `when` carries only the moments no matcher shows, and an entry whose
- * moments are all observable has no `when` and leaves the session-start
- * index — a pointer delivered many turns before its moment was found not
- * to be followed at the moment.
+ * Two delivery channels. The session-start index carries every document's
+ * moments under `when`: recognizing a moment as it arrives is the reader's,
+ * and the index is what the reader recognizes it against. A moment the
+ * host's tool matcher can also see — a named file tool touching a path of
+ * a given shape, a named agent tool being called — is delivered a second
+ * time at that call, through the PreToolUse hook (route-tool.mjs): an `at`
+ * field on the entry names the matcher-decided moment and the clause for
+ * the line delivered there. The second delivery is a reinforcement, not a
+ * replacement: a hook's context reaches the model on the request after the
+ * call, so the call has run by the time the line is read, and the line
+ * asks for the document before the result is built on. The session line
+ * therefore stays for every moment, including the ones the matcher sees.
  *
  * What qualifies for the tool channel is what the matcher decides without
  * reading the call's content: a tool name, a path shape. A moment that
  * needs the content read — whether a command's intent is to write, whether
- * a set of options genuinely diverges, whether an action can be undone —
- * stays on the session channel, because that reading is the reader's own
+ * a set of options genuinely diverges, whether an action can be undone,
+ * whether an agent's return is a report or a launch notice — stays on the
+ * session channel alone, because that reading is the reader's own
  * reasoning; a hook that did it would couple the premise to one harness's
  * tool set and move the judgment out of the reasoning it belongs to. The
  * tool channel is therefore the fast layer here: bound to a harness, and
@@ -45,8 +45,8 @@
  *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
- * exists, every document has an entry, and every `at` names a moment the
- * matcher can decide.
+ * exists, every document has an entry, every entry has a `when`, and every
+ * `at` names a moment the matcher can decide.
  *
  * Every shortfall yields "" so the caller can fail open. Zero external
  * dependencies: Node.js standard library only.
@@ -63,20 +63,17 @@ const PREMISE_HEADER =
 
 // Heads a tool-channel injection: it names the moment the host observed, so
 // the line beneath reads as arriving at that moment rather than as a
-// standing instruction. One phrasing before the call, one after.
-const TOOL_HEADER_BEFORE =
-  "Premise — this tool call is the moment the entry below names. Read the document before it runs:";
-const TOOL_HEADER_AFTER =
-  "Premise — this tool result is the moment the entry below names. Read the document before acting on it:";
+// standing instruction. The call has run by the time this is read, so the
+// header asks for the document before the result is built on.
+const TOOL_HEADER =
+  "Premise — the tool call this arrived with is the moment the entry below names. Read the document before building on its result:";
 
 const PREMISE_INTRO =
   "The cognitive and collaboration premises behind structured human-AI dialogue — stated so they hold on their own, independent of any specific codebase, tool, or harness that happens to implement them.";
 
-// One entry per document. `when` is the clause for the session-start line —
-// the moments only the reader can recognize. `at` names a matcher-decided
-// moment (a key of MOMENTS) and the clause for the line delivered at it.
-// A document has `when`, `at`, or both; the two never describe the same
-// moment.
+// One entry per document. `when` is the clause for the session-start line
+// and carries every moment. `at` names a matcher-decided moment (a key of
+// MOMENTS) and the clause for the line delivered again at that call.
 const PREMISE_INDEX = [
   { file: "recognition-and-authority.md", when: "when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a specification may fix a criterion's answer in advance at all." },
   { file: "interaction-factorization.md", when: "when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several." },
@@ -86,14 +83,13 @@ const PREMISE_INDEX = [
   { file: "calibration-methodology.md", when: "when setting or changing how much a project resolves on its own versus routes to its user for judgment." },
   { file: "approach-verification.md", when: "before deciding what to do with a request, when an utterance's grammatical form may differ from the action it actually wants, and when an instruction reaches only part of what it lands on." },
   { file: "matching-the-request.md", when: "when unsure whether the conversation is at design level or implementation level, when deciding how far a fix should reach, when deciding how detailed a question back to the person should be, and when a time or date arrives without a stated zone." },
-  { file: "verification-discipline.md",
-    when: "before declaring something done, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look.",
-    at: { moment: "delegate-report", when: "when a delegated agent reports that its work is complete." } },
+  { file: "verification-discipline.md", when: "before declaring something done, when a delegated agent reports that its work is complete, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look." },
   { file: "instruction-authoring.md",
-    at: { moment: "instruction-surface-change", when: "when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, when a defect has been found and the repair is about to be written, when two instructions turn out to conflict, and when deciding how much to inline for a reader versus leaving as a reference." } },
+    when: "when writing or revising instructions and durable records, when judging whether a new rule earns its place, before settling what a change adds to a surface that already carries entries, when a defect has been found and the repair is about to be written, when two instructions turn out to conflict, and when deciding how much to inline for a reader versus leaving as a reference.",
+    at: { moment: "instruction-surface-change", when: "when writing or revising instructions and durable records, and before settling what a change adds to a surface that already carries entries." } },
   { file: "delegation-and-subagents.md",
-    when: "when deciding what a coordinator keeps for itself versus delegates outward.",
-    at: { moment: "delegation", when: "when handing work to an agent that cannot see this conversation." } },
+    when: "when handing work to an agent that cannot see this conversation, and when deciding what a coordinator keeps for itself versus delegates outward.",
+    at: { moment: "delegation", when: "when handing work to another agent — the document says what changes with whether it can see this conversation." } },
   { file: "session-and-handoff.md", when: "when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, when someone interrupts the work mid-task, when attention has already moved off a commitment that is still open, and when the way the work is understood has been replaced since a commitment was written down." },
   { file: "boundaries-and-safety.md", when: "before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable." },
 ];
@@ -105,36 +101,36 @@ const PREMISE_INDEX = [
 // ---------------------------------------------------------------------------
 
 // A durable instruction file a host loads for an agent — the project
-// instruction file, a rule, a principle, a skill, an agent definition.
-// Matched on path shape alone, so it holds on any host and on a path that
-// does not exist yet.
+// instruction file and its override, a rule, a principle, a skill, an agent
+// definition (hosts scan `agents/` recursively). Matched on the normalized
+// path's shape alone, so it holds on any host and on a path that does not
+// exist yet.
 function isInstructionSurface(file) {
-  const p = String(file).replace(/\\/g, "/");
+  const p = path.posix.normalize(String(file).replace(/\\/g, "/"));
   if (!p.endsWith(".md")) return false;
   const base = path.posix.basename(p);
-  if (["CLAUDE.md", "CLAUDE.local.md", "AGENTS.md", "SKILL.md"].includes(base)) return true;
+  if (["CLAUDE.md", "CLAUDE.local.md", "AGENTS.md", "AGENTS.override.md", "SKILL.md"].includes(base)) return true;
   const dir = path.posix.dirname(p);
   if (/(^|\/)\.claude\/(rules|principles)(\/|$)/.test(dir)) return true;
-  return /(^|\/)agents$/.test(dir);
+  return /(^|\/)agents(\/|$)/.test(dir);
 }
 
-// The tools that hand work to an agent which cannot see this conversation,
-// as the host names them. An unmatched name costs nothing, so a host's
-// rename shows as a missed delivery rather than a fault.
+// The tools that hand work to another agent, as the hosts name them (Codex
+// reports its own under the same canonical name). An unmatched name costs
+// nothing, so a host's rename shows as a missed delivery rather than a
+// fault.
 const AGENT_TOOLS = new Set(["Agent", "Task"]);
 
 /**
- * Each observable moment, as a predicate over the call: the hook event
- * ("PreToolUse" or "PostToolUse"), the tool name, and the paths the call
- * names (read off the input by route-tool.mjs).
+ * Each observable moment, as a predicate over the call: the hook event, the
+ * tool name, and the paths the call names (read off the input by
+ * route-tool.mjs).
  */
 const MOMENTS = {
   "instruction-surface-change": ({ event, files }) =>
     event === "PreToolUse" && files.some(isInstructionSurface),
   "delegation": ({ event, tool }) =>
     event === "PreToolUse" && AGENT_TOOLS.has(tool),
-  "delegate-report": ({ event, tool }) =>
-    event === "PostToolUse" && AGENT_TOOLS.has(tool),
 };
 
 function isFile(file) {
@@ -192,27 +188,25 @@ function line(root, e, when) {
 }
 
 /**
- * The header, the intro, and one line per document present under `root`
- * that has a session-channel clause, each with its absolute path. Nothing
- * when no document is there.
+ * The header, the intro, and one line per document present under `root`,
+ * each with its absolute path. Nothing when no document is there.
  */
 function renderPremise(root) {
   if (!root) return "";
-  const entries = present(root).filter((e) => e.when);
+  const entries = present(root);
   if (entries.length === 0) return "";
   return [PREMISE_HEADER, PREMISE_INTRO, ...entries.map((e) => line(root, e, e.when))].join("\n");
 }
 
 /**
- * One line per document present under `root` whose observable moment the
- * call is, under the header for the call's event. Nothing when none binds.
+ * One line per document present under `root` whose matcher-decided moment
+ * the call is. Nothing when none binds.
  */
 function renderToolPremise(root, call) {
   if (!root) return "";
   const entries = present(root).filter((e) => bindsAt(e, call));
   if (entries.length === 0) return "";
-  const header = call.event === "PostToolUse" ? TOOL_HEADER_AFTER : TOOL_HEADER_BEFORE;
-  return [header, ...entries.map((e) => line(root, e, e.at.when))].join("\n");
+  return [TOOL_HEADER, ...entries.map((e) => line(root, e, e.at.when))].join("\n");
 }
 
 export {
@@ -221,8 +215,7 @@ export {
   PREMISE_HEADER,
   PREMISE_INDEX,
   PREMISE_INTRO,
-  TOOL_HEADER_AFTER,
-  TOOL_HEADER_BEFORE,
+  TOOL_HEADER,
   bindsAt,
   isInstructionSurface,
   premiseRoot,
