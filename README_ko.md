@@ -118,7 +118,6 @@ claude plugin install route@epistemic-protocols
 | `/realign` | 프로젝트 가이드의 direction line이 작업 방향과 더는 맞지 않을 때 — inscribed line, 외부 신호, 당신의 현재 이해를 융합 |
 | **Codex 위임** | |
 | `/goal-research` | 백그라운드 Codex 세션에서 범위를 잡고 외부 검증까지 받고 싶은 사실 리서치 질문 — 전체 trace를 되돌려 받음 |
-| `/image-companion` | 문서의 한 passage를 위한 슬라이드용 상징 이미지, 다른 companion 이미지와 시각적으로 일관되게 |
 
 ### [Route](./route)
 

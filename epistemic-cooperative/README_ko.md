@@ -27,7 +27,6 @@
 | `/steer` | 프로젝트 프로필 재조정 — 세션의 calibration drift 를 감사하고 cluster 별 사용자 verdict | 갱신된 project-profile 규칙 + settled-direction 절 |
 | `/realign` | 3-horizon 융합으로 프로젝트 가이드 direction line 도출 | 프로젝트 가이드에 기록된 fused direction line |
 | `/goal-research` | 백그라운드 Codex CLI 세션에 위임한 리서치 (`goal` 범위 설정 + Aitesis 검증) | 되돌려 받은 리서치 trace |
-| `/image-companion` | 문서 passage 용 슬라이드 상징 이미지, 형제 이미지와 일관 | 이미지 파일 (`/forge` + Codex compose) |
 
 ## 스킬
 
@@ -127,8 +126,7 @@ epistemic-cooperative/
     ├── zero-shot/SKILL.md        # /zero-shot 앵커링 예시 프로즈 감사
     ├── steer/SKILL.md            # /steer 프로젝트 프로필 재조정
     ├── realign/SKILL.md          # /realign 프로젝트 가이드 direction line 융합
-    ├── goal-research/SKILL.md    # /goal-research Codex 위임 리서치
-    └── image-companion/SKILL.md  # /image-companion Codex 생성 companion 이미지
+    └── goal-research/SKILL.md    # /goal-research Codex 위임 리서치
 ```
 
 ## 사용 시기
@@ -150,7 +148,6 @@ epistemic-cooperative/
 | 관찰된 calibration drift 로 프로젝트 프로필을 갱신할 때 | `/steer` |
 | 프로젝트 가이드 direction line 을 다시 도출할 때 | `/realign` |
 | 리서치 질문을 Codex 에 위임할 때 | `/goal-research` |
-| 문서 passage 에 붙일 companion 이미지가 필요할 때 | `/image-companion` |
 ## 사용법
 
 ```

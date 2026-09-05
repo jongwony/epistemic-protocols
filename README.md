@@ -118,7 +118,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
 | **Delegating to Codex** | |
 | `/goal-research` | A factual research question you want scoped and externally verified in a background Codex session, with the full trace returned |
-| `/image-companion` | A slide-ready symbolic image for a passage, visually consistent with the document's other images |
 
 ### [Route](./route)
 

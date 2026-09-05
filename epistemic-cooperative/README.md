@@ -27,7 +27,6 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/steer` | Project-profile recalibration — audits calibration drift in a session, per-cluster user verdicts | Updated project-profile rule + settled-direction clause |
 | `/realign` | Project guide direction line via three-horizon fusion | Fused direction line written to the project guide |
 | `/goal-research` | Research delegated to a background Codex CLI session (`goal` scoping + Aitesis verification) | Research trace surfaced back |
-| `/image-companion` | Slide-ready symbolic image for a document passage, consistent with its sibling images | Image file (composes `/forge` + Codex) |
 
 ## Skills
 
@@ -127,8 +126,7 @@ epistemic-cooperative/
     ├── zero-shot/SKILL.md        # /zero-shot anchoring-example prose audit
     ├── steer/SKILL.md            # /steer project-profile recalibration
     ├── realign/SKILL.md          # /realign project guide direction-line fusion
-    ├── goal-research/SKILL.md    # /goal-research Codex-delegated research
-    └── image-companion/SKILL.md  # /image-companion Codex-generated companion images
+    └── goal-research/SKILL.md    # /goal-research Codex-delegated research
 ```
 
 ## When to Use
@@ -150,7 +148,6 @@ epistemic-cooperative/
 | Refreshing the project profile from observed calibration drift | `/steer` |
 | Re-deriving the project guide's direction line | `/realign` |
 | Delegating a research question to Codex | `/goal-research` |
-| A companion image for a passage in a document | `/image-companion` |
 
 ## Install
 
