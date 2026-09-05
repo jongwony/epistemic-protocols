@@ -108,7 +108,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
 | **Reviewing a change** | |
 | `/review-loop` | Drive a change through review until every finding is verified against the codebase and disposed of, re-reviewing each round |
-| `/lens-review` | One consolidated PR comment from several analytical lenses plus a gap scan, each analyzed in isolation and cross-verified |
 | **Auditing instruction prose** | |
 | `/place` | An instruction file keeps growing — route each clause to where it belongs (a load tier, the ledger, or deletion) |
 | `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
@@ -118,7 +117,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
 | **Delegating to Codex** | |
 | `/goal-research` | A factual research question you want scoped and externally verified in a background Codex session, with the full trace returned |
-| `/image-companion` | A slide-ready symbolic image for a passage, visually consistent with the document's other images |
 
 ### [Route](./route)
 

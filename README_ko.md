@@ -108,7 +108,6 @@ claude plugin install route@epistemic-protocols
 | `/gate-check` | 옵션 집합이 당신에게 제시되기 직전 — 독립 advisor가 genuine / collapsed / malformed를 판정하고 인용 근거를 먼저 검증 |
 | **변경 리뷰** | |
 | `/review-loop` | 모든 finding이 코드베이스에 대해 검증되고 처분될 때까지 매 라운드 재리뷰하며 변경을 리뷰로 끌고 갈 때 |
-| `/lens-review` | 여러 분석 렌즈 + gap scan을 각각 격리 분석하고 교차 검증해 통합 PR 코멘트 하나로 |
 | **지시문 산문 감사** | |
 | `/place` | 지시문 파일이 계속 불어날 때 — 절 각각을 있어야 할 자리(로드 계층, ledger, 삭제)로 라우팅 |
 | `/white-bear` | 에이전트에게 하지 말 것을 말하는 산문 — 잘못된 대상을 계속 시야에 두는 금지 프레이밍과 부정 앵커링을 찾기 |
@@ -118,7 +117,6 @@ claude plugin install route@epistemic-protocols
 | `/realign` | 프로젝트 가이드의 direction line이 작업 방향과 더는 맞지 않을 때 — inscribed line, 외부 신호, 당신의 현재 이해를 융합 |
 | **Codex 위임** | |
 | `/goal-research` | 백그라운드 Codex 세션에서 범위를 잡고 외부 검증까지 받고 싶은 사실 리서치 질문 — 전체 trace를 되돌려 받음 |
-| `/image-companion` | 문서의 한 passage를 위한 슬라이드용 상징 이미지, 다른 companion 이미지와 시각적으로 일관되게 |
 
 ### [Route](./route)
 

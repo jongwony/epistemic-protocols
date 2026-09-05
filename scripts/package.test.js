@@ -402,18 +402,18 @@ describe('goal-research runtime contract', () => {
 });
 
 // ============================================================
-// codex stdout extraction contract (review-loop, image-companion)
+// codex stdout extraction contract (review-loop)
 // ============================================================
 
 // codex prints plain notice lines to stdout alongside its `--json` event stream —
 // `Codex autostart is disabled.` survives `2>/dev/null` on codex-cli 0.149.0 — so
 // stdout is NOT pure JSONL. `jq -rs` aborts on the first such line with
-// `parse error: Invalid numeric literal`, exits 5, and prints nothing. Both surfaces
-// below read an empty extraction as "codex failed before answering" / "the call
-// produced no verdict", so without the filter a SUCCESSFUL run is reported as a
-// failure. Both files also asserted the events file was pure JSONL, which is the
-// claim that made the missing filter look deliberate. goal-research/SKILL.md carries
-// the same repair, pinned by the block above; these assertions hold it here.
+// `parse error: Invalid numeric literal`, exits 5, and prints nothing. The surface
+// below reads an empty extraction as "the call produced no verdict", so without the
+// filter a SUCCESSFUL run is reported as a failure. The file also asserted the events
+// file was pure JSONL, which is the claim that made the missing filter look
+// deliberate. goal-research/SKILL.md carries the same repair, pinned by the block
+// above; these assertions hold it here.
 
 describe('codex stdout extraction contract', () => {
   const REPO_ROOT = path.join(__dirname, '..');
@@ -428,10 +428,6 @@ describe('codex stdout extraction contract', () => {
         'references',
         'source-adapter-codex.md',
       ),
-    ],
-    [
-      'image-companion',
-      path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'image-companion', 'SKILL.md'),
     ],
   ];
 
@@ -1316,10 +1312,8 @@ describe('package.js CLI', () => {
         'grasp.zip',
         'ground.zip',
         'ideate.zip',
-        'image-companion.zip',
         'induce.zip',
         'inquire.zip',
-        'lens-review.zip',
         'onboard.zip',
         'place.zip',
         'preview.zip',

@@ -1,6 +1,6 @@
 ---
 name: formal-review
-description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", or invokes /formal-review. A fixed-lens PR review for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel plus a gap scan over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Project-local contributor tooling."
+description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", or invokes /formal-review. A fixed-lens PR review for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Project-local contributor tooling."
 allowed-tools: Bash, Read, Grep, Glob, Task, Skill
 skills:
   - prothesis:frame
@@ -8,11 +8,11 @@ skills:
 
 # Formal Lens Review
 
-A one-pass review of a PR diff through a **fixed formal lens panel** — Category Theory ∥ Type Theory ∥ Operational Semantics — plus a gap scan, posted back to the PR as a single consolidated comment for human reviewers. This is the project-local specialization of the general, frame-driven `/lens-review` (epistemic-cooperative): that skill lets `/frame` derive whatever lenses fit the diff, whereas this skill **pins** the formal triple on every run so a formally-structured protocol change gets a meticulous, complete formal review on the same three axes each time.
+A one-pass review of a PR diff through a **fixed formal lens panel** — Category Theory ∥ Type Theory ∥ Operational Semantics — posted back to the PR as a single consolidated comment for human reviewers. The panel is **pinned** at definition time rather than derived from the diff, so a formally-structured protocol change gets a meticulous, complete formal review on the same three axes every run.
 
 ## Why this is a project skill
 
-The formal triple (morphism coherence, type soundness, evaluation-order consistency) is **this repository's** standing review axis — protocol `SKILL.md` files carry category-theoretic formal blocks, `TYPES` / `PHASE TRANSITIONS`, and operational-semantics state machines. `/frame`, run generically, is unlikely to select all three formal lenses at once on a given diff; pinning them here guarantees the formal partial review is exhaustive every run. The fixed panel is therefore project-specific and belongs in the project skill layer, while the general frame-driven pipeline stays in the `/lens-review` plugin. This skill is self-contained — it composes `/frame` and carries the gap lens itself, and does not depend on the `/lens-review` plugin skill being installed.
+The formal triple (morphism coherence, type soundness, evaluation-order consistency) is **this repository's** standing review axis — protocol `SKILL.md` files carry category-theoretic formal blocks, `TYPES` / `PHASE TRANSITIONS`, and operational-semantics state machines. `/frame`, run generically, is unlikely to select all three formal lenses at once on a given diff; pinning them here guarantees the formal partial review is exhaustive every run. The fixed panel is therefore project-specific and belongs in the project skill layer. This skill is self-contained — it composes `/frame` and describes its own isolated-then-adversarial substrate; `prothesis` is its one plugin dependency.
 
 ## Caller Signature
 
@@ -23,7 +23,7 @@ scope : PR number | (implicit)                       -- optional; PR number, or 
                                                      --   absent → Phase 0 detects it
 ```
 
-When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tree). The lens panel is fixed in this skill — Category Theory, Type Theory, Operational Semantics, plus gap scanning — and is not a runtime parameter; the scope is the only argument. (For a diff-derived, non-fixed panel, use the general `/lens-review` instead.)
+When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tree). The lens panel is fixed in this skill — Category Theory, Type Theory, Operational Semantics — and is not a runtime parameter; the scope is the only argument.
 
 ## Pipeline Overview
 
@@ -31,7 +31,7 @@ When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tre
 /formal-review [scope?]
   Phase 0  : scope detect (PR number | current-branch PR | working tree) + free-exit — no SHA pinning, tools fetch live
   Phase 1  : diff prep   — fetch diff live (gh pr diff {N} | git diff HEAD); read file fate (A/M/D/R) from diff headers; state diff-reading conventions
-  Phase 2  : fixed-lens review (isolated → adversarial) — pin the formal triple (Category Theory ∥ Type Theory ∥ OpSem) via /frame + the gap lens fixed in-skill; substrate described in-skill (not /conduct)
+  Phase 2  : fixed-lens review (isolated → adversarial) — pin the formal triple (Category Theory ∥ Type Theory ∥ OpSem) via /frame; substrate described in-skill (not /conduct)
               2a isolated per-lens analysis (independence) — each finding: file:line + lens tag + severity + evidence-grounded rationale, confidence ≥ 80%
               2b adversarial cross-verification — refute each finding; survive → Phase 3, defeated → recorded in the Phase 4 comment as refuted (relay drop w/ basis)
   Phase 3  : direction-error guard (verify) — cross-check review text vs diff-header fate; Added-but-described-as-deleted → warning augment (relay)
@@ -43,7 +43,7 @@ The skill's identity is the **fixed formal lens panel** applied once over a PR d
 
 ## When to Use
 
-- One-pass review of a formally-structured protocol change on this repository's standing formal axes — morphism/type/evaluation-order coherence — plus a gap audit, every run on the same three lenses
+- One-pass review of a formally-structured protocol change on this repository's standing formal axes — morphism/type/evaluation-order coherence — every run on the same three lenses
 - You want the findings posted back to the PR as a single consolidated comment for human reviewers to consume
 - The change touches protocol formal blocks (`TYPES`, `PHASE TRANSITIONS`, `MORPHISM`, `LOOP`, `CONVERGENCE`) where the formal triple is the load-bearing review axis
 
@@ -76,21 +76,16 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 `/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. Review **only the changed files**.
 
-**Lens framing.** Call `/frame` (prothesis) to frame the perspectives; the gap audit is one further lens this skill fixes itself. Unlike the general `/lens-review`, this skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, never a diff-derived selection. The fixed lenses and gap dimensions are:
+**Lens framing.** Call `/frame` (prothesis) to frame the perspectives. This skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
 
 - **Category Theory** — morphism coherence, composition laws, functor consistency
 - **Type Theory** — type-signature soundness, variance, type safety
 - **Operational Semantics** — evaluation order, phase transitions, state consistency
-- **Gap Scanning** (fixed in-skill) — scan decision points in the diff for unnoticed gaps:
-  - **Procedural** — missing steps or incomplete workflows
-  - **Consideration** — unaddressed trade-offs
-  - **Assumption** — implicit assumptions needing explicit statement
-  - **Alternative** — unexplored approaches
 
 **2a — Isolated per-lens analysis (independence-before-contamination).** Analyze the changed files through each lens in **isolation**: every lens forms its findings without seeing the other lenses' findings, so a blind spot or bias in one lens cannot contaminate the others. Substrate realization (recorded here, executed by the substrate): run each lens as an isolated analysis — e.g. an isolated subagent per lens, briefed only with its single lens plus the diff — and collect the per-lens findings independently. Each finding carries:
 
 - **File path + line number** drawn from the diff (the line must appear in the diff)
-- **Tag** — `[Category Theory]`, `[Type Theory]`, `[OpSem]`, or `[Gap: <type>]`
+- **Tag** — `[Category Theory]`, `[Type Theory]`, or `[OpSem]`
 - **Severity** — Critical / Important / Suggestion
 - **Evidence-grounded rationale** — reference the actual changed code; confidence ≥ 80% (drop lower-confidence findings)
 
@@ -113,7 +108,7 @@ Post the findings back to the PR as a **single consolidated comment** — one co
 Posting discipline:
 
 - Consolidate all surviving findings into the one comment body; defeated findings (Phase 2b) go in a clearly-labelled **refuted** section of the same comment, each with its refutation basis — recorded as already-refuted, not presented as actionable, so a human reviewer cannot mistake them for live findings.
-- Each finding line carries its `path:line`, the lens tag (`[Category Theory]` / `[Type Theory]` / `[OpSem]` / `[Gap: <type>]`), and the severity (Critical / Important / Suggestion).
+- Each finding line carries its `path:line`, the lens tag (`[Category Theory]` / `[Type Theory]` / `[OpSem]`), and the severity (Critical / Important / Suggestion).
 - Skip duplicate or near-duplicate findings.
 - Write the Markdown comment body through a file (e.g. a heredoc to a temp file), then build the JSON request body from that file with `jq --rawfile` (so the body becomes `{"body": "<markdown>"}`) and feed that JSON to `gh api` via `--input -`; do not pass the Markdown body inside a double-quoted shell argument, because backticks in Markdown trigger shell command substitution, and do not `--input` the raw Markdown file directly because the endpoint requires a JSON object. (`--input` makes `gh api` default to POST, so the comment is created, not listed.)
 
@@ -121,7 +116,7 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 
 ## Rules
 
-1. **Fixed formal panel** — the lenses are pinned to Category Theory, Type Theory, and Operational Semantics every run; `/frame` is framed onto this triple, not a diff-derived selection. A diff-derived panel is the general `/lens-review`, not this skill.
+1. **Fixed formal panel** — the lenses are pinned to Category Theory, Type Theory, and Operational Semantics every run; `/frame` is framed onto this triple, so the panel stays the same whatever the diff contains.
 2. **Changed files only** — review the files in the Phase 1 diff and nothing else; the diff headers are authoritative for file fate, the hunks for line-level evidence.
 3. **Isolated lenses, then adversarial cross-verification** — each lens forms its findings in isolation (independence-before-contamination); the aggregated findings then pass a single adversarial refutation pass before posting. Surviving findings proceed; defeated findings are recorded in the consolidated comment as refuted with cited basis. The isolated-then-adversarial substrate is described in this skill directly.
 4. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
