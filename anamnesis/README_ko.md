@@ -6,7 +6,7 @@
 
 ## Anamnesis란?
 
-플라톤 ἀνάμνησις(상기)의 현대적 재해석 — **모호한 단서를 SSOT(세션 transcript)와 hypomnesis INDEX와 대조하여 — `memory/`는 스캔 대상이 아닌 사용자 큐레이션 adjunct — 키워드 매칭 검색 결과를 반환하는 대신 올바른 과거 맥락을 소크라테스식 인지(recognition)로 사용자에게 안내하는** 프로토콜.
+플라톤 ἀνάμνησις(상기)의 현대적 재해석 — **모호한 단서를 SSOT(세션 transcript)와 hypomnesis INDEX와 대조하여 — `memory/`는 스캔 대상이 아닌 사용자 큐레이션 adjunct — 각 후보의 원기록을 열어 단서가 닿는 발췌를 뽑고, 그 발췌를 출처와 함께 제시하여 사용자가 올바른 과거 맥락을 직접 식별하게 하는** 프로토콜 — 키워드 매칭 결과나 인덱스의 요약을 돌려주는 것이 아니라.
 
 ### 핵심 문제
 
@@ -14,9 +14,9 @@ AI 시스템은 모호한 회상 신호(`RecallAmbiguous`)를 놓치기 쉽습�
 
 ### 해결책
 
-**검색보다 인지(Recognition over Retrieval)**: AI가 SSOT(세션 JSONL)와 hypomnesis INDEX를 Salience 차원을 따라 스캔하여, 후보를 소크라테스식 내러티브 지문(origin → direction → outcome)으로 제시하고, 사용자가 직접 매치를 인지합니다 — 또는 인접 벡터를 통해 소크라테스식 probe로 세부 조정하거나, 직교적 회상 차원으로 방향을 재설정합니다. 구조화된 literal match는 source namespace가 회상 trace의 claim kind를 인가(authorize)할 때만 ranking anchor가 됩니다. 모호한 회상을 인지된 맥락으로 변환합니다.
+**출처로 근거 지어진 인지(Source-grounded recognition)**: AI가 발화와 쌓인 맥락에서 단서를 읽고, hypomnesis INDEX와 세션 기록의 머리(spine)를 Salience 차원을 따라 뒤져 후보를 찾은 뒤, 1순위 후보의 원기록을 — 구성 세션마다 한 번씩 — 열어 단서가 닿는 발췌를 뽑습니다. 그 논의의 이야기를 기록의 말로(origin → direction → outcome; 한 세션 위에서는 라인·토픽·개념의 형태로), 발췌마다 출처와 resume 핸들을 붙여 보여 주고 턴을 넘깁니다. 사용자가 식별하거나, 자기 말로 단서를 고치면 검색이 다시 돕니다. INDEX의 서사는 회상을 깨우는 단서일 뿐 증거가 아니며, 증거는 발췌이고, 식별은 사용자의 것입니다. 구조화된 literal match는 source namespace가 회상 trace의 claim kind를 인가(authorize)할 때만 ranking anchor가 됩니다.
 
-Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고 모든 후보에 출처를 유지합니다. Raw transcript는 compact 검색과 한 번의 회상 probe가 모두 빗나간 뒤 `/recollect`가 명시적으로 선택을 요청하는 2단계 확장 범위입니다.
+Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고 모든 후보에 출처를 유지합니다. 저장소 전체의 raw transcript를 훑는 것은 compact 검색과 열린 질문 하나가 모두 빗나간 뒤 `/recollect`가 명시적으로 선택을 요청하는 2단계 확장이고, 제시할 후보가 가리키는 기록 하나를 여는 것은 유한하므로 그런 선택이 필요 없습니다.
 
 ### Codex 캡처 라이프사이클
 
@@ -39,15 +39,15 @@ Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고
 ## 프로토콜 흐름
 
 ```
-Phase 0: Detect      → 빈 지향 감지, 입력 타입 분류, 트랙 디스패치 (silent)
-Phase 1: Scan        → Salience 차원을 따라 저장소 스캔, 후보 순위화
-Phase 2: Recognize   → SingleObvious면 게이트 없이 최상위 후보를 바로 emit (침묵 = 인지); 그 외에는 최상위 후보를 사이클당 하나씩 소크라테스식 인지를 위해 제시 (gate interaction)
-Phase 3: Integrate   → 인지된 맥락을 세션 텍스트로 방출; 불일치 시 Refine/Reorient 로 루프
+Phase 0: Cue         → 빈 지향 감지; 단서와 그것이 가리키는 단위를 읽음 — 한 세션, 또는 그 위의 라인·토픽·개념 (silent)
+Phase 1: Find+Ground → INDEX와 기록 머리에서 후보를 찾아 순위화; 1순위 후보의 원기록을 열어 단서가 닿는 발췌를 뽑음
+Phase 2: Present     → 기록의 말로 된 이야기를 발췌마다 출처·resume 핸들과 함께 보여 주고 턴을 넘김 (모든 입도에서 같은 형태)
+Phase 3: Resolve     → 사용자가 식별 → RecalledContext; 단서를 고침 → Find로 (세 번까지); 넘어감 → 종료
 ```
 
 ## Salience 차원
 
-`MarkerProfile`의 여섯 차원 — 회상 후보 순위화와 초기 후보가 빗나갔을 때 소크라테스식 probe 구성에 사용.
+`MarkerProfile`의 여섯 차원 — 회상 후보를 찾고 순위화하는 데 사용.
 
 | 차원 | 마커링 대상 |
 |------|-------------|
