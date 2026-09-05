@@ -116,17 +116,19 @@ test("no document anywhere resolves to null, never an error", () => {
 // Rendering
 // ---------------------------------------------------------------------------
 
-test("renders header, intro, and one line per document with its absolute path", () => {
+test("renders header, intro, and one line per session-channel document with its absolute path", () => {
   const host = makeHost();
   try {
     const root = premiseRoot(host.env);
     const lines = renderPremise(root).split("\n");
     assert.equal(lines[0], PREMISE_HEADER);
     assert.equal(lines[1], PREMISE_INTRO);
-    assert.equal(lines.length, 2 + PREMISE_INDEX.length);
-    PREMISE_INDEX.forEach((e, i) => {
+    assert.equal(lines.length, 2 + SESSION.length);
+    SESSION.forEach((e, i) => {
       assert.equal(lines[2 + i], `Read \`${path.join(root, e.file)}\` ${e.when}`);
     });
+    // An edit-channel entry is delivered at its edit, not here.
+    for (const e of EDIT) assert.doesNotMatch(lines.join("\n"), new RegExp(e.file.replace(".", "\\.")));
     // Every path is absolute and under the root; no relative link survives.
     for (const m of lines.join("\n").matchAll(/`([^`]+)`/g)) {
       assert.ok(path.isAbsolute(m[1]) && m[1].startsWith(root + path.sep), m[1]);

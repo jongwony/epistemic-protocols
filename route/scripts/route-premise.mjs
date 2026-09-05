@@ -24,7 +24,9 @@
  * the reader carries it. A moment that is a file operation is observable
  * by the host, so its entry goes out at that operation instead, through the
  * PreToolUse hook (route-edit.mjs): an `edit` field on the entry names the
- * surfaces whose change is the moment.
+ * surfaces whose change is the moment, and such an entry leaves the
+ * session-start index, since a pointer delivered many turns before its
+ * moment was found not to be followed at the moment.
  *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
@@ -122,9 +124,9 @@ function present(root) {
   return PREMISE_INDEX.filter((e) => isFile(path.join(root, e.file)));
 }
 
-/** The entries delivered at session start: every present entry. */
+/** The entries delivered at session start: those with no edit channel. */
 function sessionEntries(root) {
-  return present(root);
+  return present(root).filter((e) => !e.edit);
 }
 
 /**
