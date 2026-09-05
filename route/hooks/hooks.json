@@ -1,5 +1,5 @@
 {
-  "description": "Three hooks. SessionStart injects the derived deficit → resolution table once per context epoch (startup, resume, clear, compact) with an opener conditioned on the source, and the session-channel premise index beneath it with every path absolute — scripts/route-session.mjs. UserPromptSubmit carries the per-prompt firing conditions for /route — scripts/route-prompt.mjs. PreToolUse delivers an edit-channel premise entry at the moment a tool call changes the instruction surface it names — scripts/route-edit.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
+  "description": "Four hook entries, three scripts. SessionStart injects the derived deficit → resolution table once per context epoch (startup, resume, clear, compact) with an opener conditioned on the source, and beneath it the premise index for the moments only the reader can recognize, every path absolute — scripts/route-session.mjs. UserPromptSubmit carries the per-prompt firing conditions for /route — scripts/route-prompt.mjs. PreToolUse and PostToolUse deliver a premise entry at the tool call that is its moment — scripts/route-tool.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
   "hooks": {
     "SessionStart": [
       {
@@ -23,11 +23,22 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash|apply_patch",
+        "matcher": "^(Edit|Write|MultiEdit|NotebookEdit|Bash|apply_patch|AskUserQuestion|request_user_input|Agent|Task|spawn_agent|CronCreate|ScheduleWakeup)$|send_later|create_trigger",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-edit.mjs\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-tool.mjs\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(Agent|Task|spawn_agent)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-tool.mjs\""
           }
         ]
       }
