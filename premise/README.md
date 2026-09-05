@@ -2,14 +2,17 @@
 
 These documents are the collaboration premises behind structured human-AI dialogue, stated so they
 hold on their own. Their index — each document and the moment that calls for it — is carried by the
-[`route`](../route) plugin's session-start hook, which is also how they reach a session. This file
-covers adopting them.
+[`route`](../route) plugin's hooks, which are also how they reach a session: at session start for
+the moments only the reader can recognize, and at the tool call for the moments the host can
+observe — an instruction surface about to change, a question about to be put, work handed to an
+agent, an irreversible action. This file covers adopting them.
 
 They are a reference surface, not a package: nothing here runs. Adopt them in one of two ways.
 
-- **Install the [`route`](../route) plugin.** Its session-start hook resolves this directory
-  through the host's own plugin records and injects the index into every context epoch with each
-  entry's path absolute, so a document is read by that path at the moment its entry names.
+- **Install the [`route`](../route) plugin.** Its hooks resolve this directory through the host's
+  own plugin records and inject each entry with its path absolute — at every context epoch, or at
+  the tool call that is its moment — so a document is read by that path at the moment its entry
+  names.
   Nothing is wired by hand, and the host's plugin manager keeps the marketplace checkout the paths
   point into current; a marketplace added from a local clone resolves to that clone, which is how
   to hold a copy that changes only when you say so. The install and the mechanism are in
@@ -28,8 +31,10 @@ names four triggers: design level, fix scope, question granularity, and a time o
 stated zone. Requiring all four makes the answer depend on the index rather than on a guess from the
 filename.
 
-A correct response establishes that the index reached that session. It does not establish that
-another session will behave the same way. Treat a wrong answer as an absent layer: the hook leaves
+A correct response establishes that the session-start index reached that session. It does not
+establish that another session will behave the same way. For the tool-call channel, ask the session
+to add one line to its project instruction file: the premise line for `instruction-authoring.md`
+should arrive before the edit runs. Treat a wrong answer as an absent layer: the hook leaves
 the index out rather than failing loudly when it cannot resolve this directory, so check that
 `route` is installed and its hooks are trusted (`/hooks`).
 
