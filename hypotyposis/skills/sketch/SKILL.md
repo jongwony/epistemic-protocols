@@ -20,7 +20,7 @@ Hypotyposis(I) → detect(I, ctx) →
     [R = Adjust(rev)]          revise(draft, rev) → re-present Qround                  -- pre-production loop
     [R = Approve(settlements)] settle(spec) ∧ promote(settlements) → produce(spec, Λ) → Sk →
   present(Sk) → Qfit(Sk, spec.focus) → Stop → M →
-    [M = Marks(ms)]   record(ms) → interpret(ms) → Λ.provisional → Λ.round += 1 → Qround
+    [M = Marks(ms)]   record(ms) → interpret(ms) → record(Interpreted) → Λ.round += 1 → Qround
     [M = Fit(w)]      Λ.fit_witnesses ∪= {w} → Λ.round += 1 → Qround                   -- one focus adequate; the loop continues
     [M = Finish(rec)] Λ.recognition := Some(rec) → Qplace → Stop → P → harvest → account → RecognizedForm
     [M = Withdraw]    account → EarlyExit
@@ -37,7 +37,7 @@ FormIntentSeed
   → produce         -- transform: round 1 generates one sketch per target; later rounds revise a retained parent
   → present         -- relay: each sketch from its typed concretum, then what this round can and cannot expose
   → recognize       -- Constitution: marks on a specific version — Marks | Fit | Finish | Withdraw
-  → record          -- track: every mark enters the append-only history; interpretations stay provisional
+  → record          -- track: every mark, and every interpretation read from it, enters the append-only history; interpretations stay provisional
   → place           -- Constitution: where the recognized concretum lives beyond the session; no default
   → harvest         -- active commitments, recognition witness, trace, and residual recorded before release
   → account         -- per-sketch retain-or-release disposition, verified
@@ -80,6 +80,8 @@ Coordinate = { axis: Axis, value: Value, basis: Mark | Binding | Utterance, stat
        -- interpret() yields Provisional only; Settled requires the user's act at Qround or a convention already on record
 Event = Bound(Binding) | Marked(Mark) | Interpreted(Coordinate) | Promoted(Coordinate) | Superseded(Coordinate, by: Coordinate) | Witnessed(FitWitness)
 active_coords(Λ) = fold(Λ.history)                                  -- the operative determinations now: each axis's latest Settled coordinate, with Provisional ones shown beside it
+provisional(Λ)   = { c : Interpreted(c) ∈ Λ.history ∧ ¬∃ Promoted(c) ∈ Λ.history ∧ ¬∃ Superseded(c, _) ∈ Λ.history }
+                                                                    -- AI interpretations awaiting the user's act at Qround; derived from the history, never stored apart
 FitWitness  = { sketch: SketchRef, context_revision: ℕ, scope: Focus, utterance: String }
        -- adequacy on one focus for one version; stale once its sketch is superseded or the context revision moves — shown as stale, never reused silently
 Recognition = { target: SketchRef, context_revision: ℕ, purpose_scope: String, residual: Set(Axis) }
@@ -117,7 +119,7 @@ Phase 0: I → detect(I, ctx) → fit_unrecognized?                             
        [false] Λ.exit := NotActivated → no_activation_relay → exit (NoActivationRelay)
        [true]  → Phase 1
 Phase 1: bind(I) → Λ.history := Bound(each prior item) → Λ.round := 1 → Phase 2       -- track; Settled where the user already committed, Candidate otherwise
-Phase 2: draft(RoundSpec, Λ.provisional) → Qround(Λ) → Stop → R                       -- round-spec gate [Tool]
+Phase 2: draft(RoundSpec, provisional(Λ)) → Qround(Λ) → Stop → R                       -- round-spec gate [Tool]
        [R = Adjust(rev)] revise(draft, rev) → re-present Qround                       -- nothing is produced under an unsettled spec
        [R = Approve(settlements)] Λ.spec := draft → promote(settlements) → Λ.history ++= Promoted(each) → Phase 3
        -- free responses declared pre-gate: question a focus (answered, gate re-presented); contest the activation premise (dissolution arm → Phase 6); name a boundary (boundary arm → Phase 6); withdraw (Phase 6, EarlyExit arm)
@@ -127,7 +129,7 @@ Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= 
        -- Λ.round = 1: generate(brief | prior material, active_coords); Λ.round > 1: revise(brief.parent retained, active_coords, marks since that parent)
        -- every sketch records its concretum and a versioned reference at creation; existing project files stay unchanged
 Phase 4: present(Sk) → acquire(marks) → Qfit(Sk, Λ.spec.focus) → Stop → M             -- recognition gate [Tool]
-       [M = Marks(ms)]   Λ.history ++= Marked(each) → interpret(ms) → Λ.provisional ∪= Δ → stale(Λ.fit_witnesses over superseded sketches) → Λ.round += 1 → Phase 2
+       [M = Marks(ms)]   Λ.history ++= Marked(each) → interpret(ms) → Δ → Λ.history ++= Interpreted(each c ∈ Δ) → stale(Λ.fit_witnesses over superseded sketches) → Λ.round += 1 → Phase 2
        [M = Fit(w)]      Λ.fit_witnesses ∪= {w} → Λ.history ++= Witnessed(w) → Λ.round += 1 → Phase 2
        [M = Finish(rec)] Λ.recognition := Some(rec) → Phase 5
        [M = Withdraw]    → Phase 6 (EarlyExit arm)
@@ -172,7 +174,7 @@ result equations:
 Phase 0 detect (sense)              → Internal analysis (deficit predicate over the utterance and accumulated context; no external tool)
 Phase 0 no_activation_relay (extension) → TextPresent+Proceed (the failed predicate with its basis; a sibling deficit seen in the scan is named as a finding and left to the session; not activated)
 Phase 1 bind (track)                → Internal state update (prior material enters Λ.history as Settled or Candidate with provenance; the round counter starts)
-Phase 2 draft (sense)               → Internal analysis (focus, realization, and target briefs proposed from active_coords, provisional coordinates, and the marks of the last round)
+Phase 2 draft (sense)               → Internal analysis (focus, realization, and target briefs proposed from active_coords, provisional(Λ), and the marks of the last round)
 Phase 2 Qround (constitution)       → present (mandatory round-spec gate: this round's focus, the perception it needs, the variant briefs, and each provisional coordinate with the mark it came from; fires BEFORE anything is produced; Adjust re-presents without producing; the pre-gate text declares the free-response paths — question a focus, contest the premise, name a boundary, withdraw)
 Phase 2 revise (track)              → Internal state update (Adjust branch: the draft revised as named before re-presenting)
 Phase 2 settle (track)              → Internal state update (Approve branch: Λ.spec committed; each provisional coordinate the user named becomes Settled with a Promoted event; unnamed ones stay Provisional)
@@ -181,8 +183,8 @@ Phase 3 produce_delegate (dispatch) → delegate (conditional: more than one tar
 Phase 4 present (extension)         → TextPresent+Proceed (each sketch from its typed concretum — Text re-presented as recorded, an Artifact walked through at its reference — then this round's focus, what this realization cannot expose, which content came from the user and which is the AI's proposal, and every fit witness now stale)
 Phase 4 acquire (observe)           → a channel returning utterances anchored on a sketch's element, region, whole, or span (read-only: the marks arrive as the user's utterances; the channel is a capability the host supplies, named here and bound nowhere in this contract; in a text-only host, quoting a span of a Text concretum is that channel)
 Phase 4 Qfit (constitution)         → present (mandatory recognition gate on a specific version: Marks, Fit on this focus, Finish for a stated purpose, Withdraw; Marks(∅) is Stop; the pre-gate text declares the free-response paths — interrogate, ask for another realization, contest the premise, name a boundary)
-Phase 4 record (track)              → Internal state update (every mark appended to Λ.history as itself; a fit witness appended; witnesses over superseded sketches marked stale)
-Phase 4 interpret (sense)           → Internal analysis (marks → Provisional coordinates, each carrying the mark it came from; never Settled here)
+Phase 4 record (track)              → Internal state update (every mark appended to Λ.history as itself, then each Provisional coordinate interpret read from it appended as Interpreted; a fit witness appended; witnesses over superseded sketches marked stale)
+Phase 4 interpret (sense)           → Internal analysis (marks → Provisional coordinates, each carrying the mark it came from; never Settled here; what it yields reaches Λ only through record)
 Phase 5 Qplace (constitution)       → present (mandatory placement gate: the recognized version and the capability it needs — a reference that outlives the session; the user names the location; no default is offered)
 Phase 6 harvest (track)             → Internal state update (Settled commitments, the fixture, the recognition, the trace, the residual axes, and the coordinates still Provisional, recorded before any release; the durable record is the RecognizedForm entire — sketch content beyond the retained version stays session-local)
 Phase 6 account (transform)         → artifact write, environment run (per sketch: retain the recognized version at the settled location, release every other; verify each; one retry; ReleaseFailed declared with a handoff)
@@ -195,8 +197,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 ── MODE STATE ──
 Λ = { phase: Phase, I: FormIntentSeed, round: ℕ,
       context_revision: ℕ,                     -- advances when the accumulated context moves outside the marks: a new user utterance about the form, a spec revision, a promoted coordinate
-      history: List(Event),                    -- append-only; active_coords is folded from it, never stored apart
-      provisional: Set(Coordinate),            -- AI interpretations awaiting the user's act at Qround
+      history: List(Event),                    -- append-only; active_coords and provisional are folded from it, never stored apart
       spec: Option(RoundSpec),                 -- this round's settled spec; None until Approve
       sketches: List(Sketch),                  -- every version produced, retained for revision until account
       fit_witnesses: Set(FitWitness),          -- with staleness derived from sketches and context_revision
@@ -207,7 +208,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
       initiator: Initiator,
       active: Bool, cause_tag: String }
 -- Guard: no sketch is produced before a Qround approval covers its brief — phase < 3 ⇒ sketches = ∅ on round 1; a later round holds prior sketches and produces nothing until its Qround settles
--- Guard: a Coordinate enters Settled only through Promoted (a user act at Qround) or Bound(Settled) (a commitment already on record); Interpreted events are Provisional
+-- Guard: a Coordinate enters Settled only through Promoted (a user act at Qround) or Bound(Settled) (a commitment already on record); an Interpreted event is the only way a Provisional coordinate enters the history, and it stays Provisional until Promoted or Superseded
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Form resolution emergent via session context.
