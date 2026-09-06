@@ -1,0 +1,9 @@
+{
+  "name": "hypotyposis",
+  "description": "Discover a form by marking what does not fit on concrete sketches until one is recognized — /sketch (ὑποτύπωσις: an outline, a first sketch)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}
