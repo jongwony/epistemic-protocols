@@ -36,8 +36,8 @@ FormIntentSeed
   → detect          -- deficit predicate over the utterance and accumulated context (silent analysis)
   → bind            -- prior material enters the history as Settled or Candidate, provenance kept
   → specify_round   -- Constitution: focus, realization, and targets settled; provisional coordinates promoted, superseded, or held
-  → produce         -- transform: one sketch per brief — a brief naming a parent revises that retained version, a parentless brief generates from prior material
-  → present         -- relay: each sketch from its typed concretum, then what this round can and cannot expose
+  → produce         -- transform: one sketch per brief — a brief naming a parent revises that retained version, a parentless brief generates from the material it names or from prior material — and declares what producing it determined that no coordinate covered
+  → present         -- relay: each sketch from its typed concretum, what this round can and cannot expose, and whether an artifact was observed
   → recognize       -- Constitution: marks on a specific version — Marks | Fit | Finish | Withdraw
   → record          -- track: every mark, and every interpretation read from it, enters the append-only history; interpretations stay provisional
   → place           -- Constitution: where the recognized concretum lives beyond the session; no default
@@ -73,19 +73,28 @@ R  = Round-spec gate answer ∈ {Approve(settlements, supersessions), Adjust(rev
        -- Approve names which provisional coordinates become Settled and which coordinates — Provisional or Settled — the user supersedes (either set possibly empty); Adjust revises focus, realization, or targets and re-presents before anything is produced
 SketchRef = { id: ℕ, round: ℕ }                                    -- identity of one version; the harvest and every mark point at one of these
 Concretum = Text(value) | Artifact(versioned_ref)                  -- Text: narration carried in session text; Artifact: a file under temp isolation, versioned at creation
-Sketch = { ref: SketchRef, parents: List(SketchRef), concretum: Concretum, rendered_from: snapshot(active_coords), focus: Focus }
+Sketch = { ref: SketchRef, parents: List(SketchRef), concretum: Concretum, rendered_from: snapshot(active_coords), introduced: Set(Coordinate), focus: Focus }
+       -- introduced: what producing this sketch had to determine that active_coords did not settle — a value held equal
+       --   across targets so the focus is the only difference, a proportion the brief left open, a construction the
+       --   realization forced. Each Provisional, basis Production(this ref); rendered_from records what it was drawn
+       --   from, introduced records what drawing it decided
 Anchor = Element(locator) | Region(bounds) | Whole | Span(text)    -- where on a sketch a mark points; Whole admits "something is missing here" with nothing to point at
 Mark = Misfit { sketch: SketchRef, anchor: Anchor, utterance: String, axis: Optional(Axis) }
      | Keep   { sketch: SketchRef, anchor: Anchor, utterance: String }
        -- a user utterance anchored on a version; Keep is the positive half of mixed feedback and is retained, never dropped
 Status = Provisional | Settled
-Coordinate = { axis: Axis, value: Value, basis: Mark | Binding | Utterance, status: Status, round: ℕ }
+Coordinate = { axis: Axis, value: Value, basis: Mark | Binding | Utterance | Production(SketchRef), status: Status, round: ℕ }
        -- interpret() yields Provisional only; Settled requires the user's act at Qround or a convention already on record
-Event = Bound(Binding) | Marked(Mark) | Interpreted(Coordinate) | Promoted(Coordinate) | Superseded(Coordinate, by: Optional(Coordinate)) | Witnessed(FitWitness)
+       -- Production(ref): a determination the producer had to make to render that sketch and no coordinate covered.
+       --   Provisional like any reading, and settled or superseded only by the user's act at Qround — production
+       --   introduces determinations, it never settles them
+Event = Bound(Binding) | Marked(Mark) | Interpreted(Coordinate) | Introduced(Coordinate) | Promoted(Coordinate) | Superseded(Coordinate, by: Optional(Coordinate)) | Witnessed(FitWitness)
        -- Superseded is appended by supersede at Qround and nowhere else: the user's act is its only producer, so an AI interpretation the user rejects leaves provisional(Λ) and a determination the user replaces leaves active_coords
+       -- Introduced is appended by produce and nowhere else: what making a sketch decided beyond what was settled
 active_coords(Λ) = fold(Λ.history)                                  -- the operative determinations now: per axis, the latest Settled coordinate with no Superseded(it, _) after it — Superseded(c, Some(c')) makes c' operative in c's place, Superseded(c, None) retires c with nothing in its place; Provisional ones shown beside
-provisional(Λ)   = { c : Interpreted(c) ∈ Λ.history ∧ ¬∃ Promoted(c) ∈ Λ.history ∧ ¬∃ Superseded(c, _) ∈ Λ.history }
-                                                                    -- AI interpretations awaiting the user's act at Qround; derived from the history, never stored apart
+provisional(Λ)   = { c : (Interpreted(c) ∈ Λ.history ∨ Introduced(c) ∈ Λ.history)
+                         ∧ ¬∃ Promoted(c) ∈ Λ.history ∧ ¬∃ Superseded(c, _) ∈ Λ.history }
+                                                                    -- what the AI read from a mark or decided while producing, awaiting the user's act at Qround; derived from the history, never stored apart
 FitWitness  = { sketch: SketchRef, context_revision: ℕ, scope: Focus, utterance: String }
        -- adequacy on one focus for one version; stale once its sketch is superseded or the context revision moves — shown as stale, never reused silently
 Recognition = { target: SketchRef, context_revision: ℕ, purpose_scope: String, residual: Set(Axis) }
@@ -129,7 +138,8 @@ Phase 2: draft(RoundSpec, provisional(Λ)) → Qround(Λ) → Stop → R        
        [R = Approve(settlements, supersessions)] Λ.spec := draft → promote(settlements) → Λ.history ++= Promoted(each) → supersede(supersessions) → Λ.history ++= Superseded(each of, by) → Λ.context_revision += 1 where either set is non-empty → Phase 3
        -- free responses declared pre-gate: question a focus (answered, gate re-presented); contest the activation premise (dissolution arm → Phase 6); name a boundary (boundary arm → Phase 6); withdraw (Phase 6, EarlyExit arm)
        -- on the AI-detected path, the first Qround is also the confirm-or-decline of the run: Adjust or Approve confirms; a free-response decline sets Λ.exit := NotActivated and exits as NoActivationRelay with the decline as its basis (nothing produced, nothing to account)
-Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= Sk           -- transform [Tool]
+Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= Sk
+         → Λ.history ++= Introduced(each c ∈ s.introduced for s ∈ Sk)                 -- transform [Tool]
        [|Λ.spec.targets| > 1, conditional] produce_delegate(∥ one sketch per executor, temp-isolated) [Tool]
        -- dispatch on brief.parent: Some(ref) → revise(ref retained, active_coords, marks since ref); None → generate(prior material, active_coords, brief.commits) — round 1 necessarily, a fresh start on a later round by the user's brief
        -- every sketch records its concretum and a versioned reference at creation; existing project files stay unchanged
@@ -185,13 +195,13 @@ result equations:
 Phase 0 detect (sense)              → Internal analysis (deficit predicate over the utterance and accumulated context; no external tool)
 Phase 0 no_activation_relay (extension) → TextPresent+Proceed (the non-activation basis — the failed predicate with its evidence, or the user's decline at the first Qround on the AI-detected path; a sibling deficit seen in the scan is named as a finding and left to the session; not activated)
 Phase 1 bind (track)                → Internal state update (prior material enters Λ.history as Settled or Candidate with provenance; the round counter starts)
-Phase 2 draft (sense)               → Internal analysis (focus, realization, and target briefs proposed from active_coords, provisional(Λ), and the marks of the last round)
-Phase 2 Qround (constitution)       → present (mandatory round-spec gate: this round's focus, the perception it needs, the variant briefs, and each provisional coordinate with the mark it came from — each open to settle, reject, or replace, as is any Settled coordinate in view; fires BEFORE anything is produced; Adjust re-presents without producing; the pre-gate text declares the free-response paths — question a focus, contest the premise, name a boundary, withdraw)
+Phase 2 draft (sense)               → Internal analysis (focus, realization, and target briefs proposed from active_coords, provisional(Λ), the bound prior material and the reading formed from it, and the marks of the last round — on round 1 the middle of those is the whole of it, so the briefs rest on a reading of the material rather than on coordinates that do not yet exist. Where the focus changes something that already exists, the current state is proposed as one target so the comparison has the ground it is judged against. Where a Settled coordinate bounds the axis this focus opens — a determination on one axis narrowing what another can take — that bound is named where the bounded axis is opened. An Adjust that corrects how an earlier utterance was read re-opens the provisional coordinates read from that utterance)
+Phase 2 Qround (constitution)       → present (mandatory round-spec gate: this round's focus, what the judgment needs, the variant briefs, and each provisional coordinate with where it came from — the mark it was read from, or the sketch whose production introduced it — each open to settle, reject, or replace, as is any Settled coordinate in view; fires BEFORE anything is produced; Adjust re-presents without producing; the pre-gate text declares the free-response paths — question a focus, contest the premise, name a boundary, withdraw)
 Phase 2 revise (track)              → Internal state update (Adjust branch: the draft revised as named before re-presenting)
 Phase 2 settle (track)              → Internal state update (Approve branch: Λ.spec committed; each provisional coordinate the user named becomes Settled with a Promoted event; each coordinate the user superseded takes a Superseded event — with the replacement they stated, or none; unnamed ones stay as they were)
-Phase 3 produce (transform)         → artifact write, environment run (temp-isolated sketches, each with its concretum and a versioned reference registered at creation; a brief naming a parent revises that retained version, a parentless brief generates from prior material; existing project files are never modified; Text concreta are session text only)
+Phase 3 produce (transform)         → artifact write, environment run (temp-isolated sketches, each with its concretum and a versioned reference registered at creation; a brief naming a parent revises that retained version, a parentless brief generates from the material its source names or from prior material; existing project files are never modified; Text concreta are session text only. Each sketch declares as Introduced coordinates what producing it had to determine that active_coords did not settle — what was held equal across targets so the focus is the only difference, a proportion the brief left open, a construction the realization forced — so the user meets those determinations at the next Qround rather than only their consequences on the screen)
 Phase 3 produce_delegate (dispatch) → delegate (conditional: more than one target; parallel topology: one sketch per executor, each temp-isolated with its reference registered; subordinate to the active runtime policy)
-Phase 4 present (extension)         → TextPresent+Proceed (each sketch from its typed concretum — Text re-presented as recorded, an Artifact walked through at its reference — then this round's focus, what this realization cannot expose, which content came from the user and which is the AI's proposal, and every fit witness now stale)
+Phase 4 present (extension)         → TextPresent+Proceed (each sketch from its typed concretum — Text re-presented as recorded, an Artifact walked through at its reference — then this round's focus, what this realization cannot expose, which content came from the user and which is the AI's proposal, this sketch's introduced determinations marked as the producer's, and every fit witness now stale)
 Phase 4 acquire (observe)           → a channel returning utterances anchored on a sketch's element, region, whole, or span (read-only: the marks arrive as the user's utterances; the channel is a capability the host supplies, named here and bound nowhere in this contract; in a text-only host, quoting a span of a Text concretum is that channel)
 Phase 4 Qfit (constitution)         → present (mandatory recognition gate on a specific version: Marks, Fit on this focus, Finish for a stated purpose, Withdraw; Marks(∅) is Stop; the pre-gate text declares the free-response paths — interrogate, ask for another realization, contest the premise, name a boundary)
 Phase 4 record (track)              → Internal state update (every mark appended to Λ.history as itself, then each Provisional coordinate interpret read from it appended as Interpreted; a fit witness appended; witnesses over superseded sketches marked stale)
@@ -219,7 +229,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
       initiator: Initiator,
       active: Bool, cause_tag: String }
 -- Guard: no sketch is produced before a Qround approval covers its brief — phase < 3 ⇒ sketches = ∅ on round 1; a later round holds prior sketches and produces nothing until its Qround settles
--- Guard: a Coordinate enters Settled only through Promoted (a user act at Qround), Bound(Settled) (a commitment already on record), or as the `by` of a Superseded the user stated at Qround; an Interpreted event is the only way a Provisional coordinate enters the history, and it stays Provisional until Promoted or Superseded
+-- Guard: a Coordinate enters Settled only through Promoted (a user act at Qround), Bound(Settled) (a commitment already on record), or as the `by` of a Superseded the user stated at Qround; an Interpreted or Introduced event is the only way a Provisional coordinate enters the history, and it stays Provisional until Promoted or Superseded
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Form resolution emergent via session context.
