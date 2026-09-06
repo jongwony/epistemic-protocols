@@ -23,10 +23,16 @@
  * "Active" is defined in the directive itself: a protocol invoked this
  * session that has not yet converged or deactivated. A protocol's skill
  * prose stays in context after it converges, and without the definition the
- * agent reads that leftover prose as an active protocol and skips /route for
- * the rest of the session. /route carries no active-protocol detection of
- * its own, so the exclusion stays here rather than moving into the skill.
- * The hook decides when; the /route skill decides what.
+ * agent reads that leftover prose as an active protocol and holds /route in
+ * monitor mode for the rest of the session. While a protocol is active the
+ * directive does not exclude /route; it narrows it to monitoring. Detecting
+ * a deficit and acting on it are separate flows: detection may run at every
+ * turn, but a switch away from a running protocol is a control act that
+ * belongs at that protocol's next checkpoint, where the user holds it. So in
+ * active mode /route neither invokes nor ends the turn — it places one
+ * finding line that the active protocol presents at its next checkpoint,
+ * and the loop continues. The hook decides when; the /route skill decides
+ * what, including how the active protocol is recognized.
  *
  * Output shape is the hook wire format both Claude Code and Codex accept for
  * UserPromptSubmit: hookSpecificOutput.additionalContext. The payload on
@@ -44,7 +50,7 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // time.
 const DIRECTIVE = [
   "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
-  "Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated.",
+  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /route monitors only: it may place one `↗ /command — reason` finding for that protocol's next checkpoint and invokes nothing; the turn continues.",
   "A converged protocol's prose still in context does not make it active.",
 ].join("\n");
 

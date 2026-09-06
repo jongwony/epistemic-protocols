@@ -26,9 +26,14 @@ test("directive carries the firing conditions and stays short", () => {
   assert.match(DIRECTIVE, /intent or context only the user can supply/);
   assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
   assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
-  // (b) active-protocol exclusion, with "active" defined in place: invoked
-  //     and not yet converged/deactivated — leftover skill prose is not active
-  assert.match(DIRECTIVE, /Skip while an epistemic protocol is active: invoked this session and not yet converged or deactivated/);
+  // (b) active-protocol monitor mode, with "active" defined in place: invoked
+  //     and not yet converged/deactivated — leftover skill prose is not active.
+  //     Monitoring places a finding for the next checkpoint; it never invokes
+  //     and never ends the turn — a switch is the user's, at the checkpoint.
+  assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — \/route monitors only/);
+  assert.match(DIRECTIVE, /one `↗ \/command — reason` finding for that protocol's next checkpoint/);
+  assert.match(DIRECTIVE, /invokes nothing; the turn continues/);
+  assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
   assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
   // (c) no default of silence: what to do when nothing fits is /route's own
   //     silence branch, and a standing "otherwise stay silent" read as the
@@ -39,9 +44,10 @@ test("directive carries the firing conditions and stays short", () => {
 
 test("the directive names no protocol — the condition is stated, /route matches", () => {
   // A protocol named here would be the hand-kept routing table Rule #2
-  // refuses. `/route` itself is the one command the directive may carry.
+  // refuses. `/route` itself and the `/command` placeholder in the finding's
+  // shape are the only commands the directive may carry.
   const commands = DIRECTIVE.match(/\/[a-z-]+/g) ?? [];
-  assert.deepEqual(commands.filter((c) => c !== "/route"), []);
+  assert.deepEqual(commands.filter((c) => c !== "/route" && c !== "/command"), []);
 });
 
 test("the per-prompt payload is the directive alone — no table", () => {
