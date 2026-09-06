@@ -58,6 +58,12 @@ A        = User answer ∈ {Provide(context), Point(location), Dismiss, Unknown(
 Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc gate answer type
 X'       = Updated prospect (context-enriched)
 InformedExecution = X' where remaining = ∅
+spent(u)        = A(u) = Unknown(Partial) ∧ no valid source for u is untried     -- promotion has no target (Phase 3, T2 exhausted)
+contradiction(u) = classify(u) = (Coherence, MemoryInternal) ∧ (the utterance contradicts itself ∨ the utterance contradicts collected context) ∧ no evidence can settle it
+                 -- reaches Phase 2 through the Factual resolution path MemoryInternal items enter, with every source there tried;
+                 -- the conflict is one of intent, not of fact: no EvidenceSource resolves it (CrossDomain items are out of scope and never reach here)
+exhausted(K)    = (∀ u ∈ K: spent(u)) ∨ (∃ u ∈ K: contradiction(u))            -- K = the Phase 2 cluster; the frame itself is unanswerable, or the intent is split
+                 -- one spent item is a fact the user lacks; a whole cluster spent is this protocol's boundary: what remains is not context a source can supply
 -- Layer 1 (epistemic)
 Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
@@ -156,6 +162,7 @@ Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- 
            [if ¬admissible(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], framing) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
+         [if exhausted(cluster)] Qs names the boundary beside the cluster       -- the spent items with the channels each tried, or the contradiction quoted; disposition stays the user's through sufficiency or Dismiss below
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (track: mutates Λ.X)
          [if A = Unknown(Partial) ∧ some valid source for u is untried] auto_promote(u, next-preferred untried source in ValidSources(v)) → goto Phase 1  -- backward arc (T2): a tried source is not re-selected
          [if A = Unknown(Partial) ∧ no valid source for u is untried] u stays in Λ.remaining → Phase 2  -- promotion has no target; disposition is the user's, not an AI dismissal
@@ -166,6 +173,7 @@ New uncertainties accumulate into uncertainties (cumulative, never replace).
 If Uᵢ ≠ ∅: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can declare the context sufficient at Phase 2 (sufficiency_declared): the remaining uncertainties are dismissed with the declaration recorded and the loop converges.
+At exhausted(cluster) the declaration or a Dismiss is the disposition left: the convergence trace records each such item as exhausted with the boundary named — the channels tried, or the contradiction quoted — so what inquiry could not supply is readable in the residual. This protocol ends there; what lies past its boundary is another deficit, read from that residual by whatever routes the turn after.
 Continue until: informed(X').
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted. The trace additionally declares every u ∈ Λ.non_factual_detected as detected-but-outside-scope: these resolve nowhere, so no transformation pair exists for them. The declaration is unconditional and does not gate — the all-non-actionable path (actionable(Λ) = ∅) converges without reaching a Phase 2 question, so this trace is the only surface carrying the detections there.
 
@@ -188,6 +196,7 @@ Phase 2 Qs      (constitution)        → present (mandatory: classify result + 
 Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace, including the out-of-scope declaration for every Λ.non_factual_detected item; proceed with informed execution)
 sufficiency  (extension)       → TextPresent+Proceed (fires on sufficiency_declared: the user declares the context sufficient as a free response at any Phase 2. Every uncertainty still in Λ.remaining moves to Λ.dismissed carrying the declaration as its recorded reason, so remaining = ∅ and informed(X') holds — the run converges as InformedExecution, not as an exit. It is a free-response pathway rather than a peer option in the Phase 2 set because declaring the WHOLE inquiry sufficient produces no trajectory on the per-item axis those options occupy: it disposes of the axis instead of taking a position on it. Present the dismissed set with the declaration recorded against each, so the convergence trace shows what was accepted unresolved rather than asserting resolution)
+exhausted    (extension)       → TextPresent+Proceed (fires at Phase 2 when exhausted(cluster) holds: every item in the cluster is promotion-spent, or a coherence item is a contradiction no evidence settles. Relay: the boundary is named beside the cluster — the spent items and the channels each tried, or the contradiction quoted from the utterance — so the user disposes of the cluster knowing that another round of inquiry yields nothing. The option set is unchanged: disposition stays the user's through sufficiency or Dismiss, and the residual carries the boundary into the convergence trace. This protocol ends at that boundary; what the residual shows next is read by whatever routes the turn after, from the trace, without a pointer from here)
 seam         (extension)       → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
@@ -253,6 +262,7 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 - **Recognition over Recall**: Present structured options with anticipatable post-selection states.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
 - **Option-set relay test**: Present a single dominant trajectory as Extension. Constitution options remain genuinely viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Boundary named, not crossed**: When the cluster is exhausted, say so beside it — what was tried, what contradicts — and leave disposition to the user. The residual records the boundary in this protocol's own terms; the deficit that begins past it belongs to another protocol, and the routing to it happens after this one has ended, from the trace.
 - **One coherent cluster**: Items in a multi-item cluster share a decision frame, have non-overlapping information-gain leverage, and are independently answerable. When the cluster has more than one item, cite the clustering basis and each item's gain rationale.
 - **No pre-filter rationalization**: Coherence coexistence is available only when an explicit scope hierarchy or documented precedence ordering resolves the apparent contradiction.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
