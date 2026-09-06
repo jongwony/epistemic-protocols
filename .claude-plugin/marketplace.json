@@ -76,6 +76,11 @@
       "description": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)"
     },
     {
+      "name": "hypotyposis",
+      "source": "./hypotyposis",
+      "description": "Discover a form by marking what does not fit on concrete sketches until one is recognized — /sketch (ὑποτύπωσις: an outline, a first sketch)"
+    },
+    {
       "name": "heuresis",
       "source": "./heuresis",
       "description": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)"

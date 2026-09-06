@@ -149,6 +149,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'katalepsis', skill: 'grasp' },
   { dir: 'periagoge', skill: 'induce' },
   { dir: 'proplasma', skill: 'preview' },
+  { dir: 'hypotyposis', skill: 'sketch' },
   { dir: 'merismos', skill: 'apportion' },
   { dir: 'prothesis', skill: 'frame' },
 ]);

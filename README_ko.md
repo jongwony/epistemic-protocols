@@ -69,6 +69,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Euporia](./euporia) | `/elicit` | 의도는 있지만 결정 좌표가 externalized substrate(코드베이스·규칙·과거 세션)에 암묵적으로만 존재할 때 — 역추적(reverse-trace)하여 의도를 결정화 |
 | [Heuresis](./heuresis) | `/ideate` | 결정을 위한 후보군이 비어 있거나 너무 일찍 하나로 수렴했을 때 — 선택하기 전에 다양한 후보군으로 먼저 넓힐 때 |
 | [Proplasma](./proplasma) | `/preview` | 결정 직전인데 방향 후보들이 말로는 판단이 안 서고 직접 봐야 알 것 같을 때 — 폐기 전제의 값싼 probe들로 먼저 대비 |
+| [Hypotyposis](./hypotyposis) | `/sketch` | 형태를 만들어야 하는데 무엇이어야 하는지는 말할 수 없고 보면 알아볼 수 있을 때 — 스케치하고, 맞지 않는 곳을 표시하고, 보존된 버전을 고쳐, 알아본 버전으로 마무리 |
 | [Prothesis](./prothesis) | `/frame` | 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 — 렌즈가 하나든 여럿이든 |
 | [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
 | [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
@@ -80,7 +81,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Katalepsis](./katalepsis) | `/grasp` | 코드·논문·큰 변경을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없거나 — 승인·활용 전에 이해가 진짜인지 검증 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/frame`, `/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## 유틸리티
 
@@ -156,6 +157,7 @@ claude plugin install route@epistemic-protocols
 | Anamnesis | ἀνάμνησις | 상기, 회상 |
 | Hyphegesis | ὑφήγησις | 앞서 이끌기, 안내 |
 | Proplasma | πρόπλασμα | 예비 모형, 첫 거푸집 |
+| Hypotyposis | ὑποτύπωσις | 개요, 밑그림 |
 | Heuresis | εὕρεσις | 발견, 찾아냄 |
 
 </details>

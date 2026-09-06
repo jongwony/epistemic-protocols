@@ -1321,6 +1321,7 @@ describe('package.js CLI', () => {
         'reduced-space-test.zip',
         'review-loop.zip',
         'route.zip',
+        'sketch.zip',
         'steer.zip',
         'sublate.zip',
         'triage.zip',

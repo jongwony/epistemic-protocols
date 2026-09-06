@@ -53,6 +53,7 @@ Compact mapping for inline use.
 | Euporia `/elicit` | Planning | Intent articulated but axis-undetermined; decision coordinates implicit in codebase / rules / past sessions | Multi-axis intent without single axis-specific protocol fit; substrate-implicit coordinates surface through cycle-emergent dimensions |
 | Heuresis `/ideate` | Planning | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
 | Proplasma `/preview` | Planning | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on user-settled axes | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
+| Hypotyposis `/sketch` | Planning | A form has to be made, intent cannot yet be settled from descriptions, and the user would recognize it on sight — sketch under a settled focus, take marks on a specific version, revise the retained version, finish on the recognized one | "I'd know it when I see it", a plan stalled at its first draft, a description rewritten repeatedly instead of made |
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 3+ instances with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
@@ -98,7 +99,7 @@ Present a condensed catalog as text output: render the Data Sources table groupe
 Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
-  - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview
+  - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview, /sketch
   - Analysis — /frame, /ground, /induce
   - Execution/Verification/Understanding — /apportion, /contextualize, /sublate, /recollect, /conduct, /grasp
 
