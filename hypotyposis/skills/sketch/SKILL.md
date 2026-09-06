@@ -218,14 +218,14 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 
 The transformation the moment needs decides between neighbors; a sibling deficit seen in the scan or demonstrated in a round is named as a finding at the boundary, and the session chooses what takes it.
 
-- `/preview` — contrast between named alternatives, committing to a direction; its probes are discarded. Here no alternative is named yet, and the version recognized is kept.
-- `/elicit` — coordinates read from cognition already externalized. Here nothing readable exists until a sketch is made.
-- `/contextualize` — a correct result repaired against a context that stays fixed. Here the encounter revises the intent itself.
+- `/preview` — recognize and settle a direction among named alternatives; its probes are discarded. Here the resolution sought is a form, and the recognized version is kept; a direction settled by `/preview` can enter as prior material.
+- `/elicit` — resolve intent by reverse-tracing decision coordinates from externalized cognition. Here encountering and revising sketches constitutes the remaining form intent; readable prior material may already exist.
+- `/contextualize` — adjudicate a result's fit against application context held fixed within the run, with adaptation directed by the user. Here encountering sketches develops the form intent itself.
 - `/ideate` — a thin field of ideas widened, nothing selected. Here a form is recognized.
 
 ## Mode Activation
 
-`/sketch` is directly invocable; the AI-detected path runs as the Rules' "Hybrid activation" states, with the first `Qround` as the confirm-or-decline of the run (Phase 2). Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Hypotyposis is active.
+`/sketch` is directly invocable. On the AI-detected path, cite evidence of `FitUnrecognized`; the first `Qround` confirms or declines the run. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Hypotyposis is active.
 
 Heuristic discovery cues are a plan that cannot reach its first draft, a description rewritten instead of made, a request to see something before saying more, and an explicit "I'd know it when I see it". They establish grounds to run Phase 0 rather than activation predicates.
 
@@ -278,23 +278,9 @@ Options:
 1. **Place** — name the location; the version is retained there and every other sketch is released
 ```
 
-### Phase 6: Harvest → Account (in this order)
-
-Record the harvest before any release; a failed release is declared with a handoff and does not revoke the recognition. Persist the RecognizedForm entire; sketch content beyond the retained version stays session-local.
-
-## UX Safeguards
-
-Keep placeholder status visible in every sketch and every round: a sketch is sandbox matter, not a project edit, until the user places it. Show a mark as the user's utterance and an interpretation as the AI's proposal. Show a fit witness over a superseded version as stale.
-
-## Known Limitations
-
-- The trace records what each mark became, not every alternative the AI considered while revising.
-
 ## Rules
 
-- **Hybrid activation**: `/sketch` runs on direct invocation, or from an AI-detected `FitUnrecognized` with cited evidence, where the first `Qround` is the confirm-or-decline of the run. A form-making purpose observed without that evidence does not activate it.
 - **Fresh start is a new brief**: Where the user asks to start a variant over, that is a brief with no parent, settled at `Qround`; it revises nothing and the earlier versions stay retained until account.
-- **Recognition-gate response discipline**: `Fit` names a version and this round's focus and continues the loop; `Finish` names a version, a purpose, and the axes left open, and ends it. Interrogation, a request for another perception, a premise contest, a boundary, and withdrawal are named before the gate as free responses rather than peer options; a withdrawal parses to `Withdraw`, the typed exit, because sketches exist and account has to run.
 - **Placement has no default**: The protocol names what the retained version needs — a reference that outlives the session — and the user names where. The fixture that results is a recognition witness and carries no implementation commitment.
 - **Round composition**: Use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
