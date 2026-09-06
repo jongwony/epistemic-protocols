@@ -9,7 +9,7 @@ Discover what a form should be by encountering concrete sketches and marking wha
 
 ## Definition
 
-**Hypotyposis** (ὑποτύπωσις): an outline or sketch — the word Sextus Empiricus chose for a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be. Fit is recognizable only through misfit — good fit has no positive description of its own, while each misfit is immediate in experience and can be listed (Alexander, 1964) — and in creative design the problem and its solution take shape together, each partial solution restructuring what the problem was (Dorst & Cross, 2001). So the protocol runs the other way round from a specification: it produces a concrete sketch, takes the user's marks on it as first-class utterances, revises a retained version under those marks, and stops when the user recognizes one version as the form. Presenting several alternatives yields more and sharper criticism than presenting one (Tohidi et al., 2006), and building alternatives before feedback improves both the result and the maker's stake in the process (Dow et al., 2010), so each round's variant count is settled at its own gate rather than fixed in advance; early concrete material measurably narrows what people go on to imagine (Wadinambiarachchi et al., 2024), which is why the round spec is settled before anything is produced and why unexpected marks stay admissible whatever the round's focus.
+**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit is immediate and can be pointed at (Alexander, 1964). So the protocol runs the other way round from a specification: the user settles each round's focus, the perception it needs, and its variants at a spec gate before anything is made; the AI produces the sketches; the user marks a specific version — what does not fit and what to keep — as first-class utterances; the AI revises the retained version under those marks; and the loop ends when the user recognizes one version as the form for a stated purpose and names where it lives.
 
 ```
 ── FLOW ──
@@ -216,27 +216,22 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 
 ## Core Principle
 
-**Recognition over Description**: when the user cannot say what the form should be, produce something they can mark. Each sketch is a filter over the form space — it fixes what this round asks the user to see — and the user's marks, kept as their own utterances, are the evidence intent is built from. The sketch under judgment is retained and revised, never rebuilt from the coordinates that describe it, because what the user recognized in it may be exactly what no coordinate expresses.
+**Recognition over Description**: when the user cannot say what the form should be, produce something they can mark, and let their marks — kept as their own utterances — be what intent is built from. The version under judgment is retained and revised, because what the user recognized in it may be exactly what no coordinate expresses.
 
 ## Scope Boundary
 
-What decides activation is the transformation the situation needs now, read from the utterance and the accumulated context:
+The transformation the moment needs decides between neighbors; a sibling deficit seen in the scan or demonstrated in a round is named as a finding at the boundary, and the session chooses what takes it.
 
-| Situation | Transformation needed | This protocol? |
-|-----------|----------------------|----------------|
-| Named alternatives whose futures the descriptions cannot carry | contrast → commit to one direction | No — the outcome sought is a direction, and the probes that show it are discarded |
-| Intent whose coordinates already live in externalized substrate | read the substrate → coordinates | No — nothing has to be manufactured to read them |
-| A correct result that may not fit a context already settled | repair the result against that context | No — the context is fixed there; here the encounter revises the intent itself |
-| An empty or prematurely converged field of ideas | widen the field, select nothing | No — no form is being recognized |
-| A form to make, intent underdetermined, and the user would know it on sight | sketch → mark → revise → recognize | **Yes** |
-
-A user who answers a round by settling the form in words has dissolved the deficit; the protocol stands down with the determinations it gathered. A sibling deficit the scan or a round demonstrates is named as a finding at the boundary; which protocol takes it is the session's choice.
+- `/preview` — contrast between named alternatives, committing to a direction; its probes are discarded. Here no alternative is named yet, and the version recognized is kept.
+- `/elicit` — coordinates read from cognition already externalized. Here nothing readable exists until a sketch is made.
+- `/contextualize` — a correct result repaired against a context that stays fixed. Here the encounter revises the intent itself.
+- `/ideate` — a thin field of ideas widened, nothing selected. Here a form is recognized.
 
 ## Mode Activation
 
 ### Activation
 
-`/sketch` is user-invocable. On the Hybrid path, the AI may propose it from a live form-making moment only with cited evidence of `FitUnrecognized` — an utterance like "I'd know it when I see it", a plan that stalls at its first draft, a description that keeps being rewritten instead of made — and the first `Qround` is where the user confirms or declines the run. Prior material in context may seed the history, never the recognition.
+`/sketch` is user-invocable. On the Hybrid path, the AI may propose it from a live form-making moment only with cited evidence of `FitUnrecognized`, and the first `Qround` is where the user confirms or declines the run. Prior material in context may seed the history, never the recognition.
 
 ### Priority
 
@@ -263,15 +258,15 @@ Use the Definition's result equations and TOOL GROUNDING payloads for every term
 
 ### Phase 0: Detection (Silent)
 
-Apply the deficit predicate in the Definition and cite the basis. A false predicate is relayed with what was seen; a sibling deficit visible in the same scan is named, never invoked.
+Apply the deficit predicate in the Definition and cite the basis.
 
 ### Phase 1: Bind
 
-Bring each prior item into the history as a commitment the user already made or as material to draw on, with where it came from. Nothing in the prior material is treated as settled unless the user settled it.
+Bring each prior item into the history as `Settled` only where the user settled it, as `Candidate` otherwise, with where it came from.
 
 ### Phase 2: Round Spec Gate
 
-Before the gate, lay out what this round would filter attention toward and why, the perception the judgment needs, the variant briefs (which parent each revises, or what each starts from on round 1), and every provisional coordinate with the mark it was read from. On the AI-detected path, say that this first gate also decides whether the run happens. Render `Qround`:
+Lay out the pre-gate content TOOL GROUNDING's `Qround` entry names, then render `Qround`:
 ```
 Settle this round before I make anything.
 
@@ -283,11 +278,11 @@ Name questioning a focus, contesting the premise, naming a boundary, and steppin
 
 ### Phase 3: Production (Transform)
 
-Round 1 generates one sketch per brief from the prior material and the active coordinates. Later rounds revise the retained parent each brief names, under the active coordinates and the marks since that parent. Text concreta are session text; artifacts are written only under temp isolation with a versioned reference registered at creation. Every sketch carries its placeholder status visibly.
+Produce under the settled spec as TOOL GROUNDING's `produce` entry states; every sketch carries its placeholder status visibly.
 
 ### Phase 4: Recognition Gate (Constitution)
 
-Present each sketch from its recorded concretum — narration re-presented as it was recorded, an artifact walked through at its reference — then this round's focus, what this realization cannot show, which content is the user's and which is the AI's proposal, and any fit witness now stale. Then acquire the marks through the channel the host supplies and render `Qfit`:
+Present as TOOL GROUNDING's `present` entry states, acquire the marks through the channel the host supplies, then render `Qfit`:
 ```
 Which version are you marking, and what do you see?
 
@@ -296,7 +291,7 @@ Options:
 2. **Fit on this focus** — this version is adequate on this round's focus; the next round takes another focus
 3. **Finish** — this version is the form, for the purpose you state, with the axes you leave open
 ```
-Name interrogating a sketch, asking for a different perception, contesting the premise, naming a boundary, and withdrawing as free-response paths; they are not numbered options. An empty mark set is a Stop, never a Fit.
+Name interrogating a sketch, asking for a different perception, contesting the premise, naming a boundary, and withdrawing as free-response paths; they are not numbered options.
 
 ### Phase 5: Placement Gate (Constitution)
 
@@ -307,30 +302,24 @@ Where does the recognized version live from here?
 Options:
 1. **Place** — name the location; the version is retained there and every other sketch is released
 ```
-A withdrawal here is a free response: the recognition is recorded in the partial trace and the run exits early.
 
 ### Phase 6: Harvest → Account (in this order)
 
-Record the Settled commitments, the fixture, the recognition, the trace, the residual axes, and the coordinates still provisional before any release. Then retain the recognized version at the settled location and release every other sketch, verifying each; a failed release is declared with a handoff and does not revoke the recognition. Persist the RecognizedForm entire; sketch content beyond the retained version stays session-local.
+Record the harvest before any release; a failed release is declared with a handoff and does not revoke the recognition. Persist the RecognizedForm entire; sketch content beyond the retained version stays session-local.
 
 ## UX Safeguards
 
-Keep placeholder status visible in every sketch and every round. A sketch is sandbox matter, not a project edit, until the user places it. A mark is the user's utterance and is shown as such; an interpretation drawn from it is shown as the AI's, provisional until the user settles it. A fit witness over a superseded version is shown stale, never carried forward silently. The fixture is a recognition witness: it says what the user recognized, not what an implementation must do.
+Keep placeholder status visible in every sketch and every round: a sketch is sandbox matter, not a project edit, until the user places it. Show a mark as the user's utterance and an interpretation as the AI's proposal. Show a fit witness over a superseded version as stale.
 
 ## Known Limitations
 
-- A round's focus filters attention; a misfit the user does not notice on another axis is not surfaced by the protocol.
-- The marks a realization can carry are bounded by that realization: a narration cannot expose what only layout or interaction would.
-- Coordinates express what marks named; what the user recognized in the retained version and never named survives only in that version.
 - The trace records what each mark became, not every alternative the AI considered while revising.
 
 ## Rules
 
 - **Hybrid activation**: `/sketch` runs on direct invocation, or from an AI-detected `FitUnrecognized` with cited evidence, where the first `Qround` is the confirm-or-decline of the run. A form-making purpose observed without that evidence does not activate it.
-- **Retain, then revise**: A sketch under judgment is retained and the next version revises it; coordinates alone never regenerate a sketch. Where the user asks for a fresh start on a brief, that is a new brief with no parent, settled at `Qround`.
-- **Marks are utterances; interpretations are provisional**: Every mark enters the history as the user's own words, anchored on a version. A coordinate the AI reads from a mark is provisional until the user settles it at `Qround` or a convention already on record settles it; a later user act may supersede an earlier determination, and the earlier one stays recorded.
-- **Recognition-gate response discipline**: `Fit` names a version and this round's focus and continues the loop; `Finish` names a version, a purpose, and the axes left open, and ends it. `Marks(∅)` is a Stop. A mixed response keeps its Keep marks. A version that was not presented cannot be finished. Interrogation, a request for another perception, a premise contest, a boundary, and withdrawal are named before the gate as free responses rather than peer options; a withdrawal parses to `Withdraw`, the typed exit the protocol acts on, because sketches exist and account has to run.
+- **Fresh start is a new brief**: Where the user asks to start a variant over, that is a brief with no parent, settled at `Qround`; it revises nothing and the earlier versions stay retained until account.
+- **Recognition-gate response discipline**: `Fit` names a version and this round's focus and continues the loop; `Finish` names a version, a purpose, and the axes left open, and ends it. Interrogation, a request for another perception, a premise contest, a boundary, and withdrawal are named before the gate as free responses rather than peer options; a withdrawal parses to `Withdraw`, the typed exit, because sketches exist and account has to run.
 - **Placement has no default**: The protocol names what the retained version needs — a reference that outlives the session — and the user names where. The fixture that results is a recognition witness and carries no implementation commitment.
-- **Harvest before account**: Record the commitments, witness, recognition, trace, residual, and provisional coordinates before any release. Account produces the dispositions; a `ReleaseFailed` is declared with a handoff and does not revoke the recognition.
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
+- **Round composition**: Use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
