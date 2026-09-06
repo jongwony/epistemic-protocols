@@ -25,20 +25,31 @@ test("directive carries the firing conditions and stays short", () => {
   assert.match(DIRECTIVE, /^\[route\] When the request is not fully explicit/);
   assert.match(DIRECTIVE, /intent or context only the user can supply/);
   assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
-  assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
-  // (b) active-protocol monitor mode, with "active" defined in place: invoked
-  //     and not yet converged/deactivated — leftover skill prose is not active.
-  //     Monitoring places a finding line in the transcript; it never invokes
-  //     and never ends the turn — a switch is the user's, where the active
-  //     protocol next stops for them. The protocol carries no slot for it.
-  assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — \/route monitors only/);
-  assert.match(DIRECTIVE, /one `↗ \/command — reason` finding line and invokes nothing; the turn continues/);
+  assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route — the skill call itself, each time, even when its prose is already in context/);
+  // (b) monitor mode, with the one narrowing condition defined in place: a
+  //     gate that holds the user's judgment — presented, and not yet answered,
+  //     closed, or entrusted to the session by its own contract; leftover
+  //     skill prose holds no gate. Monitoring places a finding line in the
+  //     transcript; it never invokes and never ends the turn — a switch is the
+  //     user's, where that gate next stops for them.
+  assert.match(DIRECTIVE, /While a gate holds the user's judgment — a protocol presented one this session and its own contract has not yet taken an answer at it, closed it, or entrusted the prompt to the session — /);
+  // (b'') the prompt is that protocol's to read first, by its own contract;
+  //     /route routes the context that reading leaves — a gate closed or
+  //     entrusted to the session holds no longer, one still holding is
+  //     monitored — and keeps no record of its own of what the user turned
+  //     away from. "active" is not the directive's vocabulary: what narrows
+  //     /route is a holding gate, read from the contract, not an invocation
+  //     that has not yet converged.
+  assert.match(DIRECTIVE, /that protocol reads the prompt first, as its contract reads any free response there; \/route, invoked the same way, routes what that reading leaves/);
+  assert.match(DIRECTIVE, /a gate still holding, at most one `↗ \/command — reason` finding line as \/route's own output and no invocation; none holding, routing as usual/);
+  assert.doesNotMatch(DIRECTIVE, /\bactive\b/);
+  assert.doesNotMatch(DIRECTIVE, /leaves open|returns there|parked/);
   assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
-  assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
+  assert.match(DIRECTIVE, /converged protocol's prose still in context holds no gate/);
   // (b') a converged protocol's residual is context /route reads next: the
   //     chain across protocols is composed here, not inside any protocol.
-  assert.match(DIRECTIVE, /what it left unresolved is context \/route reads at the next prompt/);
+  assert.match(DIRECTIVE, /what it left unresolved when it converged or deactivated is context \/route reads at the next prompt/);
   // (c) no default of silence: what to do when nothing fits is /route's own
   //     silence branch, and a standing "otherwise stay silent" read as the
   //     burden of proof sitting on invocation
