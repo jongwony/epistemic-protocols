@@ -97,17 +97,13 @@ Coordinate = { axis: Axis, value: Value, basis: Mark | Binding | Utterance | Pro
        -- Production(ref): a determination the producer had to make to render that sketch and no coordinate covered.
        --   Provisional like any reading, and settled or superseded only by the user's act at Qround — production
        --   introduces determinations, it never settles them
-Event = Bound(Binding) | Marked(Mark) | Proposed(Coordinate) | Promoted(Coordinate) | Superseded(Coordinate, by: Optional(Coordinate)) | Witnessed(FitWitness) | Parked(ParkedItem) | Taken(ParkedItem)
+Event = Bound(Binding) | Marked(Mark) | Proposed(Coordinate) | Promoted(Coordinate) | Superseded(Coordinate, by: Optional(Coordinate)) | Witnessed(FitWitness)
        -- Superseded is appended by supersede at Qround and nowhere else: the user's act is its only producer, so an AI interpretation the user rejects leaves provisional(Λ) and a determination the user replaces leaves active_coords
        -- Proposed is appended by interpret and by produce: a coordinate the AI puts forward, whichever step reached it.
        --   Its basis says which, and its lifecycle is one — presented at Qround, promoted or superseded there, residual otherwise
-       -- Parked is appended where a gate answer carries material for a later round; Taken where a later Qround's spec
-       --   takes it up or the user drops it — so parked(Λ) shrinks by a user act, the same way provisional(Λ) does
 active_coords(Λ) = fold(Λ.history)                                  -- the operative determinations now: per axis, the latest Settled coordinate with no Superseded(it, _) after it — Superseded(c, Some(c')) makes c' operative in c's place, Superseded(c, None) retires c with nothing in its place; Provisional ones shown beside
 provisional(Λ)   = { c : Proposed(c) ∈ Λ.history ∧ ¬∃ Promoted(c) ∈ Λ.history ∧ ¬∃ Superseded(c, _) ∈ Λ.history }
                                                                     -- what the AI read from a mark or decided while producing, awaiting the user's act at Qround; derived from the history, never stored apart
-parked(Λ)        = { p : Parked(p) ∈ Λ.history ∧ ¬∃ Taken(p) ∈ Λ.history }
-                                                                    -- what the user named for a later round and no round has taken up yet; derived, and declared at every terminal
 FitWitness  = { sketch: SketchRef, context_revision: ℕ, scope: Focus, utterance: String }
        -- adequacy on one focus for one version; stale once its sketch is superseded or the context revision moves — shown as stale, never reused silently
 Recognition = { target: SketchRef, context_revision: ℕ, purpose_scope: String, residual: Set(Axis) }
@@ -115,11 +111,7 @@ Recognition = { target: SketchRef, context_revision: ℕ, purpose_scope: String,
 M  = Recognition gate answer ∈ {Marks(Set(Mark)), Fit(FitWitness), Finish(Recognition), Withdraw}
        -- Marks(∅) is read as Stop, never as Fit; silence yields the turn again; a response carrying both marks and a finish is parsed as Marks — recognition names an unmarked version
        -- premise: one answer settles this version. An answer also naming what a later round should take up departs from
-       --   that premise rather than breaking it — it is parsed by its constructor, and the forward-bearing part is parked
-ParkedItem = { utterance: String, round: ℕ }
-       -- what a gate answer carried for a round after this one: a target named for the next, a focus named for one
-       --   beyond it. Recorded where it was said and re-presented at each Qround as itself, so a commitment the user
-       --   made does not cross rounds inside the AI's memory
+       --   that premise rather than breaking it — it is parsed by its constructor, and the rest is recorded as itself
 Location = a reference the user judges to outlive the session      -- the capability the placement gate asks the user to bind; the protocol supplies no default
        -- the durability is their judgment, not a checked fact: account verifies that the reference resolves to that
        --   version's concretum AT THE MOMENT IT IS CHECKED, which is the narrower of the two claims
@@ -137,8 +129,7 @@ TraceEntry = (Mark → Optional(Coordinate) → Optional(SketchRef) → Recogniz
        -- what each mark became: its interpretation, the revision it drove, and how it ended
 ExitCause ∈ {NotActivated, Recognized, Withdrawn, BoundaryReached, Dissolved}
 RecognizedForm = single record { commitments: Set(Coordinate) (Settled only), witness: Fixture, recognition: Recognition,
-                                 trace: List(TraceEntry), residual: Set(Axis), provisional: Set(Coordinate),
-                                 parked: Set(ParkedItem) }
+                                 trace: List(TraceEntry), residual: Set(Axis ⊎ ReferencedMaterial), provisional: Set(Coordinate) }
        -- assembled after account: the retained concretum is reachable through witness.ref, and what the user named for a
        --   round that never came is declared rather than dropped
 NoActivationRelay = the non-activation basis stated: the failed predicate with its evidence, or — on the AI-detected path — the user's decline at the first Qround, cited; a sibling deficit visible in the same scan is named as a finding and left to the session
@@ -163,7 +154,7 @@ Phase 0: I → detect(I, ctx) → fit_unrecognized?                             
 Phase 1: bind(I) → Λ.history := Bound(each prior item) → Λ.round := 1 → Phase 2       -- track; Settled where the user already committed, Candidate otherwise
 Phase 2: draft(RoundSpec, provisional(Λ)) → Qround(Λ) → Stop → R                       -- round-spec gate [Tool]
        [R = Adjust(rev)] revise(draft, rev) → re-present Qround                       -- nothing is produced under an unsettled spec
-       [R = Approve(settlements, supersessions)] Λ.spec := draft → promote(settlements) → Λ.history ++= Promoted(each) → supersede(supersessions) → Λ.history ++= Superseded(each of, by) → Λ.history ++= Taken(each parked item this spec takes up or the user drops) → Λ.context_revision += 1 where either set is non-empty → Phase 3
+       [R = Approve(settlements, supersessions)] Λ.spec := draft → promote(settlements) → Λ.history ++= Promoted(each) → supersede(supersessions) → Λ.history ++= Superseded(each of, by) → Λ.context_revision += 1 where either set is non-empty → Phase 3
        -- free responses declared pre-gate: question a focus (answered, gate re-presented); contest the activation premise (dissolution arm → Phase 6); name a boundary (boundary arm → Phase 6); withdraw (Phase 6, EarlyExit arm)
        -- on the AI-detected path, the first Qround is also the confirm-or-decline of the run: Adjust or Approve confirms; a free-response decline sets Λ.exit := NotActivated and exits as NoActivationRelay with the decline as its basis (nothing produced, nothing to account)
 Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= Sk
@@ -178,8 +169,6 @@ Phase 4: present(Sk) → acquire(marks) → Qfit(Sk, Λ.spec.focus) → Stop →
        [M = Withdraw]    → Phase 6 (EarlyExit arm)
        -- free responses declared pre-gate: interrogate a sketch (answered within its placeholder status, gate re-presented); ask for a different realization (a spec revision — Phase 2 with the revision named, no new round counted); contest the premise (dissolution arm); name a boundary (boundary arm)
        -- Marks(∅) is Stop; a mixed response keeps its Keep marks; a response naming a version that was not presented is answered, never parsed as Finish
-       -- on every arm: Λ.history ++= Parked(each item the answer named for a round after this one). The answer is still
-       --   parsed by its own constructor — parking takes what the constructor does not reach, never what it does
 Phase 5: Qplace(Λ.recognition.target) → Stop → P                                        -- placement gate [Tool]
        [P = Place(location, kept)] Λ.fixture := Some({ref: location, target, scope, residual, kept}) → harvest → Phase 6 (RecognizedForm arm)
        -- the protocol names the capability (a reference the user judges to outlive the session) and supplies no default, for the recognized version or for any kept one; a withdrawal here is the EarlyExit arm with the recognition recorded in the partial trace
@@ -203,7 +192,7 @@ Each round re-enters Phase 2 with the history it accumulated; the round counter 
 No fixed round cap: a round that re-enters a Constitution gate is dialogue, and the user can withdraw at any gate.
 Variant count is settled per round at Qround; a count the user already settled relays until they revise it.
 Continue until: RecognizedForm (Finish + placement + account) OR EarlyExit OR DissolutionExit OR BoundaryExit.
-Convergence evidence: at RecognizedForm, present the trace — each mark → its interpretation → the revision it drove → how it ended (recognized, superseded, or residual) — beside the recognized version, its placement, the versions kept as revert points, the Settled commitments, the coordinates still Provisional, the residual axes, and whatever is still parked. Each other terminal presents its own payload (TOOL GROUNDING). Demonstrated, not asserted.
+Convergence evidence: at RecognizedForm, present the trace — each mark → its interpretation → the revision it drove → how it ended (recognized, superseded, or residual) — beside the recognized version, its placement, the versions kept as revert points, the Settled commitments, the coordinates still Provisional and the residual — axes left open and material the user entrusted to a round that never came. Each other terminal presents its own payload (TOOL GROUNDING). Demonstrated, not asserted.
 
 ── CONVERGENCE ──
 disposition(s)  = the latest entry for s.ref in Λ.dispositions
@@ -215,7 +204,7 @@ recognition_ready(Λ) = Λ.recognition = Some(rec)
                      ∧ rec.target ∈ presented(Λ.sketches) ∧ disposition(rec.target) = Retained(Λ.fixture.ref)   -- retention verified, never assumed
                      ∧ rec.context_revision = Λ.context_revision
                      ∧ Λ.fixture ≠ None                                      -- Qplace settled
-                     ∧ residual_declared(Λ) ∧ trace_declared(Λ) ∧ parked_declared(Λ)
+                     ∧ residual_declared(Λ) ∧ trace_declared(Λ)
 converged(Λ) = accounted(Λ) ∧ ((Λ.exit = Recognized ∧ recognition_ready(Λ)) ∨ (Λ.exit = Dissolved ∧ basis_declared(Λ)))
 result equations:
   NoActivationRelay ⇔ Λ.exit = NotActivated                                  -- nothing produced; nothing to account
@@ -252,7 +241,9 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 ── MODE STATE ──
 Λ = { phase: Phase, I: FormIntentSeed, round: ℕ,
       context_revision: ℕ,                     -- advances when the accumulated context moves outside the marks: a new user utterance about the form, a spec revision, a promoted or superseded coordinate
-      history: List(Event),                    -- append-only; active_coords and provisional are folded from it, never stored apart
+      history: List(Event ⊎ ReferencedMaterial),   -- append-only; the typed events and, beside them, each gate answer as the
+                                               --   user said it, so what a constructor does not reach still survives the round
+                                               --   it was said in; active_coords and provisional are folded from it, never stored apart
       spec: Option(RoundSpec),                 -- this round's settled spec; None until Approve
       sketches: List(Sketch),                  -- every version produced, retained for revision until account
       fit_witnesses: Set(FitWitness),          -- with staleness derived from sketches and context_revision
@@ -336,6 +327,7 @@ When a retention failed, say so before re-presenting; the same location stays ad
 
 ## Rules
 
+- **Utterance continuity**: At every gate, append the user's answer as it was said to `Λ.history` beside the typed events read from it. At `Qround`, re-present outstanding material they entrusted to a later round; a subsequent act of theirs settles whether it is taken up or withdrawn. Whatever remains is declared in the terminal's residual.
 - **Ground interpretations**: Read each mark against the version it names, that version's brief, and how the round realized it. What the evidence supports about the form and about the realization is the judgment; carry it with its basis, and where the evidence does not settle which of the two a mark reaches, carry that unresolved into the provisional reading Qround presents.
 - **Placement has no default**: The protocol names what the retained version needs — a reference the user judges to outlive the session — and the user names where, together with which other versions are kept and where. The fixture that results is a recognition witness and carries no implementation commitment.
 - **Round composition**: Use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
