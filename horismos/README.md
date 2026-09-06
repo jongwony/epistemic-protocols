@@ -27,7 +27,7 @@ Users and AI often operate without clear boundaries about who knows what (`Bound
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 ## Install
 

@@ -26,7 +26,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **Key differences**:
 - **vs. Prothesis**: Prothesis selects which framework to apply when none exists. Analogia validates whether a selected framework structurally maps to your domain.

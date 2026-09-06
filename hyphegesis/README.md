@@ -23,7 +23,7 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 Prothesis frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The two share a topology algebra — the same arrangement functor Hyphegesis runs over the moves it identifies also arranges the perspectives Prothesis supplies.
 

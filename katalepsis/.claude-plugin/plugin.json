@@ -1,7 +1,7 @@
 {
   "name": "katalepsis",
-  "description": "Verify understanding of a result or artifact through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
-  "version": "3.1.5",
+  "description": "Verify understanding of a target in play — code, a document, a result — present in context and quotable, through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
+  "version": "3.2.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

@@ -1,22 +1,22 @@
 ---
 name: grasp
-description: "Verify understanding of a result or artifact through intent-scented entry points. Type: (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding"
+description: "Verify understanding of a target in play — code, a document, a result — present in context and quotable. Type: (TargetUngrasped, User, VERIFY, Target) → VerifiedUnderstanding"
 ---
 
 # Katalepsis Protocol
 
-Achieve certain comprehension of a result or artifact through structured verification, enabling the user to grasp what stands ungrasped. Type: `(ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding`.
+Achieve certain comprehension of a target in play — code, a document, a result — through structured verification, enabling the user to grasp what stands ungrasped. Type: `(TargetUngrasped, User, VERIFY, Target) → VerifiedUnderstanding`.
 
 ## Definition
 
-**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped result or artifact into verified user understanding through intent-scented entry points and progressive verification.
+**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped target into verified user understanding through intent-scented entry points and progressive verification.
 
 ```
 ── FLOW ──
 (R, U) → I → E → Fᵣ → Sₑ → B → Tᵣ → detect(E, B) → GT → P → Δ → Q → A → P' → Tᵤ → Q(coverage) → (loop until katalepsis)
 
 ── MORPHISM ──
-Result
+Target
   → orient(target, user_signal)        -- infer likely comprehension intents from the target and the user's wording
   → derive_entries(intent)             -- transform inferred intent into high-scent entry points
   → assess_route(intents, entries, R, U, context) -- annotate entry-point adequacy before user selection
@@ -26,13 +26,13 @@ Result
   → verify(comprehension)             -- Socratic probing per gap type, each adjudication against an answer attaching the material it was drawn from
   → confirm(coverage)                 -- aspect coverage check per entry point
   → VerifiedUnderstanding
-requires: result_exists(R)              -- the comprehension target must exist in context; its provenance is unconstrained
-deficit:  ResultUngrasped               -- activation precondition (Layer 1)
+requires: target_exists(R)              -- the comprehension target is present in context and can be quoted verbatim; its provenance is unconstrained. An admission condition on the target, not a promise that every answer finds enough ground for adjudication — the no-ground branch below stays
+deficit:  TargetUngrasped               -- activation precondition (Layer 1)
 preserves: R                            -- read-only throughout; morphism acts on user understanding only
 invariant: Comprehension over Explanation
 
 ── TYPES ──
-R  = The comprehension target — the result or artifact whose understanding is sought. Provenance is unconstrained: AI-authored work is the special case in which the material an adjudication would attach is already in context, because the session produced it
+R  = The comprehension target — the code, document, result, or other material whose understanding is sought, present in context and quotable. Provenance is unconstrained: AI-authored work is the special case in which the material an adjudication would attach is already in context, because the session produced it
 U  = User signal about what feels ungrasped; may be ∅ on bare `/grasp`
 I  = ComprehensionIntent inferred from R and U; I ∈ {Orientation, Rationale, Impact, Approval, Transfer} ∪ Emergent
 E  = Intent-scented entry points derived from I
@@ -112,7 +112,7 @@ If no adjudication against the answer stands once the inquiry has run, or none w
   User provides proposal via Other → detected by `proposal(A)` at Phase 3, ejected via record, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the active aspect changes, or the user-facing resume label changes — the Horizon preemption is such a moment: it binds no aspect, so its resume label names the coverage routing that answer is headed to, which is what a proposal ejected there returns to. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact.
 Continue until: all selected tasks completed (VerifiedUnderstanding).
-Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show ResultUngrasped(t) → its status, with the aspects detected for it and which of them were probed. That is what the run still holds at this point; which probes ended demonstrated and which ended unadjudicated does not, having been said in the closure of the round that produced it, which is where it was settled. What this trace demonstrates is the traversal itself — that the loop ran out over the aspects that were in play, each entry point closing where the user judged it sufficient. Convergence is demonstrated, not asserted.
+Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show TargetUngrasped(t) → its status, with the aspects detected for it and which of them were probed. That is what the run still holds at this point; which probes ended demonstrated and which ended unadjudicated does not, having been said in the closure of the round that produced it, which is where it was settled. What this trace demonstrates is the traversal itself — that the loop ran out over the aspects that were in play, each entry point closing where the user judged it sufficient. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 all_tasks_completed = ∀t ∈ Λ.tasks: t.status = completed
@@ -150,7 +150,7 @@ Seam transition to declared next protocol (extension) → TextPresent+Proceed (f
 ── MODE STATE ──
 Λ = {
   phase: Phase,
-  R: Result,
+  R: Target,
   userSignal: UserSignal,
   intents: List<ComprehensionIntent>,
   entryPoints: List<EntryPoint>,
@@ -174,7 +174,7 @@ State invariant: Λ.selected ⊆ Λ.entryPoints; every selected entry point has 
 
 ## Mode Activation
 
-`/grasp` is user-invoked only: activate when the user signals a wish to understand a result or artifact in play — AI-produced work, code or a document someone else wrote, or material the session has put on the table — including a bare command over the current one. Do not activate for an unrelated general question, an accurate account that already demonstrates understanding, an explicit decline, or a trivial formatting-only result.
+`/grasp` is user-invoked only: activate when the user signals a wish to understand a target already present in context and available for verbatim quotation, whatever its provenance — AI-produced work, code or a document someone else wrote, or material the session has put on the table; a bare command refers to the current target. Do not activate for an unrelated general question, an accurate account that already demonstrates understanding, an explicit decline, or a trivial formatting-only result.
 
 Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Katalepsis is active.
 
@@ -182,7 +182,7 @@ Loaded safety boundaries, capability restrictions, and explicit user instruction
 
 ### Intent-scented entry rendering
 
-Derive up to three first-turn labels from the user's likely comprehension intent — Orientation, Rationale, Impact, Approval, Transfer, or an Emergent intent — and phrase each as what the user will understand, decide, explain, or change by taking that path. Keep Code, Plan, Document, Analysis, Model, or mixed artifact bases behind those labels as grounding anchors. Descriptions state what becomes clear and why it matters; route-map metadata may enrich a label but never reveal a probe answer or reasoning path. A user-authored path remains valid when it stays within `ResultUngrasped → VerifiedUnderstanding`; multiple concerns the user already named become the ordered task list directly.
+Derive up to three first-turn labels from the user's likely comprehension intent — Orientation, Rationale, Impact, Approval, Transfer, or an Emergent intent — and phrase each as what the user will understand, decide, explain, or change by taking that path. Keep Code, Plan, Document, Analysis, Model, or mixed artifact bases behind those labels as grounding anchors. Descriptions state what becomes clear and why it matters; route-map metadata may enrich a label but never reveal a probe answer or reasoning path. A user-authored path remains valid when it stays within `TargetUngrasped → VerifiedUnderstanding`; multiple concerns the user already named become the ordered task list directly.
 
 ### Verification rendering and safeguards
 
@@ -208,7 +208,7 @@ When grounding an explanation or correction, cite concrete locations in the targ
 
 ## Rules
 
-- **User-initiated only**: Activate only on the user's wish to understand a result or artifact in play, whatever produced it; an explicit decline withdraws that invitation.
+- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline withdraws that invitation.
 - **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension outcome; artifact categories remain grounding material.
 - **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again.
 - **Rebuttable adjudication**: When you adjudicate against the user's answer, attach the material you adjudicated from — the target itself, or a source they cited that you can read now — quoted in place, at the narrowest span that supports the correction, never a locator they must open and never wider than the verdict. Where that material admits another reading, say which one you took, beside it. Where you have nothing to attach, do not adjudicate: take the answer, say you cannot check it, and name what you would have needed; what follows is attested or set aside, never demonstrated.

@@ -4,7 +4,7 @@
 > Skill이 세션에 로드되지 않으면 충돌이 발생하지 않습니다.
 
 **프로토콜**: Katalepsis (`/grasp`)
-**결핍 → 해소**: `ResultUngrasped → VerifiedUnderstanding`
+**결핍 → 해소**: `TargetUngrasped → VerifiedUnderstanding`
 
 ---
 
