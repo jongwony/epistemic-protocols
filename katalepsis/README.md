@@ -1,16 +1,16 @@
 # Katalepsis — /grasp (κατάληψις)
 
-Achieve certain comprehension of a result or artifact (κατάληψις: grasping firmly)
+Achieve certain comprehension of a target in play — code, a document, a result — (κατάληψις: grasping firmly)
 
 > [한국어](./README_ko.md)
 
 ## What is Katalepsis?
 
-A modern reinterpretation of Stoic κατάληψις (firm grasp, certain comprehension) — a protocol that **enables users to follow along and achieve verified understanding of a result or artifact, whoever produced it**.
+A modern reinterpretation of Stoic κατάληψις (firm grasp, certain comprehension) — a protocol that **enables users to follow along and achieve verified understanding of a target present in context, whoever produced it**.
 
 ### The Core Problem
 
-When a result is complex — a large change, code someone else wrote, a dense paper — users often can't grasp it in full (`ResultUngrasped`). They may think they understand, or feel overwhelmed without a clear entry point.
+When a target is complex — a large change, code someone else wrote, a dense paper — users often can't grasp it in full (`TargetUngrasped`). They may think they understand, or feel overwhelmed without a clear entry point.
 
 ### The Solution
 

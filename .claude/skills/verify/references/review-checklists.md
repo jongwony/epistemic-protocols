@@ -127,7 +127,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Elenchus: ContextSuspect → VettedContext (User-initiated, VET)
   - Merismos: GoalPlanUncompiled → ConditionBearingUnitPlan (User-initiated, APPORTION)
   - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
-  - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
+  - Katalepsis: TargetUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
   - Proplasma: DirectionUnrecognizable → DirectionalContrast (Hybrid, PREVIEW)
   - Heuresis: CandidateFieldUnderexpanded → DiverseCandidateField (User-initiated, DIVERGE)

@@ -27,7 +27,7 @@
 | Analogia | AI 주도 | `MappingUncertain → ValidatedMapping` |
 | Merismos | 사용자 주도 | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI 주도 | `ApplicationDecontextualized → ContextualizedExecution` |
-| Katalepsis | 사용자 주도 | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | 사용자 주도 | `TargetUngrasped → VerifiedUnderstanding` |
 
 ## 설치
 

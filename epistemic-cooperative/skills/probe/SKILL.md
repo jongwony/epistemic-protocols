@@ -178,7 +178,7 @@ FitReviewNote    = session text { presented_hypotheses, dismissed: true }
 DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     MappingUncertain, AbstractionInProcess, AbstractAporia,
                     GoalPlanUncompiled, ApplicationDecontextualized,
-                    ContextSuspect, RecallAmbiguous, ResultUngrasped,
+                    ContextSuspect, RecallAmbiguous, TargetUngrasped,
                     MethodUnderdetermined,
                     DirectionUnrecognizable, CandidateFieldUnderexpanded,
                     FitUnrecognized} ∪ Emergent

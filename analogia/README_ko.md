@@ -26,7 +26,7 @@ AI는 한 도메인의 패턴, 모델, 유비를 다른 도메인에 적용하�
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **핵심 차이**:
 - **vs. Prothesis**: Prothesis는 프레임워크가 없을 때 어떤 것을 적용할지 선택한다. Analogia는 선택된 프레임워크가 내 도메인에 구조적으로 대응되는지 검증한다.
