@@ -36,8 +36,8 @@ test("directive carries the firing conditions and stays short", () => {
   //     contract; /route reads the context that reading leaves — a closed
   //     protocol is residual, a kept one is still active — and keeps no
   //     record of its own of what the user turned away from
-  assert.match(DIRECTIVE, /the prompt is that protocol's to read first, where it stopped, as its contract reads any free response there; \/route, invoked the same way, reads what that reading leaves/);
-  assert.match(DIRECTIVE, /Where the protocol stays active, \/route places at most one `↗ \/command — reason` finding line as its own output and invokes nothing/);
+  assert.match(DIRECTIVE, /the prompt is that protocol's to read first, as its contract reads any free response where it stopped; \/route, invoked the same way, routes what that reading leaves/);
+  assert.match(DIRECTIVE, /Closed, or handed to the session under a continuation the contract holds: route as usual\. Still active: at most one `↗ \/command — reason` finding line as \/route's own output, invoking nothing/);
   assert.doesNotMatch(DIRECTIVE, /leaves open|returns there|parked/);
   assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);

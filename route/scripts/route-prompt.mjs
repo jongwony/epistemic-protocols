@@ -38,9 +38,10 @@
  * once invoked the protocol a new prompt asked for while the active one
  * still stood at its gate, in a state no contract has. The protocol's own
  * contract reads that prompt at its stop — an answer, a decline, a
- * withdrawal, a continuation it holds — and /route reads what that reading
- * leaves: a closed protocol is residual and the ordinary branches apply, a
- * kept one is still active. The third line
+ * withdrawal, a continuation it holds — and /route routes what that
+ * reading leaves: a closed protocol is residual and the ordinary branches
+ * apply, as they do to a prompt the contract handed to the session under a
+ * continuation it holds; a kept one is still active. The third line
  * also says what a converged protocol left unresolved is context /route
  * reads at the next prompt: /route composes from residual, with no pointer
  * from the protocol that left it. The hook decides when; the /route skill
@@ -62,7 +63,7 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // time.
 const DIRECTIVE = [
   "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route — the skill call itself, each time, even when its prose is already in context.",
-  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — the prompt is that protocol's to read first, where it stopped, as its contract reads any free response there; /route, invoked the same way, reads what that reading leaves. Where the protocol stays active, /route places at most one `↗ /command — reason` finding line as its own output and invokes nothing; the active protocol continues.",
+  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — the prompt is that protocol's to read first, as its contract reads any free response where it stopped; /route, invoked the same way, routes what that reading leaves. Closed, or handed to the session under a continuation the contract holds: route as usual. Still active: at most one `↗ /command — reason` finding line as /route's own output, invoking nothing.",
   "A converged protocol's prose still in context does not make it active; what it left unresolved when it converged or deactivated is context /route reads at the next prompt.",
 ].join("\n");
 
