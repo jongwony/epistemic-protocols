@@ -1,6 +1,6 @@
 ---
 name: route
-description: "Route the accumulated session context to the loaded core protocol whose deficit it shows — /route. Invokes the dominant match, nudges when several fit, silent when none, monitors while a gate holds the user's judgment."
+description: "Route the accumulated session context to the loaded core protocol whose deficit it shows — /route. Invokes the dominant match, nudges when several fit, silent when none, monitors while a gate holds."
 ---
 
 # Route Skill
