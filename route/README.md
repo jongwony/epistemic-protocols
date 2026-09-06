@@ -21,6 +21,10 @@ The table triggers; it does not match. The two ends of each morphism — the def
 | Silence | Nothing fits — the common case |
 | One finding line in the transcript (`↗ /command — reason`), no invocation, turn continues | A protocol is active and a different one is the dominant match — monitor mode |
 
+## What this plugin does not do
+
+Everything here is read-and-relay at one prompt: the hooks inject text, the skill reads the accumulated context and invokes, nudges, places a finding, or stays silent. Nothing is stored between prompts. So `/route` keeps no stack of parked protocols and resumes none — a protocol the user turns away from mid-run is settled by that protocol's own contract, and `/route` reads what it leaves at the next prompt. Routing that carries state across prompts (park, return to a checkpoint when a newer protocol converges) needs a hook layer that holds state; it is a separate, experimental plugin's job, not a feature this one grows.
+
 ## What the hooks inject
 
 `hooks/hooks.json` registers three command hooks. All write `hookSpecificOutput.additionalContext`, read the payload on stdin without requiring it, and exit 0 on every path. No file is written, no network is touched, and no session content leaves the process.

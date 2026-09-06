@@ -31,7 +31,13 @@
  * the user makes where that protocol next stops for them. So in active mode
  * /route neither invokes nor ends the turn — it places one finding line in
  * the transcript, and the loop continues; the active protocol's contract
- * ends at its own boundary and carries nothing of /route's. The third line
+ * ends at its own boundary and carries nothing of /route's. Two phrases in
+ * that line come from a runtime trace: "invoked the same way" because the
+ * model once wrote the finding line in /route's place without invoking it,
+ * and "whatever the prompt asks" because it then invoked the protocol the
+ * finding named, on its own — a prompt that carries a new deficit while a
+ * protocol is active is that protocol's to answer, and /route, keeping no
+ * stack of parked protocols, reads what it leaves. The third line
  * also says what a converged protocol left unresolved is context /route
  * reads at the next prompt: /route composes from residual, with no pointer
  * from the protocol that left it. The hook decides when; the /route skill
@@ -53,7 +59,7 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // time.
 const DIRECTIVE = [
   "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
-  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /route monitors only: it may place one `↗ /command — reason` finding line and invokes nothing; the turn continues.",
+  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /route monitors only: invoked the same way, it places at most one `↗ /command — reason` finding line as its own output and invokes nothing, whatever the prompt asks; the active protocol answers the prompt under its own contract and the turn continues.",
   "A converged protocol's prose still in context does not make it active; what it left unresolved is context /route reads at the next prompt.",
 ].join("\n");
 

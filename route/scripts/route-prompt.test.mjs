@@ -32,7 +32,8 @@ test("directive carries the firing conditions and stays short", () => {
   //     and never ends the turn — a switch is the user's, where the active
   //     protocol next stops for them. The protocol carries no slot for it.
   assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — \/route monitors only/);
-  assert.match(DIRECTIVE, /one `↗ \/command — reason` finding line and invokes nothing; the turn continues/);
+  assert.match(DIRECTIVE, /invoked the same way, it places at most one `↗ \/command — reason` finding line as its own output and invokes nothing, whatever the prompt asks/);
+  assert.match(DIRECTIVE, /the active protocol answers the prompt under its own contract and the turn continues/);
   assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
   assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
