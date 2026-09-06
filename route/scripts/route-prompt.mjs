@@ -28,11 +28,14 @@
  * directive does not exclude /route; it narrows it to monitoring. Detecting
  * a deficit and acting on it are separate flows: detection may run at every
  * turn, but a switch away from a running protocol is a control act that
- * belongs at that protocol's next checkpoint, where the user holds it. So in
- * active mode /route neither invokes nor ends the turn — it places one
- * finding line that the active protocol presents at its next checkpoint,
- * and the loop continues. The hook decides when; the /route skill decides
- * what, including how the active protocol is recognized.
+ * the user makes where that protocol next stops for them. So in active mode
+ * /route neither invokes nor ends the turn — it places one finding line in
+ * the transcript, and the loop continues; the active protocol's contract
+ * ends at its own boundary and carries nothing of /route's. The third line
+ * also says what a converged protocol left unresolved is context /route
+ * reads at the next prompt: connecting protocols is /route's doing, and no
+ * protocol names its successor. The hook decides when; the /route skill
+ * decides what, including how the active protocol is recognized.
  *
  * Output shape is the hook wire format both Claude Code and Codex accept for
  * UserPromptSubmit: hookSpecificOutput.additionalContext. The payload on
@@ -50,8 +53,8 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // time.
 const DIRECTIVE = [
   "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
-  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /route monitors only: it may place one `↗ /command — reason` finding for that protocol's next checkpoint and invokes nothing; the turn continues.",
-  "A converged protocol's prose still in context does not make it active.",
+  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /route monitors only: it may place one `↗ /command — reason` finding line and invokes nothing; the turn continues.",
+  "A converged protocol's prose still in context does not make it active; what it left unresolved is context /route reads at the next prompt.",
 ].join("\n");
 
 function render(raw) {

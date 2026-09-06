@@ -28,13 +28,17 @@ test("directive carries the firing conditions and stays short", () => {
   assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
   // (b) active-protocol monitor mode, with "active" defined in place: invoked
   //     and not yet converged/deactivated — leftover skill prose is not active.
-  //     Monitoring places a finding for the next checkpoint; it never invokes
-  //     and never ends the turn — a switch is the user's, at the checkpoint.
+  //     Monitoring places a finding line in the transcript; it never invokes
+  //     and never ends the turn — a switch is the user's, where the active
+  //     protocol next stops for them. The protocol carries no slot for it.
   assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — \/route monitors only/);
-  assert.match(DIRECTIVE, /one `↗ \/command — reason` finding for that protocol's next checkpoint/);
-  assert.match(DIRECTIVE, /invokes nothing; the turn continues/);
+  assert.match(DIRECTIVE, /one `↗ \/command — reason` finding line and invokes nothing; the turn continues/);
+  assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
   assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
+  // (b') a converged protocol's residual is context /route reads next: the
+  //     chain across protocols is composed here, not inside any protocol.
+  assert.match(DIRECTIVE, /what it left unresolved is context \/route reads at the next prompt/);
   // (c) no default of silence: what to do when nothing fits is /route's own
   //     silence branch, and a standing "otherwise stay silent" read as the
   //     burden of proof sitting on invocation
