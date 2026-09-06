@@ -647,6 +647,35 @@ function checkToolGrounding() {
       });
     }
 
+    // Check 6g: Verify each annotated entry's realization agrees with this file's
+    // own Realization header. The header binds interaction kind → realization
+    // (Constitution → TextPresent+Stop; Extension → TextPresent+Proceed); an entry
+    // that states a realization contradicting that binding is a contradiction
+    // internal to the artifact, so the verdict follows mechanically from the file.
+    if (realizationLine) {
+      const headerText = realizationLine[0];
+      const axis = new Map();
+      for (const m of headerText.matchAll(/(Constitution|Extension)\s*→\s*TextPresent\+(\w+)/gi)) {
+        axis.set(m[1].toLowerCase(), m[2]);
+      }
+      if (axis.size > 0) {
+        for (const rawLine of groundingSection.split('\n')) {
+          if (rawLine.includes('-- Realization:')) continue;
+          for (const entry of rawLine.matchAll(/\((constitution|extension)\)[^→]*→\s*TextPresent\+(\w+)/gi)) {
+            const kind = entry[1].toLowerCase();
+            const expected = axis.get(kind);
+            if (expected && entry[2].toLowerCase() !== expected.toLowerCase()) {
+              results.fail.push({
+                check: 'tool-grounding',
+                file: relPath,
+                message: `Realization axis violation: an entry marked (${kind}) realizes as TextPresent+${entry[2]}, but this file's own Realization header binds ${kind} → TextPresent+${expected}`
+              });
+            }
+          }
+        }
+      }
+    }
+
     results.pass.push({
       check: 'tool-grounding',
       file: relPath,

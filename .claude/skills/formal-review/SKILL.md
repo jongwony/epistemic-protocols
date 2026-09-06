@@ -74,7 +74,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 ## Phase 2: Fixed-Lens Review (isolated analysis → adversarial cross-verification)
 
-`/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. Review **only the changed files**.
+`/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. This skill fixes all five conduct axes — order, independence, reconciliation, termination, routing — so the method is not underdetermined and `/conduct`'s own activation precondition is unmet: declining it here IS that warrant relaying, not a shortcut past it. Review **only the changed files**.
 
 **Lens framing.** Call `/frame` (prothesis) to frame the perspectives. This skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
 
