@@ -25,15 +25,18 @@ test("directive carries the firing conditions and stays short", () => {
   assert.match(DIRECTIVE, /^\[route\] When the request is not fully explicit/);
   assert.match(DIRECTIVE, /intent or context only the user can supply/);
   assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
-  assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route/);
+  assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route — the skill call itself, each time, even when its prose is already in context/);
   // (b) active-protocol monitor mode, with "active" defined in place: invoked
   //     and not yet converged/deactivated — leftover skill prose is not active.
   //     Monitoring places a finding line in the transcript; it never invokes
   //     and never ends the turn — a switch is the user's, where the active
   //     protocol next stops for them. The protocol carries no slot for it.
-  assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — \/route monitors only/);
-  assert.match(DIRECTIVE, /invoked the same way, it places at most one `↗ \/command — reason` finding line as its own output and invokes nothing, whatever the prompt asks/);
-  assert.match(DIRECTIVE, /the active protocol answers the prompt under its own contract and the turn continues/);
+  assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /);
+  assert.match(DIRECTIVE, /a deficit the accumulated context shows is relayed, not acted on: \/route, invoked the same way, places at most one `↗ \/command — reason` finding line as its own output and invokes nothing/);
+  // (b'') a deficit the prompt itself carries is the user's turn away: /route
+  //     invokes, relaying what it leaves open and how it returns (by reading,
+  //     not by stored state)
+  assert.match(DIRECTIVE, /A deficit the prompt itself carries is the user's turn away: \/route invokes as usual, naming in one line what it leaves open and that it returns there by reading/);
   assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
   assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);

@@ -23,7 +23,7 @@ The table triggers; it does not match. The two ends of each morphism — the def
 
 ## What this plugin does not do
 
-Everything here is read-and-relay at one prompt: the hooks inject text, the skill reads the accumulated context and invokes, nudges, places a finding, or stays silent. Nothing is stored between prompts. So `/route` keeps no stack of parked protocols and resumes none — a protocol the user turns away from mid-run is settled by that protocol's own contract, and `/route` reads what it leaves at the next prompt. Routing that carries state across prompts (park, return to a checkpoint when a newer protocol converges) needs a hook layer that holds state; it is a separate, experimental plugin's job, not a feature this one grows.
+Everything here is read-and-relay at one prompt: the hooks inject text, the skill reads the accumulated context and invokes, nudges, places a finding, or stays silent. Nothing is stored between prompts. So `/route` keeps no stack of parked protocols. When the user turns away from an active protocol mid-run, `/route` invokes the protocol the prompt asks for and relays in one line what it leaves open; when that protocol converges, the line is residual like any other and `/route` reads it to point back at the open checkpoint. A protocol already open in the transcript is never invoked a second time — that reading is the recursion guard. The known risks of doing this by reading alone (an open checkpoint aging, one protocol matched from two directions, unbounded depth) are carried as relay until use shows one biting. Routing that settles them with state across prompts needs a hook layer that holds state; it is a separate, experimental plugin's job, not a feature this one grows.
 
 ## What the hooks inject
 

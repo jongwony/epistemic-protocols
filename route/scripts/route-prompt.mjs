@@ -31,13 +31,16 @@
  * the user makes where that protocol next stops for them. So in active mode
  * /route neither invokes nor ends the turn — it places one finding line in
  * the transcript, and the loop continues; the active protocol's contract
- * ends at its own boundary and carries nothing of /route's. Two phrases in
- * that line come from a runtime trace: "invoked the same way" because the
- * model once wrote the finding line in /route's place without invoking it,
- * and "whatever the prompt asks" because it then invoked the protocol the
- * finding named, on its own — a prompt that carries a new deficit while a
- * protocol is active is that protocol's to answer, and /route, keeping no
- * stack of parked protocols, reads what it leaves. The third line
+ * ends at its own boundary and carries nothing of /route's. The line splits
+ * by where the deficit sits, and a runtime trace shaped both halves. A
+ * deficit the accumulated context shows is relayed as a finding — "invoked
+ * the same way" because the model once wrote the finding line in /route's
+ * place without invoking it. A deficit the prompt itself carries is the
+ * user's turn away, so /route invokes: the model did exactly that on its
+ * own in the trace, saying it would come back to the open checkpoint, and
+ * that relay is kept as the contract rather than gated — /route keeps no
+ * stack, so the return is a reading of the transcript, and whether the
+ * reading returns reliably is what use decides. The third line
  * also says what a converged protocol left unresolved is context /route
  * reads at the next prompt: /route composes from residual, with no pointer
  * from the protocol that left it. The hook decides when; the /route skill
@@ -58,8 +61,8 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // the skill is invoked, so this directive is the surface present at decision
 // time.
 const DIRECTIVE = [
-  "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route.",
-  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /route monitors only: invoked the same way, it places at most one `↗ /command — reason` finding line as its own output and invokes nothing, whatever the prompt asks; the active protocol answers the prompt under its own contract and the turn continues.",
+  "[route] When the request is not fully explicit — intent or context only the user can supply — or the accumulated context shows an interaction deficit that a loaded core epistemic protocol resolves, invoke /route — the skill call itself, each time, even when its prose is already in context.",
+  "While an epistemic protocol is active — invoked this session and not yet converged or deactivated — a deficit the accumulated context shows is relayed, not acted on: /route, invoked the same way, places at most one `↗ /command — reason` finding line as its own output and invokes nothing; the active protocol continues. A deficit the prompt itself carries is the user's turn away: /route invokes as usual, naming in one line what it leaves open and that it returns there by reading once the new protocol converges.",
   "A converged protocol's prose still in context does not make it active; what it left unresolved is context /route reads at the next prompt.",
 ].join("\n");
 
