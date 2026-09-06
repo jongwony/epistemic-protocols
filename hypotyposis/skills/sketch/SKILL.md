@@ -64,7 +64,11 @@ fit_unrecognized(I, ctx) = a form-making purpose is in scope
 Axis      = String                                                 -- emergent label: "information unit", "reading order", "density", "tone"
 Focus     = Axis | Question(String)                                -- what this round filters attention toward; an unexpected misfit on any other axis stays admissible
 Value     = String                                                 -- a determination on an axis, in the user's words or read off the sketch
-Realization = capability description                               -- the perception this round's judgment needs (narration, spatial layout, interaction, sound, …); open, named per round
+Realization = capability description                               -- what this round's judgment needs in order to be possible: the perception it rests on
+       --   (narration, spatial layout, interaction, sound, …) and, where the focus opens an axis carrying a standard
+       --   outside both parties' preference, the referent it is checked against. Open, named per round — and a referent
+       --   the round requires that this session cannot supply is the boundary arm's condition rather than something to
+       --   proceed without, since an axis with a right answer closes as Fit when nobody brings the standard to it
 VariantBrief = { parent: Optional(SketchRef), source: Optional(ReferencedMaterial), commits: Map(Axis, Value) }
        -- one sketch to produce. Some(parent): revise that retained version. None: generate from active_coords and
        --   from the material `source` names, or from the bound prior material where it names none — every round-1
@@ -120,7 +124,10 @@ ParkedItem = { utterance: String, round: ℕ }
        -- what a gate answer carried for a round after this one: a target named for the next, a focus named for one
        --   beyond it. Recorded where it was said and re-presented at each Qround as itself, so a commitment the user
        --   made does not cross rounds inside the AI's memory
-Location = a reference that outlives the session                   -- the capability the placement gate asks the user to bind; the protocol supplies no default
+Location = a reference the user judges to outlive the session      -- the capability the placement gate asks the user to bind; the protocol supplies no default
+       -- the durability is their judgment, not a checked fact. account verifies that the reference resolves to that
+       --   version's concretum AT THE MOMENT IT IS CHECKED, which is a narrower claim than outliving the session, and
+       --   the two came apart inside one run when a reference verified at one gate stopped resolving before the next
 P  = Placement gate answer ∈ {Place(Location, kept: Map(SketchRef, Location))}
        -- where the recognized version lives, and which versions that were not recognized are kept as revert points and
        --   where; kept may be empty. On a re-presentation after RetainFailed, either may be the same or another; a
