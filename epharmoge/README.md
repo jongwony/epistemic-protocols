@@ -24,7 +24,7 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 ### Difference from Aitesis
 

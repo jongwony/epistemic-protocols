@@ -29,7 +29,7 @@ Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | **Anamnesis** | **AI-guided** | **`RecallAmbiguous → RecalledContext`** |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 | Periagoge | AI-guided | `AbstractionInProcess → CrystallizedAbstraction` |
 
 **Anamnesis vs Aitesis** — 가장 가까운 이웃. 둘 다 정보 접근을 다루지만, 현상학적 판별이 다릅니다. Aitesis는 사용자가 알지 못하는 사실을 발견합니다(`ContextInsufficient` — "정보가 필요하다"). Anamnesis는 사용자가 존재한다는 것은 어렴풋이 아는 맥락을 확인합니다(`RecallAmbiguous` — "이거 어디서 다뤘던 것 같은데"). 충족을 기다리는 빈 지향(empty intention)이면 Anamnesis; 해당 주제에 지향 자체가 없으면 Aitesis.

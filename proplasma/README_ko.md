@@ -25,7 +25,7 @@
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Proplasma** | **Hybrid** | **`DirectionUnrecognizable → DirectionalContrast`** |
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **삼분법**: 이해 부족 → `/grasp` (내가 이해했는지 검증); 경계 부족 → `/bound` (어디까지인지 확정); **미래 인식 불가 → `/preview` (어느 방향인지 보고 판단)**.
 

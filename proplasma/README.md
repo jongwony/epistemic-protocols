@@ -25,7 +25,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Proplasma** | **Hybrid** | **`DirectionUnrecognizable → DirectionalContrast`** |
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
-| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **The trichotomy**: understanding lacking → `/grasp` (verify that I understood); boundary lacking → `/bound` (settle how far); **future unrecognizable → `/preview` (see the directions, then judge)**.
 
