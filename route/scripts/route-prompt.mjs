@@ -33,8 +33,8 @@
  * the transcript, and the loop continues; the active protocol's contract
  * ends at its own boundary and carries nothing of /route's. The third line
  * also says what a converged protocol left unresolved is context /route
- * reads at the next prompt: connecting protocols is /route's doing, and no
- * protocol names its successor. The hook decides when; the /route skill
+ * reads at the next prompt: /route composes from residual, with no pointer
+ * from the protocol that left it. The hook decides when; the /route skill
  * decides what, including how the active protocol is recognized.
  *
  * Output shape is the hook wire format both Claude Code and Codex accept for

@@ -59,8 +59,9 @@ Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc g
 X'       = Updated prospect (context-enriched)
 InformedExecution = X' where remaining = ∅
 spent(u)        = A(u) = Unknown(Partial) ∧ no valid source for u is untried     -- promotion has no target (Phase 3, T2 exhausted)
-contradiction(u) = Fiber(u) = Coherence ∧ (the utterance contradicts itself ∨ the utterance contradicts collected context) ∧ no evidence can settle it
-                 -- the conflict is one of intent, not of fact: no EvidenceSource resolves it
+contradiction(u) = classify(u) = (Coherence, MemoryInternal) ∧ (the utterance contradicts itself ∨ the utterance contradicts collected context) ∧ no evidence can settle it
+                 -- reaches Phase 2 through the Factual resolution path MemoryInternal items enter, with every source there tried;
+                 -- the conflict is one of intent, not of fact: no EvidenceSource resolves it (CrossDomain items are out of scope and never reach here)
 exhausted(K)    = (∀ u ∈ K: spent(u)) ∨ (∃ u ∈ K: contradiction(u))            -- K = the Phase 2 cluster; the frame itself is unanswerable, or the intent is split
                  -- one spent item is a fact the user lacks; a whole cluster spent is this protocol's boundary: what remains is not context a source can supply
 -- Layer 1 (epistemic)
