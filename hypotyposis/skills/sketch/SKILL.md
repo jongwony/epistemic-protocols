@@ -40,7 +40,7 @@ FormIntentSeed
   → present         -- relay: each sketch from its typed concretum, what this round can and cannot expose, and whether an artifact was observed
   → recognize       -- Constitution: marks on a specific version — Marks | Fit | Finish | Withdraw
   → record          -- track: every mark, and every interpretation read from it, enters the append-only history; interpretations stay provisional
-  → place           -- Constitution: where the recognized concretum lives beyond the session; no default
+  → place           -- Constitution: where the recognized concretum lives beyond the session, and which versions the run passed over are kept as revert points; no default for either
   → harvest         -- active commitments, recognition witness, trace, and residual recorded before release
   → account         -- per-sketch retain-or-release disposition, verified
   → RecognizedForm
@@ -121,9 +121,14 @@ ParkedItem = { utterance: String, round: ℕ }
        --   beyond it. Recorded where it was said and re-presented at each Qround as itself, so a commitment the user
        --   made does not cross rounds inside the AI's memory
 Location = a reference that outlives the session                   -- the capability the placement gate asks the user to bind; the protocol supplies no default
-P  = Placement gate answer ∈ {Place(Location)}                     -- on a re-presentation after RetainFailed, Location may be the same or another; a free-response withdrawal here is EarlyExit with the recognition in the partial trace
-Fixture = { ref: Location, target: SketchRef, scope: String, residual: Set(Axis) }
+P  = Placement gate answer ∈ {Place(Location, kept: Map(SketchRef, Location))}
+       -- where the recognized version lives, and which versions that were not recognized are kept as revert points and
+       --   where; kept may be empty. On a re-presentation after RetainFailed, either may be the same or another; a
+       --   free-response withdrawal here is EarlyExit with the recognition in the partial trace
+Fixture = { ref: Location, target: SketchRef, scope: String, residual: Set(Axis), kept: Map(SketchRef, Location) }
        -- status: recognition witness. It carries no implementation commitment and is not an executable specification
+       -- kept: what a later reversal would otherwise have to rebuild. A version the loop passed over is what the
+       --   decision could return to, and returning to it costs rebuilding unless it survives as itself
 Disposition ∈ {Retained(Location), Released, ReleaseFailed(reason), RetainFailed(reason)}
        -- Retained is written only once verification holds: the reference resolves to the recognized version's exact concretum. RetainFailed sends control back to Qplace; ReleaseFailed is declared with a handoff
 TraceEntry = (Mark → Optional(Coordinate) → Optional(SketchRef) → Recognized | Superseded | Residual)
@@ -131,7 +136,7 @@ TraceEntry = (Mark → Optional(Coordinate) → Optional(SketchRef) → Recogniz
 ExitCause ∈ {NotActivated, Recognized, Withdrawn, BoundaryReached, Dissolved}
 RecognizedForm = single record { commitments: Set(Coordinate) (Settled only), witness: Fixture, recognition: Recognition,
                                  trace: List(TraceEntry), residual: Set(Axis), provisional: Set(Coordinate),
-                                 parked: Set(ParkedItem) }
+                                 parked: Set(ParkedItem), kept: Map(SketchRef, Location) }
        -- assembled after account: the retained concretum is reachable through witness.ref, and what the user named for a
        --   round that never came is declared rather than dropped
 NoActivationRelay = the non-activation basis stated: the failed predicate with its evidence, or — on the AI-detected path — the user's decline at the first Qround, cited; a sibling deficit visible in the same scan is named as a finding and left to the session
@@ -178,7 +183,9 @@ Phase 5: Qplace(Λ.recognition.target) → Stop → P                           
        -- RE-ENTERED from Phase 6 on RetainFailed: the failure is declared before the gate; the user names a location again — the same one is admissible — or withdraws
 Phase 6: account → [a terminal arm] Λ.exit := cause → terminal                          -- all arms [Tool]; the RetainFailed arm returns to Phase 5 with Λ.exit still None
        [from Phase 5 — recognized and placed] retain(recognition.target at Λ.fixture.ref) → verify(resolves(Λ.fixture.ref, concretum(recognition.target)))
-         [verified] Λ.dispositions ++= (target, Retained(Λ.fixture.ref)) → release(every other sketch) → Λ.exit := Recognized → assemble → RecognizedForm
+         [verified] Λ.dispositions ++= (target, Retained(Λ.fixture.ref))
+           → ∀ (s, loc) ∈ Λ.fixture.kept: retain(s at loc) → verify(resolves(loc, concretum(s))) → Λ.dispositions ++= (s, Retained(loc) | RetainFailed(reason))
+           → release(every sketch neither recognized nor kept) → Λ.exit := Recognized → assemble → RecognizedForm
          [failed after one retry] Λ.dispositions ++= (target, RetainFailed(reason)) → Λ.fixture := None → Phase 5 (Qplace re-presented with the failure declared; harvest re-runs with the next fixture)
            -- nothing is released on this arm: every sketch stays retained until a terminal is reached, so a later Place still finds the target
        [withdrawal at any gate] release(all) → EarlyExit
@@ -197,7 +204,8 @@ Convergence evidence: at RecognizedForm, present the trace — each mark → its
 ── CONVERGENCE ──
 disposition(s)  = the latest entry for s.ref in Λ.dispositions
 accounted(Λ) = ∀ s ∈ Λ.sketches: disposition(s) is defined                  -- every sketch has a declared disposition
-             ∧ (Λ.fixture = Some(f) ⇒ resolves(f.ref, concretum(f.target)))  -- the reference resolves to the recognized version's exact concretum, verified, and to nothing else
+             ∧ (Λ.fixture = Some(f) ⇒ resolves(f.ref, concretum(f.target))
+                                    ∧ ∀ (s, loc) ∈ f.kept: resolves(loc, concretum(s)))  -- each reference resolves to that version's exact concretum, verified at the moment it is checked, and to nothing else
              ∧ ∀ s: disposition(s) ∈ {ReleaseFailed(_), RetainFailed(_)} ⇒ handoff_declared(s)  -- failures are declared, never silent
 recognition_ready(Λ) = Λ.recognition = Some(rec)
                      ∧ rec.target ∈ presented(Λ.sketches) ∧ disposition(rec.target) = Retained(Λ.fixture.ref)   -- retention verified, never assumed
@@ -228,7 +236,7 @@ Phase 4 acquire (observe)           → a channel returning utterances anchored 
 Phase 4 Qfit (constitution)         → present (mandatory recognition gate on a specific version: Marks, Fit on this focus, Finish for a stated purpose, Withdraw; Marks(∅) is Stop; the pre-gate text declares the free-response paths — interrogate, ask for another realization, contest the premise, name a boundary)
 Phase 4 record (track)              → Internal state update (every mark appended to Λ.history as itself, then each Provisional coordinate interpret read from it appended as Interpreted; a fit witness appended; witnesses over superseded sketches marked stale)
 Phase 4 interpret (sense)           → Internal analysis (marks, read against the bound prior material, → Provisional coordinates, each carrying the mark it came from; never Settled here; what it yields reaches Λ only through record. Before a coordinate names the form, site the mark: an observed property traces either to what the brief committed or to how this round realized it — the render, the arithmetic that built it, the material it was drawn from — and where it traces to the realization the coordinate names the realization, which the next round's spec revision carries, never a form axis)
-Phase 5 Qplace (constitution)       → present (mandatory placement gate: the recognized version and the capability it needs — a reference that outlives the session; the user names the location; no default is offered)
+Phase 5 Qplace (constitution)       → present (mandatory placement gate: the recognized version and the capability it needs — a reference the user judges to outlive the session — together with the versions this run passed over, since those are what a later reversal would otherwise rebuild; the user names the location and which of the others are kept and where; no default is offered for either)
 Phase 6 harvest (track)             → Internal state update (Settled commitments, the fixture, the recognition, the trace, the residual axes, and the coordinates still Provisional, recorded before any release; the durable record is the RecognizedForm entire — sketch content beyond the retained version stays session-local)
 Phase 6 account (transform)         → artifact write, environment run (retain the recognized version at the settled location and verify the reference resolves to that exact concretum — one retry, then RetainFailed is declared and Qplace is re-presented with nothing released; once retained, release every other sketch and verify each — one retry, then ReleaseFailed declared with a handoff)
 dissolution_relay (extension)       → TextPresent+Proceed (either party, at any gate: the sharpened description made the form recognizable without a further encounter, or the activation premise collapsed; state the basis, relay the Settled commitments and every mark recorded, run account, stand down as DissolutionExit — a success, not an abandonment)
@@ -318,7 +326,7 @@ Present the recognized version and the capability it needs — a reference that 
 Where does the recognized version live from here?
 
 Options:
-1. **Place** — name the location; the version is retained there, verified, and every other sketch is released
+1. **Place** — name the location; the version is retained there and verified. Name any other versions worth keeping as revert points and where they go; the rest are released
 ```
 When a retention failed, say so before re-presenting; the same location stays admissible.
 
