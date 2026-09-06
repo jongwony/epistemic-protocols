@@ -4,7 +4,7 @@ Protocols grouped by primary concern. Clusters are non-directional — they repr
 
 | Cluster | Protocols | Question |
 |---------|-----------|----------|
-| Planning | /inquire, /elicit, /ideate, /preview | Is our direction clear? |
+| Planning | /inquire, /elicit, /ideate, /preview, /sketch | Is our direction clear? |
 | Analysis | /frame, /ground, /induce | Are we looking at this right? |
 | Execution | /apportion | What must verifiably hold when the autonomous run stops? |
 | Verification | /contextualize, /sublate | Does this fit where it's going? Has the working context held up? |

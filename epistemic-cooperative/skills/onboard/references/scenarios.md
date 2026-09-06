@@ -140,6 +140,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: πρόπλασμα (preliminary model) — the clay model a sculptor shapes before committing to marble: cheap, discardable, and made precisely to be seen. Core principle: **Contrast over Simulation**. Workflow position: Planning cluster — alongside `/inquire` (facts) and `/elicit` (intent coordinates), completing the unknowns-elicitation line with direction futures. Game feel: "I'd have to see it" → settle the axes → probes materialize the futures → you recognize, decide, and the clay goes back in the bin.
 
+## Hypotyposis `/sketch`
+
+**Situation**: You have to make something — a review page, a dashboard's first screen, a document's shape — and the plan keeps stalling at the first draft. You've rewritten the description three times and nothing exists yet. You can't say what it should be, but you're sure you'd recognize it once it was in front of you.
+
+**Intervention**: `/sketch` settles each round's focus, the kind of perception the judgment needs, and how many variants to make at a round-spec gate before anything is produced, then makes the sketches in temp isolation and presents them for your marks — what does not fit and what to keep, anchored on a specific version. Your marks stay your own words; what the AI reads from them stays provisional until you settle it at the next round. The next round revises the version you marked rather than regenerating it from a description, so what you recognized and never named survives. You finish on a version for the purpose you state, name where it lives (there is no default), and everything else is released with its disposition declared.
+
+**Trial prompt**: "Let's practice: name something you've been meaning to make but can't get past the first draft of — I'll show how /sketch turns your marks on a rough version into the form you recognize"
+
+**Quiz Q (situation)**: You need a weekly review page. You've described it four times and each description reads fine, but nothing has been made, and you say "honestly, I'd know it when I see it."
+- A) Proplasma `/preview` — B) Hypotyposis `/sketch` — C) Euporia `/elicit` — D) Heuresis `/ideate`
+- Answer: B
+
+**Quiz Q (design)**: The user cannot state the form but recognizes misfits instantly. How do you build intent from that without turning the AI's readings of their marks into commitments they never made?
+- Hint: Keep each mark as the user's utterance, keep interpretations provisional until the user settles them at the next round-spec gate, and revise the retained version instead of regenerating it from coordinates.
+
+**Philosophy**: ὑποτύπωσις (outline, sketch) — the first drawing of a position, made before it can be stated. Core principle: **Recognition over Description**. Workflow position: Planning cluster — after `/preview` (which commits to a direction and discards its probes) and before execution; `/sketch` keeps the version you recognized. Game feel: "I'd know it when I see it" → a rough version appears → you mark it → it comes back changed → you recognize the one that fits.
+
 ## Heuresis `/ideate`
 
 **Situation**: You've got a topic to write about — or maybe just a couple of scattered fragments jotted down — and what you need isn't a decision between two known options, and it isn't analytical lenses on a question you've already fixed. You just need more raw material. Right now you have one idea, or none, and you keep circling back to the same one or two instead of getting anywhere new.

@@ -180,10 +180,11 @@ DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     GoalPlanUncompiled, ApplicationDecontextualized,
                     ContextSuspect, RecallAmbiguous, TargetUngrasped,
                     MethodUnderdetermined,
-                    DirectionUnrecognizable, CandidateFieldUnderexpanded} ∪ Emergent
+                    DirectionUnrecognizable, CandidateFieldUnderexpanded,
+                    FitUnrecognized} ∪ Emergent
 ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit,
                     apportion, contextualize, sublate, recollect,
-                    grasp, conduct, preview, ideate} ∪ Emergent
+                    grasp, conduct, preview, ideate, sketch} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
