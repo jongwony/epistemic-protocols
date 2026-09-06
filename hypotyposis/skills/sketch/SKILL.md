@@ -65,7 +65,12 @@ Axis      = String                                                 -- emergent l
 Focus     = Axis | Question(String)                                -- what this round filters attention toward; an unexpected misfit on any other axis stays admissible
 Value     = String                                                 -- a determination on an axis, in the user's words or read off the sketch
 Realization = capability description                               -- the perception this round's judgment needs (narration, spatial layout, interaction, sound, …); open, named per round
-VariantBrief = { parent: Optional(SketchRef), commits: Map(Axis, Value) }  -- one sketch to produce. Some(ref): revise that retained version; None: generate from prior material and active_coords — every round-1 brief, and a fresh start the user settles at Qround on any later round
+VariantBrief = { parent: Optional(SketchRef), source: Optional(ReferencedMaterial), commits: Map(Axis, Value) }
+       -- one sketch to produce. Some(parent): revise that retained version. None: generate from active_coords and
+       --   from the material `source` names, or from the bound prior material where it names none — every round-1
+       --   brief, and a fresh start the user settles at Qround on any later round
+       -- a round that changes where the material comes from is a parentless brief naming the new source, not a
+       --   different kind of round: what the loop does is unchanged, and what moved is only what "generate" draws on
 RoundSpec = { focus: Focus, realization: Realization, targets: NonEmptyList(VariantBrief) }
        -- k = |targets| is settled here; a count the user already settled relays on later rounds
 Supersession = { of: Coordinate, by: Optional(Coordinate) }        -- the user's act on a coordinate in view: by = Some(c') replaces it with a determination the user states (c' enters Settled, basis Utterance), by = None retires it with nothing in its place
@@ -145,7 +150,7 @@ Phase 2: draft(RoundSpec, provisional(Λ)) → Qround(Λ) → Stop → R        
 Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= Sk
          → Λ.history ++= Introduced(each c ∈ s.introduced for s ∈ Sk)                 -- transform [Tool]
        [|Λ.spec.targets| > 1, conditional] produce_delegate(∥ one sketch per executor, temp-isolated) [Tool]
-       -- dispatch on brief.parent: Some(ref) → revise(ref retained, active_coords, marks since ref); None → generate(prior material, active_coords, brief.commits) — round 1 necessarily, a fresh start on a later round by the user's brief
+       -- dispatch on brief.parent: Some(ref) → revise(ref retained, active_coords, marks since ref); None → generate(brief.source where it names one else prior material, active_coords, brief.commits) — round 1 necessarily, a fresh start or a changed material source on a later round by the user's brief
        -- every sketch records its concretum and a versioned reference at creation; existing project files stay unchanged
 Phase 4: present(Sk) → acquire(marks) → Qfit(Sk, Λ.spec.focus) → Stop → M             -- recognition gate [Tool]
        [M = Marks(ms)]   Λ.history ++= Marked(each) → interpret(ms) → Δ → Λ.history ++= Interpreted(each c ∈ Δ) → stale(Λ.fit_witnesses over superseded sketches) → Λ.round += 1 → Phase 2
