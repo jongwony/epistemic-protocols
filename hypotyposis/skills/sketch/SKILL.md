@@ -178,23 +178,25 @@ Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= 
        -- every sketch records its concretum and a versioned reference at creation; existing project files stay unchanged
 Phase 4: present(Sk) → acquire(marks) → Qfit(Sk, Λ.spec.focus) → Stop → M             -- recognition gate [Tool]
        [M = Marks(ms)]   Λ.history ++= Marked(each) → interpret(ms) → Δ → Λ.history ++= Interpreted(each c ∈ Δ) → stale(Λ.fit_witnesses over superseded sketches) → Λ.round += 1 → Phase 2
-       [any arm] Λ.history ++= Parked(each item the answer named for a round after this one)   -- the answer is still parsed by its own constructor
        [M = Fit(w)]      Λ.fit_witnesses ∪= {w} → Λ.history ++= Witnessed(w) → Λ.round += 1 → Phase 2
        [M = Finish(rec)] Λ.recognition := Some(rec) → Phase 5
        [M = Withdraw]    → Phase 6 (EarlyExit arm)
        -- free responses declared pre-gate: interrogate a sketch (answered within its placeholder status, gate re-presented); ask for a different realization (a spec revision — Phase 2 with the revision named, no new round counted); contest the premise (dissolution arm); name a boundary (boundary arm)
        -- Marks(∅) is Stop; a mixed response keeps its Keep marks; a response naming a version that was not presented is answered, never parsed as Finish
+       -- on every arm: Λ.history ++= Parked(each item the answer named for a round after this one). The answer is still
+       --   parsed by its own constructor — parking takes what the constructor does not reach, never what it does
 Phase 5: Qplace(Λ.recognition.target) → Stop → P                                        -- placement gate [Tool]
-       [P = Place(location)] Λ.fixture := Some({ref: location, target, scope, residual}) → harvest → Phase 6 (RecognizedForm arm)
-       -- the protocol names the capability (a reference that outlives the session) and supplies no default; a withdrawal here is the EarlyExit arm with the recognition recorded in the partial trace
+       [P = Place(location, kept)] Λ.fixture := Some({ref: location, target, scope, residual, kept}) → harvest → Phase 6 (RecognizedForm arm)
+       -- the protocol names the capability (a reference the user judges to outlive the session) and supplies no default, for the recognized version or for any kept one; a withdrawal here is the EarlyExit arm with the recognition recorded in the partial trace
        -- RE-ENTERED from Phase 6 on RetainFailed: the failure is declared before the gate; the user names a location again — the same one is admissible — or withdraws
 Phase 6: account → [a terminal arm] Λ.exit := cause → terminal                          -- all arms [Tool]; the RetainFailed arm returns to Phase 5 with Λ.exit still None
-       [from Phase 5 — recognized and placed] retain(recognition.target at Λ.fixture.ref) → verify(resolves(Λ.fixture.ref, concretum(recognition.target)))
-         [verified] Λ.dispositions ++= (target, Retained(Λ.fixture.ref))
-           → ∀ (s, loc) ∈ Λ.fixture.kept: retain(s at loc) → verify(resolves(loc, concretum(s))) → Λ.dispositions ++= (s, Retained(loc) | RetainFailed(reason))
+       [from Phase 5 — recognized and placed] retain(recognition.target at Λ.fixture.ref) ∧ ∀ (s, loc) ∈ Λ.fixture.kept: retain(s at loc)
+         → verify(resolves(Λ.fixture.ref, concretum(recognition.target)) ∧ ∀ (s, loc) ∈ Λ.fixture.kept: resolves(loc, concretum(s)))
+         [all verified] Λ.dispositions ++= (target, Retained(Λ.fixture.ref)) and (s, Retained(loc)) for each kept
            → release(every sketch neither recognized nor kept) → Λ.exit := Recognized → assemble → RecognizedForm
-         [failed after one retry] Λ.dispositions ++= (target, RetainFailed(reason)) → Λ.fixture := None → Phase 5 (Qplace re-presented with the failure declared; harvest re-runs with the next fixture)
-           -- nothing is released on this arm: every sketch stays retained until a terminal is reached, so a later Place still finds the target
+         [any failed after one retry] Λ.dispositions ++= (each that failed, RetainFailed(reason)) → Λ.fixture := None → Phase 5 (Qplace re-presented with every failure declared; harvest re-runs with the next fixture)
+           -- ONE rule for the recognized version and for a kept one: a reference that does not resolve returns the placement to the user rather than being closed over, since accounted demands every reference the result needs
+           -- nothing is released on this arm: every sketch stays retained until a terminal is reached, so a later Place still finds the target and each kept version
        [withdrawal at any gate] release(all) → EarlyExit
        [dissolution arm] release(all) → DissolutionExit
        [boundary arm] release(all) → BoundaryExit
@@ -206,7 +208,7 @@ Each round re-enters Phase 2 with the history it accumulated; the round counter 
 No fixed round cap: a round that re-enters a Constitution gate is dialogue, and the user can withdraw at any gate.
 Variant count is settled per round at Qround; a count the user already settled relays until they revise it.
 Continue until: RecognizedForm (Finish + placement + account) OR EarlyExit OR DissolutionExit OR BoundaryExit.
-Convergence evidence: at RecognizedForm, present the trace — each mark → its interpretation → the revision it drove → how it ended (recognized, superseded, or residual) — beside the recognized version, its placement, the Settled commitments, the coordinates still Provisional, and the residual axes. Each other terminal presents its own payload (TOOL GROUNDING). Demonstrated, not asserted.
+Convergence evidence: at RecognizedForm, present the trace — each mark → its interpretation → the revision it drove → how it ended (recognized, superseded, or residual) — beside the recognized version, its placement, the versions kept as revert points, the Settled commitments, the coordinates still Provisional, the residual axes, and whatever is still parked. Each other terminal presents its own payload (TOOL GROUNDING). Demonstrated, not asserted.
 
 ── CONVERGENCE ──
 disposition(s)  = the latest entry for s.ref in Λ.dispositions
