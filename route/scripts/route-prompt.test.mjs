@@ -32,17 +32,19 @@ test("directive carries the firing conditions and stays short", () => {
   //     and never ends the turn — a switch is the user's, where the active
   //     protocol next stops for them. The protocol carries no slot for it.
   assert.match(DIRECTIVE, /While an epistemic protocol is active — invoked this session and not yet converged or deactivated — /);
-  assert.match(DIRECTIVE, /a deficit the accumulated context shows is relayed, not acted on: \/route, invoked the same way, places at most one `↗ \/command — reason` finding line as its own output and invokes nothing/);
-  // (b'') a deficit the prompt itself carries is the user's turn away: /route
-  //     invokes, relaying what it leaves open and how it returns (by reading,
-  //     not by stored state)
-  assert.match(DIRECTIVE, /A deficit the prompt itself carries is the user's turn away: \/route invokes as usual, naming in one line what it leaves open and that it returns there by reading/);
+  // (b'') the prompt is the active protocol's to read first, by its own
+  //     contract; /route reads the context that reading leaves — a closed
+  //     protocol is residual, a kept one is still active — and keeps no
+  //     record of its own of what the user turned away from
+  assert.match(DIRECTIVE, /the prompt is that protocol's to read first, where it stopped, as its contract reads any free response there; \/route, invoked the same way, reads what that reading leaves/);
+  assert.match(DIRECTIVE, /Where the protocol stays active, \/route places at most one `↗ \/command — reason` finding line as its own output and invokes nothing/);
+  assert.doesNotMatch(DIRECTIVE, /leaves open|returns there|parked/);
   assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
   assert.match(DIRECTIVE, /converged protocol's prose still in context does not make it active/);
   // (b') a converged protocol's residual is context /route reads next: the
   //     chain across protocols is composed here, not inside any protocol.
-  assert.match(DIRECTIVE, /what it left unresolved is context \/route reads at the next prompt/);
+  assert.match(DIRECTIVE, /what it left unresolved when it converged or deactivated is context \/route reads at the next prompt/);
   // (c) no default of silence: what to do when nothing fits is /route's own
   //     silence branch, and a standing "otherwise stay silent" read as the
   //     burden of proof sitting on invocation
