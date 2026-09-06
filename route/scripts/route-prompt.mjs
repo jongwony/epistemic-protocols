@@ -30,10 +30,12 @@
  * narrows it to monitoring. Detecting a deficit and acting on it are
  * separate flows: detection may run at every turn, but a switch away from
  * a gate is a control act the user makes where that gate next stops for
- * them. So while a gate holds /route neither invokes nor ends the turn — it
- * places one finding line in the transcript, and the turn goes back to the
- * gate; that protocol's contract ends at its own boundary and carries
- * nothing of /route's. A runtime trace shaped two phrases of that line.
+ * them. So while gates hold /route invokes nothing and ends nothing:
+ * exactly one holding gate permits at most one finding line about a
+ * different single dominant match, otherwise /route is silent, and the
+ * holding gates govern the turn under their own contracts, which end at
+ * their own boundary and carry nothing of /route's. A runtime trace shaped
+ * two phrases of that line.
  * "Invoked the same way", because the model once wrote the finding line in
  * /route's place without invoking it. And the protocol reading the prompt
  * first, because the model once invoked the protocol a new prompt asked
