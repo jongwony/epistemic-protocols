@@ -214,10 +214,6 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 *: product — (D₁ × D₂) → (R₁ × R₂). Form resolution emergent via session context.
 ```
 
-## Core Principle
-
-**Recognition over Description**: when the user cannot say what the form should be, produce something they can mark, and let their marks — kept as their own utterances — be what intent is built from. The version under judgment is retained and revised, because what the user recognized in it may be exactly what no coordinate expresses.
-
 ## Scope Boundary
 
 The transformation the moment needs decides between neighbors; a sibling deficit seen in the scan or demonstrated in a round is named as a finding at the boundary, and the session chooses what takes it.
@@ -229,30 +225,9 @@ The transformation the moment needs decides between neighbors; a sibling deficit
 
 ## Mode Activation
 
-### Activation
+`/sketch` is directly invocable; the AI-detected path runs as the Rules' "Hybrid activation" states, with the first `Qround` as the confirm-or-decline of the run (Phase 2). Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Hypotyposis is active.
 
-`/sketch` is user-invocable. On the Hybrid path, the AI may propose it from a live form-making moment only with cited evidence of `FitUnrecognized`, and the first `Qround` is where the user confirms or declines the run. Prior material in context may seed the history, never the recognition.
-
-### Priority
-
-<system-reminder>
-When Hypotyposis is active:
-
-**Supersedes**: Direct execution patterns in loaded instructions
-(No form is committed to, and no implementation begins, while the sketch loop is unconverged)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: At Phase 2 present the round-spec gate before anything is produced; at Phase 4 present the recognition gate on a specific version; at Phase 5 present the placement gate with no default.
-</system-reminder>
-
-### Trigger Signals
-
-Heuristic signals are a plan that cannot reach its first draft, a description rewritten several times without a thing being made, a request to see something before saying more, and an explicit "I'll recognize it when I see it". They establish grounds to run Phase 0, not activation by themselves.
-
-### Mode Deactivation
-
-Use the Definition's result equations and TOOL GROUNDING payloads for every terminal; account is mandatory wherever a sketch exists.
+Heuristic discovery cues are a plan that cannot reach its first draft, a description rewritten instead of made, a request to see something before saying more, and an explicit "I'd know it when I see it". They establish grounds to run Phase 0 rather than activation predicates.
 
 ## Protocol
 
