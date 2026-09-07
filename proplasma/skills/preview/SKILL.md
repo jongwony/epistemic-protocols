@@ -164,8 +164,9 @@ MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches (Routing
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
                                       --   misdiagnosis with no downstream protocol and return the decision to a regular
                                       --   gate, residual declared. The exit is defined even when nothing downstream fits
-MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insufficient, the draft having been settled or the direction gate
-            already re-presented once over it: deficit misdiagnosis report
+MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insufficient AT CONTRAST (Phase 3), the draft having been settled
+            or the direction gate already re-presented once over it — a withdrawal at that re-presented gate is EarlyExit, never this:
+            deficit misdiagnosis report
             + cleanup_verify enforced + route_away(MisdiagnosisRoute); no DirectionalContrast is emitted
 contrast_insufficient = the presented contrast does not make the candidate futures recognizable on the axes in force
             -- declared by the user (free response at the direction gate — not a D constructor; any drafted element sent back —
@@ -281,8 +282,10 @@ result equations:
                         -- non-convergent exit; unprobed_standdown (budget-spent naming of an unprobed candidate) and
                         --   insufficiency_standdown (repeated insufficiency at the re-presented gate with the budget spent
                         --   on Materialization) are withdrawals by consequence — the user exits the materialized decision space
-  MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ (Λ.spec_settled ∨ Λ.insufficiency_relayed) ∧ discard_declared(Λ)
-                        -- non-convergent exit
+  MisdiagnosisExit    ⇔ misdiagnosis_taken ∧ discard_declared(Λ)
+                        -- non-convergent exit; misdiagnosis_taken = the Phase 3 arm [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap
+                        --   ∧ (Λ.spec_settled ∨ Λ.insufficiency_relayed)] fired at contrast — a withdrawal at the gate that arm's sibling relay
+                        --   re-presented is user_withdraw, which keeps the two exits disjoint
   DissolutionExit     ⇔ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ)
                         -- convergent success stand-down (see converged)
 framing readout: the surfaced state names the work in play (axes being drafted, probes under contrast, direction being
