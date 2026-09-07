@@ -6,7 +6,7 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 
 ## What is Proplasma?
 
-A modern reinterpretation of Greek πρόπλασμα (preliminary model) — a protocol for the moment **right before a direction commitment, when the candidate directions cannot be judged from their descriptions and you feel you would have to see them to decide**. It materializes two to four cheap placeholder probes that diverge on user-settled axes, presents the per-axis contrast, and lets you constitute the direction decision on futures you have actually seen — then discards every probe.
+A modern reinterpretation of Greek πρόπλασμα (preliminary model) — a protocol for the moment **right before a direction commitment, when the candidate directions cannot be judged from their descriptions and you feel you would have to see them to decide**. It materializes two to four cheap placeholder probes that diverge on axes the AI drafts and relays with their basis, presents the per-axis contrast, and lets you constitute the direction decision on futures you have actually seen — then discards every probe.
 
 ### The Core Problem
 
@@ -14,7 +14,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 ### The Solution
 
-**Contrast over Simulation**: settle the divergence axes and the placeholder policy at a spec gate — sometimes the axes alone make the futures recognizable, and the protocol then stands down without generating anything — otherwise generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups), present them probe-first with a per-axis contrast map, and decide on recognition. Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (a failed destruction is declared with a cleanup handoff, never silent) — only the direction decision, the deciding contrast rows, and the newly exposed unknowns survive.
+**Contrast over Simulation**: draft the divergence axes and the placeholder policy and relay them with their basis — sometimes the axes alone make the futures recognizable, and the protocol then stands down without generating anything — otherwise generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups), present them probe-first with a per-axis contrast map, and decide on recognition, or send the draft back (the first send-back costs no re-fan budget). Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (a failed destruction is declared with a cleanup handoff, never silent) — only the direction decision, the deciding contrast rows, and the newly exposed unknowns survive.
 
 ### Difference from Other Protocols
 
@@ -33,11 +33,11 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 ## Three Breach Conditions
 
-The protocol's legitimacy lives in a survival chain — spec gate → transform generation → relay contrast → constitution decision → cleanup verification. Violating any of these dissolves it:
+The protocol's legitimacy lives in a survival chain — spec relay → transform generation → relay contrast → constitution decision → cleanup verification. Violating any of these dissolves it:
 
 | Breach | Guard |
 |--------|-------|
-| An AI-selected divergence axis without or after the spec gate | Spec gate fires before any generation |
+| A divergence axis that commits a probe value before it was relayed with its basis | The spec relay goes out before any generation, and any drafted element can be sent back at the direction gate |
 | A write to a permanent project file | Temp isolation + cleanup registered at creation |
 | A probe treated as evidence for any claim | Non-evidence stamp pierces harvest and session remnants |
 
@@ -54,7 +54,7 @@ claude plugin install proplasma@epistemic-protocols
 /preview [the direction decision you are about to commit to]
 ```
 
-Proplasma derives the axes on which your candidates genuinely diverge, has you settle the axes and the placeholder policy, builds 2–4 probes (each committing different values on the settled axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
+Proplasma derives the axes on which your candidates genuinely diverge, relays the axes and the placeholder policy with their basis, builds 2–4 probes (each committing different values on the drafted axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), send the drafted spec back, or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
 
 ## Author
 

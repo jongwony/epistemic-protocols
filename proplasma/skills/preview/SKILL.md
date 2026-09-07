@@ -9,7 +9,7 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 
 ## Definition
 
-**Proplasma** (πρόπλασμα): the preliminary clay model a sculptor shapes before committing to marble. A dialogical act for the moment right before a direction commitment when the candidate directions cannot be recognized from their descriptions: the AI derives the axes on which the candidates genuinely diverge, the user settles those axes and the placeholder policy at a spec gate, the AI instantiates two to four cheap placeholder probes that commit different values on the settled axes, presents them probe-first with a per-axis contrast, and the user constitutes the direction decision on recognized futures. Probes are discard-committed instruments — never evidence, never promoted.
+**Proplasma** (πρόπλασμα): the preliminary clay model a sculptor shapes before committing to marble. A dialogical act for the moment right before a direction commitment when the candidate directions cannot be recognized from their descriptions: the AI derives the axes on which the candidates genuinely diverge, relays the drafted axes, placeholder policy, probe target set, and realization tier with the basis that chose each, instantiates two to four cheap placeholder probes that commit different values on those axes, presents them probe-first with a per-axis contrast, and the user constitutes the direction decision on recognized futures — or sends the draft back, the first send-back costing no re-fan budget. Probes are discard-committed instruments — never evidence, never promoted.
 
 ```
 ── FLOW ──
@@ -18,31 +18,35 @@ Proplasma(X) → detect(X, route) →
   [futures recognizable from text] no_deficit_relay → exit (not activated)
   [route ∈ {①, ②, ③}] route_away_relay(matched row) → exit (not activated)
   [a type guard fails (¬fake_data_sufficient ∨ ¬placeholder_fidelity) ∧ no routing row matches] unfit_relay → exit (not activated)
-  derive_axes(X) → Axs → draft_policy → Qspec(Axs, policy, Tgt, tier) → S →
-  [S = Adjust(revision)] revise → Qspec (re-present; still pre-generation)
-  [at any Qspec circulation, either party: sharpened description makes the futures recognizable ∨ activation premise collapses]
+  derive_axes(X) → Axs → draft_policy → spec_relay(Axs, policy, Tgt, tier, each with its basis) → draft_spec →
+  [either party, at the spec relay or at any gate: sharpened description makes the futures recognizable ∨ activation premise collapses]
     dissolution: [Λ.probes ≠ ∅ (refan re-entry) → cleanup_verify first] → dissolution_relay → exit (DissolutionExit)
-  [S = Approve] instantiate(∥ probes over Tgt, temp-isolated, artifact_ref registered) →
+  instantiate(∥ probes over Tgt, temp-isolated, artifact_ref registered) →
   contrast(P, Axs) → (CM, EU, CC) → present(probe-first: probes → contrast map → unknowns) →
   Qdir → D →
   [D = Select(direction)] harvest → cleanup_verify → assemble → DirectionalContrast
   [D = Synthesize(composition)] Qmicro → Gs →
     [Gs = Confirm] harvest(synthesized direction) → cleanup_verify → assemble → DirectionalContrast
-    [Gs = Materialize] spec_gate_if_spec_revision → refan(composition) → contrast → present → Qdir
-  [contrast_insufficient ∧ refan_budget > 0] spec_gate_if_spec_revision → refan(gap) → contrast → present → Qdir
+    [Gs = Materialize] spec_relay_if_spec_revision → refan(composition) → contrast → present → Qdir
+  [draft sent back at Qdir ∧ ¬spec_settled] spec_relay_if_spec_revision → refan(gap; budget untouched) → contrast → present → Qdir
+  [contrast_insufficient ∧ refan_budget > 0] spec_relay_if_spec_revision → refan(gap) → contrast → present → Qdir
   [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ ¬insufficiency_relayed] insufficiency_after_materialization_relay → Qdir (re-present over the accumulated probes)
   [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ insufficiency_relayed] insufficiency_standdown_relay → cleanup_verify → exit (EarlyExit via insufficiency_standdown)
-  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
--- spec_gate_if_spec_revision: a refan whose implication carries a spec revision — a NEW divergence axis, a realization-tier
---   escalation, or a revised probe target set — routes through Qspec BEFORE generation
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap ∧ ¬spec_settled ∧ ¬insufficiency_relayed] insufficiency_before_settlement_relay → Qdir (re-present over the accumulated probes; the draft has not reached the user yet)
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap ∧ (spec_settled ∨ insufficiency_relayed)] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
+-- spec_relay_if_spec_revision: a refan whose implication carries a SpecRevision — a change to any drafted element of the spec —
+--   re-enters the spec relay scoped to the revision BEFORE generation
+-- spec_settled: False after the relayed draft; True at the first D answer or at the first send-back of the draft — a send-back
+--   while ¬spec_settled is the draft's own correction and re-fans without spending the shared budget; an insufficiency the AI
+--   detects at contrast is not that correction and rides the budget as any gap refan
 
 ── MORPHISM ──
 DirectionProspect
   → detect                  -- deficit predicate + 4-step routing (type guards: fake_data_sufficient, placeholder_fidelity)
   → derive_axes             -- divergence axis candidates (where the candidate directions must commit different values)
   → set_placeholder_policy  -- visible synthesis + non-evidence stamp + skeleton-faithful/data-fake split (draft)
-  → gate_spec               -- Constitution spec gate: axes + policy + probe target set + realization tier settled BEFORE any generation
-  → instantiate_probes      -- transform (∥ over the settled target set, temp-isolated, artifact_ref registered)
+  → relay_spec              -- Extension spec relay: axes + policy + probe target set + realization tier drafted with the basis for each, relayed BEFORE any generation, and open to send-back at the direction gate
+  → instantiate_probes      -- transform (∥ over the drafted target set, temp-isolated, artifact_ref registered)
   → contrast                -- per-axis juxtaposition → ContrastMap + ExposedUnknowns + CommonCommitments
   → present                 -- probe-first relay (probes one by one → contrast map → new unknowns)
   → constitute              -- direction gate: options point at probe-exposed futures (Select | Synthesize)
@@ -63,10 +67,11 @@ X   = DirectionProspect: a direction decision immediately before commitment (inp
         source-agnostic: design direction, architecture fork, UX shape, plan branch — any pre-commit direction choice)
         -- Input type: morphism processes X uniformly; enumeration scopes the definition, not behavioral dispatch
 DirectionAxis = a declared divergence axis — a direction unknown on which the probes must commit different values
-Axs = Set(DirectionAxis) settled at the spec gate (AI derives candidates; user settles — no axis is AI-selected past the gate)
-Tgt = List(direction) — the probe target set settled at the spec gate: which directions get probes on this fan
+Axs = Set(DirectionAxis) drafted at the spec relay (AI derives each and relays it with the basis that chose it; the user sends any back at the direction gate — no axis commits a probe value before it was relayed with its basis)
+Tgt = List(direction) — the probe target set drafted at the spec relay: which directions get probes on this fan
       -- contrast fan (initial, or gap refan): Tgt ⊆ X.direction_candidates with |Tgt| ∈ 2..4. When |candidates| > 4,
-      --   Qspec settles WHICH candidates are probed (the cap is a presentation bound, not a silent truncation)
+      --   the draft names WHICH candidates are probed and why, and an unprobed candidate stays reachable at the direction
+      --   gate (the cap is a presentation bound, not a silent truncation)
       -- materialization refan: Tgt = [composition] — the user's own synthesis, materialized so they can see it;
       --   |Tgt| ≥ 1 here: the composition is contrasted against the ACCUMULATED probes, which already carry the
       --   differentiated axis values
@@ -102,8 +107,11 @@ GroundTag = optional annotation ON THE CONSTITUTED DIRECTION (not an ExposedUnkn
                            --   DirectionalContrast.direction
 CommonCommitment = a design decision forced uniformly across ALL probes during instantiation (not on a divergence axis);
                    must be reported at present so the user does not mistake a shared premise for a divergence axis
-S  = Spec gate answer ∈ {Approve, Adjust(revision)}       -- Adjust revises axes/policy/target set/tier and re-presents; pre-generation
-       -- on a MATERIALIZATION re-entry, Adjust revises the new axis, policy, or tier only: Tgt = [composition] is fixed
+SpecRevision = a change to any element of the drafted spec — its divergence axes, placeholder policy, probe target set, or
+       realization tier, in whichever direction the correction runs — carried by a refan, whether the user sent the draft back at the
+       direction gate or contrast insufficiency exposed it; the spec relay re-presents scoped to it before that refan generates
+       anything. Which element moves and what it becomes are read from the send-back or the insufficiency, never enumerated here
+       -- on a MATERIALIZATION re-entry a revision reaches the axes, policy, or tier only: Tgt = [composition] is fixed
        --   by the refan kind
 directions(P) = {p.direction : p ∈ P}                     -- the directions a probe set has materialized
 D  = Direction gate answer ∈ {Select(direction), Synthesize(composition)}
@@ -137,22 +145,33 @@ EarlyExit = user WITHDRAWAL at any gate — an explicit exit declared as a free 
             acts on (side effects require explicit answer types) — or a withdrawal by consequence (unprobed_standdown /
             insufficiency_standdown, per the result equation): partial transformation trace
             over completed steps + cleanup_verify enforced + residual declared (direction NOT constituted)
-DissolutionExit = deficit dissolved during the Phase 1 circulation: deriving or settling the axes sharpened the description
-            until the candidate futures became recognizable without probes, or the circulation collapsed the activation
-            premise itself (the fork proves false). Declared by either party. Payload: the sharpened axes as the cited
+DissolutionExit = deficit dissolved at the spec relay or at a gate: deriving the axes, or seeing them relayed with their
+            basis, sharpened the description until the candidate futures became recognizable without probes, or the
+            activation premise itself collapsed (the fork proves false). Declared by either party. Payload: the sharpened axes as the cited
             basis, any recorded unknowns with their DownstreamRoutes, and — on a refan re-entry — the per-probe
             dispositions plus the pending re-fan target set (the user-authored composition on a materialization
             re-entry, the revised candidate set on a gap re-fan) relayed as live candidates for the regular gate.
             A success stand-down: no unresolved residual remains
-MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches: hand off to the cited protocol
+RoutingRow = ① a structural mapping onto a familiar domain would carry the futures → MappingUncertain (hint: /ground)
+           | ② real evidence is required before the directions can be judged       → ContextInsufficient (hint: /inquire)
+           | ③ the candidate field is thin — one or none — → CandidateFieldUnderexpanded (hint: /ideate); the frame itself is
+               absent → FrameworkAbsent (hint: /frame); the coordinates live implicit in externalized substrate → AbstractAporia
+               (hint: /elicit)
+       -- the rows Phase 0 and MisdiagnosisRoute dispatch on, first match wins: read after the requires checkpoint and before the type
+       --   guards, and what no row takes — candidates ≥ 2, evidence-free, placeholder-carriable — is this protocol's own case. Each row
+       --   names the sibling deficit as the binding and its command as the hint
+MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches (RoutingRow): hand off to the cited protocol
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
                                       --   misdiagnosis with no downstream protocol and return the decision to a regular
                                       --   gate, residual declared. The exit is defined even when nothing downstream fits
-MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insufficient: deficit misdiagnosis report
+MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insufficient AT CONTRAST (Phase 3), the draft having been settled
+            or the direction gate already re-presented once over it — a withdrawal at that re-presented gate is EarlyExit, never this:
+            deficit misdiagnosis report
             + cleanup_verify enforced + route_away(MisdiagnosisRoute); no DirectionalContrast is emitted
-contrast_insufficient = the presented contrast does not make the candidate futures recognizable on the settled axes
-            -- declared by the user (free response at the direction gate — not a D constructor) or detected at contrast
-            --   (an axis with no differentiated values across probes); either way surfaced, never silently self-repaired
+contrast_insufficient = the presented contrast does not make the candidate futures recognizable on the axes in force
+            -- declared by the user (free response at the direction gate — not a D constructor; any drafted element sent back —
+            --   an axis, the policy, the tier, the target set — is this declaration carrying its SpecRevision) or detected at contrast (an axis with no
+            --   differentiated values across probes); either way surfaced, never silently self-repaired
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → detect(X) → route?                                -- deficit predicate + 4-step routing (silent analysis)
@@ -160,24 +179,22 @@ Phase 0: X → detect(X) → route?                                -- deficit pr
        [futures recognizable from text] no_deficit_relay → exit  -- regular gate suffices; Proplasma not activated
        [route ∈ {①, ②, ③}] route_away_relay(matched row) → exit -- the matched routing row; not activated
        [a type guard fails ∧ no row matches] unfit_relay → exit  -- decision stays at a regular gate; not activated
-Phase 1: derive_axes(X) → Axs → draft_policy → Qspec(axes + policy + probe target set + tier) → Stop → S  -- spec gate [Tool]
-       [S = Adjust(revision)] revise(Λ) → re-present Qspec       -- pre-generation loop; no probe exists yet
-       [S = Approve] settle(Λ.axes, Λ.policy, Λ.tgt, Λ.tier) → Phase 2
-       [at any circulation, either party: futures recognizable from the sharpened description ∨ activation premise collapsed]
+Phase 1: derive_axes(X) → Axs → draft_policy → spec_relay(axes + policy + probe target set + tier, each with its basis) → draft_spec(Λ.axes, Λ.policy, Λ.tgt, Λ.tier; Λ.spec_settled := False on the initial pass) → Phase 2  -- spec relay [Tool]
+       [either party, at the spec relay or at any gate: futures recognizable from the sharpened description ∨ activation premise collapsed]
          [Λ.probes ≠ ∅ (refan re-entry) → cleanup_verify first] → dissolution_relay → DissolutionExit
-       -- free-response pathways at this gate, declared in the pre-gate text — none is an S constructor: a question is
-       --   answered and the gate re-presented; a premise contest feeds the dissolution arm; a withdrawal runs
-       --   cleanup_verify (when probes exist) and terminates as EarlyExit
-       -- |X.direction_candidates| > 4: Qspec settles WHICH candidates are probed (Λ.tgt); unprobed candidates are declared at present
-       -- ENTERED FROM A REFAN carrying a SPEC REVISION (Phase 3 or Phase 4) — a new divergence axis, a realization-tier
-       --   escalation, or a revised probe target set: Qspec is re-presented SCOPED TO THAT REVISION before any
-       --   generation. A refan that revises nothing in the spec skips this and enters Phase 2 directly
-       --   On a materialization re-entry Adjust cannot replace Λ.tgt: the target stays [composition] (fixed by Λ.refan_kind)
+       -- the relay yields no turn: it lays the draft out whole with the standing affordance to send any of it back at the
+       --   direction gate, where the first send-back of the draft re-fans without spending the budget and a later one rides
+       --   the shared budget like any gap refan
+       -- |X.direction_candidates| > 4: the draft names WHICH candidates are probed and why (Λ.tgt); unprobed candidates are
+       --   declared at present and stay reachable at the direction gate
+       -- ENTERED FROM A REFAN carrying a SpecRevision (Phase 3 or Phase 4): the spec relay re-presents SCOPED TO THAT
+       --   REVISION before any generation. A refan that revises nothing in the spec skips this and enters Phase 2 directly
+       --   On a materialization re-entry a revision cannot replace Λ.tgt: the target stays [composition] (fixed by Λ.refan_kind)
 Phase 2: instantiate(∥ over Λ.tgt, temp-isolated, artifact_ref registered) → P → Λ.probes := Λ.probes ++ P  -- transform [Tool]
        [Mockup tier, conditional] instantiate_delegate(∥ one probe per agent, temp-isolated) [Tool]
        -- contrast fan (initial | gap refan): |P| ∈ 2..4 — one probe per target direction
        -- materialization refan: |P| ≥ 1 — the composition itself; it is contrasted against Λ.probes (cumulative), which
-       --   already carry the differentiated values on the PREVIOUSLY SETTLED axes. A NEW axis settled on this refan
+       --   already carry the differentiated values on the axes ALREADY RELAYED. A NEW axis relayed on this refan
        --   predates the prior probes: contrast re-derives their positions on it analytically where their artifacts
        --   carry them, and declares the cell undifferentiated where they do not — surfaced, never fabricated
        -- each probe records its concretum at instantiation (Vignette: the narration text; Mockup: AtArtifact)
@@ -188,32 +205,38 @@ Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → Λ.contrast_map := CM
          -- CC is RECOMPUTED over ALL accumulated probes at every contrast and REPLACES the set (:=, never ∪=):
          --   a re-fan can break an earlier fan's shared premise
        [contrast_insufficient ∧ Λ.refan_budget > 0] refan(gap) → Λ.refan_kind := Gap → decrement budget
-         → [spec revision: new axis ∨ tier escalation ∨ revised target set] Phase 1 (Qspec scoped to the revision —
-             insufficiency rooted in realization fidelity escalates the tier here, never silently; a revised target
-             set is likewise user-settled before generation) | [no spec revision] Phase 2
+         → [SpecRevision] Phase 1 (spec relay scoped to the revision — insufficiency rooted in realization fidelity
+             escalates the tier here, never silently; every revised element is relayed with its basis before
+             generation) | [no spec revision] Phase 2
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ ¬Λ.insufficiency_relayed]
          insufficiency_after_materialization_relay → Λ.insufficiency_relayed := True → Phase 4 (re-present Qdir over Λ.probes; one-shot)
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ Λ.insufficiency_relayed]
          insufficiency_standdown_relay → Phase 5 (EarlyExit arm via insufficiency_standdown — a withdrawal by consequence)
-       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ ¬Λ.spec_settled ∧ ¬Λ.insufficiency_relayed]
+         insufficiency_before_settlement_relay → Λ.insufficiency_relayed := True → Phase 4 (re-present Qdir over Λ.probes; one-shot — the AI's own detections spent the budget before the user saw any gate, so the draft's first send-back stays reachable)
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ (Λ.spec_settled ∨ Λ.insufficiency_relayed)] → Phase 5 (MisdiagnosisExit arm)
 Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- direction gate [Tool]
        -- pre-gate text declares the free-response pathways: interrogate a probe, declare the contrast insufficient, name an unprobed candidate, or withdraw
-       [D = Select(direction) ∧ direction ∈ directions(Λ.probes)] Λ.direction := direction → Phase 5
+       [D = Select(direction) ∧ direction ∈ directions(Λ.probes)] Λ.spec_settled := True → Λ.direction := direction → Phase 5
          -- a named UNPROBED candidate never parses as Select: it enters the unprobed-candidate free response below
-       [D = Synthesize(composition)] Qmicro(composition) → Stop → Gs  -- synthesis micro-gate [Tool]
+       [D = Synthesize(composition)] Λ.spec_settled := True → Qmicro(composition) → Stop → Gs  -- synthesis micro-gate [Tool]
          [Gs = Confirm] Λ.direction := composition → Phase 5
          [Gs = Materialize] refan(composition) → Λ.refan_kind := Materialization → Λ.tgt := [composition] → decrement budget
-           → [spec revision: new axis ∨ tier escalation — a target-set revision cannot arise here: Tgt is fixed to
-               [composition] by the refan kind] Phase 1 (Qspec scoped to the revision) | [no spec revision] Phase 2
+           → [SpecRevision — a target-set revision cannot arise here: Tgt is fixed to [composition] by the refan
+               kind] Phase 1 (spec relay scoped to the revision) | [no spec revision] Phase 2
        [free response: interrogation]                              -- not a D constructor; the gate is re-presented unchanged
          [design-intent] answer within placeholder discipline → re-present Qdir
          [factual unknown] record as ExposedUnknown (route: Inquire) → re-present Qdir
-       [free response: contrast_insufficient] → Phase 3 insufficiency arms (same guards)
+       [free response: draft sent back — a SpecRevision named — ∧ ¬Λ.spec_settled] refan(gap) → Λ.spec_settled := True   -- the draft's own correction: budget and refan_kind untouched
+         → Phase 1 (spec relay scoped to the revision)
+       [free response: contrast_insufficient — a send-back once Λ.spec_settled included] → Phase 3 insufficiency arms (same guards)
        [free response: unprobed candidate named (whenever ∃ c ∈ X.direction_candidates: c ∉ directions(Λ.probes) —
          judged on ACCUMULATED probe coverage, not on Λ.tgt, which a materialization overwrites)]
-         [Λ.refan_budget > 0] refan(gap over the named candidate) → Λ.refan_kind := Gap → decrement budget
-           → Phase 1 (Qspec scoped to the revised target set) — the named candidate is probed before it is settled
-         [Λ.refan_budget = 0] stand_down_relay → cleanup_verify → unprobed_standdown → EarlyExit
+         [¬Λ.spec_settled] refan(gap over the named candidate) → Λ.spec_settled := True   -- the draft's own correction: budget untouched
+           → Phase 1 (spec relay scoped to the revised target set) — the named candidate is probed before it is settled
+         [Λ.spec_settled ∧ Λ.refan_budget > 0] refan(gap over the named candidate) → Λ.refan_kind := Gap → decrement budget
+           → Phase 1 (spec relay scoped to the revised target set)
+         [Λ.spec_settled ∧ Λ.refan_budget = 0] stand_down_relay → cleanup_verify → unprobed_standdown → EarlyExit
            (a withdrawal by consequence: the choice moved outside the materialized set)
 Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only where a direction was constituted [Tool]
        [from Phase 4 — direction constituted] harvest → cleanup_verify → assemble → DirectionalContrast  -- harvest BEFORE discard
@@ -230,23 +253,23 @@ Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only wher
          [DiscardFailed] retry once → still present → declare DiscardFailed(reason) in discard_trace (visible, never silent)
 
 ── LOOP ──
-Probe target set 2–4 for a contrast fan (settled at the spec gate; when candidates exceed 4, the gate settles which are probed).
-Re-fan bound: at most 1 re-fan per activation — contrast-insufficiency re-fan and synthesis materialization SHARE this
+Probe target set 2–4 for a contrast fan (drafted at the spec relay; when candidates exceed 4, the draft names which are probed and why, and an unprobed candidate stays reachable at the direction gate).
+Re-fan bound: at most 1 budgeted re-fan per activation — contrast-insufficiency re-fan and synthesis materialization SHARE this
   single budget (no separate budgets), and what it was spent on decides the still-insufficient branch (`One shared re-fan`).
-Interrogation, contrast-insufficiency declaration, and Adjust do not consume the re-fan budget (they generate no probes).
+Interrogation and a contrast-insufficiency declaration do not consume the re-fan budget (they generate no probes); the first send-back of the relayed draft re-fans without spending it (the draft's own correction), and a later one rides the shared budget.
 User can withdraw at any gate (an explicit exit, free response): EarlyExit — cleanup_verify runs; partial trace
   presented; residual declared.
 Continue until: DirectionalContrast (direction constituted + harvest recorded + discard declared) OR EarlyExit OR MisdiagnosisExit
-  OR DissolutionExit (deficit dissolved in the spec-gate circulation — the cheapest success).
+  OR DissolutionExit (deficit dissolved at the spec relay or at a gate — the cheapest success).
 Convergence evidence: at terminal, present the transformation trace over the steps actually completed — at
-  DirectionalContrast, each settled axis mapped to the contrast rows that made its futures recognizable, the constituted
+  DirectionalContrast, each axis in force mapped to the contrast rows that made its futures recognizable, the constituted
   direction, each exposed unknown with its downstream route, and the per-probe discard disposition; each other terminal
   presents its own relay payload (TOOL GROUNDING). Demonstrated, not asserted.
 
 ── CONVERGENCE ──
 converged(Λ) = (Λ.harvest ≠ None ∧ discard_declared(Λ))                    -- primary success: DirectionalContrast
                                                                    --   (harvest recorded before discard — assemble needs it)
-             ∨ (Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ))
+             ∨ ((futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ))
                                                                    -- success stand-down: DissolutionExit is convergent;
                                                                    --   EarlyExit / MisdiagnosisExit are not
 discard_declared(Λ) = ∀ p ∈ Λ.probes: ∃ d: (ref(p), d) ∈ Λ.discard_trace   -- every probe has a declared Disposition,
@@ -259,11 +282,13 @@ result equations:
                         -- non-convergent exit; unprobed_standdown (budget-spent naming of an unprobed candidate) and
                         --   insufficiency_standdown (repeated insufficiency at the re-presented gate with the budget spent
                         --   on Materialization) are withdrawals by consequence — the user exits the materialized decision space
-  MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ discard_declared(Λ)
-                        -- non-convergent exit
-  DissolutionExit     ⇔ Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ)
+  MisdiagnosisExit    ⇔ misdiagnosis_taken ∧ discard_declared(Λ)
+                        -- non-convergent exit; misdiagnosis_taken = the Phase 3 arm [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap
+                        --   ∧ (Λ.spec_settled ∨ Λ.insufficiency_relayed)] fired at contrast — a withdrawal at the gate that arm's sibling relay
+                        --   re-presented is user_withdraw, which keeps the two exits disjoint
+  DissolutionExit     ⇔ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ)
                         -- convergent success stand-down (see converged)
-framing readout: the surfaced state names the work in play (axes being settled, probes under contrast, direction being
+framing readout: the surfaced state names the work in play (axes being drafted, probes under contrast, direction being
   constituted, discard being verified) — never a completion tally.
 
 ── TOOL GROUNDING ──
@@ -275,19 +300,20 @@ Phase 0 unfit_relay (extension)    → TextPresent+Proceed (a type guard fails a
 Phase 0 requires_fail_relay (extension) → TextPresent+Proceed (no imminent commitment, or fewer than two candidates: state the failed requirement; one or zero candidates is handed to row ③'s targets — /ideate primary for the thin field, /frame · /elicit for their own narrower cases (frame absent; substrate-implicit coordinates); not activated)
 Phase 1 derive_axes (sense)        → Internal analysis (divergence axis candidates from the candidate directions)
 Phase 1 draft_policy (sense)       → Internal analysis (placeholder policy draft: visible synthesis, non-evidence stamp, skeleton-data split)
-Phase 1 Qspec (constitution)       → present (mandatory spec gate: divergence axes + placeholder policy + probe target set + realization tier; fires BEFORE any probe generation — no divergence axis is AI-selected past this gate; Adjust re-presents without generation; RE-ENTERED from a refan carrying a spec revision — a new axis, a tier escalation, or a revised target set — scoped to that revision, before that refan generates anything; pre-gate text declares the free-response pathways — question an axis, contest the activation premise, withdraw)
-Phase 1 dissolution_relay (extension) → TextPresent+Proceed (either party, at any circulation: the sharpened description made the futures recognizable without probes, or the activation premise collapsed; state the basis — the sharpened axes themselves — and hand to the regular gate the enriched axes together with any exposed unknowns already recorded (each with its route) and, on a refan re-entry, the per-probe dispositions from the preceding cleanup_verify plus the pending re-fan target set — the user-authored composition on a materialization re-entry, the revised candidate set on a gap re-fan — relayed as live candidates (a user-constituted candidate never dies with the stand-down); stand down as DissolutionExit — a success, not an abandonment)
-Phase 1 revise (track)             → Internal state update (Adjust branch: Λ axes/policy/target-set/tier revision before re-presenting Qspec; on a materialization re-entry the target set is fixed to the composition and is not adjustable)
-Phase 1 settle (track)             → Internal state update (Approve branch: the user-approved axes, policy, probe target set, and tier are committed to Λ before generation — the spec every downstream transform is bound to)
+Phase 1 spec_relay (extension)     → TextPresent+Proceed (the drafted spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where the target set leaves a candidate unprobed, why; fires BEFORE any probe generation, so no axis commits a probe value before it was relayed with its basis; yields no turn, and carries the standing affordance to send any of it back at the direction gate, the first send-back riding no budget; RE-ENTERED from a refan carrying a SpecRevision — whichever drafted element it changes — scoped to that revision, before that refan generates anything)
+Phase 1 dissolution_relay (extension) → TextPresent+Proceed (either party, at the spec relay or at any gate: the sharpened description made the futures recognizable without probes, or the activation premise collapsed; state the basis — the sharpened axes themselves — and hand to the regular gate the enriched axes together with any exposed unknowns already recorded (each with its route) and, on a refan re-entry, the per-probe dispositions from the preceding cleanup_verify plus the pending re-fan target set — the user-authored composition on a materialization re-entry, the revised candidate set on a gap re-fan — relayed as live candidates (a user-constituted candidate never dies with the stand-down); stand down as DissolutionExit — a success, not an abandonment)
+Phase 1 revise (track)             → Internal state update (a refan's SpecRevision: Λ axes/policy/target-set/tier revised before the spec relay re-presents scoped to it; on a materialization re-entry the target set is fixed to the composition and is not adjustable)
+Phase 1 draft_spec (track)         → Internal state update (the relayed draft committed to Λ — axes, policy, probe target set, tier — with Λ.spec_settled := False on the initial pass; the spec every downstream transform is bound to until a send-back revises it)
 Phase 2 instantiate (transform)    → artifact write, environment run (temp-isolated placeholder artifacts, artifact_ref registered at creation; existing project files never modified; Vignette tier emits session text only — no file artifact; each probe's concretum is recorded on the Probe at instantiation — Vignette: the narration text, Mockup: at its artifact_ref)
 Phase 2 instantiate_delegate (dispatch) → delegate (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with its artifact_ref registered; delegation subordinate to the active runtime/tool policy)
 Phase 3 contrast (sense)           → Internal analysis (per-axis juxtaposition; CommonCommitment extraction)
 Phase 3 present (extension)        → TextPresent+Proceed (probe-first order: probes one by one, each from its typed concretum — the Vignette narration re-presented as instantiated, the Mockup artifact walked through, never regenerated at presentation → per-axis contrast map with common commitments declared → newly exposed unknowns; table-first re-abstracts and reproduces the deficit)
-Phase 4 Qdir (constitution)        → present (mandatory direction gate: each option points at the probe-exposed future it settles — recognition, not label simulation; presented as one concrete Select per probe-exposed direction (type-preserving materialization of the Select constructor) plus Synthesize. The free-response pathways — interrogate a probe, declare the contrast insufficient, name an unprobed candidate, withdraw — are declared in the pre-gate text, never as peer options: they commit no downstream action on the decision axis)
+Phase 4 Qdir (constitution)        → present (mandatory direction gate: each option points at the probe-exposed future it settles — recognition, not label simulation; presented as one concrete Select per probe-exposed direction (type-preserving materialization of the Select constructor) plus Synthesize. The free-response pathways — interrogate a probe, declare the contrast insufficient or send back any drafted element — an axis, the policy, the tier, the target set, name an unprobed candidate, withdraw — are declared in the pre-gate text, never as peer options: they commit no downstream action on the decision axis)
 Phase 4 Qmicro (constitution)      → present (conditional: fires on Synthesize; Confirm settles the synthesis now, Materialize re-fans it into new probes consuming the shared budget; only the user can judge whether the synthesis is already recognized. Presents the option set currently defined by Gs — with the budget spent that set is {Confirm})
 Phase 4 interrogate_answer (extension) → TextPresent+Proceed (free-response pathway, not a gate option: design-intent answers within placeholder discipline; factual unknowns recorded as ExposedUnknowns with the Inquire route; the gate is re-presented unchanged)
 Phase 4 materialize_unavailable_relay (extension) → TextPresent+Proceed (Materialize requested with the shared re-fan budget spent: state the exhaustion with its basis; Qmicro presents {Confirm})
 Phase 3 insufficiency_after_materialization_relay (extension) → TextPresent+Proceed (budget spent on the user's own materialization and the contrast is still insufficient: state it with its basis and re-present the direction gate over the accumulated probes — the standing synthesis is Selectable there, since its probe now exists among the accumulated probes (type-preserving materialization of Select), and the original directions stay Selectable; one-shot, marked by Λ.insufficiency_relayed)
+Phase 3 insufficiency_before_settlement_relay (extension) → TextPresent+Proceed (the AI's own contrast detections spent the shared budget before the user answered any gate: state the insufficiency with its basis and re-present the direction gate over the accumulated probes, so the draft's first send-back — free, since ¬spec_settled — a Select, or a Synthesize stays reachable before any stand-down; one-shot, marked by Λ.insufficiency_relayed; a repeated insufficiency after it takes the MisdiagnosisExit arm)
 Phase 3 insufficiency_standdown_relay (extension) → TextPresent+Proceed (repeated insufficiency at the re-presented gate with the budget spent on Materialization: state that the accumulated contrast cannot make the futures recognizable and no re-fan remains; relay the contrast harvest as context to the regular gate; cleanup_verify enforced; terminate as EarlyExit via insufficiency_standdown)
 Phase 5 harvest (track)            → Internal state update (direction, deciding contrast rows, routed unknowns recorded before discard; the discard trace does not exist yet)
 Phase 5 cleanup (transform)        → environment run (the DESTRUCTION step inside cleanup_verify's typed sequence — per-probe artifact destruction, retry once on failure; every transition that names cleanup_verify runs this step first)
@@ -301,25 +327,26 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: DirectionProspect,
-      axes: Set(DirectionAxis),                -- settled at Qspec; extended only via inherited spec-gate duty on refan
+      axes: Set(DirectionAxis),                -- drafted at the spec relay; extended only via a refan's SpecRevision, relayed before generation
       policy: PlaceholderPolicy, tier: RealizationTier,
-      tgt: List(direction),                    -- probe target set settled at Qspec; := [composition] on a materialization refan
+      tgt: List(direction),                    -- probe target set drafted at the spec relay; := [composition] on a materialization refan
       probes: List(Probe),                     -- cumulative across refan (discarded probes remain listed for the trace)
       contrast_map: Option(ContrastMap),
       exposed_unknowns: Set(ExposedUnknown),   -- each carries a DownstreamRoute (PreCommit | Inquire)
       common_commitments: Set(CommonCommitment),
       refan_budget: ℕ,                         -- init 1; decremented by refan (insufficiency or materialization, shared)
       refan_kind: Option(RefanKind),           -- what the budget was spent on; None until the single refan is taken
-      insufficiency_relayed: Bool,             -- init False; set when insufficiency_after_materialization_relay fires
+      insufficiency_relayed: Bool,             -- init False; set when insufficiency_after_materialization_relay or insufficiency_before_settlement_relay fires
+      spec_settled: Bool,                      -- init False at the relayed draft; True at the first D answer or the first send-back of the draft
       direction: Option(UserDecision),
       harvest: Option(Harvest),                -- recorded before discard; carries no discard trace
       discard_trace: DiscardTrace,             -- one entry per probe by terminal (invariant: discard_declared)
       history: List<(Q, A)>,
       active: Bool, cause_tag: String }
--- Guard: no probe is generated before a Qspec approval covers its axes — on the initial pass, phase < 2 ⇒ probes = ∅;
---   a refan re-entry to Phase 1 HOLDS prior probes but generates nothing until its Qspec settles the revision
---   (new axis, tier escalation, or revised target set)
--- Guard: ∀ a ∈ axes: settled_at_Qspec(a) — a refan carrying a new axis re-enters Phase 1 before generating
+-- Guard: no probe commits a value on an axis before the spec relay presented that axis with its basis — on the initial pass,
+--   phase < 2 ⇒ probes = ∅; a refan re-entry to Phase 1 HOLDS prior probes but generates nothing until the spec relay has
+--   gone out scoped to the revision (whichever drafted element it changes)
+-- Guard: ∀ a ∈ axes: relayed_with_basis(a) — a refan carrying a new axis re-enters Phase 1 before generating
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Direction resolution emergent via session context.
@@ -333,7 +360,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
 
 ### Activation
 
-`/preview` is user-invocable. On the Hybrid path, the AI may propose it from a live direction gate only with cited evidence of `DirectionUnrecognizable`; the user still settles the spec before generation. Prior-session indices may seed detection, never the constitutive judgment.
+`/preview` is user-invocable. On the Hybrid path, the AI may propose it from a live direction gate only with cited evidence of `DirectionUnrecognizable`; the drafted spec is relayed with its basis before generation, and the user sends it back at the direction gate. Prior-session indices may seed detection, never the constitutive judgment.
 
 ### Priority
 
@@ -345,7 +372,7 @@ When Proplasma is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1 present the spec gate before any generation; at Phase 4 present the direction gate whose options point at probe-exposed futures.
+**Action**: At Phase 1 relay the drafted spec with its basis before any generation; at Phase 4 present the direction gate whose options point at probe-exposed futures.
 </system-reminder>
 
 ### Trigger Signals
@@ -362,17 +389,9 @@ Use the Definition's result equations and TOOL GROUNDING payloads for every term
 
 Apply PHASE TRANSITIONS Phase 0 in its stated precedence and cite the matched relay basis.
 
-### Phase 1: Spec Gate
+### Phase 1: Spec Relay
 
-Render `Qspec` after the proposed axes, policy, target set, and tier:
-```
-Settle the probe spec before I build anything.
-
-Options:
-1. **Approve** — generate under this spec
-2. **Adjust** — revise the axes, policy, targets, or tier and re-present before generation
-```
-Name questioning an axis, contesting the premise, and stepping out as free-response paths. On materialization re-entry, `Tgt = [composition]` remains fixed as TYPES specifies.
+Lay the drafted spec out whole before anything is built — each axis with the basis that chose it, the placeholder policy, which candidates get probes and why any does not, and the tier — then proceed to generation without yielding the turn. Say in one line that any of it can be sent back at the direction gate and that the first send-back costs no re-fan budget. On materialization re-entry, `Tgt = [composition]` remains fixed as TYPES specifies.
 
 ### Phase 2: Instantiation (Transform)
 
@@ -404,7 +423,8 @@ Keep placeholder status visible in every probe and contrast. A Mockup is sandbox
 
 ## Rules
 
-- **Direction-gate response discipline**: `Select` accepts only an accumulated probe direction; an unprobed candidate follows the typed free-response branch. Name probe questions, insufficiency, withdrawal, and unprobed candidates before `Qdir`, not as peer options. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route the pre-commit check to `/inquire` as well once the direction becomes committed; attach `/ground` as a tag on a familiar-domain direction.
+- **Direction-gate response discipline**: `Select` accepts only an accumulated probe direction; an unprobed candidate follows the typed free-response branch. Name probe questions, insufficiency, a send-back of the drafted spec, withdrawal, and unprobed candidates before `Qdir`, not as peer options. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route the pre-commit check to `/inquire` as well once the direction becomes committed; attach `/ground` as a tag on a familiar-domain direction.
+- **Draft relayed with its basis**: relay every axis, the policy, the target set, and the tier with the basis that chose it and the affordance to send it back, then generate; the first send-back of the draft re-fans without spending the shared budget, and a later one rides it.
 - **One shared re-fan**: gap repair and synthesis materialization consume the same budget. Its recorded `RefanKind` determines the exhausted-budget ending exactly as LOOP and PHASE TRANSITIONS specify; a materialized synthesis remains among the accumulated selectable probes.
 - **Harvest before discard**: retain only the constituted direction, deciding contrast rows, and routed unknowns before cleanup. Cleanup produces the discard trace; assemble the durable record afterward, leaving probe detail session-local.
 - **Round composition**: use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
