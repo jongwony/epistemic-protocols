@@ -127,7 +127,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You're at a direction gate — three ways to lay out the dashboard's first screen, or two shapes for the new API — and the options are well described, but you can't tell from the descriptions which future you'd actually want. You catch yourself saying "go with whatever fits the northstar" or "I'd have to see it."
 
-**Intervention**: `/preview` derives the axes on which the candidates genuinely diverge and has you settle them (plus the placeholder policy) at a spec gate before anything is generated — and sometimes the axes alone make the futures recognizable, in which case the protocol stands down without building anything. Otherwise it builds 2–4 cheap, overtly fake probes — text vignettes or temp-isolated mockups — each committing different values on the settled axes, and shows them one at a time before the per-axis contrast map. You select a probe-exposed direction or synthesize your own from the probes; questioning a probe first stays open as a free response. Harvest precedes discard: the direction, the deciding contrast rows, and the newly exposed unknowns survive; file probes are destroyed with each disposition declared — a failed destruction is declared with a cleanup handoff, never silent — and nothing probe-derived ever counts as evidence.
+**Intervention**: `/preview` derives the axes on which the candidates genuinely diverge and relays them (plus the placeholder policy) with their basis before anything is generated — and sometimes the axes alone make the futures recognizable, in which case the protocol stands down without building anything. Otherwise it builds 2–4 cheap, overtly fake probes — text vignettes or temp-isolated mockups — each committing different values on the settled axes, and shows them one at a time before the per-axis contrast map. You select a probe-exposed direction or synthesize your own from the probes; questioning a probe first stays open as a free response. Harvest precedes discard: the direction, the deciding contrast rows, and the newly exposed unknowns survive; file probes are destroyed with each disposition declared — a failed destruction is declared with a cleanup handoff, never silent — and nothing probe-derived ever counts as evidence.
 
 **Trial prompt**: "Let's practice: name a direction decision you keep deferring because the options read fine but you can't picture them — I'll show how /preview contrasts discard-committed probes before you commit"
 
@@ -136,7 +136,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - Answer: C
 
 **Quiz Q (design)**: The candidate directions are known and no real evidence is needed — the futures just don't come through in words. How do you make them recognizable without committing to any direction or leaving artifacts behind?
-- Hint: Settle the divergence axes first, then contrast cheap placeholder probes that are discarded after harvest — the probes show futures; they never become evidence.
+- Hint: Relay the drafted divergence axes with their basis, then contrast cheap placeholder probes that are discarded after harvest — the probes show futures; they never become evidence.
 
 **Philosophy**: πρόπλασμα (preliminary model) — the clay model a sculptor shapes before committing to marble: cheap, discardable, and made precisely to be seen. Core principle: **Contrast over Simulation**. Workflow position: Planning cluster — alongside `/inquire` (facts) and `/elicit` (intent coordinates), completing the unknowns-elicitation line with direction futures. Game feel: "I'd have to see it" → settle the axes → probes materialize the futures → you recognize, decide, and the clay goes back in the bin.
 
@@ -144,7 +144,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You have to make something — a review page, a dashboard's first screen, a document's shape — and the plan keeps stalling at the first draft. You've rewritten the description three times and nothing exists yet. You can't say what it should be, but you're sure you'd recognize it once it was in front of you.
 
-**Intervention**: `/sketch` settles each round's focus, the kind of perception the judgment needs, and how many variants to make at a round-spec gate before anything is produced, then makes the sketches in temp isolation and presents them for your marks — what does not fit and what to keep, anchored on a specific version. Your marks stay your own words; what the AI reads from them stays provisional until you settle it at the next round. The next round revises the version you marked rather than regenerating it from a description, so what you recognized and never named survives. You finish on a version for the purpose you state, name where it lives (there is no default), and everything else is released with its disposition declared.
+**Intervention**: `/sketch` drafts each round's focus, the kind of perception the judgment needs, and how many variants to make, relays the draft with its basis before anything is produced, then makes the sketches in temp isolation and presents them for your marks — what does not fit and what to keep, anchored on a specific version. Your marks stay your own words; what the AI reads from them stays provisional until you settle it at the next round. The next round revises the version you marked rather than regenerating it from a description, so what you recognized and never named survives. You finish on a version for the purpose you state, name where it lives (there is no default), and everything else is released with its disposition declared.
 
 **Trial prompt**: "Let's practice: name something you've been meaning to make but can't get past the first draft of — I'll show how /sketch turns your marks on a rough version into the form you recognize"
 
@@ -153,7 +153,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - Answer: B
 
 **Quiz Q (design)**: The user cannot state the form but recognizes misfits instantly. How do you build intent from that without turning the AI's readings of their marks into commitments they never made?
-- Hint: Keep each mark as the user's utterance, keep interpretations provisional until the user settles them at the next round-spec gate, and revise the retained version instead of regenerating it from coordinates.
+- Hint: Keep each mark as the user's utterance, keep interpretations provisional until the user settles them at the recognition gate, and revise the retained version instead of regenerating it from coordinates.
 
 **Philosophy**: ὑποτύπωσις (outline, sketch) — the first drawing of a position, made before it can be stated. Core principle: **Recognition over Description**. Workflow position: Planning cluster — after `/preview` (which commits to a direction and discards its probes) and before execution; `/sketch` keeps the version you recognized. Game feel: "I'd know it when I see it" → a rough version appears → you mark it → it comes back changed → you recognize the one that fits.
 
