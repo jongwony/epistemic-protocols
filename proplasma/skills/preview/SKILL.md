@@ -152,7 +152,15 @@ DissolutionExit = deficit dissolved at the spec relay or at a gate: deriving the
             dispositions plus the pending re-fan target set (the user-authored composition on a materialization
             re-entry, the revised candidate set on a gap re-fan) relayed as live candidates for the regular gate.
             A success stand-down: no unresolved residual remains
-MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches: hand off to the cited protocol
+RoutingRow = ① a structural mapping onto a familiar domain would carry the futures → MappingUncertain (hint: /ground)
+           | ② real evidence is required before the directions can be judged       → ContextInsufficient (hint: /inquire)
+           | ③ the candidate field is thin — one or none — → CandidateFieldUnderexpanded (hint: /ideate); the frame itself is
+               absent → FrameworkAbsent (hint: /frame); the coordinates live implicit in externalized substrate → AbstractAporia
+               (hint: /elicit)
+       -- the rows Phase 0 and MisdiagnosisRoute dispatch on, first match wins: read after the requires checkpoint and before the type
+       --   guards, and what no row takes — candidates ≥ 2, evidence-free, placeholder-carriable — is this protocol's own case. Each row
+       --   names the sibling deficit as the binding and its command as the hint
+MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches (RoutingRow): hand off to the cited protocol
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
                                       --   misdiagnosis with no downstream protocol and return the decision to a regular
                                       --   gate, residual declared. The exit is defined even when nothing downstream fits
