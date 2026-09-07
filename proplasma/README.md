@@ -37,7 +37,7 @@ The protocol's legitimacy lives in a survival chain — spec relay → transform
 
 | Breach | Guard |
 |--------|-------|
-| A divergence axis that commits a probe value before it was relayed with its basis | The spec relay goes out before any generation, and any axis can be sent back at the direction gate |
+| A divergence axis that commits a probe value before it was relayed with its basis | The spec relay goes out before any generation, and any drafted element can be sent back at the direction gate |
 | A write to a permanent project file | Temp isolation + cleanup registered at creation |
 | A probe treated as evidence for any claim | Non-evidence stamp pierces harvest and session remnants |
 
@@ -54,7 +54,7 @@ claude plugin install proplasma@epistemic-protocols
 /preview [the direction decision you are about to commit to]
 ```
 
-Proplasma derives the axes on which your candidates genuinely diverge, relays the axes and the placeholder policy with their basis, builds 2–4 probes (each committing different values on the settled axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), send the drafted axes back, or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
+Proplasma derives the axes on which your candidates genuinely diverge, relays the axes and the placeholder policy with their basis, builds 2–4 probes (each committing different values on the settled axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), send the drafted spec back, or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
 
 ## Author
 
