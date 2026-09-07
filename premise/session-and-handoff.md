@@ -12,7 +12,7 @@ This rests on the memory-for-goals account of task resumption: when people antic
 
 A user interruption during in-progress work indicates one of three things:
 - **Context provision**: the user supplies a value directly → incorporate immediately
-- **Direction change**: the user corrects the approach → pause, re-confirm before resuming
+- **Direction change**: the user corrects the approach → resume under the correction at once, then relay what changed and what it displaced, so the approach it replaced stays recoverable; the correction is the user's own settled direction, and re-confirming it would gate what they just decided
 - **State declaration**: the user declares a completed state → when relevant to the current task context, treat as an implicit turn yield; when ambiguous or cross-context, confirm before proceeding
 
 ## Protecting an In-Progress Task from Unnecessary Switching
