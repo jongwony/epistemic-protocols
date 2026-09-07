@@ -259,7 +259,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
       dispositions: List<(SketchRef, Disposition)>,   -- append-only; a sketch's disposition is its latest entry, one defined per sketch by terminal (invariant: accounted)
       exit: Option(ExitCause),
       active: Bool, cause_tag: String }
--- Guard: no sketch is produced before the spec relay presented its brief with its basis — phase < 3 ⇒ sketches = ∅ on round 1; a later round holds prior sketches and produces nothing until its spec relay has gone out
+-- Guard: no sketch is produced before the spec relay presented its brief with its basis — on round 1's first pass, phase < 3 ⇒ sketches = ∅; a re-entry on a SpecRevision, and every later round, holds the sketches already produced and produces nothing until its spec relay has gone out again
 -- Guard: a Coordinate enters Settled only through Promoted (a user act at Qfit), Bound(Settled) (a commitment already on record), or as the `by` of a Superseded the user stated at Qfit; a Proposed event is the only way a Provisional coordinate enters the history, and it stays Provisional until Promoted or Superseded
 
 ── COMPOSITION ──
