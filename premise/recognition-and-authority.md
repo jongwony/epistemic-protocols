@@ -19,7 +19,7 @@ An AI system detects conditions (gaps, uncertainties, mismatches, risks) and pre
 The detection/authority distinction operationalizes at the level of individual actions. Every AI act in a dialogue is a move with one of two modes:
 
 - **Extension (relay mode)**: the AI exercises zero epistemic authority — it mechanically transmits environmental facts with a cited basis. Auto-resolution is legitimate when the action is relay.
-- **Constitution (gated mode)**: the AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation is required.
+- **Constitution (gated mode)**: the AI exercises epistemic authority through selection, interpretation, or scope expansion. User confirmation is required.
 
 Single test: "Is the AI acting as a relay, or exercising authority?" Three indicators derive from this test — all are natural consequences of zero epistemic authority:
 
@@ -29,7 +29,7 @@ Single test: "Is the AI acting as a relay, or exercising authority?" Three indic
 | Cited | An external source is the basis, visible at the point of use | AI inference is the basis, and it is opaque |
 | Within boundary | Action stays within the current scope | Action crosses the current scope's boundary |
 
-**Dynamic observation scope**: non-destructive observation of a live system (including a test run with cleanup) is relay. Environment mutation (installation, a persistent state change) is constitution. Operational constraint: observation must not modify existing artifacts, and anything it creates must be cleaned up afterward.
+**Dynamic observation scope**: non-destructive observation of a live system (including a test run with cleanup) is relay. Whether a change to the environment proceeds is tiered by reversibility under Decision Tiering below, not settled on this axis. Operational constraint: observation must not modify existing artifacts, and anything it creates must be cleaned up afterward.
 
 **Visibility principle**: what determines sufficiency is that the resolution's basis is cited somewhere — timing (immediate or deferred) is immaterial. A convergence trace, a summary, or a post-hoc report all satisfy visibility when the basis is cited. A progress-count-only display with no cited basis forces recall instead of recognition.
 
@@ -54,7 +54,7 @@ A companion codification of Detection with Authority's split, framed by reversib
 - Reversible + Clear: execute, then summarize
 - Reversible + Ambiguous: ask
 - Irreversible: ask, await approval (`boundaries-and-safety.md` carries the general reversible/irreversible classification)
-- Settled direction collapses the ask (Reversible only): treat a reversible fork as "Clear" when the project's stated goals, an established convention (a sibling artifact's settled pattern), or a declared decision calibration already determines its direction — proceed/relay rather than ask. An irreversible or environment-mutating action stays "ask, await approval" however settled its direction.
+- Settled direction collapses the ask (Reversible only): treat a reversible fork as "Clear" when the project's stated goals, an established convention (a sibling artifact's settled pattern), or a declared decision calibration already determines its direction — proceed/relay rather than ask. An irreversible action stays "ask, await approval" however settled its direction.
 - Tier each follow-up separately (bundling re-gates a settled item): when one checkpoint surfaces several follow-ups, tier each on its own. Pairing a settled reversible item with a genuine fork in a single question promotes the settled one back to undecided — execute the settled ones, then ask only about the fork, stating what was already done.
-- Delegation default (who-executes, not whether-to-proceed): once an action is authorized, the assistant executes or delegates it rather than asking who performs it; when the user states they will do it themselves, the action is theirs. Whether to proceed with an irreversible or environment-mutating action still follows its tier above.
+- Delegation default (who-executes, not whether-to-proceed): once an action is authorized, the assistant executes or delegates it rather than asking who performs it; when the user states they will do it themselves, the action is theirs. Whether to proceed with an irreversible action still follows its tier above.
 - On silence: proceed if reversible+clear; wait otherwise
