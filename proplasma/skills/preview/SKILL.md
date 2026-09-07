@@ -32,7 +32,8 @@ Proplasma(X) → detect(X, route) →
   [contrast_insufficient ∧ refan_budget > 0] spec_relay_if_spec_revision → refan(gap) → contrast → present → Qdir
   [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ ¬insufficiency_relayed] insufficiency_after_materialization_relay → Qdir (re-present over the accumulated probes)
   [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ insufficiency_relayed] insufficiency_standdown_relay → cleanup_verify → exit (EarlyExit via insufficiency_standdown)
-  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap ∧ ¬spec_settled ∧ ¬insufficiency_relayed] insufficiency_before_settlement_relay → Qdir (re-present over the accumulated probes; the draft has not reached the user yet)
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap ∧ (spec_settled ∨ insufficiency_relayed)] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
 -- spec_relay_if_spec_revision: a refan whose implication carries a spec revision — a NEW divergence axis, a realization-tier
 --   escalation, or a revised probe target set — re-enters the spec relay scoped to the revision BEFORE generation
 -- spec_settled: False after the relayed draft; True at the first D answer or at the first send-back of the draft — a send-back
@@ -154,7 +155,8 @@ MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches: hand of
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
                                       --   misdiagnosis with no downstream protocol and return the decision to a regular
                                       --   gate, residual declared. The exit is defined even when nothing downstream fits
-MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insufficient: deficit misdiagnosis report
+MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insufficient, the draft having been settled or the direction gate
+            already re-presented once over it: deficit misdiagnosis report
             + cleanup_verify enforced + route_away(MisdiagnosisRoute); no DirectionalContrast is emitted
 contrast_insufficient = the presented contrast does not make the candidate futures recognizable on the settled axes
             -- declared by the user (free response at the direction gate — not a D constructor; a draft axis, tier, or target
@@ -200,7 +202,9 @@ Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → Λ.contrast_map := CM
          insufficiency_after_materialization_relay → Λ.insufficiency_relayed := True → Phase 4 (re-present Qdir over Λ.probes; one-shot)
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ Λ.insufficiency_relayed]
          insufficiency_standdown_relay → Phase 5 (EarlyExit arm via insufficiency_standdown — a withdrawal by consequence)
-       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ ¬Λ.spec_settled ∧ ¬Λ.insufficiency_relayed]
+         insufficiency_before_settlement_relay → Λ.insufficiency_relayed := True → Phase 4 (re-present Qdir over Λ.probes; one-shot — the AI's own detections spent the budget before the user saw any gate, so the draft's first send-back stays reachable)
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ (Λ.spec_settled ∨ Λ.insufficiency_relayed)] → Phase 5 (MisdiagnosisExit arm)
 Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- direction gate [Tool]
        -- pre-gate text declares the free-response pathways: interrogate a probe, declare the contrast insufficient, name an unprobed candidate, or withdraw
        [D = Select(direction) ∧ direction ∈ directions(Λ.probes)] Λ.spec_settled := True → Λ.direction := direction → Phase 5
@@ -268,7 +272,7 @@ result equations:
                         -- non-convergent exit; unprobed_standdown (budget-spent naming of an unprobed candidate) and
                         --   insufficiency_standdown (repeated insufficiency at the re-presented gate with the budget spent
                         --   on Materialization) are withdrawals by consequence — the user exits the materialized decision space
-  MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ discard_declared(Λ)
+  MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ (Λ.spec_settled ∨ Λ.insufficiency_relayed) ∧ discard_declared(Λ)
                         -- non-convergent exit
   DissolutionExit     ⇔ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ)
                         -- convergent success stand-down (see converged)
@@ -297,6 +301,7 @@ Phase 4 Qmicro (constitution)      → present (conditional: fires on Synthesize
 Phase 4 interrogate_answer (extension) → TextPresent+Proceed (free-response pathway, not a gate option: design-intent answers within placeholder discipline; factual unknowns recorded as ExposedUnknowns with the Inquire route; the gate is re-presented unchanged)
 Phase 4 materialize_unavailable_relay (extension) → TextPresent+Proceed (Materialize requested with the shared re-fan budget spent: state the exhaustion with its basis; Qmicro presents {Confirm})
 Phase 3 insufficiency_after_materialization_relay (extension) → TextPresent+Proceed (budget spent on the user's own materialization and the contrast is still insufficient: state it with its basis and re-present the direction gate over the accumulated probes — the standing synthesis is Selectable there, since its probe now exists among the accumulated probes (type-preserving materialization of Select), and the original directions stay Selectable; one-shot, marked by Λ.insufficiency_relayed)
+Phase 3 insufficiency_before_settlement_relay (extension) → TextPresent+Proceed (the AI's own contrast detections spent the shared budget before the user answered any gate: state the insufficiency with its basis and re-present the direction gate over the accumulated probes, so the draft's first send-back — free, since ¬spec_settled — a Select, or a Synthesize stays reachable before any stand-down; one-shot, marked by Λ.insufficiency_relayed; a repeated insufficiency after it takes the MisdiagnosisExit arm)
 Phase 3 insufficiency_standdown_relay (extension) → TextPresent+Proceed (repeated insufficiency at the re-presented gate with the budget spent on Materialization: state that the accumulated contrast cannot make the futures recognizable and no re-fan remains; relay the contrast harvest as context to the regular gate; cleanup_verify enforced; terminate as EarlyExit via insufficiency_standdown)
 Phase 5 harvest (track)            → Internal state update (direction, deciding contrast rows, routed unknowns recorded before discard; the discard trace does not exist yet)
 Phase 5 cleanup (transform)        → environment run (the DESTRUCTION step inside cleanup_verify's typed sequence — per-probe artifact destruction, retry once on failure; every transition that names cleanup_verify runs this step first)
@@ -319,7 +324,7 @@ seam (extension)                    → TextPresent+Proceed (fires at deactivati
       common_commitments: Set(CommonCommitment),
       refan_budget: ℕ,                         -- init 1; decremented by refan (insufficiency or materialization, shared)
       refan_kind: Option(RefanKind),           -- what the budget was spent on; None until the single refan is taken
-      insufficiency_relayed: Bool,             -- init False; set when insufficiency_after_materialization_relay fires
+      insufficiency_relayed: Bool,             -- init False; set when insufficiency_after_materialization_relay or insufficiency_before_settlement_relay fires
       spec_settled: Bool,                      -- init False at the relayed draft; True at the first D answer or the first send-back of the draft
       direction: Option(UserDecision),
       harvest: Option(Harvest),                -- recorded before discard; carries no discard trace
