@@ -70,8 +70,9 @@ Realization = capability description                               -- what this 
        --   proceed without
 VariantBrief = { parent: Optional(SketchRef), source: Optional(ReferencedMaterial), commits: Map(Axis, Value) }
        -- one sketch to produce. Some(parent): revise that retained version. None: generate from active_coords and
-       --   from the material `source` names, or from the bound prior material where it names none — every round-1
-       --   brief, and a fresh start the user names at Qfit for a later round
+       --   from the material `source` names, or from the bound prior material where it names none — every brief of round 1's
+       --   first pass, and a fresh start the user names at Qfit for a later round; a SpecRevision re-entry that keeps a version
+       --   names it as parent, so the re-drafted round revises the retained version rather than regenerating it
        -- a round that changes where the material comes from is a parentless brief naming the new source, not a
        --   different kind of round: what the loop does is unchanged, and what moved is only what "generate" draws on
 RoundSpec = { focus: Focus, realization: Realization, targets: NonEmptyList(VariantBrief) }
