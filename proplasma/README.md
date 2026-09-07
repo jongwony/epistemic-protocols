@@ -54,7 +54,7 @@ claude plugin install proplasma@epistemic-protocols
 /preview [the direction decision you are about to commit to]
 ```
 
-Proplasma derives the axes on which your candidates genuinely diverge, relays the axes and the placeholder policy with their basis, builds 2–4 probes (each committing different values on the settled axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), send the drafted spec back, or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
+Proplasma derives the axes on which your candidates genuinely diverge, relays the axes and the placeholder policy with their basis, builds 2–4 probes (each committing different values on the drafted axes), and presents them one at a time before the contrast map. You then select a probe-exposed direction, synthesize your own from the probes (optionally re-materialized once), send the drafted spec back, or interrogate a probe before deciding. Harvest precedes discard: the direction, the deciding contrast rows, and the inherited unknowns (routed to `/inquire`) survive; the probes do not.
 
 ## Author
 
