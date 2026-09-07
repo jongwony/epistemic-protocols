@@ -44,7 +44,7 @@
 
 - Alexander, C. (1964). *Notes on the Synthesis of Form*. Harvard UP — *verified*. 좋은 적합에는 긍정적 서술이 없고, 부적합은 즉각적이며 열거 가능하다. 게이트의 답 타입을 결정 — 형태의 서술이 아니라 버전 위의 표시.
 - Dorst, K. & Cross, N. (2001). Creativity in the design process: co-evolution of problem–solution. *Design Studies* 22(5) — *mostly*. 문제와 해는 함께 형성된다. 좌표가 한 번 수용되면 고정되는 것이 아니라 출처를 남긴 채 개정 가능하다는 결정.
-- Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. 안을 하나만 보여주면 평가가 부풀고 비판이 억제된다. 변형 수가 기본값 1이 아니라 라운드마다 확정된다는 결정.
+- Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. 안을 하나만 보여주면 평가가 부풀고 비판이 억제된다. 변형 수가 기본값 1이 아니라 라운드마다 초안으로 세워져 재인 게이트에서 교정된다는 결정.
 - Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. 피드백 전에 만든 대안이 결과와 만드는 이의 몫을 모두 높인다. 대안이 라운드 일정에 고정되지 않고 라운드마다 초안으로 세워져 재인 게이트에서 교정된다는 결정.
 - Wadinambiarachchi, S. et al. (2024). The effects of generative AI on design fixation and divergent thinking. *CHI 2024* — *verified*. 이른 구체물은 이후의 상상을 좁힌다. 무엇이든 만들기 전에 라운드 스펙을 근거와 함께 중계해 스케치를 좁힌 것이 보이게 하고, 초점과 무관한 예상 밖 표시도 받아들인다는 결정.
 

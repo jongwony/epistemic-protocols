@@ -25,9 +25,9 @@ Hypotyposis(I) → detect(I, ctx) →
                         [retention verified] RecognizedForm
                         [retention failed]   declare → Qplace (re-presented with the failure; the same location is admissible)
     [M = Withdraw]    account → EarlyExit
-  [either party, at any gate: recognition needs no further encounter ∨ activation premise collapsed]
+  [either party, at the spec relay or at any gate: recognition needs no further encounter ∨ activation premise collapsed]
     dissolution_relay → account → DissolutionExit
-  [either party, at any gate: a sibling deficit is demonstrated ∨ a realization the round requires is unavailable]
+  [either party, at the spec relay or at any gate: a sibling deficit is demonstrated ∨ a realization the round requires is unavailable]
     boundary_relay → account → BoundaryExit
 
 ── MORPHISM ──
@@ -85,7 +85,7 @@ SpecRevision = a change to this round's focus, realization, or targets, named by
 SketchRef = { id: ℕ, round: ℕ }                                    -- identity of one version; the harvest and every mark point at one of these
 Concretum = Text(value) | Artifact(versioned_ref)                  -- Text: narration carried in session text; Artifact: a file under temp isolation, versioned at creation
 Sketch = { ref: SketchRef, parents: List(SketchRef), concretum: Concretum, rendered_from: snapshot(active_coords), focus: Focus }
-       -- what producing it determined beyond the spec reaches the history as Proposed coordinates basis Production(ref),
+       -- what it was rendered under that no Settled or Provisional coordinate covered — its brief's commits and what producing it determined — reaches the history as Proposed coordinates basis Production(ref),
        --   so a sketch's own determinations are read back by its reference rather than stored a second time
 Anchor = Element(locator) | Region(bounds) | Whole | Span(text)    -- where on a sketch a mark points; Whole admits "something is missing here" with nothing to point at
        -- premise: a mark points at a place. A property recurring across the sketch sits at none, and arrives as Whole
@@ -96,7 +96,7 @@ Mark = Misfit { sketch: SketchRef, anchor: Anchor, utterance: String, axis: Opti
 Status = Provisional | Settled
 Coordinate = { axis: Axis, value: Value, basis: Mark | Binding | Utterance | Production(SketchRef), status: Status, round: ℕ }
        -- interpret() yields Provisional only; Settled requires the user's act at Qfit or a convention already on record
-       -- Production(ref): a determination the producer had to make to render that sketch and no coordinate covered.
+       -- Production(ref): a determination rendered into that sketch that no Settled or Provisional coordinate covered — drafted in its brief or made while producing.
        --   Provisional like any reading, and settled or superseded only by the user's act at the next recognition gate —
        --   production introduces determinations, it never settles them
 Event = Bound(Binding) | Marked(Mark) | Proposed(Coordinate) | Promoted(Coordinate) | Superseded(Coordinate, by: Optional(Coordinate)) | Witnessed(FitWitness)
@@ -163,7 +163,7 @@ Phase 2: draft(RoundSpec, provisional(Λ)) → spec_relay(draft, provisional(Λ)
        -- RE-ENTERED from Qfit on a SpecRevision: revise(draft, rev) first, then the relay goes out scoped to the revision and no new round is counted
        -- on the AI-detected path the relay cites the evidence of FitUnrecognized as the run's basis; a decline of the run is the withdrawal arm at the first Qfit (Phase 6, EarlyExit arm — account enforced, since a sketch exists by then)
 Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= Sk
-         → Λ.history ++= Proposed(each determination producing Sk made that operative commitments and Λ.spec left open, basis Production(its ref))   -- transform [Tool]
+         → Λ.history ++= Proposed(each determination rendered into Sk that no Settled or Provisional coordinate covered — its brief's own commits included, since the relayed draft settled nothing — basis Production(its ref))   -- transform [Tool]
        [|Λ.spec.targets| > 1, conditional] produce_delegate(∥ one sketch per executor, temp-isolated) [Tool]
        -- dispatch on brief.parent: Some(ref) → revise(ref retained, active_coords, marks since ref, brief.source where it names one); None → generate(brief.source where it names one else prior material, active_coords, brief.commits) — a brief may name both, and changing the material does not itself abandon the parent
        -- every sketch records its concretum and a versioned reference at creation; existing project files stay unchanged
@@ -228,7 +228,7 @@ Phase 2 draft (sense)               → Internal analysis (focus, realization, a
 Phase 2 spec_relay (extension)      → TextPresent+Proceed (the round's draft whole: this round's focus, what the judgment needs, the variant briefs, each with the basis that chose it, and each provisional coordinate with where it came from — laid out so that any of it can be settled, sent back, or replaced at the recognition gate, as can any Settled coordinate in view; fires BEFORE anything is produced and settles nothing; on the AI-detected path it cites the evidence of FitUnrecognized as the run's basis; re-presented scoped to a SpecRevision the recognition gate named, without counting a round)
 Phase 2 revise (track)              → Internal state update (a SpecRevision named at Qfit: the draft revised as named before the spec relay re-presents)
 Phase 2 commit (track)              → Internal state update (Λ.spec := the relayed draft; no coordinate moves here — the user's acts on coordinates are written at Qfit's record step)
-Phase 3 produce (transform)         → artifact write, environment run (temp-isolated sketches, each with its concretum and a versioned reference registered at creation; a brief naming a parent revises that retained version, a parentless brief generates from the material its source names or from prior material; existing project files are never modified; Text concreta are session text only. Each sketch proposes as coordinates what producing it determined that the operative commitments and the settled spec left open, so the user meets those determinations beside the sketch at Qfit rather than only their consequences on the screen)
+Phase 3 produce (transform)         → artifact write, environment run (temp-isolated sketches, each with its concretum and a versioned reference registered at creation; a brief naming a parent revises that retained version, a parentless brief generates from the material its source names or from prior material; existing project files are never modified; Text concreta are session text only. Each sketch proposes as coordinates what it was rendered under that no Settled or Provisional coordinate covered — its brief's own commits and what producing it determined beyond them, since the relayed draft settles nothing — so the user meets those determinations beside the sketch at Qfit rather than only their consequences on the screen)
 Phase 3 produce_delegate (dispatch) → delegate (conditional: more than one target; parallel topology: one sketch per executor, each temp-isolated with its reference registered; subordinate to the active runtime policy)
 Phase 4 present (extension)         → TextPresent+Proceed (each sketch from its typed concretum — Text re-presented as recorded, an Artifact walked through at its reference, reporting what was observed there or that it was not observed and what was tried — since Text is read as recorded while an Artifact is only ever presented as far as it was seen — then this round's focus, what this realization cannot expose, which content came from the user and which is the AI's proposal, what this sketch's own production determined, and every fit witness now stale)
 Phase 4 acquire (observe)           → a channel returning utterances anchored on a sketch (read-only: the marks arrive as the user's utterances; the channel is a capability the host supplies, named here and bound nowhere in this contract. What a host must satisfy is that the user can point at what they saw and that the pointing arrives with the utterance; how it does so is read at the round against the host in front of it)
@@ -238,8 +238,8 @@ Phase 4 interpret (sense)           → Internal analysis (marks, read against t
 Phase 5 Qplace (constitution)       → present (mandatory placement gate: the recognized version and the capability it needs — a reference the user judges to outlive the session — together with the versions this run passed over, since those are what a later reversal would otherwise rebuild; the user names the location and which of the others are kept and where; no default is offered for either)
 Phase 6 harvest (track)             → Internal state update (Settled commitments, the fixture, the recognition, the trace, the residual axes, and the coordinates still Provisional, recorded before any release; the durable record is the RecognizedForm entire — sketch content beyond what placement retains stays session-local)
 Phase 6 account (transform)         → artifact write, environment run (retain the recognized version at the settled location and verify the reference resolves to that exact concretum — one retry, then RetainFailed is declared and Qplace is re-presented with nothing released; once every placed version is retained, release the sketches placement did not keep and verify each — one retry, then ReleaseFailed declared with a handoff)
-dissolution_relay (extension)       → TextPresent+Proceed (either party, at any gate: the sharpened description made the form recognizable without a further encounter, or the activation premise collapsed; state the basis, relay the Settled commitments and every mark recorded, run account, stand down as DissolutionExit — a success, not an abandonment)
-boundary_relay (extension)          → TextPresent+Proceed (either party, at any gate: a sibling deficit is demonstrated, or a realization this round requires is one this session cannot supply; name the obligation and its basis, relay the harvest so far, run account, exit as BoundaryExit; the next protocol is the session's to choose)
+dissolution_relay (extension)       → TextPresent+Proceed (either party, at the spec relay or at any gate: the sharpened description made the form recognizable without a further encounter, or the activation premise collapsed; state the basis, relay the Settled commitments and every mark recorded, run account, stand down as DissolutionExit — a success, not an abandonment)
+boundary_relay (extension)          → TextPresent+Proceed (either party, at the spec relay or at any gate: a sibling deficit is demonstrated, or a realization this round requires is one this session cannot supply; name the obligation and its basis, relay the harvest so far, run account, exit as BoundaryExit; the next protocol is the session's to choose)
 withdraw (extension)                → TextPresent+Proceed (explicit free-response exit at any gate: partial trace + residual declared; account enforced; EarlyExit. A hard interrupt yields no turn, so account cannot run: temp isolation's bounded lifecycle is the backstop)
 converge (extension)                → TextPresent+Proceed (transformation trace: marks → interpretations → revisions → recognition; the recognized version, its placement, Settled commitments, Provisional coordinates, residual axes, and every disposition)
 seam (extension)                    → TextPresent+Proceed (fires at deactivation: a user-declared chain naming the next protocol settles the next move — proceed to it, citing that settling source; the RecognizedForm enters it as prior material, its fixture a recognition witness and nothing more. This protocol declares no wired outbound edge of its own. Every Constitution gate inside this protocol and inside the next fires unchanged)
@@ -296,7 +296,7 @@ Lay out the draft TOOL GROUNDING's `spec_relay` entry names — the focus, the p
 
 ### Phase 3: Production (Transform)
 
-Produce under the settled spec as TOOL GROUNDING's `produce` entry states; every sketch carries its placeholder status visibly.
+Produce under the relayed spec as TOOL GROUNDING's `produce` entry states; every sketch carries its placeholder status visibly.
 
 ### Phase 4: Recognition Gate (Constitution)
 
