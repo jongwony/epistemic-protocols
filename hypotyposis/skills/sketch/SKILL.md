@@ -21,7 +21,7 @@ Hypotyposis(I) → detect(I, ctx) →
     [M = Marks(ms, acts)]   act(acts) → record(ms) → interpret(ms) → record(Proposed) → Λ.round += 1 → spec_relay
     [M = Fit(w, acts)]      act(acts) → w.context_revision := Λ.context_revision → Λ.fit_witnesses ∪= {w} → Λ.round += 1 → spec_relay   -- one focus adequate; the loop continues
     [free response: spec revision] revise(draft, rev) → spec_relay (scoped to the revision; no new round counted)
-    [M = Finish(rec)] Λ.recognition := Some(rec) → Qplace → Stop → P → harvest → account →
+    [M = Finish(rec, acts)] act(acts) → rec.context_revision := Λ.context_revision → Λ.recognition := Some(rec) → Qplace → Stop → P → harvest → account →
                         [retention verified] RecognizedForm
                         [retention failed]   declare → Qplace (re-presented with the failure; the same location is admissible)
     [M = Withdraw]    account → EarlyExit
@@ -110,10 +110,11 @@ FitWitness  = { sketch: SketchRef, context_revision: ℕ, scope: Focus, utteranc
        -- adequacy on one focus for one version; bound to the context revision the answer carrying it left, acts included; stale once its sketch is superseded or the context revision moves — shown as stale, never reused silently
 Recognition = { target: SketchRef, context_revision: ℕ, purpose_scope: String, residual: Set(Axis) }
        -- target must be a presented, retained version; Finish is recognition of the assembled form, not of one focus
-M  = Recognition gate answer ∈ {Marks(Set(Mark), CoordinateActs), Fit(FitWitness, CoordinateActs), Finish(Recognition), Withdraw}
-       -- the acts ride Marks and Fit: the answer that judges the version also settles or sends back the readings shown beside
-       --   it, and an answer naming none carries empty sets; Finish carries none — what is still Provisional at Finish is
-       --   declared in the result's provisional set
+M  = Recognition gate answer ∈ {Marks(Set(Mark), CoordinateActs), Fit(FitWitness, CoordinateActs), Finish(Recognition, CoordinateActs), Withdraw}
+       -- the acts ride Marks, Fit, and Finish: the answer that judges the version also settles or sends back the readings shown
+       --   beside it, and an answer naming none carries empty sets; a settlement stated in the Finish answer reaches commitments
+       --   through the same act, and what is still Provisional after it is declared in the result's provisional set; Withdraw
+       --   carries none — nothing it settled would be read
        -- Marks(∅, ∅) is read as Stop, never as Fit; Marks(∅, acts) with acts non-empty moves the coordinates and re-enters the
        --   next round as any Marks does; silence yields the turn again; a response carrying both marks and a finish is parsed
        --   as Marks — recognition names an unmarked version
@@ -170,7 +171,7 @@ Phase 3: produce(Λ.spec, Λ) → Sk : NonEmptyList(Sketch) → Λ.sketches ++= 
 Phase 4: present(Sk) → acquire(marks) → Qfit(Sk, Λ.spec.focus) → Stop → M             -- recognition gate [Tool]
        [M = Marks(ms, acts)] act(acts) → Λ.history ++= Marked(each) → interpret(ms) → Δ → Λ.history ++= Proposed(each c ∈ Δ) → stale(Λ.fit_witnesses over superseded sketches) → Λ.round += 1 → Phase 2
        [M = Fit(w, acts)]    act(acts) → w.context_revision := Λ.context_revision → Λ.fit_witnesses ∪= {w} → Λ.history ++= Witnessed(w) → Λ.round += 1 → Phase 2   -- the witness is bound to the revision the same answer left, so the acts riding it do not stale it on arrival
-       [M = Finish(rec)]     Λ.recognition := Some(rec) → Phase 5
+       [M = Finish(rec, acts)] act(acts) → rec.context_revision := Λ.context_revision → Λ.recognition := Some(rec) → Phase 5   -- the recognition is bound to the revision its own acts left, as a Fit witness is
        [M = Withdraw]        → Phase 6 (EarlyExit arm)
        -- act(acts): promote(acts.settlements) → Λ.history ++= Promoted(each) → supersede(acts.supersessions) → Λ.history ++= Superseded(each of, by) → Λ.context_revision += 1 where either set is non-empty; it runs before interpret, so a reading is drawn against what the user just settled
        -- free responses declared pre-gate: interrogate a sketch (answered within its placeholder status, gate re-presented); send back this round's focus, realization, or variants (a SpecRevision — Phase 2 with the revision named, no new round counted); contest the premise (dissolution arm); name a boundary (boundary arm)
@@ -232,7 +233,7 @@ Phase 3 produce (transform)         → artifact write, environment run (temp-is
 Phase 3 produce_delegate (dispatch) → delegate (conditional: more than one target; parallel topology: one sketch per executor, each temp-isolated with its reference registered; subordinate to the active runtime policy)
 Phase 4 present (extension)         → TextPresent+Proceed (each sketch from its typed concretum — Text re-presented as recorded, an Artifact walked through at its reference, reporting what was observed there or that it was not observed and what was tried — since Text is read as recorded while an Artifact is only ever presented as far as it was seen — then this round's focus, what this realization cannot expose, which content came from the user and which is the AI's proposal, what this sketch's own production determined, and every fit witness now stale)
 Phase 4 acquire (observe)           → a channel returning utterances anchored on a sketch (read-only: the marks arrive as the user's utterances; the channel is a capability the host supplies, named here and bound nowhere in this contract. What a host must satisfy is that the user can point at what they saw and that the pointing arrives with the utterance; how it does so is read at the round against the host in front of it)
-Phase 4 Qfit (constitution)         → present (mandatory recognition gate on a specific version: Marks, Fit on this focus, Finish for a stated purpose, Withdraw — and, riding Marks or Fit, the user's acts on the coordinates in view: which provisional readings they settle, and which coordinates they supersede or retire; Marks(∅, ∅) is Stop; the pre-gate text declares the free-response paths — interrogate, send back this round's focus, realization, or variants, contest the premise, name a boundary)
+Phase 4 Qfit (constitution)         → present (mandatory recognition gate on a specific version: Marks, Fit on this focus, Finish for a stated purpose, Withdraw — and, riding Marks, Fit, or Finish, the user's acts on the coordinates in view: which provisional readings they settle, and which coordinates they supersede or retire; Marks(∅, ∅) is Stop; the pre-gate text declares the free-response paths — interrogate, send back this round's focus, realization, or variants, contest the premise, name a boundary)
 Phase 4 record (track)              → Internal state update (the user's acts on coordinates written first — each settled coordinate takes a Promoted event, each superseded one a Superseded event with the replacement they stated or none, and the context revision advances where either set is non-empty; then every mark appended to Λ.history as itself, then each Provisional coordinate interpret read from it appended as Proposed; a fit witness appended, bound to the context revision those acts left; witnesses over superseded sketches marked stale)
 Phase 4 interpret (sense)           → Internal analysis (marks, read against the accumulated history, → Provisional coordinates, each carrying the mark it came from; never Settled here; what it yields reaches Λ only through record)
 Phase 5 Qplace (constitution)       → present (mandatory placement gate: the recognized version and the capability it needs — a reference the user judges to outlive the session — together with the versions this run passed over, since those are what a later reversal would otherwise rebuild; the user names the location and which of the others are kept and where; no default is offered for either)
@@ -309,7 +310,7 @@ Options:
 2. **Fit on this focus** — this version is adequate on this round's focus; the next round takes another focus
 3. **Finish** — this version is the form, for the purpose you state, with the axes you leave open
 ```
-With Mark or Fit, name which of the readings shown beside the version you settle, reject, or replace; unnamed ones stay as they were. Name interrogating a sketch, sending back this round's focus, perception, or variants, contesting the premise, naming a boundary, and withdrawing as free-response paths; they are not numbered options.
+With Mark, Fit, or Finish, name which of the readings shown beside the version you settle, reject, or replace; unnamed ones stay as they were. Name interrogating a sketch, sending back this round's focus, perception, or variants, contesting the premise, naming a boundary, and withdrawing as free-response paths; they are not numbered options.
 
 ### Phase 5: Placement Gate (Constitution)
 
