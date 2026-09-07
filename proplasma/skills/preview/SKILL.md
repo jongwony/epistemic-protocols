@@ -28,15 +28,16 @@ Proplasma(X) → detect(X, route) →
   [D = Synthesize(composition)] Qmicro → Gs →
     [Gs = Confirm] harvest(synthesized direction) → cleanup_verify → assemble → DirectionalContrast
     [Gs = Materialize] spec_relay_if_spec_revision → refan(composition) → contrast → present → Qdir
-  [contrast_insufficient ∧ ¬spec_settled] spec_relay_if_spec_revision → refan(gap; budget untouched) → contrast → present → Qdir
-  [contrast_insufficient ∧ spec_settled ∧ refan_budget > 0] spec_relay_if_spec_revision → refan(gap) → contrast → present → Qdir
-  [contrast_insufficient ∧ spec_settled ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ ¬insufficiency_relayed] insufficiency_after_materialization_relay → Qdir (re-present over the accumulated probes)
-  [contrast_insufficient ∧ spec_settled ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ insufficiency_relayed] insufficiency_standdown_relay → cleanup_verify → exit (EarlyExit via insufficiency_standdown)
-  [contrast_insufficient ∧ spec_settled ∧ refan_budget = 0 ∧ refan_kind = Gap] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
+  [draft sent back at Qdir ∧ ¬spec_settled] spec_relay_if_spec_revision → refan(gap; budget untouched) → contrast → present → Qdir
+  [contrast_insufficient ∧ refan_budget > 0] spec_relay_if_spec_revision → refan(gap) → contrast → present → Qdir
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ ¬insufficiency_relayed] insufficiency_after_materialization_relay → Qdir (re-present over the accumulated probes)
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization ∧ insufficiency_relayed] insufficiency_standdown_relay → cleanup_verify → exit (EarlyExit via insufficiency_standdown)
+  [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
 -- spec_relay_if_spec_revision: a refan whose implication carries a spec revision — a NEW divergence axis, a realization-tier
 --   escalation, or a revised probe target set — re-enters the spec relay scoped to the revision BEFORE generation
 -- spec_settled: False after the relayed draft; True at the first D answer or at the first send-back of the draft — a send-back
---   while ¬spec_settled is the draft's own correction and re-fans without spending the shared budget
+--   while ¬spec_settled is the draft's own correction and re-fans without spending the shared budget; an insufficiency the AI
+--   detects at contrast is not that correction and rides the budget as any gap refan
 
 ── MORPHISM ──
 DirectionProspect
@@ -191,17 +192,15 @@ Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → Λ.contrast_map := CM
                                                                   --   (with CommonCommitments declared) → new unknowns [Tool]
          -- CC is RECOMPUTED over ALL accumulated probes at every contrast and REPLACES the set (:=, never ∪=):
          --   a re-fan can break an earlier fan's shared premise
-       [contrast_insufficient ∧ ¬Λ.spec_settled] refan(gap) → Λ.spec_settled := True   -- the draft's own correction: budget and refan_kind untouched
-         → [SpecRevision] Phase 1 (spec relay scoped to the revision) | [no spec revision] Phase 2
-       [contrast_insufficient ∧ Λ.spec_settled ∧ Λ.refan_budget > 0] refan(gap) → Λ.refan_kind := Gap → decrement budget
+       [contrast_insufficient ∧ Λ.refan_budget > 0] refan(gap) → Λ.refan_kind := Gap → decrement budget
          → [SpecRevision: new axis ∨ tier escalation ∨ revised target set] Phase 1 (spec relay scoped to the revision —
              insufficiency rooted in realization fidelity escalates the tier here, never silently; a revised target
              set is likewise relayed with its basis before generation) | [no spec revision] Phase 2
-       [contrast_insufficient ∧ Λ.spec_settled ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ ¬Λ.insufficiency_relayed]
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ ¬Λ.insufficiency_relayed]
          insufficiency_after_materialization_relay → Λ.insufficiency_relayed := True → Phase 4 (re-present Qdir over Λ.probes; one-shot)
-       [contrast_insufficient ∧ Λ.spec_settled ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ Λ.insufficiency_relayed]
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization ∧ Λ.insufficiency_relayed]
          insufficiency_standdown_relay → Phase 5 (EarlyExit arm via insufficiency_standdown — a withdrawal by consequence)
-       [contrast_insufficient ∧ Λ.spec_settled ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
+       [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
 Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- direction gate [Tool]
        -- pre-gate text declares the free-response pathways: interrogate a probe, declare the contrast insufficient, name an unprobed candidate, or withdraw
        [D = Select(direction) ∧ direction ∈ directions(Λ.probes)] Λ.spec_settled := True → Λ.direction := direction → Phase 5
@@ -214,7 +213,9 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
        [free response: interrogation]                              -- not a D constructor; the gate is re-presented unchanged
          [design-intent] answer within placeholder discipline → re-present Qdir
          [factual unknown] record as ExposedUnknown (route: Inquire) → re-present Qdir
-       [free response: contrast_insufficient — a draft axis, tier, or target set sent back included] → Phase 3 insufficiency arms (same guards)
+       [free response: draft sent back — a SpecRevision named — ∧ ¬Λ.spec_settled] refan(gap) → Λ.spec_settled := True   -- the draft's own correction: budget and refan_kind untouched
+         → Phase 1 (spec relay scoped to the revision)
+       [free response: contrast_insufficient — a send-back once Λ.spec_settled included] → Phase 3 insufficiency arms (same guards)
        [free response: unprobed candidate named (whenever ∃ c ∈ X.direction_candidates: c ∉ directions(Λ.probes) —
          judged on ACCUMULATED probe coverage, not on Λ.tgt, which a materialization overwrites)]
          [¬Λ.spec_settled] refan(gap over the named candidate) → Λ.spec_settled := True   -- the draft's own correction: budget untouched
@@ -239,7 +240,7 @@ Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only wher
 
 ── LOOP ──
 Probe target set 2–4 for a contrast fan (drafted at the spec relay; when candidates exceed 4, the draft names which are probed and why, and an unprobed candidate stays reachable at the direction gate).
-Re-fan bound: at most 1 re-fan per activation — contrast-insufficiency re-fan and synthesis materialization SHARE this
+Re-fan bound: at most 1 budgeted re-fan per activation — contrast-insufficiency re-fan and synthesis materialization SHARE this
   single budget (no separate budgets), and what it was spent on decides the still-insufficient branch (`One shared re-fan`).
 Interrogation and a contrast-insufficiency declaration do not consume the re-fan budget (they generate no probes); the first send-back of the relayed draft re-fans without spending it (the draft's own correction), and a later one rides the shared budget.
 User can withdraw at any gate (an explicit exit, free response): EarlyExit — cleanup_verify runs; partial trace
