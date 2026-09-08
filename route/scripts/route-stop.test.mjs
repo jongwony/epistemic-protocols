@@ -91,6 +91,13 @@ test("a fence closes only on its own character and no shorter a run", () => {
   assert.ok(presentsOptionSet(`~~~\n\`\`\`\n~~~\n${INK_GATE}`));
 });
 
+test("a fence is read off its lines wherever it is indented, and an inline span opens none", () => {
+  const nested = MARKDOWN_GATE.split("\n").map((l) => `    ${l}`).join("\n");
+  assert.ok(!presentsOptionSet(`- An example:\n\n    \`\`\`md\n${nested}\n    \`\`\`\n`));
+  assert.ok(presentsOptionSet(`\`\`\`code\`\`\` is an inline span, not a fence.\n\n${MARKDOWN_GATE}`));
+  assert.ok(!presentsOptionSet(`~~~ \`x\`\n${MARKDOWN_GATE}\n~~~`));
+});
+
 // ---------------------------------------------------------------------------
 // Holding the stop, once
 // ---------------------------------------------------------------------------

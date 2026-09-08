@@ -29,9 +29,14 @@
  * between that opening and its closing rule, the form the epistemic output
  * style renders a checkpoint in. A numbered list of plain steps or findings
  * is not one, and is left alone — including one that follows a closed
- * block of another kind, such as a convergence readout. Nothing inside a
- * fenced code block counts: a message that quotes the shape of a gate is
- * not presenting one.
+ * block of another kind, such as a convergence readout — while a list
+ * whose items lead with bold is read as a choice wherever it stands,
+ * findings or not: the shape is what is read, never what the items mean.
+ * Lines inside a fenced code block do not count, so a message that quotes
+ * the shape of a gate is not presenting one. The fence is read the same
+ * way, off its own lines — an opener of backticks or tildes and the
+ * matching closer — and not off markdown structure: a fence the lines do
+ * not show is read as text.
  *
  * The reason also carries the one exemption the test itself declares: a
  * set built to verify understanding — one correct answer by design, the
@@ -65,12 +70,24 @@ const DIVIDER = /^·\s.*─{3,}\s*$/;
 const RULE = /^─{3,}\s*$/;
 
 // A fenced code block's opening line: three or more backticks or tildes,
-// indented at most three spaces, optionally followed by an info string.
-const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/;
+// optionally followed by an info string. Indentation is not bounded, since
+// a fence inside a list item sits deeper than the three spaces CommonMark
+// allows at the top level and this hook does not track containers. A
+// backtick fence's info string carries no backtick — a line such as
+// ```code``` is an inline span, not an opener.
+const FENCE_OPEN = /^\s*(`{3,}|~{3,})(.*)$/;
 
 // A candidate closing line: the fence alone. It closes only a block opened
 // with the same character and no longer a run, as CommonMark has it.
-const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})\s*$/;
+const FENCE_CLOSE = /^\s*(`{3,}|~{3,})\s*$/;
+
+/** The fence `line` opens, or "" when it opens none. */
+function fenceOpened(line) {
+  const m = FENCE_OPEN.exec(line);
+  if (!m) return "";
+  if (m[1][0] === "`" && m[2].includes("`")) return "";
+  return m[1];
+}
 
 // What the model continues from. It carries the test itself, its one
 // exemption, and the two ways the pass ends, so no document has to be
@@ -103,8 +120,8 @@ function presentsOptionSet(text) {
       if (close && close[1][0] === fence[0] && close[1].length >= fence.length) fence = "";
       continue;
     }
-    const open = FENCE_OPEN.exec(line);
-    if (open) { fence = open[1]; continue; }
+    const open = fenceOpened(line);
+    if (open) { fence = open; continue; }
     if (DIVIDER.test(line)) { inBlock = true; blockItems = 0; continue; }
     if (inBlock && RULE.test(line)) { inBlock = false; continue; }
     if (!ITEM.test(line)) continue;
