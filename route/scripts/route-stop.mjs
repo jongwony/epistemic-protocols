@@ -64,8 +64,13 @@ const DIVIDER = /^·\s.*─{3,}\s*$/;
 // The rule that closes such a block: a line of `─` alone.
 const RULE = /^─{3,}\s*$/;
 
-// A fenced code block's opening or closing line.
-const FENCE = /^\s*(```|~~~)/;
+// A fenced code block's opening line: three or more backticks or tildes,
+// indented at most three spaces, optionally followed by an info string.
+const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/;
+
+// A candidate closing line: the fence alone. It closes only a block opened
+// with the same character and no longer a run, as CommonMark has it.
+const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})\s*$/;
 
 // What the model continues from. It carries the test itself, its one
 // exemption, and the two ways the pass ends, so no document has to be
@@ -91,10 +96,15 @@ function presentsOptionSet(text) {
   let bold = 0;
   let blockItems = 0;
   let inBlock = false;
-  let inFence = false;
+  let fence = "";
   for (const line of text.split("\n")) {
-    if (FENCE.test(line)) { inFence = !inFence; continue; }
-    if (inFence) continue;
+    if (fence) {
+      const close = FENCE_CLOSE.exec(line);
+      if (close && close[1][0] === fence[0] && close[1].length >= fence.length) fence = "";
+      continue;
+    }
+    const open = FENCE_OPEN.exec(line);
+    if (open) { fence = open[1]; continue; }
     if (DIVIDER.test(line)) { inBlock = true; blockItems = 0; continue; }
     if (inBlock && RULE.test(line)) { inBlock = false; continue; }
     if (!ITEM.test(line)) continue;

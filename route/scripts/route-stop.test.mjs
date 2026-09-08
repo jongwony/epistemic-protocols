@@ -84,6 +84,13 @@ test("a gate quoted inside a fenced code block is not presented", () => {
   assert.ok(presentsOptionSet(`\`\`\`\n${STEPS}\n\`\`\`\n${MARKDOWN_GATE}`));
 });
 
+test("a fence closes only on its own character and no shorter a run", () => {
+  assert.ok(!presentsOptionSet(`\`\`\`\`md\n\`\`\`\n${MARKDOWN_GATE}\n\`\`\`\n\`\`\`\``));
+  assert.ok(!presentsOptionSet(`\`\`\`\n~~~\n${MARKDOWN_GATE}\n~~~\n\`\`\``));
+  assert.ok(presentsOptionSet(`\`\`\`\`\n\`\`\`\n${STEPS}\n\`\`\`\n\`\`\`\`\n${MARKDOWN_GATE}`));
+  assert.ok(presentsOptionSet(`~~~\n\`\`\`\n~~~\n${INK_GATE}`));
+});
+
 // ---------------------------------------------------------------------------
 // Holding the stop, once
 // ---------------------------------------------------------------------------
