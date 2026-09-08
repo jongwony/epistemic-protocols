@@ -25,6 +25,28 @@ The table triggers; it does not match. The two ends of each morphism — the def
 
 Everything here is read-and-relay at one prompt: the hooks inject text, the skill reads the accumulated context and invokes, nudges, places a finding, or stays silent. Nothing is stored between prompts, so `/route` keeps no stack of parked protocols and no resumption point of its own. The one thing that narrows it is a gate that holds the user's judgment: a checkpoint a protocol presented and its own contract has not yet taken an answer at, closed, or entrusted to the session. When the user turns away from such a gate mid-run, the prompt is that protocol's to read first, the way its contract reads any free response there; what that reading leaves — a residual folded at a dismissal or a withdrawal, or a checkpoint the contract itself holds across a continuation while it entrusts the prompt to the session — is the protocol's own record. A gate the reading closed or entrusted holds no longer, so `/route` routes the prompt as usual and reads the residual at the next prompt like any other; a gate still holding is monitored.
 
+## A worked case: one name, two referents
+
+The match question is whether the context shows a deficit — and a deficit is a property of some object, settled by some ground. The case that shows why Rule #2 now says so is a name with two referents. Reduced to its shape, with a synthetic domain:
+
+- A source the session has read — a design note — defines a term, say *restore*, as a step that runs **after** cleanup, on demand.
+- The user's own earlier turn used the same word for a step **before** cleanup: "back up, restore, then clean up."
+- A status summary has just relayed the source's definition, correcting the user's picture.
+- The user's next prompt is imperative: "I'll start the restore work now."
+
+Nothing in that prompt says which *restore* is meant. The source fixes what the word means in the note; it does not fix which meaning the user has adopted, and only the user can. That is `/elicit`'s deficit — an endpoint the user's own wording leaves undetermined — and it stays open however completely the source defines the word. Read against the wrong object, the same context looks resolved: the source has an answer, so nothing is missing. Read against the right one, the answer the source has is about the term, and the deficit is about the user.
+
+The case comes in two twins that differ only in the current prompt:
+
+| Twin | The current prompt | `/route` |
+|------|--------------------|----------|
+| Referent unsettled | "I'll start the restore work now." | invokes `/elicit`, with a one-sentence deficit statement naming the term whose referent is open |
+| Referent settled by the user | "I'll start the restore work now — the on-demand step from the note; my earlier 'restore' was the backup." | silence: the user's own words have supplied the determination, so no deficit shows |
+
+The imperative form is the same in both. What separates them is whether the user's words in context settle the referent, judged apart from the action the prompt asks for.
+
+This case is a synthetic reconstruction of an observed session, not a transcript from it. Two things about running it are easy to get wrong. The earlier turn and the correcting summary have to be *in the accumulated context* when `/route` reads — supplied as chronological context in the prompt — because Route declares no step that collects them from files; a scaffold that puts the note and the earlier plan on disk has put nothing in `C`. And the negative twin is graded on `/route` running without a downstream `/elicit` invocation, not on the tree staying unchanged: Route's own silence ends its turn, so an untouched tree cannot tell correct silence from the defect. An executable `/realize route` target that runs these twins is a separate follow-up — the harness would need to load a dependency plugin beside the target, assert a per-case expected downstream skill, and select its scaffold per target.
+
 ## What the hooks inject
 
 `hooks/hooks.json` registers three command hooks. All write `hookSpecificOutput.additionalContext`, read the payload on stdin without requiring it, and exit 0 on every path. No file is written, no network is touched, and no session content leaves the process.
