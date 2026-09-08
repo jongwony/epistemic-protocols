@@ -27,7 +27,7 @@ Everything here is read-and-relay at one prompt: the hooks inject text, the skil
 
 ## A worked case: one name, two referents
 
-The match question is whether the context shows a deficit — and a deficit is a property of some object, settled by some ground. The case that shows why Rule #2 now says so is a name with two referents. Reduced to its shape, with a synthetic domain:
+The match question is whether the context shows a deficit — and a deficit is a property of some object, settled by some ground. The case that shows why Rule #2 says so is a name with two referents. Reduced to its shape, with a synthetic domain:
 
 - A source the session has read — a design note — defines a term, say *restore*, as a step that runs **after** cleanup, on demand.
 - The user's own earlier turn used the same word for a step **before** cleanup: "back up, restore, then clean up."
@@ -45,7 +45,7 @@ The case comes in two twins that differ only in the current prompt:
 
 The imperative form is the same in both. What separates them is whether the user's words in context settle the referent, judged apart from the action the prompt asks for.
 
-This case is a synthetic reconstruction of an observed session, not a transcript from it. Two things about running it are easy to get wrong. The earlier turn and the correcting summary have to be *in the accumulated context* when `/route` reads — supplied as chronological context in the prompt — because Route declares no step that collects them from files; a scaffold that puts the note and the earlier plan on disk has put nothing in `C`. And the negative twin is graded on `/route` running without a downstream `/elicit` invocation, not on the tree staying unchanged: Route's own silence ends its turn, so an untouched tree cannot tell correct silence from the defect. An executable `/realize route` target that runs these twins is a separate follow-up — the harness would need to load a dependency plugin beside the target, assert a per-case expected downstream skill, and select its scaffold per target.
+This case is synthetic, not a transcript. Two things about running it are easy to get wrong. The earlier turn and the correcting summary have to be *in the accumulated context* when `/route` reads — supplied as chronological context in the prompt — because Route declares no step that collects them from files; a scaffold that puts the note and the earlier plan on disk has put nothing in `C`. And the negative twin is graded on `/route` running without a downstream `/elicit` invocation, not on the tree staying unchanged: Route's own silence ends its turn, so an untouched tree cannot tell correct silence from the defect.
 
 ## What the hooks inject
 
