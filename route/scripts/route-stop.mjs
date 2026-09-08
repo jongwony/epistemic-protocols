@@ -25,9 +25,18 @@
  * The shape is read off `last_assistant_message`, which the host places
  * in the Stop payload. Two shapes count: a numbered list whose items lead
  * with a bold label — the form a choice takes in markdown — and a divider
- * block that opens with `·` and a rule of `─` and carries numbered items,
- * the form the epistemic output style renders a checkpoint in. A numbered
- * list of plain steps or findings is not one, and is left alone.
+ * block that opens with `·` and a rule of `─` and carries numbered items
+ * between that opening and its closing rule, the form the epistemic output
+ * style renders a checkpoint in. A numbered list of plain steps or findings
+ * is not one, and is left alone — including one that follows a closed
+ * block of another kind, such as a convergence readout. Nothing inside a
+ * fenced code block counts: a message that quotes the shape of a gate is
+ * not presenting one.
+ *
+ * The reason also carries the one exemption the test itself declares: a
+ * set built to verify understanding — one correct answer by design, the
+ * others there to be told apart from it — is not a choice the test reads,
+ * and the second pass leaves it as it stands.
  *
  * One pass, never a loop: the host sets `stop_hook_active` on a stop that
  * follows a hook-held continuation, and the hook lets every such stop
@@ -52,33 +61,47 @@ const ITEM = /^\s*\d+[.)]\s+\S/;
 // `· label ───…`.
 const DIVIDER = /^·\s.*─{3,}\s*$/;
 
-// What the model continues from. It carries the test itself and the two
-// ways the pass ends, so no document has to be fetched at a turn boundary;
-// it names the user's answer as still theirs, since a held stop is the
-// model's turn and not a response at the checkpoint.
+// The rule that closes such a block: a line of `─` alone.
+const RULE = /^─{3,}\s*$/;
+
+// A fenced code block's opening or closing line.
+const FENCE = /^\s*(```|~~~)/;
+
+// What the model continues from. It carries the test itself, its one
+// exemption, and the two ways the pass ends, so no document has to be
+// fetched at a turn boundary; it names the user's answer as still theirs,
+// since a held stop is the model's turn and not a response at the
+// checkpoint.
 const REASON = [
   "An option set was just presented. Before this turn ends, read it once more:",
   "if the analysis already settles one option — the others standing as foils — say so, relay that conclusion with what settles it, and leave the set behind;",
   "if the options diverge on a value or knowledge only the user holds, say so in one line and leave the set open.",
+  "A set built to verify understanding — one correct answer by design, the others there to be told apart from it — is not this test's subject: leave it as it stands.",
   "Add only what changed — do not re-present the set, and do not answer the question for the user; the answer is still theirs.",
   "If what was presented is a list of steps or findings rather than a choice, say so in a few words and stop.",
 ].join(" ");
 
-/** True when `text` presents a numbered option set, read off its shape alone. */
+/**
+ * True when `text` presents a numbered option set, read off its shape alone.
+ * Bold-led items count anywhere outside a fence; plain items count only
+ * inside the divider block that opens above them, up to its closing rule.
+ */
 function presentsOptionSet(text) {
   if (typeof text !== "string" || !text) return false;
-  const lines = text.split("\n");
   let bold = 0;
-  let divider = false;
-  let items = 0;
-  for (const line of lines) {
-    if (DIVIDER.test(line)) divider = true;
-    if (ITEM.test(line)) {
-      items += 1;
-      if (BOLD_ITEM.test(line)) bold += 1;
-    }
+  let blockItems = 0;
+  let inBlock = false;
+  let inFence = false;
+  for (const line of text.split("\n")) {
+    if (FENCE.test(line)) { inFence = !inFence; continue; }
+    if (inFence) continue;
+    if (DIVIDER.test(line)) { inBlock = true; blockItems = 0; continue; }
+    if (inBlock && RULE.test(line)) { inBlock = false; continue; }
+    if (!ITEM.test(line)) continue;
+    if (BOLD_ITEM.test(line)) bold += 1;
+    if (inBlock && (blockItems += 1) >= 2) return true;
   }
-  return bold >= 2 || (divider && items >= 2);
+  return bold >= 2;
 }
 
 /** The payload's `last_assistant_message`, or "" where the host carries none. */

@@ -40,6 +40,13 @@ const FINDINGS = [
   "2. **Note**: the test only catches removal.",
 ].join("\n");
 
+const CONVERGENCE = [
+  "· Convergence ───────────",
+  "✓ Scope: defined",
+  "○ Owner: pending",
+  "─────────────────────────",
+].join("\n");
+
 function payload(fields) {
   return JSON.stringify({ hook_event_name: "Stop", ...fields });
 }
@@ -60,9 +67,21 @@ test("a divider block with numbered items presents an option set, bold or not", 
 test("plain steps, a single bold item, and a lone divider are not option sets", () => {
   assert.ok(!presentsOptionSet(STEPS));
   assert.ok(!presentsOptionSet(FINDINGS));
-  assert.ok(!presentsOptionSet("· Convergence ───────────\n✓ Scope: defined\n○ Owner: pending\n─────────────────────────"));
+  assert.ok(!presentsOptionSet(CONVERGENCE));
   assert.ok(!presentsOptionSet(""));
   assert.ok(!presentsOptionSet(undefined));
+});
+
+test("plain numbered items count only inside the block that opens above them", () => {
+  assert.ok(!presentsOptionSet(`${CONVERGENCE}\n\n${STEPS}`));
+  assert.ok(!presentsOptionSet(`${STEPS}\n\n${CONVERGENCE}`));
+  assert.ok(presentsOptionSet(`${CONVERGENCE}\n\n${INK_GATE}`));
+});
+
+test("a gate quoted inside a fenced code block is not presented", () => {
+  assert.ok(!presentsOptionSet(`The shape of a gate:\n\`\`\`\n${MARKDOWN_GATE}\n\`\`\`\nThat is all.`));
+  assert.ok(!presentsOptionSet(`~~~\n${INK_GATE}\n~~~`));
+  assert.ok(presentsOptionSet(`\`\`\`\n${STEPS}\n\`\`\`\n${MARKDOWN_GATE}`));
 });
 
 // ---------------------------------------------------------------------------
@@ -92,9 +111,10 @@ test("a payload without last_assistant_message passes through rather than failin
   assert.equal(render(""), "");
 });
 
-test("the reason names both endings and keeps the answer the user's", () => {
+test("the reason names both endings, exempts a set that verifies understanding, and keeps the answer the user's", () => {
   assert.match(REASON, /relay/);
   assert.match(REASON, /leave the set open/);
+  assert.match(REASON, /verify understanding[^.]*leave it as it stands/);
   assert.match(REASON, /do not answer the question for the user/);
   assert.match(REASON, /do not re-present the set/);
 });
