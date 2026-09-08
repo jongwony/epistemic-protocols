@@ -25,6 +25,28 @@ The table triggers; it does not match. The two ends of each morphism — the def
 
 Everything here is read-and-relay at one prompt: the hooks inject text, the skill reads the accumulated context and invokes, nudges, places a finding, or stays silent. Nothing is stored between prompts, so `/route` keeps no stack of parked protocols and no resumption point of its own. The one thing that narrows it is a gate that holds the user's judgment: a checkpoint a protocol presented and its own contract has not yet taken an answer at, closed, or entrusted to the session. When the user turns away from such a gate mid-run, the prompt is that protocol's to read first, the way its contract reads any free response there; what that reading leaves — a residual folded at a dismissal or a withdrawal, or a checkpoint the contract itself holds across a continuation while it entrusts the prompt to the session — is the protocol's own record. A gate the reading closed or entrusted holds no longer, so `/route` routes the prompt as usual and reads the residual at the next prompt like any other; a gate still holding is monitored.
 
+## A worked case: one name, two referents
+
+The match question is whether the context shows a deficit — and a deficit is a property of some object, settled by some ground. The case that shows why Rule #2 says so is a name with two referents, met where `/elicit` is ordinarily reached: the user is about to plan a piece of work, and what that work is for has not yet been fixed as decision coordinates. Reduced to its shape, with a synthetic domain:
+
+- A source the session has read — a design note — defines a term, say *restore*, as a step that runs **after** cleanup, on demand, when a read misses.
+- The user's own earlier turn used the same word for a step **before** cleanup: "back up, restore, then clean up."
+- A status summary has just relayed the source's definition, correcting the user's picture.
+- The user's next prompt opens the planning: "Let's plan the restore work."
+
+What that prompt leaves open is not one word but the work's endpoint — which stage the restore belongs to, what triggers it, what has to exist when it is done: the coordinates a plan is built from. The term with two referents is the signal that those coordinates are unfixed, not the whole of what is unfixed. The source fixes what the word means in the note; it does not fix which meaning the user has adopted, nor what the user's restore work is for, and only the user can. That is `/elicit`'s deficit — an intent whose axes the user's own wording leaves undetermined, with a substrate (the note, the earlier plan) to trace candidate coordinates from — and it stays open however completely the source defines the word. Read against the wrong object, the same context looks resolved: the source has an answer, so nothing is missing. Read against the right one, the answer the source has is about the term, and the deficit is about the user. The prompt may equally arrive as an announcement — "I'll start the restore work now" — and reads the same: starting work whose endpoint is open is planning it, and the announcement's form settles nothing.
+
+The case comes in two twins that differ only in the current prompt:
+
+| Twin | The current prompt | `/route` |
+|------|--------------------|----------|
+| Intent undetermined | "Let's plan the restore work." | invokes `/elicit`, with a one-sentence deficit statement naming the work whose endpoint is open |
+| Intent fixed by the user | "Let's plan the restore work — the on-demand step from the note, triggered by a read miss after cleanup; my earlier 'restore' was the backup." | silence: the user's own words have supplied the coordinates, so no deficit shows |
+
+Both prompts ask for the same action. What separates them is whether the user's words in context settle the endpoint, judged apart from the action the prompt asks for.
+
+This case is synthetic, not a transcript. Two things about running it are easy to get wrong. The earlier turn and the correcting summary have to be *in the accumulated context* when `/route` reads — supplied as chronological context in the prompt — because Route declares no step that collects them from files; a scaffold that puts the note and the earlier plan on disk has put nothing in `C`. And the negative twin is graded on `/route` running without a downstream `/elicit` invocation, not on the tree staying unchanged: Route's own silence ends its turn, so an untouched tree cannot tell correct silence from the defect.
+
 ## What the hooks inject
 
 `hooks/hooks.json` registers four command hooks. Three write `hookSpecificOutput.additionalContext`; the fourth holds a stop with `decision: block`. All read the payload on stdin without requiring it, and exit 0 on every path. No file is written, no network is touched, and no session content leaves the process.
