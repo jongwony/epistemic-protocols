@@ -41,11 +41,7 @@
  * reasoning; a hook that did it would couple the premise to one harness's
  * tool set and move the judgment out of the reasoning it belongs to. The
  * tool channel is therefore the fast layer here: bound to a harness, and
- * expected to shrink as readers follow the session index unaided. One of
- * those readings has a retrospective channel as well: the Stop hook
- * (route-stop.mjs) reads off the shape of the message that just ended
- * whether a numbered option set was presented — not whether it diverges —
- * and hands that judgment back to the reader for a second pass.
+ * expected to shrink as readers follow the session index unaided.
  *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
