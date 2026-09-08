@@ -38,10 +38,14 @@
  * matching closer — and not off markdown structure: a fence the lines do
  * not show is read as text.
  *
- * The reason also carries the one exemption the test itself declares: a
- * set built to verify understanding — one correct answer by design, the
- * others there to be told apart from it — is not a choice the test reads,
- * and the second pass leaves it as it stands.
+ * The reason also carries the axis question beside the test: a set whose
+ * options differ on something the decision does not turn on is standing
+ * on the wrong axis, and the second pass names the axis it does turn on
+ * rather than leaving such a set open. And it carries the one exemption
+ * the test itself declares: a set built to verify understanding — one
+ * correct answer by design, the others there to be told apart from it —
+ * is not a choice the test reads, and the second pass leaves it as it
+ * stands.
  *
  * One pass, never a loop: the host sets `stop_hook_active` on a stop that
  * follows a hook-held continuation, and the hook lets every such stop
@@ -89,14 +93,16 @@ function fenceOpened(line) {
   return m[1];
 }
 
-// What the model continues from. It carries the test itself, its one
-// exemption, and the two ways the pass ends, so no document has to be
-// fetched at a turn boundary; it names the user's answer as still theirs,
-// since a held stop is the model's turn and not a response at the
-// checkpoint.
+// What the model continues from. It carries the test itself, the axis
+// question beside it — whether the set stands on the axis the decision
+// turns on at all — its one exemption, and the ways the pass ends, so no
+// document has to be fetched at a turn boundary; it names the user's
+// answer as still theirs, since a held stop is the model's turn and not a
+// response at the checkpoint.
 const REASON = [
   "An option set was just presented. Before this turn ends, read it once more:",
   "if the analysis already settles one option — the others standing as foils — say so, relay that conclusion with what settles it, and leave the set behind;",
+  "if the options stand on an axis the decision does not turn on — differing on something the user has no need to settle — name the axis it does turn on, and leave the set behind;",
   "if the options diverge on a value or knowledge only the user holds, say so in one line and leave the set open.",
   "A set built to verify understanding — one correct answer by design, the others there to be told apart from it — is not this test's subject: leave it as it stands.",
   "Add only what changed — do not re-present the set, and do not answer the question for the user; the answer is still theirs.",

@@ -129,6 +129,7 @@ test("the reason names both endings, exempts a set that verifies understanding, 
   assert.match(REASON, /relay/);
   assert.match(REASON, /leave the set open/);
   assert.match(REASON, /verify understanding[^.]*leave it as it stands/);
+  assert.match(REASON, /axis/);
   assert.match(REASON, /do not answer the question for the user/);
   assert.match(REASON, /do not re-present the set/);
 });
