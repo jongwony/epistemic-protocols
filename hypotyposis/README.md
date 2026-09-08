@@ -14,7 +14,7 @@ Some forms cannot be specified before they are seen (`FitUnrecognized`): the pla
 
 ### The Solution
 
-**Recognition over Description**: draft each round's focus, the perception it needs, and how many variants to produce, relay the draft with its basis, and produce the sketches in temp isolation; present them and take your marks on a specific version — settling or sending back the round's readings in the same answer; revise the retained version — never regenerate it from the coordinates that describe it — and repeat until you finish on a version for a stated purpose. Your marks stay your words; what the AI reads from them stays provisional until you settle it. At the end you name where the recognized version lives (there is no default), and everything else is released with its disposition declared.
+**Recognition over Description**: draft each round's focus, the perception it needs, and how many variants to produce, relay the draft with its basis, and produce the sketches in a workspace of their own; present them and take your marks on a specific version — settling or sending back the round's readings in the same answer; revise the retained version — never regenerate it from the coordinates that describe it — and repeat until you finish on a version for a stated purpose. Your marks stay your words; what the AI reads from them stays provisional until you settle it. At the end you name where the recognized version lives (there is no default), and everything else is released with its disposition declared.
 
 ### Difference from Other Protocols
 
