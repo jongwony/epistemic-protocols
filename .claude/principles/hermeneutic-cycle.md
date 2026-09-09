@@ -38,7 +38,6 @@ Each surface operationalizes the same structural pattern at a different scale. C
 - **Correction-channel evidence** — When calibrating a grant, assess feedback and recovery through `premise/calibration-methodology.md`. Resolve the decision's actual authority under `premise/recognition-and-authority.md`; a correction channel alone neither determines an answer nor grants discretion.
 - **Substrate respect** — skipping an evidence-gate with hermeneutic respect acknowledges that the gate is part of the cycle; premature attempts violate substrate-first.
 - **Cross-version traceability** — Issue / PR inscriptions surviving across sessions are the substrate of the inter-version surface; severing them breaks the cycle's backward reach.
-- **Authoring placement (invariant / horizon test)** — At inscription time, content mapping to `preserves` / `invariant` blocks (stable references, productive prejudices) compiles to T1 auto-load; content mapping to `LOOP` / `CONVERGENCE` blocks (revisable interpretations, fusion-conditioned outputs) belongs in T2–T3 lazy-load or `docs/`. Per Tier Factorization, this prevents compiling horizons that should remain hermeneutically revisable. External research substrate for the test: issue #402.
 
 ## Naming
 
@@ -46,4 +45,4 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 ## Tier
 
-Lives in `.claude/principles/` (axis_β = T2–T3, lazy-load, authoring/verify-time invocation). Per Tier Factorization (`.claude/principles/architectural-principles.md §Tier Factorization`), this file names the family for authoring coherence; runtime detection is operationalized at each surface (LOOP blocks at runtime, hypomnesis store at session boundary, VCS at inter-version scale, Constitution gate per Phase 2).
+Use this family at authoring and verification time; load it under `.claude/principles/AGENTS.md` §Distinction from `.claude/rules/`. Each protocol or substrate states the operative loop, record, or checkpoint at its own binding moment.

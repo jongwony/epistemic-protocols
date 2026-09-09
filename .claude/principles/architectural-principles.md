@@ -9,11 +9,11 @@ Project structure decisions; independent of the axiom system.
 - When assigning a principle's tier, use `premise/tiering-and-scope.md`; when choosing its loading moment, use this directory's `AGENTS.md` and the root `AGENTS.md` placement rules. A role classification does not determine loading frequency.
 - When changing a loading path, preserve the principle's reach before its binding moment. Moving a file does not reclassify its obligation.
 
-### Authority Mode: Standing/Active
+### Authority at Protocol Checkpoints
 
 - When a recorded standing rule determines a gate's answer, derive its scope from the user's constitutive act and apply only the conditional relay path the protocol actually defines.
 - When the person grants discretion among alternatives, read that grant's scope under `premise/recognition-and-authority.md` §Judgment Across Delegation. The grant authorizes judgment without making its answer deterministic.
-- When a protocol requires a live user response, its TYPES, PHASE TRANSITIONS, and TOOL GROUNDING govern that checkpoint. Standing authority or a calibration profile does not manufacture the missing answer.
+- When a protocol requires a live user response, its TYPES, PHASE TRANSITIONS, and TOOL GROUNDING govern that checkpoint. An earlier grant or a calibration profile does not manufacture the missing answer.
 - When classifying an interaction, apply `premise/interaction-factorization.md`'s single classification per case. Judge consequence and recovery separately; authority source does not establish a regret bound.
 
 ## Epistemic Cost Topology

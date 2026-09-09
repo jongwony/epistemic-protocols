@@ -478,7 +478,7 @@ function checkToolGrounding() {
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
   const MANDATORY_CLASSIFICATIONS = new Set(['dispatch']);
 
-  // Valid annotation vocabulary (7-label MECE set; Cognitive Partnership Move primary frame)
+  // Valid interaction and operation annotations (TOOL GROUNDING vocabulary)
   const VALID_ANNOTATIONS = new Set(['sense', 'observe', 'track', 'transform', 'dispatch', 'constitution', 'extension']);
 
   // Find operation in PHASE TRANSITIONS with any valid pattern

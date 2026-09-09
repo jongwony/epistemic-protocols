@@ -1,13 +1,13 @@
 # `.claude/principles/` — Demotion Zone
 
-**Purpose**: Location for prescriptive content demoted from `.claude/rules/`. Per Tier Factorization, this directory realizes the **o-tier** axis (operational/runtime invocation frequency) at T2-T3; §Distinction from `.claude/rules/` below states the load behavior that realizes it.
+**Purpose**: Location for prescriptive content demoted from `.claude/rules/`. §Distinction from `.claude/rules/` below states when this content loads.
 
 This directory realizes the root `AGENTS.md` `## Progressive Disclosure` policy in three stages: at session start, nothing in this directory loads; when work touches this directory, its entry document (`AGENTS.md`, aliased as `CLAUDE.md`) is picked up by directory convention, bringing this index and the placement policy below into context; a specific principle document is then fetched via Read/Grep only when the utterance or current context names it. Other AI clients can adopt the same content via their own load conventions; the content itself is substrate-agnostic.
 
 ## Distinction from `.claude/rules/`
 
-- **`.claude/rules/`** — o-tier T1. Auto-loaded by the harness at session start, so it is invoked per-turn.
-- **`.claude/principles/`** — o-tier T2-T3, with two load paths. The entry document (`AGENTS.md`, aliased `CLAUDE.md`) loads by directory convention when work touches this directory, so it is invoked once per directory visit. Each principle document lazy-loads via Read/Grep only when named, so it is invoked per-session or per-authoring.
+- **`.claude/rules/`** — Auto-loaded by the harness at session start, so it is invoked per-turn.
+- **`.claude/principles/`** — Two load paths. The entry document (`AGENTS.md`, aliased `CLAUDE.md`) loads by directory convention when work touches this directory, so it is invoked once per directory visit. Each principle document lazy-loads via Read/Grep only when named, so it is invoked per-session or per-authoring.
 
 This section is the canonical statement of the load mechanism in this repository; other files point here rather than restating it. Naming this index `AGENTS.md` with the `CLAUDE.md` alias — the only file in this directory that carries that name — is what makes the directory-convention pickup happen, which is why it stays short and current.
 
@@ -21,7 +21,7 @@ This section is the canonical statement of the load mechanism in this repository
 
 ## Philosophy
 
-This directory is not an archive (content remains canonical and current) and not a docs/ replacement (docs/ holds contributor-facing specification and editing conventions, not prescriptive principles; investigation and research products go to the ledger). It is a **Tier Factorization o-tier zone** — same content, different invocation frequency, different load mechanism.
+This directory is not an archive (content remains canonical and current) and not a docs/ replacement (docs/ holds contributor-facing specification and editing conventions, not prescriptive principles; investigation and research products go to the ledger).
 
 The demotion zone reduces auto-load memory pressure (Epistemic Cost Topology applied to the loading dimension) while keeping the demoted content canonical and editable. The split is one-directional by default: there is no formal re-promotion pathway. A demoted section returning to `.claude/rules/` is a contributor-judgment decision per case, not an inscribed criterion.
 
