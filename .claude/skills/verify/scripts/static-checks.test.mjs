@@ -93,13 +93,13 @@ describe('gate-answer-reference', () => {
 
       const horismosPath = path.join(root, 'horismos/skills/bound/SKILL.md');
       const horismos = readFileSync(horismosPath, 'utf-8');
-      assert.ok(horismos.includes('→ Stop → Λ.final_gate_answers'), 'Horismos mutation anchor moved');
+      assert.ok(horismos.includes('→ Stop → Λ.answer'), 'Horismos mutation anchor moved');
       assert.ok(horismos.includes('→ Stop → confirmed_intent ∈ J'), 'Horismos inline type anchor moved');
       writeFileSync(
         horismosPath,
         horismos
-          .replace('→ Stop → Λ.final_gate_answers', '→ Stop → Λ.missing_gate_answers')
-          .replace('→ Stop → confirmed_intent ∈ J', '→ Stop → confirmed_intent ∈ Zeta')
+          .replace('→ Stop → Λ.answer', '→ Stop → Λ.missing_gate_answers')
+          .replaceAll('→ Stop → confirmed_intent ∈ J', '→ Stop → confirmed_intent ∈ Zeta')
       );
 
       const mutated = run(root);

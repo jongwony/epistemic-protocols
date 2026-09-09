@@ -7,7 +7,7 @@ description: "Scoped empirical validation. Decomposes a target↔surrogate equiv
 
 Validate an inference-uncertain proposition inside a constraint-bounded stand-in space synchronized with the user, obtain a scoped resolution ("within these conditions, whether it holds, fails, or remains inconclusive"), and carry the uncovered complement forward to a follow-up protocol. This skill does not run the experiment substrate, open branches, or create PRs. It orchestrates existing protocols around one disciplined empirical move.
 
-**This is an orchestration utility, not a runtime executor and not a new epistemic protocol.** Reduced-Space Test introduces no new interaction deficit. It realizes a known composite — decompose the target↔surrogate equivalence claim into verifiable facets, then `/bound` a synchronized test space (+ residual) ∘ `/inquire` for evidence inside it → scoped resolution + carried complement. It is sibling to `/triage` and `/forge`: a thin composition over existing protocols, kept outside the core protocol set because it owns no deficit of its own.
+**This is an orchestration utility, not a runtime executor and not a new epistemic protocol.** Reduced-Space Test introduces no new interaction deficit. It realizes a known composite — decompose the target↔surrogate equivalence claim into verifiable facets, then project `/bound`'s source-grounded result into a synchronized test space and coverage complement ∘ `/inquire` for evidence inside it → scoped resolution + carried complement. It is sibling to `/triage` and `/forge`: a thin composition over existing protocols, kept outside the core protocol set because it owns no deficit of its own.
 
 The core recognition act is **decomposing the equivalence claim into verifiable facets** — not "creating a reduced space." A stand-in space is only as good as the facets on which it is claimed equivalent to the target; the value lives in making those facets explicit and observable.
 
@@ -18,7 +18,7 @@ The core recognition act is **decomposing the equivalence claim into verifiable 
 ```
 InferenceUncertainClaim
   -> ScopedClaimFrame       (core: decompose target↔surrogate equivalence into verifiable facets)
-  -> BoundedTestSpace       (/bound: user-synchronized in-scope space + residual complement)
+  -> BoundedTestSpace       (/bound result projected into settled test scope, coverage complement, and pending boundary obligations)
   -> EmpiricalEvidence      (/inquire: observe inside the bounded space, evidence over inference)
   -> ScopedResolution | CoverageShortfall   (scoped outcome — holds, fails, or inconclusive — within the claim's defined conditions; or, on under-coverage, a CoverageShortfall: slice-scoped resolution or no resolution, with the remainder re-bounded or carried)
   -> Residual               (uncovered complement -> follow-up protocol)
@@ -34,7 +34,7 @@ The orchestration produces two first-class outputs: a **scoped resolution** (the
 | `EquivalenceClaim` | The asserted target-environment ↔ surrogate-space equivalence the test rests on. The test is only valid on the facets where this equivalence is itself examined. |
 | `VerifiableFacet` | One decomposed, observable dimension of the equivalence claim — a place where target and surrogate can be compared and a gap measured. |
 | `ScopedClaimFrame` | The Phase 1 output: the decomposed set of `VerifiableFacet`s the test will and will not speak to — critical facets, the surrogate↔target difference inventory, influence-path hypotheses, and the chosen gap-measurement approach. Surfaced for user recognition before it constrains the boundary; it is what keeps the later evidence sentence honest. |
-| `BoundedTestSpace` | The in-scope validation space defined with the user through `/bound`, paired with its residual complement. The space's definition is what constitutes the verifiable claim. |
+| `BoundedTestSpace` | The validation scope projected from `/bound`'s source-grounded entries and the `ScopedClaimFrame`, paired with its coverage complement. Carry pending boundary obligations with their source and required next treatment; the settled scope constitutes the verifiable claim. |
 | `Residual` | The complement the bounded space does not cover. A first-class output, carried forward, never dropped. |
 | `EmpiricalEvidence` | Observation captured inside the bounded test space through `/inquire` — evidence with cited basis, scoped to the conditions actually exercised. |
 | `ScopedResolution` | The scoped outcome within the bounded space on the tested facets: the proposition holds, fails, or remains inconclusive — stated as an updated failure probability within the defined conditions (lower on confirmation, higher on disconfirmation), never a bare "it works". A disconfirming or inconclusive result is a first-class resolution, not a loop failure. |
@@ -47,12 +47,14 @@ Reduced-Space Test orchestrates existing protocols; most per-step work is delega
 ```
 (conditional front) /elicit | /induce                              Phase 0
    -> decompose equivalence claim into facets [owned: ScopedClaimFrame]  Phase 1
-   -> /bound      [BoundaryUndefined -> DefinedBoundary, + residual]  Phase 2
+   -> /bound      [BoundaryUndefined -> DefinedBoundary]
+   -> project scope, coverage complement, and pending obligations     Phase 2
    -> /inquire    [ContextInsufficient -> InformedExecution, Observe]  Phase 3
    -> residual carry-forward (/inquire | /elicit)                      Phase 4
 ```
 
-`/bound` natively emits a boundary plus its residual, so the complement is produced by the bound step itself rather than bolted on afterward. `/inquire` natively captures observation evidence under a scope-covers-claim discipline, so the empirical step reuses that grounding rather than re-deriving it.
+- At the `/bound` return, project the validation scope and its coverage complement from the current boundary entries, their setting record, and the `ScopedClaimFrame`. A boundary remainder can be pending work inside the scope; an established exclusion can belong to the coverage complement with no unsettled judgment. Preserve this distinction when composing the result.
+- At the `/inquire` handoff, pass the settled scope, conditions, and source-grounded pending obligations that bear on the observation. Its scope-covers-claim discipline governs what the evidence can support.
 
 ## Phase 0: Intake + Name the Pattern (conditional)
 
@@ -80,16 +82,19 @@ The output is a `ScopedClaimFrame`: the facets that the test will and will not s
 
 ## Phase 2: Bound the Test Space (compose /bound)
 
-Compose `/bound` (Horismos: `BoundaryUndefined -> DefinedBoundary`) to define the `BoundedTestSpace` with the user and to emit its `Residual` complement in the same move.
+Compose `/bound` (Horismos: `BoundaryUndefined -> DefinedBoundary`) to define the validation boundary with the user, then derive `BoundedTestSpace` from its result under the projection below.
 
 **Constraint sync is a Constitution interaction.** The user defines the reduced space, and that definition *constitutes the verifiable claim* — testing "does the API respond" and testing "does the API sustain its rated throughput" are different reduced spaces that license different claims. The boundary the user draws is therefore not a mechanical narrowing; it determines what the eventual resolution is allowed to assert. Surface the facet frame from Phase 1 so the user draws the boundary in recognition of what each cut includes and excludes.
 
-`/bound` returns the in-scope space and the residual together; carry both forward.
+- After `/bound` returns, read its map and setting record to resolve the actual included conditions and exclusions against the `ScopedClaimFrame`. Project the included conditions into the test scope and the uncovered facets into this utility's `Residual`; cite the source of each cut.
+- When `/bound` carries unresolved material, retain it with its required next treatment in `BoundedTestSpace`. Distinguish a pending in-scope selection or prerequisite from an uncovered facet; copying the entire boundary residual as the coverage complement loses that distinction.
+- Before empirical work depends on an unsettled scope value or prerequisite, resolve it through its source-defined disposition or return to the affected `/bound` judgment. Continue independent authorized observation only within already-settled conditions. Carry still-pending obligations with the final scoped result if they remain relevant.
 
 ## Phase 3: Capture Empirical Evidence (compose /inquire)
 
 Compose `/inquire` (Aitesis: `ContextInsufficient -> InformedExecution`) to observe inside the `BoundedTestSpace` and settle the scoped uncertainty (confirm, disconfirm, or find it inconclusive).
 
+- Read the projected scope and pending obligations before observation; satisfy the dependencies of the observation under their setting sources.
 - Capture observation evidence in the bounded space — evidence over inference, with cited basis.
 - Hold the scope-covers-claim discipline: the space actually exercised must cover the claim the evidence will license. Evidence drawn from a narrower slice than the claim it is asked to support is under-covering and does not yield a `ScopedResolution`.
 
@@ -109,7 +114,7 @@ At convergence, present the pairing: the scoped resolution with its defined cond
 1. **Facet decomposition is the core act** (orchestration identity): The test's value is the explicit decomposition of the target↔surrogate equivalence into verifiable facets, not the construction of a stand-in space. A reduced space presented without its facet frame is an untested equivalence assumption wearing the appearance of evidence. The decomposed frame is surfaced for user recognition — with an Emergent probe for missing facets — before it constrains the boundary, so which facets count is never a silent AI determination.
 2. **Constraint sync is Constitution** (authority boundary): The user defines the bounded space, and that definition constitutes the verifiable claim. The skill surfaces the facet frame and the boundary's includes/excludes; the user draws the cut.
 3. **Scoped claim only** (evidence discipline): Resolution sentences assert an updated failure probability within the defined conditions — lower on confirmation, higher on disconfirmation, open on inconclusive. Absolute claims in either direction exceed what a stand-in space supports and are reframed to the scoped form. A disconfirming or inconclusive result is a first-class resolution, never suppressed to force a confirmation.
-4. **Residual carries forward** (completeness): The uncovered complement is a first-class output routed to a follow-up protocol. A scoped resolution that omits its residual overclaims its reach.
+4. **Residual carries forward** (completeness): Derive the uncovered complement from the settled test scope and facet frame, and route it to a follow-up protocol. Preserve pending boundary obligations separately with their source and next treatment; dependent observation waits until its scope and prerequisites are settled.
 5. **Scope covers claim** (coverage): The bounded test space must cover the claim it licenses. Evidence from a slice narrower than its claim is under-covering: it yields no scoped resolution for the full claim and exits as a `CoverageShortfall` — re-scope to the covered slice (resolution over the slice + remainder as residual) or re-bound — never an implicit retry.
 6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). It introduces no new interaction deficit and does not constitute a new protocol.
 
@@ -132,7 +137,7 @@ At convergence, present the pairing: the scoped resolution with its defined cond
 
 - [ ] Phase 0 the `InferenceUncertainClaim` is stated; a `/elicit` or `/induce` front is used only when the intent is aporetic or the pattern is unnamed
 - [ ] Phase 1 critical facets, surrogate↔target difference inventory, influence-path hypotheses, and a gap-measurement approach are surfaced as the `ScopedClaimFrame`, and the frame is surfaced for user recognition (with an Emergent missing-facet probe) before Phase 2 draws the boundary over it
-- [ ] Phase 2 `/bound` defines the `BoundedTestSpace` with the user as a Constitution interaction and emits the `Residual`
+- [ ] Phase 2 `/bound` defines the validation boundary with the user; the source-grounded projection derives test scope and coverage `Residual` from that boundary and `ScopedClaimFrame`, retaining pending boundary obligations separately
 - [ ] Phase 3 `/inquire` captures `EmpiricalEvidence` inside the bounded space under a scope-covers-claim discipline
 - [ ] Phase 4 the resolution is scoped to the tested conditions (no absolute claim; a disconfirming/inconclusive outcome recorded as a first-class resolution, not retried into a confirmation) and the `Residual` is routed to a follow-up protocol
 - [ ] Convergence pairs the scoped resolution with its defined conditions and the carried residual with its routing (or, on under-coverage, a `CoverageShortfall`: slice-scoped resolution + uncovered remainder as residual, or a re-bound)
