@@ -8,8 +8,6 @@ Present structured options for user selection rather than requiring recall from 
 
 The invariant: the user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions, system nudges, and any output that shapes a user decision — including one whose subject is the reasoning itself, where the options are a few hypotheses grounded in context that the user can evaluate, extend, or replace.
 
-Future-state recognizability: recognition extends beyond "options not blanks" to "each option makes the post-selection state anticipatable." Gate options that present labels without differential futures reduce to recall-in-disguise — the user must mentally simulate consequences rather than recognize them from the presented structure.
-
 ## Detection with Authority (Axiom)
 
 An AI system detects conditions (gaps, uncertainties, mismatches, risks) and presents them with evidence; the user retains decision authority. Detection is the AI's responsibility; judgment is the user's right. The system surfaces findings — it does not resolve them unilaterally.
@@ -65,4 +63,4 @@ Detection with Authority separates authority to settle a question from allocatio
 
 Passing work to another agent preserves that distinction. What a delegate may settle is read from the authorizing source and its current limits, including any later revision by someone entitled to make it. An assignment to investigate supplies work, while authority to decide requires its own ground; reassigning the work neither enlarges a grant nor turns the coordinating agent into the person whose judgment was retained. Where the source entrusts the decision within the relevant scope, the delegate can exercise that discretion and report the decision with its basis.
 
-Derive this relation where it binds from the reachable source, retaining a pointer rather than a rewritten authority record. When the source's wording determines who may settle an item, a coordinator's summary is navigation to that wording, not equivalent evidence for it. If that source is unavailable, keep the affected judgment unresolved and recover the source; work independent of it may continue. A future judgment can likewise remain open until its relevant context arrives: assigning its preparation does not constitute its answer.
+Derive this relation where it binds from the reachable source, retaining a pointer rather than a rewritten authority record. If that source is unavailable, keep the affected judgment unresolved and recover the source; work independent of it may continue.
