@@ -23,16 +23,16 @@ The axis_α × axis_β observed-instance example above, materialized in full.
 
 Detection with Authority (`premise/recognition-and-authority.md`) extends to a second order: not only WHO exercises judgment (1st order — AI detects, User judges), but HOW authority is allocated between pre-committed rules and live judgment (2nd order).
 
-Gate authority decomposes into two modes:
+For a gate whose handling has been assigned to a pre-committed rule, distinguish that rule from a fresh judgment:
 
 - **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the Extension domain (entropy→0).
 - **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the Constitution domain (entropy>0).
 
 The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
 
-**Boundary protection at 2nd order**: Detection with Authority protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is compatible with it — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory violates it. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
+**Boundary protection at 2nd order**: Read a pre-committed rule within the scope of the constitutive act that established it. A bounded grant of discretionary choice is judged against its own source and limits; it is not converted to deterministic relay by this rule-based distinction. The protocol's answer and gate contract still determine what a response settles.
 
-**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per Interaction Kind Factorization's single annotation axis (`premise/interaction-factorization.md`).
+**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — a user-established deterministic rule can settle an otherwise open answer within its scope; granting discretion leaves the choice indeterminate. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per Interaction Kind Factorization's single annotation axis (`premise/interaction-factorization.md`).
 
 **Coordination with Interaction Kind Factorization**: Standing/Active is an authority-source dimension; that axiom's regret dimension (bounded/unbounded) is coextensive with the operational classification, up to its structural exceptions. The two dimensions are conceptually distinguishable at the meta/design layer (per this section's axis_α × axis_β observed instances) but collapse at the runtime annotation layer, per its single annotation axis.
 

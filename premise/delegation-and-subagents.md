@@ -2,6 +2,8 @@
 
 This document covers how to hand work to a delegated agent — one that executes without visibility into the conversation that produced its task — and how a coordinating agent that is dividing work among several such delegates should allocate its own attention.
 
+Before assigning the work or reading a delegate's return, read [Judgment Across Delegation](recognition-and-authority.md#judgment-across-delegation-derived) for the authority the handoff must preserve.
+
 ## Grounding a Context-Isolated Delegate
 
 When a delegated agent cannot see the conversation that produced its task, everything the work needs must be present in what it is actually handed: the objective, the pieces of context the work depends on restated inline rather than referenced, the boundaries of what is and is not in scope, and the form the expected output should take. Nothing outside that handoff is available to it, however obvious it was to whoever did the delegating.
