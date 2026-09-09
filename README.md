@@ -113,7 +113,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
 | **Steering the project** | |
-| `/steer` | Your rules and the agent's actual behavior have drifted apart — audit the drift, give per-cluster verdicts, and rewrite the project profile |
 | `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
 | **Delegating to Codex** | |
 | `/goal-research` | A factual research question you want scoped and externally verified in a background Codex session, with the full trace returned |

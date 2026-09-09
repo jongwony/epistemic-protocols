@@ -22,7 +22,6 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, a rebuilt option set, or — where the check could not close — the repair space, the contested reading, or both sets with neither presented as the answer |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
 | `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
-| `/steer` | Project-profile recalibration — audits calibration drift in a session, per-cluster user verdicts | Updated project-profile rule + settled-direction clause |
 | `/realign` | Project guide direction line via three-horizon fusion | Fused direction line written to the project guide |
 | `/goal-research` | Research delegated to a background Codex CLI session (`goal` scoping + Aitesis verification) | Research trace surfaced back |
 
@@ -116,7 +115,6 @@ epistemic-cooperative/
     ├── gate-check/SKILL.md       # /gate-check advisor-checked decision gates
     ├── white-bear/SKILL.md       # /white-bear competing-target prose audit
     ├── zero-shot/SKILL.md        # /zero-shot anchoring-example prose audit
-    ├── steer/SKILL.md            # /steer project-profile recalibration
     ├── realign/SKILL.md          # /realign project guide direction-line fusion
     └── goal-research/SKILL.md    # /goal-research Codex-delegated research
 ```
@@ -135,7 +133,6 @@ epistemic-cooperative/
 | Deciding where a clause of instruction prose belongs | `/place` |
 | Checking a drafted option set before it reaches the user | `/gate-check` |
 | Auditing prose for prohibition framing or anchoring examples | `/white-bear`, `/zero-shot` |
-| Refreshing the project profile from observed calibration drift | `/steer` |
 | Re-deriving the project guide's direction line | `/realign` |
 | Delegating a research question to Codex | `/goal-research` |
 

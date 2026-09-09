@@ -1322,7 +1322,6 @@ describe('package.js CLI', () => {
         'review-loop.zip',
         'route.zip',
         'sketch.zip',
-        'steer.zip',
         'sublate.zip',
         'triage.zip',
         'white-bear.zip',

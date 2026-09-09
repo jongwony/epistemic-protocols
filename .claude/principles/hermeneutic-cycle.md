@@ -33,7 +33,7 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 **Gated interaction realization**: Recognition over Recall (`premise/recognition-and-authority.md`) reaches gated interactions, including those whose subject is the reasoning itself — the same move that grounds this surface's horizon-fusion point above. Fusion needs the user's horizon to be able to exceed the presented options, which Context and Utterance as First-Class Ground (same file) supplies.
 
-**Operational axis (closure / categorization)** — Hermeneutic-cycle availability acts as a closure clause in autonomous decisions. The availability is itself a profile variable: `hermeneutic_circle_availability` in `epistemic-cooperative/skills/steer/SKILL.md`.
+**Operational axis (closure / categorization)** — Hermeneutic-cycle availability acts as a closure clause in autonomous decisions. The availability is itself a profile variable: *Correction-channel availability* in `premise/calibration-methodology.md` §Profile Variables.
 
 ## Operational implications
 
@@ -44,7 +44,7 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 ## Naming
 
-"Hermeneutic cycle", "hermeneutic circle", and "Hermeneutischer Zirkel" are synonyms. Default to "hermeneutic cycle" in prose; "Hermeneutischer Zirkel" when explicitly mapping to `LOOP` block; profile-variable form `hermeneutic_circle_availability` preserved as identifier convention. "Tertiary hermeneutic circle" is the historic label for the inter-session surface (`.claude/principles/architectural-principles.md §Cross-Session Knowledge Composition`) — new prose prefers "Tertiary surface" or names the scale (Cross-Session Knowledge Composition).
+"Hermeneutic cycle", "hermeneutic circle", and "Hermeneutischer Zirkel" are synonyms. Default to "hermeneutic cycle" in prose; "Hermeneutischer Zirkel" when explicitly mapping to `LOOP` block. "Tertiary hermeneutic circle" is the historic label for the inter-session surface (`.claude/principles/architectural-principles.md §Cross-Session Knowledge Composition`) — new prose prefers "Tertiary surface" or names the scale (Cross-Session Knowledge Composition).
 
 ## Tier
 

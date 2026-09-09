@@ -32,7 +32,7 @@ Invoke this skill when:
 
 Skip when:
 - The deficit is forward-looking deficit-recognition fit review (use `/probe`)
-- The audit target is a calibration profile rather than the project guide direction line (use `/steer`)
+- The audit target is a calibration profile rather than the project guide direction line (edit the project's calibration profile rule directly)
 - The user wants in-conversation abstraction crystallization without project-guide line inscription (use `/induce` directly)
 
 ## Distinction from Adjacent Skills
@@ -41,10 +41,9 @@ Skip when:
 |-------|---------|-----------|--------|-------------|
 | `/probe` | Deficit recognition fit review | RECOGNIZE | ProtocolRoute or FitReviewNote | Session text |
 | `/induce` | Abstraction crystallization | INDUCE | CrystallizedAbstraction | Session text |
-| `/steer` | Calibration profile recalibration | INDUCE-with-inscription | UpdatedProjectProfile | Project profile rule file |
 | `/realign` | Three-horizon fusion of project guide direction | INDUCE-with-fusion | FusedDirection or NoFusionNote | Project guide direction line |
 
-The skill family coexists by subject and persistence — none replaces the others. Realign is for keeping the project guide's direction line a faithful fusion of three horizons; the other skills serve forward-looking, in-conversation, or calibration-profile needs.
+The skill family coexists by subject and persistence — none replaces the others. Realign is for keeping the project guide's direction line a faithful fusion of three horizons; the other skills serve forward-looking or in-conversation needs.
 
 ## Protocol
 
