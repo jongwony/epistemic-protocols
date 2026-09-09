@@ -8,7 +8,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You ask Claude to edit a long email draft. You're fine with typo fixes and smoother phrasing, but paragraph reorganization and tone changes feel like decisions you want to own. Right now there's no explicit boundary — Claude might change anything.
 
-**Intervention**: `/bound` first shows the relevant whole draft of decisions and their connections, including what the user already settled, AI proposals, and unresolved parts. The user can open an axis such as tone to inspect concrete proposed changes before deciding how much to entrust. A request to see those changes does not adopt them. Correcting a premise updates the affected decisions while preserving independent ones; a sufficient boundary can leave questions explicitly open. The result is read with the sources that set its limits, so assigning a subagent preserves retained decisions and the actual discretion granted.
+**Intervention**: `/bound` first shows the relevant whole provisional decision map, including what you already settled, AI proposals, and unresolved parts. You can open an axis such as tone to inspect concrete proposed changes before deciding how much to entrust. A request to see those changes does not adopt them. Correcting a premise updates the affected decisions while preserving independent ones; a sufficient boundary can leave questions explicitly open. The result is read with the sources that set its limits, so assigning a subagent preserves retained decisions and the actual discretion granted.
 
 **Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show a provisional map that you can open, correct, or entrust at the depth you need"
 

@@ -37,7 +37,7 @@ claude plugin install horismos@epistemic-protocols
 
 - [SKILL.md](skills/bound/SKILL.md) defines provisional discovery, kind fit, progressive examination, source-bound settlement, and convergence.
 - [Round composition](skills/bound/references/round-composition.md) supplies occasion-specific presentation rules.
-- [Repository verification](../AGENTS.md#verification) gives contributor checks. Run these from the repository root, sequentially:
+- [Repository verification](../AGENTS.md#verification) gives the contributor workflow. For this plugin's static and packaging checks, run these from the repository root, sequentially:
 
 ```bash
 node .claude/skills/verify/scripts/static-checks.js .

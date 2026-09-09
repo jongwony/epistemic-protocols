@@ -37,7 +37,7 @@ claude plugin install horismos@epistemic-protocols
 
 - [SKILL.md](skills/bound/SKILL.md)는 잠정 구조의 발견, 경계 종류의 적합성, 점진적 검토, 출처에 따른 결정과 수렴을 정의합니다.
 - [라운드 구성](skills/bound/references/round-composition.md)은 특정 상황에서 필요한 제시 규칙을 담습니다.
-- [저장소 검증 지침](../AGENTS.md#verification)에 기여자용 검사가 있습니다. 저장소 루트에서 다음 명령을 순서대로 실행합니다.
+- [저장소 검증 지침](../AGENTS.md#verification)에 기여자용 작업 흐름이 있습니다. 이 플러그인의 정적 검사와 패키징 검증은 저장소 루트에서 다음 명령을 순서대로 실행합니다.
 
 ```bash
 node .claude/skills/verify/scripts/static-checks.js .
