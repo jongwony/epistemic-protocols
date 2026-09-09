@@ -59,7 +59,7 @@ These review cases distinguish an unresolved deficit from a settled one. Supply 
 | The same mismatch has a user-selected disposition and the requested adaptation has resolved it; no other deficit remains | Silence is available on the current evidence |
 | One protocol's gate still holds and a different deficit is recognized | Preserve monitor mode: a single dominant alternative permits one finding; no automatic switch |
 
-A routing outcome can therefore be silence after a settled mismatch, or a finding while a gate holds. The missing outcome is recognizing a live fit and proceeding directly with an ad hoc question or repair. These are semantic review cases, not automated behavioral tests; hook tests check delivery of the directive, not whether a model follows it.
+A routing outcome can therefore be silence after a settled mismatch, or a finding while a gate holds. What may not be missing is the routing decision itself: recognizing a live fit and proceeding directly to an ad hoc question or repair skips it. Work already done at the recognition stands; work that turns on the deficit waits behind that decision — for the invoked protocol, or for the turn after the nudge lines — and resumes on silence. These are semantic review cases, not automated behavioral tests; hook tests check delivery of the directive, not whether a model follows it.
 
 ## What the hooks inject
 

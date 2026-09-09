@@ -26,6 +26,10 @@ test("directive carries the firing conditions and stays short", () => {
   assert.match(DIRECTIVE, /intent or context only the user can supply/);
   assert.match(DIRECTIVE, /accumulated context shows an interaction deficit/);
   assert.match(DIRECTIVE, /loaded core epistemic protocol resolves, invoke \/route — the skill call itself, each time, even when its prose is already in context/);
+  // (a') the same conditions bind at recognition, not only at the prompt:
+  //     a deficit noticed while preparing a response or action is routed
+  //     before that deficit is addressed.
+  assert.match(DIRECTIVE, /Apply this at recognition, including while preparing a response or action during the turn; complete the routing decision before addressing that deficit\./);
   // (b) monitor mode, with the one narrowing condition defined in place: a
   //     gate that holds the user's judgment — presented, and not yet answered,
   //     closed, or entrusted to the session by its own contract; leftover
