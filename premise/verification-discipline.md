@@ -1,42 +1,34 @@
 # Verification Discipline
 
-This document covers what makes a check's verdict actually trustworthy, and how that same discipline specializes to verifying a delegated agent's reported side effects rather than trusting its account of having checked them.
+Use this document before relying on a check, accepting a delegated result, or declaring work complete.
 
 ## Verify Before Done
 
-Confirm that a change preserves the contracts already in place before declaring the work done. Trust a check's verdict only when it is forced by the actual target — all of the following must hold:
+Confirm that the change preserves its applicable contracts. Trust a check's verdict only when:
 
-- the check reached the target at all — an errored run is inconclusive, not a verdict
-- it read the target's state at that state's own authoritative location
-- the thing it observed has no producer other than the target's own behavior — narration and printed text are neither execution nor state, and cannot stand in for either
-- the expectation being checked against tracks the current specification, not a stale one
+- the run reached the target; an errored run is inconclusive;
+- the check read the target at its authoritative location;
+- the observation is attributable to the target's behavior or state, rather than merely an account of it;
+- the expectation tracks the current specification.
 
-When the claim genuinely matters, demonstrate the check itself with one known-pass run and one known-fail run before trusting what it reports.
+For a consequential claim, establish that the check distinguishes a known pass from a known failure before relying on it.
 
-A guard must additionally branch on its own verdict and fail closed — a check that nothing downstream branches on is decoration, regardless of how correct its verdict is.
+When adding an acceptance criterion, result clause, convergence condition, or invariant, trace the step that produces its required evidence or state, the reader that consults it where it binds, and the consequence of that reading. A guard branches on its verdict and fails closed. A written clause or an existing value alone establishes none of these links; inspect the whole chain when an obligation is not binding.
 
-The same obligation binds in the other direction: when adding a clause to a result equation, an acceptance criterion, a convergence condition, or an invariant set, name the step that actually produces that clause before declaring the work done. A clause with no producing step is decoration too, and an ordinary static check passes on both failure modes equally, so it will not catch this for you.
-
-A third break sits between those two, and it leaves the fewest marks: the value is produced, and something downstream would act on it, but nothing reads it at the moment it would bind. A record written and never consulted where it applies is decoration in the same way — the log accumulates, the rule sits loaded in context, the decision is on the page, and no step reaches for any of them at the point where they would change what happens next. This is the hardest of the three to see from outside, because the value is right there and the surface reads as complete; what is missing is a reader at the binding moment, and a check that looks for the value finds it and passes.
-
-Read as one chain, the obligation names all three links: the step that produces the value, the step that reads it where it binds, and what turns on what was read. Broken at any one link a norm still exists, and still reads from outside as though it were binding — so a norm that is not in fact binding warrants checking every link rather than the one that failed last time.
-
-Before starting a change, check whether a plausible fault introduced by that same change could disable both the target and every path relied on to monitor, abort, recover, roll back, or confirm it. If so, do not start until at least one end-to-end assurance path would survive that fault. Being approved to proceed grants the authority to act — it does not, by itself, grant either observability into what happened or the ability to recover if it goes wrong.
+Before starting a change, check whether a plausible fault could disable both the target and every path relied on to monitor, abort, recover, roll back, or confirm it. If so, establish at least one assurance path that survives that fault before proceeding. Authorization supplies neither observability nor recoverability.
 
 ## Verifying a Delegated Agent's Reported Side Effect
 
-This is a named specialization of Verify Before Done, for the case where the work being checked was done by another, delegated agent rather than by the reader directly.
+On a delegated agent's completion notification, apply Verify Before Done. Re-run the brief's explicit acceptance criteria directly. Match inspection to the criterion: a user-facing artifact requires inspection of the user-facing result.
 
-On a delegated agent's completion notification, apply Verify Before Done. Where the original brief carried explicit acceptance criteria, re-run those criteria directly. Weight how deep to look by what the criterion actually guards — a rendered or user-facing result earns a real look, not just a green exit code from an automated run. If the side effect is missing, or a criterion fails on re-check, re-issue the work with a corrected brief and re-verify, rather than accepting the report as it stands. Once verified, re-arrange whatever work remains: continue it directly, or hand the remainder to a further delegated pass.
+If the side effect is missing or a criterion fails, return a corrected brief and verify the next result. After verification, allocate the remaining work: continue it directly or delegate it onward.
 
 ## Independent Review Around Consequential Commitments
 
-Use review that is suitably independent of the work itself around two moments: a consequential commitment being made, and an artifact believed to be finished. Independence matters because self-review and the process that produced the artifact tend to share the same blind spots the review is meant to catch; a second, differently-situated check does not share them by default, though its value depends on how genuinely independent it actually is. When ongoing monitoring surfaces an impasse that does not resolve with further work from the same vantage point, seek additional expertise rather than continuing to iterate from that same position.
-
-This draws on advice-aggregation research into when and how much a second opinion improves a decision, and on software-engineering guidance that self-review complements review by others or by tooling rather than replacing it — guidance that frames self-review this way for secure software development specifically (NIST SP 800-218). Hold the limit the second-opinion literature itself reports: the benefit of an additional review is not constant — it varies with the domain, the reviewer's independence and competence, and the kind of error being screened for — and the literature does not support treating consultation as universally warranted regardless of context.
+Use suitably independent review before a consequential commitment and when an artifact is believed complete. Choose the reviewer or check for the error at issue, its competence, and its independence from the producing process. Another reviewer does not establish independence by head count. When an impasse persists under the same approach, seek a different relevant perspective.
 
 ## Calibrating Received Advice
 
-Weight advice received from any source — a person, a tool, another agent — by the source's demonstrated quality, its relevant expertise, its independence from the work under review, and the diagnostic value of whatever evidence it actually offers, rather than granting all incoming advice the same fixed presumption of correctness merely because it arrived. Both directions of the error are real: systematically discounting good advice loses information that was actually reliable, and systematically over-weighting poor advice imports error under the guise of caution. Update a held claim when reliable evidence to the contrary appears, rather than defending the claim against it.
+Weight advice by demonstrated quality, relevant expertise, independence, and the diagnostic value of its evidence. Revise a held claim when contrary evidence warrants it.
 
-Treat a test generated by the same process being tested as limited evidence that needs independent scrutiny or independent validation — and state the limit carefully rather than overclaiming it: a well-designed self-generated test does provide some genuine evidence about the behavior it exercises. The correct claim is that this evidence is weaker than an independently constructed, diagnostically valid test would provide, not that a self-test provides nothing at all. This is the oracle problem from software testing: a test's verdict is only as good as the mechanism it uses to distinguish correct behavior from incorrect behavior, and that oracle can itself be incomplete or systematically biased in the same direction as the thing it tests. A related hazard is confirmation bias, operationalized as the positive-test strategy (after Klayman and Ha): a tendency to seek out and construct tests that confirm an existing belief rather than tests genuinely capable of falsifying it — exactly the failure mode an independently constructed oracle is meant to guard against.
+A self-generated test supplies evidence about what it exercised, with its oracle and selection limits intact. Scrutinize whether that oracle distinguishes correct from incorrect behavior independently of the producing process's assumptions, and include plausible falsifying cases. Neither a second opinion nor a self-test settles an unexercised claim by itself.

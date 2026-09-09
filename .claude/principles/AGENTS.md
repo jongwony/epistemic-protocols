@@ -11,14 +11,12 @@ This directory realizes the root `AGENTS.md` `## Progressive Disclosure` policy 
 
 This section is the canonical statement of the load mechanism in this repository; other files point here rather than restating it. Naming this index `AGENTS.md` with the `CLAUDE.md` alias — the only file in this directory that carries that name — is what makes the directory-convention pickup happen, which is why it stays short and current.
 
-The split realizes the orthogonal e-tier × o-tier mapping established in this project (`.claude/principles/architectural-principles.md` §Authority Mode's coordination note on Interaction Kind Factorization). e-tier (epistemological status: Axiom/Derived/Architectural/Safeguard) is realized by file content; o-tier (operational frequency) is realized by directory location.
-
 ## Index
 
 - **`architectural-principles.md`** — Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Task Externalization Boundary, Reference over Copy, Inter-Protocol Guidance, Coexistence over Mirroring, Termination, Plugin Encapsulation, Utility Skills delegation.
-- **`hermeneutic-cycle.md`** — Pattern over Vocabulary (Gadamerian formal-block mapping), plus the six-surface catalog: Primary, Secondary, Tertiary, Inter-version, Inter-agent, Operational axis.
+- **`hermeneutic-cycle.md`** — Pattern over Vocabulary, reinterpretation across protocol/session/version/agent boundaries, and correction-channel evidence.
 - **`safeguards.md`** — Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance. All are authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` instead.
-- **`project-profile-calibration.md`** — Profile Variables (six) and Calibration Rule, Scope Boundary. Authoring/calibration-time reference, not per-turn.
+- **`project-profile-calibration.md`** — Profile Variables and Calibration Rule, Scope Boundary. Authoring/calibration-time reference, not per-turn.
 - **`outcome-equivalence.md`** — Outcome Equivalence (whole section). Derived tier, runtime-inert argument chain.
 
 ## Philosophy

@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
   "description": "Utility skills layered on top of the core protocols; each utility skill's own SKILL.md carries its contract.",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "outputStyles": "./styles/",
   "author": {
     "name": "Jongwon Choi",

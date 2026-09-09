@@ -1,57 +1,24 @@
 # Setting up this layer
 
-These documents are the collaboration premises behind structured human-AI dialogue, stated so they
-hold on their own. Their index — each document and the moment that calls for it — is carried by the
-[`route`](../route) plugin's hooks, which are also how they reach a session: at session start, and
-again at the tool calls the host's tool matcher can see are a document's moment — an instruction
-surface changing, work handed to an agent. This file covers adopting them.
+These documents state premises for structured human-AI collaboration. Adopt each for the scope it governs, with its prerequisites and point-of-need references available to the intended reader. The documents provide instructions; they do not enforce execution.
 
-They are a reference surface, not a package: nothing here runs. Adopt them in one of two ways.
+## Adopting
 
-- **Install the [`route`](../route) plugin.** Its hooks resolve this directory through the host's
-  own plugin records and inject each entry with its path absolute — at every context epoch, and
-  again at a tool call the matcher sees is its moment — so a document is read by that path at the
-  moment its entry names.
-  Nothing is wired by hand, and the host's plugin manager keeps the marketplace checkout the paths
-  point into current; a marketplace added from a local clone resolves to that clone, which is how
-  to hold a copy that changes only when you say so. The install and the mechanism are in
-  [`route/README.md`](../route/README.md).
-- **Copy the parts you want** into your own instructions, verbatim or adapted. Each premise
-  document stands on its own, so adopting a subset is coherent.
+- Install the [`route`](../route/README.md) plugin to deliver the premise index and supported point-of-need hooks. Its README carries the installation and host-specific mechanism.
+- Or copy or adapt selected premises into your own instruction system. Resolve their cited dependencies; a subset is coherent only when its obligations and required ground still reach its readers.
 
-A global rules file importing the index, or an instruction-file pointer to it, was the earlier way
-to link to this layer. Beside the `route` hook it delivers the same index twice, so remove it when
-installing `route`.
+Avoid delivering the same index twice. When replacing a manual import with hook delivery, verify the new route before removing the old one.
 
 ## Verifying
 
-Ask a fresh session to reproduce the complete index entry for `matching-the-request.md`. That entry
-names four triggers: design level, fix scope, question granularity, and a time or date without a
-stated zone. Requiring all four makes the answer depend on the index rather than on a guess from the
-filename.
+Inspect the canonical index in [`route/scripts/route-premise.mjs`](../route/scripts/route-premise.mjs), then ask a fresh session to reproduce a complete entry and resolve its path. Compare the response with the current entry, including its trigger conditions. This checks what reached that session, not future sessions generally.
 
-A correct response establishes that the session-start index reached that session. It does not
-establish that another session will behave the same way. For the tool-call channel, ask the session
-to add one line to its project instruction file: the premise line for `instruction-authoring.md`
-arrives with that edit's result. Treat a wrong answer as an absent layer: the hook leaves
-the index out rather than failing loudly when it cannot resolve this directory, so check that
-`route` is installed and its hooks are trusted (`/hooks`).
+Exercise a tool-call delivery moment supported by the installed host and check that the intended entry arrives at that moment. Use the plugin's documented diagnostics when delivery is absent. Merely finding the document on disk establishes no delivery to a reader.
 
 ## Adapting
 
-The standing set above is one setup's choice, not a required set. A document you adopt governs the
-general principles within the scope you adopted it for; a document you do not adopt governs nothing.
-A project may bind a narrower or wider set on its own instruction surface without changing the
-global layer. Where a host instruction and an adopted document disagree on a general principle, the
-document is the one to reason from.
+An adopted premise governs within its declared scope. The adopting project's instruction surface states that scope and supplies the environment-specific bindings. For a disagreement about a general principle within that scope, reason from the adopted premise.
 
-Your own instructions supply what an adopted document deliberately leaves open — the concrete
-surface a principle binds to, the value your project has settled on — rather than restating the
-general principle in their own words. That boundary runs both ways: a sentence whose meaning depends
-on your own artifacts or conventions stays with your instructions rather than moving into one of
-these documents, and your instructions do not cite one of them as the ground for a claim that is
-theirs — a citation the document cannot support lends a local decision the standing of a general
-principle. Such a sentence carries a concept name rather than a path, so what finds it is reading it
-as someone who adopted these documents without access to your setup and asking whether it resolves;
-retiring one restates in general form whatever contract its wording carried that no other document
-in the collection states.
+Keep project-specific values, artifacts, and conventions on project surfaces. A citation to a general premise must support the actual claim; it cannot lend general authority to an unrelated local choice. Conversely, a general premise must resolve for a reader without this repository's private context.
+
+At revision, read each purportedly general sentence as such a reader. Move a project-dependent claim to its proper surface; preserve in general form any independent obligation that would otherwise be lost. Maintain the references needed to reach it before it binds.
