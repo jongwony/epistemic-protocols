@@ -6,39 +6,19 @@ Project structure decisions; independent of the axiom system.
 
 ## Tier Factorization
 
-Tier-classified artifacts in this project factor into a product of two orthogonal axes: an **epistemological** axis (axis_α — derivation status, model-improvement trajectory) and an **operational** axis (axis_β — invocation frequency, load-bearing strength). Neither dimension subsumes the other; the same artifact carries both annotations independently, and movement along one axis is independent of movement along the other.
+- When assigning a principle's tier, use `premise/tiering-and-scope.md`; when choosing its loading moment, use this directory's `AGENTS.md` and the root `AGENTS.md` placement rules. A role classification does not determine loading frequency.
+- When changing a loading path, preserve the principle's reach before its binding moment. Moving a file does not reclassify its obligation.
 
-The factorization is realized by complementary mechanisms. File content typically carries axis_α — a `premise/` document carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the T1 zone and `.claude/principles/` the T2–T3 zone, each through its own load mechanism (stated in `AGENTS.md` §Distinction from `.claude/rules/`). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
+### Authority at Protocol Checkpoints
 
-**Observed instances**:
-- Gate annotations: the coordination note in `### Authority Mode: Standing/Active` below distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis, the two being coextensive there.
-- Principle classification: `.claude/rules/` (T1) versus `.claude/principles/` (T2–T3) directly realizes the factorization for prescriptive content.
-- Tier-changing moves: e-tier reclassification (Axiom → Safeguard) and o-tier compression (content reduction) operate as independent moves — see `.claude/principles/safeguards.md` Adversarial Anticipation tier note.
-
-Sibling concept to Interaction Kind Factorization (`premise/interaction-factorization.md`): that axiom factors gate operations into Extension/Constitution × bounded/unbounded; Tier Factorization factors tier classifications into axis_α × axis_β.
-
-### Authority Mode: Standing/Active
-
-The axis_α × axis_β observed-instance example above, materialized in full.
-
-Detection with Authority (`premise/recognition-and-authority.md`) extends to a second order: not only WHO exercises judgment (1st order — AI detects, User judges), but HOW authority is allocated between pre-committed rules and live judgment (2nd order).
-
-Gate authority decomposes into two modes:
-
-- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the Extension domain (entropy→0).
-- **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the Constitution domain (entropy>0).
-
-The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
-
-**Boundary protection at 2nd order**: Detection with Authority protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is compatible with it — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory violates it. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
-
-**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per Interaction Kind Factorization's single annotation axis (`premise/interaction-factorization.md`).
-
-**Coordination with Interaction Kind Factorization**: Standing/Active is an authority-source dimension; that axiom's regret dimension (bounded/unbounded) is coextensive with the operational classification, up to its structural exceptions. The two dimensions are conceptually distinguishable at the meta/design layer (per this section's axis_α × axis_β observed instances) but collapse at the runtime annotation layer, per its single annotation axis.
+- When a recorded standing rule determines a gate's answer, derive its scope from the user's constitutive act and apply only the conditional relay path the protocol actually defines.
+- When the person grants discretion among alternatives, read that grant's scope under `premise/recognition-and-authority.md` §Judgment Across Delegation. The grant authorizes judgment without making its answer deterministic.
+- When a protocol requires a live user response, its TYPES, PHASE TRANSITIONS, and TOOL GROUNDING govern that checkpoint. An earlier grant or a calibration profile does not manufacture the missing answer.
+- When classifying an interaction, apply `premise/interaction-factorization.md`'s single classification per case. Judge consequence and recovery separately; authority source does not establish a regret bound.
 
 ## Epistemic Cost Topology
 
-Full text: `premise/tiering-and-scope.md`. This project's specialization: unused *protocols* (not just unused mechanisms in general) pollute cognitive space, and `project-profile-calibration.md` depends on this meta/execution asymmetry — do not delete this section, demote further only past that dependency.
+- When deciding whether protocol machinery earns its place, apply `premise/tiering-and-scope.md` §Epistemic Cost Topology to its independent obligation and loading/maintenance cost. Use the source's bounded ablation method for subtraction; non-use alone does not settle removal.
 
 ## Unix Philosophy Homomorphism
 
@@ -62,21 +42,11 @@ Anamnesis's hypomnesis store persists session recall indices that enrich protoco
 
 ## Task Externalization Boundary
 
-Session-boundary durable-record externalization criteria, complementing Cross-Session Knowledge Composition above.
-
-Recognition over Recall (`premise/recognition-and-authority.md`) enters through one channel only — the framing the user reasons with must be recognizable rather than recalled — and not through the re-derivation argument below, which rests on offloading cost-sensitivity, not on Recognition.
-
-Externalize to the durable record only two things: (1) the problem — or commitment — the session must solve, and (2) framing shifts, recorded on each framing or work-unit change so they survive interruption and context compaction. Everything else — dependencies, sub-steps, granular progress — stays in session. As models improve, in-session retention with cheap re-derivation dominates bookkeeping: a model can re-derive its own sub-steps and dependency order on demand, so capturing them externally pays the capture, review, and reacquisition cost while the offloading benefit it would otherwise buy (below) does not accrue to a record the substrate can already regenerate. The durable record is reserved for what the session genuinely cannot reconstruct from the substrate: the committed problem and the framing under which it is being solved.
-
-The two externalized items connect to the axiom basis directly. The problem-to-solve is the commitment the substrate cannot re-derive — losing it loses the session's purpose, the one thing delegation (the Epistemic Completeness Boundary) cannot recover. Framing shifts are the constitutive frame under which work proceeds; a frame change silently dropped corrupts every downstream judgment, and the user must be able to recognize the frame in force rather than recall a frame that has since moved.
-
-**Trigger discipline is EVENT-based, not phase-boundary.** The record is updated on a framing or work-unit change — the event that alters what the session is solving or how it is framed — not on phase entry/exit. Blind phase logging (a durable write at every phase boundary regardless of whether the framing moved) adds extraneous capture, review, and reacquisition load: it externalizes bookkeeping the model can re-derive, taxing the very working memory offloading is meant to relieve. Phase boundaries that carry no framing change produce no durable write.
-
-**The boundary owns what crosses, not how it renders.** This principle governs what reaches the durable record. How the durable surface is then rendered to the user — a framing readout of the kind of work in play, not a progress bar, percentage, or completion tally — is realized one layer down at the Output Style, per the Epistemic Completeness Boundary's principle/realization split. The only constraint the principle itself contributes is that progress bookkeeping does not cross into the durable record; fixing the rendering vocabulary belongs to the realization layer, not here.
-
-**Convergence evidence is a terminal relay, not the in-flight surface.** The per-item transformation trace required at convergence (`premise/gate-design.md §Convergence Evidence`) is a one-time end-of-protocol relay in session text, enumerating each resolved deficit to demonstrate the morphism completed. It is distinct from the durable status surface this boundary governs: the no-completion-tally reading applies to the in-flight surface, not to this terminal trace, so the two principles govern different moments and do not conflict.
-
-**Safety valve**: a blocker discovered mid-session that the model cannot re-derive from the substrate — a non-reconstructable external constraint, a credential gap, an irreversible state it has already entered — is included in the framing record. The boundary test is re-derivability from the substrate (codebase, branch, runtime state, and the model's own reconstruction), not the item's grain: it excludes re-derivable bookkeeping, not genuinely lost-on-interruption facts, so when a sub-step graduates into a non-re-derivable commitment it crosses into the externalized set.
+- When a commitment or framing changes, preserve the committed problem and current framing in the canonical record. Carry a pointer into that record across session boundaries under `AGENTS.md` §Session-handoff routing.
+- Before deferral or interruption, apply `premise/session-and-handoff.md` §Resumption Cues. Make the goal, relevant state, and intended next action recoverable; explicitly identify the next action. Re-derivable detail stays at its authoritative source, while otherwise lost state or constraints must be recorded.
+- When a commitment has lost attention or its framing is stale, apply that document's recovery procedure and reconcile the record before relying on it.
+- A phase transition alone requires no durable status write. Persist information for recovery or a changed commitment, rather than a running completion tally. The per-item convergence trace remains a terminal relay in session text under `premise/gate-design.md` §Convergence Evidence.
+- Render the current framing through the Output Style's framing readout. That presentation rule does not determine which recovery evidence must survive a boundary.
 
 ## Reference over Copy
 
