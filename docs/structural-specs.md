@@ -40,7 +40,7 @@ New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GRO
 
 Every TOOL GROUNDING line carries a parenthetical annotation classifying the operation type. Annotations are exhaustive — every entry must have one.
 
-**Cognitive Partnership Move** names an interaction classified as Constitution or Extension; the interaction annotations below give those meanings. Each packaged contract defines its own required presentation and response.
+**Cognitive Partnership Move** names an interaction classified as Constitution or Extension. `premise/recognition-and-authority.md` §Operational refinement: the Extension/Constitution move supplies the conceptual distinction; the annotations below describe its realization in formal blocks. Each packaged contract defines its own required presentation and response.
 
 **Interaction annotations** (user-facing):
 
