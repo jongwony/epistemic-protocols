@@ -8,18 +8,18 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You ask Claude to edit a long email draft. You're fine with typo fixes and smoother phrasing, but paragraph reorganization and tone changes feel like decisions you want to own. Right now there's no explicit boundary — Claude might change anything.
 
-**Intervention**: `/bound` identifies the boundary question — direction, scope, type, ownership, or an emergent kind — and settles responsibility for that question. In this ownership example, the decisions concern the edits themselves: "Typos — AI decides within the editing scope? Phrasing — AI proposes, you pick? Paragraph structure — you decide?" An instruction to choose who should decide is a different question from permission to make the edit. The resulting BoundaryMap is read with the source that set its limits; assigning a subagent to edit preserves your retained decisions and the discretion actually granted. A scope or direction disposition can instead assign who will settle that value later.
+**Intervention**: `/bound` first shows the relevant whole provisional decision map, including what you already settled, AI proposals, and unresolved parts. You can open an axis such as tone to inspect concrete proposed changes before deciding how much to entrust. A request to see those changes does not adopt them. Correcting a premise updates the affected decisions while preserving independent ones; a sufficient boundary can leave questions explicitly open. The result is read with the sources that set its limits, so assigning a subagent preserves retained decisions and the actual discretion granted.
 
-**Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound dispatches each edit domain's boundary kind and settles its disposition"
+**Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show a provisional map that you can open, correct, or entrust at the depth you need"
 
 **Quiz Q (situation)**: You ask Claude to "tidy up my resume" — it rewrites your summary, swaps out job titles, and restructures bullet points. You only wanted typo fixes and better wording; the content decisions are yours.
 - A) Aitesis `/inquire` — B) Horismos `/bound` — C) Euporia `/elicit` — D) Merismos `/apportion`
 - Answer: B
 
-**Quiz Q (design)**: You're about to delegate a multi-step task with some sensitive decisions. How would you make explicit which steps are AI's call vs yours?
-- Hint: The problem isn't unclear intent or missing context — it's unsettled boundaries: first name each decision's boundary kind (direction/priority, scope, type/concept, ownership, or an emergent kind), then settle how each is decided.
+**Quiz Q (design)**: You're about to delegate a multi-step task, but you do not yet know all the decisions it involves. How would you decide where AI may act and which choices you want to inspect first?
+- Hint: Ask for the relevant whole provisional structure before choosing the boundary's parts or depth. Open an axis when its concrete implications matter, then accept or correct the arrangement without having to visit every axis. An open goal or deferred choice can remain in the result with its next treatment stated.
 
-**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: cross-cutting — the BoundaryMap tells all downstream protocols which boundaries are settled and how each gets decided. Game feel: "What's unsettled here — and what kind of boundary is it?" → kind dispatch (direction/priority, scope, type/concept, ownership, or a named emergent kind) → disposition per domain → BoundaryMap emerges → shared understanding of the boundaries.
+**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Workflow position: cross-cutting — the resulting boundary and its residual guide downstream judgment through their setting sources. Game feel: a recognizable whole → open the axis that matters → inspect and correct its implications → entrust at sufficient depth → carry the boundary and the remaining questions.
 
 ## Anamnesis `/recollect`
 
