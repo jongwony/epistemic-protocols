@@ -76,10 +76,13 @@ reach nor a source direction by inference.
    include staged, unstaged, and recursively enumerated untracked paths, and retain
    the captured `HEAD` as base even after loop commits. No changes means ask what to
    review and stop. For a PR, read [PR scope](references/pr-scope.md) **before the
-   first review** for checkout, base, and landing preparation.
+   first review** for checkout and base preparation, and again before repairs for landing.
 3. For PR repairs, relay an already-settled `head` or `stacked` landing, including a
-   stated standing practice. State the reading and its basis. Otherwise ask; silence
-   stops. Hold the landing for this invocation while keeping the captured review base.
+   stated standing practice. State the reading and its basis. When unsettled, proceed
+   with read-only review and finding disposition; ask before the first repair.
+   Silence at that gate stops repairs. Hold the settled landing for this invocation
+   while keeping the captured review base. An invocation ending without repairs
+   needs no landing choice.
    A correction before repairs are committed replaces a misread designation; after
    commits, show what landed where and stop for recovery direction. A deliberately
    different settled landing belongs to a new invocation.
@@ -108,6 +111,13 @@ reach nor a source direction by inference.
 Use the selected host route and source adapter with the captured pointer and current
 intent bundle. Read the returned review and diagnostics in full. Record actual call
 settings and any reported failure cause as provenance, not coverage.
+
+Use the first read-only review call to confirm the selected command and its contract
+through startup, any skill expansion, and returned output. Reuse matching implementation
+evidence as the adapter specifies. Before accepting a verdict, establish that the
+selected source actually reviewed the captured surface and completed successfully.
+When execution contradicts the expected contract, diagnose that mismatch; unresolved
+source or scope mismatches contribute no verdict and follow the incomplete-call rule.
 
 A call ending without a usable review contributes no verdict and satisfies neither
 convergence arm. Show what returned and ask whether to continue without that round,
@@ -191,6 +201,9 @@ trends. Separate introduced, fix-induced, and pre-existing-side work when decidi
 what this unit carries. A rising count changes neither the criterion nor source scope.
 
 ### Phase 4 — Apply and check the bundle
+
+For PR scope, settle any pending landing choice under Phase 0 and prepare that
+destination through [PR scope](references/pr-scope.md) before the first edit.
 
 1. The driving session scans planned change points, adjacent interactions, and repeated
    instances. Name each fix's predicate and enumerate its sites across the artifact.

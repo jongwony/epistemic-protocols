@@ -1,6 +1,7 @@
 # PR Scope and Landing
 
-Load for PR scope before the first review and consult again when repairs change head.
+Load for PR scope before the first review; prepare landing before the first repair
+and consult again when repairs change head.
 Use repository/GitHub tools available to the host; `gh` below is an example binding.
 
 1. Resolve the explicit PR, or detect the current branch's PR with `gh pr view`.
@@ -15,7 +16,9 @@ Use repository/GitHub tools available to the host; `gh` below is an example bind
    captured cut remains its ancestor. An ordinary advance preserves that relation;
    a rewrite may not. On a broken relation, present the cut, lower PR head, and
    intervening changes and stop for recovery direction.
-4. Follow the landing settled at Phase 0. `head` appends repairs to the reviewed head.
+4. Before the first repair, resolve any pending landing under Phase 0 and prepare it.
+   Read-only review proceeds from the PR checkout while landing is unsettled.
+   `head` appends repairs to the reviewed head.
    `stacked` cuts a layer from that head. Where using GitHub stacks, check the
    `github/gh-stack` extension, resolve existing ordered membership and the bottom
    base first. Follow `gh stack link --help` to link the repair layer while preserving
