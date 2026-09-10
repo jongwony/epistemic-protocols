@@ -1,71 +1,72 @@
-# `codex` Source Adapter
+# Codex CLI Adapter
 
-How to drive `codex` once Phase 0 has designated it. Nothing here bears on *which* source to designate — the properties that decision turns on are in the Source Interface table in `SKILL.md`, which is where the designation gate reads them. This file loads only on a run that designated `codex`; a run on another source never reaches it, which is why each adapter has its own file rather than a shared one.
+Use from either host after `source=codex` is designated. Start a fresh child context
+in the reviewed checkout, passing the request through stdin. Resolve the executable and check
+`codex exec --help` for installed flag support.
+Unless the user specifies otherwise, retain the review recipe's `gpt-6-astra` model
+and select effort by the diff: `high` for small mechanical work, `xhigh` for substantive
+work, `max` for the most demanding reviews. Record the actual setting. A child using
+the driving model remains a separate context, not a different-model comparison.
 
-The contract this adapter answers to — what it accepts, what it yields, and the Conveyance boundary it observes — is stated in `SKILL.md`'s Source Interface and is deliberately not restated here: a second statement of a contract is a copy, and a copy drifts from what it copies.
+## Request
 
-1. **Write the review prompt** to `/tmp/review_loop_codex_${SUFFIX}.txt` (generate `SUFFIX=$(openssl rand -hex 4)`), passing a **pointer** to the diff rather than inlining it, so codex fetches the live diff with its own git. Include a Pointers section:
+Write the prompt to a unique temporary directory (`mktemp -d`). Include:
 
-   ```
-   ## Pointers — read the diff yourself with your own tools
-   - Diff command: `git diff {base_sha}...{head_sha}`  (PR scope — `{head_sha}` is the PR head, which equals `HEAD` only when the PR branch is checked out; for a working-tree scope use `git diff {captured_base}` — the `HEAD` SHA captured at Phase 0, still equal to `HEAD` until the loop lands commits — then read directly each untracked path carried in Changed files because it is absent from the diff)
-   - Changed files: {file_list}
-   Run the diff command in this repo and, for working-tree scope, read the identified untracked files directly to see exactly what changed — the diff is not inlined.
-   ```
+- PR pointer: `git diff {base_sha}...{head_sha}`, where the captured base is the
+  resolved diff cut and head is the current repair landing.
+- Working-tree pointer: `git diff {captured_base}` plus each untracked file from
+  `git status --porcelain --untracked-files=all`; ask the reviewer to read those files.
+- Changed-file list and the current design-intent bundle from Phase 0: repository
+  pointers, constituted decisions and their basis, declared authority order or its
+  absence, and mission pointer or the recorded absence of a declared goal.
+- The Source Interface output: findings, `VERDICT: approve | needs-attention`,
+  `EXERCISED:` on every verdict, and optional `DIRECTION:` with a falsifier after
+  findings on a non-approval. Convey the mission-based severity calibration.
 
-   Also include a **Design-intent** section carrying the design-intent bundle — repo-resident sources as pointers (codex reads these files itself via `--cd`, read-only sandbox), constituted decisions inlined as content — so codex reads the documented intent before judging and does not spend findings refuting intentional, documented choices:
+Ask explicitly about closure across the whole changed artifact, not only hunks.
+Report what this call examined or executed and what it could not reach; a sandbox's
+capabilities do not establish exercise. Convey decisions descriptively and leave
+the reviewer free to flag a defect those decisions cause. Give it no prior fix
+statuses, dispositions, hypotheses, or requested verdict.
 
-   ```
-   ## Design intent — read these before flagging; do not spend findings merely refuting a documented choice the intent already explains
-   - Project rules (read in full): {relevant_rule_paths}
-   - Project-guide rationale (read in full): {project_guide_paths}  (design-rationale sections of the project guide)
-   - Design comments to weight: {design_comment_locations}  (the "why this is intentional" comments adjacent to the changed hunks)
-   - Design decisions constituted during this loop: {constituted_decisions}  (each with its constitutive basis; conveyed as design intent, NOT suppression — flag freely if a decision itself causes a defect)
-   - Authority order among the surfaces above: {declared_authority_order}  (where the project declares one. When two of them disagree, the higher governs and the lower is what should be corrected — flag the disagreement and say which is which, rather than choosing a side yourself or reading the lower one as the standard)
-   A finding whose only objection is that a choice looks wrong, when the documented intent above accounts for it, is intentional design — drop it or note the intent and downgrade rather than flagging high-severity. But intent excuses the design rationale, not a defect the design actually causes: if a documented choice still produces a real bug, regression, or security hole the intent does not prevent, flag it.
+## Execution and collection
 
-   ## Severity anchor (mission-level calibration)
-   {mission_anchor_pointer}  (the project's stated-goal section, as resolved at Phase 0)
-   Calibrate severity against it: a defect that breaks runtime behavior is high — critical when it additionally corrupts silently, producing wrong results acted on without notice; a defect that misbehaves only in edge conditions is medium; an internal-consistency mismatch with no behavioral consequence is low or suggestion; a wording preference the documented conventions already account for is not a finding. Do not manufacture findings to satisfy thoroughness. Your verdict is your own.
-   ```
+Run through the host's supervised/background execution facility and wait for its
+completion signal. This command is the ordinary prompt-based route:
 
-   Where Phase 0 recorded that the project declares no goal, say so in the prompt rather than omitting the section silently — an absent anchor and an unstated one read alike to the model, and only one of them is true.
+```bash
+codex exec --ephemeral --json --color never --cd "$review_repo" \
+  -m "$review_model" -c "model_reasoning_effort=\"$review_effort\"" \
+  --sandbox read-only - \
+  < "$review_dir/prompt.txt" \
+  > "$review_dir/events.jsonl" 2> "$review_dir/stderr.txt"
+review_status=$?
+printf '%s\n' "$review_status" > "$review_dir/status.txt"
+```
 
-   Per the Conveyance boundary, the prompt never contains fix-status claims, do-not-reflag lists, or verdict-conditioning instructions.
+Set `review_model` and `review_effort` as above before launch. If the installed
+CLI/model does not support that selection, report the limitation rather than
+silently substituting. Keep the captured revisions locally available.
+A child unable to read a revision
+or the required files has not completed the requested review.
 
-   Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`, followed — when that verdict is not approve — by a `DIRECTION:` line naming the one mechanism codex reads behind the findings it just listed, together with the observation that would break that reading. Ask for it in that order, after the findings, so the direction accounts for what was surfaced; state that it never licenses adding, reshaping, or reweighting a finding to fit, and that having no single mechanism to name is an acceptable answer.
+Stdout is **not pure JSONL**: plain notice lines may accompany events. The filter
+below is load-bearing because one notice otherwise makes `jq -rs` reject the stream.
+Extract the last completed `agent_message`; earlier ones can be progress reports:
 
-   Ask also for an `EXERCISED:` line, on every verdict including approve, reporting which claims it actually reached against the artifact this call and which it did not — naming, for each unreached one, what stopped it. Reaching a claim means arriving at a judgment that claim bears on: driving the artifact under substituted conditions where that is what the claim needs, examining the code that governs it where it is not. Say plainly in the prompt that reporting a claim as unreached costs it nothing and that a guess about what it "effectively" covered is the one answer that does harm here, because the loop reads an unreached claim as unknown and a falsely-claimed one as cleared. A read-only sandbox bounds what a run can touch without fixing what it can reach: a check that resolves its inputs through an interceptable boundary can often be driven over substituted content entirely in-process, and whether a given call finds that route varies between calls made under identical constraints. So the prompt asks what this call did, never what the sandbox permits in principle.
+```bash
+grep '^{' "$review_dir/events.jsonl" \
+  | jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty'
+```
 
-   Name one claim in the prompt so it is asked on every call rather than left to what the run chose to look at: whether each changed file's own contract closes — whether what it declares is carried through it, so that a value declared with no step producing it, a branch taken on a value nothing supplies, or a rule stated in one place and relied on in another that never received it would have been seen. Say plainly that this claim is about the whole of each changed file and not its hunks, because an absence never appears in a diff, and that reporting it unreached is a real answer where reading the whole file was not what this run did.
+Read the child exit code from `status.txt` and inspect terminal events too: progress followed by `turn.failed`
+or nonzero exit is not a successful review. Read the extracted narrative verbatim
+as an LLM, checking that it actually contains a review verdict on the requested
+surface. An empty extraction has no verdict. If extraction fails, inspect raw events
+before deciding whether the source failed. Read **all** stderr on every outcome,
+including success; state when it was empty. Capture the results before removing the
+temporary directory. A terminal failure follows Phase 1's no-review path.
 
-2. **Launch it in the background.** `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file) keeps stderr warnings out of the events file. Stdout is **not** pure JSONL — codex prints plain notice lines there as well (e.g. `Codex autostart is disabled.`, which survives `2>/dev/null`), so the step-3 extraction filters to lines starting with `{` before parsing. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base and head SHAs; `--sandbox read-only` is kept because `git diff` is a local read needing no network. Select `{effort}` per run by this review's reasoning demand — scale it to the diff's size and complexity — floored at `high` (never below): a notably small, mechanical diff runs at `high`, a substantive or wide diff at `xhigh`, and the most demanding reviews may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy diffs). If codex's git cannot resolve those SHAs the extraction comes back empty — the step-3 empty-extraction guard surfaces it.
-
-   ```bash
-   codex exec --ephemeral --json --color never --skip-git-repo-check --cd "{repo_root}" \
-     -m gpt-6-astra {effort_flag} --sandbox read-only \
-     < /tmp/review_loop_codex_${SUFFIX}.txt \
-     > /tmp/review_loop_codex_events_${SUFFIX}.jsonl \
-     2>/tmp/review_loop_codex_warn_${SUFFIX}.txt &
-   ```
-
-   `{effort_flag}` is `--config model_reasoning_effort="{effort}"`. Report that setting back to the loop, which records it on the round trace as observed provenance under the contract in `SKILL.md`'s Convergence section.
-
-   Whether a call that stops answering is cut off, and by what, is not this adapter's to decide — `SKILL.md`'s Source Interface states where that goes.
-
-3. **Collect on the completion notification** — do not poll or sleep. Extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings, the `EXERCISED:` line, and the closing `VERDICT:` line directly from the narrative. **An empty extraction means the call produced no verdict** — the loop reads that round per Rule 13. An extraction-pipeline error (e.g. `jq` missing) is an extraction failure, not a source failure — fall back to reading the raw events file directly rather than reporting the source as failed.
-
-   ```bash
-   grep '^{' /tmp/review_loop_codex_events_${SUFFIX}.jsonl \
-     | jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty'
-   ```
-
-   The `grep '^{'` is load-bearing, not defensive tidiness: codex prints plain notice lines to stdout alongside the JSONL, and `jq -rs` aborts on the first one with a parse error and returns nothing at all. Without the filter a **successful** round produces exactly the empty extraction the sentence above tells the loop to record as no verdict — and the fallback that sentence prescribes never fires either, because a parse error looks like an answered call that said nothing, not like a missing `jq`.
-
-   Some codex warnings ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. **Read that file whole, on every outcome including a clean one, and never through a keyword filter.** A filter admits only what someone thought to enumerate, and what it drops it drops silently: no match reads exactly like no problem, so a run that stated its own reason for stalling gets reported as showing no sign of error — the filter's omission and a genuinely quiet run are indistinguishable downstream. The file holds a banner and whatever the run wrote to stderr, so reading it outright costs little and forfeits nothing a filter would have saved. Surface its contents alongside the findings; when it is empty, say that it was empty rather than leaving the check unmentioned, so a reader can tell the stream was inspected.
-
-   ```bash
-   tail -c 4000 /tmp/review_loop_codex_warn_${SUFFIX}.txt
-   ```
-
-4. **Clean up all three temp files each round** (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt /tmp/review_loop_codex_events_${SUFFIX}.jsonl /tmp/review_loop_codex_warn_${SUFFIX}.txt`) to prevent `/tmp` accumulation across rounds.
+When the user requests a curated review skill or Codex's native review mode, read
+[Codex review options](codex-review-options.md). These change the child review recipe,
+not the host/source matrix or the loop's disposition authority.
