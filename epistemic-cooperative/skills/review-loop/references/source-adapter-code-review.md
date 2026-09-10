@@ -3,10 +3,19 @@
 The host reference supplies isolation and invocation. This adapter maps the available
 Claude `/code-review` implementation to the Source Interface in `SKILL.md`.
 
-Before selection, inspect the implementation's accepted scope and output contract.
-Pass the resolved **local** base/head (or captured working-tree base and untracked
-paths) and design-intent bundle. Establish that the review examined that surface.
-A raw PR number alone addresses remote PR state and can omit local or stacked repairs.
+- At selection, reuse an available contract record matching the executable/version,
+  selected skill implementation/version, and relevant configuration. Keep its exact
+  command, accepted scope, output format, finding cap, reach channel, and evidence
+  pointer on the trace for later invocations. Reuse capability evidence only; each
+  call establishes its own authentication, reviewed scope, and completed result.
+- When a record is absent or its identity changes, start with the host's read-only
+  review invocation and determine the contract from its skill expansion and output.
+  Mark unknown limits until observed; refresh the affected record fields when runtime
+  evidence differs. A contract that cannot be established remains an explicit gap.
+- For every call, pass the resolved **local** base/head (or captured working-tree base
+  and untracked paths) and design-intent bundle. Establish that the review examined
+  that surface before normalizing it. A raw PR number alone addresses remote PR state
+  and can omit local or stacked repairs.
 
 Preserve the native result, then normalize only a completed review:
 

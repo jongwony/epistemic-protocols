@@ -3,10 +3,10 @@
 Load at source selection. Availability is the running host's advertised capability,
 not the model name or the presence of a plugin directory alone.
 
-- `code-review`: resolve the installed/built-in Claude review skill and its contract.
-  It must accept the captured local diff pointer and intent bundle and return review
-  results to the caller. Inspect its scope, output limits, reach channel, and whether
-  it is a `context: fork` skill. Invoke that fork with the advertised skill name;
+- `code-review`: resolve the advertised skill and isolation route. Reuse matching
+  contract evidence under [Claude review output](source-adapter-code-review.md), and
+  confirm scope and reporting limits through the first read-only review call.
+  When exposed metadata establishes `context: fork`, invoke that fork with the advertised skill name;
   otherwise use an available isolated reviewer subagent that calls the skill with
   only the review request. An inline `Skill(...)` call alone does not establish a
   fork. If neither route exists, report this source unavailable.
