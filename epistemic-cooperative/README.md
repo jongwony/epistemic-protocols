@@ -99,6 +99,13 @@ Key features:
 - scoped claim only — reduced failure probability within the tested conditions, never absolute equivalence
 - residual complement is a first-class output routed to a follow-up protocol
 
+## Review loop hosts
+
+`codex` and `code-review` select the reviewer in either Claude Code or Codex.
+The [runtime contract](skills/review-loop/SKILL.md) routes to the active host
+reference, then loads only the selected source adapter. Claude reviews require a
+skill that can review the captured local scope; Codex reviews require its CLI.
+
 ## Architecture
 
 ```

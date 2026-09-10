@@ -8,549 +8,263 @@ skills:
 
 # Review Loop
 
-A source-agnostic, convergence-paced review-resolve loop for code/PR diffs: it drives a pluggable review source until every finding has reached a disposition — closed by a landed repair, a handover to a successor, or a drop on its cited basis, or left open as declared residual — auto-applying mechanical fixes, gating the judgment calls, and unfolding a conflict between governing surfaces instead of settling it.
-
-What the artifact converges *on* is the project's own stated goal — a mission statement, a Northstar, a stated-purpose section, whatever the project calls the thing it says it is for — together with the conventions beneath it, in whatever order of authority the project declares among them. The loop supplies neither the goal nor the order: it reads both from the project it is run in and says so when a project declares neither. That is what keeps this skill portable — the criterion is always the same question (*is this artifact converging on what this project says it is for?*) and always answered from that project's own surfaces, never from a standard the skill brought with it.
+Drive a code/PR change through independent review, verification, disposition, repair,
+and full re-review. Each finding ends in a verified repair, a cited drop, a successor
+handover, or declared residual. Measure the artifact against the project's own stated
+goal and governing conventions, in its declared authority order.
 
 ## Caller Signature
 
 ```
 /review-loop [source?] [scope?] [landing?]
 
-source  : { codex | code-review }                    -- optional; review source behind the (diff, design-intent) → { findings[], verdict } interface
-                                                     --   absent → Phase 0 asks which source to use (no default; one invokable source relays, zero stops)
-scope   : PR number | (implicit)                     -- optional; PR number, or implicit current-PR / working-tree detection
-landing : { head | stacked }                         -- optional; PR scope only — where this invocation's repairs land
-                                                     --   absent → Phase 0 asks; a working-tree scope has nowhere to stack, so it never asks
+source  : codex | code-review
+scope   : PR number | implicit current-branch PR / working tree
+landing : head | stacked       (PR scope only)
 ```
 
-The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default; with exactly one invokable source it relays the designation, with none it stops). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree). When `landing` is omitted on a PR scope, Phase 0 asks that too. All three read the invocation as it arrived rather than only a parsed flag: a designation carried in the request's own words is the ordinary form, and a slot that only matches its own spelling leaves the loop asking a question the user has already answered. How far back each one reads is not shared, and the difference is grounded rather than incidental — each ground stated where that designation is settled, not here. `scope` is detected rather than asked, so it has no gate to relay past. `source` reads this invocation only, on the ground its own paragraph gives for waiting: the choice sets every round's cost and coverage. `landing` reads further, to a practice the user stated earlier and has not withdrawn, and the paragraph that widens it carries what closes that axis — that the answer exists, not the sentence it arrived in.
-
-## Pipeline Overview
-
-```
-/review-loop [source?] [scope?]
-  Phase 0  : source designation (arg → relay | absent → ask, cardinality-guarded) + scope detect (PR diff | working tree)
-                          + landing path, PR scope only (already settled → relay, stating the reading and its
-                            basis | otherwise → ask: commits on the reviewed head | a layer stacked above it;
-                            settled once per invocation; it moves where repairs land, not the review base)
-                          + design-intent harvest (rules/comments for the changed surface → intent bundle,
-                            carrying the project's declared order of authority among those surfaces where it declares one)
-  Phase 1  : review    — source(diff, intent) → { findings[], verdict, exercised, direction? }
-                          (direction: the source's own root reading, asked when the verdict is not approve)
-                          (exercised: which axes the source reached vs did not this call — required wherever the source
-                           can report; a source with no reach channel is declared once at Phase 0 instead;
-                           one axis is always named — whether the artifact's own contract closes)
-  Phase 2  : verify     — per finding: /inquire (vs codebase), and the same finding vs the Phase 0 base
-                          → introduced | pre-existing | indeterminate;
-                          drop findings failing support-integrity (cite basis)
-  Phase 3  : classify  — shared-cause reading over the verified set, and across rounds where one shape recurs
-                          (pre-gate analysis, fix-side only)
-                          Mechanical → Extension (auto)
-                          Judgment   → cluster by shared disposition → Constitution scope-gate
-                          governing-surface conflict → settled by declared authority order → relay;
-                            otherwise unfolded, and its direction asked open-ended
-  Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
-                          + sweep → verify the write → /contextualize once over the applied bundle (vs design-decision ledger + touched-surface conventions)
-                          → landed adaptation loops back to scan/screen/sweep/verify (bounded to once) → hand forward
-  Phase 5  : re-review  — source(diff', intent) → verdict'
-               verdict'=approve (or 0 new, no recurrence pending diagnosis) → converge ; else round k+1: these findings + this call's direction → Phase 2 (re-review already done; no second source call)
-  free-exit : user may end the loop at any time (declared once in Phase 0)
-```
-
-The loop is the skill's identity; the review source is a parameter behind it. The **phase topology** (verify → classify → apply → re-review) is fixed; the source that produces `{ findings[], verdict, exercised }` is swappable. The criterion is not a parameter alongside it: every round measures the artifact against the goal and conventions that govern it, and a source's verdict is that source's reading of the change rather than the criterion itself. Naming the topology rather than "loop control" is deliberate — what a round is measured against *is* loop control in a way the source is not, so treating the two as the same kind of parameter is exactly what would let a hard round be answered by changing what "done" means.
-
-**Scope:** the loop resolves every source-surfaced, verification-passing finding on the changed code — including pre-existing issues in touched files and methodology concerns — not only defects the diff introduced. *Resolves* means reaching a disposition, which is not the same as landing a repair. Which findings this unit carries and which go to a successor is a boundary the user draws (Phase 3's scope-expansion axis), and a finding placed on the far side of it is dispositioned rather than dropped: it leaves with an entry point, not as a note that something was left.
-
-## When to Use
-
-- Driving code/PR review findings all the way to resolution and convergence (verdict=approve)
-- A review pass surfaced findings and you want them verified, dispositioned, applied, and re-checked in one controlled loop
-- Multiple review rounds are expected before the diff is clean
-- Converging an artifact on what the project says it is for — its stated goal and the conventions beneath it — where a conflict is to be understood and given a direction rather than closed by whichever surface was read first
-
-## When NOT to Use
-
-- Trivial single-line edits where a direct Edit is faster than a review loop
-
-## Phase 0: Source Designation + Scope Detection
-
-**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate with no preselected default: present only the sources the current harness can invoke as a choice (`codex` for a single independent external model when the codex CLI is present; `code-review` for a Claude-native built-in review when the running harness provides that built-in), each with its coverage/cost trade-off, and let the user constitute the selection. Unless a `source` is named at invocation, the loop does not pick one on the user's behalf — source selection determines the cost and coverage of every round, so it waits for the answer. Cardinality guards the gate: with exactly one invokable source there is nothing to choose — designate it as relay, citing the availability fact, and proceed; with none, stop and surface what would make a source available.
-
-**Whether a source can report its own reach belongs to that trade-off, and is settled here.** Some sources can say which axes they reached this call (the exercised report the Source Interface requires) and some have no channel for it at all. That is a standing property of the source, not something a round discovers: it holds identically every round, so announcing it round after round would put a line on the trace that never varies — and a signal that is always on stops being read at precisely the moment a varying one needs to land. Name it once, here, beside coverage and cost, because this is the point where it bears on a decision: a source that cannot report reach returns verdicts whose silence cannot be distinguished from ground nobody examined, and that is worth weighing when choosing it. When the source arrives as an argument and no gate opens, state the same fact as relay rather than skipping it — the user chose the source, which is not the same as having chosen this consequence. It surfaces once more at convergence, so a trace read cold still carries how far that loop's quiet reached.
-
-**Scope detection**:
-
-1. PR number given as `scope`: scope = `gh pr diff {N}`
-2. No PR argument: `gh pr view --json number,title,headRefName,changedFiles 2>/dev/null` to detect a current-branch PR; if found, scope = its diff
-3. No PR: scope = working tree (`git diff HEAD`), with untracked files from `git status --porcelain --untracked-files=all` folded into the changed-files list — plain porcelain collapses an untracked directory to one entry and hides its nested files; the source reads those files directly because the diff does not show them
-4. No diff and no untracked files: ask the user what to review (stop here)
-
-Capture the **resolved base SHA** (the merge-base or PR base commit the diff is taken against; for a working-tree scope, the `HEAD` SHA at capture time) and, for either PR scope (explicit number or detected current-branch PR), the **PR head SHA** (`gh pr view [{N}] --json headRefOid`), plus the changed-files list: this base SHA + head + file list is the **pointer** every source receives — the codex prompt carries it, and the `code-review` call passes it as its scope; the source re-derives the diff locally with its own git (codex: read-only sandbox, no network), so the full diff content is not inlined. PR review runs on a **checkout of that PR head**: when local `HEAD` differs from the PR head SHA (a stale or unrelated checkout), reconcile first — sync or check out the head (a worktree works) — or surface the mismatch and stop; merely fetching the SHA is not enough, because the source reads the artifact and design-intent files from the working tree, and the apply phase must write onto the same head it reviewed. A stacked layer carries a second head, and reaching it takes two more reads than the capture above: the reviewed PR's `baseRefName`, and — where a PR exists on that branch — its `headRefOid`, fetched so the two heads can actually be compared locally. Where no PR sits on the base branch there is no lower layer and nothing further to check. What is being checked is not that the lower head moved: an ordinary advance leaves the cut point an ancestor of it, so the captured base still resolves and the review is unaffected. It is that the lower branch was **rewritten** — the cut point is no longer an ancestor of its head — which leaves this layer standing on a base the layer below no longer has, and which the diff pointer cannot show. That case surfaces and stops, carrying the three values that make it judgeable: the cut point, the lower PR's head as it stands now, and what lies between them. What follows is constituted then rather than fixed here, because whether the layer rebases onto the rewritten base, reviews as it stands, or something else depends on what moved and why — which is what those three show and no rule written here can know. The checkout must also be clean: dirty local edits make the source read content the diff pointer does not address, and the fix commits the re-review requires could fold unrelated same-file edits in — surface dirty state that overlaps the changed surface and stop until it is stowed or adopted. Also capture diff stats for context.
-
-**Where this round's repairs land.** A PR scope gives an apply two places to put its commits: onto the head just reviewed, or onto a branch cut from it that opens its own PR above the first. The difference is not in the code but in what a reader of the PR sees — one grows the unit under review, the other leaves that unit's own commits where they were and stacks the repair above them — and which one fits depends on how the work is being picked up, which the diff does not show. What the second does not do is leave the reviewed PR separately approved: the verdict is formed against the base and the head the round actually ran on, so once repairs sit on a layer the approve covers the two together and neither alone. **A landing the user has already settled relays**, exactly as a named source does: they have decided, and the gate has nothing left for them to constitute. It counts however that decision reached the loop — a `landing` argument, the request's own words naming where these repairs go, or a standing practice they stated earlier and have not withdrawn. This is the boundary Phase 3 already draws for a disposition policy constituted in a prior round, put to this gate: what is decided closes the axis, and where it was decided does not change that. Reading it only in the formal slot misses the ordinary case, where someone who says where the work should land says it plainly; reading it only in this request's phrasing misses the one after that, where they said it once and took it as holding.
-
-Where the landing relays from anything but an explicit argument, **say what was read and what it rests on**, before the first review call. A standing practice taken as this round's designation is an inference, and a practice can have exceptions the loop cannot see — so the reading is stated rather than assumed, which leaves a correction that costs the user nothing where a confirming gate would have cost them a turn answering what they had already said. Stating it is not asking: the loop proceeds, and the free-response channel that is open at every point of this loop is what the correction travels on.
-
-A correction that arrives is not the mid-loop switch Rule 15 forbids. That rule holds a *settled* landing still, and a landing the loop inferred wrongly was never settled — there is nothing it moves away from. What the correction costs turns on when it lands, which is why the reading is stated before the first review call rather than at the first apply. **Before any repair is committed**, the correction replaces the designation and the invocation continues on it; nothing is split, because nothing has landed. **Once repairs are already committed**, surface what landed and where, and stop — whether those commits are relocated, the invocation re-run, or the landing in force kept turns on what has landed and is the user's to constitute, exactly as the rewritten-base case above leaves its next move to the moment rather than fixing it here.
-
-**Otherwise ask**: present both with that difference and let the user constitute it; the loop does not pick on the user's behalf, and silence stops rather than selecting. Silence is nothing said anywhere, and holding it to that is what keeps this widening from swallowing the rule: a practice the user stated is not silence, and a practice they never stated is not a designation — the loop reads what was said and never supplies the answer itself. A working-tree scope has nothing to stack onto, so the gate does not open there whichever way this went.
-
-The answer is taken once per invocation (Rule 15), and it settles **where commits land, not what gets reviewed**. The base captured above stays this invocation's review base whichever way the gate goes: every round types its findings against that base and Phase 5 re-reviews the whole surface it covers, so a finding left unfixed in the reviewed PR keeps returning on every round exactly as it would have. A stacked layer is cut from the head just reviewed and takes the repair commits; the surface beneath it stays in view because the base did not move with it. Opening that layer takes `gh stack link {N} {layer_branch}` — the `github/gh-stack` extension, arguments bottom to top — which pushes the branch, opens its PR on the reviewed head, and links the two into a stack on GitHub: a correct base chain alone leaves the layer unlinked, where the stack map and a stack-wide merge never reach it.
-
-The incremental effect shows up at the *next* invocation instead, and needs no rule of its own: scope detection above resolves a stacked PR's base to the layer beneath it, so a session opening on an upper layer reviews what that layer adds. A defect a lower layer introduced then sits under that invocation's base and Phase 2 types it `pre-existing` — the loop needs no fourth type for its own earlier work, because Phase 3's scope-expansion axis, which decides which findings a unit carries, is already the user's to draw.
-
-**Design-intent harvest.** A review source reads the diff with fresh context: it does not know *why* a choice was made, so it spends high-severity findings refuting intent the project already documented. Alongside the diff pointer, resolve the **design intent already captured for the changed surface** and pass it to the source as context, so the source pre-filters findings that an intentional, documented choice already explains — shifting that refutation upstream into the review request instead of leaving Phase 2 to re-derive it every round. Harvest from these sources, in priority order, **bounded to what touches the changed files** (never the whole rules directory):
-
-1. **Project rules** — the project's rule files (commonly `.claude/rules/*.md`, and design-rationale sections of the root or changed-directory project guide such as `CLAUDE.md` or `AGENTS.md`, though a project may keep them somewhere else entirely) whose scope intersects the changed surface: matched by path/filename correspondence to the changed files or directories, or by the rule's content referencing the changed components.
-2. **In-code design comments** adjacent to the changed hunks — the "why this is intentional" comments at the call sites being modified.
-3. *(Optional, secondary)* prior fresh-context session captures (e.g. anamnesis memory) when cheaply available — use only what is already at hand.
-4. **Decisions constituted at this loop's own gates** (rounds k ≥ 2) — design decisions the user constituted at Phase 3 disposition gates or recurrence escalations during this loop (the **design-decision ledger**): each entry a decision or convention that holds independently of current code state, carried with its constitutive basis. This is the only loop-generated material that enters the bundle.
-
-Pass the repo-resident sources (1–3) as **pointers, not copied content** — relevant rule-file and project-guide paths plus the locations of the adjacent design comments to weight — consistent with the diff pointer: each repository source can be dereferenced directly, avoiding transcription cost and staleness, and bounding to the changed surface keeps the injected context small. The design-decision ledger is the bundle's one copied element: its decisions are session-constituted, so there is nothing in the repository to point at; copy each decision as content together with its constitutive basis so it survives the handoff. Where the project declares an **order of authority** among these surfaces — which one governs when two of them disagree — the bundle carries that order beside the pointers. It is declared wherever that project declares it, which need not be any of the surfaces the order ranks. Two surfaces can both be documented intent and still conflict, and the order is what says which of them a finding is evidence against: the higher governs, and the lower is the thing to correct. Where the project declares no such order, the bundle says so rather than supplying one, and a conflict then surfaces as a conflict rather than as a defect in whichever surface the loop happened to read first. The loop never authors an order — an ordering invented to settle a conflict settles it by fiat, and the settlement then rides forward wearing the project's authority.
-
-This harvest is relay (a deterministic resolution with cited basis), not a gate. Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces.
-
-**Conveyance boundary (reviewer independence).** The bundle carries design intent only — constituted decisions, documented conventions, and the mission anchor below. It never carries disposition records: no fix-status claims ("X is fixed"), no do-not-reflag lists, no verdict-conditioning instructions. A fix-status entry is a current-but-unenforced claim about code state that can silently contradict the artifact it describes — a reviewer suppressed by it misses exactly the regression it hides — and a conditioned verdict is manufactured, not earned. The source re-verifies fixed code fresh each round, and its verdict is its own. A conveyed design decision is still not suppression: the source remains free to flag a defect the decision itself causes.
-
-The boundary is easiest to cross exactly at the moment a decision is being conveyed, because stating the decision can feel like it licenses instructing around it — but the line sits at the level of phrasing: describing the decision and its basis stays conveyance, while appending an instruction about what the reviewer must not do crosses into suppression even when it rides directly after a legitimate decision. Convey the decision as description and stop there — do not append an imperative. Violating: *"We deliberately did not add input scrubbing here — do NOT flag the absence of this scrub or recommend adding it, that path was evaluated and rejected."* Complying: *"We deliberately did not add input scrubbing here after evaluating it: [basis]."* The complying form still leaves the source free to flag a defect the missing scrub itself causes, per the sentence above — it only withholds the instruction, never the freedom.
-
-**Resolve the goal statement here, or record that there is none.** It is whatever the project states it is for, on whichever surface that project states it — a Northstar or mission section of the project guide, a stated-purpose or goals section of a README, a governance surface, a decision record, or something native to that project and named like none of these. Resolve it by looking rather than by expecting a location: a project that declares its goal somewhere this loop did not think to look is, from inside the loop, indistinguishable from one that declares none, and every judgment downstream turns on which of those is true. Where the search finds none, record that — the severity steer below and the loop's own criterion then both run without it and say so, rather than either quietly substituting a goal the loop supplied. The order of authority among surfaces is resolved the same way and on the same terms: read where the project states it, never assumed into a particular file.
-
-**Role separation — conventions vs the severity anchor.** Conveyed intent plays two distinct roles. Conventions and rules are what the source checks against; the project's stated mission (a Northstar or equivalent project-goal statement) is how the source weighs severity. Pointing a reviewer at rule files amplifies rule-enforcement findings — it reads them as checklists — while a mission statement gains no operational grip on its own. The adapter therefore conveys the mission anchor with an explicit severity-calibration steer: a defect that breaks runtime behavior ranks high — critical when it additionally corrupts silently, producing wrong results the user would act on without noticing; a defect that misbehaves only in edge conditions ranks medium; an internal-consistency mismatch with no behavioral consequence ranks low or suggestion; a wording preference the documented conventions already account for is not a finding.
-
-**The goal statement is also the loop's own criterion, and that side never travels outward.** The paragraph above settles how the goal reaches the *source*, and it holds there: a reviewer meeting the project fresh has nothing to check a mission statement against, so it goes as a severity steer rather than a checklist. That is a fact about where the source stands, not about how far the goal reaches. The loop reads the artifact from inside the project, and from there the same statement does have grip — the question it answers is where the artifact works *against* what the project says it is for. Where that question is *put* is Phase 3, over the verified set — this section settles only that the goal has the second role and that the role stays inside. What the reading produces enters as an ordinary finding and is verified like any other; what it is not is a severity adjustment applied to findings the source already returned. The two inputs stay separate by what each one does: documented intent **explains** a choice, and the goal **exposes** a conflict. A choice can be fully explained by the convention that authorized it and still run against what the project says it is for, and only the second reading reaches that case. Held as a dial alone, the goal cannot reach the defect whose every local surface is already consistent — a shared name that kept its shape and lost its meaning, where every check that compares shapes passes and nothing is left to notice it.
-
-**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's exit paragraph, and `references/exit-handover.md` for what the offer covers). This declares an exit from review-loop itself.
-
-## Phase 1: Review
-
-Call the designated source over the current diff — together with the design-intent bundle — and obtain `{ findings[], verdict, exercised, direction? }`. Each finding carries the form `[severity] file:line — description`; `severity ∈ critical | high | medium | low | suggestion`; `verdict ∈ approve | needs-attention`. The **exercised** report states which axes the source actually reached against the changed artifact this call and which it did not, naming for each unreached axis what stopped it. Reaching an axis means arriving at a judgment that axis actually bears on: for a source that runs things, that is often driving the artifact under substituted conditions; for one that works by analysis, it is having examined that axis rather than passed near it. The form differs by source and the report is asked in whichever form fits — what does not differ is that an axis either got judged this round or did not. What the report guards is that reach varies per call rather than being fixed by the kind of source: the same constraints that stop one call leave another a way through. Without it, a round that surfaces nothing on such an axis is unreadable — *nothing is wrong here* and *nothing here got looked at* arrive as the same silence, and the loop reads the second as the first.
-
-An axis can go unreached for reasons that differ in kind, and the difference decides where each belongs. **The round ran out of room for it, or the attempt broke on the way** — both are facts about this round, vary between rounds, and ride the round's trace. **The source has no way to report reach at all** — that is a standing property of the source, identical every round, and it is settled once at Phase 0 rather than re-announced. Keeping the two apart is what stops the standing case from swallowing the round-specific ones: a source that could report and did not is an anomaly worth seeing, and it stays visible only while the round-level slot means something. When the verdict is not approve, the source is asked additionally for its own **root direction** — the one mechanism it reads behind the findings it just surfaced together with the observation that would break that reading, stated after the findings so the direction accounts for them rather than shaping them. The direction is optional at the interface: a source that returns none still satisfies it and the loop proceeds on findings alone. The per-source mechanics (how `codex` versus `code-review` produce this output) live one file per source — `references/source-adapter-codex.md` and `references/source-adapter-code-review.md` — and the one the designation named is read at the moment this call is made, the other never; Phase 1 only consumes the interface.
-
-**One axis is always owed: whether the artifact's own contract closes.** Among the axes a round reports on, this one is named rather than left to whatever the source chose to look at, because it is the axis a change-shaped read passes over by construction. A diff shows what moved; it does not show what was never there. A value the artifact declares that no step produces, a branch taken on a value nothing supplies, a rule stated in one place and leaned on in another that never received it — each is an absence, and an absence has no hunk to appear in. Nothing stops a source from finding one anyway, by reading the whole of a file it was pointed at; what is missing without this axis is that anyone *owed* the judgment, so finding it stays incidental to how the source happened to explore. Ask whether the source judged the changed surface's contract closed in this sense, and take the answer on the same terms as any other axis: reached, or not reached with what stopped it. A round that did not reach it has said nothing about whether the artifact holds together, and Phase 5 reads that quiet as quiet.
-
-## Phase 2: Verify (against codebase)
-
-Before acting on any finding, verify it — a review model can hallucinate or flag a stale issue, and currency is not the same as fidelity. For each finding:
-
-- Call `/inquire` to check the finding against the current codebase: does the asserted issue actually hold against the code as it stands? This is the support-integrity / currency check — an artifact being fresh does not establish that it tracks current behavior.
-- Check the same finding against the artifact **as of the base captured at Phase 0**: does the asserted issue also hold there? This types the finding, and it takes two readings rather than one. First: does the issue hold at the base? Where it does, the finding is `pre-existing` — the change only put it in view. Where it does not, read the finding's own evidence for the second: a defect statable entirely in terms of what the change wrote is `introduced`, while one that exists only because some independent condition the change did not supply also holds — the change being one of two contributors that must both be present for the defect to exist at all — is jointly attributable and types `indeterminate`. An unchanged passage that merely restates what the change wrote is not such a contributor: it is the same material left unsynced, and the change is what put it out of step, so a disagreement between the two types `introduced`. That second reading is what keeps `indeterminate` from becoming the place anything hard to decide gets put: it names a property of the finding's own evidence and is checked against it, not against how confident the reader felt. Both readings are relay — the base is already in hand from Phase 0, so the first is a read against a named ref with the ref cited, and the second reads evidence the finding already carries. The first reading asks after the issue, not after the path it now sits at: for a file the change created the issue was nowhere at the base, so the second reading is what types it, while one the change only moved carries whatever the issue was before the move.
-
-Phase 3's scope-expansion axis and Rule 1 both branch on whether a defect sits on the **pre-existing side**, and the check above is what produces the value that decides it. Before it the distinction was read off whatever the round happened to know — which is to say off nothing the trace could show afterwards. The classification therefore rides on the finding's trace entry (Convergence section), so a round's boundary stays legible once the session that drew it is gone. What the classification does not do is decide anything by itself: `pre-existing` licenses no repair and forecloses none. It is the evidence the boundary question is asked with, and Phase 3 is where that question gets put. `indeterminate` resolves fail-closed there: it is not evidence that the change introduced the defect, so where a boundary decides something it sits on the pre-existing side alongside `pre-existing` itself and reaches the user, rather than being folded in on a classification that was never established. Two of the three values therefore occupy that side, which is why the clauses downstream name the side rather than either value — a clause naming one value would silently drop the other, and the one it drops is the one whose attribution was never established.
-
-This phase is primarily relay — read-only codebase checks with cited basis. A finding that fails verification (the issue does not hold) is **dropped**, and the drop is surfaced with its cited basis rather than silently discarded or applied. A dropped finding takes no provenance: there is no defect to locate on either side of the base, and stamping one would assert a reading of something the loop has just established does not hold. Provenance is produced for the findings that survive this phase and for those alone. A shared-cause reading (Phase 3) is never that basis: it accounts for findings and cannot retire one, so a drop rests on what the codebase shows, never on the account that would be tidier without the finding. Genuine Constitution uncertainties that `/inquire` raises (where the user's judgment is genuinely needed) fold forward into the Phase 3 disposition gate rather than firing as separate in-round chat gates — keeping the in-round gate count down to the Phase 3 cluster gates.
-
-## Phase 3: Classify + Disposition Gate
-
-**Shared-cause reading (before dispositions are fixed).** Findings that differ semantically can still issue from one mechanism, and each may carry a self-evident local fix while the mechanism itself carries none — a run of symptom patches that individually classify Mechanical can close the round without the root repair ever reaching the user. Read the surviving set for a shared cause before classifying: name the leading explanation and what it accounts for, the observation that would break it, a competing explanation where one is live, and what neither explains. Finding no shared cause is a result of that reading, not a failure to look — unrelated findings are the ordinary case, and where the set carries no mechanism behind it the reading says so and each finding is classified on its own. A mechanism named because one was expected would elevate independent fixes into a repair-shape choice the user never faced. Where root repair and local repair diverge materially, the affected findings classify together at the plan level — an aggregate whose repair shapes diverge is Judgment even when each member alone looked Mechanical. A direction the source returned enters here as one candidate account beside the loop's own, with no head start: it was read before verification ran, so it falls with whatever findings verification dropped and earns standing only by still explaining the set that survived. The two readings are not independent — the loop reads the same findings the source read, and reads them with the source's direction already in view — so their landing on one mechanism is weak evidence and is never presented as corroboration. Divergence is what carries information here: a reading that departs from the direction departed against the anchor, and both accounts then reach the user as competing explanations rather than one being quietly retired. This is pre-gate analysis feeding the existing disposition gate, never a second gate, and Rule 12 fixes what standing the reading carries. A single defect returning across rounds is not this reading's subject: that is recurrence, diagnosed below. That leaves a third case between the two, and it is the one neither reading reaches: successive rounds surfacing *different* defects, at *different* sites, that instantiate one shape — each round's fix correct on its own, each round's set carrying no shared cause of its own, and the shape legible only from the sequence. The material for reading it is already produced and already stored: every fix names the predicate it instantiates and enumerates that predicate's sites (Phase 4, step 1), and that predicate rides on the fix's trace entry. The reader runs here, at Phase 3, over the predicates earlier rounds already recorded. This round's own predicate does not exist yet and is not needed: the question is whether the findings now in hand instantiate a shape an earlier round's predicate already named. This round's predicate is named at Phase 4 and becomes readable to the round after, which is what makes the record accumulate rather than a step waiting on a value its own phase has not produced. What makes the answer checkable rather than a story told about the rounds is the sweep that already ran: an earlier sweep claimed to reach every site of its predicate, so a later instance at a site that sweep did not reach is that claim falsified — but only where the site already instantiated the predicate at the artifact state that sweep ran against. The scan enumerates against the artifact as it stood, so a site a later round created, or that a later round's edit first brought under the predicate, was never in that sweep's range and does not impeach it. Without that qualification the falsifier fires on ordinary growth and retires readings that were never wrong. What the falsification establishes then splits on which kind of instance it was, and the two call for different repairs. A site the named predicate already reaches, missed by the search, falsifies the enumeration and nothing more: the predicate was right and the sweep it licensed is what completes. A later instance the named predicate does not reach is the case this reading exists for — there the earlier abstraction was too narrow, the root reading reopens at the wider shape, and what that shape calls for is characteristically not one more site but the single place all of them could have referenced, per-site repair being what produced the sequence in the first place. In every other respect it is a shared-cause reading and Rule 12 governs it unchanged: fix-side, provisional on its stated falsifier, analytical.
-
-Classify each surviving finding:
-
-- **Mechanical** — typo, rename, mechanical symbol or format fix; deterministic, one correct edit, no design judgment. A finding is **also Mechanical** when (a) verification (Phase 2) confirmed it as a correctness bug — not a style or design preference — and (b) a minimal localized fix is self-evident: the plausible resolution shapes do not produce materially different downstream trajectories. → **Extension**: auto-apply, no gate, with the applied fix noted on its Relay trace entry; the Phase 4 risk screen still gates orthogonally. Mechanical findings keep the loop running — only Constitution warrants interruption.
-- **Judgment** — multiple valid resolutions that materially diverge, a design tradeoff, or a change with irreversible divergence. → **Constitution**: the user's judgment constitutes the resolution.
-
-**The goal as criterion (once a round).** Ask of the artifact — with the verified set in view but not bounded by it — where it works against what the project says it is for, naming the specific goal a finding runs counter to and how — load raised where the project says it is lowered, a deficit closed where the symptom shows rather than where it comes from, one shared term carrying different meanings in different places. It reads the artifact rather than only the surfaced set, which is what lets it reach the case it exists for: a defect whose every local surface is already consistent, where nothing the source checks would catch on it. A round that surfaced nothing therefore does not excuse this pass — an empty set is the source having nothing to add, which is evidence about the source's axes and never about the axis only the loop holds. It runs here rather than at Phase 0 because it wants whatever the round has already established in view, and its output is findings: each goes back through Phase 2 verification like any other before it is classified, since a reading formed against a goal is as capable of being wrong about the code as a reading formed against a convention. Finding nothing is a result of asking, not a failure to ask.
-
-**A conflict between governing surfaces is a different subject, not a third class.** The two classes above sort findings by how the repair is reached; this sorts by what the finding is *about*. Most findings are about the artifact — it fails something, and the something is not in question. A finding can instead be about the surfaces themselves: two of them govern the same point and say different things, or the artifact answers to one while the project's stated goal points the other way. The artifact is then not simply wrong; which way it should face has not been settled, and repairing it either way settles that on the project's behalf.
-
-How such a finding resolves splits on whether the settlement already exists. Where the project declares an order of authority and that order reaches this pair, the conflict is already settled and applying it is **relay** on the axis the order settles: which surface governs, and therefore which one is the thing to correct. That axis is the direction, and it is the only one that relays here — how the correction is shaped stays with the Mechanical/Judgment classification above, and whether it may land stays with the Phase 4 risk screen. A settled direction never carries a settled repair with it. Nor is a declared order the only settlement that counts: the settled-policy check below names others — a direction the user constituted in a prior round, the PR's stated purpose, an established precedent — and any of them reaching this pair closes the direction axis exactly as an order would. Reopening a conflict something already settled is the over-gating failure mode in its most expensive form, because the question looks profound while its answer is on file. The direction stays open only where none of them reaches — nothing declared, everything declared silent on this pair, or the accumulated context and what the user has actually said contesting the governing coordinate itself. There the conflict is **unfolded** rather than dispositioned: name each side with the surface it rests on and what that surface says, name the point they disagree about, and name the authority relation between them or state that there is none. Then ask the direction as the strategic question it is — an open question with that framing, not a forced choice among trajectories the loop composed. This is the one place where an AI-authored option set would decide the very thing being asked: the answer that matters may be a direction neither surface currently holds, and an option list cannot contain it. Carry the answer in the user's own words; a paraphrase keeps the conclusion and drops the frame that produced it, and the frame is what the next reader needs. On the trace the entry sits under **Gated** — it asked — and takes the outcome its direction implies: `applied` where the direction lands an edit this round, `carried` where it directs work beyond it. The direction itself travels separately, to the design-decision ledger where it holds independently of current code state, and otherwise as an unsettled conflict at exit (Convergence).
-
-**Collapse test at classification time.** The gate-authoring criterion — each option must produce a materially different downstream trajectory; dispositions converging to the same trajectory collapse to one — applies at classification, not only when authoring gate options. If every plausible disposition of a finding collapses to "apply the obvious minimal fix", the finding is Extension, not Judgment: that a fix *could* be shaped more than one way does not make it Judgment when the shapes do not materially diverge for the user. Classifying such a finding Judgment interrupts the loop for a decision the user would always answer "apply" — an over-gating failure mode.
-
-**Settled-policy check (before opening any disposition gate).** A finding whose disposition policy was already constituted in a prior round is **Extension by default**: a consistent application of that settled policy auto-resolves per the prior disposition (apply / dismiss / defer), and any non-trivial side-effect (for example, an edit that touches a line outside the original diff hunk) is surfaced as a **relay annotation on its Relay trace entry**, not as a gate. The Extension/Constitution boundary for a finding moves with what is already decided — a prior round's direction and the PR's stated purpose can close an axis that would otherwise be live. A gate reopens only when a genuinely competing **Judgment-level** disposition (defer / separate follow-up / dismiss) is still live — one not already foreclosed by the PR's purpose or an established precedent. For a **Mechanical** finding — a verified correctness bug whose minimal localized fix is self-evident — the fold-now-vs-defer / which-PR scope axis does not reopen a gate: which PR the identical fix lands in is an administrative packaging variant (the fix is the same; only the PR boundary differs), folded in by the convergence goal. A genuine **scope expansion** — fixing a defect on the pre-existing side because it happens to sit in the changed surface — is a separate axis: it folds in as a relay annotation on its Relay trace entry only when a citable basis licenses it (a mandated closure sweep, the PR's stated purpose, or a settled precedent); absent such a basis, expanding scope to a defect on that side is itself a judgment the user constitutes, so it surfaces for the user rather than auto-folding. Re-gating the consistent propagation of settled policy is the over-gating failure mode.
-
-**Recurrence escalation.** Settled policy absorbs the FIRST recurrence — consistent application, no re-gate — when the return is uninformed: the source had not yet seen the disposition's outcome (no conveyed decision in the bundle it reviewed with, or the fix not yet in the reviewed diff). A return made with the constituted decision already conveyed is not absorption material — it is the contested return and awaits diagnosis immediately; without this, a dismissal that lands no edit would converge on the very round that absorbed it, leaving the design gate below unreachable. When the same finding returns beyond absorption — after its fix was applied (the return signals an incomplete repair), or with the constituted decision conveyed (the return signals contest) — the repetition is itself evidence requiring diagnosis. An instance-specific dismissal or deferral is never conveyed, so its returns stay uninformed and absorb every round: it keeps auto-resolving as settled policy and surfaces as annotated residual at convergence, never entering diagnosis. Finding identity is semantic, judged at Phase 2 verification: a re-surfaced finding is the same finding when it asserts the same defect about the same clause or invariant, even under different wording, severity, or line anchors — line numbers and phrasing never define identity, so rewording cannot make a persistent defect count as new. When the prior disposition was an apply and Phase 2 verification confirms the original diagnosis still holds — the fix was merely incomplete and a minimal repair remains self-evident — the finding remains Mechanical: stay Extension and re-apply properly under the Phase 4 write-tier escalation, with the loop-driving session writing inline and no gate. When the recurrence instead evidences a design-level disagreement — the prior disposition was a dismissal the source keeps contesting, or the source rejects the constituted direction itself — escalate to a Constitution design gate presenting the recurrence history. Only a resolution that articulates a decision or convention holding independently of current code state enters the design-decision ledger (Phase 0 harvest, source 4) and re-enters the bundle at the next re-harvest — a shared-cause reading is excluded by where it came from, however generally it happens to be worded (Rule 12) — and a resolution that revises an earlier constituted decision supersedes its ledger entry: the ledger carries the current direction only, with the retirement noted on the round trace; an instance-specific dismissal or deferral remains a disposition — it auto-resolves as settled policy in later rounds, is surfaced as annotated residual at convergence, and never enters the bundle. If the same finding returns a third time after a tier-escalated re-apply, the Mechanical diagnosis is discredited: treat the disagreement as design-level and gate. Do not silently re-drop it — recurrence ends through constitution or a completed repair, never through suppression.
-
-For Judgment findings whose axis remains live, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer) and present ONE scope-gate per cluster rather than one gate per finding. Where the live axis is the repair shape — the plan-level aggregate above, escalated precisely because root repair and local repair diverge — the gate's options are those repair trajectories themselves rather than the stance they share: a cluster whose members all say "apply" has its real choice elsewhere, and asking the stance would settle the shape on the user's behalf. The trajectory the user picks is what the fix brief then carries into Phase 4. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
-
-## Phase 4: Apply
-
-For every fix that is going to land — Mechanical (auto-approved) or Judgment (user-approved at the Phase 3 gate) — screen the edit for risk before applying it. A "Mechanical" edit can still be risky: it may touch an irreversibility, a security boundary, or an external / human-visible effect that the Mechanical/Judgment axis does not capture. The risk screen is orthogonal to the resolution class and gates the apply on risk grounds.
-
-The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry. This framing screens an edit before it lands; the bundle-level fit pass's loop-back (Apply executor step 4 below) screens an adaptation `/contextualize` has already written, and applies this same non-actuation principle to that retroactive case — see step 4 for how.
-
-**Apply executor (tiered).** Applying is execution, not judgment — the judgment already
-landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
-
-1. **Adversarial change-point scan (inherit tier, before writing)**: the session driving
-   the loop adversarially scans each planned edit site before delegating — does the fix
-   interact with adjacent code, break an invariant the finding did not mention, or recur
-   at unswept sites? The scan compiles the self-contained fix brief: each fix
-   file:line-anchored with its verified basis and fix direction, and — for every fix —
-   the predicate that fix instantiates, named explicitly, with that predicate's sites
-   enumerated across the artifact at scan time. Each enumerated site is semantically
-   verified and risk-screened per site (Rule 6) before it enters the brief; a site the
-   writer discovers beyond the brief is returned for screening, never written unbriefed.
-   A fix whose predicate is unnamed is not written, on any tier. That named predicate
-   rides on the fix's trace entry, where Phase 3's cross-round shape reading later reads it:
-   the naming this step already requires is also the storage that reading needs, so it
-   records nothing further of its own.
-2. **Write on the low-cost tier**: hand the brief to a fresh subagent on the low-cost
-   executor tier — a role, not a model name: the running harness's configuration (its
-   tier registry or agent config) resolves the concrete model — the normal case, since
-   the brief is self-contained by construction. Fall back to a fork only when a fix
-   rides on loop context the brief cannot carry. When the harness resolves no low-cost
-   tier (no tier registry, no subagents), the loop-driving session writes inline as the
-   degenerate tier — the sequence (scan → write → verify), not the existence of a
-   cheaper model, is what the contract requires. Stay inline for a trivial few-line batch, and for substrate-risky edits
-   routed to the harness permission layer (those remain parent-executed).
-   **Tier escalation on recurring fix-follow-ups**: when a round's re-review surfaces
-   findings caused by the previous round's applied fixes, and the pattern repeats across
-   consecutive rounds, escalate the write tier to the loop-driving session itself
-   (inherit tier, writing inline) — recurring fix-induced findings signal that the briefs
-   are dropping loop context the fixes need (accumulated conventions, prior fix shapes,
-   adjacent invariants). De-escalate back to the low-cost tier once a re-review round
-   surfaces no fix-induced follow-ups.
-3. **Verify the delegated write**: read each site against what its disposition called for —
-   every fix the brief carried and every site the completeness sweep ranged over — under the
-   rule below, so a site written on an accepted verdict is read for that effect and a site
-   whose verdict was recorded rather than actuated is read for the state it already had. What
-   this establishes is conformance to what was decided and nothing wider; the brief's own
-   correctness was settled earlier, each finding verified at Phase 2, dispositioned at Phase
-   3, and scanned at step 1, and what judges the result's behavior independently is Phase 5's
-   re-review. A discrepancy here — a site missed, a wrong edit landed, a site moved that was
-   to stay put — is recorded on the trace and carried to the next round like any other
-   finding, and does not block the pass. An apply pass does not warrant a complete or correct
-   bundle and this contract does not ask it to: repairing one that came out incomplete or
-   wrong is the loop's work. What this step buys is that the discrepancy is seen and written
-   down at the point it happened rather than rediscovered later as a symptom.
-4. **Bundle-level fit pass (once, before hand-forward)**: call `/contextualize` a single
-   time over the whole applied edit bundle — never
-   per fix — checking the bundle as a set against the design-decision ledger harvested at
-   Phase 0 (harvest source 4) and against the conventions of every surface the bundle
-   touched. This sits here rather than at Phase 2 because the property it checks — coherence
-   across the bundle, not any one finding's own correctness — belongs to the bundle as a
-   whole; a per-finding check has no vantage from which to see it. It sits after step 3 so a
-   write discrepancy is on the record before the bundle is adapted, which keeps a later
-   symptom attributable — an ordering convenience, not a guarantee that what it receives is
-   correct, which nothing in this pass establishes. The pass runs before the updated diff is
-   handed to the designated source in step 5.
-
-   **The apply pass does not branch on how the call terminates.** `/contextualize`
-   converges as `ContextualizedExecution` (every mismatch adjudicated). Once it returns,
-   the apply pass finishes the same way: the loop-back below runs over any adaptation that
-   landed, and the bundle then proceeds to step 5 and is handed forward — judging the
-   result is the next round's full re-review (Phase 5), not a branch taken here.
-
-   `/contextualize` is not read-only: a Confirm or Adapt answer at its own Phase 2 lands an
-   edit through Edit/Write, adapting the bundle rather than merely assessing it.
-   **Loop-back**: when the fit pass lands such an adaptation, that edit re-enters this apply
-   pass at step 1 — the predicate it instantiates is named, that predicate's sites are
-   enumerated across the artifact, each site is semantically verified and risk-screened per
-   site (Rule 6), and the completeness sweep runs over them, and step 3 reads each against
-   the disposition its screen returned — before the bundle proceeds to step 5. A Dismiss answer lands no edit and
-   triggers no loop-back: the condition is an adaptation actually having landed, not the fit
-   pass having run.
-
-   **A guard actuates where its subject has not been written, and records where it has.**
-   This is the rule the whole apply pass runs on, and it covers every guard here and every arm
-   each of them carries — a predicate that cannot be named, a site that fails semantic
-   verification, a risk verdict of defer or drop, a discrepancy step 3 reads. Where nothing
-   has been written at the site yet, a rejecting arm does what it says and the edit does not
-   land; the further sites this loop-back's sweep enumerates are that case, and their screen
-   keeps every arm live. Where the edit is already on the artifact — the adaptation itself,
-   by the time it reaches this re-entry — the same arm still produces its verdict, and the
-   verdict is recorded on the trace with the site left standing. This document defines no
-   rollback or revert transition and needs none: an apply pass is not warranted to come out
-   complete or correct, and repairing one that did not is the loop's work, which the next
-   round's full re-review does by re-detecting the condition fresh. That is the same
-   treatment the risk-screen paragraph above already gives a carried finding; what the
-   loop-back adds is that these verdicts get produced and written down at all, rather than an
-   edit reaching hand-forward with no guard having looked at it. The verdict rides forward as an annotation
-   on the trace (Convergence section) exactly as any other carried finding does — per the
-   risk-screen paragraph above, carrying forward does not hold a finding as live in-loop
-   state, and the next round's full re-review re-detects the condition fresh rather than the
-   annotation itself gating anything. The substrate arm of that same screen is not left
-   dangling either: `/contextualize`'s Edit/Write calls already passed through the harness
-   permission layer at the moment they ran, so substrate gating already happened at the tool
-   level — what the retroactive screen carries forward is the epistemic judgment, and that
-   is what gets recorded.
-
-   The loop-back runs at most once per apply pass; the fit pass is not re-invoked after it.
-   What sets that bound is that whatever the loop-back's own sweep newly introduces is
-   exactly what Phase 5's full re-review already backstops — this document takes the same
-   position for the sweep itself, in the "Completeness sweep on apply" paragraph below ("the
-   Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to
-   defer it"); a fixpoint loop here would be a structure this document uses nowhere else.
-5. **Hand forward to the designated source**: with the write verified at step 3 and the
-   bundle's fit checked at step 4, Phase 5's full re-review by the designated source re-judges
-   the updated surface — the loop's own convergence check remains the final reviewer of the
-   delegated writing.
-
-**Completeness sweep on apply.** The predicate the scan named for each fix (Apply executor, step 1) is what this sweep ranges over. Where that predicate recurs across multiple sites in the artifact — a vocabulary rename, a guard that must hold at every mention of a symbol, a stale predicate repeated in several blocks — apply the fix consistently at every one of its sites in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The sweep is a required step of the apply pass, and the Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to defer it. The enumeration is a claim and stays checkable as one: a later round finding the same predicate instantiated at a site this sweep did not reach is that claim falsified, which is what Phase 3's cross-round reading reads it for. What it falsifies is the enumeration — the search missed a site the predicate already reached — and completing that sweep is the repair. Reading it as evidence that the predicate itself was drawn too narrow needs a later instance the predicate does not reach; Phase 3 is where the two are told apart.
-
-## Phase 5: Re-review + Convergence
-
-Re-call the source on the updated diff — a **FULL re-review each round**, not an incremental check against the prior round's findings. For a PR scope, land the applied fixes as commits first — on the reviewed head, or on the layer stacked above it where Phase 0's landing path designated one, which this phase reads rather than re-opens — and re-resolve `{head_sha}` to the new head while `{base_sha}` stays as captured, so the pointer still spans the whole reviewed surface plus the fixes. Under the stacked path that re-resolution does not run the Phase 0 recipe again: `gh pr view [{N}] --json headRefOid` names the reviewed PR, whose head the repairs did not touch, and re-using it would point the re-review at a surface with none of this round's fixes on it. The layer branch's own head is what `{head_sha}` becomes: the diff pointer compares committed trees, so an uncommitted working-tree fix is invisible to the re-review — the source would re-surface already-fixed findings and miss fix-induced regressions. For a working-tree scope, diff against the **base captured at Phase 0** (the `HEAD` SHA recorded before the loop landed anything): re-reviewing `git diff HEAD` after loop commits can empty the diff and falsely approve an unreviewed surface — the captured base keeps the whole reviewed surface (original changes plus fixes) visible. Convergence is reached when:
-
-- the source verdict converges to `approve` and every finding it still surfaces has reached a disposition without landing an edit — verification and disposition are owed to every surfaced finding, new or recurring, and none may be a recurrence awaiting diagnosis; approve ends the re-review cadence, not the disposition duty, and a disposition that lands an edit moves the diff past the verdict, owing a fresh full re-review — OR
-- the re-review surfaces zero new non-refuted findings and no recurrences await diagnosis — a recurrence is not "new" and routes through the Phase 3 recurrence escalation before any convergence claim — OR
-- the user exits (free-response).
-
-**Silence on an unreached axis is not a pass.** A round's verdict reaches exactly as far as the round examined, and the exercised report is what states that reach. An axis the source reported as unreached contributed no evidence either way, so a convergence resting on that round's quiet is resting on nothing there — the axis surfaces as annotated residual at convergence, exactly as a carried deferral does and for the same reason: it is an open item the trace has to show rather than one the verdict silently absorbed. It does not block convergence and does not trigger a further re-review. Blocking would turn an axis the source cannot reach into a loop that cannot end, and the loop has no means of granting a reach the source lacks; what it can refuse is to record the gap as a clearance. Where the axis matters enough to close, closing it is work outside this loop, and the residual is what carries that judgment to the user.
-
-**A source that cannot report reach at all surfaces once, not every round.** Where the designated source has no channel for the exercised report — a standing property declared at Phase 0 among its coverage trade-offs — what is open is not any particular axis but the attribution of the loop's whole quiet, and it surfaces that way at convergence: one statement that this loop ran on a source which does not say what it reached, so none of its silence carries clearance. Restating it each round would add nothing that varies and would spend the round-level residual's meaning, which has to stay sharp for the sources that can report — including for the case that matters most there, a source able to report which returned no report at all.
-
-Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly. The bundle-level fit pass's loop-back (Phase 4, Apply executor step 4) carries the same shape in its retroactive form: a non-accept risk-screen verdict recorded against an already-landed adaptation rides forward as its trace annotation rather than a live-held finding, and at convergence that recorded verdict surfaces as annotated residual precisely like any other carried deferral — a "zero new findings" convergence does not silently swallow it either.
-
-**Reading the loop's own trajectory.** The finding count a round reports is not itself evidence of how the loop is converging. Under the clean regime — design intent conveyed per the Conveyance boundary above, no disposition records — a round-over-round rise is ordinary, not a sign of drift: a reviewer working from documented intent can still surface more before it surfaces nothing, and a rise the round before approve is a shape convergence itself can take. Diagnose divergence the way Phase 3 diagnoses a recurrence — by regime and by re-flagging (the same defect returning on the same clause after its fix landed) — never by comparing raw counts across rounds. An impulse, mid-loop, to read a rising or non-monotonic count as evidence the loop lacks a stopping point, and respond by deriving a new stopping policy, routes back to the Conveyance boundary and the Phase 0 design-intent harvest instead: inventing a new scope restriction on the reviewer — telling it a class of finding is out of bounds — is the suppression regime under a different name, and risks the same manufactured convergence an independent re-review would overturn. Where the conveyance is already clean and the rise persists, one reading is left, and it is not read off the counts either: look at what Phase 2 classified, at how the round's findings divide into `introduced`, `pre-existing`, and `indeterminate`. A rise the introduced side carries is the ordinary case above, and one carrying fix-induced findings is the write-tier escalation signal Phase 4 already names — that one is not a fourth classification and Phase 2 does not produce it: the loop applied those fixes itself a round ago, so what caused a finding is already in what it has accumulated, and it is read from there. A rise the pre-existing side carries is neither — it is the review reaching past what this change introduced into what the artifact was already holding, which says nothing about the loop having no stopping point. What that owes is the split itself, presented with each side's findings; which side this unit carries is a boundary the user draws per the scope-expansion axis. The counts may prompt the look and never supply its answer, and a round is ordinarily mixed rather than one-sided, so the classification is the only thing a split can be read off. Nor is this reading relief from a hard round: it presents a boundary and never narrows the review, and reaching for it because the round ran long is the same manufactured convergence, arriving by a longer route.
-
-Phase 5's re-review **is** round k+1's review — one source call per round, not a separate verdict-check followed by a fresh Phase 1 call. If the verdict is still `needs-attention`, the findings this re-review just produced become round k+1's input: increment the round counter and carry them into Phase 2 (verify) directly — do not re-call the source again at the next round's Phase 1. Whatever direction that same call returned rides forward with them to Phase 3, exactly as a first-round direction does: a re-review is a full review, so its reading is not a lesser one, and dropping it would leave divergence between the two accounts available only in round 1. Findings surfaced alongside an `approve` verdict take the same Phase 2 path; once they are dispositioned without landing any edit (dismissals, deferrals, annotations) — and no recurrence awaits diagnosis — the approve verdict stands and no further re-review round is owed. If any disposition lands an edit, the diff has moved past the verdict: a fresh full re-review of the updated diff is owed before convergence. The re-review is full because a fix can introduce a regression a narrow incremental check would miss; only a full pass over the updated diff justifies declaring convergence. It also re-harvests the design-intent bundle for the current changed surface — Phase 4 may have grown the surface beyond the Phase 0 harvest — so the source judges the new surface with matching intent rather than a bundle that predates the apply. The re-harvest folds in the design decisions constituted at this loop's gates since the prior round (Phase 0 harvest, source 4) — the constituted-decision channel legitimately ends a recurring signal whose disagreement is design-level, while a mechanically incomplete fix ends through a completed re-apply instead; disposition records still never enter the bundle (Conveyance boundary).
+Read designations from the request's words as well as its arguments. `source` selects
+the reviewer; the host is the environment driving the loop, not another user choice.
+Read only that host's reference before determining availability:
+
+| Host | `source=code-review` | `source=codex` | Reference |
+|---|---|---|---|
+| Claude Code | Fork the available Claude `/code-review` skill | Spawn `codex exec` | [Claude Code](references/host-claude-code.md) |
+| Codex | Spawn `claude -p` with the available `/code-review` skill | Spawn a fresh `codex exec` | [Codex](references/host-codex.md) |
+
+Other hosts may supply the same capabilities. Record the actual host, reviewer, and
+execution route; a new process provides a separate review context, not evidence of
+an independent model family. Sources remain runtime parameters rather than fixed
+frontmatter dependencies.
 
 ## Source Interface
 
-Every source satisfies one abstraction: `(diff, design-intent) → { findings[], verdict, exercised, direction? }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`; the exercised report names which axes the source reached against the artifact this call and which it did not — required of every source that can report at all, and unlike the direction it does not degrade to an empty case, because the empty answer is exactly what it has to be able to say. A source that reached nothing reports that it reached nothing, and the round is read accordingly; a source that could report and stays silent leaves the loop unable to tell those two apart, which is the confusion the slot exists to remove. Reaching is defined by the judgment arrived at rather than by the means, so a source that never executes anything still reports meaningfully: the axes it examined, and the ones it did not get to. One axis the interface names rather than leaving to whatever the source chose to look at: whether the artifact's own contract closes — whether what it declares is carried through — which is the judgment a change-shaped read passes over, an absence having no hunk to appear in. Phase 1 states what that judgment is; the interface's part is only that it is asked of every source able to answer at all. A source with no channel for this report at all is a separate case and does not fall to this slot every round — Phase 0 settles it once, where choosing the source is what that fact bears on. The direction is the source's own reading of the one mechanism behind the findings it surfaced, paired with the observation that would break that reading — a mechanism named without one is not a direction this interface admits and degrades to the empty case, which keeps the expiry Rule 12 puts on a reading from resting on a component the interface never required. The direction is requested when the verdict is not approve and is optional at the interface, so a source that returns none still satisfies it. Because the direction is the source's independent reading rather than anything the bundle carried in, it raises no conveyance question on the way out; on the way back it is a shared-cause reading like any other and Rule 12 governs it, so it never re-enters a later round's bundle. Each adapter asks for it after the findings, and a direction never licenses adding, reshaping, or reweighting a finding to fit. The `design-intent` input is the harvested bundle for the current changed surface (pointers to the changed-surface rules, project-guide design-rationale, and adjacent design comments, with the project's declared order of authority among them where it declares one; the loop's own constituted design decisions conveyed as content with their constitutive basis; plus the mission-anchor severity steer) — first resolved in the Phase 0 harvest and re-harvested before each full re-review (Phase 5) so a grown surface gets matching intent; each source's adapter is responsible for conveying it to its model so intent-explained findings are pre-filtered upstream — the input is source-agnostic, the conveyance is per-adapter, and every adapter observes the Conveyance boundary (design intent only; never disposition records or verdict-conditioning instructions). A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter accepts the design-intent input and yields this interface.
-
-Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`); sources are pluggable and called dynamically (`codex` via a background CLI call; `code-review` via a `Skill` call to the built-in), so they are intentionally not fixed `skills:` entries. Two sources are documented:
-
-| Source | Availability | What the designation gate weighs |
-|--------|--------------|----------------------------------|
-| `codex` | requires the `codex` CLI on the host | A single **independent external** model: its verdict is formed outside this harness, which is the coverage this source adds and the reason it costs an external call. It **can** report reach and **can** return a direction, so a round run on it carries reach evidence and an account the loop did not form for itself. |
-| `code-review` | available whenever the running harness provides the built-in; needs no external CLI | Claude-native and reading the same repo, so it resolves the project guide and the adjacent code comments itself — the bundle still directs it to the changed-surface rule files it would not otherwise weight. Its output is capped at 15 findings, so a round can be bounded by the cap rather than by what is there. It carries **no direction** and **no channel for a reach report at all**, and the two absences differ in kind: the first costs the loop an account it can form for itself, whereas reach is not the loop's to form. Rounds run on this source therefore carry no reach evidence, and Phase 5 weighs their quiet against that standing fact rather than against a claim the round made. Both are standing properties of the source, stated once here where the choice is made and once more at convergence. |
-
-**Bounding the source call is delegated to the harness.** Whether a call that stops answering is cut off, and by what, is an execution-channel decision: the loop routes it outward and does not absorb it, declaring no budget and prescribing no enforcer. What counts as a bound is a harness-supplied execution guarantee, not a figure named in prose — a number with nothing acting on it leaves a run that never answers indistinguishable from one still working. Where the harness supplies no such guarantee, the call runs unbounded, and Rule 13 is what the loop reads its rounds by. This holds of every source, so it is stated here rather than inside any one adapter.
-
-**How a source is actually driven, once designated, is in that source's own adapter file** — `references/source-adapter-codex.md` or `references/source-adapter-code-review.md` — the prompt an adapter composes, the call it makes, how it collects the result and maps it onto this interface. None of that bears on which source to designate, so it loads at the point it binds: after Phase 0 has settled the source, and for that source alone. One file per source rather than one shared file, so a run reads the adapter it is using and never the other; a source added later brings its own file and leaves these untouched, which suits the open set this interface declares rather than constituting it. What stays here is what the designation gate weighs and what every adapter answers to.
-
-## Convergence
-
-Convergence is `verdict=approve` with every surfaced finding dispositioned edit-free and no recurrence awaiting diagnosis, OR zero new (non-refuted) findings on a full re-review with no recurrences awaiting diagnosis, OR a user free-response exit. A recurrence is not "new" — it routes through the Phase 3 recurrence escalation before any convergence claim. A finding the user placed on the far side of this unit's boundary is dispositioned, not outstanding. Every full re-review re-surfaces it — it is still in the artifact — and on none of those rounds is it new, so it does not stand in the way of the second arm. A run that ends with every finding at a closing disposition — a landed repair, a handover, or a drop on its basis — has converged there, whatever the last verdict said: the arms measure what the loop still owes, and it owes nothing to a finding whose disposition was to leave it, named and with an entry point, for a successor. What this does not shorten is the review itself. An edit moves the artifact past the verdict that preceded it, so the last repair to land still owes a full pass before any of this is claimed — a handover is a disposition, never a way to stop reviewing.
-
-Convergence is demonstrated, not asserted: at each round, present a relay trace showing the round's transformation:
-
 ```
-Round {k} — source: {source} — verdict: {verdict}
-  Exercised: {axes the source reached this call; axes it reported it did not reach}
-             (omitted entirely for a source with no reach channel — that stands once at Phase 0)
-  Call:      {only when there is something to record about the call itself: the reasoning-effort setting the adapter reported, any cause the harness gave for a call that produced no verdict}
-  Goal:      {the loop's own reading against the project's stated goal — what it found, or that it ran and found nothing}
-             (omitted entirely where Phase 0 recorded that the project declares no goal — that stands once)
-  Relay:   {findings the loop dispositioned autonomously — Extension}
-             each entry: finding [provenance, on the entries Phase 2 produced one for] → [applied | dropped: basis | carried: reason]   (a side-effect rides inline as [side-effect: …] on an applied entry; an applied entry also carries the predicate its fix instantiates)
-  Gated:   {findings that needed your judgment — Constitution, from a Judgment disposition or an orthogonal risk screen}
-             each entry: finding [provenance, on the entries Phase 2 produced one for] → [applied | dropped: basis | carried: reason]
-  Landing: {where this round's repairs went — the reviewed head, or the layer stacked above it}
-             (omitted entirely for a working-tree scope, which has no landing to choose)
+(diff pointer, design intent) → { findings[], verdict, exercised, direction? }
+finding   : [critical | high | medium | low | suggestion] file:line — description
+verdict   : approve | needs-attention
+exercised : axes judged; axes not reached and what stopped each
+direction : optional shared-cause hypothesis with its falsifier
 ```
 
-The landing line is on the trace for the same reason the exercised line is: a verdict reaches exactly the surface the round ran on, and under a stacked landing that surface is the reviewed base through the layer's head — not the reviewed PR by itself. A trace that records the approve without recording where the repairs went reads, cold, as though the reviewed PR were the approved thing, and merging it alone would land the defects with none of their fixes.
+Every source able to report reach owes `exercised`, including on approval. Ask
+explicitly whether the whole changed artifact's contract closes: declared values
+have producers, branches have supplied inputs, and obligations reach their consumers.
+Distinguish source analysis from executed checks. Request `direction` after findings
+on a non-approval; no single mechanism is a valid answer. A mechanism lacking a
+falsifier does not fill this slot.
 
-The two header lines above the slots are round-level facts, not findings, and take no slot: `Exercised` carries the source's own report of which axes it reached this call and which it did not, and it is left off the trace altogether when the designated source has no channel for that report — that fact is standing, was stated at Phase 0, and returns once at convergence, so repeating it per round would only teach the reader to skip the line. `Call` appears only when there is something to record about the call itself — the reasoning-effort setting the source adapter reported for this round, and any cause the harness gave for a call that ended without a verdict; both are observed provenance rather than evidence of coverage, since what the round actually reached is carried by `Exercised`. `Goal` records that the loop's own criterion ran this round and what came of it, and it is the one header line reporting something the loop did rather than something the source did. It is there because that reading produces findings only sometimes and has to be legible on the rounds when it produced none — a pass that surfaced nothing and a pass nobody ran are the same silence otherwise, which is the confusion `Exercised` exists to remove one level up. Where Phase 0 found no declared goal, the line is left off altogether: that is a standing fact about the project rather than an outcome of the round, and it was stated once where it was found. All three lines qualify how this round's verdict is to be read — something no per-finding entry below can state, since each of those speaks for one finding while these speak for the round that produced them all.
-
-Two annotations on an entry are produced in one phase and read in another, and they ride the entry because the reader who needs them arrives later than the round that produced them. `[provenance]` is Phase 2's classification — `introduced`, `pre-existing`, or `indeterminate` — and it is what Phase 5 divides a round by when reading the loop's trajectory, and what keeps a boundary the user drew legible after the session that drew it is gone. The predicate on an applied entry is the one Phase 4's scan named for that fix, and Phase 3's cross-round shape reading is its reader. Neither is a disposition and neither gates anything: they are the round's evidence, kept where a later round can still reach it.
-
-The slot is keyed by the loop's **interruption axis** — whether the loop acted autonomously (**Relay**, Extension) or needed your judgment (**Gated**, Constitution) — and the outcome of each finding (applied / dropped / carried) plus its cited basis rides inline as an annotation on the entry. Because the partition's first axis is interruption rather than outcome, every finding has exactly one home, and the per-round disposition reads off the slot directly.
-
-The interruption axis — not the resolution class — places each entry. A Mechanical edit blocked on a risk screen sits under **Gated** because it needed your judgment, even though its resolution class is Extension; its Mechanical origin can ride as an inline note, and its outcome follows your decision — accept → `[applied]`, defer → `[carried: reason]`, drop → `[dropped: risk basis]`. A settled-policy auto-resolution sits under **Relay**, annotated by the prior disposition it applies — apply → `[applied]`, dismiss → `[dropped: prior-disposition basis]`, defer → `[carried: reason]`. Verify-stage drops are Relay `[dropped: verify basis]`; gated dismissals and risk-screen drops are Gated `[dropped: basis]`. An edit routed to the harness permission layer rides as a relay annotation on its entry — the harness's grant or denial is the substrate's record, not a loop gate. A `[carried: reason]` records the deferral reason, not a live-held finding: each round's full re-review re-detects the finding, so recurrence surfaces as a fresh recognition gate.
-
-The bundle-level fit pass (Phase 4, Apply executor step 4) is not itself one of the round's source-surfaced findings, so it has no pre-existing finding entry to attach to — it rides as its own entry, labeled by what it did (`no adaptation` | `adapted: {predicate}`). Which slot that entry takes is read off the axis for the round that just ran — **Gated** where the pass put a question to you, **Relay** where it did not. Whether it asks is the called protocol's own business and turns on what it finds; this document does not restate that protocol's conditions for asking, because a restatement is a copy that drifts from the contract it copies and the axis needs nothing but what actually happened. What the axis records is whether you were asked, not which contract asked — a nested gate interrupts exactly as an in-loop one does. The loop-back's retroactive risk screen is its own occasion of that same test: an epistemic risk is a direct Constitution decision in this loop by the risk-screen paragraph in Phase 4, so a round carrying that verdict is Gated on its own account whatever the fit pass itself did. That verdict rides inline on the same entry — `[applied; fit-pass risk: defer|drop — recorded, not actuated]` — using the inline-annotation form the trace already carries for a side-effect, so it is visible without a new slot.
-
-The per-round trace is a relay presentation — present it and proceed; it is not a gate. At convergence, the accumulated traces are the evidence that each finding reached a disposition — applied, dropped or dismissed, or explicitly surfaced as annotated residual.
-
-**The offer never conditions the exit.** Some of what a run produces reaches past it, and each such thing is surfaced at exit with the durable home its reach implies, carrying what its own kind has to carry — a decision the user constituted travels in their words rather than a summary, while a record of something nobody settled travels as what each side rests on. What governs the exit itself stays here: the exit has already landed when the offer is made, declining ends the loop identically, and the user may redirect the record's shape or home.
-
-**Which kinds travel, what each must carry, and where each belongs is in `references/exit-handover.md`** — read at exit, converged or free, before the offer is made. None of it bears on how a round is run or how a finding is dispositioned; its need first arises at the last moment, so that is where it loads.
-
-## Error Handling
-
-| Condition | Action |
-|-----------|--------|
-| Designated source unavailable in the current harness (codex CLI not found, or a built-in the harness does not provide) | Surface which source is unavailable and why, and **ask** which source the current harness can invoke to use instead — or whether to stop and make the designated source available; do not silently substitute |
-| No diff / no changes | Ask the user what to review, then stop at Phase 0 (nothing to review; the same transition as scope-detection step 4) |
-| Source call ends without a verdict — no answer, or output the adapter cannot read | The round carries no review (Rule 13). Report what did come back, record any cause the harness supplied as provenance, and put the choice to the user — continue without this round, switch source, or stop. Never converge on a blank, and never let it stand as the full re-review Phase 5's zero-new-findings arm requires |
-| A source that can report reach returns no exercised report | Treat the round's quiet as unattributed rather than as clearance, and surface the missing report itself. A source able to report which did not is an anomaly about this round — not the standing no-channel case, which Phase 0 already settled and which never routes here |
-| Source approves with no findings | Not yet converged: the source has nothing to add, and the loop's own goal reading has not run. Run it (Phase 3) over the artifact, then converge if it too surfaces nothing — reporting convergence straight off an empty source result would retire the one criterion the source never held |
+A native report may be normalized by its adapter. An explicit successful empty
+findings result can mean approval; failed, skipped, missing, or unreadable review
+output cannot. Determine output capabilities from the available implementation. A
+source with no reach channel is declared once at entry and again at exit; a missing
+report from a capable source is a round-specific gap. The loop supplies neither
+reach nor a source direction by inference.
 
 ## Rules
 
-1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution warrants interruption — a Judgment-class disposition or an orthogonal epistemic risk screen (so a Mechanical edit blocked on risk can interrupt too). A verified correctness bug whose minimal localized fix is self-evident — its plausible resolution shapes do not materially diverge — classifies Mechanical, not Judgment: the trajectory-collapse test applies at classification time, before any gate is authored, and the applied fix is noted on the Relay trace entry. A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-resolves per the prior disposition (apply / dismiss / defer) and any side-effect rides as a relay annotation on its trace entry. A gate reopens only for a genuinely competing live **Judgment** disposition, not one foreclosed by the PR's purpose or a prior precedent; for a Mechanical finding the fold-now-vs-defer / which-PR scope axis does not reopen a gate — which PR the identical fix lands in is an administrative packaging variant, folded in by the convergence goal. A genuine scope expansion (fixing a defect on the pre-existing side — `pre-existing`, or `indeterminate` resolving there — because it sits in the changed surface) folds in as a relay annotation only when a citable basis licenses it — a mandated closure sweep, the PR's purpose, or a settled precedent — and otherwise surfaces for the user as a scope-expansion judgment. Re-gating settled policy is the over-gating failure mode. A finding that is *about* the governing surfaces rather than about the artifact splits on the same boundary: where the project's declared order of authority reaches the disagreeing pair, the conflict is already settled and applying it is relay — the higher surface governs, the lower is what gets corrected, and the order is cited rather than asked. A declared order is not the only settlement that counts: a direction the user constituted in a prior round, the PR's stated purpose, or an established precedent closes that same axis exactly as an order would. The direction stays open only where none of them reaches, and it is then unfolded rather than dispositioned and its direction asked open-ended (Phase 3).
-2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
-3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
-4. **FULL re-review each round** — re-call the source over the updated diff; declare convergence only after a full re-review pass over the updated diff. A finding handed to a successor is dispositioned and is not new on the rounds that re-surface it, so a run ending with every finding at a closing disposition — repair, handover, or a drop on its basis — converges on the zero-new arm whatever the last verdict said; the last repair to land still owes its full pass first, because an edit moves the artifact past the verdict that preceded it.
-5. **Verify before apply** — a finding that fails support-integrity is dropped with its cited basis; only support-integrity-passing findings proceed to apply. Verification also checks the finding against the artifact as of the base captured at Phase 0, typing it `introduced`, `pre-existing`, or `indeterminate`, and that type rides on its trace entry. This is relay, and it decides nothing on its own: the scope-expansion axis in Rule 1 and the trajectory reading in Rule 11 both branch on whether a defect sits on the pre-existing side — where `indeterminate` sits alongside `pre-existing`, since its attribution to the change was never established — and this is the step that produces the value they branch on. Fit against the surrounding work-flow is not checked per finding here — it is checked once, at Phase 4, over the whole applied bundle, immediately before hand-forward.
-6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
-7. **Pass design intent upstream** — alongside the diff pointer, harvest the design intent already captured for the changed surface (the project's rule files whose scope intersects it — commonly `.claude/rules/*.md` and the design-rationale sections of a project guide such as `CLAUDE.md` or `AGENTS.md`, though a project may keep them somewhere else entirely, so they are resolved by looking rather than by expecting a location — plus the design comments adjacent to the changed hunks) and pass it to the source as context, bounded to the changed files, as pointers not copied content. The source then pre-filters findings that an intentional documented choice already explains, so that refutation happens upstream in the review request rather than being re-derived in Phase 2 each round; Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces. Documented intent pre-filters only findings whose objection is the choice itself — it never licenses suppressing a real defect the documented choice actually causes, which the source still flags. Because Phase 4 can grow the changed surface (completeness sweep or licensed scope expansion), the bundle is re-harvested for the current changed surface before each full re-review rather than frozen at the Phase 0 harvest. The bundle additionally folds in decisions constituted at this loop's own gates (the design-decision ledger) as its one copied element — session-constituted decisions have no repository location to point at, so each is conveyed as content with its constitutive basis — and conveys the project's mission anchor with an explicit severity-calibration steer (conventions are what the source checks against; the mission anchor is how it weighs severity). Where the project declares an order of authority among the harvested surfaces, the bundle carries that order, since two surfaces can both be documented intent and still disagree and the order is what says which one a finding is evidence against; where none is declared the bundle says so rather than supplying one. The mission anchor has a second role the bundle never carries outward: it is also the loop's own criterion, put to the verified set once a round to ask where the artifact works against what the project says it is for. The two are separate by what each does — documented intent explains a choice, the goal exposes a conflict — and a choice fully explained by the convention that authorized it can still run against the stated goal, which only the second reading reaches. Conveyance boundary: design intent only — never fix-status records, do-not-reflag lists, or verdict-conditioning instructions; the source re-verifies fixed code fresh, and its verdict is its own.
-8. **Tiered apply with a required completeness sweep, and recurrence escalation** — the
-   inherit-tier session adversarially scans the change points and compiles the fix brief,
-   naming for every fix the predicate that fix instantiates and enumerating that
-   predicate's sites across the artifact; a fix whose predicate is unnamed is not
-   written, on any tier. The sweep over those sites runs in the same
-   apply pass — the Phase 5 re-review is its backstop, not its substitute — with each
-   swept site semantically verified and risk-screened per site (Rule 6). A low-cost
-   subagent writes the
-   fixes (fork only when context-bound; inline only for trivial batches or parent-held
-   risky edits); the side-effect is verified in its own step, ahead of everything else that
-   reads the bundle, rather than on the way out. When fix-induced follow-up findings recur
-   across consecutive rounds, the write
-   tier escalates to the loop-driving session writing inline (the briefs are dropping
-   loop context the fixes need); it de-escalates once a re-review round surfaces no
-   fix-induced follow-ups. A bundle-level fit pass (`/contextualize`, once, after that
-   verify) then checks the whole applied bundle against the design-decision ledger and the
-   touched surfaces' conventions before hand-forward, and an adaptation it
-   lands loops back into this apply pass at step 1, bounded to once. Throughout the pass a
-   guard actuates where its subject has not been written and records where it has, so a
-   rejecting arm stops an edit that has not landed and produces a trace-recorded verdict for
-   one that has. No step of this pass warrants a complete or correct bundle, and none blocks
-   on failing to: the next round's full re-review is what repairs a bundle that came out
-   incomplete or wrong.
-9. **Recurrence escalates; suppression never converges** — when a finding returns beyond
-   absorption (returns = re-asserts the same defect on the same clause or invariant,
-   judged semantically — never by line or wording; an uninformed return, made before the
-   source saw the disposition's outcome, is absorbed by settled policy — permanently so
-   for never-conveyed instance-specific dismissals and deferrals — while a return made
-   with the constituted decision already conveyed awaits diagnosis immediately),
-   diagnose the repetition: if the prior disposition was an apply and Phase
-   2 confirms the original diagnosis still holds, an incomplete but still-self-evident
-   repair remains Mechanical and is re-applied under the Phase 4 write-tier escalation,
-   with the loop-driving session writing inline and no gate. If the recurrence instead
-   evidences design-level disagreement — a prior dismissal the source keeps contesting,
-   or rejection of the constituted direction itself — open a Constitution design gate
-   with the recurrence history presented. Only a resolution that holds independently of
-   current code state enters the design-decision ledger and re-enters the source's
-   bundle at the next re-harvest; an instance-specific dismissal or deferral remains a
-   settled-policy disposition, is surfaced as annotated residual at convergence, and
-   never enters the bundle. A third recurrence after a tier-escalated re-apply
-   discredits the Mechanical diagnosis
-   and is design-level by backstop. Recurrence ends through a completed repair or
-   constitution, never suppression; a manufactured verdict (a source instructed to
-   approve when findings match a ledger) is not convergence.
-10. **A constituted decision outlives the loop; its record is offered, never demanded** —
-    a design-decision ledger entry is admitted because it holds independently of current
-    code state, so its reach already exceeds the diff, and the ledger's loop-local
-    lifetime would drop it anyway. At every exit, converged or free, surface each entry
-    with the durable home its reach implies — for a PR scope, a decision that redirects
-    the work rather than settling the diff belongs on the issues the PR declares it
-    closes — carrying the user's constituting words verbatim, because a summary drops the
-    frame the next reader needs. The offer never conditions the exit: exiting is
-    immediate, declining costs nothing, and the user may redirect the record's shape or
-    home. Other things reach past the loop for that same reason while failing the ledger's
-    criterion of being already constituted, and each takes the same offer. A conflict left
-    unsettled travels as the conflict: each side with the surface it rests on, the point of
-    disagreement, and the authority relation or its stated absence — never a verdict nobody
-    gave. The far side of a boundary the user drew travels as an entry point: each finding
-    with where it holds and what establishes it. A direction exceeding this unit travels as
-    the proposal with its falsifier, marked unconstituted, which is not the ledger admitting
-    a shared-cause reading by another door since nothing a later harvest reads is written.
-    That far side is the run's deliverable rather than its remainder.
-11. **The driving session reads its own trajectory by regime and by re-flagging, never by
-    comparing finding counts** — a round-over-round rise is not itself evidence of
-    divergence; under the clean regime (design intent conveyed, no disposition records —
-    the Conveyance boundary) a count can rise the round before it converges. Diagnose
-    divergence the way Rule 9 diagnoses a recurrence — by the same defect returning on the
-    same clause after its fix landed, or by a persisting structural regime — not by the
-    trend of raw counts. When the counts alone tempt a mid-loop conclusion that the
-    trajectory has no stopping point, the corrective move is to re-consult the Conveyance
-    boundary and the Phase 0 design-intent harvest, not to invent a new scope restriction
-    on the reviewer: a restriction manufactured to force convergence is the suppression
-    regime under a different name, and courts the same manufactured approve Rule 9 forbids.
-    Where conveyance is already clean and the rise persists, the reading left is not read
-    off the counts either: divide the round by the provenance Rule 5 produced. A rise the
-    introduced side carries is ordinary; one carrying fix-induced findings is Rule 8's
-    tier-escalation signal, which is not a fourth classification and is read from what the
-    loop already accumulated — it applied those fixes itself a round ago — rather than from
-    Rule 5; a rise the pre-existing side carries is the review reaching past
-    what this change introduced, and what that owes is the split presented with each side's
-    findings, the boundary drawn by the user per Rule 1's scope-expansion axis. Counts may
-    prompt the look and never answer it — rounds are ordinarily mixed — and the reading is
-    never relief from a hard round, since it presents a boundary and never narrows the
-    review.
-12. **A shared-cause reading is fix-side, provisional, and analytical** — reading one
-    mechanism behind several findings is what makes a root repair available
-    instead of a run of symptom patches, and the reading is a hypothesis about this
-    artifact state, holding exactly three positions whoever authored it: the loop's own
-    reading and a direction the source returned are governed identically, because standing
-    here follows what a reading is, not who produced it. **Fix-side**: it may direct repair,
-    entering the fix brief like any other verified fix direction, and it acquires none of
-    the standing it did not earn — it is not a basis for dropping a finding, it is
-    ineligible for the design-decision ledger by what it is rather than by how it is
-    worded, and it is
-    not inscribed into any surface the design-intent harvest reads. The reviewer therefore
-    meets the changed artifact, never the account of it — including an account it authored
-    itself a round earlier — and an approve stays earned rather
-    than shared. **Provisional**: it directs repair only while the falsifier stated
-    alongside it has not fired, and its settled-policy propagation ends when that falsifier
-    fires; a reading formed before verification ran holds only over the findings that
-    survived it. The falsifier is re-checked whenever the surviving set changes or a repair
-    lands, and firing retires the reading: work not yet landed returns to Phase 3 to be read
-    again — which may find no shared cause and classify each finding on its own — while a
-    repair already applied stands and is judged by the next full re-review rather than
-    unwound, since every finding was verified on its own before any reading grouped them. The
-    reading also ranges across rounds where one shape recurs at different sites — not the
-    same defect returning, which is Rule 9's recurrence, but successive rounds instantiating
-    one shape. Its identity is the predicate each fix already names (Rule 8), stored on that
-    fix's trace entry and read at a later round's Phase 3 over the predicates earlier
-    rounds recorded — this round's own predicate does not exist yet and is not wanted; its falsifier is an
-    earlier round's own sweep, since a later instance at a site that sweep did not reach
-    falsifies its enumeration — but only where that site already instantiated the predicate
-    at the artifact state the sweep ran against, since a site a later round created was
-    never in its range. That falsification alone says the search missed a site the predicate
-    already reached, and completing the sweep is what answers it; the root reading reopens at
-    the wider shape only where the later instance is one the named predicate does not reach,
-    which is the abstraction having come up short rather than the search. Every other
-    clause here governs it unchanged. **Analytical**: it is weighed on the verified set before dispositions are
-    fixed and presented as pre-gate analysis; what the user constitutes at the gate is the
-    repair trajectory, not which account is true. Two accounts landing on one mechanism is
-    not corroboration and is never offered as such — the loop forms its reading over the
-    same findings, with any direction the source returned already in view — so agreement
-    adds little and it is divergence that carries information.
-13. **A terminal outcome without a verdict is not a review** — a source call that ends
-    without producing a verdict contributes no completed review, whatever ended it. It does
-    not count as the full re-review Phase 5 requires, so it satisfies neither convergence
-    arm: not the `approve` arm, which it never reached, and not the zero-new-findings arm,
-    whose emptiness it would otherwise imitate. Report whatever did come back, treat the
-    round as carrying no review, and put the choice to the user — continue without this
-    round, switch source, or stop. What did come back is read whole on every outcome, never
-    through a keyword filter: a filter admits only what was enumerated and drops the rest
-    without a sound, so what it misses is reported as the absence of a problem. Where the
-    harness reports why the call ended, record that as diagnostic provenance on the round
-    trace; the loop does not branch on it, because the outcomes that cause would distinguish
-    make the same claim about the artifact, which is none.
-14. **A source reports what it reached, and unreached silence is residual, not
-    clearance** — every source that can report at all returns a report naming which axes it
-    reached against the artifact this call and which it did not, one of them named by the
-    contract rather than left to what the source chose to look at — whether the artifact's
-    own contract closes, the judgment a change-shaped read passes over because an absence
-    has no hunk to appear in; the slot admits an empty
-    answer but never an absent one, since *nothing is wrong here* and *nothing here got
-    looked at* are precisely the two readings it exists to separate. Reaching is defined by
-    the judgment arrived at and not by the means of arriving, so a source that executes
-    nothing still reports meaningfully — the requirement is not a demand that every source
-    run things, and reading it that way would exclude exactly the sources whose silence
-    most needs attributing. Reach varies between calls rather than being fixed by the kind
-    of source, which is why the report is asked per call and never inferred from what the
-    constraints allow in principle. Where a source has no channel for the report at all,
-    that is a standing property rather than a round outcome: it is declared once at Phase 0
-    among that source's coverage trade-offs and surfaced once at convergence, never stamped
-    onto each round — a signal that is always on stops being read, and the round-level slot
-    has to keep its meaning for the case that needs it most, a source able to report which
-    returned nothing. A convergence resting on a round's quiet reaches only as far as that
-    round reached: an unreached axis surfaces as annotated residual at convergence like any
-    carried deferral, blocking neither convergence nor triggering a further re-review,
-    because the loop cannot grant a reach the source lacks. What it can refuse is to record
-    the gap as a clearance.
-15. **The landing path is settled once and the rounds inherit it** — where a PR scope's
-    repairs land, on the head just reviewed or on a layer stacked above it, is constituted at
-    Phase 0 — by relay where the user had already settled it, whether in this request or in a
-    standing practice stated earlier, and by the gate where they had not — and holds for the whole
-    invocation. Relaying from a standing practice states the reading and its basis rather than
-    asking, so a practice with an exception is correctable without a gate; silence still stops,
-    because silence is nothing said anywhere and a stated practice is not that. Correcting a
-    misread relay is not the switch this rule forbids — what it holds still is a landing the user
-    settled, and one the loop inferred wrongly was never that. Before any repair is committed the
-    correction replaces the designation and the invocation continues; after, Phase 0's recovery
-    surfaces what landed where and stops. It does not move the review base: the Phase 0
-    capture fixes that, every round types against it (Rule 5), and Phase 5 re-reviews the whole
-    surface it covers (Rule 4) whichever way the landing went. What it fixes is where this
-    invocation's repairs accumulate, and no round re-opens it, because a mid-loop switch would
-    split one invocation's repairs across two places — part on the reviewed head, part on a layer
-    above it — leaving no single surface for the re-review to read as one and no single home for
-    the exit record. Where the work wants a different landing than the one in force, that is a
-    fresh invocation rather than a switch inside this one. This is a different axis from the
-    fold-now-vs-defer one the settled-policy check collapses, and the two are easy to read as
-    one: that check asks where a single identical fix is packaged and answers that the PR
-    boundary does not change the fix, which is why it collapses. This asks where an entire
-    invocation's repairs accumulate, which decides what the round's verdict covers and what a
-    reader of either PR is looking at. Applying the collapse test to this axis and concluding
-    the gate is over-gating is reading the narrower question in place of the wider one.
+### Phase 0 — Set the invocation and its ground
+
+1. Use the source designated in this invocation. Otherwise present the invokable
+   sources with their actual coverage, cost, and reporting limits, without a default;
+   ask which to use and wait for the answer. Silence stops. One available source relays its designation; zero stops with the missing capability.
+   If an explicitly designated source is unavailable, surface why and ask whether to
+   make it available, use an available alternative, or stop; retain the designation
+   until that is settled.
+2. Resolve explicit or current-branch PR scope; otherwise use the working tree.
+   Capture the resolved diff base SHA and changed-file list. For working-tree scope,
+   include staged, unstaged, and recursively enumerated untracked paths, and retain
+   the captured `HEAD` as base even after loop commits. No changes means ask what to
+   review and stop. For a PR, read [PR scope](references/pr-scope.md) **before the
+   first review** for checkout, base, and landing preparation.
+3. For PR repairs, relay an already-settled `head` or `stacked` landing, including a
+   stated standing practice. State the reading and its basis. Otherwise ask; silence
+   stops. Hold the landing for this invocation while keeping the captured review base.
+   A correction before repairs are committed replaces a misread designation; after
+   commits, show what landed where and stop for recovery direction. A deliberately
+   different settled landing belongs to a new invocation.
+4. Harvest intent for the changed surface: applicable rules, project-guide rationale,
+   adjacent design comments, and relevant context already at hand. Resolve the
+   project's goal and authority order from its own declarations; report what the
+   search did not find. Convey repository material as pointers. Convey loop-constituted
+   design decisions as content with their constitutive basis, keeping the user's
+   words where they establish direction. Only decisions holding independently of
+   current code state enter this design-decision ledger; a revised decision supersedes
+   its predecessor, with the retirement on the trace.
+5. **Preserve reviewer independence.** Convey design intent, allowing the reviewer to
+   challenge defects that intent causes. Keep fix-status claims, dispositions,
+   do-not-reflag instructions, and shared-cause hypotheses out of reviewer context
+   and out of surfaces harvested into it. A description of a decision carries no
+   instruction about which verdict to return. Calibrate source severity by actual
+   consequence against the mission: silent wrong results are critical, broken runtime
+   behavior high, edge-condition failures medium, and consistency-only discrepancies
+   low/suggestion; a convention-explained wording preference is not a defect.
+6. Announce once that the user may end the loop at any time, receiving the trace and
+   an optional offer to record what outlives it. Execution permissions and call
+   supervision belong to the host; the loop provides no timeout guarantee itself.
+
+### Phase 1 — Obtain one review
+
+Use the selected host route and source adapter with the captured pointer and current
+intent bundle. Read the returned review and diagnostics in full. Record actual call
+settings and any reported failure cause as provenance, not coverage.
+
+A call ending without a usable review contributes no verdict and satisfies neither
+convergence arm. Show what returned and ask whether to continue without that round,
+switch source, or stop. Continuing still owes a completed review before convergence.
+An extraction failure calls for inspecting raw output; it does not prove source
+failure. A capable source omitting reach leaves the missing report visible as residual.
+
+### Phase 2 — Verify and attribute
+
+Call `/inquire` on each finding against the current artifact before acting. Drop a
+refuted finding with its cited basis and no defect provenance. For surviving findings,
+check the asserted issue against the captured base, following moves/renames:
+
+| Base reading | Provenance |
+|---|---|
+| The issue already held | `pre-existing` |
+| Absent at base; the change alone supplies the defect | `introduced` |
+| Absent at base but an independent condition is jointly necessary | `indeterminate` |
+
+An unchanged copy left inconsistent by this change is introduced drift, not an
+independent contributor. `indeterminate` takes the pre-existing side for scope
+decisions. Provenance informs scope; it neither licenses nor excludes repair. Fold
+genuine user judgments raised by verification into Phase 3's disposition gate.
+
+### Phase 3 — Read the cause and settle disposition
+
+Once per round, examine the artifact against the project's stated goal, even when
+the source found nothing. Name the goal and consequence behind any additional finding,
+verify it through Phase 2, and include it in classification. Record an empty goal
+reading too; omit this pass only where no declared goal was found.
+
+Read the verified set for a shared mechanism, competing explanations, unexplained
+findings, and a falsifier. No shared cause is a valid result. A source direction is
+one candidate, reconsidered after verification; agreement with the loop's reading
+is not independent corroboration. Materially different root and local repairs are
+a plan-level judgment even when each isolated fix looks mechanical.
+
+A shared-cause reading may direct repair only while its falsifier holds off. It
+neither drops findings nor becomes constituted design intent. Recheck the falsifier
+when the surviving set changes or a repair lands; retire a defeated reading and
+reclassify unlanded work. Applied repairs stand for the next full review. Across
+rounds, compare new findings with prior fix predicates on the trace: a previously
+matching site missed by a sweep calls for completing the enumeration; an instance
+outside that predicate calls for reconsidering the abstraction. A later-created or
+newly matching site does not falsify an earlier sweep.
+
+- **Mechanical / Extension:** a verified bug with a self-evident localized fix, or
+  another deterministic edit whose plausible shapes do not materially diverge.
+  Apply and report without a disposition gate.
+- **Judgment / Constitution:** materially different repair trajectories, unresolved
+  design trade-offs, or unentrusted scope/risk decisions. Present evidence first,
+  then ask the live question in everyday language. Cluster findings by shared
+  disposition; when repair shape is the live axis, ask about trajectories rather
+  than asking whether to apply them all.
+
+Relay a disposition already settled by the user's prior direction, the PR's purpose,
+or citable precedent, recording side effects. Reopen only a genuinely live competing
+judgment. Packaging an identical mechanical fix does not reopen disposition; repairing
+a pre-existing-side defect needs a citable scope license (purpose, mandated sweep,
+or settled precedent), otherwise ask about expansion.
+
+For conflicting governing surfaces, cite an applicable declared authority order or
+settled direction to identify what governs. That settles direction, not repair shape
+or execution permission. Where direction remains unsettled or its authority is
+contested, show both surfaces, their disagreement, and their authority relation or
+its absence; ask an open-ended direction question and retain the user's words.
+
+**Recurrence:** identify the same defect by clause/invariant, not phrasing or line.
+An initial uninformed return is absorbed by settled policy. Instance-specific
+dismissals/deferrals never enter reviewer context, so their returns keep that
+disposition and remain residual. A return after a fix was visible or a constituted
+decision conveyed requires diagnosis before convergence. A still-self-evident
+incomplete repair stays Mechanical and is rewritten by the driving session. A
+contested design decision reaches a judgment gate with the recurrence history;
+a third recurrence after the escalated re-apply discredits the Mechanical diagnosis
+and also gates. End recurrence through repair or constituted direction, not reviewer
+suppression.
+
+Read trajectory from recurrence, causes, and base provenance, not finding-count
+trends. Separate introduced, fix-induced, and pre-existing-side work when deciding
+what this unit carries. A rising count changes neither the criterion nor source scope.
+
+### Phase 4 — Apply and check the bundle
+
+1. The driving session scans planned change points, adjacent interactions, and repeated
+   instances. Name each fix's predicate and enumerate its sites across the artifact.
+   Semantically verify and risk-screen every site before adding it to the fix brief;
+   a new unbriefed site returns for screening. A nameless predicate licenses no write.
+   Sweep matching sites in this apply pass within the settled scope, reporting expansion.
+2. Risk is separate from Mechanical/Judgment classification. Route substrate actions
+   to host permissions; an unsettled epistemic risk goes to the user for apply, defer,
+   or drop. Rejection blocks an edit not yet written.
+3. Use a self-contained brief for a fresh low-cost writer where the host exposes and
+   permits one; its configuration selects the model. Use inline writing for trivial
+   batches, parent-held risky actions, or absent delegation. Fork only where necessary
+   loop context cannot be conveyed. Repeated fix-induced follow-ups across consecutive
+   rounds escalate writing to the driving session; return to the lower tier after a
+   review without such follow-ups.
+4. Read every brief/sweep site against its disposition. Record missed or wrong edits
+   and unintended changes for the next round; this establishes conformance to the
+   brief, not independent correctness. Call `/contextualize` once on the whole applied
+   bundle against the design-decision ledger and touched-surface conventions.
+5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
+   sweep, and write verification once; do not call `/contextualize` again in that pass.
+   A rejecting guard on an already-written adaptation records its verdict and leaves
+   the artifact standing for full re-review. Further unwritten sites still obey their
+   screens. Recorded defer/drop verdicts remain visible at exit. A pass without an
+   adaptation has no loop-back; the bundle proceeds to re-review on either outcome.
+
+### Phase 5 — Re-review and stop on evidence
+
+When the processed round has not earned convergence below, refresh changed files
+and design intent and obtain a **full** re-review, including after dispositions that
+landed no edit. Any edit invalidates the preceding verdict and always owes this
+review of the original surface plus all repairs. For PR scope, commit repairs to the
+settled landing and use its new head; [PR scope](references/pr-scope.md) defines that
+pointer. For working-tree scope, compare against the captured base and include current
+untracked files even if the loop has since committed. Keep review base fixed.
+
+This call is the next round's review: send its findings and direction straight to
+Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
+perform the goal reading. Converge only on the current reviewed artifact when every
+surfaced finding is dispositioned, no recurrence awaits diagnosis, no edit has landed
+since the review, and either:
+
+- the source returned `approve`; or
+- a full re-review returned zero new non-refuted findings.
+
+A handed-over finding has a disposition and is not new when it returns. Unreached
+axes, missing reach reports, open deferrals, and recorded rejecting adaptation
+verdicts remain explicit residual; they do not themselves force another round and
+are never reported as clearance. The user may exit at any point without convergence.
+
+## Trace and Exit
+
+Present each round's trace and continue without a gate:
+
+```
+Round k — host / source / route — reviewed base → head or working-tree state — verdict
+Exercised: source-reported reach and gaps (omit for a standing no-channel source)
+Call: observed settings or diagnostics, when present
+Goal: loop's goal reading and its findings, including none (omit if no declared goal)
+Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
+Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
+Landing: repair destination (PR only)
+```
+
+Each verified finding carries base provenance; an applied fix also carries its
+predicate and sweep side effects. Assign exactly one Relay/Gated home by whether
+the user was asked, including nested `/contextualize` questions and epistemic risk
+gates. Host permission decisions are execution annotations. Record the fit pass as
+its own entry, with adaptation and any retroactive rejecting verdict. Preserve write
+discrepancies; carried reasons are records, while subsequent reviews detect findings
+fresh. A stacked approval covers captured base through the repair layer, not either
+PR alone.
+
+At convergence or free exit, present the accumulated dispositions and residual,
+including standing source limits. Read [exit handover](references/exit-handover.md)
+before offering durable recording. Exiting is immediate; the record offer, its home,
+or its refusal never conditions the exit.

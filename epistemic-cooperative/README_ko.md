@@ -99,6 +99,13 @@ ClaimIntake → ScopedClaimFrame → BoundedTestSpace → EmpiricalEvidence → 
 - scoped claim 전용 — 절대 동등성이 아니라 정의된 조건 범위 내 실패확률 저감
 - residual 여집합은 1차 산출물로 후속 프로토콜에 라우팅
 
+## Review loop 실행 환경
+
+Claude Code와 Codex 모두에서 `codex`, `code-review`로 리뷰 소스를 선택합니다.
+[런타임 계약](skills/review-loop/SKILL.md)이 현재 호스트 참조로 연결하고,
+선택한 소스 어댑터만 읽습니다. Claude 리뷰에는 지정된 로컬 범위를 검토할 수
+있는 스킬이, Codex 리뷰에는 CLI가 필요합니다.
+
 ## 아키텍처
 
 ```
