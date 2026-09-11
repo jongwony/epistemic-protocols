@@ -1,6 +1,10 @@
 # Verification Discipline
 
-Use this document before relying on a check, accepting a delegated result, or declaring work complete.
+Use this document before stating a claim about a system's or artifact's state, relying on a check, accepting a delegated result, or declaring work complete.
+
+## Observation Before Claim
+
+State a claim about a system's or artifact's state after making the observation that grounds it, and cite that observation's invocation and output beside the claim. Where no such observation was made, write `unverified` in the claim's place.
 
 ## Verify Before Done
 
