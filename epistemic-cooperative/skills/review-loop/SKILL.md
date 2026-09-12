@@ -54,7 +54,8 @@ The review source is pluggable: any source satisfying the `(diff, design-intent)
                           + sweep → verify the write → /contextualize once over the applied bundle (vs design-decision ledger + touched-surface conventions)
                           → landed adaptation loops back to scan/screen/sweep/verify (bounded to once) → hand forward
   Phase 5  : re-review  — source(diff', intent) → verdict'
-               verdict'=approve (or 0 new, no recurrence pending diagnosis) → converge ; else round k+1: these findings + this call's direction → Phase 2 (re-review already done; no second source call)
+               current artifact reviewed + every finding dispositioned + no recurrence pending diagnosis
+               + (verdict'=approve or 0 new non-refuted findings) → converge ; else round k+1: these findings + this call's direction → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
 ```
 
@@ -121,7 +122,7 @@ The boundary is easiest to cross exactly at the moment a decision is being conve
 
 **The goal statement is also the loop's own criterion, and that side never travels outward.** The paragraph above settles how the goal reaches the *source*, and it holds there: a reviewer meeting the project fresh has nothing to check a mission statement against, so it goes as a severity steer rather than a checklist. That is a fact about where the source stands, not about how far the goal reaches. The loop reads the artifact from inside the project, and from there the same statement does have grip — the question it answers is where the artifact works *against* what the project says it is for. Where that question is *put* is Phase 3, over the verified set — this section settles only that the goal has the second role and that the role stays inside. What the reading produces enters as an ordinary finding and is verified like any other; what it is not is a severity adjustment applied to findings the source already returned. The two inputs stay separate by what each one does: documented intent **explains** a choice, and the goal **exposes** a conflict. A choice can be fully explained by the convention that authorized it and still run against what the project says it is for, and only the second reading reaches that case. Held as a dial alone, the goal cannot reach the defect whose every local surface is already consistent — a shared name that kept its shape and lost its meaning, where every check that compares shapes passes and nothing is left to notice it.
 
-**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's exit paragraph, and `references/exit-handover.md` for what the offer covers). This declares an exit from review-loop itself.
+**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the review trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's exit paragraph, and `references/exit-handover.md` for what the offer covers). This declares an exit from review-loop itself.
 
 ## Phase 1: Review
 
@@ -169,7 +170,7 @@ For Judgment findings whose axis remains live, **cluster by shared disposition**
 
 For every fix that is going to land — Mechanical (auto-approved) or Judgment (user-approved at the Phase 3 gate) — screen the edit for risk before applying it. A "Mechanical" edit can still be risky: it may touch an irreversibility, a security boundary, or an external / human-visible effect that the Mechanical/Judgment axis does not capture. The risk screen is orthogonal to the resolution class and gates the apply on risk grounds.
 
-The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry. This framing screens an edit before it lands; the bundle-level fit pass's loop-back (Apply executor step 4 below) screens an adaptation `/contextualize` has already written, and applies this same non-actuation principle to that retroactive case — see step 4 for how.
+The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry. A pending epistemic decision holds its dependent repair; an explicit deferral records a residual. An adaptation already written by the fit pass enters the reconciliation at step 4 before hand-forward.
 
 **Apply executor (tiered).** Applying is execution, not judgment — the judgment already
 landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
@@ -180,7 +181,12 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    at unswept sites? The scan compiles the self-contained fix brief: each fix
    file:line-anchored with its verified basis and fix direction, and — for every fix —
    the predicate that fix instantiates, named explicitly, with that predicate's sites
-   enumerated across the artifact at scan time. Each enumerated site is semantically
+   enumerated across the artifact at scan time. Derive the predicate from the violated
+   invariant and the verified causal mechanism, then trace where relevant state is produced,
+   transferred, invalidated, and consumed across transitions and possible interleavings.
+   State the observation that would falsify the repair and use it to select bounded checks.
+   A consistency or support boundary the evidence leaves undecided returns to Phase 3
+   before its dependent repair is written. Each enumerated site is semantically
    verified and risk-screened per site (Rule 6) before it enters the brief; a site the
    writer discovers beyond the brief is returned for screening, never written unbriefed.
    A fix whose predicate is unnamed is not written, on any tier. That named predicate
@@ -203,97 +209,57 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    are dropping loop context the fixes need (accumulated conventions, prior fix shapes,
    adjacent invariants). De-escalate back to the low-cost tier once a re-review round
    surfaces no fix-induced follow-ups.
-3. **Verify the delegated write**: read each site against what its disposition called for —
-   every fix the brief carried and every site the completeness sweep ranged over — under the
-   rule below, so a site written on an accepted verdict is read for that effect and a site
-   whose verdict was recorded rather than actuated is read for the state it already had. What
-   this establishes is conformance to what was decided and nothing wider; the brief's own
-   correctness was settled earlier, each finding verified at Phase 2, dispositioned at Phase
-   3, and scanned at step 1, and what judges the result's behavior independently is Phase 5's
-   re-review. A discrepancy here — a site missed, a wrong edit landed, a site moved that was
-   to stay put — is recorded on the trace and carried to the next round like any other
-   finding, and does not block the pass. An apply pass does not warrant a complete or correct
-   bundle and this contract does not ask it to: repairing one that came out incomplete or
-   wrong is the loop's work. What this step buys is that the discrepancy is seen and written
-   down at the point it happened rather than rediscovered later as a symptom.
-4. **Bundle-level fit pass (once, before hand-forward)**: call `/contextualize` a single
-   time over the whole applied edit bundle — never
-   per fix — checking the bundle as a set against the design-decision ledger harvested at
-   Phase 0 (harvest source 4) and against the conventions of every surface the bundle
-   touched. This sits here rather than at Phase 2 because the property it checks — coherence
-   across the bundle, not any one finding's own correctness — belongs to the bundle as a
-   whole; a per-finding check has no vantage from which to see it. It sits after step 3 so a
-   write discrepancy is on the record before the bundle is adapted, which keeps a later
-   symptom attributable — an ordering convenience, not a guarantee that what it receives is
-   correct, which nothing in this pass establishes. The pass runs before the updated diff is
-   handed to the designated source in step 5.
+3. **Verify the repair bundle**: read every briefed and swept site against its disposition,
+   and exercise the repaired invariant through the relevant state transitions and orderings
+   identified by the scan. Record the artifact checked, evidence obtained, and unexercised
+   limits. Repair a known discrepancy within the settled disposition and re-check the
+   affected bundle before hand-forward. If completing it requires a live judgment, return
+   that judgment to Phase 3; an explicitly accepted or deferred limitation remains a named
+   residual. An unavailable check is recorded with its reason and consequence for confidence;
+   passing checks establish only their executed reach.
+4. **Bundle-level fit pass (once, before hand-forward)**: call `/contextualize` once over
+   the applied bundle against the harvested design decisions and touched-surface conventions.
+   When it lands an adaptation, re-enter step 1 for that adaptation: name its predicate,
+   enumerate and screen its sites, complete the sweep, and verify the affected bundle at
+   step 3. A Dismiss answer lands no edit and needs no re-entry.
+   - When re-entry finds a discrepancy in an already-written adaptation, reconcile its
+     current state with the settled disposition before hand-forward. A self-evident repair
+     stays within that disposition; a genuinely competing repair or support boundary
+     returns to Phase 3 with the current artifact and consequences. A defer or drop verdict
+     must state whether the landed effect remains and on what authorized basis; the verdict
+     alone does not authorize retaining that effect.
+   - The fit call runs once per apply pass. Re-entry checks the adaptation without invoking
+     another fit call; a repair that cannot complete within the invocation's bound exits
+     with the unfinished bundle and residuals, without convergence.
+5. **Hand forward to the designated source**: after the authorized repair bundle satisfies
+   its dispositions and its checks have completed or have explicit unavailable-check
+   limits recorded under step 3, obtain Phase 5's independent full re-review.
+   Keep accepted or deferred limits visible on the loop's trace. The source receives the
+   updated artifact pointer and constituted intent under the Conveyance boundary.
 
-   **The apply pass does not branch on how the call terminates.** `/contextualize`
-   converges as `ContextualizedExecution` (every mismatch adjudicated). Once it returns,
-   the apply pass finishes the same way: the loop-back below runs over any adaptation that
-   landed, and the bundle then proceeds to step 5 and is handed forward — judging the
-   result is the next round's full re-review (Phase 5), not a branch taken here.
-
-   `/contextualize` is not read-only: a Confirm or Adapt answer at its own Phase 2 lands an
-   edit through Edit/Write, adapting the bundle rather than merely assessing it.
-   **Loop-back**: when the fit pass lands such an adaptation, that edit re-enters this apply
-   pass at step 1 — the predicate it instantiates is named, that predicate's sites are
-   enumerated across the artifact, each site is semantically verified and risk-screened per
-   site (Rule 6), and the completeness sweep runs over them, and step 3 reads each against
-   the disposition its screen returned — before the bundle proceeds to step 5. A Dismiss answer lands no edit and
-   triggers no loop-back: the condition is an adaptation actually having landed, not the fit
-   pass having run.
-
-   **A guard actuates where its subject has not been written, and records where it has.**
-   This is the rule the whole apply pass runs on, and it covers every guard here and every arm
-   each of them carries — a predicate that cannot be named, a site that fails semantic
-   verification, a risk verdict of defer or drop, a discrepancy step 3 reads. Where nothing
-   has been written at the site yet, a rejecting arm does what it says and the edit does not
-   land; the further sites this loop-back's sweep enumerates are that case, and their screen
-   keeps every arm live. Where the edit is already on the artifact — the adaptation itself,
-   by the time it reaches this re-entry — the same arm still produces its verdict, and the
-   verdict is recorded on the trace with the site left standing. This document defines no
-   rollback or revert transition and needs none: an apply pass is not warranted to come out
-   complete or correct, and repairing one that did not is the loop's work, which the next
-   round's full re-review does by re-detecting the condition fresh. That is the same
-   treatment the risk-screen paragraph above already gives a carried finding; what the
-   loop-back adds is that these verdicts get produced and written down at all, rather than an
-   edit reaching hand-forward with no guard having looked at it. The verdict rides forward as an annotation
-   on the trace (Convergence section) exactly as any other carried finding does — per the
-   risk-screen paragraph above, carrying forward does not hold a finding as live in-loop
-   state, and the next round's full re-review re-detects the condition fresh rather than the
-   annotation itself gating anything. The substrate arm of that same screen is not left
-   dangling either: `/contextualize`'s Edit/Write calls already passed through the harness
-   permission layer at the moment they ran, so substrate gating already happened at the tool
-   level — what the retroactive screen carries forward is the epistemic judgment, and that
-   is what gets recorded.
-
-   The loop-back runs at most once per apply pass; the fit pass is not re-invoked after it.
-   What sets that bound is that whatever the loop-back's own sweep newly introduces is
-   exactly what Phase 5's full re-review already backstops — this document takes the same
-   position for the sweep itself, in the "Completeness sweep on apply" paragraph below ("the
-   Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to
-   defer it"); a fixpoint loop here would be a structure this document uses nowhere else.
-5. **Hand forward to the designated source**: with the write verified at step 3 and the
-   bundle's fit checked at step 4, Phase 5's full re-review by the designated source re-judges
-   the updated surface — the loop's own convergence check remains the final reviewer of the
-   delegated writing.
-
-**Completeness sweep on apply.** The predicate the scan named for each fix (Apply executor, step 1) is what this sweep ranges over. Where that predicate recurs across multiple sites in the artifact — a vocabulary rename, a guard that must hold at every mention of a symbol, a stale predicate repeated in several blocks — apply the fix consistently at every one of its sites in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The sweep is a required step of the apply pass, and the Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to defer it. The enumeration is a claim and stays checkable as one: a later round finding the same predicate instantiated at a site this sweep did not reach is that claim falsified, which is what Phase 3's cross-round reading reads it for. What it falsifies is the enumeration — the search missed a site the predicate already reached — and completing that sweep is the repair. Reading it as evidence that the predicate itself was drawn too narrow needs a later instance the predicate does not reach; Phase 3 is where the two are told apart.
+**Completeness sweep on apply.** The predicate the scan named for each fix (Apply executor, step 1) is what this sweep ranges over. Where that predicate recurs across multiple sites or transitions in the artifact, apply the fix consistently at every one of its sites in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The sweep is a required step of the apply pass, and the Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to defer it. The enumeration is a claim and stays checkable as one: a later round finding the same predicate instantiated at a site this sweep did not reach is that claim falsified, which is what Phase 3's cross-round reading reads it for. What it falsifies is the enumeration — the search missed a site the predicate already reached — and completing that sweep is the repair. Reading it as evidence that the predicate itself was drawn too narrow needs a later instance the predicate does not reach; Phase 3 is where the two are told apart.
 
 ## Phase 5: Re-review + Convergence
 
-Re-call the source on the updated diff — a **FULL re-review each round**, not an incremental check against the prior round's findings. For a PR scope, land the applied fixes as commits first — on the reviewed head, or on the layer stacked above it where Phase 0's landing path designated one, which this phase reads rather than re-opens — and re-resolve `{head_sha}` to the new head while `{base_sha}` stays as captured, so the pointer still spans the whole reviewed surface plus the fixes. Under the stacked path that re-resolution does not run the Phase 0 recipe again: `gh pr view [{N}] --json headRefOid` names the reviewed PR, whose head the repairs did not touch, and re-using it would point the re-review at a surface with none of this round's fixes on it. The layer branch's own head is what `{head_sha}` becomes: the diff pointer compares committed trees, so an uncommitted working-tree fix is invisible to the re-review — the source would re-surface already-fixed findings and miss fix-induced regressions. For a working-tree scope, diff against the **base captured at Phase 0** (the `HEAD` SHA recorded before the loop landed anything): re-reviewing `git diff HEAD` after loop commits can empty the diff and falsely approve an unreviewed surface — the captured base keeps the whole reviewed surface (original changes plus fixes) visible. Convergence is reached when:
+Re-call the source on the updated diff — a **FULL re-review each round**, not an incremental check against the prior round's findings. For a PR scope, land the applied fixes as commits first — on the reviewed head, or on the layer stacked above it where Phase 0's landing path designated one, which this phase reads rather than re-opens — and re-resolve `{head_sha}` to the new head while `{base_sha}` stays as captured, so the pointer still spans the whole reviewed surface plus the fixes. Under the stacked path that re-resolution does not run the Phase 0 recipe again: `gh pr view [{N}] --json headRefOid` names the reviewed PR, whose head the repairs did not touch, and re-using it would point the re-review at a surface with none of this round's fixes on it. The layer branch's own head is what `{head_sha}` becomes: the diff pointer compares committed trees, so an uncommitted working-tree fix is invisible to the re-review — the source would re-surface already-fixed findings and miss fix-induced regressions. For a working-tree scope, diff against the **base captured at Phase 0** (the `HEAD` SHA recorded before the loop landed anything): re-reviewing `git diff HEAD` after loop commits can empty the diff and falsely approve an unreviewed surface — the captured base keeps the whole reviewed surface (original changes plus fixes) visible. Convergence requires all of the following:
 
-- the source verdict converges to `approve` and every finding it still surfaces has reached a disposition without landing an edit — verification and disposition are owed to every surfaced finding, new or recurring, and none may be a recurrence awaiting diagnosis; approve ends the re-review cadence, not the disposition duty, and a disposition that lands an edit moves the diff past the verdict, owing a fresh full re-review — OR
-- the re-review surfaces zero new non-refuted findings and no recurrences await diagnosis — a recurrence is not "new" and routes through the Phase 3 recurrence escalation before any convergence claim — OR
-- the user exits (free-response).
+- The latest full review addresses the current artifact, with the captured base and current
+  head or working-tree state identified; every subsequent edit owes a fresh full review.
+- Every source-surfaced and loop-generated finding has undergone verification and reached a
+  disposition, with accepted or deferred limits explicit and no recurrence awaiting diagnosis.
+- That review returned `approve`, or surfaced zero new non-refuted findings. A new finding
+  remains new for that review even when handed over or deferred; disposition alone does
+  not satisfy the zero-new condition.
+
+A user exit or exhausted invocation bound ends execution. If these conditions are unmet,
+report a non-converged exit with the latest reviewed artifact, any later edits, unfinished
+repairs, residuals, and retained judgments. A bound supplies no evidence of convergence.
 
 **Silence on an unreached axis is not a pass.** A round's verdict reaches exactly as far as the round examined, and the exercised report is what states that reach. An axis the source reported as unreached contributed no evidence either way, so a convergence resting on that round's quiet is resting on nothing there — the axis surfaces as annotated residual at convergence, exactly as a carried deferral does and for the same reason: it is an open item the trace has to show rather than one the verdict silently absorbed. It does not block convergence and does not trigger a further re-review. Blocking would turn an axis the source cannot reach into a loop that cannot end, and the loop has no means of granting a reach the source lacks; what it can refuse is to record the gap as a clearance. Where the axis matters enough to close, closing it is work outside this loop, and the residual is what carries that judgment to the user.
 
 **A source that cannot report reach at all surfaces once, not every round.** Where the designated source has no channel for the exercised report — a standing property declared at Phase 0 among its coverage trade-offs — what is open is not any particular axis but the attribution of the loop's whole quiet, and it surfaces that way at convergence: one statement that this loop ran on a source which does not say what it reached, so none of its silence carries clearance. Restating it each round would add nothing that varies and would spend the round-level residual's meaning, which has to stay sharp for the sources that can report — including for the case that matters most there, a source able to report which returned no report at all.
 
-Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly. The bundle-level fit pass's loop-back (Phase 4, Apply executor step 4) carries the same shape in its retroactive form: a non-accept risk-screen verdict recorded against an already-landed adaptation rides forward as its trace annotation rather than a live-held finding, and at convergence that recorded verdict surfaces as annotated residual precisely like any other carried deferral — a "zero new findings" convergence does not silently swallow it either.
+Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly. An already-landed adaptation whose effect remains under an explicit disposition surfaces with that effect and basis; an unresolved reconciliation prevents hand-forward under Phase 4.
 
 **Reading the loop's own trajectory.** The finding count a round reports is not itself evidence of how the loop is converging. Under the clean regime — design intent conveyed per the Conveyance boundary above, no disposition records — a round-over-round rise is ordinary, not a sign of drift: a reviewer working from documented intent can still surface more before it surfaces nothing, and a rise the round before approve is a shape convergence itself can take. Diagnose divergence the way Phase 3 diagnoses a recurrence — by regime and by re-flagging (the same defect returning on the same clause after its fix landed) — never by comparing raw counts across rounds. An impulse, mid-loop, to read a rising or non-monotonic count as evidence the loop lacks a stopping point, and respond by deriving a new stopping policy, routes back to the Conveyance boundary and the Phase 0 design-intent harvest instead: inventing a new scope restriction on the reviewer — telling it a class of finding is out of bounds — is the suppression regime under a different name, and risks the same manufactured convergence an independent re-review would overturn. Where the conveyance is already clean and the rise persists, one reading is left, and it is not read off the counts either: look at what Phase 2 classified, at how the round's findings divide into `introduced`, `pre-existing`, and `indeterminate`. A rise the introduced side carries is the ordinary case above, and one carrying fix-induced findings is the write-tier escalation signal Phase 4 already names — that one is not a fourth classification and Phase 2 does not produce it: the loop applied those fixes itself a round ago, so what caused a finding is already in what it has accumulated, and it is read from there. A rise the pre-existing side carries is neither — it is the review reaching past what this change introduced into what the artifact was already holding, which says nothing about the loop having no stopping point. What that owes is the split itself, presented with each side's findings; which side this unit carries is a boundary the user draws per the scope-expansion axis. The counts may prompt the look and never supply its answer, and a round is ordinarily mixed rather than one-sided, so the classification is the only thing a split can be read off. Nor is this reading relief from a hard round: it presents a boundary and never narrows the review, and reaching for it because the round ran long is the same manufactured convergence, arriving by a longer route.
 
@@ -316,7 +282,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 
 ## Convergence
 
-Convergence is `verdict=approve` with every surfaced finding dispositioned edit-free and no recurrence awaiting diagnosis, OR zero new (non-refuted) findings on a full re-review with no recurrences awaiting diagnosis, OR a user free-response exit. A recurrence is not "new" — it routes through the Phase 3 recurrence escalation before any convergence claim. A finding the user placed on the far side of this unit's boundary is dispositioned, not outstanding. Every full re-review re-surfaces it — it is still in the artifact — and on none of those rounds is it new, so it does not stand in the way of the second arm. A run that ends with every finding at a closing disposition — a landed repair, a handover, or a drop on its basis — has converged there, whatever the last verdict said: the arms measure what the loop still owes, and it owes nothing to a finding whose disposition was to leave it, named and with an entry point, for a successor. What this does not shorten is the review itself. An edit moves the artifact past the verdict that preceded it, so the last repair to land still owes a full pass before any of this is claimed — a handover is a disposition, never a way to stop reviewing.
+At exit, report whether Phase 5's convergence conditions hold, identify the latest reviewed artifact and any subsequent edits, and carry all open limits and retained judgments. Present the accumulated trace on converged and non-converged exits alike.
 
 Convergence is demonstrated, not asserted: at each round, present a relay trace showing the round's transformation:
 
@@ -345,13 +311,13 @@ The slot is keyed by the loop's **interruption axis** — whether the loop acted
 
 The interruption axis — not the resolution class — places each entry. A Mechanical edit blocked on a risk screen sits under **Gated** because it needed your judgment, even though its resolution class is Extension; its Mechanical origin can ride as an inline note, and its outcome follows your decision — accept → `[applied]`, defer → `[carried: reason]`, drop → `[dropped: risk basis]`. A settled-policy auto-resolution sits under **Relay**, annotated by the prior disposition it applies — apply → `[applied]`, dismiss → `[dropped: prior-disposition basis]`, defer → `[carried: reason]`. Verify-stage drops are Relay `[dropped: verify basis]`; gated dismissals and risk-screen drops are Gated `[dropped: basis]`. An edit routed to the harness permission layer rides as a relay annotation on its entry — the harness's grant or denial is the substrate's record, not a loop gate. A `[carried: reason]` records the deferral reason, not a live-held finding: each round's full re-review re-detects the finding, so recurrence surfaces as a fresh recognition gate.
 
-The bundle-level fit pass (Phase 4, Apply executor step 4) is not itself one of the round's source-surfaced findings, so it has no pre-existing finding entry to attach to — it rides as its own entry, labeled by what it did (`no adaptation` | `adapted: {predicate}`). Which slot that entry takes is read off the axis for the round that just ran — **Gated** where the pass put a question to you, **Relay** where it did not. Whether it asks is the called protocol's own business and turns on what it finds; this document does not restate that protocol's conditions for asking, because a restatement is a copy that drifts from the contract it copies and the axis needs nothing but what actually happened. What the axis records is whether you were asked, not which contract asked — a nested gate interrupts exactly as an in-loop one does. The loop-back's retroactive risk screen is its own occasion of that same test: an epistemic risk is a direct Constitution decision in this loop by the risk-screen paragraph in Phase 4, so a round carrying that verdict is Gated on its own account whatever the fit pass itself did. That verdict rides inline on the same entry — `[applied; fit-pass risk: defer|drop — recorded, not actuated]` — using the inline-annotation form the trace already carries for a side-effect, so it is visible without a new slot.
+The bundle-level fit pass (Phase 4, Apply executor step 4) is not itself one of the round's source-surfaced findings, so it has no pre-existing finding entry to attach to — it rides as its own entry, labeled by what it did (`no adaptation` | `adapted: {predicate}`). Which slot that entry takes is read off the axis for the round that just ran — **Gated** where the pass put a question to you, **Relay** where it did not. Whether it asks is the called protocol's own business and turns on what it finds; this document does not restate that protocol's conditions for asking, because a restatement is a copy that drifts from the contract it copies and the axis needs nothing but what actually happened. What the axis records is whether you were asked, not which contract asked — a nested gate interrupts exactly as an in-loop one does. The loop-back reconciliation takes the same interruption axis and records its resulting artifact state and disposition inline on the fit-pass entry.
 
 The per-round trace is a relay presentation — present it and proceed; it is not a gate. At convergence, the accumulated traces are the evidence that each finding reached a disposition — applied, dropped or dismissed, or explicitly surfaced as annotated residual.
 
 **The offer never conditions the exit.** Some of what a run produces reaches past it, and each such thing is surfaced at exit with the durable home its reach implies, carrying what its own kind has to carry — a decision the user constituted travels in their words rather than a summary, while a record of something nobody settled travels as what each side rests on. What governs the exit itself stays here: the exit has already landed when the offer is made, declining ends the loop identically, and the user may redirect the record's shape or home.
 
-**Which kinds travel, what each must carry, and where each belongs is in `references/exit-handover.md`** — read at exit, converged or free, before the offer is made. None of it bears on how a round is run or how a finding is dispositioned; its need first arises at the last moment, so that is where it loads.
+**Which kinds travel, what each must carry, and where each belongs is in `references/exit-handover.md`** — read at exit, converged, user-ended, or bounded, before the offer is made. None of it bears on how a round is run or how a finding is dispositioned; its need first arises at the last moment, so that is where it loads.
 
 ## Error Handling
 
@@ -368,7 +334,11 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution warrants interruption — a Judgment-class disposition or an orthogonal epistemic risk screen (so a Mechanical edit blocked on risk can interrupt too). A verified correctness bug whose minimal localized fix is self-evident — its plausible resolution shapes do not materially diverge — classifies Mechanical, not Judgment: the trajectory-collapse test applies at classification time, before any gate is authored, and the applied fix is noted on the Relay trace entry. A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-resolves per the prior disposition (apply / dismiss / defer) and any side-effect rides as a relay annotation on its trace entry. A gate reopens only for a genuinely competing live **Judgment** disposition, not one foreclosed by the PR's purpose or a prior precedent; for a Mechanical finding the fold-now-vs-defer / which-PR scope axis does not reopen a gate — which PR the identical fix lands in is an administrative packaging variant, folded in by the convergence goal. A genuine scope expansion (fixing a defect on the pre-existing side — `pre-existing`, or `indeterminate` resolving there — because it sits in the changed surface) folds in as a relay annotation only when a citable basis licenses it — a mandated closure sweep, the PR's purpose, or a settled precedent — and otherwise surfaces for the user as a scope-expansion judgment. Re-gating settled policy is the over-gating failure mode. A finding that is *about* the governing surfaces rather than about the artifact splits on the same boundary: where the project's declared order of authority reaches the disagreeing pair, the conflict is already settled and applying it is relay — the higher surface governs, the lower is what gets corrected, and the order is cited rather than asked. A declared order is not the only settlement that counts: a direction the user constituted in a prior round, the PR's stated purpose, or an established precedent closes that same axis exactly as an order would. The direction stays open only where none of them reaches, and it is then unfolded rather than dispositioned and its direction asked open-ended (Phase 3).
 2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
 3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
-4. **FULL re-review each round** — re-call the source over the updated diff; declare convergence only after a full re-review pass over the updated diff. A finding handed to a successor is dispositioned and is not new on the rounds that re-surface it, so a run ending with every finding at a closing disposition — repair, handover, or a drop on its basis — converges on the zero-new arm whatever the last verdict said; the last repair to land still owes its full pass first, because an edit moves the artifact past the verdict that preceded it.
+4. **FULL re-review each round** — converge only on the currently reviewed artifact,
+   after every finding is dispositioned and no recurrence awaits diagnosis, with `approve`
+   or zero new non-refuted findings from that full review. A later edit owes another full
+   review; a handover or deferral preserves the finding's newness in the review that surfaced
+   it. A user exit or invocation bound ends execution without establishing convergence.
 5. **Verify before apply** — a finding that fails support-integrity is dropped with its cited basis; only support-integrity-passing findings proceed to apply. Verification also checks the finding against the artifact as of the base captured at Phase 0, typing it `introduced`, `pre-existing`, or `indeterminate`, and that type rides on its trace entry. This is relay, and it decides nothing on its own: the scope-expansion axis in Rule 1 and the trajectory reading in Rule 11 both branch on whether a defect sits on the pre-existing side — where `indeterminate` sits alongside `pre-existing`, since its attribution to the change was never established — and this is the step that produces the value they branch on. Fit against the surrounding work-flow is not checked per finding here — it is checked once, at Phase 4, over the whole applied bundle, immediately before hand-forward.
 6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
 7. **Pass design intent upstream** — alongside the diff pointer, harvest the design intent already captured for the changed surface (the project's rule files whose scope intersects it — commonly `.claude/rules/*.md` and the design-rationale sections of a project guide such as `CLAUDE.md` or `AGENTS.md`, though a project may keep them somewhere else entirely, so they are resolved by looking rather than by expecting a location — plus the design comments adjacent to the changed hunks) and pass it to the source as context, bounded to the changed files, as pointers not copied content. The source then pre-filters findings that an intentional documented choice already explains, so that refutation happens upstream in the review request rather than being re-derived in Phase 2 each round; Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces. Documented intent pre-filters only findings whose objection is the choice itself — it never licenses suppressing a real defect the documented choice actually causes, which the source still flags. Because Phase 4 can grow the changed surface (completeness sweep or licensed scope expansion), the bundle is re-harvested for the current changed surface before each full re-review rather than frozen at the Phase 0 harvest. The bundle additionally folds in decisions constituted at this loop's own gates (the design-decision ledger) as its one copied element — session-constituted decisions have no repository location to point at, so each is conveyed as content with its constitutive basis — and conveys the project's mission anchor with an explicit severity-calibration steer (conventions are what the source checks against; the mission anchor is how it weighs severity). Where the project declares an order of authority among the harvested surfaces, the bundle carries that order, since two surfaces can both be documented intent and still disagree and the order is what says which one a finding is evidence against; where none is declared the bundle says so rather than supplying one. The mission anchor has a second role the bundle never carries outward: it is also the loop's own criterion, put to the verified set once a round to ask where the artifact works against what the project says it is for. The two are separate by what each does — documented intent explains a choice, the goal exposes a conflict — and a choice fully explained by the convention that authorized it can still run against the stated goal, which only the second reading reaches. Conveyance boundary: design intent only — never fix-status records, do-not-reflag lists, or verdict-conditioning instructions; the source re-verifies fixed code fresh, and its verdict is its own.
@@ -390,11 +360,10 @@ The per-round trace is a relay presentation — present it and proceed; it is no
    verify) then checks the whole applied bundle against the design-decision ledger and the
    touched surfaces' conventions before hand-forward, and an adaptation it
    lands loops back into this apply pass at step 1, bounded to once. Throughout the pass a
-   guard actuates where its subject has not been written and records where it has, so a
-   rejecting arm stops an edit that has not landed and produces a trace-recorded verdict for
-   one that has. No step of this pass warrants a complete or correct bundle, and none blocks
-   on failing to: the next round's full re-review is what repairs a bundle that came out
-   incomplete or wrong.
+   known discrepancy is reconciled with its disposition and the affected bundle re-checked
+   before hand-forward. A live judgment returns to Phase 3; accepted or deferred limits stay
+   explicit. Checks establish their bounded reach, and the independent full review judges
+   the resulting artifact.
 9. **Recurrence escalates; suppression never converges** — when a finding returns beyond
    absorption (returns = re-asserts the same defect on the same clause or invariant,
    judged semantically — never by line or wording; an uninformed return, made before the
@@ -419,7 +388,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 10. **A constituted decision outlives the loop; its record is offered, never demanded** —
     a design-decision ledger entry is admitted because it holds independently of current
     code state, so its reach already exceeds the diff, and the ledger's loop-local
-    lifetime would drop it anyway. At every exit, converged or free, surface each entry
+    lifetime would drop it anyway. At every exit, converged, user-ended, or bounded, surface each entry
     with the durable home its reach implies — for a PR scope, a decision that redirects
     the work rather than settling the diff belongs on the issues the PR declares it
     closes — carrying the user's constituting words verbatim, because a summary drops the
