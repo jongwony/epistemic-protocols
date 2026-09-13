@@ -1,6 +1,6 @@
 # Exit Handover
 
-Read at converged or free exit, before offering durable recording. Carry each item
+Read at every exit, before offering durable recording. Carry each item
 with its appropriate home; the user may redirect or decline the offer.
 
 - **Constituted design decisions:** preserve the user's words and constitutive basis.
