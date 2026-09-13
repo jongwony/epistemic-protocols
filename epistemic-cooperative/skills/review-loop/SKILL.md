@@ -210,7 +210,8 @@ destination through [PR scope](references/pr-scope.md) before the first edit.
    Trace relevant state through production, transfer, invalidation, and consumption,
    including transitions and interleavings; enumerate the predicate's sites. State the
    observation that would falsify the repair and select bounded checks from it. Return
-   an undecided consistency or support boundary to Phase 3 before its dependent repair.
+   a live judgment about consistency or evidence support to Phase 3 before its
+   dependent repair.
    Semantically verify and risk-screen every site before adding it to the fix brief;
    a new unbriefed site returns for screening. A nameless predicate licenses no write.
    Sweep matching sites in this apply pass within the settled scope, reporting expansion.
@@ -235,12 +236,16 @@ destination through [PR scope](references/pr-scope.md) before the first edit.
 5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
    sweep, and write verification once; the fit call is not repeated in that apply pass.
    Reconcile an already-written adaptation with its settled disposition before hand-forward.
-   A self-evident repair stays within that disposition; a competing repair or support
-   boundary returns to Phase 3 with the current artifact and consequences. A defer or
-   drop verdict states whether the landed effect remains and its authorized basis;
-   the verdict alone does not authorize retaining it. Further unwritten sites obey
+   A self-evident repair stays within that disposition; a competing repair or a live
+   judgment about evidence support returns to Phase 3 with the current artifact and
+   consequences. A defer or drop verdict states whether the landed effect remains and
+   its authorized basis; the verdict alone does not authorize retaining it. Further
+   unwritten sites obey
    their screens. An adaptation-free pass needs no re-entry. After reconciliation and
    checks, including explicit unavailable-check limits, obtain the full re-review.
+6. After a judgment returned to Phase 3 is settled, resume the pending scan or check
+   in the same apply pass with that answer. Screen any newly included sites; a fit
+   call already completed in that pass remains completed.
 
 ### Phase 5 — Re-review and stop on evidence
 
@@ -262,9 +267,9 @@ since the review, and either:
 - a full re-review returned zero new non-refuted findings.
 
 A new finding remains new in its discovery review even when deferred or handed over;
-its later return preserves the disposition. Unreached axes, missing reach reports,
-open deferrals, and explicitly retained adaptation effects remain residual; they do
-not themselves force another round and are never reported as clearance.
+its later return is not new and preserves the disposition. Unreached axes, missing
+reach reports, open deferrals, and explicitly retained adaptation effects remain
+residual; they do not themselves force another round and are never reported as clearance.
 
 At any exit before these conditions hold, report non-convergence with the latest
 reviewed artifact, later edits, unfinished repairs, residuals, and retained judgments.
@@ -285,14 +290,15 @@ Landing: repair destination (PR only)
 ```
 
 Each verified finding carries base provenance; an applied fix also carries its
-predicate and sweep side effects. Assign exactly one Relay/Gated home by whether
-the user was asked, including nested `/contextualize` questions and epistemic risk
-gates. Host permission decisions are execution annotations. Record the fit pass as
+predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
+limits, and unavailable-check reasons with that repair's Relay/Gated entry; keep this
+loop-side evidence distinct from the source-reported `Exercised` line.
+Assign exactly one Relay/Gated home by whether the user was asked, including nested
+`/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
 artifact state and disposition. Preserve write discrepancies and their reconciliation;
-carried reasons are records, while subsequent reviews detect findings
-fresh. A stacked approval covers captured base through the repair layer, not either
-PR alone.
+carried reasons are records, while subsequent reviews detect findings fresh. A stacked
+approval covers captured base through the repair layer, not either PR alone.
 
 At every exit, present the accumulated dispositions and residual,
 including standing source limits. Read [exit handover](references/exit-handover.md)
