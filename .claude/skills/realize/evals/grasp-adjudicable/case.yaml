@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: grasp-adjudicable
+
+context:
+  # Both /grasp cases mount the same substrate on purpose. What separates them is what the
+  # user asks to understand, not what the tree contains: this case asks about behaviour the
+  # tree settles, its pair asks about a rationale the tree does not record. Different
+  # substrates would turn the pair's question into "is a file missing" rather than "does the
+  # protocol notice it has no ground".
+  scaffold_script: ../scaffold-grasp.sh
