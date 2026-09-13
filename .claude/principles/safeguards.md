@@ -1,12 +1,8 @@
 # Safeguards
 
-Principles that become LESS important as models improve; temporary guards against current model limitations.
-
-Safeguard-tier principles are revisitable as model capability evolves — their operational force diminishes with empirical evidence of reduced need. Demotion from higher tiers is a legitimate outcome when empirical trajectory diverges from the tier's definitional criterion.
-
-**Actionable revision criterion**: Safeguard-tier status is not a passive label but an operational commitment to revisit guards as evidence accumulates. Full text of the three revision triggers and what happens when one fires: `premise/instruction-authoring.md` §Actionable Revision Criterion, whose second trigger runs the ablation method — with its bounded-trial, evidentiary-reach, probe, and recoverability conditions — stated in §Deletion by Default, Retention on Evidence immediately above it. This project's demonstrated precedent for the third trigger: the PR #270 XC1-XC4 compression showed guard reducibility across all 11 protocol SKILL.md Rules sections without outcome loss.
-
-**Compiled-copy consumers** (drift tracking): The Actionable revision criterion above is inlined into protocol SKILL.md `## Rules` sections under the Safeguard tier annotation per Plugin Encapsulation (no path reference is permitted in SKILL.md). When this criterion changes, audit `## Rules` sections of each protocol for `(Safeguard tier — revisitable as model capability evolves; revision triggers: ...)` formulations and refresh them to match. Current consumers: recover via `rg -l 'revisitable as' */skills/*/SKILL.md`. The abbreviated form (e.g., `revisitable as instruction-following improves`) is the current norm across protocol SKILL.md Rules sections.
+- When revisiting a guard, read `premise/instruction-authoring.md` §Actionable Revision Criterion and §Deletion by Default, Retention on Evidence. Apply the trial's evidence only within the readers and conditions exercised.
+- When a model changes, treat the change as a reason to re-evaluate relevant guards rather than as evidence of a predetermined trajectory.
+- When this criterion changes, search protocol `SKILL.md` Rules with `rg 'revisitable as|revision triggers' */skills/*/SKILL.md` and align any compiled restatements. A search with no matches establishes no current compiled consumer.
 
 ## Literature Application Discipline
 
@@ -40,7 +36,7 @@ Methodology for SKILL.md `## Rules` consolidation. Each rule is classified by so
 | Tier | Source | Action |
 |---|---|---|
 | 1. Axiom anchor | A1-A6 (in `premise/`) | KEEP. 1-2 line restatement with axiom name inline; do NOT use the `(Aₙ)` label form per Plugin Encapsulation source-leak prohibition |
-| 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation) | KEEP. Anchor reference using principle name |
+| 2. Derived anchor | Derived principles (Convergence Evidence, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation) | KEEP. Anchor reference using principle name |
 | 3. Architectural project-specific | Architectural principles or protocol Core Principle | KEEP. Paragraph-length rules migrate body to Phase prose or UX Safeguards table; invariant 1-line stays in Rules |
 | 4. Cross-protocol | Rule about distinction with another protocol | Move to "Distinction from Other Protocols" section |
 | 5. Safeguard tier | This file's principles or Trajectory Candidates table match | Mark Safeguard tier explicitly + inline the Actionable revision criterion (Compiled-copy consumers pattern) |
@@ -82,16 +78,9 @@ This framework is the *classification methodology* for `## Rules` consolidation 
 
 ## Adversarial Anticipation
 
-Full text — rationalization paths a protocol must anticipate (premature convergence assertion, silent detection dismissal, skipping a gate interaction, collapsing a constitutive gate to acknowledgment, and the gate mutation taxonomy) plus guard consistency: `premise/gate-design.md`.
-
-**Tier note**: Classified as Safeguard per audit-2026-04-11 #241 resolution. The original Axiom-tier classification rested on the claim that Adversarial Anticipation becomes MORE important as models improve. Empirical counter-evidence: PR #270 (merged 2026-04-18, commit `26da87e` on `main`) compressed adversarial scaffolding across all 11 protocol SKILL.md Rules sections under the Opus 4.7 instruction-following premise, net −14 content lines with zero new verify warnings. The aggregate compression demonstrates the inverse trajectory (becomes LESS important with improved instruction-following). The self-referential falsifiability concern (audit Rank 5: guard-list inflation as pseudo-refutation) is resolved by honest tier reclassification rather than by adding more guards. This PR (#273) performs only the tier reclassification — the 11-protocol compression was completed in PR #270 independently.
+- When reviewing a contract for shortcuts or guard contradictions, apply `premise/gate-design.md` §Adversarial Anticipation and §Gate Integrity. A clean static check alone does not demonstrate an execution safeguard's dispensability.
 
 ## White Bear Avoidance
 
-General principle (the base-rate condition for stating a prohibition, the ironic-process rationale, the forms it distinguishes — prohibition framing, superseded-path mention, negated anchoring — the placement distinction between runtime motivating prose and diagnostic substrate, and the rewrite test): `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
-
-**This project's grounding observation** (the evidence behind the prohibition form's strongest-evidenced status recorded in the Tier note below): pattern observed across multiple LLM-facing updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs. The general rule travels; this instance stays because it names this repository's own Output Style surface.
-
-**Empirical scope**: applies to LLM-facing instructions only (contributor-facing documentation exempt). The prohibition form is grounded in output-format instructions (markdown emission, structural rendering, list formatting), with generalization to other instruction types — notably turn-yield behavior at gate interactions — remaining a theoretical extension; the superseded-path and negated-anchoring forms are heuristic extensions of the same functional concern (unnecessary competing-target mention), carried by option-availability reasoning and accumulated editing practice respectively. The application axis is *attractor vs discriminant boundary* (derived from Recognition over Recall's differential-future property, `premise/recognition-and-authority.md`, plus Interaction Kind Factorization's entropy axis, `premise/interaction-factorization.md`): commission-detectable in produced output → apply avoidance; omission-detectable at a decision-point cue only → preserve the mention (removing it erases the calibration signal that distinguishes a gated path from an auto-resolved one).
-
-**Tier note**: cascaded from A7 (Adversarial Anticipation) reclassification per audit-2026-04-11 #241 — sibling complement to Zero-Shot Instruction Preference on the *unnecessary-mention* axis (Zero-Shot operates on the *example* axis; the prohibition form remains this principle's strongest-evidenced instance). The principle statement's empirical grounding confirms operational force at the Safeguard tier; the trajectory reads per-form — the prohibition form decays as models handle negative formulations more robustly, the mention forms decay with instruction-following and attention robustness — with the overall direction unchanged (becomes LESS important as models improve).
+- When rewriting a prohibition or competing-target mention, apply `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance. Preserve the diagnostic cue or decision boundary the mention independently carries.
+- For Output Style wording, inspect the applicable emission or omission failure under the actual rendering contract. A result about output formatting does not by itself establish turn-yield behavior, and a human mechanism does not establish an LLM mechanism.

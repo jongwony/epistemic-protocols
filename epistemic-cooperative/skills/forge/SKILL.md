@@ -125,7 +125,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 3. **Prompt-artifact endpoint** (Architectural — handoff specificity): every adapter's projection endpoint is a `PromptArtifact` — a prompt-family payload (an initial prompt for a follow-up session or tool, or a standing custom-skill recipe). This is a unifying role, not a shared output type; the real per-adapter forms remain those in the Adapter Index "PromptArtifact form" column.
 4. **Reference grounding required** (Axiom anchor — Detection with Authority): every projection grounds against a fetched reference with cited provenance. A projection without a grounded, provenance-tagged reference is not a forge output.
 5. **Recognition over Recall** (Axiom anchor — Recognition over Recall): forge emits a filled draft, not a blank question list. Relay slots are auto-filled with cited basis; constitution slots carry a proposed default explicitly flagged so the user recognizes and adjusts rather than recalls from blank.
-6. **Surfacing over Deciding** (Derived — Surfacing over Deciding): constitution slots are surfaced with their proposed defaults flagged; forge does not silently finalize a slot that requires the user's judgment. A blind full draft that hides which slots were guessed is an anti-pattern.
+6. **Expose unresolved judgment** (Axiom anchor — Detection with Authority): constitution slots are surfaced with their proposed defaults flagged; forge does not silently finalize a slot that requires the user's judgment. A blind full draft that hides which slots were guessed is an anti-pattern.
 8. **Staleness guard** (Architectural — provenance continuity): reference evidence is staleness-guarded and tagged `web:{url}` or `file:{path}` depending on the canonical-source substrate. If staleness cannot be verified, fall back to the curated seed and mark the draft `stale-guide`; never present a stale reference silently.
 9. **Adapter accumulation, not top-down** (Architectural — empirical restraint): adapters are added per real use as accumulated prior. The Adapter Index above is the authoritative list of currently-shipped adapters; do not build a multi-reference framework ahead of use.
 10. **Formation, not execution** (Architectural — role boundary): `/forge` does not run the downstream tool, create branches, or open PRs. It emits the prompt artifact and stops.
@@ -136,7 +136,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 
 The cross-adapter abstraction — "reference-grounded prompt-artifact formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
 
-Trigger to extract the meta-pattern: a built first-reference instance plus accumulated prior from real use of a second instance, per the epistemic cost asymmetry (an unused abstraction costs more than a missing one) and instance-first methodology. Naming it before that is the over-generalization the methodology refuses.
+Trigger to extract the meta-pattern: a built first-reference instance plus accumulated prior from real use of a second instance. Derive the shared obligations from those uses before extracting the abstraction.
 
 Candidate adapters (not yet realized — list only, do not build ahead of use):
 

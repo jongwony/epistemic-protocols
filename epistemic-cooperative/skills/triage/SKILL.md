@@ -194,9 +194,9 @@ The receiving session starts from that locator, dereferences the record with its
 8. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
 9. **Session route authority** (Axiom anchor — Detection with Authority): Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
 10. **Externalized record is the handoff artifact** (Architectural — handoff specificity): A receiving session starts from a locator pointing at the externalized `WorkUnitRecord` — never a raw issue list, and never a session-local unit that was never written to substrate: every unit that crosses the session boundary goes through the Phase 7 externalize-then-point path.
-11. **No silent grouping** (Derived — Surfacing over Deciding): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
+11. **No silent grouping** (Axiom anchor — Detection with Authority): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
 12. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and composed handoff cites the source issue numbers that contributed to it.
-13. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
+13. **Blocked work stays visible** (Axiom anchor — Detection with Authority): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
 14. **Pointer, not a second copy** (Architectural — externalization boundary): `/triage` forms and routes focused work units and externalizes each routed unit to a `WorkUnitRecord`; the handoff is a navigation block over that record, not a re-authored restatement of its contents. A second copy is not coupled by any enforcement channel to the record it describes, so it can silently disagree with it — the pointer removes that failure class rather than auditing for it.
 
 ## Boundary Note

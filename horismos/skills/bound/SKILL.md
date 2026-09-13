@@ -1,359 +1,284 @@
 ---
 name: bound
-description: "Define epistemic boundaries per decision. Fires when a decision's direction, scope, type, or ownership is undefined. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary"
+description: "Define epistemic boundaries from a provisional whole map, opening decisions to the depth needed for delegation. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary"
 ---
 
 # Horismos Protocol
 
-Define epistemic boundaries per decision through AI-guided classification. Type: `(BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary`.
+Define epistemic boundaries through a recognizable whole map and progressive examination. Type: `(BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary`.
 
 ## Definition
 
-**Horismos** (ὁρισμός): A dialogical act of proactively defining epistemic boundaries per decision, where AI probes for boundary-undefined domains, dispatches the boundary **kind** up-front (a KindRouteMap of recognition seeds — direction/priority, scope, type/concept, ownership — plus an emergent/naming path) through a fail-closed deficit-fit certificate, collects contextual evidence to enrich classification quality, and presents each domain for user classification by a **uniform settlement disposition** (user-supplies / AI-proposes / AI-autonomous / dismiss) into a BoundaryMap consumed by all downstream protocols. The disposition coproduct is the same for every kind — the captured kind sets WHAT boundary is being settled, the disposition sets HOW that boundary value is settled downstream. **Ownership** is one kind among the seeds (who decides), and it is the *degenerate* case where the boundary value being settled is itself the disposition — so for ownership, content and disposition coincide; for every other kind they separate cleanly.
+- **Horismos** (ὁρισμός) takes a task whose boundary is undefined, including one whose decision structure or sufficient depth of examination is not yet recognizable, and produces a source-grounded boundary with its unresolved remainder.
+- Before asking the user what to settle or entrust, construct the relevant whole provisional map of decisions, obligations, assumptions, and dependencies. A settled goal and a user-supplied inventory are not prerequisites. Bound this whole to the current context and show what remains unknown.
+- Let the user open any axis, see the concrete content and consequences needed to judge it, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
+- Keep the boundary question distinct from its settlement disposition and from the content of the decision. For ownership, the disposition assigns the named decision directly; an allocation question is a separate domain only when the source makes allocation itself the subject.
 
 ```
 ── FLOW ──
-Horismos(T, B_prior?) → Probe(T) → Bᵢ? →
-  |Bᵢ| = 0: Qc(zero_signal_finding) → Stop → [Confirm: deactivate | Reopen(d): Bᵢ := {d}, proceed]      -- zero-signal gate (`Zero-signal surfacing`)
-  |Bᵢ| > 0: Phase 0b sync_kind_route(T) → KindRouteMap →                                            -- up-front KIND dispatch (dispatch-first: kind settles before downstream consumers read it)
-    [single_dominant_kind(KindRouteMap, T, context): relay(captured_kind + basis) (extension) → proceed (kind committed)   -- entropy→0 fast-path (option-set relay test): one kind dominates, foils route away → NO turn yield
-     | else: Stop → captured_kind (constitution)]                                                   -- ≥2 viable hypotheses ∨ undecidable foil ∨ emergent gesture naming no single kind ∨ live ground leaves the emergent question undetermined → mandatory Constitution gate
-    bind_kind(captured_kind) → KindBinding                                                           -- {label, positive_predicate, evidence, atomicity}; non-atomic → split/route, re-sync before continuing
-    certify(KindBinding, local_claims) → DeficitFitCertificate                                         -- fail-closed: status(certificate) ≠ pass BLOCKS value-space binding (split / route claim / narrow-disambiguation first)
-      status(certificate) = route:      → route_away(routed_deficit) → deactivate (a local route claim holds the kind; no DefinedBoundary)
-      KindBinding.atomicity = non-atomic: → split → re-sync Phase 0b → re-certify
-      status(certificate) = ambiguous:  → Qa(captured_kind, claims_supported) → Stop → Attribution → attribute — Own: status re-reads as pass → bind_value_space; Route(d): route_away(d) → deactivate; Unattributable: deactivate (unattributable) with a relay of the finding; no DefinedBoundary
-      status(certificate) = pass:       → bind_value_space → BoundaryClassification                                  -- the uniform settlement-disposition coproduct, generated ONLY after certificate passes (same codomain for every kind; captured kind sets each option's content, not the coproduct)
-    init_loop_state: cycle_n=1, BoundaryEssence="", B = seed_if_kind_match(B_prior, captured_kind), B_seed = Bᵢ (seed only when kind(B_prior) = captured_kind; kind-mismatched prior map → advisory, NOT seeded — see seed_if_kind_match; B_seed carries the Phase 0 domain signal — incl. the zero-signal Reopen(d) seed {d} — as unclassified cycle-1 anchor candidates (non-anchored remainder residualizes at the Phase 1 residualize), never unioned into the classified map B), default=DefaultClassification(MixedTrend), EssenceTrend(history, cycle_n)=MixedTrend at init since cycle_n < 2 (kind-general — the per-cycle disposition-trend machinery runs for every kind), loop:
-    Phase 1 Ctx(T, cycle_n) [per-cycle re-scan] → (Sub-D[cycle_n], auto_resolved?) →
-      Sub-D empty ∧ residual ≠ ∅: → Phase 4 (substrate exhausted, residual remains)
-      Sub-D empty ∧ residual = ∅: → TERMINAL CARRIERS (Phase 1 row) → DefinedBoundary → converge (substrate exhausted, all surfaced domains classified — no empty Phase 4 gate)
-      auto_resolved: → Phase 3 (skip Phase 2 for this cycle; no user A — the substrate-settled classification is carried into Phase 3)
-      else:          → Phase 2
-    Phase 2 Qc(Sub-D[cycle_n], kind, BoundaryClassification, BoundaryEssence, cycle_n, B_snapshot, default) → Stop → A
-    Phase 3 (user-response: conservative parse(A) → (typed_A?, TerminationIntent?) — a commitment is recognized only when the whole response's decision-relevant meaning supports that reading; otherwise Phase 2 re-presents from A with the map unmutated; auto-resolved: typed_A = substrate-settled classification, no TerminationIntent) →
-      integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)                                      -- total current-cycle fold: classification updates the anchor; termination-only residualizes it and returns B' = B with the empty delta
-      crystallize(Δessence, BoundaryEssence) → BoundaryEssence'                                      -- sole producer of the accumulated essence; the empty delta is the identity
-      refresh B'-snapshot with the current default_for_residual                                       -- BEFORE the branch below, on EVERY fold including a terminating one: a just-residualized anchor gets its provisional entry here, so every route below reads a complete map
-      ImplicitTermination: → TERMINAL CARRIERS (Phase 3 row) → DefinedBoundary → converge
-                            -- "default" is Λ.default_for_residual at entry to Phase 3 (the value Phase 2 surfaced); NOT re-derived
-      ExplicitTermination: → Phase 4
-      else:                → DefaultClassification(EssenceTrend(history', cycle_n)) → default' for NEXT cycle (kind-general; count-only over the uniform disposition) → re-snapshot with default' → cycle_n += 1, loop
-  Phase 4 (optional path) Qf(residual, FinalGateDisposition) → Stop → TERMINAL CARRIERS (Phase 4 row) → DefinedBoundary
+Horismos(T, B_prior?) → Probe(T, context) → B_provisional → boundary_readout → present provisional whole →
+  no undefined boundary: Qc(zero_signal_finding) → Stop → ZeroSignalConfirmation →
+    Confirm: deactivate; Reopen(utterance): rebuild from that ground → dispatch
+  undefined boundary: dispatch
+  Phase 0b: sync_kind_route(B_provisional, T, context) → KindRouteMap →
+    single_dominant_kind: relay(captured_kind + basis) → bind_kind
+    otherwise: Qs(KindRouteMap) → Stop → KindAnswer → bind_kind
+    non-atomic: split the boundary questions → re-sync
+    atomic: certify(KindBinding, local_claims) → DeficitFitCertificate →
+      route: route_away → deactivate
+      ambiguous: Qa(kind, supported claims) → Stop → Attribution → attribute →
+        Own: init; Route(d): route_away → deactivate; Unattributable: relay finding → deactivate
+      pass: init
+  Phase 1: enrich the whole map and requested focus → enriched candidate map → reconcile → update B →
+    already_settled: final_readout → DefinedBoundary → converge
+    otherwise: Phase 2 boundary_readout(B, kind, focus, context) → BoundaryEssence → Qs → Stop → A
+  Phase 3: read the whole utterance → (RoundAnswer?, viable futures) →
+    ambiguous handling: Qc(live readings and consequences) → Stop → confirmed_intent ∈ J
+    no recognized answer: preserve B and the whole utterance → Phase 2 readout
+    recognized Withdraw: reconcile current-kind effects, preserve the correction and unresolved remainder → deactivate
+    active answer changing the boundary question: retain requested focus → Phase 0b
+    otherwise, for a recognized answer, integrate grounded changes; reconcile affected entries →
+      Continue: Phase 1 with the requested focus or correction
+      Finish and completion_ready: final_readout → DefinedBoundary → converge
+      Finish and further judgment required by the response or changed ground: Phase 1
+  A changed-kind re-entry preserves the unserved examination request before further settlement; withdrawal opens no new round.
 
 ── MORPHISM ──
 TaskScope, B_prior?
-  → probe(task, context)                                           -- detect boundary-undefined domains
-  → sync_kind_route(task, context) → KindRouteMap                  -- up-front dispatch: one hypothesis for every recognition seed (direction/priority, scope, type/concept, ownership) + emergent/naming path; each seed hypothesis carries positive_predicate, evidence, differential_future, route_away conditions
-  → [single_dominant_kind: relay(captured_kind) (extension) | else: present(KindRouteMap) (constitution)]  -- option-set relay test over the kind hypotheses AND the live ground: one dominant kind (entropy→0) relays without a turn yield — either a seed (positive_predicate satisfied, foils' route_away hold, no emergent indicated) or an emergent kind the user's own wording already names unambiguously; ≥2 viable ∨ undecidable foil ∨ an emergent gesture naming no single kind ∨ an emergent question the live ground leaves undetermined gates. BOTH branches feed bind_kind → certify → bind_value_space (certificate fail-closed on both)
-  → bind_kind(captured_kind) → KindBinding                         -- {label, positive_predicate, evidence, atomicity}; non-atomic kind → split or route before continuing
-  → certify(KindBinding, local_claims) → DeficitFitCertificate         -- {own_claim, route_claims[], claimed_by, evidence}; fail-closed — status(certificate) ≠ pass BLOCKS bind_value_space; fits the captured kind's positive_predicate against the own claim and the route claims inscribed in THIS SKILL.md
-  → bind_value_space → BoundaryClassification                     -- the uniform settlement disposition {UserSupplies, AIPropose, AIAutonomous, Dismiss}, generated ONLY after certificate passes; same codomain for every kind (kind sets each option's content); relay / dead-signal test applied; frozen for the activation
-  → seed(B_prior, B)                                               -- hermeneutic carry-over at Phase 0b step 4 (AFTER bind_value_space + B init): optional prior BoundaryMap seeds the freshly-initialized B ONLY when kind(B_prior) = captured_kind (same-kind — its dispositions were settled over the SAME boundary question). Values are always type-compatible now (every kind shares BoundaryClassification), so the guard is SEMANTIC: a kind-mismatched prior answers a DIFFERENT boundary question (e.g. an ownership prior's "AIAutonomous" decided who-owns, not how-wide a scope is) and is surfaced as advisory context, NOT seeded. Seeded domains enter `context_resolved` partition with "prior classification" basis (entries mutable in subsequent cycles). Phase 0 only DETECTS B_prior (binds Λ.B_prior together with its kind); it does not seed B, which does not exist until loop-state init
-  → enrich(domains, codebase, cycle_n)                             -- per-cycle context collection (re-scan)
-  → classify(domain, as_inquiry) → typed_A ∈ BoundaryClassification               -- per-cycle object_ref(kind) classification by the uniform settlement disposition (the captured kind sets the content of each disposition option; the 4-value coproduct itself is kind-invariant)
-  → integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)       -- total current-cycle fold; does NOT update default_for_residual
-  → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'      -- sole producer of the accumulated essence; the empty delta is the identity
-  → snapshot(B', residual, default_for_residual) → B_complete'     -- refreshed after EVERY fold, termination included, and BEFORE any terminal route below: this is what gives a just-residualized anchor its provisional entry — classified entries ∪ (residual ↦ default_for_residual), at the value Phase 2 surfaced
-  → DefaultClassification(EssenceTrend(history', cycle_n)) → default'                      -- count-based EssenceTrend → DefaultClassification for NEXT cycle's residual (runs on loop continuation ONLY; count-only over the uniform disposition, so the derivation is kind-general — it reads disposition counts, never kind-specific content)
-  → snapshot(B', residual, default') → B_complete''                -- continuation only: supersedes B_complete' for the cycle about to open
-  → [finalize | bulk_classify | identity] → Λ.boundary_map         -- terminal operation selected by the reachable convergence path; source, write, and final value are defined once in TERMINAL CARRIERS
+  → Probe(T, context) → present_provisional_whole
+  → capture_boundary_question → certify_local_fit
+  → ground_current_arrangement
+  → make_whole_and_focus_recognizable
+  → user_examination_and_settlement ↺ affected_revision
+  → sufficient_boundary_with_declared_remainder
   → DefinedBoundary
-requires: boundary_undefined(T)            -- runtime checkpoint (Phase 0); sole activation precondition. (status(certificate) = pass is the Phase-0b value-space-BINDING gate, NOT an activation precondition — it lives in the certificate-before-binding invariant below and the Phase 0b → Phase 1 transition; route/ambiguous status routes/re-syncs inside Phase 0b rather than blocking activation.)
-deficit:  BoundaryUndefined                -- activation precondition (Layer 1/2); the certificate's own_claim deficit for in-scope kinds
-preserves: task_identity(T)                -- task scope invariant; BoundaryMap and BoundaryEssence mutated; B_prior seed entries are mutable across cycles
+requires: boundary_undefined(T)
+deficit: BoundaryUndefined
+preserves: task_identity(T)                         -- the purpose and limits actually supplied, including their open coordinates and authorized revisions
 invariant: Definition over Assumption
-invariant: certificate-before-binding      -- status(certificate) = pass strictly precedes bind_value_space (shared meta-backbone order)
+invariant: certificate-before-settlement            -- a passing local fit precedes map settlement; provisional discovery supplies no authority
+invariant: proposal-and-settlement-separation       -- presence, inspection, and work allocation supply no boundary-setting act
 
 ── TYPES ──
-T              = TaskScope (task/project requiring boundary definition)
-B_prior        = Optional(SeededPrior)                        -- optional invocation seed for hermeneutic carry-over (prior BoundaryMap detected in session context). Seeded into B at Phase 0b step 4 ONLY when the prior map's kind matches the captured kind (same-kind — same boundary question). The guard is SEMANTIC, not type-based: every kind shares BoundaryClassification, so a mismatched prior's values are type-valid but answer a DIFFERENT boundary question, so a kind-mismatched prior map is surfaced as advisory context, NOT seeded as a structural entry. Seed entries are mutable across cycles
-SeededPrior    = { map: BoundaryMap, kind: Kind }             -- the prior BoundaryMap together with the boundary kind it was produced over (Phase 0 step 3 detection binds both). The carried kind is the typed carrier the same-kind guard tests: kind(B_prior) ≡ B_prior.kind
-seed_if_kind_match : (Optional(SeededPrior), Kind) → BoundaryMap  -- seeds the prior map ONLY when B_prior.kind = captured_kind (returns B_prior.map); a kind-mismatched prior (B_prior.kind ≠ captured_kind) or B_prior = ⊥ returns ∅ (a mismatched prior is surfaced as advisory, not seeded)
-Probe          = T → Set(Domain)                              -- boundary-undefined domain detection (Phase 0; existence check, not exhaustive enumeration)
-Domain         = { name: String, description: String, evidence: Set(Evidence) }
-Evidence       = { source: String, content: String }
-Bᵢ             = Set(Domain) from Probe(T)                    -- initial boundary-undefined domain signal (cycle 1 seed: formally carried into Phase 0b loop-state init as Λ.B_seed = Bᵢ, kept separate from the classified map B until classification — on zero-signal Reopen(d), Bᵢ = {d} is the one entry the Phase 1 re-scan cannot be assumed to re-derive)
-ZeroSignalConfirmation = user's answer to a zero-signal finding ∈ {Confirm, Reopen(Domain)}  -- Confirm accepts no boundary-undefined signal (`Zero-signal surfacing`); Reopen names a domain Probe(T) missed, seeding it into Bᵢ and proceeding
+T = TaskScope                                      -- the task or concern needing a boundary; its goal, structure, scope, and desired examination depth may remain open
+Evidence = { source: String, content: String }      -- reachable record or artifact, with the decision-bearing wording where that wording determines meaning
+Domain = String                                    -- stable identity for a decision, obligation, premise, or unresolved question; runtime-grounded, not a fixed taxonomy
+BoundaryMap = Map(Domain, BoundaryEntry)
+BoundaryEntry = { question: String, relevance: String, evidence: Set(Evidence),
+                  depends_on: Set(Domain), applicability: String,
+                  content: Optional(DecisionContent),
+                  proposal: Optional(Settlement), settled: Optional(Settlement),
+                  remainder: String }
+                 -- relevance says why the item bears on this boundary; applicability states its current or conditional reach.
+                 -- depends_on names entries whose change may alter this one; unknown prerequisites are entries, not fabricated answers.
+                 -- remainder states what is still open, why it is left open, and what must happen before dependent work can rely on it; explicitly empty when none.
+DecisionContent = { account: String, evidence: Set(Evidence), setting: Optional(Set(Evidence)) }
+                 -- setting identifies the act that settled this content and any grant it exercised. With no setting the content is tentative, even when its author is authorized to propose it.
+Settlement = { disposition: BoundaryClassification, question: String, limits: String, source: Set(Evidence) }
+                 -- in proposal this is a suggested arrangement; in settled its source records the actual determining instruction, accepting response, or authorized choice.
+BoundaryClassification = UserSupplies | AIPropose | AIAutonomous
+                 -- UserSupplies: the source's retained judgment holder supplies the value.
+                 -- AIPropose: AI develops candidates; selection remains with that holder.
+                 -- AIAutonomous: AI chooses within the source-defined limits, including among viable alternatives.
+                 -- These forms concern the named boundary question. For ownership they assign that decision directly; for another kind they assign settlement of that boundary value.
+                 -- A request to use a displayed default accepts the actual proposal it denotes. A legacy Dismiss entry is read through its setting source to that disposition; the label alone supplies none.
+B = Λ.boundary_map                                 -- the sole current map, including settled entries, proposals, and open structure; a readout is not another store
+B_prior = Optional(SeededPrior)                     -- the applicable prior bound at entry or re-entry; earlier setting records remain reachable in context
+SeededPrior = { map: BoundaryMap, kind: Kind, record: Set(Evidence) }
+                 -- a prior result with its setting record. A legacy disposition map is reconstructed from that record before being read as BoundaryEntries.
+Probe : (TaskScope, context) → BoundaryMap           -- construct the relevant whole provisional structure; discovery and evidence collection do not constitute its proposals
+B_provisional = Probe(T, context)                   -- the actual presented provisional map, recoverable from its conversation record across kind capture; initialization reads that map with later authorized corrections
+ZeroSignalConfirmation = Confirm | Reopen(utterance: String)
 
--- Shared meta-backbone (KIND dispatch). One canonical schema; bound-local instantiation ONLY for object_ref, local_value_space, the label field's type (Kind), the own claim, and the local route claims.
-KindRouteMap   = sync_kind_route : (T, context) → { hypotheses: List<KindHypothesis>, emergent: NamingPath }
-                                                              -- up-front dispatch sync surfaced at Phase 0b; hypotheses contains one carrier for every recognition seed (direction/priority, scope, type/concept, ownership), while the emergent/naming path keeps the kind open beyond those priors
+Kind = the boundary question captured from live ground; direction/priority, scope, type/concept, and ownership are recognition seeds, with emergent kinds remaining open
 KindHypothesis = { label: Kind, positive_predicate: String, evidence: Set(Evidence), differential_future: String, route_away_if: String }
-                                                              -- each named kind is a PRIOR (recognition seed), NOT a closed coproduct member (`Dynamic rendering`: no fixed taxonomy)
-NamingPath     = free-response affordance for a kind not among the seeds (emergent capture; user names the kind, or extends/replaces a seed)
-single_dominant_kind : (KindRouteMap, T, context) → Bool      -- option-set relay test (entropy→0 predicate): true iff the live ground determines EXACTLY ONE kind, by either route — (a) SEED: exactly one hypothesis has its positive_predicate unambiguously satisfied by the framing, every other hypothesis' route_away_if holds, and (T, context) indicates no emergent capture; or (b) EMERGENT: (T, context) names exactly one emergent kind unambiguously, which IS the capture — the naming already happened in the user's own words, so gating it would ask for a value the live ground has settled. The seed conjuncts read KindRouteMap, which carries every recognition seed; the emergent conjunct turns on what the framing DENOTES, so it resolves against (T, context) — the user's own wording and the accumulated context — and the seed summary never stands in for it, because a summary cannot carry a branch whose decision rests on an unresolved denotation. An undecidable route_away_if, an emergent gesture resolving to no single naming, OR an emergent question (T, context) leaves undetermined makes the predicate false. true ⟹ the dispatch sync RELAYS the captured kind without a turn yield (Phase 0b sync_kind_route_relay, extension), citing its basis in the user's own wording — verbatim on route (b), where that wording IS the capture and a paraphrase would substitute the AI's reading for it; false ⟹ the mandatory Constitution gate fires (≥2 viable kind hypotheses, an undecidable foil, an emergent gesture naming no single kind, or an emergent question the live ground leaves undetermined). The captured kind still flows through bind_kind → fail-closed certify → bind_value_space on BOTH branches — the relay collapses only the kind-capture turn yield, NEVER the certificate (a non-pass certificate gets the full gated treatment — route → route_away/deactivate, ambiguous → re-sync the gate)
-Kind           = captured boundary kind (seed ∈ {direction/priority, scope, type/concept, ownership} | emergent)
-                 -- object_ref(kind) : the anchor the loop classifies (= Domain for bound, every kind; bound-local instantiation point — the kind sets WHAT the Domain's boundary is about, not the anchor type)
-KindBinding    = { label: Kind, positive_predicate: String, evidence: Set(Evidence), atomicity ∈ {atomic, non-atomic} }
-                 -- captures the kind; if atomicity = non-atomic → split or route BEFORE certify (no value-space binding on a compound kind)
-Deficit        = a deficit label a kind may be claimed by — bound's own BoundaryUndefined, or one of the sibling deficits named in the route claims below. Every label this certificate can assign is inscribed in THIS SKILL.md; nothing outside this file supplies one
-OwnClaim       = { deficit: BoundaryUndefined, resolution: DefinedBoundary, in_scope_if: String }
-                 -- the claim bound makes, stated as the WHOLE local morphism: the deficit it takes AND the resolution it produces. A kind is claimed here when its positive_predicate instantiates BoundaryUndefined AND the local value-space can carry it to DefinedBoundary — the bare deficit label is a name, the morphism is the predicate
-DeficitFitCertificate = { own_claim: OwnClaim, route_claims: List<RouteClaim>, claimed_by: Set(Deficit), evidence: Set(Evidence), attribution_by ∈ {certificate, user} }
-                 -- attribution_by records WHO SETTLED claimed_by: `certificate` where the fit alone settled it, `user` where the fit was ambiguous and the user's Attribution at Qa rewrote claimed_by. Written by attribute and nowhere else; read by the converge trace and the route / unattributable relays
-                 -- fail-closed: status(c) ≠ pass BLOCKS bind_value_space. Generated by fitting KindBinding.positive_predicate against own_claim and every route_claim inscribed below — the certificate reads nothing outside this SKILL.md
-                 -- claimed_by collects every claim the evidence supports; a SET, so "no claim holds" is the value ∅ rather than a hole in the type
-status(c)      = pass if c.claimed_by = {BoundaryUndefined}; route if c.claimed_by = {d} with d a route_claim's routed_deficit; ambiguous otherwise
-                 -- read off claimed_by rather than stored beside it, so no field can drift from the claim set it is determined by
-                 -- pass: the own claim holds alone → bind_value_space
-                 -- route: a single route_claim's routed_deficit d holds → emit d as the typed handoff, deactivate (kind is out-of-scope for bound)
-                 -- ambiguous: |claimed_by| ≠ 1 — several claims hold, or none holds on the evidence at hand → Qa, the one-turn disambiguation TYPED: the kind is put to the user with the claims its evidence supports, and their Attribution settles it — Own (status re-reads as pass → bind_value_space), Route(d) (route_away → deactivate), or Unattributable (deactivate with a relay of the finding; no DefinedBoundary). Never silently bind under ambiguity, and never re-sync on ambiguity alone: re-certifying unchanged ground can land ambiguous again with no terminal, so the user's attribution is what gives this arm one. Which arm is read at that turn from the user's wording, never fixed here
-                 -- what a pass certifies is LOCAL ADMISSIBILITY: bound's own gate governing bound's own activation, not the absence of a claim anywhere in the wider protocol set. Where two protocols' scopes both reach a situation, each protocol's own gate governs
-RouteClaim     = (route_if_predicate: String, routed_deficit: Deficit)
-                 -- bound-local route claims — the sibling deficits a boundary-misfit kind is handed to. routed_deficit is the BINDING field; the command in parentheses is a non-binding hint for the user, not the relation this guard composes on:
-                 --   missing pre-execution fact            → ContextInsufficient       (hint: /inquire)
-                 --   framework absent for the decision      → FrameworkAbsent           (hint: /frame)
-                 --   cross-domain mapping uncertain         → MappingUncertain          (hint: /ground)
-                 --   direction candidates' futures unrecognizable from description → DirectionUnrecognizable  (hint: /preview)
-claims_supported(k) = { d ∈ {BoundaryUndefined} ∪ { rc.routed_deficit : rc ∈ route_claims } : the evidence supports d's predicate }   -- what Qa presents: the inscribed claims the captured kind's evidence supports, each with what attributing the kind to it would mean. Equal to claimed_by at the moment Qa fires; named separately because Qa also presents the case none of them holds
-Attribution    = Own | Route(routed_deficit: Deficit) | Unattributable   -- the user's answer at Qa. A CLOSED coproduct because each constructor is a distinct processing path: Own binds the value space like any kind the fit passed; Route(d) takes the route_away deactivation; Unattributable deactivates with a relay of the finding. Route's payload is the deficit the user named — one of the claims Qa presented, or one they name themselves, emitted bare where this file inscribes no hint for it
-attribute(k, a) = the step that writes the user's Attribution onto the certificate: Own → claimed_by := {BoundaryUndefined}; Route(d) → claimed_by := {d}; Unattributable → claimed_by := ∅ — and attribution_by := user on every arm. It rewrites the certificate rather than bypassing it so that every downstream reader of status(c) — bind_value_space, the invariants, the converge trace — reads the attributed value through the same function it always read. Runs on the far side of Qa's Stop, over Λ.certificate
-local_claims   = (OwnClaim, the RouteClaim list above)      -- what certify reads beside the KindBinding; every claim it can fit is inscribed in THIS SKILL.md
-V              = bind_value_space : Kind → ValueSpace         -- the kind is the DOMAIN (it selects each option's content), but the codomain is CONSTANT — bind_value_space returns the same coproduct for every kind; generated ONLY after status(certificate) = pass; frozen for the activation (relay / dead-signal test applied)
-ValueSpace     = BoundaryClassification                       -- the uniform settlement disposition (local_value_space; bound-local instantiation point); the same coproduct for every boundary kind — see BoundaryClassification below
-cycle_n        = Nat                                          -- current cycle counter (visible at Phase 2)
-                                                              -- bound index `k` ranges over `Λ.D_history` (the cycles that produced a Sub-D) in the convergence trace — NOT [1, cycle_n], since a substrate-exhaustion terminal scan increments cycle_n without producing a Sub-D
-Ctx            = (T, cycle_n) → Sub-D                         -- per-cycle context collection (re-scan)
-Sub-D          = { domain: Domain, scan_summary: String, evidence: Set(Evidence) }  -- per-cycle dimension projection (one anchor domain per cycle)
-                                                              -- Sub-D[k] = D_history[k] (k-th historical entry); current cycle = Sub-D[cycle_n]
-Δessence       = String                                       -- per-cycle boundary-essence delta; produced by `integrate` at Phase 3 step 2 (integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)); the termination-only fold produces the empty delta
-BoundaryEssence = String                                      -- accumulated boundary essence (crystallized form of the responsibility boundary space); initialized "" at Phase 0b loop-state init; updated as BoundaryEssence' = BoundaryEssence ⊕ Δessence at Phase 3 by `crystallize` (crystallize(Δessence, BoundaryEssence) → BoundaryEssence'), the sole producer of BoundaryEssence'
-EssenceTrend(history, cycle_n) ∈ {ExtensionTrend, ConstitutionTrend, MixedTrend}
-                                                              -- kind-general: the disposition trend reads only the COUNT distribution of classified dispositions across Λ.history — never kind-specific content — so it runs identically for every captured kind
-                                                              -- count-based ONLY; no textual-lean interpretation — keeps derivation deterministic and relay-eligible
-                                                              -- ExtensionTrend: count(AIPropose ∪ AIAutonomous) strictly dominant
-                                                              -- ConstitutionTrend: count(UserSupplies) strictly dominant
-                                                              -- MixedTrend: no strict dominance OR cycle_n < 2 (explicit single-cycle initialization rule — insufficient classification history to commit a non-fallback trend; cycle_n is an argument because the count rules read history while this clause reads the cycle)
-DefaultClassification : {ExtensionTrend, ConstitutionTrend, MixedTrend} → {AIAutonomous, UserSupplies} ⊆ BoundaryClassification
-                                                              -- kind-general per-cycle default re-derivation, applied to EssenceTrend(history', cycle_n) on loop continuation (reads disposition counts, kind-independent); DefaultClassification(MixedTrend) is the loop-state init value, since cycle_n < 2 there
-                                                              -- codomain restricted to the 2-value reachable subset (AIPropose and Dismiss are unreachable from this function)
-                                                              -- ExtensionTrend → AIAutonomous; ConstitutionTrend → UserSupplies; MixedTrend → AIAutonomous (Extension-default fallback)
-Qc             = Per-cycle boundary classification interaction [Tool: Constitution interaction]
-A              = the Phase 2 user response — an OPEN utterance, never a classification.
-                 -- parse(A) → (typed_A?, TerminationIntent?) is conservative whole-utterance recognition. A commitment may be returned only when every decision-relevant part of A is coherent with and represented by that reading. If any part reframes the anchor, names an emergent concern, shifts the axis, or undercuts the apparent commitment, parse returns no commitment and Phase 2 re-presents with that material drawn directly from A in the conversation record. No separate framing carrier is needed, and no decision-relevant material can disappear down a terminal path.
-                 -- Recognizing NO commitment (neither typed_A nor termination) is legitimate, not malformed: no map commitment exists yet. The map remains unchanged and the deliberative self-edge may stutter without an exhaustion bound; committing a disposition would exercise authority the user did not delegate.
-typed_A        = the cycle's classification ∈ BoundaryClassification         -- recognized within the user's response on a Phase 2 cycle, or read from the substrate assignment on an auto-resolved cycle (Phase 1 auto-resolve check); its origin is recoverable from which MODE STATE partition the anchor landed in (Λ.user_responded / Λ.dismissed vs Λ.context_resolved), so the convergence trace can cite it. Drawn from the uniform settlement disposition; the presented option set is exactly this 4-value coproduct, intact per gate integrity invariant (a termination-only response carries no typed_A and is NOT an option-set extension — `Free-response separation`)
-                 -- typed_A ∈ {UserSupplies(boundary), AIPropose(boundary), AIAutonomous(boundary), Dismiss} — the 4-value coproduct is kind-invariant; the captured kind sets what `boundary` refers to (who-decides for ownership, which-way for direction/priority, how-wide for scope, which-category for type/concept)
-                 -- termination_intent surfaces via free-response affordance, NOT as an extra option in BoundaryClassification
-TerminationIntent = parsed natural-language signal of user satisfaction
-                  ∈ {ImplicitTermination(default_override?), ExplicitTermination}
-                                                              -- ImplicitTermination: residual ↦ default_at_surfacing (the Λ.default_for_residual value visible in the just-completed Phase 2 surfacing; NOT re-derived in Phase 3) OR user-stated override; terminal provenance is defined in TERMINAL CARRIERS
-                                                              -- ExplicitTermination: enter Phase 4 for bulk residual classification
-                                                              -- default_override : BoundaryClassification — optional user-named alternative default (a member of the uniform settlement disposition) overriding the surfaced default
-B              = BoundaryMap: Map(object_ref(kind), BoundaryClassification)
-                 -- value type is the uniform settlement disposition BoundaryClassification — the SAME value type for every kind (the BoundaryMap value does NOT follow the kind; the kind sets only what content each entry's disposition is about)
-                 -- object_ref(kind) = Domain for bound, every kind (bound-local instantiation)
-                 -- Always-complete after each Phase 2 round: classified entries (per-cycle answers + auto-resolved) ∪ residual entries provisionally mapped to current default_for_residual
-                 -- Snapshot completeness makes ImplicitTermination AVAILABLE at any cycle; snapshots are recognition surfaces, while TERMINAL CARRIERS exclusively defines what convergence emits.
-BoundaryClassification = {UserSupplies(boundary), AIPropose(boundary), AIAutonomous(boundary), Dismiss}
-                 -- the UNIFORM settlement disposition (local_value_space): HOW the captured kind's boundary value is settled downstream — the SAME 4-value coproduct for every kind, used across Phase 2 (per-cycle) and Phase 4 (residual bulk)
-                 -- the OWNERSHIP kind is the degenerate case: there the boundary value being settled (who decides) IS the disposition, so disposition and content coincide — which is why this coproduct historically read as ownership-specific. For every other kind the disposition says HOW the boundary value gets settled while the kind says WHAT that value is about (direction/priority, scope, type/concept)
-                 -- UserSupplies semantic (kind-general): user retains settlement authority for this boundary; downstream gates present open questions; user supplies the boundary value (or invokes other protocols) at decision-point activation
-                 -- Dismiss is a COMMITTED no-boundary signal (proceed with the stated default), an on-axis disposition — not a skip; its differential future is "residual settled by default," distinct from the three active-settlement members
-Qf             = Final gate bulk classification interaction [Tool: Constitution interaction]
-FinalGateDisposition = {UserSupplies, AIAutonomous} ⊆ BoundaryClassification    -- the uniform residual-disposition subset surfaced at Phase 4, the same for every kind (the two settlement dispositions a bulk residual can take)
-                 -- Phase 4 UserSupplies (kind-general): bulk-classify residual domains as user-retained (each residual domain becomes its own boundary; lazy-binding — values or protocol invocation deferred to downstream activation)
-                 -- Phase 4 AIAutonomous (kind-general): bulk-classify residual as AI-settled (semantically equivalent to per-cycle AIAutonomous(boundary))
-DefinedBoundary = { map: Λ.boundary_map, kind: Λ.captured_kind } where one TERMINAL CARRIERS row completed ∧ BoundaryEssence finalized
-                 -- TERMINAL CARRIERS is the exclusive provenance definition for the result map. The kind pairing makes the map's boundary question recoverable by a later /bound seed guard and by downstream advisory consumers because object_ref(kind) = Domain does not encode the kind.
-Phase          ∈ {0, 0b, 1, 2, 3, 4}
+KindRouteMap = { hypotheses: List(KindHypothesis), emergent: NamingPath }
+sync_kind_route : (BoundaryMap, TaskScope, context) → KindRouteMap
+NamingPath = an affordance to name, extend, or replace the framing in the user's own words
+KindAnswer = the user's captured boundary question, including an emergent naming or a correction of the provisional framing
+KindBinding = { label: Kind, positive_predicate: String, evidence: Set(Evidence), atomicity: {atomic, non-atomic} }
+                 -- atomic means one boundary question, which may span many decisions and depths; a whole delegation question is not compound merely because its map has several axes.
+single_dominant_kind : (KindRouteMap, TaskScope, context) → Bool
+                 -- true only when citable live ground determines one boundary question: one seed holds with the other seeds' route-away conditions established and no emergent question left open, or the user's wording already names one emergent question unambiguously. Quote that naming verbatim on the emergent relay. AI preference and a vague gesture are not determining ground.
+Deficit = a label named by a local claim or the user's Route answer
+OwnClaim = { deficit: BoundaryUndefined, resolution: DefinedBoundary, in_scope_if: String }
+                 -- the whole local morphism: making the boundary question and its decision structure recognizable, then settling its scope and judgment ownership to sufficient depth with residue. A missing goal or unseen structure alone does not make this request a misfit.
+RouteClaim = { route_if_predicate: String, routed_deficit: Deficit }
+                 -- local alternatives when the requested resolution is instead:
+                 -- a missing pre-execution fact → ContextInsufficient (hint: /inquire)
+                 -- analytical lenses for an inquiry → FrameworkAbsent (hint: /frame)
+                 -- validity of a cross-domain mapping → MappingUncertain (hint: /ground)
+                 -- a contrast that must be instantiated before its direction is recognizable → DirectionUnrecognizable (hint: /preview)
+                 -- Evidence needed while defining a boundary does not itself change that boundary request into one of these resolutions.
+local_claims = (OwnClaim, the RouteClaims above)
+DeficitFitCertificate = { own_claim: OwnClaim, route_claims: List(RouteClaim), evidence: Set(Evidence), attribution: certificate(Set(Deficit)) | user(Attribution) }
+Attribution = Own | Route(routed_deficit: Deficit) | Unattributable
+status(c) = for certificate(S): pass when S = {BoundaryUndefined}, route when S is one local route claim, ambiguous otherwise
+          = for user(a): pass for Own, route for Route(d), ambiguous for Unattributable
+routed_deficit(c) = the sole local route label on certificate route status, or d on user(Route(d)); read only on route status
+attribute(a) = Λ.certificate.attribution := user(a)  -- preserve the control form even when d equals the own-claim label; unchanged ambiguous evidence is not re-certified
+
+BoundaryEssence = a readable account of the relevant whole map, its setting sources, provisional content, conditional dependencies, focused detail, and unresolved remainder
+boundary_readout : (BoundaryMap, Optional(Kind), Set(Domain), context) → BoundaryEssence
+                 -- With no captured kind, read the structure provisionally. Make the proposed scope and the implications of accepting it recognizable before asking. Render the whole overview even when focus is nonempty; expose details where they change the present judgment. Read current sources, not labels alone. This read does not mutate B.
+focus = Set(Domain)                                -- the user's outstanding examination request; empty for an overview only when none is pending. An unseen axis can be added from the utterance. Kind re-entry preserves the request and resolves its domains under the revised question.
+A = String                                         -- a complete user utterance; read a confirming response with the original utterance as context. Inspection, correction, acceptance, entrustment, deferral, and finish can coexist.
+RoundAnswer = Continue(utterance: A) | Finish(utterance: A) | Withdraw(utterance: A)
+                 -- closed handling forms; substantive axes, commitments, and depth remain runtime-bound in the whole utterance.
+                 -- Continue keeps the interaction open for requested examination, correction, or further settlement.
+                 -- Finish requests closure at the depth the utterance establishes, with only the commitments it actually supplies.
+                 -- Withdraw exits without declaring the morphism complete; constituted entries and unresolved material remain attributable.
+                 -- These forms assume a coherent handling direction. If several futures remain viable, expose their consequences and obtain confirmation; never ask the user to classify their wording into the formal constructors.
+J = {Continue, Finish, Withdraw}
+read_answer : (A, BoundaryMap, context) → (Optional(RoundAnswer), Set(J))
+                 -- recognize a handling form only when it accounts for all decision-relevant meaning; the second projection records the handling futures still viable. An unsettled reading commits nothing. A request to inspect is not adoption of the inspected proposal.
+enrich : (BoundaryMap, Set(Domain), context) → BoundaryMap
+                 -- return a candidate map with the requested detail, newly revealed domains, evidence, dependencies, and explicit unknowns. Preserve source/status distinctions. This observation leaves Λ unchanged; reconciliation consumes the returned map before the sole current-map update.
+reconcile : (BoundaryMap, context) → BoundaryMap
+                 -- read each changed entry and its transitive dependents against current sources. Re-derive relevance, applicability, content, proposals, and settlement separately; retain every still-supported decision. Withdraw only what its ground no longer supports, carrying the displaced source in the trace. Preserve unrelated entries.
+integrate : (BoundaryMap, RoundAnswer, context) → BoundaryMap
+                 -- apply only the response's grounded commitments and corrections, citing it; adopt exactly the displayed proposals denoted by an informed acceptance or the user's stated replacements. Return the integrated map for reconciliation; unaccepted proposals and open material remain unsettled.
+ready : (BoundaryMap, context) → Bool
+                 -- true when the current boundary is attributable, every recorded item is accounted for as settled, conditional, excluded by grounded scope, or explicitly unresolved, and no judgment or requested inspection needed by the contemplated next move remains unserved. Open goals and deferred work can remain if the next move respects them.
+already_settled : (BoundaryMap, context) → Bool
+                 -- ready and citable prior ground already determines the arrangement and sufficient examination for the current request; a grant to carry out work alone does not answer a newly required checkpoint.
+completion_ready : (BoundaryMap, RoundAnswer, context) → Bool
+                 -- Finish with ready and an attributable sufficiency judgment for the actual current arrangement. If reconciliation reveals a changed implication not covered by that judgment, re-present the affected region; settled independent commitments survive.
+Residual = Map(Domain, String)                      -- the projection of nonempty remainders, including unresolved scope, unknown prerequisites, conditional applicability, and pending values even where their settlement is entrusted; reasons and required next treatment remain in the entry
+DefinedBoundary = { map: BoundaryMap, kind: Kind, residual: Residual, record: Set(Evidence) }
+                 -- emitted only on a CONVERGENCE path. residual is projected from the final map and explicitly ∅ when empty; record reaches the scope and sufficiency ground, entry-setting acts, and any pending obligations.
+Phase ∈ {0, 0b, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
-Phase 0: T, B_prior? → Probe(T) → scan_B_prior(T) → Λ.B_prior → Bᵢ?                                           -- boundary existence checkpoint + optional hermeneutic-seed DETECTION (silent); detection binds Λ.B_prior but does NOT seed B — B does not exist yet (loop state, incl. boundary_map, is initialized at Phase 0b step 4 after the kind is captured and the certificate passes, since binding is gated on a passing certificate)
-       [Bᵢ = ∅] Qc(zero_signal_finding) → Stop → ZeroSignalConfirmation   -- zero-signal (`Zero-signal surfacing`): Confirm → deactivate (Horismos not activated) | Reopen(d) → Bᵢ := {d}, proceed to Phase 0b [Tool]
-Phase 0b: T → sync_kind_route(T) → KindRouteMap → [single_dominant_kind: relay(captured_kind + basis) → proceed (extension, kind committed, NO Stop) | else: Stop → captured_kind (constitution)]
-       → bind_kind(captured_kind) → KindBinding
-       → certify(KindBinding, local_claims) → DeficitFitCertificate
-       → (status(certificate) = pass) bind_value_space → BoundaryClassification → init_loop_state(default_for_residual = DefaultClassification(MixedTrend), B = seed_if_kind_match(Λ.B_prior, captured_kind), B_seed = Bᵢ)
-                                                                                                              -- up-front KIND dispatch + fail-closed certificate + uniform value-space, THEN loop-state init (cycle_n, BoundaryEssence, default_for_residual = DefaultClassification(MixedTrend), and the B_prior seed into B) — the seed folds into Phase 0b step 4, AFTER B is initialized, never before; seeded ONLY when kind(Λ.B_prior) = captured_kind (same boundary question), kind-mismatched prior map surfaced as advisory not seeded; Λ.B_seed := Bᵢ carries the domain signal as unclassified cycle-1 anchor candidates (non-anchored remainder residualizes at the Phase 1 residualize), separate from the classified map B (partition invariant preserved) — the formal carrier of the zero-signal Reopen(d) seed {d}, which the Phase 1 re-scan cannot be assumed to re-derive [Tool: Constitution gate | Extension relay (single-dominant-kind)]
-Phase 1: T, cycle_n → Ctx(T, cycle_n) → candidates[cycle_n] → (cycle_n = 1: candidates[1] := candidates[1] ∪ (Λ.B_seed \ Λ.domains_touched)) → (Sub-D[cycle_n], auto_resolved?) → Sub-D[cycle_n].domain → Λ.domains_touched   -- per-cycle context collection; cycle-1 anchor selection runs over candidates[1] = newly-surfaced ∪ (Λ.B_seed \ Λ.domains_touched) (seed joins BEFORE Sub-D binds — the seed join; a Reopen(d) seed stays an anchor candidate even when the re-scan misses it; an already-touched seed domain — e.g. B_prior-seeded into context_resolved — is excluded here and re-enters ONLY via the Ctx re-scan's stale-seed re-surface, preserving the pairwise-disjoint partition), then auto-resolve check, then the domains_touched write (the anchor commits to Λ.domains_touched and to no partition member until Phase 3 files it) [Tool]
-       → (cycle_n = 1) non-anchored B_seed remainder (deduped set) → Λ.residual ∪ Λ.domains_touched; Λ.B_seed := ∅   -- cycle-1 B_seed consumption (track): non-anchored remainder of the deduped seed residualizes (the residualize write), cleared after consumption (consumed once)
-Phase 2: Sub-D[cycle_n], kind, BoundaryClassification, BoundaryEssence, cycle_n, B_snapshot, default
-       → Qc(Sub-D[cycle_n], kind, BoundaryClassification, BoundaryEssence, cycle_n, B_snapshot, default) → Stop → A          -- per-cycle classification over BoundaryClassification with complete B_snapshot + default visibility [Tool]
-Phase 3: (user-response: A → conservative parse(A) → (typed_A?, TerminationIntent?)) | (auto-resolved: typed_A = substrate-settled classification from the Phase 1 auto-resolve check, no TerminationIntent)
-       → integrate(typed_A?, B, BoundaryEssence) → (B', Δessence)                                             -- total cycle fold: a classification updates the anchor; a termination-only reading residualizes it and returns B' = B with the empty delta
-       → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'                                            -- sole producer of the accumulated essence; the empty delta is the identity
-       → snapshot(B', Λ.residual, default_for_residual) → B_complete'                                         -- ALWAYS, termination folds included, and BEFORE any route: the round-local completeness invariant holds after EVERY fold, so a just-residualized anchor carries its provisional entry before any terminal write reads it
-       → (only on loop continuation) DefaultClassification(EssenceTrend(history', cycle_n)) → default' → snapshot(B', Λ.residual, default') → B_complete''
-                                                                                                              -- next-cycle default (track + sense), then the snapshot that supersedes B_complete' for the cycle about to open; EssenceTrend re-derivation is kind-general (count-only over the uniform disposition)
-Phase 4 (optional): residual, BoundaryEssence → Qf(residual, FinalGateDisposition) → Stop → Λ.final_gate_answers
-                                                                                                              -- final gate [Tool], reached via ExplicitTermination or Phase 1 substrate exhaustion; FinalGateDisposition = {UserSupplies, AIAutonomous}, every kind
-
-Phase 0 → Phase 0b: boundary_undefined(T) = true ∨ ZeroSignalConfirmation = Reopen(d)       -- domain signal present (probe-detected, or user-reopened seeding Bᵢ := {d}) → dispatch the kind before the loop
-Phase 0 → deactivate: boundary_undefined(T) = false ∧ ZeroSignalConfirmation = Confirm      -- no undefined boundary signal, zero-signal finding confirmed (`Zero-signal surfacing`)
-Phase 0b sync_kind_route relay branch: single_dominant_kind(KindRouteMap, T, context) = true → relay captured_kind + basis, proceed (extension, NO turn yield) → continue to bind_kind   -- entropy→0 (option-set relay test): one kind dominates, foils route away; the captured kind is committed for the activation (a rare mis-relay is corrected by re-invoking /bound, not an in-loop redirect); certify stays fail-closed
-Phase 0b sync_kind_route gated branch: single_dominant_kind(KindRouteMap, T, context) = false → Stop → captured_kind (constitution)                                                                      -- ≥2 viable hypotheses ∨ undecidable foil ∨ emergent gesture naming no single kind ∨ live ground leaves the emergent question undetermined → mandatory Constitution gate
-Phase 0b → Phase 1: status(certificate) = pass ∧ BoundaryClassification bound                               -- kind captured (via relay or gate), fit certified, value-space frozen → enter the per-cycle loop
-Phase 0b → deactivate (route): status(certificate) = route                                   -- a local route claim holds the kind → route_away(RouteClaim.routed_deficit), residual untreated (kind out-of-scope for bound)
-Phase 0b → Phase 0b (re-sync): KindBinding.atomicity = non-atomic                          -- compound kind → split, re-sync, re-certify BEFORE binding values (fail-closed); terminates because each split strictly decreases the bundled kinds
-Phase 0b → attribute (CONSTITUTION): status(certificate) = ambiguous                          -- |claimed_by| ≠ 1 (several claims hold, or none does) → Qa(captured_kind, claims_supported) → Stop → Attribution → attribute: Own → claimed_by := {BoundaryUndefined}, attribution_by := user, status re-reads as pass → Phase 0b → Phase 1; Route(d) → claimed_by := {d}, attribution_by := user → Phase 0b → deactivate (route), with basis = the user's attribution and a command hint only where this file inscribes one for d; Unattributable → claimed_by := ∅, attribution_by := user → Phase 0b → deactivate (unattributable). ONE gate and no re-certification of unchanged ground: the user's utterance is the one new ground that can arrive, and their attribution is what gives an ambiguous certificate a terminal [Tool]
-Phase 0b → deactivate (unattributable): Attribution = Unattributable                         -- the user found no claim that holds → relay the finding (the captured kind, the claims its evidence supported, what the user saw as unresolved), non-convergent exit; no DefinedBoundary, no BoundaryClassification bound
-Phase 1 → Phase 2:  Sub-D[cycle_n] non-empty ∧ ¬auto_resolved                               -- per-cycle anchor domain surfaced, requires user judgment
-Phase 1 → Phase 3:  Sub-D[cycle_n] non-empty ∧ auto_resolved                                -- definitive assignment found in substrate, skip Phase 2
-Phase 1 → Phase 4:  Sub-D[cycle_n] empty ∧ Λ.residual ≠ ∅                                   -- substrate-exhaustion path to explicit bulk classify (residual remains)
-Phase 1 → converge: Sub-D[cycle_n] empty ∧ Λ.residual = ∅ → substrate-exhaustion terminal carrier             -- every surfaced domain already classified; no empty Phase 4 gate
-Phase 2 → Phase 3:  A received ∧ commitment recognized (typed_A ∨ termination)               -- parse recognized a commitment in the response: typed classification, termination signal, or both
-Phase 2 → Phase 2:  A received ∧ no commitment recognized                                    -- re-present from A with every decision-relevant reframing made visible; the map is unchanged. This deliberative self-edge carries no monotone progress claim and no exhaustion bound: it may stutter until the user constitutes a commitment [Tool]
-Phase 3 → Phase 3 (confirm): parse leaves ≥2 J routing branches viable → Qc(candidate readings) → Stop → confirmed_intent ∈ J   -- `Ambiguous response routing`; routing resumes at J with the confirmed branch, which is a TerminationIntent member on the terminating branches and the absence of one on `next` [Tool]
-Phase 3 → Phase 1:  ¬termination_intent → derive default' → cycle_n += 1             -- continue loop with next-cycle default
-Phase 3 → converge (implicit): TerminationIntent = ImplicitTermination → implicit terminal carrier             -- Phase 2-surfaced default committed (NOT re-derived)
-Phase 3 → Phase 4:  TerminationIntent = ExplicitTermination                                 -- user-judged satisfaction with explicit residual classification request
-Phase 4 → converge: Λ.final_gate_answers covers Λ.residual → Phase 4 terminal carrier                              -- BoundaryMap + BoundaryEssence finalized
-
-── TERMINAL CARRIERS ──
-The table below is the sole definition of DefinedBoundary map provenance. Every graceful path starts from an initialized map source, completes its terminal write, and emits only the resulting Λ.boundary_map paired with Λ.captured_kind.
-
-Path                              | Initialized source                                                   | Terminal write                                                                                                  | Final value
-Phase 3 ImplicitTermination       | B' from the current cycle fold, which has ALREADY placed the anchor per the parse — a response carrying typed_A leaves the anchor classified in B', a termination-only response residualizes it; Λ.residual is read as the fold left it and is NEVER assumed to hold the anchor, so a classification the user just stated is never overwritten by the residual disposition; residual_disposition = user override when stated, otherwise default_at_surfacing | finalize(B', Λ.residual, residual_disposition) → B_final; Λ.boundary_map := B_final | { map: Λ.boundary_map, kind: Λ.captured_kind }
-Phase 4 completed                 | Λ.boundary_map at Phase 4 entry + Λ.residual + Λ.final_gate_answers | bulk_classify overwrites every residual provisional entry, moves those domains to final_gate_classified, empties Λ.residual, and writes Λ.boundary_map | { map: Λ.boundary_map, kind: Λ.captured_kind }
-Phase 1 substrate exhaustion      | Λ.boundary_map at the guarded edge where Λ.residual = ∅             | identity; Λ.boundary_map is unchanged                                                                           | { map: Λ.boundary_map, kind: Λ.captured_kind }
-
-B_snapshot and B_complete' are recognition surfaces only. Neither is a result carrier, and pairing either with a kind does not constitute DefinedBoundary.
+Phase 0: T, B_prior? → Λ.B_prior := B_prior → inspect context → Probe(T, context) → B_provisional → boundary_readout → present the provisional whole without a turn yield [Tool]
+       → boundary_undefined(T): Phase 0b
+       → otherwise: Qc(zero_signal_finding with basis) → Stop → ZeroSignalConfirmation [Tool]
+       → Confirm: deactivate; Reopen(utterance): incorporate that ground and present the revised provisional whole → Phase 0b
+Phase 0b: B_provisional, T, context → sync_kind_route → KindRouteMap
+       → single_dominant_kind: relay captured_kind and basis → bind_kind
+       → otherwise: Qs(KindRouteMap beside the provisional whole) → Stop → KindAnswer → bind_kind [Tool]
+       → non-atomic KindBinding: separate the questions and their dependencies, preserve the unselected questions provisionally, re-sync before certification
+       → atomic KindBinding: certify local_claims → Λ.certificate
+       → status = route: route_away(routed_deficit(certificate)) → deactivate
+       → status = ambiguous with certificate(S): Qa(kind, supported claims and implications) → Stop → Attribution → attribute [Tool]
+       → user(Route(d)): route_away(d) → deactivate; user(Unattributable): relay finding → deactivate
+       → status = pass: initialize B by grounding the presented B_provisional with current context and Λ.B_prior; derive focus from outstanding examination requests in context, preserving a re-entry request; use ∅ only when none is pending → Phase 1
+       → prior grounding: read Λ.B_prior through its setting record and revisions, retaining earlier reachable records in context; admit only same-kind, current supported settlements. Keep still-relevant unresolved domains even if current discovery omitted them. A kind-mismatched prior is advisory; an unavailable setting source supplies no settlement. Never alter the prior record.
+Phase 1: B, focus, context → enrich(B, focus, context) → B_enriched
+       → reconcile(B_enriched, context) → B' → Λ.boundary_map := B' [Tool]
+       → already_settled(B', context): final_readout → DefinedBoundary → converge [Tool]
+       → otherwise: Phase 2
+Phase 2: B, captured_kind, focus, context → boundary_readout(B, captured_kind, focus, context) → BoundaryEssence [Tool]
+       → Qs(current arrangement, sufficient as shown or open/correct an axis) → Stop → Λ.answer [Tool]
+       → Phase 3
+Phase 3: read_answer(Λ.answer, B, context) → (RoundAnswer?, viable futures)
+       → several viable J futures: Qc(candidate readings with their different consequences) → Stop → confirmed_intent ∈ J [Tool]
+       → read the confirming utterance whole with the original source, including corrections and examination requests; while no coherent handling is recognized, hold the checkpoint and clarify from current ground without committing a branch
+       → bind the recognized RoundAnswer to the original utterance and any whole confirming source
+       → otherwise no recognized answer: preserve B and the complete utterance in context → Phase 2 for a current readout and question
+       → Withdraw: reconcile only effects on the current-kind boundary, preserve the correction and any new-kind question as unresolved with their source; present the partial map and residual → deactivate without DefinedBoundary or re-entry
+       → an active answer changing the boundary question: bind Λ.B_prior := {map: B, kind: captured_kind, record: current setting sources} while retaining earlier records in context; carry the utterance's outstanding examination into focus, rebuild and present B_provisional from the user-revised concern → Phase 0b before integrating any new-kind settlement
+       → otherwise integrate(B, RoundAnswer, context) → B_integrated → reconcile(B_integrated, context) → B' → Λ.boundary_map := B' [Tool]
+       → Continue: derive focus from the utterance → Phase 1
+       → Finish ∧ completion_ready(B', RoundAnswer, context): final_readout → DefinedBoundary → converge [Tool]
+       → Finish ∧ ¬completion_ready: show the unserved judgment or changed implication; set its focus → Phase 1
 
 ── LOOP ──
-Pre-loop dispatch (Phase 0b, one-shot — runs once before the per-cycle loop opens):
-  sync_kind_route(T) surfaces the KindRouteMap (every recognition seed + emergent/naming path); the user captures the kind (recognize a seed, name an emergent, or extend/replace a seed).
-  Extension fast-path (single-dominant-kind relay): when single_dominant_kind(KindRouteMap, T, context) holds (per the single_dominant_kind predicate (TYPES) and `Option-set relay test`) — present the captured kind + its basis as relay text and proceed (the captured kind is committed for the activation), recording Λ.captured_kind with ZERO turn yields. The basis is the dominating predicate + the foils' route-away on the seed route, and the user's own naming quoted verbatim on the emergent route. The mandatory Constitution gate fires when single_dominant_kind is false — the default when in doubt; relay is the NARROW exception (`Option-set relay test`).
-  bind_kind → certify (fail-closed) → bind_value_space. The captured kind FIXES BoundaryClassification for the whole activation; the per-cycle loop classifies object_ref(kind) over the frozen BoundaryClassification. BOTH branches (relay and gate) feed this same pipeline — the relay collapses only the kind-capture turn yield; a non-pass certificate still gets the full gated treatment. Re-sync on ambiguous/non-atomic; route_away (deactivate) when a local route claim holds the kind.
-
-J = {next, terminate_implicit, terminate_explicit}
-  (every value read below is the CONFIRMED one — a parse leaving ≥2 routing branches viable is resolved to a single branch via `Ambiguous response routing`'s one-turn confirmation gate at Phase 3 step 1 BEFORE J is evaluated, and a confirmed `next` is the absence of a TerminationIntent rather than a member of it; routing here is immediate only for an unambiguous parse)
-  next:               ¬termination_intent → next-cycle default' (= DefaultClassification(EssenceTrend(history', cycle_n)), count-based, kind-general) → cycle_n += 1, Phase 3 → Phase 1 (per-cycle re-scan)
-  terminate_implicit: TerminationIntent = ImplicitTermination (parsed from Phase 2 free response) → Phase 3 → converge with residual filled by default_at_surfacing (the Λ.default_for_residual value Phase 2 surfaced — NOT re-derived) or user-stated override; a termination-only response (no typed selection) first residualizes the current anchor (Phase 3 step 2), so it is included in that fill
-  terminate_explicit: TerminationIntent = ExplicitTermination (parsed from Phase 2 free response) → Phase 3 → Phase 4 (final gate)
-
-Per-cycle re-scan: Phase 1 substrate scan (artifact read/artifact search) re-executes each cycle; `Λ.domains_touched` (anchored ⊔ non-anchored ⊔ resolved/dismissed) is the dedup source — no domain surfaced twice.
-Cycle 1 ordering: AI Impact ordering selects highest-impact domain.
-Cycle k≥2 ordering: previous cycle's typed_A[cycle_n-1] or free-response routes next cycle's domain selection frame; AI re-applies Impact ordering within the routed frame.
-
-Answer types (members of the uniform disposition BoundaryClassification: UserSupplies/AIPropose/AIAutonomous/Dismiss) determine BoundaryMap entry, not loop path.
-FinalGateDisposition (the uniform subset {UserSupplies, AIAutonomous} ⊆ BoundaryClassification, every kind) determines residual BoundaryMap entries at Phase 4.
-
-Round-local BoundaryMap invariant: after each Phase 3 integrate — termination folds included, since the snapshot refresh is NOT conditioned on loop continuation — `Λ.boundary_map` snapshot is always complete: classified entries ∪ (residual ↦ default_for_residual). Snapshot completeness makes ImplicitTermination available AND gives every residual domain the provisional entry the Phase 4 bulk_classify overwrite reads, so no domain reaches a terminal write without an entry; TERMINAL CARRIERS governs every emitted result.
-
-Convergence evidence: At convergence (Phase 3 ImplicitTermination ∨ Phase 4 completed ∨ substrate-exhaustion empty-residual), present transformation trace — per-cycle (Sub-D[k], Δessence[k], disposition[k]) for each anchored cycle k (k ranges over Λ.D_history — the cycles that produced a Sub-D; a substrate-exhaustion terminal scan produces no Sub-D and contributes no entry; disposition[k] ∈ BoundaryClassification is READ FROM the finalized Λ.boundary_map entry for Sub-D[k].domain, never re-declared per terminal path — the trace evidences the emitted map, so it carries the map's own value for that domain whichever path assigned it; Δessence[k] is the delta integrate produced for cycle k, or the empty delta when the cycle produced no classification), plus residual disposition:
-Cover: the parts together range over the domains of the EMITTED Λ.boundary_map, each domain reported exactly once. "non-anchored d" means d ∉ { s.domain | s ∈ Λ.D_history } — compared on DOMAIN IDENTITY, since D_history holds Sub-D projections while the partition sets hold Domains, and a raw membership test across the two types would fail to exclude an auto-resolved anchor. Anchored membership takes precedence, so a domain anchored in some cycle is reported only as a per-cycle entry even when it also sits in context_resolved (auto-resolved), residual (the termination-only anchor), or final_gate_classified. Every other map domain — a kind-matched B_prior seed left unchanged in context_resolved, a non-anchored domain accumulated into residual, a bulk-classified domain — is reported by the matching part below. A map domain in neither part is a gap in the evidence, not an omission the trace may make.
-  • ImplicitTermination: ∀ non-anchored d ∈ residual: (d, default_at_surfacing_or_override) — basis follows which value committed: the EssenceTrend / count-distribution derivation when the surfaced default committed (kind-general), the user's stated override when one did
-  • Phase 4 completion: ∀ non-anchored d ∈ final_gate_classified: (d, Λ.final_gate_answers[d])   -- the partition bulk_classify moved them into; Λ.residual is empty by then
-  • Seeded-and-unchanged: ∀ non-anchored d ∈ context_resolved: (d, disposition(d)) — cites the substrate assignment or the prior-classification seed basis; these never anchored a cycle, so nothing else reports them
-  • substrate-exhaustion empty-residual: residual = ∅ — no residual disposition (every surfaced domain classified per-cycle)
-BoundaryEssence is presented as separate session text artifact. Convergence is demonstrated, not asserted.
+The first presentation concerns the provisional whole, including why decisions arise and how open premises condition them. Kind dispatch uses that recognizable context. A passing certificate opens the whole-map examination loop.
+Each Phase 1 takes the scope and focus from current ground. A requested axis can reveal subdecisions, provisional concrete choices, constraints, or dependencies; enrichment carries them and their evidence in its candidate map, which reconciliation reads before updating B. The next readout shows their relationship to the whole. A focus is not a fixed level or mode, and an unchanged source supplies no reason to re-ask a settled decision.
+Phase 2 offers acceptance at the displayed depth and continuation through inspection or correction. Materialize the relevant BoundaryClassification forms inside the proposed arrangement or an opened question; use domain-specific language and keep inspection, sufficiency, and withdrawal as interaction-level paths.
+Phase 3 reads mixed utterances whole. Commit the portion actually grounded, preserve material the response leaves open, and let its requested inspection or correction determine the next focus. Showing concrete content alone never settles that content or expands the grant.
+A correction reopens the affected dependency region, not a sequence of all entries. Newly exposed consequences needed for the pending judgment return to Phase 1 before closure; unrelated settled choices remain intact.
+Every unanswered Constitution interaction holds its dependent transition. The loop may continue while the user examines; neither scan exhaustion nor a visit count constitutes sufficiency. A user can finish without opening every axis, leaving explicit residue and choosing a next move consistent with it.
+Withdrawal takes precedence over changed-kind re-entry: reconcile current-kind effects and preserve the correction and pending questions as a non-converged record, then deactivate. An active changed-kind response carries its unserved examination into the next presentation; prior settlement is read only under its own source and applicability checks.
 
 ── CONVERGENCE ──
-converge iff (Phase 3 ImplicitTermination ∨ Phase 4 completed ∨ substrate_exhaustion_empty_residual) ∧ status(certificate) = pass
-  certificate gate:            convergence presupposes a passing DeficitFitCertificate (Phase 0b); a route certificate, or an ambiguous one the user left unattributable, never reaches the loop, and an ambiguous one reaches it only on the user's Own attribution — so DefinedBoundary is unreachable without an in-scope, fit-certified kind, certified on the evidence or on the user's word. The pass certifies LOCAL admissibility — bound's own gate over bound's own activation — not the absence of a claim anywhere in the wider protocol set
-  kind_dispatch_branch:        the captured kind reaches the loop via EITHER branch of Phase 0b sync_kind_route — the single_dominant_kind relay (extension, no turn yield) or the mandatory Constitution gate — and both flow through the fail-closed certificate, so convergence is branch-invariant: a relay-captured kind whose certificate is route (routes away/deactivates) or ambiguous (goes to Qa, and reaches the loop only on an Own attribution) is handled exactly as the gated branch's is
-  unattributable_deactivate:   Phase 0b Attribution = Unattributable → relay the finding, non-convergent exit (no DefinedBoundary emitted; the evidence did not settle the certificate and the user did not settle it either — reported, never silently bound or silently dropped)
-  Phase 3 ImplicitTermination: the Phase 3 ImplicitTermination row in TERMINAL CARRIERS completed
-  Phase 4 completed:           the Phase 4 row in TERMINAL CARRIERS completed — reachable via Phase 3 ExplicitTermination OR Phase 1 substrate exhaustion with residual remaining
-  substrate_exhaustion_empty_residual: the substrate-exhaustion row in TERMINAL CARRIERS completed under Sub-D empty ∧ Λ.residual = ∅
-  route_deactivate:            Phase 0b status(certificate) = route → route_away(RouteClaim.routed_deficit), non-convergent exit (kind out-of-scope for bound; no DefinedBoundary emitted)
+converge iff status(certificate) = pass ∧ (already_settled(B, context) ∨ completion_ready(B, RoundAnswer, context))
+  final_readout: read the current map and setting sources; derive residual from every nonempty remainder; bind record to the scope, sufficiency, and settlement acts.
+  trace: map each recorded boundary instance to its current settlement or explicitly carried remainder, with the source and effect of relevant corrections. Present the whole arrangement and what the next move may and may not settle under it.
+  result: DefinedBoundary = {map: B, kind: captured_kind, residual: projected remainder, record: setting sources}.
+  limits: closure defines a boundary at its constituted scope and depth; it supplies neither a fixed project goal nor proof of the user's comprehension or exhaustive discovery.
+  non-convergent exits: zero-signal Confirm, route attribution, Unattributable, and Withdraw emit no DefinedBoundary and retain their relevant finding or partial record.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Probe (sense)        → Internal analysis (silent — no user output; heuristic boundary-undefined detection + session-context scan for a prior BoundaryMap as Λ.B_prior (DETECTION only — Phase 0 seeds nothing; a kind-matched prior is seeded at Phase 0b step 4, a kind-mismatched prior stays advisory-only); notice visibility deferred to Phase 2 cycle 1 surfacing)
-Phase 0 ZeroSignalConfirm (constitution) → present (conditional: Bᵢ = ∅; zero-signal finding + reasoning; Confirm/Reopen(Domain) — `Zero-signal surfacing`)
-Phase 0b sync_kind_route (constitution) → present (GATED branch — fires when single_dominant_kind = false: ≥2 seeds stay viable under the framing, a seed's route-away is undecidable from the framing, an emergent gesture resolves to no single naming, OR the live ground (T, context) leaves the emergent question undetermined; up-front KindRouteMap — one hypothesis for every recognition seed, each with positive_predicate + evidence + differential_future + route-away conditions, plus an emergent/naming free-response path; named kinds are PRIORS not a closed set; user captures the kind by recognizing a seed, naming an emergent, or extending/replacing a seed)
-Phase 0b sync_kind_route_relay (extension) → TextPresent+Proceed (RELAY branch — fires when single_dominant_kind = true, per the single_dominant_kind predicate (TYPES) and `Option-set relay test`. Present the captured kind + its basis as relay text — the basis quotes the user's own wording rather than paraphrasing it wherever the emergent conjunct carried the decision, and quotes it VERBATIM when the relay fires because the user already named the emergent kind, since there that wording IS the capture — and proceed, recording Λ.captured_kind WITHOUT a turn yield; the captured kind is committed for the activation (like the gated branch) — a rare mis-relay is corrected by re-invoking /bound, not an in-loop redirect transition. The fail-closed certify STILL runs on this branch — a non-pass DeficitFitCertificate gets the full gated treatment (route → route_away/deactivate, ambiguous → re-sync), so the relay never bypasses deficit-fit)
-Phase 0b certify (sense)     → Internal analysis (extension — fail-closed DeficitFitCertificate; deterministic check of KindBinding.positive_predicate against the own claim and the route claims inscribed in this SKILL.md, reading nothing outside this file: claimed_by = {BoundaryUndefined} when the own claim holds alone; status(certificate) = pass | route | ambiguous; basis = the cited claim fit, shown at Phase 2 cycle 1's first surfacing; ambiguous → Qa, the certificate itself binding nothing and closing nothing under ambiguity)
-Phase 0b Qa (constitution)   → present (conditional: status(certificate) = ambiguous. Presents, as text before the gate, the captured kind, its evidence with its channel, and what the certificate found — the claims that evidence supports, or that none does; the gate itself carries the question "whose is this?" and the Attribution options with their differential implications: the own claim → the boundary is defined here, the value space binds and the loop opens; each supported route claim → handed to that deficit, with the command hint this file inscribes for it, and this activation ends; none of these → the finding is relayed and this activation ends with no boundary defined. A deficit the user names outside the presented set is a Route(d) answer emitted bare. One turn, once: the user's attribution is written by attribute and read by every downstream reader of status(certificate). Constitution because the certificate has already said what the evidence settles, and what it does not settle is not the AI's to decide — `Ambiguity surfaces`)
-Phase 0b attribute (track)   → Internal state update (writes the user's Attribution onto Λ.certificate — claimed_by rewritten to {BoundaryUndefined} / {d} / ∅ and attribution_by := user. Runs on the far side of Qa's Stop and nowhere else; the deactivation or binding that follows is the arm the attributed status selects)
-Phase 0b unattributable_deactivate (extension) → TextPresent+Proceed (conditional: Attribution = Unattributable → relay the finding — the captured kind, the claims its evidence supported, what the user saw as unresolved — and deactivate; no DefinedBoundary, no value space bound)
-Phase 0b bind_value_space (track) → Internal state update (extension — generate the uniform settlement disposition {UserSupplies, AIPropose, AIAutonomous, Dismiss} ONLY after status(certificate) = pass; same coproduct for every kind; relay / dead-signal test applied; freeze BoundaryClassification for the activation. On status(certificate) = route → route_away(routed_deficit), deactivate — reached also through the user's Route(d) attribution at Qa, with basis = that attribution; on KindBinding.atomicity = non-atomic → re-sync Phase 0b before binding; on status(certificate) = ambiguous → Qa, and binding only on an Own attribution)
-Phase 1 Ctx   (observe)      → artifact read, artifact search (per-cycle re-scan: CLAUDE.md, project rule files, prior session context)
-Phase 1       (track)        → Internal state update (cycle 1 only: Λ.B_seed candidates (minus Λ.domains_touched) enter anchor selection alongside newly-surfaced domains; non-anchored remainder of the deduped seed → Λ.residual ∪ Λ.domains_touched — partition invariant preserved; Λ.B_seed := ∅, consumed once)
-Phase 2 Qc    (constitution) → present (mandatory; per-cycle classification over BoundaryClassification + captured-kind label + essence-refinement preview (NOT the committed Δessence, which integrate produces at Phase 3 step 2) + cycle_n + current B_snapshot + current default_for_residual with count-distribution basis cite + cycle-1 certificate-fit basis + cycle-1 notice when Λ.B_prior non-empty (seed notice when kind-matched, advisory-only notice when kind-mismatched) + free-response termination affordance with implicit/explicit sub-signals)
-Phase 3 parse  (sense)       → Internal analysis (conservative whole-utterance recognition with no Λ mutation: return typed_A? + TerminationIntent only when the reading accounts for all decision-relevant meaning in A; otherwise return no commitment and let Phase 2 re-present directly from A)
-Phase 3 confirm_intent (constitution) → present (conditional: a parse leaving ≥2 J routing branches viable — present the candidate readings that parse actually left open (ImplicitTermination committing residual at default_at_surfacing | next continuing to the following cycle | ExplicitTermination proceeding to Phase 4), each with its differential future, and Stop; the user's confirmation or correction routes the loop at J — `Ambiguous response routing`)
-Phase 3       (track)        → Internal state update (integrate(typed_A?, B, BoundaryEssence) → B', Δessence as the total current-cycle fold; a termination-only commitment returns B' = B, residualizes the anchor, and supplies the empty delta; crystallize applies to every delta with the empty delta as identity; ImplicitTermination executes the Phase 3 TERMINAL CARRIERS write; on loop continuation only — DefaultClassification(EssenceTrend(history', cycle_n)) → default' (kind-general, count-only); the B-snapshot refresh runs on EVERY fold, termination included, taking default' on continuation and the current default_for_residual on termination, so the completeness invariant leaves no gap for a terminal write to read)
-Phase 4 Qf    (constitution) → present (residual bulk classification over FinalGateDisposition = {UserSupplies, AIAutonomous}, every kind; reached via ExplicitTermination or substrate exhaustion)
-Phase 4       (track)        → Internal state update (bind the complete final_gate_answers map, then execute the Phase 4 TERMINAL CARRIERS write)
-converge      (extension)    → TextPresent+Proceed (captured-kind + DeficitFitCertificate basis + per-cycle trace + residual disposition trace + BoundaryEssence artifact; proceed with defined boundary)
-Seam transition to declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: a route claim fires when status(certificate) = route, a pre-loop out-of-scope route-away that deactivates before any DefinedBoundary, not a post-convergence handoff, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
+Phase 0 prior binding (track) → Internal state update (bind the supplied prior to Λ.B_prior; its authority still depends on the source/applicability read)
+Phase 0 inspect / Probe (observe) → record read, artifact read, artifact search (read current context and reachable prior records; construct the relevant provisional whole with uncertain goals and dependencies exposed)
+Phase 0 provisional readout (sense) → Internal composition (prepare the current whole with its evidential status; no settlement)
+Phase 0 / changed-kind provisional presentation (extension) → TextPresent+Proceed (show that provisional whole and its source/assumption distinctions before every kind or attribution judgment; relay the proposed object for recognition, without adopting its content)
+Phase 0 zero-signal (constitution) → present (the finding, reasoning, and Confirm/Reopen path)
+Phase 0b sync_kind_route (sense) → Internal analysis (one hypothesis for every recognition seed plus an emergent naming path; derive fit and consequences from the provisional whole)
+Phase 0b kind capture (constitution) → present (when single_dominant_kind is false, show the hypotheses with evidence, differential future, and route-away conditions before the question; preserve an open naming path)
+Phase 0b kind relay (extension) → TextPresent+Proceed (when single_dominant_kind is true, cite the determining source; quote the user's emergent naming verbatim; certify still follows)
+Phase 0b bind / certify (track) → Internal state update (record KindBinding and the locally supported claim set before reading status; non-atomic questions re-sync before certification)
+Phase 0b Qa (constitution) → present (on ambiguous local fit, show the supported claims or their absence; Own defines here, Route hands off the named deficit, Unattributable ends with the finding; yield once and preserve the actual attribution form)
+Phase 0b attribute / initialize (track) → Internal state update (record the actual Attribution, or initialize the sole current map after a pass; derive focus from unserved requests, preserving a request carried through kind re-entry)
+Phase 0b prior grounding (observe) → record read, artifact read (read source-defined same-kind settlement and revisions; retain unresolved domains; remembered dispositions with unavailable sources remain advisory)
+Phase 0b route / unattributable exit (extension) → TextPresent+Proceed (relay deficit and basis with the local command hint where one exists; a user-named deficit without a hint is emitted bare. On re-entry, include the relevant prior-record pointer with its original kind and limits)
+Phase 1 enrich (observe) → record read, artifact read, artifact search (return the candidate map containing collected or derived evidence, newly exposed domains, and tentative concrete content needed for the requested examination; respect the observation boundary, leave unavailable evidence explicit, and mutate no Λ field)
+Phase 1/3 reconcile / integrate (track) → Internal state update (execute the source and dependency reconciliation in TYPES; the transcript remains the reachable setting record; an update does not itself require a user-facing log)
+Phase 2 boundary_readout (observe) → record read, artifact read (derive the whole map and focused detail beside their current sources at every Phase 2 entry, including a no-recognized-answer return; classify content by its actual setting act)
+Phase 2 Qs (constitution) → present (the recognizable arrangement is before the question; ask whether it is sufficient at the displayed scope and depth or which part to open or correct; yield for the whole response)
+Phase 3 read_answer (sense) → Internal analysis (conservative recognition of the whole utterance, including reframing, retention, proposed defaults, and requested inspection)
+Phase 3 confirmation (constitution) → present (only when several live handling futures remain; show their actual consequences, read confirmation or correction as a whole source with the original utterance, and hold the checkpoint while handling is still unresolved)
+Phase 3 focus / question revision (track) → Internal state update (for an active changed-kind answer, bind the current map/kind/setting-source record into Λ.B_prior and carry the unserved focus through dispatch; earlier records remain reachable. For Withdraw, preserve the correction in the partial record and deactivate)
+final_readout (observe) → record read, artifact read (derive the final boundary, residual, trace, and pointers from current state and actual setting acts)
+converge (extension) → TextPresent+Proceed (present DefinedBoundary with its limits, source-grounded trace, and required next treatment)
+withdrawal (extension) → TextPresent+Proceed (present the non-converged partial record with its limits and required next treatment)
+Seam transition to declared next protocol (extension) → TextPresent+Proceed (at a user-declared continuation, cite that source and proceed to the named next protocol; every required checkpoint there still fires. No automatic post-convergence protocol is selected here)
 
 ── MODE STATE ──
-Λ = { phase: Phase, T: TaskScope,
-      kind_route_map: Optional(KindRouteMap),          -- Phase 0b dispatch sync (every recognition seed + emergent path)
-      captured_kind: Optional(Kind),                   -- the kind the dispatch settled on (recognize-seed | name-emergent | extend/replace-seed); set via the single_dominant_kind relay (extension, no turn yield) OR the mandatory Constitution gate
-      kind_binding: Optional(KindBinding),             -- fields: label, positive_predicate, evidence, atomicity
-      certificate: Optional(DeficitFitCertificate),    -- fields: own_claim, route_claims[], claimed_by, evidence, attribution_by; fail-closed gate — status(certificate) must = pass before value_space binds; attribute rewrites claimed_by here on the far side of Qa's Stop
-      value_space: Optional(ValueSpace),               -- the uniform settlement disposition; frozen for the activation once status(certificate) = pass (UserSupplies / AIPropose / AIAutonomous / Dismiss, same for every kind)
-      B_prior: Optional(SeededPrior),                  -- hermeneutic seed detected at Phase 0 (a SeededPrior — prior BoundaryMap plus the kind it was produced over); the carried kind (B_prior.kind) is what Phase 0b step 4 tests to gate seeding to same-kind only (kind-mismatched prior map → advisory, not seeded)
-      B_seed: Set(Domain),                             -- = Bᵢ, the Phase 0 domain-signal seed (the singleton d on zero-signal Reopen(d)); carried across the Phase 0 → 0b transition (both Stops sit between production and consumption); kept separate from the classified map B — B_seed is a Set(Domain), B a Map — and consumed at Phase 1 cycle-1 anchor selection as unclassified candidates; the non-anchored remainder residualizes at the Phase 1 residualize (→ Λ.residual ∪ Λ.domains_touched) and B_seed clears after cycle 1
-      cycle_n: Nat,
-      domains_touched: Set(Domain),                    -- accumulated across cycles (Phase 1 surfacing union)
-      D_history: List<Sub-D>,                          -- per-cycle dimension projections
-      essence_history: List<Δessence>,                 -- per-cycle delta accumulation
-      boundary_essence: BoundaryEssence,               -- accumulated essence text
-      default_for_residual: BoundaryClassification member,            -- provisional residual disposition surfaced each Phase 2 (a member of the uniform disposition); DefaultClassification(EssenceTrend(history, cycle_n)) re-derived each cycle, every kind
-      context_resolved: Set(Domain),                   -- Phase 1 auto-resolved (Bᵣ-equivalent, per-cycle) ∪ B_prior-seeded domains (Phase 0b step 4 init; basis: "prior classification" — entries mutable across cycles, may be re-surfaced by Phase 1 if a stale-prior signal is detected)
-      user_responded: Set(Domain),                     -- Phase 2 BoundaryClassification classification completed (the uniform 4-value disposition)
-      final_gate_classified: Set(Domain),              -- Phase 4 bulk classification completed
-      dismissed: Set(Domain),
-      residual: Set(Domain),                           -- unclassified subset of domains_touched (implicit-delegation candidates; provisionally mapped to default_for_residual in boundary_map snapshot)
-      boundary_map: BoundaryMap,                       -- always-complete after each Phase 3: classified entries ∪ (residual ↦ default_for_residual)
-      final_gate_answers: Map(Domain, FinalGateDisposition),
-      history: List<(Domain, BoundaryClassification)>,
+Λ = { phase: Phase, T: TaskScope, B_prior: Optional(SeededPrior),
+      boundary_map: BoundaryMap,
+      kind_route_map: Optional(KindRouteMap), captured_kind: Optional(Kind),
+      kind_binding: Optional(KindBinding), certificate: Optional(DeficitFitCertificate),
+      focus: Set(Domain), answer: Optional(A),
       active: Bool, cause_tag: String }
--- Invariant: domains_touched = context_resolved ∪ user_responded ∪ final_gate_classified ∪ dismissed ∪ residual (pairwise disjoint)
---   Scope: holds at every cycle boundary — after each Phase 3 and at every Phase 1 entry. The one transient exception is the cycle's own anchor between the Phase 1 domains_touched write (which commits it there) and Phase 3 step 2 (which files it into a partition member): across the Phase 2 Stop the anchor is in domains_touched and in no member, by construction, since the member it belongs to is what Phase 2 is asking. Every path out of Phase 2 — typed answer or termination-only — reaches a step that files it.
--- Invariant: boundary_map = classified_entries(context_resolved ∪ user_responded ∪ dismissed ∪ final_gate_classified) ∪ (residual ↦ default_for_residual) — round-local completeness
+-- Every current entry is in B, even if unsettled or conditional; readouts and residual are derived views.
+-- settled and content.setting carry actual setting sources; proposal and content without setting remain provisional.
+-- A dependency change invalidates only the portions their sources no longer support; prior setting records remain reachable.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
-Dispatch-first rationale: BoundaryMap is a multi-consumer router. The captured kind must settle BEFORE the per-cycle loop opens — hence bound carries the up-front Phase 0b sync rather than emerging the kind cycle-by-cycle: downstream consumers reading a stable kind cannot tolerate a kind that shifts mid-loop. The DeficitFitCertificate (checked against the own claim and the route claims inscribed in this SKILL.md) keeps a misfit kind from entering the shared map — a kind a local route claim holds is routed away (deactivate) instead of polluting the multi-consumer signal. What a pass certifies is LOCAL admissibility, bound's own gate governing bound's own activation, not the absence of a claim anywhere in the wider protocol set: where two protocols' scopes both reach a situation, each protocol's own gate governs.
-Hermeneutic carry-over (kind-aware): an optional B_prior input (prior BoundaryMap detected in session context, together with the kind it was produced over) seeds the new invocation ONLY when its kind matches the captured kind (same-kind — same boundary question). Every kind shares the uniform disposition, so a mismatched prior's values are type-compatible; the guard is SEMANTIC: a kind-mismatched prior answers a DIFFERENT boundary question, so it is surfaced as advisory context, NOT seeded into boundary_map (seeding it would commit a wrong-question disposition into the multi-consumer signal). Seed entries are mutable in subsequent cycles and BoundaryEssence is re-crystallized from the current task scope. The seed enables a feedback loop where a downstream observation refines a prior BoundaryMap through re-invocation.
-Round-local BoundaryMap composition: each Phase 2 cycle produces a complete BoundaryMap (classified entries ∪ residual ↦ default_for_residual). The complete snapshot is citable as scope text for a realization-layer turn-condition primitive — the AIAutonomous and AIPropose entries delineate an Extension-progression scope whose exhaustion is a natural completion condition orthogonal to the in-protocol satisfaction signal that emits DefinedBoundary.
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.
+A receiving protocol or delegate reads DefinedBoundary with its record. It resolves the relevant entry's question, applicability, dependencies, limits, and setting sources before relying on a disposition or content. Use only B[d].settled as a grant; read tentative content and remainder as such.
+UserSupplies leaves the source's retained holder to supply the value. AIPropose permits proposal work while retaining that holder's selection. AIAutonomous permits choice only inside the cited grant. A missing entry, unreadable setting source, or changed prerequisite leaves that judgment unresolved; continue independent authorized work and reopen the affected boundary before dependent settlement.
+A grant to perform work preserves every checkpoint whose own contract requires the user's response. Reassignment does not enlarge authority. Carry the whole boundary and its residue, citing the setting record rather than converting the map into an uncited task list.
+When examination requires another capability, name the evidence or concrete comparison needed and preserve the pending judgment. This protocol defines the boundary; it does not claim to execute or enforce downstream work.
 ```
 
 ## Mode Activation
 
-`/bound` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
-
-### Activation exceptions
-
-Skip AI-guided activation when the current message or project rules already settle the boundary, when the user explicitly requests proceeding without boundary settlement, when the same domain and description were dismissed in this session, or when the task has one obvious boundary. A zero-signal probe still presents its finding and reasoning for correction.
-
-Heuristic detection may use multiple unsettled decision areas, delegation uncertainty, a preceding protocol's boundary signal, or a possibly stale prior BoundaryMap. These are discovery cues rather than additional activation predicates.
+- `/bound` remains directly invocable.
+- When a decision boundary or the structure needed to judge it is undefined, invoke the protocol with the available task context. Keep goal, success criteria, and scope open where the user has left them open.
+- During AI-guided activation, apply current safety boundaries, capability limits, and explicit instructions. Skip activation when source-defined direction already settles the requested boundary, when the user expressly requests proceeding without this interaction, or when the same unresolved finding was dismissed and its ground has not changed.
+- On explicit invocation with no undefined boundary, present the zero-signal finding and correction path. A single localized issue can still receive a concise whole-map presentation.
 
 ## Protocol
 
-### User-facing realization
-
-At kind dispatch, render each viable seed as a positive hypothesis with its cited evidence, differential future, and route-away condition, while keeping an open naming path for an emergent kind. On the single-dominant relay, present the captured kind and basis without a turn yield; when the user's wording itself names an emergent kind, carry that wording verbatim. A non-passing deficit-fit certificate remains visible as the reason for routing or re-synchronizing. When the certificate cannot say whose the kind is, put it to the user before anything binds: show the kind, its evidence, and which of the inscribed claims that evidence supports — or that none does — then ask whose it is, one option per supported claim (define the boundary here / hand it to that protocol, with its command hint where one exists / none of these, recorded and this activation ends). An answer here says whose the kind is and nothing about how its domains classify. Do not re-synchronize on ambiguity alone and do not drop an ambiguous kind without this question — a kind the certificate could not place is the user's to place.
-
-At each classification round, use everyday language to place the anchor domain beside its evidence, the current BoundaryEssence, the complete BoundaryMap snapshot, and the residual default with its derivation. Materialize the uniform dispositions for the captured kind as:
-
-- **I'll supply it** — the user supplies the boundary value.
-- **Draft options for me** — AI proposes candidates for the user to choose or steer.
-- **Decide within this scope** — AI resolves the boundary within the stated limits.
-- **Use the stated default** — commit the displayed residual default.
-
-Keep the satisfaction affordance outside that option set: the user may finish with the displayed default, finish with a stated override, continue to another cycle, or request the residual review. When one response supports several of those futures, present only the live readings and their consequences, then yield before routing.
-
-A same-kind prior BoundaryMap is identified as a mutable seed with its basis. A kind-mismatched prior and cross-session recall are advisory evidence only; say so when they are surfaced. At the final residual review, render the two typed dispositions in the same domain-specific language and keep downstream value provision lazy.
-
-Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
-
-### Intensity
-
-| Level | When | Format |
-|-------|------|--------|
-| Light | One localized boundary | Concise evidence, current default, and materialized dispositions |
-| Medium | Several related boundaries | Current map, essence, evidence, and one anchored classification |
-| Heavy | High-impact or conflicting boundaries | Detailed cited evidence, route-away distinctions, and residual consequences |
+- At the first presentation, show the relevant whole draft before asking the user to choose its boundary kind, applicable parts, or examination depth. Give every included item its decision-relevant reason and conditional connections. State the scope of discovery and what is unknown; do not require the user to invent an obligation inventory.
+- When the goal is open, distinguish the work that can investigate it, the judgment that would select it, and obligations conditional on that selection. Propose a way to handle those questions without supplying an unchosen goal.
+- At a whole-map gate, make existing user decisions, exercised AI discretion, unaccepted proposals, and unresolved items recognizable through their source and setting status. Show the proposed continuation and retained judgments so that accepting the displayed arrangement has a visible consequence.
+- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis. Keep the whole overview in view and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
+- At an opened settlement question, materialize UserSupplies, AIPropose, and AIAutonomous in the user's idiom: the named person supplies the decision, AI proposes for that person's selection, or AI chooses within stated limits. A displayed default is one of these proposals and binds only through its actual acceptance.
+- When the user corrects an assumption or scope, revise affected content and obligations, show their changed implications, and preserve independent commitments. Keep excluded or conditional parts legible in the remainder where they matter to later reliance.
+- When an answer says the map is sufficient, close at that depth once its commitments and residue are consistent with the next move. An unvisited axis stays exactly as grounded; finishing does not itself entrust unresolved decisions. Present the constituted whole and remaining questions without demanding a second approval of the same arrangement.
+- Before handing off or using a resulting boundary, read the COMPOSITION contract with its source record. Preserve the holder of every retained judgment, the reach of each grant, and any condition that must be revisited.
+- When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
 
 ## Rules
 
 - **Recognition over Recall**: Present structured options with anticipatable post-selection states.
 - **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
-- **Dynamic rendering**: Treat named kinds as recognition priors rather than a closed taxonomy; keep the emergent naming path visible wherever no single kind dominates.
-- **Prior-map provenance**: Structural seeding requires a same-session Horismos result with the same captured kind. Other remembered classifications remain advisory and never silently populate the map.
-- **Zero-signal surfacing**: Present a zero-signal finding with its reasoning and a path for the user to reopen a missed domain.
-- **Free-response separation**: Keep satisfaction, default override, and residual-review signals outside the typed classification options; a termination-only response adds no classification constructor.
-- **Default visibility**: Surface the residual default and its derivation before every classification gate. An implicit finish commits the value that was displayed in that round; an override remains reachable in the same response.
-- **Ambiguous response routing**: When a response supports several termination or continuation futures, present only those live readings with their consequences and yield before routing.
-- **Option-set relay test**: Present a single dominant kind as Extension. Constitution hypotheses remain viable under different readings of the live ground, and off-axis responses remain free-response pathways.
-- **Ambiguity surfaces**: An ambiguous certificate is put to the user at `Qa` with the claims its evidence supports, before any value space binds. The user's attribution — define it here, hand it to a named deficit, or none of these — is what settles pass, route, or the unattributable exit; the certificate never binds or drops a kind it could not place, the AI takes no second look at ground that has not moved, and ambiguity alone never re-synchronizes the dispatch.
+- **Whole before selection**: Construct and present the relevant provisional whole before asking what to settle, inspect, or entrust; the user's existing goal and map can remain incomplete.
+- **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole. Bind requested examination to the next presentation and to completion readiness, including through kind re-entry; a request to see content adopts none of it.
+- **Dynamic rendering**: Keep boundary kinds and examination dimensions runtime-grounded, with recognizable seeds and a path to extend or replace the framing.
+- **Source-bound settlement**: Distinguish proposals, content-setting acts, and boundary-setting acts. Apply acceptance only within its actual referent and limits; a displayed or completed AI proposal does not become the retained holder's choice.
+- **Dependency revision**: Reconcile changed ground and transitive dependents before a gate or terminal read, retaining supported decisions and recording unresolved consequences. An active answer changing the boundary question re-enters dispatch; a recognized withdrawal preserves the correction and exits without another round.
+- **Prior-map provenance**: Read prior same-kind boundaries through their setting record and authorized revisions. Preserve still-relevant unresolved domains and treat unavailable or mismatched prior authority as advisory.
+- **Settlement across delegation**: Carry and read the source-defined question, judgment holder, limits, dependencies, and residual at downstream use; work reassignment and a summary supply no additional grant.
+- **Sufficient closure**: Require an attributable sufficiency judgment for the current arrangement, preserve explicit residue, and continue only work consistent with it. Already-determined boundaries relay; silence and scan exhaustion supply no new answer.
+- **Zero-signal surfacing**: Present a zero-signal finding with its reasoning and a path to reopen missed structure.
+- **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, present those readings and their consequences before routing. Commit nothing from an unresolved reading.
+- **Option-set relay test**: Relay the captured kind only when citable live ground determines it; otherwise retain the kind question and emergent path. A relay still undergoes fail-closed local fit certification.
+- **Ambiguity surfaces**: A locally ambiguous certificate opens Qa before settlement; preserve Own, Route(d), or Unattributable as the actual control form, and do not re-certify unchanged evidence in place of the answer.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

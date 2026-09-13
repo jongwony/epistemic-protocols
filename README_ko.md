@@ -113,7 +113,6 @@ claude plugin install route@epistemic-protocols
 | `/white-bear` | 에이전트에게 하지 말 것을 말하는 산문 — 잘못된 대상을 계속 시야에 두는 금지 프레이밍과 부정 앵커링을 찾기 |
 | `/zero-shot` | 원칙이면 일반화될 자리에 예시로 앵커링한 산문 — 그 자리를 찾아 명명 |
 | **프로젝트 조타** | |
-| `/steer` | 규칙과 에이전트의 실제 행동이 벌어졌을 때 — drift를 감사하고 클러스터별 verdict를 내려 프로젝트 프로필을 다시 쓰기 |
 | `/realign` | 프로젝트 가이드의 direction line이 작업 방향과 더는 맞지 않을 때 — inscribed line, 외부 신호, 당신의 현재 이해를 융합 |
 | **Codex 위임** | |
 | `/goal-research` | 백그라운드 Codex 세션에서 범위를 잡고 외부 검증까지 받고 싶은 사실 리서치 질문 — 전체 trace를 되돌려 받음 |

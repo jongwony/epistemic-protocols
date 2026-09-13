@@ -22,7 +22,6 @@
 | `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 재구성된 옵션 집합, 또는 검사가 닫지 못한 경우 수리 공간·다툼 있는 읽기·어느 쪽도 답이 아닌 두 집합 |
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
-| `/steer` | 프로젝트 프로필 재조정 — 세션의 calibration drift 를 감사하고 cluster 별 사용자 verdict | 갱신된 project-profile 규칙 + settled-direction 절 |
 | `/realign` | 3-horizon 융합으로 프로젝트 가이드 direction line 도출 | 프로젝트 가이드에 기록된 fused direction line |
 | `/goal-research` | 백그라운드 Codex CLI 세션에 위임한 리서치 (`goal` 범위 설정 + Aitesis 검증) | 되돌려 받은 리서치 trace |
 
@@ -100,6 +99,13 @@ ClaimIntake → ScopedClaimFrame → BoundedTestSpace → EmpiricalEvidence → 
 - scoped claim 전용 — 절대 동등성이 아니라 정의된 조건 범위 내 실패확률 저감
 - residual 여집합은 1차 산출물로 후속 프로토콜에 라우팅
 
+## Review loop 실행 환경
+
+Claude Code와 Codex 모두에서 `codex`, `code-review`로 리뷰 소스를 선택합니다.
+[런타임 계약](skills/review-loop/SKILL.md)이 현재 호스트 참조로 연결하고,
+선택한 소스 어댑터만 읽습니다. Claude 리뷰에는 지정된 로컬 범위를 검토할 수
+있는 스킬이, Codex 리뷰에는 CLI가 필요합니다.
+
 ## 아키텍처
 
 ```
@@ -116,7 +122,6 @@ epistemic-cooperative/
     ├── gate-check/SKILL.md       # /gate-check 자문 검증 결정 게이트
     ├── white-bear/SKILL.md       # /white-bear 경쟁-대상 언급 프로즈 감사
     ├── zero-shot/SKILL.md        # /zero-shot 앵커링 예시 프로즈 감사
-    ├── steer/SKILL.md            # /steer 프로젝트 프로필 재조정
     ├── realign/SKILL.md          # /realign 프로젝트 가이드 direction line 융합
     └── goal-research/SKILL.md    # /goal-research Codex 위임 리서치
 ```
@@ -135,7 +140,6 @@ epistemic-cooperative/
 | 지시문 산문의 한 절이 어디에 속하는지 정할 때 | `/place` |
 | 초안된 옵션 집합이 사용자에게 닿기 전에 검사할 때 | `/gate-check` |
 | 프로즈의 금지 프레이밍·앵커링 예시를 감사할 때 | `/white-bear`, `/zero-shot` |
-| 관찰된 calibration drift 로 프로젝트 프로필을 갱신할 때 | `/steer` |
 | 프로젝트 가이드 direction line 을 다시 도출할 때 | `/realign` |
 | 리서치 질문을 Codex 에 위임할 때 | `/goal-research` |
 ## 사용법
@@ -149,6 +153,10 @@ epistemic-cooperative/
 /place path/to/SKILL.md
 /goal-research <question>
 ```
+
+`/review-loop`는 환경이 일치하는 리뷰어 기능 확인 기록을 재사용하고, 첫 읽기 전용
+리뷰에서 명령과 범위를 확인합니다. PR의 `head`/`stacked` 수정 반영 위치를 생략하면
+첫 수정 전에 확정하며, 그 선택 때문에 리뷰를 늦추지 않습니다.
 
 ## 저자
 
