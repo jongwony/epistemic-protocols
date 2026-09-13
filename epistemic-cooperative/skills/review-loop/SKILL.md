@@ -243,8 +243,8 @@ destination through [PR scope](references/pr-scope.md) before the first edit.
    unwritten sites obey
    their screens. An adaptation-free pass needs no re-entry. After reconciliation and
    checks, including explicit unavailable-check limits, obtain the full re-review.
-6. After a judgment returned to Phase 3 is settled, resume the pending scan or check
-   in the same apply pass with that answer. Screen any newly included sites; a fit
+6. After a judgment returned to Phase 3 is settled, resume the pending step in the
+   same apply pass with that answer. Screen any newly included sites; a fit
    call already completed in that pass remains completed.
 
 ### Phase 5 — Re-review and stop on evidence
