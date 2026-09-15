@@ -1,7 +1,5 @@
 # AGENTS.md
 
-This file provides always-loaded guidance for coding agents when working in this repository. Keep it short: put orientation, decision rules, and verification commands here; use linked docs and `rg` for recoverable detail.
-
 ## Northstar
 
 Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it reduces cognitive load by eliciting unknowns into utterance, constraining AI attention without bias, and resolving interaction deficits at their root within bounded loops before local misalignment hardens into system-wide rework.
@@ -45,7 +43,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 ## Progressive Disclosure
 
-- Keep this file focused on high-risk decisions and commands needed before search.
+- Keep this file focused on orientation, high-risk decisions, and commands needed before search.
 - Do not mirror long protocol descriptions, utility-skill internals, CI workflow details, or full architecture trees here when a linked source is authoritative.
 - Use `README.md`, `docs/`, `.claude/rules/`, `.claude/principles/`, `.claude/skills/verify/`, and per-skill `SKILL.md` files as the next layer of detail.
 - When adding guidance, first ask whether `rg`, `find`, or a linked doc would recover it cheaply at the point of need. If yes, add a pointer rather than copying the content.
