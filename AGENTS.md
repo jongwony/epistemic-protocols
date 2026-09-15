@@ -65,7 +65,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
   - `.claude/skills/verify/scripts/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation for the same reason `/verify` does — see the concurrency note under `## Verification`.
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`
-- Installer: `scripts/install.sh`; `README.md` is the source of truth for the install set.
+- Installer: `scripts/install.sh` (and `scripts/install-codex.sh`); the install set derives from `.claude-plugin/marketplace.json`.
 
 ## Verification
 
