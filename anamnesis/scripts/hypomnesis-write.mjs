@@ -113,6 +113,17 @@ const MAX_ALL_CHARS = 80_000;
 const FULL_TEXT_PROMPT_CHARS = 30_000;
 const HAIKU_TIMEOUT = 120_000;
 
+// Every full-text prompt joins its texts with this, so it is what a sample's
+// length is made of and what a whole-source count has to include.
+const TEXT_SEPARATOR = "\n---\n";
+
+// Length of joining `count` texts of `chars` characters total with
+// TEXT_SEPARATOR. Both sides of an omitted_chars subtraction are measured
+// through this, so neither side counts a separator the other does not.
+function joinedLength(chars, count) {
+  return count > 0 ? chars + TEXT_SEPARATOR.length * (count - 1) : 0;
+}
+
 const TRUNCATION_NOTICE =
   "NOTE: the session content below is the opening portion of a longer session; "
   + "its later turns are absent. Describe only what this portion shows, and say "
@@ -120,7 +131,7 @@ const TRUNCATION_NOTICE =
 
 // The prompts' own view of the session, and the one place their bound applies.
 function fullTextSample(allTexts) {
-  const joined = allTexts.join("\n---\n");
+  const joined = allTexts.join(TEXT_SEPARATOR);
   return {
     sample: joined.slice(0, FULL_TEXT_PROMPT_CHARS),
     truncated: joined.length > FULL_TEXT_PROMPT_CHARS,
@@ -131,11 +142,14 @@ function fullTextSample(allTexts) {
 // realization reports 0 when its event_msg channel is empty: Claude has no
 // second channel to cross-check human turns against, so no turn is witnessed
 // as unverified — 0 here means unwitnessed, not verified.
-function computeSourceScan(totalTextChars, sampleChars, skippedLines) {
+// Both arguments are measured in the joined representation (see joinedLength);
+// a raw character sum on one side and a joined sample length on the other
+// subtract to less than the real omission.
+function computeSourceScan(wholeJoinedChars, sampleChars, skippedLines) {
   return {
     skipped_lines: skippedLines,
     unverified_user_turns: 0,
-    omitted_chars: Math.max(0, totalTextChars - sampleChars),
+    omitted_chars: Math.max(0, wholeJoinedChars - sampleChars),
   };
 }
 
@@ -260,8 +274,11 @@ function parseSession(transcriptPath) {
   let sawAnyAssistantUsage = false;
   let skippedLines = 0;
   // Counted past MAX_ALL_CHARS, unlike totalChars, because what the extraction
-  // omitted is the difference between the whole source and the sample.
+  // omitted is the difference between the whole source and the sample. The
+  // count rides alongside the chars because the joined representation a prompt
+  // receives spends TEXT_SEPARATOR between every pair.
   let totalTextChars = 0;
+  let totalTextCount = 0;
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
@@ -273,7 +290,7 @@ function parseSession(transcriptPath) {
     return {
       userMsgs, allTexts, timestamps, protocols: [],
       tokenEstimate: 0, cwd: "",
-      totalTextChars: 0, skippedLines: 0,
+      totalTextChars: 0, totalTextCount: 0, skippedLines: 0,
     };
   }
   let totalChars = 0;
@@ -306,7 +323,7 @@ function parseSession(transcriptPath) {
 
     if (etype === "user" || etype === "assistant") {
       const text = textFromContent(entry.message?.content ?? "");
-      if (text) totalTextChars += text.length;
+      if (text) { totalTextChars += text.length; totalTextCount += 1; }
       if (text && totalChars < MAX_ALL_CHARS) {
         allTexts.push(text);
         totalChars += text.length;
@@ -345,6 +362,7 @@ function parseSession(transcriptPath) {
     sawAnyAssistantUsage,
     cwd,
     totalTextChars,
+    totalTextCount,
     skippedLines,
   };
 }
@@ -1028,7 +1046,7 @@ function main() {
   const {
     userMsgs, allTexts, timestamps, protocols, tokenEstimate,
     lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
-    totalTextChars, skippedLines,
+    totalTextChars, totalTextCount, skippedLines,
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
 
@@ -1036,7 +1054,9 @@ function main() {
   // parse buffer: the buffer is an intermediate, and a reader weighing this
   // record needs the gap between the whole source and what was read.
   const scan = computeSourceScan(
-    totalTextChars, fullTextSample(allTexts).sample.length, skippedLines
+    joinedLength(totalTextChars, totalTextCount),
+    fullTextSample(allTexts).sample.length,
+    skippedLines,
   );
   if (scan.omitted_chars > 0 || scan.skipped_lines > 0) {
     logErr(`source_scan: omitted_chars=${scan.omitted_chars} skipped_lines=${scan.skipped_lines}`);
@@ -1211,6 +1231,7 @@ export {
   buildHaikuArgs,
   callHaiku,
   computeSourceScan,
+  joinedLength,
   sourceScanLines,
   fullTextSample,
   buildNarrativePrompt,

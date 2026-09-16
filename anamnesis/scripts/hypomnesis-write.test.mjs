@@ -14,6 +14,7 @@ import {
   buildHaikuArgs,
   callHaiku,
   computeSourceScan,
+  joinedLength,
   sourceScanLines,
   fullTextSample,
   buildNarrativePrompt,
@@ -229,6 +230,8 @@ test("callHaiku delivers the prompt on stdin, never in argv", () => {
 
 // --- source_scan: the record says how much of its source it read ---
 
+const TEXT_SEPARATOR_LEN = "\n---\n".length;
+
 test("computeSourceScan: omitted_chars is the gap between source and sample", () => {
   const scan = computeSourceScan(127_209, 30_000, 0);
   assert.equal(scan.omitted_chars, 97_209);
@@ -240,6 +243,34 @@ test("computeSourceScan: omitted_chars is the gap between source and sample", ()
 test("computeSourceScan: a wholly-read source omits nothing and never goes negative", () => {
   assert.equal(computeSourceScan(1_200, 1_200, 0).omitted_chars, 0);
   assert.equal(computeSourceScan(900, 30_000, 0).omitted_chars, 0);
+});
+
+// The separators a joined sample spends are characters of the bound, so a
+// whole-source count that omits them subtracts to less than the real gap. The
+// falsifying case is two texts that exactly fill the bound between them: the
+// prompt is truncated and a raw-sum count still reports a complete read.
+test("omitted_chars: a sample the prompt flagged as truncated never publishes zero", () => {
+  const texts = ["a".repeat(15_000), "b".repeat(15_000)];
+  const { sample, truncated } = fullTextSample(texts);
+  assert.ok(truncated, "the joined form exceeds the bound — the fixture must reach the cut");
+  const rawSum = texts.reduce((n, t) => n + t.length, 0);
+  assert.equal(computeSourceScan(rawSum, sample.length, 0).omitted_chars, 0,
+    "a raw-sum count is what this guards against; if this stops holding the fixture drifted");
+  // The composition main() performs.
+  const scan = computeSourceScan(joinedLength(rawSum, texts.length), sample.length, 0);
+  assert.ok(scan.omitted_chars > 0,
+    "truncated prompt with omitted_chars 0 — the frontmatter contradicts the prompt");
+  assert.equal(scan.omitted_chars, TEXT_SEPARATOR_LEN);
+});
+
+test("joinedLength: one separator per pair, none for a single text or none at all", () => {
+  assert.equal(joinedLength(0, 0), 0);
+  assert.equal(joinedLength(100, 1), 100);
+  assert.equal(joinedLength(100, 2), 100 + TEXT_SEPARATOR_LEN);
+  assert.equal(joinedLength(100, 4), 100 + TEXT_SEPARATOR_LEN * 3);
+  // Measured against the real join rather than against the formula restated.
+  const texts = ["ab", "cd", "ef"];
+  assert.equal(joinedLength(6, 3), texts.join("\n---\n").length);
 });
 
 test("computeSourceScan: unparsable transcript lines are counted", () => {
