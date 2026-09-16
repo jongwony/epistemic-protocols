@@ -11,6 +11,8 @@ import {
   extractCrossRefs,
   buildClueMd,
   buildMarkersMd,
+  buildHaikuArgs,
+  callHaiku,
   invokes,
   skillCalls,
   resolveSkillProtocol,
@@ -186,4 +188,37 @@ test("protocolMap covers every protocol plugin command on disk", () => {
   assert.deepEqual(missing, [], `protocolMap is missing: ${missing.map(([c]) => c).join(", ")}`);
   const wrongPlugin = commands.filter(([c, p]) => protocolMap[c]?.[1] !== p);
   assert.deepEqual(wrongPlugin, [], `protocolMap plugin mismatch: ${wrongPlugin.map(([c, p]) => `${c} should be ${p}`).join(", ")}`);
+});
+
+// --tools is variadic, so anything positional trailing it is parsed as a
+// tool-name list and the CLI then exits with "Input must be provided" — every
+// extraction returns empty and the record is discarded. The 2026-09-04
+// injection guard put --tools "" at the end of argv, which is what made a
+// trailing prompt unreachable. Both properties are asserted together: the guard
+// stays, and no positional rides behind it.
+test("buildHaikuArgs keeps --tools \"\" and carries no positional prompt", () => {
+  const args = buildHaikuArgs();
+  const toolsAt = args.indexOf("--tools");
+  assert.notEqual(toolsAt, -1, "--tools \"\" is the injection guard — it must not be dropped");
+  assert.equal(args[toolsAt + 1], "", "--tools must disable every built-in tool");
+  assert.equal(toolsAt + 1, args.length - 1, "nothing may follow --tools: it would be read as a tool name");
+  for (const a of args) {
+    assert.ok(a === "" || a.startsWith("-") || args[args.indexOf(a) - 1]?.startsWith("-"),
+      `argv carries a stray positional: ${JSON.stringify(a)}`);
+  }
+});
+
+test("callHaiku delivers the prompt on stdin, never in argv", () => {
+  const prompt = "Session content:\n--tools !errors.As --base -p decoy tokens";
+  let seen = null;
+  const out = callHaiku(prompt, {
+    run: (file, args, opts) => { seen = { file, args, opts }; return "  result  "; },
+  });
+  assert.equal(out, "result");
+  assert.equal(seen.file, "claude");
+  assert.equal(seen.opts.input, prompt, "prompt must travel on stdin");
+  assert.ok(!seen.args.includes(prompt), "prompt must not appear in argv");
+  // A prompt fragment reaching argv would be captured by --tools just as the
+  // whole prompt was; assert the argv is exactly the flag set.
+  assert.deepEqual(seen.args, buildHaikuArgs());
 });
