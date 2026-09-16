@@ -111,6 +111,10 @@ const MAX_ALL_CHARS = 80_000;
 // source_scan measures omission against it, and a literal repeated at each
 // call site can drift from the count that publishes it.
 const FULL_TEXT_PROMPT_CHARS = 30_000;
+// What the clue prompt receives. It reads the user-message stream rather than
+// the full text, and is bounded twice: by message count and by characters.
+const CLUE_PROMPT_MSGS = 30;
+const CLUE_PROMPT_CHARS = 20_000;
 const HAIKU_TIMEOUT = 120_000;
 
 // Every full-text prompt joins its texts with this, so it is what a sample's
@@ -138,6 +142,20 @@ function fullTextSample(allTexts) {
   };
 }
 
+// The clue prompt's own view, and the one place its two bounds apply.
+// cleanedJoined is the whole cleaned stream, so the gap to `sample` carries
+// both the message-count cut and the character cut.
+function cluePromptSample(userMsgs) {
+  const cleaned = userMsgs
+    .filter((m) => !isNoise(m.text))
+    .map((m) => cleanText(m.text))
+    .filter((t) => t.length > 5);
+  return {
+    sample: cleaned.slice(0, CLUE_PROMPT_MSGS).join(TEXT_SEPARATOR).slice(0, CLUE_PROMPT_CHARS),
+    cleanedJoined: cleaned.join(TEXT_SEPARATOR).length,
+  };
+}
+
 // SKILL.md SourceScan. unverified_user_turns stays 0 for the reason the Codex
 // realization reports 0 when its event_msg channel is empty: Claude has no
 // second channel to cross-check human turns against, so no turn is witnessed
@@ -150,6 +168,44 @@ function computeSourceScan(wholeJoinedChars, sampleChars, skippedLines) {
     skipped_lines: skippedLines,
     unverified_user_turns: 0,
     omitted_chars: Math.max(0, wholeJoinedChars - sampleChars),
+  };
+}
+
+// One scan per extraction path. The six artifacts do not share a sample, so a
+// single scan describes at most the path it was measured on and misstates the
+// rest; each artifact carries the scan of the path that produced it.
+//   clue      — the user-message stream under CLUE_PROMPT_MSGS/CLUE_PROMPT_CHARS
+//   semantic  — the joined full text under FULL_TEXT_PROMPT_CHARS
+//   retained  — the parse buffer under MAX_ALL_CHARS
+// skipped_lines is a parse-level count and is the same in all three.
+function buildSourceScans({
+  userMsgs, allTexts, totalTextChars, totalTextCount,
+  totalUserChars, totalUserCount, skippedLines,
+}) {
+  const wholeJoined = joinedLength(totalTextChars, totalTextCount);
+
+  // Beyond MAX_USER_MSGS a user message never reaches the cleaned stream, so
+  // its characters are added raw. Raw is never shorter than cleaned, which
+  // overstates rather than understates — the safe direction for a field whose
+  // whole use is to warn that a record read less than its source.
+  const retainedUserJoined = joinedLength(
+    userMsgs.reduce((n, m) => n + m.text.length, 0), userMsgs.length,
+  );
+  const userResidue = Math.max(
+    0, joinedLength(totalUserChars, totalUserCount) - retainedUserJoined,
+  );
+  const clue = cluePromptSample(userMsgs);
+
+  return {
+    clue: computeSourceScan(
+      clue.cleanedJoined + userResidue, clue.sample.length, skippedLines,
+    ),
+    semantic: computeSourceScan(
+      wholeJoined, fullTextSample(allTexts).sample.length, skippedLines,
+    ),
+    retained: computeSourceScan(
+      wholeJoined, allTexts.join(TEXT_SEPARATOR).length, skippedLines,
+    ),
   };
 }
 
@@ -279,6 +335,10 @@ function parseSession(transcriptPath) {
   // receives spends TEXT_SEPARATOR between every pair.
   let totalTextChars = 0;
   let totalTextCount = 0;
+  // The clue path's own source. Counted past MAX_USER_MSGS for the reason the
+  // full-text totals are counted past MAX_ALL_CHARS.
+  let totalUserChars = 0;
+  let totalUserCount = 0;
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
@@ -290,7 +350,8 @@ function parseSession(transcriptPath) {
     return {
       userMsgs, allTexts, timestamps, protocols: [],
       tokenEstimate: 0, cwd: "",
-      totalTextChars: 0, totalTextCount: 0, skippedLines: 0,
+      totalTextChars: 0, totalTextCount: 0,
+      totalUserChars: 0, totalUserCount: 0, skippedLines: 0,
     };
   }
   let totalChars = 0;
@@ -311,6 +372,8 @@ function parseSession(transcriptPath) {
       for (const [slash, [name, plugin]] of Object.entries(protocolMap)) {
         if (invokes(text, slash, plugin)) protocols.add(name);
       }
+      totalUserChars += text.length;
+      totalUserCount += 1;
       if (userMsgs.length < MAX_USER_MSGS) userMsgs.push({ text, ts });
     }
 
@@ -363,6 +426,8 @@ function parseSession(transcriptPath) {
     cwd,
     totalTextChars,
     totalTextCount,
+    totalUserChars,
+    totalUserCount,
     skippedLines,
   };
 }
@@ -370,12 +435,7 @@ function parseSession(transcriptPath) {
 // --- Prompt Builders ---
 
 function buildCluePrompt(userMsgs) {
-  const cleaned = userMsgs
-    .filter((m) => !isNoise(m.text))
-    .map((m) => cleanText(m.text))
-    .filter((t) => t.length > 5);
-
-  const sample = cleaned.slice(0, 30).join("\n---\n").slice(0, 20_000);
+  const { sample } = cluePromptSample(userMsgs);
 
   return `You are a session indexer. Extract recall anchors from user messages only.
 
@@ -1046,20 +1106,22 @@ function main() {
   const {
     userMsgs, allTexts, timestamps, protocols, tokenEstimate,
     lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
-    totalTextChars, totalTextCount, skippedLines,
+    totalTextChars, totalTextCount, totalUserChars, totalUserCount, skippedLines,
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
 
-  // Measured against what the extraction prompts received, not against the
-  // parse buffer: the buffer is an intermediate, and a reader weighing this
-  // record needs the gap between the whole source and what was read.
-  const scan = computeSourceScan(
-    joinedLength(totalTextChars, totalTextCount),
-    fullTextSample(allTexts).sample.length,
-    skippedLines,
-  );
-  if (scan.omitted_chars > 0 || scan.skipped_lines > 0) {
-    logErr(`source_scan: omitted_chars=${scan.omitted_chars} skipped_lines=${scan.skipped_lines}`);
+  // Measured per extraction path against what that path's prompt received: a
+  // reader weighing one artifact needs the gap between the whole source and
+  // what produced THAT artifact.
+  const scans = buildSourceScans({
+    userMsgs, allTexts, totalTextChars, totalTextCount,
+    totalUserChars, totalUserCount, skippedLines,
+  });
+  for (const [pathName, pathScan] of Object.entries(scans)) {
+    if (pathScan.omitted_chars > 0 || pathScan.skipped_lines > 0) {
+      logErr(`source_scan[${pathName}]: omitted_chars=${pathScan.omitted_chars}`
+        + ` skipped_lines=${pathScan.skipped_lines}`);
+    }
   }
 
   // Observability for stale token estimates (final assistant turn had no fresh
@@ -1110,7 +1172,7 @@ function main() {
     const clueRaw = callHaiku(buildCluePrompt(userMsgs));
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs, scan);
+      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs, scans.clue);
     } else {
       logErr(`clue validation failed: invalid schema`);
     }
@@ -1123,7 +1185,7 @@ function main() {
     const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
     vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
-      files["vector.md"] = buildVectorMd(sessionId, date, vectorData, scan);
+      files["vector.md"] = buildVectorMd(sessionId, date, vectorData, scans.semantic);
     } else {
       logErr(`vector validation failed: invalid schema`);
     }
@@ -1139,7 +1201,7 @@ function main() {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
         sessionId, date, startedAt, lastTurnAt, sessionCwd,
-        topics, protocols, narrativeData, scan,
+        topics, protocols, narrativeData, scans.semantic,
       );
     } else {
       logErr(`narrative validation failed: invalid schema`);
@@ -1184,7 +1246,7 @@ function main() {
 
   try {
     const refs = extractEntropyRefs(allTexts);
-    files["entropy.md"] = buildEntropyMd(sessionId, date, refs, scan);
+    files["entropy.md"] = buildEntropyMd(sessionId, date, refs, scans.retained);
   } catch (e) {
     logErr(`entropy extraction failed: ${e.message}`);
   }
@@ -1202,7 +1264,7 @@ function main() {
       const corpusRoot = path.join(slugDir, "hypomnesis");
       coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
     }
-    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason, scan);
+    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason, scans.retained);
   } catch (e) {
     logErr(`coinage extraction failed: ${e.message}`);
   }
@@ -1212,7 +1274,7 @@ function main() {
   if (markerData) {
     try {
       files["markers.md"] = buildMarkersMd(
-        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD, scan,
+        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD, scans.semantic,
       );
     } catch (e) {
       logErr(`markers assembly failed: ${e.message}`);
@@ -1230,6 +1292,8 @@ export {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  buildSourceScans,
+  cluePromptSample,
   computeSourceScan,
   joinedLength,
   sourceScanLines,

@@ -13,6 +13,7 @@ import {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  buildSourceScans,
   computeSourceScan,
   joinedLength,
   sourceScanLines,
@@ -275,6 +276,66 @@ test("joinedLength: one separator per pair, none for a single text or none at al
 
 test("computeSourceScan: unparsable transcript lines are counted", () => {
   assert.equal(computeSourceScan(10, 10, 3).skipped_lines, 3);
+});
+
+// The six artifacts are built from three different samples, so a scan measured
+// on one of them describes the other two wrongly. Each case below is a session
+// shape where two paths disagree; a single shared scan cannot satisfy any of
+// them.
+test("buildSourceScans: the clue bound cuts where the full-text bound does not", () => {
+  const text = "u".repeat(25_000);
+  const scans = buildSourceScans({
+    userMsgs: [{ text, ts: "" }], allTexts: [text],
+    totalTextChars: text.length, totalTextCount: 1,
+    totalUserChars: text.length, totalUserCount: 1,
+    skippedLines: 0,
+  });
+  // 25,000 characters of user text: the clue prompt takes 20,000 of them, and
+  // neither the 30k semantic bound nor the 80k buffer bound is reached.
+  assert.equal(scans.clue.omitted_chars, 5_000);
+  assert.equal(scans.semantic.omitted_chars, 0);
+  assert.equal(scans.retained.omitted_chars, 0);
+});
+
+test("buildSourceScans: the semantic bound cuts where the parse buffer does not", () => {
+  const texts = ["a".repeat(25_000), "b".repeat(25_000)];
+  const scans = buildSourceScans({
+    userMsgs: [], allTexts: texts,
+    totalTextChars: 50_000, totalTextCount: 2,
+    totalUserChars: 0, totalUserCount: 0,
+    skippedLines: 0,
+  });
+  assert.equal(scans.semantic.omitted_chars, 50_000 + TEXT_SEPARATOR_LEN - 30_000);
+  assert.equal(scans.retained.omitted_chars, 0, "the 80k buffer held the whole session");
+  assert.notEqual(scans.semantic.omitted_chars, scans.retained.omitted_chars,
+    "one shared scan cannot describe both — that is what the split exists for");
+});
+
+test("buildSourceScans: user messages dropped past the retention cap are counted", () => {
+  const text = "m".repeat(100);
+  const scans = buildSourceScans({
+    userMsgs: Array.from({ length: 150 }, () => ({ text, ts: "" })),
+    allTexts: [text],
+    totalTextChars: 100, totalTextCount: 1,
+    // 200 user messages reached the transcript; MAX_USER_MSGS retained 150.
+    totalUserChars: 100 * 200, totalUserCount: 200,
+    skippedLines: 0,
+  });
+  assert.ok(scans.clue.omitted_chars > 0,
+    "50 user messages never reached the clue stream — the record must not read as whole");
+});
+
+test("buildSourceScans: skipped_lines is a parse-level count and is shared", () => {
+  const scans = buildSourceScans({
+    userMsgs: [{ text: "hello there", ts: "" }], allTexts: ["hello there"],
+    totalTextChars: 11, totalTextCount: 1,
+    totalUserChars: 11, totalUserCount: 1,
+    skippedLines: 7,
+  });
+  for (const [name, scan] of Object.entries(scans)) {
+    assert.equal(scan.skipped_lines, 7, `${name} lost the parse-level count`);
+    assert.equal(scan.omitted_chars, 0, `${name} read a short session whole`);
+  }
 });
 
 test("sourceScanLines: emits one inline mapping, and nothing when uncaptured", () => {
