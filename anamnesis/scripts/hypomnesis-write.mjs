@@ -180,15 +180,8 @@ function channelUnionJoined(allTexts, allTextIsUser, userMsgs, limit) {
 }
 
 // One coverage per EXTRACTION: how much of the session that extraction's own
-// bound kept it from reading. This is producer-side fact — a bound applied to a
-// parsed session yields one number — and it names no artifact, because which
-// file an extraction ends up in is decided by whether it ran.
-//
-//   cluePrompt — the cleaned user stream under CLUE_PROMPT_MSGS/CLUE_PROMPT_CHARS
-//   crossRefs  — the head CROSS_REF_MSGS of both channels
-//   semantic   — the joined full text under FULL_TEXT_PROMPT_CHARS
-//   entropy    — the parse buffer under MAX_ALL_CHARS
-//   coinage    — the parse buffer and the user stream together
+// bound kept it from reading. Names no artifact — which file an extraction
+// reaches is settled at assembly, by scanOf.
 function buildCoverages({
   userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
   totalUserChars, totalUserCount,
@@ -221,29 +214,19 @@ function buildCoverages({
   };
 }
 
-// The scan a file carries, composed where that file is assembled from the
-// extractions that actually went into it. Each contribution is the extraction's
-// own result paired with the coverage of the read that produced it; a result
-// that is null was never produced, so it contributes no coverage and the file
-// is not charged for a bound nothing of it came through. Composing at the
-// assembly site is what keeps this checkable: the result named here is the same
-// value the builder receives, so a claim about what fed the file and what
-// actually fed it cannot drift apart.
+// The scan a file carries. Each contribution is an extraction's own result
+// paired with the coverage of the read that produced it; a null result was
+// never produced and contributes no coverage.
 //
 // The count is the widest omission among the contributions, so
-// `omitted_chars == 0` means no extraction feeding this file dropped anything
-// — which is what SKILL.md's "built from less than its whole source" has to
-// mean for the field to be readable at all. `skipped_lines` is a parse-level
-// count, upstream of every bound, and is the same wherever a scan is published.
+// `omitted_chars == 0` means no extraction feeding this file dropped anything.
+// `skipped_lines` is a parse-level count, upstream of every bound, and is the
+// same wherever a scan is published. `unverified_user_turns` is 0 because
+// Claude has no second channel to cross-check human turns against: 0 here
+// means unwitnessed, not verified.
 //
-// `unverified_user_turns` stays 0 for the reason the Codex realization reports
-// 0 when its event_msg channel is empty: Claude has no second channel to
-// cross-check human turns against, so no turn is witnessed as unverified — 0
-// here means unwitnessed, not verified.
-//
-// Null when nothing contributed: no bounded read happened, so there is no
-// omission to report, and SKILL.md already gives a reader the absent field as
-// neutral. A row of zeros there would claim a complete read nobody performed.
+// Null when nothing contributed — no bounded read fed the file, so there is no
+// omission to report and the field is absent.
 function scanOf(skippedLines, ...contributions) {
   const omissions = contributions
     .filter(([result]) => result != null)
