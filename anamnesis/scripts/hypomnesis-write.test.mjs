@@ -321,21 +321,26 @@ test("the prompt bounds leave the spawn-level class reachable, in bytes", () => 
 });
 
 // The measurement the bound above rests on, pinned rather than recalled: the
-// same character count crosses the buffer in one language and not in another.
-// Korean is the case that occurs here — these sessions are predominantly
-// Korean — and it is the case a character-indexed check cannot see.
-test("a Korean sample under the character bound exceeds the pipe buffer in bytes", () => {
-  const ko = "컨텍스트를 메우는 같은 작업이 반복되었습니다. 세션 기록이 정본으로 저장됩니다. ";
-  let sample = "";
-  while (sample.length < PROMPT_SAMPLE_CHARS) sample += ko;
-  sample = sample.slice(0, PROMPT_SAMPLE_CHARS);
+// same character count crosses the buffer in one script and not in another.
+// Built from the Hangul syllables block (U+AC00-U+D7A3) by code point rather
+// than from a prose sample, because the property under test is the encoding
+// width of a three-byte script and not any particular sentence. This is the
+// script these sessions are written in, and the case a character-indexed check
+// cannot see.
+const HANGUL_SYLLABLES_START = 0xAC00;
+const HANGUL_SYLLABLES_COUNT = 11172;
 
-  assert.ok(sample.length <= PROMPT_SAMPLE_CHARS,
-    "the sample must sit inside the character bound the writer cuts at");
+test("a three-byte script under the character bound exceeds the pipe buffer in bytes", () => {
+  const sample = Array.from({ length: PROMPT_SAMPLE_CHARS }, (_, i) =>
+    String.fromCodePoint(HANGUL_SYLLABLES_START + (i % HANGUL_SYLLABLES_COUNT))).join("");
+  const ascii = "x".repeat(PROMPT_SAMPLE_CHARS);
+
+  assert.equal(sample.length, PROMPT_SAMPLE_CHARS,
+    "the sample must sit exactly on the character bound the writer cuts at");
   assert.ok(Buffer.byteLength(sample, "utf8") > PIPE_BUFFER_BYTES,
-    `a ${sample.length}-character Korean sample encodes to ${Buffer.byteLength(sample, "utf8")} bytes, which no longer clears the ${PIPE_BUFFER_BYTES}-byte pipe buffer — the character bound and the byte limit have stopped diverging and the comments above need re-reading`);
-  assert.ok("x".repeat(PROMPT_SAMPLE_CHARS).length === Buffer.byteLength("x".repeat(PROMPT_SAMPLE_CHARS), "utf8"),
-    "the ASCII counterpart is the control: same character count, one byte each");
+    `a ${sample.length}-character sample of a three-byte script encodes to ${Buffer.byteLength(sample, "utf8")} bytes, which no longer clears the ${PIPE_BUFFER_BYTES}-byte pipe buffer — the character bound and the byte limit have stopped diverging and the comments above need re-reading`);
+  assert.ok(Buffer.byteLength(ascii, "utf8") < PIPE_BUFFER_BYTES,
+    "the ASCII control must stay under it: the same character count, one byte each, is what makes the bound alone undecidable");
 });
 
 // The spawn-level class in general: `message` is bare and the child's diagnosis
