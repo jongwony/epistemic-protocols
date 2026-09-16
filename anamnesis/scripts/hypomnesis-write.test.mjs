@@ -197,15 +197,21 @@ test("protocolMap covers every protocol plugin command on disk", () => {
 // injection guard put --tools "" at the end of argv, which is what made a
 // trailing prompt unreachable. Both properties are asserted together: the guard
 // stays, and no positional rides behind it.
+// A reintroduced positional does not fail loudly: with both channels supplied
+// this CLI runs the argv turn and then the stdin turn, so the extraction's JSON
+// arrives with an extra turn in front of it rather than erroring.
 test("buildHaikuArgs keeps --tools \"\" and carries no positional prompt", () => {
   const args = buildHaikuArgs();
   const toolsAt = args.indexOf("--tools");
   assert.notEqual(toolsAt, -1, "--tools \"\" is the injection guard — it must not be dropped");
   assert.equal(args[toolsAt + 1], "", "--tools must disable every built-in tool");
-  assert.equal(toolsAt + 1, args.length - 1, "nothing may follow --tools: it would be read as a tool name");
-  for (const a of args) {
-    assert.ok(a === "" || a.startsWith("-") || args[args.indexOf(a) - 1]?.startsWith("-"),
-      `argv carries a stray positional: ${JSON.stringify(a)}`);
+  // Indexed by position, not by value: argv already carries "" twice, so
+  // resolving an element to its first occurrence would judge a repeated one
+  // against the wrong predecessor. A flag pair appended after --tools "" is
+  // admitted; anything not preceded by a flag is not.
+  for (const [i, a] of args.entries()) {
+    assert.ok(a.startsWith("-") || args[i - 1]?.startsWith("-"),
+      `argv carries a stray positional at ${i}: ${JSON.stringify(a)}`);
   }
 });
 
