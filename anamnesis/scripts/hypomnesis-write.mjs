@@ -108,8 +108,9 @@ const protocolMap = {
 
 const MAX_ALL_CHARS = 80_000;
 // What actually reaches the child on stdin. MAX_ALL_CHARS bounds the parse
-// buffer; these bound the sample cut from it, so these are the numbers that
-// decide whether a write fits the OS pipe buffer in one go.
+// buffer; these bound the sample cut from it. They are character counts and the
+// OS pipe buffer is a byte limit, so neither settles the other: the same bound
+// clears the buffer in ASCII and crosses it in Korean.
 const CLUE_SAMPLE_CHARS = 20_000;
 const PROMPT_SAMPLE_CHARS = 30_000;
 const HAIKU_TIMEOUT = 120_000;
@@ -479,9 +480,10 @@ function callHaiku(prompt, { run = execFileSync } = {}) {
     // A spawn-level failure leaves `message` bare — `spawnSync claude
     // ETIMEDOUT`, `… EPIPE`, `… ENOENT` — while the child's own diagnosis
     // reaches `stderr` alone. Callers read `message`, so the two are joined
-    // here. ETIMEDOUT is the class reachable through today's prompt path;
-    // EPIPE needs a write larger than the OS pipe buffer, which the sample
-    // bounds above currently keep it under.
+    // here. Both classes are reachable through today's prompt path: EPIPE needs
+    // a write past the OS pipe buffer, and the sample bounds are characters
+    // against a byte limit, so a Korean payload crosses it where an ASCII one of
+    // the same length does not. The join is indifferent to which arrives.
     //
     // `code` is what separates the two classes. It is set for a spawn-level
     // failure (EPIPE, ETIMEDOUT, ENOENT, ENOBUFS), which is exactly where

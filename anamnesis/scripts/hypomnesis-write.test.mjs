@@ -293,21 +293,49 @@ test("callHaiku's options deliver stdin to a real child process", () => {
   assert.equal(out, prompt, "the child read something other than the prompt from stdin");
 });
 
-const PIPE_BUFFER_CHARS = 64 * 1024;
+// The OS pipe buffer is a BYTE limit. The sample bounds are character counts,
+// and UTF-8 spends up to 4 bytes on one character, so a bound below this number
+// settles nothing on its own — what decides a write is the payload's encoded
+// size. Named for the unit it is in, because the earlier name said CHARS and a
+// character bound was compared against it for two rounds.
+const PIPE_BUFFER_BYTES = 64 * 1024;
 
-// Which prompts can outgrow one pipe write, stated over the bounds that decide
-// it. MAX_ALL_CHARS bounds the parse buffer, not the payload: what reaches the
-// child is a sample cut from it. Today every sample is under the pipe buffer, so
-// EPIPE is not reachable through the prompt path — ETIMEDOUT is the spawn-level
-// class that is. This test pins that relation, so raising a sample bound past
-// the pipe buffer turns EPIPE into a live class loudly rather than silently.
-test("the prompt bounds keep every payload inside one pipe write", () => {
+// Where the sample bounds actually stand against that limit. MAX_ALL_CHARS
+// bounds the parse buffer, not the payload: what reaches the child is a sample
+// cut from it. Measured, a 30,000-character sample of Korean prose encodes to
+// about 76,000 bytes and a sample of ASCII to 30,000, so EPIPE is reachable on
+// one and not the other from the same bound. Both spawn-level classes are
+// therefore live, which is what the join has to cover; the tests below drive
+// EPIPE because it is the one a test can produce deterministically.
+test("the prompt bounds leave the spawn-level class reachable, in bytes", () => {
   assert.ok(MAX_ALL_CHARS > PROMPT_SAMPLE_CHARS,
     "the parse buffer is what the sample is cut from, so it must exceed it");
   for (const [name, bound] of [["clue", CLUE_SAMPLE_CHARS], ["full-text", PROMPT_SAMPLE_CHARS]]) {
-    assert.ok(bound < PIPE_BUFFER_CHARS,
-      `${name} prompts are bounded at ${bound}, at or above the ${PIPE_BUFFER_CHARS}-char pipe buffer — EPIPE is now reachable and the callHaiku comment naming ETIMEDOUT as the live class is stale`);
+    // Not an assertion that the bound is safe — an assertion that nobody may
+    // read it as safe. A character bound whose worst-case encoding clears the
+    // pipe buffer would make EPIPE unreachable and the comments above stale in
+    // the other direction, so that case has to be noticed too.
+    assert.ok(bound * 4 > PIPE_BUFFER_BYTES,
+      `${name} prompts are bounded at ${bound} characters, whose worst-case UTF-8 encoding is ${bound * 4} bytes — now under the ${PIPE_BUFFER_BYTES}-byte pipe buffer, so EPIPE is no longer reachable and the comments naming it live are stale`);
   }
+});
+
+// The measurement the bound above rests on, pinned rather than recalled: the
+// same character count crosses the buffer in one language and not in another.
+// Korean is the case that occurs here — these sessions are predominantly
+// Korean — and it is the case a character-indexed check cannot see.
+test("a Korean sample under the character bound exceeds the pipe buffer in bytes", () => {
+  const ko = "컨텍스트를 메우는 같은 작업이 반복되었습니다. 세션 기록이 정본으로 저장됩니다. ";
+  let sample = "";
+  while (sample.length < PROMPT_SAMPLE_CHARS) sample += ko;
+  sample = sample.slice(0, PROMPT_SAMPLE_CHARS);
+
+  assert.ok(sample.length <= PROMPT_SAMPLE_CHARS,
+    "the sample must sit inside the character bound the writer cuts at");
+  assert.ok(Buffer.byteLength(sample, "utf8") > PIPE_BUFFER_BYTES,
+    `a ${sample.length}-character Korean sample encodes to ${Buffer.byteLength(sample, "utf8")} bytes, which no longer clears the ${PIPE_BUFFER_BYTES}-byte pipe buffer — the character bound and the byte limit have stopped diverging and the comments above need re-reading`);
+  assert.ok("x".repeat(PROMPT_SAMPLE_CHARS).length === Buffer.byteLength("x".repeat(PROMPT_SAMPLE_CHARS), "utf8"),
+    "the ASCII counterpart is the control: same character count, one byte each");
 });
 
 // The spawn-level class in general: `message` is bare and the child's diagnosis
@@ -317,7 +345,7 @@ test("the prompt bounds keep every payload inside one pipe write", () => {
 // and a child that exits without draining. The behaviour asserted is the join,
 // which is what ETIMEDOUT needs too.
 test("callHaiku carries the child's stderr out with a spawn-level failure", () => {
-  const prompt = "x".repeat(PIPE_BUFFER_CHARS + 16_000);
+  const prompt = "x".repeat(PIPE_BUFFER_BYTES + 16_000);
   const child = "process.stderr.write('Error: Input must be provided\\n'); process.exit(1)";
   let err = null;
   try {
