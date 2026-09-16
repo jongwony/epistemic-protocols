@@ -113,6 +113,10 @@ const FULL_TEXT_PROMPT_CHARS = 30_000;
 // the full text, and is bounded twice: by message count and by characters.
 const CLUE_PROMPT_MSGS = 30;
 const CLUE_PROMPT_CHARS = 20_000;
+// What extractCrossRefs reads from the head of each of its two channels. Named
+// rather than left inline at the slice, because the coverage a cross-ref bears
+// is measured from this same bound.
+const CROSS_REF_MSGS = 20;
 const HAIKU_TIMEOUT = 120_000;
 
 // Every full-text prompt joins its texts with this, so it is what a sample's
@@ -167,18 +171,52 @@ function computeSourceScan(wholeJoinedChars, sampleChars, skippedLines) {
   };
 }
 
-// One scan per extraction path. The six artifacts do not share a sample, so a
-// single scan describes at most the path it was measured on and misstates the
-// rest; each artifact carries the scan of the path that produced it.
-//   clue      — the user-message stream under CLUE_PROMPT_MSGS/CLUE_PROMPT_CHARS
-//   semantic  — the joined full text under FULL_TEXT_PROMPT_CHARS
-//   retained  — the parse buffer under MAX_ALL_CHARS
-// skipped_lines is a parse-level count and is the same in all three.
+// The joined length of what an extractor reading the head of both channels
+// actually receives. `allTexts` is the interleaved stream and `userMsgs` its
+// user-only subset, so the two slices overlap: the user entries inside
+// `allTexts[0, limit)` are a prefix of `userMsgs`, and only the user messages
+// past that prefix are what the second channel adds. Counting the union rather
+// than either channel is what keeps an extractor reading both from being
+// charged for text one of them delivered.
+function channelUnionJoined(allTexts, allTextIsUser, userMsgs, limit) {
+  const nAll = Math.min(limit, allTexts.length);
+  let chars = 0;
+  let usersInside = 0;
+  for (let i = 0; i < nAll; i += 1) {
+    chars += allTexts[i].length;
+    if (allTextIsUser[i]) usersInside += 1;
+  }
+  let count = nAll;
+  const nUser = Math.min(limit, userMsgs.length);
+  for (let j = usersInside; j < nUser; j += 1) {
+    chars += userMsgs[j].text.length;
+    count += 1;
+  }
+  return joinedLength(chars, count);
+}
+
+// One scan per ARTIFACT, not per prompt bound. An artifact is a composite —
+// several extractors, each with its own bound, writing separate fields into one
+// file — and a reader holding that file cannot tell which field they are
+// weighing. So the count an artifact carries is the widest omission among the
+// extractions composed into it: `omitted_chars == 0` then means no extractor
+// feeding this file dropped anything, which is what SKILL.md's "built from less
+// than its whole source" has to mean for the field to be readable at all.
+//
+// The five extractions and what each one's bound drops:
+//   cluePrompt — the cleaned user stream under CLUE_PROMPT_MSGS/CLUE_PROMPT_CHARS
+//   crossRefs  — the head CROSS_REF_MSGS of both channels
+//   semantic   — the joined full text under FULL_TEXT_PROMPT_CHARS
+//   entropy    — the parse buffer under MAX_ALL_CHARS
+//   coinage    — the parse buffer and the user stream together
+// skipped_lines is a parse-level count, upstream of every bound, and is the
+// same in all six.
 function buildSourceScans({
-  userMsgs, allTexts, totalTextChars, totalTextCount,
+  userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
   totalUserChars, totalUserCount, skippedLines,
 }) {
   const wholeJoined = joinedLength(totalTextChars, totalTextCount);
+  const drop = (received) => Math.max(0, wholeJoined - received);
 
   // Beyond MAX_USER_MSGS a user message never reaches the cleaned stream, so
   // its characters are added raw. Raw is never shorter than cleaned, so this
@@ -191,16 +229,39 @@ function buildSourceScans({
   );
   const clue = cluePromptSample(userMsgs);
 
+  // The clue prompt is scoped to the user channel by design, so its whole is
+  // that channel and not the session — a scope is not an omission. The four
+  // below read the transcript, so theirs is the session.
+  const clueDrop = Math.max(
+    0, (clue.cleanedJoined + userResidue) - clue.sample.length,
+  );
+  const crossRefsDrop = drop(
+    channelUnionJoined(allTexts, allTextIsUser, userMsgs, CROSS_REF_MSGS),
+  );
+  const semanticDrop = drop(fullTextSample(allTexts).sample.length);
+  const entropyDrop = drop(
+    joinedLength(allTexts.reduce((n, t) => n + t.length, 0), allTexts.length),
+  );
+  const coinageDrop = drop(
+    channelUnionJoined(allTexts, allTextIsUser, userMsgs, Infinity),
+  );
+
+  const scan = (...drops) => ({
+    skipped_lines: skippedLines,
+    unverified_user_turns: 0,
+    omitted_chars: Math.max(...drops),
+  });
+
   return {
-    clue: computeSourceScan(
-      clue.cleanedJoined + userResidue, clue.sample.length, skippedLines,
-    ),
-    semantic: computeSourceScan(
-      wholeJoined, fullTextSample(allTexts).sample.length, skippedLines,
-    ),
-    retained: computeSourceScan(
-      wholeJoined, allTexts.join(TEXT_SEPARATOR).length, skippedLines,
-    ),
+    // topics/keywords/utterances from the clue prompt, cross_refs from extractCrossRefs
+    "clue.md": scan(clueDrop, crossRefsDrop),
+    "vector.md": scan(semanticDrop),
+    // prose from the narrative prompt, topics carried over from the clue extraction
+    "narrative.md": scan(semanticDrop, clueDrop),
+    // haiku markers from the semantic sample, counts from the coinage extraction
+    "markers.md": scan(semanticDrop, coinageDrop),
+    "entropy.md": scan(entropyDrop),
+    "coinage.md": scan(coinageDrop),
   };
 }
 
@@ -317,6 +378,10 @@ function cleanText(text) {
 function parseSession(transcriptPath) {
   const userMsgs = [];
   const allTexts = [];
+  // Which entries of allTexts came from the user channel. An extractor reading
+  // both channels overlaps on exactly these, and the overlap is what separates
+  // what it received from what either slice alone carries.
+  const allTextIsUser = [];
   const timestamps = [];
   const protocols = new Set();
   let lastAssistantInputTokens = 0;
@@ -343,7 +408,7 @@ function parseSession(transcriptPath) {
   } catch (e) {
     logErr(`failed to read transcript ${transcriptPath}: ${e.message}`);
     return {
-      userMsgs, allTexts, timestamps, protocols: [],
+      userMsgs, allTexts, allTextIsUser, timestamps, protocols: [],
       tokenEstimate: 0, cwd: "",
       totalTextChars: 0, totalTextCount: 0,
       totalUserChars: 0, totalUserCount: 0, skippedLines: 0,
@@ -384,6 +449,7 @@ function parseSession(transcriptPath) {
       if (text) { totalTextChars += text.length; totalTextCount += 1; }
       if (text && totalChars < MAX_ALL_CHARS) {
         allTexts.push(text);
+        allTextIsUser.push(etype === "user");
         totalChars += text.length;
       }
     }
@@ -419,6 +485,7 @@ function parseSession(transcriptPath) {
     lastTurnHadFreshInput,
     sawAnyAssistantUsage,
     cwd,
+    allTextIsUser,
     totalTextChars,
     totalTextCount,
     totalUserChars,
@@ -734,8 +801,8 @@ function extractCrossRefs(userMsgs, allTexts) {
     if (channel === "user") prev.channel = "user";
   };
   const channels = [
-    ["user", userMsgs.slice(0, 20).map((m) => m.text)],
-    ["transcript", allTexts.slice(0, 20)],
+    ["user", userMsgs.slice(0, CROSS_REF_MSGS).map((m) => m.text)],
+    ["transcript", allTexts.slice(0, CROSS_REF_MSGS)],
   ];
   for (const [channel, texts] of channels) {
     for (const t of texts) {
@@ -1099,22 +1166,22 @@ function main() {
   const storeDir = path.join(slugDir, "hypomnesis", sessionId);
 
   const {
-    userMsgs, allTexts, timestamps, protocols, tokenEstimate,
+    userMsgs, allTexts, allTextIsUser, timestamps, protocols, tokenEstimate,
     lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
     totalTextChars, totalTextCount, totalUserChars, totalUserCount, skippedLines,
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
 
-  // One scan per extraction path, each measured against what that path's
-  // prompt received.
+  // One scan per artifact, each the widest omission among the extractions
+  // composed into that file.
   const scans = buildSourceScans({
-    userMsgs, allTexts, totalTextChars, totalTextCount,
+    userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
     totalUserChars, totalUserCount, skippedLines,
   });
-  for (const [pathName, pathScan] of Object.entries(scans)) {
-    if (pathScan.omitted_chars > 0 || pathScan.skipped_lines > 0) {
-      logErr(`source_scan[${pathName}]: omitted_chars=${pathScan.omitted_chars}`
-        + ` skipped_lines=${pathScan.skipped_lines}`);
+  for (const [artifact, artifactScan] of Object.entries(scans)) {
+    if (artifactScan.omitted_chars > 0 || artifactScan.skipped_lines > 0) {
+      logErr(`source_scan[${artifact}]: omitted_chars=${artifactScan.omitted_chars}`
+        + ` skipped_lines=${artifactScan.skipped_lines}`);
     }
   }
 
@@ -1166,7 +1233,7 @@ function main() {
     const clueRaw = callHaiku(buildCluePrompt(userMsgs));
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs, scans.clue);
+      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs, scans["clue.md"]);
     } else {
       logErr(`clue validation failed: invalid schema`);
     }
@@ -1179,7 +1246,7 @@ function main() {
     const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
     vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
-      files["vector.md"] = buildVectorMd(sessionId, date, vectorData, scans.semantic);
+      files["vector.md"] = buildVectorMd(sessionId, date, vectorData, scans["vector.md"]);
     } else {
       logErr(`vector validation failed: invalid schema`);
     }
@@ -1195,7 +1262,7 @@ function main() {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
         sessionId, date, startedAt, lastTurnAt, sessionCwd,
-        topics, protocols, narrativeData, scans.semantic,
+        topics, protocols, narrativeData, scans["narrative.md"],
       );
     } else {
       logErr(`narrative validation failed: invalid schema`);
@@ -1240,7 +1307,7 @@ function main() {
 
   try {
     const refs = extractEntropyRefs(allTexts);
-    files["entropy.md"] = buildEntropyMd(sessionId, date, refs, scans.retained);
+    files["entropy.md"] = buildEntropyMd(sessionId, date, refs, scans["entropy.md"]);
   } catch (e) {
     logErr(`entropy extraction failed: ${e.message}`);
   }
@@ -1258,7 +1325,7 @@ function main() {
       const corpusRoot = path.join(slugDir, "hypomnesis");
       coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
     }
-    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason, scans.retained);
+    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason, scans["coinage.md"]);
   } catch (e) {
     logErr(`coinage extraction failed: ${e.message}`);
   }
@@ -1268,7 +1335,7 @@ function main() {
   if (markerData) {
     try {
       files["markers.md"] = buildMarkersMd(
-        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD, scans.semantic,
+        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD, scans["markers.md"],
       );
     } catch (e) {
       logErr(`markers assembly failed: ${e.message}`);
@@ -1287,6 +1354,7 @@ export {
   buildHaikuArgs,
   callHaiku,
   buildSourceScans,
+  parseSession,
   cluePromptSample,
   computeSourceScan,
   joinedLength,
