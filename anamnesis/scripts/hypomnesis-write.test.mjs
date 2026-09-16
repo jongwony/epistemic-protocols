@@ -14,11 +14,38 @@ import {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  stderrDetail,
   invokes,
   skillCalls,
   resolveSkillProtocol,
   protocolMap,
+  HAIKU_FLAG_ARITY,
+  MAX_ALL_CHARS,
+  CLUE_SAMPLE_CHARS,
+  PROMPT_SAMPLE_CHARS,
+  STDERR_DETAIL_CHARS,
 } from "./hypomnesis-write.mjs";
+import {
+  formatReport,
+  REPORT_MAX_LINES,
+  REPORT_MAX_LINE_CHARS,
+} from "./hypomnesis-dispatch.mjs";
+
+// The CLI's own consumption rule, applied to the argv the writer emits: a token
+// is legal as a flag the arity map names, or as the value of one whose arity is
+// 1. Everything else is a positional — which is what `--tools` eats.
+function strayTokens(args, arity = HAIKU_FLAG_ARITY) {
+  const stray = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === "--") { stray.push(`${i}:${a} (end-of-options: what follows is positional)`); continue; }
+    if (!a.startsWith("-")) { stray.push(`${i}:${JSON.stringify(a)}`); continue; }
+    const name = a.includes("=") ? a.slice(0, a.indexOf("=")) : a;
+    if (!(name in arity)) { stray.push(`${i}:${name} (undeclared flag)`); continue; }
+    if (arity[name] === 1 && !a.includes("=")) i += 1;
+  }
+  return stray;
+}
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -192,27 +219,50 @@ test("protocolMap covers every protocol plugin command on disk", () => {
 });
 
 // --tools is variadic, so anything positional trailing it is parsed as a
-// tool-name list and the CLI then exits with "Input must be provided" — every
-// extraction returns empty and the record is discarded. The 2026-09-04
-// injection guard put --tools "" at the end of argv, which is what made a
-// trailing prompt unreachable. Both properties are asserted together: the guard
-// stays, and no positional rides behind it.
-// A reintroduced positional does not fail loudly: with both channels supplied
-// this CLI runs the argv turn and then the stdin turn, so the extraction's JSON
-// arrives with an extra turn in front of it rather than erroring.
-test("buildHaikuArgs keeps --tools \"\" and carries no positional prompt", () => {
+// tool-name list. What the argv must satisfy is therefore not "nothing follows
+// --tools" but the CLI's own consumption rule: every token is a declared flag or
+// the value of one that takes a value. `strayTokens` above is that rule, and the
+// arity map it reads lives beside `buildHaikuArgs`, so a flag added without a
+// declared arity fails here rather than widening the guard silently.
+test("buildHaikuArgs carries no stray positional under the CLI's consumption rule", () => {
   const args = buildHaikuArgs();
+  assert.deepEqual(strayTokens(args), [], "argv carries a token the CLI would read as positional");
+});
+
+// A flag written twice is not a stray token, so the rule above cannot see it —
+// and a second --tools is the case that matters: a reader checking the first one
+// would report tools disabled while the last occurrence is what the CLI takes.
+test("buildHaikuArgs declares --tools \"\" exactly once, and no flag twice", () => {
+  const args = buildHaikuArgs();
+  const flags = args.filter((a) => a.startsWith("-"));
+  const repeated = flags.filter((f, i) => flags.indexOf(f) !== i);
+  assert.deepEqual(repeated, [], "a repeated flag makes the effective value the last one");
   const toolsAt = args.indexOf("--tools");
   assert.notEqual(toolsAt, -1, "--tools \"\" is the injection guard — it must not be dropped");
   assert.equal(args[toolsAt + 1], "", "--tools must disable every built-in tool");
-  // Indexed by position, not by value: argv already carries "" twice, so
-  // resolving an element to its first occurrence would judge a repeated one
-  // against the wrong predecessor. A flag pair appended after --tools "" is
-  // admitted; anything not preceded by a flag is not.
-  for (const [i, a] of args.entries()) {
-    assert.ok(a.startsWith("-") || args[i - 1]?.startsWith("-"),
-      `argv carries a stray positional at ${i}: ${JSON.stringify(a)}`);
+});
+
+// The mutations the rule rejects, asserted rather than described. Each is a
+// shape a later edit to buildHaikuArgs could produce; the previous guard, which
+// read "preceded by something flag-shaped", admitted all but the last two.
+test("the consumption rule rejects every argv shape that reintroduces a positional", () => {
+  const base = buildHaikuArgs();
+  const cases = {
+    "positional after a nullary flag": ["-p", "THE PROMPT", ...base.slice(1)],
+    "positional after --dangerously-skip-permissions":
+      [...base.slice(0, 7), "THE PROMPT", ...base.slice(7)],
+    "positional appended behind --tools \"\"": [...base, "THE PROMPT"],
+    "positional behind an end-of-options marker": [...base, "--", "THE PROMPT"],
+    "positional behind an undeclared flag pair": [...base, "--output-format", "json", "THE PROMPT"],
+    "positional behind an attached-value flag": [...base, "--output-format=json", "THE PROMPT"],
+    "positional inserted before --tools": [...base.slice(0, 9), "THE PROMPT", ...base.slice(9)],
+  };
+  for (const [name, argv] of Object.entries(cases)) {
+    assert.notDeepEqual(strayTokens(argv), [], `rule admits ${name}`);
   }
+  // The control: the rule accepts what the writer actually emits, so the cases
+  // above fail for their own shape rather than because the rule rejects all.
+  assert.deepEqual(strayTokens(base), []);
 });
 
 test("callHaiku delivers the prompt on stdin, never in argv", () => {
@@ -243,13 +293,31 @@ test("callHaiku's options deliver stdin to a real child process", () => {
   assert.equal(out, prompt, "the child read something other than the prompt from stdin");
 });
 
-// Every prompt but clue's exceeds the 64 KiB pipe buffer (MAX_ALL_CHARS is
-// 80_000), so a child that exits before draining stdin fails the parent's write
-// rather than its read: spawnSync reports EPIPE as the whole error and the
-// child's own diagnosis reaches `stderr` alone. The call sites log `message`,
-// so an unjoined pair is an extraction failing with nothing in it to act on.
-test("callHaiku carries the child's stderr out with an EPIPE write failure", () => {
-  const prompt = "x".repeat(80_000);
+const PIPE_BUFFER_CHARS = 64 * 1024;
+
+// Which prompts can outgrow one pipe write, stated over the bounds that decide
+// it. MAX_ALL_CHARS bounds the parse buffer, not the payload: what reaches the
+// child is a sample cut from it. Today every sample is under the pipe buffer, so
+// EPIPE is not reachable through the prompt path — ETIMEDOUT is the spawn-level
+// class that is. This test pins that relation, so raising a sample bound past
+// the pipe buffer turns EPIPE into a live class loudly rather than silently.
+test("the prompt bounds keep every payload inside one pipe write", () => {
+  assert.ok(MAX_ALL_CHARS > PROMPT_SAMPLE_CHARS,
+    "the parse buffer is what the sample is cut from, so it must exceed it");
+  for (const [name, bound] of [["clue", CLUE_SAMPLE_CHARS], ["full-text", PROMPT_SAMPLE_CHARS]]) {
+    assert.ok(bound < PIPE_BUFFER_CHARS,
+      `${name} prompts are bounded at ${bound}, at or above the ${PIPE_BUFFER_CHARS}-char pipe buffer — EPIPE is now reachable and the callHaiku comment naming ETIMEDOUT as the live class is stale`);
+  }
+});
+
+// The spawn-level class in general: `message` is bare and the child's diagnosis
+// reaches `stderr` alone, so the call sites that log `message` get an extraction
+// failing with nothing in it to act on. Driven here through EPIPE because it is
+// the one a test can produce deterministically — a payload above the pipe buffer
+// and a child that exits without draining. The behaviour asserted is the join,
+// which is what ETIMEDOUT needs too.
+test("callHaiku carries the child's stderr out with a spawn-level failure", () => {
+  const prompt = "x".repeat(PIPE_BUFFER_CHARS + 16_000);
   const child = "process.stderr.write('Error: Input must be provided\\n'); process.exit(1)";
   let err = null;
   try {
@@ -263,4 +331,80 @@ test("callHaiku carries the child's stderr out with an EPIPE write failure", () 
   assert.match(err.message, /EPIPE/, "precondition: the write, not the read, is what failed");
   assert.match(err.message, /Input must be provided/,
     "the child's diagnosis must reach the caller that logs message");
+  assert.match(err.message, /child stderr:/,
+    "the child's stream must be named, not concatenated as though it were the cause");
+  assert.equal(err.code, "EPIPE", "the original error's own fields must survive the join");
+});
+
+// The class Node already joined itself: a plain non-zero exit puts the child's
+// stderr in `message` and leaves `code` unset. Joining there would spend the
+// forwarding window on a duplicate.
+test("callHaiku leaves a plain non-zero exit untouched", () => {
+  const child = "require('node:fs').readFileSync(0); process.stderr.write('BOOM\\n'); process.exit(3)";
+  let err = null;
+  try {
+    callHaiku("short", {
+      run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", child], opts),
+    });
+  } catch (e) { err = e; }
+  assert.ok(err);
+  assert.equal(err.code, undefined, "precondition: a plain non-zero exit sets no code");
+  assert.match(err.message, /BOOM/, "Node already carries the child's stderr here");
+  assert.doesNotMatch(err.message, /child stderr:/, "so this must not append it a second time");
+});
+
+// Where the diagnosis sits in the stream is the child's choice. A tail-only
+// window loses a cause that a long trace pushes out of it, and says nothing
+// about having lost it.
+test("stderrDetail keeps both ends and states what it dropped", () => {
+  const long = `Error: account expired\n${Array.from({ length: 80 }, (_, i) => `    at frame${i} (/very/long/path/to/module/file-${i}.js:${i}:${i})`).join("\n")}`;
+  const detail = stderrDetail(long);
+  assert.ok(long.length > STDERR_DETAIL_CHARS, "precondition: the input must exceed the budget");
+  assert.match(detail, /account expired/, "the cause sits at the head and must survive");
+  assert.match(detail, /frame79/, "the tail must survive too");
+  assert.match(detail, /chars elided/, "a cut presented as whole is the defect this replaces");
+  assert.doesNotMatch(detail, /\n/, "the detail rides on one line through the dispatcher");
+});
+
+// Colour reaches a piped stderr, so the escapes travel unless removed — and they
+// compete for the same window as the text.
+test("stderrDetail strips terminal escapes", () => {
+  const detail = stderrDetail("\u001b[31mError: Invalid MCP configuration:\u001b[39m bad path");
+  assert.equal(detail, "Error: Invalid MCP configuration: bad path");
+});
+
+// --- writer → dispatcher composition ---
+//
+// The writer bounds each diagnostic line; the dispatcher bounds how many lines
+// it forwards. These are two budgets in two files, and the failure they have to
+// survive together is the one where every extraction fails identically at once:
+// four lines competing for one window. A character window over the whole stream
+// kept four lines before the child's stderr was joined on and none after, so the
+// richer diagnosis arrived as strictly less observable output. These two tests
+// are what fails if the budgets drift apart again.
+
+test("the dispatcher's per-line budget admits a writer line at full budget", () => {
+  const worstLine = `[hypomnesis-write] narrative extraction failed: spawnSync claude EPIPE | child stderr: ${"x".repeat(STDERR_DETAIL_CHARS)}`;
+  assert.ok(worstLine.length <= REPORT_MAX_LINE_CHARS,
+    `a writer line at full budget (${worstLine.length}) exceeds the dispatcher's per-line window (${REPORT_MAX_LINE_CHARS})`);
+  assert.equal(formatReport(worstLine), worstLine, "and must pass through uncut");
+});
+
+test("every simultaneous extraction failure survives the dispatcher's forward", () => {
+  const names = ["clue", "vector", "narrative", "marker"];
+  const lines = names.map((n) =>
+    `[hypomnesis-write] ${n} extraction failed: spawnSync claude EPIPE | child stderr: ${"x".repeat(STDERR_DETAIL_CHARS)}`);
+  const forwarded = formatReport(lines.join("\n"));
+  for (const n of names) {
+    assert.ok(forwarded.includes(`${n} extraction failed`), `${n}'s failure did not survive the forward`);
+  }
+  assert.ok(names.length <= REPORT_MAX_LINES, "precondition: the line window must admit one line per extraction");
+});
+
+test("formatReport says how many lines it dropped", () => {
+  const many = Array.from({ length: REPORT_MAX_LINES + 3 }, (_, i) => `line ${i}`).join("\n");
+  const forwarded = formatReport(many);
+  assert.match(forwarded, /^\[3 earlier lines dropped\]\n/, "a truncated forward must say it was truncated");
+  assert.ok(forwarded.includes(`line ${REPORT_MAX_LINES + 2}`), "the newest line must survive");
+  assert.ok(!forwarded.includes("line 0\n"), "the oldest must be the one dropped");
 });

@@ -107,6 +107,11 @@ const protocolMap = {
 };
 
 const MAX_ALL_CHARS = 80_000;
+// What actually reaches the child on stdin. MAX_ALL_CHARS bounds the parse
+// buffer; these bound the sample cut from it, so these are the numbers that
+// decide whether a write fits the OS pipe buffer in one go.
+const CLUE_SAMPLE_CHARS = 20_000;
+const PROMPT_SAMPLE_CHARS = 30_000;
 const HAIKU_TIMEOUT = 120_000;
 
 // v0.4.0 two-track extension budgets.
@@ -308,7 +313,7 @@ function buildCluePrompt(userMsgs) {
     .map((m) => cleanText(m.text))
     .filter((t) => t.length > 5);
 
-  const sample = cleaned.slice(0, 30).join("\n---\n").slice(0, 20_000);
+  const sample = cleaned.slice(0, 30).join("\n---\n").slice(0, CLUE_SAMPLE_CHARS);
 
   return `You are a session indexer. Extract recall anchors from user messages only.
 
@@ -332,7 +337,7 @@ ${sample}`;
 }
 
 function buildVectorPrompt(allTexts) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const sample = allTexts.join("\n---\n").slice(0, PROMPT_SAMPLE_CHARS);
 
   return `You are a session indexer. Extract decisions and direction changes from the full session.
 
@@ -354,7 +359,7 @@ ${sample}`;
 }
 
 function buildNarrativePrompt(allTexts, protocols) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const sample = allTexts.join("\n---\n").slice(0, PROMPT_SAMPLE_CHARS);
   const protoList = protocols.length > 0 ? protocols.join(", ") : "none detected";
 
   return `You are a session indexer. Write a concise session narrative from the full conversation.
@@ -376,7 +381,7 @@ ${sample}`;
 }
 
 function buildMarkerPrompt(allTexts, startedAt) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const sample = allTexts.join("\n---\n").slice(0, PROMPT_SAMPLE_CHARS);
   const dateAnchor = toDateString(startedAt);
 
   return `You are a session indexer. Extract salience markers as concrete, anchored entities.
@@ -408,8 +413,22 @@ ${sample}`;
 // --- Haiku Invocation ---
 
 // The prompt is absent from argv by contract: --tools is variadic, so a
-// positional prompt following it is consumed as a tool-name list. Stdin is the
-// other input channel --print accepts, and it is not reachable by flag parsing.
+// positional prompt following it is consumed as a tool-name list.
+//
+// Arity of every flag this emits. A token is legal only as a flag named here or
+// as the value of one whose arity is 1; the guard in the test reads this map, so
+// adding a flag without declaring it here fails rather than widening silently.
+const HAIKU_FLAG_ARITY = {
+  "-p": 0,
+  "--no-session-persistence": 0,
+  "--model": 1,
+  "--disable-slash-commands": 0,
+  "--strict-mcp-config": 0,
+  "--dangerously-skip-permissions": 0,
+  "--setting-sources": 1,
+  "--tools": 1,
+};
+
 function buildHaikuArgs() {
   return [
     "-p",
@@ -423,9 +442,27 @@ function buildHaikuArgs() {
   ];
 }
 
-// How much of a failed child's stderr rides along on the thrown error. A tail,
-// because the CLI puts its diagnosis last.
-const STDERR_TAIL_CHARS = 500;
+// How much of a failed child's stderr rides along on the thrown error, and how
+// that budget is split. Head and tail both, because where a diagnosis sits in
+// the stream is the child's choice and not this project's: an early-exit CLI
+// puts it first, a crash puts it above the trace and a long trace pushes it out
+// of a tail-only window.
+const STDERR_DETAIL_CHARS = 500;
+const STDERR_DETAIL_HEAD_CHARS = 150;
+
+// Colour reaches a piped stderr, so the escapes travel with the text unless
+// they are removed before it is measured or logged.
+const CSI_RE = /\x1B\[[0-?]*[ -/]*[@-~]/g;
+
+// The child's stderr as one bounded line: escapes gone, newlines folded, and an
+// elision that says how much was dropped rather than presenting a cut as whole.
+function stderrDetail(raw) {
+  const clean = String(raw ?? "").replace(CSI_RE, "").replace(/\s+/g, " ").trim();
+  if (clean.length <= STDERR_DETAIL_CHARS) return clean;
+  const tailChars = STDERR_DETAIL_CHARS - STDERR_DETAIL_HEAD_CHARS;
+  const elided = clean.length - STDERR_DETAIL_CHARS;
+  return `${clean.slice(0, STDERR_DETAIL_HEAD_CHARS)} …[${elided} chars elided]… ${clean.slice(-tailChars)}`;
+}
 
 function callHaiku(prompt, { run = execFileSync } = {}) {
   let output;
@@ -439,18 +476,29 @@ function callHaiku(prompt, { run = execFileSync } = {}) {
       cwd: "/tmp",
     });
   } catch (e) {
-    // A prompt above the pipe buffer that the child abandons surfaces as the
-    // write's own failure: `message` carries `spawnSync claude EPIPE` and the
-    // CLI's diagnosis reaches `stderr` alone. Callers read `message`, so the
-    // two are joined here rather than at each call site.
-    const stderr = String(e?.stderr ?? "").trim();
-    if (!stderr) throw e;
-    const detail = stderr.slice(-STDERR_TAIL_CHARS);
+    // A spawn-level failure leaves `message` bare — `spawnSync claude
+    // ETIMEDOUT`, `… EPIPE`, `… ENOENT` — while the child's own diagnosis
+    // reaches `stderr` alone. Callers read `message`, so the two are joined
+    // here. ETIMEDOUT is the class reachable through today's prompt path;
+    // EPIPE needs a write larger than the OS pipe buffer, which the sample
+    // bounds above currently keep it under.
+    //
+    // `code` is what separates the two classes. It is set for a spawn-level
+    // failure (EPIPE, ETIMEDOUT, ENOENT, ENOBUFS), which is exactly where
+    // `message` is bare; a plain non-zero exit leaves it unset and Node has
+    // already appended the stderr itself, so joining there would duplicate it.
+    if (!e?.code) throw e;
+    const detail = stderrDetail(e?.stderr);
+    if (!detail) throw e;
+    // Named, not concatenated: what the child wrote is a second fact beside the
+    // spawn failure, and an unlabelled join reads as the cause. A warning on
+    // stderr during an unrelated timeout is the case that misleads.
+    const joined = `child stderr: ${detail}`;
     if (e instanceof Error) {
-      e.message = `${e.message} | ${detail}`;
+      e.message = `${e.message} | ${joined}`;
       throw e;
     }
-    throw new Error(`${String(e)} | ${detail}`);
+    throw Object.assign(new Error(`${String(e)} | ${joined}`), { cause: e });
   }
   return output.trim();
 }
@@ -1160,10 +1208,16 @@ export {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  stderrDetail,
   invokes,
   skillCalls,
   resolveSkillProtocol,
   protocolMap,
+  HAIKU_FLAG_ARITY,
+  MAX_ALL_CHARS,
+  CLUE_SAMPLE_CHARS,
+  PROMPT_SAMPLE_CHARS,
+  STDERR_DETAIL_CHARS,
 };
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
