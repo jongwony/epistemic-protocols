@@ -423,15 +423,35 @@ function buildHaikuArgs() {
   ];
 }
 
+// How much of a failed child's stderr rides along on the thrown error. A tail,
+// because the CLI puts its diagnosis last.
+const STDERR_TAIL_CHARS = 500;
+
 function callHaiku(prompt, { run = execFileSync } = {}) {
-  const output = run("claude", buildHaikuArgs(), {
-    encoding: "utf8",
-    input: prompt,
-    timeout: HAIKU_TIMEOUT,
-    stdio: ["pipe", "pipe", "pipe"],
-    maxBuffer: 8 * 1024 * 1024,
-    cwd: "/tmp",
-  });
+  let output;
+  try {
+    output = run("claude", buildHaikuArgs(), {
+      encoding: "utf8",
+      input: prompt,
+      timeout: HAIKU_TIMEOUT,
+      stdio: ["pipe", "pipe", "pipe"],
+      maxBuffer: 8 * 1024 * 1024,
+      cwd: "/tmp",
+    });
+  } catch (e) {
+    // A prompt above the pipe buffer that the child abandons surfaces as the
+    // write's own failure: `message` carries `spawnSync claude EPIPE` and the
+    // CLI's diagnosis reaches `stderr` alone. Callers read `message`, so the
+    // two are joined here rather than at each call site.
+    const stderr = String(e?.stderr ?? "").trim();
+    if (!stderr) throw e;
+    const detail = stderr.slice(-STDERR_TAIL_CHARS);
+    if (e instanceof Error) {
+      e.message = `${e.message} | ${detail}`;
+      throw e;
+    }
+    throw new Error(`${String(e)} | ${detail}`);
+  }
   return output.trim();
 }
 

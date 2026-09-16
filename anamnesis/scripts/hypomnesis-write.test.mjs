@@ -236,3 +236,25 @@ test("callHaiku's options deliver stdin to a real child process", () => {
   });
   assert.equal(out, prompt, "the child read something other than the prompt from stdin");
 });
+
+// Every prompt but clue's exceeds the 64 KiB pipe buffer (MAX_ALL_CHARS is
+// 80_000), so a child that exits before draining stdin fails the parent's write
+// rather than its read: spawnSync reports EPIPE as the whole error and the
+// child's own diagnosis reaches `stderr` alone. The call sites log `message`,
+// so an unjoined pair is an extraction failing with nothing in it to act on.
+test("callHaiku carries the child's stderr out with an EPIPE write failure", () => {
+  const prompt = "x".repeat(80_000);
+  const child = "process.stderr.write('Error: Input must be provided\\n'); process.exit(1)";
+  let err = null;
+  try {
+    callHaiku(prompt, {
+      run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", child], opts),
+    });
+  } catch (e) { err = e; }
+  assert.ok(err, "a child exiting non-zero must reach the caller as a throw");
+  // Without this the test would pass on a payload small enough to keep the
+  // child's message in `message` on its own, proving nothing.
+  assert.match(err.message, /EPIPE/, "precondition: the write, not the read, is what failed");
+  assert.match(err.message, /Input must be provided/,
+    "the child's diagnosis must reach the caller that logs message");
+});
