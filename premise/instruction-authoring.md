@@ -4,7 +4,7 @@ Use this document when authoring or revising instructions and durable records. `
 
 ## Zero-Shot Instruction Preference (Safeguard)
 
-For instructions a model applies at runtime, state the principle before adding examples or category mappings. Remove an example when the principle preserves the required behavior or format without it. Retain an example whose removal demonstrably loses an independent obligation; fix an underspecified principle rather than relying on examples to supply its missing scope.
+For instructions a model applies at runtime, state the principle before adding examples or category mappings. Remove an example when the principle preserves the required behavior or format without it. Retain an example whose removal demonstrably loses an independent obligation; fix an underspecified principle rather than relying on examples to supply its missing scope. Read the finished text back and apply the preceding test to it, not only while composing.
 
 Human-facing explanatory examples are outside this preference when they do not constrain runtime application. On a mixed surface, evaluate their effect on the model's application as well. The competing-target test below concerns a different question: whether a named alternative carries a necessary distinction.
 
