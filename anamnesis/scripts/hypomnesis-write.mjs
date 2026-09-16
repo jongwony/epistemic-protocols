@@ -13,7 +13,7 @@
  *   1. Read stdin (hook input) + parse session JSONL (deterministic)
  *   2. Apply gate per entry point
  *   3. Build 3 prompts (clue: user-only, vector: full, narrative: full)
- *   4. Call claude -p --model haiku per prompt (LLM semantic extraction)
+ *   4. Call claude -p --model haiku per prompt, prompt on stdin (LLM semantic extraction)
  *   5. Validate JSON output + assemble md files (deterministic)
  *   6. Atomic write to ~/.claude/projects/{slug}/hypomnesis/{session-id}/
  *      (slug derived from transcript_path dirname — sibling to SSOT JSONL.
@@ -107,7 +107,148 @@ const protocolMap = {
 };
 
 const MAX_ALL_CHARS = 80_000;
+// What the vector/narrative/marker prompts actually receive.
+const FULL_TEXT_PROMPT_CHARS = 30_000;
+// What the clue prompt receives. It reads the user-message stream rather than
+// the full text, and is bounded twice: by message count and by characters.
+const CLUE_PROMPT_MSGS = 30;
+const CLUE_PROMPT_CHARS = 20_000;
+// What extractCrossRefs reads from the head of each of its two channels, and
+// the bound the coverage a cross-ref bears is measured from.
+const CROSS_REF_MSGS = 20;
 const HAIKU_TIMEOUT = 120_000;
+
+// Every full-text prompt joins its texts with this, so it is what a sample's
+// length is made of and what a whole-source count has to include.
+const TEXT_SEPARATOR = "\n---\n";
+
+// Length of joining `count` texts of `chars` characters total with
+// TEXT_SEPARATOR. Both sides of an omitted_chars subtraction are measured
+// through this, so neither side counts a separator the other does not.
+function joinedLength(chars, count) {
+  return count > 0 ? chars + TEXT_SEPARATOR.length * (count - 1) : 0;
+}
+
+const TRUNCATION_NOTICE =
+  "NOTE: the session content below is the opening portion of a longer session; "
+  + "its later turns are absent. Describe only what this portion shows, and say "
+  + "so where it does not reach an outcome.";
+
+// The prompts' own view of the session, and the one place their bound applies.
+function fullTextSample(allTexts) {
+  const joined = allTexts.join(TEXT_SEPARATOR);
+  return {
+    sample: joined.slice(0, FULL_TEXT_PROMPT_CHARS),
+    truncated: joined.length > FULL_TEXT_PROMPT_CHARS,
+  };
+}
+
+// The clue prompt's own view, and the one place its two bounds apply.
+// cleanedJoined is the whole cleaned stream, so the gap to `sample` carries
+// both the message-count cut and the character cut.
+function cluePromptSample(userMsgs) {
+  const cleaned = userMsgs
+    .filter((m) => !isNoise(m.text))
+    .map((m) => cleanText(m.text))
+    .filter((t) => t.length > 5);
+  return {
+    sample: cleaned.slice(0, CLUE_PROMPT_MSGS).join(TEXT_SEPARATOR).slice(0, CLUE_PROMPT_CHARS),
+    cleanedJoined: cleaned.join(TEXT_SEPARATOR).length,
+  };
+}
+
+// The joined length of what an extractor reading the head of both channels
+// actually receives. `allTexts` is the interleaved stream and `userMsgs` its
+// user-only subset, so the two slices overlap: the user entries inside
+// `allTexts[0, limit)` are a prefix of `userMsgs`, and only the user messages
+// past that prefix are what the second channel adds.
+function channelUnionJoined(allTexts, allTextIsUser, userMsgs, limit) {
+  const nAll = Math.min(limit, allTexts.length);
+  let chars = 0;
+  let usersInside = 0;
+  for (let i = 0; i < nAll; i += 1) {
+    chars += allTexts[i].length;
+    if (allTextIsUser[i]) usersInside += 1;
+  }
+  let count = nAll;
+  const nUser = Math.min(limit, userMsgs.length);
+  for (let j = usersInside; j < nUser; j += 1) {
+    chars += userMsgs[j].text.length;
+    count += 1;
+  }
+  return joinedLength(chars, count);
+}
+
+// One coverage per EXTRACTION: how much of the session that extraction's own
+// bound kept it from reading. Names no artifact — which file an extraction
+// reaches is settled at assembly, by scanOf.
+function buildCoverages({
+  userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
+  totalUserChars, totalUserCount,
+}) {
+  const wholeJoined = joinedLength(totalTextChars, totalTextCount);
+  const drop = (received) => Math.max(0, wholeJoined - received);
+
+  // Beyond MAX_USER_MSGS a user message never reaches the cleaned stream, so
+  // its characters are added raw. Raw is never shorter than cleaned, so this
+  // term overstates the omission rather than understating it.
+  const retainedUserJoined = joinedLength(
+    userMsgs.reduce((n, m) => n + m.text.length, 0), userMsgs.length,
+  );
+  const userResidue = Math.max(
+    0, joinedLength(totalUserChars, totalUserCount) - retainedUserJoined,
+  );
+  const clue = cluePromptSample(userMsgs);
+
+  return {
+    // The clue prompt is scoped to the user channel by design, so its whole is
+    // that channel and not the session — a scope is not an omission. The four
+    // below read the transcript, so theirs is the session.
+    cluePrompt: Math.max(0, (clue.cleanedJoined + userResidue) - clue.sample.length),
+    crossRefs: drop(channelUnionJoined(allTexts, allTextIsUser, userMsgs, CROSS_REF_MSGS)),
+    semantic: drop(fullTextSample(allTexts).sample.length),
+    entropy: drop(joinedLength(
+      allTexts.reduce((n, t) => n + t.length, 0), allTexts.length,
+    )),
+    coinage: drop(channelUnionJoined(allTexts, allTextIsUser, userMsgs, Infinity)),
+  };
+}
+
+// The scan a file carries. Each contribution is an extraction's own result
+// paired with the coverage of the read that produced it; a null result was
+// never produced and contributes no coverage.
+//
+// The count is the widest omission among the contributions, so
+// `omitted_chars == 0` means no extraction feeding this file dropped anything.
+// `skipped_lines` is a parse-level count, upstream of every bound, and is the
+// same wherever a scan is published. `unverified_user_turns` is 0 because
+// Claude has no second channel to cross-check human turns against: 0 here
+// means unwitnessed, not verified.
+//
+// Null when nothing contributed — no bounded read fed the file, so there is no
+// omission to report and the field is absent.
+function scanOf(skippedLines, ...contributions) {
+  const omissions = contributions
+    .filter(([result]) => result != null)
+    .map(([, omitted]) => omitted);
+  if (omissions.length === 0) return null;
+  return {
+    skipped_lines: skippedLines,
+    unverified_user_turns: 0,
+    omitted_chars: Math.max(...omissions),
+  };
+}
+
+// Spreads to nothing when no scan was captured, which is the Null case
+// SKILL.md already gives the reader: an entry predating integrity capture is
+// neutral, and an absent field says that where a row of zeros would claim a
+// complete read nobody performed.
+function sourceScanLines(scan) {
+  if (!scan) return [];
+  return [`source_scan: {skipped_lines: ${scan.skipped_lines}, `
+    + `unverified_user_turns: ${scan.unverified_user_turns}, `
+    + `omitted_chars: ${scan.omitted_chars}}`];
+}
 
 // v0.4.0 two-track extension budgets.
 // Soft cap on deterministic extract/coinage; the haiku calls (clue, vector,
@@ -211,12 +352,27 @@ function cleanText(text) {
 function parseSession(transcriptPath) {
   const userMsgs = [];
   const allTexts = [];
+  // Which entries of allTexts came from the user channel. An extractor reading
+  // both channels overlaps on exactly these, and the overlap is what separates
+  // what it received from what either slice alone carries.
+  const allTextIsUser = [];
   const timestamps = [];
   const protocols = new Set();
   let lastAssistantInputTokens = 0;
   let outputTokensSum = 0;
   let lastTurnHadFreshInput = false;
   let sawAnyAssistantUsage = false;
+  let skippedLines = 0;
+  // Counted past MAX_ALL_CHARS, unlike totalChars, because what the extraction
+  // omitted is the difference between the whole source and the sample. The
+  // count rides alongside the chars because the joined representation a prompt
+  // receives spends TEXT_SEPARATOR between every pair.
+  let totalTextChars = 0;
+  let totalTextCount = 0;
+  // The clue path's own source. Counted past MAX_USER_MSGS for the reason the
+  // full-text totals are counted past MAX_ALL_CHARS.
+  let totalUserChars = 0;
+  let totalUserCount = 0;
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
@@ -226,8 +382,10 @@ function parseSession(transcriptPath) {
   } catch (e) {
     logErr(`failed to read transcript ${transcriptPath}: ${e.message}`);
     return {
-      userMsgs, allTexts, timestamps, protocols: [],
+      userMsgs, allTexts, allTextIsUser, timestamps, protocols: [],
       tokenEstimate: 0, cwd: "",
+      totalTextChars: 0, totalTextCount: 0,
+      totalUserChars: 0, totalUserCount: 0, skippedLines: 0,
     };
   }
   let totalChars = 0;
@@ -235,7 +393,7 @@ function parseSession(transcriptPath) {
   for (const line of raw.split("\n")) {
     if (!line.trim()) continue;
     let entry;
-    try { entry = JSON.parse(line); } catch { continue; }
+    try { entry = JSON.parse(line); } catch { skippedLines += 1; continue; }
 
     const ts = entry.timestamp ?? "";
     if (ts) timestamps.push(ts);
@@ -248,6 +406,8 @@ function parseSession(transcriptPath) {
       for (const [slash, [name, plugin]] of Object.entries(protocolMap)) {
         if (invokes(text, slash, plugin)) protocols.add(name);
       }
+      totalUserChars += text.length;
+      totalUserCount += 1;
       if (userMsgs.length < MAX_USER_MSGS) userMsgs.push({ text, ts });
     }
 
@@ -260,8 +420,10 @@ function parseSession(transcriptPath) {
 
     if (etype === "user" || etype === "assistant") {
       const text = textFromContent(entry.message?.content ?? "");
+      if (text) { totalTextChars += text.length; totalTextCount += 1; }
       if (text && totalChars < MAX_ALL_CHARS) {
         allTexts.push(text);
+        allTextIsUser.push(etype === "user");
         totalChars += text.length;
       }
     }
@@ -297,18 +459,19 @@ function parseSession(transcriptPath) {
     lastTurnHadFreshInput,
     sawAnyAssistantUsage,
     cwd,
+    allTextIsUser,
+    totalTextChars,
+    totalTextCount,
+    totalUserChars,
+    totalUserCount,
+    skippedLines,
   };
 }
 
 // --- Prompt Builders ---
 
 function buildCluePrompt(userMsgs) {
-  const cleaned = userMsgs
-    .filter((m) => !isNoise(m.text))
-    .map((m) => cleanText(m.text))
-    .filter((t) => t.length > 5);
-
-  const sample = cleaned.slice(0, 30).join("\n---\n").slice(0, 20_000);
+  const { sample } = cluePromptSample(userMsgs);
 
   return `You are a session indexer. Extract recall anchors from user messages only.
 
@@ -332,9 +495,11 @@ ${sample}`;
 }
 
 function buildVectorPrompt(allTexts) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const { sample, truncated } = fullTextSample(allTexts);
+  const notice = truncated ? `\n${TRUNCATION_NOTICE}\n` : "";
 
-  return `You are a session indexer. Extract decisions and direction changes from the full session.
+  return `You are a session indexer. Extract decisions and direction changes from the session content below.
+${notice}
 
 Output EXACTLY valid JSON, nothing else:
 {
@@ -354,10 +519,12 @@ ${sample}`;
 }
 
 function buildNarrativePrompt(allTexts, protocols) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const { sample, truncated } = fullTextSample(allTexts);
+  const notice = truncated ? `\n${TRUNCATION_NOTICE}\n` : "";
   const protoList = protocols.length > 0 ? protocols.join(", ") : "none detected";
 
-  return `You are a session indexer. Write a concise session narrative from the full conversation.
+  return `You are a session indexer. Write a concise session narrative from the session content below.
+${notice}
 
 Output EXACTLY valid JSON, nothing else:
 {
@@ -376,7 +543,7 @@ ${sample}`;
 }
 
 function buildMarkerPrompt(allTexts, startedAt) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const { sample } = fullTextSample(allTexts);
   const dateAnchor = toDateString(startedAt);
 
   return `You are a session indexer. Extract salience markers as concrete, anchored entities.
@@ -407,8 +574,11 @@ ${sample}`;
 
 // --- Haiku Invocation ---
 
-function callHaiku(prompt) {
-  const output = execFileSync("claude", [
+// The prompt is absent from argv by contract: --tools is variadic, so a
+// positional prompt following it is consumed as a tool-name list. Stdin is the
+// other input channel --print accepts, and it is not reachable by flag parsing.
+function buildHaikuArgs() {
+  return [
     "-p",
     "--no-session-persistence",
     "--model", "haiku",
@@ -417,9 +587,13 @@ function callHaiku(prompt) {
     "--dangerously-skip-permissions",
     "--setting-sources", "",
     "--tools", "",
-    prompt,
-  ], {
+  ];
+}
+
+function callHaiku(prompt, { run = execFileSync } = {}) {
+  const output = run("claude", buildHaikuArgs(), {
     encoding: "utf8",
+    input: prompt,
     timeout: HAIKU_TIMEOUT,
     stdio: ["pipe", "pipe", "pipe"],
     maxBuffer: 8 * 1024 * 1024,
@@ -481,7 +655,7 @@ function validateMarkers(data) {
 
 // --- File Builders ---
 
-function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRefs) {
+function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRefs, scan) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
@@ -500,6 +674,7 @@ function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRef
          ...crossRefs.map((r) => `  - {kind: ${r.kind}, ref: "${esc(r.ref)}", channel: ${r.channel}}`)]),
     "evidence_modes:",
     ...Object.entries(EVIDENCE_MODES.clue).map(([field, mode]) => `  ${field}: ${mode}`),
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -512,7 +687,7 @@ function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRef
   return lines.filter((l) => l !== undefined).join("\n") + "\n";
 }
 
-function buildVectorMd(sessionId, date, data) {
+function buildVectorMd(sessionId, date, data, scan) {
   const labels = data.decisions.map((d) => d.label ?? "").slice(0, 5);
   const lines = [
     "---",
@@ -520,6 +695,7 @@ function buildVectorMd(sessionId, date, data) {
     `date: ${date}`,
     `decisions: [${labels.map((l) => `"${esc(l)}"`).join(", ")}]`,
     `evidence_mode: ${EVIDENCE_MODES.vector}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -540,7 +716,7 @@ function buildVectorMd(sessionId, date, data) {
   return lines.join("\n") + "\n";
 }
 
-function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, protocols, data) {
+function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, protocols, data, scan) {
   return [
     "---",
     `session_id: ${sessionId}`,
@@ -556,6 +732,7 @@ function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, p
     // frontmatter keeps the old schema — acceptable under per-artifact
     // Null-neutral semantics.
     `evidence_mode: ${EVIDENCE_MODES.narrative}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -598,8 +775,8 @@ function extractCrossRefs(userMsgs, allTexts) {
     if (channel === "user") prev.channel = "user";
   };
   const channels = [
-    ["user", userMsgs.slice(0, 20).map((m) => m.text)],
-    ["transcript", allTexts.slice(0, 20)],
+    ["user", userMsgs.slice(0, CROSS_REF_MSGS).map((m) => m.text)],
+    ["transcript", allTexts.slice(0, CROSS_REF_MSGS)],
   ];
   for (const [channel, texts] of channels) {
     for (const t of texts) {
@@ -746,7 +923,7 @@ function computeCoinage(userMsgs, allTexts, corpusPath, currentSessionId, budget
   };
 }
 
-function buildEntropyMd(sessionId, date, refs) {
+function buildEntropyMd(sessionId, date, refs, scan) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
@@ -754,6 +931,7 @@ function buildEntropyMd(sessionId, date, refs) {
     `identifier_count: ${refs.length}`,
     `extractors: [${ENTROPY_EXTRACTORS.map((e) => e.name).join(", ")}]`,
     `evidence_mode: ${EVIDENCE_MODES.entropy}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -776,7 +954,7 @@ function buildEntropyMd(sessionId, date, refs) {
 // categories (actor/temporal/emotional/cognitive/singularity) with the
 // deterministic coinage statistics. extractionMethod is recorded in
 // frontmatter for cross-version observability (no ranking influence).
-function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extractionMethod) {
+function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extractionMethod, scan) {
   const coinageItems = coinageResult?.coinage ?? [];
   const counts = {
     coinage: coinageItems.length,
@@ -795,6 +973,7 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
     `extraction_method: ${extractionMethod}`,
     "evidence_modes:",
     ...Object.entries(EVIDENCE_MODES.markers).map(([field, mode]) => `  ${field}: ${mode}`),
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -833,7 +1012,7 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
   return lines.join("\n") + "\n";
 }
 
-function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
+function buildCoinageMd(sessionId, date, result, skipped, skipReason, scan) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
@@ -844,6 +1023,7 @@ function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
     `elapsed_ms: ${result?.elapsed_ms ?? 0}`,
     `threshold: ${COINAGE_PRECISION_THRESHOLD}`,
     `evidence_mode: ${EVIDENCE_MODES.coinage}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -960,10 +1140,22 @@ function main() {
   const storeDir = path.join(slugDir, "hypomnesis", sessionId);
 
   const {
-    userMsgs, allTexts, timestamps, protocols, tokenEstimate,
+    userMsgs, allTexts, allTextIsUser, timestamps, protocols, tokenEstimate,
     lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
+    totalTextChars, totalTextCount, totalUserChars, totalUserCount, skippedLines,
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
+
+  // One coverage per extraction. Which file each one reaches is settled below,
+  // where the file is assembled from the results that actually came back.
+  const cov = buildCoverages({
+    userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
+    totalUserChars, totalUserCount,
+  });
+  for (const [extraction, omitted] of Object.entries(cov)) {
+    if (omitted > 0) logErr(`coverage[${extraction}]: omitted_chars=${omitted}`);
+  }
+  if (skippedLines > 0) logErr(`source_scan: skipped_lines=${skippedLines}`);
 
   // Observability for stale token estimates (final assistant turn had no fresh
   // input_tokens — full cache hit or tool-use-only turn can leave the estimate
@@ -1013,7 +1205,11 @@ function main() {
     const clueRaw = callHaiku(buildCluePrompt(userMsgs));
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs);
+      // topics/keywords/utterances from the clue prompt, cross_refs from extractCrossRefs
+      files["clue.md"] = buildClueMd(
+        sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs,
+        scanOf(skippedLines, [clueData, cov.cluePrompt], [crossRefs, cov.crossRefs]),
+      );
     } else {
       logErr(`clue validation failed: invalid schema`);
     }
@@ -1026,7 +1222,10 @@ function main() {
     const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
     vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
-      files["vector.md"] = buildVectorMd(sessionId, date, vectorData);
+      files["vector.md"] = buildVectorMd(
+        sessionId, date, vectorData,
+        scanOf(skippedLines, [vectorData, cov.semantic]),
+      );
     } else {
       logErr(`vector validation failed: invalid schema`);
     }
@@ -1042,7 +1241,10 @@ function main() {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
         sessionId, date, startedAt, lastTurnAt, sessionCwd,
+        // prose from the narrative prompt, topics carried over from the clue
+        // extraction — which is null exactly when `topics` is the empty fallback
         topics, protocols, narrativeData,
+        scanOf(skippedLines, [narrativeData, cov.semantic], [clueData, cov.cluePrompt]),
       );
     } else {
       logErr(`narrative validation failed: invalid schema`);
@@ -1087,7 +1289,9 @@ function main() {
 
   try {
     const refs = extractEntropyRefs(allTexts);
-    files["entropy.md"] = buildEntropyMd(sessionId, date, refs);
+    files["entropy.md"] = buildEntropyMd(
+      sessionId, date, refs, scanOf(skippedLines, [refs, cov.entropy]),
+    );
   } catch (e) {
     logErr(`entropy extraction failed: ${e.message}`);
   }
@@ -1105,7 +1309,12 @@ function main() {
       const corpusRoot = path.join(slugDir, "hypomnesis");
       coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
     }
-    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason);
+    // A skipped or failed coinage leaves coinageResult null, so no bounded read
+    // fed this file and the scan is absent rather than zero.
+    files["coinage.md"] = buildCoinageMd(
+      sessionId, date, coinageResult, skipped, skipReason,
+      scanOf(skippedLines, [coinageResult, cov.coinage]),
+    );
   } catch (e) {
     logErr(`coinage extraction failed: ${e.message}`);
   }
@@ -1115,7 +1324,9 @@ function main() {
   if (markerData) {
     try {
       files["markers.md"] = buildMarkersMd(
+        // haiku markers from the semantic sample, counts from the coinage extraction
         sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD,
+        scanOf(skippedLines, [markerData, cov.semantic], [coinageResult, cov.coinage]),
       );
     } catch (e) {
       logErr(`markers assembly failed: ${e.message}`);
@@ -1131,6 +1342,16 @@ export {
   extractCrossRefs,
   buildClueMd,
   buildMarkersMd,
+  buildHaikuArgs,
+  callHaiku,
+  buildCoverages,
+  scanOf,
+  parseSession,
+  cluePromptSample,
+  joinedLength,
+  sourceScanLines,
+  fullTextSample,
+  buildNarrativePrompt,
   invokes,
   skillCalls,
   resolveSkillProtocol,

@@ -5,12 +5,23 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   extractCrossRefs,
   buildClueMd,
   buildMarkersMd,
+  buildHaikuArgs,
+  callHaiku,
+  buildCoverages,
+  scanOf,
+  parseSession,
+  joinedLength,
+  sourceScanLines,
+  fullTextSample,
+  buildNarrativePrompt,
   invokes,
   skillCalls,
   resolveSkillProtocol,
@@ -186,4 +197,306 @@ test("protocolMap covers every protocol plugin command on disk", () => {
   assert.deepEqual(missing, [], `protocolMap is missing: ${missing.map(([c]) => c).join(", ")}`);
   const wrongPlugin = commands.filter(([c, p]) => protocolMap[c]?.[1] !== p);
   assert.deepEqual(wrongPlugin, [], `protocolMap plugin mismatch: ${wrongPlugin.map(([c, p]) => `${c} should be ${p}`).join(", ")}`);
+});
+
+// --tools is variadic, so anything positional trailing it is parsed as a
+// tool-name list and the CLI then exits with "Input must be provided" — every
+// extraction returns empty and the record is discarded. Both properties are
+// asserted together: the guard stays, and no positional rides behind it.
+test("buildHaikuArgs keeps --tools \"\" and carries no positional prompt", () => {
+  const args = buildHaikuArgs();
+  const toolsAt = args.indexOf("--tools");
+  assert.notEqual(toolsAt, -1, "--tools \"\" is the injection guard — it must not be dropped");
+  assert.equal(args[toolsAt + 1], "", "--tools must disable every built-in tool");
+  assert.equal(toolsAt + 1, args.length - 1, "nothing may follow --tools: it would be read as a tool name");
+  for (const a of args) {
+    assert.ok(a === "" || a.startsWith("-") || args[args.indexOf(a) - 1]?.startsWith("-"),
+      `argv carries a stray positional: ${JSON.stringify(a)}`);
+  }
+});
+
+test("callHaiku delivers the prompt on stdin, never in argv", () => {
+  const prompt = "Session content:\n--tools !errors.As --base -p decoy tokens";
+  let seen = null;
+  const out = callHaiku(prompt, {
+    run: (file, args, opts) => { seen = { file, args, opts }; return "  result  "; },
+  });
+  assert.equal(out, "result");
+  assert.equal(seen.file, "claude");
+  assert.equal(seen.opts.input, prompt, "prompt must travel on stdin");
+  assert.ok(!seen.args.includes(prompt), "prompt must not appear in argv");
+  // A prompt fragment reaching argv would be captured by --tools just as the
+  // whole prompt was; assert the argv is exactly the flag set.
+  assert.deepEqual(seen.args, buildHaikuArgs());
+});
+
+// The assertion above reads the options object; it would still hold if the
+// options stopped delivering stdin to a child at all (stdio "ignore" passes it).
+// This one substitutes only the binary and keeps the options callHaiku built,
+// so a real child process has to receive the prompt on fd 0 for it to pass.
+test("callHaiku's options deliver stdin to a real child process", () => {
+  const prompt = `carried-on-stdin-${process.pid}-${Date.now()}`;
+  const echo = "process.stdout.write(require('node:fs').readFileSync(0, 'utf8'))";
+  const out = callHaiku(prompt, {
+    run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", echo], opts),
+  });
+  assert.equal(out, prompt, "the child read something other than the prompt from stdin");
+});
+
+// --- source_scan: the record says how much of its source it read ---
+
+const TEXT_SEPARATOR_LEN = "\n---\n".length;
+
+// The separators a joined sample spends are characters of the bound, so a
+// whole-source count that omits them subtracts to less than the real gap. The
+// falsifying case is two texts that exactly fill the bound between them: the
+// prompt is truncated and a raw-sum count still reports a complete read.
+test("omitted_chars: a sample the prompt flagged as truncated never publishes zero", () => {
+  const texts = ["a".repeat(15_000), "b".repeat(15_000)];
+  const { sample, truncated } = fullTextSample(texts);
+  assert.ok(truncated, "the joined form exceeds the bound — the fixture must reach the cut");
+  const rawSum = texts.reduce((n, t) => n + t.length, 0);
+  assert.equal(Math.max(0, rawSum - sample.length), 0,
+    "a raw-sum count is what this guards against; if this stops holding the fixture drifted");
+  // The measurement buildCoverages performs, both sides joined.
+  const cov = buildCoverages({
+    userMsgs: [], allTexts: texts, allTextIsUser: [false, false],
+    totalTextChars: rawSum, totalTextCount: texts.length,
+    totalUserChars: 0, totalUserCount: 0,
+  });
+  assert.ok(cov.semantic > 0,
+    "truncated prompt with omitted_chars 0 — the frontmatter contradicts the prompt");
+  assert.equal(cov.semantic, TEXT_SEPARATOR_LEN);
+});
+
+test("joinedLength: one separator per pair, none for a single text or none at all", () => {
+  assert.equal(joinedLength(0, 0), 0);
+  assert.equal(joinedLength(100, 1), 100);
+  assert.equal(joinedLength(100, 2), 100 + TEXT_SEPARATOR_LEN);
+  assert.equal(joinedLength(100, 4), 100 + TEXT_SEPARATOR_LEN * 3);
+  // Measured against the real join rather than against the formula restated.
+  const texts = ["ab", "cd", "ef"];
+  assert.equal(joinedLength(6, 3), texts.join("\n---\n").length);
+});
+
+test("scanOf: unparsable transcript lines are counted", () => {
+  assert.equal(scanOf(3, [{ ok: true }, 0]).skipped_lines, 3);
+  // Claude has no cross-check channel for human turns; 0 means unwitnessed.
+  assert.equal(scanOf(3, [{ ok: true }, 0]).unverified_user_turns, 0);
+});
+
+// An extraction's coverage is what its own bound kept it from reading. The
+// cases below are session shapes where two bounds disagree; one number cannot
+// satisfy both.
+test("buildCoverages: each bound reports its own omission", () => {
+  const text = "u".repeat(25_000);
+  const cov = buildCoverages({
+    userMsgs: [{ text, ts: "" }], allTexts: [text], allTextIsUser: [true],
+    totalTextChars: text.length, totalTextCount: 1,
+    totalUserChars: text.length, totalUserCount: 1,
+  });
+  // 25,000 characters of user text: the clue prompt takes 20,000 of them, and
+  // neither the 30k semantic bound nor the 80k buffer bound is reached.
+  assert.equal(cov.cluePrompt, 5_000);
+  assert.equal(cov.semantic, 0);
+  assert.equal(cov.entropy, 0);
+});
+
+test("buildCoverages: the semantic bound cuts where the parse buffer does not", () => {
+  const texts = ["a".repeat(25_000), "b".repeat(25_000)];
+  const cov = buildCoverages({
+    userMsgs: [], allTexts: texts, allTextIsUser: [false, false],
+    totalTextChars: 50_000, totalTextCount: 2,
+    totalUserChars: 0, totalUserCount: 0,
+  });
+  assert.equal(cov.semantic, 50_000 + TEXT_SEPARATOR_LEN - 30_000);
+  assert.equal(cov.entropy, 0, "the 80k buffer held the whole session");
+  assert.notEqual(cov.semantic, cov.entropy,
+    "one shared number cannot describe both — that is what the split exists for");
+});
+
+test("buildCoverages: user messages dropped past the retention cap are counted", () => {
+  const text = "m".repeat(100);
+  const cov = buildCoverages({
+    userMsgs: Array.from({ length: 150 }, () => ({ text, ts: "" })),
+    allTexts: [text], allTextIsUser: [true],
+    totalTextChars: 100, totalTextCount: 1,
+    // 200 user messages reached the transcript; MAX_USER_MSGS retained 150.
+    totalUserChars: 100 * 200, totalUserCount: 200,
+  });
+  assert.ok(cov.cluePrompt > 0,
+    "50 user messages never reached the clue stream — the record must not read as whole");
+});
+
+test("buildCoverages: the cross-ref bound cuts where the clue prompt's does not", () => {
+  // 21 short user messages. The clue prompt takes 30, so its own bound cuts
+  // nothing; extractCrossRefs takes 20, so the 21st message never reached it.
+  const texts = Array.from({ length: 21 }, (_, i) => `message-${String(i).padStart(2, "0")}`);
+  const chars = texts.reduce((n, t) => n + t.length, 0);
+  const cov = buildCoverages({
+    userMsgs: texts.map((text) => ({ text, ts: "" })),
+    allTexts: texts, allTextIsUser: texts.map(() => true),
+    totalTextChars: chars, totalTextCount: texts.length,
+    totalUserChars: chars, totalUserCount: texts.length,
+  });
+  assert.equal(cov.cluePrompt, 0, "the clue prompt's own bound took all 21");
+  assert.equal(cov.crossRefs, texts[20].length + TEXT_SEPARATOR_LEN,
+    "the message past the cross-ref bound is what that extractor did not read");
+});
+
+test("buildCoverages: coinage is not charged for text its second channel delivered", () => {
+  // The final user message is past MAX_ALL_CHARS and so never enters allTexts,
+  // but computeCoinage also reads userMsgs, which still carries it. entropy
+  // reads allTexts alone and is charged for it; coinage is not.
+  const first = "u".repeat(15);
+  const bulk = "a".repeat(80_000);
+  const last = "l".repeat(26);
+  const cov = buildCoverages({
+    userMsgs: [{ text: first, ts: "" }, { text: last, ts: "" }],
+    allTexts: [first, bulk], allTextIsUser: [true, false],
+    totalTextChars: first.length + bulk.length + last.length, totalTextCount: 3,
+    totalUserChars: first.length + last.length, totalUserCount: 2,
+  });
+  assert.equal(cov.coinage, 0, "coinage read every source message across its two channels");
+  assert.equal(cov.entropy, last.length + TEXT_SEPARATOR_LEN,
+    "entropy reads the parse buffer alone, so the final message is absent from it");
+});
+
+// A file is charged for a bound only where something actually came through it.
+test("scanOf: an extraction that produced nothing contributes no coverage", () => {
+  assert.equal(scanOf(0, [null, 5_000], [{ ok: true }, 0]).omitted_chars, 0,
+    "a failed extraction must not charge the file it never reached");
+  assert.equal(scanOf(0, [{ ok: true }, 5_000], [{ ok: true }, 0]).omitted_chars, 5_000,
+    "the widest omission among what did contribute");
+  assert.equal(scanOf(3, [{ ok: true }, 0]).skipped_lines, 3,
+    "the parse-level count rides on every published scan");
+});
+
+test("scanOf: nothing contributed means no scan, not a scan of zeros", () => {
+  assert.equal(scanOf(0, [null, 5_000]), null);
+  assert.equal(scanOf(4, [null, 0], [undefined, 9]), null);
+  assert.deepEqual(sourceScanLines(scanOf(0, [null, 5_000])), [],
+    "an unmeasured read publishes no field; zeros would claim a read nobody performed");
+});
+
+test("parseSession hands buildCoverages every field it reads", () => {
+  // The wiring, not the arithmetic. buildCoverages is reachable with a
+  // hand-built object that a real parse never produces, so a field the parse
+  // stops returning fails nowhere else — it reaches the writer as undefined and
+  // only the written artifact shows it.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "hyp-parse-"));
+  const tp = path.join(dir, "sid.jsonl");
+  const row = (type, text) => JSON.stringify({
+    type, timestamp: "2026-09-16T00:00:00.000Z", cwd: "/tmp",
+    message: { role: type, content: [{ type: "text", text }] },
+  });
+  fs.writeFileSync(tp, [
+    row("user", "first user message with enough length"),
+    row("assistant", "an assistant reply of some length"),
+    row("user", "second user message with enough length"),
+  ].join("\n") + "\n");
+  try {
+    const parsed = parseSession(tp);
+    assert.ok(Array.isArray(parsed.allTextIsUser), "parseSession returns the channel flags");
+    assert.deepEqual(parsed.allTextIsUser, [true, false, true]);
+    const cov = buildCoverages(parsed);
+    for (const [name, omitted] of Object.entries(cov)) {
+      assert.equal(omitted, 0, `${name} read this short session whole`);
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// The published artifact, not a builder. Every defect this field has carried
+// survived a green unit suite, because a unit test hands a builder the scan it
+// wants and never asks which scan the writer would have paired with that file.
+// This runs the writer whole, fails one extraction, and reads what landed.
+test("a file is not charged for an extraction that failed", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "hyp-e2e-"));
+  try {
+    const sid = "probe";
+    const bin = path.join(dir, "bin");
+    fs.mkdirSync(bin);
+    // Fails the clue call and answers the rest. narrative.md still gets built,
+    // with `topics` falling back to [] — so nothing of the clue extraction is
+    // in it, and its clue bound must not reach the published count.
+    fs.writeFileSync(path.join(bin, "claude"), `#!/usr/bin/env node
+const p = require("node:fs").readFileSync(0, "utf8");
+if (p.includes("Extract recall anchors")) process.exit(3);
+const out = p.includes("Extract decisions and direction changes")
+  ? { decisions: [{ label: "d", what: "w", why: "y" }] }
+  : p.includes("Write a concise session narrative")
+  ? { origin: "o", direction: "d", outcome: "oc" }
+  : { actor: [], temporal: [], emotional: [], cognitive: [], singularity: [] };
+process.stdout.write(JSON.stringify(out));
+`, { mode: 0o755 });
+    // 25,000 characters in one user message: past the clue prompt's 20,000
+    // bound, inside the semantic prompt's 30,000 one.
+    const tp = path.join(dir, `${sid}.jsonl`);
+    fs.writeFileSync(tp, JSON.stringify({
+      type: "user", timestamp: "2026-09-17T00:00:00.000Z", cwd: "/probe",
+      message: { role: "user", content: [{ type: "text", text: "x".repeat(25_000) }] },
+    }) + "\n");
+
+    const writer = fileURLToPath(new URL("./hypomnesis-write.mjs", import.meta.url));
+    execFileSync(process.execPath, [writer], {
+      input: JSON.stringify({
+        session_id: sid, transcript_path: tp, hook_event_name: "PreCompact",
+      }),
+      env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+      encoding: "utf8", stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    const narrative = fs.readFileSync(
+      path.join(dir, "hypomnesis", sid, "narrative.md"), "utf8",
+    );
+    const scan = narrative.match(/source_scan: \{[^}]*\}/)?.[0] ?? "";
+    assert.ok(scan, "narrative.md published no scan at all");
+    assert.match(scan, /omitted_chars: 0\b/,
+      "the clue extraction failed and reached nothing into this file, "
+      + "so its bound must not be charged here");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("sourceScanLines: emits one inline mapping, and nothing when uncaptured", () => {
+  const [line] = sourceScanLines({ skipped_lines: 2, unverified_user_turns: 0, omitted_chars: 41 });
+  assert.equal(line, "source_scan: {skipped_lines: 2, unverified_user_turns: 0, omitted_chars: 41}");
+  assert.deepEqual(sourceScanLines(undefined), []);
+  assert.deepEqual(sourceScanLines(null), []);
+});
+
+test("buildClueMd: carries source_scan beside derived_from when scanned", () => {
+  const scan = { skipped_lines: 1, unverified_user_turns: 0, omitted_chars: 20_000 };
+  const md = buildClueMd("sid-4", "2026-06-11", "2026-06-11T00:00:00Z", "2026-06-11T01:00:00Z", "/tmp", clueData, [], scan);
+  const lines = md.split("\n");
+  const scanIdx = lines.findIndex((l) => l.startsWith("source_scan:"));
+  const derivedIdx = lines.findIndex((l) => l.startsWith("derived_from:"));
+  assert.ok(scanIdx > 0, "source_scan present");
+  assert.equal(derivedIdx, scanIdx + 1, "sits immediately before derived_from");
+  assert.ok(lines[scanIdx].includes("omitted_chars: 20000"));
+  // A legacy call without a scan stays valid and claims nothing.
+  const legacy = buildClueMd("sid-5", "2026-06-11", "2026-06-11T00:00:00Z", "2026-06-11T01:00:00Z", "/tmp", clueData, []);
+  assert.ok(!legacy.includes("source_scan:"));
+});
+
+test("fullTextSample: bounds the prompt and reports whether it cut", () => {
+  const short = fullTextSample(["abc", "def"]);
+  assert.equal(short.sample, "abc\n---\ndef");
+  assert.equal(short.truncated, false);
+
+  const long = fullTextSample(["x".repeat(40_000)]);
+  assert.equal(long.sample.length, 30_000);
+  assert.equal(long.truncated, true);
+});
+
+test("buildNarrativePrompt: a truncated sample tells the extractor it is a prefix", () => {
+  const whole = buildNarrativePrompt(["a short session"], []);
+  assert.ok(!whole.includes("opening portion"), "no notice when nothing was cut");
+
+  const cut = buildNarrativePrompt(["y".repeat(40_000)], []);
+  assert.ok(cut.includes("opening portion of a longer session"));
+  assert.ok(cut.includes("does not reach an outcome"));
 });
