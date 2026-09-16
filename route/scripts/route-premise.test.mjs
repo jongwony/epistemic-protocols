@@ -10,6 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  CLOSE_HEADER,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
@@ -17,6 +18,7 @@ import {
   bindsAt,
   isInstructionSurface,
   premiseRoot,
+  renderClosePremise,
   renderPremise,
   renderToolPremise,
 } from "./route-premise.mjs";
@@ -60,6 +62,7 @@ function cleanup(host) {
 
 const FIRST = PREMISE_INDEX[0].file;
 const TOOL = PREMISE_INDEX.filter((e) => e.at);
+const CLOSING = PREMISE_INDEX.filter((e) => e.atClose);
 
 // ---------------------------------------------------------------------------
 // Resolution
@@ -168,6 +171,23 @@ test("the tool channel renders the entries whose moment the call is, under its h
   }
 });
 
+test("the close channel renders every entry that binds at a close, under its header", () => {
+  const host = makeHost();
+  try {
+    const root = premiseRoot(host.env);
+    const out = renderClosePremise(root).split("\n");
+    const head = CLOSE_HEADER.split("\n");
+    assert.deepEqual(out.slice(0, head.length), head);
+    assert.deepEqual(out.slice(head.length), CLOSING.map((e) => `Read \`${path.join(root, e.file)}\` ${e.atClose.when}`));
+    // Unlike the tool channel there is no call to match: every close is the
+    // moment, so the only thing that withholds the lines is an absent document.
+    assert.equal(renderClosePremise(null), "");
+    assert.equal(renderClosePremise("/nonexistent/premise"), "");
+  } finally {
+    cleanup(host);
+  }
+});
+
 test("an instruction surface is recognized by path shape, on any host", () => {
   for (const f of [
     "CLAUDE.md", "/h/.claude/CLAUDE.md", "/p/AGENTS.md", "/p/AGENTS.override.md", "/p/CLAUDE.local.md",
@@ -206,9 +226,13 @@ test("the index and the premise directory name the same documents", () => {
       assert.ok(MOMENTS[e.at.moment], `${e.file}: names a moment the matcher can decide`);
       assert.match(e.at.when, /^(when|before) /, `${e.file}: the tool clause states the moment it is for`);
     }
+    if (e.atClose) {
+      assert.match(e.atClose.when, /^(when|before) /, `${e.file}: the close clause states the moment it is for`);
+    }
   }
   assert.equal(new Set(indexed).size, indexed.length, "no document is indexed twice");
   assert.ok(TOOL.length > 0, "the tool channel carries at least one entry");
+  assert.ok(CLOSING.length > 0, "the close channel carries at least one entry");
   // Every observable moment the hook defines is some document's moment.
   for (const m of Object.keys(MOMENTS)) {
     assert.ok(TOOL.some((e) => e.at.moment === m), `${m}: a moment no entry names is dead`);

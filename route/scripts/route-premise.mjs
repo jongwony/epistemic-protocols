@@ -19,14 +19,18 @@
  * the plugin root is the same directory. An entry whose document is not
  * there is left out; a root holding none of them is no root.
  *
- * Two delivery channels. The session-start index carries every document's
+ * Three delivery channels. The session-start index carries every document's
  * moments under `when`: recognizing a moment as it arrives is the reader's,
  * and the index is what the reader recognizes it against. A moment the
  * host's tool matcher can also see — a named file tool touching a path of
  * a given shape, a named agent tool being called — is delivered a second
  * time at that call, through the PreToolUse hook (route-tool.mjs): an `at`
  * field on the entry names the matcher-decided moment and the clause for
- * the line delivered there. The second delivery is a reinforcement, not a
+ * the line delivered there. The close of a turn is a third such moment, and
+ * the host decides it whole: an `atClose` field names the clause delivered
+ * through the Stop hook (route-stop.mjs). It needs no predicate beside it
+ * the way `at` needs MOMENTS, because there is no question of which close
+ * is the moment — every one is. The second delivery is a reinforcement, not a
  * replacement: a hook's context reaches the model on the request after the
  * call, so the call has run by the time the line is read, and the line
  * asks for the document before the result is built on. The session line
@@ -71,11 +75,26 @@ const PREMISE_HEADER =
 const TOOL_HEADER =
   "Collaboration premises — the situation named below has just arisen. Read the document before continuing this work:";
 
+// Heads the close channel. This one carries more than a header because the
+// moment is not a call to annotate but a turn about to end: the reading has
+// to say what closing again would mean, or a turn with nothing owed cannot
+// tell that it may simply close. The substance of the reading stays in the
+// document; what is here is the occasion and the three ways it can go.
+const CLOSE_HEADER = [
+  "Collaboration premises — this turn is about to close, and the close is the moment below.",
+  "Read the turn's final paragraph once against the document named. Where it announces work rather than carrying it out — a promise, a plan, a next step, a question the turn could have answered itself — that work is what the turn owed, and ending on the announcement hands back a direction already settled. Carry it out now, in this turn.",
+  "Where the work genuinely waits on something nameable — the user's own act, a running agent, an external event — that is a real boundary: say in one sentence what it waits on, and close.",
+  "Where the reading finds nothing owed, close without remarking on it. This is a reading, not a message to answer.",
+].join("\n");
+
 // One entry per document. `when` is the clause for the session-start line
 // and carries every moment. `at` names a matcher-decided moment (a key of
 // MOMENTS) and the clause for the line delivered again at that call.
+// `atClose` carries the clause for the line delivered at a turn's close.
 const PREMISE_INDEX = [
-  { file: "recognition-and-authority.md", when: "when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a rule may fix an answer before the situation it applies to is known." },
+  { file: "recognition-and-authority.md",
+    when: "when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a rule may fix an answer before the situation it applies to is known.",
+    atClose: { when: "when a turn is about to close on an announcement of work rather than on the work itself." } },
   { file: "interaction-factorization.md", when: "when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several." },
   { file: "gate-design.md", when: "when designing or defending a checkpoint, when deciding what that checkpoint should present, when deciding what counts as done and when to stop, and when checking whether a required step can be skipped." },
   { file: "tiering-and-scope.md", when: "when deciding a principle's role, scope, loading moment, or revision basis, including after a model change." },
@@ -209,8 +228,21 @@ function renderToolPremise(root, call) {
   return [TOOL_HEADER, ...entries.map((e) => line(root, e, e.at.when))].join("\n");
 }
 
+/**
+ * One line per document present under `root` that binds at a turn's close,
+ * under the close header. Nothing when none is there — a reading with no
+ * document to read against is cost without a channel.
+ */
+function renderClosePremise(root) {
+  if (!root) return "";
+  const entries = present(root).filter((e) => e.atClose);
+  if (entries.length === 0) return "";
+  return [CLOSE_HEADER, ...entries.map((e) => line(root, e, e.atClose.when))].join("\n");
+}
+
 export {
   AGENT_TOOLS,
+  CLOSE_HEADER,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
@@ -218,6 +250,7 @@ export {
   bindsAt,
   isInstructionSurface,
   premiseRoot,
+  renderClosePremise,
   renderPremise,
   renderToolPremise,
 };
