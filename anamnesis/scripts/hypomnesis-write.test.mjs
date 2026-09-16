@@ -198,10 +198,8 @@ test("protocolMap covers every protocol plugin command on disk", () => {
 
 // --tools is variadic, so anything positional trailing it is parsed as a
 // tool-name list and the CLI then exits with "Input must be provided" — every
-// extraction returns empty and the record is discarded. The 2026-09-04
-// injection guard put --tools "" at the end of argv, which is what made a
-// trailing prompt unreachable. Both properties are asserted together: the guard
-// stays, and no positional rides behind it.
+// extraction returns empty and the record is discarded. Both properties are
+// asserted together: the guard stays, and no positional rides behind it.
 test("buildHaikuArgs keeps --tools \"\" and carries no positional prompt", () => {
   const args = buildHaikuArgs();
   const toolsAt = args.indexOf("--tools");

@@ -107,9 +107,7 @@ const protocolMap = {
 };
 
 const MAX_ALL_CHARS = 80_000;
-// What the vector/narrative/marker prompts actually receive. Named because
-// source_scan measures omission against it, and a literal repeated at each
-// call site can drift from the count that publishes it.
+// What the vector/narrative/marker prompts actually receive.
 const FULL_TEXT_PROMPT_CHARS = 30_000;
 // What the clue prompt receives. It reads the user-message stream rather than
 // the full text, and is bounded twice: by message count and by characters.
@@ -160,9 +158,7 @@ function cluePromptSample(userMsgs) {
 // realization reports 0 when its event_msg channel is empty: Claude has no
 // second channel to cross-check human turns against, so no turn is witnessed
 // as unverified — 0 here means unwitnessed, not verified.
-// Both arguments are measured in the joined representation (see joinedLength);
-// a raw character sum on one side and a joined sample length on the other
-// subtract to less than the real omission.
+// Both arguments are measured in the joined representation (see joinedLength).
 function computeSourceScan(wholeJoinedChars, sampleChars, skippedLines) {
   return {
     skipped_lines: skippedLines,
@@ -185,9 +181,8 @@ function buildSourceScans({
   const wholeJoined = joinedLength(totalTextChars, totalTextCount);
 
   // Beyond MAX_USER_MSGS a user message never reaches the cleaned stream, so
-  // its characters are added raw. Raw is never shorter than cleaned, which
-  // overstates rather than understates — the safe direction for a field whose
-  // whole use is to warn that a record read less than its source.
+  // its characters are added raw. Raw is never shorter than cleaned, so this
+  // term overstates the omission rather than understating it.
   const retainedUserJoined = joinedLength(
     userMsgs.reduce((n, m) => n + m.text.length, 0), userMsgs.length,
   );
@@ -1110,9 +1105,8 @@ function main() {
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
 
-  // Measured per extraction path against what that path's prompt received: a
-  // reader weighing one artifact needs the gap between the whole source and
-  // what produced THAT artifact.
+  // One scan per extraction path, each measured against what that path's
+  // prompt received.
   const scans = buildSourceScans({
     userMsgs, allTexts, totalTextChars, totalTextCount,
     totalUserChars, totalUserCount, skippedLines,
