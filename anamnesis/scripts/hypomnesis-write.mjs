@@ -13,7 +13,7 @@
  *   1. Read stdin (hook input) + parse session JSONL (deterministic)
  *   2. Apply gate per entry point
  *   3. Build 3 prompts (clue: user-only, vector: full, narrative: full)
- *   4. Call claude -p --model haiku per prompt (LLM semantic extraction)
+ *   4. Call claude -p --model haiku per prompt, prompt on stdin (LLM semantic extraction)
  *   5. Validate JSON output + assemble md files (deterministic)
  *   6. Atomic write to ~/.claude/projects/{slug}/hypomnesis/{session-id}/
  *      (slug derived from transcript_path dirname — sibling to SSOT JSONL.
@@ -407,8 +407,11 @@ ${sample}`;
 
 // --- Haiku Invocation ---
 
-function callHaiku(prompt) {
-  const output = execFileSync("claude", [
+// The prompt is absent from argv by contract: --tools is variadic, so a
+// positional prompt following it is consumed as a tool-name list. Stdin is the
+// other input channel --print accepts, and it is not reachable by flag parsing.
+function buildHaikuArgs() {
+  return [
     "-p",
     "--no-session-persistence",
     "--model", "haiku",
@@ -417,9 +420,13 @@ function callHaiku(prompt) {
     "--dangerously-skip-permissions",
     "--setting-sources", "",
     "--tools", "",
-    prompt,
-  ], {
+  ];
+}
+
+function callHaiku(prompt, { run = execFileSync } = {}) {
+  const output = run("claude", buildHaikuArgs(), {
     encoding: "utf8",
+    input: prompt,
     timeout: HAIKU_TIMEOUT,
     stdio: ["pipe", "pipe", "pipe"],
     maxBuffer: 8 * 1024 * 1024,
@@ -1131,6 +1138,8 @@ export {
   extractCrossRefs,
   buildClueMd,
   buildMarkersMd,
+  buildHaikuArgs,
+  callHaiku,
   invokes,
   skillCalls,
   resolveSkillProtocol,
