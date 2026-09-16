@@ -113,9 +113,8 @@ const FULL_TEXT_PROMPT_CHARS = 30_000;
 // the full text, and is bounded twice: by message count and by characters.
 const CLUE_PROMPT_MSGS = 30;
 const CLUE_PROMPT_CHARS = 20_000;
-// What extractCrossRefs reads from the head of each of its two channels. Named
-// rather than left inline at the slice, because the coverage a cross-ref bears
-// is measured from this same bound.
+// What extractCrossRefs reads from the head of each of its two channels, and
+// the bound the coverage a cross-ref bears is measured from.
 const CROSS_REF_MSGS = 20;
 const HAIKU_TIMEOUT = 120_000;
 
@@ -158,26 +157,11 @@ function cluePromptSample(userMsgs) {
   };
 }
 
-// SKILL.md SourceScan. unverified_user_turns stays 0 for the reason the Codex
-// realization reports 0 when its event_msg channel is empty: Claude has no
-// second channel to cross-check human turns against, so no turn is witnessed
-// as unverified — 0 here means unwitnessed, not verified.
-// Both arguments are measured in the joined representation (see joinedLength).
-function computeSourceScan(wholeJoinedChars, sampleChars, skippedLines) {
-  return {
-    skipped_lines: skippedLines,
-    unverified_user_turns: 0,
-    omitted_chars: Math.max(0, wholeJoinedChars - sampleChars),
-  };
-}
-
 // The joined length of what an extractor reading the head of both channels
 // actually receives. `allTexts` is the interleaved stream and `userMsgs` its
 // user-only subset, so the two slices overlap: the user entries inside
 // `allTexts[0, limit)` are a prefix of `userMsgs`, and only the user messages
-// past that prefix are what the second channel adds. Counting the union rather
-// than either channel is what keeps an extractor reading both from being
-// charged for text one of them delivered.
+// past that prefix are what the second channel adds.
 function channelUnionJoined(allTexts, allTextIsUser, userMsgs, limit) {
   const nAll = Math.min(limit, allTexts.length);
   let chars = 0;
@@ -195,25 +179,19 @@ function channelUnionJoined(allTexts, allTextIsUser, userMsgs, limit) {
   return joinedLength(chars, count);
 }
 
-// One scan per ARTIFACT, not per prompt bound. An artifact is a composite —
-// several extractors, each with its own bound, writing separate fields into one
-// file — and a reader holding that file cannot tell which field they are
-// weighing. So the count an artifact carries is the widest omission among the
-// extractions composed into it: `omitted_chars == 0` then means no extractor
-// feeding this file dropped anything, which is what SKILL.md's "built from less
-// than its whole source" has to mean for the field to be readable at all.
+// One coverage per EXTRACTION: how much of the session that extraction's own
+// bound kept it from reading. This is producer-side fact — a bound applied to a
+// parsed session yields one number — and it names no artifact, because which
+// file an extraction ends up in is decided by whether it ran.
 //
-// The five extractions and what each one's bound drops:
 //   cluePrompt — the cleaned user stream under CLUE_PROMPT_MSGS/CLUE_PROMPT_CHARS
 //   crossRefs  — the head CROSS_REF_MSGS of both channels
 //   semantic   — the joined full text under FULL_TEXT_PROMPT_CHARS
 //   entropy    — the parse buffer under MAX_ALL_CHARS
 //   coinage    — the parse buffer and the user stream together
-// skipped_lines is a parse-level count, upstream of every bound, and is the
-// same in all six.
-function buildSourceScans({
+function buildCoverages({
   userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
-  totalUserChars, totalUserCount, skippedLines,
+  totalUserChars, totalUserCount,
 }) {
   const wholeJoined = joinedLength(totalTextChars, totalTextCount);
   const drop = (received) => Math.max(0, wholeJoined - received);
@@ -229,39 +207,52 @@ function buildSourceScans({
   );
   const clue = cluePromptSample(userMsgs);
 
-  // The clue prompt is scoped to the user channel by design, so its whole is
-  // that channel and not the session — a scope is not an omission. The four
-  // below read the transcript, so theirs is the session.
-  const clueDrop = Math.max(
-    0, (clue.cleanedJoined + userResidue) - clue.sample.length,
-  );
-  const crossRefsDrop = drop(
-    channelUnionJoined(allTexts, allTextIsUser, userMsgs, CROSS_REF_MSGS),
-  );
-  const semanticDrop = drop(fullTextSample(allTexts).sample.length);
-  const entropyDrop = drop(
-    joinedLength(allTexts.reduce((n, t) => n + t.length, 0), allTexts.length),
-  );
-  const coinageDrop = drop(
-    channelUnionJoined(allTexts, allTextIsUser, userMsgs, Infinity),
-  );
+  return {
+    // The clue prompt is scoped to the user channel by design, so its whole is
+    // that channel and not the session — a scope is not an omission. The four
+    // below read the transcript, so theirs is the session.
+    cluePrompt: Math.max(0, (clue.cleanedJoined + userResidue) - clue.sample.length),
+    crossRefs: drop(channelUnionJoined(allTexts, allTextIsUser, userMsgs, CROSS_REF_MSGS)),
+    semantic: drop(fullTextSample(allTexts).sample.length),
+    entropy: drop(joinedLength(
+      allTexts.reduce((n, t) => n + t.length, 0), allTexts.length,
+    )),
+    coinage: drop(channelUnionJoined(allTexts, allTextIsUser, userMsgs, Infinity)),
+  };
+}
 
-  const scan = (...drops) => ({
+// The scan a file carries, composed where that file is assembled from the
+// extractions that actually went into it. Each contribution is the extraction's
+// own result paired with the coverage of the read that produced it; a result
+// that is null was never produced, so it contributes no coverage and the file
+// is not charged for a bound nothing of it came through. Composing at the
+// assembly site is what keeps this checkable: the result named here is the same
+// value the builder receives, so a claim about what fed the file and what
+// actually fed it cannot drift apart.
+//
+// The count is the widest omission among the contributions, so
+// `omitted_chars == 0` means no extraction feeding this file dropped anything
+// — which is what SKILL.md's "built from less than its whole source" has to
+// mean for the field to be readable at all. `skipped_lines` is a parse-level
+// count, upstream of every bound, and is the same wherever a scan is published.
+//
+// `unverified_user_turns` stays 0 for the reason the Codex realization reports
+// 0 when its event_msg channel is empty: Claude has no second channel to
+// cross-check human turns against, so no turn is witnessed as unverified — 0
+// here means unwitnessed, not verified.
+//
+// Null when nothing contributed: no bounded read happened, so there is no
+// omission to report, and SKILL.md already gives a reader the absent field as
+// neutral. A row of zeros there would claim a complete read nobody performed.
+function scanOf(skippedLines, ...contributions) {
+  const omissions = contributions
+    .filter(([result]) => result != null)
+    .map(([, omitted]) => omitted);
+  if (omissions.length === 0) return null;
+  return {
     skipped_lines: skippedLines,
     unverified_user_turns: 0,
-    omitted_chars: Math.max(...drops),
-  });
-
-  return {
-    // topics/keywords/utterances from the clue prompt, cross_refs from extractCrossRefs
-    "clue.md": scan(clueDrop, crossRefsDrop),
-    "vector.md": scan(semanticDrop),
-    // prose from the narrative prompt, topics carried over from the clue extraction
-    "narrative.md": scan(semanticDrop, clueDrop),
-    // haiku markers from the semantic sample, counts from the coinage extraction
-    "markers.md": scan(semanticDrop, coinageDrop),
-    "entropy.md": scan(entropyDrop),
-    "coinage.md": scan(coinageDrop),
+    omitted_chars: Math.max(...omissions),
   };
 }
 
@@ -1172,18 +1163,16 @@ function main() {
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
 
-  // One scan per artifact, each the widest omission among the extractions
-  // composed into that file.
-  const scans = buildSourceScans({
+  // One coverage per extraction. Which file each one reaches is settled below,
+  // where the file is assembled from the results that actually came back.
+  const cov = buildCoverages({
     userMsgs, allTexts, allTextIsUser, totalTextChars, totalTextCount,
-    totalUserChars, totalUserCount, skippedLines,
+    totalUserChars, totalUserCount,
   });
-  for (const [artifact, artifactScan] of Object.entries(scans)) {
-    if (artifactScan.omitted_chars > 0 || artifactScan.skipped_lines > 0) {
-      logErr(`source_scan[${artifact}]: omitted_chars=${artifactScan.omitted_chars}`
-        + ` skipped_lines=${artifactScan.skipped_lines}`);
-    }
+  for (const [extraction, omitted] of Object.entries(cov)) {
+    if (omitted > 0) logErr(`coverage[${extraction}]: omitted_chars=${omitted}`);
   }
+  if (skippedLines > 0) logErr(`source_scan: skipped_lines=${skippedLines}`);
 
   // Observability for stale token estimates (final assistant turn had no fresh
   // input_tokens — full cache hit or tool-use-only turn can leave the estimate
@@ -1233,7 +1222,11 @@ function main() {
     const clueRaw = callHaiku(buildCluePrompt(userMsgs));
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs, scans["clue.md"]);
+      // topics/keywords/utterances from the clue prompt, cross_refs from extractCrossRefs
+      files["clue.md"] = buildClueMd(
+        sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs,
+        scanOf(skippedLines, [clueData, cov.cluePrompt], [crossRefs, cov.crossRefs]),
+      );
     } else {
       logErr(`clue validation failed: invalid schema`);
     }
@@ -1246,7 +1239,10 @@ function main() {
     const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
     vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
-      files["vector.md"] = buildVectorMd(sessionId, date, vectorData, scans["vector.md"]);
+      files["vector.md"] = buildVectorMd(
+        sessionId, date, vectorData,
+        scanOf(skippedLines, [vectorData, cov.semantic]),
+      );
     } else {
       logErr(`vector validation failed: invalid schema`);
     }
@@ -1262,7 +1258,10 @@ function main() {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
         sessionId, date, startedAt, lastTurnAt, sessionCwd,
-        topics, protocols, narrativeData, scans["narrative.md"],
+        // prose from the narrative prompt, topics carried over from the clue
+        // extraction — which is null exactly when `topics` is the empty fallback
+        topics, protocols, narrativeData,
+        scanOf(skippedLines, [narrativeData, cov.semantic], [clueData, cov.cluePrompt]),
       );
     } else {
       logErr(`narrative validation failed: invalid schema`);
@@ -1307,7 +1306,9 @@ function main() {
 
   try {
     const refs = extractEntropyRefs(allTexts);
-    files["entropy.md"] = buildEntropyMd(sessionId, date, refs, scans["entropy.md"]);
+    files["entropy.md"] = buildEntropyMd(
+      sessionId, date, refs, scanOf(skippedLines, [refs, cov.entropy]),
+    );
   } catch (e) {
     logErr(`entropy extraction failed: ${e.message}`);
   }
@@ -1325,7 +1326,12 @@ function main() {
       const corpusRoot = path.join(slugDir, "hypomnesis");
       coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
     }
-    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason, scans["coinage.md"]);
+    // A skipped or failed coinage leaves coinageResult null, so no bounded read
+    // fed this file and the scan is absent rather than zero.
+    files["coinage.md"] = buildCoinageMd(
+      sessionId, date, coinageResult, skipped, skipReason,
+      scanOf(skippedLines, [coinageResult, cov.coinage]),
+    );
   } catch (e) {
     logErr(`coinage extraction failed: ${e.message}`);
   }
@@ -1335,7 +1341,9 @@ function main() {
   if (markerData) {
     try {
       files["markers.md"] = buildMarkersMd(
-        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD, scans["markers.md"],
+        // haiku markers from the semantic sample, counts from the coinage extraction
+        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD,
+        scanOf(skippedLines, [markerData, cov.semantic], [coinageResult, cov.coinage]),
       );
     } catch (e) {
       logErr(`markers assembly failed: ${e.message}`);
@@ -1353,10 +1361,10 @@ export {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
-  buildSourceScans,
+  buildCoverages,
+  scanOf,
   parseSession,
   cluePromptSample,
-  computeSourceScan,
   joinedLength,
   sourceScanLines,
   fullTextSample,

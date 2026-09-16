@@ -15,9 +15,9 @@ import {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
-  buildSourceScans,
+  buildCoverages,
+  scanOf,
   parseSession,
-  computeSourceScan,
   joinedLength,
   sourceScanLines,
   fullTextSample,
@@ -247,19 +247,6 @@ test("callHaiku's options deliver stdin to a real child process", () => {
 
 const TEXT_SEPARATOR_LEN = "\n---\n".length;
 
-test("computeSourceScan: omitted_chars is the gap between source and sample", () => {
-  const scan = computeSourceScan(127_209, 30_000, 0);
-  assert.equal(scan.omitted_chars, 97_209);
-  assert.equal(scan.skipped_lines, 0);
-  // Claude has no cross-check channel for human turns; 0 means unwitnessed.
-  assert.equal(scan.unverified_user_turns, 0);
-});
-
-test("computeSourceScan: a wholly-read source omits nothing and never goes negative", () => {
-  assert.equal(computeSourceScan(1_200, 1_200, 0).omitted_chars, 0);
-  assert.equal(computeSourceScan(900, 30_000, 0).omitted_chars, 0);
-});
-
 // The separators a joined sample spends are characters of the bound, so a
 // whole-source count that omits them subtracts to less than the real gap. The
 // falsifying case is two texts that exactly fill the bound between them: the
@@ -269,13 +256,17 @@ test("omitted_chars: a sample the prompt flagged as truncated never publishes ze
   const { sample, truncated } = fullTextSample(texts);
   assert.ok(truncated, "the joined form exceeds the bound — the fixture must reach the cut");
   const rawSum = texts.reduce((n, t) => n + t.length, 0);
-  assert.equal(computeSourceScan(rawSum, sample.length, 0).omitted_chars, 0,
+  assert.equal(Math.max(0, rawSum - sample.length), 0,
     "a raw-sum count is what this guards against; if this stops holding the fixture drifted");
-  // The composition main() performs.
-  const scan = computeSourceScan(joinedLength(rawSum, texts.length), sample.length, 0);
-  assert.ok(scan.omitted_chars > 0,
+  // The measurement buildCoverages performs, both sides joined.
+  const cov = buildCoverages({
+    userMsgs: [], allTexts: texts, allTextIsUser: [false, false],
+    totalTextChars: rawSum, totalTextCount: texts.length,
+    totalUserChars: 0, totalUserCount: 0,
+  });
+  assert.ok(cov.semantic > 0,
     "truncated prompt with omitted_chars 0 — the frontmatter contradicts the prompt");
-  assert.equal(scan.omitted_chars, TEXT_SEPARATOR_LEN);
+  assert.equal(cov.semantic, TEXT_SEPARATOR_LEN);
 });
 
 test("joinedLength: one separator per pair, none for a single text or none at all", () => {
@@ -288,117 +279,108 @@ test("joinedLength: one separator per pair, none for a single text or none at al
   assert.equal(joinedLength(6, 3), texts.join("\n---\n").length);
 });
 
-test("computeSourceScan: unparsable transcript lines are counted", () => {
-  assert.equal(computeSourceScan(10, 10, 3).skipped_lines, 3);
+test("scanOf: unparsable transcript lines are counted", () => {
+  assert.equal(scanOf(3, [{ ok: true }, 0]).skipped_lines, 3);
+  // Claude has no cross-check channel for human turns; 0 means unwitnessed.
+  assert.equal(scanOf(3, [{ ok: true }, 0]).unverified_user_turns, 0);
 });
 
-// The six artifacts are built from three different samples, so a scan measured
-// on one of them describes the other two wrongly. Each case below is a session
-// shape where two paths disagree; a single shared scan cannot satisfy any of
-// them.
-test("buildSourceScans: an artifact carries the widest omission among its inputs", () => {
+// An extraction's coverage is what its own bound kept it from reading. The
+// cases below are session shapes where two bounds disagree; one number cannot
+// satisfy both.
+test("buildCoverages: each bound reports its own omission", () => {
   const text = "u".repeat(25_000);
-  const scans = buildSourceScans({
+  const cov = buildCoverages({
     userMsgs: [{ text, ts: "" }], allTexts: [text], allTextIsUser: [true],
     totalTextChars: text.length, totalTextCount: 1,
     totalUserChars: text.length, totalUserCount: 1,
-    skippedLines: 0,
   });
   // 25,000 characters of user text: the clue prompt takes 20,000 of them, and
   // neither the 30k semantic bound nor the 80k buffer bound is reached.
-  assert.equal(scans["clue.md"].omitted_chars, 5_000);
-  assert.equal(scans["vector.md"].omitted_chars, 0);
-  assert.equal(scans["entropy.md"].omitted_chars, 0);
-  // narrative.md carries topics out of the clue extraction, so the clue cut
-  // reaches it even though its own prompt read the session whole.
-  assert.equal(scans["narrative.md"].omitted_chars, 5_000);
+  assert.equal(cov.cluePrompt, 5_000);
+  assert.equal(cov.semantic, 0);
+  assert.equal(cov.entropy, 0);
 });
 
-test("buildSourceScans: the semantic bound cuts where the parse buffer does not", () => {
+test("buildCoverages: the semantic bound cuts where the parse buffer does not", () => {
   const texts = ["a".repeat(25_000), "b".repeat(25_000)];
-  const scans = buildSourceScans({
+  const cov = buildCoverages({
     userMsgs: [], allTexts: texts, allTextIsUser: [false, false],
     totalTextChars: 50_000, totalTextCount: 2,
     totalUserChars: 0, totalUserCount: 0,
-    skippedLines: 0,
   });
-  assert.equal(scans["vector.md"].omitted_chars, 50_000 + TEXT_SEPARATOR_LEN - 30_000);
-  assert.equal(scans["entropy.md"].omitted_chars, 0, "the 80k buffer held the whole session");
-  assert.notEqual(scans["vector.md"].omitted_chars, scans["entropy.md"].omitted_chars,
-    "one shared scan cannot describe both — that is what the split exists for");
+  assert.equal(cov.semantic, 50_000 + TEXT_SEPARATOR_LEN - 30_000);
+  assert.equal(cov.entropy, 0, "the 80k buffer held the whole session");
+  assert.notEqual(cov.semantic, cov.entropy,
+    "one shared number cannot describe both — that is what the split exists for");
 });
 
-test("buildSourceScans: user messages dropped past the retention cap are counted", () => {
+test("buildCoverages: user messages dropped past the retention cap are counted", () => {
   const text = "m".repeat(100);
-  const scans = buildSourceScans({
+  const cov = buildCoverages({
     userMsgs: Array.from({ length: 150 }, () => ({ text, ts: "" })),
     allTexts: [text], allTextIsUser: [true],
     totalTextChars: 100, totalTextCount: 1,
     // 200 user messages reached the transcript; MAX_USER_MSGS retained 150.
     totalUserChars: 100 * 200, totalUserCount: 200,
-    skippedLines: 0,
   });
-  assert.ok(scans["clue.md"].omitted_chars > 0,
+  assert.ok(cov.cluePrompt > 0,
     "50 user messages never reached the clue stream — the record must not read as whole");
 });
 
-test("buildSourceScans: clue.md answers for the cross-ref bound, not only the prompt's", () => {
+test("buildCoverages: the cross-ref bound cuts where the clue prompt's does not", () => {
   // 21 short user messages. The clue prompt takes 30, so its own bound cuts
-  // nothing; extractCrossRefs takes 20, so the 21st message reached no
-  // extractor that writes into clue.md.
+  // nothing; extractCrossRefs takes 20, so the 21st message never reached it.
   const texts = Array.from({ length: 21 }, (_, i) => `message-${String(i).padStart(2, "0")}`);
   const chars = texts.reduce((n, t) => n + t.length, 0);
-  const scans = buildSourceScans({
+  const cov = buildCoverages({
     userMsgs: texts.map((text) => ({ text, ts: "" })),
     allTexts: texts, allTextIsUser: texts.map(() => true),
     totalTextChars: chars, totalTextCount: texts.length,
     totalUserChars: chars, totalUserCount: texts.length,
-    skippedLines: 0,
   });
-  assert.equal(
-    scans["clue.md"].omitted_chars,
-    texts[20].length + TEXT_SEPARATOR_LEN,
-    "the message past the cross-ref bound is what clue.md did not read",
-  );
+  assert.equal(cov.cluePrompt, 0, "the clue prompt's own bound took all 21");
+  assert.equal(cov.crossRefs, texts[20].length + TEXT_SEPARATOR_LEN,
+    "the message past the cross-ref bound is what that extractor did not read");
 });
 
-test("buildSourceScans: coinage.md is not charged for text its second channel delivered", () => {
+test("buildCoverages: coinage is not charged for text its second channel delivered", () => {
   // The final user message is past MAX_ALL_CHARS and so never enters allTexts,
-  // but computeCoinage also reads userMsgs, which still carries it. entropy.md
-  // reads allTexts alone and is charged for it; coinage.md is not.
+  // but computeCoinage also reads userMsgs, which still carries it. entropy
+  // reads allTexts alone and is charged for it; coinage is not.
   const first = "u".repeat(15);
   const bulk = "a".repeat(80_000);
   const last = "l".repeat(26);
-  const scans = buildSourceScans({
+  const cov = buildCoverages({
     userMsgs: [{ text: first, ts: "" }, { text: last, ts: "" }],
     allTexts: [first, bulk], allTextIsUser: [true, false],
     totalTextChars: first.length + bulk.length + last.length, totalTextCount: 3,
     totalUserChars: first.length + last.length, totalUserCount: 2,
-    skippedLines: 0,
   });
-  assert.equal(scans["coinage.md"].omitted_chars, 0,
-    "coinage read every source message across its two channels");
-  assert.equal(scans["entropy.md"].omitted_chars, last.length + TEXT_SEPARATOR_LEN,
+  assert.equal(cov.coinage, 0, "coinage read every source message across its two channels");
+  assert.equal(cov.entropy, last.length + TEXT_SEPARATOR_LEN,
     "entropy reads the parse buffer alone, so the final message is absent from it");
 });
 
-test("buildSourceScans: skipped_lines is a parse-level count and is shared", () => {
-  const scans = buildSourceScans({
-    userMsgs: [{ text: "hello there", ts: "" }], allTexts: ["hello there"],
-    allTextIsUser: [true],
-    totalTextChars: 11, totalTextCount: 1,
-    totalUserChars: 11, totalUserCount: 1,
-    skippedLines: 7,
-  });
-  assert.equal(Object.keys(scans).length, 6, "one scan per written artifact");
-  for (const [name, scan] of Object.entries(scans)) {
-    assert.equal(scan.skipped_lines, 7, `${name} lost the parse-level count`);
-    assert.equal(scan.omitted_chars, 0, `${name} read a short session whole`);
-  }
+// A file is charged for a bound only where something actually came through it.
+test("scanOf: an extraction that produced nothing contributes no coverage", () => {
+  assert.equal(scanOf(0, [null, 5_000], [{ ok: true }, 0]).omitted_chars, 0,
+    "a failed extraction must not charge the file it never reached");
+  assert.equal(scanOf(0, [{ ok: true }, 5_000], [{ ok: true }, 0]).omitted_chars, 5_000,
+    "the widest omission among what did contribute");
+  assert.equal(scanOf(3, [{ ok: true }, 0]).skipped_lines, 3,
+    "the parse-level count rides on every published scan");
 });
 
-test("parseSession hands buildSourceScans every field it reads", () => {
-  // The wiring, not the arithmetic. buildSourceScans is reachable with a
+test("scanOf: nothing contributed means no scan, not a scan of zeros", () => {
+  assert.equal(scanOf(0, [null, 5_000]), null);
+  assert.equal(scanOf(4, [null, 0], [undefined, 9]), null);
+  assert.deepEqual(sourceScanLines(scanOf(0, [null, 5_000])), [],
+    "an unmeasured read publishes no field; zeros would claim a read nobody performed");
+});
+
+test("parseSession hands buildCoverages every field it reads", () => {
+  // The wiring, not the arithmetic. buildCoverages is reachable with a
   // hand-built object that a real parse never produces, so a field the parse
   // stops returning fails nowhere else — it reaches the writer as undefined and
   // only the written artifact shows it.
@@ -417,11 +399,63 @@ test("parseSession hands buildSourceScans every field it reads", () => {
     const parsed = parseSession(tp);
     assert.ok(Array.isArray(parsed.allTextIsUser), "parseSession returns the channel flags");
     assert.deepEqual(parsed.allTextIsUser, [true, false, true]);
-    const scans = buildSourceScans(parsed);
-    assert.equal(Object.keys(scans).length, 6);
-    for (const [name, scan] of Object.entries(scans)) {
-      assert.equal(scan.omitted_chars, 0, `${name} read this short session whole`);
+    const cov = buildCoverages(parsed);
+    for (const [name, omitted] of Object.entries(cov)) {
+      assert.equal(omitted, 0, `${name} read this short session whole`);
     }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// The published artifact, not a builder. Every defect this field has carried
+// survived a green unit suite, because a unit test hands a builder the scan it
+// wants and never asks which scan the writer would have paired with that file.
+// This runs the writer whole, fails one extraction, and reads what landed.
+test("a file is not charged for an extraction that failed", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "hyp-e2e-"));
+  try {
+    const sid = "probe";
+    const bin = path.join(dir, "bin");
+    fs.mkdirSync(bin);
+    // Fails the clue call and answers the rest. narrative.md still gets built,
+    // with `topics` falling back to [] — so nothing of the clue extraction is
+    // in it, and its clue bound must not reach the published count.
+    fs.writeFileSync(path.join(bin, "claude"), `#!/usr/bin/env node
+const p = require("node:fs").readFileSync(0, "utf8");
+if (p.includes("Extract recall anchors")) process.exit(3);
+const out = p.includes("Extract decisions and direction changes")
+  ? { decisions: [{ label: "d", what: "w", why: "y" }] }
+  : p.includes("Write a concise session narrative")
+  ? { origin: "o", direction: "d", outcome: "oc" }
+  : { actor: [], temporal: [], emotional: [], cognitive: [], singularity: [] };
+process.stdout.write(JSON.stringify(out));
+`, { mode: 0o755 });
+    // 25,000 characters in one user message: past the clue prompt's 20,000
+    // bound, inside the semantic prompt's 30,000 one.
+    const tp = path.join(dir, `${sid}.jsonl`);
+    fs.writeFileSync(tp, JSON.stringify({
+      type: "user", timestamp: "2026-09-17T00:00:00.000Z", cwd: "/probe",
+      message: { role: "user", content: [{ type: "text", text: "x".repeat(25_000) }] },
+    }) + "\n");
+
+    const writer = fileURLToPath(new URL("./hypomnesis-write.mjs", import.meta.url));
+    execFileSync(process.execPath, [writer], {
+      input: JSON.stringify({
+        session_id: sid, transcript_path: tp, hook_event_name: "PreCompact",
+      }),
+      env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+      encoding: "utf8", stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    const narrative = fs.readFileSync(
+      path.join(dir, "hypomnesis", sid, "narrative.md"), "utf8",
+    );
+    const scan = narrative.match(/source_scan: \{[^}]*\}/)?.[0] ?? "";
+    assert.ok(scan, "narrative.md published no scan at all");
+    assert.match(scan, /omitted_chars: 0\b/,
+      "the clue extraction failed and reached nothing into this file, "
+      + "so its bound must not be charged here");
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -435,7 +469,7 @@ test("sourceScanLines: emits one inline mapping, and nothing when uncaptured", (
 });
 
 test("buildClueMd: carries source_scan beside derived_from when scanned", () => {
-  const scan = computeSourceScan(50_000, 30_000, 1);
+  const scan = { skipped_lines: 1, unverified_user_turns: 0, omitted_chars: 20_000 };
   const md = buildClueMd("sid-4", "2026-06-11", "2026-06-11T00:00:00Z", "2026-06-11T01:00:00Z", "/tmp", clueData, [], scan);
   const lines = md.split("\n");
   const scanIdx = lines.findIndex((l) => l.startsWith("source_scan:"));
