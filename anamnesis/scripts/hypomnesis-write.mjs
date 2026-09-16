@@ -107,7 +107,48 @@ const protocolMap = {
 };
 
 const MAX_ALL_CHARS = 80_000;
+// What the vector/narrative/marker prompts actually receive. Named because
+// source_scan measures omission against it, and a literal repeated at each
+// call site can drift from the count that publishes it.
+const FULL_TEXT_PROMPT_CHARS = 30_000;
 const HAIKU_TIMEOUT = 120_000;
+
+const TRUNCATION_NOTICE =
+  "NOTE: the session content below is the opening portion of a longer session; "
+  + "its later turns are absent. Describe only what this portion shows, and say "
+  + "so where it does not reach an outcome.";
+
+// The prompts' own view of the session, and the one place their bound applies.
+function fullTextSample(allTexts) {
+  const joined = allTexts.join("\n---\n");
+  return {
+    sample: joined.slice(0, FULL_TEXT_PROMPT_CHARS),
+    truncated: joined.length > FULL_TEXT_PROMPT_CHARS,
+  };
+}
+
+// SKILL.md SourceScan. unverified_user_turns stays 0 for the reason the Codex
+// realization reports 0 when its event_msg channel is empty: Claude has no
+// second channel to cross-check human turns against, so no turn is witnessed
+// as unverified — 0 here means unwitnessed, not verified.
+function computeSourceScan(totalTextChars, sampleChars, skippedLines) {
+  return {
+    skipped_lines: skippedLines,
+    unverified_user_turns: 0,
+    omitted_chars: Math.max(0, totalTextChars - sampleChars),
+  };
+}
+
+// Spreads to nothing when no scan was captured, which is the Null case
+// SKILL.md already gives the reader: an entry predating integrity capture is
+// neutral, and an absent field says that where a row of zeros would claim a
+// complete read nobody performed.
+function sourceScanLines(scan) {
+  if (!scan) return [];
+  return [`source_scan: {skipped_lines: ${scan.skipped_lines}, `
+    + `unverified_user_turns: ${scan.unverified_user_turns}, `
+    + `omitted_chars: ${scan.omitted_chars}}`];
+}
 
 // v0.4.0 two-track extension budgets.
 // Soft cap on deterministic extract/coinage; the haiku calls (clue, vector,
@@ -217,6 +258,10 @@ function parseSession(transcriptPath) {
   let outputTokensSum = 0;
   let lastTurnHadFreshInput = false;
   let sawAnyAssistantUsage = false;
+  let skippedLines = 0;
+  // Counted past MAX_ALL_CHARS, unlike totalChars, because what the extraction
+  // omitted is the difference between the whole source and the sample.
+  let totalTextChars = 0;
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
@@ -228,6 +273,7 @@ function parseSession(transcriptPath) {
     return {
       userMsgs, allTexts, timestamps, protocols: [],
       tokenEstimate: 0, cwd: "",
+      totalTextChars: 0, skippedLines: 0,
     };
   }
   let totalChars = 0;
@@ -235,7 +281,7 @@ function parseSession(transcriptPath) {
   for (const line of raw.split("\n")) {
     if (!line.trim()) continue;
     let entry;
-    try { entry = JSON.parse(line); } catch { continue; }
+    try { entry = JSON.parse(line); } catch { skippedLines += 1; continue; }
 
     const ts = entry.timestamp ?? "";
     if (ts) timestamps.push(ts);
@@ -260,6 +306,7 @@ function parseSession(transcriptPath) {
 
     if (etype === "user" || etype === "assistant") {
       const text = textFromContent(entry.message?.content ?? "");
+      if (text) totalTextChars += text.length;
       if (text && totalChars < MAX_ALL_CHARS) {
         allTexts.push(text);
         totalChars += text.length;
@@ -297,6 +344,8 @@ function parseSession(transcriptPath) {
     lastTurnHadFreshInput,
     sawAnyAssistantUsage,
     cwd,
+    totalTextChars,
+    skippedLines,
   };
 }
 
@@ -332,9 +381,11 @@ ${sample}`;
 }
 
 function buildVectorPrompt(allTexts) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const { sample, truncated } = fullTextSample(allTexts);
+  const notice = truncated ? `\n${TRUNCATION_NOTICE}\n` : "";
 
-  return `You are a session indexer. Extract decisions and direction changes from the full session.
+  return `You are a session indexer. Extract decisions and direction changes from the session content below.
+${notice}
 
 Output EXACTLY valid JSON, nothing else:
 {
@@ -354,10 +405,12 @@ ${sample}`;
 }
 
 function buildNarrativePrompt(allTexts, protocols) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const { sample, truncated } = fullTextSample(allTexts);
+  const notice = truncated ? `\n${TRUNCATION_NOTICE}\n` : "";
   const protoList = protocols.length > 0 ? protocols.join(", ") : "none detected";
 
-  return `You are a session indexer. Write a concise session narrative from the full conversation.
+  return `You are a session indexer. Write a concise session narrative from the session content below.
+${notice}
 
 Output EXACTLY valid JSON, nothing else:
 {
@@ -376,7 +429,7 @@ ${sample}`;
 }
 
 function buildMarkerPrompt(allTexts, startedAt) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const { sample } = fullTextSample(allTexts);
   const dateAnchor = toDateString(startedAt);
 
   return `You are a session indexer. Extract salience markers as concrete, anchored entities.
@@ -488,7 +541,7 @@ function validateMarkers(data) {
 
 // --- File Builders ---
 
-function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRefs) {
+function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRefs, scan) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
@@ -507,6 +560,7 @@ function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRef
          ...crossRefs.map((r) => `  - {kind: ${r.kind}, ref: "${esc(r.ref)}", channel: ${r.channel}}`)]),
     "evidence_modes:",
     ...Object.entries(EVIDENCE_MODES.clue).map(([field, mode]) => `  ${field}: ${mode}`),
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -519,7 +573,7 @@ function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRef
   return lines.filter((l) => l !== undefined).join("\n") + "\n";
 }
 
-function buildVectorMd(sessionId, date, data) {
+function buildVectorMd(sessionId, date, data, scan) {
   const labels = data.decisions.map((d) => d.label ?? "").slice(0, 5);
   const lines = [
     "---",
@@ -527,6 +581,7 @@ function buildVectorMd(sessionId, date, data) {
     `date: ${date}`,
     `decisions: [${labels.map((l) => `"${esc(l)}"`).join(", ")}]`,
     `evidence_mode: ${EVIDENCE_MODES.vector}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -547,7 +602,7 @@ function buildVectorMd(sessionId, date, data) {
   return lines.join("\n") + "\n";
 }
 
-function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, protocols, data) {
+function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, protocols, data, scan) {
   return [
     "---",
     `session_id: ${sessionId}`,
@@ -563,6 +618,7 @@ function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, p
     // frontmatter keeps the old schema — acceptable under per-artifact
     // Null-neutral semantics.
     `evidence_mode: ${EVIDENCE_MODES.narrative}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -753,7 +809,7 @@ function computeCoinage(userMsgs, allTexts, corpusPath, currentSessionId, budget
   };
 }
 
-function buildEntropyMd(sessionId, date, refs) {
+function buildEntropyMd(sessionId, date, refs, scan) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
@@ -761,6 +817,7 @@ function buildEntropyMd(sessionId, date, refs) {
     `identifier_count: ${refs.length}`,
     `extractors: [${ENTROPY_EXTRACTORS.map((e) => e.name).join(", ")}]`,
     `evidence_mode: ${EVIDENCE_MODES.entropy}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -783,7 +840,7 @@ function buildEntropyMd(sessionId, date, refs) {
 // categories (actor/temporal/emotional/cognitive/singularity) with the
 // deterministic coinage statistics. extractionMethod is recorded in
 // frontmatter for cross-version observability (no ranking influence).
-function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extractionMethod) {
+function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extractionMethod, scan) {
   const coinageItems = coinageResult?.coinage ?? [];
   const counts = {
     coinage: coinageItems.length,
@@ -802,6 +859,7 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
     `extraction_method: ${extractionMethod}`,
     "evidence_modes:",
     ...Object.entries(EVIDENCE_MODES.markers).map(([field, mode]) => `  ${field}: ${mode}`),
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -840,7 +898,7 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
   return lines.join("\n") + "\n";
 }
 
-function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
+function buildCoinageMd(sessionId, date, result, skipped, skipReason, scan) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
@@ -851,6 +909,7 @@ function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
     `elapsed_ms: ${result?.elapsed_ms ?? 0}`,
     `threshold: ${COINAGE_PRECISION_THRESHOLD}`,
     `evidence_mode: ${EVIDENCE_MODES.coinage}`,
+    ...sourceScanLines(scan),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -969,8 +1028,19 @@ function main() {
   const {
     userMsgs, allTexts, timestamps, protocols, tokenEstimate,
     lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
+    totalTextChars, skippedLines,
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
+
+  // Measured against what the extraction prompts received, not against the
+  // parse buffer: the buffer is an intermediate, and a reader weighing this
+  // record needs the gap between the whole source and what was read.
+  const scan = computeSourceScan(
+    totalTextChars, fullTextSample(allTexts).sample.length, skippedLines
+  );
+  if (scan.omitted_chars > 0 || scan.skipped_lines > 0) {
+    logErr(`source_scan: omitted_chars=${scan.omitted_chars} skipped_lines=${scan.skipped_lines}`);
+  }
 
   // Observability for stale token estimates (final assistant turn had no fresh
   // input_tokens — full cache hit or tool-use-only turn can leave the estimate
@@ -1020,7 +1090,7 @@ function main() {
     const clueRaw = callHaiku(buildCluePrompt(userMsgs));
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs);
+      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs, scan);
     } else {
       logErr(`clue validation failed: invalid schema`);
     }
@@ -1033,7 +1103,7 @@ function main() {
     const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
     vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
-      files["vector.md"] = buildVectorMd(sessionId, date, vectorData);
+      files["vector.md"] = buildVectorMd(sessionId, date, vectorData, scan);
     } else {
       logErr(`vector validation failed: invalid schema`);
     }
@@ -1049,7 +1119,7 @@ function main() {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
         sessionId, date, startedAt, lastTurnAt, sessionCwd,
-        topics, protocols, narrativeData,
+        topics, protocols, narrativeData, scan,
       );
     } else {
       logErr(`narrative validation failed: invalid schema`);
@@ -1094,7 +1164,7 @@ function main() {
 
   try {
     const refs = extractEntropyRefs(allTexts);
-    files["entropy.md"] = buildEntropyMd(sessionId, date, refs);
+    files["entropy.md"] = buildEntropyMd(sessionId, date, refs, scan);
   } catch (e) {
     logErr(`entropy extraction failed: ${e.message}`);
   }
@@ -1112,7 +1182,7 @@ function main() {
       const corpusRoot = path.join(slugDir, "hypomnesis");
       coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
     }
-    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason);
+    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason, scan);
   } catch (e) {
     logErr(`coinage extraction failed: ${e.message}`);
   }
@@ -1122,7 +1192,7 @@ function main() {
   if (markerData) {
     try {
       files["markers.md"] = buildMarkersMd(
-        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD,
+        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD, scan,
       );
     } catch (e) {
       logErr(`markers assembly failed: ${e.message}`);
@@ -1140,6 +1210,10 @@ export {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  computeSourceScan,
+  sourceScanLines,
+  fullTextSample,
+  buildNarrativePrompt,
   invokes,
   skillCalls,
   resolveSkillProtocol,

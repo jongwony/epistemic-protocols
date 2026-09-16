@@ -13,6 +13,10 @@ import {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  computeSourceScan,
+  sourceScanLines,
+  fullTextSample,
+  buildNarrativePrompt,
   invokes,
   skillCalls,
   resolveSkillProtocol,
@@ -221,4 +225,63 @@ test("callHaiku delivers the prompt on stdin, never in argv", () => {
   // A prompt fragment reaching argv would be captured by --tools just as the
   // whole prompt was; assert the argv is exactly the flag set.
   assert.deepEqual(seen.args, buildHaikuArgs());
+});
+
+// --- source_scan: the record says how much of its source it read ---
+
+test("computeSourceScan: omitted_chars is the gap between source and sample", () => {
+  const scan = computeSourceScan(127_209, 30_000, 0);
+  assert.equal(scan.omitted_chars, 97_209);
+  assert.equal(scan.skipped_lines, 0);
+  // Claude has no cross-check channel for human turns; 0 means unwitnessed.
+  assert.equal(scan.unverified_user_turns, 0);
+});
+
+test("computeSourceScan: a wholly-read source omits nothing and never goes negative", () => {
+  assert.equal(computeSourceScan(1_200, 1_200, 0).omitted_chars, 0);
+  assert.equal(computeSourceScan(900, 30_000, 0).omitted_chars, 0);
+});
+
+test("computeSourceScan: unparsable transcript lines are counted", () => {
+  assert.equal(computeSourceScan(10, 10, 3).skipped_lines, 3);
+});
+
+test("sourceScanLines: emits one inline mapping, and nothing when uncaptured", () => {
+  const [line] = sourceScanLines({ skipped_lines: 2, unverified_user_turns: 0, omitted_chars: 41 });
+  assert.equal(line, "source_scan: {skipped_lines: 2, unverified_user_turns: 0, omitted_chars: 41}");
+  assert.deepEqual(sourceScanLines(undefined), []);
+  assert.deepEqual(sourceScanLines(null), []);
+});
+
+test("buildClueMd: carries source_scan beside derived_from when scanned", () => {
+  const scan = computeSourceScan(50_000, 30_000, 1);
+  const md = buildClueMd("sid-4", "2026-06-11", "2026-06-11T00:00:00Z", "2026-06-11T01:00:00Z", "/tmp", clueData, [], scan);
+  const lines = md.split("\n");
+  const scanIdx = lines.findIndex((l) => l.startsWith("source_scan:"));
+  const derivedIdx = lines.findIndex((l) => l.startsWith("derived_from:"));
+  assert.ok(scanIdx > 0, "source_scan present");
+  assert.equal(derivedIdx, scanIdx + 1, "sits immediately before derived_from");
+  assert.ok(lines[scanIdx].includes("omitted_chars: 20000"));
+  // A legacy call without a scan stays valid and claims nothing.
+  const legacy = buildClueMd("sid-5", "2026-06-11", "2026-06-11T00:00:00Z", "2026-06-11T01:00:00Z", "/tmp", clueData, []);
+  assert.ok(!legacy.includes("source_scan:"));
+});
+
+test("fullTextSample: bounds the prompt and reports whether it cut", () => {
+  const short = fullTextSample(["abc", "def"]);
+  assert.equal(short.sample, "abc\n---\ndef");
+  assert.equal(short.truncated, false);
+
+  const long = fullTextSample(["x".repeat(40_000)]);
+  assert.equal(long.sample.length, 30_000);
+  assert.equal(long.truncated, true);
+});
+
+test("buildNarrativePrompt: a truncated sample tells the extractor it is a prefix", () => {
+  const whole = buildNarrativePrompt(["a short session"], []);
+  assert.ok(!whole.includes("opening portion"), "no notice when nothing was cut");
+
+  const cut = buildNarrativePrompt(["y".repeat(40_000)], []);
+  assert.ok(cut.includes("opening portion of a longer session"));
+  assert.ok(cut.includes("does not reach an outcome"));
 });
