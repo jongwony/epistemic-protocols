@@ -5,6 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -225,6 +226,19 @@ test("callHaiku delivers the prompt on stdin, never in argv", () => {
   // A prompt fragment reaching argv would be captured by --tools just as the
   // whole prompt was; assert the argv is exactly the flag set.
   assert.deepEqual(seen.args, buildHaikuArgs());
+});
+
+// The assertion above reads the options object; it would still hold if the
+// options stopped delivering stdin to a child at all (stdio "ignore" passes it).
+// This one substitutes only the binary and keeps the options callHaiku built,
+// so a real child process has to receive the prompt on fd 0 for it to pass.
+test("callHaiku's options deliver stdin to a real child process", () => {
+  const prompt = `carried-on-stdin-${process.pid}-${Date.now()}`;
+  const echo = "process.stdout.write(require('node:fs').readFileSync(0, 'utf8'))";
+  const out = callHaiku(prompt, {
+    run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", echo], opts),
+  });
+  assert.equal(out, prompt, "the child read something other than the prompt from stdin");
 });
 
 // --- source_scan: the record says how much of its source it read ---
