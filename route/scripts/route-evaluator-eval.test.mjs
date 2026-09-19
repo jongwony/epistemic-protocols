@@ -102,11 +102,9 @@ test("a live run without a binding refuses rather than pretending", async () => 
 });
 
 test("an omitted config resolves the binding from disk; an explicit null does not", async () => {
-  // The path the CLI actually takes is `config` omitted, and no test took it:
-  // every case above injects a binding to exercise a guard, so a default that
-  // turned "omitted" into "explicitly absent" broke `node
-  // route-evaluator-eval.mjs --live` outright while the suite stayed green.
-  // The two callers have to be distinguishable, so assert both sides here.
+  // Omitting `config` is the CLI's own call and must read the binding off
+  // disk; passing an explicit null is a caller saying there is none. The two
+  // have to stay distinguishable, so both sides are asserted here.
   // `cases: []` keeps this off the network — the guards run, the loop does not.
   const omitted = await run({ live: true, cases: [], env: { [EVAL_KEY_ENV]: "k" } });
   assert.ok(

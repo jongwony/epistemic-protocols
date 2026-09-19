@@ -25,6 +25,7 @@ import {
   budgetFor,
   buildCriteria,
   buildRequest,
+  EVAL_KEY_ENV,
   clean,
   conversationFrom,
   estimateTokens,
@@ -39,6 +40,9 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPT = path.join(HERE, "route-evaluator.mjs");
 const SHIPPED_CONFIG = path.join(HERE, "..", "config", "evaluator.json");
+// The name the shipped binding arms on, read from the file so this test file
+// cannot drift from what actually ships.
+const SHIPPED_KEY_ENV = JSON.parse(fs.readFileSync(SHIPPED_CONFIG, "utf8")).apiKeyEnv;
 
 const PROTOCOLS = [
   { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution", description: "Infer context insufficiency before execution — /inquire." },
@@ -57,6 +61,17 @@ const CONFIG = {
 
 const ENV = { TEST_KEY: "k" };
 
+// A child environment with every key variable this plugin reads stripped out.
+// A subprocess test that claims "no key is present" has to build that state
+// rather than inherit whatever the developer or CI happens to export — a real
+// key would let the hook reach the network, and a refusal or a `none` answer
+// produces exactly the silence such a test asserts.
+function envWithoutKeys() {
+  const env = { ...process.env };
+  for (const name of [SHIPPED_KEY_ENV, EVAL_KEY_ENV, "TYPESAFE_API_KEY"]) delete env[name];
+  return env;
+}
+
 function answering(probabilities, model = "test-model-1.0") {
   return async () => ({ model, answers: { deficit: { type: "choice", probabilities } } });
 }
@@ -67,7 +82,12 @@ test("the shipped config names where to send and carries no secret", () => {
   // fresh install, and that is what keeps the channel off the network.
   const shipped = loadConfig(SHIPPED_CONFIG);
   assert.ok(shipped, "the shipped binding resolves");
-  assert.equal(shipped.apiKeyEnv, "TYPESAFE_API_KEY");
+  // The switch is a name this channel owns. A vendor or account name would be
+  // a credential an adopter may already hold for another purpose, so an upgrade
+  // could arm the channel off a key set for something else, and a restored
+  // config would reconnect it rather than leaving it unset.
+  assert.equal(shipped.apiKeyEnv, "ROUTE_ADVISORY_KEY");
+  assert.notEqual(shipped.apiKeyEnv, EVAL_KEY_ENV, "the harness name is reserved");
   const raw = JSON.parse(
     spawnSync(process.execPath, ["-e", `process.stdout.write(require("fs").readFileSync(${JSON.stringify(SHIPPED_CONFIG)}, "utf8"))`], { encoding: "utf8" }).stdout,
   );
@@ -105,6 +125,10 @@ test("loadConfig refuses a file that is absent, unreadable, or not https", () =>
   assert.equal(write({ apiKeyEnv: "K" }), null, "no endpoint is not a binding");
   assert.equal(write({ endpoint: "https://e.example/v1" }), null, "no key variable is not a binding");
   assert.ok(write({ endpoint: "https://e.example/v1", apiKeyEnv: "K" }), "endpoint and variable are the whole binding");
+  // Naming the harness variable here would route the fixture key back into
+  // the session channel, which is the separation the two names exist for.
+  assert.equal(write({ endpoint: "https://e.example/v1", apiKeyEnv: EVAL_KEY_ENV }), null,
+    "a binding may not name the reserved harness variable");
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
@@ -234,6 +258,7 @@ test("the hook exits 0 and stays silent with the shipped config", () => {
   const result = spawnSync(process.execPath, [SCRIPT], {
     input: JSON.stringify({ hook_event_name: "UserPromptSubmit", prompt: "anything" }),
     encoding: "utf8",
+    env: envWithoutKeys(),
   });
   assert.equal(result.status, 0);
   const out = JSON.parse(result.stdout);
@@ -453,6 +478,7 @@ test("the hook process handles a real-shaped payload with a transcript", () => {
         cwd: dir,
       }),
       encoding: "utf8",
+      env: envWithoutKeys(),
     });
     assert.equal(result.status, 0);
     assert.equal(JSON.parse(result.stdout).hookSpecificOutput, undefined);
