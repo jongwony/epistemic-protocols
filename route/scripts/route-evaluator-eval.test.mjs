@@ -7,6 +7,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
+import { envWithoutKeys, shippedKeyEnv } from "./route-test-env.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-evaluator-eval.mjs");
 
@@ -84,7 +85,7 @@ test("the shipped fixtures cover every outcome and ship unadjudicated", () => {
   }
 });
 
-const KEY_ENV = "TYPESAFE_API_KEY";
+const KEY_ENV = shippedKeyEnv();
 
 const BINDING = {
   endpoint: "https://e.example/v1",
@@ -118,13 +119,16 @@ test("an omitted config resolves the binding from disk; an explicit null does no
 });
 
 test("the CLI reaches the key guard rather than refusing before it", () => {
-  // End to end through the real entry point, with the harness key absent from
-  // the child's environment: the refusal that comes back must be the key's,
-  // which is only reachable once the binding has resolved. Nothing is sent —
-  // the guard returns before any request is built.
-  const env = { ...process.env };
-  delete env[KEY_ENV];
-  const result = spawnSync(process.execPath, [SCRIPT, "--live"], { encoding: "utf8", env });
+  // End to end through the real entry point, on this checkout's binding with
+  // no key: the refusal that comes back must be the key guard's, which is only
+  // reachable once the binding has resolved. Clearing the credential alone
+  // would not establish that nothing is sent — an inherited CLAUDE_PLUGIN_ROOT
+  // selects another checkout's binding, whose own variable may be set and would
+  // carry the guard past. `envWithoutKeys` fixes both.
+  const result = spawnSync(process.execPath, [SCRIPT, "--live"], {
+    encoding: "utf8",
+    env: envWithoutKeys(),
+  });
   assert.match(result.stdout, new RegExp(`live run needs a key in ${KEY_ENV}`));
 });
 

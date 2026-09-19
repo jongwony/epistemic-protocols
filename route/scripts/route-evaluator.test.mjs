@@ -35,13 +35,12 @@ import {
   textOf,
 } from "./route-evaluator.mjs";
 import { DIRECTIVE } from "./route-prompt.mjs";
+import { envWithoutKeys, shippedKeyEnv } from "./route-test-env.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPT = path.join(HERE, "route-evaluator.mjs");
 const SHIPPED_CONFIG = path.join(HERE, "..", "config", "evaluator.json");
-// The name the shipped binding arms on, read from the file so this test file
-// cannot drift from what actually ships.
-const SHIPPED_KEY_ENV = JSON.parse(fs.readFileSync(SHIPPED_CONFIG, "utf8")).apiKeyEnv;
+const SHIPPED_KEY_ENV = shippedKeyEnv();
 
 const PROTOCOLS = [
   { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution", description: "Infer context insufficiency before execution — /inquire." },
@@ -60,24 +59,6 @@ const CONFIG = {
 
 const ENV = { TEST_KEY: "k" };
 
-// The environment a subprocess test claiming "no key is present" has to build
-// rather than inherit. Two halves, and stripping only the first leaves the
-// claim unestablished:
-//
-//   - the credential, so no inherited export can arm the child;
-//   - the config selection, since `pluginRoot()` honours CLAUDE_PLUGIN_ROOT and
-//     an inherited one sends the child to another checkout's binding, which may
-//     name a variable this list does not strip.
-//
-// CLAUDE_PLUGIN_ROOT is pinned rather than deleted: the assertion is about the
-// binding this repository ships, so the test names it instead of relying on the
-// path-derived fallback to land there.
-function envWithoutKeys() {
-  const env = { ...process.env };
-  for (const name of [SHIPPED_KEY_ENV, "TYPESAFE_API_KEY"]) delete env[name];
-  env.CLAUDE_PLUGIN_ROOT = path.join(HERE, "..");
-  return env;
-}
 
 function answering(probabilities, model = "test-model-1.0") {
   return async () => ({ model, answers: { deficit: { type: "choice", probabilities } } });
