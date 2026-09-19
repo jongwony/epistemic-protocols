@@ -38,6 +38,12 @@
  * same one that arms the session channel, since this project counts holding
  * that key as consent for both.
  *
+ * A case's `conversation` is written to a transcript and offered by path, so
+ * the shipped walk — budget derived under the endpoint ceiling, newest-first
+ * fill, harness wrappers stripped — is what assembles the state. Passing the
+ * turns straight to `advise` would skip every one of those, and a run that
+ * skipped them would be scoring a state the session channel never sends.
+ *
  * Zero external dependencies: Node.js standard library only.
  */
 
@@ -46,6 +52,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
+import { digestTurns, transcriptWorkspace, turnProblems } from "./route-eval-transcript.mjs";
 import { deriveProtocols, isMain } from "./route-protocols.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -132,7 +139,22 @@ async function run({
   // to arrive as `undefined` for the check below to tell it apart from an
   // explicit null, and a default here would make every caller look explicit.
   config: configOverride,
+  // Injected so a test states its own domain. Read from disk, the domain
+  // depends on where this checkout sits: `deriveProtocols` identifies the
+  // marketplace by the installed path and falls back to the name of the
+  // directory above, which in a worktree is the worktree's name. A test
+  // leaving it to disk passes or fails on that rather than on what it asserts.
+  protocols: protocolsOverride,
   readRecorded: readRecordedFn = readRecorded,
+  // Injected so a test exercising a live run does not write into the
+  // directory a real run's observations live in.
+  writeRecorded: writeRecordedFn = writeRecorded,
+  makeWorkspace = transcriptWorkspace,
+  // Injected so a test can read the request this run actually sent. Watching
+  // the transcript get written is not the same assertion and does not catch
+  // the failure this harness had: the file was written and the path was not
+  // passed on, so the state went out carrying the prompt alone.
+  ask,
 } = {}) {
   const adjudicated = [];
   const unadjudicated = [];
@@ -155,14 +177,31 @@ async function run({
   if (live && !env[config.apiKeyEnv]) {
     return { error: `live run needs a key in ${config.apiKeyEnv}` };
   }
-  const protocols = live ? deriveProtocols() : [];
+  const protocols = protocolsOverride ?? (live ? deriveProtocols() : []);
   const criteria = live ? buildCriteria(protocols) : null;
   if (live && !criteria) return { error: "no installed protocols to ask about" };
 
+  // Only a live run offers anything, so only a live run needs transcripts on
+  // disk; a replay reads what was recorded and sends nothing.
+  const workspace = live ? makeWorkspace() : null;
+  try {
   for (const kase of cases) {
+    // A malformed conversation is a fixture defect, reported rather than
+    // dropped: a turn that vanishes quietly leaves the run reporting on a
+    // state it never offered.
+    const problems = turnProblems(kase.conversation);
+    if (problems.length > 0) {
+      skipped.push({ id: kase.id, why: `conversation is malformed (${problems.join("; ")})` });
+      continue;
+    }
     let record = readRecordedFn(kase.id);
     if (live) {
-      const result = await advise(kase.prompt, { config, env, protocols });
+      // Offered by path rather than as an array. `advise` takes an array as a
+      // state already assembled and walks nothing; the path is what sends the
+      // request through budget derivation, the endpoint ceiling and the
+      // newest-first fill — the assembly the session channel runs.
+      const transcriptPath = workspace.write(kase.id, kase.conversation);
+      const result = await advise(kase.prompt, { config, env, protocols, transcriptPath, ask });
       // Only an answer is recorded. Every other reason is a shortfall on our
       // side, and writing it over an existing recording destroys an
       // observation to put a non-observation in its place.
@@ -182,9 +221,16 @@ async function run({
         criteria: Object.keys(criteria).sort(),
         criteriaDigest: digest(JSON.stringify(criteria)),
         promptDigest: digest(kase.prompt ?? ""),
+        // The conversation is part of what was asked, so a recording that
+        // outlives a change to it is as stale as one whose prompt moved.
+        conversationDigest: digestTurns(kase.conversation),
+        // How many turns survived the budget — a number the fixture cannot
+        // state, since it depends on the ceiling and on what every installed
+        // protocol's options cost.
+        turns: result.turns ?? 0,
         at: new Date().toISOString(),
       };
-      writeRecorded(kase.id, record);
+      writeRecordedFn(kase.id, record);
     }
     if (!record) {
       skipped.push({ id: kase.id, why: "no recorded answer; run with --live" });
@@ -198,14 +244,32 @@ async function run({
       stale.push({ id: kase.id, why: "the fixture's prompt changed since this answer was recorded" });
       continue;
     }
+    // A recording made before the fixture carried a conversation answered a
+    // narrower question and has no digest to say so. Its absence is read as
+    // "no conversation was offered", which is what was true when it was made,
+    // so adding one to the fixture makes it stale.
+    const recordedTurns = record.conversationDigest ?? digestTurns([]);
+    if (recordedTurns !== digestTurns(kase.conversation)) {
+      stale.push({ id: kase.id, why: "the fixture's conversation changed since this answer was recorded" });
+      continue;
+    }
     const cutoffs = config ?? loadConfigOrDefaults();
     cutoffsUsed.add(`displayCutoff=${cutoffs.displayCutoff} maxNames=${cutoffs.maxNames}`);
     // Replay applies the *current* display settings, so the same recorded
     // answer yields different names when they move. Carry them into the
     // report rather than leaving the reader to assume they held.
     const names = namesFrom({ probabilities: record.probabilities }, cutoffs, record.criteria);
-    const scored = { id: kase.id, outcome: kase.outcome, expected: kase.expected ?? [], ...scoreOne(kase, names) };
+    const scored = {
+      id: kase.id,
+      outcome: kase.outcome,
+      expected: kase.expected ?? [],
+      turns: record.turns ?? 0,
+      ...scoreOne(kase, names),
+    };
     (kase.adjudicated === true ? adjudicated : unadjudicated).push(scored);
+  }
+  } finally {
+    workspace?.cleanup();
   }
 
   return {
@@ -256,7 +320,7 @@ function report(out) {
   lines.push(`unadjudicated cases: ${unadjudicated.results.length} — reported, not scored into any rate`);
   for (const r of unadjudicated.results) {
     lines.push(`    ${r.cell === "right→wrong" ? "SPOILED" : r.cell.padEnd(7)}  ${r.outcome.padEnd(9)} ${r.id}`);
-    lines.push(`             expected [${r.expected.join(", ")}]  got [${r.names.join(", ")}]`);
+    lines.push(`             expected [${r.expected.join(", ")}]  got [${r.names.join(", ")}]  ${r.turns ?? 0} turns offered`);
   }
 
   if (skipped.length) {
