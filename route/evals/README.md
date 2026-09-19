@@ -10,16 +10,9 @@ Set `"adjudicated": true` on a case once that has happened. `route-evaluator-eva
 
 ## Why spoiled cases are counted apart
 
-The published result for the analogous design — a one-line suggestion added to an agent's system prompt over a 182-skill roster, measured across 488 requests — reports wrong selections falling from 16.8% to 7.3%, and needless ones from 9.8% to 4.0%. It also reports that the suggestion broke decisions the unaided agent had got right. Both things are true of the same change.
+Netting a gain against a loss hides the loss, so the harness scores in pairs — the same case with the advisory and without — and reports the spoiled cell on its own, as a count, as a fraction of baseline-correct cases, and broken out by Route outcome.
 
-An aggregate that nets those together hides the second. So the harness scores in pairs — the same case with the advisory and without — and reports four cells:
-
-| | assisted right | assisted wrong |
-|---|---|---|
-| **baseline right** | `right→right` | **`right→wrong` — spoiled** |
-| **baseline wrong** | `wrong→right` — repaired | `wrong→wrong` |
-
-`right→wrong` is reported as a count, as a fraction of baseline-correct cases, and broken out by Route outcome, because spoiling a correct silence is a different failure from picking the wrong protocol out of several that fit. A correct baseline silence that becomes a needless advisory **is** a spoiled case; it is the most likely one, and the easiest to lose in an average.
+**Read `route-evaluator-eval.mjs`'s header before reading any cell.** It states what the baseline arm actually is and therefore what `right→wrong` can and cannot mean here; that boundary is narrower than the four-cell shape suggests, and the header is the one place it is stated.
 
 ## What a fixture is
 

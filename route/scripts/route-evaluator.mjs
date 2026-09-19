@@ -4,50 +4,35 @@
  * fit, from a constrained-output evaluator. Disabled unless
  * config/evaluator.json says otherwise.
  *
- * What this is, and what it is not. A constrained-output evaluator reads
- * state the caller assembles and answers over an answer space the caller
- * declares — here, one choice across the installed protocols plus `none`.
- * It returns a typed answer and a probability for every option; it writes
- * no prose and explains nothing. So the line it produces names protocols
- * and stops. It is not a Route nudge: `↗ /command — reason` is Route's own
- * output, produced by invoking Route, and Rule #1 says a line written
- * without that invocation is not one. This line is input the reader may
- * consider before Route produces any outcome of its own, and its wording
- * says so — labelled, modal, and asking to be checked.
+ * A constrained-output evaluator reads state the caller assembles and answers
+ * over an answer space the caller declares — here, one choice across the
+ * installed protocols plus `none`. It returns a typed answer and a probability
+ * for every option; it writes no prose and explains nothing. So the line it
+ * produces names protocols and stops, and the skill's own Rules are where
+ * what separates it from a Route outcome is stated.
  *
  * It reinforces and never replaces. It rides its own hook entry beside
- * route-prompt.mjs rather than inside it, so a timeout here cannot take the
- * static directive down with it; and the directive goes out whatever this
- * says, including when it says nothing. That still holds with the
+ * route-prompt.mjs rather than inside it, so a failure here does not stop the
+ * static directive from being emitted; and the directive goes out whatever
+ * this says, including when it says nothing. That still holds with the
  * conversation in state: `none` is an answer about what this hook assembled
  * and offered, not a finding that the session holds no deficit. What the walk
  * dropped, what the budget cut, a deficit that surfaces later in the turn, and
  * a protocol the harness loaded that disk does not show — none of those are in
  * the answer, and the directive is what covers them.
  *
- * The cards are built from each protocol's own declared material — its
- * deficit, the resolution it yields, and its frontmatter description. No
- * field here says how one protocol differs from another. Authored
- * cross-protocol discrimination would be exactly the hand-kept routing
- * table SKILL.md's Rule #2 refuses, and README.md extends that refusal to
- * this surface where it says the directive names no protocol. Whether the
- * declared text separates the candidates on its own is a question for
- * measurement (route-evaluator-eval.mjs), not one to pre-empt by writing
- * the differences in.
+ * The options are built from each protocol's own declared material — its
+ * deficit, the resolution it yields, its frontmatter description — and no
+ * field says how one protocol differs from another. Whether the declared text
+ * separates the candidates on its own is a question for measurement
+ * (route-evaluator-eval.mjs).
  *
- * The answer is read from `probabilities`, never by thresholding
- * `confidence`. Confidence measures how concentrated the distribution is,
- * so a low value means the mass is spread — several options fit — which is
- * Route's own several-fit outcome, not its silence. Gating on it would
- * delete the case the advisory is most useful for. A live call during this
- * work returned inquire 0.43 / sublate 0.42 at confidence 0.29 on a real
- * prompt where both did fit.
+ * Why the answer is read from the full distribution rather than a confidence
+ * threshold, and what a live call returned while that was decided: git log.
  *
- * Every shortfall — disabled, no config, no key, timeout, non-200, a state
- * still over the ceiling after one halved retry, malformed body, no
- * candidates, no name outranking `none` — yields "" and writes nothing.
- * Nothing here throws. Zero external dependencies: Node.js standard library
- * only.
+ * Which shortfalls yield "" and write nothing is in route-evaluator.test.mjs,
+ * which is what re-runs them. Zero external dependencies: Node.js standard
+ * library only.
  */
 
 import fs from "node:fs";
