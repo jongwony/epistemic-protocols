@@ -84,11 +84,11 @@ grounding analysis") 은 각각 다른 주제이거나 제목 자체가 존재�
   `intent/` 가 여섯 번째 목적지가 되어야 하는지는 사용자의 결정이다.
 
 - **소멸 시점.** "머지와 함께 소멸"의 실현이 둘이다. PR 의 마지막 커밋에서 지우면 리뷰어가
-  intent 를 diff 에서 못 보고, 머지 후에 지우면 main 에 잠깐 남는다. 이 PR 은 파일을 남긴 채
-  올라가고, 어느 쪽인지는 정하지 않았다.
+  intent 를 diff 에서 못 보고, 머지 후에 지우면 main 에 잠깐 남는다. 이 PR 은 리뷰 가능하도록
+  파일을 **남긴 채** 올라간다 — 이 변경이 고른 쪽이고, 규약으로 고정한 것은 아니다.
 
 - **`premise/instruction-authoring.md` 의 선언 범위.** 여는 문장이 "instructions and durable
   records" 를 governs 한다고 말하는데, durable record 를 독립된 대상으로 다루던 유일한 절이
   이번에 나갔다. 좁힐지는 `route/scripts/route-premise.mjs` 의 색인 문자열과 세션 시작 훅
   텍스트까지 움직이는 일이라 이번에 하지 않았다. 남은 절들이 durable record 에도 걸린다는
-  읽기로 그대로 두었다.
+  읽기로 그대로 두었다. 좁히기로 하면 `ONBOARDING.md:49` 의 같은 어구도 함께 움직인다.

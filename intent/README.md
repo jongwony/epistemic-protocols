@@ -49,8 +49,10 @@ that another one already carries.
   branch.
 - **Dies with the merge.** The file is removed when the change lands. After the merge the pull
   request, its commits, and the links between them carry the connection; the intent file's job
-  is over. Whether the removal happens in the pull request's own last commit or in a follow-up
-  after merge is the author's call, and the reviewability of the file is what it trades against.
+  is over. *Where in the merge the removal happens is not settled by this convention* — the
+  pull request's own last commit hides the file from the reviewer's diff, and a follow-up after
+  merge leaves it briefly on the default branch. Until it is settled, an intent file states the
+  choice its own change made under Open questions.
 - **Graduation is separate.** Where the change settles a direction that keeps governing after
   the merge, that direction goes to `AGENTS.md` §Settled Directions as its own clause, in the
   change's own commits. Deleting the intent file is not how a standing direction is preserved.
