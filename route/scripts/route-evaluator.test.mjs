@@ -10,6 +10,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
+import fs from "node:fs";
+import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
@@ -240,6 +242,11 @@ test("clean strips the harness wrappers and this plugin's own injections", () =>
   const advisory = `${LABEL} This prompt may fit /inquire. Verify each is loaded.`;
   const text = `real question\n${DIRECTIVE}\n${advisory}\n<system-reminder>ignore</system-reminder>`;
   assert.equal(clean(text), "real question");
+  // A turn that DISCUSSES the advisory is content, not an injection. Found by
+  // running this over a real transcript: unanchored, the mention below lost
+  // everything after the label, mid-sentence.
+  const mention = `I think ${LABEL} is the wrong label because it buries the verb.`;
+  assert.equal(clean(mention), mention);
   assert.equal(clean("<command-name>/verify</command-name>kept"), "kept");
   assert.equal(clean("<local-command-stdout>noise</local-command-stdout>x"), "x");
 });
@@ -341,3 +348,124 @@ test("a tie with none is silence, whatever order the keys arrived in", () => {
   // Above the cutoff but under none stays out.
   assert.deepEqual(namesFrom({ probabilities: { conduct: 0.3, none: 0.35 } }, config), []);
 });
+
+// --- Against the shape a real transcript actually has -----------------------
+//
+// The vocabulary below was read off live transcripts on disk: the entry types
+// a session writes besides `user` and `assistant`, the block types a content
+// array carries, and the fact that most `user` entries are not the user at all
+// but the carrier for a tool's result. Authored here rather than copied, so no
+// session content lands in the repository — what is reproduced is the schema.
+
+test("the entry types a session writes besides turns are all dropped", () => {
+  const raw = jsonl(
+    { type: "ai-title", title: "whatever" },
+    { type: "queue-operation", op: "enqueue" },
+    { type: "attachment", attachment: { kind: "file", content: "pasted bulk" } },
+    { type: "atis-latch", value: 1 },
+    { type: "last-prompt", prompt: "a duplicate of the user's turn" },
+    { type: "system", subtype: "stop_hook_summary", content: "hook output" },
+    { type: "cost-state", usd: 0.42 },
+    userTurn("the only real turn"),
+  );
+  assert.deepEqual(conversationFrom("/t", 28000, { readFile: reader(raw) }), [
+    { role: "user", text: "the only real turn" },
+  ]);
+});
+
+test("a user entry carrying only a tool result is not a user turn", () => {
+  // In a live transcript most `type: "user"` entries are this: the harness
+  // hands a tool's result back under the user role. Keeping `text` blocks
+  // alone is what tells the two apart, and nothing else has to.
+  const raw = jsonl(
+    userTurn("run the thing"),
+    botTurn([
+      { type: "thinking", thinking: "deliberating" },
+      { type: "text", text: "running it" },
+      { type: "tool_use", name: "Bash", input: { command: "psql -c 'select *'" } },
+    ]),
+    userTurn([{ type: "tool_result", content: "PASSWORD=hunter2\n42 rows" }]),
+    botTurn([{ type: "text", text: "42 rows" }]),
+  );
+  const turns = conversationFrom("/t", 28000, { readFile: reader(raw) });
+  assert.deepEqual(turns, [
+    { role: "user", text: "run the thing" },
+    { role: "assistant", text: "running it" },
+    { role: "assistant", text: "42 rows" },
+  ]);
+  const joined = turns.map((t) => t.text).join("\n");
+  assert.ok(!joined.includes("hunter2"));
+  assert.ok(!joined.includes("psql"));
+  assert.ok(!joined.includes("deliberating"));
+});
+
+test("the hook process handles a real-shaped payload with a transcript", () => {
+  // The shipped config is disabled, so this is the path every install takes:
+  // the real binary, a real payload shape, a transcript on disk — exit 0 and
+  // silent, and no reading of that file able to take the static directive down.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "route-hook-"));
+  const tp = path.join(dir, "transcript.jsonl");
+  fs.writeFileSync(tp, jsonl(userTurn("a question"), botTurn([{ type: "text", text: "an answer" }])));
+  try {
+    const result = spawnSync(process.execPath, [SCRIPT], {
+      input: JSON.stringify({
+        hook_event_name: "UserPromptSubmit",
+        prompt: "the next thing",
+        transcript_path: tp,
+        session_id: "abc",
+        cwd: dir,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0);
+    assert.equal(JSON.parse(result.stdout).hookSpecificOutput, undefined);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the request built from a transcript on disk carries turns, not tools", () => {
+  // End to end through the filesystem: advise() reads the path it is handed,
+  // and what reaches the transport is what the walk produced.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "route-state-"));
+  const tp = path.join(dir, "transcript.jsonl");
+  fs.writeFileSync(
+    tp,
+    jsonl(
+      userTurn("earlier ask"),
+      botTurn([{ type: "text", text: "earlier answer" }, { type: "tool_use", name: "Read", input: { file: "/etc/shadow" } }]),
+      userTurn([{ type: "tool_result", content: "root:$6$secret" }]),
+    ),
+  );
+  let sent = null;
+  const config = {
+    endpoint: "https://example.invalid/v1", apiKeyEnv: "K", model: "m",
+    timeoutMs: 10, displayCutoff: 0.25, maxNames: 3, stateTokenBudget: 28000,
+  };
+  try {
+    return advise("the newest turn", {
+      config,
+      env: { K: "key" },
+      protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+      transcriptPath: tp,
+      ask: (_c, _k, body) => {
+        sent = JSON.parse(body);
+        return Promise.resolve(null);
+      },
+    }).then(() => {
+      assert.equal(sent.state.current_prompt, "the newest turn");
+      assert.deepEqual(sent.state.conversation, [
+        { role: "user", text: "earlier ask" },
+        { role: "assistant", text: "earlier answer" },
+      ]);
+      assert.ok(!body_includes(sent, "shadow"));
+      assert.ok(!body_includes(sent, "secret"));
+    });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+function body_includes(obj, needle) {
+  return JSON.stringify(obj).includes(needle);
+}

@@ -134,7 +134,12 @@ function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-const OWN_ADVISORY = new RegExp(`${escapeRe(LABEL)}[^\n]*`, "g");
+// Anchored to the line start, because that is where an injected line sits and
+// a mention does not. Unanchored, this ate legitimate prose: a turn that
+// discusses the advisory — a review of it, this repository's own README —
+// carries the label mid-line, and everything after it to the newline was
+// being cut out of the conversation as though it were an injection.
+const OWN_ADVISORY = new RegExp(`^[ \t]*${escapeRe(LABEL)}[^\n]*`, "gm");
 
 /**
  * Strip what the harness wrapped around a turn, and what this plugin itself
