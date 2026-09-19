@@ -35,10 +35,12 @@ import {
   textOf,
 } from "./route-evaluator.mjs";
 import { DIRECTIVE } from "./route-prompt.mjs";
+import { envWithoutKeys, shippedKeyEnv } from "./route-test-env.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPT = path.join(HERE, "route-evaluator.mjs");
 const SHIPPED_CONFIG = path.join(HERE, "..", "config", "evaluator.json");
+const SHIPPED_KEY_ENV = shippedKeyEnv();
 
 const PROTOCOLS = [
   { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution", description: "Infer context insufficiency before execution — /inquire." },
@@ -57,28 +59,57 @@ const CONFIG = {
 
 const ENV = { TEST_KEY: "k" };
 
+
 function answering(probabilities, model = "test-model-1.0") {
   return async () => ({ model, answers: { deficit: { type: "choice", probabilities } } });
 }
 
-test("the shipped config is disabled and carries no secret", () => {
-  // Landing it enabled would start sending prompt text off-machine for
-  // everyone who installs the plugin, without anyone deciding to.
-  assert.equal(loadConfig(SHIPPED_CONFIG), null);
+test("the shipped config names where to send and carries no secret", () => {
+  // The config is a destination, not a switch: it may ship complete because
+  // nothing in it can start a send. The key variable it names is empty on a
+  // fresh install, and that is what keeps the channel off the network.
+  const shipped = loadConfig(SHIPPED_CONFIG);
+  assert.ok(shipped, "the shipped binding resolves");
+  // The name the consent policy in route/README.md is written against.
+  assert.equal(shipped.apiKeyEnv, "TYPESAFE_API_KEY");
   const raw = JSON.parse(
     spawnSync(process.execPath, ["-e", `process.stdout.write(require("fs").readFileSync(${JSON.stringify(SHIPPED_CONFIG)}, "utf8"))`], { encoding: "utf8" }).stdout,
   );
-  assert.equal(raw.enabled, false);
+  assert.ok(!("enabled" in raw), "the file must not carry a switch it does not decide");
   // The variable's name may ship; a value never may.
-  assert.equal(raw.apiKeyEnv, "TYPESAFE_API_KEY");
   assert.ok(!("apiKey" in raw), "config must not carry a key field");
   for (const v of Object.values(raw)) {
     assert.doesNotMatch(String(v), /^(sk|ts)[-_][A-Za-z0-9]{8,}/, "no credential-shaped value");
   }
 });
 
-test("loadConfig refuses anything that is off, absent, or not https", () => {
+test("the shipped config stays silent because no key is present", async () => {
+  // The whole of what keeps a fresh install off the network, asserted on the
+  // real binding rather than a fixture: the destination resolves, and the
+  // empty variable is what stops the call.
+  const result = await advise("anything", {
+    config: loadConfig(SHIPPED_CONFIG),
+    env: {},
+    protocols: PROTOCOLS,
+    ask: () => assert.fail("no request may be built without a key"),
+  });
+  assert.equal(result.advisory, "");
+  assert.equal(result.reason, "no-key");
+});
+
+test("loadConfig refuses a file that is absent, unreadable, or not https", () => {
   assert.equal(loadConfig(path.join(HERE, "does-not-exist.json")), null);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "route-binding-"));
+  const write = (raw) => {
+    const file = path.join(dir, `${Math.random().toString(36).slice(2)}.json`);
+    fs.writeFileSync(file, JSON.stringify(raw));
+    return loadConfig(file);
+  };
+  assert.equal(write({ endpoint: "http://e.example/v1", apiKeyEnv: "K" }), null, "plain http is not a binding");
+  assert.equal(write({ apiKeyEnv: "K" }), null, "no endpoint is not a binding");
+  assert.equal(write({ endpoint: "https://e.example/v1" }), null, "no key variable is not a binding");
+  assert.ok(write({ endpoint: "https://e.example/v1", apiKeyEnv: "K" }), "endpoint and variable are the whole binding");
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test("cards are built from declared material, and say nothing about each other", () => {
@@ -158,7 +189,7 @@ test("the advisory is labelled, modal, and demands a check — and is not a Rout
 test("every shortfall is silent and none of them throws", async () => {
   const cases = [
     ["no-prompt", { config: CONFIG, env: ENV, protocols: PROTOCOLS, ask: answering({ inquire: 1 }) }, ""],
-    ["disabled", { config: null, env: ENV, protocols: PROTOCOLS }, "p"],
+    ["no-binding", { config: null, env: ENV, protocols: PROTOCOLS }, "p"],
     ["no-key", { config: CONFIG, env: {}, protocols: PROTOCOLS }, "p"],
     ["no-candidates", { config: CONFIG, env: ENV, protocols: [] }, "p"],
     ["no-answer", { config: CONFIG, env: ENV, protocols: PROTOCOLS, ask: async () => null }, "p"],
@@ -202,11 +233,12 @@ test("render emits nothing addressable when there is no advisory", () => {
 });
 
 test("the hook exits 0 and stays silent with the shipped config", () => {
-  // Disabled by default, so this is the behaviour every install gets: the
-  // process runs, says nothing, and cannot take the static directive down.
+  // No key in the environment, so this is the behaviour every install gets:
+  // the process runs, says nothing, and cannot take the static directive down.
   const result = spawnSync(process.execPath, [SCRIPT], {
     input: JSON.stringify({ hook_event_name: "UserPromptSubmit", prompt: "anything" }),
     encoding: "utf8",
+    env: envWithoutKeys(),
   });
   assert.equal(result.status, 0);
   const out = JSON.parse(result.stdout);
@@ -410,9 +442,9 @@ test("a user entry carrying only a tool result is not a user turn", () => {
 });
 
 test("the hook process handles a real-shaped payload with a transcript", () => {
-  // The shipped config is disabled, so this is the path every install takes:
-  // the real binary, a real payload shape, a transcript on disk — exit 0 and
-  // silent, and no reading of that file able to take the static directive down.
+  // No key is present, so this is the path every install takes: the real
+  // binary, a real payload shape, a transcript on disk — exit 0 and silent,
+  // and no reading of that file able to take the static directive down.
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "route-hook-"));
   const tp = path.join(dir, "transcript.jsonl");
   fs.writeFileSync(tp, jsonl(userTurn("a question"), botTurn([{ type: "text", text: "an answer" }])));
@@ -426,6 +458,7 @@ test("the hook process handles a real-shaped payload with a transcript", () => {
         cwd: dir,
       }),
       encoding: "utf8",
+      env: envWithoutKeys(),
     });
     assert.equal(result.status, 0);
     assert.equal(JSON.parse(result.stdout).hookSpecificOutput, undefined);
@@ -527,7 +560,6 @@ test("the shipped budget stays under the endpoint's documented state ceiling", (
   // with half, so the budget does not have to absorb the tail by itself.
   const file = new URL("../config/evaluator.json", import.meta.url);
   const raw = JSON.parse(fs.readFileSync(file, "utf8"));
-  assert.equal(raw.enabled, false, "the channel still ships disabled");
   assert.ok(
     Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget <= 32000,
     `budget ${raw.stateTokenBudget} is at or over the ceiling it is meant to sit under`,
@@ -731,7 +763,7 @@ test("a display cutoff outside [0,1] falls back rather than disabling the filter
     const file = path.join(dir, `${Math.random().toString(36).slice(2)}.json`);
     fs.writeFileSync(
       file,
-      JSON.stringify({ enabled: true, endpoint: "https://e.example/v1", apiKeyEnv: "K", ...extra }),
+      JSON.stringify({ endpoint: "https://e.example/v1", apiKeyEnv: "K", ...extra }),
     );
     return loadConfig(file);
   };

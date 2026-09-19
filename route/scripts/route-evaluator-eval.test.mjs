@@ -3,7 +3,13 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
+import { envWithoutKeys, shippedKeyEnv } from "./route-test-env.mjs";
+
+const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-evaluator-eval.mjs");
 
 test("correctness is set equality, not overlap", () => {
   assert.ok(correct(["inquire", "sublate"], ["sublate", "inquire"]));
@@ -79,29 +85,60 @@ test("the shipped fixtures cover every outcome and ship unadjudicated", () => {
   }
 });
 
+const KEY_ENV = shippedKeyEnv();
+
+const BINDING = {
+  endpoint: "https://e.example/v1",
+  apiKeyEnv: KEY_ENV,
+  model: "m",
+  timeoutMs: 10,
+  deadlineMs: 20,
+  displayCutoff: 0.25,
+  maxNames: 3,
+};
+
 test("a live run without a binding refuses rather than pretending", async () => {
-  const out = await run({ live: true, cases: [] });
-  assert.match(out.error, /config\/evaluator\.json enabled/);
+  const out = await run({ live: true, cases: [], env: {}, config: null });
+  assert.match(out.error, /config\/evaluator\.json/);
   assert.match(report(out), /^error:/);
 });
 
+test("an omitted config resolves the binding from disk; an explicit null does not", async () => {
+  // Omitting `config` is the CLI's own call and must read the binding off
+  // disk; passing an explicit null is a caller saying there is none. The two
+  // have to stay distinguishable, so both sides are asserted here.
+  // `cases: []` keeps this off the network — the guards run, the loop does not.
+  const omitted = await run({ live: true, cases: [], env: { [KEY_ENV]: "k" } });
+  assert.ok(
+    !/name an https endpoint/.test(omitted.error ?? ""),
+    `omitting config must read the binding off disk, got: ${omitted.error}`,
+  );
+
+  const explicit = await run({ live: true, cases: [], env: { [KEY_ENV]: "k" }, config: null });
+  assert.match(explicit.error ?? "", /name an https endpoint/);
+});
+
+test("the CLI reaches the key guard rather than refusing before it", () => {
+  // End to end through the real entry point, on this checkout's binding with
+  // no key: the refusal that comes back must be the key guard's, which is only
+  // reachable once the binding has resolved. Clearing the credential alone
+  // would not establish that nothing is sent — an inherited CLAUDE_PLUGIN_ROOT
+  // selects another checkout's binding, whose own variable may be set and would
+  // carry the guard past. `envWithoutKeys` fixes both.
+  const result = spawnSync(process.execPath, [SCRIPT, "--live"], {
+    encoding: "utf8",
+    env: envWithoutKeys(),
+  });
+  assert.match(result.stdout, new RegExp(`live run needs a key in ${KEY_ENV}`));
+});
+
 test("a live run without a key refuses rather than recording a non-observation", async () => {
-  // The refusal message always claimed a key was required; only the config
-  // was checked. Without one every case returned `no-key`, which is not
+  // Without this check every case returned `no-key`, which is not
   // `no-answer`, so a null distribution was written over the case's
   // recording and scored as silence — a run that observed nothing, reported
   // as a run that observed silence.
-  const config = {
-    endpoint: "https://e.example/v1",
-    apiKeyEnv: "ROUTE_TEST_ABSENT_KEY",
-    model: "m",
-    timeoutMs: 10,
-    deadlineMs: 20,
-    displayCutoff: 0.25,
-    maxNames: 3,
-  };
-  const out = await run({ live: true, cases: [], env: {}, config });
-  assert.match(out.error ?? "", /ROUTE_TEST_ABSENT_KEY/);
+  const out = await run({ live: true, cases: [], env: {}, config: BINDING });
+  assert.match(out.error ?? "", new RegExp(KEY_ENV));
 });
 
 test("a recording whose fixture prompt has moved is reported, not scored", async () => {

@@ -41,4 +41,8 @@ node route/scripts/route-evaluator-eval.mjs
 TYPESAFE_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
 ```
 
+**A live run reads the same variable that arms the advisory channel, so running it is the same consent.** This project counts holding a System One key in that variable, with the plugin enabled, as consent for the channel to send conversations, and the harness is not carved out of that.
+
+What separates a scoring run from a standing channel is process scope. The invocation above assigns the variable for that one command, so it does not reach sessions already running, nor sessions started from a shell that never exported it. `export TYPESAFE_API_KEY=…` instead and every session launched from that shell is armed for as long as it lives. Scoring with the variable unset is not an option — the run refuses without a key.
+
 `--live` writes each answer into `recorded/` keyed by case id, model and the criteria it was asked with. A replay whose recorded model differs from the configured one is reported rather than silently scored: the configured name may be an alias, and a fixture graded under one version and replayed under another is measuring two things.

@@ -32,7 +32,11 @@
  * Measuring that needs paired agent turns, which this does not do.
  *
  *   node route/scripts/route-evaluator-eval.mjs           # replay recorded answers
- *   node route/scripts/route-evaluator-eval.mjs --live    # call, record, then score
+ *   TYPESAFE_API_KEY=… node route/scripts/route-evaluator-eval.mjs --live
+ *
+ * A live run reads the key from the variable config/evaluator.json names — the
+ * same one that arms the session channel, since this project counts holding
+ * that key as consent for both.
  *
  * Zero external dependencies: Node.js standard library only.
  */
@@ -124,8 +128,10 @@ async function run({
   cases = readCases(),
   env = process.env,
   // Injected so the guards below can be exercised without a binding on disk
-  // and without touching evals/recorded/.
-  config: configOverride = null,
+  // and without touching evals/recorded/. No default: an omitted `config` has
+  // to arrive as `undefined` for the check below to tell it apart from an
+  // explicit null, and a default here would make every caller look explicit.
+  config: configOverride,
   readRecorded: readRecordedFn = readRecorded,
 } = {}) {
   const adjudicated = [];
@@ -135,14 +141,17 @@ async function run({
   const models = new Set();
   const cutoffsUsed = new Set();
 
-  const config = configOverride ?? (live ? loadConfig() : null);
-  if (live && !config) {
-    return { error: "live run needs config/evaluator.json enabled and a key in the named environment variable" };
+  // An explicit null is a caller saying there is no binding on disk, which
+  // `??` would read as no override and send back to disk.
+  const binding = configOverride === undefined ? (live ? loadConfig() : null) : configOverride;
+  if (live && !binding) {
+    return { error: "live run needs config/evaluator.json to name an https endpoint" };
   }
-  // The message above says a key is required, so check for one. Without this
-  // every case returns `no-key`, which is not `no-answer` and so was written
-  // over the case's recording as a null distribution and scored as silence —
-  // a run that observed nothing, reported as a run that observed silence.
+  const config = binding;
+  // Without this check every case returns `no-key`, which is not `no-answer`
+  // and so was written over the case's recording as a null distribution and
+  // scored as silence — a run that observed nothing, reported as a run that
+  // observed silence.
   if (live && !env[config.apiKeyEnv]) {
     return { error: `live run needs a key in ${config.apiKeyEnv}` };
   }
