@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
  * UserPromptSubmit hook — an advisory line naming protocols the session may
- * fit, from a constrained-output evaluator. Disabled unless
- * config/evaluator.json says otherwise.
+ * fit, from a constrained-output evaluator. Silent unless a key is present in
+ * the environment variable config/evaluator.json names: the config says where
+ * to send and the key says whether to send, so an install with no key never
+ * reaches the network.
  *
  * A constrained-output evaluator reads state the caller assembles and answers
  * over an answer space the caller declares — here, one choice across the
@@ -120,10 +122,14 @@ function configFile() {
   return path.join(pluginRoot(), "config", "evaluator.json");
 }
 
-/** The binding, or null when absent, unreadable, or off. */
+/**
+ * Where to send and how much, or null when the file is absent, unreadable, or
+ * names no https endpoint and key variable. It does not decide whether to
+ * send: the key named here does, and `advise` reads it.
+ */
 function loadConfig(file = configFile()) {
   const raw = readJson(file);
-  if (!raw || raw.enabled !== true) return null;
+  if (!raw) return null;
   const endpoint = typeof raw.endpoint === "string" ? raw.endpoint : "";
   const apiKeyEnv = typeof raw.apiKeyEnv === "string" ? raw.apiKeyEnv : "";
   if (!endpoint.startsWith("https://") || !apiKeyEnv) return null;
@@ -528,8 +534,11 @@ function renderAdvisory(names) {
 async function advise(prompt, options = {}) {
   const empty = (reason) => ({ advisory: "", reason, model: null, probabilities: null });
   if (typeof prompt !== "string" || !prompt.trim()) return empty("no-prompt");
-  const config = options.config ?? loadConfig();
-  if (!config) return empty("disabled");
+  // An explicit null is a caller saying there is no binding, which is not the
+  // same as not passing one; `??` would read them alike and fall through to
+  // disk in both cases.
+  const config = options.config === undefined ? loadConfig() : options.config;
+  if (!config) return empty("no-binding");
   const key = (options.env ?? process.env)[config.apiKeyEnv];
   if (!key) return empty("no-key");
   const protocols = options.protocols ?? deriveProtocols();
