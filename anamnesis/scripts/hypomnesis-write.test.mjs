@@ -14,11 +14,38 @@ import {
   buildMarkersMd,
   buildHaikuArgs,
   callHaiku,
+  stderrDetail,
   invokes,
   skillCalls,
   resolveSkillProtocol,
   protocolMap,
+  HAIKU_FLAG_ARITY,
+  MAX_ALL_CHARS,
+  CLUE_SAMPLE_CHARS,
+  PROMPT_SAMPLE_CHARS,
+  STDERR_DETAIL_CHARS,
 } from "./hypomnesis-write.mjs";
+import {
+  formatReport,
+  REPORT_MAX_LINES,
+  REPORT_MAX_LINE_CHARS,
+} from "./hypomnesis-dispatch.mjs";
+
+// The CLI's own consumption rule, applied to the argv the writer emits: a token
+// is legal as a flag the arity map names, or as the value of one whose arity is
+// 1. Everything else is a positional — which is what `--tools` eats.
+function strayTokens(args, arity = HAIKU_FLAG_ARITY) {
+  const stray = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === "--") { stray.push(`${i}:${a} (end-of-options: what follows is positional)`); continue; }
+    if (!a.startsWith("-")) { stray.push(`${i}:${JSON.stringify(a)}`); continue; }
+    const name = a.includes("=") ? a.slice(0, a.indexOf("=")) : a;
+    if (!(name in arity)) { stray.push(`${i}:${name} (undeclared flag)`); continue; }
+    if (arity[name] === 1 && !a.includes("=")) i += 1;
+  }
+  return stray;
+}
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -192,21 +219,50 @@ test("protocolMap covers every protocol plugin command on disk", () => {
 });
 
 // --tools is variadic, so anything positional trailing it is parsed as a
-// tool-name list and the CLI then exits with "Input must be provided" — every
-// extraction returns empty and the record is discarded. The 2026-09-04
-// injection guard put --tools "" at the end of argv, which is what made a
-// trailing prompt unreachable. Both properties are asserted together: the guard
-// stays, and no positional rides behind it.
-test("buildHaikuArgs keeps --tools \"\" and carries no positional prompt", () => {
+// tool-name list. What the argv must satisfy is therefore not "nothing follows
+// --tools" but the CLI's own consumption rule: every token is a declared flag or
+// the value of one that takes a value. `strayTokens` above is that rule, and the
+// arity map it reads lives beside `buildHaikuArgs`, so a flag added without a
+// declared arity fails here rather than widening the guard silently.
+test("buildHaikuArgs carries no stray positional under the CLI's consumption rule", () => {
   const args = buildHaikuArgs();
+  assert.deepEqual(strayTokens(args), [], "argv carries a token the CLI would read as positional");
+});
+
+// A flag written twice is not a stray token, so the rule above cannot see it —
+// and a second --tools is the case that matters: a reader checking the first one
+// would report tools disabled while the last occurrence is what the CLI takes.
+test("buildHaikuArgs declares --tools \"\" exactly once, and no flag twice", () => {
+  const args = buildHaikuArgs();
+  const flags = args.filter((a) => a.startsWith("-"));
+  const repeated = flags.filter((f, i) => flags.indexOf(f) !== i);
+  assert.deepEqual(repeated, [], "a repeated flag makes the effective value the last one");
   const toolsAt = args.indexOf("--tools");
   assert.notEqual(toolsAt, -1, "--tools \"\" is the injection guard — it must not be dropped");
   assert.equal(args[toolsAt + 1], "", "--tools must disable every built-in tool");
-  assert.equal(toolsAt + 1, args.length - 1, "nothing may follow --tools: it would be read as a tool name");
-  for (const a of args) {
-    assert.ok(a === "" || a.startsWith("-") || args[args.indexOf(a) - 1]?.startsWith("-"),
-      `argv carries a stray positional: ${JSON.stringify(a)}`);
+});
+
+// The mutations the rule rejects, asserted rather than described. Each is a
+// shape a later edit to buildHaikuArgs could produce; the previous guard, which
+// read "preceded by something flag-shaped", admitted all but the last two.
+test("the consumption rule rejects every argv shape that reintroduces a positional", () => {
+  const base = buildHaikuArgs();
+  const cases = {
+    "positional after a nullary flag": ["-p", "THE PROMPT", ...base.slice(1)],
+    "positional after --dangerously-skip-permissions":
+      [...base.slice(0, 7), "THE PROMPT", ...base.slice(7)],
+    "positional appended behind --tools \"\"": [...base, "THE PROMPT"],
+    "positional behind an end-of-options marker": [...base, "--", "THE PROMPT"],
+    "positional behind an undeclared flag pair": [...base, "--output-format", "json", "THE PROMPT"],
+    "positional behind an attached-value flag": [...base, "--output-format=json", "THE PROMPT"],
+    "positional inserted before --tools": [...base.slice(0, 9), "THE PROMPT", ...base.slice(9)],
+  };
+  for (const [name, argv] of Object.entries(cases)) {
+    assert.notDeepEqual(strayTokens(argv), [], `rule admits ${name}`);
   }
+  // The control: the rule accepts what the writer actually emits, so the cases
+  // above fail for their own shape rather than because the rule rejects all.
+  assert.deepEqual(strayTokens(base), []);
 });
 
 test("callHaiku delivers the prompt on stdin, never in argv", () => {
@@ -235,4 +291,153 @@ test("callHaiku's options deliver stdin to a real child process", () => {
     run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", echo], opts),
   });
   assert.equal(out, prompt, "the child read something other than the prompt from stdin");
+});
+
+// The OS pipe buffer is a BYTE limit. The sample bounds are character counts,
+// and UTF-8 spends up to 4 bytes on one character, so a bound below this number
+// settles nothing on its own — what decides a write is the payload's encoded
+// size. Named for the unit it is in, because the earlier name said CHARS and a
+// character bound was compared against it for two rounds.
+const PIPE_BUFFER_BYTES = 64 * 1024;
+
+// Where the sample bounds actually stand against that limit. MAX_ALL_CHARS
+// bounds the parse buffer, not the payload: what reaches the child is a sample
+// cut from it. Measured, a 30,000-character sample of Korean prose encodes to
+// about 76,000 bytes and a sample of ASCII to 30,000, so EPIPE is reachable on
+// one and not the other from the same bound. Both spawn-level classes are
+// therefore live, which is what the join has to cover; the tests below drive
+// EPIPE because it is the one a test can produce deterministically.
+test("the prompt bounds leave the spawn-level class reachable, in bytes", () => {
+  assert.ok(MAX_ALL_CHARS > PROMPT_SAMPLE_CHARS,
+    "the parse buffer is what the sample is cut from, so it must exceed it");
+  for (const [name, bound] of [["clue", CLUE_SAMPLE_CHARS], ["full-text", PROMPT_SAMPLE_CHARS]]) {
+    // Not an assertion that the bound is safe — an assertion that nobody may
+    // read it as safe. A character bound whose worst-case encoding clears the
+    // pipe buffer would make EPIPE unreachable and the comments above stale in
+    // the other direction, so that case has to be noticed too.
+    assert.ok(bound * 4 > PIPE_BUFFER_BYTES,
+      `${name} prompts are bounded at ${bound} characters, whose worst-case UTF-8 encoding is ${bound * 4} bytes — now under the ${PIPE_BUFFER_BYTES}-byte pipe buffer, so EPIPE is no longer reachable and the comments naming it live are stale`);
+  }
+});
+
+// The measurement the bound above rests on, pinned rather than recalled: the
+// same character count crosses the buffer in one script and not in another.
+// Built from the Hangul syllables block (U+AC00-U+D7A3) by code point rather
+// than from a prose sample, because the property under test is the encoding
+// width of a three-byte script and not any particular sentence. This is the
+// script these sessions are written in, and the case a character-indexed check
+// cannot see.
+const HANGUL_SYLLABLES_START = 0xAC00;
+const HANGUL_SYLLABLES_COUNT = 11172;
+
+test("a three-byte script under the character bound exceeds the pipe buffer in bytes", () => {
+  const sample = Array.from({ length: PROMPT_SAMPLE_CHARS }, (_, i) =>
+    String.fromCodePoint(HANGUL_SYLLABLES_START + (i % HANGUL_SYLLABLES_COUNT))).join("");
+  const ascii = "x".repeat(PROMPT_SAMPLE_CHARS);
+
+  assert.equal(sample.length, PROMPT_SAMPLE_CHARS,
+    "the sample must sit exactly on the character bound the writer cuts at");
+  assert.ok(Buffer.byteLength(sample, "utf8") > PIPE_BUFFER_BYTES,
+    `a ${sample.length}-character sample of a three-byte script encodes to ${Buffer.byteLength(sample, "utf8")} bytes, which no longer clears the ${PIPE_BUFFER_BYTES}-byte pipe buffer — the character bound and the byte limit have stopped diverging and the comments above need re-reading`);
+  assert.ok(Buffer.byteLength(ascii, "utf8") < PIPE_BUFFER_BYTES,
+    "the ASCII control must stay under it: the same character count, one byte each, is what makes the bound alone undecidable");
+});
+
+// The spawn-level class in general: `message` is bare and the child's diagnosis
+// reaches `stderr` alone, so the call sites that log `message` get an extraction
+// failing with nothing in it to act on. Driven here through EPIPE because it is
+// the one a test can produce deterministically — a payload above the pipe buffer
+// and a child that exits without draining. The behaviour asserted is the join,
+// which is what ETIMEDOUT needs too.
+test("callHaiku carries the child's stderr out with a spawn-level failure", () => {
+  const prompt = "x".repeat(PIPE_BUFFER_BYTES + 16_000);
+  const child = "process.stderr.write('Error: Input must be provided\\n'); process.exit(1)";
+  let err = null;
+  try {
+    callHaiku(prompt, {
+      run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", child], opts),
+    });
+  } catch (e) { err = e; }
+  assert.ok(err, "a child exiting non-zero must reach the caller as a throw");
+  // Without this the test would pass on a payload small enough to keep the
+  // child's message in `message` on its own, proving nothing.
+  assert.match(err.message, /EPIPE/, "precondition: the write, not the read, is what failed");
+  assert.match(err.message, /Input must be provided/,
+    "the child's diagnosis must reach the caller that logs message");
+  assert.match(err.message, /child stderr:/,
+    "the child's stream must be named, not concatenated as though it were the cause");
+  assert.equal(err.code, "EPIPE", "the original error's own fields must survive the join");
+});
+
+// The class Node already joined itself: a plain non-zero exit puts the child's
+// stderr in `message` and leaves `code` unset. Joining there would spend the
+// forwarding window on a duplicate.
+test("callHaiku leaves a plain non-zero exit untouched", () => {
+  const child = "require('node:fs').readFileSync(0); process.stderr.write('BOOM\\n'); process.exit(3)";
+  let err = null;
+  try {
+    callHaiku("short", {
+      run: (_file, _args, opts) => execFileSync(process.execPath, ["-e", child], opts),
+    });
+  } catch (e) { err = e; }
+  assert.ok(err);
+  assert.equal(err.code, undefined, "precondition: a plain non-zero exit sets no code");
+  assert.match(err.message, /BOOM/, "Node already carries the child's stderr here");
+  assert.doesNotMatch(err.message, /child stderr:/, "so this must not append it a second time");
+});
+
+// Where the diagnosis sits in the stream is the child's choice. A tail-only
+// window loses a cause that a long trace pushes out of it, and says nothing
+// about having lost it.
+test("stderrDetail keeps both ends and states what it dropped", () => {
+  const long = `Error: account expired\n${Array.from({ length: 80 }, (_, i) => `    at frame${i} (/very/long/path/to/module/file-${i}.js:${i}:${i})`).join("\n")}`;
+  const detail = stderrDetail(long);
+  assert.ok(long.length > STDERR_DETAIL_CHARS, "precondition: the input must exceed the budget");
+  assert.match(detail, /account expired/, "the cause sits at the head and must survive");
+  assert.match(detail, /frame79/, "the tail must survive too");
+  assert.match(detail, /chars elided/, "a cut presented as whole is the defect this replaces");
+  assert.doesNotMatch(detail, /\n/, "the detail rides on one line through the dispatcher");
+});
+
+// Colour reaches a piped stderr, so the escapes travel unless removed — and they
+// compete for the same window as the text.
+test("stderrDetail strips terminal escapes", () => {
+  const detail = stderrDetail("\u001b[31mError: Invalid MCP configuration:\u001b[39m bad path");
+  assert.equal(detail, "Error: Invalid MCP configuration: bad path");
+});
+
+// --- writer → dispatcher composition ---
+//
+// The writer bounds each diagnostic line; the dispatcher bounds how many lines
+// it forwards. These are two budgets in two files, and the failure they have to
+// survive together is the one where every extraction fails identically at once:
+// four lines competing for one window. A character window over the whole stream
+// kept four lines before the child's stderr was joined on and none after, so the
+// richer diagnosis arrived as strictly less observable output. These two tests
+// are what fails if the budgets drift apart again.
+
+test("the dispatcher's per-line budget admits a writer line at full budget", () => {
+  const worstLine = `[hypomnesis-write] narrative extraction failed: spawnSync claude EPIPE | child stderr: ${"x".repeat(STDERR_DETAIL_CHARS)}`;
+  assert.ok(worstLine.length <= REPORT_MAX_LINE_CHARS,
+    `a writer line at full budget (${worstLine.length}) exceeds the dispatcher's per-line window (${REPORT_MAX_LINE_CHARS})`);
+  assert.equal(formatReport(worstLine), worstLine, "and must pass through uncut");
+});
+
+test("every simultaneous extraction failure survives the dispatcher's forward", () => {
+  const names = ["clue", "vector", "narrative", "marker"];
+  const lines = names.map((n) =>
+    `[hypomnesis-write] ${n} extraction failed: spawnSync claude EPIPE | child stderr: ${"x".repeat(STDERR_DETAIL_CHARS)}`);
+  const forwarded = formatReport(lines.join("\n"));
+  for (const n of names) {
+    assert.ok(forwarded.includes(`${n} extraction failed`), `${n}'s failure did not survive the forward`);
+  }
+  assert.ok(names.length <= REPORT_MAX_LINES, "precondition: the line window must admit one line per extraction");
+});
+
+test("formatReport says how many lines it dropped", () => {
+  const many = Array.from({ length: REPORT_MAX_LINES + 3 }, (_, i) => `line ${i}`).join("\n");
+  const forwarded = formatReport(many);
+  assert.match(forwarded, /^\[3 earlier lines dropped\]\n/, "a truncated forward must say it was truncated");
+  assert.ok(forwarded.includes(`line ${REPORT_MAX_LINES + 2}`), "the newest line must survive");
+  assert.ok(!forwarded.includes("line 0\n"), "the oldest must be the one dropped");
 });

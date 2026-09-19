@@ -11,6 +11,7 @@ import {
   isCodexTranscript,
   spawnWorker,
 } from "./hypomnesis-codex-write.mjs";
+import { STDERR_DETAIL_CHARS } from "./hypomnesis-write.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,6 +36,30 @@ function runClaudeScript(name, raw, { scriptDir = SCRIPT_DIR } = {}) {
   });
 }
 
+// The writer emits one diagnostic line per failed extraction, and in the
+// spawn-failure class every extraction fails the same way at once — so the unit
+// this must not split is the line, not the stream. A character window over the
+// whole stream drops whole failures at its seam and leaves a fragment of the
+// last; a line window keeps each failure's identity and bounds the rest.
+const REPORT_MAX_LINES = 12;
+// One writer line at its full budget: the `[hypomnesis-write] <name> extraction
+// failed: ` prefix, the spawn message, the ` | child stderr: ` label, and the
+// detail. Derived from the writer's own budget rather than chosen beside it, so
+// raising one cannot silently outgrow the other.
+const REPORT_MAX_LINE_CHARS = STDERR_DETAIL_CHARS + 300;
+
+// Bounded by lines, each bounded in turn, with what was dropped stated rather
+// than left to look like the whole.
+function formatReport(stderr) {
+  const lines = String(stderr ?? "").trim().split("\n").filter((l) => l.trim() !== "");
+  const kept = lines.slice(-REPORT_MAX_LINES);
+  const dropped = lines.length - kept.length;
+  const body = kept
+    .map((l) => (l.length <= REPORT_MAX_LINE_CHARS ? l : `${l.slice(0, REPORT_MAX_LINE_CHARS)}…`))
+    .join("\n");
+  return dropped > 0 ? `[${dropped} earlier lines dropped]\n${body}` : body;
+}
+
 // A spawned writer's extraction/schema failures must leave a signal
 // somewhere; this is that signal. Hook-side work stays short and must not
 // fail the hook, so this never throws and never changes the caller's result.
@@ -45,16 +70,16 @@ function reportChildFailure(name, result) {
       process.stderr.write(`hypomnesis-dispatch: ${name} failed to spawn: ${result.error.message}\n`);
       return;
     }
-    const reported = String(result.stderr ?? "").trim();
+    const reported = formatReport(result.stderr);
     if (result.status !== 0) {
-      process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${reported.slice(-500)}\n`);
+      process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${reported}\n`);
       return;
     }
     // Exit status alone reports nothing here: both Claude-side writers catch
     // their own operational failures, write the diagnostic to stderr, and exit
     // zero regardless. Forwarding a non-empty stderr is what makes an
     // extraction, validation, or write failure visible at all.
-    if (reported) process.stderr.write(`hypomnesis-dispatch: ${name} reported: ${reported.slice(-500)}\n`);
+    if (reported) process.stderr.write(`hypomnesis-dispatch: ${name} reported: ${reported}\n`);
   } catch {}
 }
 
@@ -83,7 +108,13 @@ function dispatchHook(raw, options = {}) {
   return { runtime: "claude", handled: false };
 }
 
-export { dispatchHook, isClaudeTranscript };
+export {
+  dispatchHook,
+  isClaudeTranscript,
+  formatReport,
+  REPORT_MAX_LINES,
+  REPORT_MAX_LINE_CHARS,
+};
 
 let isMain = true;
 try {
