@@ -58,6 +58,9 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
+// Both response readers below accumulate into memory before parsing, so they
+// need a ceiling that does not depend on the peer behaving.
+const MAX_BYTES = 64 * 1024;
 
 // The one shortfall the caller can answer: the state was too large. Every
 // other shortfall is null and ends the turn silently.
@@ -144,7 +147,14 @@ function loadConfig(file = configFile()) {
     apiKeyEnv,
     model: typeof raw.model === "string" && raw.model ? raw.model : "jev-latest",
     timeoutMs: Number.isFinite(raw.timeoutMs) && raw.timeoutMs > 0 ? raw.timeoutMs : 2000,
-    displayCutoff: Number.isFinite(raw.displayCutoff) ? raw.displayCutoff : 0.25,
+    deadlineMs: Number.isFinite(raw.deadlineMs) && raw.deadlineMs > 0 ? raw.deadlineMs : 3000,
+    // A cutoff outside [0,1] is not a cutoff: below it nothing is filtered,
+    // above it nothing passes, and either way the field stops meaning what its
+    // name says.
+    displayCutoff:
+      Number.isFinite(raw.displayCutoff) && raw.displayCutoff >= 0 && raw.displayCutoff <= 1
+        ? raw.displayCutoff
+        : 0.25,
     maxNames: Number.isInteger(raw.maxNames) && raw.maxNames > 0 ? raw.maxNames : 3,
     // A cap an adopter can lower, not the budget itself — that is derived per
     // run from what the question and the prompt leave. Absent, the cap is the
@@ -394,13 +404,21 @@ function buildRequest(config, prompt, criteria, conversation) {
 function ask(config, key, body) {
   return new Promise((resolve) => {
     let settled = false;
+    let timer = null;
+    let req;
     const done = (value) => {
       if (!settled) {
         settled = true;
+        if (timer) clearTimeout(timer);
+        try { req?.destroy(); } catch {}
         resolve(value);
       }
     };
-    let req;
+    // `timeout` above is a socket inactivity timer, so it alone lets a peer
+    // that dribbles a byte inside every window hold the request open for as
+    // long as it likes. This is the wall-clock cap that actually ends it.
+    timer = setTimeout(() => done(null), config.deadlineMs);
+    if (typeof timer.unref === "function") timer.unref();
     try {
       req = https.request(
         config.endpoint,
@@ -418,6 +436,10 @@ function ask(config, key, body) {
             let detail = "";
             res.setEncoding("utf8");
             res.on("data", (c) => {
+              if (detail.length + c.length > MAX_BYTES) {
+                done(null);
+                return;
+              }
               detail += c;
             });
             res.on("end", () => done(detail.includes("max_tokens_exceeded") ? OVER_LIMIT : null));
@@ -432,6 +454,10 @@ function ask(config, key, body) {
           let text = "";
           res.setEncoding("utf8");
           res.on("data", (c) => {
+            if (text.length + c.length > MAX_BYTES) {
+              done(null);
+              return;
+            }
             text += c;
           });
           res.on("end", () => {
@@ -468,11 +494,19 @@ function ask(config, key, body) {
  * else is not a name to show. Order is by probability, descending, so the
  * strongest reads first.
  */
-function namesFrom(answer, config) {
+function namesFrom(answer, config, optionNames = null) {
   const probabilities = answer && answer.probabilities;
-  if (!probabilities || typeof probabilities !== "object") return [];
+  if (!probabilities || typeof probabilities !== "object" || Array.isArray(probabilities)) return [];
+  // The answer space is ours, so a key outside it is not an answer to the
+  // question we asked. Without this the peer chooses the text: the names go
+  // into additionalContext verbatim, and a key carrying a newline leaves the
+  // advisory line and reads as a second instruction. An array's indices are
+  // finite-valued entries too, and a value outside [0,1] did not come from a
+  // distribution.
+  const allowed = optionNames ? new Set(optionNames) : null;
   const ranked = Object.entries(probabilities)
-    .filter(([, v]) => Number.isFinite(v))
+    .filter(([name, v]) =>
+      Number.isFinite(v) && v >= 0 && v <= 1 && (allowed ? allowed.has(name) : /^[a-z][a-z0-9-]*$/.test(name)))
     .sort((a, b) => b[1] - a[1]);
   if (ranked.length === 0) return [];
   // `none` decides by mass, not by rank. A sort leaves ties in whatever order
@@ -544,7 +578,7 @@ async function advise(prompt, options = {}) {
   if (!body) return empty("no-answer");
   const answer = body.answers && body.answers.deficit;
   if (!answer || typeof answer !== "object") return empty("no-answer");
-  const names = namesFrom(answer, config);
+  const names = namesFrom(answer, config, Object.keys(criteria));
   return {
     advisory: renderAdvisory(names),
     reason: names.length === 0 ? "none" : "advised",
