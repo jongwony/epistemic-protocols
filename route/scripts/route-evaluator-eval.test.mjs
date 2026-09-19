@@ -3,8 +3,13 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { EVAL_KEY_ENV, correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
 import { advise } from "./route-evaluator.mjs";
+
+const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-evaluator-eval.mjs");
 
 test("correctness is set equality, not overlap", () => {
   assert.ok(correct(["inquire", "sublate"], ["sublate", "inquire"]));
@@ -94,6 +99,34 @@ test("a live run without a binding refuses rather than pretending", async () => 
   const out = await run({ live: true, cases: [], env: {}, config: null });
   assert.match(out.error, /config\/evaluator\.json/);
   assert.match(report(out), /^error:/);
+});
+
+test("an omitted config resolves the binding from disk; an explicit null does not", async () => {
+  // The path the CLI actually takes is `config` omitted, and no test took it:
+  // every case above injects a binding to exercise a guard, so a default that
+  // turned "omitted" into "explicitly absent" broke `node
+  // route-evaluator-eval.mjs --live` outright while the suite stayed green.
+  // The two callers have to be distinguishable, so assert both sides here.
+  // `cases: []` keeps this off the network — the guards run, the loop does not.
+  const omitted = await run({ live: true, cases: [], env: { [EVAL_KEY_ENV]: "k" } });
+  assert.ok(
+    !/name an https endpoint/.test(omitted.error ?? ""),
+    `omitting config must read the binding off disk, got: ${omitted.error}`,
+  );
+
+  const explicit = await run({ live: true, cases: [], env: { [EVAL_KEY_ENV]: "k" }, config: null });
+  assert.match(explicit.error ?? "", /name an https endpoint/);
+});
+
+test("the CLI reaches the key guard rather than refusing before it", () => {
+  // End to end through the real entry point, with the harness key absent from
+  // the child's environment: the refusal that comes back must be the key's,
+  // which is only reachable once the binding has resolved. Nothing is sent —
+  // the guard returns before any request is built.
+  const env = { ...process.env };
+  delete env[EVAL_KEY_ENV];
+  const result = spawnSync(process.execPath, [SCRIPT, "--live"], { encoding: "utf8", env });
+  assert.match(result.stdout, new RegExp(`live run needs a key in ${EVAL_KEY_ENV}`));
 });
 
 test("a live run without a key refuses rather than recording a non-observation", async () => {

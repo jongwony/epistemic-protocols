@@ -132,8 +132,10 @@ async function run({
   cases = readCases(),
   env = process.env,
   // Injected so the guards below can be exercised without a binding on disk
-  // and without touching evals/recorded/.
-  config: configOverride = null,
+  // and without touching evals/recorded/. No default: an omitted `config` has
+  // to arrive as `undefined` for the check below to tell it apart from an
+  // explicit null, and a default here would make every caller look explicit.
+  config: configOverride,
   readRecorded: readRecordedFn = readRecorded,
 } = {}) {
   const adjudicated = [];
