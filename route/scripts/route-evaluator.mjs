@@ -46,10 +46,8 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
 
-// Reserved for the fixture harness (route-evaluator-eval.mjs), which reads it
-// instead of the session channel's variable. It lives here because this is the
-// side that has to refuse it: a binding naming it would route the harness's
-// key back into the session channel and undo the separation.
+// The fixture harness (route-evaluator-eval.mjs) reads this variable; a
+// binding may not name it, and `loadConfig` below refuses one that does.
 const EVAL_KEY_ENV = "ROUTE_EVAL_API_KEY";
 // Both response readers below accumulate into memory before parsing, so they
 // need a ceiling that does not depend on the peer behaving.
