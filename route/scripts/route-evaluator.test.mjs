@@ -61,14 +61,22 @@ const CONFIG = {
 
 const ENV = { TEST_KEY: "k" };
 
-// A child environment with every key variable this plugin reads stripped out.
-// A subprocess test that claims "no key is present" has to build that state
-// rather than inherit whatever the developer or CI happens to export — a real
-// key would let the hook reach the network, and a refusal or a `none` answer
-// produces exactly the silence such a test asserts.
+// The environment a subprocess test claiming "no key is present" has to build
+// rather than inherit. Two halves, and stripping only the first leaves the
+// claim unestablished:
+//
+//   - the credentials, so no inherited export can arm the child;
+//   - the config selection, since `pluginRoot()` honours CLAUDE_PLUGIN_ROOT and
+//     an inherited one sends the child to another checkout's binding, which may
+//     name a variable this list does not strip.
+//
+// CLAUDE_PLUGIN_ROOT is pinned rather than deleted: the assertion is about the
+// binding this repository ships, so the test names it instead of relying on the
+// path-derived fallback to land there.
 function envWithoutKeys() {
   const env = { ...process.env };
   for (const name of [SHIPPED_KEY_ENV, EVAL_KEY_ENV, "TYPESAFE_API_KEY"]) delete env[name];
+  env.CLAUDE_PLUGIN_ROOT = path.join(HERE, "..");
   return env;
 }
 
@@ -82,10 +90,8 @@ test("the shipped config names where to send and carries no secret", () => {
   // fresh install, and that is what keeps the channel off the network.
   const shipped = loadConfig(SHIPPED_CONFIG);
   assert.ok(shipped, "the shipped binding resolves");
-  // The switch is a name this channel owns. A vendor or account name would be
-  // a credential an adopter may already hold for another purpose, so an upgrade
-  // could arm the channel off a key set for something else, and a restored
-  // config would reconnect it rather than leaving it unset.
+  // The name the consent policy in route/README.md is written against, and the
+  // name a restored config leaves unset.
   assert.equal(shipped.apiKeyEnv, "ROUTE_ADVISORY_KEY");
   assert.notEqual(shipped.apiKeyEnv, EVAL_KEY_ENV, "the harness name is reserved");
   const raw = JSON.parse(
