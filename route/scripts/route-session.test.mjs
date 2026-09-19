@@ -132,10 +132,13 @@ test("derives one row per installed single-skill protocol, route excluded", () =
   const fixture = makeFixture(SUITE);
   try {
     const rows = deriveProtocols(fixture.env);
+    // The declared description rides along and stays off the table: the
+    // table's job is to trigger, and matching reads the description where
+    // matching happens. The advisory channel reads it from here too.
     assert.deepEqual(rows, [
-      { command: "recollect", deficit: "RecallAmbiguous", resolution: "RecalledContext" },
-      { command: "bound", deficit: "BoundaryUndefined", resolution: "DefinedBoundary" },
-      { command: "induce", deficit: "AbstractionInProcess", resolution: "CrystallizedAbstraction" },
+      { command: "recollect", deficit: "RecallAmbiguous", resolution: "RecalledContext", description: "Does a thing." },
+      { command: "bound", deficit: "BoundaryUndefined", resolution: "DefinedBoundary", description: "Does a thing." },
+      { command: "induce", deficit: "AbstractionInProcess", resolution: "CrystallizedAbstraction", description: "Does a thing." },
     ]);
     // Route never routes to itself.
     assert.ok(!rows.some((r) => r.command === "route"));

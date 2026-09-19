@@ -1,5 +1,5 @@
 {
-  "description": "Three hooks. SessionStart injects the derived deficit → resolution table once per context epoch (startup, resume, clear, compact), and the premise index beneath it with every path absolute — scripts/route-session.mjs. UserPromptSubmit carries the firing conditions for /route beside every prompt, for a deficit held in the request and for one the accumulated context shows alike, applied at the prompt and again at any recognition during the turn, and narrows /route to monitor mode while a gate holds the user's judgment — scripts/route-prompt.mjs. PreToolUse delivers a premise entry again at the tool call the matcher decides is its moment — scripts/route-tool.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
+  "description": "Four hooks. SessionStart injects the derived deficit → resolution table once per context epoch (startup, resume, clear, compact), and the premise index beneath it with every path absolute — scripts/route-session.mjs. UserPromptSubmit carries the firing conditions for /route beside every prompt, for a deficit held in the request and for one the accumulated context shows alike, applied at the prompt and again at any recognition during the turn, and narrows /route to monitor mode while a gate holds the user's judgment — scripts/route-prompt.mjs. A second UserPromptSubmit entry, registered separately so its failure cannot suppress the first, may add an advisory line naming protocols the prompt looks like it fits; it is disabled unless config/evaluator.json turns it on — scripts/route-evaluator.mjs. PreToolUse delivers a premise entry again at the tool call the matcher decides is its moment — scripts/route-tool.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
   "hooks": {
     "SessionStart": [
       {
@@ -17,6 +17,14 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-prompt.mjs\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-evaluator.mjs\""
           }
         ]
       }
