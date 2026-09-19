@@ -4,87 +4,101 @@
     "outcome": "silence",
     "prompt": "Rename the `timeoutMs` field to `requestTimeoutMs` across the three files that read it.",
     "expected": [],
-    "adjudicated": false,
-    "note": "A settled mechanical change. Nothing is missing and no framing is in question; README calls silence the common case, and this is it."
+    "adjudicated": true,
+    "note": "Confirmed. Scope and target are both in the prompt — the field, the new name, and that three files read it. No protocol's deficit is present: nothing is missing that only the user holds, no mapping is in question, no framing is absent. Silence is the answer, and it is the common case."
   },
   {
     "id": "silence-answered-question",
     "outcome": "silence",
     "prompt": "Thanks — that matches what I had. Go ahead and land it.",
     "expected": [],
-    "adjudicated": false,
-    "note": "An approval. The most likely spoiled case in the set: an advisory here is a needless nudge over a turn that was already correct in saying nothing."
+    "adjudicated": true,
+    "note": "Confirmed. An approval closing a question already answered. The prompt carries no open determination, so an advisory here would be a needless nudge over a turn that was already correct in saying nothing — the most likely spoiled case in the set, and the one that makes the paired scoring worth having."
   },
   {
     "id": "singleton-inquire",
     "outcome": "singleton",
     "prompt": "Set up the deploy for the new service.",
-    "expected": ["inquire"],
-    "adjudicated": false,
-    "note": "Target environment, rollback and acceptable downtime are unstated and only the user holds them — the request-side deficit 07830bd0 was about."
+    "expected": [
+      "inquire"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed, and readable from the prompt alone: 'set up the deploy' names an execution whose target environment, rollback and acceptable downtime are unstated and held only by the user. That is ContextInsufficient before execution. /bound was considered and rejected — the gap is user-held fact, not an unscoped task awaiting delegation; /conduct likewise, since what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
     "outcome": "singleton",
     "prompt": "Does this lifecycle model actually map onto how our ingest module behaves? Walk the correspondence.",
-    "expected": ["ground"],
-    "adjudicated": false,
-    "note": "An abstract structure against a concrete application, with the substrate present to check it — MappingUncertain, not a missing fact."
+    "expected": [
+      "ground"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed. The prompt names an abstract structure and a concrete application and asks whether one maps onto the other, with the substrate present to check against — MappingUncertain, not a missing fact. /grasp was considered and rejected: it verifies the user's own comprehension of a target, whereas here the user is asking whether a correspondence holds."
   },
   {
     "id": "singleton-elicit",
     "outcome": "singleton",
     "prompt": "Let's plan the restore work.",
-    "expected": ["elicit"],
-    "adjudicated": false,
-    "note": "README's own worked case: the term has two referents in this session and what the work is for has not been fixed as coordinates."
+    "expected": [
+      "elicit"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed, but the label's basis is re-grounded. The prior note rested on 'restore' having two referents earlier in the session — context the harness never supplies, since every case is scored on prompt-only state. The label survives without it: 'let's plan the restore work' states no purpose and no coordinates, which is AbstractAporia. /apportion was considered and rejected — it compiles a goal that is already determined, and here it is not. This is the least separable label in the set; an adjudicator who reads the missing purpose as a user-held fact rather than an undetermined axis would mark it several with /inquire."
   },
   {
     "id": "several-fit-inquire-sublate",
     "outcome": "several",
     "prompt": "That hook was written before any of this existed. Reconsider in light of it.",
-    "expected": ["inquire", "sublate"],
-    "adjudicated": false,
-    "note": "Verbatim shape of a real turn from the session this was built in. The live evaluator returned inquire 0.43 / sublate 0.42 at confidence 0.29 — both fit, and a confidence gate deletes the case."
+    "expected": [
+      "inquire",
+      "sublate"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed. A standing artifact is said to predate facts that have since landed, and the prompt asks for reconsideration: what changed is user-held (ContextInsufficient) and the assumptions the artifact was built on are now suspect (ContextSuspect). Neither dominates. /contextualize was considered and rejected on its object — it types over Result, the output of an execution just completed, not an artifact written in an earlier session."
   },
   {
     "id": "several-fit-frame-ideate",
     "outcome": "several",
     "prompt": "I don't think we've even framed this right, and I can only see one way to do it.",
-    "expected": ["frame", "ideate"],
-    "adjudicated": false,
-    "note": "Two deficits are stated in one sentence — an absent framework and an unexpanded candidate field. Neither dominates."
+    "expected": [
+      "frame",
+      "ideate"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed. Two deficits are stated outright in one sentence — an absent framework and a candidate field the user says holds only one member. Neither subsumes the other, so a correct advisory carries both. This is the case where collapsing to a singleton costs the user the choice."
   },
   {
     "id": "monitor-gate-holds-free-response",
     "outcome": "monitor",
     "prompt": "Before I answer that — is the second option reversible?",
     "expected": [],
-    "adjudicated": false,
-    "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on the advisory staying out of the way: holding is a reading of a contract, not a detection."
+    "adjudicated": true,
+    "note": "Confirmed as empty. Whether a gate holds is a reading of that protocol's contract against what the user has said since, which prompt-only state cannot carry and the evaluator is not asked to answer. The case is here to be measured, not routed: it is scored on the advisory staying out of the way so the holding contract reads the free response first."
   },
   {
     "id": "monitor-gate-holds-different-deficit",
     "outcome": "monitor",
     "prompt": "Hold on — I'm not sure the numbers you just quoted are right.",
     "expected": [],
-    "adjudicated": false,
-    "note": "A different deficit surfaces while a gate holds. Route's own answer is at most one finding line, which requires invoking Route; the hook must not pre-empt it."
+    "adjudicated": true,
+    "note": "Confirmed as empty, and for a second reason beyond the gate being invisible: Route's own answer here is at most one finding line, which requires invoking Route. A hook line naming the new deficit would pre-empt that, so the correct advisory is none."
   },
   {
     "id": "installed-not-loaded",
     "outcome": "singleton",
     "prompt": "Walk me through what we settled about the caching layer three sessions ago.",
-    "expected": ["recollect"],
-    "adjudicated": false,
-    "note": "Scored for the degradation it exercises rather than the pick: if this protocol is installed but not loaded, the advisory names something the reader cannot invoke and the reader's own check has to absorb it."
+    "expected": [
+      "recollect"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed. The prompt asks for what was settled in an earlier session — RecallAmbiguous — and the hook reads installed-and-enabled plugins from disk while Route's candidates come from what the harness loaded. Naming a protocol the reader cannot invoke is the disclosed degradation the advisory's own 'verify each is loaded' clause absorbs, not a wrong outcome, so the name is expected. This field is the advisory's output, not the reader's correct move; the reader's answer here is silence, and this harness does not measure that arm."
   },
   {
     "id": "silence-deficit-arrives-mid-turn",
     "outcome": "silence",
     "prompt": "Go ahead with the refactor we discussed.",
     "expected": [],
-    "adjudicated": false,
-    "note": "The boundary case for the whole channel: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a prompt-time evaluator can see. The static directive is what covers it, which is why the advisory never replaces the directive."
+    "adjudicated": true,
+    "note": "Confirmed as empty. The prompt points at a refactor already specified and leaves nothing open, and the deficit that surfaces while preparing the change arrives after the only moment a prompt-time evaluator exists. This is the boundary case for the whole channel: the static directive is what covers it, which is why the advisory never replaces the directive."
   }
 ]
