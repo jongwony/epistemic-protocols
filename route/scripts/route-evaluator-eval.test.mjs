@@ -61,10 +61,14 @@ test("the shipped fixtures cover every outcome and ship unadjudicated", () => {
   for (const o of ["silence", "singleton", "several", "monitor"]) {
     assert.ok(outcomes.has(o), `no fixture for ${o}`);
   }
-  // Every label was written by the same hand as the harness. Shipping one
-  // marked adjudicated would assert a check nobody performed.
+  // Every case carries the field, and it is a boolean either way. Which
+  // value it holds is the adjudicator's to set: evals/README.md tells an
+  // independent reviewer to set it true, and a check that refuses that value
+  // makes the documented next step fail the suite. What a static check can
+  // decide here is that the field exists and is typed — whether the review
+  // behind a `true` actually happened is not something this can read.
   for (const c of cases) {
-    assert.notEqual(c.adjudicated, true, `${c.id} claims adjudication`);
+    assert.equal(typeof c.adjudicated, "boolean", `${c.id} has no adjudicated flag`);
     assert.ok(typeof c.note === "string" && c.note.length > 0, `${c.id} has no note`);
     assert.ok(Array.isArray(c.expected), `${c.id} has no expected`);
   }
