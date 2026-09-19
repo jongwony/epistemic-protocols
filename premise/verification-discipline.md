@@ -6,6 +6,8 @@ Use this document before stating a claim about a system's or artifact's state, r
 
 State a claim about a system's or artifact's state after making the observation that grounds it, and cite that observation's invocation and output beside the claim. Where no such observation was made, write `unverified` in the claim's place.
 
+A stated intention is that claim pointed forward, and it answers here the same way. Saying an act will be taken asserts a state nothing yet grounds, and the act is what would ground it; the sentence carries nothing but itself, which makes it the weakest available carrier for work not yet done. Where the act is available, take it and let the sentence report what was done. Where it is not available, the sentence names what the act waits on, since a condition is checkable and a promise is not.
+
 ## Verify Before Done
 
 Confirm that the change preserves its applicable contracts. Trust a check's verdict only when:
