@@ -43,10 +43,11 @@
  * work returned inquire 0.43 / sublate 0.42 at confidence 0.29 on a real
  * prompt where both did fit.
  *
- * Every shortfall — disabled, no config, no key, timeout, non-200 (a state
- * over the endpoint's ceiling answers 400), malformed body, no candidates,
- * no name outranking `none` — yields "" and writes nothing. Nothing here throws. Zero external dependencies: Node.js
- * standard library only.
+ * Every shortfall — disabled, no config, no key, timeout, non-200, a state
+ * still over the ceiling after one halved retry, malformed body, no
+ * candidates, no name outranking `none` — yields "" and writes nothing.
+ * Nothing here throws. Zero external dependencies: Node.js standard library
+ * only.
  */
 
 import fs from "node:fs";
@@ -61,6 +62,38 @@ const NONE = "none";
 // The one shortfall the caller can answer: the state was too large. Every
 // other shortfall is null and ends the turn silently.
 const OVER_LIMIT = Symbol("over-limit");
+
+// Measured by bisection against the endpoint: it accepted 32,521 single-token
+// syllables beside a minimal question and rejected 32,522, over 285 tokens of
+// fixed request scaffolding. So the limit is on everything the request carries,
+// not on the conversation alone, which is why the budget below is derived from
+// it rather than written down.
+const CEILING = 32768;
+
+// What a `{role, text}` entry costs before its text: measured at exactly 18 by
+// differencing 50 two-character turns against 10. Charged at 20. This is easy
+// to miss and expensive to miss: an earlier version charged 4, so a session of
+// a few hundred turns walked past the ceiling while the estimate still read
+// under it.
+const TURN_OVERHEAD = 20;
+
+const INSTRUCTIONS =
+  "Which of these protocols, if any, does this session now show the deficit for? `current_prompt` is the turn being asked about; `conversation` is what the session accumulated before it, the user's turns and the replies to them. Each option states the deficit it resolves and the resolution it yields, in that protocol's own words.";
+
+/**
+ * How much conversation there is room for, once the question and the prompt
+ * are paid for, keeping a tenth back.
+ *
+ * Derived rather than configured, because the question grows: each protocol
+ * adds about ninety tokens of options, so a constant written today is a margin
+ * that a later protocol silently eats. `stateTokenBudget` stays as a ceiling an
+ * adopter can lower, never one that can raise this past what the endpoint takes.
+ */
+function budgetFor(config, criteria, prompt) {
+  const question = estimateTokens(INSTRUCTIONS) + estimateTokens(JSON.stringify(criteria));
+  const room = Math.floor((CEILING - question - estimateTokens(prompt)) * 0.9);
+  return Math.max(0, Math.min(config.stateTokenBudget, room));
+}
 
 // The option that lets the evaluator decline. Without one, an answer space
 // of protocols alone forces a pick from a list that may fit nothing, which
@@ -95,10 +128,13 @@ function loadConfig(file = configFile()) {
     timeoutMs: Number.isFinite(raw.timeoutMs) && raw.timeoutMs > 0 ? raw.timeoutMs : 2000,
     displayCutoff: Number.isFinite(raw.displayCutoff) ? raw.displayCutoff : 0.25,
     maxNames: Number.isInteger(raw.maxNames) && raw.maxNames > 0 ? raw.maxNames : 3,
+    // A cap an adopter can lower, not the budget itself — that is derived per
+    // run from what the question and the prompt leave. Absent, the cap is the
+    // ceiling, so the derived value governs alone.
     stateTokenBudget:
       Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget > 0
         ? raw.stateTokenBudget
-        : 24000,
+        : CEILING,
   };
 }
 
@@ -107,6 +143,9 @@ function loadConfig(file = configFile()) {
 // Anything else — digits, punctuation, symbols, fullwidth forms — is its own
 // class, because punctuation-dense text tokenizes far denser than prose.
 function classOf(cp) {
+  // Above the BMP the tokenizer falls back to UTF-8 bytes: measured 3.03
+  // tokens per code point for CJK extension B and 2.03 for an emoji.
+  if (cp > 0xffff) return 4;
   if ((cp >= 0x1100 && cp <= 0x11ff) || (cp >= 0x3130 && cp <= 0x318f) ||
       (cp >= 0xac00 && cp <= 0xd7af)) return 0;
   if ((cp >= 0x3040 && cp <= 0x30ff) || (cp >= 0x3400 && cp <= 0x4dbf) ||
@@ -122,7 +161,7 @@ function classOf(cp) {
 // predict under the measured cost on any of them, keeping a tenth in hand.
 // Overshoot is about a fifth on prose and three quarters on punctuation-dense
 // JSON. Order matches classOf.
-const RATES = [1.0, 1.14, 0.22, 1.0];
+const RATES = [1.0, 1.14, 0.22, 1.0, 3.1];
 
 /**
  * What a string is likely to cost, without a tokenizer.
@@ -236,14 +275,14 @@ function conversationFrom(transcriptPath, budgetTokens, options = {}) {
   const kept = [];
   let spent = 0;
   for (let i = turns.length - 1; i >= 0; i -= 1) {
-    const cost = estimateTokens(turns[i].text) + 4;
+    const cost = estimateTokens(turns[i].text) + TURN_OVERHEAD;
     if (spent + cost > budgetTokens) {
       // A single turn larger than the whole budget would otherwise leave the
       // state empty — the one turn nearest the deficit dropped for being the
       // one that says the most. Carry its tail instead, on the same
       // newest-first rule the walk runs on, and only when nothing is kept yet.
       if (kept.length === 0) {
-        const room = Math.max(0, budgetTokens - 4);
+        const room = Math.max(0, budgetTokens - TURN_OVERHEAD);
         const text = turns[i].text;
         const ratio = estimateTokens(text) / text.length;
         const chars = ratio > 0 ? Math.floor(room / ratio) : 0;
@@ -286,8 +325,7 @@ function buildRequest(config, prompt, criteria, conversation) {
     questions: {
       deficit: {
         type: "choice",
-        instructions:
-          "Which of these protocols, if any, does this session now show the deficit for? `current_prompt` is the turn being asked about; `conversation` is what the session accumulated before it, the user's turns and the replies to them. Each option states the deficit it resolves and the resolution it yields, in that protocol's own words.",
+        instructions: INSTRUCTIONS,
         criteria,
       },
     },
@@ -430,7 +468,7 @@ async function advise(prompt, options = {}) {
   const criteria = buildCriteria(protocols);
   if (!criteria) return empty("no-candidates");
   const conversation = options.conversation
-    ?? conversationFrom(options.transcriptPath, config.stateTokenBudget);
+    ?? conversationFrom(options.transcriptPath, budgetFor(config, criteria, prompt));
   const send = options.ask ?? ask;
   // The shipped transport resolves rather than throwing, but this function's
   // contract is that nothing reaches the hook as a rejection — an unhandled
@@ -479,10 +517,14 @@ function render(advisory, eventName = "UserPromptSubmit") {
 }
 
 export {
+  CEILING,
+  INSTRUCTIONS,
   LABEL,
   NONE,
   OVER_LIMIT,
+  TURN_OVERHEAD,
   advise,
+  budgetFor,
   buildCriteria,
   buildRequest,
   clean,

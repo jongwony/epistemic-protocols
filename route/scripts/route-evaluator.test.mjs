@@ -15,10 +15,13 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
+  CEILING,
   LABEL,
   NONE,
   OVER_LIMIT,
+  TURN_OVERHEAD,
   advise,
+  budgetFor,
   buildCriteria,
   buildRequest,
   clean,
@@ -586,4 +589,64 @@ test("the none option is worded for the session, not for the prompt alone", () =
   assert.ok(!/\bthis prompt\b/i.test(none), "the none option must not be scoped to the prompt");
   assert.ok(!/say nothing about the rest of the session/i.test(none));
   assert.ok(/session/i.test(none), "it names what it is about");
+});
+
+// --- What the endpoint charges besides the text -----------------------------
+
+test("a turn is charged for its structure, not only its text", () => {
+  // Measured at exactly 18 tokens per `{role, text}` entry by differencing 50
+  // two-character turns against 10. An earlier version charged 4, and nothing
+  // in the suite could see it: every test used a handful of turns, where 14
+  // tokens of undercount is invisible. A few hundred turns is not.
+  const MEASURED = 18;
+  assert.ok(TURN_OVERHEAD >= MEASURED, `${TURN_OVERHEAD} falls under the measured ${MEASURED}`);
+  assert.ok(TURN_OVERHEAD <= MEASURED * 1.5, "an overhead this high wastes the budget");
+
+  // And the walk must actually charge it: many tiny turns cost their structure.
+  const tiny = jsonl(...Array.from({ length: 40 }, () => userTurn("ab")));
+  const all = conversationFrom("/t", 40 * (TURN_OVERHEAD + 2), { readFile: reader(tiny) });
+  assert.equal(all.length, 40);
+  const squeezed = conversationFrom("/t", 10 * TURN_OVERHEAD, { readFile: reader(tiny) });
+  assert.ok(squeezed.length <= 10, `structure uncharged: kept ${squeezed.length} in a 10-turn budget`);
+});
+
+test("code points above the BMP are charged for the byte fallback", () => {
+  // Measured per code point: 3.03 for CJK extension B, 2.03 for an emoji —
+  // the tokenizer has no vocabulary entry and falls back to UTF-8 bytes.
+  // Charged above the worst of those, so the emoji case overpays.
+  const extB = String.fromCodePoint(0x20000).repeat(100);
+  const latin = "a".repeat(100);
+  assert.ok(estimateTokens(extB) >= 303, `${estimateTokens(extB)} falls under the measured 303`);
+  assert.ok(estimateTokens(extB) > estimateTokens(latin) * 10);
+});
+
+test("the budget is derived from what the question and prompt leave", () => {
+  // A constant would be a margin that a later protocol silently eats: each one
+  // adds about ninety tokens of options to every request.
+  const cap = { stateTokenBudget: CEILING };
+  const few = buildCriteria([
+    { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" },
+  ]);
+  const many = buildCriteria(
+    Array.from({ length: 40 }, (_, i) => ({
+      command: `p${i}`,
+      deficit: `Deficit${i}`,
+      resolution: `Resolution${i}`,
+      description: "a sentence of declared description standing in for the real one",
+    })),
+  );
+  const shortPrompt = String.fromCharCode(0xc9e7, 0xc740, 0x20, 0xb9d0);  // a short Korean prompt
+  const withFew = budgetFor(cap, few, shortPrompt);
+  const withMany = budgetFor(cap, many, shortPrompt);
+  assert.ok(withMany < withFew, "a larger question must leave less room");
+  assert.ok(withFew < CEILING, "the margin is kept back");
+  assert.ok(withFew > 0 && withMany > 0);
+
+  // A long prompt takes its own room.
+  const longPrompt = String.fromCharCode(0xac00).repeat(2000);
+  assert.ok(budgetFor(cap, few, longPrompt) < withFew);
+
+  // The configured value caps, and never raises past what is derived.
+  assert.equal(budgetFor({ stateTokenBudget: 5000 }, few, "x"), 5000);
+  assert.ok(budgetFor({ stateTokenBudget: 10 ** 9 }, few, "x") < CEILING);
 });
