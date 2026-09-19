@@ -52,6 +52,7 @@ import fs from "node:fs";
 import https from "node:https";
 import path from "node:path";
 import { deriveProtocols, isMain, parsePayload, pluginRoot, readJson } from "./route-protocols.mjs";
+import { DIRECTIVE } from "./route-prompt.mjs";
 
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
@@ -80,7 +81,137 @@ function loadConfig(file = configFile()) {
     timeoutMs: Number.isFinite(raw.timeoutMs) && raw.timeoutMs > 0 ? raw.timeoutMs : 2000,
     displayCutoff: Number.isFinite(raw.displayCutoff) ? raw.displayCutoff : 0.25,
     maxNames: Number.isInteger(raw.maxNames) && raw.maxNames > 0 ? raw.maxNames : 3,
+    stateTokenBudget:
+      Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget > 0
+        ? raw.stateTokenBudget
+        : 28000,
   };
+}
+
+// Hangul, kana, and the CJK ideograph blocks, plus the fullwidth forms that
+// travel with them.
+const CJK =
+  /[\u1100-\u11FF\u3000-\u30FF\u3130-\u318F\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF\uFF00-\uFFEF]/;
+
+/**
+ * What a string is likely to cost, without a tokenizer. Measured against the
+ * endpoint on this repository's own prose: Korean ran 1.84 characters per
+ * token and English 3.99, so one ratio is wrong by more than double on
+ * whichever language it was not fitted to. These are the reciprocals, rounded
+ * against the budget rather than toward it. The server enforces the real
+ * limit; this only decides how much to offer it, and offering too much fails
+ * closed to "" like every other shortfall here.
+ */
+function estimateTokens(text) {
+  if (typeof text !== "string") return 0;
+  let cjk = 0;
+  let rest = 0;
+  for (const ch of text) {
+    if (CJK.test(ch)) cjk += 1;
+    else rest += 1;
+  }
+  return Math.ceil(cjk * 0.56 + rest * 0.27);
+}
+
+/**
+ * The text of one transcript entry — and the whole of what "tool calls
+ * excluded" means here. A content array carries `text`, `tool_use`,
+ * `tool_result`, `thinking` and whatever a later version adds; keeping only
+ * `text` drops every one of the others by construction rather than by a list
+ * this file would have to maintain against the harness.
+ */
+function textOf(content) {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content
+    .filter((b) => b && b.type === "text")
+    .map((b) => (typeof b.text === "string" ? b.text : ""))
+    .filter(Boolean)
+    .join("\n");
+}
+
+function escapeRe(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const OWN_ADVISORY = new RegExp(`${escapeRe(LABEL)}[^\n]*`, "g");
+
+/**
+ * Strip what the harness wrapped around a turn, and what this plugin itself
+ * put there. The second half matters more than it looks: the per-prompt
+ * directive and this channel's own advisory arrive appended to user turns, so
+ * without this the state would carry one copy per turn of text this plugin
+ * wrote — the channel reading itself back, and paying for it.
+ */
+function clean(text) {
+  let t = text.split(DIRECTIVE).join("");
+  t = t.replace(OWN_ADVISORY, "");
+  return t
+    .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, "")
+    .replace(/<local-command-[^>]*>[\s\S]*?<\/local-command-[^>]*>/g, "")
+    .replace(/<command-[^>]*>[\s\S]*?<\/command-[^>]*>/g, "")
+    .trim();
+}
+
+/**
+ * The conversation as state: the user's turns and the assistant's replies, in
+ * order, newest-first up to the budget and then restored to chronological
+ * order — because what a deficit is read from is the recent stretch, and the
+ * oldest turn is the one to lose when the budget binds.
+ *
+ * A subagent's turns are dropped: they are a different conversation, carried
+ * out under a brief rather than with the user, and the deficit Route matches
+ * is in the one the user is in. Returns [] on any shortfall, so a transcript
+ * that cannot be read leaves the prompt-only state this shipped with.
+ */
+function conversationFrom(transcriptPath, budgetTokens, options = {}) {
+  if (typeof transcriptPath !== "string" || !transcriptPath) return [];
+  let raw;
+  try {
+    raw = (options.readFile ?? fs.readFileSync)(transcriptPath, "utf8");
+  } catch {
+    return [];
+  }
+  if (typeof raw !== "string") return [];
+  const turns = [];
+  for (const line of raw.split("\n")) {
+    if (!line.trim()) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (!entry || typeof entry !== "object") continue;
+    if (entry.isSidechain === true) continue;
+    const role = entry.type;
+    if (role !== "user" && role !== "assistant") continue;
+    const text = clean(textOf(entry.message ? entry.message.content : ""));
+    if (!text) continue;
+    turns.push({ role, text });
+  }
+  const kept = [];
+  let spent = 0;
+  for (let i = turns.length - 1; i >= 0; i -= 1) {
+    const cost = estimateTokens(turns[i].text) + 4;
+    if (spent + cost > budgetTokens) {
+      // A single turn larger than the whole budget would otherwise leave the
+      // state empty — the one turn nearest the deficit dropped for being the
+      // one that says the most. Carry its tail instead, on the same
+      // newest-first rule the walk runs on, and only when nothing is kept yet.
+      if (kept.length === 0) {
+        const room = Math.max(0, budgetTokens - 4);
+        const text = turns[i].text;
+        const ratio = estimateTokens(text) / text.length;
+        const chars = ratio > 0 ? Math.floor(room / ratio) : 0;
+        if (chars > 0) kept.push({ role: turns[i].role, text: text.slice(-chars) });
+      }
+      break;
+    }
+    spent += cost;
+    kept.push(turns[i]);
+  }
+  return kept.reverse();
 }
 
 /**
@@ -103,15 +234,17 @@ function buildCriteria(protocols) {
   return criteria;
 }
 
-function buildRequest(config, prompt, criteria) {
+function buildRequest(config, prompt, criteria, conversation) {
+  const state = { current_prompt: prompt };
+  if (Array.isArray(conversation) && conversation.length > 0) state.conversation = conversation;
   return JSON.stringify({
     model: config.model,
-    state: { current_prompt: prompt },
+    state,
     questions: {
       deficit: {
         type: "choice",
         instructions:
-          "Which of these protocols, if any, does this prompt show the deficit for? Each option states the deficit it resolves and the resolution it yields, in that protocol's own words.",
+          "Which of these protocols, if any, does this session now show the deficit for? `current_prompt` is the turn being asked about; `conversation` is what the session accumulated before it, the user's turns and the replies to them. Each option states the deficit it resolves and the resolution it yields, in that protocol's own words.",
         criteria,
       },
     },
@@ -193,9 +326,15 @@ function namesFrom(answer, config) {
     .filter(([, v]) => Number.isFinite(v))
     .sort((a, b) => b[1] - a[1]);
   if (ranked.length === 0) return [];
-  if (ranked[0][0] === NONE) return [];
+  // `none` decides by mass, not by rank. A sort leaves ties in whatever order
+  // the response happened to serialize its keys in, so reading rank alone lets
+  // the server's key order pick between "nothing fits" and a named protocol —
+  // and a tie is exactly what a real session produces once the conversation is
+  // in state. Requiring a name to carry strictly more mass than `none` breaks
+  // the tie the one way that is safe to be wrong in: silence.
+  const none = Number.isFinite(probabilities[NONE]) ? probabilities[NONE] : 0;
   return ranked
-    .filter(([name, v]) => name !== NONE && v >= config.displayCutoff)
+    .filter(([name, v]) => name !== NONE && v > none && v >= config.displayCutoff)
     .slice(0, config.maxNames)
     .map(([name]) => name);
 }
@@ -228,6 +367,8 @@ async function advise(prompt, options = {}) {
   const protocols = options.protocols ?? deriveProtocols();
   const criteria = buildCriteria(protocols);
   if (!criteria) return empty("no-candidates");
+  const conversation = options.conversation
+    ?? conversationFrom(options.transcriptPath, config.stateTokenBudget);
   const send = options.ask ?? ask;
   // The shipped transport resolves to null rather than throwing, but this
   // function's contract is that nothing reaches the hook as a rejection —
@@ -235,7 +376,7 @@ async function advise(prompt, options = {}) {
   // was supposed to be able to say nothing about.
   let body;
   try {
-    body = await send(config, key, buildRequest(config, prompt, criteria));
+    body = await send(config, key, buildRequest(config, prompt, criteria, conversation));
   } catch {
     return empty("no-answer");
   }
@@ -251,6 +392,7 @@ async function advise(prompt, options = {}) {
     // measuring two things, and only this field shows it.
     model: typeof body.model === "string" ? body.model : null,
     probabilities: answer.probabilities ?? null,
+    turns: conversation.length,
   };
 }
 
@@ -268,10 +410,14 @@ export {
   advise,
   buildCriteria,
   buildRequest,
+  clean,
+  conversationFrom,
+  estimateTokens,
   loadConfig,
   namesFrom,
   render,
   renderAdvisory,
+  textOf,
 };
 
 if (isMain(import.meta.url)) {
@@ -284,7 +430,9 @@ if (isMain(import.meta.url)) {
     ? payload.hook_event_name
     : "UserPromptSubmit";
   const prompt = typeof payload.prompt === "string" ? payload.prompt : "";
-  advise(prompt)
+  const transcriptPath =
+    typeof payload.transcript_path === "string" ? payload.transcript_path : "";
+  advise(prompt, { transcriptPath })
     .then((result) => {
       process.stdout.write(render(result.advisory, eventName) + "\n");
       process.exit(0);
