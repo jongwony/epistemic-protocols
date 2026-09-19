@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import {
   LABEL,
   NONE,
+  OVER_LIMIT,
   advise,
   buildCriteria,
   buildRequest,
@@ -297,11 +298,14 @@ test("the budget keeps the newest turns and drops the oldest", () => {
 test("a turn larger than the whole budget is carried as its tail, not dropped", () => {
   // Otherwise the one turn nearest the deficit is the one lost, for being the
   // one that says the most.
-  const raw = jsonl(userTurn("head ".repeat(20) + "TAIL-MARKER"));
-  const turns = conversationFrom("/t", 30, { readFile: reader(raw) });
+  const text = "head ".repeat(60) + "TAIL-MARKER";
+  const raw = jsonl(userTurn(text));
+  const budget = 30;
+  assert.ok(estimateTokens(text) > budget, "the fixture must exceed the budget to test this");
+  const turns = conversationFrom("/t", budget, { readFile: reader(raw) });
   assert.equal(turns.length, 1);
   assert.ok(turns[0].text.endsWith("TAIL-MARKER"));
-  assert.ok(turns[0].text.length < 105, `kept ${turns[0].text.length} chars`);
+  assert.ok(turns[0].text.length < text.length, `kept ${turns[0].text.length} of ${text.length}`);
 });
 
 test("every transcript shortfall leaves the prompt-only state", () => {
@@ -467,32 +471,107 @@ function body_includes(obj, needle) {
   return JSON.stringify(obj).includes(needle);
 }
 
-test("the token estimate errs high on CJK, because erring low sends nothing", () => {
-  // Measured against the endpoint by reading `usage.input_tokens` back: Korean
-  // prose runs near 1.2 characters per token, Latin near 4. A first pass fitted
-  // the CJK rate to this repository's Korean README — a file carrying markdown,
-  // code spans and English identifiers — and undercounted real Korean by about
-  // half, which put a request over the endpoint's state ceiling and turned every
-  // prompt in a Korean session into a silent `400`.
-  const hangul = String.fromCharCode(0xac00);  // one Hangul syllable
-  const ko = estimateTokens(hangul.repeat(1000));
-  const en = estimateTokens("a".repeat(1000));
-  assert.ok(ko >= 820, `CJK estimate ${ko} must not fall under the measured 820`);
-  assert.ok(en >= 250, `latin estimate ${en} must not fall under the measured 250`);
-  assert.ok(ko <= 950 && en <= 320, "an estimate this high wastes the budget");
+// Measured against the endpoint by sending each sample and reading
+// `usage.input_tokens` back. The estimate must sit above every one of these,
+// because falling under puts the request over the endpoint's ceiling and the
+// rejection costs a round trip. The earlier calibration failed exactly here:
+// fitted on a mixed-script markdown file, it undercounted Korean sentences by
+// about half and answered every prompt of a Korean session with a silent 400.
+const MEASURED = [
+  { name: "Korean prose", tokensPerChar: 0.658 },
+  { name: "Japanese prose", tokensPerChar: 1.0 },
+  { name: "Chinese prose", tokensPerChar: 1.0 },
+  { name: "English prose", tokensPerChar: 0.197 },
+  { name: "JavaScript", tokensPerChar: 0.354 },
+];
+// Space density is part of the script: Korean is word-spaced, Japanese and
+// Chinese are not, and a sample that spaces them anyway measures a text nobody
+// writes.
+const SAMPLE = {
+  "Korean prose": String.fromCharCode(0xac00, 0xb098, 0xb2e4, 0x20),
+  "Japanese prose": String.fromCharCode(0x3042, 0x304b, 0x3055, 0x306e),
+  "Chinese prose": String.fromCharCode(0x4e00, 0x4e8c, 0x4e09, 0x56db),
+  "English prose": "word here and ",
+  JavaScript: "const x = f(y); ",
+};
+
+test("the estimate sits above every measured rate, for every script", () => {
+  for (const { name, tokensPerChar } of MEASURED) {
+    const text = SAMPLE[name].repeat(200);
+    const predicted = estimateTokens(text);
+    const measured = text.length * tokensPerChar;
+    assert.ok(
+      predicted >= measured,
+      `${name}: predicted ${predicted} falls under the measured ${measured.toFixed(0)}`,
+    );
+    assert.ok(
+      predicted <= measured * 2.2,
+      `${name}: predicted ${predicted} wastes too much against ${measured.toFixed(0)}`,
+    );
+  }
+  assert.equal(estimateTokens(null), 0);
 });
 
-test("the shipped budget leaves room under the endpoint's state ceiling", () => {
+test("the shipped budget stays under the endpoint's documented state ceiling", () => {
   // 32k of state plus the longest question, and the options are part of that
-  // question — roughly 1.6k for the protocols installed today, more as they are
-  // added. The default is set with that growth in mind.
+  // question. The estimate runs conservative and a rejection is retried once
+  // with half, so the budget does not have to absorb the tail by itself.
   const file = new URL("../config/evaluator.json", import.meta.url);
   const raw = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(raw.enabled, false, "the channel still ships disabled");
   assert.ok(
-    Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget <= 26000,
-    `budget ${raw.stateTokenBudget} leaves too little room under the 32k ceiling`,
+    Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget <= 32000,
+    `budget ${raw.stateTokenBudget} is at or over the ceiling it is meant to sit under`,
   );
+});
+
+test("a rejected state is retried once with half the conversation", () => {
+  // No static estimate is safe against out-of-vocabulary text, so the estimate
+  // is fitted to ordinary prose and this is what carries the tail.
+  const conversation = Array.from({ length: 8 }, (_, i) => ({ role: "user", text: `turn ${i}` }));
+  const sent = [];
+  const config = {
+    endpoint: "https://example.invalid/v1", apiKeyEnv: "K", model: "m",
+    timeoutMs: 10, displayCutoff: 0.25, maxNames: 3, stateTokenBudget: 28000,
+  };
+  const answer = { answers: { deficit: { probabilities: { inquire: 0.9, none: 0.05 } } } };
+  return advise("p", {
+    config,
+    env: { K: "key" },
+    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+    conversation,
+    ask: (_c, _k, body) => {
+      const parsed = JSON.parse(body);
+      sent.push((parsed.state.conversation ?? []).length);
+      return Promise.resolve(sent.length === 1 ? OVER_LIMIT : answer);
+    },
+  }).then((r) => {
+    assert.deepEqual(sent, [8, 4], "the retry carries half");
+    assert.equal(r.turns, 4, "the result reports what was actually offered");
+    assert.match(r.advisory, /\/inquire/);
+  });
+});
+
+test("a second rejection ends the turn rather than retrying again", () => {
+  let calls = 0;
+  const config = {
+    endpoint: "https://example.invalid/v1", apiKeyEnv: "K", model: "m",
+    timeoutMs: 10, displayCutoff: 0.25, maxNames: 3, stateTokenBudget: 28000,
+  };
+  return advise("p", {
+    config,
+    env: { K: "key" },
+    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+    conversation: [{ role: "user", text: "a" }, { role: "user", text: "b" }],
+    ask: () => {
+      calls += 1;
+      return Promise.resolve(OVER_LIMIT);
+    },
+  }).then((r) => {
+    assert.equal(calls, 2, "exactly one retry");
+    assert.equal(r.advisory, "");
+    assert.equal(r.reason, "over-limit");
+  });
 });
 
 test("the none option is worded for the session, not for the prompt alone", () => {

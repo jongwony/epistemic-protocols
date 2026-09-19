@@ -58,6 +58,10 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
 
+// The one shortfall the caller can answer: the state was too large. Every
+// other shortfall is null and ends the turn silently.
+const OVER_LIMIT = Symbol("over-limit");
+
 // The option that lets the evaluator decline. Without one, an answer space
 // of protocols alone forces a pick from a list that may fit nothing, which
 // is the failure the vendor's own guidance names for a closed option set.
@@ -98,39 +102,53 @@ function loadConfig(file = configFile()) {
   };
 }
 
-// Hangul, kana, and the CJK ideograph blocks, plus the fullwidth forms that
-// travel with them.
-const CJK =
-  /[\u1100-\u11FF\u3000-\u30FF\u3130-\u318F\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF\uFF00-\uFFEF]/;
+// Character classes as code-point ranges: Hangul (jamo, compatibility jamo,
+// syllables), then the kana and Han blocks, then Latin letters and whitespace.
+// Anything else — digits, punctuation, symbols, fullwidth forms — is its own
+// class, because punctuation-dense text tokenizes far denser than prose.
+function classOf(cp) {
+  if ((cp >= 0x1100 && cp <= 0x11ff) || (cp >= 0x3130 && cp <= 0x318f) ||
+      (cp >= 0xac00 && cp <= 0xd7af)) return 0;
+  if ((cp >= 0x3040 && cp <= 0x30ff) || (cp >= 0x3400 && cp <= 0x4dbf) ||
+      (cp >= 0x4e00 && cp <= 0x9fff) || (cp >= 0xf900 && cp <= 0xfaff)) return 1;
+  if ((cp >= 0x41 && cp <= 0x5a) || (cp >= 0x61 && cp <= 0x7a) ||
+      cp === 0x20 || cp === 0x09 || cp === 0x0a || cp === 0x0d) return 2;
+  return 3;
+}
+
+// Fitted against the endpoint: text was sent and `usage.input_tokens` read back
+// over Korean, English, Japanese, Chinese, mixed, code, JSON and
+// Korean-with-markdown prose. These are the cheapest coefficients that never
+// predict under the measured cost on any of them, keeping a tenth in hand.
+// Overshoot is about a fifth on prose and three quarters on punctuation-dense
+// JSON. Order matches classOf.
+const RATES = [1.0, 1.14, 0.22, 1.0];
 
 /**
- * What a string is likely to cost, without a tokenizer. Measured against the
- * endpoint by sending prose and reading `usage.input_tokens` back: Latin text
- * runs near 4 characters per token, Korean prose near 1.2. One ratio is wrong
- * by more than triple on whichever of the two it was not fitted to, so the two
- * are charged separately.
+ * What a string is likely to cost, without a tokenizer.
  *
- * Fit to PROSE in each script, not to a document mixing them. A first pass
- * calibrated on this repository's Korean README read 1.84 characters per token
- * and set the CJK rate from it — but that file carries markdown, code spans
- * and English identifiers, which are Latin-rate text inflating the average. On
- * Korean sentences the same rate undercounted by about half, so a budget set
- * under the endpoint's ceiling produced a request over it, and the channel
- * answered every prompt in a Korean session with `400 max_tokens_exceeded` —
+ * No static estimate is safe on its own, which is why the transport retries a
+ * rejection rather than trusting this one. Measuring by character class shows
+ * why: ordinary Korean prose costs about 0.66 tokens per character, but a run
+ * of rare syllables costs 2.14 — out of vocabulary, so the tokenizer falls
+ * back to bytes. A coefficient covering that tail would throw away two thirds
+ * of the budget on every ordinary session, and counting bytes does no better,
+ * since the same run costs 1.4 bytes per token against 5.1 for English prose.
+ * So this is fitted to ordinary text, and the retry carries the tail.
+ *
+ * It is fitted to prose in each script rather than to a document mixing them.
+ * An earlier pass calibrated the CJK rate on this repository's Korean README —
+ * a file carrying markdown, code spans and English identifiers, all Latin-rate
+ * text inflating the average — and undercounted Korean sentences by about
+ * half. A budget set under the endpoint's ceiling then produced a request over
+ * it, and every prompt of a Korean session answered `400 max_tokens_exceeded`,
  * silently, because a shortfall here is "".
- *
- * Erring high is therefore the safe direction: an overestimate offers less
- * conversation than it could, an underestimate offers none at all.
  */
 function estimateTokens(text) {
   if (typeof text !== "string") return 0;
-  let cjk = 0;
-  let rest = 0;
-  for (const ch of text) {
-    if (CJK.test(ch)) cjk += 1;
-    else rest += 1;
-  }
-  return Math.ceil(cjk * 0.85 + rest * 0.27);
+  let total = 0;
+  for (const ch of text) total += RATES[classOf(ch.codePointAt(0))];
+  return Math.ceil(total);
 }
 
 /**
@@ -276,7 +294,16 @@ function buildRequest(config, prompt, criteria, conversation) {
   });
 }
 
-/** POST once. Resolves to the parsed body, or null on any shortfall. */
+/**
+ * POST once. Resolves to the parsed body, `OVER_LIMIT` when the endpoint
+ * rejects the state as too large, or null on any other shortfall.
+ *
+ * The rejection is told apart from the rest because it is the one shortfall
+ * the caller can do something about: no static estimate is safe against
+ * out-of-vocabulary text, so the estimate is fitted to ordinary prose and this
+ * signal carries the tail. Measured round trip for a rejection followed by a
+ * halved retry: about 700 ms, against the 30 s this event allows a hook.
+ */
 function ask(config, key, body) {
   return new Promise((resolve) => {
     let settled = false;
@@ -300,6 +327,16 @@ function ask(config, key, body) {
           timeout: config.timeoutMs,
         },
         (res) => {
+          if (res.statusCode === 400) {
+            let detail = "";
+            res.setEncoding("utf8");
+            res.on("data", (c) => {
+              detail += c;
+            });
+            res.on("end", () => done(detail.includes("max_tokens_exceeded") ? OVER_LIMIT : null));
+            res.on("error", () => done(null));
+            return;
+          }
           if (res.statusCode !== 200) {
             res.resume();
             done(null);
@@ -395,15 +432,27 @@ async function advise(prompt, options = {}) {
   const conversation = options.conversation
     ?? conversationFrom(options.transcriptPath, config.stateTokenBudget);
   const send = options.ask ?? ask;
-  // The shipped transport resolves to null rather than throwing, but this
-  // function's contract is that nothing reaches the hook as a rejection —
-  // an unhandled one there would be a hook that fails loudly on a turn it
-  // was supposed to be able to say nothing about.
-  let body;
-  try {
-    body = await send(config, key, buildRequest(config, prompt, criteria, conversation));
-  } catch {
-    return empty("no-answer");
+  // The shipped transport resolves rather than throwing, but this function's
+  // contract is that nothing reaches the hook as a rejection — an unhandled
+  // one there would be a hook that fails loudly on a turn it was supposed to
+  // be able to say nothing about.
+  const attempt = async (turns) => {
+    try {
+      return await send(config, key, buildRequest(config, prompt, criteria, turns));
+    } catch {
+      return null;
+    }
+  };
+  let offered = conversation;
+  let body = await attempt(offered);
+  if (body === OVER_LIMIT) {
+    // The estimate is fitted to ordinary prose, so out-of-vocabulary text can
+    // cost several times what it predicted. Halving the conversation is the
+    // one correction available without a tokenizer, and it is taken once: a
+    // second rejection means the state is not the conversation's fault.
+    offered = conversation.slice(Math.ceil(conversation.length / 2));
+    body = offered.length > 0 ? await attempt(offered) : await attempt([]);
+    if (body === OVER_LIMIT) return empty("over-limit");
   }
   if (!body) return empty("no-answer");
   const answer = body.answers && body.answers.deficit;
@@ -417,7 +466,7 @@ async function advise(prompt, options = {}) {
     // measuring two things, and only this field shows it.
     model: typeof body.model === "string" ? body.model : null,
     probabilities: answer.probabilities ?? null,
-    turns: conversation.length,
+    turns: offered.length,
   };
 }
 
@@ -432,6 +481,7 @@ function render(advisory, eventName = "UserPromptSubmit") {
 export {
   LABEL,
   NONE,
+  OVER_LIMIT,
   advise,
   buildCriteria,
   buildRequest,

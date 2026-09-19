@@ -1,5 +1,5 @@
 {
-  "_comment": "Advisory channel binding, disabled. Carries no secret and never will: apiKeyEnv names the environment variable the key is read from, and the key itself lives in the adopter's own credential store. Turning `enabled` on sends the conversation — the user's turns and the replies to them, tool calls excluded — to `endpoint` on every prompt; read the advisory section of route/README.md before doing so. stateTokenBudget is how much of that conversation is offered, under the endpoint's own 32k state ceiling.",
+  "_comment": "Advisory channel binding, disabled. Carries no secret and never will: apiKeyEnv names the environment variable the key is read from, and the key itself lives in the adopter's own credential store. Turning `enabled` on sends the conversation — the user's turns and the replies to them, tool calls excluded — to `endpoint` on every prompt; read the advisory section of route/README.md before doing so. stateTokenBudget is how much of that conversation is offered, estimated rather than counted; a rejection is retried once with half of it.",
   "enabled": false,
   "endpoint": "https://api.typesafe.ai/v1/systemone",
   "model": "jev-latest",
@@ -7,5 +7,5 @@
   "timeoutMs": 2000,
   "displayCutoff": 0.25,
   "maxNames": 3,
-  "stateTokenBudget": 24000
+  "stateTokenBudget": 28000
 }
