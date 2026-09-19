@@ -38,7 +38,9 @@ The `installed-not-loaded` cases exist because the hook reads installed-and-enab
 node route/scripts/route-evaluator-eval.mjs
 
 # Call the evaluator live and record what it says, then score.
-TYPESAFE_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
+ROUTE_EVAL_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
 ```
+
+**`ROUTE_EVAL_API_KEY` is this harness's own variable, not the one the session channel reads, and neither falls back to the other.** Scoring the fixtures is a bounded act over the prompts in `cases/`; arming the advisory channel is a standing one over every prompt of every session. A single variable for both would make the first silently do the second in every shell that inherited the export, so the harness refuses to run rather than borrowing the session channel's key, and the channel stays silent rather than borrowing this one. `config/evaluator.json` still supplies the endpoint, model and budget for a live run — what it does not supply is permission.
 
 `--live` writes each answer into `recorded/` keyed by case id, model and the criteria it was asked with. A replay whose recorded model differs from the configured one is reported rather than silently scored: the configured name may be an alias, and a fixture graded under one version and replayed under another is measuring two things.
