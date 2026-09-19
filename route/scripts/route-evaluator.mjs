@@ -4,50 +4,35 @@
  * fit, from a constrained-output evaluator. Disabled unless
  * config/evaluator.json says otherwise.
  *
- * What this is, and what it is not. A constrained-output evaluator reads
- * state the caller assembles and answers over an answer space the caller
- * declares — here, one choice across the installed protocols plus `none`.
- * It returns a typed answer and a probability for every option; it writes
- * no prose and explains nothing. So the line it produces names protocols
- * and stops. It is not a Route nudge: `↗ /command — reason` is Route's own
- * output, produced by invoking Route, and Rule #1 says a line written
- * without that invocation is not one. This line is input the reader may
- * consider before Route produces any outcome of its own, and its wording
- * says so — labelled, modal, and asking to be checked.
+ * A constrained-output evaluator reads state the caller assembles and answers
+ * over an answer space the caller declares — here, one choice across the
+ * installed protocols plus `none`. It returns a typed answer and a probability
+ * for every option; it writes no prose and explains nothing. So the line it
+ * produces names protocols and stops, and the skill's own Rules are where
+ * what separates it from a Route outcome is stated.
  *
  * It reinforces and never replaces. It rides its own hook entry beside
- * route-prompt.mjs rather than inside it, so a timeout here cannot take the
- * static directive down with it; and the directive goes out whatever this
- * says, including when it says nothing. That still holds with the
+ * route-prompt.mjs rather than inside it, so a failure here does not stop the
+ * static directive from being emitted; and the directive goes out whatever
+ * this says, including when it says nothing. That still holds with the
  * conversation in state: `none` is an answer about what this hook assembled
  * and offered, not a finding that the session holds no deficit. What the walk
  * dropped, what the budget cut, a deficit that surfaces later in the turn, and
  * a protocol the harness loaded that disk does not show — none of those are in
  * the answer, and the directive is what covers them.
  *
- * The cards are built from each protocol's own declared material — its
- * deficit, the resolution it yields, and its frontmatter description. No
- * field here says how one protocol differs from another. Authored
- * cross-protocol discrimination would be exactly the hand-kept routing
- * table SKILL.md's Rule #2 refuses, and README.md extends that refusal to
- * this surface where it says the directive names no protocol. Whether the
- * declared text separates the candidates on its own is a question for
- * measurement (route-evaluator-eval.mjs), not one to pre-empt by writing
- * the differences in.
+ * The options are built from each protocol's own declared material — its
+ * deficit, the resolution it yields, its frontmatter description — and no
+ * field says how one protocol differs from another. Whether the declared text
+ * separates the candidates on its own is a question for measurement
+ * (route-evaluator-eval.mjs).
  *
- * The answer is read from `probabilities`, never by thresholding
- * `confidence`. Confidence measures how concentrated the distribution is,
- * so a low value means the mass is spread — several options fit — which is
- * Route's own several-fit outcome, not its silence. Gating on it would
- * delete the case the advisory is most useful for. A live call during this
- * work returned inquire 0.43 / sublate 0.42 at confidence 0.29 on a real
- * prompt where both did fit.
+ * Why the answer is read from the full distribution rather than a confidence
+ * threshold, and what a live call returned while that was decided: git log.
  *
- * Every shortfall — disabled, no config, no key, timeout, non-200, a state
- * still over the ceiling after one halved retry, malformed body, no
- * candidates, no name outranking `none` — yields "" and writes nothing.
- * Nothing here throws. Zero external dependencies: Node.js standard library
- * only.
+ * Which shortfalls yield "" and write nothing is in route-evaluator.test.mjs,
+ * which is what re-runs them. Zero external dependencies: Node.js standard
+ * library only.
  */
 
 import fs from "node:fs";
@@ -58,6 +43,9 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
+// Both response readers below accumulate into memory before parsing, so they
+// need a ceiling that does not depend on the peer behaving.
+const MAX_BYTES = 64 * 1024;
 
 // The one shortfall the caller can answer: the state was too large. Every
 // other shortfall is null and ends the turn silently.
@@ -144,7 +132,14 @@ function loadConfig(file = configFile()) {
     apiKeyEnv,
     model: typeof raw.model === "string" && raw.model ? raw.model : "jev-latest",
     timeoutMs: Number.isFinite(raw.timeoutMs) && raw.timeoutMs > 0 ? raw.timeoutMs : 2000,
-    displayCutoff: Number.isFinite(raw.displayCutoff) ? raw.displayCutoff : 0.25,
+    deadlineMs: Number.isFinite(raw.deadlineMs) && raw.deadlineMs > 0 ? raw.deadlineMs : 3000,
+    // A cutoff outside [0,1] is not a cutoff: below it nothing is filtered,
+    // above it nothing passes, and either way the field stops meaning what its
+    // name says.
+    displayCutoff:
+      Number.isFinite(raw.displayCutoff) && raw.displayCutoff >= 0 && raw.displayCutoff <= 1
+        ? raw.displayCutoff
+        : 0.25,
     maxNames: Number.isInteger(raw.maxNames) && raw.maxNames > 0 ? raw.maxNames : 3,
     // A cap an adopter can lower, not the budget itself — that is derived per
     // run from what the question and the prompt leave. Absent, the cap is the
@@ -394,13 +389,21 @@ function buildRequest(config, prompt, criteria, conversation) {
 function ask(config, key, body) {
   return new Promise((resolve) => {
     let settled = false;
+    let timer = null;
+    let req;
     const done = (value) => {
       if (!settled) {
         settled = true;
+        if (timer) clearTimeout(timer);
+        try { req?.destroy(); } catch {}
         resolve(value);
       }
     };
-    let req;
+    // `timeout` above is a socket inactivity timer, so it alone lets a peer
+    // that dribbles a byte inside every window hold the request open for as
+    // long as it likes. This is the wall-clock cap that actually ends it.
+    timer = setTimeout(() => done(null), config.deadlineMs);
+    if (typeof timer.unref === "function") timer.unref();
     try {
       req = https.request(
         config.endpoint,
@@ -418,6 +421,10 @@ function ask(config, key, body) {
             let detail = "";
             res.setEncoding("utf8");
             res.on("data", (c) => {
+              if (detail.length + c.length > MAX_BYTES) {
+                done(null);
+                return;
+              }
               detail += c;
             });
             res.on("end", () => done(detail.includes("max_tokens_exceeded") ? OVER_LIMIT : null));
@@ -432,6 +439,10 @@ function ask(config, key, body) {
           let text = "";
           res.setEncoding("utf8");
           res.on("data", (c) => {
+            if (text.length + c.length > MAX_BYTES) {
+              done(null);
+              return;
+            }
             text += c;
           });
           res.on("end", () => {
@@ -468,11 +479,19 @@ function ask(config, key, body) {
  * else is not a name to show. Order is by probability, descending, so the
  * strongest reads first.
  */
-function namesFrom(answer, config) {
+function namesFrom(answer, config, optionNames = null) {
   const probabilities = answer && answer.probabilities;
-  if (!probabilities || typeof probabilities !== "object") return [];
+  if (!probabilities || typeof probabilities !== "object" || Array.isArray(probabilities)) return [];
+  // The answer space is ours, so a key outside it is not an answer to the
+  // question we asked. Without this the peer chooses the text: the names go
+  // into additionalContext verbatim, and a key carrying a newline leaves the
+  // advisory line and reads as a second instruction. An array's indices are
+  // finite-valued entries too, and a value outside [0,1] did not come from a
+  // distribution.
+  const allowed = optionNames ? new Set(optionNames) : null;
   const ranked = Object.entries(probabilities)
-    .filter(([, v]) => Number.isFinite(v))
+    .filter(([name, v]) =>
+      Number.isFinite(v) && v >= 0 && v <= 1 && (allowed ? allowed.has(name) : /^[a-z][a-z0-9-]*$/.test(name)))
     .sort((a, b) => b[1] - a[1]);
   if (ranked.length === 0) return [];
   // `none` decides by mass, not by rank. A sort leaves ties in whatever order
@@ -544,7 +563,7 @@ async function advise(prompt, options = {}) {
   if (!body) return empty("no-answer");
   const answer = body.answers && body.answers.deficit;
   if (!answer || typeof answer !== "object") return empty("no-answer");
-  const names = namesFrom(answer, config);
+  const names = namesFrom(answer, config, Object.keys(criteria));
   return {
     advisory: renderAdvisory(names),
     reason: names.length === 0 ? "none" : "advised",

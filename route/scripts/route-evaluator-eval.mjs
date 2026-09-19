@@ -37,6 +37,7 @@
  * Zero external dependencies: Node.js standard library only.
  */
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,6 +49,11 @@ const EVALS = path.join(HERE, "..", "evals");
 const CASES = path.join(EVALS, "cases", "cases.json");
 const RECORDED = path.join(EVALS, "recorded");
 const OUTCOMES = ["silence", "singleton", "several", "monitor"];
+
+/** Short content hash — equality of the question, not its contents. */
+function digest(text) {
+  return crypto.createHash("sha256").update(text).digest("hex").slice(0, 16);
+}
 
 function readCases(file = CASES) {
   try {
@@ -113,26 +119,46 @@ function tally(results) {
   return { overall, byOutcome, baselineCorrect };
 }
 
-async function run({ live = false, cases = readCases(), env = process.env } = {}) {
+async function run({
+  live = false,
+  cases = readCases(),
+  env = process.env,
+  // Injected so the guards below can be exercised without a binding on disk
+  // and without touching evals/recorded/.
+  config: configOverride = null,
+  readRecorded: readRecordedFn = readRecorded,
+} = {}) {
   const adjudicated = [];
   const unadjudicated = [];
   const skipped = [];
+  const stale = [];
   const models = new Set();
+  const cutoffsUsed = new Set();
 
-  const config = live ? loadConfig() : null;
+  const config = configOverride ?? (live ? loadConfig() : null);
   if (live && !config) {
     return { error: "live run needs config/evaluator.json enabled and a key in the named environment variable" };
+  }
+  // The message above says a key is required, so check for one. Without this
+  // every case returns `no-key`, which is not `no-answer` and so was written
+  // over the case's recording as a null distribution and scored as silence —
+  // a run that observed nothing, reported as a run that observed silence.
+  if (live && !env[config.apiKeyEnv]) {
+    return { error: `live run needs a key in ${config.apiKeyEnv}` };
   }
   const protocols = live ? deriveProtocols() : [];
   const criteria = live ? buildCriteria(protocols) : null;
   if (live && !criteria) return { error: "no installed protocols to ask about" };
 
   for (const kase of cases) {
-    let record = readRecorded(kase.id);
+    let record = readRecordedFn(kase.id);
     if (live) {
       const result = await advise(kase.prompt, { config, env, protocols });
-      if (result.reason === "no-answer") {
-        skipped.push({ id: kase.id, why: "evaluator returned nothing" });
+      // Only an answer is recorded. Every other reason is a shortfall on our
+      // side, and writing it over an existing recording destroys an
+      // observation to put a non-observation in its place.
+      if (result.reason !== "advised" && result.reason !== "none") {
+        skipped.push({ id: kase.id, why: `evaluator returned nothing (${result.reason})` });
         continue;
       }
       record = {
@@ -141,7 +167,12 @@ async function run({ live = false, cases = readCases(), env = process.env } = {}
         probabilities: result.probabilities,
         reason: result.reason,
         // What it was asked, so a replay can tell whether the question moved.
+        // Names alone do not: a protocol's declared description is part of
+        // the question, and so is the prompt. Both are hashed rather than
+        // copied, since the check is equality and the fixture is the source.
         criteria: Object.keys(criteria).sort(),
+        criteriaDigest: digest(JSON.stringify(criteria)),
+        promptDigest: digest(kase.prompt ?? ""),
         at: new Date().toISOString(),
       };
       writeRecorded(kase.id, record);
@@ -151,7 +182,19 @@ async function run({ live = false, cases = readCases(), env = process.env } = {}
       continue;
     }
     if (record.model) models.add(record.model);
-    const names = namesFrom({ probabilities: record.probabilities }, config ?? loadConfigOrDefaults());
+    // A recording answers the question it was asked. When the fixture's
+    // prompt has since changed, scoring it against the new one grades an old
+    // answer on a new task, and nothing in the output would have said so.
+    if (record.promptDigest && record.promptDigest !== digest(kase.prompt ?? "")) {
+      stale.push({ id: kase.id, why: "the fixture's prompt changed since this answer was recorded" });
+      continue;
+    }
+    const cutoffs = config ?? loadConfigOrDefaults();
+    cutoffsUsed.add(`displayCutoff=${cutoffs.displayCutoff} maxNames=${cutoffs.maxNames}`);
+    // Replay applies the *current* display settings, so the same recorded
+    // answer yields different names when they move. Carry them into the
+    // report rather than leaving the reader to assume they held.
+    const names = namesFrom({ probabilities: record.probabilities }, cutoffs, record.criteria);
     const scored = { id: kase.id, outcome: kase.outcome, expected: kase.expected ?? [], ...scoreOne(kase, names) };
     (kase.adjudicated === true ? adjudicated : unadjudicated).push(scored);
   }
@@ -160,7 +203,9 @@ async function run({ live = false, cases = readCases(), env = process.env } = {}
     adjudicated: { results: adjudicated, ...tally(adjudicated) },
     unadjudicated: { results: unadjudicated, ...tally(unadjudicated) },
     skipped,
+    stale,
     models: [...models],
+    cutoffs: [...cutoffsUsed],
   };
 }
 
@@ -209,6 +254,20 @@ function report(out) {
     lines.push("");
     lines.push("skipped:");
     for (const s of skipped) lines.push(`    ${s.id}: ${s.why}`);
+  }
+
+  if (out.stale && out.stale.length) {
+    lines.push("");
+    lines.push("stale recordings — the question moved since the answer was recorded:");
+    for (const s of out.stale) lines.push(`    ${s.id}: ${s.why}`);
+    lines.push("    re-run with --live to answer the current fixtures.");
+  }
+
+  // The names scored are a function of the display settings as well as the
+  // recorded answer, so the settings are part of what the run reports.
+  if (out.cutoffs && out.cutoffs.length) {
+    lines.push("");
+    lines.push(`scored under: ${out.cutoffs.join(" | ")}`);
   }
 
   if (models.length > 1) {
