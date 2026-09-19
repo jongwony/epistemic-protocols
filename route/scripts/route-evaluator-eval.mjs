@@ -31,6 +31,17 @@
  * contribution to the line, not the reader's behaviour after reading it.
  * Measuring that needs paired agent turns, which this does not do.
  *
+ * A fixture is a session, not a line. The channel this harness scores sends
+ * the accumulated context — the user's turns and the replies to them, newest
+ * first under a budget derived from what the question and the prompt leave —
+ * so a fixture carrying only a prompt scored a state the channel never sends,
+ * and every such run landed on the transcript-shortfall path that leaves the
+ * prompt-only state. A case may therefore carry `conversation`, which the
+ * harness materializes as a transcript and hands to `advise` as a path, so the
+ * walk the channel runs — cleaning, the subagent drop, the per-turn overhead,
+ * the derived budget, the newest-first fill — is the walk the fixture is
+ * scored through rather than one this file reimplements.
+ *
  *   node route/scripts/route-evaluator-eval.mjs           # replay recorded answers
  *   TYPESAFE_API_KEY=… node route/scripts/route-evaluator-eval.mjs --live
  *
@@ -43,6 +54,7 @@
 
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
@@ -66,6 +78,33 @@ function readCases(file = CASES) {
   } catch {
     return [];
   }
+}
+
+/**
+ * The state a case asks about: its prompt and the conversation behind it. One
+ * digest over both, because a recording answers the whole question it was
+ * asked, and a conversation that moved moves the question exactly as a changed
+ * prompt does.
+ */
+function stateDigest(kase) {
+  return digest(JSON.stringify({ prompt: kase.prompt ?? "", conversation: kase.conversation ?? [] }));
+}
+
+/**
+ * The fixture's conversation as a transcript on disk, so `advise` reads it
+ * through the same walk the hook does rather than through a shortcut this file
+ * would own. Returns "" when the case carries none — the prompt-only state,
+ * still reachable, now only where a fixture asks for it.
+ */
+function transcriptFor(conversation, dir) {
+  if (!Array.isArray(conversation) || conversation.length === 0) return "";
+  const lines = conversation
+    .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.text === "string")
+    .map((t) => JSON.stringify({ type: t.role, message: { content: t.text } }));
+  if (lines.length === 0) return "";
+  const file = path.join(dir, `${crypto.randomUUID()}.jsonl`);
+  fs.writeFileSync(file, lines.join("\n") + "\n");
+  return file;
 }
 
 function recordedFile(id) {
@@ -159,53 +198,87 @@ async function run({
   const criteria = live ? buildCriteria(protocols) : null;
   if (live && !criteria) return { error: "no installed protocols to ask about" };
 
-  for (const kase of cases) {
-    let record = readRecordedFn(kase.id);
-    if (live) {
-      const result = await advise(kase.prompt, { config, env, protocols });
-      // Only an answer is recorded. Every other reason is a shortfall on our
-      // side, and writing it over an existing recording destroys an
-      // observation to put a non-observation in its place.
-      if (result.reason !== "advised" && result.reason !== "none") {
-        skipped.push({ id: kase.id, why: `evaluator returned nothing (${result.reason})` });
+  // Fixtures become transcripts for the length of the run and nothing after
+  // it, so the directory is made here and removed below whatever happens.
+  const scratch = live ? fs.mkdtempSync(path.join(os.tmpdir(), "route-eval-")) : null;
+  try {
+    for (const kase of cases) {
+      let record = readRecordedFn(kase.id);
+      if (live) {
+        // The path rather than the turns: passing `conversation` straight to
+        // `advise` would skip the derived budget and the newest-first fill,
+        // which is the part of the channel a fixture run is here to cross.
+        const transcriptPath = transcriptFor(kase.conversation, scratch);
+        const result = await advise(kase.prompt, { config, env, protocols, transcriptPath });
+        // Only an answer is recorded. Every other reason is a shortfall on our
+        // side, and writing it over an existing recording destroys an
+        // observation to put a non-observation in its place.
+        if (result.reason !== "advised" && result.reason !== "none") {
+          skipped.push({ id: kase.id, why: `evaluator returned nothing (${result.reason})` });
+          continue;
+        }
+        record = {
+          id: kase.id,
+          model: result.model,
+          probabilities: result.probabilities,
+          reason: result.reason,
+          // What it was asked, so a replay can tell whether the question moved.
+          // Names alone do not: a protocol's declared description is part of
+          // the question, and so is the state. Both are hashed rather than
+          // copied, since the check is equality and the fixture is the source.
+          criteria: Object.keys(criteria).sort(),
+          criteriaDigest: digest(JSON.stringify(criteria)),
+          stateDigest: stateDigest(kase),
+          // How much of the conversation actually reached the request. A case
+          // that carries turns and records none did not cross the walk, and
+          // without this the report cannot tell that from a case carrying none.
+          turns: Number.isInteger(result.turns) ? result.turns : 0,
+          at: new Date().toISOString(),
+        };
+        writeRecorded(kase.id, record);
+      }
+      if (!record) {
+        skipped.push({ id: kase.id, why: "no recorded answer; run with --live" });
         continue;
       }
-      record = {
+      if (record.model) models.add(record.model);
+      // A recording answers the question it was asked. When the state the
+      // fixture describes has since moved, scoring it against the new one
+      // grades an old answer on a new task, and nothing in the output would
+      // have said so. A recording carrying no state digest at all is that same
+      // case rather than an exempt one: it was answered before the
+      // conversation was part of the question, so it answers a question this
+      // fixture no longer asks.
+      if (record.stateDigest !== stateDigest(kase)) {
+        stale.push({
+          id: kase.id,
+          why: record.stateDigest
+            ? "the fixture's prompt or conversation changed since this answer was recorded"
+            : "recorded before the state carried the conversation",
+        });
+        continue;
+      }
+      const cutoffs = config ?? loadConfigOrDefaults();
+      cutoffsUsed.add(`displayCutoff=${cutoffs.displayCutoff} maxNames=${cutoffs.maxNames}`);
+      // Replay applies the *current* display settings, so the same recorded
+      // answer yields different names when they move. Carry them into the
+      // report rather than leaving the reader to assume they held.
+      const names = namesFrom({ probabilities: record.probabilities }, cutoffs, record.criteria);
+      const scored = {
         id: kase.id,
-        model: result.model,
-        probabilities: result.probabilities,
-        reason: result.reason,
-        // What it was asked, so a replay can tell whether the question moved.
-        // Names alone do not: a protocol's declared description is part of
-        // the question, and so is the prompt. Both are hashed rather than
-        // copied, since the check is equality and the fixture is the source.
-        criteria: Object.keys(criteria).sort(),
-        criteriaDigest: digest(JSON.stringify(criteria)),
-        promptDigest: digest(kase.prompt ?? ""),
-        at: new Date().toISOString(),
+        outcome: kase.outcome,
+        expected: kase.expected ?? [],
+        // What the fixture describes against what the request carried. A gap
+        // between them is the shortfall path, and it is reported rather than
+        // scored around.
+        carried: Array.isArray(kase.conversation) ? kase.conversation.length : 0,
+        offered: Number.isInteger(record.turns) ? record.turns : 0,
+        ...scoreOne(kase, names),
       };
-      writeRecorded(kase.id, record);
+      (kase.adjudicated === true ? adjudicated : unadjudicated).push(scored);
     }
-    if (!record) {
-      skipped.push({ id: kase.id, why: "no recorded answer; run with --live" });
-      continue;
-    }
-    if (record.model) models.add(record.model);
-    // A recording answers the question it was asked. When the fixture's
-    // prompt has since changed, scoring it against the new one grades an old
-    // answer on a new task, and nothing in the output would have said so.
-    if (record.promptDigest && record.promptDigest !== digest(kase.prompt ?? "")) {
-      stale.push({ id: kase.id, why: "the fixture's prompt changed since this answer was recorded" });
-      continue;
-    }
-    const cutoffs = config ?? loadConfigOrDefaults();
-    cutoffsUsed.add(`displayCutoff=${cutoffs.displayCutoff} maxNames=${cutoffs.maxNames}`);
-    // Replay applies the *current* display settings, so the same recorded
-    // answer yields different names when they move. Carry them into the
-    // report rather than leaving the reader to assume they held.
-    const names = namesFrom({ probabilities: record.probabilities }, cutoffs, record.criteria);
-    const scored = { id: kase.id, outcome: kase.outcome, expected: kase.expected ?? [], ...scoreOne(kase, names) };
-    (kase.adjudicated === true ? adjudicated : unadjudicated).push(scored);
+  } finally {
+    if (scratch) fs.rmSync(scratch, { recursive: true, force: true });
   }
 
   return {
@@ -257,6 +330,20 @@ function report(out) {
   for (const r of unadjudicated.results) {
     lines.push(`    ${r.cell === "right→wrong" ? "SPOILED" : r.cell.padEnd(7)}  ${r.outcome.padEnd(9)} ${r.id}`);
     lines.push(`             expected [${r.expected.join(", ")}]  got [${r.names.join(", ")}]`);
+    lines.push(`             conversation: ${r.carried ?? 0} carried, ${r.offered ?? 0} offered`);
+  }
+
+  // The state the run actually sent, called out on its own. A fixture set that
+  // describes sessions and a run that sent none of them is the shortfall this
+  // harness spent a cycle reporting as a measurement, and the one line that
+  // would have shown it is this one.
+  const scored = [...adjudicated.results, ...unadjudicated.results];
+  const starved = scored.filter((r) => (r.carried ?? 0) > 0 && (r.offered ?? 0) === 0);
+  if (starved.length) {
+    lines.push("");
+    lines.push("prompt-only — these fixtures describe a session and the request carried none of it:");
+    for (const r of starved) lines.push(`    ${r.id}`);
+    lines.push("    the channel sends the accumulated context; a run scored here scored something else.");
   }
 
   if (skipped.length) {
@@ -291,7 +378,7 @@ function report(out) {
   return lines.join("\n");
 }
 
-export { correct, readCases, report, run, scoreOne, tally };
+export { correct, readCases, report, run, scoreOne, stateDigest, tally, transcriptFor };
 
 if (isMain(import.meta.url)) {
   run({ live: process.argv.includes("--live") })
