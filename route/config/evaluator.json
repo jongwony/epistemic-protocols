@@ -1,0 +1,11 @@
+{
+  "_comment": "Advisory channel binding, disabled. Carries no secret and never will: apiKeyEnv names the environment variable the key is read from, and the key itself lives in the adopter's own credential store. Turning `enabled` on sends the conversation — the user's turns and the replies to them, tool calls excluded — to `endpoint` on every prompt; read the advisory section of route/README.md before doing so. stateTokenBudget is a cap on how much of that conversation is offered, not the budget itself: that is derived per request from what the question and the prompt leave under the endpoint ceiling, and a rejection is retried once with half.",
+  "enabled": false,
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "model": "jev-latest",
+  "apiKeyEnv": "TYPESAFE_API_KEY",
+  "timeoutMs": 2000,
+  "displayCutoff": 0.25,
+  "maxNames": 3,
+  "stateTokenBudget": 28000
+}

@@ -102,6 +102,11 @@ function soleSkill(dir) {
  * protocol yields comes from its `Type: (Deficit, …) → Resolution` clause,
  * wherever the SKILL.md carries it — description or body; a protocol without
  * one keeps its row, with the deficit alone.
+ *
+ * The frontmatter `description` is read too, and stays off the table: the
+ * table's job is to trigger. It is the text Rule #2 names as the sole source
+ * of what deficit a protocol resolves, so anything that has to tell two
+ * protocols apart reads it from here rather than being told the difference.
  */
 function readProtocol(skillFile) {
   let text;
@@ -117,7 +122,16 @@ function readProtocol(skillFile) {
   const name = command[1].trim().replace(/^["']|["']$/g, "");
   if (!name) return null;
   const type = /Type:\s*[`"]?\([A-Z][A-Za-z]+\s*,[^)]*\)\s*→\s*([A-Z][A-Za-z]+)/.exec(text);
-  return { command: name, deficit: deficit[1], resolution: type ? type[1] : null };
+  const declared = frontmatter && /^description:[ \t]*(.+)$/m.exec(frontmatter[1]);
+  const description = declared
+    ? declared[1].trim().replace(/^["']|["']$/g, "")
+    : null;
+  return {
+    command: name,
+    deficit: deficit[1],
+    resolution: type ? type[1] : null,
+    description,
+  };
 }
 
 /**

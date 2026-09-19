@@ -36,12 +36,26 @@
  * reading the call's content: a tool name, a path shape. A moment that
  * needs the content read — whether a command's intent is to write, whether
  * a set of options genuinely diverges, whether an action can be undone,
- * whether an agent's return is a report or a launch notice — stays on the
- * session channel alone, because that reading is the reader's own
- * reasoning; a hook that did it would couple the premise to one harness's
- * tool set and move the judgment out of the reasoning it belongs to. The
- * tool channel is therefore the fast layer here: bound to a harness, and
+ * whether an agent's return is a report or a launch notice — is past what
+ * a matcher reaches: deciding it there means a regex over a command or a
+ * roster of host-specific tool names, which varies by configuration and
+ * resists testing. Those moments stay on the session channel. The tool
+ * channel is therefore the fast layer here: bound to a harness, and
  * expected to shrink as readers follow the session index unaided.
+ *
+ * That a matcher cannot reach a moment does not settle that nothing can.
+ * A detector that reads assembled state and answers from a declared set
+ * is neither a matcher nor the reader's own reasoning; no channel here is
+ * built on one, and these are the conditions one would answer to. It
+ * reinforces and never replaces: the session index carries every moment
+ * whatever the detector says, because a hook's context reaches the model
+ * only on the request after the call, so anything withheld would arrive
+ * too late to inform the call it was about. It assembles the state it
+ * reads — a detector answers about what it is given, and the call alone
+ * is not the accumulated context that reversibility or divergence is
+ * judged from. And fail-open covers less of it: "" covers a shortfall
+ * that fails loudly, not a well-formed wrong answer, whose cost is a
+ * reader anchored on a document the moment did not call for.
  *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
