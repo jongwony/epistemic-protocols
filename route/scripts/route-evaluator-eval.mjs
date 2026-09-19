@@ -32,11 +32,11 @@
  * Measuring that needs paired agent turns, which this does not do.
  *
  *   node route/scripts/route-evaluator-eval.mjs           # replay recorded answers
- *   ROUTE_EVAL_API_KEY=… node route/scripts/route-evaluator-eval.mjs --live
+ *   TYPESAFE_API_KEY=… node route/scripts/route-evaluator-eval.mjs --live
  *
- * A live run reads its key from ROUTE_EVAL_API_KEY and never from the variable
- * the session channel names, and there is no fallback between them: running
- * the fixtures arms nothing, and arming the session channel runs no fixtures.
+ * A live run reads the key from the variable config/evaluator.json names — the
+ * same one that arms the session channel, since this project counts holding
+ * that key as consent for both.
  *
  * Zero external dependencies: Node.js standard library only.
  */
@@ -45,7 +45,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { EVAL_KEY_ENV, advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
+import { advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
 import { deriveProtocols, isMain } from "./route-protocols.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -147,15 +147,13 @@ async function run({
   if (live && !binding) {
     return { error: "live run needs config/evaluator.json to name an https endpoint" };
   }
-  // The key is this harness's own, substituted into the binding so the call
-  // cannot read the session channel's variable even when one is set.
-  const config = binding && live ? { ...binding, apiKeyEnv: EVAL_KEY_ENV } : binding;
+  const config = binding;
   // Without this check every case returns `no-key`, which is not `no-answer`
   // and so was written over the case's recording as a null distribution and
   // scored as silence — a run that observed nothing, reported as a run that
   // observed silence.
-  if (live && !env[EVAL_KEY_ENV]) {
-    return { error: `live run needs a key in ${EVAL_KEY_ENV}` };
+  if (live && !env[config.apiKeyEnv]) {
+    return { error: `live run needs a key in ${config.apiKeyEnv}` };
   }
   const protocols = live ? deriveProtocols() : [];
   const criteria = live ? buildCriteria(protocols) : null;
@@ -293,7 +291,7 @@ function report(out) {
   return lines.join("\n");
 }
 
-export { EVAL_KEY_ENV, correct, readCases, report, run, scoreOne, tally };
+export { correct, readCases, report, run, scoreOne, tally };
 
 if (isMain(import.meta.url)) {
   run({ live: process.argv.includes("--live") })

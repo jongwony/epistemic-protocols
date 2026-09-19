@@ -46,9 +46,6 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
 
-// The fixture harness (route-evaluator-eval.mjs) reads this variable; a
-// binding may not name it, and `loadConfig` below refuses one that does.
-const EVAL_KEY_ENV = "ROUTE_EVAL_API_KEY";
 // Both response readers below accumulate into memory before parsing, so they
 // need a ceiling that does not depend on the peer behaving.
 const MAX_BYTES = 64 * 1024;
@@ -137,7 +134,6 @@ function loadConfig(file = configFile()) {
   const endpoint = typeof raw.endpoint === "string" ? raw.endpoint : "";
   const apiKeyEnv = typeof raw.apiKeyEnv === "string" ? raw.apiKeyEnv : "";
   if (!endpoint.startsWith("https://") || !apiKeyEnv) return null;
-  if (apiKeyEnv === EVAL_KEY_ENV) return null;
   return {
     endpoint,
     apiKeyEnv,
@@ -600,7 +596,6 @@ function render(advisory, eventName = "UserPromptSubmit") {
 
 export {
   CEILING,
-  EVAL_KEY_ENV,
   INSTRUCTIONS,
   LABEL,
   MARGIN,

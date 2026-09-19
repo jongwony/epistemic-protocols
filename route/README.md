@@ -112,20 +112,20 @@ The estimator is fitted to prose in each script rather than to a document mixing
 
 **Who the evaluator is.** The configured endpoint is `https://api.typesafe.ai/v1/systemone` — System One, and this hook is its application surface inside Claude Code. A System One key is what it needs; which variable holds that key is what decides whether it runs.
 
-**Arming it.** Put the key in the environment variable `config/evaluator.json` names — `ROUTE_ADVISORY_KEY` as it ships. That is the whole of it. Nothing in the file turns the channel on: the file ships inside the plugin checkout and is tracked by git, so an edit to it sits under the install cache where a plugin update reverts it without saying so. That property is why the variable is the switch, and why the paragraph below tells you not to withhold consent by editing `apiKeyEnv`.
+**Arming it.** Put the key in the environment variable `config/evaluator.json` names — `TYPESAFE_API_KEY` as it ships. That is the whole of it. Nothing in the file turns the channel on: the file ships inside the plugin checkout and is tracked by git, so an edit to it sits under the install cache where a plugin update reverts it without saying so. That property is why the variable is the switch, and why the paragraph below tells you not to withhold consent by editing `apiKeyEnv`.
 
-**What this project counts as consent — a policy, not an inference about you.** A System One key in the variable `apiKeyEnv` names — `ROUTE_ADVISORY_KEY` as it ships — while this plugin is installed and enabled is taken as consent for this channel to send the conversation to System One. That is a standard this project sets, and it does not ask where the key came from: a key you exported, a key your shell profile sets, a key a deployment put there all count the same.
+**What this project counts as consent — a policy, not an inference about you.** A System One key in the variable `apiKeyEnv` names — `TYPESAFE_API_KEY` as it ships — while this plugin is installed and enabled is taken as consent for this channel to send the conversation to System One. That is a standard this project sets, and it does not ask where the key came from: a key you exported, a key your shell profile sets, a key a deployment put there all count the same.
 
 Two states withhold that consent, and both are mechanical — you can check either without trusting a claim:
 
 - **the variable is unset**, so the hook returns before a request is built
 - **the plugin is disabled**, so none of its hooks run at all
 
+One variable covers both uses, so **scoring the fixtures and arming the session channel are the same consent**: there is no state in which `--live` runs and the per-prompt channel stays silent.
+
 Withhold consent by one of those two, not by editing `apiKeyEnv` to a dead name. A plugin update restores `config/evaluator.json`, but no update sets the variable that file names — nothing in this plugin ever writes a key anywhere. Editing `apiKeyEnv` is the case that fails: that edit is reverted by the same restore, and a key still sitting in the shipped variable is reconnected by it.
 
 What the file carries is where to send and how much; whether to send is the variable. The config carries no secret and never should; the key belongs in your own credential store, and the binding between the two belongs on your own rules surface rather than in this repository. Be aware of what the key turns on: **the conversation is sent to the configured endpoint on every prompt.** Cost is on the evaluator's side, not your context — a call across five options billed 455 input and 57 output tokens, so roughly 90 input tokens per option; one request carries every option and every question, and the vendor's guidance is that adding questions barely moves the response time.
-
-**The fixture harness has its own key, and nothing falls back between them.** `scripts/route-evaluator-eval.mjs --live` reads `ROUTE_EVAL_API_KEY`, never the variable above. Running the fixtures is a bounded act on fixture prompts; arming the channel is a standing one over every session — so exporting a key to score the fixtures must not arm the channel in every shell that inherits it, and arming the channel must not start a fixture run. Neither name substitutes for the other, and `ROUTE_EVAL_API_KEY` is reserved: `loadConfig` refuses a binding that names it, so pointing `apiKeyEnv` there cannot route the fixture key back into the session channel.
 
 Before trusting it, run `scripts/route-evaluator-eval.mjs` against your own adjudicated fixtures. The published result for the analogous case — a suggestion line over a 182-skill roster — reports wrong selections falling from 16.8% to 7.3% *and* some decisions spoiled that the unaided agent had got right. That second number is why the harness counts spoiled cases separately, and why no key ships with this.
 

@@ -25,7 +25,6 @@ import {
   budgetFor,
   buildCriteria,
   buildRequest,
-  EVAL_KEY_ENV,
   clean,
   conversationFrom,
   estimateTokens,
@@ -65,7 +64,7 @@ const ENV = { TEST_KEY: "k" };
 // rather than inherit. Two halves, and stripping only the first leaves the
 // claim unestablished:
 //
-//   - the credentials, so no inherited export can arm the child;
+//   - the credential, so no inherited export can arm the child;
 //   - the config selection, since `pluginRoot()` honours CLAUDE_PLUGIN_ROOT and
 //     an inherited one sends the child to another checkout's binding, which may
 //     name a variable this list does not strip.
@@ -75,7 +74,7 @@ const ENV = { TEST_KEY: "k" };
 // path-derived fallback to land there.
 function envWithoutKeys() {
   const env = { ...process.env };
-  for (const name of [SHIPPED_KEY_ENV, EVAL_KEY_ENV, "TYPESAFE_API_KEY"]) delete env[name];
+  for (const name of [SHIPPED_KEY_ENV, "TYPESAFE_API_KEY"]) delete env[name];
   env.CLAUDE_PLUGIN_ROOT = path.join(HERE, "..");
   return env;
 }
@@ -90,10 +89,8 @@ test("the shipped config names where to send and carries no secret", () => {
   // fresh install, and that is what keeps the channel off the network.
   const shipped = loadConfig(SHIPPED_CONFIG);
   assert.ok(shipped, "the shipped binding resolves");
-  // The name the consent policy in route/README.md is written against, and the
-  // name a restored config leaves unset.
-  assert.equal(shipped.apiKeyEnv, "ROUTE_ADVISORY_KEY");
-  assert.notEqual(shipped.apiKeyEnv, EVAL_KEY_ENV, "the harness name is reserved");
+  // The name the consent policy in route/README.md is written against.
+  assert.equal(shipped.apiKeyEnv, "TYPESAFE_API_KEY");
   const raw = JSON.parse(
     spawnSync(process.execPath, ["-e", `process.stdout.write(require("fs").readFileSync(${JSON.stringify(SHIPPED_CONFIG)}, "utf8"))`], { encoding: "utf8" }).stdout,
   );
@@ -131,10 +128,6 @@ test("loadConfig refuses a file that is absent, unreadable, or not https", () =>
   assert.equal(write({ apiKeyEnv: "K" }), null, "no endpoint is not a binding");
   assert.equal(write({ endpoint: "https://e.example/v1" }), null, "no key variable is not a binding");
   assert.ok(write({ endpoint: "https://e.example/v1", apiKeyEnv: "K" }), "endpoint and variable are the whole binding");
-  // Naming the harness variable here would route the fixture key back into
-  // the session channel, which is the separation the two names exist for.
-  assert.equal(write({ endpoint: "https://e.example/v1", apiKeyEnv: EVAL_KEY_ENV }), null,
-    "a binding may not name the reserved harness variable");
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

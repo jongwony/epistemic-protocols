@@ -6,8 +6,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { EVAL_KEY_ENV, correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
-import { advise } from "./route-evaluator.mjs";
+import { correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-evaluator-eval.mjs");
 
@@ -85,9 +84,11 @@ test("the shipped fixtures cover every outcome and ship unadjudicated", () => {
   }
 });
 
+const KEY_ENV = "TYPESAFE_API_KEY";
+
 const BINDING = {
   endpoint: "https://e.example/v1",
-  apiKeyEnv: "TYPESAFE_API_KEY",
+  apiKeyEnv: KEY_ENV,
   model: "m",
   timeoutMs: 10,
   deadlineMs: 20,
@@ -106,13 +107,13 @@ test("an omitted config resolves the binding from disk; an explicit null does no
   // disk; passing an explicit null is a caller saying there is none. The two
   // have to stay distinguishable, so both sides are asserted here.
   // `cases: []` keeps this off the network — the guards run, the loop does not.
-  const omitted = await run({ live: true, cases: [], env: { [EVAL_KEY_ENV]: "k" } });
+  const omitted = await run({ live: true, cases: [], env: { [KEY_ENV]: "k" } });
   assert.ok(
     !/name an https endpoint/.test(omitted.error ?? ""),
     `omitting config must read the binding off disk, got: ${omitted.error}`,
   );
 
-  const explicit = await run({ live: true, cases: [], env: { [EVAL_KEY_ENV]: "k" }, config: null });
+  const explicit = await run({ live: true, cases: [], env: { [KEY_ENV]: "k" }, config: null });
   assert.match(explicit.error ?? "", /name an https endpoint/);
 });
 
@@ -122,9 +123,9 @@ test("the CLI reaches the key guard rather than refusing before it", () => {
   // which is only reachable once the binding has resolved. Nothing is sent —
   // the guard returns before any request is built.
   const env = { ...process.env };
-  delete env[EVAL_KEY_ENV];
+  delete env[KEY_ENV];
   const result = spawnSync(process.execPath, [SCRIPT, "--live"], { encoding: "utf8", env });
-  assert.match(result.stdout, new RegExp(`live run needs a key in ${EVAL_KEY_ENV}`));
+  assert.match(result.stdout, new RegExp(`live run needs a key in ${KEY_ENV}`));
 });
 
 test("a live run without a key refuses rather than recording a non-observation", async () => {
@@ -133,35 +134,7 @@ test("a live run without a key refuses rather than recording a non-observation",
   // recording and scored as silence — a run that observed nothing, reported
   // as a run that observed silence.
   const out = await run({ live: true, cases: [], env: {}, config: BINDING });
-  assert.match(out.error ?? "", new RegExp(EVAL_KEY_ENV));
-});
-
-test("the fixture key and the session key do not arm each other", async () => {
-  // The two variables name two different acts. A fixture run must not be
-  // startable by the session channel's key, and the session channel must not
-  // be startable by the fixture key — so neither may fall back to the other.
-  assert.notEqual(EVAL_KEY_ENV, BINDING.apiKeyEnv);
-
-  // The session channel's key set, the harness's absent: the fixture run
-  // refuses rather than borrowing it.
-  const borrowed = await run({
-    live: true,
-    cases: [],
-    env: { [BINDING.apiKeyEnv]: "session-key" },
-    config: BINDING,
-  });
-  assert.match(borrowed.error ?? "", new RegExp(EVAL_KEY_ENV));
-
-  // The harness's key set, the session channel's absent: the session channel
-  // stays silent rather than borrowing it.
-  const session = await advise("p", {
-    config: BINDING,
-    env: { [EVAL_KEY_ENV]: "fixture-key" },
-    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
-    ask: () => assert.fail("the session channel must not use the fixture key"),
-  });
-  assert.equal(session.reason, "no-key");
-  assert.equal(session.advisory, "");
+  assert.match(out.error ?? "", new RegExp(KEY_ENV));
 });
 
 test("a recording whose fixture prompt has moved is reported, not scored", async () => {

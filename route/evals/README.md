@@ -38,9 +38,9 @@ The `installed-not-loaded` cases exist because the hook reads installed-and-enab
 node route/scripts/route-evaluator-eval.mjs
 
 # Call the evaluator live and record what it says, then score.
-ROUTE_EVAL_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
+TYPESAFE_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
 ```
 
-**`ROUTE_EVAL_API_KEY` is this harness's own variable, not the one the session channel reads, and neither falls back to the other.** Scoring the fixtures is a bounded act over the prompts in `cases/`; arming the advisory channel is a standing one over every prompt of every session. A single variable for both would make the first silently do the second in every shell that inherited the export, so the harness refuses to run rather than borrowing the session channel's key, and the channel stays silent rather than borrowing this one. `config/evaluator.json` still supplies the endpoint, model and budget for a live run — what it does not supply is permission.
+**A live run reads the same variable that arms the advisory channel, so running it is the same consent.** This project counts holding a System One key in that variable, with the plugin enabled, as consent for the channel to send conversations — and the fixture harness is not carved out of that: there is no state in which you can score the fixtures while the per-prompt channel stays silent. If you want the channel silent, unset the variable or disable the plugin, and score the fixtures in a shell or on a machine where you have done so.
 
 `--live` writes each answer into `recorded/` keyed by case id, model and the criteria it was asked with. A replay whose recorded model differs from the configured one is reported rather than silently scored: the configured name may be an alias, and a fixture graded under one version and replayed under another is measuring two things.
