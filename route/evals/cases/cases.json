@@ -1,0 +1,90 @@
+[
+  {
+    "id": "silence-ordinary-edit",
+    "outcome": "silence",
+    "prompt": "Rename the `timeoutMs` field to `requestTimeoutMs` across the three files that read it.",
+    "expected": [],
+    "adjudicated": false,
+    "note": "A settled mechanical change. Nothing is missing and no framing is in question; README calls silence the common case, and this is it."
+  },
+  {
+    "id": "silence-answered-question",
+    "outcome": "silence",
+    "prompt": "Thanks — that matches what I had. Go ahead and land it.",
+    "expected": [],
+    "adjudicated": false,
+    "note": "An approval. The most likely spoiled case in the set: an advisory here is a needless nudge over a turn that was already correct in saying nothing."
+  },
+  {
+    "id": "singleton-inquire",
+    "outcome": "singleton",
+    "prompt": "Set up the deploy for the new service.",
+    "expected": ["inquire"],
+    "adjudicated": false,
+    "note": "Target environment, rollback and acceptable downtime are unstated and only the user holds them — the request-side deficit 07830bd0 was about."
+  },
+  {
+    "id": "singleton-ground",
+    "outcome": "singleton",
+    "prompt": "Does this lifecycle model actually map onto how our ingest module behaves? Walk the correspondence.",
+    "expected": ["ground"],
+    "adjudicated": false,
+    "note": "An abstract structure against a concrete application, with the substrate present to check it — MappingUncertain, not a missing fact."
+  },
+  {
+    "id": "singleton-elicit",
+    "outcome": "singleton",
+    "prompt": "Let's plan the restore work.",
+    "expected": ["elicit"],
+    "adjudicated": false,
+    "note": "README's own worked case: the term has two referents in this session and what the work is for has not been fixed as coordinates."
+  },
+  {
+    "id": "several-fit-inquire-sublate",
+    "outcome": "several",
+    "prompt": "That hook was written before any of this existed. Reconsider in light of it.",
+    "expected": ["inquire", "sublate"],
+    "adjudicated": false,
+    "note": "Verbatim shape of a real turn from the session this was built in. The live evaluator returned inquire 0.43 / sublate 0.42 at confidence 0.29 — both fit, and a confidence gate deletes the case."
+  },
+  {
+    "id": "several-fit-frame-ideate",
+    "outcome": "several",
+    "prompt": "I don't think we've even framed this right, and I can only see one way to do it.",
+    "expected": ["frame", "ideate"],
+    "adjudicated": false,
+    "note": "Two deficits are stated in one sentence — an absent framework and an unexpanded candidate field. Neither dominates."
+  },
+  {
+    "id": "monitor-gate-holds-free-response",
+    "outcome": "monitor",
+    "prompt": "Before I answer that — is the second option reversible?",
+    "expected": [],
+    "adjudicated": false,
+    "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on the advisory staying out of the way: holding is a reading of a contract, not a detection."
+  },
+  {
+    "id": "monitor-gate-holds-different-deficit",
+    "outcome": "monitor",
+    "prompt": "Hold on — I'm not sure the numbers you just quoted are right.",
+    "expected": [],
+    "adjudicated": false,
+    "note": "A different deficit surfaces while a gate holds. Route's own answer is at most one finding line, which requires invoking Route; the hook must not pre-empt it."
+  },
+  {
+    "id": "installed-not-loaded",
+    "outcome": "singleton",
+    "prompt": "Walk me through what we settled about the caching layer three sessions ago.",
+    "expected": ["recollect"],
+    "adjudicated": false,
+    "note": "Scored for the degradation it exercises rather than the pick: if this protocol is installed but not loaded, the advisory names something the reader cannot invoke and the reader's own check has to absorb it."
+  },
+  {
+    "id": "silence-deficit-arrives-mid-turn",
+    "outcome": "silence",
+    "prompt": "Go ahead with the refactor we discussed.",
+    "expected": [],
+    "adjudicated": false,
+    "note": "The boundary case for the whole channel: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a prompt-time evaluator can see. The static directive is what covers it, which is why the advisory never replaces the directive."
+  }
+]

@@ -1,0 +1,238 @@
+#!/usr/bin/env node
+/**
+ * Score the advisory channel against adjudicated fixtures.
+ *
+ * This prepares a comparison. It does not adjudicate one: every case's
+ * `expected` label is a person's judgement of what a correct advisory would
+ * carry, and the labels shipped with this harness were written by the same
+ * hand that wrote the harness. `evals/README.md` says what that is worth.
+ * Until a case is marked `adjudicated`, its result is reported apart and
+ * left out of every rate, because a rate over labels nobody checked is a
+ * number with a confidence interval nobody can state.
+ *
+ * Scoring is paired — the same case with the advisory and without — into
+ * four cells, and the spoiled cell is reported on its own:
+ *
+ *   baseline right → assisted right    right→right
+ *   baseline right → assisted wrong    right→wrong   SPOILED
+ *   baseline wrong → assisted right    wrong→right   repaired
+ *   baseline wrong → assisted wrong    wrong→wrong
+ *
+ * Netting these together is what hides the second row. The published result
+ * for the analogous design reports both a large fall in wrong selections and
+ * decisions spoiled that the unaided agent had got right; an aggregate shows
+ * only the first. A correct baseline silence that becomes a needless
+ * advisory is a spoiled case and the most likely one in the set.
+ *
+ * The baseline arm is the channel disabled: no advisory, every case scored
+ * as silence. That is the honest counterfactual for *this* change, since
+ * turning the channel off is what the repository ships. It is not a model of
+ * how well an agent routes unaided — this harness measures the advisory's
+ * contribution to the line, not the reader's behaviour after reading it.
+ * Measuring that needs paired agent turns, which this does not do.
+ *
+ *   node route/scripts/route-evaluator-eval.mjs           # replay recorded answers
+ *   node route/scripts/route-evaluator-eval.mjs --live    # call, record, then score
+ *
+ * Zero external dependencies: Node.js standard library only.
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
+import { deriveProtocols, isMain } from "./route-protocols.mjs";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const EVALS = path.join(HERE, "..", "evals");
+const CASES = path.join(EVALS, "cases", "cases.json");
+const RECORDED = path.join(EVALS, "recorded");
+const OUTCOMES = ["silence", "singleton", "several", "monitor"];
+
+function readCases(file = CASES) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function recordedFile(id) {
+  return path.join(RECORDED, `${id}.json`);
+}
+
+function readRecorded(id) {
+  try {
+    return JSON.parse(fs.readFileSync(recordedFile(id), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function writeRecorded(id, record) {
+  fs.mkdirSync(RECORDED, { recursive: true });
+  fs.writeFileSync(recordedFile(id), JSON.stringify(record, null, 2) + "\n");
+}
+
+/**
+ * Right when the names the advisory would carry are exactly the ones the
+ * adjudicator said it should. Set equality, not overlap: a correct name
+ * beside a wrong one is not a correct advisory, and an extra name on a case
+ * whose answer is silence is the needless-advisory failure.
+ */
+function correct(expected, actual) {
+  const a = [...new Set(expected)].sort();
+  const b = [...new Set(actual)].sort();
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+}
+
+function emptyCells() {
+  return { "right→right": 0, "right→wrong": 0, "wrong→right": 0, "wrong→wrong": 0 };
+}
+
+function scoreOne(kase, names) {
+  // Baseline is the channel off: the line is never emitted, so the baseline
+  // advisory is empty and is right exactly on the cases whose answer is
+  // silence.
+  const baselineRight = correct(kase.expected ?? [], []);
+  const assistedRight = correct(kase.expected ?? [], names);
+  const cell = `${baselineRight ? "right" : "wrong"}→${assistedRight ? "right" : "wrong"}`;
+  return { cell, baselineRight, assistedRight, names };
+}
+
+function tally(results) {
+  const overall = emptyCells();
+  const byOutcome = Object.fromEntries(OUTCOMES.map((o) => [o, emptyCells()]));
+  let baselineCorrect = 0;
+  for (const r of results) {
+    overall[r.cell] += 1;
+    if (byOutcome[r.outcome]) byOutcome[r.outcome][r.cell] += 1;
+    if (r.baselineRight) baselineCorrect += 1;
+  }
+  return { overall, byOutcome, baselineCorrect };
+}
+
+async function run({ live = false, cases = readCases(), env = process.env } = {}) {
+  const adjudicated = [];
+  const unadjudicated = [];
+  const skipped = [];
+  const models = new Set();
+
+  const config = live ? loadConfig() : null;
+  if (live && !config) {
+    return { error: "live run needs config/evaluator.json enabled and a key in the named environment variable" };
+  }
+  const protocols = live ? deriveProtocols() : [];
+  const criteria = live ? buildCriteria(protocols) : null;
+  if (live && !criteria) return { error: "no installed protocols to ask about" };
+
+  for (const kase of cases) {
+    let record = readRecorded(kase.id);
+    if (live) {
+      const result = await advise(kase.prompt, { config, env, protocols });
+      if (result.reason === "no-answer") {
+        skipped.push({ id: kase.id, why: "evaluator returned nothing" });
+        continue;
+      }
+      record = {
+        id: kase.id,
+        model: result.model,
+        probabilities: result.probabilities,
+        reason: result.reason,
+        // What it was asked, so a replay can tell whether the question moved.
+        criteria: Object.keys(criteria).sort(),
+        at: new Date().toISOString(),
+      };
+      writeRecorded(kase.id, record);
+    }
+    if (!record) {
+      skipped.push({ id: kase.id, why: "no recorded answer; run with --live" });
+      continue;
+    }
+    if (record.model) models.add(record.model);
+    const names = namesFrom({ probabilities: record.probabilities }, config ?? loadConfigOrDefaults());
+    const scored = { id: kase.id, outcome: kase.outcome, expected: kase.expected ?? [], ...scoreOne(kase, names) };
+    (kase.adjudicated === true ? adjudicated : unadjudicated).push(scored);
+  }
+
+  return {
+    adjudicated: { results: adjudicated, ...tally(adjudicated) },
+    unadjudicated: { results: unadjudicated, ...tally(unadjudicated) },
+    skipped,
+    models: [...models],
+  };
+}
+
+/** Cutoffs for replay when the channel is off — the shipped defaults. */
+function loadConfigOrDefaults() {
+  return loadConfig() ?? { displayCutoff: 0.25, maxNames: 3 };
+}
+
+function formatCells(cells, baselineCorrect) {
+  const spoiled = cells["right→wrong"];
+  const share = baselineCorrect > 0 ? ` (${((spoiled / baselineCorrect) * 100).toFixed(1)}% of baseline-correct)` : "";
+  return [
+    `    right→right ${cells["right→right"]}   wrong→right ${cells["wrong→right"]} (repaired)`,
+    `    wrong→wrong ${cells["wrong→wrong"]}   right→wrong ${spoiled} (SPOILED)${share}`,
+  ].join("\n");
+}
+
+function report(out) {
+  if (out.error) return `error: ${out.error}`;
+  const lines = [];
+  const { adjudicated, unadjudicated, skipped, models } = out;
+
+  lines.push(`adjudicated cases: ${adjudicated.results.length}`);
+  if (adjudicated.results.length === 0) {
+    lines.push("    none — every rate below is withheld. Adjudicate the labels in");
+    lines.push("    route/evals/cases/cases.json and set \"adjudicated\": true on each.");
+  } else {
+    lines.push(formatCells(adjudicated.overall, adjudicated.baselineCorrect));
+    for (const outcome of OUTCOMES) {
+      const cells = adjudicated.byOutcome[outcome];
+      const n = Object.values(cells).reduce((a, b) => a + b, 0);
+      if (n === 0) continue;
+      lines.push(`  ${outcome} (${n})`);
+      lines.push(formatCells(cells, cells["right→right"] + cells["right→wrong"]));
+    }
+  }
+
+  lines.push("");
+  lines.push(`unadjudicated cases: ${unadjudicated.results.length} — reported, not scored into any rate`);
+  for (const r of unadjudicated.results) {
+    lines.push(`    ${r.cell === "right→wrong" ? "SPOILED" : r.cell.padEnd(7)}  ${r.outcome.padEnd(9)} ${r.id}`);
+    lines.push(`             expected [${r.expected.join(", ")}]  got [${r.names.join(", ")}]`);
+  }
+
+  if (skipped.length) {
+    lines.push("");
+    lines.push("skipped:");
+    for (const s of skipped) lines.push(`    ${s.id}: ${s.why}`);
+  }
+
+  if (models.length > 1) {
+    lines.push("");
+    lines.push(`WARNING: answers came from more than one model version (${models.join(", ")}).`);
+    lines.push("Cases graded under one version and replayed under another measure two things.");
+  } else if (models.length === 1) {
+    lines.push("");
+    lines.push(`answers from: ${models[0]}`);
+  }
+
+  return lines.join("\n");
+}
+
+export { correct, readCases, report, run, scoreOne, tally };
+
+if (isMain(import.meta.url)) {
+  run({ live: process.argv.includes("--live") })
+    .then((out) => {
+      process.stdout.write(report(out) + "\n");
+      process.exit(out.error ? 1 : 0);
+    })
+    .catch((e) => {
+      process.stdout.write(`error: ${e && e.message}\n`);
+      process.exit(1);
+    });
+}
