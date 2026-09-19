@@ -13,7 +13,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { advise } from "./route-evaluator.mjs";
-import { digestTurns, transcriptLines, transcriptWorkspace, turnProblems } from "./route-eval-transcript.mjs";
+import { digestText, digestTurns, transcriptLines, transcriptWorkspace, turnProblems } from "./route-eval-transcript.mjs";
 import { coverage, failed, readCases, reached, report, run } from "./route-evaluator-smoke.mjs";
 import { run as runEval } from "./route-evaluator-eval.mjs";
 import { shippedKeyEnv } from "./route-test-env.mjs";
@@ -232,6 +232,41 @@ test("the transcript is written in the shape conversationFrom reads", () => {
     assert.equal(e.isSidechain, false);
     assert.equal(e.message.content[0].type, "text");
   }
+});
+
+test("each of the three ways the question can move is caught, not just the conversation", async () => {
+  // Checking one of them lets the other two replay silently — a stale answer
+  // reported as a current observation.
+  const kase = { id: "k", protocol: "inquire", conversation: TURNS, prompt: "the prompt", note: "n" };
+  const current = {
+    id: "k",
+    probabilities: { inquire: 0.9, none: 0.05 },
+    criteria: ["inquire", "ground", "none"],
+    conversationDigest: digestTurns(TURNS),
+    promptDigest: digestText("the prompt"),
+  };
+  const of = async (record, k = kase) =>
+    run({ cases: [k], protocols: PROTOCOLS, config: BINDING, readRecorded: () => record });
+
+  // Nothing moved: the recording is scored.
+  assert.equal((await of(current)).results.length, 1);
+
+  // The prompt moved.
+  const promptMoved = await of(current, { ...kase, prompt: "a different prompt" });
+  assert.match(promptMoved.stale[0]?.why ?? "", /prompt changed/);
+
+  // The conversation moved.
+  const turnsMoved = await of(current, { ...kase, conversation: [...TURNS].reverse() });
+  assert.match(turnsMoved.stale[0]?.why ?? "", /conversation changed/);
+
+  // A protocol's declared text moved, which moves every case at once.
+  const declMoved = await of({ ...current, criteriaDigest: digestText("{\"was\":\"something else\"}") });
+  assert.match(declMoved.stale[0]?.why ?? "", /declared text changed/);
+
+  // A recording made before a digest existed reads as the value that was true
+  // then, so a fixture that has since grown one is stale rather than regraded.
+  const noDigests = await of({ ...current, promptDigest: undefined, conversationDigest: undefined });
+  assert.equal(noDigests.stale.length, 1);
 });
 
 test("a digest distinguishes a changed conversation from an absent one", () => {

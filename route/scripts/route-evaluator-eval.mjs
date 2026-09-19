@@ -253,6 +253,13 @@ async function run({
       stale.push({ id: kase.id, why: "the fixture's conversation changed since this answer was recorded" });
       continue;
     }
+    // Recorded since this harness shipped and never read. A protocol's declared
+    // text is part of the question every case was asked, so editing one moves
+    // every recording at once — and nothing said so.
+    if (criteria && record.criteriaDigest && record.criteriaDigest !== digest(JSON.stringify(criteria))) {
+      stale.push({ id: kase.id, why: "a protocol's declared text changed since this answer was recorded" });
+      continue;
+    }
     const cutoffs = config ?? loadConfigOrDefaults();
     cutoffsUsed.add(`displayCutoff=${cutoffs.displayCutoff} maxNames=${cutoffs.maxNames}`);
     // Replay applies the *current* display settings, so the same recorded

@@ -15,9 +15,18 @@
  *     construction of the context, and the `note` on each case states the
  *     construction. No claim is made that X is the *right* routing for it.
  *
- * So a failure here is a wiring failure — a protocol whose declared material
- * does not separate it enough for its own constructed context to reach it, or
- * a channel that did not answer — and not a verdict on the advisory's value.
+ * A miss reads two ways and this run does not settle which. The protocol's
+ * declared material may not separate it from its neighbours; or the context
+ * may not show that deficit as cleanly as its author believed. The same hand
+ * writes the context and reads the result, so "true by construction" holds for
+ * the author's intent and not for what the evaluator saw. Neither reading is a
+ * verdict on the advisory's value, and neither licenses re-cutting a case until
+ * it reaches — that fits the fixture to the endpoint.
+ *
+ * A third reading belongs to the display rule rather than to either: a name can
+ * be present in the distribution and still carry none of the advisory, because
+ * `namesFrom` requires strictly more mass than `none` and a cutoff besides.
+ * Read the ranking this run prints before assigning a miss to the other two.
  *
  * The verdict per case is membership, not set equality: the protocol's name is
  * among the names the advisory would carry. A second name beside it is not a
@@ -45,7 +54,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
-import { digestTurns, transcriptWorkspace, turnProblems } from "./route-eval-transcript.mjs";
+import { digestText, digestTurns, transcriptWorkspace, turnProblems } from "./route-eval-transcript.mjs";
 import { deriveProtocols, isMain } from "./route-protocols.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -104,6 +113,28 @@ function ranking(probabilities, limit = 4) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([name, v]) => `${name} ${v.toFixed(2)}`);
+}
+
+/**
+ * Why a recording no longer answers this fixture, or "" when it still does.
+ *
+ * A missing digest is read as the value that was true when recordings carried
+ * no such field — an empty conversation, an empty prompt — so a fixture that
+ * has since grown one is stale rather than silently regraded. The criteria
+ * digest covers the half nothing was checking: a protocol's declared text is
+ * part of the question, and editing it moves every case at once.
+ */
+function staleReason(record, kase, criteria) {
+  if ((record.conversationDigest ?? digestTurns([])) !== digestTurns(kase.conversation)) {
+    return "the fixture's conversation changed since this answer was recorded";
+  }
+  if ((record.promptDigest ?? digestText("")) !== digestText(kase.prompt ?? "")) {
+    return "the fixture's prompt changed since this answer was recorded";
+  }
+  if (record.criteriaDigest && criteria && record.criteriaDigest !== digestText(JSON.stringify(criteria))) {
+    return "a protocol's declared text changed since this answer was recorded";
+  }
+  return "";
 }
 
 /**
@@ -179,6 +210,12 @@ async function run({
           probabilities: result.probabilities,
           reason: result.reason,
           criteria: optionNames.slice().sort(),
+          // The whole of what was asked. Names alone do not fix the question:
+          // a protocol's declared description is part of it, and so is the
+          // prompt. A recording that outlives any of the three answered a
+          // question this fixture no longer asks.
+          criteriaDigest: digestText(JSON.stringify(criteria)),
+          promptDigest: digestText(kase.prompt ?? ""),
           conversationDigest: digestTurns(kase.conversation),
           // The turns the budget actually left, which the fixture cannot state.
           turns: result.turns ?? 0,
@@ -190,8 +227,12 @@ async function run({
         skipped.push({ id: kase.id, why: "no recorded answer; run with --live" });
         continue;
       }
-      if ((record.conversationDigest ?? digestTurns([])) !== digestTurns(kase.conversation)) {
-        stale.push({ id: kase.id, why: "the fixture's conversation changed since this answer was recorded" });
+      // Three ways the question can have moved since the answer was recorded.
+      // Checking only one of them lets the other two replay silently, which is
+      // a stale answer scored as a current observation.
+      const moved = staleReason(record, kase, criteria);
+      if (moved) {
+        stale.push({ id: kase.id, why: moved });
         continue;
       }
       if (record.model) models.add(record.model);

@@ -25,6 +25,11 @@ import path from "node:path";
 
 const ROLES = new Set(["user", "assistant"]);
 
+/** Short content hash — equality of the text, not its contents. */
+function digestText(text) {
+  return crypto.createHash("sha256").update(typeof text === "string" ? text : "").digest("hex").slice(0, 16);
+}
+
 /** Short content hash — equality of the turns, not their contents. */
 function digestTurns(turns) {
   const normalized = (Array.isArray(turns) ? turns : []).map((t) => ({
@@ -89,4 +94,4 @@ function transcriptWorkspace(prefix = "route-eval-") {
   };
 }
 
-export { digestTurns, transcriptLines, transcriptWorkspace, turnProblems };
+export { digestText, digestTurns, transcriptLines, transcriptWorkspace, turnProblems };
