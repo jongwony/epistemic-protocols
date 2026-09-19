@@ -3,7 +3,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
+import { EVAL_KEY_ENV, correct, readCases, report, run, scoreOne, tally } from "./route-evaluator-eval.mjs";
+import { advise } from "./route-evaluator.mjs";
 
 test("correctness is set equality, not overlap", () => {
   assert.ok(correct(["inquire", "sublate"], ["sublate", "inquire"]));
@@ -79,29 +80,57 @@ test("the shipped fixtures cover every outcome and ship unadjudicated", () => {
   }
 });
 
+const BINDING = {
+  endpoint: "https://e.example/v1",
+  apiKeyEnv: "TYPESAFE_API_KEY",
+  model: "m",
+  timeoutMs: 10,
+  deadlineMs: 20,
+  displayCutoff: 0.25,
+  maxNames: 3,
+};
+
 test("a live run without a binding refuses rather than pretending", async () => {
-  const out = await run({ live: true, cases: [] });
-  assert.match(out.error, /config\/evaluator\.json enabled/);
+  const out = await run({ live: true, cases: [], env: {}, config: null });
+  assert.match(out.error, /config\/evaluator\.json/);
   assert.match(report(out), /^error:/);
 });
 
 test("a live run without a key refuses rather than recording a non-observation", async () => {
-  // The refusal message always claimed a key was required; only the config
-  // was checked. Without one every case returned `no-key`, which is not
+  // Without this check every case returned `no-key`, which is not
   // `no-answer`, so a null distribution was written over the case's
   // recording and scored as silence — a run that observed nothing, reported
   // as a run that observed silence.
-  const config = {
-    endpoint: "https://e.example/v1",
-    apiKeyEnv: "ROUTE_TEST_ABSENT_KEY",
-    model: "m",
-    timeoutMs: 10,
-    deadlineMs: 20,
-    displayCutoff: 0.25,
-    maxNames: 3,
-  };
-  const out = await run({ live: true, cases: [], env: {}, config });
-  assert.match(out.error ?? "", /ROUTE_TEST_ABSENT_KEY/);
+  const out = await run({ live: true, cases: [], env: {}, config: BINDING });
+  assert.match(out.error ?? "", new RegExp(EVAL_KEY_ENV));
+});
+
+test("the fixture key and the session key do not arm each other", async () => {
+  // The two variables name two different acts. A fixture run must not be
+  // startable by the session channel's key, and the session channel must not
+  // be startable by the fixture key — so neither may fall back to the other.
+  assert.notEqual(EVAL_KEY_ENV, BINDING.apiKeyEnv);
+
+  // The session channel's key set, the harness's absent: the fixture run
+  // refuses rather than borrowing it.
+  const borrowed = await run({
+    live: true,
+    cases: [],
+    env: { [BINDING.apiKeyEnv]: "session-key" },
+    config: BINDING,
+  });
+  assert.match(borrowed.error ?? "", new RegExp(EVAL_KEY_ENV));
+
+  // The harness's key set, the session channel's absent: the session channel
+  // stays silent rather than borrowing it.
+  const session = await advise("p", {
+    config: BINDING,
+    env: { [EVAL_KEY_ENV]: "fixture-key" },
+    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+    ask: () => assert.fail("the session channel must not use the fixture key"),
+  });
+  assert.equal(session.reason, "no-key");
+  assert.equal(session.advisory, "");
 });
 
 test("a recording whose fixture prompt has moved is reported, not scored", async () => {

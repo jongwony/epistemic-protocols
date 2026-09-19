@@ -32,7 +32,11 @@
  * Measuring that needs paired agent turns, which this does not do.
  *
  *   node route/scripts/route-evaluator-eval.mjs           # replay recorded answers
- *   node route/scripts/route-evaluator-eval.mjs --live    # call, record, then score
+ *   ROUTE_EVAL_API_KEY=… node route/scripts/route-evaluator-eval.mjs --live
+ *
+ * A live run reads its key from ROUTE_EVAL_API_KEY and never from the variable
+ * the session channel names, and there is no fallback between them: running
+ * the fixtures arms nothing, and arming the session channel runs no fixtures.
  *
  * Zero external dependencies: Node.js standard library only.
  */
@@ -49,6 +53,10 @@ const EVALS = path.join(HERE, "..", "evals");
 const CASES = path.join(EVALS, "cases", "cases.json");
 const RECORDED = path.join(EVALS, "recorded");
 const OUTCOMES = ["silence", "singleton", "several", "monitor"];
+
+// This harness's own key variable. It is not the one config/evaluator.json
+// names, and nothing falls back from one to the other.
+const EVAL_KEY_ENV = "ROUTE_EVAL_API_KEY";
 
 /** Short content hash — equality of the question, not its contents. */
 function digest(text) {
@@ -135,16 +143,21 @@ async function run({
   const models = new Set();
   const cutoffsUsed = new Set();
 
-  const config = configOverride ?? (live ? loadConfig() : null);
-  if (live && !config) {
-    return { error: "live run needs config/evaluator.json enabled and a key in the named environment variable" };
+  // An explicit null is a caller saying there is no binding on disk, which
+  // `??` would read as no override and send back to disk.
+  const binding = configOverride === undefined ? (live ? loadConfig() : null) : configOverride;
+  if (live && !binding) {
+    return { error: "live run needs config/evaluator.json to name an https endpoint" };
   }
-  // The message above says a key is required, so check for one. Without this
-  // every case returns `no-key`, which is not `no-answer` and so was written
-  // over the case's recording as a null distribution and scored as silence —
-  // a run that observed nothing, reported as a run that observed silence.
-  if (live && !env[config.apiKeyEnv]) {
-    return { error: `live run needs a key in ${config.apiKeyEnv}` };
+  // The key is this harness's own, substituted into the binding so the call
+  // cannot read the session channel's variable even when one is set.
+  const config = binding && live ? { ...binding, apiKeyEnv: EVAL_KEY_ENV } : binding;
+  // Without this check every case returns `no-key`, which is not `no-answer`
+  // and so was written over the case's recording as a null distribution and
+  // scored as silence — a run that observed nothing, reported as a run that
+  // observed silence.
+  if (live && !env[EVAL_KEY_ENV]) {
+    return { error: `live run needs a key in ${EVAL_KEY_ENV}` };
   }
   const protocols = live ? deriveProtocols() : [];
   const criteria = live ? buildCriteria(protocols) : null;
@@ -282,7 +295,7 @@ function report(out) {
   return lines.join("\n");
 }
 
-export { correct, readCases, report, run, scoreOne, tally };
+export { EVAL_KEY_ENV, correct, readCases, report, run, scoreOne, tally };
 
 if (isMain(import.meta.url)) {
   run({ live: process.argv.includes("--live") })
