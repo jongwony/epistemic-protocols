@@ -80,9 +80,27 @@ const TURN_OVERHEAD = 20;
 const INSTRUCTIONS =
   "Which of these protocols, if any, does this session now show the deficit for? `current_prompt` is the turn being asked about; `conversation` is what the session accumulated before it, the user's turns and the replies to them. Each option states the deficit it resolves and the resolution it yields, in that protocol's own words.";
 
+// The share of the room left unasked for.
+//
+// The measured residual is far smaller than this: after the word-run rule, the
+// worst underestimate across every sample tried — prose in four scripts, code,
+// JSON, hex digests, base64, UUIDs, file paths — is three percent. A margin
+// fitted to that number would be fitted to the wrong thing. Every time a new
+// kind of content was measured in this work, it underestimated: Korean first,
+// then the per-turn structure, then code points above the BMP, then base64.
+// The risk lives in the content nobody has measured yet, and the measured
+// residual says nothing about its size.
+//
+// What decides the size is the cost of being wrong. Overshooting is not a
+// failure — the retry catches it — but the retry halves the conversation, so a
+// near miss costs half the context rather than a few hundred milliseconds.
+// Against that, a quarter of the room is cheap: it leaves about 23k tokens,
+// past what a long working session has been observed to carry.
+const MARGIN = 0.75;
+
 /**
  * How much conversation there is room for, once the question and the prompt
- * are paid for, keeping a tenth back.
+ * are paid for and the margin is held back.
  *
  * Derived rather than configured, because the question grows: each protocol
  * adds about ninety tokens of options, so a constant written today is a margin
@@ -91,7 +109,7 @@ const INSTRUCTIONS =
  */
 function budgetFor(config, criteria, prompt) {
   const question = estimateTokens(INSTRUCTIONS) + estimateTokens(JSON.stringify(criteria));
-  const room = Math.floor((CEILING - question - estimateTokens(prompt)) * 0.9);
+  const room = Math.floor((CEILING - question - estimateTokens(prompt)) * MARGIN);
   return Math.max(0, Math.min(config.stateTokenBudget, room));
 }
 
@@ -138,13 +156,13 @@ function loadConfig(file = configFile()) {
   };
 }
 
-// Character classes as code-point ranges: Hangul (jamo, compatibility jamo,
-// syllables), then the kana and Han blocks, then Latin letters and whitespace.
-// Anything else — digits, punctuation, symbols, fullwidth forms — is its own
-// class, because punctuation-dense text tokenizes far denser than prose.
+// Character classes as code-point ranges: above the BMP first, where the
+// tokenizer has no entry and falls back to UTF-8 bytes; then Hangul (jamo,
+// compatibility jamo, syllables); then the kana and Han blocks; then Latin
+// letters and whitespace. Anything else — punctuation, symbols, fullwidth
+// forms — is its own class, since punctuation-dense text tokenizes far denser
+// than prose.
 function classOf(cp) {
-  // Above the BMP the tokenizer falls back to UTF-8 bytes: measured 3.03
-  // tokens per code point for CJK extension B and 2.03 for an emoji.
   if (cp > 0xffff) return 4;
   if ((cp >= 0x1100 && cp <= 0x11ff) || (cp >= 0x3130 && cp <= 0x318f) ||
       (cp >= 0xac00 && cp <= 0xd7af)) return 0;
@@ -157,11 +175,22 @@ function classOf(cp) {
 
 // Fitted against the endpoint: text was sent and `usage.input_tokens` read back
 // over Korean, English, Japanese, Chinese, mixed, code, JSON and
-// Korean-with-markdown prose. These are the cheapest coefficients that never
-// predict under the measured cost on any of them, keeping a tenth in hand.
-// Overshoot is about a fifth on prose and three quarters on punctuation-dense
-// JSON. Order matches classOf.
+// Korean-with-markdown prose. Order matches classOf; the last is the byte
+// fallback above the BMP, measured at 3.03 per code point for CJK extension B
+// and 2.03 for an emoji.
 const RATES = [1.0, 1.14, 0.22, 1.0, 3.1];
+
+// A run of letters and digits is charged as a word only when it reads like
+// one. Latin letters cost about a fifth of a token each inside real words,
+// because the vocabulary carries the words whole — but a hex digest, a base64
+// blob or an identifier is letters by character class and nothing like a word
+// to the tokenizer, and costs near a full token per character. Measured on
+// runs this rule catches: hex 0.69 predicted against actual before it, base64
+// 0.63, a UUID run 0.80. The discriminators are a digit inside the run, which
+// no ordinary word carries, and a length no ordinary word reaches.
+const WORDLIKE_MAX = 14;
+const ALNUM = /[A-Za-z0-9]/;
+const DIGIT = /[0-9]/;
 
 /**
  * What a string is likely to cost, without a tokenizer.
@@ -173,7 +202,9 @@ const RATES = [1.0, 1.14, 0.22, 1.0, 3.1];
  * back to bytes. A coefficient covering that tail would throw away two thirds
  * of the budget on every ordinary session, and counting bytes does no better,
  * since the same run costs 1.4 bytes per token against 5.1 for English prose.
- * So this is fitted to ordinary text, and the retry carries the tail.
+ * So this is fitted to ordinary text, the word-run rule above covers the
+ * non-word alphanumerics that ordinary text does carry, and the retry carries
+ * what is left.
  *
  * It is fitted to prose in each script rather than to a document mixing them.
  * An earlier pass calibrated the CJK rate on this repository's Korean README —
@@ -186,7 +217,25 @@ const RATES = [1.0, 1.14, 0.22, 1.0, 3.1];
 function estimateTokens(text) {
   if (typeof text !== "string") return 0;
   let total = 0;
-  for (const ch of text) total += RATES[classOf(ch.codePointAt(0))];
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ALNUM.test(ch)) {
+      let j = i;
+      let digits = false;
+      while (j < text.length && ALNUM.test(text[j])) {
+        if (DIGIT.test(text[j])) digits = true;
+        j += 1;
+      }
+      const run = j - i;
+      total += run * (digits || run > WORDLIKE_MAX ? RATES[3] : RATES[2]);
+      i = j;
+      continue;
+    }
+    const cp = text.codePointAt(i);
+    total += RATES[classOf(cp)];
+    i += cp > 0xffff ? 2 : 1;  // a surrogate pair is one code point
+  }
   return Math.ceil(total);
 }
 
@@ -520,6 +569,7 @@ export {
   CEILING,
   INSTRUCTIONS,
   LABEL,
+  MARGIN,
   NONE,
   OVER_LIMIT,
   TURN_OVERHEAD,

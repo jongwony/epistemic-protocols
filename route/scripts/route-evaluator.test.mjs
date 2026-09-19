@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import {
   CEILING,
   LABEL,
+  MARGIN,
   NONE,
   OVER_LIMIT,
   TURN_OVERHEAD,
@@ -256,10 +257,15 @@ test("clean strips the harness wrappers and this plugin's own injections", () =>
   assert.equal(clean("<local-command-stdout>noise</local-command-stdout>x"), "x");
 });
 
-test("the token estimate charges CJK more than latin", () => {
-  const ko = estimateTokens("\uAC00".repeat(100));  // Hangul syllable
-  const en = estimateTokens("a".repeat(100));
-  assert.ok(ko > en, `${ko} should exceed ${en}`);
+test("the token estimate charges CJK more per character than word-like latin", () => {
+  // Per character, on equal lengths: a syllable is its own token while a
+  // letter inside a word is about a fifth of one. Comparing totals of unequal
+  // strings would say nothing.
+  const koText = "\uAC00\uB098\uB2E4 ".repeat(100);
+  const enText = "the criterion comes first ".repeat(15);
+  const koRate = estimateTokens(koText) / koText.length;
+  const enRate = estimateTokens(enText) / enText.length;
+  assert.ok(koRate > enRate * 2, `${koRate.toFixed(2)} vs ${enRate.toFixed(2)}`);
   assert.equal(estimateTokens(null), 0);
 });
 
@@ -288,9 +294,9 @@ test("a subagent's turns are a different conversation and stay out", () => {
 
 test("the budget keeps the newest turns and drops the oldest", () => {
   const raw = jsonl(
-    userTurn("oldest " + "x".repeat(400)),
-    userTurn("middle " + "y".repeat(400)),
-    userTurn("newest " + "z".repeat(400)),
+    userTurn("oldest " + "the criterion comes before the count ".repeat(12)),
+    userTurn("middle " + "the criterion comes before the count ".repeat(12)),
+    userTurn("newest " + "the criterion comes before the count ".repeat(12)),
   );
   const turns = conversationFrom("/t", 250, { readFile: reader(raw) });
   assert.ok(turns.length >= 1 && turns.length < 3, `kept ${turns.length}`);
@@ -615,9 +621,9 @@ test("code points above the BMP are charged for the byte fallback", () => {
   // the tokenizer has no vocabulary entry and falls back to UTF-8 bytes.
   // Charged above the worst of those, so the emoji case overpays.
   const extB = String.fromCodePoint(0x20000).repeat(100);
-  const latin = "a".repeat(100);
+  const words = "the criterion comes before the count ".repeat(3);  // ~100 chars
   assert.ok(estimateTokens(extB) >= 303, `${estimateTokens(extB)} falls under the measured 303`);
-  assert.ok(estimateTokens(extB) > estimateTokens(latin) * 10);
+  assert.ok(estimateTokens(extB) > estimateTokens(words) * 10);
 });
 
 test("the budget is derived from what the question and prompt leave", () => {
@@ -649,4 +655,37 @@ test("the budget is derived from what the question and prompt leave", () => {
   // The configured value caps, and never raises past what is derived.
   assert.equal(budgetFor({ stateTokenBudget: 5000 }, few, "x"), 5000);
   assert.ok(budgetFor({ stateTokenBudget: 10 ** 9 }, few, "x") < CEILING);
+});
+
+test("a non-word alphanumeric run is charged as one, not as prose", () => {
+  // Latin letters cost about a fifth of a token inside real words, because the
+  // vocabulary carries words whole. A hex digest or a base64 blob is letters
+  // by character class and nothing like a word, and costs near a full token
+  // per character — measured 0.63 predicted against actual for base64 before
+  // this rule, 0.69 for hex, 0.80 for a UUID run.
+  const word = "conversation ".repeat(40);
+  const hex = "a3f90c1d4e5b6f70a3f90c1d4e5b6f70a3f90c1d ".repeat(40);
+  const perCharWord = estimateTokens(word) / word.length;
+  const perCharHex = estimateTokens(hex) / hex.length;
+  assert.ok(perCharHex > perCharWord * 3, `${perCharHex} vs ${perCharWord}`);
+  // A digit inside the run is the other discriminator, and it fires on short
+  // runs too: no ordinary word carries one.
+  assert.ok(estimateTokens("abc1 ") > estimateTokens("abcd "));
+  // An ordinary word stays cheap.
+  assert.ok(estimateTokens("the criterion must come before the count") < 15);
+});
+
+test("the margin is generous because the retry costs half the conversation", () => {
+  // Not fitted to the measured residual, which is three percent: fitted to the
+  // cost of being wrong. Overshooting is caught, but the catch halves the
+  // context — so the margin buys against content nobody has measured yet.
+  assert.ok(MARGIN <= 0.8, `margin ${MARGIN} leaves too little against unmeasured content`);
+  assert.ok(MARGIN >= 0.6, `margin ${MARGIN} throws away room the channel needs`);
+  const cap = { stateTokenBudget: CEILING };
+  const criteria = buildCriteria([
+    { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" },
+  ]);
+  const budget = budgetFor(cap, criteria, "x");
+  assert.ok(budget < CEILING * 0.8, "the held-back share must actually be held back");
+  assert.ok(budget > 15000, `budget ${budget} is too small to carry a working session`);
 });
