@@ -80,3 +80,41 @@ test("a live run without a binding refuses rather than pretending", async () => 
   assert.match(out.error, /config\/evaluator\.json enabled/);
   assert.match(report(out), /^error:/);
 });
+
+test("a live run without a key refuses rather than recording a non-observation", async () => {
+  // The refusal message always claimed a key was required; only the config
+  // was checked. Without one every case returned `no-key`, which is not
+  // `no-answer`, so a null distribution was written over the case's
+  // recording and scored as silence — a run that observed nothing, reported
+  // as a run that observed silence.
+  const config = {
+    endpoint: "https://e.example/v1",
+    apiKeyEnv: "ROUTE_TEST_ABSENT_KEY",
+    model: "m",
+    timeoutMs: 10,
+    deadlineMs: 20,
+    displayCutoff: 0.25,
+    maxNames: 3,
+  };
+  const out = await run({ live: true, cases: [], env: {}, config });
+  assert.match(out.error ?? "", /ROUTE_TEST_ABSENT_KEY/);
+});
+
+test("a recording whose fixture prompt has moved is reported, not scored", async () => {
+  const kase = { id: "moved", outcome: "silence", prompt: "the new prompt", expected: [] };
+  const out = await run({
+    cases: [kase],
+    readRecorded: () => ({
+      id: "moved",
+      model: "m",
+      probabilities: { none: 0.9 },
+      reason: "none",
+      criteria: ["none"],
+      promptDigest: "0000000000000000",
+    }),
+  });
+  assert.equal(out.adjudicated.results.length + out.unadjudicated.results.length, 0);
+  assert.equal(out.stale.length, 1);
+  assert.match(report(out), /stale recordings/);
+});
+
