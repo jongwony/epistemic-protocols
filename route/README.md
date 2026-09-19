@@ -4,6 +4,13 @@ Route the accumulated session context to the core epistemic protocol whose defic
 
 > [한국어](./README_ko.md)
 
+> **Experimental.** Two distinct things, and they are not the same promise:
+>
+> - **The contract can change without a deprecation path.** The directive's wording, the injected table's shape, the hook set, the config's fields and the name of the variable that arms the advisory channel have all moved between releases and may move again. Pin a version if you are depending on any of them.
+> - **The advisory channel is unvalidated.** Its fixture labels ship unadjudicated, and the one paired-agent run to date found no net gain and one decision spoiled that the unaided agent had got right. It ships with no key set for that reason. Read `evals/README.md` before drawing anything from its numbers.
+>
+> The other hooks — the session-start table, the per-prompt directive, the premise index — touch no network and are the settled part of this plugin. *Experimental* above is about the contract's stability for them, and about both the contract and the evidence for the advisory channel.
+
 ## What is Route?
 
 Each epistemic protocol's own description names the interaction deficit that protocol resolves. Two things stand between that and an invocation, and only one of them is the moment. The other is the catalog: a host's loaded-skills listing may carry each skill's description, or it may carry the command identifiers alone, and where it carries identifiers alone the agent on the loop holds no statement of what deficit any protocol resolves. A screen phrased as *does the context show a deficit some loaded protocol resolves* then asks for a match against a catalog that is not in context at prompt time — and never fires.
@@ -107,7 +114,14 @@ The estimator is fitted to prose in each script rather than to a document mixing
 
 **Arming it.** Put the key in `ROUTE_ADVISORY_KEY`, the environment variable `config/evaluator.json` names. That is the whole of it — the file carries no on switch, because a file inside the plugin checkout is the wrong place for one: it is tracked by git, so turning it on means editing a tracked file under the install cache, and a plugin update reverts that edit without saying so.
 
-**The variable is this channel's, not the vendor's, and that is deliberate.** Naming it after System One would have made the switch a credential you may already hold for something else — an account, a script, an earlier fixture run — and the channel would arm itself on an upgrade, off a key you set for another reason. A name only this channel uses cannot do that: setting it is a decision about this hook and nothing else, and the failure direction runs the safe way, since a plugin update that restores this file leaves an unset variable rather than reconnecting a live one. If you hold a System One key under another name, this hook does not read it until you copy it here.
+**What this project counts as consent — a policy, not an inference about you.** A System One key in `ROUTE_ADVISORY_KEY` while this plugin is installed and enabled is taken as consent for this channel to send the conversation to System One. That is a standard this project sets, not a reading of what your environment implies: nothing here inspects what else on your machine may hold a key or why.
+
+Two states withhold that consent, and both are mechanical — you can check either without trusting a claim:
+
+- **the variable is unset**, so the hook returns before a request is built
+- **the plugin is disabled**, so none of its hooks run at all
+
+Withhold consent by one of those two, not by editing `apiKeyEnv` to a dead name. **On the shipped binding** — `apiKeyEnv` left as it ships — a plugin update that restores `config/evaluator.json` leaves the variable unset rather than reconnecting a live one, so the file returning to its shipped state cannot arm the channel. Repoint `apiKeyEnv` and that no longer holds: the edit is to a git-tracked file under the install cache, an update reverts it, and a key still sitting in `ROUTE_ADVISORY_KEY` is reconnected by the restore.
 
 What the file carries is where to send and how much; whether to send is the variable. The config carries no secret and never should; the key belongs in your own credential store, and the binding between the two belongs on your own rules surface rather than in this repository. Be aware of what the key turns on: **the conversation is sent to the configured endpoint on every prompt.** Cost is on the evaluator's side, not your context — a call across five options billed 455 input and 57 output tokens, so roughly 90 input tokens per option; one request carries every option and every question, and the vendor's guidance is that adding questions barely moves the response time.
 
