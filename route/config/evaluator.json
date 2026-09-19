@@ -7,5 +7,5 @@
   "timeoutMs": 2000,
   "displayCutoff": 0.25,
   "maxNames": 3,
-  "stateTokenBudget": 28000
+  "stateTokenBudget": 24000
 }

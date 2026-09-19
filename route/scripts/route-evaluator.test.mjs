@@ -16,6 +16,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
   LABEL,
+  NONE,
   advise,
   buildCriteria,
   buildRequest,
@@ -100,7 +101,7 @@ test("cards are built from declared material, and say nothing about each other",
 test("the answer space carries an explicit none", () => {
   const criteria = buildCriteria(PROTOCOLS);
   assert.ok("none" in criteria);
-  assert.match(criteria.none, /supports none of the listed protocols/);
+  assert.match(criteria.none, /No listed protocol's deficit is present/);
   const body = JSON.parse(buildRequest(CONFIG, "p", criteria));
   assert.equal(body.questions.deficit.type, "choice");
   assert.equal(body.model, "test-model");
@@ -252,13 +253,9 @@ test("clean strips the harness wrappers and this plugin's own injections", () =>
 });
 
 test("the token estimate charges CJK more than latin", () => {
-  // Measured against the endpoint: Korean ran 1.84 chars/token and English
-  // 3.99, so a single ratio is wrong by more than double on one of them.
   const ko = estimateTokens("\uAC00".repeat(100));  // Hangul syllable
   const en = estimateTokens("a".repeat(100));
   assert.ok(ko > en, `${ko} should exceed ${en}`);
-  assert.ok(ko >= 50 && ko <= 60, `CJK estimate ${ko} off the measured rate`);
-  assert.ok(en >= 25 && en <= 30, `latin estimate ${en} off the measured rate`);
   assert.equal(estimateTokens(null), 0);
 });
 
@@ -469,3 +466,45 @@ test("the request built from a transcript on disk carries turns, not tools", () 
 function body_includes(obj, needle) {
   return JSON.stringify(obj).includes(needle);
 }
+
+test("the token estimate errs high on CJK, because erring low sends nothing", () => {
+  // Measured against the endpoint by reading `usage.input_tokens` back: Korean
+  // prose runs near 1.2 characters per token, Latin near 4. A first pass fitted
+  // the CJK rate to this repository's Korean README — a file carrying markdown,
+  // code spans and English identifiers — and undercounted real Korean by about
+  // half, which put a request over the endpoint's state ceiling and turned every
+  // prompt in a Korean session into a silent `400`.
+  const hangul = String.fromCharCode(0xac00);  // one Hangul syllable
+  const ko = estimateTokens(hangul.repeat(1000));
+  const en = estimateTokens("a".repeat(1000));
+  assert.ok(ko >= 820, `CJK estimate ${ko} must not fall under the measured 820`);
+  assert.ok(en >= 250, `latin estimate ${en} must not fall under the measured 250`);
+  assert.ok(ko <= 950 && en <= 320, "an estimate this high wastes the budget");
+});
+
+test("the shipped budget leaves room under the endpoint's state ceiling", () => {
+  // 32k of state plus the longest question, and the options are part of that
+  // question — roughly 1.6k for the protocols installed today, more as they are
+  // added. The default is set with that growth in mind.
+  const file = new URL("../config/evaluator.json", import.meta.url);
+  const raw = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(raw.enabled, false, "the channel still ships disabled");
+  assert.ok(
+    Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget <= 26000,
+    `budget ${raw.stateTokenBudget} leaves too little room under the 32k ceiling`,
+  );
+});
+
+test("the none option is worded for the session, not for the prompt alone", () => {
+  // The state carries the conversation now. A `none` criterion telling the
+  // evaluator to disregard the session contradicts the question that asks it
+  // to read one, and the contradiction cost accuracy in both directions.
+  const criteria = buildCriteria([
+    { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" },
+  ]);
+  const none = criteria[NONE];
+  assert.equal(typeof none, "string");
+  assert.ok(!/\bthis prompt\b/i.test(none), "the none option must not be scoped to the prompt");
+  assert.ok(!/say nothing about the rest of the session/i.test(none));
+  assert.ok(/session/i.test(none), "it names what it is about");
+});

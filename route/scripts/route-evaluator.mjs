@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * UserPromptSubmit hook — an advisory line naming protocols the prompt may
+ * UserPromptSubmit hook — an advisory line naming protocols the session may
  * fit, from a constrained-output evaluator. Disabled unless
  * config/evaluator.json says otherwise.
  *
@@ -18,11 +18,12 @@
  * It reinforces and never replaces. It rides its own hook entry beside
  * route-prompt.mjs rather than inside it, so a timeout here cannot take the
  * static directive down with it; and the directive goes out whatever this
- * says, including when it says nothing. That matters more than it looks:
- * `none` is an answer about the prompt this hook was handed, not a finding
- * that the session holds no deficit — the accumulated context that Route
- * actually matches against is not in this hook's reach, and neither is a
- * deficit that surfaces later in the turn.
+ * says, including when it says nothing. That still holds with the
+ * conversation in state: `none` is an answer about what this hook assembled
+ * and offered, not a finding that the session holds no deficit. What the walk
+ * dropped, what the budget cut, a deficit that surfaces later in the turn, and
+ * a protocol the harness loaded that disk does not show — none of those are in
+ * the answer, and the directive is what covers them.
  *
  * The cards are built from each protocol's own declared material — its
  * deficit, the resolution it yields, and its frontmatter description. No
@@ -42,9 +43,9 @@
  * work returned inquire 0.43 / sublate 0.42 at confidence 0.29 on a real
  * prompt where both did fit.
  *
- * Every shortfall — disabled, no config, no key, timeout, non-200,
- * malformed body, no candidates, `none` on top — yields "" and writes
- * nothing. Nothing here throws. Zero external dependencies: Node.js
+ * Every shortfall — disabled, no config, no key, timeout, non-200 (a state
+ * over the endpoint's ceiling answers 400), malformed body, no candidates,
+ * no name outranking `none` — yields "" and writes nothing. Nothing here throws. Zero external dependencies: Node.js
  * standard library only.
  */
 
@@ -60,8 +61,17 @@ const NONE = "none";
 // The option that lets the evaluator decline. Without one, an answer space
 // of protocols alone forces a pick from a list that may fit nothing, which
 // is the failure the vendor's own guidance names for a closed option set.
+// Worded for the session, because the session is what is now in `state`. The
+// first version of this line was written when only the prompt was sent, and it
+// ended "Say nothing about the rest of the session" — which, once the
+// conversation went into state, instructed the evaluator to disregard the very
+// thing the question asks it to read. Measured on one deficit case and one
+// control: correcting the contradiction moved `none` on the deficit case from
+// 0.48 to 0.24 while raising it on the control from 0.93 to 0.99. Both
+// directions improved, which is what removing a contradiction looks like —
+// unlike tuning, which trades one against the other.
 const NONE_CRITERION =
-  "This prompt supports none of the listed protocols. Say nothing about the rest of the session.";
+  "The session is proceeding on settled ground: what to do next, and what would settle it, are already determined. No listed protocol's deficit is present.";
 
 function configFile() {
   return path.join(pluginRoot(), "config", "evaluator.json");
@@ -84,7 +94,7 @@ function loadConfig(file = configFile()) {
     stateTokenBudget:
       Number.isInteger(raw.stateTokenBudget) && raw.stateTokenBudget > 0
         ? raw.stateTokenBudget
-        : 28000,
+        : 24000,
   };
 }
 
@@ -95,12 +105,22 @@ const CJK =
 
 /**
  * What a string is likely to cost, without a tokenizer. Measured against the
- * endpoint on this repository's own prose: Korean ran 1.84 characters per
- * token and English 3.99, so one ratio is wrong by more than double on
- * whichever language it was not fitted to. These are the reciprocals, rounded
- * against the budget rather than toward it. The server enforces the real
- * limit; this only decides how much to offer it, and offering too much fails
- * closed to "" like every other shortfall here.
+ * endpoint by sending prose and reading `usage.input_tokens` back: Latin text
+ * runs near 4 characters per token, Korean prose near 1.2. One ratio is wrong
+ * by more than triple on whichever of the two it was not fitted to, so the two
+ * are charged separately.
+ *
+ * Fit to PROSE in each script, not to a document mixing them. A first pass
+ * calibrated on this repository's Korean README read 1.84 characters per token
+ * and set the CJK rate from it — but that file carries markdown, code spans
+ * and English identifiers, which are Latin-rate text inflating the average. On
+ * Korean sentences the same rate undercounted by about half, so a budget set
+ * under the endpoint's ceiling produced a request over it, and the channel
+ * answered every prompt in a Korean session with `400 max_tokens_exceeded` —
+ * silently, because a shortfall here is "".
+ *
+ * Erring high is therefore the safe direction: an overestimate offers less
+ * conversation than it could, an underestimate offers none at all.
  */
 function estimateTokens(text) {
   if (typeof text !== "string") return 0;
@@ -110,7 +130,7 @@ function estimateTokens(text) {
     if (CJK.test(ch)) cjk += 1;
     else rest += 1;
   }
-  return Math.ceil(cjk * 0.56 + rest * 0.27);
+  return Math.ceil(cjk * 0.85 + rest * 0.27);
 }
 
 /**
