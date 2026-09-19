@@ -45,7 +45,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
+import { EVAL_KEY_ENV, advise, buildCriteria, loadConfig, namesFrom } from "./route-evaluator.mjs";
 import { deriveProtocols, isMain } from "./route-protocols.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -53,10 +53,6 @@ const EVALS = path.join(HERE, "..", "evals");
 const CASES = path.join(EVALS, "cases", "cases.json");
 const RECORDED = path.join(EVALS, "recorded");
 const OUTCOMES = ["silence", "singleton", "several", "monitor"];
-
-// This harness's own key variable. It is not the one config/evaluator.json
-// names, and nothing falls back from one to the other.
-const EVAL_KEY_ENV = "ROUTE_EVAL_API_KEY";
 
 /** Short content hash — equality of the question, not its contents. */
 function digest(text) {

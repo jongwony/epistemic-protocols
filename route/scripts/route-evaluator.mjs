@@ -45,6 +45,12 @@ import { DIRECTIVE } from "./route-prompt.mjs";
 
 const LABEL = "[route advisory — not a /route outcome]";
 const NONE = "none";
+
+// Reserved for the fixture harness (route-evaluator-eval.mjs), which reads it
+// instead of the session channel's variable. It lives here because this is the
+// side that has to refuse it: a binding naming it would route the harness's
+// key back into the session channel and undo the separation.
+const EVAL_KEY_ENV = "ROUTE_EVAL_API_KEY";
 // Both response readers below accumulate into memory before parsing, so they
 // need a ceiling that does not depend on the peer behaving.
 const MAX_BYTES = 64 * 1024;
@@ -133,6 +139,7 @@ function loadConfig(file = configFile()) {
   const endpoint = typeof raw.endpoint === "string" ? raw.endpoint : "";
   const apiKeyEnv = typeof raw.apiKeyEnv === "string" ? raw.apiKeyEnv : "";
   if (!endpoint.startsWith("https://") || !apiKeyEnv) return null;
+  if (apiKeyEnv === EVAL_KEY_ENV) return null;
   return {
     endpoint,
     apiKeyEnv,
@@ -595,6 +602,7 @@ function render(advisory, eventName = "UserPromptSubmit") {
 
 export {
   CEILING,
+  EVAL_KEY_ENV,
   INSTRUCTIONS,
   LABEL,
   MARGIN,
