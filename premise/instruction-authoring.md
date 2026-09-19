@@ -54,7 +54,7 @@ Remove the candidate wholly or to a reduced form, and deliberately exercise its 
 
 Report only the readers and conditions actually exercised. Aim at readers on whom the obligation can surface: both readers prone to the guarded error and readers capable of prematurely closing a question that should remain open. Unexercised readers block a universal-removability claim, but do not establish a reason for retention.
 
-Outside the exercised scope, a deletion remains a probe. Leaving it in place requires a route for observed failure to reach someone able to restore it; that route is monitoring, not a successful result. Keep the removed wording and derivation in the ledger so a failed probe is recoverable.
+Outside the exercised scope, a deletion remains a probe. Leaving it in place requires a route for observed failure to reach someone able to restore it; that route is monitoring, not a successful result. Keep the removed wording and its derivation where a restoration can reach them, so a failed probe is recoverable.
 
 Run an ablation only where failure can be observed without committing an unrecoverable consequence, or where the consequence is recoverable. If that bound or the removal's recoverability is absent, inspect by other means or retain the entry pending an individually justified removal.
 
@@ -79,10 +79,6 @@ Two instructions conflict when both are live, bind at the same situation, and ca
 Do not infer from a run under conflicting instructions that either instruction independently governed it. Re-derive the obligation and remove the conflicting prescription rather than preserving two apparent authorities through cosmetic reconciliation. A more specific repair rule governs its own domain; `gate-design.md` governs adversarial guard consistency.
 
 When an instruction conflicts with live context, derive who may settle the conflict from `recognition-and-authority.md`. Relay a response already fixed by citable ground, exercise an applicable grant within its limits, and leave an unentrusted judgment with its holder. `approach-verification.md` applies this to contradicted task premises.
-
-## Ledger/State Separation
-
-At write time, route rationale, provenance, trade-offs, and rejected alternatives to the project's canonical ledger, whose binding the adopting project declares once. Keep state surfaces for operative contracts and claims coupled to a channel that checks them. An uncoupled assertion must gain that channel, move to the ledger, or be explicitly advisory. The most frequently loaded surfaces carry operative instructions only.
 
 ## Currency is not Support-Integrity (Derived)
 

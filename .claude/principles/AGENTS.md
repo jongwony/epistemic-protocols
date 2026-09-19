@@ -25,4 +25,4 @@ This directory is not an archive (content remains canonical and current) and not
 
 The demotion zone reduces auto-load memory pressure (Epistemic Cost Topology applied to the loading dimension) while keeping the demoted content canonical and editable. The split is one-directional by default: there is no formal re-promotion pathway. A demoted section returning to `.claude/rules/` is a contributor-judgment decision per case, not an inscribed criterion.
 
-Per-section demotion history — which section moved from where, when, and why — is not restated here; it is recorded in the git record (commit messages, PR bodies), per this project's Ledger binding (`AGENTS.md` §Settled Directions).
+Per-section demotion history — which section moved from where, when, and why — is not restated here; it is recorded in the commit that landed the move, per this project's Ledger binding (`AGENTS.md` §Settled Directions).
