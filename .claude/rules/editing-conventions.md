@@ -2,9 +2,6 @@
 
 ## Git Conventions
 
-- **Commit message**: `type(scope): Korean description` — type ∈ {feat, fix, refactor, style}, scope = plugin name
-- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
-- **PR body language**: Korean (hook-enforced)
 - **Release tag**: CalVer `v{YYYY}.{MM}.{DD}[.{N}]` — tag push triggers CI release (`gh release create --draft`)
 
 ## Editing Guidelines
