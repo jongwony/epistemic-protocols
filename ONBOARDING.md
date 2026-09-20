@@ -63,7 +63,6 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/analogia:ground` — validate abstract-concrete mappings
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, on a recorded acceptance where none compiles, or on a recorded reservation where a judgment rather than a check settles it
-- [ ] [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) — one-shot commit + push + PR + task registration. Optional convenience; lives in the external `jongwony/ClaudePanel.spoon` plugin, not this repo. Plain `git push` + `gh pr create` also works.
 
 ## Contribution Workflow
 
@@ -73,7 +72,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
-7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
+7. **Ship** — `git push -u origin <branch>` then `gh pr create`; PR body language is Korean
 8. **Address review** — run `/formal-review` for the fixed formal-triple review of protocol changes, which posts a single consolidated PR comment, and `/review-loop` for code review; use `/gh-address-comments` to respond to posted comments
 9. **Merge** — the maintainer merges manually via web after final review
 
