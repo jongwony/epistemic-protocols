@@ -47,5 +47,5 @@ where the morphism's unit of presentation changed, an option set indexed on one 
 where it is already indexed on another, a grounding entry corrected to the operation it marks.
 `.claude/rules/type-category-convention.md` settles this for TYPES specifically; this rule puts
 the same question to Rules, TOOL GROUNDING, CONVERGENCE, and gate option sets.
-An addition considered here and not made is a rejected alternative, and the ledger binding
-`AGENTS.md` §Settled Directions states already routes it.
+An addition considered here and not made is a rejected alternative, and Ledger binding in
+`AGENTS.md` §Settled Directions already routes it.
