@@ -109,7 +109,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | **Reviewing a change** | |
 | `/review-loop` | Drive a change through review until every finding is verified against the codebase and disposed of, re-reviewing each round |
 | **Auditing instruction prose** | |
-| `/place` | An instruction file keeps growing — route each clause to where it belongs (a load tier, the ledger, or deletion) |
 | `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
 | **Steering the project** | |
