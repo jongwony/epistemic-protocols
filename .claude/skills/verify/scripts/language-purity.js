@@ -6,7 +6,6 @@
  *   - **\/README_ko.md            Korean README localizations
  *   - .claude/skills/release/**   Release notes skill (Korean by purpose)
  *   - docs/**                     Repo documentation reports
- *   - intent/**                   Per-change intent files (Korean by purpose)
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
  *
  * Severity: warn (Stage 1 surface posture; fail promotion gated on Stage 2
@@ -38,7 +37,6 @@ const WHITELIST_PATTERNS = [
   /(^|\/)docs(\/|$)/,                     // repo and per-plugin docs
   /(^|\/)references(\/|$)/,               // plugin contributor references
   /^design(\/|$)/,                        // root design docs
-  /^intent(\/|$)/,                        // per-change intent files (Korean by purpose)
   /^examples(\/|$)/,                      // root examples
   /^\.claude\/rules\/editing-conventions\.md$/,
 ];
