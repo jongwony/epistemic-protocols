@@ -27,17 +27,17 @@ what was decided about each, the alternative rejected, the friction that admitte
 — each is a then-record and goes in the commit message of the change (`AGENTS.md` §Settled
 Directions, Ledger binding), and the surface keeps only what asserts now.
 
-**The direction the change is being built toward goes in `intent/`, not in the commit.** A
-commit message is read by someone who goes looking; a session picking the branch up afterwards
-does not know to look. So what the change is *for* — the problem, the outcome wanted, the
-constraints it is being built under, and what is still open — goes in `intent/<slug>.md` on
-the branch, where `AGENTS.md` §Settled Directions, Intent binding sends every session that
-opens it. Revise that file as the direction is corrected, in the same commit as the
-correction.
+**The direction the change is being built toward goes in the unit's record, not in the
+commit.** A commit message is read by someone who goes looking; a session picking the branch
+up afterwards does not know to look. So what the change is *for* — the problem, the outcome
+wanted, the constraints it is being built under, and what is still open — goes in the record
+`AGENTS.md` §Settled Directions, Intent binding names, where a session that opens the branch
+reads it. When the direction is corrected, write the correction there as a decision line at
+the moment it is made.
 
-**The order the obligations bind in.** Read the premise sections above, and the branch's
-`intent/` file where one exists. Audit the surface as opened, and write down the subtraction
+**The order the obligations bind in.** Read the premise sections above, and the record the
+branch points at. Audit the surface as opened, and write down the subtraction
 candidates with the obligations each carries. Only then settle what the change adds, letting
 the audit shape it. Route each sentence as it is written. Run `/verify` before the commit, put
-the audit's outcome in the commit message, and leave the branch's `intent/` file saying what
-the change is still being built toward.
+the audit's outcome in the commit message, and leave the unit's record saying what the change
+is still being built toward.
