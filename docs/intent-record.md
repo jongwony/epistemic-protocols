@@ -17,13 +17,13 @@ Write these in order. Omit a section only when it would be empty, and say nothin
 ## Lifecycle
 
 - **Created** before a session other than the author's picks the work up, and normally when the direction is first settled enough to write down.
-- **Revised** by a decision line on the record at the moment the direction changes — one line saying what was chosen, why, and what was set aside. The sections above are not rewritten; the line is what a later reader dates the change by.
+- **Revised** by a decision line on the record at the moment the direction changes — one line saying what was chosen, the reason in a clause, and what was set aside by name. The sections above are not rewritten; the line is what a later reader dates the change by, and it is the current direction, not its history: the derivation behind it goes to the commit that lands the change.
 - **Closed** by an explicit act, never by the last merge on its own. The close leaves a closing note on the record: what landed, the commits that carry its then-record, and what is still open. A follow-up unit born at the close carries a relation to this record and a pointer to the closing note, so its first session starts from the direction rather than from a person's memory.
 - **Kept.** The record is not deleted when the change lands. After the close it indexes the then-record; it no longer states a direction, and a session reads it as history.
 
 ## What does not go here
 
-- **A then-record.** Rationale for a decision already taken, a rejected alternative, the provenance of a value — these route to the commit message (`AGENTS.md` §Settled Directions, Ledger binding). The record points at those commits; it does not restate them.
+- **A then-record.** The derivation of a decision — the evidence weighed, the alternatives worked through, the provenance of a value — routes to the commit message (`AGENTS.md` §Settled Directions, Ledger binding). The decision line above keeps the choice and its one-clause reason because a reader needs those to act; it does not carry the derivation, and the record points at the commits that do.
 - **A standing convention.** Anything that keeps binding after the close belongs on a surface that survives it: `AGENTS.md`, a file under `.claude/rules/`, or a packaged `SKILL.md`.
 - **A transcript or a session dump.** The record carries the direction, not the deliberation that produced it. Point at the session and let the reader open it.
 - **State.** Progress, status, and whether a check is green are read from their source at need, never copied here.
