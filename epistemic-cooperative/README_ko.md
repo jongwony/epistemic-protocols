@@ -6,7 +6,7 @@
 
 ## Epistemic Cooperative란?
 
-인식론적 프로토콜 온보딩, 작업 orchestration, 그리고 결정 지점 유틸리티에 걸친 유틸리티 플러그인이다. 시작하는 자리이면서 — 체험 기반 프로토콜 학습, 이슈에서 형성하는 focused work unit — 동시에 몇몇 스킬은 그 자신의 특정 결정 지점에서 작동한다: 지시문 배치 감사, 초안된 게이트의 옵션 집합 검사, 리뷰를 수렴까지 끌고 가기.
+인식론적 프로토콜 온보딩, 작업 orchestration, 그리고 결정 지점 유틸리티에 걸친 유틸리티 플러그인이다. 시작하는 자리이면서 — 체험 기반 프로토콜 학습, 이슈에서 형성하는 focused work unit — 동시에 몇몇 스킬은 그 자신의 특정 결정 지점에서 작동한다: 초안된 게이트의 옵션 집합 검사, 리뷰를 수렴까지 끌고 가기.
 
 ### 스킬
 
@@ -18,7 +18,6 @@
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 — 프로젝트가 표방한 목표로 아티팩트를 수렴 | 적용된 수정 + 인계 + 수렴 trace |
-| `/place` | 배치 감사 — 지시문 산문의 절 각각을 다섯 목적지(로드 계층 셋, ledger, 삭제) 중 하나로 라우팅하고 집행 축을 설정 | 라우팅 보고서 — 라우트 블록 + 리포트 수준 발견 (읽기 전용) |
 | `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 재구성된 옵션 집합, 또는 검사가 닫지 못한 경우 수리 공간·다툼 있는 읽기·어느 쪽도 답이 아닌 두 집합 |
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
@@ -118,7 +117,6 @@ epistemic-cooperative/
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop 수렴 페이스 리뷰-resolve 루프
-    ├── place/SKILL.md            # /place 지시문 산문 배치 감사
     ├── gate-check/SKILL.md       # /gate-check 자문 검증 결정 게이트
     ├── white-bear/SKILL.md       # /white-bear 경쟁-대상 언급 프로즈 감사
     ├── zero-shot/SKILL.md        # /zero-shot 앵커링 예시 프로즈 감사
@@ -137,7 +135,6 @@ epistemic-cooperative/
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
 | 뭔가 어긋났는데 어떤 결핍인지 아직 이름 붙이지 못할 때 | `/probe` |
 | 모든 finding 이 처분될 때까지 변경을 리뷰로 끌고 갈 때 | `/review-loop` |
-| 지시문 산문의 한 절이 어디에 속하는지 정할 때 | `/place` |
 | 초안된 옵션 집합이 사용자에게 닿기 전에 검사할 때 | `/gate-check` |
 | 프로즈의 금지 프레이밍·앵커링 예시를 감사할 때 | `/white-bear`, `/zero-shot` |
 | 프로젝트 가이드 direction line 을 다시 도출할 때 | `/realign` |
@@ -150,7 +147,6 @@ epistemic-cooperative/
 /triage
 /triage #41 #52 #60
 /review-loop codex 123
-/place path/to/SKILL.md
 /goal-research <question>
 ```
 

@@ -1313,7 +1313,6 @@ describe('package.js CLI', () => {
         'induce.zip',
         'inquire.zip',
         'onboard.zip',
-        'place.zip',
         'preview.zip',
         'probe.zip',
         'realign.zip',
