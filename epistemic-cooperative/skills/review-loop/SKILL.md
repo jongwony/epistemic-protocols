@@ -258,8 +258,7 @@ so far, so the driving session records rather than re-derives it.
    its authorized basis; the verdict alone does not authorize retaining it. An
    adaptation-free pass needs no re-entry. After reconciliation and checks, including
    explicit unavailable-check limits, the writer commits to the settled landing for PR
-   scope and pushes where that landing has a remote, then returns. The driving session
-   obtains the full re-review.
+   scope and pushes where that landing has a remote, then returns.
 6. After a judgment returned to Phase 3 is settled, resume the pending step in the
    same apply pass with that answer.
 
