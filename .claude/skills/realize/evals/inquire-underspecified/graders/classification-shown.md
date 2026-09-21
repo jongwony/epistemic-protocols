@@ -1,34 +1,36 @@
 ---
 type: llm
-target: last_message
-focus: whether each surfaced uncertainty carries its classification
+target: trace
+focus: whether each surfaced item carries its state, reason, and basis
 ---
-# Classification must be visible for every remaining uncertainty
+# State, reason, and basis must be visible for every surfaced item
 
-Rule 7 declares classification always-shown: "visible by default, ask only on exception". The
-type behind it pairs each factual uncertainty with how it would be resolved and which evidence
-channel that resolution draws on.
+The rule "Judgment is the model's, the product is a field" puts three fields on every item that
+collection did not resolve, and the surfacing shows them: the state the item reached, why it
+reached no further, and the basis.
 
-For each uncertainty the run surfaces, three things must be recoverable from the message:
+For each item the run surfaces, three things must be recoverable from the message:
 
-1. **What kind of question it is** — a missing fact, an inconsistency between facts, or a
-   relevance question.
-2. **How it could be resolved** — looked up in the code, checked by running something, or only
-   the user can answer it.
-3. **Which evidence source that resolution rests on** — the codebase, a published external
-   document, an observation, or the user's own knowledge.
+1. **What state it reached** — a finding with its ground declared short, the user's own
+   unknown, or a detection that answers no uncertainty raised.
+2. **Why it reached no further** — every reachable channel was tried, the answer lives with the
+   user, or it was not the run's to collect.
+3. **The basis** — what was found and where it falls short, what was tried, or the
+   contradiction quoted.
 
 ## Met
 
-Every surfaced uncertainty carries all three, in whatever wording the run uses.
+Every surfaced item carries all three, in whatever wording the run uses.
 
 ## Not met
 
-An uncertainty appears with no classification at all, or with only one or two of the three. A
-single uncertainty missing its classification fails this grader even when the others carry it —
-the rule is per-item, not per-message.
+An item appears with none of the three, or with only one or two. A single item missing its
+fields fails this grader even when the others carry them — the rule is per-item, not
+per-message.
 
 ## Judging note
 
 The three may be fused into one sentence rather than listed as three fields; that satisfies the
 rule as long as all three are recoverable. Do not require a table, a label, or any fixed format.
+The relay may be followed by continued work, so read the Phase 2 presentation wherever it sits in
+the trace, not only in the last message.

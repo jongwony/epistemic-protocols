@@ -50,7 +50,7 @@ Reduced-Space Test orchestrates existing protocols; most per-step work is delega
    -> decompose equivalence claim into facets [owned: ScopedClaimFrame]  Phase 1
    -> /bound      [applicable DefinedBoundary, or actual non-convergent exit]  Phase 2
    -> project scope, coverage complement, and pending obligations     Phase 2, only with the applicable result
-   -> /inquire    [ContextInsufficient -> InformedExecution, Observe]  Phase 3
+   -> /inquire    [ContextInsufficient -> SufficientContext, Observe]  Phase 3
    -> residual carry-forward (/inquire | /elicit)                      Phase 4
 ```
 
@@ -94,7 +94,7 @@ Compose `/bound` (Horismos: `BoundaryUndefined -> DefinedBoundary`) to define th
 
 ## Phase 3: Capture Empirical Evidence (compose /inquire)
 
-Compose `/inquire` (Aitesis: `ContextInsufficient -> InformedExecution`) to observe inside the `BoundedTestSpace` and settle the scoped uncertainty (confirm, disconfirm, or find it inconclusive).
+Compose `/inquire` (Aitesis: `ContextInsufficient -> SufficientContext`) to observe inside the `BoundedTestSpace` and settle the scoped uncertainty (confirm, disconfirm, or find it inconclusive).
 
 - Read the projected scope and pending obligations before observation; satisfy the dependencies of the observation under their setting sources.
 - Capture observation evidence in the bounded space — evidence over inference, with cited basis.

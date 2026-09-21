@@ -119,7 +119,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 - [ ] Correct epistemic type signature declared:
   - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, DESIGN)
   - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
-  - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INQUIRE)
+  - Aitesis: ContextInsufficient → SufficientContext (AI-guided, INQUIRE)
   - Analogia: MappingUncertain → ValidatedMapping (AI-guided, GROUND)
   - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, INDUCE)
   - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE-CYCLE)

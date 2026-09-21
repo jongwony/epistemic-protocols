@@ -86,10 +86,10 @@ describe('gate-answer-reference', () => {
   it('rejects dangling TYPES, MODE STATE, and inline type references', () => {
     const root = copyWorkingTree();
     try {
-      const aitesisPath = path.join(root, 'aitesis/skills/inquire/SKILL.md');
-      const aitesis = readFileSync(aitesisPath, 'utf-8');
-      assert.ok(aitesis.includes('→ Stop → A '), 'Aitesis mutation anchor moved');
-      writeFileSync(aitesisPath, aitesis.replace('→ Stop → A ', '→ Stop → Zeta '));
+      const anamnesisPath = path.join(root, 'anamnesis/skills/recollect/SKILL.md');
+      const anamnesis = readFileSync(anamnesisPath, 'utf-8');
+      assert.ok(anamnesis.includes('→ Stop → U '), 'Anamnesis mutation anchor moved');
+      writeFileSync(anamnesisPath, anamnesis.replaceAll('→ Stop → U ', '→ Stop → Zeta '));
 
       const horismosPath = path.join(root, 'horismos/skills/bound/SKILL.md');
       const horismos = readFileSync(horismosPath, 'utf-8');

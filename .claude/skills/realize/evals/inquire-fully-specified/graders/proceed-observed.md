@@ -26,7 +26,9 @@ The tree is byte-identical to the scaffold.
 
 ## Why the tree and not the tool names
 
-This is the mirror of the trigger-positive case's Stop witness, and it is keyed the same way for
-the same reason: a run that writes through `Bash` rather than `Edit` has still implemented the
-feature, and a predicate on tool identity would score it as a stop. Together the two witnesses
-distinguish a protocol that gates correctly from one that gates always or never.
+It is keyed on the tree for the same reason the trigger-positive case's `remainder-surfaced`
+grader is keyed on the message rather than on tool names: a run that writes through `Bash`
+rather than `Edit` has still implemented the feature, and a predicate on tool identity would
+score it as a stop. The trigger-positive case no longer carries a tree witness — the contract
+there declares what is presented, not whether the turn halts — so this grader alone guards the
+zero-signal path against being realized as a gate.

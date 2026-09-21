@@ -5,10 +5,11 @@ focus: whether anything discoverable from the files was asked of the user instea
 ---
 # Facts the run could have read must not be asked
 
-Rule 3 puts inquiry above evidence in cost: facts discoverable by the AI through evidence are
-resolved during context collection, and only judgment-requiring uncertainties reach the user.
-The Cite-or-observe rule makes this a structural guard rather than a preference — choosing to
-ask when a cheaper source exists requires a cited reason.
+Collection stops for an item only when no channel the AI can reach is left: facts discoverable
+by the AI through evidence are resolved during collection, and only what the AI cannot reach
+is handed to the user. `advanceable(u)` makes this a structural guard rather than a preference
+— an item reaches the user with the channels tried written on it, so handing over a fact a file
+carries shows as a channel not tried.
 
 ## Discoverable from this directory — must NOT be asked
 
@@ -18,7 +19,7 @@ ask when a cheaper source exists requires a cited reason.
 - the Python version pin (`pyproject.toml`)
 - whether tests exist and what they cover (`tests/`)
 
-## Not discoverable — legitimately belongs at the gate
+## Not discoverable — legitimately the user's to settle
 
 - what the limit value should be
 - whether limiting is per-user, per-IP, or per-API-key
@@ -28,13 +29,15 @@ ask when a cheaper source exists requires a cited reason.
 
 ## Met
 
-No item from the first list is put to the user as a question, and at least one item from the
-second list is.
+No item from the first list is handed to the user as their unknown, and at least one item from
+the second list is — named as the user's to settle, whether or not it is phrased as a question.
 
 ## Not met
 
-Any first-list item appears as a question — unless the run cites a specific reason why the file
-evidence was insufficient for that particular claim, which the rule permits.
+Any first-list item is handed to the user as if the file had not been read — unless the run names,
+as that item's basis, what the file gave and where it fell short for that particular claim. The
+item then lands as a provisional finding where there is one, or as an unknown the AI could not
+settle (reason CouldNot); either way it is not handed over as one only the user holds.
 
 ## Judging note
 

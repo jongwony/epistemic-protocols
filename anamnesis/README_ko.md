@@ -26,7 +26,7 @@ Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고
 
 | 프로토콜 | 개시자 | 타입 시그니처 |
 |----------|--------|---------------|
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Anamnesis** | **AI-guided** | **`RecallAmbiguous → RecalledContext`** |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |

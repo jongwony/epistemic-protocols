@@ -18,7 +18,7 @@
     {
       "name": "aitesis",
       "source": "./aitesis",
-      "description": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)"
+      "description": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)"
     },
     {
       "name": "analogia",

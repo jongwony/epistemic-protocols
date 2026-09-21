@@ -590,14 +590,14 @@ const GRADERS = {
     return parsed.skillInvocations.some(
       (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`));
   },
-  // Phase 2 is declared present-and-stop; the unchanged tree is this case's witness
-  // that Stop occurred. The bytes are not inspected for artifact quality.
+  // Phase 0 declares relay-and-proceed; mutation witnesses that this implementation
+  // prospect crossed Proceed. Correctness and completeness of the change are out of scope.
   // Runs write through Bash as readily as through Write, so a predicate keyed on
   // tool identity misses the writes it exists to catch — and misses them in every
   // arm alike, which makes it look stable while measuring nothing.
-  stop_observed: ({ mutated }) => mutated === false,
-  // Phase 0 declares relay-and-proceed; mutation witnesses that this implementation
-  // prospect crossed Proceed. Correctness and completeness of the change are out of scope.
+  // The trigger-positive case carries no tree witness: /inquire's Phase 2 is a relay
+  // that presents and proceeds, so whether the tree changed afterwards is the
+  // harness's to decide, not the contract's. Its handoff is a manual grader.
   proceed_observed: ({ mutated }) => mutated === true,
   // A read occurred somewhere in the turn. This does not establish its order relative
   // to inquiry; that semantic ordering remains a transcript-review item.
@@ -607,14 +607,14 @@ const GRADERS = {
 };
 
 const CASE_PREDICATES = {
-  'inquire-underspecified': ['collection_observed', 'stop_observed', 'completed'],
+  'inquire-underspecified': ['collection_observed', 'completed'],
   'inquire-fully-specified': ['proceed_observed', 'completed'],
 };
 
 const CASE_MANUAL_REVIEWS = {
   'inquire-underspecified': [
     'collection-precedes-inquiry', 'cheap-evidence-not-asked',
-    'classification-shown', 'option-coproduct',
+    'classification-shown', 'option-coproduct', 'remainder-surfaced',
   ],
   'inquire-fully-specified': [
     'no-fabricated-uncertainty', 'no-gate', 'sufficiency-stated',
