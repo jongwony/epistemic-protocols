@@ -11,6 +11,10 @@ process's authentication and advertised skills in that environment.
   matching invocation evidence, and launch the read-only review below. Confirm the
   selected `/code-review` implementation from the print-mode session's startup and
   skill expansion; a matching plugin display name alone leaves that identity open.
+- Writer (Phase 4): this host exposes no full-context fork of the driving
+  conversation, only a fresh-context child. The deciding fact is that capability,
+  so the driving session holds the scan and the brief route applies; the child
+  writer returns the apply trace like any other.
 
 ## Claude print-mode call
 

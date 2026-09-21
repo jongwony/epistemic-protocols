@@ -206,16 +206,19 @@ what this unit carries. A rising count changes neither the criterion nor source 
 For PR scope, settle any pending landing choice under Phase 0 and prepare that
 destination through [PR scope](references/pr-scope.md) before the first edit.
 
-The driving session settles disposition and hands the apply pass to a writer; where
-the host offers a full-context fork, one fork per apply pass is the default writer
-and carries steps 1, 4 and 5 below end to end; the host reference (for Claude Code,
-[Claude Code](references/host-claude-code.md) § Writer fork) names the fork and
-resume mechanism. Use a self-contained brief to a fresh low-cost writer only
-where the predicate and every site are already enumerated, so the brief carries no
-loop ground beyond them; use inline writing for parent-held risky actions or where
-the host offers no delegation.
+The driving session settles disposition and hands the apply pass to a writer, by
+the host's delegation capability. Where the host offers a full-context fork, one
+fork per apply pass is the default writer and carries steps 1, 4 and 5 below end
+to end; the host reference (for Claude Code, [Claude Code](references/host-claude-code.md)
+§ Writer fork) names the fork and resume mechanism. Where the host offers only a
+fresh-context delegate, the driving session performs step 1 itself and hands the
+enumerated predicate and screened sites to that writer in a self-contained brief,
+which then carries steps 4 and 5. Where the host offers no delegation, or an action
+is parent-held for risk, the driving session writes inline. Under every route the
+scan holder is whoever performs step 1, and the writer is whoever performs steps 4
+and 5; the apply trace is owed by the writer on every route.
 
-1. The writer scans planned change points, adjacent interactions, and repeated
+1. The scan holder scans planned change points, adjacent interactions, and repeated
    instances. Derive each fix's predicate from the violated invariant and verified cause.
    Trace relevant state through production, transfer, invalidation, and consumption,
    including transitions and interleavings; enumerate the predicate's sites. State the
@@ -227,7 +230,8 @@ the host offers no delegation.
    Sweep matching sites in this apply pass within the settled scope, reporting expansion.
 2. Risk is separate from Mechanical/Judgment classification. Route substrate actions
    to host permissions; an unsettled epistemic risk goes to the user for apply, defer,
-   or drop. Rejection blocks an edit not yet written.
+   or drop. A writer that cannot open that gate returns the risk to Phase 3 through
+   the same channel as a live judgment. Rejection blocks an edit not yet written.
 3. Repeated fix-induced follow-ups across consecutive rounds move judgment, not
    writing: the next apply pass returns its enumerated predicate and sites to Phase 3
    before writing. Return to autonomous apply after a review without such follow-ups.
@@ -251,13 +255,23 @@ the host offers no delegation.
    their screens. An adaptation-free pass needs no re-entry. After reconciliation and
    checks, including explicit unavailable-check limits, the writer commits to the
    settled landing for PR scope and pushes where that landing has a remote, then
-   returns the apply trace: per finding its predicate, the sites written and swept,
-   the check artifact and results with unexercised and unavailable limits, the fit
-   pass's adaptation and disposition, the commits or new head, and any live judgment
-   it could not settle. The driving session obtains the full re-review from that trace.
-6. After a judgment returned to Phase 3 is settled, resume the same writer with that
-   answer so it continues the pending step in the same apply pass. Screen any newly
-   included sites; a fit call already completed in that pass remains completed.
+   returns the apply trace, one block per finding:
+
+   ```
+   Predicate: the invariant the fix restores
+   Sites: written | swept
+   Checks: artifact → result; unexercised; unavailable: reason
+   Fit: adaptation → disposition
+   Discrepancies: write → reconciliation
+   Landing: commits | new head
+   Open: judgment or risk gate returned to Phase 3
+   ```
+
+   The driving session obtains the full re-review from that trace.
+6. After a judgment or risk gate returned to Phase 3 is settled, resume the same
+   writer with that answer so it continues the pending step in the same apply pass.
+   Screen any newly included sites; a fit call already completed in that pass
+   remains completed.
 
 ### Phase 5 — Re-review and stop on evidence
 
@@ -309,9 +323,9 @@ Landing: repair destination (PR only)
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
 limits, and unavailable-check reasons with that repair's Relay/Gated entry; keep this
-loop-side evidence distinct from the source-reported `Exercised` line. A writer's
-apply trace supplies that check evidence; the driving session records it rather than
-re-deriving it.
+loop-side evidence distinct from the source-reported `Exercised` line. The writer's
+apply trace supplies that check evidence, its Discrepancies line the write discrepancies
+and their reconciliation; the driving session records both rather than re-deriving them.
 Assign exactly one Relay/Gated home by whether the user was asked, including nested
 `/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
