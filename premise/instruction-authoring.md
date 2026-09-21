@@ -42,6 +42,8 @@ Compose context-specific values from durable principles at the point of need. Pl
 
 Opening an always-loaded instruction surface for revision puts its existing entries in scope. Establish subtraction candidates before settling additions, and let the obligations the audit exposes shape the change. Audit the surface as opened; a candidate produced by that audit does not recursively trigger another audit.
 
+A subtraction candidate is the smallest complete statement. Before accounting for a passage, mark each clause naming an action, a threshold, or a condition, restate it on the surface it binds, and treat the remainder as a candidate too. Read each restatement alone and restore as a subordinate clause the minimum context it needs; one that quietly supplies context the passage never stated still reads as correct, so the check is run rather than assumed. A passage whose candidates all reach the same destination then moves whole.
+
 For each candidate, account for directive force, boundary meaning, decision calibration, diagnostic detection, and legacy, migration, or fallback behavior. Name what survives and where, and what is intentionally retired.
 
 A named record containing no exercise of an entry justifies investigating its role. It establishes neither redundancy nor behavioral preservation; a missing execution record is missing evidence.
