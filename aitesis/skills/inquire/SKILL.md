@@ -169,7 +169,7 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 ## Rules
 
 - **Recognition over Recall**: Present each landed item with its state, reason, and basis, so the reader recognizes what remains rather than reconstructing it.
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
 - **Option-set relay test**: Surfacing is a relay: it presents and proceeds. An item lands where the material puts it; the user's answer, when it comes, is one more channel, not a gate this protocol holds.
 - **Judgment is the model's, the product is a field**: Which state an item reached and why are judged from the material, and the judgment is written into `state`, `reason`, and `basis` on the item. A sentence is not a substitute for an empty field.
 - **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and the item moves to its next channel. Only the user's answer disposes of an item, and a declaration of sufficiency reaches every unresolved item, observed or not.
