@@ -36,7 +36,7 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Deficit | `ContextInsufficient` | `ApplicationDecontextualized` |
 | Resolution | `SufficientContext` | `ContextualizedExecution` |
 
-Same axis (context fitness), opposite timing, opposite direction. Aitesis asks "do I have enough context to execute well?" — Epharmoge asks "does my execution actually fit the context?" They are complementary, not redundant.
+Same axis (context fitness), opposite timing, opposite direction. Aitesis asks "what can I reach on my own, and what is yours to settle?" — Epharmoge asks "does my execution actually fit the context?" They are complementary, not redundant.
 
 ## Protocol Flow
 

@@ -36,7 +36,7 @@
 | 결핍 | `ContextInsufficient` | `ApplicationDecontextualized` |
 | 해소 | `SufficientContext` | `ContextualizedExecution` |
 
-같은 축(context fitness), 반대 타이밍, 반대 방향. Aitesis는 "실행을 잘 하기 위한 충분한 맥락이 있는가?"를 묻고, Epharmoge는 "실행 결과가 실제로 맥락에 맞는가?"를 묻는다. 상호 보완적이지, 중복이 아니다.
+같은 축(context fitness), 반대 타이밍, 반대 방향. Aitesis는 "내가 스스로 닿을 수 있는 것은 무엇이고, 당신 몫은 무엇인가?"를 묻고, Epharmoge는 "실행 결과가 실제로 맥락에 맞는가?"를 묻는다. 상호 보완적이지, 중복이 아니다.
 
 ## 프로토콜 흐름
 

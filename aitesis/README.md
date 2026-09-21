@@ -30,7 +30,7 @@ Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Ai
 ## Protocol Flow
 
 ```
-Phase 0: Gate               → Scan context sufficiency (silent)
+Phase 0: Checkpoint         → Scan context sufficiency (silent)
 Phase 1: Collection          → Push each uncertainty through every channel the AI can reach; write its state, reason, basis
 Phase 2: Surfacing           → Hand back what remains — findings with their shortfalls, the user's unknowns, detections — and proceed
 Phase 3: Integration         → An answer, when it comes, reopens collection as one more channel

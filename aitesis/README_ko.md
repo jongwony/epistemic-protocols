@@ -30,7 +30,7 @@ Proplasma(`/preview`)는 방향 축의 Planning 클러스터 형제입니다: Ai
 ## 프로토콜 흐름
 
 ```
-Phase 0: Gate               → 맥락 충분성 스캔 (무성)
+Phase 0: Checkpoint         → 맥락 충분성 스캔 (무성)
 Phase 1: Collection          → 각 불확실성을 AI가 닿을 수 있는 모든 채널로 밀고, 상태·이유·근거를 적음
 Phase 2: Surfacing           → 남은 것을 돌려줌 — 근거 모자란 발견, 사용자의 Unknown, 탐지 — 그리고 진행
 Phase 3: Integration         → 답이 오면 하나의 채널로 수집이 다시 열림
