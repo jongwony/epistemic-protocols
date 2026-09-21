@@ -23,12 +23,6 @@ Write the prompt to a unique temporary directory (`mktemp -d`). Include:
   `EXERCISED:` on every verdict, and optional `DIRECTION:` with a falsifier after
   findings on a non-approval. Convey the mission-based severity calibration.
 
-Ask explicitly about closure across the whole changed artifact, not only hunks.
-Report what this call examined or executed and what it could not reach; a sandbox's
-capabilities do not establish exercise. Convey decisions descriptively and leave
-the reviewer free to flag a defect those decisions cause. Give it no prior fix
-statuses, dispositions, hypotheses, or requested verdict.
-
 ## Execution and collection
 
 Run through the host's supervised/background execution facility and wait for its

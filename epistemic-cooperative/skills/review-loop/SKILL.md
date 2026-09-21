@@ -262,8 +262,7 @@ so far, so the driving session records rather than re-derives it.
    settled landing for PR scope and pushes where that landing has a remote, then
    returns. The driving session obtains the full re-review.
 6. After a judgment returned to Phase 3 is settled, resume the pending step in the
-   same apply pass with that answer. Screen any newly included sites; a fit
-   call already completed in that pass remains completed.
+   same apply pass with that answer.
 
 ### Phase 5 — Re-review and stop on evidence
 
@@ -320,8 +319,7 @@ Assign exactly one Relay/Gated home by whether the user was asked, including nes
 `/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
 artifact state and disposition. Preserve write discrepancies and their reconciliation;
-carried reasons are records, while subsequent reviews detect findings fresh. A stacked
-approval covers captured base through the repair layer, not either PR alone.
+carried reasons are records, while subsequent reviews detect findings fresh.
 
 At every exit, present the accumulated dispositions and residual,
 including standing source limits. Read [exit handover](references/exit-handover.md)
