@@ -42,6 +42,8 @@ Compose context-specific values from durable principles at the point of need. Pl
 
 Opening an always-loaded instruction surface for revision puts its existing entries in scope. Establish subtraction candidates before settling additions, and let the obligations the audit exposes shape the change. Audit the surface as opened; a candidate produced by that audit does not recursively trigger another audit.
 
+A candidate is the smallest complete thing the surface states, not the passage containing it. An operative clause — one naming an action, a threshold, or a condition — sits inside prose written to explain something else, and the two carry different obligations; accounting for the unsplit passage settles both on whichever obligation the larger part carries, so a subtraction meant to relocate loses what it was preserving. Split first: mark each clause naming an action, a threshold, or a condition, restate it to stand alone on the surface it binds, and take the remainder as a candidate in its own right rather than as leftover. Read each restatement by itself afterward. One that reads correctly to someone who has just read the original passage can fail for a reader who never saw it, so restore as a subordinate clause the minimum context it needs; this check is the one whose failure leaves no trace in the result.
+
 For each candidate, account for directive force, boundary meaning, decision calibration, diagnostic detection, and legacy, migration, or fallback behavior. Name what survives and where, and what is intentionally retired.
 
 A named record containing no exercise of an entry justifies investigating its role. It establishes neither redundancy nor behavioral preservation; a missing execution record is missing evidence.
