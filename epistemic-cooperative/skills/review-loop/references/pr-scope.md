@@ -26,8 +26,8 @@ Use repository/GitHub tools available to the host; `gh` below is an example bind
    members or reset a non-default bottom base. Verify resulting PR bases and stack
    membership. A base chain alone does not establish linkage. Report a missing
    capability rather than claiming a link.
-5. Before re-review, commit repairs to the selected destination and resolve its new
-   local head. Keep the original base fixed and compare through this new head. On a
+5. Before re-review, resolve the selected destination's new local head.
+   Keep the original base fixed and compare through this new head. On a
    stack, re-reading the lower PR's `headRefOid` would omit the repairs: use the layer's
    head. Refresh changed paths and intent against the entire captured range.
 

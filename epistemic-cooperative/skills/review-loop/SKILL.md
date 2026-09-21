@@ -50,9 +50,11 @@ direction : optional shared-cause hypothesis with its falsifier
 Every source able to report reach owes `exercised`, including on approval. Ask
 explicitly whether the whole changed artifact's contract closes: declared values
 have producers, branches have supplied inputs, and obligations reach their consumers.
-Distinguish source analysis from executed checks. Request `direction` after findings
-on a non-approval; no single mechanism is a valid answer. A mechanism lacking a
-falsifier does not fill this slot.
+Ask equally what the artifact carries that its remaining text already recovers: which
+obligation fails on a clause's deletion, and which two places state one thing and would
+have to be kept in step. Distinguish source analysis from executed checks.
+Request `direction` after findings on a non-approval; no single mechanism is a
+valid answer. A mechanism lacking a falsifier does not fill this slot.
 
 A native report may be normalized by its adapter. An explicit successful empty
 findings result can mean approval; failed, skipped, missing, or unreadable review
@@ -268,9 +270,9 @@ so far, so the driving session records rather than re-derives it.
 When the processed round has not earned convergence below, refresh changed files
 and design intent and obtain a **full** re-review, including after dispositions that
 landed no edit. Any edit invalidates the preceding verdict and always owes this
-review of the original surface plus all repairs. For PR scope, commit repairs to the
-settled landing and use its new head; [PR scope](references/pr-scope.md) defines that
-pointer. For working-tree scope, compare against the captured base and include current
+review of the original surface plus all repairs. For PR scope, use the settled
+landing's new head; [PR scope](references/pr-scope.md) defines that pointer.
+For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
 Where the ledger convention puts a repair's derivation in its commit message, that
 message is a fix-status claim under Phase 0 rule 5: point the re-review at the ledger
@@ -306,16 +308,14 @@ Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
-Apply: writer route (fork | brief | inline) → commits or new head
+Apply: writer route (fork | brief | inline) → commits or new head, or tree state (omit if no pass ran)
 Landing: repair destination (PR only)
 ```
 
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
 limits, and unavailable-check reasons with that repair's Relay/Gated entry; keep this
-loop-side evidence distinct from the source-reported `Exercised` line. A writer that held
-the pass returns all of it, once per stop, and the driving session records rather than
-re-derives it.
+loop-side evidence distinct from the source-reported `Exercised` line.
 Assign exactly one Relay/Gated home by whether the user was asked, including nested
 `/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
