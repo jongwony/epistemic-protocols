@@ -255,12 +255,11 @@ so far, so the driving session records rather than re-derives it.
    A self-evident repair stays within that disposition; a competing repair or a live
    judgment about evidence support returns to Phase 3 with the current artifact and
    consequences. A defer or drop verdict states whether the landed effect remains and
-   its authorized basis; the verdict alone does not authorize retaining it. Further
-   unwritten sites obey
-   their screens. An adaptation-free pass needs no re-entry. After reconciliation and
-   checks, including explicit unavailable-check limits, the writer commits to the
-   settled landing for PR scope and pushes where that landing has a remote, then
-   returns. The driving session obtains the full re-review.
+   its authorized basis; the verdict alone does not authorize retaining it. An
+   adaptation-free pass needs no re-entry. After reconciliation and checks, including
+   explicit unavailable-check limits, the writer commits to the settled landing for PR
+   scope and pushes where that landing has a remote, then returns. The driving session
+   obtains the full re-review.
 6. After a judgment returned to Phase 3 is settled, resume the pending step in the
    same apply pass with that answer.
 
