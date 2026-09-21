@@ -386,8 +386,8 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Difficulty progression**: Start with high-contrast pairs (e.g., `/elicit` vs `/apportion`), progress to subtle distinctions (e.g., `/elicit` vs `/inquire`, `/inquire` vs `/contextualize`).
 
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
-- `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis asks the user for facts (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
-- `/inquire` ↔ `/apportion`: both run right before the AI acts, but `/inquire` fills the context the action rests on, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, on an acceptance you recorded when none compiles, or on a reservation where a judgment rather than a check settles it — before an autonomous run
+- `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis collects the facts the AI can reach and hands back what only the user holds (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
+- `/inquire` ↔ `/apportion`: both run right before the AI acts, but `/inquire` collects the context the action rests on as far as the AI can reach and names the rest as the user's unknown, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, on an acceptance you recorded when none compiles, or on a reservation where a judgment rather than a check settles it — before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)
