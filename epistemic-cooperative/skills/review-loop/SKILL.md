@@ -230,8 +230,10 @@ and 5; the apply trace is owed by the writer on every route.
    Sweep matching sites in this apply pass within the settled scope, reporting expansion.
 2. Risk is separate from Mechanical/Judgment classification. Route substrate actions
    to host permissions; an unsettled epistemic risk goes to the user for apply, defer,
-   or drop. A writer that cannot open that gate returns the risk to Phase 3 through
-   the same channel as a live judgment. Rejection blocks an edit not yet written.
+   or drop. A writer without a user channel answers no nested gate — this risk gate,
+   a `/contextualize` gate, a live judgment — and returns each to Phase 3 through the
+   apply trace's Open line; a writer with a user channel answers it and records who
+   answered and on what basis. Rejection blocks an edit not yet written.
 3. Repeated fix-induced follow-ups across consecutive rounds move judgment, not
    writing: the next apply pass returns its enumerated predicate and sites to Phase 3
    before writing. Return to autonomous apply after a review without such follow-ups.
@@ -261,10 +263,10 @@ and 5; the apply trace is owed by the writer on every route.
    Predicate: the invariant the fix restores
    Sites: written | swept
    Checks: artifact → result; unexercised; unavailable: reason
-   Fit: adaptation → disposition
+   Fit: adaptation → disposition; settled by: relay basis | user answer | returned
    Discrepancies: write → reconciliation
    Landing: commits | new head
-   Open: judgment or risk gate returned to Phase 3
+   Open: judgment or risk gate returned to Phase 3 — the question and its two trajectories
    ```
 
    The driving session obtains the full re-review from that trace.
@@ -325,9 +327,11 @@ predicate and sweep side effects. Carry the loop's check artifact, evidence, une
 limits, and unavailable-check reasons with that repair's Relay/Gated entry; keep this
 loop-side evidence distinct from the source-reported `Exercised` line. The writer's
 apply trace supplies that check evidence, its Discrepancies line the write discrepancies
-and their reconciliation; the driving session records both rather than re-deriving them.
+and their reconciliation, and its Fit and Open lines who settled each nested gate and
+on what basis; the driving session records these rather than re-deriving them.
 Assign exactly one Relay/Gated home by whether the user was asked, including nested
-`/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
+`/contextualize` questions and epistemic risk gates — read off the Fit and Open lines
+where a writer held the pass. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
 artifact state and disposition. Preserve write discrepancies and their reconciliation;
 carried reasons are records, while subsequent reviews detect findings fresh. A stacked
