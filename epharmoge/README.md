@@ -21,7 +21,7 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
@@ -34,7 +34,7 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Direction | User → AI (context provision) | AI → User (applicability check) |
 | Axis | Context fitness | Context fitness |
 | Deficit | `ContextInsufficient` | `ApplicationDecontextualized` |
-| Resolution | `InformedExecution` | `ContextualizedExecution` |
+| Resolution | `SufficientContext` | `ContextualizedExecution` |
 
 Same axis (context fitness), opposite timing, opposite direction. Aitesis asks "do I have enough context to execute well?" — Epharmoge asks "does my execution actually fit the context?" They are complementary, not redundant.
 

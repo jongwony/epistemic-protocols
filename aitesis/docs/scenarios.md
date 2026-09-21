@@ -4,7 +4,7 @@
 > Skill이 세션에 로드되지 않으면 충돌이 발생하지 않습니다.
 
 **프로토콜**: Aitesis (`/inquire`)
-**결핍 → 해소**: `ContextInsufficient → InformedExecution`
+**결핍 → 해소**: `ContextInsufficient → SufficientContext`
 
 ---
 
@@ -40,7 +40,7 @@
 
 **결핍(전)**: 외부 의존성(Stripe)이 핵심. 프로젝트 고유 설정 없이 구현하면 재작업 필수.
 
-**해결(후)**: AI가 CI 설정, 환경변수, 기존 코드를 먼저 탐색하여 맥락을 수집하고, 남은 불확실성(signing secret 위치, 이벤트 필터)만 질문해 InformedExecution으로 전환한다.
+**해결(후)**: AI가 CI 설정, 환경변수, 기존 코드를 먼저 탐색하여 맥락을 수집하고, 남은 불확실성(signing secret 위치, 이벤트 필터)만 질문해 SufficientContext으로 전환한다.
 
 ---
 

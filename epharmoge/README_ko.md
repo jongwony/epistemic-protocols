@@ -21,7 +21,7 @@
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
@@ -34,7 +34,7 @@
 | 방향 | User → AI (맥락 제공) | AI → User (적용 가능성 확인) |
 | 축 | Context fitness | Context fitness |
 | 결핍 | `ContextInsufficient` | `ApplicationDecontextualized` |
-| 해소 | `InformedExecution` | `ContextualizedExecution` |
+| 해소 | `SufficientContext` | `ContextualizedExecution` |
 
 같은 축(context fitness), 반대 타이밍, 반대 방향. Aitesis는 "실행을 잘 하기 위한 충분한 맥락이 있는가?"를 묻고, Epharmoge는 "실행 결과가 실제로 맥락에 맞는가?"를 묻는다. 상호 보완적이지, 중복이 아니다.
 

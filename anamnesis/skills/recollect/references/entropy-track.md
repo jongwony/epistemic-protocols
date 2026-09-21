@@ -16,7 +16,7 @@ claim_kind(trace) = expected identifier category implied by the recall trace
 compatible_anchor(t, trace) ≡ claim_kind(trace) ∈ AuthorizedClaimKinds(source_namespace(t))
   where AuthorizedClaimKinds(ns) = { ck : (ns, ck) ∈ AuthorizedPairs }   -- a namespace determines the claim kinds it can anchor
         AuthorizedPairs = ⋃ᵢ extractor_i.authorized_pairs                -- each extractor declares the (source_namespace, claim_kind) pairs it grounds; the registry is the explicit witness
-  -- the witness is defined LOCALLY (extractor registry), independent of Aitesis's reflexive authorizes: analogous structure, different concern (namespace → claim-kind authorization, not evidence-channel authorization)
+  -- the witness is defined LOCALLY (extractor registry): namespace → claim-kind authorization, self-contained — not a shared cross-protocol relation and not evidence-channel authorization
   -- the tuple carries source_namespace only; claim_kind(t) is not stored, removing the unused-field inconsistency and matching what the regex writer can materialize
 
 extractor registry:

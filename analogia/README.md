@@ -21,7 +21,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |

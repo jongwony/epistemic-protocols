@@ -21,7 +21,7 @@ AI는 한 도메인의 패턴, 모델, 유비를 다른 도메인에 적용하�
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
