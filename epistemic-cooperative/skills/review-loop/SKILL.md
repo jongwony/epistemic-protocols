@@ -190,7 +190,8 @@ An initial uninformed return is absorbed by settled policy. Instance-specific
 dismissals/deferrals never enter reviewer context, so their returns keep that
 disposition and remain residual. A return after a fix was visible or a constituted
 decision conveyed requires diagnosis before convergence. A still-self-evident
-incomplete repair stays Mechanical and is rewritten by the driving session. A
+incomplete repair stays Mechanical and is rewritten in the next apply pass with the
+recurrence history in its hand-off. A
 contested design decision reaches a judgment gate with the recurrence history;
 a third recurrence after the escalated re-apply discredits the Mechanical diagnosis
 and also gates. End recurrence through repair or constituted direction, not reviewer
@@ -205,26 +206,32 @@ what this unit carries. A rising count changes neither the criterion nor source 
 For PR scope, settle any pending landing choice under Phase 0 and prepare that
 destination through [PR scope](references/pr-scope.md) before the first edit.
 
-1. The driving session scans planned change points, adjacent interactions, and repeated
+The driving session settles disposition and hands the apply pass to a writer; where
+the host offers a full-context fork, one fork per apply pass is the default writer
+and carries steps 1, 4 and 5 below end to end; the host reference (for Claude Code,
+[Claude Code](references/host-claude-code.md) § Writer fork) names the fork and
+resume mechanism. Use a self-contained brief to a fresh low-cost writer only
+where the predicate and every site are already enumerated, so the brief carries no
+loop ground beyond them; use inline writing for parent-held risky actions or where
+the host offers no delegation.
+
+1. The writer scans planned change points, adjacent interactions, and repeated
    instances. Derive each fix's predicate from the violated invariant and verified cause.
    Trace relevant state through production, transfer, invalidation, and consumption,
    including transitions and interleavings; enumerate the predicate's sites. State the
    observation that would falsify the repair and select bounded checks from it. Return
    a live judgment about consistency or evidence support to Phase 3 before its
    dependent repair.
-   Semantically verify and risk-screen every site before adding it to the fix brief;
-   a new unbriefed site returns for screening. A nameless predicate licenses no write.
+   Semantically verify and risk-screen every site before writing it; a new unscreened
+   site returns for screening. A nameless predicate licenses no write.
    Sweep matching sites in this apply pass within the settled scope, reporting expansion.
 2. Risk is separate from Mechanical/Judgment classification. Route substrate actions
    to host permissions; an unsettled epistemic risk goes to the user for apply, defer,
    or drop. Rejection blocks an edit not yet written.
-3. Use a self-contained brief for a fresh low-cost writer where the host exposes and
-   permits one; its configuration selects the model. Use inline writing for trivial
-   batches, parent-held risky actions, or absent delegation. Fork only where necessary
-   loop context cannot be conveyed. Repeated fix-induced follow-ups across consecutive
-   rounds escalate writing to the driving session; return to the lower tier after a
-   review without such follow-ups.
-4. Read every brief/sweep site against its disposition and exercise the repaired
+3. Repeated fix-induced follow-ups across consecutive rounds move judgment, not
+   writing: the next apply pass returns its enumerated predicate and sites to Phase 3
+   before writing. Return to autonomous apply after a review without such follow-ups.
+4. Read every written and swept site against its disposition and exercise the repaired
    invariant through the transitions and orderings identified by the scan. Record the
    artifact checked, evidence, and unexercised limits. Repair a known discrepancy within
    the settled disposition and re-check the affected bundle before hand-forward; a live
@@ -242,10 +249,15 @@ destination through [PR scope](references/pr-scope.md) before the first edit.
    its authorized basis; the verdict alone does not authorize retaining it. Further
    unwritten sites obey
    their screens. An adaptation-free pass needs no re-entry. After reconciliation and
-   checks, including explicit unavailable-check limits, obtain the full re-review.
-6. After a judgment returned to Phase 3 is settled, resume the pending step in the
-   same apply pass with that answer. Screen any newly included sites; a fit
-   call already completed in that pass remains completed.
+   checks, including explicit unavailable-check limits, the writer commits to the
+   settled landing for PR scope and pushes where that landing has a remote, then
+   returns the apply trace: per finding its predicate, the sites written and swept,
+   the check artifact and results with unexercised and unavailable limits, the fit
+   pass's adaptation and disposition, the commits or new head, and any live judgment
+   it could not settle. The driving session obtains the full re-review from that trace.
+6. After a judgment returned to Phase 3 is settled, resume the same writer with that
+   answer so it continues the pending step in the same apply pass. Screen any newly
+   included sites; a fit call already completed in that pass remains completed.
 
 ### Phase 5 — Re-review and stop on evidence
 
@@ -256,6 +268,10 @@ review of the original surface plus all repairs. For PR scope, commit repairs to
 settled landing and use its new head; [PR scope](references/pr-scope.md) defines that
 pointer. For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
+Where the ledger convention puts a repair's derivation in its commit message, that
+message is a fix-status claim under Phase 0 rule 5: point the re-review at the ledger
+through the pre-repair range only, and state that the repair commits are judged from
+their content in the diff as part of the whole range.
 
 This call is the next round's review: send its findings and direction straight to
 Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
@@ -286,13 +302,16 @@ Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
+Apply: writer route (fork | brief | inline) → commits or new head
 Landing: repair destination (PR only)
 ```
 
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
 limits, and unavailable-check reasons with that repair's Relay/Gated entry; keep this
-loop-side evidence distinct from the source-reported `Exercised` line.
+loop-side evidence distinct from the source-reported `Exercised` line. A writer's
+apply trace supplies that check evidence; the driving session records it rather than
+re-deriving it.
 Assign exactly one Relay/Gated home by whether the user was asked, including nested
 `/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
