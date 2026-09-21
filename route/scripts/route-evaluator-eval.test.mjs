@@ -60,7 +60,7 @@ test("unadjudicated cases are reported but never scored into a rate", async () =
   assert.match(text, /no recorded answer; run with --live/);
 });
 
-test("the shipped fixtures cover every outcome and ship unadjudicated", () => {
+test("the shipped fixtures cover every outcome and carry a typed adjudication flag", () => {
   const cases = readCases();
   assert.ok(cases.length >= 8, `expected a real set, got ${cases.length}`);
   const outcomes = new Set(cases.map((c) => c.outcome));

@@ -4,13 +4,23 @@
     "outcome": "silence",
     "prompt": "Rename the `timeoutMs` field to `requestTimeoutMs` across the three files that read it.",
     "expected": [],
-    "adjudicated": false,
-    "note": "A settled mechanical change. Nothing is missing and no framing is in question; README calls silence the common case, and this is it."
+    "adjudicated": true,
+    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: nothing is missing that only the user holds, no mapping is in question, no framing is absent. Silence is the answer, and it is the common case."
   },
   {
     "id": "silence-answered-question",
     "outcome": "silence",
     "prompt": "Thanks — that matches what I had. Go ahead and land it.",
+    "conversation": [
+      {
+        "role": "user",
+        "text": "The retry only fires on 400 with max_tokens_exceeded, right? Anything else and we give up."
+      },
+      {
+        "role": "assistant",
+        "text": "Yes. Every other status resolves to null and the turn ends silently; only that one body is told apart, and the retry is taken once."
+      }
+    ],
     "expected": [],
     "adjudicated": false,
     "note": "An approval. The most likely spoiled case in the set: an advisory here is a needless nudge over a turn that was already correct in saying nothing."
@@ -19,39 +29,81 @@
     "id": "singleton-inquire",
     "outcome": "singleton",
     "prompt": "Set up the deploy for the new service.",
-    "expected": ["inquire"],
-    "adjudicated": false,
-    "note": "Target environment, rollback and acceptable downtime are unstated and only the user holds them — the request-side deficit 07830bd0 was about."
+    "expected": [
+      "inquire"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed, and readable from the prompt alone: 'set up the deploy' names an execution whose target environment, rollback and acceptable downtime are unstated and held only by the user. That is ContextInsufficient before execution. /bound was considered and rejected - the gap is user-held fact, not an unscoped task awaiting delegation; /conduct likewise, since what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
     "outcome": "singleton",
     "prompt": "Does this lifecycle model actually map onto how our ingest module behaves? Walk the correspondence.",
-    "expected": ["ground"],
-    "adjudicated": false,
-    "note": "An abstract structure against a concrete application, with the substrate present to check it — MappingUncertain, not a missing fact."
+    "expected": [
+      "ground"
+    ],
+    "adjudicated": true,
+    "note": "Confirmed. The prompt names an abstract structure and a concrete application and asks whether one maps onto the other, with the substrate present to check against - MappingUncertain, not a missing fact. /grasp was considered and rejected: it verifies the user's own comprehension of a target, whereas here the user is asking whether a correspondence holds."
   },
   {
     "id": "singleton-elicit",
     "outcome": "singleton",
     "prompt": "Let's plan the restore work.",
-    "expected": ["elicit"],
+    "conversation": [
+      {
+        "role": "user",
+        "text": "The restore path is the one thing I keep coming back to."
+      },
+      {
+        "role": "assistant",
+        "text": "Restore of the recorded fixtures, or restore of the plugin's own config after an update? Both have come up under that name in this session."
+      }
+    ],
+    "expected": [
+      "elicit"
+    ],
     "adjudicated": false,
-    "note": "README's own worked case: the term has two referents in this session and what the work is for has not been fixed as coordinates."
+    "note": "README's own worked case: the term has two referents in this session and what the work is for has not been fixed as coordinates. The conversation carries that ambiguity, so the label rests on the state the channel actually sends rather than on the prompt alone. /apportion does not fit - it compiles a goal already determined, and here it is not. This is the least separable label in the set: an adjudicator who reads the missing purpose as a user-held fact rather than an undetermined axis would mark it several with /inquire."
   },
   {
     "id": "several-fit-inquire-sublate",
     "outcome": "several",
     "prompt": "That hook was written before any of this existed. Reconsider in light of it.",
-    "expected": ["inquire", "sublate"],
+    "conversation": [
+      {
+        "role": "user",
+        "text": "We added the accumulated context to the state this morning."
+      },
+      {
+        "role": "assistant",
+        "text": "Right — the hook now sends the conversation, newest-first under a derived budget, where before it sent the prompt alone."
+      }
+    ],
+    "expected": [
+      "inquire",
+      "sublate"
+    ],
     "adjudicated": false,
-    "note": "Verbatim shape of a real turn from the session this was built in. The live evaluator returned inquire 0.43 / sublate 0.42 at confidence 0.29 — both fit, and a confidence gate deletes the case."
+    "note": "Verbatim shape of a real turn from the session this was built in. Both fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. /contextualize does not fit on its object - it types over Result, the output of an execution just completed, not an artifact written in an earlier session."
   },
   {
     "id": "several-fit-frame-ideate",
     "outcome": "several",
     "prompt": "I don't think we've even framed this right, and I can only see one way to do it.",
-    "expected": ["frame", "ideate"],
+    "conversation": [
+      {
+        "role": "user",
+        "text": "I want to cut how much of the conversation we send."
+      },
+      {
+        "role": "assistant",
+        "text": "Halving the budget is one way. Do you want me to take that?"
+      }
+    ],
+    "expected": [
+      "frame",
+      "ideate"
+    ],
     "adjudicated": false,
     "note": "Two deficits are stated in one sentence — an absent framework and an unexpanded candidate field. Neither dominates."
   },
@@ -59,6 +111,16 @@
     "id": "monitor-gate-holds-free-response",
     "outcome": "monitor",
     "prompt": "Before I answer that — is the second option reversible?",
+    "conversation": [
+      {
+        "role": "user",
+        "text": "Work out what to do with the stale recordings."
+      },
+      {
+        "role": "assistant",
+        "text": "Two ways to go, and this is yours to decide: (1) discard the recordings and re-run live, (2) keep them and report them apart. I recommend (2). Which?"
+      }
+    ],
     "expected": [],
     "adjudicated": false,
     "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on the advisory staying out of the way: holding is a reading of a contract, not a detection."
@@ -67,6 +129,16 @@
     "id": "monitor-gate-holds-different-deficit",
     "outcome": "monitor",
     "prompt": "Hold on — I'm not sure the numbers you just quoted are right.",
+    "conversation": [
+      {
+        "role": "user",
+        "text": "Work out what to do with the stale recordings."
+      },
+      {
+        "role": "assistant",
+        "text": "Two ways to go, and this is yours to decide: (1) discard and re-run live — about 40 calls, (2) keep them and report them apart. Which?"
+      }
+    ],
     "expected": [],
     "adjudicated": false,
     "note": "A different deficit surfaces while a gate holds. Route's own answer is at most one finding line, which requires invoking Route; the hook must not pre-empt it."
@@ -75,14 +147,36 @@
     "id": "installed-not-loaded",
     "outcome": "singleton",
     "prompt": "Walk me through what we settled about the caching layer three sessions ago.",
-    "expected": ["recollect"],
+    "conversation": [
+      {
+        "role": "user",
+        "text": "I don't have the caching notes in front of me."
+      },
+      {
+        "role": "assistant",
+        "text": "Nothing about the caching layer is in this session's context either."
+      }
+    ],
+    "expected": [
+      "recollect"
+    ],
     "adjudicated": false,
-    "note": "Scored for the degradation it exercises rather than the pick: if this protocol is installed but not loaded, the advisory names something the reader cannot invoke and the reader's own check has to absorb it."
+    "note": "Scored for the degradation it exercises rather than the pick: if this protocol is installed but not loaded, the advisory names something the reader cannot invoke and the reader's own check has to absorb it. The field is the advisory's output, not the reader's correct move - the reader's answer here is silence, and this harness does not measure that arm."
   },
   {
     "id": "silence-deficit-arrives-mid-turn",
     "outcome": "silence",
     "prompt": "Go ahead with the refactor we discussed.",
+    "conversation": [
+      {
+        "role": "user",
+        "text": "Pull the budget derivation out of conversationFrom so the caller can see it."
+      },
+      {
+        "role": "assistant",
+        "text": "It is already exported as budgetFor; conversationFrom takes the number. I can hoist the call to advise so the derivation is visible at the call site."
+      }
+    ],
     "expected": [],
     "adjudicated": false,
     "note": "The boundary case for the whole channel: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a prompt-time evaluator can see. The static directive is what covers it, which is why the advisory never replaces the directive."
