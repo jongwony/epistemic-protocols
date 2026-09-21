@@ -240,24 +240,24 @@ so far, so the driving session records rather than re-derives it.
    writing: the next apply pass returns its enumerated predicate and sites to Phase 3
    before writing. Return to autonomous apply after a review without such follow-ups.
 4. Read every written and swept site against its disposition and exercise the repaired
-   invariant through the transitions and orderings identified by the scan. Record the
-   artifact checked, evidence, and unexercised limits. Repair a known discrepancy within
-   the settled disposition and re-check the affected bundle before hand-forward; a live
-   judgment returns to Phase 3. An explicitly accepted or deferred limit remains residual.
+   invariant through the transitions and orderings identified by the scan. Repair a known
+   discrepancy within the settled disposition and re-check the affected bundle before
+   hand-forward; a live judgment returns to Phase 3. An explicitly accepted or deferred
+   limit remains residual.
    Record unavailable checks with their reason and consequence for confidence. These
    checks establish bounded conformance; full re-review independently judges the artifact.
    Call `/contextualize` once on the whole applied bundle against the design-decision
    ledger and touched-surface conventions.
 5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
-   sweep, and write verification once; the fit call is not repeated in that apply pass.
+   sweep, and write verification once.
    Reconcile an already-written adaptation with its settled disposition before hand-forward.
    A self-evident repair stays within that disposition; a competing repair or a live
    judgment about evidence support returns to Phase 3 with the current artifact and
    consequences. A defer or drop verdict states whether the landed effect remains and
-   its authorized basis; the verdict alone does not authorize retaining it. An
-   adaptation-free pass needs no re-entry. After reconciliation and checks, including
-   explicit unavailable-check limits, the writer commits to the settled landing for PR
-   scope and pushes where that landing has a remote, then returns.
+   its authorized basis; the verdict alone does not authorize retaining it. After
+   reconciliation and checks, including explicit unavailable-check limits, the writer
+   commits to the settled landing for PR scope and pushes where that landing has a
+   remote, then returns.
 6. After a judgment returned to Phase 3 is settled, resume the pending step in the
    same apply pass with that answer.
 
@@ -320,5 +320,4 @@ carried reasons are records, while subsequent reviews detect findings fresh.
 
 At every exit, present the accumulated dispositions and residual,
 including standing source limits. Read [exit handover](references/exit-handover.md)
-before offering durable recording. Exiting is immediate; the record offer, its home,
-or its refusal never conditions the exit.
+before offering durable recording.

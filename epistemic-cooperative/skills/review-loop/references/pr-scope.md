@@ -27,9 +27,8 @@ Use repository/GitHub tools available to the host; `gh` below is an example bind
    membership. A base chain alone does not establish linkage. Report a missing
    capability rather than claiming a link.
 5. Before re-review, resolve the selected destination's new local head.
-   Keep the original base fixed and compare through this new head. On a
-   stack, re-reading the lower PR's `headRefOid` would omit the repairs: use the layer's
-   head. Refresh changed paths and intent against the entire captured range.
+   On a stack, re-reading the lower PR's `headRefOid` would omit the repairs: use the
+   layer's head.
 
 The resulting verdict covers the reviewed range, including the repair layer when
 stacked. A later invocation on the upper PR resolves its own incremental base normally.
