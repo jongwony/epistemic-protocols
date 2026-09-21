@@ -1,12 +1,12 @@
 # Analogia — /ground (ἀναλογία)
 
-Validate structural mapping between domains (ἀναλογία: a proportion)
+Audit what an analogical mapping licenses (ἀναλογία: a proportion)
 
 > [한국어](./README_ko.md)
 
 ## What is Analogia?
 
-A modern reinterpretation of Greek ἀναλογία (proportion, analogy) — a protocol that **validates whether abstract frameworks actually map to your concrete situation**, producing verified structural correspondences.
+A modern reinterpretation of Greek ἀναλογία (proportion, analogy) — a protocol that **audits what an abstract framework licenses you to conclude about the case in front of you**, and how far.
 
 ### The Core Problem
 
@@ -14,7 +14,9 @@ AI applies patterns, models, and analogies from one domain to another without ch
 
 ### The Solution
 
-**Structural Correspondence over Abstract Assertion**: When AI output contains abstract frameworks applied to your domain, Analogia decomposes both the abstract and concrete domains, constructs explicit mappings between them, and presents concrete instantiations for you to verify. Instead of asserting "this pattern applies," it shows you exactly how each abstract component maps (or fails to map) to your situation.
+**Warrant tracks cited evidence, never assent**: Analogia settles what the mapping is being asked to license, decomposes both domains, constructs the correspondences, and then asks of each one what actually supports it. For every claim an intended conclusion rides on, it states what evidence would require that claim to change and who can go and get it, carries out the checks it can reach itself, and reports each conclusion as licensed with its limits, blocked, or undetermined with what is missing.
+
+It does not ask you to certify the mapping. Your agreement is not evidence about your codebase, and a protocol that converged on it would be recording your confidence rather than the structure. What moves the assessment is a fact, a source, a counterexample, or the result of running something.
 
 ### Difference from Other Protocols
 
@@ -22,7 +24,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
-| **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
+| **Analogia** | **AI-guided** | **`MappingUncertain → MappingAssessment`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
@@ -39,19 +41,23 @@ AI applies patterns, models, and analogies from one domain to another without ch
 ## Protocol Flow
 
 ```
-Phase 0: Gate         → Detect mapping uncertainty in AI output (silent)
-Phase 1: Decompose    → Identify abstract + concrete domains, construct structural correspondences
-Phase 2: Validate     → Present concrete instantiation for user verification (gate interaction)
-Phase 3: Integrate    → Update output with explicit mapping status
+Phase 0: Detect       → Is what this mapping licenses open, with a target account in play? (silent)
+Phase 1: Assess       → Settle the comparison focus and the conclusions at stake, construct the
+                        correspondences, state what would defeat each bearing claim, run the
+                        checks reachable here, read warrant off the grounds, judge each conclusion
+Phase 2: Surface      → Present the whole assessment and proceed (relay — no verdict is requested)
+Phase 3: Integrate    → A later turn that cites a ground re-opens assessment
 ```
 
-## Mapping Validation
+The one place the protocol stops for you is the comparison focus, because nothing else can settle which comparison to construct.
 
-| Validation | Action |
-|------------|--------|
-| **Confirm** | Correspondence is correct — mapping validated |
-| **Adjust** | Mapping needs refinement — provide feedback, return to Phase 1 |
-| **Dismiss** | This correspondence does not need further grounding |
+## What a later turn does
+
+| Turn | Effect |
+|------|--------|
+| **Cite a ground** | Attaches to the named claim, re-reads warrant, re-judges every conclusion |
+| **Adopt / withdraw** | Recorded as yours, reported apart from the evidence, moves no warrant |
+| **Anything else** | Answered; re-opens assessment only if the answer needs evidence outside the current basis |
 
 ## When to Use
 
@@ -63,8 +69,9 @@ Phase 3: Integrate    → Update output with explicit mapping status
 
 **Skip**:
 - AI output is already domain-specific with concrete examples
-- You already understand the mapping ("I know how this applies")
+- What the mapping licenses is already settled in context
 - No abstract framework is being applied (output is purely concrete)
+- **You are meeting one of the two domains for the first time.** That is explanation, not audit: this protocol takes an account you already hold and asks what it supports. Reach for an explanation protocol instead, and come back with the account in hand.
 
 ## Install
 

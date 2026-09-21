@@ -44,7 +44,7 @@ const SHIPPED_KEY_ENV = shippedKeyEnv();
 
 const PROTOCOLS = [
   { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext", description: "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire." },
-  { command: "ground", deficit: "MappingUncertain", resolution: "ValidatedMapping", description: "Validate an abstract structure against a concrete application — /ground." },
+  { command: "ground", deficit: "MappingUncertain", resolution: "MappingAssessment", description: "Validate an abstract structure against a concrete application — /ground." },
   { command: "sublate", deficit: "ContextSuspect", resolution: "VettedContext", description: null },
 ];
 

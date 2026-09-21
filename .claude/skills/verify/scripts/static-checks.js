@@ -1553,7 +1553,13 @@ function checkPartitionInvariant() {
     // Find invariant line (single-line only; multi-line invariants require regex update)
     const invMatch = modeStateSection.match(invariantPattern);
     if (!invMatch) {
-      if (/-- Invariant:/.test(modeStateSection)) {
+      // Only a partition invariant is this check's business. A MODE STATE
+      // carrying invariants of other shapes and no partition has nothing here
+      // to verify, so the cue for "malformed" is the partition's own phrase
+      // appearing without the full pattern matching — not the mere presence of
+      // an invariant line, which warned forever on any protocol whose state is
+      // not partitioned into subsets of one universe.
+      if (/pairwise disjoint/.test(modeStateSection)) {
         results.warn.push({
           check: checkName,
           file: relPath,

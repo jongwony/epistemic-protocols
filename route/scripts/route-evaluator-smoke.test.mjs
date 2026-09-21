@@ -33,7 +33,7 @@ const BINDING = {
 
 const PROTOCOLS = [
   { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext", description: "d" },
-  { command: "ground", deficit: "MappingUncertain", resolution: "ValidatedMapping", description: "d" },
+  { command: "ground", deficit: "MappingUncertain", resolution: "MappingAssessment", description: "d" },
 ];
 
 const TURNS = [
