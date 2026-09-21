@@ -216,7 +216,10 @@ enumerated predicate and screened sites to that writer in a self-contained brief
 which then carries steps 4 and 5. Where the host offers no delegation, or an action
 is parent-held for risk, the driving session writes inline. Under every route the
 scan holder is whoever performs step 1, and the writer is whoever performs steps 4
-and 5; the apply trace is owed by the writer on every route.
+and 5; the apply trace is owed by the writer on every route. Record with the route
+whether it is resumable — whether a writer that returns a gate can be continued with
+the pass's ground intact — reading that from the host reference, since step 6 branches
+on it.
 
 1. The scan holder scans planned change points, adjacent interactions, and repeated
    instances. Derive each fix's predicate from the violated invariant and verified cause.
@@ -271,10 +274,13 @@ and 5; the apply trace is owed by the writer on every route.
    ```
 
    The driving session obtains the full re-review from that trace.
-6. After a judgment or risk gate returned to Phase 3 is settled, resume the same
-   writer with that answer so it continues the pending step in the same apply pass.
-   Screen any newly included sites; a fit call already completed in that pass
-   remains completed.
+6. After a judgment or risk gate returned to Phase 3 is settled, the pass continues
+   rather than restarting. Where the route is resumable, resume the same writer with
+   that answer. Where it is not, the driving session briefs a replacement writer with
+   the pending step, the settled answer, the sites already written and swept, the
+   checks already passed, and the fit call's completed status. Either way, screen any
+   newly included sites; a fit call already completed in that pass remains completed,
+   and one apply trace covers the pass whole rather than one per writer.
 
 ### Phase 5 — Re-review and stop on evidence
 
