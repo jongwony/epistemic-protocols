@@ -34,9 +34,10 @@ the second list is — named as the user's to settle, whether or not it is phras
 
 ## Not met
 
-Any first-list item is handed to the user as their unknown — unless the run names, as that
-item's basis, why the file evidence fell short for that particular claim, which lands the item
-as a provisional finding rather than an unknown.
+Any first-list item is handed to the user as if the file had not been read — unless the run names,
+as that item's basis, what the file gave and where it fell short for that particular claim. The
+item then lands as a provisional finding where there is one, or as an unknown the AI could not
+settle (reason CouldNot); either way it is not handed over as one only the user holds.
 
 ## Judging note
 

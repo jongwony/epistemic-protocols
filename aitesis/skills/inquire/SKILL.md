@@ -65,7 +65,7 @@ State ∈ {Resolved, Provisional, UserUnknown, DetectOnly}
              -- DetectOnly:   a finding that answers no uncertainty raised; surfaced as detected, on its own line
 Reason ∈ {NotMine, CouldNot, OnlyYou} ∪ Emergent(Reason)   -- why an item reached no further; written for every state but Resolved
              -- NotMine: not the AI's to collect (another domain, another authority) · CouldNot: every channel tried, ground still short · OnlyYou: the answer lives with the user
-contradiction(u) = the utterance contradicts itself or what was collected, and no channel settles it   -- lands UserUnknown with reason OnlyYou and the contradiction quoted in basis
+contradiction(u) = the utterance contradicts itself or what was collected, and no channel settles it   -- lands UserUnknown with the contradiction quoted in basis; the reason is judged like any other landing — OnlyYou where the conflict is one of intent (the user's own words against each other, or against what they asked for), CouldNot where it is one of fact that no channel the AI can reach settles, Emergent otherwise
 A        = User answer, read from a later utterance that addresses a surfaced item
            ∈ {Provide(context), Point(location), Unknown(Partial), Dismiss(u), Sufficient}
              Partial     = what the user does say they know
