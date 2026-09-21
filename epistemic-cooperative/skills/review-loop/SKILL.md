@@ -220,9 +220,10 @@ and 5. Record with the route whether it is resumable — whether a writer that r
 a gate can be continued with the pass's ground intact — reading that from the host
 reference, since step 6 branches on it. Step 4's fit call belongs to a holder that can
 hold its gate: the writer where the route is resumable, and otherwise the driving
-session, which makes it on the bundle the writer returned and re-enters step 5 through
-this same route selection for any adaptation it writes. So a suspended nested call is
-never handed to another holder.
+session, which makes it on the bundle the writer returned. Its result rejoins the pass
+through this same route selection either way — an adaptation first re-entering step 5's
+scan and verification, an adaptation-free result going on to that step's finalization.
+So a suspended nested call is never handed to another holder.
 
 On every route the writer returns the apply trace whenever it stops — at a gate it
 cannot settle, or at the end of the pass — one block per finding:
