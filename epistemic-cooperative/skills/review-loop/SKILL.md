@@ -205,8 +205,7 @@ what this unit carries. A rising count changes neither the criterion nor source 
 
 ### Phase 4 — Apply and check the bundle
 
-For PR scope, settle any pending landing choice under Phase 0 and prepare that
-destination through [PR scope](references/pr-scope.md) before the first edit.
+For PR scope, follow [PR scope](references/pr-scope.md) before the first edit.
 
 The driving session settles disposition and hands the apply pass to a writer.
 Where the host offers a full-context fork, one fork per apply pass is the default
@@ -266,8 +265,8 @@ so far, so the driving session records rather than re-derives it.
 When the processed round has not earned convergence below, refresh changed files
 and design intent and obtain a **full** re-review, including after dispositions that
 landed no edit. Any edit invalidates the preceding verdict and always owes this
-review of the original surface plus all repairs. For PR scope, use the settled
-landing's new head; [PR scope](references/pr-scope.md) defines that pointer.
+review of the original surface plus all repairs. For PR scope, use the re-review
+pointer supplied by [PR scope](references/pr-scope.md).
 For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
 Where the ledger convention puts a repair's derivation in its commit message, that
