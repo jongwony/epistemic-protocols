@@ -31,12 +31,12 @@
 | 관점 | Aitesis | Epharmoge |
 |------|---------|-----------|
 | 타이밍 | 실행 전 | 실행 후 |
-| 방향 | User → AI (맥락 제공) | AI → User (적용 가능성 확인) |
+| 방향 | AI가 스스로 모으고 사용자의 Unknown을 돌려줌 | AI가 자기 결과를 사용자의 맥락에 대조함 |
 | 축 | Context fitness | Context fitness |
 | 결핍 | `ContextInsufficient` | `ApplicationDecontextualized` |
 | 해소 | `SufficientContext` | `ContextualizedExecution` |
 
-같은 축(context fitness), 반대 타이밍, 반대 방향. Aitesis는 "내가 스스로 닿을 수 있는 것은 무엇이고, 당신 몫은 무엇인가?"를 묻고, Epharmoge는 "실행 결과가 실제로 맥락에 맞는가?"를 묻는다. 상호 보완적이지, 중복이 아니다.
+같은 축(context fitness), 반대 타이밍, 다른 대상 — 결과가 있기 전엔 AI에게 부족한 것, 뒤엔 결과가 맞는지. Aitesis는 "내가 스스로 닿을 수 있는 것은 무엇이고, 당신 몫은 무엇인가?"를 묻고, Epharmoge는 "실행 결과가 실제로 맥락에 맞는가?"를 묻는다. 상호 보완적이지, 중복이 아니다.
 
 ## 프로토콜 흐름
 

@@ -31,12 +31,12 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Aspect | Aitesis | Epharmoge |
 |--------|---------|-----------|
 | Timing | Pre-execution | Post-execution |
-| Direction | User → AI (context provision) | AI → User (applicability check) |
+| Direction | AI collects on its own, hands back the user's unknown | AI checks its result against the user's context |
 | Axis | Context fitness | Context fitness |
 | Deficit | `ContextInsufficient` | `ApplicationDecontextualized` |
 | Resolution | `SufficientContext` | `ContextualizedExecution` |
 
-Same axis (context fitness), opposite timing, opposite direction. Aitesis asks "what can I reach on my own, and what is yours to settle?" — Epharmoge asks "does my execution actually fit the context?" They are complementary, not redundant.
+Same axis (context fitness), opposite timing, different object — before a result exists, on what the AI lacks; after, on whether the result fits. Aitesis asks "what can I reach on my own, and what is yours to settle?" — Epharmoge asks "does my execution actually fit the context?" They are complementary, not redundant.
 
 ## Protocol Flow
 

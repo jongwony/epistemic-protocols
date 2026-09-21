@@ -23,7 +23,7 @@ AI 시스템은 맥락이 불충분한 상태(`ContextInsufficient`)에서도 �
 | **Aitesis** | **INQUIRE** | **`ContextInsufficient → SufficientContext`** |
 | Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-**핵심 구분**: Aitesis는 AI에게 부족한 것을 모으고 사용자만 쥔 것을 이름 붙입니다 — 정보 흐름 사용자→AI (이타인지: "내가 닿을 수 있는 것은 무엇이고, 당신 몫은 무엇인가?").
+**핵심 구분**: Aitesis는 AI에게 부족한 것을 모으고 사용자만 쥔 것을 이름 붙입니다 — AI가 스스로 맥락에 닿고 닿지 못한 것을 돌려줍니다 (이타인지: "내가 닿을 수 있는 것은 무엇이고, 당신 몫은 무엇인가?").
 
 Proplasma(`/preview`)는 방향 축의 Planning 클러스터 형제입니다: Aitesis는 부족한 사실을 공급하고 사용자의 Unknown을 이름 붙이며, Proplasma는 후보가 이미 알려져 있으나 서술로 인식되지 않을 때 폐기 전제의 placeholder 대비로 방향의 미래를 물질화합니다.
 
