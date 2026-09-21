@@ -1195,7 +1195,7 @@ describe('generateReleaseNotes', () => {
 
   it('includes deficit → resolution pairs in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
-    assert.ok(notes.includes('ContextInsufficient → InformedExecution'));
+    assert.ok(notes.includes('ContextInsufficient → SufficientContext'));
     assert.ok(notes.includes('BoundaryUndefined → DefinedBoundary'));
     assert.ok(notes.includes('FrameworkAbsent → FramedInquiry'));
   });

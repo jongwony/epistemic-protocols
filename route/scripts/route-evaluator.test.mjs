@@ -43,7 +43,7 @@ const SHIPPED_CONFIG = path.join(HERE, "..", "config", "evaluator.json");
 const SHIPPED_KEY_ENV = shippedKeyEnv();
 
 const PROTOCOLS = [
-  { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution", description: "Infer context insufficiency before execution — /inquire." },
+  { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext", description: "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire." },
   { command: "ground", deficit: "MappingUncertain", resolution: "ValidatedMapping", description: "Validate an abstract structure against a concrete application — /ground." },
   { command: "sublate", deficit: "ContextSuspect", resolution: "VettedContext", description: null },
 ];
@@ -124,8 +124,8 @@ test("cards are built from declared material, and say nothing about each other",
     assert.ok(!("not_for" in value), `${name} must not carry authored discrimination`);
   }
   assert.deepEqual(criteria.inquire, {
-    declares: "ContextInsufficient → InformedExecution",
-    description: "Infer context insufficiency before execution — /inquire.",
+    declares: "ContextInsufficient → SufficientContext",
+    description: "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire.",
   });
   // A protocol with no declared description keeps its card on the pair alone
   // rather than being given one.
@@ -369,7 +369,7 @@ test("every transcript shortfall leaves the prompt-only state", () => {
 
 test("the request carries the conversation only when there is one", () => {
   const config = { model: "jev-latest", stateTokenBudget: 28000 };
-  const criteria = { inquire: { declares: "ContextInsufficient → InformedExecution" }, none: "x" };
+  const criteria = { inquire: { declares: "ContextInsufficient → SufficientContext" }, none: "x" };
   const bare = JSON.parse(buildRequest(config, "ask", criteria, []));
   assert.deepEqual(Object.keys(bare.state), ["current_prompt"]);
   const rich = JSON.parse(
@@ -489,7 +489,7 @@ test("the request built from a transcript on disk carries turns, not tools", () 
     return advise("the newest turn", {
       config,
       env: { K: "key" },
-      protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+      protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext" }],
       transcriptPath: tp,
       ask: (_c, _k, body) => {
         sent = JSON.parse(body);
@@ -579,7 +579,7 @@ test("a rejected state is retried once with half the conversation", () => {
   return advise("p", {
     config,
     env: { K: "key" },
-    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext" }],
     conversation,
     ask: (_c, _k, body) => {
       const parsed = JSON.parse(body);
@@ -602,7 +602,7 @@ test("a second rejection ends the turn rather than retrying again", () => {
   return advise("p", {
     config,
     env: { K: "key" },
-    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" }],
+    protocols: [{ command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext" }],
     conversation: [{ role: "user", text: "a" }, { role: "user", text: "b" }],
     ask: () => {
       calls += 1;
@@ -620,7 +620,7 @@ test("the none option is worded for the session, not for the prompt alone", () =
   // evaluator to disregard the session contradicts the question that asks it
   // to read one, and the contradiction cost accuracy in both directions.
   const criteria = buildCriteria([
-    { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" },
+    { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext" },
   ]);
   const none = criteria[NONE];
   assert.equal(typeof none, "string");
@@ -663,7 +663,7 @@ test("the budget is derived from what the question and prompt leave", () => {
   // adds about ninety tokens of options to every request.
   const cap = { stateTokenBudget: CEILING };
   const few = buildCriteria([
-    { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" },
+    { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext" },
   ]);
   const many = buildCriteria(
     Array.from({ length: 40 }, (_, i) => ({
@@ -715,7 +715,7 @@ test("the margin is generous because the retry costs half the conversation", () 
   assert.ok(MARGIN >= 0.6, `margin ${MARGIN} throws away room the channel needs`);
   const cap = { stateTokenBudget: CEILING };
   const criteria = buildCriteria([
-    { command: "inquire", deficit: "ContextInsufficient", resolution: "InformedExecution" },
+    { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext" },
   ]);
   const budget = budgetFor(cap, criteria, "x");
   assert.ok(budget < CEILING * 0.8, "the held-back share must actually be held back");

@@ -26,7 +26,7 @@ The shared plugin hook records Codex Stop, PreCompact, and SessionEnd events wit
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Anamnesis** | **AI-guided** | **`RecallAmbiguous → RecalledContext`** |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
