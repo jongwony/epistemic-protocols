@@ -15,20 +15,22 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 ── FLOW ──
 Aitesis(X) → Scan(X) → Uᵢ →
   [if Uᵢ = ∅] sufficiency_relay(reasoning) → proceed (trivial SufficientContext)
-  Collect(Uᵢ) → ∀u: push(u) until ¬advanceable(u) → land(u) → (Uᵣ, Uₚ, Uᵤ, Uₙ) →
+  Collect(Uᵢ) → ∀u: push(u) until ¬advanceable(u) → land(u) → (Uᵣ, Uₚ, Uᵤ, Uₙ) → X' := enrich(X, landed) →
   Surface(Uₚ ∪ Uᵤ ∪ Uₙ, Uᵣ) → proceed → converge(X')
-  [a later utterance answers a surfaced item] integrate(A, X') → X'' → Collect(reopened) → …   -- each pass converges; an answer opens the next
+  [a later utterance answers a surfaced item] integrate(A, X') → X'' → Uₐ := Scan(X'') \ uncertainties → Collect(reopened ∪ Uₐ) → …   -- each pass converges; an answer opens the next
 -- push(u): one untried channel the AI can reach on its own, cheapest first; a tried channel is not re-selected
 -- land(u): the state the item reached, the reason it reached no further, and the basis — written as fields on the item, read from the material by the model
--- Uᵣ resolved · Uₚ provisional (a finding with its shortfall declared) · Uᵤ the user's unknown · Uₙ detect-only
+-- enrich: the landed records written into the prospect — the pass's product
+-- Uᵣ resolved · Uₚ provisional (a finding with its shortfall declared) · Uᵤ the user's unknown · Uₙ detect-only · Uₐ what an answer exposes
 
 ── MORPHISM ──
 Prospect
   → scan(prospect, context)                    -- infer what the prospect leaves uncertain; open dimensions, no fixed taxonomy
   → collect(uncertainties, channels)           -- push each uncertainty through every channel the AI can reach on its own
   → land(uncertainty, state, reason, basis)    -- write what collection reached and why it reached no further
+  → enrich(prospect, landed)                   -- write the landed records into the prospect: X → X'
   → surface(landed, as_relay)                  -- hand what remains to the user as their own unknown; proceed
-  → integrate(answer, prospect)                -- an answer, when it comes, is one more channel: reopen and collect again
+  → integrate(answer, prospect)                -- an answer, when it comes, is one more channel: reopen, scan for what it exposes, collect again
   → SufficientContext
 requires: uncertain(sufficiency(X))            -- runtime checkpoint (Phase 0)
 deficit:  ContextInsufficient                  -- activation precondition (Layer 1/2)
@@ -44,7 +46,7 @@ Scan     = Context sufficiency scan: X → Set(Uncertainty)
 Uncertainty = { domain: String, description: String, priority: Priority,
                 context: Set(Evidence), tried: Set(Channel),
                 state: Optional(State), reason: Optional(Reason), basis: Optional(String) }
-             -- state, reason, basis are empty while the item is in Collect and written once at land(u); the judgment is the model's, the fields are the product
+             -- state, reason, basis are empty while the item is in Collect and written at land(u); an item that reopens has them emptied and is landed again; the judgment is the model's, the fields are the product
              -- basis: for Resolved, what sufficed and why; for Provisional, the finding and where its ground falls short; for UserUnknown, what was tried, or the contradiction quoted; for DetectOnly, what was seen
 Evidence = { source: String, content: String }      -- attached during Collect; a run that observed nothing attaches its null result as content
 Priority ∈ {Critical, Significant, Marginal}       -- orders the surfacing: information gain first
@@ -64,11 +66,13 @@ A        = User answer, read from a later utterance that addresses a surfaced it
            ∈ {Provide(context), Point(location), Unknown(Partial), Dismiss(u), Sufficient}
              Partial     = what the user does say they know
              -- Provide / Point: one more channel for u; u reopens into Collect
-             -- Unknown(Partial): the user does not know either; u stays UserUnknown, Partial attached, reason updated
+             -- Unknown(Partial): the user does not know either; Partial attaches as context and the user counts as a tried channel; u reopens if Partial opens a channel the AI can push on, otherwise keeps its state with the reason updated
              -- Dismiss(u): u → dismissed, the reason recorded on it
              -- Sufficient: the whole inquiry is declared enough; every Provisional and UserUnknown item → dismissed with the declaration recorded, DetectOnly items stand as detections
+             -- every answer but Sufficient is also scanned for what it exposes (Uₐ below)
              -- premise: one utterance carries one disposition per item, and silence is none of them — an unanswered item is the user's unknown, which is the product, not a pending state
-X'       = Updated prospect (context-enriched)
+Uₐ       = Uncertainties an answer exposes: Scan(X'') \ uncertainties — enter Collect beside the reopened item, as Uᵢ did
+X'       = Updated prospect (context-enriched): the prospect with every landed record written into it, produced at the end of each Phase 1 pass — X' after the first pass, and written in place into X'', the prospect an answer was integrated into, after a later one, so no third prime is needed
 SufficientContext = X' where collecting = ∅
              -- every uncertainty has landed: what collection settled, what it found without full warrant, what is the user's to settle, what it only detected
              -- sufficiency is the exhaustion of the AI's own reach, not coverage of the task; open items that are the user's are the product, not a shortfall
@@ -84,22 +88,24 @@ Phase 0: X → Scan(X) → Uᵢ?                                              --
 Phase 1: Uᵢ → collecting := collecting ∪ Uᵢ →
          Step₁ ∀u ∈ collecting: while advanceable(u): push(u, c) → tried(u) += c, context(u) += evidence   -- collection over the AI's own channels, cheapest first; an observation run is one such channel, its escape logged when it must not run; a contradiction(u) no channel settles ends the loop for u [Tool]
          Step₂ land(u) → state(u), reason(u), basis(u) → u: collecting → resolved | provisional | user_unknown | detect_only   -- the item's record is written; the judgment is the model's, the fields are the product (track)
+         Step₃ Λ.X := enrich(Λ.X, uncertainties)                            -- every item has landed: the records are written into the prospect, the pass's product — X → X' on the first pass, in place on X'' after an answer (track)
 Phase 2: Surface(provisional ∪ user_unknown ∪ detect_only, resolved, priority) → proceed   -- relay: each landed item beside its state, reason, basis, and what an answer would change [Tool]
 Phase 3: A → integrate(A, X') → X''                                        -- fires when a later utterance answers a surfaced item (track: mutates Λ)
-         [A = Provide ∨ A = Point] u → collecting, tried(u) += user, context(u) += answer → goto Phase 1
-         [A = Unknown(Partial)] u stays in user_unknown; context(u) += Partial; reason(u) := the user does not know either
+         [A = Provide ∨ A = Point] tried(u) += user, context(u) += answer → u → collecting (state, reason, basis emptied)
+         [A = Unknown(Partial)] tried(u) += user, context(u) += Partial → [advanceable(u)] u → collecting (state, reason, basis emptied) | [¬advanceable(u)] u keeps its state, reason(u) := the user does not know either
          [A = Dismiss(u)] u → dismissed
          [A = Sufficient] provisional ∪ user_unknown → dismissed, the declaration recorded on each → converge
+         then Uₐ := Scan(X'') \ uncertainties → uncertainties ∪= Uₐ, collecting ∪= Uₐ → [collecting ≠ ∅] goto Phase 1 | [collecting = ∅] converge   -- every answer but Sufficient: what it exposes enters collection beside what it reopened; a pass converges only once nothing is left to push
 
 ── LOOP ──
-After Phase 1 every item has landed, so collecting = ∅ holds by construction: Phase 2 surfaces and the pass converges.
-An answer to a surfaced item (Phase 3) opens the next pass: the item re-enters collecting with the answer as one more tried channel, and Phase 1 pushes it again. Uncertainties an answer exposes accumulate into uncertainties (cumulative, never replace).
+After Phase 1 every item has landed and the prospect carries their records, so collecting = ∅ holds by construction: Phase 2 surfaces and the pass converges.
+An answer to a surfaced item (Phase 3) opens the next pass: the item re-enters collecting with the answer as one more tried channel, what the answer exposes (Uₐ) enters collecting beside it, and Phase 1 pushes, lands, and enriches once more. Uncertainties accumulate (cumulative, never replace). An answer that opens no channel and exposes nothing converges at once.
 Nothing here holds the turn for that answer. Silence leaves the surfaced items as the user's unknown, and that is the product, not a pending state.
 Continue until: sufficient(X').
 Convergence evidence: at collecting = ∅, present the transformation trace — for every u ∈ uncertainties, one pair (ContextInsufficient(u) → landing(u)): a resolved item with what sufficed; a provisional item with its finding and where the ground falls short; a user-unknown item with its reason — only the user can settle it, or nobody yet knows — and what was tried; a detect-only item as detected, answering no uncertainty raised, with its reason; a dismissed item with the reason or declaration recorded. No item is declared out of scope without its own line. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-sufficient(X') = collecting = ∅              -- every uncertainty has landed in a state; the AI's own reach is exhausted
+sufficient(X') = collecting = ∅              -- every uncertainty has landed in a state, including what an answer reopened or exposed; the AI's own reach is exhausted
                                               -- user_unknown ≠ ∅ does not block convergence: what remains is surfaced as the user's, which is the product
 
 ── TOOL GROUNDING ──
@@ -109,8 +115,9 @@ Phase 0 sufficiency_relay (extension) → TextPresent+Proceed (Uᵢ = ∅: prese
 Phase 1 push    (observe)     → artifact read, artifact search, record read (stored knowledge: codebase, memory, references); external fetch (conditional: canonical external sources — RFCs, vendor API docs, standards; `source: "web:{url}"` tag, cross-checked against the codebase version so a page that may be stale lands the item Provisional rather than Resolved); environment run (conditional: read-only commit-log queries via subprocess — content pickaxe, message search, temporal range; `source: "history:{ref}"` tag)
 Phase 1 Observe (transform)   → artifact write, environment run, artifact read (an observation run as one channel, shaped by ObservationSpec — setup, execute, observe, cleanup via environment run; a run that resolves nothing attaches its null result as evidence and the item continues to its next channel — it never lands on the run alone)
 Phase 1 land    (track)       → Internal state update (advanceable(u) false → state, reason, basis written on u and u moved out of collecting; a source tried and a channel declined under an EscapeCondition both enter tried(u), the latter also observation_skips)
+Phase 1 enrich  (track)       → Internal state update (Λ.X := enrich(Λ.X, uncertainties) — the landed records written into the prospect once every item has landed)
 Phase 2 Surface (extension)   → TextPresent+Proceed (relay: every landed item that is not Resolved, in priority order, each beside its state, its reason, its basis — the finding and where its ground falls short, the channels tried, the contradiction quoted — and what an answer would change; then proceed. The presentation is owed unconditionally; the turn is not held for a reply)
-Phase 3 integrate (track)     → Internal state update (an answer read from a later utterance: Provide and Point reopen the item with the answer as one more tried channel; Unknown(Partial) attaches Partial and updates the reason; Dismiss(u) moves u to dismissed; Sufficient moves every provisional and user_unknown item to dismissed with the declaration recorded)
+Phase 3 integrate (track)     → Internal state update (an answer read from a later utterance: Provide and Point reopen the item with the answer as one more tried channel; Unknown(Partial) attaches Partial, counts the user as tried, and reopens the item only where a channel is now open, otherwise updates the reason; Dismiss(u) moves u to dismissed; Sufficient moves every provisional and user_unknown item to dismissed with the declaration recorded; every answer but Sufficient is scanned for what it exposes, and those items enter collecting)
 converge     (extension)      → TextPresent+Proceed (convergence evidence trace, one pair per uncertainty including the dismissed and the detect-only; proceed with SufficientContext)
 sufficiency  (extension)      → TextPresent+Proceed (fires on A = Sufficient: present the dismissed set with the declaration recorded against each, so the trace shows what was accepted unresolved rather than asserting resolution)
 seam         (extension)      → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move; proceed directly to it, citing that settling source)
@@ -122,7 +129,7 @@ seam         (extension)      → TextPresent+Proceed (fires at deactivation/han
       provisional: Set(Uncertainty),       -- state = Provisional
       user_unknown: Set(Uncertainty),      -- state = UserUnknown
       detect_only: Set(Uncertainty),       -- state = DetectOnly
-      dismissed: Set(Uncertainty),         -- disposed by the user, per item or by declaration; the reason recorded on the item
+      dismissed: Set(Uncertainty),         -- disposed by the user, per item or by declaration; the reason recorded on the item, the state it landed in kept
       history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Evidence)>,
       observation_skips: List<(Uncertainty, EscapeCondition, String)>,   -- audit trail: channels declined before running (a run that ran and resolved nothing is in observation_history, never here)
       active: Bool,
