@@ -21,13 +21,21 @@ Netting a gain against a loss hides the loss, so the harness scores in pairs —
   "id": "several-fit-inquire-sublate",
   "outcome": "several",
   "prompt": "…the text the UserPromptSubmit hook would receive…",
+  "conversation": [
+    { "role": "user", "text": "…what the session accumulated before that prompt…" },
+    { "role": "assistant", "text": "…and the reply to it…" }
+  ],
   "expected": ["inquire", "sublate"],
   "adjudicated": false,
   "note": "why this is the right answer, in the adjudicator's words"
 }
 ```
 
-`outcome` is one of `silence`, `singleton`, `several`, `monitor`. `expected` is the protocol names a correct advisory would carry — `[]` for `silence`. `monitor` cases are the ones where a gate holds the user's judgment, and they are here to be *measured*, not to be routed: whether a gate still holds is a reading of that protocol's contract against what the user has said since, which is not something the evaluator is asked or able to answer. A `monitor` case is scored on whether the advisory stays out of the way.
+`outcome` is one of `silence`, `singleton`, `several`, `monitor`.
+
+`conversation` is optional and is what the session accumulated before the prompt — the shape the channel sends when it is armed. A case that omits it is scored on the prompt alone, which is a narrower state than the channel ever sends. The harness writes these turns to a transcript and offers it **by path**, so the shipped walk assembles the state: the budget derived from what the question and the prompt leave under the endpoint ceiling, the newest-first fill, the harness wrappers stripped. Handing the turns to `advise` as an array instead would skip every one of those, and a run that skipped them would be scoring a state the channel never sends.
+
+A recording carries a digest of the turns it was asked with, so adding or changing a `conversation` makes the recording stale rather than silently regrading an old answer on a new question. `expected` is the protocol names a correct advisory would carry — `[]` for `silence`. `monitor` cases are the ones where a gate holds the user's judgment, and they are here to be *measured*, not to be routed: whether a gate still holds is a reading of that protocol's contract against what the user has said since, which is not something the evaluator is asked or able to answer. A `monitor` case is scored on whether the advisory stays out of the way.
 
 The `installed-not-loaded` cases exist because the hook reads installed-and-enabled plugins from disk while Route's candidates come from what the harness loaded. They check that a name for an unloadable protocol is a degradation the reader's own check absorbs, not a wrong outcome.
 
@@ -45,4 +53,31 @@ TYPESAFE_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
 
 What separates a scoring run from a standing channel is process scope. The invocation above assigns the variable for that one command, so it does not reach sessions already running, nor sessions started from a shell that never exported it. `export TYPESAFE_API_KEY=…` instead and every session launched from that shell is armed for as long as it lives. Scoring with the variable unset is not an option — the run refuses without a key.
 
-`--live` writes each answer into `recorded/` keyed by case id, model and the criteria it was asked with. A replay whose recorded model differs from the configured one is reported rather than silently scored: the configured name may be an alias, and a fixture graded under one version and replayed under another is measuring two things.
+`--live` writes each answer into `recorded/` keyed by case id, model and the criteria it was asked with. A replay whose recorded model differs from the configured one is reported rather than silently scored: the configured name may be an alias, and a fixture graded under one version and replayed under another is measuring two things. Recordings are not committed: each carries the model version that answered and the moment it answered, so it belongs to whoever ran it rather than to the checkout.
+
+## The mapping smoke asks something smaller, and can answer it
+
+`cases/smoke.json` and `scripts/route-evaluator-smoke.mjs` are a separate set with a separate claim. The eval above asks whether the advisory **helps**, which needs a label saying what a correct advisory would carry — a judgement, and the shipped ones are unadjudicated. The smoke asks only whether each deficit in the domain reaches its own resolution: one context per installed protocol, built to show that protocol's deficit, put through the live channel to see whether that protocol's name comes back.
+
+"This context shows deficit X" is true by the construction of the context, and each case's `note` states the construction. Nothing there claims X is the *right* routing — so a miss is a reach failure, not a verdict on the advisory.
+
+- The verdict is **membership**, not set equality: the protocol's name is among the names carried. A second name beside it is the eval's question, not this one's.
+- The domain is what `deriveProtocols()` returns — installed and enabled, read from disk, compared by identity. A derived protocol with no case and a case naming no derived protocol both fail the run, and nothing counts protocols.
+- One case is a settled-ground control expecting no name. Without it a run cannot tell reaching from the channel lighting up on everything.
+- A skip fails the run: a protocol nothing was observed for has not been shown to reach.
+
+```bash
+node route/scripts/route-evaluator-smoke.mjs            # replay recorded answers
+TYPESAFE_API_KEY=... node route/scripts/route-evaluator-smoke.mjs --live
+```
+
+**From a git worktree, pin `CLAUDE_PLUGIN_ROOT` at the installed plugin.** `deriveProtocols()` identifies this plugin's marketplace by the installed path and, failing that, by the name of the directory above it — which in a worktree is the worktree's name. Unpinned there, the domain comes back empty; the run refuses rather than reporting zero of zero reached, but the refusal is about the checkout, not about what is installed. The path to pin, and the commit that install is actually carrying:
+
+```bash
+node -e 'const j=require(process.env.HOME+"/.claude/plugins/installed_plugins.json");
+console.log(j.plugins["route@epistemic-protocols"][0])'
+```
+
+A merge does not update an install, and a session already running does not pick up one that has been updated. Both are worth checking before reading a run as an observation of current code.
+
+A live smoke reads the same variable as everything else here, so it is the same consent and the same process scope — assigned inline it arms that command and nothing else. Its answers land in `smoke-recorded/` and are not committed, for the reason the eval's recordings are not.
