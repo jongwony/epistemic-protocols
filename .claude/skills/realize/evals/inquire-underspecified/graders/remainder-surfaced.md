@@ -1,6 +1,6 @@
 ---
 type: llm
-target: last_message
+target: trace
 focus: whether what collection could not reach is handed back with its state, reason, and basis
 ---
 # What remains must be handed back as the user's own unknown
@@ -33,4 +33,5 @@ detect-only finding is presented as if it answered one of the uncertainties rais
 
 Whether the run went on to implement afterwards is not under judgment here: the contract
 declares what is presented, not whether the turn halts. Grade the presence and shape of the
-handoff, in whatever wording the run uses.
+handoff, in whatever wording the run uses. Because the run may continue after the relay, the
+handoff can sit anywhere in the trace; the last message alone is not the window.

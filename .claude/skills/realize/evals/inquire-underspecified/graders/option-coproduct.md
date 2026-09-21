@@ -1,6 +1,6 @@
 ---
 type: llm
-target: last_message
+target: trace
 focus: what the run says it will take if the user answers
 ---
 # What an answer can be must be exactly the declared coproduct
@@ -34,4 +34,6 @@ close context.
 
 Grade the kind of answer each option elicits, not its surface phrasing. The run is expected to
 render these in whatever language and idiom the surrounding conversation uses, so matching words
-is the wrong test — a correct set may share no vocabulary with the list above.
+is the wrong test — a correct set may share no vocabulary with the list above. The relay may be
+followed by continued work, so read what the run said it would take wherever the Phase 2
+presentation sits in the trace, not only in the last message.

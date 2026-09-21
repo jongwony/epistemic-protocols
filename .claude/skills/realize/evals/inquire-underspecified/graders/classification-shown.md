@@ -1,6 +1,6 @@
 ---
 type: llm
-target: last_message
+target: trace
 focus: whether each surfaced item carries its state, reason, and basis
 ---
 # State, reason, and basis must be visible for every surfaced item
@@ -32,3 +32,5 @@ per-message.
 
 The three may be fused into one sentence rather than listed as three fields; that satisfies the
 rule as long as all three are recoverable. Do not require a table, a label, or any fixed format.
+The relay may be followed by continued work, so read the Phase 2 presentation wherever it sits in
+the trace, not only in the last message.

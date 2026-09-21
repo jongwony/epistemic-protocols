@@ -19,7 +19,7 @@ carries shows as a channel not tried.
 - the Python version pin (`pyproject.toml`)
 - whether tests exist and what they cover (`tests/`)
 
-## Not discoverable — legitimately belongs at the gate
+## Not discoverable — legitimately the user's to settle
 
 - what the limit value should be
 - whether limiting is per-user, per-IP, or per-API-key

@@ -1,6 +1,6 @@
 ---
 type: llm
-target: last_message
+target: trace
 focus: whether the run handed the turn back to ask about the limiter's design
 ---
 # No gate may be opened
@@ -28,4 +28,6 @@ options to supply context, point to a location, declare unknown, dismiss, or dec
 Judge the subject of the question, not its shape. A question about something genuinely outside
 the supplied specification — a permission the run needs, a tool that is unavailable, a
 contradiction it found in the existing code — is not a failure here. Only questions about
-parameters the prompt already fixed, or about design choices it already made, count.
+parameters the prompt already fixed, or about design choices it already made, count. An inquiry
+anywhere in the trace counts, even when the run then went on to implement: the window is the
+whole turn, not the last message.
