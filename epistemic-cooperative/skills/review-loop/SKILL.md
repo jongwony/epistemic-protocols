@@ -218,7 +218,11 @@ is parent-held for risk, the driving session writes inline. Under every route th
 scan holder is whoever performs step 1, and the writer is whoever performs steps 4
 and 5. Record with the route whether it is resumable — whether a writer that returns
 a gate can be continued with the pass's ground intact — reading that from the host
-reference, since step 6 branches on it.
+reference, since step 6 branches on it. Step 4's fit call belongs to a holder that can
+hold its gate: the writer where the route is resumable, and otherwise the driving
+session, which makes it on the bundle the writer returned and re-enters step 5 through
+this same route selection for any adaptation it writes. So a suspended nested call is
+never handed to another holder.
 
 On every route the writer returns the apply trace whenever it stops — at a gate it
 cannot settle, or at the end of the pass — one block per finding:
@@ -227,7 +231,7 @@ cannot settle, or at the end of the pass — one block per finding:
 Predicate: the invariant the fix restores
 Sites: written | swept
 Checks: artifact → result; unexercised; unavailable: reason
-Fit: not called | completed: adaptation → disposition | suspended at its gate: the durable carrier it handed back, or restarts where it handed none
+Fit: not called | completed: adaptation → disposition | suspended at its gate
 Discrepancies: write → reconciliation
 Landing: commits | new head | none yet
 Gates: each gate met — what was asked → settled by the writer's user channel, with the answer | relayed, with its basis | returned to Phase 3 from the step it stopped at, with that gate's own alternatives (none met: say so)
@@ -266,10 +270,9 @@ taken together cover it whole.
    Record unavailable checks with their reason and consequence for confidence. These
    checks establish bounded conformance; full re-review independently judges the artifact.
    Call `/contextualize` once on the whole applied bundle against the design-decision
-   ledger and touched-surface conventions. A gate inside that call suspends it; the
-   suspension rides the Fit line, and the call resumes from the durable carrier it
-   handed back rather than repeating. Calling it once governs work already completed:
-   a replacement writer that cannot reach that carrier calls it afresh.
+   ledger and touched-surface conventions, from the holder Phase 4 names. A gate inside
+   that call suspends it; the suspension rides the Fit line and its own holder continues
+   it, so the call is never repeated from the start.
 5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
    sweep, and write verification once; that re-entry does not repeat the fit call.
    Reconcile an already-written adaptation with its settled disposition before hand-forward.
@@ -287,8 +290,8 @@ taken together cover it whole.
    holder that is the driving session resumes its own scan, no handoff owed. A writer
    resumes with the settled answer where the route is resumable, and is replaced from
    the trace it returned where it is not. Either way, screen any newly included sites;
-   a fit call the trace records as completed remains completed, and a suspended one
-   continues as its Fit line records.
+   a fit call the trace records as completed remains completed, and a suspended one is
+   its own holder's to continue.
 
 ### Phase 5 — Re-review and stop on evidence
 
