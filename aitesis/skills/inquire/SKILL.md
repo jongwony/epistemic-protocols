@@ -18,6 +18,7 @@ Aitesis(X) → Scan(X) → Uᵢ →
   Pass(X): W := Scan(X) ∪ live → ∀u ∈ W: push(u) until ¬advanceable(u) → ∀u ∈ W: land(u) → (Uᵣ, Uₚ, Uᵤ, Uₙ) → X' := enrich(X, landed) →
   [the pass changed something] Pass(X') → …   [it changed nothing] Surface(Uₚ ∪ Uᵤ ∪ Uₙ, Uᵣ) → proceed → converge(X')
   [a later utterance answers a surfaced item] integrate(A, X') → X'' → Pass(X'') → …   -- an answer is one more channel; the next pass re-reads everything
+  [A = Sufficient] integrate(A, X') → X'' → converge(X'')                               -- the one answer that opens no pass: the inquiry is declared enough and what remains is dismissed with the declaration
 -- live: every uncertainty not dismissed — the pass is the unit, and every pass pushes and lands the whole of it again
 -- push(u): one untried channel the AI can reach on its own, cheapest first; a tried channel is not re-selected
 -- land(u): the state the item reached, the reason it reached no further, and the basis — written as fields on the item, read from the material by the model; written at every pass, the same where nothing moved
@@ -44,6 +45,7 @@ X        = Prospect for action (source-agnostic: planning, task execution, analy
              -- Input type: morphism processes X uniformly; enumeration scopes the definition, not behavioral dispatch
 Scan     = Context sufficiency scan: X → Set(Uncertainty)
              -- infers across whatever the prospect leaves open — a missing fact, a contradiction between the utterance and what was collected, a relevance gap; no fixed taxonomy
+             -- and registers, as an item of its own, a finding the material now in the prospect carries that answers nothing raised — the item lands DetectOnly at Step₂, and the question the material was collected for keeps its own record beside it
 Uncertainty = { domain: String, description: String, priority: Priority,
                 context: Set(Evidence), tried: Set(Channel),
                 state: Optional(State), reason: Optional(Reason), basis: Optional(String) }
@@ -55,6 +57,7 @@ Channel  = a route the AI can read or run on its own for this item — artifact 
              -- open set: which channels an item admits is read from the item, never from a table; what is fixed is that a tried channel is not re-selected
 advanceable(u) = ∃ c ∈ channels(u) \ tried(u)      -- the AI can still push this item on its own; false both ends collection for u and hands u to the user
              -- false when every channel the item admits has been tried, when the item's answer lives only with the user, or when the item is not the AI's to collect
+             -- whether an untried channel is still worth reaching for is part of the judgment: a channel whose expected yield no longer justifies pushing it on the AI's own is not one the item admits, and that reading — the model's, recorded on the item as which way it fell — is what bounds a pass over an open channel set
 State ∈ {Resolved, Provisional, UserUnknown, DetectOnly}
              -- Resolved:     evidence settles the item
              -- Provisional:  a finding exists and its ground is short — a finding, never an absence
@@ -88,7 +91,7 @@ EscapeCondition ∈ {EnvironmentMutation, RiskElevated}
 Phase 0: X → Scan(X) → Uᵢ?                                              -- context sufficiency checkpoint (silent)
        [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed                    -- zero-signal: present the sufficiency finding as relay text; trivial SufficientContext (nothing to collect), Aitesis not activated
 Phase 1: one pass over the whole live set
-         Step₀ W := Scan(Λ.X) ∪ live → uncertainties ∪= W                 -- the working set: what this scan raises (Uᵢ on the first pass; later, what the enriched or integrated prospect now leaves open) and every item not dismissed
+         Step₀ W := Scan(Λ.X) ∪ live → uncertainties ∪= W                 -- the working set: what this scan raises (Uᵢ on the first pass; later, what the enriched or integrated prospect now leaves open, and a finding the collected material carries that answers nothing raised — opened here as its own item, so the question it was collected for keeps its own record beside it) and every item not dismissed
          Step₁ ∀u ∈ W: while advanceable(u): push(u, c) → tried(u) += c, context(u) += evidence   -- collection over the AI's own channels, cheapest first; an observation run is one such channel, its escape logged when it must not run; a contradiction(u) no channel settles ends the loop for u [Tool]
          Step₂ ∀u ∈ W: land(u) → state(u), reason(u), basis(u) → u ∈ resolved | provisional | user_unknown | detect_only   -- every item is landed again on the material as it now stands; a landing the material did not move is written the same; the judgment is the model's, the fields are the product (track)
          Step₃ Λ.X := enrich(Λ.X, uncertainties)                            -- the records are written into the prospect, the pass's product — X → X' on the first pass, in place on X'' after an answer (track)
@@ -101,14 +104,14 @@ Phase 3: A → integrate(A, X') → X''                                        -
          [A = Sufficient] provisional ∪ user_unknown → dismissed, the declaration recorded on each → converge
 
 ── LOOP ──
-The pass is the unit. Each pass scans the prospect as it now stands, pushes every live item through the channels still open to it, lands every live item again on the whole material, and writes the records into the prospect. A pass is followed by another while it changed something — opened an item, tried a channel, changed a landing — and the loop is bounded: tried(u) only grows and a tried channel is not re-selected, and a scan over a prospect nothing enriched raises nothing new. Uncertainties accumulate (cumulative, never replace); a dismissed item never re-enters a pass.
-A pass that changed nothing converges: Phase 2 surfaces. An answer to a surfaced item (Phase 3) is one more channel and opens the next pass, which re-reads everything on the integrated prospect — what the answer settles, what it refutes elsewhere, what it exposes.
+The pass is the unit. Each pass scans the prospect as it now stands, pushes every live item through the channels still open to it, lands every live item again on the whole material, and writes the records into the prospect. A pass is followed by another while it changed something — opened an item, tried a channel, changed a landing. What bounds the loop is the stopping judgment advanceable(u) carries, together with the monotone tried set: tried(u) only grows and a tried channel is not re-selected, and a channel no longer worth reaching for on the AI's own is not one the item admits, so "the pass changed nothing" is reached by that judgment, not by exhausting an enumeration the open channel set never closes. A pass cap is not a member of this contract, as duration is not a member of EscapeCondition. A run that keeps discovering lands what it has at the point the judgment says stop and surfaces the rest as the user's unknown — the residual is preserved, never a stall. Uncertainties accumulate (cumulative, never replace); a dismissed item never re-enters a pass.
+A pass that changed nothing converges: Phase 2 surfaces. An answer to a surfaced item (Phase 3) is one more channel and opens the next pass, which re-reads everything on the integrated prospect — what the answer settles, what it refutes elsewhere, what it exposes. Sufficient is the one answer that opens no pass: it dismisses what remains with the declaration and converges at once.
 Nothing here holds the turn for that answer. Silence leaves the surfaced items as the user's unknown, and that is the product, not a pending state.
 Continue until: sufficient(X').
 Convergence evidence: at a pass that changed nothing, present the transformation trace — for every u ∈ uncertainties, those the first scan raised and those a later pass opened alike, one pair (ContextInsufficient(u) → landing(u)): a resolved item with what sufficed; a provisional item with its finding and where the ground falls short; a user-unknown item with its reason — only the user can settle it, or nobody yet knows — and what was tried; a detect-only item as detected, answering no uncertainty raised, with its reason; a dismissed item with the reason or declaration recorded. No item is declared out of scope without its own line. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-sufficient(X') = the last pass changed nothing   -- it opened no item, tried no channel, changed no landing: the AI's own reach is exhausted and every landing stands on the whole material, including what an answer added
+sufficient(X') = the last pass changed nothing   -- it opened no item, tried no channel, changed no landing: the AI's own reach is exhausted — as advanceable(u) judges it, a reasonable stopping point rather than an enumeration run dry — and every landing stands on the whole material, including what an answer added
                                                  -- user_unknown ≠ ∅ does not block convergence: what remains is surfaced as the user's, which is the product
 
 ── TOOL GROUNDING ──
