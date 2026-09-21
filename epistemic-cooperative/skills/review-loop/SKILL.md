@@ -208,17 +208,16 @@ what this unit carries. A rising count changes neither the criterion nor source 
 For PR scope, settle any pending landing choice under Phase 0 and prepare that
 destination through [PR scope](references/pr-scope.md) before the first edit.
 
-The driving session settles disposition and hands the apply pass to a writer, by
-the host's delegation capability. Where the host offers a full-context fork, one
-fork per apply pass is the default writer and carries steps 1, 4 and 5 below end
-to end; the host reference (for Claude Code, [Claude Code](references/host-claude-code.md)
-§ Writer fork) names the fork and resume mechanism. Where the host offers only a
-fresh-context delegate, the driving session performs step 1 itself and hands the
-enumerated predicate and screened sites to that writer in a self-contained brief,
-which then carries steps 4 and 5. Where the host offers no delegation, or an action
-is parent-held for risk, the driving session writes inline. Under every route the
-scan holder is whoever performs step 1, and the writer is whoever performs steps 4
-and 5.
+The driving session settles disposition and hands the apply pass to a writer.
+Where the host offers a full-context fork, one fork per apply pass is the default
+writer and carries steps 1, 4 and 5 below end to end; the host reference (for
+Claude Code, [Claude Code](references/host-claude-code.md) § Writer fork) names the
+fork and resume mechanism. Where the host offers only a fresh-context delegate, the
+driving session performs step 1 itself and hands the enumerated predicate and
+screened sites to that writer in a self-contained brief, which then carries steps 4
+and 5. Where the host offers no delegation, or an action is parent-held for risk,
+the driving session writes inline. Under every route the scan holder is whoever
+performs step 1, and the writer is whoever performs steps 4 and 5.
 
 A writer returns to the driving session whenever it stops — at a gate it cannot
 settle, or at the end of the pass — carrying what Trace and Exit requires of the pass
