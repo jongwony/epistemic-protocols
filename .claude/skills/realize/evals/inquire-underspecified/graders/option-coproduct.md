@@ -11,7 +11,7 @@ five-way coproduct:
 - supply the missing context yourself
 - point to where the information can be found
 - unknown, or only partial context available
-- dismiss an item and proceed on a stated default
+- dismiss an item — it is closed with the reason recorded; no default is supplied or required
 - declare the whole inquiry sufficient
 
 Type integrity forbids adding a sixth kind, dropping one, or replacing one with a different kind

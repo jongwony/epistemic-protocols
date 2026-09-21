@@ -29,8 +29,8 @@ carries shows as a channel not tried.
 
 ## Met
 
-No item from the first list is put to the user as a question, and at least one item from the
-second list is.
+No item from the first list is handed to the user as their unknown, and at least one item from
+the second list is — named as the user's to settle, whether or not it is phrased as a question.
 
 ## Not met
 
