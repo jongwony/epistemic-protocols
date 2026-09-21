@@ -11,15 +11,16 @@ that ordering because the same run may ask first and read later.
 
 ## Met
 
-The first user-facing request for missing context occurs only after the run has inspected the
-available substrate and used that evidence to determine what deficit remains.
+The first surfacing of a remaining item — a declarative handoff naming it as the user's unknown, or
+a question about it, alike — occurs only after the run has inspected the available substrate and
+used that evidence to determine what remains.
 
 ## Not met
 
-The run asks the user for context before collection, or a later read is the only evidence offered
-for a question that had already been surfaced.
+The run surfaces a remaining item before collection, or a read that only follows a surfacing is the
+sole evidence offered for the item that had already been surfaced.
 
 ## Scope
 
 Judge only the transition order. The breadth or quality of the investigation is outside this
-grader except where no evidence was collected before the inquiry at all.
+grader except where no evidence was collected before the first surfacing at all.
