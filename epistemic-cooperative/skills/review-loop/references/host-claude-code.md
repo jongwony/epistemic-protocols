@@ -15,10 +15,9 @@ not the model name or the presence of a plugin directory alone.
 
 - Writer fork (Phase 4): the `Agent` tool with `subagent_type: "fork"` inherits the
   loop's context, runs in the background, and keeps its tool output out of the driving
-  session, which is what the returned apply trace stands in for. Resume the same fork
-  with `SendMessage` to its agent name to continue with its context intact; a new
-  `Agent` call starts a writer without the pass's ground. That `SendMessage` route is
-  what makes this a resumable route for step 6.
+  session, which is what its return to the driving session stands in for. Resume the
+  same fork with `SendMessage` to its agent name to continue with its context intact;
+  a new `Agent` call starts a writer without the pass's ground.
 
 After designation, load only the selected adapter:
 [Claude review output](source-adapter-code-review.md) or

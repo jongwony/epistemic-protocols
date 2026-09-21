@@ -216,32 +216,11 @@ enumerated predicate and screened sites to that writer in a self-contained brief
 which then carries steps 4 and 5. Where the host offers no delegation, or an action
 is parent-held for risk, the driving session writes inline. Under every route the
 scan holder is whoever performs step 1, and the writer is whoever performs steps 4
-and 5. Record with the route whether it is resumable — whether a writer that returns
-a gate can be continued with the pass's ground intact — reading that from the host
-reference, since step 6 branches on it. Step 4's fit call belongs to a holder that can
-hold its gate: the writer where the route is resumable, and otherwise the driving
-session, which makes it on the bundle the writer returned. Its result rejoins the pass
-through this same route selection either way — an adaptation first re-entering step 5's
-scan and verification, an adaptation-free result going on to that step's finalization.
-So a suspended nested call is never handed to another holder.
+and 5.
 
-On every route the writer returns the apply trace whenever it stops — at a gate it
-cannot settle, or at the end of the pass — one block per finding:
-
-```
-Predicate: the invariant the fix restores
-Sites: written | swept
-Checks: artifact → result; unexercised; unavailable: reason
-Fit: not called | completed: adaptation → disposition | suspended at its gate
-Discrepancies: write → reconciliation
-Landing: commits | new head | none yet
-Gates: each gate met — what was asked → settled by the writer's user channel, with the answer | relayed, with its basis | returned to Phase 3 from the step it stopped at, with that gate's own alternatives (none met: say so)
-```
-
-A stop is continued from where its state already lives — the worktree holds the sites
-written, the loop's own records hold the dispositions, the driving session holds the
-pass's earlier traces — so the trace points rather than copies, and a pass's traces
-taken together cover it whole.
+A writer returns to the driving session whenever it stops — at a gate it cannot
+settle, or at the end of the pass — carrying what Trace and Exit requires of the pass
+so far, so the driving session records rather than re-derives it.
 
 1. The scan holder scans planned change points, adjacent interactions, and repeated
    instances. Derive each fix's predicate from the violated invariant and verified cause.
@@ -255,11 +234,7 @@ taken together cover it whole.
    Sweep matching sites in this apply pass within the settled scope, reporting expansion.
 2. Risk is separate from Mechanical/Judgment classification. Route substrate actions
    to host permissions; an unsettled epistemic risk goes to the user for apply, defer,
-   or drop. A writer without a user channel answers no nested gate — this risk gate,
-   a `/contextualize` gate, a live judgment — and returns each to Phase 3 with that
-   gate's own alternatives; a writer with a user channel answers it. Either way the
-   gate and how it was settled ride the trace's Gates line, and returning one is a
-   stop that returns the trace with it. Rejection blocks an edit not yet written.
+   or drop. Rejection blocks an edit not yet written.
 3. Repeated fix-induced follow-ups across consecutive rounds move judgment, not
    writing: the next apply pass returns its enumerated predicate and sites to Phase 3
    before writing. Return to autonomous apply after a review without such follow-ups.
@@ -271,11 +246,9 @@ taken together cover it whole.
    Record unavailable checks with their reason and consequence for confidence. These
    checks establish bounded conformance; full re-review independently judges the artifact.
    Call `/contextualize` once on the whole applied bundle against the design-decision
-   ledger and touched-surface conventions, from the holder Phase 4 names. A gate inside
-   that call suspends it; the suspension rides the Fit line and its own holder continues
-   it, so the call is never repeated from the start.
+   ledger and touched-surface conventions.
 5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
-   sweep, and write verification once; that re-entry does not repeat the fit call.
+   sweep, and write verification once; the fit call is not repeated in that apply pass.
    Reconcile an already-written adaptation with its settled disposition before hand-forward.
    A self-evident repair stays within that disposition; a competing repair or a live
    judgment about evidence support returns to Phase 3 with the current artifact and
@@ -285,14 +258,10 @@ taken together cover it whole.
    their screens. An adaptation-free pass needs no re-entry. After reconciliation and
    checks, including explicit unavailable-check limits, the writer commits to the
    settled landing for PR scope and pushes where that landing has a remote, then
-   returns the trace complete. The driving session obtains the full re-review from it.
-6. After a judgment or risk gate returned to Phase 3 is settled, the pass continues
-   rather than restarting, and whoever holds the suspended step continues it. A scan
-   holder that is the driving session resumes its own scan, no handoff owed. A writer
-   resumes with the settled answer where the route is resumable, and is replaced from
-   the trace it returned where it is not. Either way, screen any newly included sites;
-   a fit call the trace records as completed remains completed, and a suspended one is
-   its own holder's to continue.
+   returns. The driving session obtains the full re-review.
+6. After a judgment returned to Phase 3 is settled, resume the pending step in the
+   same apply pass with that answer. Screen any newly included sites; a fit
+   call already completed in that pass remains completed.
 
 ### Phase 5 — Re-review and stop on evidence
 
@@ -344,15 +313,11 @@ Landing: repair destination (PR only)
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
 limits, and unavailable-check reasons with that repair's Relay/Gated entry; keep this
-loop-side evidence distinct from the source-reported `Exercised` line. The pass's apply
-trace supplies that check evidence, its Discrepancies line the write discrepancies
-and their reconciliation, its Gates line who settled each nested gate and on what basis,
-and its Fit line the fit pass's artifact state and disposition; the driving session
-records these rather than re-deriving them. Where gates stopped the pass it returned
-one trace per stop, and they are read together.
+loop-side evidence distinct from the source-reported `Exercised` line. A writer that held
+the pass returns all of it, once per stop, and the driving session records rather than
+re-derives it.
 Assign exactly one Relay/Gated home by whether the user was asked, including nested
-`/contextualize` questions and epistemic risk gates — read off the Gates line
-where a writer held the pass. Host permission decisions are execution annotations. Record the fit pass as
+`/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
 artifact state and disposition. Preserve write discrepancies and their reconciliation;
 carried reasons are records, while subsequent reviews detect findings fresh. A stacked

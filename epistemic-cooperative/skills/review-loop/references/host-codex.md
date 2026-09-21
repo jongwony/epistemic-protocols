@@ -16,12 +16,10 @@ process's authentication and advertised skills in that environment.
   is a `spawn_agent` tool with `fork_turns: all`; another may be advertised. Where
   it is advertised and the spawn succeeds, the fork route applies. Where none is
   advertised, or the spawn fails, the driving session holds the scan and briefs a
-  fresh `codex exec` child. Either writer returns the apply trace; record the route
-  actually taken in the round's `Apply:` line. Resolve that route's resumability the
-  same way and at the same moment: a fork carries the pass's ground by construction,
-  while a fresh child carries it only where the CLI exposes a continuation for a prior
-  child session — `codex exec resume` is one observed form — and where it does not,
-  step 6's replacement brief applies.
+  fresh `codex exec` child. Record the route actually taken in the round's `Apply:`
+  line. A fork continues with the pass's ground by construction; a fresh child
+  continues only where the CLI exposes a continuation for a prior child session —
+  `codex exec resume` is one observed form.
 
 ## Claude print-mode call
 
