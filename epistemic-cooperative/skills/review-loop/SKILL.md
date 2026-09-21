@@ -227,14 +227,16 @@ cannot settle, or at the end of the pass — one block per finding:
 Predicate: the invariant the fix restores
 Sites: written | swept
 Checks: artifact → result; unexercised; unavailable: reason
-Fit: not called | completed: adaptation → disposition | suspended at its gate
+Fit: not called | completed: adaptation → disposition | suspended at its gate: the durable carrier it handed back, or restarts where it handed none
 Discrepancies: write → reconciliation
 Landing: commits | new head | none yet
 Gates: each gate met — what was asked → settled by the writer's user channel, with the answer | relayed, with its basis | returned to Phase 3 from the step it stopped at, with that gate's own alternatives (none met: say so)
 ```
 
-At a stop mid-pass the fields carry the pass's state as it stands; at the end they
-carry it complete, and a pass's traces taken together cover it whole.
+A stop is continued from where its state already lives — the worktree holds the sites
+written, the loop's own records hold the dispositions, the driving session holds the
+pass's earlier traces — so the trace points rather than copies, and a pass's traces
+taken together cover it whole.
 
 1. The scan holder scans planned change points, adjacent interactions, and repeated
    instances. Derive each fix's predicate from the violated invariant and verified cause.
@@ -265,9 +267,11 @@ carry it complete, and a pass's traces taken together cover it whole.
    checks establish bounded conformance; full re-review independently judges the artifact.
    Call `/contextualize` once on the whole applied bundle against the design-decision
    ledger and touched-surface conventions. A gate inside that call suspends it; the
-   suspension rides the Fit line and the call resumes rather than repeating.
+   suspension rides the Fit line, and the call resumes from the durable carrier it
+   handed back rather than repeating. Calling it once governs work already completed:
+   a replacement writer that cannot reach that carrier calls it afresh.
 5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
-   sweep, and write verification once; the fit call is not repeated in that apply pass.
+   sweep, and write verification once; that re-entry does not repeat the fit call.
    Reconcile an already-written adaptation with its settled disposition before hand-forward.
    A self-evident repair stays within that disposition; a competing repair or a live
    judgment about evidence support returns to Phase 3 with the current artifact and
@@ -279,11 +283,12 @@ carry it complete, and a pass's traces taken together cover it whole.
    settled landing for PR scope and pushes where that landing has a remote, then
    returns the trace complete. The driving session obtains the full re-review from it.
 6. After a judgment or risk gate returned to Phase 3 is settled, the pass continues
-   rather than restarting, from the trace the writer returned with that gate. Where
-   the route is resumable, resume the same writer with the settled answer. Where it
-   is not, the driving session briefs a replacement from that trace and the answer.
-   Either way, screen any newly included sites; a fit call the trace records as
-   completed remains completed, and one suspended there resumes.
+   rather than restarting, and whoever holds the suspended step continues it. A scan
+   holder that is the driving session resumes its own scan, no handoff owed. A writer
+   resumes with the settled answer where the route is resumable, and is replaced from
+   the trace it returned where it is not. Either way, screen any newly included sites;
+   a fit call the trace records as completed remains completed, and a suspended one
+   continues as its Fit line records.
 
 ### Phase 5 — Re-review and stop on evidence
 
