@@ -4,10 +4,10 @@
     "protocol": "inquire",
     "conversation": [
       { "role": "user", "text": "The billing exporter is finished. It reads from the warehouse replica and writes a CSV per account." },
-      { "role": "assistant", "text": "It runs clean against the replica — one file per account, written to the staging bucket." }
+      { "role": "assistant", "text": "It runs clean against the replica — one file per account into the staging bucket. There is no schedule config anywhere in the repo, and nothing in it says when this is meant to run." }
     ],
-    "prompt": "Good. Now set up the scheduler for it and land it.",
-    "note": "Constructed so the facts needed to execute sit only with the user: the window, the timezone that window means, what happens on a partial run, who hears about a failure. Nothing in the repository answers any of them, and none is a judgement the assistant could make well by itself."
+    "prompt": "Right. Put it on the schedule.",
+    "note": "Constructed so the facts needed to execute sit only with the user: the window, the timezone that window means, what a partial run should do, who hears about a failure. The repository answers none of them, and none is a judgement the assistant could make well by itself. The instruction is a single move on purpose, so what is missing is a fact rather than an order — a multi-move instruction would fire /conduct's own trigger instead."
   },
   {
     "id": "reach-ground",
@@ -85,11 +85,11 @@
     "id": "reach-conduct",
     "protocol": "conduct",
     "conversation": [
-      { "role": "user", "text": "We added the composite index last week and I want to know whether it actually helped." },
-      { "role": "assistant", "text": "The goal is clear enough — the question is what would count as an answer." }
+      { "role": "user", "text": "We're moving the session store off the single Redis node onto the cluster. Same key space, same TTLs, and no live session can drop during the cutover." },
+      { "role": "assistant", "text": "The pieces are known: a dual-write window, a backfill of the existing keys, the read-path switch, and retiring the old node." }
     ],
-    "prompt": "I know exactly what I want to find out. I have no idea how to go about finding it out.",
-    "note": "Constructed so the target is settled and the procedure is not. The user states the split themselves, which is what separates this from a missing fact or an unfixed endpoint."
+    "prompt": "Right, those four. What I don't have is how to run them so nothing drops in between.",
+    "note": "Constructed so the target, the endpoint and the pieces are all settled and only their sequence is open. The pieces are named in the conversation rather than left to be derived, which separates this from a goal still to be compiled; the endpoint is fixed by the constraint the user states, which separates it from an endpoint still undetermined. The deficit is shown by the situation rather than declared in the protocol's own vocabulary."
   },
   {
     "id": "reach-sketch",
