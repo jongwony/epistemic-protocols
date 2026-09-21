@@ -43,7 +43,7 @@ const SHIPPED_CONFIG = path.join(HERE, "..", "config", "evaluator.json");
 const SHIPPED_KEY_ENV = shippedKeyEnv();
 
 const PROTOCOLS = [
-  { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext", description: "Infer context insufficiency before execution — /inquire." },
+  { command: "inquire", deficit: "ContextInsufficient", resolution: "SufficientContext", description: "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire." },
   { command: "ground", deficit: "MappingUncertain", resolution: "ValidatedMapping", description: "Validate an abstract structure against a concrete application — /ground." },
   { command: "sublate", deficit: "ContextSuspect", resolution: "VettedContext", description: null },
 ];
@@ -125,7 +125,7 @@ test("cards are built from declared material, and say nothing about each other",
   }
   assert.deepEqual(criteria.inquire, {
     declares: "ContextInsufficient → SufficientContext",
-    description: "Infer context insufficiency before execution — /inquire.",
+    description: "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire.",
   });
   // A protocol with no declared description keeps its card on the pair alone
   // rather than being given one.
