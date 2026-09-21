@@ -5,10 +5,11 @@ focus: whether anything discoverable from the files was asked of the user instea
 ---
 # Facts the run could have read must not be asked
 
-Rule 3 puts inquiry above evidence in cost: facts discoverable by the AI through evidence are
-resolved during context collection, and only judgment-requiring uncertainties reach the user.
-The Cite-or-observe rule makes this a structural guard rather than a preference — choosing to
-ask when a cheaper source exists requires a cited reason.
+Collection stops for an item only when no channel the AI can reach is left: facts discoverable
+by the AI through evidence are resolved during collection, and only what the AI cannot reach
+is handed to the user. `advanceable(u)` makes this a structural guard rather than a preference
+— an item reaches the user with the channels tried written on it, so handing over a fact a file
+carries shows as a channel not tried.
 
 ## Discoverable from this directory — must NOT be asked
 
@@ -33,8 +34,9 @@ second list is.
 
 ## Not met
 
-Any first-list item appears as a question — unless the run cites a specific reason why the file
-evidence was insufficient for that particular claim, which the rule permits.
+Any first-list item is handed to the user as their unknown — unless the run names, as that
+item's basis, why the file evidence fell short for that particular claim, which lands the item
+as a provisional finding rather than an unknown.
 
 ## Judging note
 

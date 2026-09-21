@@ -5,8 +5,9 @@ focus: whether evidence collection occurred before the first user-facing inquiry
 ---
 # Context collection must precede inquiry
 
-Rule 5 declares the transition order: context collection, classification, then inquiry. Tool
-existence alone cannot establish that ordering because the same run may ask first and read later.
+PHASE TRANSITIONS declare the order: Phase 1 pushes each item through every channel the AI can
+reach and lands it, then Phase 2 surfaces what remains. Tool existence alone cannot establish
+that ordering because the same run may ask first and read later.
 
 ## Met
 

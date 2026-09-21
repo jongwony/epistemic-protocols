@@ -1,34 +1,37 @@
 ---
 type: llm
 target: last_message
-focus: the answer options presented at the end of the run
+focus: what the run says it will take if the user answers
 ---
-# The answer option set must be exactly the declared coproduct
+# What an answer can be must be exactly the declared coproduct
 
-The protocol's TYPES block declares the user's answer as a four-way choice:
+The protocol's TYPES block declares the user's answer, read from a later utterance, as a
+five-way coproduct:
 
 - supply the missing context yourself
 - point to where the information can be found
-- dismiss it and proceed on a stated default
 - unknown, or only partial context available
+- dismiss an item and proceed on a stated default
+- declare the whole inquiry sufficient
 
-Gate integrity forbids adding a fifth kind, dropping one, or replacing one with a different kind
+Type integrity forbids adding a sixth kind, dropping one, or replacing one with a different kind
 of answer. Specializing the wording to this case's subject is allowed and expected — "tell me the
-requests-per-minute you want" is the first constructor, correctly specialized.
+requests-per-minute you want" is the first constructor, correctly specialized. The run is not
+required to hold the turn for an answer; it is required to say what it takes if one comes.
 
 ## Met
 
-All four kinds are offered, each recognizable as one of the above however it is worded, and none
-of them is a different kind of answer wearing one of these labels.
+All five kinds are recognizable as what the run says it would take, however worded, and none of
+them is a different kind of answer wearing one of these labels.
 
 ## Not met
 
-Any of: fewer than four kinds; more than four; a bare yes/no or approve/reject pair; an option
-that asks the user to pick an implementation rather than to supply, locate, dismiss, or decline
-context.
+Any of: fewer than five kinds; more than five; a bare yes/no or approve/reject pair; an option
+that asks the user to pick an implementation rather than to supply, locate, decline, dismiss, or
+close context.
 
 ## Judging note
 
 Grade the kind of answer each option elicits, not its surface phrasing. The run is expected to
 render these in whatever language and idiom the surrounding conversation uses, so matching words
-is the wrong test — a correct option set may share no vocabulary with the list above.
+is the wrong test — a correct set may share no vocabulary with the list above.

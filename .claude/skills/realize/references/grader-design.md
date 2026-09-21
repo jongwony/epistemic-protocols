@@ -38,18 +38,18 @@ transition it was built to observe.
 
 | Declared in | Obligation | Grader | Kind |
 |---|---|---|---|
-| TOOL GROUNDING | Phase 2 reaches `Stop` | `stop_observed` | tree witness |
+| TOOL GROUNDING | Phase 2 hands the remainder back with state, reason, basis | `remainder-surfaced` | manual; judge specified |
 | Phase 0 | zero-uncertainty path reaches `Proceed` | `proceed_observed` | tree witness |
-| Rule 5 / PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
-| Rule 5 / PHASE TRANSITIONS | collection precedes inquiry | `collection-precedes-inquiry` | manual transcript review |
+| PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
+| PHASE TRANSITIONS | collection precedes surfacing | `collection-precedes-inquiry` | manual transcript review |
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
 | — | the protocol loaded and fired | `skill_fired` | behaviour |
-| TYPES | answer set is the declared four-way coproduct | `option-coproduct` | manual; judge specified |
-| TYPES / Rule 7 | classification shown per uncertainty | `classification-shown` | manual; judge specified |
-| Rule 3 / Cite-or-observe | cheap evidence resolved, not asked | `cheap-evidence-not-asked` | manual; judge specified |
+| TYPES | answer set is the declared five-way coproduct | `option-coproduct` | manual; judge specified |
+| TYPES / Rules | state, reason, basis shown per item | `classification-shown` | manual; judge specified |
+| TYPES `advanceable` | cheap evidence resolved, not handed over | `cheap-evidence-not-asked` | manual; judge specified |
 | Phase 0 | sufficiency finding stated rather than skipped | `sufficiency-stated` | manual; judge specified |
 | Skip conditions | no gate when context is already sufficient | `no-gate` | manual; judge specified |
-| Rule 7 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | manual; judge specified |
+| Phase 0 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | manual; judge specified |
 
 ## Read the branch witness, not the tool names
 

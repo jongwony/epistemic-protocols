@@ -152,9 +152,10 @@ so they are not mistaken for findings.
 
 `pass_k` is one only when every repetition passed its deterministic transition
 predicates. The `manual` column counts scenario-specific transcript judgments excluded from that
-composite; the report names them. For `inquire`, constructor coverage, classification,
-collection-before-inquiry order, sufficiency rendering, and no-gate judgments remain
-manual observations grounded by the grader files.
+composite; the report names them. For `inquire`, constructor coverage, the per-item
+state, reason and basis, collection-before-surfacing order, the handoff of the remainder
+as the user's unknown, sufficiency rendering, and no-gate judgments remain manual
+observations grounded by the grader files.
 
 On Claude, `skill` says whether the protocol fired where it was available, and `n/a`
 where there was no plugin to fire. Codex reports `trace-unavailable` for that column and
