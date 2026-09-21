@@ -21,12 +21,14 @@ Use repository/GitHub tools available to the host; `gh` below is an example bind
    `head` appends repairs to the reviewed head.
    `stacked` cuts a layer from that head. Where using GitHub stacks, check the
    `github/gh-stack` extension, resolve existing ordered membership and the bottom
-   base first. Follow `gh stack link --help` to link the repair layer while preserving
-   those relationships; supplying only a reviewed PR and new branch can omit existing
-   members or reset a non-default bottom base. Verify resulting PR bases and stack
-   membership. A base chain alone does not establish linkage. Report a missing
-   capability rather than claiming a link.
-5. Before re-review, resolve the selected destination's new local head.
+   base first. Report a missing capability rather than claiming a link.
+5. For a stacked repair layer using GitHub stacks, after the first committed repair
+   and before re-review, follow `gh stack link --help` to link it while preserving
+   those relationships;
+   supplying only a reviewed PR and new branch can omit existing members or reset a
+   non-default bottom base. Verify resulting PR bases and stack membership. A base
+   chain alone does not establish linkage.
+6. Before re-review, resolve the selected destination's new local head.
    On a stack, re-reading the lower PR's `headRefOid` would omit the repairs: use the
    layer's head.
 
