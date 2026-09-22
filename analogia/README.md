@@ -31,12 +31,12 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **Key differences**:
-- **vs. Prothesis**: Prothesis selects which framework to apply when none exists. Analogia validates whether a selected framework structurally maps to your domain.
-- **vs. Aitesis**: Aitesis collects the facts the AI can reach and names what only the user holds (factual). Analogia checks if abstract structures preserve when mapped to your context (relational).
-- **vs. Epharmoge**: Epharmoge checks post-execution applicability. Analogia checks pre-execution mapping validity between abstraction levels.
-- **vs. Proplasma**: Proplasma contrasts discard-committed placeholder probes when no familiar-domain mapping is available and direction futures are unrecognizable from descriptions. Analogia validates a structural mapping when one exists — a direction that survives the contrast flows to Analogia when a mapping is available.
+- **vs. Prothesis**: Prothesis selects which framework to apply when none exists. Analogia audits which conclusions a selected framework supports about an account already in play.
+- **vs. Aitesis**: Aitesis collects the facts the AI can reach and names what only the user holds (factual). Analogia audits what a mapping licenses from the evidence for its structural claims (relational).
+- **vs. Epharmoge**: Epharmoge checks post-execution applicability. Analogia audits the conclusions licensed by a mapping between abstraction levels.
+- **vs. Proplasma**: Proplasma contrasts discard-committed placeholder probes when direction futures remain unrecognizable from descriptions after its routing checks. Analogia audits a mapping against an account already in play — a direction that survives the contrast flows to Analogia when its intended inferences need that audit.
 
-**Litmus test**: If the uncertainty is about *whether abstract structure A corresponds to concrete structure B*, it's Analogia. If it's about *which facts the AI can still reach and which only the user holds*, it's Aitesis. If it's about *which framework to apply*, it's Prothesis.
+**Litmus test**: If the uncertainty is about *what a mapping from structure A licenses about an account of B already in play*, it's Analogia. If it's about *which facts the AI can still reach and which only the user holds*, it's Aitesis. If it's about *which framework to apply*, it's Prothesis.
 
 ## Protocol Flow
 
@@ -46,26 +46,27 @@ Phase 1: Assess       → Settle the comparison focus and the conclusions at sta
                         correspondences, state what would defeat each bearing claim, run the
                         checks reachable here, read warrant off the grounds, judge each conclusion
 Phase 2: Surface      → Present the whole assessment and proceed (relay — no verdict is requested)
-Phase 3: Integrate    → A later turn that cites a ground re-opens assessment
+Phase 3: Integrate    → A later turn re-opens the earliest assessment step affected by its evidence or revised question
 ```
 
-The one place the protocol stops for you is the comparison focus, because nothing else can settle which comparison to construct.
+The comparison focus is the only decision gate, and it opens when the request and existing context leave a genuine choice about which comparison to construct.
 
 ## What a later turn does
 
 | Turn | Effect |
 |------|--------|
-| **Cite a ground** | Attaches to the named claim, re-reads warrant, re-judges every conclusion |
+| **Cite a ground** | Its relevance and scope are checked; affected mapping or evidence steps rerun before conclusions are judged |
 | **Adopt / withdraw** | Recorded as yours, reported apart from the evidence, moves no warrant |
-| **Anything else** | Answered; re-opens assessment only if the answer needs evidence outside the current basis |
+| **Revise the focus or intended conclusions** | Reopens settlement before constructing the comparison |
+| **Ask a question** | Answered from current grounds, or reopens the affected evidence or mapping step |
 
 ## When to Use
 
 **Use**:
-- AI recommends a pattern or architecture but you're unsure it fits your specific codebase
-- Abstract advice sounds correct in theory but unclear in your context
-- Cross-domain analogy applied without concrete validation
-- You want to see "show me how this applies to my case"
+- You already have an account of a pattern and your codebase, and want to audit what transferring the pattern supports
+- A familiar framework suggests a conclusion whose structural evidence or limits are uncertain
+- A cross-domain analogy is being used to justify a conclusion beyond its checked scope
+- You want to know which conclusions the analogy supports, blocks, or leaves unresolved
 
 **Skip**:
 - AI output is already domain-specific with concrete examples
@@ -83,7 +84,7 @@ claude plugin install analogia@epistemic-protocols
 ## Usage
 
 ```
-/ground [AI output to validate]
+/ground [mapping and intended conclusions to audit]
 ```
 
 ## Author

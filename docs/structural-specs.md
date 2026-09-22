@@ -169,7 +169,7 @@ DeficitResolved<D, R> = {
 **Artifact-observability boundary** (type naming principle): Protocol input type names encode their temporal relationship to observable artifacts — the dividing line being Read/Grep observability:
 - **Aitesis** (Prospect): Pre-artifact. Context sufficiency is assessed before artifacts are produced. X cannot yet be Read/Grep'd.
 - **Epharmoge** (Result): Post-artifact. Applicability is evaluated after artifacts exist. R is Read/Grep-observable.
-- **Analogia** (Text): Time-independent. Structural mapping validation operates on abstract structures regardless of artifact existence.
+- **Analogia** (Text): Time-independent. Analogical-inference auditing operates on a target account already in play; evidence about an artifact's behavior requires observing that behavior.
 
 This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Result` (completed work product), `Text` (abstract structure carrier). The temporal encoding in type names provides protocol discrimination signal at SKILL.md load time, per Semantic Autonomy (`premise/interaction-factorization.md`).
 
