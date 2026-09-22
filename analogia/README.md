@@ -57,7 +57,7 @@ The comparison focus is the only decision gate, and it opens when the request an
 |------|--------|
 | **Cite a ground** | Its relevance and scope are checked; affected mapping or evidence steps rerun before conclusions are judged |
 | **Adopt / withdraw** | Recorded as yours, reported apart from the evidence, moves no warrant |
-| **Revise the focus or intended conclusions** | Reopens settlement before constructing the comparison |
+| **Revise the focus or intended conclusions** | Reads back the revised question; an unchanged comparison is reassessed without reconstruction |
 | **Ask a question** | Answered from current grounds, or reopens the affected evidence or mapping step |
 
 ## When to Use

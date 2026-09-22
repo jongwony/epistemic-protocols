@@ -71,7 +71,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
 | [Hypotyposis](./hypotyposis) | `/sketch` | A form has to be made and you cannot say what it should be, but you'd know it on sight — sketch it, mark what does not fit, revise the kept version, and finish on the one you recognize |
 | [Prothesis](./prothesis) | `/frame` | Need to settle which lens to look through before the analysis starts — one lens or several |
-| [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
+| [Analogia](./analogia) | `/ground` | A mapping against an account already in play leaves its intended conclusions or supported limits uncertain |
 | [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does, or on a reservation where a judgment rather than a check settles it |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
@@ -132,7 +132,7 @@ Entry-point routing happens up front, so you can experience the protocols while 
 
 - **First encounter, no prior context** → `/onboard` (epistemic-cooperative) for a quick recommendation plus scenario/trial/quiz walkthrough
 - **Want comprehension of the project itself verified** → `/grasp` (katalepsis) over `CLAUDE.md` or a specific `SKILL.md`
-- **Already have a personal Claude Code workflow and want this project mapped onto it** → `/ground` (analogia), with your existing usage as the concrete domain
+- **Already have accounts of your Claude Code workflow and these protocols, and want to audit what comparing them supports** → `/ground` (analogia), with your existing usage as the target account
 - **Need a fast when-to-use-which reference** → the protocol table above, or the `route` plugin's session-start table
 
 For the architecture and principles behind the protocols themselves, read [CLAUDE.md](./CLAUDE.md) and the axiom files under [`.claude/rules/`](./.claude/rules/).
