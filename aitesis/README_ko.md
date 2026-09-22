@@ -52,7 +52,7 @@ Phase 3: Integration         → 답이 오면 하나의 채널로 수집이 다
 Aitesis → Prothesis → Analogia → Katalepsis
 ```
 
-Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 매핑 검증(Analogia) 전에 AI가 모을 수 있는 것을 다 모읍니다.
+Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 유비 추론 감사(Analogia) 전에 AI가 모을 수 있는 것을 다 모읍니다.
 
 ## 사용 시기
 

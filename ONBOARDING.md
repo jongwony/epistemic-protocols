@@ -60,7 +60,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
 - [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
-- [ ] `/analogia:ground` — validate abstract-concrete mappings
+- [ ] `/analogia:ground` — audit what an abstract-concrete mapping licenses about an account already in play
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, on a recorded acceptance where none compiles, or on a recorded reservation where a judgment rather than a check settles it
 
@@ -123,7 +123,7 @@ standard flow afterwards:
   over `CLAUDE.md` or a specific `SKILL.md` they just read
 - Already has a personal Claude Code workflow and wants this project mapped
   onto it → `/ground` (analogia), with their existing usage as the concrete
-  domain and this project's protocols as the abstract domain being validated
+  domain and a familiar account of this project's protocols as the abstract domain; audit the conclusions that comparison supports
 - Needs a fast when-to-use-which-protocol reference → the protocol table in `README.md`, or the `route` plugin's session-start table
   (epistemic-cooperative)
 - Prefers to go straight to environment setup → skip routing, proceed to

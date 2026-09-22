@@ -107,7 +107,7 @@ RouteClaim = { route_if_predicate: String, routed_deficit: Deficit }
                  -- local alternatives when the requested resolution is instead:
                  -- a missing pre-execution fact → ContextInsufficient (hint: /inquire)
                  -- analytical lenses for an inquiry → FrameworkAbsent (hint: /frame)
-                 -- validity of a cross-domain mapping → MappingUncertain (hint: /ground)
+                 -- what a mapping licenses about a target account already in play → MappingUncertain (hint: /ground)
                  -- a contrast that must be instantiated before its direction is recognizable → DirectionUnrecognizable (hint: /preview)
                  -- Evidence needed while defining a boundary does not itself change that boundary request into one of these resolutions.
 local_claims = (OwnClaim, the RouteClaims above)

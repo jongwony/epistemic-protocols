@@ -1553,11 +1553,12 @@ function checkPartitionInvariant() {
     // Find invariant line (single-line only; multi-line invariants require regex update)
     const invMatch = modeStateSection.match(invariantPattern);
     if (!invMatch) {
-      if (/-- Invariant:/.test(modeStateSection)) {
+      // A partition cue without a recognized invariant needs format review.
+      if (/pairwise disjoint/.test(modeStateSection)) {
         results.warn.push({
           check: checkName,
           file: relPath,
-          message: `${protocolName}: MODE STATE contains "-- Invariant:" but failed to parse — may be multi-line or non-standard format`
+          message: `${protocolName}: MODE STATE contains "pairwise disjoint" but its partition invariant failed to parse — may be multi-line or non-standard format`
         });
       }
       continue;

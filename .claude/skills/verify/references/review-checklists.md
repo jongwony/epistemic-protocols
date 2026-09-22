@@ -120,7 +120,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, DESIGN)
   - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
   - Aitesis: ContextInsufficient → SufficientContext (AI-guided, INQUIRE)
-  - Analogia: MappingUncertain → ValidatedMapping (AI-guided, GROUND)
+  - Analogia: MappingUncertain → MappingAssessment (AI-guided, GROUND)
   - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, INDUCE)
   - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE-CYCLE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)

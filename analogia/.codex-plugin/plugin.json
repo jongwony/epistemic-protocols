@@ -1,7 +1,7 @@
 {
   "name": "analogia",
-  "version": "2.1.13",
-  "description": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)",
+  "version": "3.0.0",
+  "description": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Analogia",
-    "shortDescription": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)",
-    "longDescription": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)",
+    "shortDescription": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)",
+    "longDescription": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
