@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const MAX_EVIDENCE_CHARS = 2000;
 const MAX_ARTIFACT_BYTES = 16 * 1024 * 1024;
+const LIMITATION_KINDS = new Set(['input_failed', 'invocation_failed', 'validation_failed', 'skipped', 'execution_failed']);
 function sessionKey(runtime, id) {
   if (runtime === 'codex') return String(id ?? 'unknown').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 160) || 'unknown';
   if (runtime === 'claude' && typeof id === 'string' && /^[A-Za-z0-9_-]+$/.test(id)) return id;
@@ -45,7 +46,11 @@ function loadAttempt(root, id, runtime) {
     const value = JSON.parse(fs.readFileSync(target, 'utf8'));
     const isRevision = (r) => r === null || (r && Number.isFinite(r.mtime_ms) && Number.isFinite(r.size) && r.size >= 0);
     const validArtifacts = (items) => Array.isArray(items) && items.length <= 64 && items.every((item) =>
-      item && typeof item.path === 'string' && /^[a-f0-9]{64}$/.test(item.sha256) && (item.revision === undefined || isRevision(item.revision)));
+      item && typeof item.path === 'string' && /^[a-f0-9]{64}$/.test(item.sha256) && (item.revision === undefined || isRevision(item.revision)) && (item.receipt_id === undefined || typeof item.receipt_id === 'string')
+      && (item.append_qualification === undefined || (typeof item.append_qualification.prior_origin_unknown === 'boolean'
+        && item.append_qualification.prior_detail_omitted === true && Array.isArray(item.append_qualification.observed_limitations)
+        && item.append_qualification.observed_limitations.length <= LIMITATION_KINDS.size
+        && item.append_qualification.observed_limitations.every((kind) => LIMITATION_KINDS.has(kind)))));
     if (value.runtime !== candidate || value.schema_version !== 1 || value.session_id !== String(id)
       || !['claude', 'codex'].includes(value.runtime) || !isRevision(value.revision)
       || typeof value.attempt_id !== 'string' || !['in_progress', 'complete', 'superseded'].includes(value.state)
@@ -54,7 +59,9 @@ function loadAttempt(root, id, runtime) {
       || !value.publication || !['none', 'complete', 'partial', 'failed'].includes(value.publication.state)
       || !validArtifacts(value.publication.artifacts)
       || (value.retained_artifacts && !validArtifacts(value.retained_artifacts))
-      || (value.last_success && (!isRevision(value.last_success.revision) || !validArtifacts(value.last_success.artifacts)))) continue;
+      || (value.last_publication && (!['complete', 'partial', 'failed'].includes(value.last_publication.state) || !validArtifacts(value.last_publication.artifacts)))
+      || (value.receipts && (typeof value.receipts !== 'object' || Array.isArray(value.receipts) || Object.keys(value.receipts).length > 64
+        || !Object.values(value.receipts).every((receipt) => receipt && isRevision(receipt.revision) && typeof receipt.attempt_id === 'string' && receipt.extractors && typeof receipt.extractors === 'object')))) continue;
     return value;
   } catch {}
   }
@@ -63,41 +70,114 @@ function loadAttempt(root, id, runtime) {
 
 export { takeSessionLock } from './session-lock.mjs';
 
+function effectiveArtifacts(attempt) {
+  return [...new Map([
+    ...(attempt.retained_artifacts ?? []),
+    ...(attempt.last_publication?.artifacts ?? []),
+    ...attempt.publication.artifacts,
+  ].map((artifact) => [artifact.path, artifact])).values()];
+}
+
+function compactReceipts(root, attempt) {
+  let artifacts = effectiveArtifacts(attempt);
+  if (attempt.runtime === 'codex') {
+    const session = sessionKey('codex', attempt.session_id);
+    const pointerPaths = [path.join(root, session, 'current.json'), path.join(root, 'catalog', `${session}.json`)];
+    const keep = new Set([...(attempt.last_publication?.artifacts ?? []).map((a) => a.path), ...pointerPaths]);
+    for (const filename of pointerPaths) {
+      const descriptor = artifacts.find((a) => a.path === filename);
+      if (!descriptor || !verifyArtifact(root, attempt.session_id, 'codex', descriptor).verified) continue;
+      try {
+        const pointer = JSON.parse(fs.readFileSync(filename, 'utf8'));
+        if (typeof pointer.generation === 'string') keep.add(path.resolve(root, session, pointer.generation));
+        if (typeof pointer.record_path === 'string') keep.add(path.resolve(pointer.record_path));
+      } catch {}
+    }
+    artifacts = artifacts.filter((artifact) => keep.has(artifact.path));
+  }
+  const represented = new Set([...(attempt.last_publication?.artifacts ?? []), ...attempt.publication.artifacts].map((a) => a.path));
+  attempt.retained_artifacts = artifacts.filter((artifact) => !represented.has(artifact.path));
+  const referenced = new Set(artifacts.map((a) => a.receipt_id).filter(Boolean));
+  attempt.receipts = Object.fromEntries(Object.entries(attempt.receipts ?? {}).filter(([id]) => referenced.has(id)));
+}
+
 function beginAttempt(root, sessionId, info) {
   const previous = loadAttempt(root, sessionId, info.runtime);
-  if (previous?.revision && info.revision && compareRevision(previous.revision, info.revision) > 0
-    && !(previous.state === 'superseded' && (!previous.last_success?.revision
-      || compareRevision(previous.last_success.revision, info.revision) <= 0))) return null;
   const attempt = {
     schema_version: 1, attempt_id: randomUUID(), session_id: String(sessionId),
     runtime: info.runtime, revision: info.revision ?? null,
     source_transcript: info.source_transcript, source_event: info.source_event,
     started_at: new Date().toISOString(), state: 'in_progress', extractors: {},
-    publication: { state: 'none', artifacts: [] }, last_success: previous?.last_success ?? null,
-    retained_artifacts: previous ? readOutcome(root, sessionId, info.runtime).artifacts.filter((a) => a.verified
-      && (info.runtime !== 'codex' || [...(previous.last_success?.artifacts ?? []), ...previous.publication.artifacts].some((current) => current.path === a.path)))
-      .map(({ verified, ...artifact }) => artifact) : [],
+    publication: { state: 'none', artifacts: [] }, last_publication: previous?.last_publication ?? null,
+    receipts: previous?.receipts ?? {},
+    retained_artifacts: previous ? effectiveArtifacts(previous).filter((artifact) => !['missing', 'mismatch', 'outside_scope'].includes(verifyArtifact(root, sessionId, info.runtime, artifact).verification)) : [],
   };
+  compactReceipts(root, attempt);
   atomicJson(outcomePath(root, sessionId, info.runtime), attempt);
   return attempt;
 }
 
-function finishAttempt(root, attempt, result) {
-  if (!attempt || loadAttempt(root, attempt.session_id, attempt.runtime)?.attempt_id !== attempt.attempt_id) return false;
-  const final = { ...attempt, ...result, finished_at: new Date().toISOString() };
-  if (final.publication.state === 'complete') {
-    final.last_success = { revision: final.revision, artifacts: final.publication.artifacts, at: final.finished_at };
-    if (final.runtime === 'codex') final.retained_artifacts = [];
+function foldAppendQualification(previous, priorReceipt, current) {
+  const inherited = previous?.append_qualification;
+  const observed = new Set(inherited?.observed_limitations ?? []);
+  for (const receipt of [priorReceipt, current]) {
+    for (const stage of Object.values(receipt?.extractors ?? {})) {
+      if (LIMITATION_KINDS.has(stage.state)) observed.add(stage.state);
+    }
+    if (receipt?.execution?.state === 'failed') observed.add('execution_failed');
   }
+  return {
+    prior_origin_unknown: !!inherited?.prior_origin_unknown || !priorReceipt,
+    prior_detail_omitted: true,
+    observed_limitations: [...observed].sort(),
+  };
+}
+
+function finishAttempt(root, attempt, result) {
+  if (!attempt) return false;
+  const current = loadAttempt(root, attempt.session_id, attempt.runtime);
+  if (current?.attempt_id !== attempt.attempt_id) return false;
+  const final = { ...current, ...result, retained_artifacts: effectiveArtifacts(current) };
+  if (result.state !== undefined && current.state === 'in_progress') final.finished_at = new Date().toISOString();
+  if (result.publication && result.publication.state !== 'none') {
+    const at = final.finished_at ?? new Date().toISOString();
+    final.receipts = { ...(current.receipts ?? {}) };
+    final.publication = { ...result.publication, artifacts: result.publication.artifacts.map((artifact) => {
+      const { revision: _revision, appended_from_sha256, ...descriptor } = artifact;
+      const receipt_id = artifact.receipt_id && final.receipts[artifact.receipt_id] ? artifact.receipt_id : final.attempt_id;
+      if (!final.receipts[receipt_id]) final.receipts[receipt_id] = {
+        attempt_id: final.attempt_id, revision: final.revision, source_transcript: final.source_transcript,
+        source_event: final.source_event, at, extractors: final.extractors,
+        ...(final.execution ? { execution: final.execution } : {}),
+      };
+      if (appended_from_sha256) {
+        const previous = effectiveArtifacts(current).find((prior) => prior.path === artifact.path && prior.sha256 === appended_from_sha256);
+        descriptor.append_qualification = foldAppendQualification(previous, current.receipts?.[previous?.receipt_id], final);
+      }
+      return { ...descriptor, receipt_id };
+    }) };
+    final.last_publication = { ...final.publication, at, attempt_id: final.attempt_id };
+  }
+  compactReceipts(root, final);
   atomicJson(outcomePath(root, attempt.session_id, attempt.runtime), final);
   return true;
 }
 
 function captureArtifacts(paths) {
   return paths.map((filename) => {
-    const content = fs.readFileSync(filename);
-    if (content.length > MAX_ARTIFACT_BYTES) throw new Error('artifact exceeds outcome verification bound');
-    return { path: path.resolve(filename), sha256: createHash('sha256').update(content).digest('hex') };
+    const fd = fs.openSync(filename, 'r');
+    try {
+      const hash = createHash('sha256');
+      const chunk = Buffer.alloc(64 * 1024);
+      let size = 0;
+      for (;;) {
+        const count = fs.readSync(fd, chunk, 0, chunk.length, null);
+        if (!count) break;
+        hash.update(chunk.subarray(0, count));
+        size += count;
+      }
+      return { path: path.resolve(filename), sha256: hash.digest('hex'), size };
+    } finally { fs.closeSync(fd); }
   });
 }
 
@@ -112,23 +192,20 @@ function verifyArtifact(root, id, runtime, artifact) {
       : relative === path.join('catalog', `${session}.json`) || relative === path.join(session, 'current.json')
         || (relative.startsWith(path.join(session, 'generations') + path.sep) && path.basename(relative) === 'record.json');
     if (!allowed || !relative || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)
-      || relative.split(path.sep).includes('.outcomes')) return { ...artifact, verified: false };
-    if (fs.statSync(resolved).size > MAX_ARTIFACT_BYTES) return { ...artifact, verified: false };
+      || relative.split(path.sep).includes('.outcomes')) return { ...artifact, verified: false, verification: 'outside_scope' };
+    if (fs.statSync(resolved).size > MAX_ARTIFACT_BYTES) return { ...artifact, verified: false, verification: 'unverified' };
     const actual = captureArtifacts([resolved])[0];
-    return { ...artifact, verified: actual.sha256 === artifact.sha256 };
-  } catch { return { ...artifact, verified: false }; }
+    return { ...artifact, verified: actual.sha256 === artifact.sha256, verification: actual.sha256 === artifact.sha256 ? 'verified' : 'mismatch' };
+  } catch (error) { return { ...artifact, verified: false, verification: error.code === 'ENOENT' ? 'missing' : 'unverified' }; }
 }
 
 function readOutcome(root, id, runtime) {
   const attempt = loadAttempt(root, id, runtime);
   if (!attempt) return { record_state: 'unknown', session_id: String(id), attempt: null, artifacts: [], source_revision: null, source_changed: null };
-  const descriptors = [
-    ...(attempt.last_success?.artifacts ?? []).map((a) => ({ ...a, revision: a.revision ?? attempt.last_success.revision })),
-    ...(attempt.retained_artifacts ?? []),
-    ...attempt.publication.artifacts.map((a) => ({ ...a, revision: a.revision ?? attempt.revision })),
-  ];
-  const byPath = new Map(descriptors.map((a) => [a.path, a]));
-  const artifacts = [...byPath.values()].map((a) => verifyArtifact(root, id, attempt.runtime, a));
+  const artifacts = effectiveArtifacts(attempt).map((artifact) => {
+    const receipt = attempt.receipts?.[artifact.receipt_id] ?? null;
+    return { ...verifyArtifact(root, id, attempt.runtime, artifact), revision: receipt?.revision ?? artifact.revision ?? null };
+  });
   let source_revision = null;
   let source_changed = null;
   try {
@@ -142,7 +219,7 @@ function readOutcome(root, id, runtime) {
 function formatOutcome(result) {
   return JSON.stringify({ session_id: result.session_id, record_state: result.record_state,
     state: result.attempt?.state ?? null, attempt_id: result.attempt?.attempt_id ?? null, started_at: result.attempt?.started_at ?? null, revision: result.attempt?.revision ?? null, source_changed: result.source_changed ?? null, source_revision: result.source_revision ?? null, extractors: result.attempt?.extractors ?? {},
-    publication: result.attempt?.publication ?? null, artifacts: result.artifacts });
+    publication: result.attempt?.publication ?? null, receipts: result.attempt?.receipts ?? {}, execution: result.attempt?.execution ?? null, artifacts: result.artifacts });
 }
 
 export { beginAttempt, finishAttempt, readOutcome, captureArtifacts, errorEvidence, outcomePath, boundedText, formatOutcome, sessionKey };

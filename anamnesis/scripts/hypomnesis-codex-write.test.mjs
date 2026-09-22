@@ -453,10 +453,10 @@ test("Codex outcome distinguishes legacy, unfinished, failure, retry, and retain
   assert.equal(success.attempt.publication.artifacts.length, 3);
   fs.appendFileSync(transcript, "\n");
   enqueueCodexJob(input, { root });
-  runWorker(root, "session-a", { extract: () => { throw Object.assign(new Error("process failed"), { stderr: "raw stderr", status: 7 }); } });
+  runWorker(root, "session-a", { extract: () => { throw Object.assign(new Error("process failed"), { stage: "invocation_failed", stderr: "raw stderr", status: 7 }); } });
   const failed = readOutcome(root, "session-a", "codex");
   assert.ok(failed.artifacts.some((artifact) => artifact.verified));
-  assert.deepEqual(failed.attempt.last_success, success.attempt.last_success);
+  assert.deepEqual(failed.attempt.last_publication, success.attempt.last_publication);
   assert.equal(failed.attempt.extractors.codex.state, "invocation_failed");
   assert.deepEqual(failed.attempt.retry, { failures: 2, disposition: "quarantined" });
   assert.equal(failed.attempt.extractors.codex.evidence.stderr.text, "raw stderr");
@@ -512,12 +512,12 @@ test("Codex missing transcript records input failure and stale attempts cannot r
   const { job } = enqueueCodexJob(input, { root });
   processJob(root, job, { extract: () => extraction() });
   const outcome = readOutcome(root, "session-a", "codex").attempt;
-  const declined = processJob(root, { ...job, revision: { mtime_ms: job.revision.mtime_ms - 1, size: 0 }, transcript_path: `${transcript}.missing` });
-  assert.equal(declined.declined, true);
-  assert.equal(readOutcome(root, "session-a", "codex").attempt.attempt_id, outcome.attempt_id);
+  assert.throws(() => processJob(root, { ...job, revision: { mtime_ms: job.revision.mtime_ms - 1, size: 0 }, transcript_path: `${transcript}.missing` }));
+  assert.notEqual(readOutcome(root, "session-a", "codex").attempt.attempt_id, outcome.attempt_id);
+  assert.deepEqual(readOutcome(root, "session-a", "codex").attempt.last_publication, outcome.last_publication);
   fs.unlinkSync(transcript);
   assert.throws(() => processJob(root, job));
-  assert.equal(readOutcome(root, "session-a", "codex").attempt.extractors.codex.state, "input_failed");
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.extractors.input.state, "input_failed");
 });
 
 test("Codex records raw invocation and output-validation evidence without parsing messages", (t) => {
@@ -720,4 +720,81 @@ test('shared lock release rechecks the detached identity before deletion', (t) =
   release();
   mock.mock.restore();
   assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
+});
+
+test('missing Codex enqueue source records input failure and releases shared lock', (t) => {
+  const { root, transcript } = fixture(t);
+  fs.unlinkSync(transcript);
+  assert.equal(enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root }), null);
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.equal(result.record_state, 'known');
+  assert.equal(result.attempt.extractors.codex.state, 'input_failed');
+  assert.equal(result.attempt.publication.state, 'none');
+  assert.equal(fs.existsSync(path.join(root, '.locks', 'session-a')), false);
+});
+
+test('source deleted during Codex extraction records observed input failure without model blame', (t) => {
+  const { root, transcript } = fixture(t);
+  enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  runWorker(root, 'session-a', { extract: () => { fs.unlinkSync(transcript); return extraction(); } });
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.equal(result.attempt.extractors.input.state, 'input_failed');
+  assert.equal(result.attempt.publication.state, 'none');
+  assert.equal(result.attempt.retry.disposition, 'quarantined');
+  assert.equal(fs.existsSync(path.join(root, 'session-a', 'current.json')), false);
+  assert.equal(fs.existsSync(path.join(root, '.locks', 'session-a')), false);
+});
+
+test('Codex internal extraction exception stays unclassified execution evidence', (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  assert.throws(() => processJob(root, job, { extract: () => { throw new ReferenceError('missing helper'); } }));
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.equal(result.attempt.execution.state, 'failed');
+  assert.match(result.attempt.execution.evidence.message.text, /missing helper/);
+  assert.equal(result.attempt.extractors.codex, undefined);
+});
+
+test('Codex failure before attempt creation cannot annotate a previous publication', (t) => {
+  const { root, transcript } = fixture(t);
+  const input = { session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' };
+  const { job } = enqueueCodexJob(input, { root });
+  processJob(root, job, { extract: () => extraction() });
+  const previous = readOutcome(root, 'session-a', 'codex').attempt;
+  const original = fs.renameSync;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/')) throw Object.assign(new Error('outcome unavailable'), { code: 'EACCES' });
+    return original(from, to);
+  });
+  runWorker(root, 'session-a', { extract: () => extraction() });
+  mock.mock.restore();
+  assert.deepEqual(readOutcome(root, 'session-a', 'codex').attempt, previous);
+});
+
+test('Codex generation reuse retains original capture receipt limitations', (t) => {
+  const { root, transcript } = fixture(t);
+  fs.appendFileSync(transcript, '{malformed\n');
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  processJob(root, job, { extract: () => extraction() });
+  const previous = readOutcome(root, 'session-a', 'codex');
+  const receiptId = previous.artifacts.find((artifact) => artifact.path.endsWith('/record.json')).receipt_id;
+  assert.ok(receiptId);
+  assert.equal(previous.attempt.receipts[receiptId].extractors.input.state, 'input_failed');
+  processJob(root, job, { extract: () => { throw new Error('must reuse'); } });
+  const reused = readOutcome(root, 'session-a', 'codex');
+  assert.notEqual(reused.attempt.attempt_id, previous.attempt.attempt_id);
+  assert.equal(reused.attempt.extractors.codex.state, 'skipped');
+  assert.ok(reused.artifacts.every((artifact) => artifact.receipt_id === receiptId));
+  assert.deepEqual(reused.attempt.receipts[receiptId], previous.attempt.receipts[receiptId]);
+});
+
+test('missing Codex enqueue does not release another active owner', (t) => {
+  const { root, transcript } = fixture(t);
+  fs.unlinkSync(transcript);
+  const release = takeSessionLock(root, 'session-a');
+  try {
+    assert.equal(enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root }), null);
+    assert.equal(release.owned(), true);
+    assert.equal(readOutcome(root, 'session-a', 'codex').record_state, 'unknown');
+  } finally { release(); }
 });

@@ -94,13 +94,12 @@ function enqueueCodexJob(input, { root = resolveStoreRoot() } = {}) {
   try { revision = statRevision(transcriptPath); }
   catch (error) { inputError = error; }
   if (!revision) {
-    const lockDir = path.join(root, ".locks", safeId(sessionId));
-    fs.mkdirSync(path.dirname(lockDir), { recursive: true });
-    if (!acquireLock(lockDir)) return null;
+    const release = takeSessionLock(root, safeId(sessionId), { staleAfterMs: WORKER_TIMEOUT_MS * 2 });
+    if (!release) return null;
     try {
       const attempt = beginAttempt(root, sessionId, { runtime: "codex", revision: null, source_transcript: transcriptPath, source_event: event });
       if (attempt) finishAttempt(root, attempt, { state: "complete", extractors: { codex: { state: "input_failed", reason: "transcript unavailable", ...(inputError ? { evidence: errorEvidence(inputError) } : {}) } }, publication: { state: "none", artifacts: [] } });
-    } finally { fs.rmSync(lockDir, { recursive: true, force: true }); }
+    } finally { release(); }
     return null;
   }
   const jobDir = path.join(root, ".queue", safeId(sessionId));
@@ -288,7 +287,7 @@ function callCodexExtractor(session, { root, run = spawnSync }) {
   const outputPath = path.join(workDir, "result.json");
   try {
     const prompt = buildExtractionPrompt(session);
-    const result = run("codex", buildCodexCommandArgs({
+    const args = buildCodexCommandArgs({
       // Extract from the empty work directory, never the session's own cwd:
       // an AGENTS.md at the working directory is injected as authoritative
       // instruction, which neither --ignore-rules nor --ignore-user-config
@@ -300,12 +299,14 @@ function callCodexExtractor(session, { root, run = spawnSync }) {
       cwd: workDir,
       outputPath,
       prompt,
-    }), {
+    });
+    let result;
+    try { result = run("codex", args, {
       encoding: "utf8",
       timeout: WORKER_TIMEOUT_MS,
       maxBuffer: 8 * 1024 * 1024,
       stdio: ["ignore", "pipe", "pipe"],
-    });
+    }); } catch (error) { throw Object.assign(error, { stage: "invocation_failed" }); }
     if (result.error || result.status !== 0) {
       throw Object.assign(result.error || new Error(`codex exec exited ${result.status}`), {
         stage: "invocation_failed", stderr: result.stderr, status: result.status, signal: result.signal,
@@ -512,12 +513,6 @@ function publicationArtifacts(root, job, tolerateMissing = false) {
 }
 
 function processJob(root, job, { extract = callCodexExtractor } = {}) {
-  let queuedSource;
-  try { queuedSource = statRevision(job.transcript_path); } catch {}
-  if (queuedSource && compareRevision(queuedSource, job.revision) !== 0) {
-    const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true, requeued: requeued?.path ?? null };
-  }
   const attempt = beginAttempt(root, job.session_id, {
     runtime: "codex", revision: job.revision,
     source_transcript: job.transcript_path, source_event: job.hook_event_name,
@@ -525,6 +520,7 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
   if (!attempt) return { published: false, declined: true };
   const extractors = {};
   let publishing = false;
+  let reuseReceiptId;
   const finish = (result, publication = { state: "none", artifacts: [] }) => {
     if (attempt) finishAttempt(root, attempt, { state: result.stale || result.declined ? "superseded" : "complete", extractors, publication });
     return result;
@@ -539,7 +535,7 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
     publishing = true;
     const published = publishRecord(root, job, record);
     return finish({ published, declined: !published, ...extra }, {
-      state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job) : [],
+      state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job).map((artifact) => ({ ...artifact, ...(reuseReceiptId ? { receipt_id: reuseReceiptId } : {}) })) : [],
     });
   };
   try {
@@ -553,7 +549,12 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
     if (existingRecord) {
       const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
       validateExtraction(Object.fromEntries(Object.keys(schema.properties).map((key) => [key, existingRecord[key]])));
-      extractors.codex = { state: hasSemanticContent(Object.fromEntries(Object.keys(schema.properties).map((key) => [key, existingRecord[key]]))) ? "succeeded" : "empty", reason: "reused immutable generation" };
+      const generationPath = path.join(root, safeId(job.session_id), "generations", revisionKey(job.revision), "record.json");
+      const descriptor = captureArtifacts([generationPath])[0];
+      const prior = [...(attempt.retained_artifacts || []), ...(attempt.last_publication?.artifacts || [])].find((artifact) => artifact.path === descriptor.path && artifact.sha256 === descriptor.sha256);
+      reuseReceiptId = prior?.receipt_id;
+      extractors.codex = { state: "skipped", reason: "reused immutable generation; original extraction not rerun" };
+      if (existingRecord.source_scan?.skipped_lines > 0) extractors.input = { state: "input_failed", reason: "reused generation records malformed JSONL input" };
       return publish(existingRecord, { reused: true });
     }
 
@@ -569,7 +570,10 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
     const extraction = validateExtraction(extract(session, { root, job }));
     extractors.codex = { state: hasSemanticContent(extraction) ? "succeeded" : "empty" };
     const record = recordFor(job, session, extraction);
-    const after = statRevision(job.transcript_path);
+    let after;
+    try { after = statRevision(job.transcript_path); }
+    catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    if (!after) throw Object.assign(new Error("transcript disappeared during extraction"), { stage: "input_failed" });
     if (compareRevision(after, job.revision) !== 0) return supersede(parseCounts);
     const latest = chooseLatestJob(readJobs(root, job.session_id));
     if (latest && compareRevision(latest.revision, job.revision) > 0) return finish({ stale: true, ...parseCounts });
@@ -578,13 +582,18 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
     let artifacts = [];
     let artifactError;
     if (publishing) {
-      try { artifacts = publicationArtifacts(root, job, true); }
+      try { artifacts = publicationArtifacts(root, job, true).map((artifact) => ({ ...artifact, ...(reuseReceiptId ? { receipt_id: reuseReceiptId } : {}) })); }
       catch (failure) { artifactError = errorEvidence(failure); }
-    } else extractors.codex = { state: error.stage || "invocation_failed", evidence: errorEvidence(error) };
+    } else if (error.stage) {
+      const component = error.stage === "input_failed" ? "input" : "codex";
+      extractors[component] = { state: error.stage, evidence: errorEvidence(error) };
+    }
     if (attempt) finishAttempt(root, attempt, {
       state: "complete", extractors,
+      ...(!publishing && !error.stage ? { execution: { state: "failed", evidence: errorEvidence(error) } } : {}),
       publication: { state: publishing ? (artifacts.length ? "partial" : "failed") : "none", artifacts, ...(publishing ? { evidence: errorEvidence(error), ...(artifactError ? { artifact_error: artifactError } : {}) } : {}) },
     });
+    error.attempt_id = attempt.attempt_id;
     throw error;
   }
 }
@@ -615,7 +624,7 @@ function runWorker(root, sessionId, options = {}) {
         const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
         failureCounts.set(job._path, failureCount);
         const failedAttempt = readOutcome(root, job.session_id, "codex").attempt;
-        if (failedAttempt && compareRevision(failedAttempt.revision, job.revision) === 0) {
+        if (failedAttempt && error.attempt_id === failedAttempt.attempt_id) {
           finishAttempt(root, failedAttempt, {
             retry: { failures: failureCount, disposition: failureCount < 2 ? "pending" : "quarantined" },
           });

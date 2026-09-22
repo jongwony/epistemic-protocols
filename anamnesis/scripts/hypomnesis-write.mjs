@@ -5,7 +5,7 @@
  * Semantic files and outcome sidecars are separate. Failed stages retain prior
  * published files; each replacement is atomic and acknowledged independently.
  * Nested extraction receives the prompt on stdin with tools and settings disabled.
- * The hook reports persisted state and exits zero.
+ * The writer reports persisted state; startup failure exits nonzero for the dispatcher.
  */
 
 import fs from "node:fs";
@@ -139,10 +139,7 @@ const EVIDENCE_MODES = Object.freeze({
 const SKIP_REASONS = new Set([]);
 const KNOWN_EVENTS = new Set(["SessionEnd", "PreCompact"]);
 
-// SessionEnd gate: cooldown against narrative.md mtime. Skip if last index
-// write occurred < 300s ago — prevents resume-cycle spam during active
-// multi-day sessions while permitting indexing once activity gap exceeds
-// the cooldown window. PreCompact bypasses cooldown entirely.
+// SessionEnd rate limit after a useful, physically complete publication.
 const COOLDOWN_MS = 300 * 1000;
 
 // --- Helpers ---
@@ -862,9 +859,12 @@ function writeStore(targetDir, files, revision) {
     const dest = path.join(targetDir, name);
     const tmp = path.join(targetDir, `.${name}.${randomUUID()}.tmp`);
     try {
-      const previous = name === "narrative.md" && fs.existsSync(dest) ? fs.readFileSync(dest, "utf8") + "\n" : "";
+      const priorBytes = name === "narrative.md" && fs.existsSync(dest) ? fs.readFileSync(dest) : null;
+      const previous = priorBytes ? priorBytes.toString("utf8") + "\n" : "";
       fs.writeFileSync(tmp, previous + content, "utf8");
-      const acknowledged = captureArtifacts([tmp]).map((artifact) => ({ ...artifact, path: path.resolve(dest), revision }));
+      const acknowledged = captureArtifacts([tmp]).map((artifact) => ({ ...artifact, path: path.resolve(dest), revision,
+        ...(priorBytes?.length ? { appended_from_sha256: createHash("sha256").update(priorBytes).digest("hex") } : {}),
+      }));
       fs.renameSync(tmp, dest);
       artifacts.push(...acknowledged);
     } catch (error) { errors[name] = errorEvidence(error); }
@@ -908,13 +908,10 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
     let inputError;
     try { snapshot = readClaudeSnapshot(transcriptPath); revision = snapshot.revision; } catch (error) { inputError = error; }
     const previous = readOutcome(root, sessionId, "claude");
-    const success = previous.attempt?.last_success;
-    const interrupted = previous.attempt?.state === "in_progress" || previous.attempt?.state === "superseded";
-    const failed = Object.values(previous.attempt?.extractors ?? {}).some((item) => item.state.endsWith("_failed"))
-      || ["partial", "failed"].includes(previous.attempt?.publication.state);
-    const cooldown = event === "SessionEnd" && !interrupted && !failed && success?.artifacts.length > 0
-      && Date.now() - Date.parse(success.at) < COOLDOWN_MS
-      && success.artifacts.every((artifact) => previous.artifacts.some((item) => item.path === artifact.path && item.sha256 === artifact.sha256 && item.verified));
+    const published = previous.attempt?.last_publication;
+    const cooldown = event === "SessionEnd" && published?.state === "complete" && published.artifacts.length > 0
+      && Date.now() - Date.parse(published.at) < COOLDOWN_MS
+      && published.artifacts.every((artifact) => previous.artifacts.some((item) => item.path === artifact.path && item.sha256 === artifact.sha256 && !["missing", "mismatch", "outside_scope"].includes(item.verification)));
     attempt = beginAttempt(root, sessionId, { runtime: "claude", revision, source_transcript: transcriptPath, source_event: event });
     if (!attempt) return readOutcome(root, sessionId);
     if (inputError) throw Object.assign(inputError, { stage: "input_failed" });
@@ -923,14 +920,14 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
       finishAttempt(root, attempt, { state: "complete", extractors, publication });
       return readOutcome(root, sessionId);
     }
-    let session;
-    try { session = parseSession(snapshot.raw); } catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
-    if (session.parseFailed) extractors.input = { state: "input_failed", reason: "malformed JSONL input" };
-    else if (revision.size < MIN_SESSION_BYTES) {
+    if (revision.size < MIN_SESSION_BYTES) {
       extractors.input = { state: "skipped", reason: "transcript below minimum capture size" };
       finishAttempt(root, attempt, { state: "complete", extractors, publication });
       return readOutcome(root, sessionId);
     }
+    let session;
+    try { session = parseSession(snapshot.raw); } catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    if (session.parseFailed) extractors.input = { state: "input_failed", reason: "malformed JSONL input" };
     if (session.userMsgs.length === 0) {
       extractors.input ??= { state: "empty", reason: "no user messages" };
       finishAttempt(root, attempt, { state: "complete", extractors, publication });
@@ -996,15 +993,18 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
     if (Object.keys(files).length) {
       try { publication = publish(storeDir, files, revision); }
       catch (error) { publication = { state: "failed", artifacts: [], evidence: errorEvidence(error) }; }
-      if (publication.state === "complete" && Object.values(extractors).some((item) => item.state.endsWith("_failed") || item.state === "skipped")) publication.state = "partial";
     }
     finishAttempt(root, attempt, { state: "complete", extractors, publication });
     return readOutcome(root, sessionId);
   } catch (error) {
-    extractors.input ??= { state: error.stage ?? "input_failed", evidence: errorEvidence(error) };
-    if (attempt) finishAttempt(root, attempt, { state: "complete", extractors, publication });
-    else logErr(`outcome persistence failed: ${error.message}`);
-    return readOutcome(root, sessionId);
+    const failure = error.stage === "input_failed"
+      ? { extractors: { ...extractors, input: { state: "input_failed", evidence: errorEvidence(error) } } }
+      : { execution: { state: "failed", evidence: errorEvidence(error) } };
+    if (attempt) {
+      finishAttempt(root, attempt, { state: "complete", extractors, publication, ...failure });
+      return readOutcome(root, sessionId);
+    }
+    throw error;
   } finally { release(); }
 }
 
@@ -1033,6 +1033,5 @@ try {
   isMain = !!process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
 } catch { isMain = true; }
 if (isMain) {
-  try { main(); } catch (e) { logErr(`top-level: ${e.message}`); }
-  process.exit(0);
+  try { main(); } catch (e) { logErr(`top-level: ${e.message}`); process.exitCode = 1; }
 }

@@ -16,20 +16,20 @@ PartialExtract    : extract/detect produces well-formed but semantically partial
                     -- cause: continue-on-error parser tolerates malformed lines; anomalous shape logged but not write-gated
                     -- detection: invisible to reader without schema version field or observability log surface
 
-SidechainNoSSOT   : scan_entropy(Store, trace) ≠ ∅ via INDEX_substitute ∧ no top-level SSOT for the recalled id (the id is a sidechain/derived record)
+SidechainNoSSOT   : scan_entropy(Store, trace).candidates ≠ ∅ via INDEX_substitute ∧ no top-level SSOT for the recalled id (the id is a sidechain/derived record)
                     -- cause: the recalled id is a sidechain/derived record whose turns live in the originating record + the substitute channel; no top-level SSOT for the id ever existed — distinct from NullMatch₁ (pre-store/lifecycle gap): here the scan SUCCEEDS on the substitute channel, only the top-level SSOT is absent by design
                     -- detection: the recalled id matches a substitute-channel record with no sibling top-level SSOT of its own (substrate mechanism in TOOL GROUNDING)
                     -- recovery: the id is not independently resumable (no top-level record of its own); read the orchestrating parent from the substitute record (backtrace_parent → parent_pointer, parent_cwd) and offer the parent as the resumable candidate; when the parent's record has aged out, mark non-resumable and surface the recoverable artifacts (substitute record + memory)
 
-NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
+NullMatch₁        : scan_entropy(Store, trace).candidates = ∅ ∧ InputType = StructuredIdentifier
                     -- cause: literal absent from the searched scope. Use Λ.capture for any claim about capture execution; an unknown outcome leaves that cause unknown. Spine matching remains independent of semantic-index availability, and its miss establishes only no match in the heads actually read
                     -- recovery: the open question on a first miss (a correction already counts as the round-trip), then StoreExpansion; after accepted full-text exhaustion, offer Aitesis handoff with accumulated trace
 
-NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
+NullMatch₂        : scan_salience(Store, trace).candidates = ∅ ∧ InputType = NaturalRecall
                     -- cause: profile too vague or target session lacks distinctive markers
                     -- recovery: the open question → recue → Phase 1 re-find
 
-MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
+MutualNull        : scan_entropy.candidates = ∅ ∧ scan_salience.candidates = ∅ on Track = hybrid
                     -- structural risk: recall target absent from the searched scope
                     -- action: NullMatch pathway with source-labeled scope disclosure (principal failure mode)
 ```

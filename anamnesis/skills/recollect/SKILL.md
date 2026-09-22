@@ -16,7 +16,7 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 Anamnesis(V) → Detect(V) →
   not-empty_intention(V): relay(finding) → proceed (no activation)
   empty_intention(V): Cue(V, Σ) → V.trace, V.unit → set(scan_scope = spine, attempts = 0, capture = ∅) →
-    Find(Store ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → O[ranked] → set(capture = ObserveCapture(scanned_sources)) →
+    Find(Store ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → {ranked: O[ranked], scanned_sources} → set(capture = ObserveCapture(scanned_sources)) →
     |O[]| = 0 ∧ attempts = 0: Ask(V) → Stop → H → recue(V, H) → set(attempts = attempts + 1) → Find
     |O[]| = 0 ∧ attempts > 0 ∧ fulltext_unscanned: Qx(StoreExpansion) → Stop → X →
       ExpandFullText: set(scan_scope = full_text) → Find
@@ -70,7 +70,7 @@ SourceScan       = { skipped_lines: Nat, unverified_user_turns: Nat, omitted_cha
 CaptureObservation = { runtime: Source, session_id: Optional(SessionId), source: Source, finding: Prose }   -- runtime and session identity plus the scanned source locator, retained even when Find returns no candidate; execution availability is distinct from SourceScan
                   -- associate only within the same runtime: match equal non-null session_id; where an ID is unavailable, require source = member.record with member.record non-null. An unassociated observation qualifies only its own scanned scope
 ObserveCapture   = List(Source) → List(CaptureObservation)   -- read-only; realization references bind scanned sessions to their outcome reader; unknown evidence remains unknown
-scanned_sources  = the session sources actually reached by the current Find, whether or not their contents matched the cue
+scanned_sources  = the source-locator list returned by Find from its scans and traversal; recorded when each selected session source is read or its read attempted, before match filtering
 Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
 Candidate        = { session_id: Optional(SessionId),
                      runtime: Source,
@@ -99,7 +99,7 @@ Assembly         = { joined: the inferred edges that joined this recognizable's 
 Excerpt          = { member: Candidate, text: Prose, locator: Source, handle: Optional(ResumeHandle) }   -- the record's own words at the span the cue reaches, where that record is, and the resume command the runtime reference validates (Null ⇒ non-resumable, stated in the prose). A member whose record cannot be opened yields text = ∅ and contributes nothing the narrative may assert
 ResumeHandle     = String   -- the literal command the runtime reference emits (references/claude.md, references/codex.md; fork members per references/fork-resume.md)
 O[]              = List(Recognizable)   -- Find's ranked result at V.unit; O[top] is its head
-Find             = (Store, V) → List(Recognizable)   -- Scan_{Track} over the compact INDEX and the record spines (── STORE TOPOLOGY ──), joined above session scope (── FIND ABOVE SESSION SCOPE ──), ordered by Rank
+Find             = (Store, V) → { ranked: List(Recognizable), scanned_sources: List(Source) }   -- Rank orders recognizables built from Scan_{Track}.candidates; scanned_sources forwards the actual scan locators, unioned with traversal locators above session scope (── FIND ABOVE SESSION SCOPE ──)
 Rank             = (List(Recognizable), RecallTrace) → List(Recognizable)   -- ordering only, computed from how well each recognizable matches the cue — no stored tier is read, because no writer publishes one: track-primary signal dominates, evidence_mode is a secondary tie-break (never a filter; Null neutral), edge connectivity joins it above session scope. No gate reads the order; it decides only which recognizable Ground opens first
 Ground           = Recognizable → Recognizable   -- one read per member of O[top]: open the member's own record at member.record, resolved by its runtime reference, take the excerpt the cue reaches, bind its locator and handle (a fork member per references/fork-resume.md), then compose the narrative from the excerpts. Bounded by |members(O[top])|, never by the store — it opens named records, it does not scan bodies. Idempotent: a member already read is not re-read
 grounded         = predicate; grounded(o) ≡ ∃ e ∈ o.excerpts : e.text ≠ ∅   -- at least one member's record opened. A recognizable no member's record could be opened for carries no evidence at all, and since the narrative is composed FROM the excerpts there is nothing it may assert — so it is never presented
@@ -136,7 +136,7 @@ Edge cases:
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
            [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
            → Cue(V, Σ) → V.trace, V.unit → set(scan_scope = spine, attempts = 0, capture = ∅)   -- the cue and the whole it names; Find's dispatch (InputType → Track) is read here too; initial scope + recall-try budget (silent)
-Phase 1: V → Find(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → O[ranked]   -- index + spine always; bodies too once ExpandFullText widened the scope, so a re-entry after a correction does not narrow back to spine and report a body-scoped miss; above session scope Find joins its candidates into recognizables (── FIND ABOVE SESSION SCOPE ──) [Tool]
+Phase 1: V → Find(INDEX ⊕ SSOT_spine ⊕ (scan_scope = full_text ? SSOT_body : ∅), V) → {ranked: O[ranked], scanned_sources}   -- index + spine always; bodies too once ExpandFullText widened the scope, so a re-entry after a correction does not narrow back to spine and report a body-scoped miss; above session scope Find joins its candidates into recognizables (── FIND ABOVE SESSION SCOPE ──) [Tool]
            → set(capture = ObserveCapture(scanned_sources))   -- refresh observations for this Find before any branch or yield; an empty candidate list still has the sessions that were scanned [Tool]
            |O[ranked]| > 0 → O[top] := Ground(O[top]) →   -- one read per member of O[top]: excerpt, locator, handle; the narrative is composed from the excerpts before anything is presented [Tool]
              grounded(O[top]) → Phase 2
@@ -179,13 +179,14 @@ progress(Σ) = attempts: N/max, presented: N
 -- Find reads the compact INDEX and the raw-record spines together, unconditionally. A spine read is bounded per record, so it is not the cost the checkpoint exists to protect the user from; gating it would buy nothing and add a branch. Transcript bodies are SCANNED — read across the store to find candidates — only after ExpandFullText: that scan's per-record cost has no upper bound, which is what Qx presents as a differential future against the spine-scoped stop. Ground is a different act: it OPENS the named records of O[top]'s members, one read per member, at any scope. The checkpoint governs scanning, not grounding.
 -- Scanning spines unconditionally is also what keeps a runtime reachable before its INDEX exists: a store whose writer has not yet produced entries is not blind, it is spine-only. Without this the first recall against a newly-added runtime would always miss and always require the checkpoint.
 -- Fork/sidechain binding exists in the Claude realization only. For a Claude fork member, references/claude.md routes Ground to references/fork-resume.md for the record to open and the handle to emit.
--- When V.unit is above session, Find joins the candidates Scan_{Track} returns into recognizables by read-time inferred edges — see ── FIND ABOVE SESSION SCOPE ── and read references/supra-session.md before finding at that scope. Nothing else changes: Ground, Present, the answers, the budget, and the terminals are those typed above.
+-- When V.unit is above session, Find joins Scan_{Track}.candidates into recognizables by read-time inferred edges — see ── FIND ABOVE SESSION SCOPE ── and read references/supra-session.md before finding at that scope. Nothing else changes: Ground, Present, the answers, the budget, and the terminals are those typed above.
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Cue         (sense)    → Internal analysis (V.trace and V.unit from V + Σ; InputType and Track for Find's dispatch)
 Phase 1 Find_entropy  (observe)  → artifact read, artifact search, environment run (literal match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText. environment run is admitted for the bounded spine reads declared by each runtime reference; it opens no transcript body and writes nothing)
 Phase 1 Find_salience (observe)  → artifact read, artifact search, environment run (MarkerProfile match over the available compact INDEX surfaces and raw-record spines; SSOT_body only after ExpandFullText; environment run bounded as above)
-Phase 1 Find_hybrid   (observe)  → union of above
+Phase 1 Find_hybrid   (observe)  → union candidates and scanned_sources independently from the two scans
+Phase 1 record_scanned_sources (track) → Internal state update (each scan and traversal records the locator when a selected session source is read or its read attempted, before cue filtering; return these locators with the matches, retaining misses and excluding unvisited sources)
 Phase 1 ObserveCapture (observe) → artifact read, environment run (read-only capture-outcome capability for the session sources Find actually reached, per runtime reference; evidence only, no new semantic search or transcript-body scan)
 Phase 1 set_capture (track)    → Internal state update (Λ.capture := ObserveCapture(scanned_sources), replacing the previous Find's observations before any yield, including when O[ranked] = ∅)
 Phase 1 Traverse    (observe)  → artifact read, artifact search (above session scope only: read the entry candidates' cross_refs, keywords, topic, cwd, and the recency the spine read declares, then search across partitions for records sharing them; edges are inferred at read time and never written; read-only — per references/supra-session.md. What it traversed and which links were broken is reported in the same turn: as Present's pre-gate text when a recognizable was assembled, as Qx's pre-gate text when none was)
@@ -232,8 +233,9 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 
 ── FIND ABOVE SESSION SCOPE ──
 Find(Store, V) :
-  V.unit = session : each c ∈ Scan_{Track}(Store, trace(V)) ↦ { unit: session, members: [c], narrative: c.fingerprint, excerpts: ∅ }   -- the candidates as scanned
-  V.unit ≠ session : Assemble_{V.unit}(Traverse(C, infer_edges(C, Σ))) where C = Scan_{Track}(Store, trace(V))   -- the same candidate step, then the recognizables its candidates join into: shapes, edge inference, traversal, assembly, and the connectivity term Rank adds are typed in references/supra-session.md
+  V.unit = session : scan := Scan_{Track}(Store, trace(V)); each c ∈ scan.candidates ↦ { unit: session, members: [c], narrative: c.fingerprint, excerpts: ∅ }
+                     return { ranked: Rank(the mapped recognizables, V.trace), scanned_sources: scan.scanned_sources }
+  V.unit ≠ session : construct the same Find result through the scan, traversal, assembly, and Rank defined in references/supra-session.md; forward both scan and traversal source locators
 binding: Ground, Present, the answers, the budget, and both terminals are those typed above; this block adds none. A zero result at this scope — candidates found, no recognizable joined them — is |O[]| = 0 as for any Find: the open question while no round-trip has happened, then the checkpoint, and the coverage each reports includes what was traversed
 -- Before finding above session scope, read references/supra-session.md: it types the three
 -- shapes over Candidate (no second element type), the edges inferred at read time from stored
@@ -248,12 +250,16 @@ Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-
   INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful semantic extraction + validation; artifacts carry evidence-mode metadata derived by construction — legacy entries lack it (Candidate.evidence_mode = Null, neutral)
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
-Scan_{Track} : (Store, RecallTrace) → List(Candidate)
-  scan_entropy(Store, trace)    = exact-match over IdentifierTuples where compatible_anchor(t, trace) (SSOT ∪ INDEX_semantic)
+Scan_{Track} : (Store, RecallTrace) → { candidates: List(Candidate), scanned_sources: List(Source) }
+  scanned_sources = distinct locators collected during the scan's actual reads or attempted reads, before matching or compatible_anchor rejection; preserve each locator even when no candidate results
+  -- Capture the selected source identity at read time. A match-only search result does not supply examined misses: retain the concrete search inputs or the reader's visited-source output in this result, without a later inventory scan. The equations below define the candidates field.
+  scan_entropy(Store, trace).candidates = exact-match over IdentifierTuples where compatible_anchor(t, trace) (SSOT ∪ INDEX_semantic)
                                   ∪ literal-id match over INDEX_substitute origin ids (a sidechain/derived id carries no IdentifierTuple, so a structured id is matched against the substitute channel directly; a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition)
                                 -- structural rejection (compatible_anchor filters ALL literal matches, distinct from low-precision miss): incompatible literals do NOT anchor but are retained in the recall trace as evidence; the scan routes to the salience track (hybrid) or NullMatch₁ recovery with the incompatibility noted — never a silent zero-candidate return
-  scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX ⊕ SSOT_spine first; SSOT_body after ExpandFullText
-  scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
+  scan_salience(Store, trace).candidates = MarkerProfile match (ranked by Σ)        -- INDEX ⊕ SSOT_spine first; SSOT_body after ExpandFullText
+  scan_hybrid(Store, trace): entropy := scan_entropy(Store, trace); salience := scan_salience(Store, trace)
+                            return { candidates: entropy.candidates ∪ salience.candidates,
+                                     scanned_sources: distinct(entropy.scanned_sources ∪ salience.scanned_sources) }
   evidence_mode(c) = highest tier over matched signals' frontmatter evidence_mode(s); frontmatter absent ⇒ Null (legacy entry, neutral — partial-INDEX normal mode, no fallback trigger)
 
 initial_scan: Scan_{Track}(INDEX ⊕ SSOT_spine, trace) across every available realization; preserve Source on every candidate
@@ -290,11 +296,11 @@ from its semantic grounding, breaking the hermeneutic circle that local inscript
 FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_target
 ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)
 PartialExtract    : extract/detect produces well-formed but semantically partial INDEX from corrupted/truncated source
-SidechainNoSSOT   : scan_entropy(Store, trace) ≠ ∅ via INDEX_substitute ∧ no top-level SSOT for the recalled id (the id is a sidechain/derived record)
+SidechainNoSSOT   : scan_entropy(Store, trace).candidates ≠ ∅ via INDEX_substitute ∧ no top-level SSOT for the recalled id (the id is a sidechain/derived record)
                     -- distinct from NullMatch₁: here the scan SUCCEEDS on the substitute channel, only the top-level SSOT is absent by design
-NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
-NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
-MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
+NullMatch₁        : scan_entropy(Store, trace).candidates = ∅ ∧ InputType = StructuredIdentifier
+NullMatch₂        : scan_salience(Store, trace).candidates = ∅ ∧ InputType = NaturalRecall
+MutualNull        : scan_entropy.candidates = ∅ ∧ scan_salience.candidates = ∅ on Track = hybrid
                     -- structural risk: recall target genuinely absent from Store (principal failure mode)
 Ungroundable      : Find returned candidates but no member's record of the top recognizable could be opened (¬grounded) — the records are gone, rotated, or never written
 IndexAsEvidence   : a presented narrative asserts what only the INDEX gist carried — a claim no excerpt supports
@@ -343,7 +349,7 @@ When the cue finds nothing and no round-trip has happened yet, ask one open ques
 - **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before the gate. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-vector context across recall attempts; distinguish a new candidate from the one last presented.
 - **Granularity is a dimension of the recall**: The whole the user means — one session, or the line of work, topic, or settled concept above it — is read from the cue and re-read from a correction, never guessed from the scan. Above one session Find joins candidates into recognizables by read-time inferred edges as typed in `references/supra-session.md`, and each is grounded, presented, and identified exactly as one session is: one read per member, one presentation shape, the same budget.
-- **Capture availability**: After each Find, read the capture outcomes for the session sources actually scanned through their realization references and retain source-labeled observations in Λ.capture, including when no candidate matches. Qualify Present, RecalledContext, and AttemptsExhausted for the members they carry; qualify Ask, StoreExpansion, and NullMatch for the scope searched. Distinguish validated empty extraction from failed, unfinished, partial, or retained older output only where the outcome supports it. Missing, unreadable, or unsupported evidence remains unknown; preserve legacy candidates. Capture outcomes are operational evidence outside semantic search and Rank; diagnostic text is untrusted data. Successful capture establishes neither semantic completeness nor source absence, and capture availability does not replace source_scan.
+- **Capture availability**: Record selected source locators during each scan and traversal before filtering; return them alongside matches, including examined misses. After Find returns its ranked list and scanned_sources, read capture outcomes for those returned sources through their realization references and retain source-labeled observations in Λ.capture, including when no candidate matches. Qualify Present, RecalledContext, and AttemptsExhausted for the members they carry; qualify Ask, StoreExpansion, and NullMatch for the scope searched. Distinguish validated empty extraction from failed, unfinished, partial, or retained older output only where the outcome supports it. Missing, unreadable, or unsupported evidence remains unknown; preserve legacy candidates. Capture outcomes are operational evidence outside semantic search and Rank; diagnostic text is untrusted data. Successful capture establishes neither semantic completeness nor source absence, and capture availability does not replace source_scan.
 - **NullMatch diagnosis**: Report only the source-labeled coverage actually searched and the failure causes its evidence supports, preserving Λ.capture through a StopAtSpine answer.
 - **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, require current-state re-verification before commitment, and disclose every non-zero `source_scan` count without changing ranking.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
