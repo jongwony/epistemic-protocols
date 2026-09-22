@@ -51,10 +51,7 @@ function reportChildFailure(name, result) {
       process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${reported}\n`);
       return;
     }
-    // Exit status alone reports nothing here: both Claude-side writers catch
-    // their own operational failures, write the diagnostic to stderr, and exit
-    // zero regardless. Forwarding a non-empty stderr is what makes an
-    // extraction, validation, or write failure visible at all.
+    // Forward non-empty writer diagnostics even when the child exits zero.
     if (reported) process.stderr.write(`hypomnesis-dispatch: ${name} reported: ${reported}\n`);
   } catch {}
 }

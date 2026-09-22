@@ -5,6 +5,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const MAX_EVIDENCE_CHARS = 2000;
+const MAX_OUTCOME_BYTES = 256 * 1024;
 const MAX_ARTIFACT_BYTES = 16 * 1024 * 1024;
 const LIMITATION_KINDS = new Set(['input_failed', 'invocation_failed', 'validation_failed', 'skipped', 'execution_failed']);
 function sessionKey(runtime, id) {
@@ -31,19 +32,8 @@ function errorEvidence(error) {
   };
 }
 
-function atomicJson(target, value) {
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  const tmp = `${target}.${randomUUID()}.tmp`;
-  try { fs.writeFileSync(tmp, JSON.stringify(value) + '\n'); fs.renameSync(tmp, target); }
-  finally { try { fs.unlinkSync(tmp); } catch {} }
-}
-
-function loadAttempt(root, id, runtime) {
-  for (const candidate of runtime ? [runtime] : ['claude', 'codex']) {
+function validAttempt(value, id, runtime) {
   try {
-    const target = outcomePath(root, id, candidate);
-    if (fs.statSync(target).size > 256 * 1024) continue;
-    const value = JSON.parse(fs.readFileSync(target, 'utf8'));
     const isRevision = (r) => r === null || (r && Number.isFinite(r.mtime_ms) && Number.isFinite(r.size) && r.size >= 0);
     const validArtifacts = (items) => Array.isArray(items) && items.length <= 64 && items.every((item) =>
       item && typeof item.path === 'string' && /^[a-f0-9]{64}$/.test(item.sha256) && (item.revision === undefined || isRevision(item.revision)) && (item.receipt_id === undefined || typeof item.receipt_id === 'string')
@@ -51,7 +41,7 @@ function loadAttempt(root, id, runtime) {
         && item.append_qualification.prior_detail_omitted === true && Array.isArray(item.append_qualification.observed_limitations)
         && item.append_qualification.observed_limitations.length <= LIMITATION_KINDS.size
         && item.append_qualification.observed_limitations.every((kind) => LIMITATION_KINDS.has(kind)))));
-    if (value.runtime !== candidate || value.schema_version !== 1 || value.session_id !== String(id)
+    if (value.runtime !== runtime || value.schema_version !== 1 || value.session_id !== String(id)
       || !['claude', 'codex'].includes(value.runtime) || !isRevision(value.revision)
       || typeof value.attempt_id !== 'string' || !['in_progress', 'complete', 'superseded'].includes(value.state)
       || !value.extractors || typeof value.extractors !== 'object' || Array.isArray(value.extractors)
@@ -61,9 +51,107 @@ function loadAttempt(root, id, runtime) {
       || (value.retained_artifacts && !validArtifacts(value.retained_artifacts))
       || (value.last_publication && (!['complete', 'partial', 'failed'].includes(value.last_publication.state) || !validArtifacts(value.last_publication.artifacts)))
       || (value.receipts && (typeof value.receipts !== 'object' || Array.isArray(value.receipts) || Object.keys(value.receipts).length > 64
-        || !Object.values(value.receipts).every((receipt) => receipt && isRevision(receipt.revision) && typeof receipt.attempt_id === 'string' && receipt.extractors && typeof receipt.extractors === 'object')))) continue;
-    return value;
-  } catch {}
+        || !Object.values(value.receipts).every((receipt) => receipt && isRevision(receipt.revision) && typeof receipt.attempt_id === 'string' && receipt.extractors && typeof receipt.extractors === 'object')))) return false;
+    return true;
+  } catch { return false; }
+}
+
+function clippedDetail(original, keep) {
+  if (keep >= original.text.length) return { ...original };
+  let head = Math.floor(keep / 2);
+  let tail = keep - head;
+  if (original.split_at !== undefined) {
+    head = Math.min(head, original.split_at);
+    tail = Math.min(keep - head, original.text.length - original.split_at);
+    head += Math.min(keep - head - tail, original.split_at - head);
+  }
+  const text = original.text.slice(0, head) + (tail ? original.text.slice(-tail) : '');
+  return { ...original, text, omitted_chars: original.omitted_chars + original.text.length - text.length, split_at: head };
+}
+
+function prepareOutcome(value) {
+  const prepared = JSON.parse(JSON.stringify(value));
+  const encode = () => JSON.stringify(prepared) + '\n';
+  let serialized = encode();
+  if (Buffer.byteLength(serialized) > MAX_OUTCOME_BYTES) {
+    const details = [];
+    const seen = new Set();
+    const collect = (node) => {
+      if (!node || typeof node !== 'object' || seen.has(node)) return;
+      seen.add(node);
+      if (typeof node.text === 'string' && Number.isSafeInteger(node.omitted_chars) && node.omitted_chars >= 0) {
+        details.push(node);
+        return;
+      }
+      for (const child of Object.values(node)) collect(child);
+    };
+    for (const [id, receipt] of Object.entries(prepared.receipts ?? {}).sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)))) {
+      if (id !== prepared.attempt_id) collect(receipt);
+    }
+    if (prepared.last_publication?.attempt_id !== prepared.attempt_id) collect(prepared.last_publication);
+    collect(prepared.receipts?.[prepared.attempt_id]);
+    collect(prepared.last_publication);
+    collect(prepared.publication);
+    collect(prepared.execution);
+    collect(prepared.extractors);
+    for (const detail of details) {
+      if (!detail.text.length) continue;
+      const original = { ...detail };
+      Object.assign(detail, clippedDetail(original, 0));
+      serialized = encode();
+      if (Buffer.byteLength(serialized) > MAX_OUTCOME_BYTES) continue;
+      let low = 0;
+      let high = original.text.length - 1;
+      while (low < high) {
+        const middle = Math.ceil((low + high) / 2);
+        Object.assign(detail, clippedDetail(original, middle));
+        if (Buffer.byteLength(encode()) <= MAX_OUTCOME_BYTES) low = middle;
+        else high = middle - 1;
+      }
+      Object.assign(detail, clippedDetail(original, low));
+      serialized = encode();
+      break;
+    }
+  }
+  if (Buffer.byteLength(serialized) > MAX_OUTCOME_BYTES) {
+    throw Object.assign(new Error('outcome essential structure exceeds the persisted byte envelope'), { code: 'OUTCOME_TOO_LARGE' });
+  }
+  if (!validAttempt(prepared, prepared.session_id, prepared.runtime)) {
+    throw Object.assign(new Error('outcome does not satisfy the reader schema'), { code: 'OUTCOME_INVALID' });
+  }
+  return { prepared, serialized };
+}
+
+function atomicJson(target, value) {
+  let tmp;
+  try {
+    const { prepared, serialized } = prepareOutcome(value);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    tmp = `${target}.${randomUUID()}.tmp`;
+    fs.writeFileSync(tmp, serialized);
+    const readback = fs.readFileSync(tmp);
+    if (readback.length > MAX_OUTCOME_BYTES || readback.toString('utf8') !== serialized
+      || !validAttempt(JSON.parse(readback), prepared.session_id, prepared.runtime)) {
+      throw Object.assign(new Error('outcome readback does not satisfy the persisted envelope'), { code: 'OUTCOME_READBACK' });
+    }
+    fs.renameSync(tmp, target);
+    return prepared;
+  } catch (error) {
+    error.operation = 'outcome_persistence';
+    throw error;
+  } finally { if (tmp) { try { fs.unlinkSync(tmp); } catch {} } }
+}
+
+function loadAttempt(root, id, runtime) {
+  for (const candidate of runtime ? [runtime] : ['claude', 'codex']) {
+    try {
+      const target = outcomePath(root, id, candidate);
+      if (fs.statSync(target).size > MAX_OUTCOME_BYTES) continue;
+      const bytes = fs.readFileSync(target);
+      if (bytes.length > MAX_OUTCOME_BYTES) continue;
+      const value = JSON.parse(bytes);
+      if (validAttempt(value, id, candidate)) return value;
+    } catch {}
   }
   return null;
 }
@@ -113,8 +201,7 @@ function beginAttempt(root, sessionId, info) {
     retained_artifacts: previous ? effectiveArtifacts(previous).filter((artifact) => !['missing', 'mismatch', 'outside_scope'].includes(verifyArtifact(root, sessionId, info.runtime, artifact).verification)) : [],
   };
   compactReceipts(root, attempt);
-  atomicJson(outcomePath(root, sessionId, info.runtime), attempt);
-  return attempt;
+  return atomicJson(outcomePath(root, sessionId, info.runtime), attempt);
 }
 
 function foldAppendQualification(previous, priorReceipt, current) {
@@ -222,7 +309,7 @@ function formatOutcome(result) {
     publication: result.attempt?.publication ?? null, receipts: result.attempt?.receipts ?? {}, execution: result.attempt?.execution ?? null, artifacts: result.artifacts });
 }
 
-export { beginAttempt, finishAttempt, readOutcome, captureArtifacts, errorEvidence, outcomePath, boundedText, formatOutcome, sessionKey };
+export { beginAttempt, finishAttempt, readOutcome, captureArtifacts, errorEvidence, outcomePath, boundedText, formatOutcome, sessionKey, MAX_OUTCOME_BYTES };
 
 let isMain = false;
 try { isMain = !!process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url)); } catch {}

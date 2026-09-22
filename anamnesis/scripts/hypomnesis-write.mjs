@@ -997,6 +997,7 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
     finishAttempt(root, attempt, { state: "complete", extractors, publication });
     return readOutcome(root, sessionId);
   } catch (error) {
+    if (error.operation === "outcome_persistence") throw error;
     const failure = error.stage === "input_failed"
       ? { extractors: { ...extractors, input: { state: "input_failed", evidence: errorEvidence(error) } } }
       : { execution: { state: "failed", evidence: errorEvidence(error) } };

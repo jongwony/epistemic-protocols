@@ -24,7 +24,7 @@ import {
   PROMPT_SAMPLE_CHARS,
 } from "./hypomnesis-write.mjs";
 import { dispatchHook } from "./hypomnesis-dispatch.mjs";
-import { beginAttempt, finishAttempt, readOutcome, captureArtifacts, boundedText, outcomePath, readOutcomes, sessionKey } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+import { beginAttempt, finishAttempt, readOutcome, captureArtifacts, boundedText, outcomePath, readOutcomes, sessionKey, MAX_OUTCOME_BYTES } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -744,4 +744,92 @@ test("legacy narrative append explicitly retains unknown prior origin", (t) => {
   assert.equal(narrative.append_qualification.prior_origin_unknown, true);
   assert.equal(narrative.append_qualification.prior_detail_omitted, true);
   assert.match(fs.readFileSync(narrative.path, "utf8"), /legacy contribution/);
+});
+
+for (const codePoint of [0xAC00, 0x01]) {
+  test(`actual six-publication outcomes fit the byte envelope for diagnostic code point ${codePoint}`, (t) => {
+    const f = fixture(t);
+    const store = path.join(f.root, "session");
+    fs.mkdirSync(store, { recursive: true });
+    for (const name of ["entropy.md", "coinage.md"]) fs.mkdirSync(path.join(store, name));
+    const payloads = [
+      { topics: [], keywords: [], initial_request: "real clue", key_utterances: [] },
+      { decisions: [{ label: "decision", description: "real decision" }] },
+      { origin: "real origin", direction: "real direction", outcome: "real outcome" },
+      { actor: [{ name: "person" }], temporal: [], emotional: [], cognitive: [], singularity: [] },
+    ];
+    const targets = ["clue.md", "vector.md", "narrative.md", "markers.md", "entropy.md", "coinage.md"];
+    const child = `require('node:fs').readFileSync(0);process.stderr.write(String.fromCodePoint(${codePoint}).repeat(5000));process.exit(1)`;
+    let final;
+    for (let step = 0; step < targets.length; step += 1) {
+      if (step >= 4) fs.rmdirSync(path.join(store, targets[step]));
+      fs.writeFileSync(f.transcript, JSON.stringify({ type: "user", timestamp: "2026-09-23T00:00:00Z", message: {
+        content: "indexabletoken ".repeat(100) + (step < 5 ? " #938" : ""),
+      } }) + "\n");
+      let calls = 0;
+      final = processClaudeInput(f.input, { run: (_file, _args, options) => {
+        const current = calls++;
+        return current === step ? JSON.stringify(payloads[current]) : execFileSync(process.execPath, ["-e", child], options);
+      } });
+      assert.equal(calls, 4);
+      assert.equal(final.record_state, "known");
+      assert.ok(fs.statSync(outcomePath(f.root, "session")).size <= MAX_OUTCOME_BYTES);
+      assert.equal(Object.keys(final.attempt.receipts).length, step + 1);
+      assert.deepEqual(final.attempt.publication.artifacts.map((a) => path.basename(a.path)), [targets[step]]);
+    }
+    const ids = Object.keys(final.attempt.receipts);
+    const historical = Object.entries(final.attempt.receipts).filter(([id]) => id !== final.attempt.attempt_id);
+    assert.ok(historical.some(([, receipt]) => Object.values(receipt.extractors).some((stage) => stage.evidence?.stderr.omitted_chars > 3000)));
+    for (const receipt of Object.values(final.attempt.receipts)) {
+      for (const stage of Object.values(receipt.extractors)) {
+        if (stage.state !== "invocation_failed") continue;
+        const detail = stage.evidence.stderr;
+        assert.equal(detail.text.length + detail.omitted_chars, 5000);
+        assert.ok(detail.split_at >= 0 && detail.split_at <= detail.text.length);
+      }
+    }
+    for (const name of ["clue", "vector", "narrative", "marker"]) {
+      const current = final.attempt.extractors[name];
+      assert.equal(current.state, "invocation_failed");
+      assert.equal(current.evidence.stderr.text.length, 2000, "historical compaction must preserve the current detail when it fits");
+    }
+    const next = processClaudeInput(f.input, { run: failedRun });
+    assert.equal(next.record_state, "known");
+    for (const id of ids.filter((id) => final.artifacts.some((a) => a.receipt_id === id && path.basename(a.path) !== "coinage.md"))) {
+      assert.ok(next.attempt.receipts[id], "an acknowledged predecessor receipt must survive the next attempt");
+    }
+    assert.equal(Object.keys(next.attempt.receipts).length, 6);
+    assert.ok(fs.statSync(outcomePath(f.root, "session")).size <= MAX_OUTCOME_BYTES);
+    assert.equal(next.artifacts.length, 6);
+  });
+}
+
+test("essential overflow and invalid schema preserve the previous valid outcome", (t) => {
+  const f = fixture(t);
+  const attempt = beginAttempt(f.root, "session", { runtime: "claude", revision: null });
+  const filename = outcomePath(f.root, "session");
+  const before = fs.readFileSync(filename);
+  assert.throws(() => finishAttempt(f.root, attempt, { source_transcript: "x".repeat(MAX_OUTCOME_BYTES), state: "complete" }),
+    { code: "OUTCOME_TOO_LARGE", operation: "outcome_persistence" });
+  assert.deepEqual(fs.readFileSync(filename), before);
+  assert.throws(() => finishAttempt(f.root, attempt, { state: "unsupported-state" }),
+    { code: "OUTCOME_INVALID", operation: "outcome_persistence" });
+  assert.deepEqual(fs.readFileSync(filename), before);
+  assert.equal(readOutcome(f.root, "session").record_state, "known");
+});
+
+test("atomic outcome replacement checks actual UTF-8 readback before publishing", (t) => {
+  const f = fixture(t);
+  const attempt = beginAttempt(f.root, "session", { runtime: "claude", revision: null });
+  const filename = outcomePath(f.root, "session");
+  const before = fs.readFileSync(filename);
+  const write = fs.writeFileSync;
+  const mocked = t.mock.method(fs, "writeFileSync", (target, content, ...rest) => {
+    if (String(target).startsWith(filename + ".") && String(target).endsWith(".tmp")) return write(target, String(content).slice(0, -3), ...rest);
+    return write(target, content, ...rest);
+  });
+  assert.throws(() => finishAttempt(f.root, attempt, { state: "complete" }), { operation: "outcome_persistence" });
+  mocked.mock.restore();
+  assert.deepEqual(fs.readFileSync(filename), before);
+  assert.deepEqual(fs.readdirSync(path.dirname(filename)), [path.basename(filename)]);
 });

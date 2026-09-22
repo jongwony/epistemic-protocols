@@ -798,3 +798,90 @@ test('missing Codex enqueue does not release another active owner', (t) => {
     assert.equal(readOutcome(root, 'session-a', 'codex').record_state, 'unknown');
   } finally { release(); }
 });
+
+test('Codex outcome persistence failure does not relabel acknowledged physical publication', (t) => {
+  const { root, transcript } = fixture(t);
+  const input = { session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' };
+  const first = enqueueCodexJob(input, { root });
+  processJob(root, first.job, { extract: () => extraction('prior') });
+  const prior = readOutcome(root, 'session-a', 'codex').attempt;
+  fs.appendFileSync(transcript, '\n');
+  const next = enqueueCodexJob(input, { root });
+  const original = fs.renameSync;
+  const failure = Object.assign(new Error('outcome storage full'), { code: 'ENOSPC' });
+  let rejected = 0;
+  let savedBeforeFailure;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/')) {
+      const pending = JSON.parse(fs.readFileSync(from, 'utf8'));
+      if (pending.state === 'complete') {
+        rejected += 1;
+        savedBeforeFailure = fs.readFileSync(to, 'utf8');
+        throw failure;
+      }
+    }
+    return original(from, to);
+  });
+  assert.throws(() => processJob(root, next.job, { extract: () => extraction('new physical record') }), (error) => {
+    assert.equal(error, failure);
+    assert.equal(error.operation, 'outcome_persistence');
+    return true;
+  });
+  mock.mock.restore();
+  assert.equal(rejected, 1, 'the failed persistence operation must not trigger a second partial publication record');
+  const after = readOutcome(root, 'session-a', 'codex');
+  assert.equal(after.attempt.state, 'in_progress');
+  assert.deepEqual(after.attempt.last_publication, prior.last_publication);
+  const outcomeFile = path.join(root, '.outcomes', 'session-a.json');
+  assert.equal(fs.readFileSync(outcomeFile, 'utf8'), savedBeforeFailure);
+  const current = JSON.parse(fs.readFileSync(path.join(root, 'session-a', 'current.json'), 'utf8'));
+  const record = JSON.parse(fs.readFileSync(path.join(root, 'session-a', current.generation), 'utf8'));
+  assert.equal(record.topic, 'new physical record');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'catalog', 'session-a.json'), 'utf8')).topic, record.topic);
+});
+
+test('Codex retry annotation persistence failure preserves the original processing failure', (t) => {
+  const { root, transcript } = fixture(t);
+  enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  const original = fs.renameSync;
+  let rejected = 0;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/')) {
+      const pending = JSON.parse(fs.readFileSync(from, 'utf8'));
+      if (pending.retry) {
+        rejected += 1;
+        throw Object.assign(new Error('annotation disk failure'), { code: 'EIO' });
+      }
+    }
+    return original(from, to);
+  });
+  assert.equal(runWorker(root, 'session-a', { extract: () => { throw new ReferenceError('original processing defect'); } }), true);
+  mock.mock.restore();
+  assert.equal(rejected, 2);
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.match(result.attempt.execution.evidence.message.text, /original processing defect/);
+  const log = fs.readFileSync(path.join(root, 'logs', 'session-a.log'), 'utf8');
+  assert.match(log, /annotation disk failure/);
+  assert.match(log, /original processing defect/);
+  assert.equal(fs.readdirSync(path.join(root, 'failures', 'session-a')).length, 1);
+});
+
+test('Codex error-record persistence failure carries the original execution cause', (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  const original = fs.renameSync;
+  const storageFailure = Object.assign(new Error('cannot store failure'), { code: 'EIO' });
+  const executionFailure = new ReferenceError('execution failed before publication');
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/') && JSON.parse(fs.readFileSync(from, 'utf8')).state === 'complete') throw storageFailure;
+    return original(from, to);
+  });
+  assert.throws(() => processJob(root, job, { extract: () => { throw executionFailure; } }), (error) => {
+    assert.equal(error, storageFailure);
+    assert.equal(error.operation, 'outcome_persistence');
+    assert.equal(error.cause, executionFailure);
+    return true;
+  });
+  mock.mock.restore();
+  assert.equal(readOutcome(root, 'session-a', 'codex').attempt.state, 'in_progress');
+});

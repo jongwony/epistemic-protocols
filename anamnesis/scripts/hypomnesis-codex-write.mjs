@@ -534,9 +534,11 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
   const publish = (record, extra) => {
     publishing = true;
     const published = publishRecord(root, job, record);
-    return finish({ published, declined: !published, ...extra }, {
+    const publication = {
       state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job).map((artifact) => ({ ...artifact, ...(reuseReceiptId ? { receipt_id: reuseReceiptId } : {}) })) : [],
-    });
+    };
+    publishing = false;
+    return finish({ published, declined: !published, ...extra }, publication);
   };
   try {
     let before;
@@ -579,6 +581,10 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
     if (latest && compareRevision(latest.revision, job.revision) > 0) return finish({ stale: true, ...parseCounts });
     return publish(record, { record, ...parseCounts });
   } catch (error) {
+    if (error.operation === "outcome_persistence") {
+      error.attempt_id = attempt.attempt_id;
+      throw error;
+    }
     let artifacts = [];
     let artifactError;
     if (publishing) {
@@ -588,11 +594,15 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
       const component = error.stage === "input_failed" ? "input" : "codex";
       extractors[component] = { state: error.stage, evidence: errorEvidence(error) };
     }
-    if (attempt) finishAttempt(root, attempt, {
+    try { finishAttempt(root, attempt, {
       state: "complete", extractors,
       ...(!publishing && !error.stage ? { execution: { state: "failed", evidence: errorEvidence(error) } } : {}),
       publication: { state: publishing ? (artifacts.length ? "partial" : "failed") : "none", artifacts, ...(publishing ? { evidence: errorEvidence(error), ...(artifactError ? { artifact_error: artifactError } : {}) } : {}) },
-    });
+    }); } catch (persistenceError) {
+      persistenceError.attempt_id = attempt.attempt_id;
+      persistenceError.cause ??= error;
+      throw persistenceError;
+    }
     error.attempt_id = attempt.attempt_id;
     throw error;
   }
@@ -624,10 +634,14 @@ function runWorker(root, sessionId, options = {}) {
         const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
         failureCounts.set(job._path, failureCount);
         const failedAttempt = readOutcome(root, job.session_id, "codex").attempt;
-        if (failedAttempt && error.attempt_id === failedAttempt.attempt_id) {
-          finishAttempt(root, failedAttempt, {
-            retry: { failures: failureCount, disposition: failureCount < 2 ? "pending" : "quarantined" },
-          });
+        if (error.operation !== "outcome_persistence" && failedAttempt && error.attempt_id === failedAttempt.attempt_id) {
+          try {
+            finishAttempt(root, failedAttempt, {
+              retry: { failures: failureCount, disposition: failureCount < 2 ? "pending" : "quarantined" },
+            });
+          } catch (persistenceError) {
+            log(root, sessionId, `retry annotation failed: ${persistenceError.stack ?? persistenceError.message}`);
+          }
         }
         if (failureCount < 2) {
           log(root, sessionId, `failed ${job._path} (retry ${failureCount}): ${error.stack ?? error.message}`);
