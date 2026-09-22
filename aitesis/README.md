@@ -52,7 +52,7 @@ Uncertainties are identified dynamically per task — no fixed taxonomy:
 Aitesis → Prothesis → Analogia → Katalepsis
 ```
 
-Aitesis runs early: exhaust what the AI can collect before perspective framing (Prothesis) and mapping validation (Analogia).
+Aitesis runs early: exhaust what the AI can collect before perspective framing (Prothesis) and analogical-inference auditing (Analogia).
 
 ## When to Use
 
