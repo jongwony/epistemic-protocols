@@ -50,9 +50,11 @@ direction : optional shared-cause hypothesis with its falsifier
 Every source able to report reach owes `exercised`, including on approval. Ask
 explicitly whether the whole changed artifact's contract closes: declared values
 have producers, branches have supplied inputs, and obligations reach their consumers.
-Distinguish source analysis from executed checks. Request `direction` after findings
-on a non-approval; no single mechanism is a valid answer. A mechanism lacking a
-falsifier does not fill this slot.
+Ask equally what the artifact carries that its remaining text already recovers: which
+obligation fails on a clause's deletion, and which two places state one thing and would
+have to be kept in step. Distinguish source analysis from executed checks.
+Request `direction` after findings on a non-approval; no single mechanism is a
+valid answer. A mechanism lacking a falsifier does not fill this slot.
 
 A native report may be normalized by its adapter. An explicit successful empty
 findings result can mean approval; failed, skipped, missing, or unreadable review
@@ -190,7 +192,8 @@ An initial uninformed return is absorbed by settled policy. Instance-specific
 dismissals/deferrals never enter reviewer context, so their returns keep that
 disposition and remain residual. A return after a fix was visible or a constituted
 decision conveyed requires diagnosis before convergence. A still-self-evident
-incomplete repair stays Mechanical and is rewritten by the driving session. A
+incomplete repair stays Mechanical and is rewritten in the next apply pass with the
+recurrence history in its hand-off. A
 contested design decision reaches a judgment gate with the recurrence history;
 a third recurrence after the escalated re-apply discredits the Mechanical diagnosis
 and also gates. End recurrence through repair or constituted direction, not reviewer
@@ -202,60 +205,74 @@ what this unit carries. A rising count changes neither the criterion nor source 
 
 ### Phase 4 — Apply and check the bundle
 
-For PR scope, settle any pending landing choice under Phase 0 and prepare that
-destination through [PR scope](references/pr-scope.md) before the first edit.
+For PR scope, follow [PR scope](references/pr-scope.md) before the first edit.
 
-1. The driving session scans planned change points, adjacent interactions, and repeated
+The driving session settles disposition and hands the apply pass to a writer.
+Where the host offers a full-context fork, one fork per apply pass is the default
+writer and carries steps 1, 4 and 5 below end to end; the host reference (for
+Claude Code, [Claude Code](references/host-claude-code.md) § Writer fork) names the
+fork mechanism. Where the host offers only a fresh-context delegate, the
+driving session performs step 1 itself and hands the enumerated predicate and
+screened sites to that writer in a self-contained brief, which then carries steps 4
+and 5. Where the host offers no delegation, or an action is parent-held for risk,
+the driving session writes inline. Under every route the scan holder is whoever
+performs step 1, and the writer is whoever performs steps 4 and 5.
+
+A writer returns to the driving session whenever it stops — at a gate it cannot
+settle, or at the end of the pass — carrying what Trace and Exit requires of the pass
+so far, so the driving session records rather than re-derives it.
+
+1. The scan holder scans planned change points, adjacent interactions, and repeated
    instances. Derive each fix's predicate from the violated invariant and verified cause.
    Trace relevant state through production, transfer, invalidation, and consumption,
    including transitions and interleavings; enumerate the predicate's sites. State the
    observation that would falsify the repair and select bounded checks from it. Return
    a live judgment about consistency or evidence support to Phase 3 before its
    dependent repair.
-   Semantically verify and risk-screen every site before adding it to the fix brief;
-   a new unbriefed site returns for screening. A nameless predicate licenses no write.
+   Semantically verify and risk-screen every site before writing it; a new unscreened
+   site returns for screening. A nameless predicate licenses no write.
    Sweep matching sites in this apply pass within the settled scope, reporting expansion.
 2. Risk is separate from Mechanical/Judgment classification. Route substrate actions
    to host permissions; an unsettled epistemic risk goes to the user for apply, defer,
    or drop. Rejection blocks an edit not yet written.
-3. Use a self-contained brief for a fresh low-cost writer where the host exposes and
-   permits one; its configuration selects the model. Use inline writing for trivial
-   batches, parent-held risky actions, or absent delegation. Fork only where necessary
-   loop context cannot be conveyed. Repeated fix-induced follow-ups across consecutive
-   rounds escalate writing to the driving session; return to the lower tier after a
-   review without such follow-ups.
-4. Read every brief/sweep site against its disposition and exercise the repaired
-   invariant through the transitions and orderings identified by the scan. Record the
-   artifact checked, evidence, and unexercised limits. Repair a known discrepancy within
-   the settled disposition and re-check the affected bundle before hand-forward; a live
-   judgment returns to Phase 3. An explicitly accepted or deferred limit remains residual.
+3. Repeated fix-induced follow-ups across consecutive rounds move judgment, not
+   writing: the next apply pass returns its enumerated predicate and sites to Phase 3
+   before writing. Return to autonomous apply after a review without such follow-ups.
+4. Read every written and swept site against its disposition and exercise the repaired
+   invariant through the transitions and orderings identified by the scan. Repair a known
+   discrepancy within the settled disposition and re-check the affected bundle before
+   hand-forward; a live judgment returns to Phase 3. An explicitly accepted or deferred
+   limit remains residual.
    Record unavailable checks with their reason and consequence for confidence. These
    checks establish bounded conformance; full re-review independently judges the artifact.
    Call `/contextualize` once on the whole applied bundle against the design-decision
    ledger and touched-surface conventions.
 5. An adaptation that `/contextualize` actually writes re-enters scan, site screening,
-   sweep, and write verification once; the fit call is not repeated in that apply pass.
+   sweep, and write verification once.
    Reconcile an already-written adaptation with its settled disposition before hand-forward.
    A self-evident repair stays within that disposition; a competing repair or a live
    judgment about evidence support returns to Phase 3 with the current artifact and
    consequences. A defer or drop verdict states whether the landed effect remains and
-   its authorized basis; the verdict alone does not authorize retaining it. Further
-   unwritten sites obey
-   their screens. An adaptation-free pass needs no re-entry. After reconciliation and
-   checks, including explicit unavailable-check limits, obtain the full re-review.
+   its authorized basis; the verdict alone does not authorize retaining it. After
+   reconciliation and checks, including explicit unavailable-check limits, the writer
+   commits to the settled landing for PR scope and pushes where that landing has a
+   remote, then returns.
 6. After a judgment returned to Phase 3 is settled, resume the pending step in the
-   same apply pass with that answer. Screen any newly included sites; a fit
-   call already completed in that pass remains completed.
+   same apply pass with that answer.
 
 ### Phase 5 — Re-review and stop on evidence
 
 When the processed round has not earned convergence below, refresh changed files
 and design intent and obtain a **full** re-review, including after dispositions that
 landed no edit. Any edit invalidates the preceding verdict and always owes this
-review of the original surface plus all repairs. For PR scope, commit repairs to the
-settled landing and use its new head; [PR scope](references/pr-scope.md) defines that
-pointer. For working-tree scope, compare against the captured base and include current
+review of the original surface plus all repairs. For PR scope, use the re-review
+pointer supplied by [PR scope](references/pr-scope.md).
+For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
+Where the ledger convention puts a repair's derivation in its commit message, that
+message is a fix-status claim under Phase 0 rule 5: point the re-review at the ledger
+through the pre-repair range only, and state that the repair commits are judged from
+their content in the diff as part of the whole range.
 
 This call is the next round's review: send its findings and direction straight to
 Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
@@ -286,6 +303,7 @@ Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
+Apply: writer route (fork | brief | inline) → commits or new head, or tree state (omit if no pass ran)
 Landing: repair destination (PR only)
 ```
 
@@ -297,10 +315,8 @@ Assign exactly one Relay/Gated home by whether the user was asked, including nes
 `/contextualize` questions and epistemic risk gates. Host permission decisions are execution annotations. Record the fit pass as
 its own entry, with adaptation, any retroactive rejecting verdict, and the resulting
 artifact state and disposition. Preserve write discrepancies and their reconciliation;
-carried reasons are records, while subsequent reviews detect findings fresh. A stacked
-approval covers captured base through the repair layer, not either PR alone.
+carried reasons are records, while subsequent reviews detect findings fresh.
 
 At every exit, present the accumulated dispositions and residual,
 including standing source limits. Read [exit handover](references/exit-handover.md)
-before offering durable recording. Exiting is immediate; the record offer, its home,
-or its refusal never conditions the exit.
+before offering durable recording.

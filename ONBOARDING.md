@@ -80,7 +80,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 - **Notation in formal blocks**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
 - **Verb usage in TOOL GROUNDING**: `call` for tool references, `present` for gate operations (tool-agnostic per Semantic Autonomy, `premise/interaction-factorization.md`)
-- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
+- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`; where an issue anchors the unit, its identifier follows the type — `feat/<issue-id>-description` — and one branch carries one unit (`CLAUDE.md` §Settled Directions, Intent binding)
 - **Release tags**: CalVer `v{YYYY}.{MM}.{DD}[.{N}]`; tag push triggers `release.yml` draft
 - **README sync**: `README.md` and `README_ko.md` must stay in sync
 - **SKILL.md self-containment**: No external references to axiom identifiers, rule file paths, or contributor-only concepts — end users see only SKILL.md via the plugin system
