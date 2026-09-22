@@ -12,10 +12,9 @@ Claude `/code-review` implementation to the Source Interface in `SKILL.md`.
   review invocation and determine the contract from its skill expansion and output.
   Mark unknown limits until observed; refresh the affected record fields when runtime
   evidence differs. A contract that cannot be established remains an explicit gap.
-- For every call, pass the resolved **local** base/head (or captured working-tree base
-  and untracked paths) and design-intent bundle. Establish that the review examined
-  that surface before normalizing it. A raw PR number alone addresses remote PR state
-  and can omit local or stacked repairs.
+- Establish that each review examined the requested local surface before normalizing
+  it. A raw PR number alone addresses remote PR state and can omit local or stacked
+  repairs.
 
 Preserve the native result, then normalize only a completed review:
 

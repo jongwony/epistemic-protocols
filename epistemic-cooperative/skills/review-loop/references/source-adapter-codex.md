@@ -19,15 +19,9 @@ Write the prompt to a unique temporary directory (`mktemp -d`). Include:
 - Changed-file list and the current design-intent bundle from Phase 0: repository
   pointers, constituted decisions and their basis, declared authority order or its
   absence, and mission pointer or the recorded absence of a declared goal.
-- The Source Interface output: findings, `VERDICT: approve | needs-attention`,
-  `EXERCISED:` on every verdict, and optional `DIRECTION:` with a falsifier after
-  findings on a non-approval. Convey the mission-based severity calibration.
-
-Ask explicitly about closure across the whole changed artifact, not only hunks.
-Report what this call examined or executed and what it could not reach; a sandbox's
-capabilities do not establish exercise. Convey decisions descriptively and leave
-the reviewer free to flag a defect those decisions cause. Give it no prior fix
-statuses, dispositions, hypotheses, or requested verdict.
+- The Source Interface output using findings and the labels
+  `VERDICT: approve | needs-attention`, `EXERCISED:`, and `DIRECTION:`.
+  Convey the mission-based severity calibration.
 
 ## Execution and collection
 
