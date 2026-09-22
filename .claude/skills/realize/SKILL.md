@@ -56,7 +56,7 @@ free, and it runs on every commit.
 ```bash
 cd .claude/skills/realize/scripts
 
-./setup.sh inquire                           # default Claude runner
+./setup.sh inquire                           # or: grasp -- one target per invocation
 export CLAUDE_CODE_OAUTH_TOKEN="$(...)" && ./run.sh inquire
 
 REALIZE_RUNNER=codex ./setup.sh inquire      # no credential consumed or stored
@@ -122,12 +122,17 @@ rather than inferring invocation from the model's prose.
 ## Cases
 
 Each registered target needs at least a trigger-positive case, where its obligations
-must fire, and a trigger-negative case, where firing is the failure. `inquire` is the
-only registered target today; no result is implied for an unregistered protocol.
+must fire, and a trigger-negative case, where firing is the failure. Read
+`harness.config.json`'s target registry for which protocols are registered; no result is
+implied for one that is not.
 
-Both cases mount the same scaffold, deliberately: one observes whether a
-file-discoverable fact was asked, the other whether a supplied parameter was re-asked,
-and differing substrates would let a run pass one by luck.
+A target's two cases mount the same scaffold, deliberately. For `inquire`, one observes
+whether a file-discoverable fact was asked and the other whether a supplied parameter was
+re-asked; for `grasp`, one observes whether an adjudication arrived with the material it
+was drawn from and the other whether a verdict was withheld where the tree records no
+ground for one. Differing substrates would let a run pass one by luck, and would turn the
+negative case into a test of whether a file is missing. Targets do not share a scaffold
+across the registry: each case declares its fixture in `case.yaml` as `scaffold_script`.
 
 Write the prompt as the task alone. The line that invokes the protocol lives in
 `harness.config.json` and reaches only the arms that have it — a prompt naming the
@@ -139,8 +144,30 @@ exhaustive can still leave a term underdetermined, and a correct protocol will o
 gate on it — recording a failure that belongs to the case author.
 
 `evals/inquire-underspecified/` and `evals/inquire-fully-specified/` are the worked
-pair for `/inquire`. Follow their shape when adding a protocol: a `prompt.md` carrying
+pair for `/inquire`; `evals/grasp-adjudicable/` and `evals/grasp-unattachable/` are the
+pair for `/grasp`. Follow their shape when adding a protocol: a `prompt.md` carrying
 frontmatter and the user's words, and one grader per obligation under `graders/`.
+
+## Scripted turns
+
+An obligation that fires only AFTER the user answers is unreachable by a single-turn run:
+the observation ends at the first `Stop`, and there is nothing to adjudicate against until
+a turn arrives. `/inquire` never showed this, because its obligations all land before that
+gate; `/grasp` does, because its adjudication obligations begin at the answer.
+
+A case opts in by shipping `followup.md` beside `prompt.md` — its body is fed as the next
+user turn, and `followup-2.md` / `followup-3.md` continue the sequence. Absence of the file
+is the single-turn contract, unchanged. Session persistence is kept only where something
+resumes, since `--no-session-persistence` is what would remove the session `--resume`
+reaches. Every scripted turn must produce its own complete start/end event pair; a partial
+one makes the cell a launch failure rather than a short observation, because the transcript
+cannot tell those apart.
+
+What this buys is reach, never the judgment of a real user: the answer is fixed before the
+probe is seen, so it cannot respond to what was actually asked. A grader reads whether the
+obligation fired against the answer it got, not whether the exchange went well. Codex has
+no resume wired here, so a case with scripted turns fails closed on that runner rather than
+running single-turn under the same cell name.
 
 ## Reading results
 
