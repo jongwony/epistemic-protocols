@@ -24,7 +24,7 @@ import {
   PROMPT_SAMPLE_CHARS,
 } from "./hypomnesis-write.mjs";
 import { dispatchHook } from "./hypomnesis-dispatch.mjs";
-import { beginAttempt, finishAttempt, readOutcome, captureArtifacts, boundedText, outcomePath } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+import { beginAttempt, finishAttempt, readOutcome, captureArtifacts, boundedText, outcomePath, readOutcomes, sessionKey } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -237,10 +237,10 @@ const failedRun = () => { throw Object.assign(new Error("spawn failed"), { code:
  test("validated empty and invocation failure remain distinct without semantic files", (t) => {
   const f = fixture(t);
   const empty = processClaudeInput(f.input, { run: extractionRun(emptyOutputs) });
-  assert.equal(empty.availability, "empty");
+  assert.equal(empty.attempt.extractors.clue.state, "empty");
   assert.equal(fs.existsSync(path.join(f.root, "session")), false);
   const failed = processClaudeInput(f.input, { run: failedRun });
-  assert.equal(failed.availability, "failed");
+  assert.equal(failed.record_state, "known");
   assert.equal(failed.attempt.extractors.clue.state, "invocation_failed");
   assert.equal(failed.attempt.extractors.clue.evidence.code, "EPIPE");
   assert.match(failed.attempt.extractors.clue.evidence.stderr.text, /<system>/);
@@ -250,7 +250,7 @@ const failedRun = () => { throw Object.assign(new Error("spawn failed"), { code:
 test("schema rejection persists separately from invocation failure", (t) => {
   const f = fixture(t);
   const result = processClaudeInput(f.input, { run: extractionRun(["not JSON", {}, {}, {}]) });
-  assert.equal(result.availability, "failed");
+  assert.equal(result.record_state, "known");
   assert.equal(result.attempt.extractors.clue.state, "validation_failed");
   assert.equal(result.attempt.extractors.clue.output.text, "not JSON");
 });
@@ -258,11 +258,11 @@ test("schema rejection persists separately from invocation failure", (t) => {
 test("failed refresh retains acknowledged verified artifacts and their earlier revision", (t) => {
   const f = fixture(t);
   const first = processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
-  assert.equal(first.availability, "available");
+  assert.equal(first.attempt.publication.state, "complete");
   const clue = fs.readFileSync(path.join(f.root, "session", "clue.md"), "utf8");
   fs.appendFileSync(f.transcript, "\n");
   const failed = processClaudeInput(f.input, { run: failedRun });
-  assert.equal(failed.availability, "stale");
+  assert.equal(failed.record_state, "known");
   assert.equal(fs.readFileSync(path.join(f.root, "session", "clue.md"), "utf8"), clue);
   assert.ok(failed.artifacts.every((item) => item.verified));
   assert.deepEqual(failed.artifacts[0].revision, first.attempt.revision);
@@ -272,18 +272,20 @@ test("failed refresh retains acknowledged verified artifacts and their earlier r
 test("partial extraction publication remains verified after a later failed attempt", (t) => {
   const f = fixture(t);
   const partial = processClaudeInput(f.input, { run: extractionRun([successfulOutputs()[0], new Error("failed"), new Error("failed"), new Error("failed")]) });
-  assert.equal(partial.availability, "partial");
+  assert.equal(partial.attempt.publication.state, "partial");
   assert.deepEqual(partial.artifacts.map((item) => path.basename(item.path)), ["clue.md"]);
   const failed = processClaudeInput(f.input, { run: failedRun });
-  assert.equal(failed.availability, "stale");
+  assert.equal(failed.record_state, "known");
   assert.equal(failed.artifacts[0].verified, true);
 });
 
 test("publication acknowledges each replaced file and reports partial filesystem failure", (t) => {
   const f = fixture(t);
   fs.mkdirSync(path.join(f.root, "session", "vector.md"), { recursive: true });
-  const result = processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
-  assert.equal(result.availability, "partial");
+  const outputs = successfulOutputs();
+  outputs[1] = { decisions: [{ label: "decision", description: "meaningful content" }] };
+  const result = processClaudeInput(f.input, { run: extractionRun(outputs) });
+  assert.equal(result.attempt.publication.state, "partial");
   assert.equal(result.attempt.publication.state, "partial");
   assert.ok(result.attempt.publication.errors["vector.md"]);
   assert.ok(result.artifacts.every((item) => item.verified));
@@ -293,7 +295,7 @@ test("publication acknowledges each replaced file and reports partial filesystem
 test("total publication failure is not successful extraction publication", (t) => {
   const f = fixture(t);
   const result = processClaudeInput(f.input, { run: extractionRun(successfulOutputs()), publish: () => { throw Object.assign(new Error("read only"), { code: "EROFS" }); } });
-  assert.equal(result.availability, "failed");
+  assert.equal(result.record_state, "known");
   assert.equal(result.attempt.extractors.clue.state, "succeeded");
   assert.equal(result.attempt.publication.state, "failed");
 });
@@ -304,25 +306,27 @@ test("input read and parse failures persist before the semantic directory exists
   assert.equal(processClaudeInput(f.input).attempt.extractors.input.state, "input_failed");
   fs.unlinkSync(f.transcript);
   const missing = processClaudeInput(f.input);
-  assert.equal(missing.availability, "failed");
+  assert.equal(missing.record_state, "known");
   assert.equal(missing.attempt.extractors.input.evidence.code, "ENOENT");
 });
 
-test("overlapping and changed-source attempts do not publish competing results", (t) => {
+test("PreCompact publishes its owned captured snapshot while the live transcript grows", (t) => {
   const f = fixture(t);
   const run = extractionRun(successfulOutputs());
   let first = true;
   const result = processClaudeInput(f.input, { run: (...args) => {
     if (first) {
       first = false;
-      assert.equal(processClaudeInput(f.input, { run: failedRun }).availability, "in_progress");
-      fs.appendFileSync(f.transcript, "\n");
+      assert.equal(processClaudeInput(f.input, { run: failedRun }).attempt.state, "in_progress");
+      fs.appendFileSync(f.transcript, JSON.stringify({ type: "user", message: { content: "LATER_TURN" } }) + "\n");
     }
+    assert.doesNotMatch(args[2].input, /LATER_TURN/);
     return run(...args);
   } });
-  assert.equal(result.attempt.state, "superseded");
-  assert.equal(result.attempt.publication.state, "none");
-  assert.equal(fs.existsSync(path.join(f.root, "session")), false);
+  assert.equal(result.attempt.state, "complete");
+  assert.equal(result.attempt.publication.state, "complete");
+  assert.equal(result.source_changed, true);
+  assert.ok(result.artifacts.every((artifact) => artifact.verified && artifact.revision.size < result.source_revision.size));
 });
 
 test("reader preserves unknown legacy, unfinished, and late-attempt distinctions", (t) => {
@@ -330,16 +334,16 @@ test("reader preserves unknown legacy, unfinished, and late-attempt distinctions
   fs.mkdirSync(path.join(f.root, "session"), { recursive: true });
   const legacy = path.join(f.root, "session", "clue.md");
   fs.writeFileSync(legacy, "legacy semantic data");
-  assert.equal(readOutcome(f.root, "session").availability, "unknown");
+  assert.equal(readOutcome(f.root, "session").record_state, "unknown");
   const info = { runtime: "claude", source_transcript: f.transcript, source_event: "PreCompact", revision: { mtime_ms: 1, size: 2 } };
   const first = beginAttempt(f.root, "session", info);
-  assert.equal(readOutcome(f.root, "session").availability, "in_progress");
+  assert.equal(readOutcome(f.root, "session").attempt.state, "in_progress");
   const next = beginAttempt(f.root, "session", { ...info, revision: { mtime_ms: 2, size: 2 } });
   assert.equal(finishAttempt(f.root, first, { state: "complete", extractors: {}, publication: { state: "complete", artifacts: captureArtifacts([legacy]) } }), false);
   assert.equal(beginAttempt(f.root, "session", info), null);
   assert.equal(readOutcome(f.root, "session").attempt.attempt_id, next.attempt_id);
   fs.writeFileSync(outcomePath(f.root, "session"), JSON.stringify({ ...next, schema_version: 99 }));
-  assert.equal(readOutcome(f.root, "session").availability, "unknown");
+  assert.equal(readOutcome(f.root, "session").record_state, "unknown");
   assert.equal(fs.readFileSync(legacy, "utf8"), "legacy semantic data");
 });
 
@@ -350,10 +354,10 @@ test("reader restricts acknowledged artifacts to the named session and checks ha
   fs.writeFileSync(outside, "private unrelated data");
   finishAttempt(f.root, attempt, { state: "complete", extractors: { clue: { state: "succeeded" } }, publication: { state: "complete", artifacts: captureArtifacts([outside]) } });
   const result = readOutcome(f.root, "session");
-  assert.equal(result.availability, "partial");
+  assert.equal(result.attempt.publication.state, "complete");
   assert.equal(result.artifacts[0].verified, false);
   fs.writeFileSync(outcomePath(f.root, "session"), JSON.stringify({ ...attempt, extractors: { clue: null } }));
-  assert.equal(readOutcome(f.root, "session").availability, "unknown");
+  assert.equal(readOutcome(f.root, "session").record_state, "unknown");
 });
 
 test("bounded operational evidence retains both ends with explicit omitted count", () => {
@@ -379,7 +383,7 @@ process.exit(3);
   });
   assert.equal(writer.status, 0);
   const result = JSON.parse(execFileSync(process.execPath, [fileURLToPath(new URL("../skills/recollect/scripts/hypomnesis-outcome.mjs", import.meta.url)), f.root, "session"], { encoding: "utf8" }));
-  assert.equal(result.availability, "failed");
+  assert.equal(result.record_state, "known");
   for (const name of ["clue", "vector", "narrative", "marker"]) {
     const evidence = result.attempt.extractors[name].evidence;
     assert.equal(evidence.status, 3);
@@ -398,7 +402,7 @@ test("repeated Codex publication retains current evidence without accumulating g
     finishAttempt(f.root, attempt, { state: "complete", extractors: { codex: { state: "succeeded" } },
       publication: { state: "complete", artifacts: captureArtifacts([record]) } });
     const result = readOutcome(f.root, "session");
-    assert.equal(result.availability, "available");
+    assert.equal(result.attempt.publication.state, "complete");
     assert.equal(result.artifacts.length, 1);
     assert.equal(result.artifacts[0].path, record);
     assert.equal(result.artifacts[0].verified, true);
@@ -411,7 +415,7 @@ test("complete then partial then failed refresh retains the newest acknowledged 
   fs.appendFileSync(f.transcript, "\n");
   const outputs = [{ ...successfulOutputs()[0], initial_request: "new partial clue" }, new Error("failed"), new Error("failed"), new Error("failed")];
   const partial = processClaudeInput(f.input, { run: extractionRun(outputs) });
-  assert.equal(partial.availability, "partial");
+  assert.equal(partial.attempt.publication.state, "partial");
   const clue = partial.artifacts.find((item) => path.basename(item.path) === "clue.md");
   fs.appendFileSync(f.transcript, "\n");
   const failed = processClaudeInput(f.input, { run: failedRun });
@@ -424,7 +428,7 @@ test("topic-only and direction-only validated results remain semantic content", 
   const f = fixture(t);
   const outputs = [{ ...emptyOutputs[0], topics: ["remember topic"] }, emptyOutputs[1], { ...emptyOutputs[2], direction: "new direction" }, emptyOutputs[3]];
   const result = processClaudeInput(f.input, { run: extractionRun(outputs) });
-  assert.equal(result.availability, "available");
+  assert.equal(result.attempt.publication.state, "complete");
   assert.equal(result.attempt.extractors.clue.state, "succeeded");
   assert.equal(result.attempt.extractors.narrative.state, "succeeded");
 });
@@ -437,7 +441,7 @@ test("dispatcher records startup failure even when a previous successful outcome
   fs.renameSync(f.transcript, transcript);
   const input = { ...f.input, transcript_path: transcript };
   const first = processClaudeInput(input, { run: extractionRun(successfulOutputs()) });
-  assert.equal(first.availability, "available");
+  assert.equal(first.attempt.publication.state, "complete");
   fs.writeFileSync(path.join(f.directory, "hypomnesis-write.mjs"), "process.stderr.write('startup failed'); process.exit(3);");
   const chunks = [];
   const previousWrite = process.stderr.write;
@@ -446,7 +450,7 @@ test("dispatcher records startup failure even when a previous successful outcome
     dispatchHook(JSON.stringify(input), { env: { CLAUDE_CONFIG_DIR: f.directory }, scriptDir: f.directory });
   } finally { process.stderr.write = previousWrite; }
   const result = readOutcome(path.join(projects, "hypomnesis"), "session");
-  assert.equal(result.availability, "stale");
+  assert.equal(result.record_state, "known");
   assert.equal(result.attempt.extractors.writer.evidence.status, 3);
   assert.match(chunks.join(""), /startup failed/);
   assert.notEqual(result.attempt.attempt_id, first.attempt.attempt_id);
@@ -470,10 +474,120 @@ test("capture size and cooldown skips remain distinct from validated empty", (t)
   processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
   const cooldown = processClaudeInput({ ...f.input, hook_event_name: "SessionEnd" }, { run: () => { throw new Error("cooldown must skip extraction"); } });
   assert.equal(cooldown.attempt.extractors.input.state, "skipped");
-  assert.equal(cooldown.availability, "stale");
+  assert.equal(cooldown.record_state, "known");
+  assert.equal(cooldown.source_changed, false);
+  assert.ok(cooldown.artifacts.every((artifact) => artifact.verified && artifact.revision.size === cooldown.source_revision.size && artifact.revision.mtime_ms === cooldown.source_revision.mtime_ms));
+  assert.equal(Object.hasOwn(cooldown, "availability"), false);
   fs.writeFileSync(f.transcript, JSON.stringify({ type: "user", message: { content: "short request" } }));
   fs.utimesSync(f.transcript, new Date(), new Date(Date.now() + 1000));
   const short = processClaudeInput(f.input);
   assert.equal(short.attempt.extractors.input.state, "skipped");
-  assert.notEqual(short.availability, "empty");
+  assert.equal(short.record_state, "known");
+  assert.equal(Object.hasOwn(short, "availability"), false);
+});
+
+test("failed-plus-empty stages publish no empty files and do not suppress the next retry", (t) => {
+  const f = fixture(t);
+  const failed = processClaudeInput(f.input, { run: extractionRun([new Error("failed clue"), ...emptyOutputs.slice(1)]) });
+  assert.equal(failed.attempt.extractors.clue.state, "invocation_failed");
+  assert.equal(failed.attempt.extractors.vector.state, "empty");
+  assert.equal(failed.attempt.extractors.narrative.state, "empty");
+  assert.equal(failed.attempt.publication.state, "none");
+  assert.equal(fs.existsSync(path.join(f.root, "session")), false);
+  let calls = 0;
+  const run = extractionRun(successfulOutputs());
+  const retry = processClaudeInput({ ...f.input, hook_event_name: "SessionEnd" }, { run: (...args) => { calls += 1; return run(...args); } });
+  assert.equal(calls, 4);
+  assert.equal(retry.attempt.publication.state, "complete");
+});
+
+test("failure-plus-empty refresh preserves previously meaningful payloads", (t) => {
+  const f = fixture(t);
+  const initial = successfulOutputs();
+  initial[1] = { decisions: [{ label: "settled", description: "keep this" }] };
+  initial[2] = { origin: "original discussion", direction: "continue", outcome: "settled" };
+  const first = processClaudeInput(f.input, { run: extractionRun(initial) });
+  const failed = processClaudeInput(f.input, { run: extractionRun([new Error("failed clue"), ...emptyOutputs.slice(1)]) });
+  assert.equal(failed.attempt.publication.state, "none");
+  assert.deepEqual(failed.artifacts, first.artifacts);
+  let calls = 0;
+  const run = extractionRun(initial);
+  processClaudeInput({ ...f.input, hook_event_name: "SessionEnd" }, { run: (...args) => { calls += 1; return run(...args); } });
+  assert.equal(calls, 4, "a failed latest attempt must remain retryable despite earlier success");
+});
+
+test("partial independent content is published without arming the complete-capture cooldown", (t) => {
+  const f = fixture(t);
+  const outputs = [new Error("failed clue"), emptyOutputs[1], emptyOutputs[2], { ...emptyOutputs[3], actor: ["a named participant"] }];
+  const partial = processClaudeInput(f.input, { run: extractionRun(outputs) });
+  assert.equal(partial.attempt.publication.state, "partial");
+  assert.deepEqual(partial.artifacts.map((item) => path.basename(item.path)), ["markers.md"]);
+  let calls = 0;
+  const run = extractionRun(successfulOutputs());
+  processClaudeInput({ ...f.input, hook_event_name: "SessionEnd" }, { run: (...args) => { calls += 1; return run(...args); } });
+  assert.equal(calls, 4);
+});
+
+test("lost attempt ownership suppresses publication even while the source is unchanged", (t) => {
+  const f = fixture(t);
+  let successor;
+  const run = extractionRun(successfulOutputs());
+  const result = processClaudeInput(f.input, { run: (...args) => {
+    if (!successor) {
+      const original = readOutcome(f.root, "session").attempt;
+      successor = beginAttempt(f.root, "session", original);
+    }
+    return run(...args);
+  } });
+  assert.equal(result.attempt.attempt_id, successor.attempt_id);
+  assert.equal(result.attempt.state, "in_progress");
+  assert.equal(fs.existsSync(path.join(f.root, "session")), false);
+});
+
+test("a first recorded skip is known and retained freshness is independently source-scoped", (t) => {
+  const f = fixture(t);
+  fs.writeFileSync(f.transcript, JSON.stringify({ type: "user", message: { content: "short" } }));
+  const skipped = processClaudeInput(f.input);
+  assert.equal(skipped.record_state, "known");
+  assert.equal(skipped.attempt.extractors.input.state, "skipped");
+  assert.equal(skipped.source_changed, false);
+  assert.deepEqual(skipped.artifacts, []);
+  assert.equal(Object.hasOwn(skipped, "availability"), false);
+});
+
+test("batch reader preserves the exact supplied identity set in one process", (t) => {
+  const f = fixture(t);
+  processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
+  const sources = [{ runtime: "claude", root: f.root, session_id: "session" },
+    ...Array.from({ length: 100 }, (_, i) => ({ runtime: "codex", root: f.root, session_id: `legacy-${i}` }))];
+  const expected = readOutcomes(sources);
+  const actual = JSON.parse(execFileSync(process.execPath, [fileURLToPath(new URL("../skills/recollect/scripts/hypomnesis-outcome.mjs", import.meta.url)), "--batch"],
+    { input: JSON.stringify(sources), encoding: "utf8" }));
+  assert.deepEqual(actual, expected);
+  assert.equal(actual.length, sources.length);
+  assert.equal(actual[0].record_state, "known");
+  assert.ok(actual.slice(1).every((result) => result.record_state === "unknown"));
+});
+
+test("runtime-aware identity mapping preserves Claude long IDs and Codex legacy keys", (t) => {
+  const f = fixture(t);
+  const longId = "s".repeat(190);
+  const result = processClaudeInput({ ...f.input, session_id: longId }, { run: extractionRun(successfulOutputs()) });
+  assert.equal(sessionKey("claude", longId), longId);
+  assert.equal(sessionKey("codex", longId), longId.slice(0, 160));
+  assert.equal(sessionKey("codex", "a/b?c"), "a_b_c");
+  assert.equal(sessionKey("codex", ""), "unknown");
+  assert.ok(result.artifacts.every((artifact) => artifact.verified && artifact.path.includes(longId)));
+  assert.equal(readOutcome(f.root, longId, "claude").record_state, "known");
+});
+
+test("legacy Codex key collisions never bind one raw session's outcome to another", (t) => {
+  const f = fixture(t);
+  for (const [left, right] of [["a/b", "a?b"], ["x".repeat(160) + "/left", "x".repeat(160) + "?right"]]) {
+    assert.equal(sessionKey("codex", left), sessionKey("codex", right));
+    beginAttempt(f.root, left, { runtime: "codex", revision: null });
+    beginAttempt(f.root, right, { runtime: "codex", revision: null });
+    assert.equal(readOutcome(f.root, left, "codex").record_state, "unknown");
+    assert.equal(readOutcome(f.root, right, "codex").attempt.session_id, right);
+  }
 });

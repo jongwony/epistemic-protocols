@@ -16,7 +16,9 @@ import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-import { beginAttempt, finishAttempt, captureArtifacts, errorEvidence, readOutcome } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+import { beginAttempt, finishAttempt, captureArtifacts, errorEvidence, readOutcome, sessionKey } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+
+import { takeSessionLock } from "../skills/recollect/scripts/session-lock.mjs";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = path.dirname(SCRIPT_PATH);
@@ -40,9 +42,7 @@ function log(root, sessionId, message) {
   } catch {}
 }
 
-function safeId(value) {
-  return String(value ?? "unknown").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 160) || "unknown";
-}
+const safeId = (value) => sessionKey("codex", value);
 
 function resolveCodexHome(env = process.env) {
   return env.CODEX_HOME || path.join(os.homedir(), ".codex");
@@ -591,9 +591,8 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
 
 function runWorker(root, sessionId, options = {}) {
   fs.mkdirSync(root, { recursive: true });
-  const lockDir = path.join(root, ".locks", safeId(sessionId));
-  fs.mkdirSync(path.dirname(lockDir), { recursive: true });
-  if (!acquireLock(lockDir)) return false;
+  const release = takeSessionLock(root, safeId(sessionId), { staleAfterMs: WORKER_TIMEOUT_MS * 2 });
+  if (!release) return false;
 
   // Bounds each job path to at most one retry before quarantine (FIX 4): a
   // job left in the queue after its first failure is picked up again by the
@@ -615,7 +614,7 @@ function runWorker(root, sessionId, options = {}) {
       } catch (error) {
         const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
         failureCounts.set(job._path, failureCount);
-        const failedAttempt = readOutcome(root, job.session_id).attempt;
+        const failedAttempt = readOutcome(root, job.session_id, "codex").attempt;
         if (failedAttempt && compareRevision(failedAttempt.revision, job.revision) === 0) {
           finishAttempt(root, failedAttempt, {
             retry: { failures: failureCount, disposition: failureCount < 2 ? "pending" : "quarantined" },
@@ -633,80 +632,13 @@ function runWorker(root, sessionId, options = {}) {
       }
     }
   } finally {
-    try {
-      const owner = JSON.parse(fs.readFileSync(path.join(lockDir, "owner.json"), "utf8"));
-      if (owner.pid === process.pid) fs.rmSync(lockDir, { recursive: true, force: true });
-    } catch {}
+    release();
   }
 
   // Close the lost-wakeup window: a hook may have queued work after the final
   // empty scan but before lock release, while its own worker saw this lock.
   if (readJobs(root, sessionId).length > 0) spawnWorker(root, sessionId);
   return true;
-}
-
-function acquireLock(lockDir) {
-  const create = () => {
-    fs.mkdirSync(lockDir);
-    atomicWriteJson(path.join(lockDir, "owner.json"), {
-      pid: process.pid,
-      acquired_at: new Date().toISOString(),
-    });
-    return true;
-  };
-  try { return create(); }
-  catch (error) {
-    if (error.code !== "EEXIST") throw error;
-  }
-
-  let stale = false;
-  let judgedOwner = null;   // the exact owner record the staleness verdict was made about
-  try {
-    judgedOwner = fs.readFileSync(path.join(lockDir, "owner.json"), "utf8");
-    const owner = JSON.parse(judgedOwner);
-    // Liveness decides, and age on its own never does: a worker draining
-    // several jobs can outlive any fixed age bound while still publishing, and
-    // stealing its lock puts two writers on one session's catalog and pointer.
-    // A wedged owner is bounded instead by the extraction timeout each job
-    // already carries. Residual: a recycled pid reads as alive, which holds the
-    // lock rather than corrupting anything.
-    let ownerAlive = true;
-    try { process.kill(owner.pid, 0); }
-    catch (error) { ownerAlive = error.code !== "ESRCH"; }
-    stale = !ownerAlive;
-  } catch {
-    // No readable owner record, so liveness cannot be tested — age is all there is.
-    try {
-      stale = Date.now() - fs.statSync(lockDir).mtimeMs > WORKER_TIMEOUT_MS * 2;
-    } catch { stale = true; }
-  }
-  if (!stale) return false;
-  // Rename-to-steal: the rename is atomic, so exactly one racer observes it
-  // succeed. A racer that loses finds lockDir already gone and backs off
-  // instead of deleting the winner's brand-new lock out from under it.
-  const stolenDir = `${lockDir}.stale.${process.pid}.${randomUUID()}`;
-  try { fs.renameSync(lockDir, stolenDir); }
-  catch { return false; }
-  // ABA guard: between judging that lock stale and renaming it, another racer
-  // can have taken the same one and put its own live lock at the same path, so
-  // an atomic rename alone only proves something was taken — not that it was
-  // the thing judged. Confirm the record taken is the record the verdict was
-  // about; otherwise put it back and back off rather than displacing a live
-  // owner. Residual: if a third contender claims the path between the restore's
-  // two steps, the restore fails and the taken lock is left in place as
-  // evidence rather than removed.
-  let stolenOwner = null;
-  try { stolenOwner = fs.readFileSync(path.join(stolenDir, "owner.json"), "utf8"); } catch {}
-  if (stolenOwner !== judgedOwner) {
-    try { fs.renameSync(stolenDir, lockDir); } catch {}
-    return false;
-  }
-  fs.rmSync(stolenDir, { recursive: true, force: true });
-  try { return create(); }
-  catch (error) {
-    if (error.code === "EEXIST") return false;
-    throw error;
-  }
 }
 
 export {

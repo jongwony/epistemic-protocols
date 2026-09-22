@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Persist per-extractor and publication outcomes for Claude lifecycle capture.
- * SessionEnd applies the narrative cooldown; PreCompact bypasses that gate.
+ * SessionEnd applies the complete-publication cooldown; PreCompact bypasses that gate.
  * Semantic files and outcome sidecars are separate. Failed stages retain prior
  * published files; each replacement is atomic and acknowledged independently.
  * Nested extraction receives the prompt on stdin with tools and settings disabled.
@@ -12,7 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { beginAttempt, finishAttempt, readOutcome, captureArtifacts, errorEvidence, boundedText, formatOutcome, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 function logErr(msg) {
@@ -192,7 +192,7 @@ function cleanText(text) {
 
 // --- JSONL Parsing ---
 
-function parseSession(transcriptPath) {
+function parseSession(raw) {
   const userMsgs = [];
   const allTexts = [];
   const timestamps = [];
@@ -204,7 +204,6 @@ function parseSession(transcriptPath) {
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
-  const raw = fs.readFileSync(transcriptPath, "utf8");
   let parseFailed = false;
   let totalChars = 0;
 
@@ -874,9 +873,16 @@ function writeStore(targetDir, files, revision) {
   return { state: Object.keys(errors).length ? artifacts.length ? "partial" : "failed" : "complete", artifacts, errors };
 }
 
-function transcriptRevision(filename) {
-  const stat = fs.statSync(filename);
-  return { mtime_ms: Math.floor(stat.mtimeMs), size: stat.size };
+function readClaudeSnapshot(filename) {
+  const fd = fs.openSync(filename, "r");
+  try {
+    const stat = fs.fstatSync(fd);
+    const bytes = fs.readFileSync(fd).subarray(0, stat.size);
+    return { raw: bytes.toString("utf8"), revision: {
+      mtime_ms: Math.floor(stat.mtimeMs), size: bytes.length,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+    } };
+  } finally { fs.closeSync(fd); }
 }
 
 function processClaudeInput(input, { run = execFileSync, publish = writeStore } = {}) {
@@ -898,25 +904,27 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
   let publication = { state: "none", artifacts: [] };
   try {
     let revision = null;
+    let snapshot;
     let inputError;
-    try { revision = transcriptRevision(transcriptPath); } catch (error) { inputError = error; }
-    let cooldown = false;
-    if (event === "SessionEnd") {
-      try {
-        const narrative = fs.statSync(path.join(storeDir, "narrative.md"), { throwIfNoEntry: false });
-        cooldown = !!narrative && Date.now() - narrative.mtimeMs < COOLDOWN_MS;
-      } catch {}
-    }
+    try { snapshot = readClaudeSnapshot(transcriptPath); revision = snapshot.revision; } catch (error) { inputError = error; }
+    const previous = readOutcome(root, sessionId, "claude");
+    const success = previous.attempt?.last_success;
+    const interrupted = previous.attempt?.state === "in_progress" || previous.attempt?.state === "superseded";
+    const failed = Object.values(previous.attempt?.extractors ?? {}).some((item) => item.state.endsWith("_failed"))
+      || ["partial", "failed"].includes(previous.attempt?.publication.state);
+    const cooldown = event === "SessionEnd" && !interrupted && !failed && success?.artifacts.length > 0
+      && Date.now() - Date.parse(success.at) < COOLDOWN_MS
+      && success.artifacts.every((artifact) => previous.artifacts.some((item) => item.path === artifact.path && item.sha256 === artifact.sha256 && item.verified));
     attempt = beginAttempt(root, sessionId, { runtime: "claude", revision, source_transcript: transcriptPath, source_event: event });
     if (!attempt) return readOutcome(root, sessionId);
     if (inputError) throw Object.assign(inputError, { stage: "input_failed" });
     if (cooldown) {
-      extractors.input = { state: "skipped", reason: "narrative cooldown active" };
+      extractors.input = { state: "skipped", reason: "complete capture cooldown active" };
       finishAttempt(root, attempt, { state: "complete", extractors, publication });
       return readOutcome(root, sessionId);
     }
     let session;
-    try { session = parseSession(transcriptPath); } catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    try { session = parseSession(snapshot.raw); } catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
     if (session.parseFailed) extractors.input = { state: "input_failed", reason: "malformed JSONL input" };
     else if (revision.size < MIN_SESSION_BYTES) {
       extractors.input = { state: "skipped", reason: "transcript below minimum capture size" };
@@ -941,9 +949,9 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
       try {
         const data = parseHaikuOutput(raw);
         if (!validate(data)) throw new Error("extraction schema rejected");
-        const content = build(data);
-        extractors[name] = { state: empty(data) ? "empty" : "succeeded" };
-        files[filename] = content;
+        const isEmpty = empty(data);
+        extractors[name] = { state: isEmpty ? "empty" : "succeeded" };
+        if (!isEmpty) files[filename] = build(data);
         return data;
       } catch (error) {
         extractors[name] = { state: "validation_failed", evidence: errorEvidence(error), output: boundedText(raw) };
@@ -979,13 +987,11 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
         const coinage = computeCoinage(userMsgs, allTexts, root, sessionId, remaining);
         extractors.coinage = { state: coinage.coinage.length ? "succeeded" : "empty" };
         if (coinage.coinage.length) files["coinage.md"] = buildCoinageMd(sessionId, date, coinage, false, null);
-        if (markers) files["markers.md"] = buildMarkersMd(sessionId, date, markers, coinage, MARKER_EXTRACTION_METHOD);
+        if (markers && (extractors.marker.state === "succeeded" || coinage.coinage.length)) files["markers.md"] = buildMarkersMd(sessionId, date, markers, coinage, MARKER_EXTRACTION_METHOD);
       }
     } catch (error) { extractors.coinage = { state: "validation_failed", evidence: errorEvidence(error) }; }
-    const after = transcriptRevision(transcriptPath);
-    if (after.mtime_ms !== revision.mtime_ms || after.size !== revision.size) {
-      finishAttempt(root, attempt, { state: "superseded", extractors, publication });
-      return readOutcome(root, sessionId);
+    if (!release.owned() || readOutcome(root, sessionId, "claude").attempt?.attempt_id !== attempt.attempt_id) {
+      return readOutcome(root, sessionId, "claude");
     }
     if (Object.keys(files).length) {
       try { publication = publish(storeDir, files, revision); }

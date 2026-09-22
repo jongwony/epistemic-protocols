@@ -1,3 +1,5 @@
+import { spawn } from "node:child_process";
+import { takeSessionLock } from "../skills/recollect/scripts/session-lock.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -439,21 +441,21 @@ test("worker launch returns before detached work completes", async (t) => {
 
 test("Codex outcome distinguishes legacy, unfinished, failure, retry, and retained success", (t) => {
   const { root, transcript } = fixture(t);
-  assert.equal(readOutcome(root, "session-a").availability, "unknown");
+  assert.equal(readOutcome(root, "session-a", "codex").record_state, "unknown");
   const input = { session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" };
   enqueueCodexJob(input, { root });
   runWorker(root, "session-a", { extract: () => {
-    assert.equal(readOutcome(root, "session-a").availability, "in_progress");
+    assert.equal(readOutcome(root, "session-a", "codex").attempt.state, "in_progress");
     return extraction();
   } });
-  const success = readOutcome(root, "session-a");
-  assert.equal(success.availability, "available");
+  const success = readOutcome(root, "session-a", "codex");
+  assert.equal(success.attempt.publication.state, "complete");
   assert.equal(success.attempt.publication.artifacts.length, 3);
   fs.appendFileSync(transcript, "\n");
   enqueueCodexJob(input, { root });
   runWorker(root, "session-a", { extract: () => { throw Object.assign(new Error("process failed"), { stderr: "raw stderr", status: 7 }); } });
-  const failed = readOutcome(root, "session-a");
-  assert.equal(failed.availability, "stale");
+  const failed = readOutcome(root, "session-a", "codex");
+  assert.ok(failed.artifacts.some((artifact) => artifact.verified));
   assert.deepEqual(failed.attempt.last_success, success.attempt.last_success);
   assert.equal(failed.attempt.extractors.codex.state, "invocation_failed");
   assert.deepEqual(failed.attempt.retry, { failures: 2, disposition: "quarantined" });
@@ -461,7 +463,7 @@ test("Codex outcome distinguishes legacy, unfinished, failure, retry, and retain
   assert.equal(fs.readdirSync(path.join(root, "failures", "session-a")).length, 1);
   enqueueCodexJob(input, { root });
   runWorker(root, "session-a", { extract: () => extraction("recovered") });
-  assert.equal(readOutcome(root, "session-a").availability, "available");
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.publication.state, "complete");
 });
 
 test("Codex extraction rejects schema-invalid successful output before publication", (t) => {
@@ -469,8 +471,8 @@ test("Codex extraction rejects schema-invalid successful output before publicati
   const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
   for (const value of [{}, { ...extraction(), topics: [42] }, { ...extraction(), extra: true }, { ...extraction(), decisions: [{ label: "only" }] }]) {
     assert.throws(() => processJob(root, job, { extract: () => value }));
-    const outcome = readOutcome(root, "session-a");
-    assert.equal(outcome.availability, "failed");
+    const outcome = readOutcome(root, "session-a", "codex");
+    assert.equal(outcome.attempt.publication.state, "none");
     assert.equal(outcome.attempt.extractors.codex.state, "validation_failed");
     assert.equal(fs.existsSync(path.join(root, "session-a", "current.json")), false);
   }
@@ -481,8 +483,7 @@ test("Codex validated semantic emptiness differs from extraction failure", (t) =
   const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
   const empty = { topic: "", topics: [], keywords: [], initial_request: "", key_utterances: [], cross_refs: [], decisions: [], narrative: { origin: "", direction: "", outcome: "" }, markers: { coinage: [], actor: [], temporal: [], emotional: [], cognitive: [], singularity: [] } };
   processJob(root, job, { extract: () => empty });
-  assert.equal(readOutcome(root, "session-a").availability, "empty");
-  assert.equal(readOutcome(root, "session-a").attempt.extractors.codex.state, "empty");
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.extractors.codex.state, "empty");
 });
 
 for (const blocked of ["catalog", "pointer"]) {
@@ -494,14 +495,14 @@ for (const blocked of ["catalog", "pointer"]) {
     if (blocked === "catalog") fs.writeFileSync(blocker, "blocked");
     else fs.mkdirSync(blocker);
     assert.throws(() => processJob(root, job, { extract: () => extraction() }));
-    const partial = readOutcome(root, "session-a");
-    assert.equal(partial.availability, "partial");
+    const partial = readOutcome(root, "session-a", "codex");
+    assert.equal(partial.attempt.publication.state, "partial");
     assert.equal(partial.attempt.extractors.codex.state, "succeeded");
     assert.equal(partial.attempt.publication.state, "partial");
     fs.rmSync(blocker, { recursive: true, force: true });
     const result = processJob(root, job, { extract: () => { throw new Error("must reuse"); } });
     assert.equal(result.reused, true);
-    assert.equal(readOutcome(root, "session-a").availability, "available");
+    assert.equal(readOutcome(root, "session-a", "codex").attempt.publication.state, "complete");
   });
 }
 
@@ -510,13 +511,13 @@ test("Codex missing transcript records input failure and stale attempts cannot r
   const input = { session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" };
   const { job } = enqueueCodexJob(input, { root });
   processJob(root, job, { extract: () => extraction() });
-  const outcome = readOutcome(root, "session-a").attempt;
+  const outcome = readOutcome(root, "session-a", "codex").attempt;
   const declined = processJob(root, { ...job, revision: { mtime_ms: job.revision.mtime_ms - 1, size: 0 }, transcript_path: `${transcript}.missing` });
   assert.equal(declined.declined, true);
-  assert.equal(readOutcome(root, "session-a").attempt.attempt_id, outcome.attempt_id);
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.attempt_id, outcome.attempt_id);
   fs.unlinkSync(transcript);
   assert.throws(() => processJob(root, job));
-  assert.equal(readOutcome(root, "session-a").attempt.extractors.codex.state, "input_failed");
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.extractors.codex.state, "input_failed");
 });
 
 test("Codex records raw invocation and output-validation evidence without parsing messages", (t) => {
@@ -524,7 +525,7 @@ test("Codex records raw invocation and output-validation evidence without parsin
   const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
   const extract = (session) => callCodexExtractor(session, { root, run: () => ({ status: 9, signal: null, stderr: "first\nraw failure\nlast" }) });
   assert.throws(() => processJob(root, job, { extract }));
-  let outcome = readOutcome(root, "session-a");
+  let outcome = readOutcome(root, "session-a", "codex");
   assert.equal(outcome.attempt.extractors.codex.evidence.status, 9);
   assert.equal(outcome.attempt.extractors.codex.evidence.stderr.text, "first\nraw failure\nlast");
   const malformed = (session) => callCodexExtractor(session, { root, run: (_bin, args) => {
@@ -532,7 +533,7 @@ test("Codex records raw invocation and output-validation evidence without parsin
     return { status: 0, stderr: "validation context" };
   } });
   assert.throws(() => processJob(root, job, { extract: malformed }));
-  outcome = readOutcome(root, "session-a");
+  outcome = readOutcome(root, "session-a", "codex");
   assert.equal(outcome.attempt.extractors.codex.state, "validation_failed");
   assert.equal(outcome.attempt.extractors.codex.evidence.stderr.text, "validation context");
 });
@@ -552,7 +553,7 @@ test("Codex source shrinking during extraction is reprocessed without publishing
     return extraction(calls === 1 ? "superseded" : "replacement");
   } });
   assert.equal(calls, 2);
-  assert.equal(readOutcome(root, "session-a").availability, "available");
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.publication.state, "complete");
   const catalog = JSON.parse(fs.readFileSync(path.join(root, "catalog", "session-a.json"), "utf8"));
   assert.equal(catalog.topic, "replacement");
 });
@@ -562,7 +563,161 @@ test("malformed Codex source is not a validated empty session", (t) => {
   fs.writeFileSync(transcript, "malformed JSONL\n");
   const queued = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
   processJob(root, queued.job, { extract: () => { throw new Error("must not extract without user messages"); } });
-  const result = readOutcome(root, "session-a");
-  assert.equal(result.availability, "failed");
+  const result = readOutcome(root, "session-a", "codex");
+  assert.equal(result.attempt.publication.state, "none");
   assert.equal(result.attempt.extractors.input.state, "input_failed");
+});
+
+for (const owner of [null, '{malformed', JSON.stringify({ pid: 0 }), JSON.stringify({ pid: -1 })]) {
+  test(`shared lock bounds recovery for invalid owner ${owner}`, (t) => {
+    const { root } = fixture(t);
+    const directory = path.join(root, '.locks', 'session-a');
+    fs.mkdirSync(directory, { recursive: true });
+    if (owner !== null) fs.writeFileSync(path.join(directory, 'owner.json'), owner);
+    assert.equal(takeSessionLock(root, 'session-a'), null);
+    fs.utimesSync(directory, new Date(0), new Date(0));
+    const release = takeSessionLock(root, 'session-a');
+    assert.equal(typeof release, 'function');
+    assert.equal(release.owned(), true);
+    release();
+    assert.equal(fs.existsSync(directory), false);
+  });
+}
+
+test('shared lock keeps live owners regardless of age and immediately recovers dead owners', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  const ownerPath = path.join(directory, 'owner.json');
+  fs.writeFileSync(ownerPath, JSON.stringify({ pid: process.pid }));
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  assert.equal(takeSessionLock(root, 'session-a'), null);
+  fs.writeFileSync(ownerPath, JSON.stringify({ pid: 2147483647 }));
+  const release = takeSessionLock(root, 'session-a');
+  assert.equal(typeof release, 'function');
+  release();
+});
+
+test('shared lock owner write failure cleans its own newly-created directory', (t) => {
+  const { root } = fixture(t);
+  const original = fs.writeFileSync;
+  const mock = t.mock.method(fs, 'writeFileSync', (...args) => {
+    if (String(args[0]).endsWith('/owner.json')) throw Object.assign(new Error('full'), { code: 'ENOSPC' });
+    return original(...args);
+  });
+  assert.throws(() => takeSessionLock(root, 'session-a'), { code: 'ENOSPC' });
+  assert.equal(fs.existsSync(path.join(root, '.locks', 'session-a')), false);
+  mock.mock.restore();
+  takeSessionLock(root, 'session-a')();
+});
+
+test('shared lock release preserves a same-PID successor with a different token', (t) => {
+  const { root } = fixture(t);
+  const release = takeSessionLock(root, 'session-a');
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.rmSync(directory, { recursive: true });
+  const successor = takeSessionLock(root, 'session-a');
+  assert.equal(release.owned(), false);
+  release();
+  assert.equal(successor.owned(), true);
+  successor();
+});
+
+test('shared stale takeover restores a successor replaced between identity check and rename', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const original = fs.renameSync;
+  let successorOwner;
+  let replaced = false;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (from === directory && !replaced) {
+      replaced = true;
+      fs.rmSync(directory, { recursive: true });
+      fs.mkdirSync(directory);
+      successorOwner = JSON.stringify({ pid: process.pid, token: 'successor' });
+      fs.writeFileSync(path.join(directory, 'owner.json'), successorOwner);
+    }
+    return original(from, to);
+  });
+  assert.equal(takeSessionLock(root, 'session-a'), null);
+  mock.mock.restore();
+  assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
+});
+
+test('shared stale lock contenders admit one owner until release', async (t) => {
+  const { base, root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const releasePath = path.join(base, 'release');
+  const moduleUrl = new URL('../skills/recollect/scripts/session-lock.mjs', import.meta.url).href;
+  const code = `import fs from 'node:fs'; import {takeSessionLock} from ${JSON.stringify(moduleUrl)};
+    const release = takeSessionLock(${JSON.stringify(root)}, 'session-a');
+    console.log(release ? 'owned' : 'busy');
+    if (release) { const timer = setInterval(() => { if (fs.existsSync(${JSON.stringify(releasePath)})) { release(); clearInterval(timer); } }, 10); setTimeout(() => { release(); process.exit(2); }, 5000).unref(); }`;
+  const children = Array.from({ length: 4 }, () => spawn(process.execPath, ['--input-type=module', '-e', code], { stdio: ['ignore', 'pipe', 'pipe'] }));
+  t.after(() => children.forEach((child) => child.kill()));
+  const completions = children.map((child) => new Promise((resolve) => child.on('exit', resolve)));
+  const states = await Promise.all(children.map((child) => new Promise((resolve, reject) => {
+    child.stdout.once('data', (chunk) => resolve(chunk.toString().trim()));
+    child.on('error', reject);
+    child.on('exit', (code) => { if (code) reject(new Error(`child exited ${code}`)); });
+  })));
+  assert.equal(states.filter((state) => state === 'owned').length, 1);
+  fs.writeFileSync(releasePath, 'release');
+  assert.deepEqual(await Promise.all(completions), [0, 0, 0, 0]);
+});
+
+test('Codex writer and outcome reader use one normalized session key', (t) => {
+  const { root, transcript } = fixture(t);
+  const sessionId = `session/${'a'.repeat(180)}`;
+  enqueueCodexJob({ session_id: sessionId, transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  assert.equal(runWorker(root, sessionId, { extract: () => extraction() }), true);
+  const result = readOutcome(root, sessionId, 'codex');
+  assert.equal(result.record_state, 'known');
+  assert.equal(result.attempt.publication.state, 'complete');
+  assert.equal(result.artifacts.length, 3);
+  assert.ok(result.artifacts.every((artifact) => artifact.verified));
+});
+
+test('shared lock failed owner write preserves a replacement directory', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  const original = fs.writeFileSync;
+  const successorOwner = JSON.stringify({ pid: process.pid, token: 'replacement' });
+  const mock = t.mock.method(fs, 'writeFileSync', (...args) => {
+    if (String(args[0]) === path.join(directory, 'owner.json')) {
+      fs.rmSync(directory, { recursive: true });
+      fs.mkdirSync(directory);
+      original(path.join(directory, 'owner.json'), successorOwner);
+      throw Object.assign(new Error('full'), { code: 'ENOSPC' });
+    }
+    return original(...args);
+  });
+  assert.throws(() => takeSessionLock(root, 'session-a'), { code: 'ENOSPC' });
+  mock.mock.restore();
+  assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
+});
+
+test('shared lock release rechecks the detached identity before deletion', (t) => {
+  const { root } = fixture(t);
+  const release = takeSessionLock(root, 'session-a');
+  const directory = path.join(root, '.locks', 'session-a');
+  const original = fs.renameSync;
+  const successorOwner = JSON.stringify({ pid: process.pid, token: 'replacement' });
+  let replaced = false;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (from === directory && !replaced) {
+      replaced = true;
+      fs.rmSync(directory, { recursive: true });
+      fs.mkdirSync(directory);
+      fs.writeFileSync(path.join(directory, 'owner.json'), successorOwner);
+    }
+    return original(from, to);
+  });
+  release();
+  mock.mock.restore();
+  assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
 });

@@ -1454,9 +1454,11 @@ it('ships an executable standalone capture-outcome reader with recollect', () =>
   const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'recollect-reader-package-'));
   try {
     const filename = path.join(root, 'hypomnesis-outcome.mjs');
-    fs.writeFileSync(filename, reader.data);
+    for (const entry of zipEntries.filter((entry) => entry.name.startsWith('recollect/scripts/'))) {
+      fs.writeFileSync(path.join(root, path.basename(entry.name)), entry.data);
+    }
     const result = JSON.parse(execFileSync(process.execPath, [filename, root, 'legacy-session'], { encoding: 'utf8' }));
-    assert.equal(result.availability, 'unknown');
+    assert.equal(result.record_state, 'unknown');
     assert.deepEqual(result.artifacts, []);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
