@@ -205,7 +205,7 @@ Phase 1 InferenceSettle (sense) → Internal analysis (derive K from R, the sett
 Phase 1 InferenceReadback (extension) → TextPresent+Proceed (relay K and its request/purpose basis beside the settled focus, including the prior-K comparison specified in Phase 1, before construction or K-dependent reassessment; no approval required)
 Phase 1 Map/AssessFit (observe) → artifact read, artifact search (domain structure and fit analysis, scoped by φ); external fetch (conditional: external domain knowledge)
 Phase 1 CheckRead (sense) → Internal analysis (no external tool; one Check per fit claim bearing on K, each naming what within its own scope would change it and who can reach that)
-Phase 1 RunChecks (observe) → artifact read, artifact search, external fetch, environment run (the AIReachable checks this activation can carry out, including exercising an artifact whose behavior the claim turns on; assess each cited ground against the claim and check scope, retain execution grounds in cited, and surface unmet UserHeld checks as their questions)
+Phase 1 RunChecks (observe) → artifact read, artifact search, external fetch, environment run (the AIReachable checks this activation can carry out, including exercising an artifact whose behavior the claim turns on; assess each cited ground against the claim and check scope, and retain execution grounds in cited)
 Phase 1 WarrantRead (track) → Internal state update (each claim's warrant read off the grounds actually cited; an unmet check leaves Open)
 Phase 1 Judge (track) → Internal state update (per inference: Licensed with limits, Blocked, or Undetermined with what is missing)
 Phase 1 PartitionRead (sense) → Internal analysis (conditional: self_grounding; supported reading within Phase 2, or its missing basis; no separate gate)
@@ -255,7 +255,7 @@ Skip AI-guided activation when what the mapping licenses is already settled in c
 
 Read code, configuration, documentation, and other available artifacts when the target domain is recorded there. When the relevant source or target structure exists primarily in external APIs, standards, scholarship, or industry material, fetch that evidence and keep its source address visible in the trace.
 
-Where a claim turns on what an artifact does rather than on what it says about itself, exercise it over the case that separates the readings and cite the result. A description of behavior is evidence of the contract its author claimed, not of the behavior, so a claim resting on the second stays unwarranted until the artifact has been run.
+Where a claim turns on what an artifact does rather than on what it says about itself, exercise it over the case that separates the readings and cite the result.
 
 ## Protocol
 
