@@ -11,7 +11,7 @@ import {
   isCodexTranscript,
   spawnWorker,
 } from "./hypomnesis-codex-write.mjs";
-import { STDERR_DETAIL_CHARS } from "./hypomnesis-write.mjs";
+import { readOutcome, formatOutcome, boundedText, beginAttempt, finishAttempt, errorEvidence, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,30 +36,6 @@ function runClaudeScript(name, raw, { scriptDir = SCRIPT_DIR } = {}) {
   });
 }
 
-// The writer emits one diagnostic line per failed extraction, and in the
-// spawn-failure class every extraction fails the same way at once — so the unit
-// this must not split is the line, not the stream. A character window over the
-// whole stream drops whole failures at its seam and leaves a fragment of the
-// last; a line window keeps each failure's identity and bounds the rest.
-const REPORT_MAX_LINES = 12;
-// One writer line at its full budget: the `[hypomnesis-write] <name> extraction
-// failed: ` prefix, the spawn message, the ` | child stderr: ` label, and the
-// detail. Derived from the writer's own budget rather than chosen beside it, so
-// raising one cannot silently outgrow the other.
-const REPORT_MAX_LINE_CHARS = STDERR_DETAIL_CHARS + 300;
-
-// Bounded by lines, each bounded in turn, with what was dropped stated rather
-// than left to look like the whole.
-function formatReport(stderr) {
-  const lines = String(stderr ?? "").trim().split("\n").filter((l) => l.trim() !== "");
-  const kept = lines.slice(-REPORT_MAX_LINES);
-  const dropped = lines.length - kept.length;
-  const body = kept
-    .map((l) => (l.length <= REPORT_MAX_LINE_CHARS ? l : `${l.slice(0, REPORT_MAX_LINE_CHARS)}…`))
-    .join("\n");
-  return dropped > 0 ? `[${dropped} earlier lines dropped]\n${body}` : body;
-}
-
 // A spawned writer's extraction/schema failures must leave a signal
 // somewhere; this is that signal. Hook-side work stays short and must not
 // fail the hook, so this never throws and never changes the caller's result.
@@ -70,7 +46,7 @@ function reportChildFailure(name, result) {
       process.stderr.write(`hypomnesis-dispatch: ${name} failed to spawn: ${result.error.message}\n`);
       return;
     }
-    const reported = formatReport(result.stderr);
+    const reported = String(result.stderr ?? "").trim() ? JSON.stringify(boundedText(result.stderr)) : "";
     if (result.status !== 0) {
       process.stderr.write(`hypomnesis-dispatch: ${name} exited ${result.status}: ${reported}\n`);
       return;
@@ -98,7 +74,31 @@ function dispatchHook(raw, options = {}) {
 
   if (!isClaudeTranscript(transcriptPath, options.env)) return { runtime: "unknown", handled: false };
   if (input.hook_event_name === "SessionEnd" || input.hook_event_name === "PreCompact") {
-    if (!options.noSpawn) reportChildFailure("hypomnesis-write.mjs", runClaudeScript("hypomnesis-write.mjs", raw, options));
+    if (!options.noSpawn) {
+      const root = path.join(path.dirname(transcriptPath), "hypomnesis");
+      const before = readOutcome(root, input.session_id);
+      const result = runClaudeScript("hypomnesis-write.mjs", raw, options);
+      let outcome = readOutcome(root, input.session_id);
+      const unchanged = outcome.attempt?.attempt_id === before.attempt?.attempt_id;
+      if (result.error || result.status !== 0) {
+        reportChildFailure("hypomnesis-write.mjs", result);
+        if (unchanged && before.attempt?.state !== "in_progress" && typeof input.session_id === "string" && /^[A-Za-z0-9_-]+$/.test(input.session_id)) {
+          let release;
+          try {
+            release = takeSessionLock(root, input.session_id);
+            if (!release || readOutcome(root, input.session_id).attempt?.attempt_id !== before.attempt?.attempt_id) throw new Error("another capture owns the session");
+            const stat = fs.statSync(transcriptPath);
+            const attempt = beginAttempt(root, input.session_id, { runtime: "claude", source_transcript: transcriptPath,
+              source_event: input.hook_event_name, revision: { mtime_ms: Math.floor(stat.mtimeMs), size: stat.size } });
+            const error = Object.assign(result.error || new Error("writer process failed"), { stderr: result.stderr, status: result.status, signal: result.signal });
+            finishAttempt(root, attempt, { state: "complete", extractors: { writer: { state: "invocation_failed", evidence: errorEvidence(error) } },
+              publication: { state: "none", artifacts: [] } });
+            outcome = readOutcome(root, input.session_id);
+          } catch {} finally { release?.(); }
+        }
+      } else if (unchanged) reportChildFailure("hypomnesis-write.mjs", result);
+      if (outcome.attempt) process.stderr.write(`hypomnesis-dispatch: persisted ${formatOutcome(outcome)}\n`);
+    }
     return { runtime: "claude", handled: true };
   }
   if (input.hook_event_name === "SubagentStop") {
@@ -111,9 +111,6 @@ function dispatchHook(raw, options = {}) {
 export {
   dispatchHook,
   isClaudeTranscript,
-  formatReport,
-  REPORT_MAX_LINES,
-  REPORT_MAX_LINE_CHARS,
 };
 
 let isMain = true;

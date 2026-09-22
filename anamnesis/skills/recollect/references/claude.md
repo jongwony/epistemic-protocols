@@ -15,6 +15,10 @@ Bind `Candidate.runtime = claude`. Bind the remaining candidate fields from INDE
 
 Claude partitions INDEX by project slug. A cross-cwd scan reaches the canonical partition selected by the session transcript rather than searching cwd-scattered copies.
 
+## Capture outcome binding
+
+- Before reading capture outcomes for the sessions Find actually scanned, read `capture-outcome.md`. Bind its transcript filename or INDEX frontmatter for the session ID and `{config_dir}/projects/{record-slug}/hypomnesis`, using each scanned record or INDEX entry's own project partition for `{store-root}`.
+
 ## Spine tier
 
 `SSOT_spine` joins the initial scan alongside the INDEX. Unlike the INDEX lookup, the spine scan is **not** slug-partitioned — it reaches every project directory under `{config_dir}/projects/`. A session whose working directory has since been removed keeps its record under a partition that no current cwd selects, so a partitioned spine scan would make exactly the sessions hardest to recall the ones it cannot see.

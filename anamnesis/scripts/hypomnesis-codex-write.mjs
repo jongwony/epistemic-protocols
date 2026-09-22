@@ -16,6 +16,8 @@ import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { beginAttempt, finishAttempt, captureArtifacts, errorEvidence, readOutcome } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = path.dirname(SCRIPT_PATH);
 const SCHEMA_PATH = path.join(SCRIPT_DIR, "hypomnesis-codex-schema.json");
@@ -87,8 +89,20 @@ function enqueueCodexJob(input, { root = resolveStoreRoot() } = {}) {
   const transcriptPath = input?.transcript_path;
   if (!EVENTS.has(event) || !sessionId || !isCodexTranscript(transcriptPath)) return null;
 
-  const revision = statRevision(transcriptPath);
-  if (!revision) return null;
+  let revision;
+  let inputError;
+  try { revision = statRevision(transcriptPath); }
+  catch (error) { inputError = error; }
+  if (!revision) {
+    const lockDir = path.join(root, ".locks", safeId(sessionId));
+    fs.mkdirSync(path.dirname(lockDir), { recursive: true });
+    if (!acquireLock(lockDir)) return null;
+    try {
+      const attempt = beginAttempt(root, sessionId, { runtime: "codex", revision: null, source_transcript: transcriptPath, source_event: event });
+      if (attempt) finishAttempt(root, attempt, { state: "complete", extractors: { codex: { state: "input_failed", reason: "transcript unavailable", ...(inputError ? { evidence: errorEvidence(inputError) } : {}) } }, publication: { state: "none", artifacts: [] } });
+    } finally { fs.rmSync(lockDir, { recursive: true, force: true }); }
+    return null;
+  }
   const jobDir = path.join(root, ".queue", safeId(sessionId));
   fs.mkdirSync(jobDir, { recursive: true });
   const job = {
@@ -292,11 +306,13 @@ function callCodexExtractor(session, { root, run = spawnSync }) {
       maxBuffer: 8 * 1024 * 1024,
       stdio: ["ignore", "pipe", "pipe"],
     });
-    if (result.error) throw result.error;
-    if (result.status !== 0) {
-      throw new Error(`codex exec exited ${result.status}: ${(result.stderr ?? "").slice(-2000)}`);
+    if (result.error || result.status !== 0) {
+      throw Object.assign(result.error || new Error(`codex exec exited ${result.status}`), {
+        stage: "invocation_failed", stderr: result.stderr, status: result.status, signal: result.signal,
+      });
     }
-    return JSON.parse(fs.readFileSync(outputPath, "utf8"));
+    try { return JSON.parse(fs.readFileSync(outputPath, "utf8")); }
+    catch (error) { throw Object.assign(error, { stage: "validation_failed", stderr: result.stderr }); }
   } finally {
     fs.rmSync(workDir, { recursive: true, force: true });
   }
@@ -451,40 +467,126 @@ function publishRecord(root, job, record) {
   return true;
 }
 
+function validateExtraction(value) {
+  const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
+  const check = (item, rule, location) => {
+    const type = Array.isArray(item) ? "array" : item === null ? "null" : typeof item;
+    if (type !== rule.type) throw new Error(`${location}: expected ${rule.type}`);
+    if (type === "object") {
+      for (const key of rule.required || []) if (!Object.hasOwn(item, key)) throw new Error(`${location}.${key}: required`);
+      for (const key of Object.keys(item)) {
+        if (!rule.properties[key]) throw new Error(`${location}.${key}: unexpected property`);
+        check(item[key], rule.properties[key], `${location}.${key}`);
+      }
+    }
+    if (type === "array") {
+      if (item.length > rule.maxItems) throw new Error(`${location}: exceeds maxItems`);
+      item.forEach((entry, index) => check(entry, rule.items, `${location}[${index}]`));
+    }
+  };
+  try { check(value, schema, "extraction"); }
+  catch (error) { throw Object.assign(error, { stage: "validation_failed" }); }
+  return value;
+}
+
+function hasSemanticContent(value) {
+  if (typeof value === "string") return value.trim().length > 0;
+  return value && typeof value === "object" && Object.values(value).some(hasSemanticContent);
+}
+
+function publicationArtifacts(root, job, tolerateMissing = false) {
+  return [
+    path.join(root, safeId(job.session_id), "generations", revisionKey(job.revision), "record.json"),
+    path.join(root, "catalog", `${safeId(job.session_id)}.json`),
+    path.join(root, safeId(job.session_id), "current.json"),
+  ].flatMap((filename) => {
+    try {
+      const value = JSON.parse(fs.readFileSync(filename, "utf8"));
+      if (compareRevision(value.revision, job.revision) !== 0) return [];
+      return captureArtifacts([filename]);
+    } catch (error) {
+      if (tolerateMissing) return [];
+      throw error;
+    }
+  });
+}
+
 function processJob(root, job, { extract = callCodexExtractor } = {}) {
-  const before = statRevision(job.transcript_path);
-  if (!before) throw new Error("transcript disappeared before extraction");
-  // Any difference, not only growth: a truncated or replaced transcript is a
-  // different source than the one queued, and extracting it under the queued
-  // revision would publish a partial record as that revision's own.
-  if (compareRevision(before, job.revision) !== 0) {
+  let queuedSource;
+  try { queuedSource = statRevision(job.transcript_path); } catch {}
+  if (queuedSource && compareRevision(queuedSource, job.revision) !== 0) {
     const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
     return { stale: true, requeued: requeued?.path ?? null };
   }
-
-  const existingRecord = readGenerationRecord(root, job);
-  if (existingRecord) {
-    const published = publishRecord(root, job, existingRecord);
-    return { published, declined: !published, reused: true };
-  }
-
-  const session = parseCodexRollout(job.transcript_path);
-  const parseCounts = { skipped_lines: session.skipped_lines, unverified_user_turns: session.unverified_user_turns };
-  if (session.user_messages.length === 0) return { empty: true, ...parseCounts };
-  const extraction = extract(session, { root, job });
-  const record = recordFor(job, session, extraction);
-
-  const after = statRevision(job.transcript_path);
-  if (compareRevision(after, job.revision) !== 0) {
+  const attempt = beginAttempt(root, job.session_id, {
+    runtime: "codex", revision: job.revision,
+    source_transcript: job.transcript_path, source_event: job.hook_event_name,
+  });
+  if (!attempt) return { published: false, declined: true };
+  const extractors = {};
+  let publishing = false;
+  const finish = (result, publication = { state: "none", artifacts: [] }) => {
+    if (attempt) finishAttempt(root, attempt, { state: result.stale || result.declined ? "superseded" : "complete", extractors, publication });
+    return result;
+  };
+  const supersede = (counts = {}) => {
+    extractors.codex ||= { state: "skipped", reason: "source revision changed" };
+    finish({ stale: true });
     const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true, requeued: requeued?.path ?? null, ...parseCounts };
+    return { stale: true, requeued: requeued?.path ?? null, ...counts };
+  };
+  const publish = (record, extra) => {
+    publishing = true;
+    const published = publishRecord(root, job, record);
+    return finish({ published, declined: !published, ...extra }, {
+      state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job) : [],
+    });
+  };
+  try {
+    let before;
+    try { before = statRevision(job.transcript_path); }
+    catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    if (!before) throw Object.assign(new Error("transcript disappeared before extraction"), { stage: "input_failed" });
+    if (compareRevision(before, job.revision) !== 0) return supersede();
+
+    const existingRecord = readGenerationRecord(root, job);
+    if (existingRecord) {
+      const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
+      validateExtraction(Object.fromEntries(Object.keys(schema.properties).map((key) => [key, existingRecord[key]])));
+      extractors.codex = { state: hasSemanticContent(Object.fromEntries(Object.keys(schema.properties).map((key) => [key, existingRecord[key]]))) ? "succeeded" : "empty", reason: "reused immutable generation" };
+      return publish(existingRecord, { reused: true });
+    }
+
+    let session;
+    try { session = parseCodexRollout(job.transcript_path); }
+    catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    const parseCounts = { skipped_lines: session.skipped_lines, unverified_user_turns: session.unverified_user_turns };
+    if (session.skipped_lines > 0) extractors.input = { state: "input_failed", reason: "malformed JSONL input" };
+    if (session.user_messages.length === 0) {
+      extractors.codex = { state: "empty", reason: "no user messages" };
+      return finish({ empty: true, ...parseCounts });
+    }
+    const extraction = validateExtraction(extract(session, { root, job }));
+    extractors.codex = { state: hasSemanticContent(extraction) ? "succeeded" : "empty" };
+    const record = recordFor(job, session, extraction);
+    const after = statRevision(job.transcript_path);
+    if (compareRevision(after, job.revision) !== 0) return supersede(parseCounts);
+    const latest = chooseLatestJob(readJobs(root, job.session_id));
+    if (latest && compareRevision(latest.revision, job.revision) > 0) return finish({ stale: true, ...parseCounts });
+    return publish(record, { record, ...parseCounts });
+  } catch (error) {
+    let artifacts = [];
+    let artifactError;
+    if (publishing) {
+      try { artifacts = publicationArtifacts(root, job, true); }
+      catch (failure) { artifactError = errorEvidence(failure); }
+    } else extractors.codex = { state: error.stage || "invocation_failed", evidence: errorEvidence(error) };
+    if (attempt) finishAttempt(root, attempt, {
+      state: "complete", extractors,
+      publication: { state: publishing ? (artifacts.length ? "partial" : "failed") : "none", artifacts, ...(publishing ? { evidence: errorEvidence(error), ...(artifactError ? { artifact_error: artifactError } : {}) } : {}) },
+    });
+    throw error;
   }
-  const latest = chooseLatestJob(readJobs(root, job.session_id));
-  if (latest && compareRevision(latest.revision, job.revision) > 0) return { stale: true, ...parseCounts };
-  const published = publishRecord(root, job, record);
-  // A false here is the pointer declining an older revision, which is the
-  // forward-only contract working, not a no-op — the two must not report alike.
-  return { published, declined: !published, record, ...parseCounts };
 }
 
 function runWorker(root, sessionId, options = {}) {
@@ -513,6 +615,12 @@ function runWorker(root, sessionId, options = {}) {
       } catch (error) {
         const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
         failureCounts.set(job._path, failureCount);
+        const failedAttempt = readOutcome(root, job.session_id).attempt;
+        if (failedAttempt && compareRevision(failedAttempt.revision, job.revision) === 0) {
+          finishAttempt(root, failedAttempt, {
+            retry: { failures: failureCount, disposition: failureCount < 2 ? "pending" : "quarantined" },
+          });
+        }
         if (failureCount < 2) {
           log(root, sessionId, `failed ${job._path} (retry ${failureCount}): ${error.stack ?? error.message}`);
           continue;

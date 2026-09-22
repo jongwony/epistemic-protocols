@@ -1446,3 +1446,17 @@ describe('packaged discovery metadata', () => {
     assert.deepEqual(offenders, [], `over ${DESCRIPTION_LIMIT}-char discovery limit: ${offenders.join('; ')}`);
   });
 });
+
+it('ships an executable standalone capture-outcome reader with recollect', () => {
+  const { zipEntries } = buildSkillArtifact({ dir: 'anamnesis', skill: 'recollect' });
+  const reader = zipEntries.find((entry) => entry.name === 'recollect/scripts/hypomnesis-outcome.mjs');
+  assert.ok(reader, 'the runtime reference requires the reader in the release artifact');
+  const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'recollect-reader-package-'));
+  try {
+    const filename = path.join(root, 'hypomnesis-outcome.mjs');
+    fs.writeFileSync(filename, reader.data);
+    const result = JSON.parse(execFileSync(process.execPath, [filename, root, 'legacy-session'], { encoding: 'utf8' }));
+    assert.equal(result.availability, 'unknown');
+    assert.deepEqual(result.artifacts, []);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});

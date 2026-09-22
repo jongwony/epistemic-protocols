@@ -22,6 +22,24 @@ Claude Code and Codex compact indexes are searched concurrently when both are av
 
 The shared plugin hook records Codex Stop, PreCompact, and SessionEnd events with a fire-and-forget queue under `$CODEX_HOME/hypomnesis`. A detached worker coalesces events by transcript revision, extracts one compact record with `gpt-5.6-luna` at `xhigh`, writes an immutable generation, and atomically advances the session pointer. Nested extraction runs are ephemeral with hooks disabled. `agents/openai.yaml` provides skill discovery metadata; hook registration stays in `hooks/hooks.json`.
 
+### Capture availability
+
+Capture records the latest attempt separately from the semantic index. `/recollect` reads that outcome for the sessions searched, so a validated empty extraction, a failed or unfinished attempt, partial publication, and retained older output can be explained at the source where they occurred. An outcome that is absent or cannot be read remains unknown; existing indexes still participate in recall.
+
+```text
+Session record → extraction → validated semantic artifacts → recall candidates
+                     └──────→ capture outcome ────────────→ search qualification
+Session record ─────────────────────────────────────────→ recognition evidence
+```
+
+Capture outcomes live in `.outcomes/` beneath each runtime's Hypomnesis store and are excluded from semantic search. The [shared outcome reader](skills/recollect/scripts/hypomnesis-outcome.mjs) verifies the recorded publication; the [runtime reading contract](skills/recollect/references/capture-outcome.md) explains its use. Capture availability describes execution and publication. `source_scan` separately describes how much source reached extraction; neither establishes that an index is semantically complete.
+
+From the repository root, exercise the producer and reader together:
+
+```bash
+node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs
+```
+
 ### Difference from Other Protocols
 
 | Protocol | Initiator | Type Signature |

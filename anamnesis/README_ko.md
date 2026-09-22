@@ -22,6 +22,24 @@ Claude Code와 Codex의 compact index가 모두 있으면 병렬로 검색하고
 
 공유 플러그인 훅은 Codex의 Stop, PreCompact, SessionEnd 이벤트를 `$CODEX_HOME/hypomnesis` 아래 fire-and-forget queue에 기록합니다. 분리된 worker는 transcript revision별로 이벤트를 합치고 `gpt-5.6-luna`를 `xhigh`로 실행해 compact record 하나를 추출한 다음, immutable generation을 쓰고 session pointer를 원자적으로 전환합니다. 중첩 추출은 ephemeral이며 hooks를 비활성화합니다. `agents/openai.yaml`은 skill discovery metadata만 제공하고, 훅 등록은 `hooks/hooks.json`에 남습니다.
 
+### 캡처 결과와 읽기 가능성
+
+캡처는 최신 시도의 결과를 의미 인덱스와 별도로 기록합니다. `/recollect`는 검색한 세션의 결과를 읽어, 검증된 빈 추출·실패하거나 미완료인 시도·부분 발행·이전 발행물의 보존을 해당 출처에 맞춰 설명합니다. 결과 기록이 없거나 읽을 수 없으면 상태 미상으로 남으며, 기존 인덱스는 계속 회상에 참여합니다.
+
+```text
+세션 원기록 → 추출 → 검증된 의미 산출물 → 회상 후보
+                └→ 캡처 결과 ─────────→ 검색 범위의 한계 설명
+세션 원기록 ──────────────────────────→ 인지의 근거
+```
+
+캡처 결과는 각 런타임의 Hypomnesis 저장소 아래 `.outcomes/`에 있으며 의미 검색에서 제외됩니다. [공유 결과 리더](skills/recollect/scripts/hypomnesis-outcome.mjs)가 기록된 발행물을 검증하고, [런타임 읽기 계약](skills/recollect/references/capture-outcome.md)이 그 사용법을 정합니다. 캡처 결과는 실행과 발행을 설명합니다. `source_scan`은 별도로 원본이 추출기에 얼마나 도달했는지를 설명하며, 어느 쪽도 의미 인덱스의 완전성을 보장하지 않습니다.
+
+저장소 루트에서 생산과 읽기를 함께 검증합니다.
+
+```bash
+node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs
+```
+
 ### 다른 프로토콜과의 차이
 
 | 프로토콜 | 개시자 | 타입 시그니처 |

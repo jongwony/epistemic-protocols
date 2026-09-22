@@ -1,6 +1,6 @@
 # Failure modes — cause, detection, recovery
 
-Read when a find returns zero candidates, when a presented candidate is corrected despite a scan match, or when `INDEX_semantic` is empty. This is the operative body of the `── KNOWN FAILURE MODES ──` formal block: runtime-normative contract, not commentary. The mode names stay in `SKILL.md` so a mode is recognizable without a read; cause, detection, and recovery live here.
+Read when a find returns zero candidates, when a presented candidate is corrected despite a scan match, when `INDEX_semantic` is empty, or when a capture outcome qualifies the searched scope. This is the operative body of the `── KNOWN FAILURE MODES ──` formal block: runtime-normative contract, not commentary. The mode names stay in `SKILL.md` so a mode is recognizable without a read; cause, detection, and recovery live here.
 
 ```
 ── KNOWN FAILURE MODES ──
@@ -22,7 +22,7 @@ SidechainNoSSOT   : scan_entropy(Store, trace) ≠ ∅ via INDEX_substitute ∧ 
                     -- recovery: the id is not independently resumable (no top-level record of its own); read the orchestrating parent from the substitute record (backtrace_parent → parent_pointer, parent_cwd) and offer the parent as the resumable candidate; when the parent's record has aged out, mark non-resumable and surface the recoverable artifacts (substitute record + memory)
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
-                    -- cause: literal absent from the searched scope. A miss confined to the index-and-spine depth points at pre-store, lifecycle gap, queued/failed writer, or extractor omission — but note the spine tier survives all four, since it reads the record itself, so a spine miss narrows the cause to the literal never appearing in a record head
+                    -- cause: literal absent from the searched scope. Use Λ.capture for any claim about capture execution; an unknown outcome leaves that cause unknown. Spine matching remains independent of semantic-index availability, and its miss establishes only no match in the heads actually read
                     -- recovery: the open question on a first miss (a correction already counts as the round-trip), then StoreExpansion; after accepted full-text exhaustion, offer Aitesis handoff with accumulated trace
 
 NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
