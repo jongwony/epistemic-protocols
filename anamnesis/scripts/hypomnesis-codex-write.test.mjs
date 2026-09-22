@@ -646,17 +646,29 @@ test('shared stale takeover restores a successor replaced between identity check
   assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
 });
 
-test('shared stale lock contenders admit one owner until release', async (t) => {
+test('shared stale lock contenders preserve mutual exclusion and recover after backoff', async (t) => {
   const { base, root } = fixture(t);
   const directory = path.join(root, '.locks', 'session-a');
   fs.mkdirSync(directory, { recursive: true });
   fs.utimesSync(directory, new Date(0), new Date(0));
   const releasePath = path.join(base, 'release');
+  const criticalPath = path.join(base, 'critical');
   const moduleUrl = new URL('../skills/recollect/scripts/session-lock.mjs', import.meta.url).href;
   const code = `import fs from 'node:fs'; import {takeSessionLock} from ${JSON.stringify(moduleUrl)};
     const release = takeSessionLock(${JSON.stringify(root)}, 'session-a');
-    console.log(release ? 'owned' : 'busy');
-    if (release) { const timer = setInterval(() => { if (fs.existsSync(${JSON.stringify(releasePath)})) { release(); clearInterval(timer); } }, 10); setTimeout(() => { release(); process.exit(2); }, 5000).unref(); }`;
+    if (release) {
+      if (!release.owned()) throw new Error('acquisition lost ownership');
+      fs.writeFileSync(${JSON.stringify(criticalPath)}, String(process.pid), {flag:'wx'});
+      console.log('owned');
+      const timer = setInterval(() => {
+        if (fs.existsSync(${JSON.stringify(releasePath)})) {
+          if (!release.owned()) throw new Error('live owner replaced during contention');
+          fs.unlinkSync(${JSON.stringify(criticalPath)});
+          release(); clearInterval(timer);
+        }
+      }, 10);
+      setTimeout(() => { release(); process.exit(2); }, 5000).unref();
+    } else console.log('busy');`;
   const children = Array.from({ length: 4 }, () => spawn(process.execPath, ['--input-type=module', '-e', code], { stdio: ['ignore', 'pipe', 'pipe'] }));
   t.after(() => children.forEach((child) => child.kill()));
   const completions = children.map((child) => new Promise((resolve) => child.on('exit', resolve)));
@@ -665,9 +677,18 @@ test('shared stale lock contenders admit one owner until release', async (t) => 
     child.on('error', reject);
     child.on('exit', (code) => { if (code) reject(new Error(`child exited ${code}`)); });
   })));
-  assert.equal(states.filter((state) => state === 'owned').length, 1);
+  assert.ok(states.every((state) => state === 'owned' || state === 'busy'));
+  assert.ok(states.filter((state) => state === 'owned').length <= 1);
   fs.writeFileSync(releasePath, 'release');
   assert.deepEqual(await Promise.all(completions), [0, 0, 0, 0]);
+  assert.equal(fs.existsSync(criticalPath), false);
+  const recovered = takeSessionLock(root, 'session-a');
+  assert.ok(recovered, 'settled contention must permit a subsequent acquisition');
+  try {
+    assert.equal(recovered.owned(), true);
+    assert.equal(takeSessionLock(root, 'session-a'), null, 'a recovered live owner must exclude another claimant');
+  } finally { recovered(); }
+  assert.equal(fs.existsSync(directory), false);
 });
 
 test('Codex writer and outcome reader use one normalized session key', (t) => {
