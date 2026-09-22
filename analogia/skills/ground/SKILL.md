@@ -38,9 +38,10 @@ R
   → read_partition(fit_map, Sₜ, warrant, context) -- derive a member partition only where its full allocation and grouping are supported; otherwise report the missing basis (self-grounding only)
   → assemble(mapping, fit_map, K, warrant, checks, verdicts) -- the whole assessment: every correspondence with its fit claim, what warrants it, what would defeat it, and what the verdicts turn on
   → surface(assessment)                -- present and proceed; the reader is not asked to adjudicate what the evidence has not settled
-  → interpret_turn(user_utterance, assessment, context) → T -- read a cited ground, an adoption, a withdrawal, or an open turn from the user's natural next move
-  → integrate_turn(T, Λ)               -- preserve each discernible act; evidence and questions re-enter the earliest changed dependency, while preferences remain separate
-  → MappingAssessment
+  → MappingAssessment                -- when Phase 2 and LOOP return a converged result; their other branches re-enter an affected dependency or return Inconclusive
+[a later utterance addresses the assessment]
+  → interpret_turn(user_utterance, assessment, context) → T
+  → integrate_turn(T, Λ)               -- preserve each discernible act and follow Phase 3's conditional reassessment or preference/exploration path
 requires: uncertain(licenses(mapping(Sₐ, Sₜ)))  -- runtime checkpoint (Phase 0)
 deficit:  MappingUncertain               -- activation precondition (Layer 1/2)
 preserves: content_identity(R)           -- output content invariant; assessment recorded in R'
@@ -105,7 +106,9 @@ warrant_of(Λ) : Map(FitClaim → Warrant) = for each x ∈ fit_claims(F):
   Open(outside this audit's checked inferences) when x has no check
              -- Evidence-bearing warrant is read off check state; unassessed peripheral claims remain Open without adding checks beyond K. A Cite reaches warrant through run_checks.
 Verdict  = Licensed(Grounds, limits: String) ∪ Blocked(Grounds) ∪ Undetermined(missing: String)
-             -- Judge reads how the grounds of bearing fit claims affect the INFERENCE: Licensed requires support for its transfer and joint consistency, Blocked requires a decisive ground against that transfer, and Undetermined names the remaining gap. A Supported warrant affirms its fit label; supporting Overextended or Missing can therefore block a transfer. A defeated fit label alone licenses no opposite conclusion. Licensed derives its limits from the supporting grounds and their checked scopes, and states only the jointly supported reach.
+             -- For each k, Licensed requires grounds supporting the whole requested inference at its requested scope, with joint consistency, and a met check (Survived or Failed) for every x ∈ fit_claims(F) where bears_on(x, {k}). Met checks are necessary, not sufficient: Judge must establish that their grounds support k. Limits describe that supported reach; support for a narrower question leaves the requested k Undetermined.
+             -- Blocked requires a decisive ground against k and can stand while other checks remain unmet. Otherwise a missing required check leaves k Undetermined. Claims irrelevant to k do not block its Licensed verdict.
+             -- Warrant affirms or defeats a FIT LABEL: supported Overextended or Missing may block a transfer; a defeated negative label alone supplies no positive support. Judge reads the grounds' bearing on k, not a mechanical label-to-verdict polarity.
 A        = Map(Inference → Verdict)
 Judge    = K × Λ → A
 converged(K, A) ≡ domain(A) = K ∧ ∀ k ∈ K : A[k] ∈ Licensed(_, _) ∪ Blocked(_)
@@ -164,7 +167,7 @@ If no relevant text exists: pause activation and request a grounding target befo
 Phase 0: R → Detect(R) → uncertain? ∧ classify self_grounding
        [¬uncertain] ZeroGapRelay: present the finding with its reasoning and proceed with R unchanged; no assessment is constructed [Tool]
 Phase 1: enter at the earliest affected dependency, carrying the utterance and cited grounds as context:
-       Settlement: (Sₐ, Sₜ) → derive_focus_candidates → candidates → settle_focus → φₚ → [focus_settled(φₚ): FocusReadback(φₚ) → φ' := φₚ | otherwise: Qc(candidates) → Stop → FocusAnswer → (Select(φₛ): φ' := φₛ | Reframe(d): [¬pair_committed: re-decompose and re-enter settlement | pair_committed ∧ replaces a domain: Λ.superseded_by := Some(d) → DomainSuperseded | otherwise: re-enter candidate derivation]), recheck focus_settled] → K' := settle_inferences(R, φ', context). If deriving K' reveals an unsettled purpose, re-enter focus settlement; otherwise InferenceReadback(φ', K') presents the requested inferences and their basis in the request, settled purpose and context before proceeding [Tool]
+       Settlement: (Sₐ, Sₜ) → derive_focus_candidates → candidates → settle_focus → φₚ → [focus_settled(φₚ): FocusReadback(φₚ) → φ' := φₚ | otherwise: Qc(candidates) → Stop → FocusAnswer → (Select(φₛ): φ' := φₛ | Reframe(d): [¬pair_committed: re-decompose and re-enter settlement | pair_committed ∧ replaces a domain: Λ.superseded_by := Some(d) → DomainSuperseded | otherwise: re-enter candidate derivation]), recheck focus_settled] → K' := settle_inferences(R, φ', context). If deriving K' reveals an unsettled purpose, re-enter focus settlement; otherwise InferenceReadback(φ', K') presents the requested inferences and their basis in the request, settled purpose and context before proceeding. When Λ.inferences already holds a prior K, compare before replacement: show additions, removals or reformulations with their request/purpose basis. A removed unresolved inference stays unanswered outside the revised scope. A narrowing without that basis returns to purpose settlement with the existing K intact. Keep this readback available in context for the current trace [Tool]
        After settlement: [a current M and F exist and φ' plus the mapping/fit basis are unchanged: inferences := Some(K') ; checks := ∅ ; warrant := {} ; verdicts := {} ; assessment := None ; partition_reading := None → evidence assessment | otherwise: reconstruction admission]
        Reconstruction admission: when settlement was skipped, φ' and K' retain the current focus and inferences. Before constructing or revising the current focus, M or F, [attempts_exhausted(Λ): Inconclusive(cap), report the requested revision separately from the last assessment | otherwise: attempts := attempts + 1]
        Reconstruction: assessment := None ; partition_reading := None → [the current focus and correspondence basis are unchanged: inferences := Some(K') ; retain M | otherwise: invalidate_derived(Λ) → focus := Some(φ') ; inferences := Some(K') → Map(Sₐ, Sₜ, φ', context) → M → carry_over(M)]. In either case AssessFit(M, Sₐ, Sₜ, context) → F → fit_map := Some(F) → evidence assessment [Tool]
@@ -189,17 +192,17 @@ Each pass reports MappingAssessment when the requested inferences converge, othe
 
 ── CONVERGENCE ──
 converged(K, A): every intended inference carries a Licensed or a Blocked verdict, each with its grounds — see TYPES.
-Convergence evidence: present the transformation trace — for each k ∈ K, one pair (MappingUncertain(k) → verdict(k)) showing the correspondences it rode on, the warrant each of those carried, and, for Licensed, the limits. For each checked fit claim, show its label, warrant and Check.scope beside the grounds, the stated defeater, available reach or its absence, and whether the check was unmet, survived or failed. An unmet check is reported as unmet, never as a pass. A claim whose warrant is Open is named Open rather than described as weakly supported. Preference is reported separately from warrant and never as a reason for a verdict. State the committed domain pair once and the comparison focus once. When self_grounding holds, append the supported PartitionReading with its grounds and routing, or state why its basis remains unresolved and route no partition action. On an Inconclusive close, retain that trace with every Undetermined verdict naming what is missing. At cap, identify the requested revision as unassessed and label any retained assessment by its earlier focus and K. Convergence is demonstrated, not asserted.
+Convergence evidence: present the transformation trace — for each k ∈ K, one pair (MappingUncertain(k) → verdict(k)) showing the correspondences it rode on, the warrant each of those carried, and, for Licensed, the limits. For each checked fit claim, show its label, warrant and Check.scope beside the grounds, the stated defeater, available reach or its absence, and whether the check was unmet, survived or failed. An unmet check is reported as unmet, never as a pass. A claim whose warrant is Open is named Open rather than described as weakly supported. Preference is reported separately from warrant and never as a reason for a verdict. State the committed domain pair, comparison focus, and current K with its request/purpose basis. Carry any K change shown by the readback into this trace, distinguishing questions removed from scope from questions answered. When self_grounding holds, append the supported PartitionReading with its grounds and routing, or state why its basis remains unresolved and route no partition action. On an Inconclusive close, retain that trace with every Undetermined verdict naming what is missing. At cap, identify the requested revision as unassessed and label any retained assessment by its earlier focus and K. Convergence is demonstrated, not asserted.
 
 ── TOOL GROUNDING ──
--- Realization: Extension → TextPresent+Proceed; Constitution → present + Stop
+-- Realization: Extension → TextPresent+Proceed; Constitution → TextPresent+Stop
 Phase 0 Detect  (sense)     → Internal analysis (no external tool; also classify self_grounding)
 Phase 0 ZeroGapRelay (extension) → TextPresent+Proceed (conditional: ¬uncertain; the finding with its reasoning; proceed with R unchanged)
 Phase 1 FocusDerive (sense) → Internal analysis (no external tool)
 Phase 1 FocusReadback (extension) → TextPresent+Proceed (conditional: focus_settled(φₚ) holds PER FIELD; relay φₚ, no gate)
 Phase 1 FocusSelector (constitution) → present (conditional: ¬focus_settled(φₚ); candidate MappingFocus options with the Select/Reframe consequences specified in Phase 1 visible before choice, including the committed-domain replacement exit)
 Phase 1 InferenceSettle (sense) → Internal analysis (derive K from R, the settled purpose and context; an unresolved purpose returns to focus settlement)
-Phase 1 InferenceReadback (extension) → TextPresent+Proceed (relay K and its request/purpose basis beside the settled focus before construction or K-dependent reassessment; no approval required)
+Phase 1 InferenceReadback (extension) → TextPresent+Proceed (relay K and its request/purpose basis beside the settled focus, including the prior-K comparison specified in Phase 1, before construction or K-dependent reassessment; no approval required)
 Phase 1 Map/AssessFit (observe) → artifact read, artifact search (domain structure and fit analysis, scoped by φ); external fetch (conditional: external domain knowledge)
 Phase 1 CheckRead (sense) → Internal analysis (no external tool; one Check per fit claim bearing on K, each naming what within its own scope would change it and who can reach that)
 Phase 1 RunChecks (observe) → artifact read, artifact search, external fetch, environment run (the AIReachable checks this activation can carry out, including exercising an artifact whose behavior the claim turns on; assess each cited ground against the claim and check scope, retain execution grounds in cited, and surface unmet UserHeld checks as their questions)
@@ -258,7 +261,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 ### User-facing realization
 
-Before assessing, read back the intended conclusions beside the comparison focus and cite the request or settled purpose they come from. At FocusSelector, show each option's consequence from Phase 1 before asking: a reframe within the committed pair revises that comparison, while replacing a committed domain ends this audit and starts a new question.
+Before assessing, read back the intended conclusions beside the comparison focus and cite the request or settled purpose they come from. When that question changes, show what was added, removed or reformulated and why; a removed unanswered question is outside the revised scope, not resolved. At FocusSelector, show each option's consequence from Phase 1 before asking: a reframe within the committed pair revises that comparison, while replacing a committed domain ends this audit and starts a new question.
 
 Present the whole assessment in everyday language: the comparison focus; what the mapping is being asked to license; every correspondence with its fit claim, one concrete scenario, and what actually warrants that claim; and for each intended inference, whether it holds, is blocked, or is undetermined, with how far it reaches.
 
@@ -274,9 +277,9 @@ Read `references/round-composition.md` before composing when terminology must re
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | One inference, one obvious correspondence | Brief assessment: the verdict, what warrants it, its limit |
-| Medium | Several inferences or partial correspondences | Whole assessment with warrant and checks per bearing claim |
-| Heavy | Complex transfer or structural mismatch | Domain decomposition, instantiations, checks carried out, and every undetermined verdict with what is missing |
+| Light | One inference, one obvious correspondence | Compact rendering of the same required assessment trace |
+| Medium | Several inferences or partial correspondences | Required assessment trace grouped by inference and bearing claim |
+| Heavy | Complex transfer or structural mismatch | Required assessment trace with expanded domain decomposition and instantiations |
 
 ## Rules
 
