@@ -1,7 +1,7 @@
 # Blank entry — frame-first gate before any concrete candidate
 
 Read when `Entry = Blank` — before Phase 1 presents anything to the user. This is the
-frame-first law: the presentation template, the FrameSelection answer type, and the
+frame-first law: the presentation template, the frame map's answer, and the
 requirement they jointly satisfy.
 
 On a Blank entry, the frame map is presented via Cognitive Partnership Move (Constitution)
@@ -29,7 +29,7 @@ Selecting ≥1 frame proceeds to Phase 2 with exactly those frames open. **Stop*
 `EarlyExit` with every derived frame declared as `frames_offered` — nothing was generated, and
 that is stated plainly, not silently dropped.
 
-`FrameSelection ∈ {Open(frames: Set(Frame)), Stop}` — Qframes answer type; Open(≥1 frame)
-proceeds to generation, Stop returns EarlyExit before anything is generated (a genuine
-differential future, not a meta-action — stays a peer constructor, not a free-response
-demotion).
+The answer is Open or Stop. Open's selected frames are the frames the first pass opens;
+an Open that selects none presents the map again rather than running an empty pass. Stop
+returns EarlyExit before anything is generated — a genuine differential future, not a
+meta-action, so it stays a peer answer rather than a free-response path.

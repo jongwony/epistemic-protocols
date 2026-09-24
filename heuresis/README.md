@@ -18,7 +18,7 @@ Some candidate fields are underexpanded (`CandidateFieldUnderexpanded`): the goa
 
 ### The Solution
 
-**Divergence over Selection**: infer blank vs. seeded entry from the utterance alone, then fork — blank entries see an abstract frame map before any concrete idea exists (ownership stays with you, and nothing anchors your own thinking early); seeded entries expand straight from what you already gave, since the anchoring risk doesn't apply the same way to material you supplied yourself. Each round generates candidates in parallel across the open frames, every candidate tagged with its origin (you or the AI), nothing discarded or ranked. There is no round quota — your own stop is what bounds the field, and a stop before anything was generated is typed honestly as an empty result, never dressed up as a candidate field that was never built.
+**Divergence over Selection**: infer blank vs. seeded entry from the utterance alone, then fork — blank entries see an abstract frame map before any concrete idea exists (ownership stays with you, and nothing anchors your own thinking early); seeded entries expand straight from what you already gave, since the anchoring risk doesn't apply the same way to material you supplied yourself. Each round generates candidates in parallel across the open frames, every candidate tagged with its origin (you, the AI, or the source chained material came from), nothing discarded or ranked. There is no round quota — your own stop is what bounds the field, and a stop before anything was generated is typed honestly as an empty result, never dressed up as a candidate field that was never built.
 
 ### Difference from Other Protocols
 

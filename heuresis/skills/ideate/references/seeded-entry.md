@@ -9,6 +9,6 @@ the round.
 fixation risk the Blank-path gate exists to avoid does not apply the same way here.
 
 On the very first pass of a Seeded entry, the original seeds are promoted to candidates
-under the frame each lands in — each keeping the origin its seed carried (utterance
-fragments `origin=User`) — alongside whatever the frames generate as `origin=AI`; every
-later pass tags its output `origin=AI`.
+under the frame each lands in — each keeping the origin its seed carried (the user's own
+fragments as `person`) — alongside whatever the frames generate as `assistant`; every
+later pass tags its output `assistant`.
