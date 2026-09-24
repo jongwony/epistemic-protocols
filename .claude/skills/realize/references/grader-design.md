@@ -40,18 +40,24 @@ transition it was built to observe.
 
 | Declared in | Obligation | Grader | Kind |
 |---|---|---|---|
-| TOOL GROUNDING | Phase 2 hands the remainder back with state, reason, basis | `remainder-surfaced` | manual; judge specified |
-| Phase 0 | zero-uncertainty path reaches `Proceed` | `proceed_observed` | tree witness |
-| PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
-| PHASE TRANSITIONS | collection precedes surfacing | `collection-precedes-inquiry` | manual transcript review |
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
 | — | the protocol loaded and fired | `skill_fired` | behaviour |
-| TYPES | answer set is the declared five-way coproduct | `option-coproduct` | manual; judge specified |
-| TYPES / Rules | state, reason, basis shown per item | `classification-shown` | manual; judge specified |
+| PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
+| PHASE TRANSITIONS | collection precedes surfacing | `collection-precedes-inquiry` | manual transcript review |
 | TYPES `advanceable` | cheap evidence resolved, not handed over | `cheap-evidence-not-asked` | manual; judge specified |
-| Phase 0 | sufficiency finding stated rather than skipped | `sufficiency-stated` | manual; judge specified |
-| Skip conditions | no gate when context is already sufficient | `no-gate` | manual; judge specified |
-| Phase 0 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | manual; judge specified |
+| TYPES `basis` / Phase 2 | each surfaced item's basis is locatable, faithfully attributed, and carries its state's content | `basis-faithful` | manual; judge specified |
+| TYPES `State`, `Reason` / Rules | each unresolved item shows state and reason; nothing the user owns is settled for them | `ownership-kept` | manual; judge specified |
+| TYPES | answer set is the declared five-way coproduct | `option-coproduct` | manual; judge specified |
+| Phase 0 | no deficit detected, none fabricated, the sufficiency finding stated as relay | `phase0-relay` | manual; judge specified |
+| Phase 0 | zero-uncertainty path reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
+
+One grader per direction, where a direction is the contract obligation it measures. Graders
+that measure the same obligation are merged; agreement across runs is only a check on that
+grouping, since two graders can agree because they duplicate one another. The basis and the
+ownership graders stay apart because faithful grounding and unauthorized settlement vary
+independently: a run can cite correctly and still decide for the user, or cite wrongly and
+leave the choice open. No grader judges whether a ground is thick enough — that is the
+run's judgment, and a grader checks that its product exists and is faithful.
 
 ## Read the branch witness, not the tool names
 
