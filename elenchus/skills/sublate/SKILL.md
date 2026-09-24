@@ -207,6 +207,7 @@ def Inscribed : Deficit → Prop
     cited fit. -/
 structure Certificate where
   claimedBy : List Deficit
+  distinct  : claimedBy.Nodup
   inscribed : ∀ d ∈ claimedBy, Inscribed d
   fit       : String
 
@@ -233,7 +234,9 @@ structure Audit where
 /-- **Your record**, read from the context: every audit formed so far, in formation order, each
     with the binding and certificate its latest pass gave it. Cumulative: an audit once formed
     stays; a split parent stays beside the children it produced; a source under a claim that
-    already names an audit is that audit. -/
+    already names an audit is that audit. A binding that bundles several claims forms no audit
+    until it is split — only a loop-time split leaves a parent, which already carries its
+    record. -/
 opaque audits : Context P → List Audit
 
 /-- The person's answer at Qa: whose the candidate is. -/
@@ -379,12 +382,11 @@ def Owed (c : Context P) (a : Audit) : Prop :=
      ∃ cond, ((filledValue (judgment c a.ref)).bind (·.continuation)) = some (.revisit cond) ∧
        TriggerMet c cond))
 
-def Vetted (c : Context P) : Prop := ∀ a ∈ audits c, ¬ Owed c a
-
 inductive Disposition
   /-- the person's, at Qs -/
   | judged (verdict : String) (continuation : Option Instruction)
-  /-- handed to another deficit before any work was done on it -/
+  /-- handed to another deficit — at admission, before any work was done on it, or by a loop
+      re-certification after it was judged -/
   | handed (d : Deficit)
   /-- the person found no claim that holds; the certificate never assigns this alone -/
   | unattributable
@@ -405,7 +407,9 @@ structure DispositionRecord where
   claimJudged : ClaimRef
   assignedBy  : Assignment
 
-/-- The record an audit's standing gives it, read from the context; `none` while it is owed. -/
+/-- The record an audit's standing gives it, read from the context; `none` while its attribution,
+    or the judgment of its latest antithesis, is still open. A judgment's claim is the one its
+    antithesis was put to, so a later re-binding does not move it. -/
 def record (c : Context P) (a : Audit) : Option DispositionRecord :=
   match status c a with
   | .route d =>
@@ -415,8 +419,12 @@ def record (c : Context P) (a : Audit) : Option DispositionRecord :=
   | .unattributable => some ⟨.unattributable, a.binding.label, .attribution⟩
   | .pass =>
     (filledValue (judgment c a.ref)).map
-      (fun j => ⟨.judged j.verdict j.continuation, a.binding.label, .judgment⟩)
+      (fun j => ⟨.judged j.verdict j.continuation,
+        ((antitheses c a.ref).getLast?.map (·.claim)).getD a.binding.label, .judgment⟩)
   | .ambiguous => none
+
+/-- Every formed audit carries a record, and none owes the person anything. -/
+def Vetted (c : Context P) : Prop := ∀ a ∈ audits c, (record c a).isSome ∧ ¬ Owed c a
 
 /-- **Your record**: contrary grounds you presented before the gate the closing answer answered,
     beyond the antithesis each claim already carries — attached to the closure; empty when there
@@ -467,7 +475,9 @@ opaque tagReads : Context P → List (Evidence P)
 /-- **Your record** of a pass, written once its reads have entered the context: the sources
     identified, bindings and splits, certificates with their fits, route handoffs with their fit,
     narrowings, tags, and the antitheses posited — for admitted audits with no antithesis yet,
-    and for those a met Revisit returns, re-bound and re-certified first. `audits`, `narrowing`,
+    and for those a met Revisit returns, re-bound and re-certified first. While any candidate
+    is ambiguous, the pass records admission only: narrowing, tagging, and positing wait until
+    every attribution is in, so `Qa` comes first. `audits`, `narrowing`,
     `tags`, and `antitheses` are read from these turns. A record grounds nothing. -/
 opaque passRecord : Context P → List (Response P)
 
@@ -533,8 +543,9 @@ vetted: every formed audit carries a record — the person's judgment, a handoff
 relayed on its fit or the person attributed, or the person's unattributable — and no admitted
 audit owes a judgment or a met Revisit (`Vetted`). An unmet Revisit at closure is reported as an
 instruction the run did not carry out. Every antithesis in the trace was put to an audit that was
-admitted when it was put; the ledger also holds the Handed and Unattributable records, which no
-antithesis reached.
+admitted when it was put; the ledger also holds the Handed and Unattributable records — those
+written at admission no antithesis reached, and one a loop re-certification wrote stands beside
+the judgment it replaced.
 Convergence evidence: for each audit an antithesis was put to, every antithesis in cycle order —
 the claim it was put to → the antithesis → the answer that answered it, read from the context,
 with a later answer that replaced it shown beside it — naming the source. One source that yielded
