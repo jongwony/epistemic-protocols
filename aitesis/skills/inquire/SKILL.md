@@ -11,142 +11,477 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 
 **Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach, where AI infers what the prospect leaves uncertain, pushes each uncertainty through every channel it can read or run on its own until no channel is left, writes down for each one what that reached — a fact that settles it, a finding whose ground it declares short, a detection that answers no uncertainty raised, or nothing — and hands what only the user can settle, or nobody yet knows, back to the user as their own unknown. The beneficiary is the user's epistemic state; the AI's collection is the instrument. Whether a turn halts on that handoff belongs to the harness; this contract inscribes what is presented and what an answer, when one comes, changes.
 
-```
-── FLOW ──
-Aitesis(X) → Scan(X) → Uᵢ →
-  [if Uᵢ = ∅] sufficiency_relay(reasoning) → proceed (trivial SufficientContext)
-  Pass(X): W := Scan(X) ∪ live → ∀u ∈ W: push(u) until ¬advanceable(u) → W ∪= what collection exposed → ∀u ∈ W: land(u) → (Uᵣ, Uₚ, Uᵤ, Uₙ) → X' := enrich(X, landed) →
-  [the pass changed something ∧ another pass is still worth it] Pass(X') → …   [it changed nothing ∨ a further pass is not worth it] Surface(Uₚ ∪ Uᵤ ∪ Uₙ, Uᵣ) → proceed → converge(X')
-  [a later utterance answers a surfaced item] integrate(A, X') → X'' → Pass(X'') → …   -- an answer is one more channel; the next pass re-reads everything
-  [A = Sufficient] integrate(A, X') → X'' → converge(X'')                               -- the one answer that opens no pass: the inquiry is declared enough and what remains is dismissed with the declaration
--- live: every uncertainty not dismissed — the pass is the unit, and every pass pushes and lands the whole of it again
--- push(u): one untried channel the AI can reach on its own, cheapest first; a tried channel is not re-selected
--- land(u): the state the item reached, the reason it reached no further, and the basis — written as fields on the item, read from the material by the model; written at every pass, the same where nothing moved
--- enrich: the landed records written into the prospect — the pass's product
--- Uᵣ resolved · Uₚ provisional (a finding with its shortfall declared) · Uᵤ the user's unknown · Uₙ detect-only
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written.
+Every `opaque` declaration is a judgment that is yours to make from the material in front of
+you; its doc comment says what you judge there, and nothing in this block decides it for you.
+Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` states a
+consequence the contract already has; it asks nothing further of you.
+-/
 
-── MORPHISM ──
+/-! ── FLOW ──
+Aitesis(X) → Scan(X) → Uᵢ →
+  [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed          (trivial SufficientContext)
+  Pass(c): W := (Scan(c) \ uncertainties) ∪ live → ∀u ∈ W: push(u) until ¬advanceable(u)
+    → W ∪= what collection exposed → ∀u ∈ W: land(u) → (Uᵣ, Uₚ, Uᵤ, Uₙ)
+  [the pass changed something ∧ another pass is still worth it] Pass(c') → …
+  [it changed nothing ∨ a further pass is not worth it] Surface(Uₚ ∪ Uᵤ ∪ Uₙ, Uᵣ) → proceed
+    → converge
+  [a later utterance answers a surfaced item] c' := fuse(c, u) → Pass(c') → …
+    (an answer is one more channel; the next pass re-reads everything)
+  [the answer is Sufficient] c' := fuse(c, u) → converge
+    (the one answer that opens no pass: the inquiry is declared enough, and what remains is
+     dismissed with the declaration)
+c is the fused session context, and every record a pass writes is part of it: the prospect
+X' the next pass reads is that context, landed records included.
+live: every uncertainty not dismissed — the pass is the unit, and every pass pushes and lands
+the whole of it again. push(u): one untried channel the AI can reach on its own, cheapest
+first; a tried channel is not re-selected. land(u): the state the item reached, the reason it
+reached no further, and the basis, read from the material; written at every pass, the same
+where nothing moved. Uᵣ resolved · Uₚ provisional (a finding with its shortfall declared) ·
+Uᵤ the user's unknown · Uₙ detect-only.
+-/
+
+/-! ── MORPHISM ──
 Prospect
   → scan(prospect, context)                    -- infer what the prospect leaves uncertain; open dimensions, no fixed taxonomy
   → collect(uncertainties, channels)           -- push each uncertainty through every channel the AI can reach on its own, and register what that collection exposes before landing
   → land(uncertainty, state, reason, basis)    -- write what collection reached and why it reached no further — every item, every pass
-  → enrich(prospect, landed)                   -- write the landed records into the prospect: X → X'; a pass that changed something is followed by another while a further pass is still worth reaching for
+  → enrich(prospect, landed)                   -- the landed records join the context the next pass reads; a pass that changed something is followed by another while a further pass is still worth reaching for
   → surface(landed, as_relay)                  -- hand what remains to the user as their own unknown; proceed
-  → integrate(answer, prospect)                -- an answer, when it comes, is one more channel: the next pass re-reads everything on it
+  → fuse(answer)                               -- an answer, when it comes, is one more channel: the next pass re-reads everything on it
   → SufficientContext
 requires: uncertain(sufficiency(X))            -- runtime checkpoint (Phase 0)
 deficit:  ContextInsufficient                  -- activation precondition (Layer 1/2)
-preserves: task_identity(X)                    -- task intent invariant; prospect context mutated (X → X')
+preserves: task_identity(X)                    -- task intent invariant; the context only grows
 invariant: Evidence over Inference over Detection
 invariant: Judgment is the model's, the product is a field   -- which state an item reached is judged from the material; that it reached it is written on the item
+-/
 
-── TYPES ──
-X        = Prospect for action (source-agnostic: planning, task execution, analysis, investigation, or any purposeful action requiring context)
-             -- Input type: morphism processes X uniformly; enumeration scopes the definition, not behavioral dispatch
-Scan     = Context sufficiency scan: X → Set(Uncertainty)
-             -- infers across whatever the prospect leaves open — a missing fact, a contradiction between the utterance and what was collected, a relevance gap; no fixed taxonomy
-             -- and registers, as an item of its own, a finding the material now in the prospect carries that answers nothing raised — the item lands DetectOnly at Step₃, and the question the material was collected for keeps its own record beside it. The same reading runs at Step₂ over what the pass itself collected, so a discovery is registered in the pass that made it, before landing, and never waits on a scan the stopping judgment may skip
-Uncertainty = { domain: String, description: String, priority: Priority,
-                context: Set(Evidence), tried: Set(Channel),
-                state: Optional(State), reason: Optional(Reason), basis: Optional(String) }
-             -- state, reason, basis are empty until the item's first landing and rewritten at every landing after it — the same where the material did not move, differently where it did; the judgment is the model's, the fields are the product
-             -- basis: for Resolved, what sufficed and why; for Provisional, the finding and where its ground falls short; for UserUnknown, what was tried, or the contradiction quoted; for DetectOnly, what was seen
-Evidence = { source: String, content: String }      -- attached to the item pushed, during Collect; a run that observed nothing attaches its null result as content. What the evidence means for any other item is read at that item's next landing, not bookkept per event
-Priority ∈ {Critical, Significant, Marginal}       -- orders the surfacing: information gain first
-Channel  = a route the AI can read or run on its own for this item — artifact read, artifact search, record read, external fetch, history query, an observation run, a location or answer the user has already given ∪ Emergent(Channel)
-             -- open set: which channels an item admits is read from the item, never from a table; what is fixed is that a tried channel is not re-selected
-             -- tried(u) records a channel as it was read: a source that has changed since — the user says so, an answer points back to it, or the material shows a newer version — is a new channel, not the tried one, so re-reading a changed source is admitted while re-reading an unchanged one is not
-advanceable(u) = ∃ c ∈ channels(u) \ tried(u)      -- the AI can still push this item on its own; false both ends collection for u and hands u to the user
-             -- false when every channel the item admits has been tried, when the item's answer lives only with the user, or when the item is not the AI's to collect
-             -- whether an untried channel is still worth reaching for is part of the judgment: a channel whose expected yield no longer justifies pushing it on the AI's own is not one the item admits, and that reading — the model's, recorded on the item as which way it fell — is what bounds a pass over an open channel set; made once for the pass, the same judgment decides whether another pass is worth reaching for at all
-State ∈ {Resolved, Provisional, UserUnknown, DetectOnly}
-             -- Resolved:     evidence settles the item
-             -- Provisional:  a finding exists and its ground is short — a finding, never an absence
-             -- UserUnknown:  no finding the AI can stand on; only the user can settle it, or nobody yet knows
-             -- DetectOnly:   a finding that answers no uncertainty raised; surfaced as detected, on its own line
-Reason ∈ {NotMine, CouldNot, OnlyYou} ∪ Emergent(Reason)   -- why an item reached no further; written for every state but Resolved
-             -- NotMine: not the AI's to collect (another domain, another authority) · CouldNot: every channel tried, ground still short · OnlyYou: the answer lives with the user
-contradiction(u) = the utterance contradicts itself or what was collected, and no channel settles it   -- lands UserUnknown with the contradiction quoted in basis; the reason is judged like any other landing — OnlyYou where the conflict is one of intent (the user's own words against each other, or against what they asked for), CouldNot where it is one of fact that no channel the AI can reach settles, Emergent otherwise
-A        = User answer, read from a later utterance that addresses a surfaced item
-           ∈ {Provide(context), Point(location), Unknown(Partial), Dismiss(u), Sufficient}
-             Partial     = what the user does say they know
-             -- Provide / Point: one more channel for u — its content attaches to u, the user counts as tried, and the next pass pushes and lands u on it; a Point back at a source already read says the source changed, and that read is a new channel
-             -- Unknown(Partial): the user does not know either; Partial attaches to u the same way, and the next landing carries the user's not-knowing in its basis
-             -- Dismiss(u): u → dismissed, the reason recorded on it
-             -- Sufficient: the whole inquiry is declared enough; every Provisional and UserUnknown item → dismissed with the declaration recorded, DetectOnly items stand as detections
-             -- every answer but Sufficient opens the next pass, which re-reads every live item on the integrated prospect and scans it for what the answer exposes
-             -- premise: one utterance carries one disposition per item, and silence is none of them — an unanswered item is the user's unknown, which is the product, not a pending state
-live     = uncertainties \ dismissed             -- what a pass works on: derived from the sets below at the moment the pass begins, holding no state of its own
-X'       = Updated prospect (context-enriched): the prospect with every landed record written into it, produced at the end of each pass — X' after the first pass, and written in place into X'', the prospect an answer was integrated into, after a later one, so no third prime is needed
-SufficientContext = X' once collection has ended — the last pass changed nothing, or a further pass was judged not worth reaching for — with every live item, including what that pass's collection opened, landed in the pass that ended it
-             -- either exit is the AI's own reach exhausted as the stopping judgment reads it, and every landing stands on the whole material; a pass that opened no item, tried no channel, and changed no landing is the first exit, and the second is the same judgment made once for the pass
-             -- what stands: what collection settled, what it found without full warrant, what is the user's to settle, what it only detected
-             -- sufficiency is the exhaustion of the AI's own reach, not coverage of the task; open items that are the user's are the product, not a shortfall
-ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }   -- an observation run is one channel; it yields evidence or nothing, never a disposition
-Action   = capability call sequence (artifact write, environment run)
-EscapeCondition ∈ {EnvironmentMutation, RiskElevated}
-             -- pre-run judgments only: each names a reason an observation MUST NOT run; a channel declined this way counts as tried and is logged in observation_skips
-             -- duration is not a member: a run that hits its budget yields evidence (its null result), while declining to run yields none
+namespace Aitesis
 
-── PHASE TRANSITIONS ──
-Phase 0: X → Scan(X) → Uᵢ?                                              -- context sufficiency checkpoint (silent)
-       [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed                    -- zero-signal: present the sufficiency finding as relay text; trivial SufficientContext (nothing to collect), Aitesis not activated
-Phase 1: one pass over the whole live set
-         Step₀ W := Scan(Λ.X) ∪ live → uncertainties ∪= W                 -- the working set: what the prospect leaves open at pass start (Uᵢ on the first pass; later, what the enriched or integrated prospect now leaves open, and a finding it carries that answers nothing raised — opened here as its own item, so the question it was collected for keeps its own record beside it) and every item not dismissed
-         Step₁ ∀u ∈ W: while advanceable(u): push(u, c) → tried(u) += c, context(u) += evidence   -- collection over the AI's own channels, cheapest first; an observation run is one such channel, its escape logged when it must not run; a contradiction(u) no channel settles ends the loop for u [Tool]
-         Step₂ W ∪= Scan(what this pass collected) \ uncertainties → uncertainties ∪= W   -- what collection itself exposed — a finding answering nothing raised, something newly left open — registered in the pass that made it, before landing, so it lands at this pass's Step₃ whatever the exit below decides (track)
-         Step₃ ∀u ∈ W: land(u) → state(u), reason(u), basis(u) → u ∈ resolved | provisional | user_unknown | detect_only   -- every item is landed again on the material as it now stands; a landing the material did not move is written the same; the judgment is the model's, the fields are the product (track)
-         Step₄ Λ.X := enrich(Λ.X, uncertainties)                            -- the records are written into the prospect, the pass's product — X → X' on the first pass, in place on X'' after an answer (track)
-         [the pass opened an item, tried a channel, or changed a landing ∧ another pass is still worth reaching for on the AI's own] goto Phase 1   -- what one item's evidence means for another, and what it newly leaves open, is read by the next pass rather than propagated per event; whether that next pass is still worth it is the judgment advanceable(u) makes per item, made once for the pass
-         [the pass changed nothing ∨ a further pass is not worth reaching for] → Phase 2   -- nothing is left unlanded either way: every item in W, opened at Step₀ or by this pass's own collection at Step₂, landed at Step₃ of the pass that opened it, so an item opened but not pushed carries the landing the material shows, with its basis saying collection stopped there
-Phase 2: Surface(provisional ∪ user_unknown ∪ detect_only, resolved, priority) → proceed   -- relay: each landed item beside its state, reason, basis, and what an answer would change [Tool]
-Phase 3: A → integrate(A, X') → X''                                        -- fires when a later utterance answers a surfaced item (track: mutates Λ)
-         [A = Provide ∨ A = Point ∨ A = Unknown(Partial)] tried(u) += user, context(u) += the answer's content → goto Phase 1   -- the next pass pushes u where the material opens a channel and lands every live item on the integrated prospect, so a finding the answer refutes — u's or another item's — is not kept on its old basis; for Unknown, u's next landing carries that the user does not know either
-         [A = Dismiss(u)] u → dismissed → goto Phase 1                       -- dismissed leaves live; the pass that follows re-reads the rest and converges at once where nothing moved
-         [A = Sufficient] provisional ∪ user_unknown → dismissed, the declaration recorded on each → converge
+/-! ── GROUND ──
+The session primitive this contract reads. A context is the list of turns the session has
+accumulated; a turn carries where it came from and what form it takes. Only a person's
+statement is an utterance; an AI turn, an injected turn, and a summary ground nothing.
+-/
 
-── LOOP ──
-The pass is the unit. Each pass scans the prospect as it now stands, pushes every live item through the channels still open to it, registers what its own collection exposed, lands every live item again on the whole material, and writes the records into the prospect. A pass is followed by another while it changed something — opened an item, tried a channel, changed a landing — and another pass is still worth reaching for on the AI's own. What bounds the loop is the stopping judgment advanceable(u) carries, made per item for channels and once per pass for scanning, together with the monotone tried set: tried(u) only grows and a tried channel is not re-selected, and a channel no longer worth reaching for on the AI's own is not one the item admits, so the pass that ends collection is reached by that judgment, not by exhausting an enumeration the open channel set never closes. A pass cap is not a member of this contract, as duration is not a member of EscapeCondition. A run that keeps discovering lands what it has at the point the judgment says stop and surfaces the rest as the user's unknown — every item the last pass opened, at Step₀ or by its own collection at Step₂, landed at its Step₃, so the residual is preserved, never a stall. Uncertainties accumulate (cumulative, never replace); a dismissed item never re-enters a pass.
-A pass that changed nothing, or after which a further pass is not worth reaching for, converges: Phase 2 surfaces. An answer to a surfaced item (Phase 3) is one more channel and opens the next pass, which re-reads everything on the integrated prospect — what the answer settles, what it refutes elsewhere, what it exposes. Sufficient is the one answer that opens no pass: it dismisses what remains with the declaration and converges at once.
-Nothing here holds the turn for that answer. Silence leaves the surfaced items as the user's unknown, and that is the product, not a pending state.
-Continue until: sufficient(X').
-Convergence evidence: after the pass that ended collection, present the transformation trace — for every u ∈ uncertainties, those the first scan raised and those a pass opened, by its scan or by its own collection, alike, one pair (ContextInsufficient(u) → landing(u)): a resolved item with what sufficed; a provisional item with its finding and where the ground falls short; a user-unknown item with its reason — only the user can settle it, or nobody yet knows — and what was tried; a detect-only item as detected, answering no uncertainty raised, with its reason; a dismissed item with the reason or declaration recorded. No item is declared out of scope without its own line. Convergence is demonstrated, not asserted.
+inductive Origin | person | assistant | external | peer | injected | unknown
+inductive Form | statement | observation | request | reasoning | summary | instruction
+inductive Basis | utterance | testimony | observation | report
+  deriving DecidableEq
 
-── CONVERGENCE ──
-sufficient(X') = the last pass changed nothing, or a further pass is not worth reaching for   -- either way the AI's own reach is exhausted as advanceable(u) judges it, per item for channels and once per pass for scanning: a reasonable stopping point rather than an enumeration run dry — and every landing stands on the whole material, including what an answer added, since every item in that pass — what its scan raised and what its own collection opened at Step₂ — landed at its Step₃
-                                                 -- user_unknown ≠ ∅ does not block convergence: what remains is surfaced as the user's, which is the product
+structure Turn (P : Type) where
+  origin  : Origin
+  form    : Form
+  content : P
 
-── TOOL GROUNDING ──
--- Realization: Extension → TextPresent+Proceed. No Constitution entry: whether a turn halts is the harness's baseline, so this file inscribes only what is presented and what an answer, when one comes, changes
-Phase 0 Scan    (sense)       → Internal analysis (no external tool)
-Phase 0 sufficiency_relay (extension) → TextPresent+Proceed (Uᵢ = ∅: present the sufficiency finding with reasoning; proceed with X unchanged, trivial SufficientContext)
-Phase 1 push    (observe)     → what a channel yields attaches to the item pushed; the channels: artifact read, artifact search, record read (stored knowledge: codebase, memory, references); external fetch (conditional: canonical external sources — RFCs, vendor API docs, standards; `source: "web:{url}"` tag, cross-checked against the codebase version so a page that may be stale lands the item Provisional rather than Resolved); environment run (conditional: read-only commit-log queries via subprocess — content pickaxe, message search, temporal range; `source: "history:{ref}"` tag)
-Phase 1 Observe (transform)   → artifact write, environment run, artifact read (an observation run as one channel, shaped by ObservationSpec — setup, execute, observe, cleanup via environment run; a run that resolves nothing attaches its null result as evidence and the item continues to its next channel — it never lands on the run alone)
-Phase 1 register (track)      → Internal state update (Step₂: what this pass's collection exposed — a finding answering nothing raised, something newly left open — entered into uncertainties and the working set before landing, so it lands in this pass whatever the exit decides)
-Phase 1 land    (track)       → Internal state update (every live item, every pass: state, reason, basis written on u from the material as it now stands, and u placed in the set its state names; a source tried and a channel declined under an EscapeCondition both enter tried(u), the latter also observation_skips)
-Phase 1 enrich  (track)       → Internal state update (Λ.X := enrich(Λ.X, uncertainties) — the landed records written into the prospect once every live item has landed; whether the pass changed anything is read here, and decides whether another pass follows)
-Phase 2 Surface (extension)   → TextPresent+Proceed (relay: every landed item that is not Resolved, in priority order, each beside its state, its reason, its basis — the finding and where its ground falls short, the channels tried, the contradiction quoted — and what an answer would change; then proceed. The presentation is owed unconditionally; the turn is not held for a reply)
-Phase 3 integrate (track)     → Internal state update (an answer read from a later utterance: Provide, Point and Unknown(Partial) attach the answer's content to the item and count the user as tried; a Point at a source already read admits re-reading it as a changed source; Dismiss(u) moves u to dismissed; Sufficient moves every provisional and user_unknown item to dismissed with the declaration recorded. Every answer but Sufficient opens the next pass; nothing else is bookkept here — what the answer means for other items and what it exposes is read by that pass)
-converge     (extension)      → TextPresent+Proceed (convergence evidence trace after the pass that ended collection, one pair per uncertainty including the dismissed and the detect-only; proceed with SufficientContext)
-sufficiency  (extension)      → TextPresent+Proceed (fires on A = Sufficient: present the dismissed set with the declaration recorded against each, so the trace shows what was accepted unresolved rather than asserting resolution)
-seam         (extension)      → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move; proceed directly to it, citing that settling source)
+abbrev Context (P : Type) := List (Turn P)
 
-── MODE STATE ──
-Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
-      resolved: Set(Uncertainty),          -- state = Resolved
-      provisional: Set(Uncertainty),       -- state = Provisional
-      user_unknown: Set(Uncertainty),      -- state = UserUnknown
-      detect_only: Set(Uncertainty),       -- state = DetectOnly
-      dismissed: Set(Uncertainty),         -- disposed by the user, per item or by declaration; the reason recorded on the item, the state it landed in kept
-      history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Evidence)>,
-      observation_skips: List<(Uncertainty, EscapeCondition, String)>,   -- audit trail: channels declined before running (a run that ran and resolved nothing is in observation_history, never here)
-      active: Bool,
-      cause_tag: String }
--- Invariant: uncertainties = resolved ∪ provisional ∪ user_unknown ∪ detect_only ∪ dismissed (pairwise disjoint), read between passes; an item a pass has raised and not yet landed is in uncertainties and in no set, and the pass's working set W is derived (Scan ∪ live), holding no state of its own
--- dismissed is entered only through A: the AI never disposes of an item — collection yields evidence or nothing
+/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
+def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
+  match e.origin, e.form with
+  | .person, .statement     => some .utterance
+  | .person, .observation   => some .testimony
+  | .external, .observation => some .observation
+  | .peer, .statement       => some .report
+  | _, _                    => none
 
-── COMPOSITION ──
+def Utterance (P : Type) := {e : Turn P // e.basis = some .utterance}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+def Evidence (P : Type) := {e : Turn P //
+  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+
+/-- Fusion appends one turn; the record only grows. -/
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
+
+/-- A citation of one turn of `c`, with the basis that turn is eligible for. -/
+structure Cite {P : Type} (c : Context P) where
+  idx  : Nat
+  lt   : idx < c.length
+  kind : Basis
+  ok   : (c[idx]'lt).basis = some kind
+
+/-- An open coordinate: which bases it admits, and whether a cited turn supports a value
+    (the support reading is the model's). -/
+structure Coord (P A : Type) where
+  admits   : Basis → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- A coordinate is filled only by a citation it admits and that supports the value; `open_`
+    may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t := ⟨[u.val], rfl⟩
+
+theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
+    e.basis = none := by simp [Turn.basis, h]
+
+/-- A citation into an earlier context still points at the same turn after later fusion;
+    what it supported there is judged again against the context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    kind := s.kind
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+variable {P : Type}
+
+/-- `X`: the prospect for action — planning, task execution, analysis, investigation, or any
+    purposeful action requiring context. The morphism processes it uniformly; it is read from
+    the context, and its task intent is never changed here. -/
+abbrev Prospect (P : Type) := Context P
+
+inductive Priority | critical | significant | marginal
+
+/-- One uncertainty. Whether a scan's item is the same as one already raised is your judgment
+    (`SameItem`), read from the material — for a dismissed item, from the person's dismissal
+    utterance. -/
+structure Item where
+  domain      : String
+  description : String
+  priority    : Priority
+
+/-- **Your judgment**: `i` and `j` are the same uncertainty. -/
+opaque SameItem : Context P → Item → Item → Prop
+
+/-- `Scan`: **your judgment** of what the context leaves uncertain — a missing fact, a
+    contradiction between the utterance and what was collected, a relevance gap; no fixed
+    taxonomy. It also registers, as an item of its own, a finding the material carries that
+    answers nothing raised: that item lands `detectOnly`, and the question the material was
+    collected for keeps its own record beside it. Run after collection, it reads what the pass
+    itself collected, so a discovery is registered in the pass that made it, before landing. -/
+opaque Scanned : Context P → Item → Prop
+
+/-- **Your record**, read from the context: every item raised so far. Cumulative: an item
+    once raised is never replaced. -/
+opaque Registered : Context P → Item → Prop
+
+/-- A dismissal is the person's own utterance: the AI never disposes of an item. -/
+structure Dismissal (c : Context P) where
+  src : Cite c
+  byPerson : src.kind = .utterance
+
+/-- **Your reading** of the person's dismissal utterance for `i` — a dismissal of that item,
+    or a declaration of sufficiency reaching it — with its citation; `none` while there is
+    none. -/
+opaque dismissal : (c : Context P) → Item → Option (Dismissal c)
+
+def live (c : Context P) (i : Item) : Prop := Registered c i ∧ dismissal c i = none
+
+/-- Step₀'s working set: what the scan raises that is not already registered, together with
+    every live item. -/
+def working (c : Context P) (i : Item) : Prop :=
+  (Scanned c i ∧ ¬ ∃ j, Registered c j ∧ SameItem c i j) ∨ live c i
+
+/-- The kinds of route the AI can read or run on its own for an item; which kinds an item
+    admits is read from the item, never from a table. -/
+inductive ChannelKind
+  | artifactRead | artifactSearch | recordRead
+  /-- conditional: canonical external sources — RFCs, vendor API docs, standards; tagged
+      `web:{url}` and cross-checked against the codebase version, so a page that may be stale
+      lands the item provisional rather than resolved -/
+  | externalFetch
+  /-- conditional: read-only commit-log queries — content pickaxe, message search, temporal
+      range; tagged `history:{ref}` -/
+  | historyQuery
+  /-- an observation run shaped by `ObservationSpec`; one channel like any other -/
+  | observationRun
+  /-- a location or answer the user has given -/
+  | userGiven
+  | emergent (name : String)
+
+/-- A channel as it was read: a source that has changed since — the user says so, an answer
+    points back to it, or the material shows a newer version — is a new channel. -/
+structure Channel where
+  kind   : ChannelKind
+  source : String
+  asRead : String
+
+/-- **Your record**, read from the context: the channels already read for `i`, the user
+    counting as one when an utterance answered `i`, and a channel declined under an
+    `EscapeCondition` counting as read. It only grows. -/
+opaque tried : Context P → Item → List Channel
+
+/-- **Your judgment**: the item admits this channel. A channel whose expected yield no longer
+    justifies pushing it on the AI's own is not one it admits; it admits none when its answer
+    lives only with the user or it is not the AI's to collect. Record which way this fell in
+    the item's basis. -/
+opaque Admits : Context P → Item → Channel → Prop
+
+/-- The AI can still push this item on its own; false ends collection for it and hands it to
+    the user. -/
+def advanceable (c : Context P) (i : Item) : Prop := ∃ ch, Admits c i ch ∧ ch ∉ tried c i
+
+inductive State | resolved | provisional | userUnknown | detectOnly
+
+/-- Why an item reached no further; written for every state but resolved. -/
+inductive Reason
+  /-- not the AI's to collect: another domain, another authority -/
+  | notMine
+  /-- every channel tried, ground still short -/
+  | couldNot
+  /-- the answer lives with the user -/
+  | onlyYou
+  | emergent (name : String)
+
+/-- **Your judgment**: the cited turn settles `i` with this finding. A person's report of what
+    they observed and their statement both reach it as turns; which one bears is read. -/
+opaque LandSupported : Item → Context P → Turn P → String → Prop
+
+/-- An item is a fact coordinate open to any grounding basis; support is read. -/
+def itemCoord (i : Item) : Coord P String :=
+  { admits := fun _ => True, supports := LandSupported i }
+
+/-- What `land(u)` writes on an item. -/
+inductive Landing (c : Context P) (i : Item)
+  /-- evidence settles the item: what sufficed is a citation, required, and why -/
+  | resolved (finding : String) (src : Cite c)
+      (supported : LandSupported i c (c[src.idx]'src.lt) finding) (why : String)
+  /-- a finding with a candidate citation whose ground is short — a finding, never an absence -/
+  | provisional (finding : String) (candidate : Cite c) (reason : Reason) (shortfall : String)
+  /-- no finding the AI can stand on: what was tried, or the contradiction quoted -/
+  | userUnknown (reason : Reason) (basis : String)
+  /-- a finding that answers no uncertainty raised: what was seen -/
+  | detectOnly (reason : Reason) (seen : String)
+
+def Landing.state {c : Context P} {i : Item} : Landing c i → State
+  | .resolved ..    => .resolved
+  | .provisional .. => .provisional
+  | .userUnknown .. => .userUnknown
+  | .detectOnly ..  => .detectOnly
+
+/-- The landing read as the item's coordinate: resolved is filled; provisional is open with a
+    candidate citation; the rest are open. -/
+def Landing.toOcc {c : Context P} {i : Item} : Landing c i → Occ (itemCoord i) c
+  | .resolved f s sup _    => .filled f s trivial sup
+  | .provisional _ s _ _   => .open_ (some s)
+  | .userUnknown ..        => .open_ none
+  | .detectOnly ..         => .open_ none
+
+-- elab: a witness lets `landing` be declared `opaque`; it adds no meaning.
+instance {c : Context P} {i : Item} : Inhabited (Landing c i) := ⟨.userUnknown .couldNot ""⟩
+
+/-- `land(u)`: **your judgment** from the whole material as it now stands. A web page that may
+    be stale lands provisional rather than resolved; an observation run that resolved nothing
+    is never the sole ground of a landing. A contradiction no channel settles lands
+    `userUnknown` with the contradiction quoted — `onlyYou` where it is one of intent,
+    `couldNot` where it is one of fact. The item's coordinate is `(landing c i).toOcc`. -/
+opaque landing : (c : Context P) → (i : Item) → Landing c i
+
+/-- `A`, read from a later utterance that addresses a surfaced item. Every answer but
+    `sufficient` opens the next pass, which re-reads every live item on the fused context.
+    Premise: one utterance carries one disposition per item; silence is none of them. -/
+inductive Answer
+  /-- one more channel for the item: the next pass pushes and lands it on the content -/
+  | provide (i : Item) (content : String)
+  /-- as `provide`; a point back at a source already read says the source changed -/
+  | point (i : Item) (location : String)
+  /-- the user does not know either; what they do know attaches the same way -/
+  | unknown (i : Item) (said : String)
+  /-- the item leaves `live` -/
+  | dismiss (i : Item)
+  /-- the whole inquiry is declared enough: every provisional and user-unknown item is dismissed
+      with the declaration recorded; detect-only items stand -/
+  | sufficient
+
+/-- **Your reading** of the latest utterance; `none` when it answers no surfaced item. -/
+opaque answer : Context P → Option Answer
+
+/-- `ObservationSpec`: an observation run is one channel; it yields evidence or nothing, never a
+    disposition. -/
+structure ObservationSpec where
+  setup   : List String
+  execute : List String
+  observe : String
+  cleanup : List String
+
+/-- Pre-run judgments only: each names a reason an observation must not run. Duration is not a
+    member: a run that hits its budget yields its null result as evidence. -/
+inductive EscapeCondition | environmentMutation | riskElevated
+
+/-- **Your record**, read from the context: observation channels declined before running,
+    each with its escape and rationale — the audit trail. -/
+opaque skips : Context P → List (Item × EscapeCondition × String)
+
+/-- `SufficientContext`: the context once collection has ended, with every live item landed in
+    the pass that ended it, or the trivial one Phase 0 proceeds with. What stands: what
+    collection settled, what it found without full warrant, what is the user's to settle, what
+    it only detected. Open items that are the user's are the product, not a shortfall. -/
+inductive Outcome (P : Type)
+  | notActivated (c : Context P)
+  | converged    (c : Context P)
+  | declared     (c : Context P)
+
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else. The prospect X', the uncertainties, each item's
+tried channels, evidence and landing, the resolved, provisional, user-unknown, detect-only and
+dismissed sets, and the skipped observations are read from it when needed; none is stored
+beside it. The working set of a pass is derived (`working`), holding no state of its own.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-- A live item in the set its landing names; the relay surfaces the provisional,
+    user-unknown, and detect-only sets, with the resolved beside them. Read between passes,
+    every registered item is dismissed or in exactly one of these sets. -/
+def inState (c : Context P) (s : State) (i : Item) : Prop := live c i ∧ (landing c i).state = s
+
+/-- The sets are disjoint by construction: an item's landing names one state. -/
+theorem state_unique {c : Context P} {i : Item} {s s' : State}
+    (h : inState c s i) (h' : inState c s' i) : s = s' := h.2.symm.trans h'.2
+
+/-! ── PHASE TRANSITIONS ──
+Phase 0 scans the context; with nothing uncertain it presents the sufficiency finding with its
+reasoning and proceeds, not activated. Otherwise each pass runs: Step₀ registers `working`;
+Step₁ pushes each item while `advanceable`, its evidence entering the context as observation
+turns [Tool]; Step₂ scans what the pass collected; Step₃ lands every live item; Step₄'s records
+join the context. Collection ends by `CollectionEnds`, the relay is presented, and the turn
+proceeds.
+-/
+
+/-- **Your collection** for one pass from `c`: what the channels returned, each an observation
+    turn — a run that observed nothing returns its null result. -/
+opaque push : Context P → List (Evidence P)
+
+def pass (c : Context P) : Context P := c ++ (push c).map (·.val)
+
+/-- **Your judgment**, made once for the pass: another pass is still worth reaching for on the
+    AI's own. No pass cap bounds it; this judgment and the growing `tried` sets do. -/
+opaque WorthAnotherPass : Context P → Prop
+
+/-- **Your judgment**: from `c` to `c'` the pass opened an item, tried a channel, or changed a
+    landing. -/
+opaque PassChanged : Context P → Context P → Prop
+
+/-- Collection from `c` ends at `c'`: passes follow while one changed something and another is
+    still worth it. -/
+inductive CollectionEnds : Context P → Context P → Prop
+  | stop (c : Context P)
+      (h : ¬ PassChanged c (pass c) ∨ ¬ WorthAnotherPass (pass c)) :
+      CollectionEnds c (pass c)
+  | more (c c' : Context P) (h1 : PassChanged c (pass c)) (h2 : WorthAnotherPass (pass c))
+      (rest : CollectionEnds (pass c) c') :
+      CollectionEnds c c'
+
+/-- **Your collection** from `c` to where it ends: `CollectionEnds c (collected c)`. -/
+opaque collected : Context P → Context P
+
+/-- `respond` is the relay presented after collection: every landed item that is not resolved,
+    in priority order, beside its state, reason, basis, and what an answer would change. -/
+def inquire (respond : Context P → Response P) : Context P → List (Utterance P) → Outcome P
+  | c, []      => .converged c
+  | c, u :: us =>
+    let c' := fuse c u
+    match answer c' with
+    | some .sufficient => .declared c'
+    | _ =>
+      let c'' := collected c'
+      inquire respond (c'' ++ [(respond c'').val]) us
+
+open Classical in
+/-- Phase 0, then the run: with nothing uncertain, not activated; otherwise the first
+    collection and its relay, then each later utterance. -/
+noncomputable def start (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  if ∃ i, Scanned c i then
+    let c' := collected c
+    inquire respond (c' ++ [(respond c').val]) us
+  else .notActivated c
+
+/-! ── LOOP ──
+The pass is the unit. Each pass scans the context as it now stands, pushes every live item
+through the channels still open to it, registers what its own collection exposed, and lands
+every live item again on the whole material. What bounds the loop is the stopping judgment
+`Admits` carries per item and `WorthAnotherPass` once per pass, with the growing `tried` sets;
+a pass cap is not part of this contract. A run that keeps discovering lands what it has where
+the judgment says stop and surfaces the rest as the user's unknown — the residual is kept,
+never a stall. Uncertainties accumulate; a dismissed item never re-enters a pass. An answer
+opens the next pass; `sufficient` is the one that opens none. Nothing here holds the turn:
+silence leaves the surfaced items as the user's unknown, which is the product.
+Convergence evidence, after the pass that ended collection: for every item — raised by the
+first scan or opened by a later pass — one pair (ContextInsufficient(u) → landing(u)): a
+resolved item with what sufficed; a provisional item with its finding and where the ground
+falls short; a user-unknown item with its reason and what was tried; a detect-only item as
+detected, answering no uncertainty raised; a dismissed item with the reason or declaration
+recorded. No item is declared out of scope without its own line. Convergence is demonstrated,
+not asserted.
+-/
+
+/-- A dismissed item never re-enters a pass: the person's dismissal keeps it out of `live`, and
+    registration keeps it out of what the scan raises. -/
+theorem no_reentry (c : Context P) (i : Item) (hreg : Registered c i) (hself : SameItem c i i)
+    (hd : (dismissal c i).isSome = true) : ¬ working c i := by
+  rintro (⟨_, hn⟩ | ⟨_, hl⟩)
+  · exact hn ⟨i, hreg, hself⟩
+  · rw [hl] at hd; cases hd
+
+/-- What sufficed for a resolved item is never an AI turn. -/
+theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
+    {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
+    (c[s.idx]'s.lt).origin ≠ .assistant := by
+  intro ho
+  have hk := s.ok
+  rw [ai_never_grounds _ ho] at hk
+  cases hk
+
+/-- A pass whose channels returned nothing leaves the context as it was. -/
+theorem empty_pass (c : Context P) (h : push c = []) : pass c = c := by
+  simp [pass, h]
+
+/-! ── CONVERGENCE ──
+sufficient(c) = the last pass changed nothing, or a further pass is not worth reaching for:
+either way the AI's own reach is exhausted as the stopping judgment reads it — a reasonable
+stopping point rather than an enumeration run dry — and every landing stands on the whole
+material. `user_unknown ≠ ∅` does not block convergence: what remains is surfaced as the
+user's, which is the product.
+-/
+
+theorem ends_sufficient {c c' : Context P} (h : CollectionEnds c c') :
+    ∃ c₀, c' = pass c₀ ∧ (¬ PassChanged c₀ (pass c₀) ∨ ¬ WorthAnotherPass (pass c₀)) := by
+  induction h with
+  | stop c h => exact ⟨c, rfl, h⟩
+  | more _ _ _ _ _ ih => exact ih
+
+/-- The Sufficient answer converges at once, with no further pass. -/
+theorem sufficient_opens_no_pass (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : answer (fuse c u) = some .sufficient) :
+    inquire respond c (u :: us) = .declared (fuse c u) := by
+  simp [inquire, h]
+
+/-! ── TOOL GROUNDING ── -/
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed. No Constitution entry: whether a turn halts is the harness's baseline
+
+inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+
+inductive Op | scan | sufficiencyRelay | push | observeRun | register | land | surface
+             | readAnswer | converge | sufficiency | seam
+
+def grounding : Op → Annot × String
+  | .scan             => (.sense, "Internal analysis: what the context leaves uncertain, at Phase 0 and at Step₀")
+  | .sufficiencyRelay => (.extension, "TextPresent+Proceed: with nothing uncertain, the sufficiency finding with its reasoning; proceed with X unchanged, trivial SufficientContext")
+  | .push             => (.observe, "artifact read, artifact search, record read, external fetch (conditional, tagged web:{url}), environment run (conditional: read-only commit-log queries, tagged history:{ref}); what a channel yields enters the context for the item pushed")
+  | .observeRun       => (.transform, "artifact write, environment run, artifact read: one observation run shaped by ObservationSpec; a run that resolves nothing returns its null result and the item continues to its next channel, and a declined run is recorded with its escape in skips")
+  | .register         => (.sense, "Internal analysis: Step₂, what this pass's collection exposed, registered before landing")
+  | .land             => (.sense, "Internal analysis: every live item, every pass — state, reason, and basis read from the material as it now stands")
+  | .surface          => (.extension, "TextPresent+Proceed: every landed item that is not resolved, in priority order, beside its state, reason, basis, and what an answer would change; the turn is not held")
+  | .readAnswer       => (.sense, "Internal analysis: which surfaced item a later utterance answers and how; every answer but Sufficient opens the next pass")
+  | .converge         => (.extension, "TextPresent+Proceed: the convergence evidence trace, one pair per item including the dismissed and the detect-only; proceed with SufficientContext")
+  | .sufficiency      => (.extension, "TextPresent+Proceed: on Sufficient, the dismissed set with the declaration recorded against each, so the trace shows what was accepted unresolved")
+  | .seam             => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed directly to it citing that source")
+
+/-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
+-/
+
+end Aitesis
 ```
 
 ## Mode Activation
@@ -159,11 +494,11 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 ### Activation exceptions
 
-Skip AI-guided activation when the user explicitly requests proceeding without context verification or when no prospect exists to verify. A dismissed `(domain, description)` pair stays skipped for the current session.
+Skip AI-guided activation when the user explicitly requests proceeding without context verification or when no prospect exists to verify. An item the user dismissed stays skipped for the current session; whether a newly raised item is that one is read from the user's dismissal itself.
 
 ### Accumulation signal
 
-When `observation_skips` across at least three sessions cluster around one `EscapeCondition` with a consistent rationale, revisit what counts as a channel the AI may run on its own.
+When the recorded skipped observations across at least three sessions cluster around one `EscapeCondition` with a consistent rationale, revisit what counts as a channel the AI may run on its own.
 
 ## Protocol
 
@@ -186,7 +521,7 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 - **Recognition over Recall**: Present each landed item with its state, reason, and basis, so the reader recognizes what remains rather than reconstructing it.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
 - **Option-set relay test**: Surfacing is a relay: it presents and proceeds. An item lands where the material puts it; the user's answer, when it comes, is one more channel, not a gate this protocol holds.
-- **Judgment is the model's, the product is a field**: Which state an item reached and why are judged from the material, and the judgment is written into `state`, `reason`, and `basis` on the item. A sentence is not a substitute for an empty field.
+- **Judgment is the model's, the product is a field**: Which state an item reached and why are judged from the material, and the judgment is written into the item's landing — its state, reason, and basis. A resolved landing carries the citation of what sufficed; the AI's own records and landings are material the next pass reads, never the ground an item stands on. A sentence is not a substitute for an empty field.
 - **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and the item moves to its next channel. What that evidence means for another item is read at that item's next landing, not decided when it lands. Only the user's answer disposes of an item, and a declaration of sufficiency reaches every unresolved item, observed or not.
 - **Finding and completion stay apart**: That an item carries a provisional finding says nothing about whether collection is complete. Completion is a pass that changed nothing, or after which a further pass is not worth reaching for — no channel left worth trying for any live item, no landing that moved, no scan worth another pass — judged on channels, landings and the stopping judgment, never on how a finding reads.
 - **Boundary named, not crossed**: For every item that is not Resolved, say what was tried, what was found, and where it falls short; leave disposition to the user. What lies past the AI's reach is another deficit, read from the trace by whatever routes the turn after.
