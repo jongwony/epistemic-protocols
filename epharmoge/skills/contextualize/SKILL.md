@@ -254,13 +254,16 @@ def identity (m : Mismatch) : String × List Indicator :=
 opaque SameClaim : Context P → Mismatch → Mismatch → Prop
 
 /-- **Your record**, read from the context: every occurrence the fold has carried, in id order.
-    Each scan's detections are bound, split, then folded in one at a time: where one states the
-    claim of an occurrence already carried (`SameClaim`), it merges into it, which keeps its id
-    and statement of the claim, takes in the detection's evidence, and combines the reading;
-    otherwise it opens an occurrence with the next id. The stamp is decided before either arm,
-    against the occurrence the latest Adapt closed and no other. An occurrence already closed is
-    not excluded: a return that opens its own occurrence is a new registration, owed its own
-    close. Cumulative: an occurrence once carried stays. -/
+    Each scan's detections are bound, split, then folded in one at a time into what the run
+    still carries open — nothing on the first scan, `pending` on every later one, together with
+    what this same fold opened: where a detection states the claim of one of those (`SameClaim`),
+    it merges into it, which keeps its id and statement of the claim, takes in the detection's
+    evidence, and combines the reading; otherwise it opens an occurrence with the next id. A
+    closed occurrence is never merged into: a detection reading as its claim opens its own
+    occurrence, a new registration owed its own close. The unrepaired stamp is decided only on
+    the re-scan that immediately follows an Adapt's close, against the occurrence that Adapt
+    closed and no other; every other scan stamps nothing. Cumulative: an occurrence once carried
+    stays. -/
 opaque mismatches : Context P → List Mismatch
 
 /-- The person's answer at Qa: whose the mismatch is — never whether it stands. -/
@@ -282,8 +285,11 @@ def attributionCoord (i : MismatchId) : Coord P Attribution :=
 -- elab: an open witness lets the occupancy readings below be declared `opaque`.
 instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
 
-/-- **Your reading**: the person's attribution of `i`, at Qa or in any later utterance; `open_`
-    where none reaches it. -/
+/-- **Your reading**: the person's attribution of `i`, at Qa or in any later utterance, that
+    still reaches the occurrence's binding as it now stands; `open_` where none does. A merge
+    that grows the evidence re-certifies the occurrence, and an attribution given before the
+    growth no longer reaches it: a re-certification that stops passing takes it out of pending,
+    and one that lands ambiguous puts it back to the person at Qa. -/
 opaque attribution : (c : Context P) → (i : MismatchId) → Occ (attributionCoord i) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
@@ -340,10 +346,13 @@ opaque RelaySupported : MismatchId → Context P → Turn P → Verdict → Prop
 def relayCoord (i : MismatchId) : Coord P Verdict :=
   { admits := (· ≠ .utterance), supports := RelaySupported i }
 
-/-- **Your reading**: the verdict cited evidence alone settles for `i`, with that evidence cited;
-    `open_` where it admits more than one reading. Read against the target and fit map the
-    selection is made on. A relayed Overruled closes the occurrence once, and within the run the
-    aspect returns to judgment only where a later Adapt re-registers it. -/
+/-- **Your reading**: the verdict cited evidence alone settled for `i`, with that evidence cited;
+    `open_` where it admitted more than one reading. Read against the target and fit map of the
+    pass that presented the occurrence, or that closed it by relay, and fixed from then on: a
+    later target or fit map does not revise it for an occurrence already presented or closed,
+    so a record reads the same at every later point. A relayed Overruled closes the occurrence
+    once, and within the run the aspect returns to judgment only where a later Adapt
+    re-registers it. -/
 opaque relay : (c : Context P) → (i : MismatchId) → Occ (relayCoord i) c
 
 /-- How an occurrence was closed. -/
@@ -410,12 +419,25 @@ def closedAtJudgment (c : Context P) (m : Mismatch) : Option DispositionRecord :
     | .filled .overruled rs _ _ => some ⟨some .overruled, .relay, some rs.idx, .answered .keep, .relay⟩
     | _ => none
 
+/-- An answer's withdrawal: the occurrence whose Discard the person answered, and what takes the
+    result's place. -/
+def withdrawal (c : Context P) : Option (Mismatch × Option Result) :=
+  (mismatches c).findSome? fun m =>
+    match status c m, filledValue (answer c m.id) with
+    | .pass, some ⟨_, .discard r, _⟩ => some (m, r)
+    | _, _                           => none
+
 /-- The record an occurrence's standing gives it, read from the context; `none` while it waits on
-    the person — at Qa, or at Qc once registered. -/
+    the person — at Qa, or at Qc once registered. Once a withdrawal has landed, every registered
+    occurrence no answer or relay closed is Moot: still pending when the target was withdrawn,
+    never judged. The carrier writes read these records like any other. -/
 def record (c : Context P) (m : Mismatch) : Option DispositionRecord :=
   match status c m with
-  | .pass => closedAtJudgment c m
-  | _     => closedAtRegistration c m
+  | .pass =>
+    match closedAtJudgment c m with
+    | some r => some r
+    | none   => if (withdrawal c).isSome then some ⟨none, .unjudged, none, .moot, .loop⟩ else none
+  | _ => closedAtRegistration c m
 
 /-- Registered and open: passing — on the fit, or on the person's Own attribution — and not yet
     closed. -/
@@ -425,14 +447,6 @@ def pending (c : Context P) : List Mismatch :=
 /-- Occurrences the certificate could not place, waiting on the person at Qa. -/
 def awaiting (c : Context P) : List Mismatch :=
   (mismatches c).filter (fun m => decide (status c m = .ambiguous))
-
-/-- An answer's withdrawal: the occurrence whose Discard the person answered, and what takes the
-    result's place. -/
-def withdrawal (c : Context P) : Option (Mismatch × Option Result) :=
-  (mismatches c).findSome? fun m =>
-    match status c m, filledValue (answer c m.id) with
-    | .pass, some ⟨_, .discard r, _⟩ => some (m, r)
-    | _, _                           => none
 
 /-- The person's answer at Qz. -/
 inductive ZeroAnswer
@@ -595,8 +609,7 @@ open Classical in
 noncomputable def close (c : Context P) : Outcome P :=
   match withdrawal c with
   | some (_, r) =>
-    .withdrawn ⟨c, r, ledgerOf c ++ (pending c).map (fun m => (m.id,
-      ⟨none, .unjudged, none, .moot, .loop⟩)), carrier c, dissent c⟩
+    .withdrawn ⟨c, r, ledgerOf c, carrier c, dissent c⟩
   | none =>
     if (mismatches c).isEmpty then .confirmed ⟨c, some (target c), [], carrier c, dissent c⟩
     else if ∀ m ∈ mismatches c, status c m ≠ .pass then
@@ -777,7 +790,7 @@ The formal blocks define execution. This section fixes the user-facing rendering
 
 Surface one selected mismatch at a time. Before its question, show its description, result-and-context evidence, fit basis, deficit-fit basis, and severity. When `unrepaired` is set, say that the prior requested adaptation did not resolve this claim. Keep one carrier entry for the evaluated result, one line per registration keyed by `id`; each line projects the mismatch, status, and completed disposition record, including who settled each axis and both grounds.
 
-The gate renders the `Judgment × Disposition` value space in plain language:
+The gate renders the `Verdict × Repair` answer space in plain language:
 
 ```
 How would you like to handle this applicability mismatch?

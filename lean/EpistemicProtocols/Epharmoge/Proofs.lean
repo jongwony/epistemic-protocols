@@ -42,15 +42,24 @@ theorem route_unjudged (c : Context P) (m : Mismatch) (r : DispositionRecord) (d
     (h : record c m = some r) (hd : r.disposition = .route d) : r.judgedBy = .unjudged := by
   unfold record at h
   split at h
-  · unfold closedAtJudgment at h
-    split at h
-    · split at h
-      · split at h
-        · cases h; simp at hd
-        · cases h; simp at hd
-      · cases h; simp at hd
-    · split at h
-      · cases h; simp at hd
+  · cases hj : closedAtJudgment c m with
+    | some r' =>
+      simp only [hj] at h
+      cases h
+      unfold closedAtJudgment at hj
+      split at hj
+      · split at hj
+        · split at hj
+          · cases hj; simp at hd
+          · cases hj; simp at hd
+        · cases hj; simp at hd
+      · split at hj
+        · cases hj; simp at hd
+        · cases hj
+    | none =>
+      simp only [hj] at h
+      split at h
+      · cases h; rfl
       · cases h
   · unfold closedAtRegistration at h
     split at h
@@ -66,16 +75,25 @@ theorem overruled_keeps (c : Context P) (m : Mismatch) (r : DispositionRecord)
     r.disposition = .answered .keep := by
   unfold record at h
   split at h
-  · unfold closedAtJudgment at h
-    split at h
-    · rename_i a _ _ _ _
+  · cases hj : closedAtJudgment c m with
+    | some r' =>
+      simp only [hj] at h
+      cases h
+      unfold closedAtJudgment at hj
+      split at hj
+      · rename_i a _ _ _ _
+        split at hj
+        · split at hj
+          · cases hj; simp at hv; simp [a.wellFormed hv]
+          · cases hj; simp at hv; simp [a.wellFormed hv]
+        · cases hj; simp at hv; simp [a.wellFormed hv]
+      · split at hj
+        · cases hj; rfl
+        · cases hj
+    | none =>
+      simp only [hj] at h
       split at h
-      · split at h
-        · cases h; simp at hv; simp [a.wellFormed hv]
-        · cases h; simp at hv; simp [a.wellFormed hv]
-      · cases h; simp at hv; simp [a.wellFormed hv]
-    · split at h
-      · cases h; rfl
+      · cases h; simp at hv
       · cases h
   · unfold closedAtRegistration at h
     split at h
@@ -90,15 +108,24 @@ theorem relay_close_keeps (c : Context P) (m : Mismatch) (r : DispositionRecord)
     (h : record c m = some r) (ha : r.assignedBy = .relay) : r.disposition = .answered .keep := by
   unfold record at h
   split at h
-  · unfold closedAtJudgment at h
-    split at h
-    · split at h
-      · split at h
-        · cases h; simp at ha
-        · cases h; simp at ha
+  · cases hj : closedAtJudgment c m with
+    | some r' =>
+      simp only [hj] at h
+      cases h
+      unfold closedAtJudgment at hj
+      split at hj
+      · split at hj
+        · split at hj
+          · cases hj; simp at ha
+          · cases hj; simp at ha
+        · cases hj; simp at ha
+      · split at hj
+        · cases hj; rfl
+        · cases hj
+    | none =>
+      simp only [hj] at h
+      split at h
       · cases h; simp at ha
-    · split at h
-      · cases h; rfl
       · cases h
   · unfold closedAtRegistration at h
     split at h
