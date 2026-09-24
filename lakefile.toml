@@ -1,0 +1,15 @@
+name = "epistemic-protocols"
+defaultTargets = ["EpistemicProtocols"]
+
+# The protocol Lean blocks, generated from each SKILL.md by
+# .claude/skills/verify/scripts/lean-contract.js (gitignored).
+[[lean_lib]]
+name = "Contract"
+srcDir = "lean/.contract"
+globs = ["Contract.+"]
+
+# The canonical GROUND module and the proofs of every stated theorem.
+[[lean_lib]]
+name = "EpistemicProtocols"
+srcDir = "lean"
+globs = ["EpistemicProtocols.+"]

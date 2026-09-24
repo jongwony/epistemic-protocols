@@ -157,7 +157,7 @@ def axisCoord : Axis → Coord P String
   | .purpose => { admits := (· = .utterance), supports := AxisSupported .purpose }
   | a        => { admits := fun _ => True,     supports := AxisSupported a }
 
-def Occ.isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
+def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _ => false
   | .filled .. => true
 
@@ -169,7 +169,7 @@ opaque focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
 
 /-- One axis the protocol would otherwise pick among viable alternatives fires the focus
     gate. -/
-def focusSettled (c : Context P) : Prop := ∀ a, (focusAxis c a).isFilled = true
+def focusSettled (c : Context P) : Prop := ∀ a, isFilled (focusAxis c a) = true
 
 /-- One thing the mapping is being asked to license about the target: a prediction, a
     permission, a limit, an expected behavior. -/

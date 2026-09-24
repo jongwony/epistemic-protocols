@@ -1,8 +1,8 @@
 name: Lean
 
-# Elaborates every Lean Definition block and the proof file that proves its stated
-# theorems. The verifier already does this when a toolchain is reachable and warns
-# when none is; this job makes one reachable, so the verdict here is never the warn.
+# Builds the Lean package — the contract modules generated from each SKILL.md Lean
+# block, the canonical GROUND, and the proofs — then runs the static checks with a
+# toolchain reachable, so the lean-definition verdict here is never the warn.
 
 on:
   pull_request:
@@ -22,11 +22,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install the pinned Lean toolchain
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-            | sh -s -- -y --default-toolchain "$(cat lean-toolchain)"
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Generate the contract modules from the SKILL.md Lean blocks
+        run: node .claude/skills/verify/scripts/lean-contract.js generate .
+
+      # Installs the toolchain lean-toolchain pins and runs `lake build`.
+      - uses: leanprover/lean-action@v1
+        with:
+          build-args: '--wfail'
 
       - name: Static checks
         run: |

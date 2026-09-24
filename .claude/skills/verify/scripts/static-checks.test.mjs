@@ -15,7 +15,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -128,104 +128,159 @@ describe('gate-answer-reference', () => {
 
 describe('lean-definition', () => {
   const leanFiles = protocolFiles({ projectRoot }).filter(isLeanProtocol).sort();
+  const target = leanFiles[0];
+  const elaborated = clean.pass.some((r) => r.check === LEAN && r.file === target);
+
+  // One copy of the tree per mutation group; `mutate` rewrites a file relative
+  // to the copy and `failures` reruns the verifier there.
+  function withCopy(body) {
+    const root = copyWorkingTree();
+    const originals = new Map();
+    const file = (relative) => path.join(root, relative);
+    const read = (relative) => readFileSync(file(relative), 'utf-8');
+    const write = (relative, text) => {
+      if (!originals.has(relative)) originals.set(relative, existsSync(file(relative)) ? read(relative) : null);
+      mkdirSync(path.dirname(file(relative)), { recursive: true });
+      writeFileSync(file(relative), text);
+    };
+    const restore = () => {
+      for (const [relative, text] of originals) {
+        if (text === null) rmSync(file(relative), { force: true });
+        else writeFileSync(file(relative), text);
+      }
+      originals.clear();
+    };
+    const failures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
+    try {
+      body({ read, write, restore, failures, verdict: () => run(root) });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  const skill = readFileSync(path.join(projectRoot, target), 'utf-8');
+  const fence = skill.indexOf('```lean\n') + '```lean\n'.length;
+  const close = skill.indexOf('\n```', fence);
+  const block = skill.slice(fence, close);
+  const withBlock = (body) => skill.slice(0, fence) + body + skill.slice(close);
+  const ns = /^namespace (\w+)/m.exec(block)[1];
+  const proofRelative = `lean/EpistemicProtocols/${ns}/Proofs.lean`;
+  const proof = readFileSync(path.join(projectRoot, proofRelative), 'utf-8');
+  const endNs = proof.lastIndexOf(`\nend ${ns}`);
+  const beforeEnd = (text) => `${proof.slice(0, endNs)}\n${text}\n${proof.slice(endNs)}`;
+  const firstTheorem = /^theorem\s+(\S+)[^\n]*$/m.exec(proof);
+  const expectSome = (messages, needle) => assert.ok(messages.some((m) => m.includes(needle)), `expected "${needle}" in:\n${messages.join('\n')}`);
 
   it('reaches every protocol whose Definition block is Lean, with no failure', () => {
     assert.ok(leanFiles.length > 0, 'no Lean Definition block found — the check has nothing to reach');
-    assert.deepEqual(leanVerdicts.map((result) => result.file).sort(), leanFiles);
+    const verdictFiles = leanVerdicts.map((result) => result.file).filter((file) => file.endsWith('SKILL.md'));
+    assert.deepEqual(verdictFiles.sort(), leanFiles);
     assert.deepEqual(leanFailures, []);
   });
 
-  it('keeps proofs out of the block and the proof file matched to it', () => {
-    const root = copyWorkingTree();
-    const target = leanFiles[0];
-    try {
-      const filePath = path.join(root, target);
-      const original = readFileSync(filePath, 'utf-8');
-      const proofRelative = target.replace(/^([^/]+)\/skills\/([^/]+)\/SKILL\.md$/, 'lean/$1/$2.lean');
-      const proofPath = path.join(root, proofRelative);
-      const originalProof = readFileSync(proofPath, 'utf-8');
-      const fence = original.indexOf('```lean\n') + '```lean\n'.length;
-      const close = original.indexOf('\n```', fence);
-      const block = original.slice(fence, close);
-      const leanFailures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
-      const restore = () => { writeFileSync(filePath, original); writeFileSync(proofPath, originalProof); };
-
-      writeFileSync(filePath, original.slice(0, fence) + `${block}\ntheorem mutation_inline : True := trivial` + original.slice(close));
-      let failures = leanFailures();
-      assert.ok(failures.some((m) => m.includes('proves `theorem mutation_inline` in place')), failures.join('\n'));
-      assert.ok(failures.some((m) => m.includes('does not open with')), failures.join('\n'));
+  it('rejects proofs in the block, sorry, axioms, forks of GROUND, and forbidden escapes', () => {
+    assert.ok(firstTheorem, 'no proved theorem found to mutate');
+    withCopy(({ write, restore, failures, verdict }) => {
+      write(target, withBlock(`${block}\n@[simp] theorem mutation_inline : True := trivial`));
+      expectSome(failures(), 'proves `theorem mutation_inline` in place');
       restore();
 
-      const stated = /^theorem\s+(\S+)[^\n]*$/m.exec(originalProof.slice(originalProof.indexOf('/-! Proofs of the theorems')));
-      assert.ok(stated, 'no proved theorem found to mutate');
-      const tail = originalProof.indexOf(stated[0], originalProof.indexOf('/-! Proofs of the theorems'));
-      writeFileSync(proofPath, originalProof.slice(0, tail) + stated[0].replace(stated[1], `${stated[1]} (mutationBinder : Nat)`) + originalProof.slice(tail + stated[0].length));
-      failures = leanFailures();
-      assert.ok(failures.some((m) => m.includes(`Stated \`theorem ${stated[1]}\` differs`)), failures.join('\n'));
+      write(target, withBlock(`${block}\ntheorem mutation_open : 1 = 2 := sorry`));
+      expectSome(failures(), '`sorry`');
       restore();
 
-      const end = originalProof.lastIndexOf('\nend ');
-      writeFileSync(proofPath, `${originalProof.slice(0, end)}\ntheorem mutation_unstated : True := trivial\n${originalProof.slice(end)}`);
-      failures = leanFailures();
-      assert.ok(failures.some((m) => m.includes('proves `theorem mutation_unstated`, which the SKILL.md block does not state')), failures.join('\n'));
+      write(target, withBlock(`${block}\naxiom mutation_assumed : 1 = 2`));
+      expectSome(failures(), '`axiom mutation_assumed`');
       restore();
 
-      writeFileSync(proofPath, originalProof.slice(0, tail) + `theorem mutation_renamed${stated[0].slice(`theorem ${stated[1]}`.length)}` + originalProof.slice(tail + stated[0].length));
-      failures = leanFailures();
-      assert.ok(failures.some((m) => m.includes(`Stated \`theorem ${stated[1]}\` has no proof`)), failures.join('\n'));
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
-  });
-
-  it('rejects sorry, a project axiom, an unelaborated reference, and a non-vocabulary annotation', () => {
-    const root = copyWorkingTree();
-    const target = leanFiles[0];
-    try {
-      const filePath = path.join(root, target);
-      const original = readFileSync(filePath, 'utf-8');
-      const fence = original.indexOf('```lean\n') + '```lean\n'.length;
-      const close = original.indexOf('\n```', fence);
-      const mutate = (body) => original.slice(0, fence) + body + original.slice(close);
-      const block = original.slice(fence, close);
-      const proofRelative = target.replace(/^([^/]+)\/skills\/([^/]+)\/SKILL\.md$/, 'lean/$1/$2.lean');
-      const proofPath = path.join(root, proofRelative);
-      const originalProof = readFileSync(proofPath, 'utf-8');
-
-      writeFileSync(filePath, mutate(`${block}\ntheorem mutation_open : 1 = 2 := sorry`));
-      let failures = run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
-      assert.ok(failures.some((m) => m.includes('`sorry`')), failures.join('\n'));
-
-      writeFileSync(filePath, mutate(`${block}\naxiom mutation_assumed : 1 = 2`));
-      failures = run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
-      assert.ok(failures.some((m) => m.includes('`axiom mutation_assumed`')), failures.join('\n'));
+      write(target, skill.replace('── GROUND ──', '── GROUND ──\nA forked primitive.'));
+      expectSome(failures(), 'GROUND section differs');
+      restore();
 
       const annotated = /\(\.(observe|sense|extension),/.exec(block);
       assert.ok(annotated, 'no grounding arm found to mutate');
-      writeFileSync(filePath, mutate(block.replace(annotated[0], '(.inspect,')));
-      const grounding = run(root);
-      failures = grounding.fail.filter((r) => r.check === 'tool-grounding').map((r) => r.message);
-      assert.ok(failures.some((m) => m.includes('Non-standard annotation "(inspect)"')), failures.join('\n'));
+      write(target, withBlock(block.replace(annotated[0], '(.inspect,')));
+      expectSome(verdict().fail.filter((r) => r.check === 'tool-grounding').map((r) => r.message), 'Non-standard annotation "(inspect)"');
+      restore();
 
-      writeFileSync(filePath, original.replace('── GROUND ──', '── GROUND ──\nA forked primitive.'));
-      failures = run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
-      if (leanFiles.length > 1) {
-        assert.ok(failures.some((m) => m.includes('GROUND section differs')), failures.join('\n'));
+      // Codex review of #961: each of these elaborated cleanly or hid a proof gap.
+      const escapes = [
+        ['set_option warn.sorry false in\ntheorem mutation_cheat : 1 = 2 := by admit', '`set_option`'],
+        ['theorem mutation_cheat : 1 = 2 := sorryAx _ true', '`sorryAx`'],
+        ['@[simp] axiom mutation_false : False', '`axiom mutation_false`'],
+        ['macro "mutation_axiom" : command => `(axiom mutationFalse : False)\nmutation_axiom', 'a metaprogramming command'],
+        ['@[implemented_by id] def mutation_impl (n : Nat) : Nat := n\ntheorem mutation_native : False := by native_decide', '`native_decide`'],
+        ['unsafe def mutation_unsafe : Nat := 0', '`unsafe`'],
+        ['set_option debug.skipKernelTC true in\ntheorem mutation_skip : True := trivial', 'a `debug.` option'],
+      ];
+      for (const [text, needle] of escapes) {
+        write(proofRelative, beforeEnd(text));
+        expectSome(failures(), needle);
+        restore();
       }
 
-      const elaborated = leanVerdicts.find((r) => r.file === target && clean.pass.includes(r));
-      if (elaborated) {
-        // Keep the proof file's prefix in step with the block so elaboration, not the
-        // prefix match, is what rejects the dangling reference.
-        const dangling = `${block}\ndef mutation_dangling : Nat := undeclaredReference`;
-        writeFileSync(filePath, mutate(dangling));
-        writeFileSync(proofPath, originalProof.replace(block, dangling));
-        failures = run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
-        assert.ok(failures.some((m) => m.includes('does not elaborate')), failures.join('\n'));
-        writeFileSync(proofPath, originalProof);
+      write(proofRelative, proof.replace(/^(public import [^\n]*)$/m, '$1\nimport Lean'));
+      expectSome(failures(), 'imports `Lean`');
+      restore();
+    });
+  });
+
+  it('accounts for every Lean file under lean/, at any depth', () => {
+    withCopy(({ write, restore, failures }) => {
+      for (const orphan of ['lean/Orphan.lean', `lean/EpistemicProtocols/${ns}/Nested/Orphan.lean`]) {
+        write(orphan, 'theorem orphan : True := trivial\n');
+        expectSome(failures(), 'neither the canonical GROUND nor the proofs module');
+        restore();
       }
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
+    });
+  });
+
+  it('reads theorems and axioms from elaboration, not from text', { skip: !elaborated && 'no Lean toolchain reachable' }, () => {
+    withCopy(({ write, restore, failures }) => {
+      // A hidden premise keeps the signature text intact but not its meaning —
+      // the Codex counterexample, on a stated theorem with no hypothesis of its
+      // own so that no unused-variable warning stops the build first.
+      const { statedTheorems, groundSpan } = require(path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js'));
+      const host = leanFiles.map((file) => {
+        const text = readFileSync(path.join(projectRoot, file), 'utf-8');
+        const hostBlock = /^```lean\n([\s\S]*?)^```$/m.exec(text)[1];
+        const hostNs = /^namespace (\w+)/m.exec(hostBlock)[1];
+        const stated = statedTheorems(hostBlock.slice(groundSpan(hostBlock).end)).find((e) => e.name && !/\(h\w*\s*:/.test(e.signature));
+        return stated && { hostNs, stated };
+      }).find(Boolean);
+      assert.ok(host, 'no hypothesis-free stated theorem found to carry a hidden premise');
+      const hostProofRelative = `lean/EpistemicProtocols/${host.hostNs}/Proofs.lean`;
+      const hostProof = readFileSync(path.join(projectRoot, hostProofRelative), 'utf-8');
+      const hostOpened = hostProof.search(new RegExp(`^theorem ${host.stated.name}\\b`, 'm'));
+      const hostClosed = Math.min(...['\n\n', '\nend '].map((mark) => hostProof.indexOf(mark, hostOpened)).filter((at) => at !== -1));
+      write(hostProofRelative, `${hostProof.slice(0, hostOpened)}section\nvariable (mutationFalse : False)\ninclude mutationFalse\n${host.stated.signature} :=\n  False.elim mutationFalse\nend${hostProof.slice(hostClosed)}`);
+      expectSome(failures(), 'does not follow from the proved theorem');
+      restore();
+
+      const name = firstTheorem[1];
+      write(proofRelative, proof.replace(firstTheorem[0], firstTheorem[0].replace(name, `${name} (_mutationBinder : Nat)`)));
+      expectSome(failures(), 'does not follow from the proved theorem');
+      restore();
+
+      // Proofs commented out: the text still reads as theorems; the environment does not.
+      const opened = proof.indexOf(firstTheorem[0]);
+      write(proofRelative, `${proof.slice(0, opened)}/-\n${proof.slice(opened, endNs)}\n-/${proof.slice(endNs)}`);
+      expectSome(failures(), 'does not follow from the proved theorem');
+      restore();
+
+      write(proofRelative, beforeEnd('private theorem mutation_extra : True := trivial'));
+      expectSome(failures(), `declares \`theorem ${ns}.mutation_extra\``);
+      restore();
+
+      // Two commands on one line escape a line-anchored axiom pattern; the
+      // environment still holds the axiom.
+      write(proofRelative, beforeEnd('example : True := trivial axiom mutationSneaky : False'));
+      expectSome(failures(), `\`axiom ${ns}.mutationSneaky\` is declared`);
+      restore();
+
+      write(target, withBlock(`${block}\ndef mutation_dangling : Nat := undeclaredReference`));
+      expectSome(failures(), 'does not elaborate');
+      restore();
+    });
   });
 });

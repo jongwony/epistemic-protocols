@@ -1829,22 +1829,30 @@ function checkGateAnswerReference() {
 // Check: Lean Definition
 // ============================================================
 // A Definition block authored in Lean 4 is a contract only if it elaborates:
-// a reference that does not resolve, a type that does not check, or a proof
-// left as `sorry` is a defect the DSL could not surface. The verdict follows
-// mechanically from the block, so it is admitted here: token predicates always
-// run, and elaboration runs with the core Lean toolchain (no Std, no Mathlib)
-// when one is reachable — `$LEAN`, `lean` on PATH, or `~/.elan/bin/lean`. With
-// no toolchain the elaboration verdict is reported as not obtained (warn),
-// never as passed.
+// a reference that does not resolve or a type that does not check is a defect
+// the DSL could not surface. The verdict follows mechanically from the block,
+// so it is admitted here. Token predicates always run; elaboration runs with
+// the core Lean toolchain (no Std, no Mathlib) when `lean` and `lake` are
+// reachable — `$LEAN`/`$LAKE`, PATH, or `~/.elan/bin`. With no toolchain the
+// elaboration verdict is reported as not obtained (warn), never as passed.
 //
 // A theorem is verification, not contract: the block states it inside a doc
-// comment (`theorem name binders : statement`, no body) and its proof lives in
-// the repository-side proof file `lean/<plugin>/<skill>.lean`, whose text is
-// the block verbatim followed by the proved theorems. Elaborating that file
-// therefore elaborates the block too; the prefix and the stated signatures are
-// matched here so the two cannot drift apart.
-function resolveLeanBinary() {
-  const candidates = [process.env.LEAN, 'lean', path.join(require('os').homedir(), '.elan/bin/lean')]
+// comment (`theorem name binders : statement`, no body), and its proof lives in
+// the Lake package at `lean/EpistemicProtocols/<NS>/Proofs.lean`, a module
+// whose proofs stay private to it. lean-contract.js generates `Contract.<NS>`
+// from the block (GROUND replaced by the canonical `EpistemicProtocols.Ground`)
+// and an audit file; the verdict is read from elaboration, not from text:
+//   - each stated signature is re-derived from the proved theorem of that name
+//     alone, so a proof carrying a premise the statement lacks fails;
+//   - the declared theorems of the proofs module, read from the elaborated
+//     environment (comments excluded, private and attributed ones included),
+//     equal the stated set;
+//   - no project module declares an axiom, and every theorem's transitive
+//     axioms lie within ALLOWED_AXIOMS.
+const leanContract = require('./lean-contract');
+
+function resolveLeanTool(name, envVar) {
+  const candidates = [process.env[envVar], name, path.join(require('os').homedir(), '.elan/bin', name)]
     .filter(Boolean);
   for (const bin of candidates) {
     try {
@@ -1855,74 +1863,88 @@ function resolveLeanBinary() {
   return null;
 }
 
-// `<plugin>/skills/<skill>/SKILL.md` → `lean/<plugin>/<skill>.lean`.
-function leanProofPath(relPath) {
-  const m = /^([^/]+)\/skills\/([^/]+)\/SKILL\.md$/.exec(relPath);
-  return m ? path.join('lean', m[1], `${m[2]}.lean`) : null;
-}
-
-const normalizeLean = (text) => text.replace(/\s+/g, ' ').trim();
-
-// Theorem signatures a block states inside its module doc comments: a line
-// opening with `theorem` and its indented continuation lines.
-function statedTheorems(source) {
-  const stated = [];
-  for (const doc of source.matchAll(/\/-!([\s\S]*?)-\//g)) {
-    const lines = doc[1].split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      if (!/^theorem\s/.test(lines[i])) continue;
-      const sig = [lines[i]];
-      while (i + 1 < lines.length && /^\s+\S/.test(lines[i + 1])) sig.push(lines[++i]);
-      stated.push(normalizeLean(sig.join('\n')));
-    }
-  }
-  return stated;
-}
-
-// Theorem signatures a proof file declares after its block prefix: the text
-// from `theorem` up to the `:=` that opens the proof.
-function provedTheorems(code) {
-  const proved = [];
-  for (const m of code.matchAll(/^theorem\s[\s\S]*?(?=^\S|$(?![\s\S]))/gm)) {
-    let depth = 0;
-    const text = m[0];
-    for (let i = 0; i < text.length - 1; i++) {
-      const ch = text[i];
-      if ('([{⟨'.includes(ch)) depth++;
-      else if (')]}⟩'.includes(ch)) depth--;
-      else if (depth === 0 && ch === ':' && text[i + 1] === '=') {
-        proved.push(normalizeLean(text.slice(0, i)));
-        break;
-      }
-    }
-  }
-  return proved;
-}
-
-const theoremName = (sig) => sig.split(' ')[1];
-
-function elaborateLean(lean, file) {
-  let output = '';
-  let status = 0;
+function runLean(bin, args) {
   try {
-    output = execFileSync(lean, [file], { encoding: 'utf8', stdio: 'pipe', timeout: 300000, cwd: projectRoot });
+    const output = execFileSync(bin, args, { encoding: 'utf8', stdio: 'pipe', timeout: 600000, cwd: projectRoot });
+    return { status: 0, output };
   } catch (e) {
-    status = e.status ?? 1;
-    output = `${e.stdout || ''}${e.stderr || ''}` || e.message;
+    return { status: e.status ?? 1, output: `${e.stdout || ''}${e.stderr || ''}` || e.message };
   }
-  const diagnostics = output.split('\n').filter(line => /(error|warning):/.test(line));
-  return status !== 0 || diagnostics.length > 0
-    ? diagnostics.slice(0, 3).join(' | ') || `exit ${status}`
-    : null;
+}
+
+const leanDiagnostics = (output) => output.split('\n').filter(line => /(?:^|\s)(error|warning):/.test(line));
+
+// Commands and options that can close a goal, add an assumption, or skip the
+// kernel without a declaration the audit would see as a theorem or an axiom.
+const LEAN_FORBIDDEN = [
+  [/(?<![\w'.])sorry(?![\w'])/, '`sorry`'],
+  [/(?<![\w'.])admit(?![\w'])/, '`admit`'],
+  [/(?<![\w'.])sorryAx(?![\w'])/, '`sorryAx`'],
+  [/(?<![\w'.])native_decide(?![\w'])/, '`native_decide`'],
+  [/(?<![\w'.])implemented_by(?![\w'])/, '`implemented_by`'],
+  [/(?<![\w'.])extern(?![\w'])/, '`extern`'],
+  [/(?<![\w'.])unsafe(?![\w'])/, '`unsafe`'],
+  [/(?<![\w'.])set_option(?![\w'])/, '`set_option`'],
+  [/(?<![\w'.])debug\./, 'a `debug.` option'],
+  [/#(?:exit|eval|print|reduce)\b/, 'a `#` command'],
+  [/(?<![\w'.])(?:run_cmd|run_elab|run_meta|macro_rules|macro|elab_rules|elab|syntax|initialize|builtin_initialize)(?![\w'])/, 'a metaprogramming command'],
+];
+const LEAN_AXIOM_DECL = /^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|public|noncomputable|partial|nonrec)\s+)*axiom\s+([^\s:({[]+)/gm;
+const LEAN_THEOREM_DECL = /^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|public|noncomputable|nonrec)\s+)*(?:theorem|lemma)\s+([^\s:({[]+)/gm;
+
+function leanLint(label, source) {
+  const code = stripLeanComments(source);
+  const problems = [];
+  for (const [pattern, what] of LEAN_FORBIDDEN) {
+    if (pattern.test(code)) problems.push(`${label} uses ${what} — a stated claim is proved in core Lean with nothing switched off`);
+  }
+  for (const m of code.matchAll(LEAN_AXIOM_DECL)) {
+    problems.push(`${label} declares \`axiom ${m[1]}\` — a contract assumes nothing without ground; state a judgment as \`opaque\` or a parameter`);
+  }
+  return problems;
+}
+
+// The only imports a proofs module takes: the contract it proves, and GROUND.
+function leanProofImports(label, source, ns) {
+  const allowed = new Set([`Contract.${ns}`, 'EpistemicProtocols.Ground', 'EpistemicProtocols.Ground.Proofs']);
+  const problems = [];
+  const code = stripLeanComments(source);
+  if (!/^module\s*$/m.test(code.split('\n').find(line => line.trim() !== '') || '')) {
+    problems.push(`${label} does not open with \`module\` — its proofs stay private only under the module system`);
+  }
+  for (const m of code.matchAll(/^\s*(?:public\s+|meta\s+)*import\s+(?:all\s+)?([\w.]+)/gm)) {
+    if (!allowed.has(m[1])) problems.push(`${label} imports \`${m[1]}\` — a proofs module imports only Contract.${ns} and GROUND`);
+  }
+  return problems;
+}
+
+function leanFilesUnder(dir, rel = '') {
+  const files = [];
+  if (!fs.existsSync(dir)) return files;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const relPath = path.join(rel, entry.name);
+    if (entry.isDirectory()) {
+      if (relPath === '.contract') continue;
+      files.push(...leanFilesUnder(path.join(dir, entry.name), relPath));
+    } else if (entry.name.endsWith('.lean')) {
+      files.push(path.join('lean', relPath));
+    }
+  }
+  return files;
 }
 
 function checkLeanDefinition() {
   const CHECK = 'lean-definition';
-  let lean;
-  const claimedProofFiles = new Set();
-  // GROUND is the session primitive every Lean block reads; one text serves all,
-  // so a block that edits its copy has forked the primitive.
-  let groundSource = null;
+  const fail = (file, message) => results.fail.push({ check: CHECK, file, message });
+  const groundPath = path.join(projectRoot, leanContract.CANONICAL_GROUND);
+  const canonicalGround = fs.existsSync(groundPath)
+    ? leanContract.canonicalGroundText(fs.readFileSync(groundPath, 'utf8'))
+    : null;
+  const blocks = [];
+  const failedFiles = new Set();
+  const namespaces = new Map();
+  const expectedLean = new Set([leanContract.CANONICAL_GROUND, leanContract.GROUND_PROOFS]);
+
   for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
@@ -1931,116 +1953,144 @@ function checkLeanDefinition() {
 
     const source = extractLeanDefinition(content);
     if (source === null) {
-      results.fail.push({ check: CHECK, file: relPath, message: 'Definition opens a ```lean fence that never closes' });
+      fail(relPath, 'Definition opens a ```lean fence that never closes');
       continue;
     }
-    const code = stripLeanComments(source);
-    let failed = false;
-    const ground = extractFormalSection(content, 'GROUND');
-    if (!ground) {
-      results.fail.push({ check: CHECK, file: relPath, message: 'Lean Definition block has no `── GROUND ──` section' });
-      failed = true;
-    } else if (groundSource === null) {
-      groundSource = { file: relPath, text: ground };
-    } else if (ground !== groundSource.text) {
-      results.fail.push({ check: CHECK, file: relPath, message: `GROUND section differs from ${groundSource.file} — the session primitive is one text across Lean blocks` });
-      failed = true;
+    const problems = leanLint('Lean Definition block', source);
+    for (const m of stripLeanComments(source).matchAll(LEAN_THEOREM_DECL)) {
+      problems.push(`Lean Definition block proves \`theorem ${m[1]}\` in place — a proof is verification, not contract: state the signature in a doc comment and prove it in the proofs module`);
     }
-    const proofRel = leanProofPath(relPath);
-    const proofFull = proofRel && path.join(projectRoot, proofRel);
-    const proof = proofFull && fs.existsSync(proofFull) ? fs.readFileSync(proofFull, 'utf8') : null;
-    if (proofRel) claimedProofFiles.add(proofRel);
-    for (const [label, text] of [['Lean Definition block', code], [proofRel, proof === null ? '' : stripLeanComments(proof)]]) {
-      if (/(?<![\w'.])sorry(?![\w'])/.test(text)) {
-        results.fail.push({ check: CHECK, file: relPath, message: `${label} contains \`sorry\` — every stated claim must be proved or removed` });
-        failed = true;
-      }
-      for (const m of text.matchAll(/^\s*(?:private\s+|protected\s+)*axiom\s+([^\s:({[]+)/gm)) {
-        results.fail.push({ check: CHECK, file: relPath, message: `${label} declares \`axiom ${m[1]}\` — a contract assumes nothing without ground; state a judgment as \`opaque\` or a parameter` });
-        failed = true;
-      }
-    }
-    for (const m of code.matchAll(/^(?:private\s+|protected\s+)*theorem\s+([^\s:({[]+)/gm)) {
-      results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block proves \`theorem ${m[1]}\` in place — a proof is verification, not contract: state the signature in a doc comment and prove it in ${proofRel}` });
-      failed = true;
-    }
-    const stated = statedTheorems(source);
-    if (proof === null) {
-      if (stated.length > 0) {
-        results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block states ${stated.length} theorem(s) but ${proofRel} does not exist` });
-        failed = true;
-      }
-    } else if (!proof.startsWith(source)) {
-      results.fail.push({ check: CHECK, file: relPath, message: `${proofRel} does not open with this SKILL.md's Lean block verbatim — regenerate its prefix from the block` });
-      failed = true;
-    } else {
-      const proved = provedTheorems(proof.slice(source.length));
-      const provedByName = new Map(proved.map(sig => [theoremName(sig), sig]));
-      const statedNames = new Set(stated.map(theoremName));
-      for (const sig of stated) {
-        const match = provedByName.get(theoremName(sig));
-        if (match === undefined) {
-          results.fail.push({ check: CHECK, file: relPath, message: `Stated \`theorem ${theoremName(sig)}\` has no proof in ${proofRel}` });
-          failed = true;
-        } else if (match !== sig) {
-          results.fail.push({ check: CHECK, file: relPath, message: `Stated \`theorem ${theoremName(sig)}\` differs from its signature in ${proofRel}` });
-          failed = true;
-        }
-      }
-      for (const sig of proved) {
-        if (!statedNames.has(theoremName(sig))) {
-          results.fail.push({ check: CHECK, file: relPath, message: `${proofRel} proves \`theorem ${theoremName(sig)}\`, which the SKILL.md block does not state` });
-          failed = true;
-        }
-      }
-    }
-    if (failed) continue;
+    const ns = leanContract.blockNamespace(source);
+    const ground = leanContract.groundSpan(source);
+    if (!ns) problems.push('Lean Definition block opens no `namespace`');
+    else if (namespaces.has(ns)) problems.push(`Lean Definition block reuses namespace ${ns} of ${namespaces.get(ns)}`);
+    if (!ground) problems.push('Lean Definition block has no `── GROUND ──` section followed by `── TYPES ──`');
+    else if (ns && source.indexOf(`namespace ${ns}`) > ground.start) problems.push('Lean Definition block opens its namespace after GROUND');
+    else if (canonicalGround === null) problems.push(`${leanContract.CANONICAL_GROUND} is missing or has no \`namespace Ground\` … \`end Ground\` text`);
+    else if (ground.text !== canonicalGround) problems.push(`GROUND section differs from ${leanContract.CANONICAL_GROUND} — the session primitive is one text across Lean blocks`);
 
-    if (lean === undefined) lean = resolveLeanBinary();
-    if (lean === null) {
-      results.warn.push({ check: CHECK, file: relPath, message: 'No Lean toolchain reachable ($LEAN, PATH, ~/.elan/bin/lean) — elaboration not run for this Lean Definition block' });
+    let proofRel = null;
+    if (ns) {
+      namespaces.set(ns, relPath);
+      proofRel = path.join('lean', 'EpistemicProtocols', ...ns.split('.'), 'Proofs.lean');
+      expectedLean.add(proofRel);
+      const proofFull = path.join(projectRoot, proofRel);
+      const stated = ground ? leanContract.statedTheorems(source.slice(ground.end)).filter(e => e.name) : [];
+      if (fs.existsSync(proofFull)) {
+        const proof = fs.readFileSync(proofFull, 'utf8');
+        problems.push(...leanLint(proofRel, proof), ...leanProofImports(proofRel, proof, ns));
+      } else if (stated.length > 0) {
+        problems.push(`Lean Definition block states ${stated.length} theorem(s) but ${proofRel} does not exist`);
+      }
+    }
+    for (const message of problems) fail(relPath, message);
+    if (problems.length > 0) failedFiles.add(relPath);
+    blocks.push({ relPath, block: source, proofRel });
+  }
+
+  for (const rel of [leanContract.CANONICAL_GROUND, leanContract.GROUND_PROOFS]) {
+    const full = path.join(projectRoot, rel);
+    if (!fs.existsSync(full)) {
+      if (blocks.length > 0) { fail(rel, 'Canonical GROUND file is missing'); failedFiles.add(rel); }
       continue;
     }
-    let problem;
-    if (proof === null) {
-      const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'lean-definition-'));
-      const file = path.join(dir, 'Definition.lean');
-      fs.writeFileSync(file, source);
-      try {
-        problem = elaborateLean(lean, file);
-        if (problem) problem = problem.replaceAll(dir, '');
-      } finally {
-        fs.rmSync(dir, { recursive: true, force: true });
+    const text = fs.readFileSync(full, 'utf8');
+    const problems = leanLint(rel, text);
+    if (rel === leanContract.GROUND_PROOFS) problems.push(...leanProofImports(rel, text, 'Ground'));
+    for (const message of problems) fail(rel, message);
+    if (problems.length > 0) failedFiles.add(rel);
+  }
+
+  // A Lean file the package does not account for proves nothing the runtime
+  // surface carries, and is elaborated by nothing here.
+  for (const rel of leanFilesUnder(path.join(projectRoot, 'lean'))) {
+    if (!expectedLean.has(rel)) fail(rel, 'Lean file is neither the canonical GROUND nor the proofs module of a protocol Lean block');
+  }
+
+  if (blocks.length === 0) return;
+  const lean = resolveLeanTool('lean', 'LEAN');
+  const lake = lean && resolveLeanTool('lake', 'LAKE');
+  if (!lean || !lake) {
+    for (const { relPath } of blocks) {
+      if (!failedFiles.has(relPath)) {
+        results.warn.push({ check: CHECK, file: relPath, message: 'No Lean toolchain reachable ($LEAN/$LAKE, PATH, ~/.elan/bin) — elaboration not run for this Lean Definition block' });
       }
-    } else {
-      problem = elaborateLean(lean, proofFull);
     }
-    if (problem) {
-      results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block does not elaborate cleanly: ${problem}` });
+    return;
+  }
+
+  // The runtime surface: each block elaborates standalone, as a reader loads it.
+  for (const { relPath, block } of blocks) {
+    if (failedFiles.has(relPath)) continue;
+    const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'lean-definition-'));
+    const file = path.join(dir, 'Definition.lean');
+    fs.writeFileSync(file, block);
+    try {
+      const run = runLean(lean, [file]);
+      const diagnostics = leanDiagnostics(run.output);
+      if (run.status !== 0 || diagnostics.length > 0) {
+        fail(relPath, `Lean Definition block does not elaborate cleanly: ${diagnostics.slice(0, 3).join(' | ').replaceAll(dir, '') || `exit ${run.status}`}`);
+        failedFiles.add(relPath);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  // The package: generated contracts, the canonical GROUND, and every proof.
+  const plan = leanContract.planContracts(projectRoot, blocks.filter(b => !failedFiles.has(b.relPath)));
+  leanContract.writeContracts(projectRoot, plan);
+  const build = runLean(lake, ['build']);
+  const buildDiagnostics = leanDiagnostics(build.output);
+  if (build.status !== 0 || buildDiagnostics.length > 0) {
+    const attributed = new Set();
+    for (const { relPath, ns } of plan.audits) {
+      const own = buildDiagnostics.filter(line => ns === 'Ground'
+        ? /EpistemicProtocols\/Ground/.test(line)
+        : line.includes(`Contract/${ns}.lean`) || line.includes(`EpistemicProtocols/${ns}/`));
+      if (own.length === 0) continue;
+      own.forEach(line => attributed.add(line));
+      fail(relPath, `Lean package does not build cleanly: ${own.slice(0, 3).join(' | ')}`);
+      failedFiles.add(relPath);
+    }
+    if (attributed.size === 0) {
+      fail('lakefile.toml', `Lean package does not build cleanly: ${buildDiagnostics.slice(0, 3).join(' | ') || `exit ${build.status}`}`);
+      return;
+    }
+  }
+
+  for (const audit of plan.audits) {
+    if (failedFiles.has(audit.relPath)) continue;
+    const run = runLean(lake, ['env', 'lean', audit.auditPath]);
+    const diagnostics = leanDiagnostics(run.output);
+    const line = /AUDIT (\{.*\})/.exec(run.output);
+    if (run.status !== 0 || diagnostics.length > 0 || !line) {
+      fail(audit.relPath, `A stated theorem does not follow from the proved theorem of its name: ${diagnostics.slice(0, 3).join(' | ') || `exit ${run.status}`}`);
+      continue;
+    }
+    const readout = JSON.parse(line[1]);
+    const problems = [];
+    const stated = new Set(audit.stated);
+    const proved = new Set(readout.proved);
+    for (const name of stated) if (!proved.has(name)) problems.push(`Stated \`theorem ${name}\` is not a theorem the proofs module declares`);
+    for (const name of proved) if (!stated.has(name)) problems.push(`The proofs module declares \`theorem ${name}\`, which the Lean block does not state`);
+    for (const name of readout.contract) problems.push(`\`theorem ${name}\` is proved in the contract module — a proof is verification, not contract`);
+    for (const name of readout.axiomDecls) problems.push(`\`axiom ${name}\` is declared in the Lean package`);
+    for (const { name, axioms } of readout.axioms) {
+      const outside = axioms.filter(a => !leanContract.ALLOWED_AXIOMS.includes(a));
+      if (outside.length > 0) problems.push(`\`${name}\` depends on ${outside.map(a => `\`${a}\``).join(', ')} — only ${leanContract.ALLOWED_AXIOMS.join(', ')} are admitted`);
+    }
+    if (problems.length > 0) {
+      for (const message of problems) fail(audit.relPath, message);
       continue;
     }
     results.pass.push({
       check: CHECK,
-      file: relPath,
-      message: proof === null
-        ? 'Lean Definition block elaborates with no error, warning, sorry, or axiom'
-        : `Lean Definition block and its ${stated.length} stated theorem(s) elaborate from ${proofRel} with no error, warning, sorry, or axiom`
+      file: audit.relPath,
+      message: audit.ns === 'Ground'
+        ? `Canonical GROUND and its ${stated.size} stated theorem(s) elaborate; every proof uses only ${leanContract.ALLOWED_AXIOMS.join(', ')}`
+        : `Lean Definition block elaborates standalone, and its ${stated.size} stated theorem(s) follow from ${blocks.find(b => b.relPath === audit.relPath).proofRel} using only ${leanContract.ALLOWED_AXIOMS.join(', ')}`
     });
-  }
-
-  // A proof file with no Lean block to state its theorems proves nothing the
-  // runtime surface carries.
-  const leanDir = path.join(projectRoot, 'lean');
-  if (fs.existsSync(leanDir)) {
-    for (const plugin of fs.readdirSync(leanDir, { withFileTypes: true })) {
-      if (!plugin.isDirectory()) continue;
-      for (const file of fs.readdirSync(path.join(leanDir, plugin.name))) {
-        const rel = path.join('lean', plugin.name, file);
-        if (file.endsWith('.lean') && !claimedProofFiles.has(rel)) {
-          results.fail.push({ check: CHECK, file: rel, message: 'Proof file has no protocol SKILL.md Lean block that states its theorems' });
-        }
-      }
-    }
   }
 }
 
