@@ -121,9 +121,11 @@ rather than inferring invocation from the model's prose.
 
 ## Cases
 
-Each registered target needs at least a trigger-positive case, where its obligations
-must fire, and a trigger-negative case, where firing is the failure. `inquire` is the
-only registered target today; no result is implied for an unregistered protocol.
+Every case runs under explicit invocation. Each registered target needs at least a case
+where the protocol's Phase 0 finds a deficit and its obligations must be realized, and one
+where Phase 0 must find none and relay. Whether a protocol is selected at all, or stays
+silent, is measured by route's own eval, not here. `inquire` is the only registered target
+today; no result is implied for an unregistered protocol.
 
 Both cases mount the same scaffold, deliberately: one observes whether a
 file-discoverable fact was asked, the other whether a supplied parameter was re-asked,
@@ -140,7 +142,9 @@ gate on it — recording a failure that belongs to the case author.
 
 `evals/inquire-underspecified/` and `evals/inquire-fully-specified/` are the worked
 pair for `/inquire`. Follow their shape when adding a protocol: a `prompt.md` carrying
-frontmatter and the user's words, and one grader per obligation under `graders/`.
+frontmatter and the user's words, and one grader per obligation under `graders/`. A grader
+checks that the fields a judgment produces exist and are faithful to their sources; it
+does not grade the judgment itself, such as whether a ground is sufficient.
 
 ## Reading results
 
@@ -152,10 +156,10 @@ so they are not mistaken for findings.
 
 `pass_k` is one only when every repetition passed its deterministic transition
 predicates. The `manual` column counts scenario-specific transcript judgments excluded from that
-composite; the report names them. For `inquire`, constructor coverage, the per-item
-state, reason and basis, collection-before-surfacing order, the handoff of the remainder
-as the user's unknown, sufficiency rendering, and no-gate judgments remain manual
-observations grounded by the grader files.
+composite; the report names them. For `inquire`, collection-before-surfacing order,
+unasked cheap evidence, faithful basis, kept ownership, constructor coverage, the Phase 0
+relay, and the absence of a design gate remain manual observations grounded by the grader
+files.
 
 On Claude, `skill` says whether the protocol fired where it was available, and `n/a`
 where there was no plugin to fire. Codex reports `trace-unavailable` for that column and

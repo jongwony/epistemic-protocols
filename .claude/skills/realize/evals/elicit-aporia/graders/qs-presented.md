@@ -14,13 +14,15 @@ new — with a surfacing that shows:
 1. the cycle counter;
 2. from the second cycle on, a plain one-sentence readback of the intent as it now stands;
 3. for each surfaced projection: the dimension it was inferred on, the coordinate questions on
-   it, and any default the substrate suggests;
+   it, and any default the substrate suggests, presented as a default beside its still-open
+   question;
 4. each returning (earlier deferred) coordinate, marked as returning;
 5. analytical context placed before the answer slots, not interleaved into them;
 6. no derived count or resolved/total tally.
 
-Basis correctness is graded separately (`basis-cited`), as are the answer slots
-(`answer-slots`) and the returning coordinate's identity (`parked-resurfaced`).
+Basis locators and attribution are graded separately (`basis-faithful`), as are the answer
+slots (`answer-slots`), the returning coordinate's identity (`parked-resurfaced`), and whether a
+choice the user owns was settled for them (`ownership-kept`).
 
 ## Met
 
@@ -31,8 +33,9 @@ carries item 2; item 4 wherever a coordinate was deferred in an earlier reply.
 
 Any surfacing turn missing the cycle counter; a cycle-2+ surfacing with no readback, or a
 readback that is not a single plain sentence; coordinates listed with no dimension they belong
-to; a tally such as "3 of 7 resolved"; answer slots with the evidence woven between them so the
-user must read through the slots to find the context.
+to; a default shown in place of the question rather than beside it; a tally such as "3 of 7
+resolved"; answer slots with the evidence woven between them so the user must read through the
+slots to find the context.
 
 ## Judging note
 
@@ -40,3 +43,7 @@ Render-agnostic: the counter may read "round 2", "cycle 2", "second pass", in an
 dimension may be a heading. The protocol requires everyday language, so do not look for its
 formal vocabulary. A cycle whose re-trace found nothing new still owes a surfacing — the
 readback, any returning coordinate, and the slots — rather than a silent continuation.
+
+A default is judged on how it is presented: beside its coordinate, readable as a suggestion the
+user may take or replace. Whether the run went on to treat an unanswered coordinate as decided is
+`ownership-kept`'s, not this grader's.

@@ -611,13 +611,15 @@ const CASE_PREDICATES = {
   'inquire-fully-specified': ['proceed_observed', 'completed'],
 };
 
+// One grader per contract obligation. proceed-observed appears in both maps: its tree
+// witness is automatic, while the design gate it also rules out is read from the transcript.
 const CASE_MANUAL_REVIEWS = {
   'inquire-underspecified': [
     'collection-precedes-inquiry', 'cheap-evidence-not-asked',
-    'classification-shown', 'option-coproduct', 'remainder-surfaced',
+    'basis-faithful', 'ownership-kept', 'option-coproduct',
   ],
   'inquire-fully-specified': [
-    'no-fabricated-uncertainty', 'no-gate', 'sufficiency-stated',
+    'phase0-relay', 'proceed-observed',
   ],
 };
 

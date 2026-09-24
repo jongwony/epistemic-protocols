@@ -32,13 +32,12 @@ gave a value for in reply `k`:
    the accepted value intact or asks the user whether to reopen the accepted one — it does not
    silently change the accepted value;
 4. the coordinate deferred in reply 1 is not treated as accepted until a later reply gives it a
-   value, and nothing the user did not say is presented as accepted.
+   value.
 
 ## Not met
 
 Any accepted value altered, dropped, merged into another, or reopened by the run on its own
-initiative; any deferred coordinate shown as settled without a value from the user; any value
-the oracle never gave appearing among what the user accepted.
+initiative; any deferred coordinate shown as settled without a value from the user.
 
 ## Judging note
 
@@ -46,4 +45,4 @@ the oracle never gave appearing among what the user accepted.
 like any other and must be carried as "unchanged from today". Adding a determination beside an
 accepted one — security alerts on top of the three — is integration, not revision. A run that
 asks "do you want to reopen X?" passes point 3; a run that answers that question for the user
-fails it.
+fails it. A value the user never gave presented as accepted is `ownership-kept`'s.

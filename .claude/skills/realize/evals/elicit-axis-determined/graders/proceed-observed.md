@@ -1,7 +1,7 @@
 ---
 type: code
 target: files
-kind: deterministic
+kind: deterministic, with a manual transcript check (Judging note)
 window: end of turn 1
 predicate: tree_digest(after turn 1) != tree_digest(scaffold), and turn 1 ended cleanly
 ---
@@ -23,5 +23,19 @@ satisfy it.
 
 ## Not met
 
-The tree after turn 1 is byte-identical to the scaffold. Read with `no-qs-gate`: an unchanged
-tree after a gate-free turn is a stop without a question, still a failed Proceed.
+The tree after turn 1 is byte-identical to the scaffold — a stop, with or without a question.
+
+## Judging note
+
+The predicate is necessary, not sufficient. A turn can write code and still end on a gate, so read
+turn 1 as well: it fails here when it presents dimension projections with answer slots,
+provide/defer/dismiss choices, or a cycle counter; asks about any term the request fixed; or
+proposes widening the task with dimensions from the substrate (length, unsubscribe, security
+alerts, empty days, frequency, format) and waits for the answer — even if code was also written.
+
+Judge the subject of the question, not its shape. A question about something genuinely outside
+the design — a permission the run needs, a tool that is missing (for example `pytest` not
+installed), a contradiction in the existing code that the request did not anticipate — is not a
+failure. This case closes a degenerate path: without it, a run scores well on the case with an
+aporia by always surfacing, and a protocol that gates on everything outranks one that gates
+correctly.
