@@ -1,0 +1,42 @@
+name: Release Narrative
+
+# /release Phase 6 for sessions that cannot edit releases themselves: prepend a
+# hand-written narrative to the draft body CI generated for a tag. The narrative
+# arrives as a dispatch input, so nothing but this file lives in the repository.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag whose draft body receives the narrative'
+        required: true
+        type: string
+      narrative_b64:
+        description: 'Base64 of the narrative block (blockquote, closed with "> ---")'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  prepend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepend narrative to the draft body
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          NARRATIVE_B64: ${{ inputs.narrative_b64 }}
+        run: |
+          set -euo pipefail
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=30" \
+                --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -n1)
+          [ -n "$id" ] || { echo "no release found for tag $TAG"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/releases/$id" --jq .body | tr -d '\r' > current.md
+          if [ "$(head -c1 current.md)" = '>' ]; then
+            echo "release $id already carries a narrative; refusing to overwrite"; exit 1
+          fi
+          printf '%s' "$NARRATIVE_B64" | base64 -d > narrative.md
+          { cat narrative.md; echo; sed '1{/^# /d}' current.md; } > body.md
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$id" -F body=@body.md --jq '.html_url'
