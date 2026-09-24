@@ -1836,21 +1836,90 @@ function checkGateAnswerReference() {
 // when one is reachable — `$LEAN`, `lean` on PATH, or `~/.elan/bin/lean`. With
 // no toolchain the elaboration verdict is reported as not obtained (warn),
 // never as passed.
+//
+// A theorem is verification, not contract: the block states it inside a doc
+// comment (`theorem name binders : statement`, no body) and its proof lives in
+// the repository-side proof file `lean/<plugin>/<skill>.lean`, whose text is
+// the block verbatim followed by the proved theorems. Elaborating that file
+// therefore elaborates the block too; the prefix and the stated signatures are
+// matched here so the two cannot drift apart.
 function resolveLeanBinary() {
   const candidates = [process.env.LEAN, 'lean', path.join(require('os').homedir(), '.elan/bin/lean')]
     .filter(Boolean);
   for (const bin of candidates) {
     try {
-      execFileSync(bin, ['--version'], { stdio: 'pipe', timeout: 30000 });
+      execFileSync(bin, ['--version'], { stdio: 'pipe', timeout: 30000, cwd: projectRoot });
       return bin;
     } catch { /* try the next candidate */ }
   }
   return null;
 }
 
+// `<plugin>/skills/<skill>/SKILL.md` → `lean/<plugin>/<skill>.lean`.
+function leanProofPath(relPath) {
+  const m = /^([^/]+)\/skills\/([^/]+)\/SKILL\.md$/.exec(relPath);
+  return m ? path.join('lean', m[1], `${m[2]}.lean`) : null;
+}
+
+const normalizeLean = (text) => text.replace(/\s+/g, ' ').trim();
+
+// Theorem signatures a block states inside its module doc comments: a line
+// opening with `theorem` and its indented continuation lines.
+function statedTheorems(source) {
+  const stated = [];
+  for (const doc of source.matchAll(/\/-!([\s\S]*?)-\//g)) {
+    const lines = doc[1].split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (!/^theorem\s/.test(lines[i])) continue;
+      const sig = [lines[i]];
+      while (i + 1 < lines.length && /^\s+\S/.test(lines[i + 1])) sig.push(lines[++i]);
+      stated.push(normalizeLean(sig.join('\n')));
+    }
+  }
+  return stated;
+}
+
+// Theorem signatures a proof file declares after its block prefix: the text
+// from `theorem` up to the `:=` that opens the proof.
+function provedTheorems(code) {
+  const proved = [];
+  for (const m of code.matchAll(/^theorem\s[\s\S]*?(?=^\S|$(?![\s\S]))/gm)) {
+    let depth = 0;
+    const text = m[0];
+    for (let i = 0; i < text.length - 1; i++) {
+      const ch = text[i];
+      if ('([{⟨'.includes(ch)) depth++;
+      else if (')]}⟩'.includes(ch)) depth--;
+      else if (depth === 0 && ch === ':' && text[i + 1] === '=') {
+        proved.push(normalizeLean(text.slice(0, i)));
+        break;
+      }
+    }
+  }
+  return proved;
+}
+
+const theoremName = (sig) => sig.split(' ')[1];
+
+function elaborateLean(lean, file) {
+  let output = '';
+  let status = 0;
+  try {
+    output = execFileSync(lean, [file], { encoding: 'utf8', stdio: 'pipe', timeout: 300000, cwd: projectRoot });
+  } catch (e) {
+    status = e.status ?? 1;
+    output = `${e.stdout || ''}${e.stderr || ''}` || e.message;
+  }
+  const diagnostics = output.split('\n').filter(line => /(error|warning):/.test(line));
+  return status !== 0 || diagnostics.length > 0
+    ? diagnostics.slice(0, 3).join(' | ') || `exit ${status}`
+    : null;
+}
+
 function checkLeanDefinition() {
   const CHECK = 'lean-definition';
   let lean;
+  const claimedProofFiles = new Set();
   // GROUND is the session primitive every Lean block reads; one text serves all,
   // so a block that edits its copy has forked the primitive.
   let groundSource = null;
@@ -1877,13 +1946,53 @@ function checkLeanDefinition() {
       results.fail.push({ check: CHECK, file: relPath, message: `GROUND section differs from ${groundSource.file} — the session primitive is one text across Lean blocks` });
       failed = true;
     }
-    if (/(?<![\w'.])sorry(?![\w'])/.test(code)) {
-      results.fail.push({ check: CHECK, file: relPath, message: 'Lean Definition block contains `sorry` — every stated claim must be proved or removed' });
+    const proofRel = leanProofPath(relPath);
+    const proofFull = proofRel && path.join(projectRoot, proofRel);
+    const proof = proofFull && fs.existsSync(proofFull) ? fs.readFileSync(proofFull, 'utf8') : null;
+    if (proofRel) claimedProofFiles.add(proofRel);
+    for (const [label, text] of [['Lean Definition block', code], [proofRel, proof === null ? '' : stripLeanComments(proof)]]) {
+      if (/(?<![\w'.])sorry(?![\w'])/.test(text)) {
+        results.fail.push({ check: CHECK, file: relPath, message: `${label} contains \`sorry\` — every stated claim must be proved or removed` });
+        failed = true;
+      }
+      for (const m of text.matchAll(/^\s*(?:private\s+|protected\s+)*axiom\s+([^\s:({[]+)/gm)) {
+        results.fail.push({ check: CHECK, file: relPath, message: `${label} declares \`axiom ${m[1]}\` — a contract assumes nothing without ground; state a judgment as \`opaque\` or a parameter` });
+        failed = true;
+      }
+    }
+    for (const m of code.matchAll(/^(?:private\s+|protected\s+)*theorem\s+([^\s:({[]+)/gm)) {
+      results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block proves \`theorem ${m[1]}\` in place — a proof is verification, not contract: state the signature in a doc comment and prove it in ${proofRel}` });
       failed = true;
     }
-    for (const m of code.matchAll(/^\s*(?:private\s+|protected\s+)*axiom\s+([^\s:({[]+)/gm)) {
-      results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block declares \`axiom ${m[1]}\` — a contract assumes nothing without ground; state a judgment as \`opaque\` or a parameter` });
+    const stated = statedTheorems(source);
+    if (proof === null) {
+      if (stated.length > 0) {
+        results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block states ${stated.length} theorem(s) but ${proofRel} does not exist` });
+        failed = true;
+      }
+    } else if (!proof.startsWith(source)) {
+      results.fail.push({ check: CHECK, file: relPath, message: `${proofRel} does not open with this SKILL.md's Lean block verbatim — regenerate its prefix from the block` });
       failed = true;
+    } else {
+      const proved = provedTheorems(proof.slice(source.length));
+      const provedByName = new Map(proved.map(sig => [theoremName(sig), sig]));
+      const statedNames = new Set(stated.map(theoremName));
+      for (const sig of stated) {
+        const match = provedByName.get(theoremName(sig));
+        if (match === undefined) {
+          results.fail.push({ check: CHECK, file: relPath, message: `Stated \`theorem ${theoremName(sig)}\` has no proof in ${proofRel}` });
+          failed = true;
+        } else if (match !== sig) {
+          results.fail.push({ check: CHECK, file: relPath, message: `Stated \`theorem ${theoremName(sig)}\` differs from its signature in ${proofRel}` });
+          failed = true;
+        }
+      }
+      for (const sig of proved) {
+        if (!statedNames.has(theoremName(sig))) {
+          results.fail.push({ check: CHECK, file: relPath, message: `${proofRel} proves \`theorem ${theoremName(sig)}\`, which the SKILL.md block does not state` });
+          failed = true;
+        }
+      }
     }
     if (failed) continue;
 
@@ -1892,29 +2001,46 @@ function checkLeanDefinition() {
       results.warn.push({ check: CHECK, file: relPath, message: 'No Lean toolchain reachable ($LEAN, PATH, ~/.elan/bin/lean) — elaboration not run for this Lean Definition block' });
       continue;
     }
-    const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'lean-definition-'));
-    const file = path.join(dir, 'Definition.lean');
-    fs.writeFileSync(file, source);
-    let output = '';
-    let status = 0;
-    try {
-      output = execFileSync(lean, [file], { encoding: 'utf8', stdio: 'pipe', timeout: 300000 });
-    } catch (e) {
-      status = e.status ?? 1;
-      output = `${e.stdout || ''}${e.stderr || ''}` || e.message;
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+    let problem;
+    if (proof === null) {
+      const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'lean-definition-'));
+      const file = path.join(dir, 'Definition.lean');
+      fs.writeFileSync(file, source);
+      try {
+        problem = elaborateLean(lean, file);
+        if (problem) problem = problem.replaceAll(dir, '');
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    } else {
+      problem = elaborateLean(lean, proofFull);
     }
-    const diagnostics = output.split('\n').filter(line => /(error|warning):/.test(line));
-    if (status !== 0 || diagnostics.length > 0) {
-      results.fail.push({
-        check: CHECK,
-        file: relPath,
-        message: `Lean Definition block does not elaborate cleanly: ${diagnostics.slice(0, 3).join(' | ').replaceAll(dir, '') || `exit ${status}`}`
-      });
+    if (problem) {
+      results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block does not elaborate cleanly: ${problem}` });
       continue;
     }
-    results.pass.push({ check: CHECK, file: relPath, message: 'Lean Definition block elaborates with no error, warning, sorry, or axiom' });
+    results.pass.push({
+      check: CHECK,
+      file: relPath,
+      message: proof === null
+        ? 'Lean Definition block elaborates with no error, warning, sorry, or axiom'
+        : `Lean Definition block and its ${stated.length} stated theorem(s) elaborate from ${proofRel} with no error, warning, sorry, or axiom`
+    });
+  }
+
+  // A proof file with no Lean block to state its theorems proves nothing the
+  // runtime surface carries.
+  const leanDir = path.join(projectRoot, 'lean');
+  if (fs.existsSync(leanDir)) {
+    for (const plugin of fs.readdirSync(leanDir, { withFileTypes: true })) {
+      if (!plugin.isDirectory()) continue;
+      for (const file of fs.readdirSync(path.join(leanDir, plugin.name))) {
+        const rel = path.join('lean', plugin.name, file);
+        if (file.endsWith('.lean') && !claimedProofFiles.has(rel)) {
+          results.fail.push({ check: CHECK, file: rel, message: 'Proof file has no protocol SKILL.md Lean block that states its theorems' });
+        }
+      }
+    }
   }
 }
 

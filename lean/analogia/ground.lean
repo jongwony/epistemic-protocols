@@ -1,17 +1,3 @@
----
-name: ground
-description: "Audit what an analogical mapping licenses about an account already in play: warrants each fit claim from cited evidence, not assent. Type: (MappingUncertain, AI, GROUND, R) → MappingAssessment"
----
-
-# Analogia Protocol
-
-Audit what a mapping licenses: construct the correspondences between an abstract structure and the target account in play, warrant each fit claim from evidence the protocol can cite, and report which of the intended inferences the mapping supports, which it blocks, and which stay undetermined. Type: `(MappingUncertain, AI, GROUND, R) → MappingAssessment`.
-
-## Definition
-
-**Analogia** (ἀναλογία): A dialogical act of auditing analogical inference, where AI detects that what a mapping licenses is uncertain, settles the comparison focus and the inferences at stake, constructs the correspondences, warrants each fit claim against evidence it can reach and states what would defeat it, and reports the resulting verdicts with their limits. The user's utterance supplies grounds and records what they adopt; it never promotes a claim to warranted, because assent is not evidence about the world.
-
-```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
 Every `opaque` declaration is a judgment that is yours to make from the material in front of
@@ -525,61 +511,56 @@ def grounding : Op → Annot × String
 -/
 
 end Analogia
-```
 
-## Mode Activation
+/-! Proofs of the theorems the block above states. The block above is the SKILL.md Lean
+    block verbatim; lean-definition checks that prefix and matches every stated signature. -/
 
-`/ground` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
+namespace Analogia
 
-### Activation heuristics and exceptions
+variable {P : Type}
 
-Activate where a target account is already in play and what the mapping licenses about it is open: an abstract framework being applied to a concrete case, a possible structural mismatch, or a located abstraction tested against its own members. Prior-session recall indices may seed domain decomposition; they do not settle a constitutive judgment.
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t := ⟨[u.val], rfl⟩
 
-The reader's first encounter with either domain is a different deficit. Where the target account is not yet in play — where what is wanted is to come to hold an account rather than to audit one — that is explanation, and it hands off to a capability that explains the unfamiliar domain; this protocol stops there rather than teaching the domain it was invoked to audit. Absence of evidence that an account is in play establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
+theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
+    e.basis = none := by simp [Turn.basis, h]
 
-Skip AI-guided activation when what the mapping licenses is already settled in context, the output is purely concrete, or no abstract framework is being applied. Route an unlocated, merely sensed essence over accumulated instances to `/induce`; retain a located abstraction tested against its own members as self-grounding. Framework selection and factual context insufficiency remain their own primary deficits.
+theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c := by
+  simp [collect, h]
 
-### Evidence loading
+theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
+    (hn : UnsupportedNarrowing c) : report c = .focusGate := by
+  simp [report, hu, hn]
 
-Read code, configuration, documentation, and other available artifacts when the target domain is recorded there. When the relevant source or target structure exists primarily in external APIs, standards, scholarship, or industry material, fetch that evidence and keep its source address visible in the trace.
+theorem assessment_converged (c : Context P) (h : report c = .assessment) :
+    focusSettled c ∧ converged c := by
+  unfold report at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · rename_i h2
+      split at h
+      · cases h
+      · split at h
+        · cases h
+        · split at h
+          · rename_i h5
+            refine ⟨?_, h5⟩
+            apply Classical.byContradiction
+            intro hn
+            exact h2 (.inl hn)
+          · cases h
 
-Where a claim turns on what an artifact does rather than on what it says about itself, exercise it over the case that separates the readings and cite the result.
+theorem check_never_assent {c : Context P} {x : FitClaim} {scope : String} (s : Cite c)
+    (ok : (checkCoord (P := P) x scope).admits s.kind) : s.kind ≠ .utterance := ok
 
-## Protocol
+theorem purpose_by_utterance {c : Context P} {s : Cite c}
+    (ok : (axisCoord (P := P) .purpose).admits s.kind) : s.kind = .utterance := ok
 
-### User-facing realization
+theorem superseded_first (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : Supersedes (fuse c u)) :
+    ground respond c (u :: us) = ⟨fuse c u, .superseded⟩ := by
+  simp [ground, h]
 
-Before assessing, read back the intended conclusions beside the comparison focus and cite the request or settled purpose they come from. When that question changes, show what was added, removed or reformulated and why; a removed unanswered question is outside the revised scope, not resolved. At the focus gate, show each option's consequence before asking: a reframe within the committed pair revises that comparison, while replacing a committed domain ends this audit and starts a new question.
-
-Present the whole assessment in everyday language: the comparison focus; what the mapping is being asked to license; every correspondence with its fit claim, one concrete scenario, and what actually warrants that claim; and for each intended inference, whether it holds, is blocked, or is undetermined, with how far it reaches.
-
-Beside each claim that matters, state the scope its grounds were checked within, what would change it, and who can reach that evidence or why neither party currently can. Carry out the ones this session can reach before presenting, and put the ones only the user holds as the questions they are. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
-
-For self-grounding, render a partition only with the grounds supporting its full member allocation and grouping. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
-
-Then state what a later turn would change, and proceed without asking for a verdict. When a revision of the intended conclusions narrows them with no basis in the request or the settled purpose, do not re-read the same context: put the comparison focus to the user at the focus gate. Read all its determinate acts together; a changed purpose or intended conclusion reopens settlement and readback, retaining the mapping when only the intended conclusions changed, while evidence reopens the earliest affected assessment step. Evidence moves the assessment: a fact, a source, a counterexample, a result from running something. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption and withdrawal are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did. If the turn says one of the two domains is the wrong one, say plainly that this ends the current question rather than adjusting it, and start the new one from what was just said, carrying the evidence but none of the verdicts.
-
-Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing a focus gate requires placing evidence before its question and option-specific consequences inside the options.
-
-### Intensity
-
-| Level | When | Format |
-|-------|------|--------|
-| Light | One inference, one obvious correspondence | Compact rendering of the same required assessment trace |
-| Medium | Several inferences or partial correspondences | Required assessment trace grouped by inference and bearing claim |
-| Heavy | Complex transfer or structural mismatch | Required assessment trace with expanded domain decomposition and instantiations |
-
-## Rules
-
-- **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **Convergence is over inferences, not correspondences**: Derive and read back what the mapping is being asked to license from the request and settled purpose before constructing or reassessing it, and read completion over those inferences. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it.
-- **Every bearing claim carries its own defeater**: For each fit claim an intended inference turns on, state what evidence, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
-- **Audit, not instruction**: This protocol takes a target account already in play. Where the reader does not yet hold one, the deficit is explanation and routes there; do not teach the domain under audit.
-- **Recognition over Recall**: Present structured alternatives with anticipatable futures only for a genuine domain decision. Keep the turn-reading constructors internal, so the reader acts in their own language rather than selecting a meta-label.
-- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question about the assessment is exploration; answer it without asking the reader to classify their own turn.
-- **Option-set relay test**: Relay a focus axis only where the user's words, a citable standing rule, or a source turn of the text under audit showing that one value is admissible settles it; the decomposition's own output settles nothing. The comparison purpose is never relayed: this audit closes on evidence, so no later utterance of the user's would cover a purpose the AI chose. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
-- **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
-- **Bounded reach**: State the limits supported by the cited grounds and their checked scopes in the same breath as every Licensed verdict. A mapping presented without its breaking point produces confident wrong inference, which is the failure this protocol exists to catch.
-- **Self-grounding visibility**: Treat a case as self-grounding only where the source abstraction is located and its member instances are the target. Surface the full member partition and the grounds supporting it before routing split to the `/conduct` decompose-recovery recipe or trim to `/induce`. An unresolved basis carries no partition recommendation. Analogia supplies the partition evidence while the downstream checkpoint constitutes cell membership.
-- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Zero-gap surfacing**: Present a zero-gap finding with its reasoning before deactivation.
+end Analogia

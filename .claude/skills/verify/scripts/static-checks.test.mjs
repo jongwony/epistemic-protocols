@@ -135,6 +135,49 @@ describe('lean-definition', () => {
     assert.deepEqual(leanFailures, []);
   });
 
+  it('keeps proofs out of the block and the proof file matched to it', () => {
+    const root = copyWorkingTree();
+    const target = leanFiles[0];
+    try {
+      const filePath = path.join(root, target);
+      const original = readFileSync(filePath, 'utf-8');
+      const proofRelative = target.replace(/^([^/]+)\/skills\/([^/]+)\/SKILL\.md$/, 'lean/$1/$2.lean');
+      const proofPath = path.join(root, proofRelative);
+      const originalProof = readFileSync(proofPath, 'utf-8');
+      const fence = original.indexOf('```lean\n') + '```lean\n'.length;
+      const close = original.indexOf('\n```', fence);
+      const block = original.slice(fence, close);
+      const leanFailures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
+      const restore = () => { writeFileSync(filePath, original); writeFileSync(proofPath, originalProof); };
+
+      writeFileSync(filePath, original.slice(0, fence) + `${block}\ntheorem mutation_inline : True := trivial` + original.slice(close));
+      let failures = leanFailures();
+      assert.ok(failures.some((m) => m.includes('proves `theorem mutation_inline` in place')), failures.join('\n'));
+      assert.ok(failures.some((m) => m.includes('does not open with')), failures.join('\n'));
+      restore();
+
+      const stated = /^theorem\s+(\S+)[^\n]*$/m.exec(originalProof.slice(originalProof.indexOf('/-! Proofs of the theorems')));
+      assert.ok(stated, 'no proved theorem found to mutate');
+      const tail = originalProof.indexOf(stated[0], originalProof.indexOf('/-! Proofs of the theorems'));
+      writeFileSync(proofPath, originalProof.slice(0, tail) + stated[0].replace(stated[1], `${stated[1]} (mutationBinder : Nat)`) + originalProof.slice(tail + stated[0].length));
+      failures = leanFailures();
+      assert.ok(failures.some((m) => m.includes(`Stated \`theorem ${stated[1]}\` differs`)), failures.join('\n'));
+      restore();
+
+      const end = originalProof.lastIndexOf('\nend ');
+      writeFileSync(proofPath, `${originalProof.slice(0, end)}\ntheorem mutation_unstated : True := trivial\n${originalProof.slice(end)}`);
+      failures = leanFailures();
+      assert.ok(failures.some((m) => m.includes('proves `theorem mutation_unstated`, which the SKILL.md block does not state')), failures.join('\n'));
+      restore();
+
+      writeFileSync(proofPath, originalProof.slice(0, tail) + `theorem mutation_renamed${stated[0].slice(`theorem ${stated[1]}`.length)}` + originalProof.slice(tail + stated[0].length));
+      failures = leanFailures();
+      assert.ok(failures.some((m) => m.includes(`Stated \`theorem ${stated[1]}\` has no proof`)), failures.join('\n'));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('rejects sorry, a project axiom, an unelaborated reference, and a non-vocabulary annotation', () => {
     const root = copyWorkingTree();
     const target = leanFiles[0];
@@ -145,6 +188,9 @@ describe('lean-definition', () => {
       const close = original.indexOf('\n```', fence);
       const mutate = (body) => original.slice(0, fence) + body + original.slice(close);
       const block = original.slice(fence, close);
+      const proofRelative = target.replace(/^([^/]+)\/skills\/([^/]+)\/SKILL\.md$/, 'lean/$1/$2.lean');
+      const proofPath = path.join(root, proofRelative);
+      const originalProof = readFileSync(proofPath, 'utf-8');
 
       writeFileSync(filePath, mutate(`${block}\ntheorem mutation_open : 1 = 2 := sorry`));
       let failures = run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
@@ -169,9 +215,14 @@ describe('lean-definition', () => {
 
       const elaborated = leanVerdicts.find((r) => r.file === target && clean.pass.includes(r));
       if (elaborated) {
-        writeFileSync(filePath, mutate(`${block}\ndef mutation_dangling : Nat := undeclaredReference`));
+        // Keep the proof file's prefix in step with the block so elaboration, not the
+        // prefix match, is what rejects the dangling reference.
+        const dangling = `${block}\ndef mutation_dangling : Nat := undeclaredReference`;
+        writeFileSync(filePath, mutate(dangling));
+        writeFileSync(proofPath, originalProof.replace(block, dangling));
         failures = run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
         assert.ok(failures.some((m) => m.includes('does not elaborate')), failures.join('\n'));
+        writeFileSync(proofPath, originalProof);
       }
     } finally {
       rmSync(root, { recursive: true, force: true });

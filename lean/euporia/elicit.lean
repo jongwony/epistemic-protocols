@@ -1,17 +1,3 @@
----
-name: elicit
-description: "Reverse-trace decision coordinates for axis-undetermined intent. Type: (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint"
----
-
-# Euporia Protocol
-
-Resolve abstract aporia through Extended-Mind reverse induction. Type: `(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint`.
-
-## Definition
-
-**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia, where AI reverse-traces decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment), surfaces them as cycle-emergent dimension projections, and shapes the converging intent through user answers until the endpoint resolves.
-
-```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
 Every `opaque` declaration is a judgment that is yours to make from the material in front of
@@ -379,43 +365,68 @@ def grounding : Op → Annot × String
 -/
 
 end Euporia
-```
 
-## Scope Boundary
+/-! Proofs of the theorems the block above states. The block above is the SKILL.md Lean
+    block verbatim; lean-definition checks that prefix and matches every stated signature. -/
 
-Euporia surfaces grounded decision coordinates without adjudicating which sibling protocol owns them. A coordinate that exposes a missing fact, undefined boundary, or unrecognizable direction remains a coordinate with its substrate basis; the user decides what to reach for next.
+namespace Euporia
 
-## Coordinate Monotonicity Invariant
+variable {P : Type}
 
-An accepted coordinate is revised only by a person's utterance. An answer joins the context and adds determinations; a later re-trace, a substrate read, or an AI turn is not ground for revising a value the user gave. When the re-trace finds a contradiction with an accepted value, surface it as such and leave the value standing until the user's own words change it.
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t := ⟨[u.val], rfl⟩
 
-## Mode Activation
+theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
+    e.basis = none := by simp [Turn.basis, h]
 
-`/elicit` remains directly invocable. AI-guided activation requires an axis-undetermined intent backed by an external substrate signal from Codebase, Rules, Session, or Environment. Utterance evidence may ground a projection after activation, but cannot activate Euporia by itself.
+theorem acceptedAux_skip (x : Coordinate) (pre ts : Context P) (acc : Option Value)
+    (h : ∀ t ∈ ts, t.basis ≠ some .utterance) :
+    acceptedAux x pre ts acc = acc := by
+  induction ts generalizing pre acc with
+  | nil => rfl
+  | cons t ts ih =>
+    have hn : ¬ (t.basis = some .utterance) := h t (by simp)
+    simp only [acceptedAux, hn, ↓reduceIte]
+    exact ih _ _ (fun t' ht' => h t' (by simp [ht']))
 
-On the AI-guided path, the immutable Phase 1 scan may precede confirmation; the first Phase 2 response confirms or declines the run. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance and substrate slice was resolved or dismissed in this session.
+theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option Value) :
+    acceptedAux x pre (c ++ e) acc = acceptedAux x (pre ++ c) e (acceptedAux x pre c acc) := by
+  induction c generalizing pre acc with
+  | nil => simp [acceptedAux]
+  | cons t ts ih =>
+    simp only [List.cons_append, acceptedAux]
+    rw [ih]
+    simp
 
-## Protocol
+theorem accepted_revised_only_by_utterance (c e : Context P) (x : Coordinate)
+    (h : ∀ t ∈ e, t.basis ≠ some .utterance) : accepted (c ++ e) x = accepted c x := by
+  simp only [accepted]
+  rw [acceptedAux_append]
+  exact acceptedAux_skip x _ e _ h
 
-### Phase 2 surfacing format
+theorem silence (respond : Context P → Response P) (c : Context P) :
+    elicit respond c [] = .holding c := rfl
 
-At Phase 2, render the cycle counter and, from cycle 2 onward, a plain one-sentence readback of current `I'`. For each surfaced projection, show its inferred axis, coordinate questions, cited substrate basis, and any substrate-derived default. Mark each parked coordinate as returning in the same wording and with the same basis. Let the listed coordinates establish what is currently in play without a derived count or resolved/total tally, then present per-coordinate provide-or-defer slots, a way to say the intent is resolved as read back, and Dismiss-with-residual, and yield the turn. An answer beyond the slots — a value for an unlisted coordinate, a dimension the surface excluded, a changed framing — joins the context whole, and the next re-trace reads it.
+theorem resolved_here (respond : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : answer (fuse c u) = .resolved) :
+    elicit respond c (u :: us) = .resolved (endpoint (fuse c u) false) := by
+  simp [elicit, h]
 
-Utterance evidence quotes the user's actual fragment; it does not attribute an unstated mental model. Only projections with concrete substrate basis reach the surface. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
+theorem parked_in_residual (c : Context P) (d : Bool) (x : Coordinate) (hx : x ∈ parked c) :
+    ResidualItem.coordinate x ∈ residualAt c d := by
+  simp only [residualAt, List.mem_append, List.mem_map]
+  exact .inl (.inr ⟨x, hx, rfl⟩)
 
-### Intensity
+theorem endpoint_ends_in_utterance (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : ResolvedEndpoint P) (h : elicit respond c us = .resolved r) :
+    ∃ (c₀ : Context P) (u : Utterance P), r.context = fuse c₀ u := by
+  induction us generalizing c with
+  | nil => simp [elicit] at h
+  | cons u us ih =>
+    simp only [elicit] at h
+    split at h
+    · cases h; exact ⟨c, u, rfl⟩
+    · cases h; exact ⟨c, u, rfl⟩
+    · exact ih _ h
 
-| Level | When | Format |
-|-------|------|--------|
-| Light | One grounded dimension | Brief surface and per-coordinate slots |
-| Medium | Several dimensions or partial evidence | Full surface at coordinate granularity |
-| Heavy | Multi-axis, weak-basis, multi-cycle prospect | Full surface with per-coordinate evidence and explicit residuals |
-
-## Rules
-
-- **Recognition over Recall**: Present structured dimension projections with anticipatable post-answer states.
-- **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
-- **Option-set relay test**: Present a single dominant coordinate value as Extension; it becomes part of the resolved intent only through the user's resolving answer, which covers it. Keep the answer slot constitutive when different user value weightings sustain multiple values.
-- **Parked-coordinate identity**: A deferred coordinate returns each cycle as the same question with the same basis, marked as returning; it stops being parked only through a value the user gives it or termination residual folding.
-- **Re-trace over the whole context**: Each re-trace reads the fused context — the seed, every answer, and every substrate read — not a summary of the values provided, so a dimension the user named in their own words is traced like any other.
-- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+end Euporia

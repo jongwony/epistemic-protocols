@@ -1,21 +1,3 @@
----
-name: bound
-description: "Define epistemic boundaries from a provisional whole map, opening decisions to the depth needed for delegation. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary"
----
-
-# Horismos Protocol
-
-Define epistemic boundaries through a recognizable whole map and progressive examination. Type: `(BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary`.
-
-## Definition
-
-- **Horismos** (ὁρισμός) takes a task whose boundary is undefined, including one whose decision structure or sufficient depth of examination is not yet recognizable, and produces a source-grounded boundary with its unresolved remainder.
-- Before asking the user what to settle or entrust, construct the relevant whole provisional map of decisions, obligations, assumptions, and dependencies. A settled goal and a user-supplied inventory are not prerequisites. Bound this whole to the current context and show what remains unknown.
-- Let the user open any axis, see the concrete content and consequences needed to judge it, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
-- Keep the boundary question distinct from its settlement disposition and from the content of the decision. For ownership, the disposition assigns the named decision directly; an allocation question is a separate domain only when the source makes allocation itself the subject.
-- Every round ends with the closing offer. Accepting it stops the protocol at that depth and sets the boundary from the context as it then stands; every other response continues, withdraws, or names a different deficit.
-
-```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
 Every `opaque` declaration is a judgment that is yours to make from the material in front of
@@ -411,42 +393,49 @@ authority. This protocol defines the boundary; it does not execute or enforce do
 -/
 
 end Horismos
-```
 
-## Mode Activation
+/-! Proofs of the theorems the block above states. The block above is the SKILL.md Lean
+    block verbatim; lean-definition checks that prefix and matches every stated signature. -/
 
-- `/bound` remains directly invocable.
-- When a decision boundary or the structure needed to judge it is undefined, invoke the protocol with the available task context. Keep goal, success criteria, and scope open where the user has left them open.
-- During AI-guided activation, apply current safety boundaries, capability limits, and explicit instructions. Skip activation when source-defined direction already settles the requested boundary, when the user expressly requests proceeding without this interaction, or when the same unresolved finding was dismissed and its ground has not changed.
-- On explicit invocation with no undefined boundary, the first round presents that finding with its reasoning and a path to reopen missed structure, and ends with the closing offer like any other round.
+namespace Horismos
 
-## Protocol
+variable {P : Type}
+variable (respond : Context P → Response P)
 
-- At the first round, show the relevant whole draft before asking the user to choose its applicable parts or examination depth. Give every included item its decision-relevant reason and conditional connections. State the scope of discovery and what is unknown; do not require the user to invent an obligation inventory.
-- When the goal is open, distinguish the work that can investigate it, the judgment that would select it, and obligations conditional on that selection. Propose a way to handle those questions without supplying an unchosen goal.
-- In every round, make existing user decisions, exercised AI discretion, unaccepted proposals, and unresolved items recognizable through their source and setting status. Put the choices still open beside the round's question, and show every proposal that would entrust an irreversible later act to AI, so that accepting the displayed arrangement has a visible consequence at the moment it is offered. End the round with the closing offer, rendered in the user's language.
-- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis. Keep the whole overview in view and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
-- At an opened settlement question, materialize UserSupplies, AIPropose, and AIAutonomous in the user's idiom: the named person supplies the decision, AI proposes for that person's selection, or AI chooses within stated limits. A displayed default is one of these proposals and binds only through its actual acceptance.
-- When the user corrects an assumption, the scope, or the question the boundary answers, the next round reads the corrected context: revise affected content and obligations, show their changed implications, and preserve independent commitments. Keep excluded or conditional parts legible in the remainder where they matter to later reliance.
-- When the user accepts the closing offer, stop at that depth. The acceptance settles what it covers, including the proposals shown in that round; what it does not cover stays open in the residual. Present the constituted whole and its remaining questions without asking for a second approval of the same arrangement.
-- When a response is not yet readable as one of continuing, accepting, withdrawing, or a different deficit, continue: the next round shows the candidate readings with their consequences, and nothing is committed from the unsettled reading.
-- When the request turns out to need a different resolution — a missing pre-execution fact, analytical lenses, what a mapping licenses, or a contrast that must be instantiated — relay that deficit with its basis and the command hint, and end here.
-- Before handing off or using a resulting boundary, read the COMPOSITION contract with its cited sources. Preserve the holder of every retained judgment, the reach of each grant, and any condition that must be revisited.
-- When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t := ⟨[u.val], rfl⟩
 
-## Rules
+theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
+    e.basis = none := by simp [Turn.basis, h]
 
-- **Recognition over Recall**: Present structured options with anticipatable post-selection states.
-- **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
-- **Whole before selection**: Construct and present the relevant provisional whole before asking what to settle, inspect, or entrust; the user's existing goal and map can remain incomplete.
-- **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole. Bind requested examination to the next round; a request to see content adopts none of it.
-- **Dynamic rendering**: Keep boundary questions and examination dimensions runtime-grounded, with recognizable seeds and a path to extend or replace the framing.
-- **Source-bound settlement**: A retained judgment is filled only by a person's utterance that supports it; a proposal, an AI turn, inspection, and silence fill nothing. Apply acceptance only within its actual referent and limits.
-- **Relay under closure**: Fill a retained judgment's proposal by relay within a round only because closure requires the user's acceptance to cover it; what the acceptance does not cover stays open.
-- **Dependency revision**: Reconcile changed ground and transitive dependents before the next round or the closing read, retaining supported decisions and recording unresolved consequences.
-- **Prior-map provenance**: Read an earlier boundary through the turns it cites. Its citation still points at the same source; whether that source still supports the settlement is judged against the context that now stands, and an unreachable or unsupported setting is advisory.
-- **Settlement across delegation**: Carry and read the source-defined question, judgment holder, limits, dependencies, and residual at downstream use; work reassignment and a summary supply no additional grant.
-- **Closing offer**: End every round with the closing offer, and with every irreversible AI-delegation proposal in view. Set the boundary only when the offer is accepted; silence holds the gate, and scan exhaustion, a visit count, or an already-determined arrangement supplies no acceptance.
-- **Zero-signal surfacing**: Present a zero-signal finding with its reasoning and a path to reopen missed structure.
-- **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, continue and present those readings and their consequences. Commit nothing from an unresolved reading.
-- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+theorem silence (c : Context P) : bound respond c [] = .holding c := rfl
+
+theorem continue_folds (c : Context P) (xs ys : List (Utterance P))
+    (h : AllCont respond c xs) :
+    bound respond c (xs ++ ys) = bound respond (foldRounds respond c xs) ys := by
+  induction xs generalizing c with
+  | nil => rfl
+  | cons u us ih =>
+    simp only [AllCont] at h
+    simp only [List.cons_append, bound, h.1, foldRounds]
+    exact ih _ h.2
+
+theorem stop_here (c : Context P) (u : Utterance P) (us : List (Utterance P))
+    (h : verdict (fuse c u) = .finish) :
+    bound respond c (u :: us) = .defined (close (fuse c u)) := by
+  simp [bound, h]
+
+theorem defined_ends_in_utterance (c : Context P) (us : List (Utterance P))
+    (b : DefinedBoundary P) (h : bound respond c us = .defined b) :
+    ∃ (c₀ : Context P) (u : Utterance P), b.context = fuse c₀ u := by
+  induction us generalizing c with
+  | nil => simp [bound] at h
+  | cons u us ih =>
+    simp only [bound] at h
+    split at h
+    · exact ih _ h
+    · cases h; exact ⟨c, u, rfl⟩
+    · cases h
+    · cases h
+
+end Horismos

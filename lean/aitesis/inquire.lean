@@ -1,17 +1,3 @@
----
-name: inquire
-description: "Collect every piece of context the AI can reach on its own, then hand back what it cannot reach as the user's own unknown. Type: (ContextInsufficient, AI, INQUIRE, Prospect) → SufficientContext"
----
-
-# Aitesis Protocol
-
-Collect every piece of context the AI can reach on its own, then hand back what it cannot reach as the user's own unknown. Type: `(ContextInsufficient, AI, INQUIRE, Prospect) → SufficientContext`.
-
-## Definition
-
-**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach, where AI infers what the prospect leaves uncertain, pushes each uncertainty through every channel it can read or run on its own until no channel is left, writes down for each one what that reached — a fact that settles it, a finding whose ground it declares short, a detection that answers no uncertainty raised, or nothing — and hands what only the user can settle, or nobody yet knows, back to the user as their own unknown. The beneficiary is the user's epistemic state; the AI's collection is the instrument. Whether a turn halts on that handoff belongs to the harness; this contract inscribes what is presented and what an answer, when one comes, changes.
-
-```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
 Every `opaque` declaration is a judgment that is yours to make from the material in front of
@@ -479,47 +465,49 @@ def grounding : Op → Annot × String
 -/
 
 end Aitesis
-```
 
-## Mode Activation
+/-! Proofs of the theorems the block above states. The block above is the SKILL.md Lean
+    block verbatim; lean-definition checks that prefix and matches every stated signature. -/
 
-`/inquire` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
+namespace Aitesis
 
-### Prior-decision scan
+variable {P : Type}
 
-When a prospect touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, begin Phase 1 with a bounded scan over persistent memory and project-local prior-decision history even without an explicit reference. Prior-session recall indices may seed Phase 0; they are one channel among the others, and current evidence governs what an item lands as.
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t := ⟨[u.val], rfl⟩
 
-### Activation exceptions
+theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
+    e.basis = none := by simp [Turn.basis, h]
 
-Skip AI-guided activation when the user explicitly requests proceeding without context verification or when no prospect exists to verify. An item the user dismissed stays skipped for the current session; whether a newly raised item is that one is read from the user's dismissal itself.
+theorem state_unique {c : Context P} {i : Item} {s s' : State}
+    (h : inState c s i) (h' : inState c s' i) : s = s' := h.2.symm.trans h'.2
 
-### Accumulation signal
+theorem no_reentry (c : Context P) (i : Item) (hreg : Registered c i) (hself : SameItem c i i)
+    (hd : (dismissal c i).isSome = true) : ¬ working c i := by
+  rintro (⟨_, hn⟩ | ⟨_, hl⟩)
+  · exact hn ⟨i, hreg, hself⟩
+  · rw [hl] at hd; cases hd
 
-When the recorded skipped observations across at least three sessions cluster around one `EscapeCondition` with a consistent rationale, revisit what counts as a channel the AI may run on its own.
+theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
+    {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
+    (c[s.idx]'s.lt).origin ≠ .assistant := by
+  intro ho
+  have hk := s.ok
+  rw [ai_never_grounds _ ho] at hk
+  cases hk
 
-## Protocol
+theorem empty_pass (c : Context P) (h : push c = []) : pass c = c := by
+  simp [pass, h]
 
-### User-facing realization
+theorem ends_sufficient {c c' : Context P} (h : CollectionEnds c c') :
+    ∃ c₀, c' = pass c₀ ∧ (¬ PassChanged c₀ (pass c₀) ∨ ¬ WorthAnotherPass (pass c₀)) := by
+  induction h with
+  | stop c h => exact ⟨c, rfl, h⟩
+  | more _ _ _ _ _ ih => exact ih
 
-At Phase 2, render each landed item in everyday language: what was found, the state it reached, why it reached no further, and the basis — beside what an answer would change. Order by priority. Say plainly which items are the user's to settle and which the AI found without full warrant; name a detect-only finding as one, on its own line. State what the protocol takes if an answer comes — a fact, a place to look, "I don't know either", a dismissal, "that is enough" — without holding the turn for it. Keep every landing open to free-response correction.
+theorem sufficient_opens_no_pass (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : answer (fuse c u) = some .sufficient) :
+    inquire respond c (u :: us) = .declared (fuse c u) := by
+  simp [inquire, h]
 
-Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
-
-### Intensity
-
-| Level | When | Format |
-|-------|------|--------|
-| Light | Marginal priority items only | Brief relay: each item with its state and basis in one line |
-| Medium | Significant priority items, collection partially resolved | Structured relay framing each item beside its evidence and what an answer would change |
-| Heavy | Critical priority, several unresolved items | Detailed evidence + channels tried + findings with their shortfalls + the user's unknowns named as such |
-
-## Rules
-
-- **Recognition over Recall**: Present each landed item with its state, reason, and basis, so the reader recognizes what remains rather than reconstructing it.
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
-- **Option-set relay test**: Surfacing is a relay: it presents and proceeds. An item lands where the material puts it; the user's answer, when it comes, is one more channel, not a gate this protocol holds.
-- **Judgment is the model's, the product is a field**: Which state an item reached and why are judged from the material, and the judgment is written into the item's landing — its state, reason, and basis. A resolved landing carries the citation of what sufficed; the AI's own records and landings are material the next pass reads, never the ground an item stands on. A sentence is not a substitute for an empty field.
-- **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and the item moves to its next channel. What that evidence means for another item is read at that item's next landing, not decided when it lands. Only the user's answer disposes of an item, and a declaration of sufficiency reaches every unresolved item, observed or not.
-- **Finding and completion stay apart**: That an item carries a provisional finding says nothing about whether collection is complete. Completion is a pass that changed nothing, or after which a further pass is not worth reaching for — no channel left worth trying for any live item, no landing that moved, no scan worth another pass — judged on channels, landings and the stopping judgment, never on how a finding reads.
-- **Boundary named, not crossed**: For every item that is not Resolved, say what was tried, what was found, and where it falls short; leave disposition to the user. What lies past the AI's reach is another deficit, read from the trace by whatever routes the turn after.
-- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+end Aitesis
