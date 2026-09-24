@@ -84,41 +84,91 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// A Definition block is authored in one of two notations: the DSL (a bare
+// ``` fence) or Lean 4 (a ```lean fence, see docs/structural-specs.md). Both
+// carry the same section markers; in Lean the marker opens a module doc
+// comment (`/-! ── NAME ──`), optionally closed on the same line (` -/`).
+// A bare `-/` line only closes such a comment and is not section content.
+const SECTION_HEADER = /^(?:\/-!\s*)?── ([^\n]+?) ──(?:\s*-\/)?$/;
+
+function sectionHeaderName(trimmedLine) {
+  const m = SECTION_HEADER.exec(trimmedLine);
+  return m ? m[1] : null;
+}
+
+function collectSection(lines, start) {
+  const collected = [];
+  for (let j = start; j < lines.length; j++) {
+    const trimmed = lines[j].trim();
+    if (trimmed === '```' || sectionHeaderName(trimmed) !== null) break;
+    if (trimmed === '-/') continue;
+    collected.push(lines[j]);
+  }
+  return collected.join('\n').replace(/^\n+|\n+$/g, '');
+}
+
 function extractFormalSection(content, sectionName) {
   const lines = content.split('\n');
-  const header = `── ${sectionName} ──`;
-  let collecting = false;
-  const collected = [];
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!collecting) {
-      if (trimmed === header) collecting = true;
-      continue;
-    }
-    if (trimmed === '```' || /^── [^\n]+ ──$/.test(trimmed)) break;
-    collected.push(line);
-  }
-
-  return collected.join('\n').replace(/^\n+|\n+$/g, '');
+  const at = lines.findIndex(line => sectionHeaderName(line.trim()) === sectionName);
+  return at === -1 ? '' : collectSection(lines, at + 1);
 }
 
 function extractAllFormalSections(content, sectionSuffix) {
   const lines = content.split('\n');
   const sections = [];
-  const headerPattern = new RegExp(`^── (?:\\w+ )*${escapeRegex(sectionSuffix)} ──$`);
+  const namePattern = new RegExp(`^(?:\\w+ )*${escapeRegex(sectionSuffix)}$`);
 
   for (let i = 0; i < lines.length; i++) {
-    if (!headerPattern.test(lines[i].trim())) continue;
-    const collected = [];
-    for (let j = i + 1; j < lines.length; j++) {
-      const trimmed = lines[j].trim();
-      if (trimmed === '```' || /^── [^\n]+ ──$/.test(trimmed)) break;
-      collected.push(lines[j]);
-    }
-    sections.push(collected.join('\n').replace(/^\n+|\n+$/g, ''));
+    const name = sectionHeaderName(lines[i].trim());
+    if (name === null || !namePattern.test(name)) continue;
+    sections.push(collectSection(lines, i + 1));
   }
   return sections;
+}
+
+// True when the Definition block is authored in Lean 4 notation.
+function isLeanDefinition(content) {
+  return /^## Definition$(?:(?!^```)[\s\S])*?^```lean$/m.test(content);
+}
+
+// The Lean Definition block's source, without its fence.
+function extractLeanDefinition(content) {
+  const m = /^```lean\n([\s\S]*?)^```$/m.exec(content);
+  return m ? m[1] : null;
+}
+
+// Lean source with comments removed, for token-level predicates that must not
+// read doc prose (a doc comment may name `sorry` or `axiom` as words).
+function stripLeanComments(source) {
+  let out = '';
+  let depth = 0;
+  for (let i = 0; i < source.length; i++) {
+    if (source.startsWith('/-', i)) { depth++; i++; continue; }
+    if (depth > 0 && source.startsWith('-/', i)) { depth--; i++; continue; }
+    if (depth > 0) { if (source[i] === '\n') out += '\n'; continue; }
+    if (source.startsWith('--', i)) {
+      const nl = source.indexOf('\n', i);
+      if (nl === -1) break;
+      i = nl - 1;
+      continue;
+    }
+    if (source[i] === '"') {
+      let end = i + 1;
+      while (end < source.length && source[end] !== '"') end += source[end] === '\\' ? 2 : 1;
+      out += '""';
+      i = end;
+      continue;
+    }
+    out += source[i];
+  }
+  return out;
+}
+
+// Names a Lean section declares at top level (inductive, structure, def, …).
+const LEAN_DECLARATION = /^(?:noncomputable\s+|private\s+|protected\s+)*(?:inductive|structure|def|abbrev|opaque|class|theorem)\s+([^\s:({[]+)/gm;
+
+function leanDeclarationNames(section) {
+  return [...section.matchAll(LEAN_DECLARATION)].map(m => m[1]);
 }
 
 // ============================================================
@@ -547,13 +597,29 @@ function checkToolGrounding() {
       continue;
     }
     const toolBindings = [];
+    const lean = isLeanDefinition(content);
+
+    // Lean notation: each entry is one arm of the grounding function,
+    //   | .op => (.annotation, "Tool: description")
+    // so operation, classification, and tool are read from that arm.
+    const leanBindingPattern = /^\s*\|\s*\.([\w']+)\s*=>\s*\(\.(\w+),\s*"(\w+)/gm;
 
     // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
     // Capture: operation, qualifier (optional), classification, tool
     // Supports: Phase prefix, qualifier word (e.g., "Qc", "Qᵣs"), Greek letters, ?'/
     const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+([\w\u0370-\u03FFᵣ]+))?\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
-    while ((match = bindingPattern.exec(groundingSection)) !== null) {
+    if (lean) {
+      while ((match = leanBindingPattern.exec(groundingSection)) !== null) {
+        toolBindings.push({
+          operation: match[1],
+          qualifier: null,
+          classification: match[2],
+          tool: match[3]
+        });
+      }
+    }
+    while (!lean && (match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({
         operation: match[1],
         qualifier: match[2] || null,
@@ -593,7 +659,23 @@ function checkToolGrounding() {
       continue;
     }
 
+    // Lean notation carries no [Tool] suffix: a mandatory binding is wired when
+    // PHASE TRANSITIONS names its operation constructor.
+    if (lean) {
+      for (const binding of toolBindings) {
+        if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
+        if (!new RegExp(`\\.${escapeRegex(binding.operation)}\\b`).test(phaseSection)) {
+          results.fail.push({
+            check: 'tool-grounding',
+            file: relPath,
+            message: `Mandatory binding ".${binding.operation} (${binding.classification})" not named in PHASE TRANSITIONS`
+          });
+        }
+      }
+    }
+
     for (const binding of toolBindings) {
+      if (lean) break;
       // Skip internal operations
       if (binding.tool === 'Internal') continue;
 
@@ -639,7 +721,10 @@ function checkToolGrounding() {
     }
 
     // Check 6f: Verify convergence behavior is explicitly classified with interaction kind
-    if (!/\bconverge\s*\((extension|constitution)\)/i.test(groundingSection)) {
+    const convergeClassified = lean
+      ? toolBindings.some(b => b.operation === 'converge' && ['extension', 'constitution'].includes(b.classification))
+      : /\bconverge\s*\((extension|constitution)\)/i.test(groundingSection);
+    if (!convergeClassified) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,
@@ -661,7 +746,10 @@ function checkToolGrounding() {
       if (axis.size > 0) {
         for (const rawLine of groundingSection.split('\n')) {
           if (rawLine.includes('-- Realization:')) continue;
-          for (const entry of rawLine.matchAll(/\((constitution|extension)\)[^→]*→\s*TextPresent\+(\w+)/gi)) {
+          const entryPattern = lean
+            ? /\(\.(constitution|extension),\s*"TextPresent\+(\w+)/gi
+            : /\((constitution|extension)\)[^→]*→\s*TextPresent\+(\w+)/gi;
+          for (const entry of rawLine.matchAll(entryPattern)) {
             const kind = entry[1].toLowerCase();
             const expected = axis.get(kind);
             if (expected && entry[2].toLowerCase() !== expected.toLowerCase()) {
@@ -883,6 +971,12 @@ function checkSpecVsImpl() {
   // Matches: ── TYPES ──, and any other section ending in " TYPES ──"
   function extractTypeNames(content) {
     const typeNames = [];
+    if (isLeanDefinition(content)) {
+      for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
+        typeNames.push(...leanDeclarationNames(typesSection));
+      }
+      return typeNames;
+    }
     for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
       const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
       let match;
@@ -944,7 +1038,9 @@ function checkSpecVsImpl() {
       // Check if type is cross-referenced elsewhere in formal block
       // (FLOW, LOOP, MODE STATE, other TYPES definitions, etc.)
       // Remove the type's own definition line(s) to avoid self-match
-      const defLinePattern = new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
+      const defLinePattern = isLeanDefinition(content)
+        ? new RegExp(`^(?:noncomputable\\s+)?(?:inductive|structure|def|abbrev|opaque|class|theorem)\\s+${escaped}(?![\\w'.]).*$`, 'gm')
+        : new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
       const formalWithoutOwnDef = formalBlock.replace(defLinePattern, '');
       const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef);
 
@@ -1544,6 +1640,10 @@ function checkPartitionInvariant() {
     const content = fs.readFileSync(filePath, 'utf8');
     const protocolName = relPath.split('/')[0];
 
+    // A Lean Definition block states a partition as a proposition the
+    // elaborator checks; the `-- Invariant:` line format is the DSL's.
+    if (isLeanDefinition(content)) continue;
+
     // Extract MODE STATE section (from marker to closing ```)
     const modeStateMatch = content.match(/── MODE STATE ──([\s\S]*?)```/);
     if (!modeStateMatch) continue;
@@ -1647,6 +1747,10 @@ function checkGateAnswerReference() {
       content = fs.readFileSync(fullPath, 'utf-8');
     } catch { continue; }
 
+    // A Lean Definition block resolves its references by elaboration, which
+    // lean-definition runs; this check reads the DSL's `→ Stop → A` arrows.
+    if (isLeanDefinition(content)) continue;
+
     const typesSection = extractFormalSection(content, 'TYPES') ?? '';
     const modeStateSection = extractFormalSection(content, 'MODE STATE') ?? '';
     const identifier = "[\\p{L}_][\\p{L}\\p{N}_'’]*";
@@ -1712,6 +1816,99 @@ function checkGateAnswerReference() {
         message: `Gate answer reference check completed (${resolvedAnswers} resolved formal answers, ${unresolvedAnswers} unresolved formal answers)`
       });
     }
+  }
+}
+
+// ============================================================
+// Check: Lean Definition
+// ============================================================
+// A Definition block authored in Lean 4 is a contract only if it elaborates:
+// a reference that does not resolve, a type that does not check, or a proof
+// left as `sorry` is a defect the DSL could not surface. The verdict follows
+// mechanically from the block, so it is admitted here: token predicates always
+// run, and elaboration runs with the core Lean toolchain (no Std, no Mathlib)
+// when one is reachable — `$LEAN`, `lean` on PATH, or `~/.elan/bin/lean`. With
+// no toolchain the elaboration verdict is reported as not obtained (warn),
+// never as passed.
+function resolveLeanBinary() {
+  const candidates = [process.env.LEAN, 'lean', path.join(require('os').homedir(), '.elan/bin/lean')]
+    .filter(Boolean);
+  for (const bin of candidates) {
+    try {
+      execFileSync(bin, ['--version'], { stdio: 'pipe', timeout: 30000 });
+      return bin;
+    } catch { /* try the next candidate */ }
+  }
+  return null;
+}
+
+function checkLeanDefinition() {
+  const CHECK = 'lean-definition';
+  let lean;
+  // GROUND is the session primitive every Lean block reads; one text serves all,
+  // so a block that edits its copy has forked the primitive.
+  let groundSource = null;
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (!isLeanDefinition(content)) continue;
+
+    const source = extractLeanDefinition(content);
+    if (source === null) {
+      results.fail.push({ check: CHECK, file: relPath, message: 'Definition opens a ```lean fence that never closes' });
+      continue;
+    }
+    const code = stripLeanComments(source);
+    let failed = false;
+    const ground = extractFormalSection(content, 'GROUND');
+    if (!ground) {
+      results.fail.push({ check: CHECK, file: relPath, message: 'Lean Definition block has no `── GROUND ──` section' });
+      failed = true;
+    } else if (groundSource === null) {
+      groundSource = { file: relPath, text: ground };
+    } else if (ground !== groundSource.text) {
+      results.fail.push({ check: CHECK, file: relPath, message: `GROUND section differs from ${groundSource.file} — the session primitive is one text across Lean blocks` });
+      failed = true;
+    }
+    if (/(?<![\w'.])sorry(?![\w'])/.test(code)) {
+      results.fail.push({ check: CHECK, file: relPath, message: 'Lean Definition block contains `sorry` — every stated claim must be proved or removed' });
+      failed = true;
+    }
+    for (const m of code.matchAll(/^\s*(?:private\s+|protected\s+)*axiom\s+([^\s:({[]+)/gm)) {
+      results.fail.push({ check: CHECK, file: relPath, message: `Lean Definition block declares \`axiom ${m[1]}\` — a contract assumes nothing without ground; state a judgment as \`opaque\` or a parameter` });
+      failed = true;
+    }
+    if (failed) continue;
+
+    if (lean === undefined) lean = resolveLeanBinary();
+    if (lean === null) {
+      results.warn.push({ check: CHECK, file: relPath, message: 'No Lean toolchain reachable ($LEAN, PATH, ~/.elan/bin/lean) — elaboration not run for this Lean Definition block' });
+      continue;
+    }
+    const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'lean-definition-'));
+    const file = path.join(dir, 'Definition.lean');
+    fs.writeFileSync(file, source);
+    let output = '';
+    let status = 0;
+    try {
+      output = execFileSync(lean, [file], { encoding: 'utf8', stdio: 'pipe', timeout: 300000 });
+    } catch (e) {
+      status = e.status ?? 1;
+      output = `${e.stdout || ''}${e.stderr || ''}` || e.message;
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+    const diagnostics = output.split('\n').filter(line => /(error|warning):/.test(line));
+    if (status !== 0 || diagnostics.length > 0) {
+      results.fail.push({
+        check: CHECK,
+        file: relPath,
+        message: `Lean Definition block does not elaborate cleanly: ${diagnostics.slice(0, 3).join(' | ').replaceAll(dir, '') || `exit ${status}`}`
+      });
+      continue;
+    }
+    results.pass.push({ check: CHECK, file: relPath, message: 'Lean Definition block elaborates with no error, warning, sorry, or axiom' });
   }
 }
 
@@ -2487,6 +2684,7 @@ try {
   checkOnboardSync();
   checkPartitionInvariant();
   checkGateAnswerReference();
+  checkLeanDefinition();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
   checkFramingReadoutEnforcement();

@@ -16,7 +16,7 @@ flowchart LR
     C -->|Sufficient| F[Defined boundary and explicit remainder]
 ```
 
-The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one.
+The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. Every round ends with the same offer: say "as is" and the boundary is set from what the conversation now holds; any other answer continues, withdraws, or names a different need.
 
 For example, a project map might show that the audience is already chosen, the data handling approach needs comparison, and the rollout date is still open. The user can inspect data handling, rule out external transmission, entrust the comparison work, and retain the final choice. The map then updates the affected options and keeps the rollout date unresolved. Finishing means this boundary is sufficient for the next move; it does not silently resolve every open project question.
 
@@ -35,7 +35,7 @@ claude plugin install horismos@epistemic-protocols
 
 ## Contract and verification
 
-- [SKILL.md](skills/bound/SKILL.md) defines provisional discovery, kind fit, progressive examination, source-bound settlement, and convergence.
+- [SKILL.md](skills/bound/SKILL.md) defines provisional discovery, progressive examination, source-bound settlement, and closing on the user's "as is" — as a Lean 4 block that elaborates.
 - [Round composition](skills/bound/references/round-composition.md) supplies occasion-specific presentation rules.
 - [Repository verification](../AGENTS.md#verification) gives the contributor workflow. For this plugin's static and packaging checks, run these from the repository root, sequentially:
 
