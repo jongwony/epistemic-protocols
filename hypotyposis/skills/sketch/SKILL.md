@@ -26,14 +26,17 @@ Hypotyposis(I) → sketch(c, utterances), where c is the fused session context:
   Phase 0: fitUnrecognized fails → the non-activation basis → not activated
   round(c): the spec relay — this round's focus, the perception it needs, the variant briefs,
     and every provisional coordinate, each with its basis; it yields no turn →
-    produce (each sketch enters c as it was written) → present → Qfit → Stop
+    produce (an Artifact sketch enters c as observed at creation; a Text sketch is carried
+    in the presentation) → present → Qfit → Stop
   while a recognition stands unplaced: Qplace → Stop
   next utterance u: c' := fuse(c, u) → verdict(c') →
+    cont: where the AI finds a realization the round or the placement needs unavailable, or
+      a sibling deficit demonstrated: the boundary relay → account → BoundaryExit, before
+      anything further is produced or presented
     cont, a recognition standing: Qplace again
+    cont, no new round called for (no marks and no acts, an interrogation): the gate again
     cont: the next round from c' — marks, a fit on this focus, a finish (which starts the
-      recognition), a spec revision, an interrogation, or any reading not yet settled; the
-      draft reads them all. Where the draft finds a realization it needs unavailable or a
-      sibling deficit demonstrated: account → BoundaryExit, before anything is produced
+      recognition), a spec revision, or any reading not yet settled; the draft reads them all
     place: retain and verify → every reference resolves: release the rest → RecognizedForm
       | a reference failed: Qplace again with the failure declared; nothing released
     dissolve: account → DissolutionExit
@@ -389,9 +392,16 @@ inductive Verdict
 /-- **Your judgment** on the whole latest utterance read with the context. -/
 opaque verdict : Context P → Verdict
 
-/-- **Your judgment**, at drafting, before anything is produced: a realization this round
-    requires is one this session cannot supply, or a sibling deficit is demonstrated. -/
-opaque BoundaryAtRelay : Context P → Prop
+/-- **Your judgment**, before anything further is produced or presented: a realization this
+    round requires, or one the placement needs, is one this session cannot supply, or a sibling
+    deficit is demonstrated. The boundary relay then takes the place of the next presentation. -/
+opaque AIBoundary : Context P → Prop
+
+/-- **Your judgment**: the latest answer calls for a new round — marks, a fit on this focus, a
+    fresh start, or a spec revision. An answer with no marks and no acts, and an interrogation
+    answered within the sketch's placeholder status, present the gate again with nothing
+    produced. -/
+opaque Redraws : Context P → Prop
 
 /-- **Your record**: the contrary grounds you presented before the gate the closing utterance
     answered — a version failing a referent it was checked against, a commitment it breaks, a
@@ -408,7 +418,7 @@ structure Closing (P : Type) where
   context : Context P
   dissent : List String
 
-/-- `RecognizedForm`, read from `context`: the settled commitments (`operative`), the fixture,
+/-- `RecognizedForm`, read from `context` as it stood before any release: the settled commitments (`operative`), the fixture,
     the recognition, the trace of every mark, the residual — axes left open and material the
     person entrusted to a round that never came — and the coordinates still `provisional`. -/
 structure RecognizedForm (P : Type) where
@@ -446,14 +456,16 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A round is one step of a structural recursion over the person's utterances. `relay` is the
-spec relay: it presents `spec`, a `RoundSpec` carrying `SpecOwes`, and yields no turn. The
+spec relay: it presents `spec`, a `RoundSpec` carrying `SpecOwes`, and yields no turn; where
+`AIBoundary` holds, the boundary relay takes its place. The
 sketches are then produced (`.produce`; in parallel through `.produceDelegate` when a spec has
 more than one target, one sketch per executor, each temp-isolated). `respond` is the
 presentation ending at Qfit, or at Qplace while a recognition stands.
 -/
 
-/-- **Your production** under the relayed spec: each sketch as it was written, its concretum
-    and versioned reference registered at creation. Existing project files stay unchanged. -/
+/-- **Your production** under the relayed spec: each Artifact sketch as observed at creation,
+    its versioned reference registered then. A Text sketch is narration the presentation
+    (`respond`) carries as recorded. Existing project files stay unchanged. -/
 opaque produce : Context P → List (Evidence P)
 
 def runRound (relay : Context P → Response P) (c : Context P) : Context P :=
@@ -467,7 +479,8 @@ opaque retain : Context P → List (Evidence P)
 
 /-- **Your account** at a terminal: release every sketch the context leaves unplaced — all of
     them on a withdrawal, a dissolution, or a boundary — and verify each absence; a failure
-    retries once, then is observed and declared with a handoff. -/
+    retries once, then is observed and declared with a handoff. What it leaves is `Accounted`:
+    every sketch with a declared disposition. -/
 opaque release : Context P → List (Evidence P)
 
 def settle (c : Context P) : Context P := c ++ (retain c).map (·.val)
@@ -496,8 +509,8 @@ noncomputable def sketch (relay respond : Context P → Response P) :
         else sketch relay respond (c₁ ++ [(respond c₁).val]) us
       | none => sketch relay respond (c₁ ++ [(respond c₁).val]) us
     | .cont =>
-      if Placing c' then sketch relay respond (c' ++ [(respond c').val]) us
-      else if BoundaryAtRelay c' then .boundary (closing (c' ++ [(relay c').val]))
+      if AIBoundary c' then .boundary (closing (c' ++ [(relay c').val]))
+      else if Placing c' ∨ ¬ Redraws c' then sketch relay respond (c' ++ [(respond c').val]) us
       else
         let c₁ := runRound relay c'
         sketch relay respond (c₁ ++ [(respond c₁).val]) us
@@ -506,7 +519,7 @@ open Classical in
 noncomputable def start (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   if ¬ fitUnrecognized c then .notActivated c
-  else if BoundaryAtRelay c then .boundary (closing (c ++ [(relay c).val]))
+  else if AIBoundary c then .boundary (closing (c ++ [(relay c).val]))
   else
     let c₁ := runRound relay c
     sketch relay respond (c₁ ++ [(respond c₁).val]) us
@@ -529,11 +542,11 @@ production wrote.
 theorem relay_before_production (relay : Context P → Response P) (c : Context P) :
     ∃ t, runRound relay c = c ++ [(relay c).val] ++ t
 
-While a recognition stands unplaced, an answer that continues produces nothing: Qplace is
-presented again.
-theorem placing_produces_nothing (relay respond : Context P → Response P) (c : Context P)
+While a recognition stands unplaced, or the answer calls for no new round, an answer that
+continues produces nothing: the gate is presented again.
+theorem held_gate_produces_nothing (relay respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hv : verdict (fuse c u) = .cont)
-    (hp : Placing (fuse c u)) :
+    (hb : ¬ AIBoundary (fuse c u)) (hh : Placing (fuse c u) ∨ ¬ Redraws (fuse c u)) :
     sketch relay respond c (u :: us) =
       sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us
 
@@ -606,7 +619,7 @@ def grounding : Op → Annot × String
   | .readAnswer        => (.sense, "Internal analysis: the latest utterance read whole with the context — the verdict, the marks, a fit, a finish, and the acts on the coordinates in view")
   | .qplace            => (.constitution, "present: mandatory placement gate — the recognized version and the capability it needs, a reference the person judges to outlive the session, beside the versions this run passed over; the person names the location and which of the others are kept and where; no default for either; after a retention failure the failure is declared before the gate, and the same location stays admissible")
   | .account           => (.transform, "artifact write, environment run: retain every placed version and verify each reference resolves to that exact concretum — one retry, then the failure is declared and Qplace presented again with nothing released; once every placed version is verified, release the sketches placement did not keep and verify each — one retry, then ReleaseFailed declared with a handoff")
-  | .assemble          => (.sense, "Internal analysis: RecognizedForm read from the context at the verified placement — the settled commitments, the fixture, the recognition, the trace, the residual, the coordinates still provisional, and the dissent attached to the closure")
+  | .assemble          => (.sense, "Internal analysis: RecognizedForm read from the context at the verified placement, before any release — the settled commitments, the fixture, the recognition, the trace, the residual, the coordinates still provisional, and the dissent attached to the closure")
   | .dissolutionRelay  => (.extension, "TextPresent+Proceed: when the person accepts or declares that no further encounter is owed — the sharpened description made the form recognizable without one, or the activation premise collapsed — state the basis, relay the settled commitments and every mark, attach any dissent, run account, stand down as DissolutionExit — a success, not an abandonment")
   | .boundaryRelay     => (.extension, "TextPresent+Proceed: named by the person at any gate, or by the AI at the spec relay before anything is produced — a sibling deficit demonstrated, or a realization this round requires that this session cannot supply; name the obligation and its basis, relay the record so far, run account, exit as BoundaryExit; the next protocol is the session's to choose")
   | .withdraw          => (.extension, "TextPresent+Proceed: explicit exit at any gate — the partial trace and residual declared, account enforced; EarlyExit. A hard interrupt yields no turn, so account cannot run: temp isolation's bounded lifecycle is the backstop")
@@ -664,7 +677,7 @@ Options:
 2. **Fit on this focus** — this version is adequate on this round's focus; the next round takes another focus
 3. **Finish** — this version is the form, for the purpose you state, with the axes you leave open
 ```
-With Mark, Fit, or Finish, name which of the readings shown beside the version you settle, reject, or replace; unnamed ones stay as they were. Name interrogating a sketch, sending back this round's focus, perception, or variants, contesting the premise, naming a boundary, and withdrawing as free-response paths; they are not numbered options. Where you read that no further encounter is owed, say so before the gate with its basis; the run stands down there only when the user accepts it.
+With Mark, Fit, or Finish, name which of the readings shown beside the version you settle, reject, or replace; unnamed ones stay as they were. Name interrogating a sketch, sending back this round's focus, perception, or variants, contesting the premise, naming a boundary, and withdrawing as free-response paths; they are not numbered options. An interrogation is answered within the sketch's placeholder status, and an answer with no marks and no acts presents the gate again; neither produces a new round. Where you read that no further encounter is owed, say so before the gate with its basis; the run stands down there only when the user accepts it.
 
 ### Phase 5: Placement Gate (Constitution)
 
@@ -675,7 +688,7 @@ Where does the recognized version live from here?
 Options:
 1. **Place** — name the location; the version is retained there and verified. Name any other versions worth keeping as revert points and where they go; the rest are released
 ```
-A version kept as a revert point is one the run passed over, never the recognized one. When a retention failed, say so before re-presenting; the same location stays admissible.
+A version kept as a revert point is one the run passed over, never the recognized one. When a retention failed, say so before re-presenting; the same location stays admissible. Where the placement needs a capability this session cannot supply, say so with its basis and exit at the boundary.
 
 ## Rules
 

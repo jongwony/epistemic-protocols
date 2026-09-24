@@ -21,12 +21,12 @@ theorem relay_before_production (relay : Context P → Response P) (c : Context 
     ∃ t, runRound relay c = c ++ [(relay c).val] ++ t :=
   ⟨_, rfl⟩
 
-theorem placing_produces_nothing (relay respond : Context P → Response P) (c : Context P)
+theorem held_gate_produces_nothing (relay respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hv : verdict (fuse c u) = .cont)
-    (hp : Placing (fuse c u)) :
+    (hb : ¬ AIBoundary (fuse c u)) (hh : Placing (fuse c u) ∨ ¬ Redraws (fuse c u)) :
     sketch relay respond c (u :: us) =
       sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [sketch, hv, hp]
+  simp [sketch, hv, hb, hh]
 
 theorem unverified_returns_to_placement (relay respond : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
@@ -57,9 +57,9 @@ theorem recognized_verified (relay respond : Context P → Response P) (c : Cont
         · exact ih _ h
       · exact ih _ h
     · split at h
-      · exact ih _ h
+      · cases h
       · split at h
-        · cases h
+        · exact ih _ h
         · exact ih _ h
 
 theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
@@ -81,9 +81,9 @@ theorem dissolved_by_person (relay respond : Context P → Response P) (c : Cont
         · exact ih _ h
       · exact ih _ h
     · split at h
-      · exact ih _ h
+      · cases h
       · split at h
-        · cases h
+        · exact ih _ h
         · exact ih _ h
 
 theorem settled_by_utterance {c : Context P} {a : Axis} {s : Cite c}
