@@ -37,7 +37,8 @@ Merismos(G) → apportion(c, utterances), where c is the fused session context:
   next utterance u: c' := fuse(c, u) →
     RouteBound at Qt → relay the route to /bound → Rerouted
     Confirm at Qc ∧ the structural invariants hold ∧ acceptance closed → AcceptResiduals →
-      Emit → package → park_carrier → record_handoff → converge → ConditionBearingUnitPlan
+      Emit → package → park_carrier → record_handoff → [the block records the carrier: converge →
+      ConditionBearingUnitPlan | it does not: reported unrecorded, with what is missing]
     Confirm with an invariant violated → Qc again, the violation named
     otherwise → pass(c') → the next presentation: an answer at Qu integrates or recuts; an
       Adjust rederives over the same units; a Reopen returns one unit's obligations to the
@@ -245,7 +246,8 @@ structure PlanUnit extends ProposedUnit where
     whole-draft relay, through AcceptUnit or OverrideFit on the cut Qu presented, or through
     Sufficient over the fitting cuts of the draft Qu displayed; each is a cut of a draft the
     context shows surfaced whole, and a unit whose fit is not `fits` entered only through
-    OverrideFit. A Reopen takes its unit out. The units hold pairwise disjoint obligations. -/
+    OverrideFit. A Reopen takes its unit out. The units hold pairwise disjoint obligations, and
+    their `UnitRef`s are pairwise distinct: one is never reused. -/
 opaque units : Context P → List PlanUnit
 
 /-- An obligation some unit holds or some out-of-scope declaration names. -/
@@ -270,7 +272,9 @@ def IsPartition (res : List Obligation) (d : List ProposedUnit) : Prop :=
     `autonomous_pack` placing at heuristic seams whatever no seam evidence reached — so
     `IsPartition (residual c) (draft c)`. A recut direction the context holds is drafted under.
     Where a region admits more than one workable cut, draw one and record nothing about the other.
-    It owns nothing and settles nothing; the next pass drafts what is left afresh. -/
+    It owns nothing and settles nothing; the next pass drafts what is left afresh — except after a
+    Sufficient, when the displayed draft stands: its still-unsettled cuts, none of them fitting,
+    are what Qu presents next, and it is not redrawn until those are settled. -/
 opaque draft : Context P → List ProposedUnit
 
 /-- **Your judgment** (the option-set relay test, read live at dispatch): no alternative cut of the
@@ -347,19 +351,22 @@ def Derivation.Bound (u : PlanUnit) (d : Derivation) : Prop :=
 
 /-- **Your derivation** for `u` (`Derive`): per obligation a verifiable predicate — completion or
     invariant — a residual, or a reservation; every obligation of `u` lands in at least one, and
-    `Derivation.Bound u`. Written once to the pass record and read back from it; an Adjust
+    `Derivation.Bound u`. You write each to exactly one: that single placement is how this step
+    reads the obligation, and a misplacement shows at Qc like any other reading here. Written once to the pass record and read back from it; an Adjust
     direction rewrites it over the same units — a withdrawn condition becoming a residual, a
     residual re-read as judgment-settled a reservation; a Reopen takes it out with its unit. The
     read is fallible and lands at Qc, where an Adjust can move an item either way. -/
 opaque derivation : Context P → PlanUnit → Derivation
 
-def Derivation.derives (d : Derivation) (o : Obligation) : Bool :=
-  d.compiled.any (·.obligation == o) || d.residuals.any (·.obligation == o) ||
+/-- `obligation_derived`: a residual counts for `u` only where it is keyed to `u`. -/
+def Derivation.derives (u : PlanUnit) (d : Derivation) (o : Obligation) : Bool :=
+  d.compiled.any (·.obligation == o) ||
+    d.residuals.any (fun r => r.unit == some u.ref && r.obligation == o) ||
     d.reserved.any (·.obligation == o)
 
 /-- `obligations_derived`. -/
 def obligationsDerived (c : Context P) : Bool :=
-  (units c).all (fun u => u.obligations.all (derivation c u).derives)
+  (units c).all (fun u => u.obligations.all ((derivation c u).derives u))
 
 def hasCompletion (u : PlanUnit) (d : Derivation) : Bool :=
   d.compiled.any (·.kind == .completion) ||
@@ -442,14 +449,20 @@ structure PlanCondition where
 /-- **Your derivation** (`DerivePlan`) of the conditions whose subject is the whole goal — final
     integration, global non-regression, a whole-goal invariant, or another scope the goal carries —
     run once and read back from the pass record, rewritten by an Adjust direction, and not
-    re-derived on Reopen. A completion criterion for the whole goal is not among them: the goal's
-    own statement of one closes `acceptance`. -/
+    re-derived on Reopen. A completion criterion for the whole goal may be among them, read from
+    the goal or introduced by an Adjust: it closes the acceptance question, Qt does not fire, and it
+    reaches the person at Qc, whose Confirm covers it. -/
 opaque planConditions : Context P → List PlanCondition
 
-/-- The whole-goal acceptance question, closed one of three ways. -/
+/-- `acceptance_present`, derived: a whole-goal condition of kind completion stands among the
+    derived conditions. A whole-goal invariant does not answer the acceptance question. -/
+def derivedAcceptance (c : Context P) : Bool :=
+  (planConditions c).any (fun p => p.scope == .wholeGoalAcceptance && p.kind == .completion)
+
+/-- The person's answer to the whole-goal acceptance question at Qt, where no derived criterion
+    closed it. -/
 inductive Acceptance
-  /-- a completion criterion for the whole goal: the goal states it, DefineNow defined it, or an
-      Adjust direction introduced it -/
+  /-- DefineNow: a completion criterion for the whole goal, defined now -/
   | defined (criterion : String)
   /-- ReserveJudgment: constitutively open — its right answer varies with the context accumulated
       by the moment the goal is judged accepted and with what the person has said by then -/
@@ -460,17 +473,16 @@ inductive Acceptance
 /-- **Your judgment**: the cited statement closes the acceptance question this way. -/
 opaque AcceptanceSupported : Context P → Turn P → Acceptance → Prop
 
-/-- Only a person's statement closes the acceptance question: the goal's own statement of a
-    criterion, or their answer at Qt or in an Adjust. -/
+/-- Only a person's statement answers Qt. -/
 def acceptanceCoord : Coord P Acceptance :=
   { admits := (· = .utterance), supports := AcceptanceSupported }
 
 -- elab: an open witness lets the occupancy reading below be declared `opaque`.
 instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
 
-/-- **Your judgment**: how the latest statement that reached the question closed it; open where
-    none has, and where an Adjust withdrew the defined criterion. Each answer revises the one
-    before it, so one value stands. -/
+/-- **Your judgment**: how the latest answer at Qt closed the question; open where none has, and
+    where an Adjust withdrew the defined criterion. Each answer revises the one before it, so one
+    value stands. -/
 opaque acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
@@ -493,15 +505,23 @@ def Acceptance.isUnbounded : Acceptance → Bool
   | .unbounded => true
   | _          => false
 
-/-- Every whole-goal acceptance requirement is bound to plan-terminal over the current unit
+/-- `plan_terminal(n)`, whole: its predicate and the evidence it rests on, both over `n`. -/
+def planTerminal (n : Nat) : PlanStateRequirement :=
+  let src : Cited := ⟨"the current plan's UnitResolution, accepted-residual and reservation projections",
+    "expected aggregate resolution count = " ++ toString n ++
+      "; all executable resolution conditions; aggregate accepted-completion record; aggregate reserved-completion record"⟩
+  ⟨.planTerminal n, ⟨[src], List.cons_ne_nil src []⟩⟩
+
+/-- Every whole-goal acceptance requirement is replaced by plan-terminal over the current unit
     count: `BindPlanRequirements`, run before every check. -/
 def bindPlan (c : Context P) (p : PlanCondition) : PlanCondition :=
-  if p.scope == .wholeGoalAcceptance then
-    { p with dischargeableWhen := { p.dischargeableWhen with predicate := .planTerminal (units c).length } }
+  if p.scope == .wholeGoalAcceptance then { p with dischargeableWhen := planTerminal (units c).length }
   else p
 
-/-- `plan_condition(d)`: the defined criterion as a completion condition over the whole goal. -/
+/-- `plan_condition(d)`: the criterion DefineNow defined, as a completion condition over the whole
+    goal; none where a derived criterion already closes the question. -/
 def acceptanceCondition (c : Context P) : Option PlanCondition :=
+  if derivedAcceptance c then none else
   match filledValue (acceptance c) with
   | some (.defined d) =>
     let src : Cited := ⟨"the statement that defined the whole-goal acceptance criterion", d⟩
@@ -534,6 +554,8 @@ def status (c : Context P) : InvariantStatus :=
     reservationGroundNamed := (units c).all (fun u => (derivation c u).reserved.all (·.ground != ""))
     planConditionsTopologyFree := (planOf c).all (fun p => TopologyFree c p.dischargeableWhen) }
 
+def acceptanceClosed (c : Context P) : Bool := derivedAcceptance c || isFilled (acceptance c)
+
 /-- The plan may be emitted: the five structural invariants hold and the acceptance question is
     closed. Topology-freedom is your reading over content: shown at Qc, and where you read a
     condition as naming topology and the person confirms, your reading rides the plan as dissent
@@ -541,7 +563,7 @@ def status (c : Context P) : InvariantStatus :=
 def closable (c : Context P) : Bool :=
   let s := status c
   s.coverageComplete && s.terminationCovered && s.obligationsDerived && s.oosSubstrateNamed &&
-    s.reservationGroundNamed && isFilled (acceptance c)
+    s.reservationGroundNamed && acceptanceClosed c
 
 /-- **Your reading**: a Reopen in the context postdates the plan conditions' derivation or their
     last Adjust. Surfaced before Qc; only an Adjust clears it, and it forces no re-derivation. -/
@@ -554,11 +576,12 @@ opaque EnteredConditions : Context P → Bool
 /-- The gate the next presentation opens. -/
 inductive Gate | qu | qt | qc
 
-/-- Qu while the residual holds an unsettled cut; Qt while the acceptance question is open, and at
-    every pass entry while no defined criterion stands — a later answer revising an earlier one;
-    Qc otherwise. -/
+/-- Qu while the residual holds an unsettled cut; Qc where a derived criterion closes the
+    acceptance question; Qt while it is open, and at every pass entry while no defined criterion
+    stands — a later answer revising an earlier one; Qc otherwise. -/
 def gate (c : Context P) : Gate :=
   if !(residual c).isEmpty then .qu
+  else if derivedAcceptance c then .qc
   else match filledValue (acceptance c) with
     | none => .qt
     | some a => if EnteredConditions c && !a.isDefined then .qt else .qc
@@ -639,8 +662,10 @@ structure Emission where
 def entry (u : PlanUnit) (r : UnitResolution) : UnitEntry :=
   ⟨u.ref, u.subject, u.obligations, r, u.capabilities, u.feasibility⟩
 
+/-- A derived criterion retracts a waiver or a reservation still standing, as an Adjust that
+    introduces acceptance does. -/
 def envelope (c : Context P) : Envelope :=
-  let a := filledValue (acceptance c)
+  let a := if derivedAcceptance c then none else filledValue (acceptance c)
   { acceptedResiduals := (units c).flatMap (fun u =>
       (derivation c u).accept.residuals.map (fun r => ⟨r.obligation, r.unit, r.kind⟩))
     reserved := (units c).flatMap (fun u => (derivation c u).reserved.map (fun s =>
@@ -739,7 +764,7 @@ def navigation (c : Context P) : NavigationBlock :=
     and states its purpose. That it was presented in the handoff output is the text itself. -/
 def HandoffRecorded (n : NavigationBlock) (c : Context P) : Prop :=
   n.purposeFrame ≠ "" ∧ n.canonicalLocator = ⟨carrierRecord c, sessionId c⟩ ∧
-    n.canonicalLocator.session ≠ ""
+    n.canonicalLocator.record ≠ "" ∧ n.canonicalLocator.session ≠ ""
 
 /-- Why the run ends without a plan. -/
 inductive RelayKind
@@ -764,7 +789,11 @@ inductive Outcome (P : Type)
   | relayed     (kind : RelayKind) (c : Context P)
   /-- `Rerouted`: the route to /bound is emitted; nothing is claimed as a plan -/
   | rerouted    (c : Context P)
+  /-- emitted, and the navigation block records its carrier -/
   | apportioned (a : Apportioned P)
+  /-- emitted, but the carrier write or its block came back incomplete: reported with what is
+      missing, never as apportioned -/
+  | unrecorded  (a : Apportioned P)
   | holding     (c : Context P)
 
 /-! ── MODE STATE ──
@@ -826,6 +855,7 @@ noncomputable def relayAt (c : Context P) : Option RelayKind :=
   else if ConditionBearing c then some .conditionBearing
   else none
 
+open Classical in
 noncomputable def apportion (respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -834,7 +864,9 @@ noncomputable def apportion (respond : Context P → Response P) :
     match verdict c' with
     | .routeBound => .rerouted c'
     | .confirm =>
-      if closable c' then .apportioned (close c')
+      if closable c' then
+        if HandoffRecorded (close c').navigation (close c').context then .apportioned (close c')
+        else .unrecorded (close c')
       else apportion respond (c' ++ [(respond c').val]) us
     | .cont =>
       let c₁ := pass c'
@@ -872,12 +904,12 @@ Silence integrates, confirms, and emits nothing.
 theorem silence (respond : Context P → Response P) (c : Context P) :
     apportion respond c [] = .holding c
 
-The plan is emitted only on the person's Confirm, over a closable plan, with your dissent
-attached.
+The plan is apportioned only on the person's Confirm, over a closable plan, with your dissent
+attached and the navigation block recording its carrier.
 theorem apportioned_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .confirm ∧
-      closable (fuse c₀ u) = true ∧ a = close (fuse c₀ u)
+      closable (fuse c₀ u) = true ∧ a = close (fuse c₀ u) ∧ HandoffRecorded a.navigation a.context
 
 The route to /bound is the person's RouteBound.
 theorem rerouted_by_person (respond : Context P → Response P) (c : Context P)
@@ -927,14 +959,21 @@ On a closable plan every unit is certified.
 theorem every_unit_certified (c : Context P) (h : closable c = true) (u : PlanUnit)
     (hu : u ∈ units c) : (resolveUnit u (derivation c u).accept).isSome = true
 
-Every unit entry joins exactly one unit's fields and its certificate; no other rides in `E`.
+Every unit entry is some unit's fields with its certificate; no other rides in `E`.
 theorem emitted_units_join (c : Context P) (e : UnitEntry) (he : e ∈ (emit c).units) :
     ∃ u ∈ units c, ∃ r, resolveUnit u (derivation c u).accept = some r ∧ e = entry u r
+
+On a closable plan every unit has its entry, and with the units' refs distinct no ref carries two.
+theorem unit_has_entry (c : Context P) (h : closable c = true) (u : PlanUnit) (hu : u ∈ units c) :
+    ∃ r, entry u r ∈ (emit c).units
+
+theorem emitted_refs_nodup (c : Context P) (h : ((units c).map (·.ref)).Nodup) :
+    ((emit c).units.map (·.ref)).Nodup
 
 Every whole-goal acceptance requirement is plan-terminal over the current unit count.
 theorem acceptance_bound_to_units (c : Context P) (p : PlanCondition) (hp : p ∈ planOf c)
     (hs : p.scope = .wholeGoalAcceptance) :
-    p.dischargeableWhen.predicate = .planTerminal (units c).length
+    p.dischargeableWhen = planTerminal (units c).length
 
 The waiver and the reserved criterion never stand together in what is emitted.
 theorem waiver_reservation_exclusive (c : Context P) :
@@ -994,7 +1033,7 @@ def grounding : Op → Annot × String
   | .emit            => (.track, "record: one entry per unit with its single certificate and its capability requirements and feasibility notes, one per plan condition, and exactly one envelope — the accepted residuals, the reservation set, the out-of-scope set, and the waiver flag kept apart")
   | .package         => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the dissent the Confirm carried")
   | .parkCarrier     => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
-  | .recordHandoff   => (.extension, "TextPresent+Proceed: the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only")
+  | .recordHandoff   => (.extension, "TextPresent+Proceed: the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A carrier write that returned no identity, or a block missing a half, is reported as unrecorded with what is missing, never as apportioned")
   | .tooThinRelay    => (.extension, "TextPresent+Proceed: nothing could be read from the goal's scope — no unit, no out-of-scope declaration; no plan is emitted")
   | .converge        => (.extension, "TextPresent+Proceed: the apportionment trace after the navigation block")
   | .seam            => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; a composition edge this file declares — /bound or /conduct into /apportion, /apportion into /conduct — is offered as a hint, never taken on its own; the edge to predicate enforcement needs its own activation; every Constitution gate here and in the next protocol fires unchanged")

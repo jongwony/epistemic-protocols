@@ -20,7 +20,7 @@ theorem silence (respond : Context P → Response P) (c : Context P) :
 theorem apportioned_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .confirm ∧
-      closable (fuse c₀ u) = true ∧ a = close (fuse c₀ u) := by
+      closable (fuse c₀ u) = true ∧ a = close (fuse c₀ u) ∧ HandoffRecorded a.navigation a.context := by
   induction us generalizing c with
   | nil => simp [apportion] at h
   | cons u us ih =>
@@ -30,8 +30,11 @@ theorem apportioned_by_person (respond : Context P → Response P) (c : Context 
     · rename_i hv
       split at h
       · rename_i hc
-        cases h
-        exact ⟨c, u, hv, hc, rfl⟩
+        split at h
+        · rename_i hr
+          cases h
+          exact ⟨c, u, hv, hc, rfl, hr⟩
+        · cases h
       · exact ih _ h
     · split at h
       · cases h
@@ -49,7 +52,7 @@ theorem rerouted_by_person (respond : Context P → Response P) (c : Context P)
       cases h
       exact ⟨c, u, rfl, hv⟩
     · split at h
-      · cases h
+      · split at h <;> cases h
       · exact ih _ h
     · split at h
       · cases h
@@ -114,9 +117,31 @@ theorem emitted_units_join (c : Context P) (e : UnitEntry) (he : e ∈ (emit c).
   obtain ⟨u, hu, r, hr, rfl⟩ := he
   exact ⟨u, hu, r, hr, rfl⟩
 
+theorem unit_has_entry (c : Context P) (h : closable c = true) (u : PlanUnit) (hu : u ∈ units c) :
+    ∃ r, entry u r ∈ (emit c).units := by
+  have hs := every_unit_certified c h u hu
+  obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp hs
+  refine ⟨r, ?_⟩
+  simp only [emit, List.mem_filterMap]
+  exact ⟨u, hu, by simp [hr]⟩
+
+theorem emitted_refs_nodup (c : Context P) (h : ((units c).map (·.ref)).Nodup) :
+    ((emit c).units.map (·.ref)).Nodup := by
+  have hsub : ((emit c).units.map (·.ref)).Sublist ((units c).map (·.ref)) := by
+    simp only [emit]
+    generalize units c = us
+    induction us with
+    | nil => simp
+    | cons u us ih =>
+      simp only [List.filterMap_cons, List.map_cons]
+      cases resolveUnit u (derivation c u).accept with
+      | none => exact ih.cons _
+      | some r => exact ih.cons_cons _
+  exact hsub.nodup h
+
 theorem acceptance_bound_to_units (c : Context P) (p : PlanCondition) (hp : p ∈ planOf c)
     (hs : p.scope = .wholeGoalAcceptance) :
-    p.dischargeableWhen.predicate = .planTerminal (units c).length := by
+    p.dischargeableWhen = planTerminal (units c).length := by
   simp only [planOf, List.mem_map] at hp
   obtain ⟨q, _, rfl⟩ := hp
   unfold bindPlan at hs ⊢
@@ -130,11 +155,13 @@ theorem waiver_reservation_exclusive (c : Context P) :
       (envelope c).reserved.any (·.subject.isAcceptance) = true) := by
   intro ⟨hu, hr⟩
   simp only [envelope] at hu hr
-  cases ha : filledValue (acceptance c) with
-  | none => simp [ha] at hu
-  | some a =>
-    cases a <;> simp_all [Acceptance.isUnbounded, Acceptance.isReserved,
-      List.any_flatMap, List.any_map, ReservedSubject.isAcceptance, Function.comp_def]
+  by_cases hd : derivedAcceptance c = true
+  · simp [hd] at hu
+  · cases ha : filledValue (acceptance c) with
+    | none => simp [hd, ha] at hu
+    | some a =>
+      cases a <;> simp_all [Acceptance.isUnbounded, Acceptance.isReserved,
+        List.any_flatMap, List.any_map, ReservedSubject.isAcceptance, Function.comp_def]
 
 theorem plan_reads_back (e : Emission) (ds : List String) :
     (package e ds).units = e.units ∧ (package e ds).planConditions = e.planConditions ∧
