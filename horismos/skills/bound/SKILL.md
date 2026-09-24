@@ -223,7 +223,8 @@ def RoundOwes (c : Context P) (r : BoundaryEssence c) : Prop :=
   (∀ e ∈ r.map, e.proposal = some .aiAutonomous → Irreversible c e.domain →
       e.domain ∈ r.irreversible)
 
-/-- A named deficit the request turns out to carry instead of this one. -/
+/-- A named deficit the request turns out to carry instead of this one. Evidence needed while
+    defining a boundary does not by itself turn the request into one of these. -/
 inductive Deficit
   /-- a missing pre-execution fact (hint: /inquire) -/
   | contextInsufficient
@@ -351,7 +352,18 @@ theorem continue_folds (c : Context P) (xs ys : List (Utterance P))
     simp only [List.cons_append, bound, h.1, foldRounds]
     exact ih _ h.2
 
-/-! ── CONVERGENCE ── -/
+/-! ── CONVERGENCE ──
+converge only on `finish`: the boundary is `close` of the context at the accepting utterance.
+  final readout: read the current map and its cited sources; derive the residual from every
+    nonempty remainder, explicitly empty when there is none.
+  trace: map each recorded boundary item to its settlement or its explicitly carried
+    remainder, with the source and effect of relevant corrections. Present the whole
+    arrangement and what the next move may and may not settle under it.
+  limits: closure defines a boundary at its constituted scope and depth; it supplies neither a
+    fixed project goal nor proof of the user's comprehension or exhaustive discovery.
+  non-convergent exits: withdrawal and a route emit no DefinedBoundary and keep their finding
+    or partial record.
+-/
 
 /-- The boundary is set where the user accepted the closing offer, from the context at that
     point; later utterances do not reach it. -/
