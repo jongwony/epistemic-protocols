@@ -18,10 +18,10 @@ theorem silence (respond : Context P → Response P) (c : Context P) :
   simp [conduct]
 
 theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (m : ConductedMethod P)
-    (h : conduct respond c us = .conducted m) :
-    ∃ (c₀ : Context P) (u : Utterance P), stage (fuse c₀ u) = .design ∧
-      verdict (fuse c₀ u) = .sufficient ∧ ¬ Unshown (fuse c₀ u) ∧ m = method (fuse c₀ u) := by
+    (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
+    (h : conduct respond c us = .conducted c₁ t) :
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = fuse c₀ u ∧ stage c₁ = .design ∧
+      verdict c₁ = .sufficient ∧ ¬ Unshown c₁ ∧ t = respond (handoffContext c₁) := by
   induction us generalizing c with
   | nil => simp [conduct] at h
   | cons u us ih =>
@@ -36,7 +36,7 @@ theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
       split at h
       · rename_i hv
         cases h
-        exact ⟨c, u, hs, hv.1, hv.2, rfl⟩
+        exact ⟨c, u, rfl, hs, hv.1, hv.2, rfl⟩
       · exact ih _ h
 
 theorem exit_only_shown (respond : Context P → Response P) (c : Context P) (u : Utterance P)
@@ -47,6 +47,13 @@ theorem exit_only_shown (respond : Context P → Response P) (c : Context P) (u 
 theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s)
     (h : filledValue (slot c s) = some v) : (method c).topology s = v := by
   simp [method, take, h]
+
+theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : isFilled (slot c s) = false)
+    (hg : (draft c s).ground = none) : take c s = defaultValue s := by
+  unfold take
+  cases h : slot c s with
+  | open_ _ => exact (draft c s).fallback hg
+  | filled a src allowed supported => rw [h] at hs; simp [isFilled] at hs
 
 theorem emergent_stop_never_silent (e : Emergent)
     (h : ObligationClass.needsStopGround ∈ e.classes) :
