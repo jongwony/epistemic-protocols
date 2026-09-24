@@ -4,7 +4,7 @@ Resolve via Extended-Mind reverse induction — `/elicit`.
 
 ## Overview
 
-Euporia opens a way through abstract aporia by reverse-tracing decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment) and surfacing them as cycle-emergent dimension projections. The user's answers explicate which coordinates were already implicit in their externalized cognition; resolution emerges through cycle iteration rather than axis-fixed extraction.
+Euporia opens a way through abstract aporia by reverse-tracing decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment) and surfacing them as cycle-emergent dimension projections. The user's answers explicate which coordinates were already implicit in their externalized cognition; resolution emerges through cycle iteration rather than axis-fixed extraction. Every answer joins the conversation whole — including a dimension you name beyond the listed options — and the next cycle re-traces from all of it; a value you gave changes only when your own words change it. The cycle ends when you say the intent is resolved as read back, or when you dismiss it with the rest delegated.
 
 The protocol stands in directional dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent through substrate to coordinates (top-down direction). The two compose as orthogonal directions of the same dialectic substrate. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
 
@@ -27,5 +27,5 @@ When the intent is axis-determined (a single axis-specific protocol covers the r
 
 ## Components
 
-- `skills/elicit/SKILL.md` — protocol definition (10 formal blocks, prose, rules)
+- `skills/elicit/SKILL.md` — protocol definition (a Lean 4 formal block that elaborates, prose, rules)
 - `.claude-plugin/plugin.json` — plugin manifest
