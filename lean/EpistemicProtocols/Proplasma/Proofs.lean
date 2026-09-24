@@ -13,31 +13,31 @@ namespace Proplasma
 
 variable {P : Type}
 
-theorem silence (relay respond : Context P → Response P) (c : Context P) :
-    preview relay respond c [] = .holding c := by
+theorem silence (ai : AITurns P) (c : Context P) : preview ai c [] = .holding c := by
   simp [preview]
 
-theorem relay_before_instantiation (relay : Context P → Response P) (c : Context P) :
-    ∃ t, fan relay c = c ++ [(relay c).val] ++ t :=
-  ⟨_, rfl⟩
+theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
+    ∃ t, fan ai c = c ++ [(ai.relay c).val] ++ t := by
+  unfold fan
+  simp only [List.append_assoc]
+  exact ⟨_, rfl⟩
 
-theorem spent_budget_no_refan (relay : Context P → Response P) (c : Context P)
-    (h : ¬ BudgetLeft c) : insufficiencyArms relay c = spentArms c := by
+theorem spent_budget_no_refan (ai : AITurns P) (c : Context P) (h : ¬ BudgetLeft c) :
+    insufficiencyArms ai c = spentArms c := by
   simp [insufficiencyArms, h]
 
-theorem materialize_unavailable (relay : Context P → Response P) (c c' : Context P)
-    (hv : verdict c' = .materialize) (hb : ¬ BudgetLeft c') : step relay c c' = .gate c' := by
+theorem materialize_unavailable (ai : AITurns P) (c c' : Context P)
+    (hv : verdict c' = .materialize) (hb : ¬ BudgetLeft c') : step ai c c' = .gate c' := by
   simp [step, hv, hb]
 
-theorem harvest_before_discard (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : DirectionalContrast P)
-    (h : preview relay respond c us = .contrasted r) :
+theorem harvest_before_discard (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (r : DirectionalContrast P) (h : preview ai c us = .contrasted r) :
     ∃ c₀, harvestOf c₀ = some r.harvest ∧ r.context = discard c₀ := by
   have spent : ∀ c₁, spentArms (P := P) c₁ ≠ .done (.contrasted r) := by
     intro c₁ hs
     unfold spentArms at hs
     split at hs <;> (split at hs <;> cases hs)
-  have arms : ∀ c₁, insufficiencyArms relay c₁ ≠ .done (.contrasted r) := by
+  have arms : ∀ c₁, insufficiencyArms ai c₁ ≠ .done (.contrasted r) := by
     intro c₁ hs
     unfold insufficiencyArms at hs
     split at hs
@@ -46,19 +46,20 @@ theorem harvest_before_discard (relay respond : Context P → Response P) (c : C
       · exact spent _ hs
       · cases hs
     · exact spent _ hs
-  have after : ∀ c₁, afterFan relay c₁ ≠ .done (.contrasted r) := by
+  have after : ∀ c₁, afterFan ai c₁ ≠ .done (.contrasted r) := by
     intro c₁ hs
     unfold afterFan at hs
     split at hs
     · exact arms _ hs
     · cases hs
-  have key : ∀ c₁ c₂, step relay c₁ c₂ = .done (.contrasted r) →
+  have key : ∀ c₁ c₂, step ai c₁ c₂ = .done (.contrasted r) →
       ∃ c₀, harvestOf c₀ = some r.harvest ∧ r.context = discard c₀ := by
     intro c₁ c₂ hs
     unfold step at hs
     split at hs
     · split at hs
       · rename_i hh
+        simp only [constituted] at hs
         cases hs
         exact ⟨c₂, hh, rfl⟩
       · cases hs
@@ -86,15 +87,14 @@ theorem harvest_before_discard (relay respond : Context P → Response P) (c : C
       cases h
       exact key _ _ hs
 
-theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (d : List String)
-    (h : preview relay respond c us = .dissolved c₁ d) :
+theorem dissolved_by_person (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (c₁ : Context P) (d : List String) (h : preview ai c us = .dissolved c₁ d) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .dissolve ∧ c₁ = discard (fuse c₀ u) := by
   have spent : ∀ c₂, spentArms (P := P) c₂ ≠ .done (.dissolved c₁ d) := by
     intro c₂ hs
     unfold spentArms at hs
     split at hs <;> (split at hs <;> cases hs)
-  have arms : ∀ c₂, insufficiencyArms relay c₂ ≠ .done (.dissolved c₁ d) := by
+  have arms : ∀ c₂, insufficiencyArms ai c₂ ≠ .done (.dissolved c₁ d) := by
     intro c₂ hs
     unfold insufficiencyArms at hs
     split at hs
@@ -103,7 +103,7 @@ theorem dissolved_by_person (relay respond : Context P → Response P) (c : Cont
       · exact spent _ hs
       · cases hs
     · exact spent _ hs
-  have after : ∀ c₂, afterFan relay c₂ ≠ .done (.dissolved c₁ d) := by
+  have after : ∀ c₂, afterFan ai c₂ ≠ .done (.dissolved c₁ d) := by
     intro c₂ hs
     unfold afterFan at hs
     split at hs
@@ -120,7 +120,8 @@ theorem dissolved_by_person (relay respond : Context P → Response P) (c : Cont
       unfold step at hs
       split at hs
       · split at hs
-        · cases hs
+        · simp only [constituted] at hs
+          cases hs
         · cases hs
       · cases hs
       · cases hs

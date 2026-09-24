@@ -28,7 +28,7 @@ Proplasma(X) → preview(c, utterances), where c is the fused session context:
     with its basis → not activated
   fan(c): the spec relay — axes, placeholder policy, probe target set, realization tier, each
     with its basis; it yields no turn → instantiate the probes (each enters c as written) →
-    contrast → [insufficient: the insufficiency arms] → present probe-first → Qdir → Stop
+    contrast → present probe-first → [insufficient: the insufficiency arms] → Qdir → Stop
   next utterance u: c' := fuse(c, u) → verdict(c') →
     constitute (a probed direction selected, or a synthesis confirmed at Qmicro):
       harvest → cleanup_verify → assemble → DirectionalContrast
@@ -238,10 +238,12 @@ structure Spec where
 opaque spec : Context P → Option Spec
 
 /-- The target-set bound a fan owes: a contrast fan — the initial one or a gap refan — probes two
-    to four directions; a materialization probes the composition, contrasted against every
-    probe so far. -/
-def TargetBound (materializing : Bool) (tgt : List Direction) : Prop :=
-  if materializing then tgt ≠ [] else 2 ≤ tgt.length ∧ tgt.length ≤ 4
+    to four directions; a materialization probes the composition alone, contrasted against
+    every probe so far. -/
+def TargetBound (composition : Option Direction) (tgt : List Direction) : Prop :=
+  match composition with
+  | some d => tgt = [d]
+  | none   => 2 ≤ tgt.length ∧ tgt.length ≤ 4
 
 /-- How a probe is realized, carried on the probe itself: a Vignette's narration, re-presented
     as instantiated and never regenerated; or a Mockup's temp-isolated path, registered at
@@ -306,8 +308,9 @@ opaque refanKind : Context P → Option RefanKind
 
 def BudgetLeft (c : Context P) : Prop := refanKind c = none
 
-/-- **Your reading**: the person has answered the direction gate — Select or Synthesize — or
-    sent the draft back once. -/
+/-- **Your reading**: the person has answered the direction gate — Select or Synthesize — sent
+    the draft back once, or named an unprobed candidate once; the first of these is the draft's
+    own correction. -/
 opaque SpecSettled : Context P → Prop
 
 /-- **Your record**: an insufficiency relay has already re-presented the direction gate
@@ -408,11 +411,13 @@ inductive Verdict
 /-- **Your judgment** on the whole latest utterance read with the context. -/
 opaque verdict : Context P → Verdict
 
-/-- `DirectionalContrast`, assembled after cleanup from the harvest read before it; `context`
-    carries the discard trace. -/
+/-- `DirectionalContrast`, assembled after cleanup from the harvest read before it. What persists
+    is the harvest, the per-probe discard trace, and the dissent; `context` is what their readings
+    point into, and probe detail stays session-local. -/
 structure DirectionalContrast (P : Type) where
   context : Context P
   harvest : Harvest
+  trace   : List (Nat × Option Disposition)
   dissent : List String
 
 inductive EarlyCause
@@ -445,20 +450,31 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 One round is one step of a structural recursion over the person's utterances; between two of
-them a fan and its insufficiency arms run without a turn. `relay` is the spec relay: it presents
-`spec` — scoped to the `SpecRevision` a re-fan carries — before anything is generated, meets
-`TargetBound`, and records what a re-fan spends. The probes are then instantiated
-(`.instantiate`; one per agent through `.instantiateDelegate` on the Mockup tier). `respond` is
-the presentation ending at Qdir, or at Qmicro after a synthesis, with any insufficiency relay due.
+them a fan and its insufficiency arms run without a turn. Your turns are `AITurns`: the spec
+relay presents `spec` — scoped to the `SpecRevision` a re-fan carries — before anything is
+generated, owes `TargetBound`, and records what a re-fan spends; the probes are then written
+(`.instantiate`; one per agent through `.instantiateDelegate` on the Mockup tier); the contrast
+is presented probe-first, insufficient or not; and the gate closes the round — Qdir, or Qmicro
+after a synthesis, with any insufficiency relay due.
 -/
 
-/-- **Your instantiation** under the relayed spec: each probe as written, its realization
-    registered at creation. Existing project files stay unchanged. -/
+/-- Your turns in a round. `narrate` writes each Vignette probe's narration, re-presented as
+    instantiated and never regenerated; being yours, it grounds nothing — a probe is evidence
+    for no claim. -/
+structure AITurns (P : Type) where
+  relay   : Context P → Response P
+  narrate : Context P → List (Response P)
+  present : Context P → Response P
+  respond : Context P → Response P
+
+/-- **Your instantiation** of the Mockup probes under the relayed spec: each artifact as
+    observed at creation, its path registered then. Existing project files stay unchanged. -/
 opaque instantiate : Context P → List (Evidence P)
 
-def fan (relay : Context P → Response P) (c : Context P) : Context P :=
-  let c₁ := c ++ [(relay c).val]
-  c₁ ++ (instantiate c₁).map (·.val)
+def fan (ai : AITurns P) (c : Context P) : Context P :=
+  let c₁ := c ++ [(ai.relay c).val]
+  let c₂ := c₁ ++ (ai.narrate c₁).map (·.val) ++ (instantiate c₁).map (·.val)
+  c₂ ++ [(ai.present c₂).val]
 
 /-- **Your cleanup**: per probe, the destruction step read off its realization, then the
     verification of absence; a failure retries once, then is observed as `discardFailed`. What it
@@ -467,7 +483,10 @@ opaque cleanup : Context P → List (Evidence P)
 
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
-/-- Where a step lands: the next presentation, or an exit. -/
+def discardTrace (c : Context P) : List (Nat × Option Disposition) :=
+  (List.range (probes c).length).map (fun i => (i, disposition c i))
+
+/-- Where a step lands: the next gate, or an exit. -/
 inductive Next (P : Type)
   | gate (c : Context P)
   | done (o : Outcome P)
@@ -486,22 +505,23 @@ noncomputable def spentArms (c : Context P) : Next P :=
 open Classical in
 /-- Entered with the contrast insufficient, whether detected at contrast or declared at the gate:
     one budgeted gap fan while the budget is unspent, and the spent arms otherwise. -/
-noncomputable def insufficiencyArms (relay : Context P → Response P) (c : Context P) : Next P :=
+noncomputable def insufficiencyArms (ai : AITurns P) (c : Context P) : Next P :=
   if BudgetLeft c then
-    let c₂ := fan relay c
+    let c₂ := fan ai c
     if Insufficient c₂ then spentArms c₂ else .gate c₂
   else spentArms c
 
 open Classical in
-noncomputable def afterFan (relay : Context P → Response P) (c : Context P) : Next P :=
-  if Insufficient c then insufficiencyArms relay c else .gate c
+noncomputable def afterFan (ai : AITurns P) (c : Context P) : Next P :=
+  if Insufficient c then insufficiencyArms ai c else .gate c
 
 def constituted (c : Context P) (h : Harvest) : Outcome P :=
-  .contrasted { context := discard c, harvest := h, dissent := dissent c }
+  let c₁ := discard c
+  .contrasted { context := c₁, harvest := h, trace := discardTrace c₁, dissent := dissent c }
 
 open Classical in
 /-- One person utterance, read against `c`, the context before it. -/
-noncomputable def step (relay : Context P → Response P) (c c' : Context P) : Next P :=
+noncomputable def step (ai : AITurns P) (c c' : Context P) : Next P :=
   match verdict c' with
   | .constitute   =>
     match harvestOf c' with
@@ -509,59 +529,57 @@ noncomputable def step (relay : Context P → Response P) (c c' : Context P) : N
     | none   => .gate c'
   | .synthesize   => .gate c'
   | .interrogate  => .gate c'
-  | .materialize  => if BudgetLeft c' then afterFan relay (fan relay c') else .gate c'
-  | .sendBack     => if SpecSettled c then insufficiencyArms relay c' else afterFan relay (fan relay c')
-  | .insufficient => insufficiencyArms relay c'
+  | .materialize  => if BudgetLeft c' then afterFan ai (fan ai c') else .gate c'
+  | .sendBack     => if SpecSettled c then insufficiencyArms ai c' else afterFan ai (fan ai c')
+  | .insufficient => insufficiencyArms ai c'
   | .unprobed     =>
-    if ¬ SpecSettled c ∨ BudgetLeft c' then afterFan relay (fan relay c')
+    if ¬ SpecSettled c ∨ BudgetLeft c' then afterFan ai (fan ai c')
     else .done (.withdrawn (discard c') .unprobedStanddown)
   | .dissolve     => .done (.dissolved (discard c') (dissent c'))
   | .withdraw     => .done (.withdrawn (discard c') .explicit)
 
-noncomputable def preview (relay respond : Context P → Response P) :
-    Context P → List (Utterance P) → Outcome P
+noncomputable def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
-    match step relay c (fuse c u) with
-    | .gate g => preview relay respond (g ++ [(respond g).val]) us
+    match step ai c (fuse c u) with
+    | .gate g => preview ai (g ++ [(ai.respond g).val]) us
     | .done o => o
 
-noncomputable def start (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) : Outcome P :=
+noncomputable def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   match phase0 c with
   | some why => .notActivated c why
   | none =>
-    match afterFan relay (fan relay c) with
-    | .gate g => preview relay respond (g ++ [(respond g).val]) us
+    match afterFan ai (fan ai c) with
+    | .gate g => preview ai (g ++ [(ai.respond g).val]) us
     | .done o => o
 
 /-! ── LOOP ──
 Probe target set 2–4 for a contrast fan (`TargetBound`). Re-fan bound: at most one budgeted
 re-fan per activation — a contrast-insufficiency re-fan and a synthesis materialization share
 it, and what it was spent on decides the still-insufficient branch. Interrogation and an
-insufficiency declaration generate no probes; the first send-back of the relayed draft re-fans
-without spending the budget, and a later one rides it. The person can withdraw at any gate:
-cleanup_verify runs, the partial trace is presented, the residual declared.
+insufficiency declaration generate no probes; the first send-back of the relayed draft, or the
+first naming of an unprobed candidate, re-fans without spending the budget, and a later one
+rides it. The person can withdraw at any gate: cleanup_verify runs, the partial trace is
+presented, the residual declared.
 -/
 
 /-!
 Silence constitutes and discards nothing.
-theorem silence (relay respond : Context P → Response P) (c : Context P) :
-    preview relay respond c [] = .holding c
+theorem silence (ai : AITurns P) (c : Context P) : preview ai c [] = .holding c
 
 No probe commits a value before the spec relay: every fan holds the relay turn ahead of what
-instantiation wrote.
-theorem relay_before_instantiation (relay : Context P → Response P) (c : Context P) :
-    ∃ t, fan relay c = c ++ [(relay c).val] ++ t
+the probes wrote.
+theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
+    ∃ t, fan ai c = c ++ [(ai.relay c).val] ++ t
 
 With the budget spent, an insufficiency fans nothing further.
-theorem spent_budget_no_refan (relay : Context P → Response P) (c : Context P)
-    (h : ¬ BudgetLeft c) : insufficiencyArms relay c = spentArms c
+theorem spent_budget_no_refan (ai : AITurns P) (c : Context P) (h : ¬ BudgetLeft c) :
+    insufficiencyArms ai c = spentArms c
 
 A materialization asked for with the budget spent generates nothing: Qmicro is presented again,
 with Confirm its option.
-theorem materialize_unavailable (relay : Context P → Response P) (c c' : Context P)
-    (hv : verdict c' = .materialize) (hb : ¬ BudgetLeft c') : step relay c c' = .gate c'
+theorem materialize_unavailable (ai : AITurns P) (c c' : Context P)
+    (hv : verdict c' = .materialize) (hb : ¬ BudgetLeft c') : step ai c c' = .gate c'
 -/
 
 /-! ── CONVERGENCE ──
@@ -579,15 +597,13 @@ discard being verified — never a completion tally. Demonstrated, not asserted.
 
 /-!
 The harvest is read before discard, and the record is assembled from it after cleanup.
-theorem harvest_before_discard (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : DirectionalContrast P)
-    (h : preview relay respond c us = .contrasted r) :
+theorem harvest_before_discard (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (r : DirectionalContrast P) (h : preview ai c us = .contrasted r) :
     ∃ c₀, harvestOf c₀ = some r.harvest ∧ r.context = discard c₀
 
 A dissolution is closed only by a person's utterance; the AI's reading of one closes nothing.
-theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (d : List String)
-    (h : preview relay respond c us = .dissolved c₁ d) :
+theorem dissolved_by_person (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (c₁ : Context P) (d : List String) (h : preview ai c us = .dissolved c₁ d) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .dissolve ∧ c₁ = discard (fuse c₀ u)
 
 The direction is constituted only by a person's statement.
@@ -618,7 +634,7 @@ def grounding : Op → Annot × String
   | .draftPolicy       => (.sense, "Internal analysis: the placeholder policy draft — visible synthesis, non-evidence stamp, skeleton-data split")
   | .specRelay         => (.extension, "TextPresent+Proceed: the drafted spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where the target set leaves a candidate unprobed, why; fires before any probe generation, so no axis commits a probe value before it was relayed with its basis; yields no turn and carries the standing affordance to send any of it back at the direction gate, the first send-back riding no budget; on a re-fan it is presented scoped to the SpecRevision that re-fan carries, before that re-fan generates anything, and it records what the re-fan spends; where you read the futures recognizable without probes, or the premise collapsed, it says so with its basis and closes nothing")
   | .dissolutionRelay  => (.extension, "TextPresent+Proceed: when the person accepts or declares that the sharpened description made the futures recognizable without probes, or that the activation premise collapsed — state the basis, the sharpened axes themselves, and hand to the regular gate the enriched axes with every exposed unknown and its route and, wherever probes exist, the per-probe dispositions from cleanup_verify plus the pending re-fan target set as live candidates (a person-constituted candidate never dies with the stand-down); attach any dissent; stand down as DissolutionExit — a success, not an abandonment")
-  | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the target set, each realization registered at creation; existing project files never modified; the Vignette tier emits session text only, recorded on the probe as its narration")
+  | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the target set, each realization registered at creation; existing project files never modified; the Vignette tier writes no file — its narration is your own turn (`narrate`), recorded on the probe and never regenerated")
   | .instantiateDelegate => (.dispatch, "delegate (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with its path registered; subordinate to the active runtime policy)")
   | .contrast          => (.sense, "Internal analysis: per-axis juxtaposition over every probe so far, the exposed unknowns tagged with their routes, and the common commitments recomputed over every probe; a new axis relayed on a re-fan predates earlier probes — their positions on it are re-derived from their artifacts where those carry them, and the cell is declared undifferentiated where they do not")
   | .present           => (.extension, "TextPresent+Proceed: probe-first order — probes one by one, each from its realization, the narration re-presented as instantiated and a Mockup walked through, never regenerated → the per-axis contrast map with the common commitments declared → newly exposed unknowns; any contrary ground held about a direction; table-first re-abstracts and reproduces the deficit")
@@ -709,7 +725,7 @@ Name the free-response paths from `Direction-gate response discipline` before th
 
 ### Phase 5: Harvest → Discard (in this order)
 
-Accept the constituted direction before cleanup: a `DiscardFailed` disposition triggers the manual-cleanup handoff but does not revoke that direction. Persist only the Definition's terminal record; probe detail remains session-local.
+Accept the constituted direction before cleanup: a `DiscardFailed` disposition triggers the manual-cleanup handoff but does not revoke that direction. Persist only the Definition's terminal record — the harvest, the discard trace, and the dissent; probe detail remains session-local.
 
 ## UX Safeguards
 
