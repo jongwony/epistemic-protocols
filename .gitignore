@@ -39,3 +39,8 @@ docs/audit-delta-*.md
 # and it belongs to whoever ran it, not to the checkout.
 route/evals/recorded/
 route/evals/smoke-recorded/
+
+# Lean: Lake build output, and the Contract/Audit modules lean-contract.js
+# generates from each SKILL.md Lean block (the block is the source).
+.lake/
+lean/.contract/
