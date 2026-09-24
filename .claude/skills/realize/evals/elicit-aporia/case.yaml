@@ -1,0 +1,19 @@
+schema_version: "1.1"
+name: elicit-aporia
+
+context:
+  # Same substrate as the trigger-negative case, deliberately. This case is graded on whether
+  # decision coordinates are reverse-traced from the substrate and cite it; the negative case
+  # is graded on whether that same substrate's latent dissatisfaction is turned into open
+  # dimensions of a request that already fixes them. Different substrates would let a run pass
+  # one of them by luck.
+  scaffold_script: ../elicit-scaffold.sh
+
+multi_turn:
+  # The subject's turns are answered by a fixed user-role policy, never by the runner's own
+  # judgment. Identical across every revision of the SKILL.md under test.
+  oracle: oracle.md
+  max_user_replies: 4
+  # A tree digest (dotfiles and __pycache__ excluded) is taken after EVERY subject turn; the
+  # gate-stopped predicate reads the per-turn digests, not only the final tree.
+  snapshot_tree_per_turn: true

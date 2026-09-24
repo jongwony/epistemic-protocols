@@ -171,6 +171,49 @@ cost. A Codex timeout is a failed launch and is not cached or graded.
 A cell whose launch never produced a transcript is not written or counted. `run` and
 `report` both propagate that incompleteness, so a re-run still picks the cell up.
 
+## Multi-turn cases, by hand
+
+A case whose `case.yaml` declares `multi_turn` is graded on turns after the first, or
+on tool-call inputs. `harness.mjs` runs one turn per cell and records tool names only,
+so such a case is not registered in `harness.config.json` and is walked by hand with
+`scripts/turn.sh` (Claude runner only). The case's `oracle.md` plays the user; the
+person running the case composes nothing.
+
+```bash
+cd .claude/skills/realize/scripts
+cell=/tmp/realize/elicit-aporia-1                # one directory per cell
+mkdir -p "$cell/work" && (cd "$cell/work" && bash "$OLDPWD/../evals/elicit-scaffold.sh")
+
+# turn 1: prompt.md without its frontmatter, then a blank line and the invocation line
+export CLAUDE_CODE_OAUTH_TOKEN="$(...)" MAX_TURNS=24 TIMEOUT=600
+sid=$(./turn.sh "$cell" ../../../../euporia turn-1.md)
+
+# every later turn: the reply the oracle assembles from turn-<n>.txt / .jsonl
+./turn.sh "$cell" ../../../../euporia reply-1.md "$sid"
+```
+
+1. **Scaffold** into `<cell>/work` with the script `case.yaml` names. Turn 1 writes the
+   scaffold's digest to `turn-0.digest` before the subject runs.
+2. **Turn 1** sends the case prompt's body. An arm carrying the protocol appends the
+   invocation line — the target's line in `harness.config.json`, or for `/elicit`
+   ``Use `/elicit` first, before any code gets written.`` — and passes the plugin
+   directory; an arm without it passes `-`. `MAX_TURNS` and `TIMEOUT` come from the
+   prompt's frontmatter.
+3. **Apply the oracle** after every turn. It either ends the run or yields one reply,
+   built only from its rules; the reply cap is in `case.yaml`.
+4. **Resume** with the printed session id and the same plugin argument, so every turn
+   carries identical flags.
+5. **Grade** from the cell: each `turn-<n>.digest` against `turn-0.digest` is the tree
+   witness per turn (the harness's digest: sorted paths, dotfiles and `__pycache__`
+   excluded), `turn-<n>.jsonl` keeps tool-call inputs for the trace predicates, and the
+   manual graders are judged from the transcript.
+
+Isolation has the harness's shape: an empty `CLAUDE_CONFIG_DIR` at `<cell>/cfg`, the
+protocol present only through `--plugin-dir`, and the variables through which an
+enclosing Claude Code session would reach the child — its session identity and its
+extra `CLAUDE.md` directories — removed. The session persists inside that config
+directory, since resuming needs it.
+
 ## Widening
 
 `harness.config.json` carries the matrix. Adding models multiplies runs directly, and
