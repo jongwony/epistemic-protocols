@@ -20,8 +20,6 @@ Aitesis(X) → Scan(X) → Uᵢ →
   [the answer is Sufficient] c' := fuse(c, u) → converge
     (the one answer that opens no pass: the inquiry is declared enough, and what remains is
      dismissed with the declaration)
-c is the fused session context, and every record a pass writes is part of it: the prospect
-X' the next pass reads is that context, landed records included.
 live: every uncertainty not dismissed — the pass is the unit, and every pass pushes and lands
 the whole of it again. push(u): one untried channel the AI can reach on its own, cheapest
 first; a tried channel is not re-selected. land(u): the state the item reached, the reason it
@@ -49,9 +47,7 @@ invariant: Judgment is the model's, the product is a field   -- which state an i
 namespace Aitesis
 
 /-! ── GROUND ──
-The session primitive this contract reads. A context is the list of turns the session has
-accumulated; a turn carries where it came from and what form it takes. Only a person's
-statement is an utterance; an AI turn, an injected turn, and a summary ground nothing.
+The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
@@ -80,24 +76,20 @@ def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
 
-/-- Fusion appends one turn; the record only grows. -/
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
-/-- A citation of one turn of `c`, with the basis that turn is eligible for. -/
 structure Cite {P : Type} (c : Context P) where
   idx  : Nat
   lt   : idx < c.length
   kind : Basis
   ok   : (c[idx]'lt).basis = some kind
 
-/-- An open coordinate: which bases it admits, and whether a cited turn supports a value
-    (the support reading is the model's). -/
+/-- `supports` is the model's reading. -/
 structure Coord (P A : Type) where
   admits   : Basis → Prop
   supports : Context P → Turn P → A → Prop
 
-/-- A coordinate is filled only by a citation it admits and that supports the value; `open_`
-    may carry a candidate citation whose support is still short. -/
+/-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
@@ -111,8 +103,8 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
     e.basis = none
 -/
 
-/-- A citation into an earlier context still points at the same turn after later fusion;
-    what it supported there is judged again against the context that now stands. -/
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
@@ -124,21 +116,18 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 variable {P : Type}
 
 /-- `X`: the prospect for action — planning, task execution, analysis, investigation, or any
-    purposeful action requiring context. The morphism processes it uniformly; it is read from
-    the context, and its task intent is never changed here. -/
+    purposeful action requiring context. Its task intent is never changed here. -/
 abbrev Prospect (P : Type) := Context P
 
 inductive Priority | critical | significant | marginal
 
-/-- One uncertainty. Whether a scan's item is the same as one already raised is your judgment
-    (`SameItem`), read from the material — for a dismissed item, from the person's dismissal
-    utterance. -/
 structure Item where
   domain      : String
   description : String
   priority    : Priority
 
-/-- **Your judgment**: `i` and `j` are the same uncertainty. -/
+/-- **Your judgment**: `i` and `j` are the same uncertainty, read from the material — for a
+    dismissed item, from the person's dismissal utterance. -/
 opaque SameItem : Context P → Item → Item → Prop
 
 /-- `Scan`: **your judgment** of what the context leaves uncertain — a missing fact, a
@@ -153,7 +142,6 @@ opaque Scanned : Context P → Item → Prop
     once raised is never replaced. -/
 opaque Registered : Context P → Item → Prop
 
-/-- A dismissal is the person's own utterance: the AI never disposes of an item. -/
 structure Dismissal (c : Context P) where
   src : Cite c
   byPerson : src.kind = .utterance
@@ -165,8 +153,7 @@ opaque dismissal : (c : Context P) → Item → Option (Dismissal c)
 
 def live (c : Context P) (i : Item) : Prop := Registered c i ∧ dismissal c i = none
 
-/-- Step₀'s working set: what the scan raises that is not already registered, together with
-    every live item. -/
+/-- Step₀'s working set. -/
 def working (c : Context P) (i : Item) : Prop :=
   (Scanned c i ∧ ¬ ∃ j, Registered c j ∧ SameItem c i j) ∨ live c i
 
@@ -202,16 +189,15 @@ opaque tried : Context P → Item → List Channel
 /-- **Your judgment**: the item admits this channel. A channel whose expected yield no longer
     justifies pushing it on the AI's own is not one it admits; it admits none when its answer
     lives only with the user or it is not the AI's to collect. Record which way this fell in
-    the item's basis. -/
+    the item's basis. Direction: `references/judgments.md` §Stopping. -/
 opaque Admits : Context P → Item → Channel → Prop
 
-/-- The AI can still push this item on its own; false ends collection for it and hands it to
-    the user. -/
+/-- False ends collection for the item and hands it to the user. -/
 def advanceable (c : Context P) (i : Item) : Prop := ∃ ch, Admits c i ch ∧ ch ∉ tried c i
 
 inductive State | resolved | provisional | userUnknown | detectOnly
 
-/-- Why an item reached no further; written for every state but resolved. -/
+/-- Why an item reached no further. -/
 inductive Reason
   /-- not the AI's to collect: another domain, another authority -/
   | notMine
@@ -225,7 +211,6 @@ inductive Reason
     they observed and their statement both reach it as turns; which one bears is read. -/
 opaque LandSupported : Item → Context P → Turn P → String → Prop
 
-/-- An item is a fact coordinate open to any grounding basis; support is read. -/
 def itemCoord (i : Item) : Coord P String :=
   { admits := fun _ => True, supports := LandSupported i }
 
@@ -247,8 +232,6 @@ def Landing.state {c : Context P} {i : Item} : Landing c i → State
   | .userUnknown .. => .userUnknown
   | .detectOnly ..  => .detectOnly
 
-/-- The landing read as the item's coordinate: resolved is filled; provisional is open with a
-    candidate citation; the rest are open. -/
 def Landing.toOcc {c : Context P} {i : Item} : Landing c i → Occ (itemCoord i) c
   | .resolved f s sup _    => .filled f s trivial sup
   | .provisional _ s _ _   => .open_ (some s)
@@ -301,26 +284,18 @@ inductive EscapeCondition | environmentMutation | riskElevated
 opaque skips : Context P → List (Item × EscapeCondition × String)
 
 /-- `SufficientContext`: the context once collection has ended, with every live item landed in
-    the pass that ended it, or the trivial one Phase 0 proceeds with. What stands: what
-    collection settled, what it found without full warrant, what is the user's to settle, what
-    it only detected. Open items that are the user's are the product, not a shortfall. -/
+    the pass that ended it, or the trivial one Phase 0 proceeds with. -/
 inductive Outcome (P : Type)
   | notActivated (c : Context P)
   | converged    (c : Context P)
   | declared     (c : Context P)
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else. The prospect X', the uncertainties, each item's
-tried channels, evidence and landing, the resolved, provisional, user-unknown, detect-only and
-dismissed sets, and the skipped observations are read from it when needed; none is stored
-beside it. The working set of a pass is derived (`working`), holding no state of its own.
+Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
 abbrev Mode (P : Type) := Context P
 
-/-- A live item in the set its landing names; the relay surfaces the provisional,
-    user-unknown, and detect-only sets, with the resolved beside them. Read between passes,
-    every registered item is dismissed or in exactly one of these sets. -/
 def inState (c : Context P) (s : State) (i : Item) : Prop := live c i ∧ (landing c i).state = s
 
 /-!
@@ -345,15 +320,14 @@ opaque push : Context P → List (Evidence P)
 def pass (c : Context P) : Context P := c ++ (push c).map (·.val)
 
 /-- **Your judgment**, made once for the pass: another pass is still worth reaching for on the
-    AI's own. No pass cap bounds it; this judgment and the growing `tried` sets do. -/
+    AI's own. No pass cap bounds it; this judgment and the growing `tried` sets do. Direction:
+    `references/judgments.md` §Stopping. -/
 opaque WorthAnotherPass : Context P → Prop
 
 /-- **Your judgment**: from `c` to `c'` the pass opened an item, tried a channel, or changed a
     landing. -/
 opaque PassChanged : Context P → Context P → Prop
 
-/-- Collection from `c` ends at `c'`: passes follow while one changed something and another is
-    still worth it. -/
 inductive CollectionEnds : Context P → Context P → Prop
   | stop (c : Context P)
       (h : ¬ PassChanged c (pass c) ∨ ¬ WorthAnotherPass (pass c)) :
@@ -378,8 +352,6 @@ def inquire (respond : Context P → Response P) : Context P → List (Utterance
       inquire respond (c'' ++ [(respond c'').val]) us
 
 open Classical in
-/-- Phase 0, then the run: with nothing uncertain, not activated; otherwise the first
-    collection and its relay, then each later utterance. -/
 noncomputable def start (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   if ∃ i, Scanned c i then
@@ -388,15 +360,7 @@ noncomputable def start (respond : Context P → Response P) (c : Context P)
   else .notActivated c
 
 /-! ── LOOP ──
-The pass is the unit. Each pass scans the context as it now stands, pushes every live item
-through the channels still open to it, registers what its own collection exposed, and lands
-every live item again on the whole material. What bounds the loop is the stopping judgment
-`Admits` carries per item and `WorthAnotherPass` once per pass, with the growing `tried` sets;
-a pass cap is not part of this contract. A run that keeps discovering lands what it has where
-the judgment says stop and surfaces the rest as the user's unknown — the residual is kept,
-never a stall. Uncertainties accumulate; a dismissed item never re-enters a pass. An answer
-opens the next pass; `sufficient` is the one that opens none. Nothing here holds the turn:
-silence leaves the surfaced items as the user's unknown, which is the product.
+Nothing here holds the turn: silence leaves the surfaced items as the user's unknown.
 Convergence evidence, after the pass that ended collection: for every item — raised by the
 first scan or opened by a later pass — one pair (ContextInsufficient(u) → landing(u)): a
 resolved item with what sufficed; a provisional item with its finding and where the ground
@@ -422,11 +386,9 @@ theorem empty_pass (c : Context P) (h : push c = []) : pass c = c
 -/
 
 /-! ── CONVERGENCE ──
-sufficient(c) = the last pass changed nothing, or a further pass is not worth reaching for:
-either way the AI's own reach is exhausted as the stopping judgment reads it — a reasonable
-stopping point rather than an enumeration run dry — and every landing stands on the whole
-material. `user_unknown ≠ ∅` does not block convergence: what remains is surfaced as the
-user's, which is the product.
+sufficient(c) = `CollectionEnds`: the AI's own reach is exhausted as the stopping judgment
+reads it, and every landing stands on the whole material. `user_unknown ≠ ∅` does not block
+convergence: what remains is surfaced as the user's, which is the product.
 -/
 
 /-!

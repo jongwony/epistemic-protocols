@@ -36,9 +36,7 @@ invariant: proposal-and-settlement-separation   -- presence, inspection, silence
 namespace Horismos
 
 /-! ── GROUND ──
-The session primitive this contract reads. A context is the list of turns the session has
-accumulated; a turn carries where it came from and what form it takes. Only a person's
-statement is an utterance; an AI turn, an injected turn, and a summary ground nothing.
+The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
@@ -67,24 +65,20 @@ def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
 
-/-- Fusion appends one turn; the record only grows. -/
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
-/-- A citation of one turn of `c`, with the basis that turn is eligible for. -/
 structure Cite {P : Type} (c : Context P) where
   idx  : Nat
   lt   : idx < c.length
   kind : Basis
   ok   : (c[idx]'lt).basis = some kind
 
-/-- An open coordinate: which bases it admits, and whether a cited turn supports a value
-    (the support reading is the model's). -/
+/-- `supports` is the model's reading. -/
 structure Coord (P A : Type) where
   admits   : Basis → Prop
   supports : Context P → Turn P → A → Prop
 
-/-- A coordinate is filled only by a citation it admits and that supports the value; `open_`
-    may carry a candidate citation whose support is still short. -/
+/-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
@@ -98,8 +92,8 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
     e.basis = none
 -/
 
-/-- A citation into an earlier context still points at the same turn after later fusion;
-    what it supported there is judged again against the context that now stands. -/
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
@@ -111,7 +105,7 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 variable {P : Type}
 
 /-- `TaskScope`: the task or concern needing a boundary; its goal, structure, scope, and
-    desired examination depth may remain open. It is read from the context. -/
+    desired examination depth may remain open. -/
 abbrev TaskScope (P : Type) := Context P
 
 /-- Stable identity for a decision, obligation, premise, or unresolved question;
@@ -137,7 +131,6 @@ opaque DispositionSupported : Domain → Context P → Turn P → BoundaryClassi
     limits. -/
 opaque ContentSupported : Domain → Context P → Turn P → String → Prop
 
-/-- The disposition of `d` is a retained judgment: only a person's utterance fills it. -/
 def dispositionOf (d : Domain) : Coord P BoundaryClassification :=
   { admits := (· = .utterance), supports := DispositionSupported d }
 
@@ -158,7 +151,7 @@ structure BoundaryEntry (c : Context P) where
   dependsOn     : List Domain
   /-- current or conditional reach -/
   applicability : String
-  /-- an AI suggestion shown for recognition; it settles nothing by being shown -/
+  /-- an AI suggestion shown for recognition -/
   proposal      : Option BoundaryClassification
   disposition   : Occ (dispositionOf domain) c
   content       : Occ (contentOf domain) c
@@ -166,19 +159,15 @@ structure BoundaryEntry (c : Context P) where
       explicitly empty when none -/
   remainder     : String
 
-/-- The boundary map: every current entry, settled, proposed, conditional, or open. -/
 abbrev BoundaryMap (c : Context P) := List (BoundaryEntry c)
 
-/-- A readable account of the whole map with its setting sources, provisional content,
-    conditional dependencies, the detail the user asked to see, and the unresolved remainder. -/
+/-- A readable account of the whole map. -/
 structure BoundaryEssence (c : Context P) where
   map           : BoundaryMap c
   /-- the axes the user asked to open, shown beside their nearest evidence -/
   opened        : List Domain
-  /-- the round question; its open choices are shown with it, not in a later turn -/
   question      : String
   openChoices   : List String
-  /-- every proposal that would entrust an irreversible later act to AI -/
   irreversible  : List Domain
 
 -- elab: an empty witness lets `readout` be declared `opaque`; it adds no meaning.
@@ -190,7 +179,7 @@ def closingOffer : String :=
 
 /-- **Your judgment**: construct the relevant whole provisional structure from the task and
     everything reachable — decisions, obligations, assumptions, dependencies, and what is
-    unknown. Discovery and evidence collection constitute no proposal's acceptance. -/
+    unknown. -/
 opaque readout : (c : Context P) → BoundaryEssence c
 
 /-- **Your judgment**: the proposal for `d` would entrust to AI a later act that cannot be
@@ -200,9 +189,7 @@ opaque Irreversible : Context P → Domain → Prop
 /-- **Your judgment**: `s` is a choice still open at this round. -/
 opaque OpenChoice : Context P → String → Prop
 
-/-- What every round presentation owes, with no extra turn: the open choices stand with the
-    question, and every irreversible AI-delegation proposal is visible when the closing
-    offer is made. -/
+/-- What every round presentation owes, with no extra turn. -/
 def RoundOwes (c : Context P) (r : BoundaryEssence c) : Prop :=
   (∀ s, OpenChoice c s → s ∈ r.openChoices) ∧
   (∀ e ∈ r.map, e.proposal = some .aiAutonomous → Irreversible c e.domain →
@@ -234,45 +221,36 @@ inductive Verdict
   | route (d : Deficit)
   deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
-/-- **Your judgment** on the whole latest utterance read with the context. `finish` only when
-    the utterance accepts the closing offer; a request to inspect adopts nothing; a reading
-    that is not yet settled is `cont`, and the next round shows its candidate readings with
-    their consequences. -/
+/-- **Your judgment** on the whole latest utterance read with the context; a request to inspect
+    adopts nothing. -/
 opaque verdict : Context P → Verdict
 
-/-- `Residual`: the nonempty remainders projected from the final map, explicitly empty when
-    there are none. -/
 abbrev Residual := List (Domain × String)
 
 /-- **Your judgment**, read at the moment the round closes: the map as the context now settles
     it. Where the latest utterance accepts the closing offer, that utterance is the citation
-    that fills every disposition it covers, proposals shown in the last round included;
-    inspection and silence fill nothing. What the acceptance does not cover stays open, with
-    its remainder. -/
+    that fills every disposition it covers, proposals shown in the last round included. What
+    the acceptance does not cover stays open, with its remainder. -/
 opaque settled : (c : Context P) → BoundaryMap c
 
 def residualOf {c : Context P} (m : BoundaryMap c) : Residual :=
   (m.filter (fun e => e.remainder ≠ "")).map (fun e => (e.domain, e.remainder))
 
-/-- The resolution: the settled map, its projected residual, and the context whose turns its
-    citations point into. -/
+/-- The resolution; `context` is what its citations point into. -/
 structure DefinedBoundary (P : Type) where
   context  : Context P
   map      : BoundaryMap context
   residual : Residual
 
-/-- Where a run of `/bound` stands. -/
 inductive Outcome (P : Type)
   | defined   (b : DefinedBoundary P)
   /-- the partial record: what stood when the user withdrew; no DefinedBoundary -/
   | withdrawn (b : DefinedBoundary P)
   | routed    (d : Deficit)
-  /-- the gate is held; nothing is selected on the user's behalf -/
   | holding   (c : Context P)
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else. The boundary map, the axes in view, the question the
-user is asking, and the latest answer are read from it when needed; none is stored beside it.
+Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
 abbrev Mode (P : Type) := Context P
@@ -280,9 +258,7 @@ abbrev Mode (P : Type) := Context P
 /-! ── PHASE TRANSITIONS ──
 One round is one step of a structural recursion over the user's utterances. The run starts
 from the context in which the first round — `probe` over the task and everything reachable,
-then its readout with the closing offer — has been presented. After each utterance that
-continues, the model responds with the next round (`readout`, with `RoundOwes` and the closing
-offer) before the following utterance arrives.
+then its readout with the closing offer — has been presented.
 -/
 
 def close (c : Context P) : DefinedBoundary P :=
@@ -301,13 +277,12 @@ def bound (respond : Context P → Response P) : Context P → List (Utterance P
     | .route d  => .routed d
 
 /-! ── LOOP ──
-The round is the unit, and its state is the fused context. A correction reopens the affected
-dependency region in the next readout; an unchanged source supplies no reason to re-ask a
-settled decision. Neither scan exhaustion nor a visit count constitutes sufficiency. The user
-can finish without opening every axis; what is still open is carried as residual. Interrupting
-or steering a run in progress is the host's to deliver; this block names it only as the point
-where execution hands off, and without such a channel `finish` still comes only from the
-closing offer being accepted.
+A correction reopens the affected dependency region in the next readout; an unchanged source
+supplies no reason to re-ask a settled decision. Neither scan exhaustion nor a visit count
+constitutes sufficiency. The user can finish without opening every axis; what is still open is
+carried as residual. Interrupting or steering a run in progress is the host's to deliver; this
+block names it only as the point where execution hands off, and without such a channel
+`finish` still comes only from the closing offer being accepted.
 -/
 
 variable (respond : Context P → Response P)
@@ -342,8 +317,7 @@ converge only on `finish`: the boundary is `close` of the context at the accepti
     arrangement and what the next move may and may not settle under it.
   limits: closure defines a boundary at its constituted scope and depth; it supplies neither a
     fixed project goal nor proof of the user's comprehension or exhaustive discovery.
-  non-convergent exits: withdrawal and a route emit no DefinedBoundary and keep their finding
-    or partial record.
+  non-convergent exits keep their finding or partial record.
 -/
 
 /-!

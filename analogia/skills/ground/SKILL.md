@@ -61,9 +61,7 @@ invariant: Judgment is the model's, the product is a field
 namespace Analogia
 
 /-! ── GROUND ──
-The session primitive this contract reads. A context is the list of turns the session has
-accumulated; a turn carries where it came from and what form it takes. Only a person's
-statement is an utterance; an AI turn, an injected turn, and a summary ground nothing.
+The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
@@ -92,24 +90,20 @@ def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
 
-/-- Fusion appends one turn; the record only grows. -/
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
-/-- A citation of one turn of `c`, with the basis that turn is eligible for. -/
 structure Cite {P : Type} (c : Context P) where
   idx  : Nat
   lt   : idx < c.length
   kind : Basis
   ok   : (c[idx]'lt).basis = some kind
 
-/-- An open coordinate: which bases it admits, and whether a cited turn supports a value
-    (the support reading is the model's). -/
+/-- `supports` is the model's reading. -/
 structure Coord (P A : Type) where
   admits   : Basis → Prop
   supports : Context P → Turn P → A → Prop
 
-/-- A coordinate is filled only by a citation it admits and that supports the value; `open_`
-    may carry a candidate citation whose support is still short. -/
+/-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
@@ -123,8 +117,8 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
     e.basis = none
 -/
 
-/-- A citation into an earlier context still points at the same turn after later fusion;
-    what it supported there is judged again against the context that now stands. -/
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
@@ -159,8 +153,6 @@ inductive Axis | sourceScope | targetScope | relation | purpose
     that uniqueness, never the decomposition's own output. -/
 opaque AxisSupported : Axis → Context P → Turn P → String → Prop
 
-/-- The comparison purpose is a retained judgment, filled only by a person's utterance; the
-    other axes admit any grounding basis. -/
 def axisCoord : Axis → Coord P String
   | .purpose => { admits := (· = .utterance), supports := AxisSupported .purpose }
   | a        => { admits := fun _ => True,     supports := AxisSupported a }
@@ -175,8 +167,8 @@ instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨
 /-- **Your judgment**: how axis `a` of the comparison focus stands in `c`. -/
 opaque focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
 
-/-- Checked per axis, never object-wide: one axis the protocol would pick among viable
-    alternatives fires the focus gate. -/
+/-- One axis the protocol would otherwise pick among viable alternatives fires the focus
+    gate. -/
 def focusSettled (c : Context P) : Prop := ∀ a, (focusAxis c a).isFilled = true
 
 /-- One thing the mapping is being asked to license about the target: a prediction, a
@@ -208,7 +200,7 @@ opaque mapping : Context P → List Correspondence
 opaque fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed.
-    This keeps the check set finite without letting the protocol choose its own exam. -/
+    Direction: `references/judgments.md` §BearsOn. -/
 opaque BearsOn : Context P → FitClaim → Inference → Prop
 
 /-- Who can carry a check out. `userHeld` is context only the user holds; it is met by what
@@ -223,13 +215,9 @@ inductive Bearing | supports | defeats
     `x`. A citation's stated bearing is read against its source and scope. -/
 opaque CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
 
-/-- A check is met only by evidence: an observation, a peer report, or what a person reports
-    observing. A person's statement of agreement or disagreement is not admitted. -/
 def checkCoord (x : FitClaim) (scope : String) : Coord P Bearing :=
   { admits := (· ≠ .utterance), supports := CheckSupported x scope }
 
-/-- One check per current fit claim bearing on `K`. Open is unmet — the honest default,
-    never a pass; filled with `supports` survived; filled with `defeats` failed. -/
 structure Check (c : Context P) where
   claim        : FitClaim
   scope        : String
@@ -242,17 +230,14 @@ structure Check (c : Context P) where
   more         : List (Cite c)
 
 /-- **Your judgment**: the checks for the current fit claims bearing on `K`, each with its
-    state read off the grounds the context now holds. -/
+    state read off the grounds the context now holds. Direction: `references/judgments.md`
+    §checks. -/
 opaque checks : (c : Context P) → List (Check c)
 
-/-- The check set is exact: a fit claim that some intended inference turns on has a check,
-    and a check names a current fit claim. Questions guide the derivation without adding
-    claimless checks. -/
 def ChecksExact (c : Context P) : Prop :=
   (∀ x ∈ fitClaims c, (∃ k ∈ inferences c, BearsOn c x k) → ∃ ch ∈ checks c, ch.claim = x) ∧
   (∀ ch ∈ checks c, ch.claim ∈ fitClaims c)
 
-/-- A warrant is read off the check and nothing else. -/
 inductive Warrant | open_ (missing : String) | supported | defeated
 
 def Check.warrant {c : Context P} (ch : Check c) : Warrant :=
@@ -261,7 +246,6 @@ def Check.warrant {c : Context P} (ch : Check c) : Warrant :=
   | .filled .supports _ _ _   => .supported
   | .filled .defeats _ _ _    => .defeated
 
-/-- Grounds: a non-empty list of citations, none of them a statement of assent. -/
 def Grounds (c : Context P) :=
   {g : List (Cite c) // g ≠ [] ∧ ∀ s ∈ g, s.kind ≠ .utterance}
 
@@ -283,7 +267,6 @@ def Verdict.decisive {c : Context P} : Verdict c → Bool
   | .undetermined _ => false
   | _               => true
 
-/-- Convergence is read over the intended inferences, never over the correspondences. -/
 def converged (c : Context P) : Prop := ∀ k ∈ inferences c, (judge c k).decisive = true
 
 inductive Pref | adopted | withdrawn
@@ -291,8 +274,7 @@ inductive Pref | adopted | withdrawn
 /-- **Your judgment**: the cited utterance adopts or withdraws `x`. -/
 opaque PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
 
-/-- What the reader takes up: recorded, reported apart from warrant, and read by no terminal
-    predicate. Unstated is open. -/
+/-- What the reader takes up. -/
 def prefCoord (x : Correspondence) : Coord P Pref :=
   { admits := (· = .utterance), supports := PrefSupported x }
 
@@ -300,7 +282,7 @@ def prefCoord (x : Correspondence) : Coord P Pref :=
 opaque preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
 
 /-- **Your judgments**: the source abstraction is located; its member instances are exactly
-    the target. An unlocated, merely sensed essence is `/induce`'s instead. -/
+    the target. -/
 opaque Located : Context P → Prop
 opaque InstancesAreTarget : Context P → Prop
 
@@ -332,7 +314,6 @@ def PartitionVerdict.route : PartitionVerdict → Option String
 /-- **Your judgment**: the partition reading, or `none` with its missing basis reported. -/
 opaque partition : (c : Context P) → Option (PartitionReading c)
 
-/-- A partition is read only under self-grounding. -/
 def PartitionScoped (c : Context P) : Prop := (partition c).isSome → selfGrounding c
 
 def partitionRoute {c : Context P} (r : PartitionReading c) : Option String := r.verdict.route
@@ -386,22 +367,15 @@ With no relevant text, ask for a grounding target before the first pass.
 -/
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else. The domains, focus, intended inferences, mapping, fit
-claims, checks, warrants, verdicts, cited grounds, preference, partition reading, and the
-reconstruction count are read from it when needed; none is stored beside it.
+Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
 abbrev Mode (P : Type) := Context P
 
-/-- What every pass leaves standing in the context it surfaces from. -/
 def PassHolds (c : Context P) : Prop := ChecksExact c ∧ PartitionScoped c
 
 /-! ── PHASE TRANSITIONS ──
-A pass reads the fused context: detection, then focus settlement and read-back, then the
-intended inferences and their read-back, then construction and fit, checks, warrants,
-verdicts, and, under self-grounding, the partition reading. Evidence the pass collects enters
-the context as observation turns before the surface, and the pass surfaces from a context in
-which `PassHolds`. The surface proceeds; the focus gate alone holds the turn.
+A pass surfaces from a context in which `PassHolds`; the focus gate alone holds the turn.
 -/
 
 open Classical in
@@ -420,8 +394,7 @@ opaque observe : Context P → List (Evidence P)
 def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
 
 open Classical in
-/-- A later utterance is fused; unless it replaces a committed domain, the next pass reads the
-    whole fused context and its surface is `respond`. -/
+/-- `respond` is your surface for the pass. -/
 noncomputable def ground (respond : Context P → Response P) :
     (c : Context P) → List (Utterance P) → (c' : Context P) × Report c'
   | c, []      => ⟨c, report c⟩
@@ -433,15 +406,12 @@ noncomputable def ground (respond : Context P → Response P) :
       ground respond (c₂ ++ [(respond c₂).val]) us
 
 /-! ── LOOP ──
-The pass is the unit, and every later utterance opens one over the fused context: whatever it
-changes — the purpose, the intended inferences, the mapping, the evidence — the next pass reads
-it there, and a change to the intended inferences alone leaves the mapping as it was. Within a
-pass, re-entering an earlier step needs evidence progress: a ground in the context that the
-affected step has not yet read, or a still-untried reachable evidence move expected to change
-its assessment. Reading unchanged evidence again changes nothing. At most three construction
-or fit passes run per activation, and none is refunded; focus settlement, read-back, and
-reassessment over an unchanged mapping spend none. An empty mapping is assessed like any
-other. Preference changes no warrant or verdict.
+A change to the intended inferences alone leaves the mapping as it was. Within a pass,
+re-entering an earlier step needs evidence progress: a ground in the context that the affected
+step has not yet read, or a still-untried reachable evidence move expected to change its
+assessment. No construction or fit pass under `maxReconstructions` is refunded; focus
+settlement, read-back, and reassessment over an unchanged mapping spend none. An empty mapping
+is assessed like any other. Preference changes no warrant or verdict.
 -/
 
 /-!

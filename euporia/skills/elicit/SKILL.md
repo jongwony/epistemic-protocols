@@ -57,9 +57,7 @@ invariant: Coordinate Monotonicity            -- an accepted coordinate is revis
 namespace Euporia
 
 /-! ── GROUND ──
-The session primitive this contract reads. A context is the list of turns the session has
-accumulated; a turn carries where it came from and what form it takes. Only a person's
-statement is an utterance; an AI turn, an injected turn, and a summary ground nothing.
+The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
@@ -88,24 +86,20 @@ def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
 
-/-- Fusion appends one turn; the record only grows. -/
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
-/-- A citation of one turn of `c`, with the basis that turn is eligible for. -/
 structure Cite {P : Type} (c : Context P) where
   idx  : Nat
   lt   : idx < c.length
   kind : Basis
   ok   : (c[idx]'lt).basis = some kind
 
-/-- An open coordinate: which bases it admits, and whether a cited turn supports a value
-    (the support reading is the model's). -/
+/-- `supports` is the model's reading. -/
 structure Coord (P A : Type) where
   admits   : Basis → Prop
   supports : Context P → Turn P → A → Prop
 
-/-- A coordinate is filled only by a citation it admits and that supports the value; `open_`
-    may carry a candidate citation whose support is still short. -/
+/-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
@@ -119,8 +113,8 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
     e.basis = none
 -/
 
-/-- A citation into an earlier context still points at the same turn after later fusion;
-    what it supported there is judged again against the context that now stands. -/
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
@@ -169,15 +163,13 @@ opaque reverseTrace : Context P → List DimensionProjection
 /-- **Your judgment**: the projection's substrate basis is concrete enough to surface. -/
 opaque concreteBasis : DimensionProjection → Bool
 
-/-- `filter_confidence`: projections with concrete basis surface this cycle; the rest are held
-    back and tried again on a later re-trace. -/
+/-- `filter_confidence`; what is held back is tried again on a later re-trace. -/
 def surfaced (c : Context P) : List DimensionProjection := (reverseTrace c).filter concreteBasis
 def deferred (c : Context P) : List DimensionProjection :=
   (reverseTrace c).filter (fun d => !concreteBasis d)
 
 /-- `A`, the reading of the user's latest utterance. Coordinate values and deferrals are read
-    from every utterance in the context (`provided`, `parked`); the constructor fixes the path
-    that follows. -/
+    from every utterance in the context (`provided`, `parked`). -/
 inductive Answer
   /-- values for surfaced or parked coordinates -/
   | provide (values : List (Coordinate × Value))
@@ -196,8 +188,7 @@ opaque answer : Context P → Answer
     context before it; `none` when it gives none. -/
 opaque provided : Context P → Turn P → Coordinate → Option Value
 
-/-- The accepted value of `x`: the latest value a person's utterance gave it. Only utterances
-    are read, so no other turn can set or revise it. -/
+/-- The accepted value of `x`: the latest value a person's utterance gave it. -/
 def acceptedAux (x : Coordinate) : Context P → Context P → Option Value → Option Value
   | _,   [],      acc => acc
   | pre, t :: ts, acc =>
@@ -210,11 +201,10 @@ def acceptedAux (x : Coordinate) : Context P → Context P → Option Value → 
 
 def accepted (c : Context P) (x : Coordinate) : Option Value := acceptedAux x [] c none
 
-/-- **Your judgment**: the coordinates the user deferred and has not since given a value, each
-    returning as itself — the same question with the same basis. -/
+/-- **Your judgment**: the coordinates the user deferred and has not since given a value
+    (`Leftover`), each returning as itself — the same question with the same basis. -/
 opaque parked : Context P → List Coordinate
 
-/-- A coordinate is either still waiting on the user or already answered, never both. -/
 def Leftover (c : Context P) : Prop := ∀ x ∈ parked c, accepted c x = none
 
 /-- **Your judgment**: the axes still unresolved when the user dismisses. -/
@@ -230,7 +220,7 @@ inductive Initiator | userInvoked | aiDetected
     surface is an implicit confirm-or-decline. -/
 opaque initiatorOf : Context P → Initiator
 
-/-- A residual member keeps its kind; none is reduced to a bare axis label or dropped. -/
+/-- None is reduced to a bare axis label. -/
 inductive ResidualItem
   /-- an unresolved axis delegated downstream -/
   | axis (label : String)
@@ -248,8 +238,6 @@ structure ResolvedEndpoint (P : Type) where
   intent   : List (Coordinate × Value)
   residual : List ResidualItem
 
-/-- Every termination folds what the filter still holds back and every parked coordinate;
-    a dismissal also delegates the unresolved axes. -/
 def residualAt (c : Context P) (dismissed : Bool) : List ResidualItem :=
   (deferred c).map .projection ++ (parked c).map .coordinate ++
     (if dismissed then (unresolvedAxes c).map .axis else [])
@@ -259,7 +247,6 @@ def endpoint (c : Context P) (dismissed : Bool) : ResolvedEndpoint P :=
 
 inductive Outcome (P : Type)
   | resolved (r : ResolvedEndpoint P)
-  /-- the gate is held; nothing is answered on the user's behalf -/
   | holding  (c : Context P)
 
 /-- **Your judgments** at Phase 0: the intent's axis is undetermined; the signal comes from
@@ -281,9 +268,7 @@ substrate signal it invites the user to articulate further or withdraw.
 -/
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else. The traced projections, what surfaces and what is held
-back, the accepted values, the parked coordinates, the cycle count, the initiator, and the
-residual are read from it when needed; none is stored beside it.
+Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
 abbrev Mode (P : Type) := Context P
@@ -307,13 +292,11 @@ def elicit (respond : Context P → Response P) : Context P → List (Utterance 
     | _         => elicit respond (c' ++ [(respond c').val]) us
 
 /-! ── LOOP ──
-Every termination folds the same two leftovers into the residual — each projection the filter
-still holds back and each parked coordinate as itself — and a dismissal adds the unresolved
-axes. No fixed cycle cap. Convergence presentation, relayed at termination: (a) a plain
-one-sentence readback of the resolved intent, in the user's language; (b) the per-cycle trace
-(surfaced → answer → intent). The readback also appears in Phase 2 from the second cycle, as
-the recognizable target a resolving answer points at; the trace is termination-only.
-Convergence is demonstrated, not asserted.
+No fixed cycle cap. Convergence presentation, relayed at termination: (a) a plain one-sentence
+readback of the resolved intent, in the user's language; (b) the per-cycle trace (surfaced →
+answer → intent). The readback also appears in Phase 2 from the second cycle, as the
+recognizable target a resolving answer points at; the trace is termination-only. Convergence
+is demonstrated, not asserted.
 -/
 
 /-!
@@ -334,8 +317,8 @@ theorem silence (respond : Context P → Response P) (c : Context P) :
 -/
 
 /-! ── CONVERGENCE ──
-resolved(c) = the user's latest utterance judges the endpoint resolved; the residual is folded
-per LOOP.
+resolved(c) = the user's latest utterance judges the endpoint resolved; the residual is
+`residualAt`.
 -/
 
 /-!
