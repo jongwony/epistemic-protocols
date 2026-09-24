@@ -177,9 +177,10 @@ structure Signal where
   content : String
   source  : SignalSource
 
-/-- **Your reading** of the bound utterance and any named chain material, and of nothing wider:
-    the signals. A concern first voiced later in the run is not among them; it stays in the
-    context as it was said. -/
+/-- **Your record**: the signals the classification relay recorded, read from the bound
+    utterance and any named chain material and from nothing wider. Fixed from then on: none is
+    removed or reinterpreted away, and a concern first voiced later in the run is not added; it
+    stays in the context as it was said. -/
 opaque signals : Context P → List Signal
 
 /-- A partition for parallel generation. It organizes divergence only and is never handed off as
@@ -346,8 +347,8 @@ theorem blank_frame_map_first (relay generate respond : Context P → Response P
     start relay generate respond c us =
       ideate generate respond (c ++ [(relay c).val] ++ [(respond (c ++ [(relay c).val])).val]) us
 
-An answer that opens no frame runs no pass: the gate is presented again. An empty round never
-exists.
+An answer that opens no frame runs no pass: the gate is presented again. No pass runs over an
+empty set of frames.
 theorem no_empty_pass (generate respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hv : verdict (fuse c u) = .cont)
     (ht : (targets (fuse c u)).isEmpty = true) :
@@ -445,7 +446,7 @@ Read `references/round-composition.md` before composing when terminology must re
 - `unexplored_frames` covers derived frames, not every conceivable angle.
 - A chain reference gives up the blank path's independent-ideation-first benefit; no mitigation is claimed.
 - Signal extraction is bounded to the entry input and is not exhaustive or session-long.
-- The result carries the final unaddressed snapshot, not the full signal take/discard ledger; that ledger remains recoverable only from the session presentation.
+- The rendered field carries the final unaddressed snapshot, not the full signal take/discard ledger; that ledger remains recoverable only from the round presentations the session context holds.
 
 ## Rules
 
