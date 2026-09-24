@@ -49,7 +49,7 @@ Phase 2: Surface      → Present the whole assessment and proceed (relay — no
 Phase 3: Integrate    → A later turn re-opens the earliest assessment step affected by its evidence or revised question
 ```
 
-The comparison focus is the only decision gate, and it opens when the request and existing context leave a genuine choice about which comparison to construct.
+The comparison focus is the only decision gate, and it opens when the request and existing context leave a genuine choice about which comparison to construct. The purpose of the comparison is never filled in for you: unless your own words already state it, the gate asks.
 
 ## What a later turn does
 

@@ -1042,7 +1042,13 @@ function checkSpecVsImpl() {
         ? new RegExp(`^(?:noncomputable\\s+)?(?:inductive|structure|def|abbrev|opaque|class|theorem)\\s+${escaped}(?![\\w'.]).*$`, 'gm')
         : new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
       const formalWithoutOwnDef = formalBlock.replace(defLinePattern, '');
-      const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef);
+      // Lean resolves `X.f` through dot notation as well (`x.f`, `.f`), so a
+      // dotted declaration is also referenced by its last component.
+      const dotted = isLeanDefinition(content) && typeName.includes('.')
+        ? new RegExp(`\\.${escapeRegex(typeName.split('.').pop())}(?![\\w'])`)
+        : null;
+      const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef)
+        || (dotted !== null && dotted.test(formalWithoutOwnDef));
 
       // A type defined in TYPES but absent from PHASE TRANSITIONS, prose,
       // AND all other formal block sections suggests rename drift or dead type
