@@ -29,8 +29,9 @@ Aitesis(X) → Scan(X) → Uᵢ →
   [the pass changed something ∧ another pass is still worth it] Pass(c') → …
   [it changed nothing ∨ a further pass is not worth it] Surface(Uₚ ∪ Uᵤ ∪ Uₙ, Uᵣ) → proceed
     → converge
-  [a later utterance answers a surfaced item] c' := fuse(c, u) → Pass(c') → …
-    (an answer is one more channel; the next pass re-reads everything)
+  [every later utterance] c' := fuse(c, u) → Pass(c') → …
+    (any utterance may carry an unknown; answering a surfaced item is one case — an answer is
+     one more channel, and the next pass re-reads everything)
   [the answer is Sufficient] c' := fuse(c, u) → converge
     (the one answer that opens no pass: the inquiry is declared enough, and what remains is
      dismissed with the declaration)
@@ -85,7 +86,9 @@ def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
   | .peer, .statement       => some .report
   | _, _                    => none
 
-def Utterance (P : Type) := {e : Turn P // e.basis = some .utterance}
+/-- A turn a person sent, a statement or an observation; which of the two it is decides what
+    it may ground (`Turn.basis`). -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
@@ -278,7 +281,9 @@ inductive Answer
       with the declaration recorded; detect-only items stand -/
   | sufficient
 
-/-- **Your reading** of the latest utterance; `none` when it answers no surfaced item. -/
+/-- **Your reading** of the latest utterance; `none` when it answers no surfaced item. Every
+    later utterance opens a pass, `none` included — answering a surfaced item is one case;
+    only `sufficient` opens none. -/
 opaque answer : Context P → Option Answer
 
 /-- `ObservationSpec`: an observation run is one channel; it yields evidence or nothing, never a
@@ -331,7 +336,16 @@ proceeds.
     turn — a run that observed nothing returns its null result. -/
 opaque push : Context P → List (Evidence P)
 
-def pass (c : Context P) : Context P := c ++ (push c).map (·.val)
+/-- **Your record** of a pass, written once its collection has entered the context: the items
+    registered, the channels tried and those declined under an `EscapeCondition`, and every
+    landing. `Registered`, `tried`, `landing`, and `skips` are read from these turns, so a
+    declined channel is recorded even when collection returned nothing. A record grounds
+    nothing. -/
+opaque passRecord : Context P → List (Response P)
+
+def pass (c : Context P) : Context P :=
+  let c₁ := c ++ (push c).map (·.val)
+  c₁ ++ (passRecord c₁).map (·.val)
 
 /-- **Your judgment**, made once for the pass: another pass is still worth reaching for on the
     AI's own. No pass cap bounds it; this judgment and the growing `tried` sets do. Direction:
@@ -395,8 +409,8 @@ theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
     {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
     (c[s.idx]'s.lt).origin ≠ .assistant
 
-A pass whose channels returned nothing leaves the context as it was.
-theorem empty_pass (c : Context P) (h : push c = []) : pass c = c
+A pass only adds to the context: what collection returned, then the pass's record.
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
 -/
 
 /-! ── CONVERGENCE ──

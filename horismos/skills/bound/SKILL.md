@@ -78,7 +78,9 @@ def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
   | .peer, .statement       => some .report
   | _, _                    => none
 
-def Utterance (P : Type) := {e : Turn P // e.basis = some .utterance}
+/-- A turn a person sent, a statement or an observation; which of the two it is decides what
+    it may ground (`Turn.basis`). -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}

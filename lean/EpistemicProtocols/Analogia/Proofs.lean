@@ -20,6 +20,12 @@ theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
     (hn : UnsupportedNarrowing c) : report c = .focusGate := by
   simp [report, hu, hn]
 
+theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Supersedes (fuse c u))
+    (hf : FocusHeld (fuse c u)) :
+    ground respond c (u :: us) = ground respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
+  simp [ground, hs, hf]
+
 theorem assessment_converged (c : Context P) (h : report c = .assessment) :
     focusSettled c ∧ converged c := by
   unfold report at h

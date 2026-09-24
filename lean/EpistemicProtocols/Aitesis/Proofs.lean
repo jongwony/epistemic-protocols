@@ -31,8 +31,9 @@ theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
   rw [ai_never_grounds _ ho] at hk
   cases hk
 
-theorem empty_pass (c : Context P) (h : push c = []) : pass c = c := by
-  simp [pass, h]
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
+  ⟨(push c).map (·.val) ++ (passRecord (c ++ (push c).map (·.val))).map (·.val), by
+    simp [pass]⟩
 
 theorem ends_sufficient {c c' : Context P} (h : CollectionEnds c c') :
     ∃ c₀, c' = pass c₀ ∧ (¬ PassChanged c₀ (pass c₀) ∨ ¬ WorthAnotherPass (pass c₀)) := by

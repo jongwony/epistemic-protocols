@@ -85,7 +85,9 @@ def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
   | .peer, .statement       => some .report
   | _, _                    => none
 
-def Utterance (P : Type) := {e : Turn P // e.basis = some .utterance}
+/-- A turn a person sent, a statement or an observation; which of the two it is decides what
+    it may ground (`Turn.basis`). -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
@@ -184,7 +186,13 @@ opaque inferences : Context P → List Inference
     settled purpose. -/
 opaque UnsupportedNarrowing : Context P → Prop
 
-inductive FitLabel | preserved | «partial» | overextended
+inductive FitLabel
+  /-- the target structure preserves the source relation -/
+  | preserved
+  /-- a correspondence exists, but some of its structural dimensions lack evidence -/
+  | «partial»
+  /-- the source relation adds constraints the target does not support -/
+  | overextended
 
 /-- What fit assessment asserts; every placement, `preserved` included, is a claim that can be
     warranted or defeated. -/
@@ -319,7 +327,8 @@ def PartitionScoped (c : Context P) : Prop := (partition c).isSome → selfGroun
 def partitionRoute {c : Context P} (r : PartitionReading c) : Option String := r.verdict.route
 
 /-- **Your judgment**: the latest utterance replaces a committed domain — a different question,
-    not an advance of this one. -/
+    not an advance of this one. The domain pair is committed once a mapping has been constructed
+    against it; before that, a reframe may replace either domain and settlement starts again. -/
 opaque Supersedes : Context P → Prop
 
 /-- **Your judgment**: an earlier dependency still needs revision and no evidence move this
@@ -378,6 +387,10 @@ def PassHolds (c : Context P) : Prop := ChecksExact c ∧ PartitionScoped c
 A pass surfaces from a context in which `PassHolds`; the focus gate alone holds the turn.
 -/
 
+/-- The focus gate holds: something is uncertain, and an axis is unsettled or `K` was narrowed
+    without basis. Nothing is constructed, checked, or collected while it holds. -/
+def FocusHeld (c : Context P) : Prop := Uncertain c ∧ (¬ focusSettled c ∨ UnsupportedNarrowing c)
+
 open Classical in
 noncomputable def report (c : Context P) : Report c :=
   if ¬ Uncertain c then .zeroGap
@@ -402,16 +415,17 @@ noncomputable def ground (respond : Context P → Response P) :
     let c₁ := fuse c u
     if Supersedes c₁ then ⟨c₁, .superseded⟩
     else
-      let c₂ := collect c₁
+      let c₂ := if FocusHeld c₁ then c₁ else collect c₁
       ground respond (c₂ ++ [(respond c₂).val]) us
 
 /-! ── LOOP ──
 A change to the intended inferences alone leaves the mapping as it was. Within a pass,
 re-entering an earlier step needs evidence progress: a ground in the context that the affected
 step has not yet read, or a still-untried reachable evidence move expected to change its
-assessment. No construction or fit pass under `maxReconstructions` is refunded; focus
-settlement, read-back, and reassessment over an unchanged mapping spend none. An empty mapping
-is assessed like any other. Preference changes no warrant or verdict.
+assessment. Every construction or fit-assessment pass spends one of `maxReconstructions`,
+including a fit-only reassessment that keeps the mapping, and none is refunded; a K-only or
+checks-only reassessment, focus settlement, and read-back spend none. An empty mapping is
+assessed like any other. Preference changes no warrant or verdict.
 -/
 
 /-!
@@ -422,6 +436,12 @@ A settlement that narrows `K` without basis holds at the focus gate rather than 
 unchanged context again.
 theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
     (hn : UnsupportedNarrowing c) : report c = .focusGate
+
+While the focus gate holds, a later utterance collects no evidence.
+theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Supersedes (fuse c u))
+    (hf : FocusHeld (fuse c u)) :
+    ground respond c (u :: us) = ground respond (fuse c u ++ [(respond (fuse c u)).val]) us
 -/
 
 /-! ── CONVERGENCE ──
@@ -547,7 +567,7 @@ Read `references/round-composition.md` before composing when terminology must re
 - **Audit, not instruction**: This protocol takes a target account already in play. Where the reader does not yet hold one, the deficit is explanation and routes there; do not teach the domain under audit.
 - **Recognition over Recall**: Present structured alternatives with anticipatable futures only for a genuine domain decision. Keep the turn-reading constructors internal, so the reader acts in their own language rather than selecting a meta-label.
 - **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question about the assessment is exploration; answer it without asking the reader to classify their own turn.
-- **Option-set relay test**: Relay a focus axis only where the user's words, a citable standing rule, or a source turn of the text under audit showing that one value is admissible settles it; the decomposition's own output settles nothing. The comparison purpose is never relayed: this audit closes on evidence, so no later utterance of the user's would cover a purpose the AI chose. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Option-set relay test**: Relay a focus axis only where the user's words, a citable standing rule, or a source turn of the text under audit showing that one value is admissible settles it; the decomposition's own output settles nothing. The AI never supplies the comparison purpose: this audit closes on evidence, so no later utterance of the user's would cover a purpose the AI chose. A purpose the user's own words settle is read back like any settled axis; otherwise it is asked at the focus gate. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
 - **Bounded reach**: State the limits supported by the cited grounds and their checked scopes in the same breath as every Licensed verdict. A mapping presented without its breaking point produces confident wrong inference, which is the failure this protocol exists to catch.
 - **Self-grounding visibility**: Treat a case as self-grounding only where the source abstraction is located and its member instances are the target. Surface the full member partition and the grounds supporting it before routing split to the `/conduct` decompose-recovery recipe or trim to `/induce`. An unresolved basis carries no partition recommendation. Analogia supplies the partition evidence while the downstream checkpoint constitutes cell membership.

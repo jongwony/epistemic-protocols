@@ -81,7 +81,9 @@ def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
   | .peer, .statement       => some .report
   | _, _                    => none
 
-def Utterance (P : Type) := {e : Turn P // e.basis = some .utterance}
+/-- A turn a person sent, a statement or an observation; which of the two it is decides what
+    it may ground (`Turn.basis`). -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
 def Evidence (P : Type) := {e : Turn P //
   e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
@@ -277,8 +279,8 @@ abbrev Mode (P : Type) := Context P
 Each cycle is one step of a structural recursion over the user's utterances. The run starts
 from the context in which Phase 0 found `activates` and the first cycle surfaced. After each
 utterance that continues, `respond` is the next cycle's surface: `surfaced` and `parked`
-beside the cycle count (`cycleOf`) and, from the second cycle, a one-sentence readback of the
-intent. Where `initiatorOf` reads an AI-detected activation, the first surface is an implicit
+beside the cycle count (`cycleOf`) and a one-sentence readback of the intent, in every cycle
+including the first. Where `initiatorOf` reads an AI-detected activation, the first surface is an implicit
 confirm-or-decline, and a decline reads as `dismiss`.
 -/
 
@@ -294,8 +296,8 @@ def elicit (respond : Context P → Response P) : Context P → List (Utterance 
 /-! ── LOOP ──
 No fixed cycle cap. Convergence presentation, relayed at termination: (a) a plain one-sentence
 readback of the resolved intent, in the user's language; (b) the per-cycle trace (surfaced →
-answer → intent). The readback also appears in Phase 2 from the second cycle, as the
-recognizable target a resolving answer points at; the trace is termination-only. Convergence
+answer → intent). The readback also appears in Phase 2 in every cycle, the first
+included, as the recognizable target a resolving answer points at; the trace is termination-only. Convergence
 is demonstrated, not asserted.
 -/
 
@@ -382,7 +384,7 @@ On the AI-guided path, the immutable Phase 1 scan may precede confirmation; the 
 
 ### Phase 2 surfacing format
 
-At Phase 2, render the cycle counter and, from cycle 2 onward, a plain one-sentence readback of current `I'`. For each surfaced projection, show its inferred axis, coordinate questions, cited substrate basis, and any substrate-derived default. Mark each parked coordinate as returning in the same wording and with the same basis. Let the listed coordinates establish what is currently in play without a derived count or resolved/total tally, then present per-coordinate provide-or-defer slots, a way to say the intent is resolved as read back, and Dismiss-with-residual, and yield the turn. An answer beyond the slots — a value for an unlisted coordinate, a dimension the surface excluded, a changed framing — joins the context whole, and the next re-trace reads it.
+At Phase 2, render the cycle counter and, in every cycle including the first, a plain one-sentence readback of the current intent — the target a "resolved as read back" answer points at. For each surfaced projection, show its inferred axis, coordinate questions, cited substrate basis, and any substrate-derived default. Mark each parked coordinate as returning in the same wording and with the same basis. Let the listed coordinates establish what is currently in play without a derived count or resolved/total tally, then present per-coordinate provide-or-defer slots, a way to say the intent is resolved as read back, and Dismiss-with-residual, and yield the turn. An answer beyond the slots — a value for an unlisted coordinate, a dimension the surface excluded, a changed framing — joins the context whole, and the next re-trace reads it.
 
 Utterance evidence quotes the user's actual fragment; it does not attribute an unstated mental model. Only projections with concrete substrate basis reach the surface. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
 
