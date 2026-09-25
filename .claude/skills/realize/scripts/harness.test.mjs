@@ -65,7 +65,7 @@ if (kind === 'exec') {
   }
   console.log(JSON.stringify({
     type: 'item.completed',
-    item: { type: 'command_execution', command: 'pwd', status: 'completed' },
+    item: { type: 'command_execution', command: process.env.FAKE_CODEX_COMMAND || 'pwd', status: 'completed' },
   }));
   console.log(JSON.stringify({
     type: 'item.completed',
@@ -459,6 +459,22 @@ console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.
     assert.equal(report.status, 0, report.stderr || report.stdout);
     assert.match(report.stdout, /\| 5\/5 \|/);
     assert.match(report.stdout, /\| 0\.0500 \|/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a numbered listing of the target counts as reading it', () => {
+  const { root, env } = fixture();
+  env.CODEX_API_KEY = 'codex-secret';
+  env.FAKE_CODEX_MODE = 'complete';
+  env.REALIZE_CASES = 'grasp-adjudicable';
+  env.FAKE_CODEX_COMMAND = "/bin/bash -lc 'nl -ba app/limiter.py'";
+  try {
+    assert.equal(invoke(env, 'setup', 'grasp').status, 0);
+    assert.equal(invoke(env, 'run', 'grasp').status, 0);
+    const report = invoke(env, 'report', 'grasp', '--markdown');
+    assert.match(report.stdout, /target_read_first 1\/1/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

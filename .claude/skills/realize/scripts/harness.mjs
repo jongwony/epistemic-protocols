@@ -835,7 +835,9 @@ function parseCodexTurn(events) {
     .map(() => CFG.protocolSkill);
   // Reading the skill contract is treatment integrity, not context collection for
   // the user's task. Require a separate read-like command against the fixture.
-  const readLike = /\b(?:rg|sed|cat|head|tail|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
+  // `nl`, `grep`, `awk`, `less` and `more` print file contents as surely as `cat` does; a
+  // Lean /grasp run read the whole target through `nl -ba` alone and was scored unread.
+  const readLike = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
   const toolUses = commands
     .filter((item) => !item.command?.includes('/plugins/cache/') && readLike.test(item.command || ''))
     .map(() => 'Read');
