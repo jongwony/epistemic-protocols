@@ -219,8 +219,6 @@ def RoundOwes (c : Context P) (r : BoundaryEssence c) : Prop :=
 inductive Deficit
   /-- a missing pre-execution fact (hint: /inquire) -/
   | contextInsufficient
-  /-- analytical lenses for an inquiry (hint: /frame) -/
-  | frameworkAbsent
   /-- what a mapping licenses about a target account already in play (hint: /ground) -/
   | mappingUncertain
   /-- a contrast that must be instantiated before its direction is recognizable (hint: /preview) -/

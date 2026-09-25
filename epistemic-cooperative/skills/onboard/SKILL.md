@@ -54,7 +54,6 @@ Compact mapping for inline use.
 | Heuresis `/ideate` | Planning | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
 | Proplasma `/preview` | Planning | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on user-settled axes | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
 | Hypotyposis `/sketch` | Planning | A form has to be made, intent cannot yet be settled from descriptions, and the user would recognize it on sight — sketch under a settled focus, take marks on a specific version, revise the retained version, finish on the recognized one | "I'd know it when I see it", a plan stalled at its first draft, a description rewritten repeatedly instead of made |
-| Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Auditing what a mapping licenses about an account already in play | Intended conclusions whose structural evidence or limits remain uncertain |
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 3+ instances with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
 | Merismos `/apportion` | Execution | An autonomous goal is stated but its unit plan is uncompiled — cut it into coarse units at cited seams and close each unit before the run begins — a derived completion condition where one compiles, a recorded acceptance or a recorded reservation where none does | An unattended-run directive ("work through", "go through all", "run until done"), a goal that plainly exceeds one execution horizon, or a stop-hook being configured — each only shows an autonomous interval is *intended*, so the deciding check is whether the goal already carries units whose completion conditions are settled — closed by a determinate predicate, by a recorded acceptance, or by a recorded reservation; a plan that does is out of scope |
@@ -100,7 +99,7 @@ Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
   - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview, /sketch
-  - Analysis — /frame, /ground, /induce
+  - Analysis — /ground, /induce
   - Execution/Verification/Understanding — /apportion, /contextualize, /sublate, /recollect, /conduct, /grasp
 
 **Gate #3** (Targeted only, session source):
@@ -131,7 +130,7 @@ From collected metadata, infer:
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/inquire`, `/frame`).
+If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/inquire`).
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization.
 
@@ -139,7 +138,7 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 
 **Quick path only.** Select exactly 1 protocol recommendation from the auto-recommend pool.
 
-**Onboarding Pool**: `/elicit` (Euporia), `/inquire` (Aitesis), `/frame` (Prothesis). These three are chosen because users can quickly experience their value. Protocols like `/grasp` are user-initiated by nature and should not be proactively suggested in the first encounter.
+**Onboarding Pool**: `/elicit` (Euporia), `/inquire` (Aitesis). These two are chosen because users can quickly experience their value. Protocols like `/grasp` are user-initiated by nature and should not be proactively suggested in the first encounter.
 
 **Recommendation rules** (applied to Quick Scan Profile):
 
@@ -147,13 +146,12 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 |----------|----------------|----------|
 | `/elicit` | Vague first prompts ("improve", "optimize", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates. An ideation ask ("ideas for", "brainstorm") routes to `/ideate` (Heuresis), which is user-initiated and therefore outside this proactive pool | Highest (also fallback) |
 | `/inquire` | Hand-off or finalization language ("go ahead", "just do it", "ready", "ship", "merge") — the AI is about to execute on the context it has; tasks with implicit requirements or environment dependencies in summary. It checks what the imminent execution rests on (assumptions, missing facts, environment dependencies); it does not audit the decision for unconsidered trade-offs, alternatives, or omitted steps | Medium |
-| `/frame` | Exploration/comparison language ("approach", "options", "tradeoffs", "compare", "architecture", "which way") | Medium |
 
 **Decision logic**:
 1. Score each protocol by signal match count from `firstPrompt` and `summary` fields
 2. **Ideation route-away**: ideation asks ("ideas for", "brainstorm") score no pool protocol — when they are the only matched signals, relay in one sentence that the ask itself maps to `/ideate` (user-initiated: named as the route for that ask, not presented as the onboarding recommendation), then continue via the Fallback rule; the Phase 2b evidence card follows its fallback form, since the recommendation rests on the default, not on a matched signal
 3. Select the single strongest match
-4. Tie-break: `/elicit` > `/inquire` > `/frame`
+4. Tie-break: `/elicit` > `/inquire`
 5. **Fallback**: If no signals detected (no sessions, sparse metadata) — or every detected signal was routed away — recommend `/elicit`
 
 **Output**: Present exactly one recommendation as a single sentence.
@@ -189,9 +187,9 @@ Branch: Try it now → Phase 4 (quick trial), Learn more about this recommendati
 
 **Targeted path only.** Apply User Context Profile to match protocols to the user's context.
 
-1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/elicit`, `/inquire`, `/frame`).
+1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/elicit`, `/inquire`).
 2. **Targeted sub-path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
-3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/elicit`, `/inquire`, `/frame`). Proceed immediately without blocking the onboarding flow.
+3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/elicit`, `/inquire`). Proceed immediately without blocking the onboarding flow.
 
 ### Phase 3: Scenario (Targeted Path — Intervention Point)
 
@@ -216,7 +214,7 @@ Scenario: /X (Protocol Name)
 Expected outcome: [e.g., reduced rework, clearer direction]
 ```
 
-**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/elicit` or `/frame`), reserve it for Phase 5 quiz material instead of using it as a scenario. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
+**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/elicit` or `/ideate`), reserve it for Phase 5 quiz material instead of using it as a scenario. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
 
 **Anti-pattern**: Scenarios must be self-contained (situation + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 5 quiz.
 
@@ -301,7 +299,7 @@ Branch: Quiz → Phase 5, Another scenario → Phase 3, Different protocol → P
 Test protocol recognition through situation-based questions. Question format differs by path.
 
 **Question sourcing** (in priority order):
-1. **Ambiguous scenarios from Phase 3 filtering** — situations that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/elicit` or `/frame`)
+1. **Ambiguous scenarios from Phase 3 filtering** — situations that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/elicit` or `/ideate`)
 2. Protocols from TRIAL + MAP results (personalized)
 3. Profile-personalized variants of preset scenarios (if User Context Profile available)
 4. Preset scenarios from `references/scenarios.md`
@@ -389,7 +387,6 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 - `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis collects the facts the AI can reach and hands back what only the user holds (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
 - `/inquire` ↔ `/apportion`: both run right before the AI acts, but `/inquire` collects the context the action rests on as far as the AI can reach and names the rest as the user's unknown, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, on an acceptance you recorded when none compiles, or on a reservation where a judgment rather than a check settles it — before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
-- `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. audit of analogical inference)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)
 
 **Path-specific question counts**:
@@ -415,7 +412,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
 2. **One at a time**: Quick path shows exactly 1 recommendation, 1 evidence card, 1 trial.
-3. **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/apportion`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
+3. **Onboarding Pool**: `/elicit`, `/inquire` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/apportion`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
 4. **Experience over analysis**: This skill teaches through doing; its output is the trial and the terminal summary.
 5. **Privacy**: Never transmit session data externally. All analysis runs locally.
 6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan.

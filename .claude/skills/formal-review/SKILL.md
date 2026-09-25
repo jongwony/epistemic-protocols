@@ -1,9 +1,7 @@
 ---
 name: formal-review
 description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", or invokes /formal-review. A fixed-lens PR review for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Project-local contributor tooling."
-allowed-tools: Bash, Read, Grep, Glob, Task, Skill
-skills:
-  - prothesis:frame
+allowed-tools: Bash, Read, Grep, Glob, Task
 ---
 
 # Formal Lens Review
@@ -12,7 +10,7 @@ A one-pass review of a PR diff through a **fixed formal lens panel** — Categor
 
 ## Why this is a project skill
 
-The formal triple (morphism coherence, type soundness, evaluation-order consistency) is **this repository's** standing review axis — protocol `SKILL.md` files carry category-theoretic formal blocks, `TYPES` / `PHASE TRANSITIONS`, and operational-semantics state machines. `/frame`, run generically, is unlikely to select all three formal lenses at once on a given diff; pinning them here guarantees the formal partial review is exhaustive every run. The fixed panel is therefore project-specific and belongs in the project skill layer. This skill is self-contained — it composes `/frame` and describes its own isolated-then-adversarial substrate; `prothesis` is its one plugin dependency.
+The formal triple (morphism coherence, type soundness, evaluation-order consistency) is **this repository's** standing review axis — protocol `SKILL.md` files carry category-theoretic formal blocks, `TYPES` / `PHASE TRANSITIONS`, and operational-semantics state machines. Pinning all three here guarantees the formal partial review is exhaustive every run. The fixed panel is therefore project-specific and belongs in the project skill layer. This skill is self-contained — it names its own lenses and describes its own isolated-then-adversarial substrate, with no plugin dependency.
 
 ## Caller Signature
 
@@ -31,7 +29,7 @@ When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tre
 /formal-review [scope?]
   Phase 0  : scope detect (PR number | current-branch PR | working tree) + free-exit — no SHA pinning, tools fetch live
   Phase 1  : diff prep   — fetch diff live (gh pr diff {N} | git diff HEAD); read file fate (A/M/D/R) from diff headers; state diff-reading conventions
-  Phase 2  : fixed-lens review (isolated → adversarial) — pin the formal triple (Category Theory ∥ Type Theory ∥ OpSem) via /frame; substrate described in-skill (not /conduct)
+  Phase 2  : fixed-lens review (isolated → adversarial) — pin the formal triple (Category Theory ∥ Type Theory ∥ OpSem); substrate described in-skill (not /conduct)
               2a isolated per-lens analysis (independence) — each finding: file:line + lens tag + severity + evidence-grounded rationale, confidence ≥ 80%
               2b adversarial cross-verification — refute each finding; survive → Phase 3, defeated → recorded in the Phase 4 comment as refuted (relay drop w/ basis)
   Phase 3  : direction-error guard (verify) — cross-check review text vs diff-header fate; Added-but-described-as-deleted → warning augment (relay)
@@ -74,9 +72,9 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 ## Phase 2: Fixed-Lens Review (isolated analysis → adversarial cross-verification)
 
-`/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. This skill fixes all five conduct axes — order, independence, reconciliation, termination, routing — so the method is not underdetermined and `/conduct`'s own activation precondition is unmet: declining it here IS that warrant relaying, not a shortcut past it. Review **only the changed files**.
+This skill names the parallel perspectives and describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. This skill fixes all five conduct axes — order, independence, reconciliation, termination, routing — so the method is not underdetermined and `/conduct`'s own activation precondition is unmet: declining it here IS that warrant relaying, not a shortcut past it. Review **only the changed files**.
 
-**Lens framing.** Call `/frame` (prothesis) to frame the perspectives. This skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
+**Lens panel.** This skill **pins** the panel to the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
 
 - **Category Theory** — morphism coherence, composition laws, functor consistency
 - **Type Theory** — type-signature soundness, variance, type safety
@@ -116,7 +114,7 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 
 ## Rules
 
-1. **Fixed formal panel** — the lenses are pinned to Category Theory, Type Theory, and Operational Semantics every run; `/frame` is framed onto this triple, so the panel stays the same whatever the diff contains.
+1. **Fixed formal panel** — the lenses are pinned to Category Theory, Type Theory, and Operational Semantics every run, so the panel stays the same whatever the diff contains.
 2. **Changed files only** — review the files in the Phase 1 diff and nothing else; the diff headers are authoritative for file fate, the hunks for line-level evidence.
 3. **Isolated lenses, then adversarial cross-verification** — each lens forms its findings in isolation (independence-before-contamination); the aggregated findings then pass a single adversarial refutation pass before posting. Surviving findings proceed; defeated findings are recorded in the consolidated comment as refuted with cited basis. The isolated-then-adversarial substrate is described in this skill directly.
 4. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
