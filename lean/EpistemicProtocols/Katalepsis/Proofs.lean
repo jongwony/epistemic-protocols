@@ -37,9 +37,29 @@ theorem asked_not_reasked (c : Context P) (t : RecordId) (hc : HorizonCandidate)
   · exact fun h => Gate.noConfusion h
   · split <;> exact fun h => Gate.noConfusion h
 
-theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : ¬ AsksSteps c) :
+theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : ¬ AsksSteps c)
+    (hi : otherIntent c = none) :
     advance c (.horizonProbe t) .cont = .gate (c ++ (attach c).map (·.val)) (.reveal t) := by
-  simp [advance, horizonAnswer, hm, hs]
+  simp [advance, horizonAnswer, hm, hs, hi]
+
+theorem other_intent_no_disclosure (c : Context P) (t : RecordId) (e : EntryPoint)
+    (hm : ¬ Reached c) (hs : ¬ AsksSteps c) (hi : otherIntent c = some e) :
+    advance c (.horizonProbe t) .cont = .gate c (redirect c e) ∧ ∀ t', redirect c e ≠ .reveal t' := by
+  refine ⟨by simp [advance, horizonAnswer, hm, hs, hi], ?_⟩
+  intro t'
+  unfold redirect
+  split
+  · unfold gateFor
+    split
+    · exact fun h => Gate.noConfusion h
+    · split
+      · exact fun h => Gate.noConfusion h
+      · split <;> exact fun h => Gate.noConfusion h
+  · exact fun h => Gate.noConfusion h
+
+theorem probe_other_intent (c : Context P) (t : RecordId) (g : Selectable) (e : EntryPoint)
+    (hi : otherIntent c = some e) : advance c (.probe t g) .cont = .gate c (redirect c e) := by
+  simp [advance, hi]
 
 theorem steps_cue (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : AsksSteps c) :
     advance c (.horizonProbe t) .cont = .gate c (.cue t) := by
@@ -56,10 +76,14 @@ theorem reached_taken (c : Context P) (t : RecordId) (hr : Reached c) :
 
 theorem no_adjudication_at_probe (c : Context P) (t : RecordId) (g : Selectable) :
     advance c (.probe t g) .cont = .gate c (.inquiry t g.val) ∨
-      advance c (.probe t g) .cont = .gate c (settle c t (.coverage t)) := by
-  by_cases ho : Objection c
-  · left; simp [advance, ho]
-  · right; simp [advance, ho]
+      advance c (.probe t g) .cont = .gate c (settle c t (.coverage t)) ∨
+      ∃ e, advance c (.probe t g) .cont = .gate c (redirect c e) := by
+  cases hi : otherIntent c with
+  | some e => exact Or.inr (Or.inr ⟨e, by simp [advance, hi]⟩)
+  | none =>
+    by_cases ho : Objection c
+    · left; simp [advance, hi, ho]
+    · right; left; simp [advance, hi, ho]
 
 theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     (∃ c₁ g₁, advance c g v = .gate c₁ g₁) ∨
@@ -118,7 +142,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     · exact ⟨_, _, rfl⟩
     · split
       · exact ⟨_, _, rfl⟩
-      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
   cases v with
   | propose => exact Or.inl ⟨_, _, by cases g <;> rfl⟩
   | withdraw => exact Or.inr (Or.inr ⟨rfl, by cases g <;> rfl⟩)
@@ -137,7 +163,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     | probe t g =>
       left; simp only [advance]; split
       · exact ⟨_, _, rfl⟩
-      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
     | inquiry t g =>
       left; simp only [advance]; split
       · exact ⟨_, _, rfl⟩
@@ -157,7 +185,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     | probe t g =>
       simp only [advance]; split
       · exact ⟨_, _, rfl⟩
-      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
     | inquiry t g =>
       simp only [advance]; split
       · exact ⟨_, _, rfl⟩
