@@ -39,16 +39,17 @@ Katalepsis(R, U) → grasp(c, utterances), where c is the fused session context:
         no gap at all: the zero-gap finding with its reasoning
         nothing probed and no Horizon asked: the start-aspect selector
         otherwise: coverage
-      the Horizon probe: the answer reached the edge → closure → back to the task;
+      the Horizon probe, or a cue: the answer reached the edge → closure → back to the task;
+        the user asked for a step instead → a cue that still does not name the edge;
         it missed → read and quote the material the edge rests on → the disclosure: the edge,
-        that material, and an application question (a cue first where the user asked for steps)
+        that material, and an application question
       the disclosure's application question, or a probe: an objection you have ground to raise
         → the reasoning inquiry; none → closure → back to the task
       the reasoning inquiry: an adjudication stands → read and quote the material it rests
         on → the correction with that material → the same aspect asked again;
         none stands → closure → back to the task
-      the start-aspect selector or coverage: an aspect chosen → its probe; none → back to the
-        task
+      the start-aspect selector or coverage: an aspect chosen → its probe, unless an admissible
+        Horizon not yet asked is due first; none → back to the task
       the zero-gap finding (Reopen): the named gap joins the task's gaps → the task's gate
     back to the task: an admissible Horizon not yet asked, read on the fused context, preempts
       the task's gate; otherwise that gate
@@ -299,15 +300,23 @@ opaque Asked : Context P → RecordId → HorizonCandidate → Prop
 def HorizonDue (c : Context P) (t : RecordId) : Prop :=
   ∃ hc, admissible c t = some hc ∧ ¬ Asked c t hc
 
-/-- **Your judgment**, read at the answer to a Horizon probe: the answer reaches the edge. -/
+/-- **Your judgment**, read at the answer to a Horizon probe or a cue: the answer reaches the
+    edge. -/
 opaque Reached : Context P → Prop
+
+/-- **Your judgment**, read at the answer to a Horizon probe or a cue: instead of answering, the
+    user asks to go step by step — a hint, a smaller step. -/
+opaque AsksSteps : Context P → Prop
 
 /-- How an aspect came to be shown: by the user on their own, through an application after you
     disclosed the edge, or through an application after a cue the user asked for. What follows a
     disclosure or a cue never reads as independent detection. -/
 inductive Demonstration | independent | afterDisclosure | afterCue
 
-/-- **Your record**, read from the context: for task `t`, each aspect shown and how. -/
+/-- **Your record**, read from the context: for task `t`, each aspect shown and how — a Horizon
+    edge an answer reached, on its own or after a cue, or an application after its disclosure
+    that you read as reaching it; and an aspect whose adjudication the user's answer met. An
+    answer merely taken, with nothing to check it against, is not shown. -/
 opaque demonstrated : Context P → RecordId → List (GapType × Demonstration)
 
 /-- **Your judgment**: turn `idx` carries the target itself — its text, or an observation of
@@ -363,9 +372,11 @@ inductive Gate
   /-- the preempting Horizon probe: an everyday scenario and nothing else — no edge, no expected
       answer, no reason for asking -/
   | horizonProbe (t : RecordId)
+  /-- the step the user asked for at a Horizon probe: a cue toward the edge that still does not
+      name it -/
+  | cue (t : RecordId)
   /-- the disclosure owed after a Horizon answer that missed the edge: the edge named, the
-      material from the target it rests on quoted in place, and an application question; where
-      the user's utterance asked to go step by step, a cue comes first -/
+      material from the target it rests on quoted in place, and an application question -/
   | reveal (t : RecordId)
   /-- which aspect to start with, over the task's gaps -/
   | startAspect (t : RecordId)
@@ -395,8 +406,8 @@ opaque answered : Context P → Gate
 /-- Relay metadata emitted before a gate, never in place of one. `outcome` says how the round
     ended: nothing to object to, an objection the user's reasoning defeated, nothing to check
     the answer against — none of them a demonstrated aspect — a Horizon edge the user reached,
-    or one disclosed and applied, or, for a side branch, that the answer was read as a proposal
-    and recorded. -/
+    on their own or after a cue, or one disclosed and applied, each shown and recorded with how;
+    or, for a side branch, that the answer was read as a proposal and recorded. -/
 structure ContinuationClosure where
   outcome   : String
   branch    : Option RecordId
@@ -436,7 +447,8 @@ structure VerifiedUnderstanding (P : Type) where
 
 inductive Outcome (P : Type)
   | verified  (v : VerifiedUnderstanding P)
-  /-- the user stopped; the context carries what was shown, and the dissent is attached -/
+  /-- the user stopped; the context ends in the trace of what was shown, presented at the stop,
+      and the dissent is attached -/
   | withdrawn (c : Context P) (dissent : List String)
   /-- the gate holds -/
   | holding   (c : Context P)
@@ -494,10 +506,21 @@ noncomputable def gateFor (c : Context P) (t : RecordId) : Gate :=
   else .coverage t
 
 open Classical in
-/-- A return to a task-level gate: an admissible Horizon not yet asked preempts it, read on the
-    context the latest answer fused. An aspect the user just chose is probed as chosen. -/
+/-- A return to a task-level gate, or the probe of an aspect the user just chose: an admissible
+    Horizon not yet asked preempts it, read on the context the latest answer fused. A choice it
+    preempts stays in the context, and the task's next coverage offers it again. -/
 noncomputable def settle (c : Context P) (t : RecordId) (g : Gate) : Gate :=
   if HorizonDue c t then .horizonProbe t else g
+
+open Classical in
+/-- An answer to a Horizon probe or a cue: one that reaches the edge is taken and the loop
+    returns to the task; a request for a step gets a cue; anything else missed the edge, which
+    is disclosed at once with the material it rests on read — never a second concealed
+    scenario. -/
+noncomputable def horizonAnswer (c : Context P) (t : RecordId) : Step P :=
+  if Reached c then .gate c (settle c t (.coverage t))
+  else if AsksSteps c then .gate c (.cue t)
+  else .gate (c ++ (attach c).map (·.val)) (.reveal t)
 
 /-- A task begins: the record update naming it, then the task's gate. -/
 noncomputable def beginTask (c : Context P) (t : Task) : Step P :=
@@ -518,7 +541,7 @@ def resumeOf : Gate → Gate
 
 noncomputable def aspectStep (c : Context P) (g : Gate) (t : RecordId) : Step P :=
   match filledValue (aspectChoice c) with
-  | some a => .gate c (.probe t a)
+  | some a => .gate c (settle c t (.probe t a))
   | none   => .gate c (settle c t g)
 
 open Classical in
@@ -536,9 +559,8 @@ noncomputable def advance (c : Context P) : Gate → Verdict → Step P
       | none   => .gate c₁ .entrySelection
     else .gate c .entrySelection
   | .zeroGap t, _ => .gate c (gateFor c t)
-  | .horizonProbe t, _ =>
-    if Reached c then .gate c (settle c t (.coverage t))
-    else .gate (c ++ (attach c).map (·.val)) (.reveal t)
+  | .horizonProbe t, _ => horizonAnswer c t
+  | .cue t, _ => horizonAnswer c t
   | .reveal t, _ =>
     if Objection c then .gate c (.inquiry t .horizon) else .gate c (settle c t (.coverage t))
   | .probe t g, _ =>
@@ -555,7 +577,8 @@ def present (respond : Context P → Gate → Response P) (c : Context P) (g : G
 
 /-- Convergence: the trace presented, then the resolution; `trace` is your convergence
     presentation — each task with its status, the aspects detected for it, the Horizon among them
-    where one was asked, and each aspect shown with how it was shown. -/
+    where one was asked, and each aspect shown with how it was shown. A withdrawal presents the
+    same trace at the stop. -/
 def understanding (trace : Context P → Response P) (c : Context P) : VerifiedUnderstanding P :=
   { context := c ++ [(trace c).val]
     shown   := (tasks c).map (fun t => (t.id, demonstrated c t.id))
@@ -568,7 +591,7 @@ noncomputable def grasp (respond : Context P → Gate → Response P)
     let c' := fuse c u
     match advance c' (answered c) (verdict c') with
     | .done c₁      => .verified (understanding trace c₁)
-    | .withdrawn c₁ => .withdrawn c₁ (dissent c₁)
+    | .withdrawn c₁ => .withdrawn (c₁ ++ [(trace c₁).val]) (dissent c₁)
     | .gate c₁ g    => grasp respond trace (present respond c₁ g) us
 
 /-- The run begins at entry selection, over the route map Phase 0 assessed in silence. -/
@@ -611,10 +634,18 @@ An edge already asked is not asked again.
 theorem asked_not_reasked (c : Context P) (t : RecordId) (hc : HorizonCandidate)
     (ha : admissible c t = some hc) (hk : Asked c t hc) : gateFor c t ≠ .horizonProbe t
 
-A Horizon answer that missed the edge is followed by its disclosure, with the material it rests
-on read, and never by a second concealed scenario.
-theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) :
+A Horizon answer that missed the edge, and asked for no step, is followed by its disclosure, with
+the material it rests on read, and never by a second concealed scenario.
+theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : ¬ AsksSteps c) :
     advance c (.horizonProbe t) .cont = .gate (c ++ (attach c).map (·.val)) (.reveal t)
+
+A user who asks for a step instead of answering gets a cue that still does not name the edge.
+theorem steps_cue (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : AsksSteps c) :
+    advance c (.horizonProbe t) .cont = .gate c (.cue t)
+
+An aspect the user chose yields to an admissible Horizon not yet asked.
+theorem choice_yields_to_horizon (c : Context P) (g : Gate) (t : RecordId)
+    (hd : HorizonDue c t) : aspectStep c g t = .gate c (.horizonProbe t)
 
 A Horizon answer that reached the edge is taken; the loop returns to the task.
 theorem reached_taken (c : Context P) (t : RecordId) (hr : Reached c) :
@@ -647,9 +678,12 @@ converged: every selected task completed — each carried to where the user clos
 convergence establishes is that the loop ran out over the aspects in play: those the user
 selected, and every admissible Horizon, which is asked before any selection and never offered at
 one. It re-evaluates no round: an aspect closed with sufficient was closed on the user's judgment
-rather than by a demonstration, an answer no adjudication reached was never demonstrated, and an
-aspect shown after a disclosure or a cue is recorded as such, never as independent detection;
-each round's closure said which. Where a round settled an aspect or disclosed an edge, it did so
+rather than by a demonstration, and an answer merely taken — nothing to object to, or nothing to
+check it against — was never demonstrated. What is shown is what you read an answer to reach
+against the target: a Horizon edge reached on the user's own or after a cue, an application
+after a disclosure, an aspect whose adjudication the user's answer met — each recorded with how,
+and what followed a disclosure or a cue never as independent detection; each round's closure said
+which. Where a round settled an aspect or disclosed an edge, it did so
 against your reading of the target, quoted from the target itself, so the user weighed that
 material rather than your account of it. A withdrawal is its own ending: what was shown stays on
 record and nothing the user did not close is completed.
@@ -667,7 +701,8 @@ A run ends withdrawn only on the user's own withdrawal.
 theorem withdrawn_by_person (respond : Context P → Gate → Response P)
     (trace : Context P → Response P) (c : Context P) (us : List (Utterance P))
     (c₁ : Context P) (d : List String) (hw : grasp respond trace c us = .withdrawn c₁ d) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = fuse c₀ u ∧ verdict c₁ = .withdraw
+    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .withdraw ∧
+      ∃ t, c₁ = fuse c₀ u ++ t
 
 A task, a selection, and a chosen aspect are each filled only by the user's statement.
 theorem completed_by_utterance {c : Context P} {t : RecordId} {s : Cite c}
@@ -690,7 +725,8 @@ theorem selectable_not_horizon (g : Selectable) : g.val ≠ .horizon
 inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
 inductive Op | orient | deriveEntries | assessRoute | routeRelay | entrySelection | materialize
-             | register | touch | detect | horizon | horizonProbe | reveal | zeroGap | startAspect
+             | register | touch | detect | horizon | horizonProbe | cue | reveal | zeroGap
+             | startAspect
              | probe | inquiry | attach | closure | coverage | update | eject | readAnswer
              | withdrawal | converge | seam
 
@@ -706,7 +742,8 @@ def grounding : Op → Annot × String
   | .detect         => (.sense, "Internal analysis: the gap types relevant to the task's entry point, read on the fused context")
   | .horizon        => (.sense, "Internal analysis: the admissible-Horizon guard, read again after every utterance — exactly one qualifying candidate, evidence-bound, material, unspoken in the signal and every answer so far, neither a route-selection question nor a decision gap — and whether that edge was already asked, read from your own turns; never exposed before a miss")
   | .horizonProbe   => (.constitution, "present (conditional: an admissible Horizon not yet asked for the task): the preempting Horizon probe, before the start-aspect selector and before a return to the task's gates — an everyday scenario only, never a Horizon label, the edge, an expected answer, or the rationale; an answer that reaches the edge is taken, one that misses it is disclosed")
-  | .reveal         => (.constitution, "present (conditional: the answer to a Horizon probe missed the edge): the disclosure — the edge named, the material from the target it rests on quoted in place at the narrowest span, and an application question; where the user asked to go step by step, a cue first; never a second concealed scenario")
+  | .cue            => (.constitution, "present (conditional: the user asked to go step by step instead of answering a Horizon probe or a cue): a cue toward the edge that still does not name it; its answer is read as a Horizon answer is")
+  | .reveal         => (.constitution, "present (conditional: the answer to a Horizon probe or a cue missed the edge, and asked for no step): the disclosure — the edge named, the material from the target it rests on quoted in place at the narrowest span, and an application question; never a second concealed scenario")
   | .zeroGap        => (.constitution, "present (conditional: no gap for the task): the zero-gap finding with its reasoning; Confirm completes the task, Reopen(description) adds the named gap and resumes verification")
   | .startAspect    => (.constitution, "present (conditional: gaps to offer, nothing probed yet for the task): which aspect to start with, over the task's gaps")
   | .probe          => (.constitution, "present: the probe of the bound aspect in the form probeKind gives it — Qc for Expectation and Sequence, Qs for Causality, Scope, and Emergent — after the selected artifact context and a concrete scenario, with a free-response path")
