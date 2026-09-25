@@ -833,3 +833,30 @@ test("atomic outcome replacement checks actual UTF-8 readback before publishing"
   assert.deepEqual(fs.readFileSync(filename), before);
   assert.deepEqual(fs.readdirSync(path.dirname(filename)), [path.basename(filename)]);
 });
+
+test("the dispatcher closes an attempt its killed writer left in progress", (t) => {
+  const f = fixture(t);
+  const projects = path.join(f.directory, "projects", "repo");
+  fs.mkdirSync(projects, { recursive: true });
+  const transcript = path.join(projects, "session.jsonl");
+  fs.renameSync(f.transcript, transcript);
+  const input = { ...f.input, transcript_path: transcript };
+  const outcomeModule = new URL("../skills/recollect/scripts/hypomnesis-outcome.mjs", import.meta.url).href;
+  const root = path.join(projects, "hypomnesis");
+  fs.writeFileSync(path.join(f.directory, "hypomnesis-write.mjs"),
+    `import { beginAttempt } from ${JSON.stringify(outcomeModule)};
+     beginAttempt(${JSON.stringify(root)}, "session", { runtime: "claude", revision: null, source_transcript: ${JSON.stringify(transcript)}, source_event: "PreCompact" });
+     process.exit(9);`);
+  const previousWrite = process.stderr.write;
+  try {
+    process.stderr.write = () => true;
+    dispatchHook(JSON.stringify(input), { env: { CLAUDE_CONFIG_DIR: f.directory }, scriptDir: f.directory });
+    const orphan = readOutcome(root, "session");
+    assert.equal(orphan.attempt.state, "complete");
+    assert.equal(orphan.attempt.extractors.writer.state, "invocation_failed");
+    fs.writeFileSync(path.join(f.directory, "hypomnesis-write.mjs"), "process.exit(3);");
+    dispatchHook(JSON.stringify(input), { env: { CLAUDE_CONFIG_DIR: f.directory }, scriptDir: f.directory });
+  } finally { process.stderr.write = previousWrite; }
+  const later = readOutcome(root, "session");
+  assert.equal(later.attempt.extractors.writer.evidence.status, 3);
+});

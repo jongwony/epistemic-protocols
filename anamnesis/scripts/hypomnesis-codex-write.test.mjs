@@ -584,13 +584,14 @@ for (const owner of [null, '{malformed', JSON.stringify({ pid: 0 }), JSON.string
   });
 }
 
-test('shared lock keeps live owners regardless of age and immediately recovers dead owners', (t) => {
+test('shared lock keeps live owners past the unowned bound and immediately recovers dead owners', (t) => {
   const { root } = fixture(t);
   const directory = path.join(root, '.locks', 'session-a');
   fs.mkdirSync(directory, { recursive: true });
   const ownerPath = path.join(directory, 'owner.json');
   fs.writeFileSync(ownerPath, JSON.stringify({ pid: process.pid }));
-  fs.utimesSync(directory, new Date(0), new Date(0));
+  const pastUnownedBound = new Date(Date.now() - 2 * 30 * 60 * 1000);
+  fs.utimesSync(directory, pastUnownedBound, pastUnownedBound);
   assert.equal(takeSessionLock(root, 'session-a'), null);
   fs.writeFileSync(ownerPath, JSON.stringify({ pid: 2147483647 }));
   const release = takeSessionLock(root, 'session-a');
@@ -905,4 +906,53 @@ test('Codex error-record persistence failure carries the original execution caus
   });
   mock.mock.restore();
   assert.equal(readOutcome(root, 'session-a', 'codex').attempt.state, 'in_progress');
+});
+
+test('a second reaper of one stale lock cannot displace the first reaper, so one claimant holds', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const original = fs.renameSync;
+  let rival;
+  let inside = false;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (from === directory && !inside && rival === undefined) {
+      inside = true;
+      try { rival = takeSessionLock(root, 'session-a', { reapWaitMs: 0 }); } finally { inside = false; }
+    }
+    if (String(from).includes('.reap.') && to === directory && !inside) {
+      fs.mkdirSync(directory, { recursive: true });
+      fs.writeFileSync(path.join(directory, 'owner.json'), JSON.stringify({ pid: process.pid, token: 'third' }));
+    }
+    return original(from, to);
+  });
+  const first = takeSessionLock(root, 'session-a');
+  mock.mock.restore();
+  const claimants = [first, rival].filter((release) => typeof release === 'function' && release.owned());
+  const displaced = [first, rival].filter((release) => typeof release === 'function' && !release.owned());
+  assert.deepEqual(displaced, [], 'no acquirer may hold a release whose lock was moved away');
+  assert.ok(claimants.length <= 1);
+  claimants.forEach((release) => release());
+});
+
+test('a live pid holds its lock only within the age ceiling, and EPERM is not proof of life', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'owner.json'), JSON.stringify({ pid: process.pid }));
+  assert.equal(takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 }), null);
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const recycled = takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 });
+  assert.equal(typeof recycled, 'function');
+  recycled();
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'owner.json'), JSON.stringify({ pid: 424242 }));
+  const kill = t.mock.method(process, 'kill', () => { throw Object.assign(new Error('perm'), { code: 'EPERM' }); });
+  assert.equal(takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 }), null);
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const foreign = takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 });
+  kill.mock.restore();
+  assert.equal(typeof foreign, 'function');
+  foreign();
 });

@@ -512,7 +512,7 @@ function publicationArtifacts(root, job, tolerateMissing = false) {
   });
 }
 
-function processJob(root, job, { extract = callCodexExtractor } = {}) {
+function processJob(root, job, { extract = callCodexExtractor, owns } = {}) {
   const attempt = beginAttempt(root, job.session_id, {
     runtime: "codex", revision: job.revision,
     source_transcript: job.transcript_path, source_event: job.hook_event_name,
@@ -532,6 +532,7 @@ function processJob(root, job, { extract = callCodexExtractor } = {}) {
     return { stale: true, requeued: requeued?.path ?? null, ...counts };
   };
   const publish = (record, extra) => {
+    if (owns && !owns()) return finish({ stale: true, ...extra });
     publishing = true;
     const published = publishRecord(root, job, record);
     const publication = {
@@ -620,10 +621,11 @@ function runWorker(root, sessionId, options = {}) {
   const failureCounts = new Map();
   try {
     for (;;) {
+      if (!release.owned()) break;
       const job = chooseLatestJob(readJobs(root, sessionId));
       if (!job) break;
       try {
-        const result = processJob(root, job, options);
+        const result = processJob(root, job, { ...options, owns: release.owned });
         const outcome = result.published ? "published" : result.stale ? "stale" : result.empty ? "empty" : result.declined ? "declined-older-revision" : "unchanged";
         const counts = result.skipped_lines != null
           ? ` skipped_lines=${result.skipped_lines} unverified_user_turns=${result.unverified_user_turns}`

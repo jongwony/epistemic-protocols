@@ -11,7 +11,7 @@ import {
   isCodexTranscript,
   spawnWorker,
 } from "./hypomnesis-codex-write.mjs";
-import { readOutcome, formatOutcome, boundedText, beginAttempt, finishAttempt, errorEvidence, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+import { readOutcome, latestAttempt, formatOutcome, boundedText, beginAttempt, finishAttempt, errorEvidence, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -73,28 +73,37 @@ function dispatchHook(raw, options = {}) {
   if (input.hook_event_name === "SessionEnd" || input.hook_event_name === "PreCompact") {
     if (!options.noSpawn) {
       const root = path.join(path.dirname(transcriptPath), "hypomnesis");
-      const before = readOutcome(root, input.session_id);
+      const validId = typeof input.session_id === "string" && /^[A-Za-z0-9_-]+$/.test(input.session_id);
+      const beforeId = validId ? latestAttempt(root, input.session_id, "claude")?.attempt_id : undefined;
       const result = runClaudeScript("hypomnesis-write.mjs", raw, options);
-      let outcome = readOutcome(root, input.session_id);
-      const unchanged = outcome.attempt?.attempt_id === before.attempt?.attempt_id;
+      const unchanged = validId && latestAttempt(root, input.session_id, "claude")?.attempt_id === beforeId;
       if (result.error || result.status !== 0) {
         reportChildFailure("hypomnesis-write.mjs", result);
-        if (unchanged && before.attempt?.state !== "in_progress" && typeof input.session_id === "string" && /^[A-Za-z0-9_-]+$/.test(input.session_id)) {
+        if (validId) {
           let release;
           try {
+            // Holding the lock means no live capture owns the session, so an attempt still
+            // in progress was left by a writer that is gone.
             release = takeSessionLock(root, input.session_id);
-            if (!release || readOutcome(root, input.session_id).attempt?.attempt_id !== before.attempt?.attempt_id) throw new Error("another capture owns the session");
-            const stat = fs.statSync(transcriptPath);
-            const attempt = beginAttempt(root, input.session_id, { runtime: "claude", source_transcript: transcriptPath,
-              source_event: input.hook_event_name, revision: { mtime_ms: Math.floor(stat.mtimeMs), size: stat.size } });
+            if (!release) throw new Error("another capture owns the session");
             const error = Object.assign(result.error || new Error("writer process failed"), { stderr: result.stderr, status: result.status, signal: result.signal });
-            finishAttempt(root, attempt, { state: "complete", extractors: { writer: { state: "invocation_failed", evidence: errorEvidence(error) } },
-              publication: { state: "none", artifacts: [] } });
-            outcome = readOutcome(root, input.session_id);
+            const writer = { state: "invocation_failed", evidence: errorEvidence(error) };
+            const current = latestAttempt(root, input.session_id, "claude");
+            if (current?.state === "in_progress") {
+              finishAttempt(root, current, { state: "complete", extractors: { ...current.extractors, writer }, publication: current.publication });
+            } else if (current?.attempt_id === beforeId) {
+              const stat = fs.statSync(transcriptPath);
+              const attempt = beginAttempt(root, input.session_id, { runtime: "claude", source_transcript: transcriptPath,
+                source_event: input.hook_event_name, revision: { mtime_ms: Math.floor(stat.mtimeMs), size: stat.size } });
+              finishAttempt(root, attempt, { state: "complete", extractors: { writer }, publication: { state: "none", artifacts: [] } });
+            }
           } catch {} finally { release?.(); }
         }
       } else if (unchanged) reportChildFailure("hypomnesis-write.mjs", result);
-      if (outcome.attempt) process.stderr.write(`hypomnesis-dispatch: persisted ${formatOutcome(outcome)}\n`);
+      if (validId) {
+        const outcome = readOutcome(root, input.session_id);
+        if (outcome.attempt) process.stderr.write(`hypomnesis-dispatch: persisted ${formatOutcome(outcome)}\n`);
+      }
     }
     return { runtime: "claude", handled: true };
   }

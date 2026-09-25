@@ -309,7 +309,9 @@ function formatOutcome(result) {
     publication: result.attempt?.publication ?? null, receipts: result.attempt?.receipts ?? {}, execution: result.attempt?.execution ?? null, artifacts: result.artifacts });
 }
 
-export { beginAttempt, finishAttempt, readOutcome, captureArtifacts, errorEvidence, outcomePath, boundedText, formatOutcome, sessionKey, MAX_OUTCOME_BYTES };
+const latestAttempt = (root, id, runtime) => loadAttempt(root, id, runtime);
+
+export { beginAttempt, finishAttempt, readOutcome, latestAttempt, captureArtifacts, errorEvidence, outcomePath, boundedText, formatOutcome, sessionKey, MAX_OUTCOME_BYTES };
 
 let isMain = false;
 try { isMain = !!process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url)); } catch {}
