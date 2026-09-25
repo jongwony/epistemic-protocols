@@ -84,41 +84,91 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// A Definition block is authored in one of two notations: the DSL (a bare
+// ``` fence) or Lean 4 (a ```lean fence, see docs/structural-specs.md). Both
+// carry the same section markers; in Lean the marker opens a module doc
+// comment (`/-! ── NAME ──`), optionally closed on the same line (` -/`).
+// A bare `-/` line only closes such a comment and is not section content.
+const SECTION_HEADER = /^(?:\/-!\s*)?── ([^\n]+?) ──(?:\s*-\/)?$/;
+
+function sectionHeaderName(trimmedLine) {
+  const m = SECTION_HEADER.exec(trimmedLine);
+  return m ? m[1] : null;
+}
+
+function collectSection(lines, start) {
+  const collected = [];
+  for (let j = start; j < lines.length; j++) {
+    const trimmed = lines[j].trim();
+    if (trimmed === '```' || sectionHeaderName(trimmed) !== null) break;
+    if (trimmed === '-/') continue;
+    collected.push(lines[j]);
+  }
+  return collected.join('\n').replace(/^\n+|\n+$/g, '');
+}
+
 function extractFormalSection(content, sectionName) {
   const lines = content.split('\n');
-  const header = `── ${sectionName} ──`;
-  let collecting = false;
-  const collected = [];
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!collecting) {
-      if (trimmed === header) collecting = true;
-      continue;
-    }
-    if (trimmed === '```' || /^── [^\n]+ ──$/.test(trimmed)) break;
-    collected.push(line);
-  }
-
-  return collected.join('\n').replace(/^\n+|\n+$/g, '');
+  const at = lines.findIndex(line => sectionHeaderName(line.trim()) === sectionName);
+  return at === -1 ? '' : collectSection(lines, at + 1);
 }
 
 function extractAllFormalSections(content, sectionSuffix) {
   const lines = content.split('\n');
   const sections = [];
-  const headerPattern = new RegExp(`^── (?:\\w+ )*${escapeRegex(sectionSuffix)} ──$`);
+  const namePattern = new RegExp(`^(?:\\w+ )*${escapeRegex(sectionSuffix)}$`);
 
   for (let i = 0; i < lines.length; i++) {
-    if (!headerPattern.test(lines[i].trim())) continue;
-    const collected = [];
-    for (let j = i + 1; j < lines.length; j++) {
-      const trimmed = lines[j].trim();
-      if (trimmed === '```' || /^── [^\n]+ ──$/.test(trimmed)) break;
-      collected.push(lines[j]);
-    }
-    sections.push(collected.join('\n').replace(/^\n+|\n+$/g, ''));
+    const name = sectionHeaderName(lines[i].trim());
+    if (name === null || !namePattern.test(name)) continue;
+    sections.push(collectSection(lines, i + 1));
   }
   return sections;
+}
+
+// True when the Definition block is authored in Lean 4 notation.
+function isLeanDefinition(content) {
+  return /^## Definition$(?:(?!^```)[\s\S])*?^```lean$/m.test(content);
+}
+
+// The Lean Definition block's source, without its fence.
+function extractLeanDefinition(content) {
+  const m = /^```lean\n([\s\S]*?)^```$/m.exec(content);
+  return m ? m[1] : null;
+}
+
+// Lean source with comments removed, for token-level predicates that must not
+// read doc prose (a doc comment may name `sorry` or `axiom` as words).
+function stripLeanComments(source) {
+  let out = '';
+  let depth = 0;
+  for (let i = 0; i < source.length; i++) {
+    if (source.startsWith('/-', i)) { depth++; i++; continue; }
+    if (depth > 0 && source.startsWith('-/', i)) { depth--; i++; continue; }
+    if (depth > 0) { if (source[i] === '\n') out += '\n'; continue; }
+    if (source.startsWith('--', i)) {
+      const nl = source.indexOf('\n', i);
+      if (nl === -1) break;
+      i = nl - 1;
+      continue;
+    }
+    if (source[i] === '"') {
+      let end = i + 1;
+      while (end < source.length && source[end] !== '"') end += source[end] === '\\' ? 2 : 1;
+      out += '""';
+      i = end;
+      continue;
+    }
+    out += source[i];
+  }
+  return out;
+}
+
+// Names a Lean section declares at top level (inductive, structure, def, …).
+const LEAN_DECLARATION = /^(?:noncomputable\s+|private\s+|protected\s+)*(?:inductive|structure|def|abbrev|opaque|class|theorem)\s+([^\s:({[]+)/gm;
+
+function leanDeclarationNames(section) {
+  return [...section.matchAll(LEAN_DECLARATION)].map(m => m[1]);
 }
 
 // ============================================================
@@ -547,13 +597,29 @@ function checkToolGrounding() {
       continue;
     }
     const toolBindings = [];
+    const lean = isLeanDefinition(content);
+
+    // Lean notation: each entry is one arm of the grounding function,
+    //   | .op => (.annotation, "Tool: description")
+    // so operation, classification, and tool are read from that arm.
+    const leanBindingPattern = /^\s*\|\s*\.([\w']+)\s*=>\s*\(\.(\w+),\s*"(\w+)/gm;
 
     // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
     // Capture: operation, qualifier (optional), classification, tool
     // Supports: Phase prefix, qualifier word (e.g., "Qc", "Qᵣs"), Greek letters, ?'/
     const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+([\w\u0370-\u03FFᵣ]+))?\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
-    while ((match = bindingPattern.exec(groundingSection)) !== null) {
+    if (lean) {
+      while ((match = leanBindingPattern.exec(groundingSection)) !== null) {
+        toolBindings.push({
+          operation: match[1],
+          qualifier: null,
+          classification: match[2],
+          tool: match[3]
+        });
+      }
+    }
+    while (!lean && (match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({
         operation: match[1],
         qualifier: match[2] || null,
@@ -593,7 +659,23 @@ function checkToolGrounding() {
       continue;
     }
 
+    // Lean notation carries no [Tool] suffix: a mandatory binding is wired when
+    // PHASE TRANSITIONS names its operation constructor.
+    if (lean) {
+      for (const binding of toolBindings) {
+        if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
+        if (!new RegExp(`\\.${escapeRegex(binding.operation)}\\b`).test(phaseSection)) {
+          results.fail.push({
+            check: 'tool-grounding',
+            file: relPath,
+            message: `Mandatory binding ".${binding.operation} (${binding.classification})" not named in PHASE TRANSITIONS`
+          });
+        }
+      }
+    }
+
     for (const binding of toolBindings) {
+      if (lean) break;
       // Skip internal operations
       if (binding.tool === 'Internal') continue;
 
@@ -639,7 +721,10 @@ function checkToolGrounding() {
     }
 
     // Check 6f: Verify convergence behavior is explicitly classified with interaction kind
-    if (!/\bconverge\s*\((extension|constitution)\)/i.test(groundingSection)) {
+    const convergeClassified = lean
+      ? toolBindings.some(b => b.operation === 'converge' && ['extension', 'constitution'].includes(b.classification))
+      : /\bconverge\s*\((extension|constitution)\)/i.test(groundingSection);
+    if (!convergeClassified) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,
@@ -661,7 +746,10 @@ function checkToolGrounding() {
       if (axis.size > 0) {
         for (const rawLine of groundingSection.split('\n')) {
           if (rawLine.includes('-- Realization:')) continue;
-          for (const entry of rawLine.matchAll(/\((constitution|extension)\)[^→]*→\s*TextPresent\+(\w+)/gi)) {
+          const entryPattern = lean
+            ? /\(\.(constitution|extension),\s*"TextPresent\+(\w+)/gi
+            : /\((constitution|extension)\)[^→]*→\s*TextPresent\+(\w+)/gi;
+          for (const entry of rawLine.matchAll(entryPattern)) {
             const kind = entry[1].toLowerCase();
             const expected = axis.get(kind);
             if (expected && entry[2].toLowerCase() !== expected.toLowerCase()) {
@@ -883,6 +971,12 @@ function checkSpecVsImpl() {
   // Matches: ── TYPES ──, and any other section ending in " TYPES ──"
   function extractTypeNames(content) {
     const typeNames = [];
+    if (isLeanDefinition(content)) {
+      for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
+        typeNames.push(...leanDeclarationNames(typesSection));
+      }
+      return typeNames;
+    }
     for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
       const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
       let match;
@@ -944,9 +1038,17 @@ function checkSpecVsImpl() {
       // Check if type is cross-referenced elsewhere in formal block
       // (FLOW, LOOP, MODE STATE, other TYPES definitions, etc.)
       // Remove the type's own definition line(s) to avoid self-match
-      const defLinePattern = new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
+      const defLinePattern = isLeanDefinition(content)
+        ? new RegExp(`^(?:noncomputable\\s+)?(?:inductive|structure|def|abbrev|opaque|class|theorem)\\s+${escaped}(?![\\w'.]).*$`, 'gm')
+        : new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
       const formalWithoutOwnDef = formalBlock.replace(defLinePattern, '');
-      const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef);
+      // Lean resolves `X.f` through dot notation as well (`x.f`, `.f`), so a
+      // dotted declaration is also referenced by its last component.
+      const dotted = isLeanDefinition(content) && typeName.includes('.')
+        ? new RegExp(`\\.${escapeRegex(typeName.split('.').pop())}(?![\\w'])`)
+        : null;
+      const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef)
+        || (dotted !== null && dotted.test(formalWithoutOwnDef));
 
       // A type defined in TYPES but absent from PHASE TRANSITIONS, prose,
       // AND all other formal block sections suggests rename drift or dead type
@@ -1544,6 +1646,10 @@ function checkPartitionInvariant() {
     const content = fs.readFileSync(filePath, 'utf8');
     const protocolName = relPath.split('/')[0];
 
+    // A Lean Definition block states a partition as a proposition the
+    // elaborator checks; the `-- Invariant:` line format is the DSL's.
+    if (isLeanDefinition(content)) continue;
+
     // Extract MODE STATE section (from marker to closing ```)
     const modeStateMatch = content.match(/── MODE STATE ──([\s\S]*?)```/);
     if (!modeStateMatch) continue;
@@ -1553,11 +1659,12 @@ function checkPartitionInvariant() {
     // Find invariant line (single-line only; multi-line invariants require regex update)
     const invMatch = modeStateSection.match(invariantPattern);
     if (!invMatch) {
-      if (/-- Invariant:/.test(modeStateSection)) {
+      // A partition cue without a recognized invariant needs format review.
+      if (/pairwise disjoint/.test(modeStateSection)) {
         results.warn.push({
           check: checkName,
           file: relPath,
-          message: `${protocolName}: MODE STATE contains "-- Invariant:" but failed to parse — may be multi-line or non-standard format`
+          message: `${protocolName}: MODE STATE contains "pairwise disjoint" but its partition invariant failed to parse — may be multi-line or non-standard format`
         });
       }
       continue;
@@ -1646,6 +1753,10 @@ function checkGateAnswerReference() {
       content = fs.readFileSync(fullPath, 'utf-8');
     } catch { continue; }
 
+    // A Lean Definition block resolves its references by elaboration, which
+    // lean-definition runs; this check reads the DSL's `→ Stop → A` arrows.
+    if (isLeanDefinition(content)) continue;
+
     const typesSection = extractFormalSection(content, 'TYPES') ?? '';
     const modeStateSection = extractFormalSection(content, 'MODE STATE') ?? '';
     const identifier = "[\\p{L}_][\\p{L}\\p{N}_'’]*";
@@ -1711,6 +1822,287 @@ function checkGateAnswerReference() {
         message: `Gate answer reference check completed (${resolvedAnswers} resolved formal answers, ${unresolvedAnswers} unresolved formal answers)`
       });
     }
+  }
+}
+
+// ============================================================
+// Check: Lean Definition
+// ============================================================
+// A Definition block authored in Lean 4 is a contract only if it elaborates:
+// a reference that does not resolve or a type that does not check is a defect
+// the DSL could not surface. The verdict follows mechanically from the block,
+// so it is admitted here. Token predicates always run; elaboration runs with
+// the core Lean toolchain (no Std, no Mathlib) when `lean` and `lake` are
+// reachable — `$LEAN`/`$LAKE`, PATH, or `~/.elan/bin`. With no toolchain the
+// elaboration verdict is reported as not obtained (warn), never as passed.
+//
+// A theorem is verification, not contract: the block states it inside a doc
+// comment (`theorem name binders : statement`, no body), and its proof lives in
+// the Lake package at `lean/EpistemicProtocols/<NS>/Proofs.lean`, a module
+// whose proofs stay private to it. lean-contract.js generates `Contract.<NS>`
+// from the block (GROUND replaced by the canonical `EpistemicProtocols.Ground`)
+// and an audit file; the verdict is read from elaboration, not from text:
+//   - each stated signature is re-derived from the proved theorem of that name
+//     alone, so a proof carrying a premise the statement lacks fails;
+//   - the declared theorems of the proofs module, read from the elaborated
+//     environment (comments excluded, private and attributed ones included),
+//     equal the stated set;
+//   - no project module declares an axiom, and every theorem's transitive
+//     axioms lie within ALLOWED_AXIOMS.
+const leanContract = require('./lean-contract');
+
+function resolveLeanTool(name, envVar) {
+  const candidates = [process.env[envVar], name, path.join(require('os').homedir(), '.elan/bin', name)]
+    .filter(Boolean);
+  for (const bin of candidates) {
+    try {
+      execFileSync(bin, ['--version'], { stdio: 'pipe', timeout: 30000, cwd: projectRoot });
+      return bin;
+    } catch { /* try the next candidate */ }
+  }
+  return null;
+}
+
+function runLean(bin, args) {
+  try {
+    const output = execFileSync(bin, args, { encoding: 'utf8', stdio: 'pipe', timeout: 600000, cwd: projectRoot });
+    return { status: 0, output };
+  } catch (e) {
+    return { status: e.status ?? 1, output: `${e.stdout || ''}${e.stderr || ''}` || e.message };
+  }
+}
+
+const leanDiagnostics = (output) => output.split('\n').filter(line => /(?:^|\s)(error|warning):/.test(line));
+
+// Commands and options that can close a goal, add an assumption, or skip the
+// kernel without a declaration the audit would see as a theorem or an axiom.
+const LEAN_FORBIDDEN = [
+  [/(?<![\w'.])sorry(?![\w'])/, '`sorry`'],
+  [/(?<![\w'.])admit(?![\w'])/, '`admit`'],
+  [/(?<![\w'.])sorryAx(?![\w'])/, '`sorryAx`'],
+  [/(?<![\w'.])native_decide(?![\w'])/, '`native_decide`'],
+  [/(?<![\w'.])implemented_by(?![\w'])/, '`implemented_by`'],
+  [/(?<![\w'.])extern(?![\w'])/, '`extern`'],
+  [/(?<![\w'.])unsafe(?![\w'])/, '`unsafe`'],
+  [/(?<![\w'.])set_option(?![\w'])/, '`set_option`'],
+  [/(?<![\w'.])debug\./, 'a `debug.` option'],
+  [/#(?:exit|eval|print|reduce)\b/, 'a `#` command'],
+  [/(?<![\w'.])(?:run_cmd|run_elab|run_meta|macro_rules|macro|elab_rules|elab|syntax|initialize|builtin_initialize)(?![\w'])/, 'a metaprogramming command'],
+];
+const LEAN_AXIOM_DECL = /^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|public|noncomputable|partial|nonrec)\s+)*axiom\s+([^\s:({[]+)/gm;
+const LEAN_THEOREM_DECL = /^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|public|noncomputable|nonrec)\s+)*(?:theorem|lemma)\s+([^\s:({[]+)/gm;
+
+// A judgment is an `axiom` the Definition block documents: the doc comment says
+// what the model judges. Anywhere else, or undocumented, an axiom is an assumption.
+const LEAN_JUDGMENT_DECL = /\/--(?:(?!-\/)[\s\S])*-\/\s*\n\s*axiom\s+([^\s:({[]+)/g;
+
+function leanLint(label, source, { judgments = false } = {}) {
+  const code = stripLeanComments(source);
+  const problems = [];
+  for (const [pattern, what] of LEAN_FORBIDDEN) {
+    if (pattern.test(code)) problems.push(`${label} uses ${what} — a stated claim is proved in core Lean with nothing switched off`);
+  }
+  const documented = judgments ? new Set([...source.matchAll(LEAN_JUDGMENT_DECL)].map(m => m[1])) : new Set();
+  for (const m of code.matchAll(LEAN_AXIOM_DECL)) {
+    if (documented.has(m[1])) continue;
+    problems.push(judgments
+      ? `${label} declares \`axiom ${m[1]}\` with no doc comment — an axiom here is a model judgment, and its doc comment says what is judged`
+      : `${label} declares \`axiom ${m[1]}\` — only a Lean Definition block declares an axiom, and there it is a documented model judgment`);
+  }
+  return problems;
+}
+
+// The only imports a proofs module takes: the contract it proves, and GROUND.
+function leanProofImports(label, source, ns) {
+  const allowed = new Set([`Contract.${ns}`, 'EpistemicProtocols.Ground', 'EpistemicProtocols.Ground.Proofs']);
+  const problems = [];
+  const code = stripLeanComments(source);
+  if (!/^module\s*$/m.test(code.split('\n').find(line => line.trim() !== '') || '')) {
+    problems.push(`${label} does not open with \`module\` — its proofs stay private only under the module system`);
+  }
+  for (const m of code.matchAll(/^\s*(?:public\s+|meta\s+)*import\s+(?:all\s+)?([\w.]+)/gm)) {
+    if (!allowed.has(m[1])) problems.push(`${label} imports \`${m[1]}\` — a proofs module imports only Contract.${ns} and GROUND`);
+  }
+  return problems;
+}
+
+function leanFilesUnder(dir, rel = '') {
+  const files = [];
+  if (!fs.existsSync(dir)) return files;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const relPath = path.join(rel, entry.name);
+    if (entry.isDirectory()) {
+      if (relPath === '.contract') continue;
+      files.push(...leanFilesUnder(path.join(dir, entry.name), relPath));
+    } else if (entry.name.endsWith('.lean')) {
+      files.push(path.join('lean', relPath));
+    }
+  }
+  return files;
+}
+
+function checkLeanDefinition() {
+  const CHECK = 'lean-definition';
+  const fail = (file, message) => results.fail.push({ check: CHECK, file, message });
+  const groundPath = path.join(projectRoot, leanContract.CANONICAL_GROUND);
+  const canonicalGround = fs.existsSync(groundPath)
+    ? leanContract.canonicalGroundText(fs.readFileSync(groundPath, 'utf8'))
+    : null;
+  const blocks = [];
+  const failedFiles = new Set();
+  const namespaces = new Map();
+  const expectedLean = new Set([leanContract.CANONICAL_GROUND, leanContract.GROUND_PROOFS]);
+
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (!isLeanDefinition(content)) continue;
+
+    const source = extractLeanDefinition(content);
+    if (source === null) {
+      fail(relPath, 'Definition opens a ```lean fence that never closes');
+      continue;
+    }
+    const problems = leanLint('Lean Definition block', source, { judgments: true });
+    for (const m of stripLeanComments(source).matchAll(LEAN_THEOREM_DECL)) {
+      problems.push(`Lean Definition block proves \`theorem ${m[1]}\` in place — a proof is verification, not contract: state the signature in a doc comment and prove it in the proofs module`);
+    }
+    const ns = leanContract.blockNamespace(source);
+    const ground = leanContract.groundSpan(source);
+    if (!ns) problems.push('Lean Definition block opens no `namespace`');
+    else if (namespaces.has(ns)) problems.push(`Lean Definition block reuses namespace ${ns} of ${namespaces.get(ns)}`);
+    if (!ground) problems.push('Lean Definition block has no `── GROUND ──` section followed by `── TYPES ──`');
+    else if (ns && source.indexOf(`namespace ${ns}`) > ground.start) problems.push('Lean Definition block opens its namespace after GROUND');
+    else if (canonicalGround === null) problems.push(`${leanContract.CANONICAL_GROUND} is missing or has no \`namespace Ground\` … \`end Ground\` text`);
+    else if (ground.text !== canonicalGround) problems.push(`GROUND section differs from ${leanContract.CANONICAL_GROUND} — the session primitive is one text across Lean blocks`);
+
+    let proofRel = null;
+    if (ns) {
+      namespaces.set(ns, relPath);
+      proofRel = path.join('lean', 'EpistemicProtocols', ...ns.split('.'), 'Proofs.lean');
+      expectedLean.add(proofRel);
+      const proofFull = path.join(projectRoot, proofRel);
+      const stated = ground ? leanContract.statedTheorems(source.slice(ground.end)).filter(e => e.name) : [];
+      if (fs.existsSync(proofFull)) {
+        const proof = fs.readFileSync(proofFull, 'utf8');
+        problems.push(...leanLint(proofRel, proof), ...leanProofImports(proofRel, proof, ns));
+      } else if (stated.length > 0) {
+        problems.push(`Lean Definition block states ${stated.length} theorem(s) but ${proofRel} does not exist`);
+      }
+    }
+    for (const message of problems) fail(relPath, message);
+    if (problems.length > 0) failedFiles.add(relPath);
+    blocks.push({ relPath, block: source, proofRel });
+  }
+
+  for (const rel of [leanContract.CANONICAL_GROUND, leanContract.GROUND_PROOFS]) {
+    const full = path.join(projectRoot, rel);
+    if (!fs.existsSync(full)) {
+      if (blocks.length > 0) { fail(rel, 'Canonical GROUND file is missing'); failedFiles.add(rel); }
+      continue;
+    }
+    const text = fs.readFileSync(full, 'utf8');
+    const problems = leanLint(rel, text);
+    if (rel === leanContract.GROUND_PROOFS) problems.push(...leanProofImports(rel, text, 'Ground'));
+    for (const message of problems) fail(rel, message);
+    if (problems.length > 0) failedFiles.add(rel);
+  }
+
+  // A Lean file the package does not account for proves nothing the runtime
+  // surface carries, and is elaborated by nothing here.
+  for (const rel of leanFilesUnder(path.join(projectRoot, 'lean'))) {
+    if (!expectedLean.has(rel)) fail(rel, 'Lean file is neither the canonical GROUND nor the proofs module of a protocol Lean block');
+  }
+
+  if (blocks.length === 0) return;
+  const lean = resolveLeanTool('lean', 'LEAN');
+  const lake = lean && resolveLeanTool('lake', 'LAKE');
+  if (!lean || !lake) {
+    for (const { relPath } of blocks) {
+      if (!failedFiles.has(relPath)) {
+        results.warn.push({ check: CHECK, file: relPath, message: 'No Lean toolchain reachable ($LEAN/$LAKE, PATH, ~/.elan/bin) — elaboration not run for this Lean Definition block' });
+      }
+    }
+    return;
+  }
+
+  // The runtime surface: each block elaborates standalone, as a reader loads it.
+  for (const { relPath, block } of blocks) {
+    if (failedFiles.has(relPath)) continue;
+    const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'lean-definition-'));
+    const file = path.join(dir, 'Definition.lean');
+    fs.writeFileSync(file, block);
+    try {
+      const run = runLean(lean, [file]);
+      const diagnostics = leanDiagnostics(run.output);
+      if (run.status !== 0 || diagnostics.length > 0) {
+        fail(relPath, `Lean Definition block does not elaborate cleanly: ${diagnostics.slice(0, 3).join(' | ').replaceAll(dir, '') || `exit ${run.status}`}`);
+        failedFiles.add(relPath);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  // The package: generated contracts, the canonical GROUND, and every proof.
+  const plan = leanContract.planContracts(projectRoot, blocks.filter(b => !failedFiles.has(b.relPath)));
+  leanContract.writeContracts(projectRoot, plan);
+  const build = runLean(lake, ['build']);
+  const buildDiagnostics = leanDiagnostics(build.output);
+  if (build.status !== 0 || buildDiagnostics.length > 0) {
+    const attributed = new Set();
+    for (const { relPath, ns } of plan.audits) {
+      const own = buildDiagnostics.filter(line => ns === 'Ground'
+        ? /EpistemicProtocols\/Ground/.test(line)
+        : line.includes(`Contract/${ns}.lean`) || line.includes(`EpistemicProtocols/${ns}/`));
+      if (own.length === 0) continue;
+      own.forEach(line => attributed.add(line));
+      fail(relPath, `Lean package does not build cleanly: ${own.slice(0, 3).join(' | ')}`);
+      failedFiles.add(relPath);
+    }
+    if (attributed.size === 0) {
+      fail('lakefile.toml', `Lean package does not build cleanly: ${buildDiagnostics.slice(0, 3).join(' | ') || `exit ${build.status}`}`);
+      return;
+    }
+  }
+
+  for (const audit of plan.audits) {
+    if (failedFiles.has(audit.relPath)) continue;
+    const run = runLean(lake, ['env', 'lean', audit.auditPath]);
+    const diagnostics = leanDiagnostics(run.output);
+    const line = /AUDIT (\{.*\})/.exec(run.output);
+    if (run.status !== 0 || diagnostics.length > 0 || !line) {
+      fail(audit.relPath, `A stated theorem does not follow from the proved theorem of its name: ${diagnostics.slice(0, 3).join(' | ') || `exit ${run.status}`}`);
+      continue;
+    }
+    const readout = JSON.parse(line[1]);
+    const problems = [];
+    const stated = new Set(audit.stated);
+    const proved = new Set(readout.proved);
+    for (const name of stated) if (!proved.has(name)) problems.push(`Stated \`theorem ${name}\` is not a theorem the proofs module declares`);
+    for (const name of proved) if (!stated.has(name)) problems.push(`The proofs module declares \`theorem ${name}\`, which the Lean block does not state`);
+    for (const name of readout.contract) problems.push(`\`theorem ${name}\` is proved in the contract module — a proof is verification, not contract`);
+    const judgments = new Set((readout.judgments || []).map(j => j.name));
+    for (const name of readout.axiomDecls) if (!judgments.has(name)) problems.push(`\`axiom ${name}\` is declared in the Lean package`);
+    for (const { name, inhabited } of readout.judgments || []) {
+      if (!inhabited) problems.push(`\`axiom ${name}\` is a judgment whose type has no \`Nonempty\` instance — declare one in the proofs module, so the judgment cannot assume what nothing inhabits`);
+    }
+    for (const { name, axioms } of readout.axioms) {
+      const outside = axioms.filter(a => !leanContract.ALLOWED_AXIOMS.includes(a) && !judgments.has(a));
+      if (outside.length > 0) problems.push(`\`${name}\` depends on ${outside.map(a => `\`${a}\``).join(', ')} — only ${leanContract.ALLOWED_AXIOMS.join(', ')} and the block's own judgments are admitted`);
+    }
+    if (problems.length > 0) {
+      for (const message of problems) fail(audit.relPath, message);
+      continue;
+    }
+    results.pass.push({
+      check: CHECK,
+      file: audit.relPath,
+      message: audit.ns === 'Ground'
+        ? `Canonical GROUND and its ${stated.size} stated theorem(s) elaborate; every proof uses only ${leanContract.ALLOWED_AXIOMS.join(', ')}`
+        : `Lean Definition block elaborates standalone, and its ${stated.size} stated theorem(s) follow from ${blocks.find(b => b.relPath === audit.relPath).proofRel} using only ${leanContract.ALLOWED_AXIOMS.join(', ')}${judgments.size > 0 ? ` and ${judgments.size} inhabited judgment(s)` : ''}`
+    });
   }
 }
 
@@ -2486,6 +2878,7 @@ try {
   checkOnboardSync();
   checkPartitionInvariant();
   checkGateAnswerReference();
+  checkLeanDefinition();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
   checkFramingReadoutEnforcement();

@@ -61,6 +61,7 @@ export CLAUDE_CODE_OAUTH_TOKEN="$(...)" && ./run.sh inquire
 
 REALIZE_RUNNER=codex ./setup.sh inquire      # no credential consumed or stored
 CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
+REALIZE_CODEX_AUTH=login REALIZE_RUNNER=codex ./run.sh inquire   # or: this machine's codex login
 REALIZE_RUNNER=codex ./teardown.sh inquire
 
 ./teardown.sh inquire                        # Claude volatile state
@@ -69,8 +70,15 @@ REALIZE_RUNNER=codex ./teardown.sh inquire
 For Claude, `setup.sh` prints the one interactive step — obtaining a token against the
 target-specific isolated config directory. For Codex, setup creates bare/protocol homes
 and installs the local protocol plugin only into the protocol home without reading or
-writing a credential. `run.sh` requires `CODEX_API_KEY` and forwards it only to each
-`codex exec` child; `codex login` is never called.
+writing a credential. `run.sh` authenticates each `codex exec` child one of two ways, and
+`codex login` is never called by either:
+
+- **API key** (default): `CODEX_API_KEY` from the run process, forwarded only to each
+  `codex exec` child.
+- **Login** (`REALIZE_CODEX_AUTH=login`): the codex login already on this machine,
+  symlinked into the arm's disposable home only for the span of each `codex exec` — never
+  copied, because a ChatGPT login rotates its refresh token and a copy would strand the real
+  one. `references/runbook.md` carries why that keeps the homes isolated.
 
 Read `references/runbook.md` before the first run. It records where runner isolation
 lives, where the budget floor sits, and what each column of the report asserts.
@@ -121,9 +129,13 @@ rather than inferring invocation from the model's prose.
 
 ## Cases
 
-Each registered target needs at least a trigger-positive case, where its obligations
-must fire, and a trigger-negative case, where firing is the failure. `inquire` is the
-only registered target today; no result is implied for an unregistered protocol.
+Every case runs under explicit invocation. Each registered target needs at least a case
+where the protocol's obligations must be realized, and one that holds the counterpart the
+protocol must not fabricate — for `/inquire`, a Phase 0 that finds no deficit and relays;
+for `/grasp`, an answer with nothing to check it against. Whether a protocol is selected at
+all, or stays silent, is measured by route's own eval, not here. The registered targets are
+the keys of `targets` in `harness.config.json`; no result is implied for a protocol absent
+there.
 
 Both cases mount the same scaffold, deliberately: one observes whether a
 file-discoverable fact was asked, the other whether a supplied parameter was re-asked,
@@ -140,7 +152,18 @@ gate on it — recording a failure that belongs to the case author.
 
 `evals/inquire-underspecified/` and `evals/inquire-fully-specified/` are the worked
 pair for `/inquire`. Follow their shape when adding a protocol: a `prompt.md` carrying
-frontmatter and the user's words, and one grader per obligation under `graders/`.
+frontmatter and the user's words, and one grader per obligation under `graders/`. A grader
+checks that the fields a judgment produces exist and are faithful to their sources; it
+does not grade the judgment itself, such as whether a ground is sufficient.
+
+A protocol whose obligations fire only after the user answers needs turns past the first
+`Stop`. A case reaches them by declaring `multi_turn` in `case.yaml`. Where its user side
+can be written as a fixed script — `driver: harness`, the replies in `reply-1.md`,
+`reply-2.md`, … — the harness sends them itself, on either runner, resuming one session;
+`evals/grasp-adjudicable/` and `evals/grasp-unattachable/` are that pair for `/grasp`, and
+their `oracle.md` says why every reply is written to stand at whichever gate it lands on.
+An oracle that must read the subject's turn to compose a reply, as `/elicit`'s does, is
+walked by hand (`references/runbook.md`) and refused if registered.
 
 ## Reading results
 
@@ -152,9 +175,14 @@ so they are not mistaken for findings.
 
 `pass_k` is one only when every repetition passed its deterministic transition
 predicates. The `manual` column counts scenario-specific transcript judgments excluded from that
-composite; the report names them. For `inquire`, constructor coverage, classification,
-collection-before-inquiry order, sufficiency rendering, and no-gate judgments remain
-manual observations grounded by the grader files.
+composite; the report names them. For `inquire`, collection-before-surfacing order,
+unasked cheap evidence, faithful basis, kept ownership, constructor coverage, the Phase 0
+relay, and the absence of a design gate remain manual observations grounded by the grader
+files. For `grasp`, the automatic set is what both cases share — the target read in the
+first turn, the tree unchanged after every turn, every turn reported — and the quoted
+correction, the withheld verdict with its named need, the stop at each gate, and closure on
+the user's word are manual. The `predicates` column breaks `pass_k` down by predicate;
+`turns` shows how many scripted turns a multi-turn cell reached.
 
 On Claude, `skill` says whether the protocol fired where it was available, and `n/a`
 where there was no plugin to fire. Codex reports `trace-unavailable` for that column and

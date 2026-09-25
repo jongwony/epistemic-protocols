@@ -1,7 +1,7 @@
 {
   "name": "aitesis",
-  "version": "6.1.0",
-  "description": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
+  "version": "8.2.0",
+  "description": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Aitesis",
-    "shortDescription": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
-    "longDescription": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
+    "shortDescription": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
+    "longDescription": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

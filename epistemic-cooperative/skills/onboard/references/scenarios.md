@@ -76,18 +76,18 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: A friend tells you their morning routine — 5am wake, cold shower, 10k run, no coffee. They swear by it. You're tempted to copy it, but you don't yet know whether your sleep schedule, fitness baseline, and commute map cleanly onto theirs or break the pattern.
 
-**Intervention**: `/ground` validates the structural mapping between their routine and yours by decomposing the analogy (sleep → 5am, recovery → cold shower, cardio → 10k run, stimulant-free → no coffee), checking each correspondence against your actual baseline, and flagging which pieces transfer vs which fail.
+**Intervention**: With both routines already described, `/ground` settles what adopting the routine is expected to achieve, constructs the correspondences, and checks the evidence for each claim those expectations depend on. It reports what the analogy supports within its limits, what it blocks, and what remains unknown.
 
-**Trial prompt**: "Let's practice: say 'My friend's morning routine sounds amazing — can I adopt it?' and I'll show how /ground validates the mapping"
+**Trial prompt**: "Compare the two routines already described: which expected benefits does the analogy support, and what evidence or limits would change that assessment?"
 
-**Quiz Q (situation)**: A popular study method swears by "90-minute deep focus sessions with no breaks." Your schedule is interrupted, your attention span is different, and your subjects aren't the same kind. You're unsure if the method structurally fits you.
+**Quiz Q (situation)**: A popular study method swears by "90-minute deep focus sessions with no breaks." Your schedule is interrupted, your attention span is different, and your subjects aren't the same kind. You already understand both the method and your study conditions, but are unsure which promised benefits their structural comparison supports.
 - A) Prothesis `/frame` — B) Katalepsis `/grasp` — C) Analogia `/ground` — D) Aitesis `/inquire`
 - Answer: C
 
-**Quiz Q (design)**: Someone says "just treat your side project like a startup." How would you check whether that mental model structurally applies to your specific setup?
-- Hint: The advice may be right in general but structurally mismatched to your context.
+**Quiz Q (design)**: Someone says "just treat your side project like a startup." With both accounts in play, how would you audit the conclusions that comparison supports about your setup?
+- Hint: Separate the intended conclusions, evidence for their bearing correspondences, and the limits of each conclusion.
 
-**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Structural Correspondence over Abstract Assertion**. An analogy is only as good as its structural match to your domain. Workflow position: Analysis cluster — now validate that abstract advice maps to concrete reality. Game feel: "Sounds right in theory, but does it fit MY situation?" → decompose analogy → check each mapping → instantiate with real components.
+**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Warrant tracks evidence, never assent**. Workflow position: Analysis cluster — audit what an analogy licenses about an account already in play. Game feel: "What can this comparison support?" → settle intended conclusions → check their structural grounds → report verdicts with limits and missing evidence.
 
 ## Periagoge `/induce`
 
@@ -104,7 +104,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: You have three examples of a phenomenon but no name for it. How would you get a candidate abstraction proposed — one you can test, widen, narrow, or discard — rather than staring at the cases until something clicks?
 - Hint: The answer is not hoping the word arrives unbidden — it's dialectical shaping with the candidate in hand.
 
-**Philosophy**: περιαγωγή (turning-around) — Plato *Republic* VII.518d, the soul's turning toward the intelligible; the dialectical collection and division moves of *Phaedrus* 265d–266a. Core principle: **Dialectical Triangulation over Unilateral Proposal**. Abstraction formation from concrete instances requires shaping by the user — AI proposes, user widens/narrows/fuses/reorients. Workflow position: Analysis cluster — dual of `/ground`. Where `/ground` validates a given structure against a target (substitution), `/induce` forms a new structure from instances (colimit). Game feel: "These cases share something — what is it?" → candidate arrives with a grounding example → widen, narrow, or reorient → the name locates itself.
+**Philosophy**: περιαγωγή (turning-around) — Plato *Republic* VII.518d, the soul's turning toward the intelligible; the dialectical collection and division moves of *Phaedrus* 265d–266a. Core principle: **Dialectical Triangulation over Unilateral Proposal**. Abstraction formation from concrete instances requires shaping by the user — AI proposes, user widens/narrows/fuses/reorients. Workflow position: Analysis cluster — dual of `/ground`. Where `/ground` audits what mapping a given structure licenses about a target account (substitution), `/induce` forms a new structure from instances (colimit). Game feel: "These cases share something — what is it?" → candidate arrives with a grounding example → widen, narrow, or reorient → the name locates itself.
 
 ## Euporia `/elicit`
 

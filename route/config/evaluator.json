@@ -1,0 +1,10 @@
+{
+  "_comment": "Advisory channel binding. This file says WHERE the channel sends and how much; whether it sends at all is decided by the environment variable `apiKeyEnv` names. With no key in that variable the hook stays silent and touches no network, which is how it ships. Putting a key there arms the channel: the conversation — the user's turns and the replies to them, tool calls excluded — is sent to `endpoint` on every prompt. Read the advisory section of route/README.md before you do — it states what this project counts as consent, and the two mechanical ways to withhold it: an unset variable, or the plugin disabled. A plugin update restores this file but does not set the variable it names. Repointing `apiKeyEnv` is not a third way to withhold: that edit is reverted by the same restore, which puts the shipped name back beside whatever key is still set. The fixture harness (route/scripts/route-evaluator-eval.mjs --live) reads the same variable, so a key set to score the fixtures also arms this channel. This file carries no secret and never will: the key lives in the adopter's own credential store. stateTokenBudget is a cap on how much of the conversation is offered, not the budget itself: that is derived per request from what the question and the prompt leave under the endpoint ceiling, and a rejection is retried once with half.",
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "model": "jev-latest",
+  "apiKeyEnv": "TYPESAFE_API_KEY",
+  "timeoutMs": 2000,
+  "displayCutoff": 0.25,
+  "maxNames": 3,
+  "stateTokenBudget": 28000
+}

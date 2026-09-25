@@ -1,219 +1,520 @@
 ---
 name: ground
-description: "Validate structural mapping between abstract and concrete domains. Presents concrete instantiations when mapping uncertainty is detected. Type: (MappingUncertain, AI, GROUND, R) → ValidatedMapping"
+description: "Audit what an analogical mapping licenses about an account already in play: warrants each fit claim from cited evidence, not assent. Type: (MappingUncertain, AI, GROUND, R) → MappingAssessment"
 ---
 
 # Analogia Protocol
 
-Validate structural mapping between abstract and concrete domains through AI-guided detection, whole-draft grounding, and user-grounded standing or repair. Type: `(MappingUncertain, AI, GROUND, R) → ValidatedMapping`.
+Audit what a mapping licenses: construct the correspondences between an abstract structure and the target account in play, warrant each fit claim from evidence the protocol can cite, and report which of the intended inferences the mapping supports, which it blocks, and which stay undetermined. Type: `(MappingUncertain, AI, GROUND, R) → MappingAssessment`.
 
 ## Definition
 
-**Analogia** (ἀναλογία): A dialogical act of validating structural correspondences between domains, where AI detects mapping uncertainty between abstract frameworks and concrete application contexts, constructs an explicit whole mapping with concrete instantiations, and lets the user's natural next move establish standing, repair named exceptions, withdraw named parts, or explore without disposition.
+**Analogia** (ἀναλογία): A dialogical act of auditing analogical inference, where AI detects that what a mapping licenses is uncertain, settles the comparison focus and the inferences at stake, constructs the correspondences, warrants each fit claim against evidence it can reach and states what would defeat it, and reports the resulting verdicts with their limits. The user's utterance supplies grounds and records what they adopt; it never promotes a claim to warranted, because assent is not evidence about the world.
 
-```
-── FLOW ──
-Analogia(R) → attempts := 0 ; superseded_by := None ; refuted_focuses := ∅ ; zero_gap_confirmed := false ; fit_map := None ; draft := None ; continuation := None ; focus := None ; mappings := ∅ ; confirmed := ∅ ; dismissed := ∅ ; remaining := ∅ ; validations := [] ; partition_reading := None ; reopen_seed := None → Detect(R) → [¬uncertain: Qs(zero_gap_finding) → Stop → (Uptake(k): zero_gap_confirmed := true ; continuation := k ; deactivate ; [k = Some(_): handoff(k)] | Reopen(q): reopen_seed := q, proceed | Explore(u): answer(u) from the scan's basis ; identity over all state → re-present zero_gap_finding)] → (Sₐ, Sₜ) → derive_focus_candidates(Sₐ, Sₜ) → candidates → settle_focus(candidates, R, context) → φₚ → [focus_settled(φₚ) ∧ φₚ ∉ Λ.refuted_focuses: FocusReadback(φₚ) → φ' := φₚ | ¬focus_settled(φₚ) ∨ φₚ ∈ Λ.refuted_focuses: Qc(candidates) → Stop → FocusAnswer → (Select(φₛ): φ' := φₛ | Reframe(d): [¬pair_committed(Λ): (Sₐ, Sₜ) := decompose(R, d, context) ; self_grounding := self_grounding(Sₐ, Sₜ) → re-enter derive_focus_candidates(Sₐ, Sₜ, d) | pair_committed(Λ) ∧ d replaces Sₐ or Sₜ: Λ.superseded_by := Some(d) ; R' := annotate(R, superseded_mapping_status, superseded_residual(Λ)) → DomainSuperseded | pair_committed(Λ) ∧ ¬replaces: re-enter derive_focus_candidates(Sₐ, Sₜ, d)])] → [Λ.focus = Some(φ) ∧ φ' ≠ φ: invalidate_derived(Λ)] → [focus_change_requires_disposition(Λ, φ'): Qc(focus_change) → Stop → FocusChangeAnswer → (ParkPriorJudgments: retain(affected(Λ)) | RevalidatePriorJudgments: return_pending(affected(Λ)))] → Λ.focus := φ' → [attempts_exhausted(Λ): D_f := declare_exhaustion_disposition(Λ) ; R' := annotate(R, unresolved_mapping_status, exhaustion_residual(Λ)) → AttemptExhausted] → attempts := attempts + 1 → Map(Sₐ, Sₜ, φ') → M → [M ≠ ∅: carry_over(M) | M = ∅: Λ.mappings := ∅] → AssessFit(M, Sₐ, Sₜ) → F → Λ.fit_map := Some(F) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ) → Λ.partition_reading := Some(partition_reading(F, Sₜ))] → [M = ∅: surface(no correspondence constructed along φ', F.missing) → Λ.refuted_focuses := Λ.refuted_focuses ∪ {φ'} ; Λ.partition_reading := None → [attempts_exhausted(Λ): D_f := declare_exhaustion_disposition(Λ) ; R' := annotate(R, unresolved_mapping_status, exhaustion_residual(Λ)) → AttemptExhausted | ¬attempts_exhausted(Λ): derive_focus_candidates(Sₐ, Sₜ, F.missing) → re-enter focus settlement] | M ≠ ∅ ∧ Λ.remaining = ∅: declare_fit_disposition(F) → D_f ; R' := annotate(R, mapping_status, D_f) ; [self_grounding: R' carries PartitionReading + routing] → terminalize | M ≠ ∅ ∧ Λ.remaining ≠ ∅: Draft(M, F, Sₜ, φ', standing(Λ)) → D → Qs(D, standing_affordances) → Stop → UserUtterance → interpret_turn(user_utterance, D, context) → T → integrate_turn(T, D, R, F) → (D_f, R')] → (loop until terminalized ∨ attempts_exhausted(Λ) ∨ domain_superseded(Λ))
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
+-/
 
-── MORPHISM ──
+/-! ── FLOW ──
+Analogia(R) → ground(c, utterances), where c is the fused session context:
+  pass(c): Detect →
+    ¬uncertain: ZeroGapRelay(finding) → proceed with R unchanged
+    uncertain: focus settlement per axis →
+      every axis settled: FocusReadback | an axis unsettled, or K narrowed without basis:
+        FocusSelector → Stop
+      → K := settle_inferences → InferenceReadback → construct and assess fit (a counted
+        reconstruction) → checks → run the reachable ones (observations enter c) → warrant →
+        judge → [self-grounding: partition reading] → Surface → proceed
+      → converged(K): MappingAssessment | an earlier dependency still pending with no evidence
+        progress, or the reconstruction cap reached: Inconclusive | otherwise Inconclusive
+  later utterance u: c' := fuse(c, u) →
+    it replaces a committed domain: DomainSuperseded
+    otherwise: pass(c')   (the purpose, K, mapping, or evidence it changes is read there)
+-/
+
+/-! ── MORPHISM ──
 R
-  → detect(R, context)                 -- infer mapping uncertainty
-  → decompose(abstract, concrete)      -- identify source and target domains
-  → derive_focus_candidates(Sₐ, Sₜ, R, context) -- surface plausible MappingFocus candidates (source_scope, target_scope, relation, purpose), before any correspondence is constructed
-  → settle_focus(candidates, R, context) → φₚ -- bind the provisional comparison focus the settlement guard then reads; focus_settled(φₚ) is checked PER FIELD, not object-wide (see focus_settled), and decides relay (FocusReadback) vs gate (FocusSelector) — this step yields the value, it does not itself make that choice; once per activation for the initial selection, before construction, plus once more per empty-construction retry
-  → constitute_focus_change_disposition(Λ, φ') -- conditional: when terminal judgments stand under an outgoing focus, the user constitutes their fate (park or revalidate) before construction runs on the successor focus
-  → construct(mapping, Sₐ→Sₜ, φ)        -- build structural correspondences along the settled focus φ
-  → assess_fit(mapping, Sₐ, Sₜ, context) -- sort correspondence adequacy before the whole draft acquires user-grounded standing
-  → read_partition(fit_map, Sₜ) -- DERIVED split-vs-trim reading over the misfit MEMBERS (self-grounding case only — guarded; relay, no gate): misfits clustering into a coherent rival essence → Split → decompose recovery (route to the /conduct recipe) vs scattered misfits → Trim → narrow in place (/induce Narrow) vs no misfit → Hold
-  → draft(mapping, fit_map, target, focus, standing) -- assemble the whole repairable mapping with one concrete example per correspondence and each one's current standing
-  → surface(draft, repair_affordance) -- present the whole mapping once; turn-reading constructors stay internal rather than becoming a response menu
-  → interpret_turn(user_utterance, draft, context) → T -- read positive uptake, direct repair, withdrawal, or exploration from the user's natural next move
-  → integrate_turn(T, draft, R, fit_map) -- establish standing by uptake or named exception, reconstruct a repair, or preserve the pending draft during exploration
-  → terminalize(mapping, user, fit_disposition) -- make mapping status and the utterance that established it explicit in output
-  → ValidatedMapping
-requires: uncertain(mapping(Sₐ, Sₜ))    -- runtime checkpoint (Phase 0)
-deficit:  MappingUncertain               -- activation precondition (Layer 1/2)
-preserves: content_identity(R)           -- output content invariant; mapping status recorded in R'
-invariant: Structural Correspondence over Abstract Assertion
+  → detect(R, context)                     -- what the mapping licenses is uncertain, with a target account in play
+  → settle_focus(R, context) → φ           -- per axis; the purpose only from the user's words
+  → settle_inferences(R, φ, context) → K   -- read back before construction
+  → construct(mapping, Sₐ → Sₜ, φ, context)
+  → assess_fit(mapping, Sₐ, Sₜ, context)   -- each cell placement is a claim
+  → check(fit_claims, K, context)          -- per bearing claim, what within its scope would change it
+  → run_checks(checks, context)            -- reachable evidence moves; results enter the context
+  → warrant(fit_claims, checks)            -- read off evidence, never assent
+  → judge(K, mapping, warrant)             -- Licensed with limits, Blocked, or Undetermined with what is missing
+  → surface(assessment)                    -- present and proceed
+  → MappingAssessment
+requires: uncertain(licenses(mapping(Sₐ, Sₜ)))  -- runtime checkpoint (Phase 0)
+deficit:  MappingUncertain                       -- activation precondition
+preserves: content_identity(R)                   -- output content invariant; the assessment is carried in R'
+invariant: Warrant tracks cited evidence, never assent
+invariant: Judgment is the model's, the product is a field
+-/
 
-── TYPES ──
-R        = Text containing abstract structures (source-agnostic: AI output, user analysis, or external reference)
-             -- Input type: morphism processes R uniformly; enumeration scopes the definition, not behavioral dispatch
-Detect   = Mapping uncertainty detection: R → Bool
-Sₐ       = Source domain (abstract structure in R)
-Sₜ       = Target domain (user's concrete application context)
-self_grounding(Sₐ, Sₜ) ≡ instances(Sₐ) = Sₜ   -- self-grounding case: Sₜ is the source abstraction's OWN member instances (Sₐ a LOCATED candidate fused abstraction validated against the instances it claims to subsume), not a separate application domain. located(Sₐ) holds — this is what distinguishes self-grounding from the colimit route-away case (locator absent → /induce); here the abstraction already has a name and is checked for wrong-fusion against its own members
-MappingFocus = { source_scope: Set(Component), target_scope: Set(Component), relation: String, purpose: String }  -- protocol-local: the comparison focus that conditions Map before any correspondence is constructed; not a Correspondence itself — MappingFocus scopes and orients WHICH comparison Map will build, a Correspondence is one constructed pairing. once pair_committed(Λ), source_scope and target_scope range over components WITHIN (Sₐ, Sₜ); they select what to compare inside the bound domains and never replace a domain. Before commitment the pair itself is still open, so a Reframe there re-decomposes instead
-φ        = MappingFocus  -- the settled comparison focus Map consumes; bound to Λ.focus once determined (φ = Λ.focus when Some), the same symbol threaded through FLOW/MORPHISM/PHASE TRANSITIONS below
-pair_committed(Λ) ≡ Λ.attempts > 0  -- the pair is committed once a Map has run against it, and attempts increments immediately before each Map, so this is the one reading of "has construction begun". Before it the decomposition is still provisional and a Reframe may replace (Sₐ, Sₜ) outright: nothing is yet standing on the pair — no fit evidence, no draft, no judgment, no spent attempt — so replacing it strands nothing and needs no disposition. After it, the pair is what the activation's question IS, and replacing it is DomainSuperseded rather than a revision
-forced(f) ≡ the decomposition admits exactly one value for f, with that uniqueness citable  -- an axis with a single possible value is a readback, not a selection
-determined(f) ≡ f is fixed by explicit user language or a citable standing rule
-focus_settled(φ) ≡ ∀ f ∈ {source_scope, target_scope, relation, purpose} : determined(f) ∨ forced(f)  -- PER-FIELD settlement predicate, never a whole-object test: EVERY axis must be independently determined or forced. An axis where the protocol would pick among viable alternatives is a selection, not a readback, and one such axis is enough to fire the gate.
-FocusAnswer = Select(MappingFocus) ∪ Reframe(description)  -- user's answer to the mapping-focus checkpoint; Reframe's reach turns on pair_committed(Λ), and on nothing else. BEFORE commitment it may re-decompose — the pair is provisional, the description feeds decompose(R, d, context) afresh, and the replacement strands nothing because no Map has run. AFTER commitment it revises the four axes WITHIN the fixed pair — scopes included, since they range inside it — and re-enters candidate derivation over that same pair; there, replacing Sₐ or Sₜ asks a different mapping question and crosses the activation seam (DomainSuperseded) rather than re-entering this settlement
-FocusChangeAnswer = ParkPriorJudgments ∪ RevalidatePriorJudgments  -- user's answer to the focus-change checkpoint; occasion-local, neither constructor establishes a standing policy. ParkPriorJudgments carries the affected judgments' standing forward, so the correspondences they addressed stay addressed under the successor focus; RevalidatePriorJudgments withdraws that standing, returning those correspondences to remaining
-affected(Λ) = { the LAST r ∈ Λ.validations per correspondence | r.correspondence ∈ (Λ.confirmed ∪ Λ.dismissed) }  -- the terminal judgments STANDING at the checkpoint. Records are append-only, so a correspondence judged more than once holds several and the last is the one standing; the earlier ones are its history and are not up for revalidation, whichever focus each was originally made under: confirmed/dismissed carry current standing, so a judgment an earlier Park carried forward is included and stays revalidatable
-focus_change_requires_disposition(Λ, φ') ≡ ∃ φ : Λ.focus = Some(φ) ∧ φ' ≠ φ ∧ affected(Λ) ≠ ∅  -- the checkpoint's guard: a stored focus exists, the comparison focus is about to change, and terminal judgments stand under the outgoing one. Comparing focus values is the WHOLE test, not a proxy for a wider one: the domain pair is committed at the first Map and cannot move inside an activation, so the focus is the only component of the basis that can change and an equal focus means an unchanged basis. False on the initial settle path (Λ.focus = None), so the checkpoint does not fire there
-return_pending(A) = reopen_targets({ r.correspondence | r ∈ A })  -- RevalidatePriorJudgments state update; records stay, the trace shows the return
-retain(A) = identity over confirmed, dismissed, remaining  -- ParkPriorJudgments state update: the affected judgments keep standing, so a correspondence they addressed stays addressed under the successor focus and is not re-gated
-invalidate_presentation(Λ) = draft := None ; partition_reading := None  -- everything derived from the CURRENT fit map's presentation: the whole-draft surface and the partition reading taken over it. EVERY route that leaves the basis runs this, and it exists so those routes cannot list the values one by one and drift apart — a route that cleared the draft and kept the reading would let an exit render a partition of the mapping it is leaving
-invalidate_derived(Λ) = mappings := ∅ ; fit_map := None ; invalidate_presentation(Λ)  -- the ASSESSED evidence Map/AssessFit and repairable draft derived from (Sₐ, Sₜ, φ), discarded whenever the focus changes, so no exit can present a departed focus's fit reading as the incoming one's. Λ.remaining is deliberately NOT cleared — a cap that fires before Map is required to declare the unresolved correspondences, and a RevalidatePriorJudgments disposition writes into exactly this set. Map consumes the domain pair and the focus, and the pair is fixed for the activation, so the focus commit is the one transition that invalidates this evidence. The standing judgments are deliberately absent here — confirmed and dismissed survive a focus change, because their fate is the focus-change checkpoint's to decide, and validations is append-only so no transition removes from it at all. attempts is absent too: the cap is per activation, so a focus change must not refund it
-carry_over(M') = mappings := M' ; confirmed := confirmed ∩ M' ; dismissed := dismissed ∩ M' ; remaining := M' \ (confirmed ∪ dismissed)  -- reconstruction carry-over, applied when Map rebuilds the correspondence set into a NON-EMPTY M'. Records are not filtered to M': a correspondence this reconstruction dropped WAS judged, and the trace reports its record as superseded rather than losing it
-Map      = Structure-preserving mapping construction: (Sₐ, Sₜ, φ) → Set(Correspondence)   -- consumes the settled MappingFocus φ; construction is scoped and oriented by φ, not by (Sₐ, Sₜ) alone
-M        = Set(Correspondence)                                   -- mapping result
-Correspondence = { abstract: Component, concrete: Component, relation: String }
-Component = { name: String, structure: String }
-Context  = Observable mapping context from R, session context, and cited domain evidence
-AssessFit = Correspondence adequacy assessment: M × Sₐ × Sₜ × Context → F
-F        = CorrespondenceFitMap { preserved, partial, missing, overextended, open }
-preserved = Set(Correspondence) where target structure preserves source relation
-partial  = Set(Correspondence) where correspondence exists but some structural dimensions lack evidence
-missing  = Set(Component) from Sₐ with no evidenced Sₜ correspondent
-overextended = Set(Correspondence) where source relation adds unsupported target constraints
-open     = Set(StructuralQuestion) where answer could change validation of M
-StructuralQuestion = { structure: Component, reason: String, evidence_needed: String }
-FitLabel ∈ {Preserved, Partial, Overextended}
-fit_classification(F, c) =
-  Preserved if c ∈ F.preserved
-  Partial if c ∈ F.partial
-  Overextended if c ∈ F.overextended
-fit_partition(F, M) = F.preserved ∪ F.partial ∪ F.overextended = M (pairwise disjoint)
-ResidualFitIssue ∈ Missing(Component) ∪ OpenQuestion(StructuralQuestion)
-residual_issues(F) = { Missing(x) | x ∈ F.missing } ∪ { OpenQuestion(q) | q ∈ F.open }
-FitDisposition = { issues: Set(ResidualFitIssue), status: None ∪ Bounded, declaration: String }
-D_f      = FitDisposition
-fit_disposition_declared(F, D_f) =
-  (residual_issues(F) = ∅ ∧ D_f.status = None)
-  ∨ (D_f.status = Bounded ∧ D_f.issues = residual_issues(F))
-MemberInstance = a member of Sₜ in the self-grounding case (an instance the abstraction Sₐ claims to subsume)  -- Sₜ's elements; self-grounding-only. Distinct from Component (a structural element of a domain): the partition reading ranges over members, not over correspondences or facets
-PartitionReading = { verdict ∈ {Split, Trim, Hold}, rival_essences: Set(InstanceCluster), trim_outliers: Set(MemberInstance), core_remainder: Set(MemberInstance), basis: F }  -- DERIVED split-vs-trim reading; verdict = Hold means no significant misfit (the fusion holds, no partition action). Computed ONLY in the self-grounding case; when ¬self_grounding the protocol holds Λ.partition_reading = None (Option — not computed at all), DISTINCT from verdict = Hold. NOT a sixth fit cell — it is SECOND-ORDER over the misfit MEMBER set (via the misfit_instances projection), not a partition of correspondences M, so it leaves fit_partition(F, M) intact. Relay (derived from F), never a gate.
-   -- THREE pairwise-disjoint member groups that PARTITION Sₜ exhaustively: core_remainder = members that genuinely FIT the original abstraction (= Sₜ minus ALL misfits, so it never contains a misfit); rival_essences = the disjoint coherent rival cells within the misfits (each a candidate new abstraction → decompose); trim_outliers = the remaining scattered/ambiguous misfits in no rival cell (narrow-out candidates). Sₜ = core_remainder ⊎ (⋃ rival_essences.members) ⊎ trim_outliers. The cell-candidate partition /conduct constitutes is { core_remainder } ∪ { rival cells }; trim_outliers is surfaced for the checkpoint to narrow-out or place (never silently folded into the core)
-InstanceCluster = { members: Set(MemberInstance), candidate_essence: String }  -- a coherent sub-group of Sₜ members + the rival essence they support; these are the rival cell candidates the /conduct decompose-recovery boundary-checkpoint consumes (cell assignment is the user's constitutive judgment there, not here)
-member_facet(F) = { facet ∈ F.missing | asserted_of_all(facet) }  -- the subset of F.missing the abstraction asserts of ALL members (universally-quantified facets), so each is per-member testable via exhibits(·); other missing components are not member-testable and stay in basis, never projecting onto members
-misfit_instances : F × Sₜ → Set(MemberInstance)  -- DERIVED projection from the fit map onto the member set: m ∈ Sₜ is misfit iff (∃ c ∈ F.overextended : m violates c's added target constraint) ∨ (∃ facet ∈ member_facet(F) : ¬exhibits(m, facet)). Only member_facet(F) ⊆ F.missing — the universally-asserted, per-member-testable facets — projects onto members; the rest of F.missing and all source-side cells of F.overextended stay in basis, never in the member set — so the reading is genuinely over instances and leaves fit_partition(F, M) intact
-rival_clusters(mis) : Set(MemberInstance) → Set(InstanceCluster)  -- the PAIRWISE-DISJOINT coherent rival-essence sub-groups within the misfit member set mis (each clustered misfit assigned to exactly one rival; a maximal InstanceCluster supporting one rival essence); ∅ when mis's members are all scattered/ambiguous with no coherent rival. Misfits in no cluster fall to trim_outliers, never to core_remainder
-partition_reading(F, Sₜ) =   -- invoked ONLY under self_grounding (guarded in FLOW / PHASE TRANSITIONS); returns a full PartitionReading RECORD, never a bare verdict token and never the Option None
-  let mis = misfit_instances(F, Sₜ), clusters = rival_clusters(mis),
-      core = Sₜ \ mis, outliers = mis \ ⋃ { c.members | c ∈ clusters },
-      cells = (if core ≠ ∅ then {core} else ∅) ∪ clusters       -- the NON-EMPTY recovery cells: the core cell (when non-empty) + the rival cells
-  in { verdict        = Hold if mis = ∅ ; Split if |cells| ≥ 2 ; Trim otherwise,
-       rival_essences = clusters,                                 -- pairwise disjoint; may be a single cluster even when verdict = Trim (one rival, empty core)
-       trim_outliers  = outliers,                                 -- misfits in no rival cell: = ∅ when Hold, = mis when there is no cluster, the scattered remainder when split
-       core_remainder = core,                                     -- the members that genuinely FIT (= Sₜ when Hold); NEVER contains a misfit
-       basis          = F }
-  -- verdict = Split (|cells| ≥ 2) → wrong fusion: route to /conduct decompose (n ≥ 2 cells satisfies the conduct warrant; trim_outliers narrowed-out or placed at the checkpoint); Trim (|cells| ≤ 1: scattered misfits around a core, OR a single coherent cell with empty core) → SINGLE-MOVE /induce recovery (Narrow or Reorient), NOT a decompose; Hold → fusion holds, no partition action
-Example  = { scenario: String, mapping_trace: List<Correspondence> }
-D        = MappingDraft { mappings: M, fit_map: F, focus: MappingFocus, examples: Map(Correspondence → Example), standing: Standing }  -- the WHOLE current mapping presented together; every correspondence has one example and its standing is visible, so the user repairs exceptions against the draft rather than triaging a serial item with meta-labels
-Standing = Map(Correspondence → {Pending, Confirmed, Dismissed})
-standing(Λ) : Standing = { c ↦ Confirmed if c ∈ Λ.confirmed ; Dismissed if c ∈ Λ.dismissed ; Pending if c ∈ Λ.remaining }  -- projected at the moment the draft is assembled
-Draft    = Whole-draft construction: M × F × Sₜ × MappingFocus × Standing → D  -- Standing is an INPUT and not derivable from the other four: one repair leaves (M, F, Sₜ, φ) unchanged while moving which correspondences are pending, and the whole-draft surface shows exactly that difference
-UserUtterance = the user's natural next turn after a surface yields — the Phase 2 draft, or the Phase 0 zero-gap finding, which has no D. The type names the turn, never the object it answers to, which is what lets one carrier serve both surfaces
-Continuation = UserUtterance that carries the surfaced mapping claim forward as a premise for a next task; preserved for the enclosing interaction after terminalization  -- the claim is D at the Phase 2 draft surface and the zero-gap finding at Phase 0, where no draft exists; the type names what the utterance takes up, not the carrier it arrives in. It is Uptake's OPTIONAL payload, not its admission condition: what establishes uptake is positive assent to the whole surfaced claim, which an utterance can give either by carrying it forward (payload Some) or by affirming it outright with nothing following (payload None). Requiring a continuation would leave the commonest turn at a validation surface — a plain "yes, this is right" — inhabiting no form at all, and re-presenting the draft at the user who just confirmed it
-TurnReading = Uptake(Option(Continuation)) ∪ Repair(NonEmptySet(Correspondence), ground: String) ∪ Withdraw(NonEmptySet(Correspondence), reason: String) ∪ Explore(UserUtterance)  -- CLOSED processing forms, not a displayed answer menu. Uptake requires positive assent to the whole of D — given by carrying D forward as a premise, or by affirming it outright — while silence, mere non-contradiction, a question about D, and an unrelated turn do not inhabit it; the continuation is what an uptake MAY carry, never what admits it. Repair/Withdraw name the exceptions; every current correspondence outside their target set stands by that utterance. Each carries the user's stated ground for the change, and the two differ in where that ground can land. Withdraw's reason reaches the RECORD: its targets close, so each takes a ValidationRecord whose answer holds the whole reading. Where a ground lands is READ OFF THE RECORD WRITER, never off the branch that produced the turn — records go to newly_confirmed ∪ withdrawn(T), and answer holds the whole reading. That yields three cases and they differ; this is the ONE place they are enumerated, and the LOOP and Rules statements point here rather than re-deriving them, because re-derivation from a branch is what got each of them wrong in turn. Withdraw's targets ARE withdrawn(T): each takes a record and the reason rides it. Repair's targets are in neither set, reopening being what Repair does, so they take no record this turn — the ground is never attached to a repaired correspondence. The correspondences that stand by the exception are every current one outside the target set, but only those that were PENDING become terminal this turn — that is newly_confirmed — and a record is written when a correspondence becomes terminal. So each of those takes a record whose answer is Repair(A, ground), carrying the ground whole as the provenance of THEIR standing, while one that was already confirmed keeps its earlier record and takes no new one: it continued standing rather than newly acquiring it. Where the repair named every pending correspondence that set is empty and no record is written at all. The type promises none of the three: the accumulated context and the utterance are what the next turn reads from, which is where a repair's reason is used. What append-only buys is separate and real — a reopened correspondence's already-earned records are not erased, so its judged history survives the reopening. Nor does any step feed either into reconstruction: what shapes a rebuild is the utterance read at that turn, never a value the type promised to thread. A turn about the COMPARISON AXIS is not a Repair at all: it changes the basis rather than the standing of correspondences under it, so it reaches Phase 1 through the open form, where the focus checkpoint that already exists resolves it. Explore carries any question or other non-dispositive turn, leaves every standing set unchanged, and routes off-axis handling through the enclosing session without converting it into mapping acceptance. READING PREMISE (declared, not assumed): one turn is read as one disposition over the whole draft. It is stated because it is what makes the unmentioned-correspondences rule sound — an utterance carrying different dispositions for different parts DEPARTS from it, and forcing such a turn into Repair or Withdraw would confirm a part the user explicitly changed. A departing turn is neither force-fitted nor handed back for re-classification: it inhabits Explore, which writes no standing, and the surface states this premise beside the departure so the next move is made against a stated constraint rather than a recalled menu. Opening further DISPOSITIVE forms to chase departures is not the repair — the utterance space is not finite, so the type layer carries the premise instead of chasing it. That is not a bar on the OPEN, non-dispositive carrier: Explore's payload is the unclassified utterance, so admitting one at a surface that lacks it supplies the opening rather than enumerating the space (ZeroGapReading does exactly that)
-T        = TurnReading
-NonEmptySet(X) = { A : Set(X) | A ≠ ∅ }
-targets(T) = A if T = Repair(A, _) ∨ T = Withdraw(A, _) else ∅  -- the named exception set a dispositive turn carries; Uptake and Explore name none, which is why well_formed discharges them on their own disjuncts rather than through this projection
-well_formed(T, D) ≡ T = Uptake(_) ∨ T = Explore(_) ∨ targets(T) ⊆ D.mappings
-interpret_turn : UserUtterance × D × Context → { T : TurnReading | well_formed(T, D) }  -- indeterminate semantic reading narrowed to the four protocol-defined processing forms. When the current utterance does not settle one form, surface the viable readings with their cited language and yield; the specification never guesses an occupant. Not settling and DEPARTING are distinct states taking distinct responses: an utterance whose reading is uncertain is clarified, while an utterance that determinately carries more than one disposition has left the reading premise — that one reads as Explore and the premise is stated, never split back onto the user as a classification task
-withdrawn(T) = targets(T) if T = Withdraw(_, _) else ∅
-reopen_targets(A) = confirmed := confirmed \ A ; dismissed := dismissed \ A ; remaining := remaining ∪ A  -- standing only; the records those correspondences already earned STAY, because what they record happened
-withdraw_targets(A) = confirmed := confirmed \ A ; remaining := remaining \ A ; dismissed := dismissed ∪ A  -- standing only; a correspondence confirmed earlier and withdrawn now carries both records, in close order, which is what happened to it
-integrate_turn : T × D × R × F → (D_f, R')  -- writes the correspondences established by Uptake or an exception-scoped turn to confirmed, withdrawn(T) to dismissed, and a ValidationRecord for each newly terminal correspondence; Repair returns its targets from confirmed/dismissed to remaining and then reconstructs, their prior records standing; Explore writes no standing and no record; the two fields it does write are Λ.draft, cleared where the answer needs evidence outside the current basis or changes a correspondence, and Λ.superseded_by, on the branch where its utterance replaces a domain — the first keeps the draft invariant from holding a draft whose basis this answer left, the second ends the activation. Neither advances a standing set, which is what "writes no standing" means
-ZeroGapReading = user's natural response to a zero-gap finding ∈ Uptake(Option(Continuation)) ∪ Reopen(StructuralQuestion) ∪ Explore(UserUtterance)  -- Uptake accepts the trivial mapping, by carrying it forward as a premise or by affirming it outright; Reopen names a structural question the Phase 0 scan missed; Explore carries a question or other non-dispositive turn, accepting nothing and reopening nothing, so the finding is answered and re-presented with its reasoning. Silence inhabits no constructor. Explore is the open carrier here for the same reason it is at the draft surface — its payload is the unclassified utterance, so it holds what the two dispositive forms do not reach without the type claiming to enumerate that space
-ValidationRecord = { correspondence: Correspondence, example: Example, answer: TurnReading, fit_label: FitLabel, residual_disposition: FitDisposition, focus_snapshot: MappingFocus }  -- focus_snapshot records the comparison focus in force when the user established standing. The domain pair is not recorded per record: it is committed once for the activation and every record in a run shares it, so stating it per record would assert a variation the contract no longer admits. answer records the natural-turn reading that established it: direct uptake, standing outside a named Repair target, or standing/withdrawal under Withdraw. Explore produces no record. correspondence types WHICH correspondence the record addresses, so a focus-change revalidation can return exactly that correspondence to remaining
-R'       = Updated output with explicit mapping status (in the self-grounding case, R' additionally carries the relay PartitionReading and its routing recommendation: verdict = Split → /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; the partition reading is an annotation on the validated mapping, not a change to the terminal type)
-ValidatedMapping = R' where terminalized(R', F, D_f)
-terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
-all_addressed(R') = Λ.mappings ≠ ∅ ∧ ∀ c ∈ Λ.mappings : confirmed(c) ∨ dismissed(c)
-no_basis_declaration(Λ) = the statement that the basis now in force holds no constructed mapping, its fit evidence having been discarded when the basis changed, and that this activation has spent its reconstruction budget (Λ.attempts of max)  -- a String, which is why exhaustion_residual wraps it as a singleton while declare_exhaustion_disposition takes it bare
-carried_remainder(Λ) = { (c, current) | c ∈ Λ.remaining } when Λ.mappings ≠ ∅, else { (c, superseded) | c ∈ Λ.remaining }  -- the un-judged correspondences an exhaustion exit reports, each tagged with whether the mapping it came from still stands
-superseded_declaration(Λ) = the statement that this activation's domain pair was replaced, naming what replaced it (Λ.superseded_by) and that the question it was asking is therefore closed rather than answered  -- a String, mirroring no_basis_declaration
-superseded_residual(Λ) = { (c, superseded) | c ∈ Λ.remaining } ∪ { superseded_declaration(Λ) }  -- what the supersede exit reports. It does NOT reuse carried_remainder, whose tag turns on whether Λ.mappings is empty: that is the right question for an exhaustion exit, where a non-empty mapping still stands, and the wrong one here, where the pair that built the mapping was replaced. On this route every un-judged correspondence is superseded whether or not a mapping is in hand, so the tag is unconditional
-exhaustion_residual(Λ) = carried_remainder(Λ) ∪ (residual_issues(F) when Λ.fit_map = Some(F), else { no_basis_declaration(Λ) })
-declare_fit_disposition(F) = { issues: residual_issues(F), status: Bounded if residual_issues(F) ≠ ∅ else None, declaration: the bounded residual statement over those issues }  -- records bounded residual status without a new gate, satisfying fit_disposition_declared(F, ·) by construction; consumes a fit map, never the Option — an exit reached with Λ.fit_map = None goes through declare_exhaustion_disposition instead
-declare_exhaustion_disposition(Λ) = declare_fit_disposition(F) when Λ.fit_map = Some(F), else { issues: ∅, status: Bounded, declaration: no_basis_declaration(Λ) }
-max      = the attempt cap LOOP fixes per activation  -- a bound on reconstruction spend, not a sufficiency criterion
-attempts_exhausted(Λ) ≡ Λ.attempts ≥ max ∧ continuing would require a further Map/AssessFit reconstruction  -- the single cap predicate every exit site reads: the cap counts reconstruction cycles, so correspondences still judgeable from the mapping already built do not trip it
-domain_superseded(Λ) ≡ Λ.superseded_by = Some(q)  -- the one guard the superseded exit reads. TWO routes set it, and both must, because a domain replacement can arrive from either surface after commitment: the Phase 3 Explore branch where q replaces a domain, and the Phase 1 Reframe answer where the description does — reachable through the empty-construction retry, which re-enters settlement and fires the selector again. Before commitment neither fires: there a Reframe re-decomposes instead
-DomainSuperseded = R' where domain_superseded(Λ)  -- reachable only after pair_committed(Λ), a pre-commitment replacement being an ordinary Reframe instead; reached from either the Phase 3 Explore branch or the Phase 1 Reframe answer. The activation's mapping question was `uncertain(mapping(Sₐ, Sₜ))`, so replacing an endpoint asks a DIFFERENT question rather than advancing this one. Non-convergent exit, distinct from both ValidatedMapping and AttemptExhausted: R' carries the correspondences already addressed and declares the rest superseded, then a fresh Analogia activation is seeded from the same utterance and context. Evidence crosses that seam as context; attempts, refuted_focuses, fit evidence, the draft and every user-grounded standing do NOT — a correspondence confirmed under one domain pair is not confirmed under another, and carrying standing across would be the cross-question conflation the fixed pair exists to prevent
-AttemptExhausted = R' where attempts_exhausted(Λ) ∧ ¬terminalized(R', F, D_f) for the current pair's F when Λ.fit_map = Some(F) ; when Λ.fit_map = None invalidate_derived cleared Λ.mappings alongside it, so all_addressed(R') is false on its non-empty conjunct and non-terminalization holds with no F needed to witness it  -- non-convergent exit on the per-activation attempt cap: distinct from ValidatedMapping; partial trace over already-addressed correspondences, remaining correspondences declared as unresolved residual (mapping not terminalized)
+namespace Analogia
 
-── R-BINDING ──
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
+
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
+
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
+
+abbrev Context (P : Type) := List (Turn P)
+
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
+
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
+
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
+
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
+
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-!
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t
+
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
+-/
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- `R`: text carrying an abstract structure and a target account already in play —
+    AI output, user analysis, or an external reference. The morphism processes it uniformly;
+    it is bound by R-BINDING and read from the context, as the positions of its turns. -/
+abbrev Text (c : Context P) := List (Fin c.length)
+
+structure Component where
+  name      : String
+  structure_ : String
+
+structure Correspondence where
+  abstract : Component
+  concrete : Component
+  relation : String
+
+/-- The four axes of the comparison focus that conditions construction. -/
+inductive Axis | sourceScope | targetScope | relation | purpose
+
+/-- **Your judgment**: the cited turn establishes value `v` for axis `a` in `c`. For `purpose`
+    only the user's own words do. For another axis the value is established when it is
+    `determined` — fixed by the user's words or a citable standing rule — or `forced` — the
+    decomposition admits exactly one value, and the citation is a source turn of `R` showing
+    that uniqueness, never the decomposition's own output. -/
+axiom AxisSupported : Axis → Context P → Turn P → String → Prop
+
+def axisCoord : Axis → Coord P String
+  | .purpose => { admits := (·.val = .person), supports := AxisSupported .purpose }
+  | a        => { admits := fun _ => True,        supports := AxisSupported a }
+
+def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
+  | .open_ _ => false
+  | .filled .. => true
+
+/-- **Your judgment**: how axis `a` of the comparison focus stands in `c`. -/
+axiom focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
+
+/-- One axis the protocol would otherwise pick among viable alternatives fires the focus
+    gate. -/
+def focusSettled (c : Context P) : Prop := ∀ a, isFilled (focusAxis c a) = true
+
+/-- One thing the mapping is being asked to license about the target: a prediction, a
+    permission, a limit, an expected behavior. -/
+structure Inference where
+  claim : String
+
+/-- **Your judgment**: `K`, what this activation audits, derived from the request and the
+    settled purpose before construction; non-empty once activated. -/
+axiom inferences : Context P → List Inference
+
+/-- **Your judgment**: the latest settlement narrows `K` with no basis in the request or the
+    settled purpose. -/
+axiom UnsupportedNarrowing : Context P → Prop
+
+inductive FitLabel
+  /-- the target structure preserves the source relation -/
+  | preserved
+  /-- a correspondence exists, but some of its structural dimensions lack evidence -/
+  | «partial»
+  /-- the source relation adds constraints the target does not support -/
+  | overextended
+
+/-- What fit assessment asserts; every placement, `preserved` included, is a claim that can be
+    warranted or defeated. -/
+inductive FitClaim
+  | fit     (c : Correspondence) (l : FitLabel)
+  | missing (x : Component)
+
+/-- **Your judgment**: the correspondences constructed along the settled focus. -/
+axiom mapping : Context P → List Correspondence
+
+/-- **Your judgment**: the fit claims over the current mapping — each correspondence in
+    exactly one cell, and every source component with no evidenced correspondent missing. -/
+axiom fitClaims : Context P → List FitClaim
+
+/-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed.
+    Direction: `references/judgments.md` §BearsOn. -/
+axiom BearsOn : Context P → FitClaim → Inference → Prop
+
+/-- Who can carry a check out. `userHeld` is context only the user holds; it is met by what
+    the user reports observing, and otherwise it is `/inquire`'s deficit. -/
+inductive Reach
+  | aiReachable (action : String)
+  | userHeld (question : String)
+
+inductive Bearing | supports | defeats
+
+/-- **Your judgment**: the cited turn establishes, within `scope`, that it supports or defeats
+    `x`. A citation's stated bearing is read against its source and scope. A person's turn
+    bears only where it reports what they observed — a result they ran, a source they read;
+    their assent, agreement, or bare assertion establishes nothing here, whatever its form. -/
+axiom CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
+
+def checkCoord (x : FitClaim) (scope : String) : Coord P Bearing :=
+  { admits := fun _ => True, supports := CheckSupported x scope }
+
+structure Check (c : Context P) where
+  claim        : FitClaim
+  scope        : String
+  /-- evidence that, within `scope`, would require the claim to change -/
+  wouldChangeIt : String
+  /-- `none`: reachable by neither party now; say what is missing -/
+  reach        : Option Reach
+  state        : Occ (checkCoord claim scope) c
+  /-- further cited grounds beside the one that fills the state -/
+  more         : List (Cite c)
+
+/-- **Your judgment**: the checks for the current fit claims bearing on `K`, each with its
+    state read off the grounds the context now holds. Direction: `references/judgments.md`
+    §checks. -/
+axiom checks : (c : Context P) → List (Check c)
+
+def ChecksExact (c : Context P) : Prop :=
+  (∀ x ∈ fitClaims c, (∃ k ∈ inferences c, BearsOn c x k) → ∃ ch ∈ checks c, ch.claim = x) ∧
+  (∀ ch ∈ checks c, ch.claim ∈ fitClaims c)
+
+inductive Warrant | open_ (missing : String) | supported | defeated
+
+def Check.warrant {c : Context P} (ch : Check c) : Warrant :=
+  match ch.state with
+  | .open_ _                  => .open_ ch.wouldChangeIt
+  | .filled .supports _ _ _   => .supported
+  | .filled .defeats _ _ _    => .defeated
+
+/-- The grounds a verdict cites, each read as evidence — a person's report of what they observed
+    among them, never their assent (`CheckSupported`). -/
+def Grounds (c : Context P) :=
+  {g : List (Cite c) // g ≠ []}
+
+inductive Verdict (c : Context P)
+  /-- grounds support the whole requested inference at its requested scope, with a met check
+      for every fit claim bearing on it; `limits` is that supported reach -/
+  | licensed     (g : Grounds c) (limits : String)
+  /-- a decisive ground against the inference -/
+  | blocked      (g : Grounds c)
+  | undetermined (missing : String)
+
+
+/-- **Your judgment** per inference, reading the grounds' bearing on `k` rather than a
+    label-to-verdict polarity. -/
+axiom judge : (c : Context P) → Inference → Verdict c
+
+def Verdict.decisive {c : Context P} : Verdict c → Bool
+  | .undetermined _ => false
+  | _               => true
+
+def converged (c : Context P) : Prop := ∀ k ∈ inferences c, (judge c k).decisive = true
+
+inductive Pref | adopted | withdrawn
+
+/-- **Your judgment**: the cited turn of the person's adopts or withdraws `x`. -/
+axiom PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
+
+/-- What the reader takes up. -/
+def prefCoord (x : Correspondence) : Coord P Pref :=
+  { admits := (·.val = .person), supports := PrefSupported x }
+
+/-- **Your judgment**: how the user's adoption of `x` stands in `c`. -/
+axiom preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
+
+/-- **Your judgment**: the source abstraction is located. -/
+axiom Located : Context P → Prop
+/-- **Your judgment**: the source abstraction's member instances are exactly the target. -/
+axiom InstancesAreTarget : Context P → Prop
+
+def selfGrounding (c : Context P) : Prop := Located c ∧ InstancesAreTarget c
+
+inductive PartitionVerdict | split | trim | hold
+
+/-- A supported partition of the target's members, read only under self-grounding and only
+    where the grounds establish the full allocation and each rival grouping. -/
+structure PartitionReading (c : Context P) where
+  misfits  : List String
+  rivals   : List (List String)
+  outliers : List String
+  core     : List String
+  grounds  : Grounds c
+
+def PartitionReading.verdict {c : Context P} (r : PartitionReading c) : PartitionVerdict :=
+  if r.misfits = [] then .hold
+  else if (if r.core = [] then 0 else 1) + r.rivals.length ≥ 2 then .split
+  else .trim
+
+/-- Where a partition verdict routes. `trim` names `/induce` Narrow as written; whether that
+    move still exists there is an open question of this contract. -/
+def PartitionVerdict.route : PartitionVerdict → Option String
+  | .split => some "/conduct decompose-recovery recipe"
+  | .trim  => some "/induce Narrow"
+  | .hold  => none
+
+/-- **Your judgment**: the partition reading, or `none` with its missing basis reported. -/
+axiom partition : (c : Context P) → Option (PartitionReading c)
+
+def PartitionScoped (c : Context P) : Prop := (partition c).isSome → selfGrounding c
+
+def partitionRoute {c : Context P} (r : PartitionReading c) : Option String := r.verdict.route
+
+/-- **Your judgment**: the latest utterance replaces a committed domain — a different question,
+    not an advance of this one. The domain pair is committed once a mapping has been constructed
+    against it; before that, a reframe may replace either domain and settlement starts again. -/
+axiom Supersedes : Context P → Prop
+
+/-- **Your judgment**: an earlier dependency still needs revision and no evidence move this
+    activation can make remains to bring it up to date. -/
+axiom PendingRevision : Context P → Prop
+
+/-- **Your judgment**: what mapping licenses is uncertain here, with a target account in play. -/
+axiom Uncertain : Context P → Prop
+
+/-- **Your count**, read from the record: construction or fit passes run in this activation. -/
+axiom reconstructions : Context P → Nat
+
+/-- **Your judgment**: the pending request needs another construction or fit pass. -/
+axiom NeedsReconstruction : Context P → Prop
+
+def maxReconstructions : Nat := 3
+
+inductive InconclusiveReason | cap | openEvidence | emergent (why : String)
+
+/-- Where an activation stands after a pass. Every close but `zeroGap` and `focusGate` carries
+    `R'`: the verdicts over `K` with their grounds and limits, every fit claim's warrant, and
+    every unmet check with its scope and reach or the absence of one — under self-grounding,
+    also the partition reading and its routing. -/
+inductive Report (c : Context P)
+  /-- nothing uncertain: the finding with its reasoning; `R` proceeds unchanged -/
+  | zeroGap
+  /-- the focus gate is presented and held -/
+  | focusGate
+  /-- `MappingAssessment`: every intended inference Licensed or Blocked with its grounds;
+      not an endorsement of the mapping -/
+  | assessment
+  | inconclusive (why : InconclusiveReason)
+  /-- the question changed; evidence crosses as context, verdicts do not -/
+  | superseded
+
+/-! ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
 Priority: explicit_arg > current_output > most_recent_output
+  /ground "text"    → R = "text"
+  /ground (alone)   → R = the most recent relevant output in the session, the AI's or the user's
+  "ground this..."  → R = the text currently under discussion
+  "does this abstraction hold across its cases?" → R = a candidate abstraction and the
+    instances it claims to subsume → self-grounding
+With no relevant text, ask for a grounding target before the first pass.
+-/
 
-/ground "text"                → R = "text"
-/ground (alone)               → R = most recent relevant output in current session (AI or user)
-"ground this..."              → R = text currently under discussion
-"does this abstraction hold across its cases?" → R = a candidate fused abstraction + the instances it claims to subsume → self-grounding (Sₐ = the abstraction, Sₜ = its own members)
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else; every reading above is taken from it.
+-/
 
-If no relevant text exists: pause activation and request a grounding target before Phase 0.
+abbrev Mode (P : Type) := Context P
 
-── PHASE TRANSITIONS ──
-Phase 0: R → Detect(R) → uncertain? ∧ classify self_grounding(Sₐ, Sₜ)   -- mapping uncertainty checkpoint (silent); also recognize the self-grounding case (a located abstraction vs its OWN instances) — distinct from colimit route-away (locator absent → /induce)
-       [¬uncertain] Qs(zero_gap_finding + reopen affordance) → Stop → ZeroGapReading   -- zero-signal (`Zero-gap surfacing`): Uptake(k) → Λ.zero_gap_confirmed := true, deactivate, then hand k back to the enclosing interaction where it carries one (mapping trivially established; the flag is what later identifies this as convergence rather than an unstarted run) | Reopen(q) → uncertain := true, reopen_seed := q, proceed to Phase 1 | Explore(u) → answer u from the scan's basis, change no state, and re-present the finding. The surface does not render constructor labels and silence accepts nothing [Tool]
-Phase 1: uncertain → (Sₐ, Sₜ) → derive_focus_candidates(Sₐ, Sₜ) → candidates → settle_focus(candidates, R, context) → φₚ → [focus_settled(φₚ) ∧ φₚ ∉ Λ.refuted_focuses: FocusReadback(φₚ) → φ' := φₚ | ¬focus_settled(φₚ) ∨ φₚ ∈ Λ.refuted_focuses: Qc(candidates) → Stop → FocusAnswer → (Select(φₛ): φ' := φₛ | Reframe(d): [¬pair_committed(Λ): (Sₐ, Sₜ) := decompose(R, d, context) ; self_grounding := self_grounding(Sₐ, Sₜ) → re-enter derive_focus_candidates(Sₐ, Sₜ, d) | pair_committed(Λ) ∧ d replaces Sₐ or Sₜ: Λ.superseded_by := Some(d) ; R' := annotate(R, superseded_mapping_status, superseded_residual(Λ)) → DomainSuperseded | pair_committed(Λ) ∧ ¬replaces: re-enter derive_focus_candidates(Sₐ, Sₜ, d)], recheck focus_settled)] → [Λ.focus = Some(φ) ∧ φ' ≠ φ: invalidate_derived(Λ)] → [focus_change_requires_disposition(Λ, φ'): surface(Λ.focus, φ', affected(Λ)) → Qc(focus_change) → Stop → FocusChangeAnswer → (ParkPriorJudgments: retain(affected(Λ)) | RevalidatePriorJudgments: return_pending(affected(Λ)))] → Λ.focus := φ' → [attempts_exhausted(Λ): D_f := declare_exhaustion_disposition(Λ) ; R' := annotate(R, unresolved_mapping_status, exhaustion_residual(Λ)) → AttemptExhausted] → attempts := attempts + 1 → Map(Sₐ, Sₜ, φ') → M → [M ≠ ∅: carry_over(M) | M = ∅: Λ.mappings := ∅] → AssessFit(M, Sₐ, Sₜ) → F → [reopen_seed = Some(q): F.open := F.open ∪ {q}] → Λ.fit_map := Some(F) → [self_grounding: PartitionRead(F, Sₜ) → Λ.partition_reading := Some(partition_reading(F, Sₜ))] → [M = ∅: surface(no correspondence constructed along φ', F.missing) → Λ.refuted_focuses := Λ.refuted_focuses ∪ {φ'} ; Λ.partition_reading := None → [attempts_exhausted(Λ): D_f := declare_exhaustion_disposition(Λ) ; R' := annotate(R, unresolved_mapping_status, exhaustion_residual(Λ)) → AttemptExhausted | ¬attempts_exhausted(Λ): derive_focus_candidates(Sₐ, Sₜ, F.missing) → re-enter focus settlement] | M ≠ ∅ ∧ Λ.remaining = ∅: declare_fit_disposition(F) → D_f ; R' := annotate(R, mapping_status, D_f) ; [self_grounding: R' carries PartitionReading + routing] → terminalize, skipping Phase 2 | M ≠ ∅ ∧ Λ.remaining ≠ ∅: proceed to Phase 2] [Tool]
-Phase 2: (M, F) → Λ.reopen_seed := None → Draft(M, F, Sₜ, φ, standing(Λ)) → D → Λ.draft := Some(D) → [surface Λ.focus as pre-surface relay: the settled comparison focus D is scoped by] → [self_grounding: surface PartitionReading + routing recommendation as pre-surface relay] → Qs(D, standing_affordances) → Stop → UserUtterance → interpret_turn(user_utterance, D, context) → T  -- WHOLE repairable draft + natural-turn reading. Qs states that carrying the draft forward OR affirming it outright establishes uptake, a direct correction repairs named parts, an explicit withdrawal removes named parts, and any question or other non-dispositive turn preserves the draft without disposition; it never renders `Uptake/Repair/Withdraw/Explore` as a response menu, and it states the reading premise — this surface reads one turn as one disposition over the whole draft. If the utterance's reading is ambiguous, surface only the viable readings with their cited language and yield for disambiguation before Phase 3. If the utterance instead determinately carries different dispositions for different correspondences, it has departed the premise: read it as Explore (no standing changes), state the premise beside the departure, and re-present the draft — never force a branch, and never return the split to the user as a classification task. Silence carries Stop [Tool]
-Phase 3: T → integrate_turn(T, D, R, F) → (D_f, R') → [T = Uptake(k): newly_confirmed := Λ.remaining ; Λ.confirmed := Λ.confirmed ∪ newly_confirmed ; Λ.remaining := ∅ ; Λ.continuation := k | T = Repair(A, ground): reopen_targets(A) ; newly_confirmed := Λ.remaining \ A ; Λ.confirmed := Λ.confirmed ∪ newly_confirmed ; Λ.remaining := A ; invalidate_presentation(Λ)  -- the draft and the reading were both derived from a fit map this repair is about to rebuild, and Phase 1 recomputes them; leaving either would let an exhaustion exit report the mapping that is being replaced | T = Withdraw(A, reason): withdraw_targets(A) ; newly_confirmed := Λ.remaining ; Λ.confirmed := Λ.confirmed ∪ newly_confirmed ; Λ.remaining := ∅ | T = Explore(q): identity over confirmed, dismissed, remaining, validations, fit_map, continuation ; [q answerable from the current basis: draft unchanged | q requires evidence outside that basis or changes a correspondence: invalidate_presentation(Λ), since the draft and the partition reading both belong to a basis this answer leaves — the draft invariant would otherwise hold a stale draft, and a self-grounding run reaching the attempt cap before recomputation would render a stale partition and its routing] ; [q replaces Sₐ or Sₜ: Λ.superseded_by := Some(q) ; R' := annotate(R, superseded_mapping_status, superseded_residual(Λ)) → DomainSuperseded, nothing carried forward but the evidence as context]] → [T ≠ Explore(q): for each c ∈ (newly_confirmed ∪ withdrawn(T)): Λ.validations := Λ.validations ⊕ { correspondence: c, example: D.examples[c], answer: T, fit_label: fit_classification(F, c), residual_disposition: D_f, focus_snapshot: φ where Λ.focus = Some(φ) }] ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]
+def PassHolds (c : Context P) : Prop := ChecksExact c ∧ PartitionScoped c
 
-── LOOP ──
-After Phase 3: evaluate the natural-turn reading.
-If T = Uptake(k): every pending correspondence gains standing from the user's positive assent to the whole draft — carried forward as a premise, or affirmed outright; record each fit-label snapshot and D_f, terminalize, then hand k back to the enclosing interaction where the uptake carried one, and simply converge where it did not. Silence, non-contradiction alone, a question about the draft, and an unrelated turn never satisfy Uptake.
-If T = Repair(A, ground): the named targets lose any prior terminal standing, every unmentioned pending correspondence stands by the user's exception-scoped repair, the stated ground lands as TurnReading states (read off the record writer, not off this branch), and the mapping reconstructs from Phase 1. An utterance revising the comparison axis itself — relation, purpose, or the scopes within the committed domains — is not this form: it is carried by Explore into Phase 1 below, where focus settlement and its change checkpoint resolve the fate of judgments standing under the outgoing focus before Λ.focus := φ'. An utterance replacing Sₐ or Sₜ is not this form either: after commitment it does not re-enter Phase 1 at all but leaves as DomainSuperseded, the question having changed rather than advanced. Reaching a draft means a Map has run, so from this surface that is always the case.
-If T = Withdraw(A, reason): the named correspondences become dismissed with the reason recorded, every unmentioned pending correspondence stands, and the run terminalizes when the fit disposition is declared.
-If T = Explore(u): when u concerns the draft, answer from the current basis and re-present the same repairable draft with all standing unchanged.; where answering requires evidence outside that basis or the answer changes a correspondence, run invalidate_presentation(Λ) and carry u into Phase 1 evidence loading and reconstruction instead. When u REPLACES Sₐ or Sₜ, this activation's question is superseded rather than advanced: terminate as DomainSuperseded, reporting the correspondences already addressed and declaring the rest superseded, and seed a fresh Analogia activation from u and the accumulated context. The evidence already gathered travels as context; attempts, refuted_focuses, fit evidence, the draft and every standing do not — a correspondence confirmed against one pair is not confirmed against another, and that is what the seam exists to stop. When u is off-axis, preserve the active draft and its next action as resumption cues while the enclosing session handles u, then resume Phase 2. Explore itself never establishes standing.
-Max 3 mapping attempts per ACTIVATION — counts Map/AssessFit reconstruction cycles: attempts := 0 on activation and never refunded, which is what makes the loop bounded rather than bounded-per-basis. attempts := attempts + 1 immediately before each Map/AssessFit reconstruction, after the focus checkpoints have resolved — and that one increment site is where the cap is tested, so every path reaching a reconstruction passes the same admission check. Neither focus checkpoint (FocusReadback, FocusSelector, or the focus-change disposition) consumes an attempt, and a focus change leaves the count alone — what the cap counts is reconstructions, not revisions. Once pair_committed(Λ) the domain pair cannot change, so no path refunds or re-bases this count — and before commitment there is nothing to refund, a re-decomposing Reframe running while attempts is still 0; a run that would need a different pair leaves as DomainSuperseded and the fresh activation starts its own budget at 0.
-Continue until one of the following, in this precedence: terminalized(R', F, D_f) → ValidatedMapping ; domain_superseded(Λ) → DomainSuperseded ; ¬terminalized(R', F, D_f) ∧ attempts_exhausted(Λ) → AttemptExhausted. The superseded exit sits ahead of exhaustion because it says the question changed, which the budget for the old question has no bearing on — a run whose pair is being replaced must not be reported as having run out of attempts on a question it is no longer asking.
-On attempts exhausted: present a partial transformation trace over already-addressed correspondences, with remaining correspondences declared as unresolved residual, terminating as AttemptExhausted rather than ValidatedMapping.
-Convergence evidence: At terminalized(R', F, D_f), present transformation trace — for each record in Λ.validations, in close order and grouped under its correspondence so a correspondence judged more than once shows its history rather than only its last state, show (record.focus_snapshot → MappingUncertain(record.example.mapping_trace) → record.fit_label → record.answer), each standing attributed to the comparison focus it was made under and the natural-turn reading that established it; the committed domain pair is stated once for the run, every record sharing it. For Repair and Withdraw, distinguish the named target correspondences from those that stood by exception so the trace never reports unmentioned mappings as explicitly confirmed. When every record shares one focus_snapshot, state it once as the common focus; when a focus change was dispositioned mid-run, the differing snapshots stay visible per record. When D_f.status = Bounded, append the bounded residual mapping uncertainty from D_f.declaration and briefly invite the user to supply a missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. When self_grounding holds, append the PartitionReading as relay: the verdict (Split / Trim / Hold), the full Sₜ partition when verdict = Split (rival cells, core cell, trim outliers), and the routing recommendation (Split → the /conduct decompose-recovery recipe; Trim → /induce Narrow; Hold → no partition action) — a relay annotation, not a new gate. Mark a record whose correspondence is not in the CURRENT Λ.mappings as superseded, so a judgment about something the mapping no longer holds is not read as standing. The mark reports current membership and not the run's drop history: a correspondence dropped by one reconstruction and reintroduced by a later one is present again and its records carry no mark, which is the reading membership supports and the whole of what this line claims. Convergence is demonstrated, not asserted.
+/-! ── PHASE TRANSITIONS ──
+A pass surfaces from a context in which `PassHolds`; the focus gate alone holds the turn.
+-/
 
-── CONVERGENCE ──
-terminalized(R', F, D_f): see TYPES (all_addressed ∧ fit_disposition_declared)
+/-- The focus gate holds: something is uncertain, and an axis is unsettled or `K` was narrowed
+    without basis. Nothing is constructed, checked, or collected while it holds. -/
+def FocusHeld (c : Context P) : Prop := Uncertain c ∧ (¬ focusSettled c ∨ UnsupportedNarrowing c)
 
-── TOOL GROUNDING ──
+open Classical in
+noncomputable def report (c : Context P) : Report c :=
+  if ¬ Uncertain c then .zeroGap
+  else if ¬ focusSettled c ∨ UnsupportedNarrowing c then .focusGate
+  else if reconstructions c ≥ maxReconstructions ∧ NeedsReconstruction c then .inconclusive .cap
+  else if PendingRevision c then .inconclusive .openEvidence
+  else if converged c then .assessment
+  else .inconclusive .openEvidence
+
+/-- **Your evidence moves** for a pass: what the reachable checks returned — artifact reads,
+    searches, fetches, and runs — each an evidence turn. -/
+axiom observe : Context P → List (Evidence P)
+
+def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
+
+open Classical in
+/-- `respond` is your surface for the pass. -/
+noncomputable def ground (respond : Context P → Response P) :
+    (c : Context P) → List (Utterance P) → (c' : Context P) × Report c'
+  | c, []      => ⟨c, report c⟩
+  | c, u :: us =>
+    let c₁ := fuse c u
+    if Supersedes c₁ then ⟨c₁, .superseded⟩
+    else
+      let c₂ := if FocusHeld c₁ then c₁ else collect c₁
+      ground respond (c₂ ++ [(respond c₂).val]) us
+
+/-! ── LOOP ──
+A change to the intended inferences alone leaves the mapping as it was. Within a pass,
+re-entering an earlier step needs evidence progress: a ground in the context that the affected
+step has not yet read, or a still-untried reachable evidence move expected to change its
+assessment. Every construction or fit-assessment pass spends one of `maxReconstructions`,
+including a fit-only reassessment that keeps the mapping, and none is refunded; a K-only or
+checks-only reassessment, focus settlement, and read-back spend none. An empty mapping is
+assessed like any other. Preference changes no warrant or verdict.
+-/
+
+/-!
+With no new evidence, collection leaves the context, and so every reading, unchanged.
+theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c
+
+A settlement that narrows `K` without basis holds at the focus gate rather than reading the
+unchanged context again.
+theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
+    (hn : UnsupportedNarrowing c) : report c = .focusGate
+
+While the focus gate holds, a later utterance collects no evidence.
+theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Supersedes (fuse c u))
+    (hf : FocusHeld (fuse c u)) :
+    ground respond c (u :: us) = ground respond (fuse c u ++ [(respond (fuse c u)).val]) us
+-/
+
+/-! ── CONVERGENCE ──
+converged(K): every intended inference carries a Licensed or a Blocked verdict with its grounds.
+Convergence evidence: for each k in K, one pair (MappingUncertain(k) → verdict(k)) showing the
+correspondences it rode on, the warrant each carried (`Check.warrant`), and, for Licensed, the
+limits. For each
+checked fit claim, its label, warrant, and scope beside the grounds, the stated defeater, the
+reach or its absence, and whether the check was unmet, survived, or failed. An unmet check is
+reported as unmet, never as a pass; a claim whose warrant is open is named open rather than
+weakly supported. Preference is reported apart from warrant and never as a reason. State the
+committed domain pair, the comparison focus, and K with its basis, carrying any read-back
+change to K and distinguishing questions removed from scope from questions answered. Under
+self-grounding, append the supported partition reading with its grounds and routing, or why
+its basis remains unresolved. An Inconclusive close keeps the same trace with every
+Undetermined verdict naming what is missing; at the cap, the requested revision is named as
+unassessed and any retained assessment is labelled by its earlier focus and K. Convergence is
+demonstrated, not asserted.
+-/
+
+/-!
+theorem assessment_converged (c : Context P) (h : report c = .assessment) :
+    focusSettled c ∧ converged c
+
+The comparison purpose is filled only by the user's own words.
+theorem purpose_by_person {c : Context P} {s : Cite c}
+    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person
+
+A replacement of a committed domain closes the activation at once.
+theorem superseded_first (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : Supersedes (fuse c u)) :
+    ground respond c (u :: us) = ⟨fuse c u, .superseded⟩
+-/
+
+/-! ── TOOL GROUNDING ── -/
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Detect  (sense)     → Internal analysis (no external tool; also classify self_grounding — a located abstraction vs its own instances, distinct from colimit route-away)
-Phase 0 ZeroGapRead (constitution) → present (conditional: ¬uncertain(mapping); zero-gap finding + reasoning + standing reopen affordance; uptake accepts — carried forward or affirmed outright — a named structural question reopens, and any other non-dispositive turn is answered against the scan's basis and the finding re-presented with no state changed. Constructor labels are not rendered, the reading premise is stated, and silence accepts nothing — `Zero-gap surfacing`)
-Phase 1 FocusDerive (sense) → Internal analysis (no external tool; derive_focus_candidates over Sₐ, Sₜ, R, context — surfaces plausible MappingFocus candidates before any correspondence is constructed)
-Phase 1 FocusReadback (extension) → TextPresent+Proceed (conditional: focus_settled(φₚ) already holds — checked PER FIELD across all four axes, each either independently determined from explicit user language or a citable standing rule, or forced to a single citable value — AND φₚ ∉ Λ.refuted_focuses; relay φₚ, binding φ' := φₚ, no gate)
-Phase 1 FocusSelector (constitution) → present (conditional: ¬focus_settled(φₚ) ∨ φₚ ∈ Λ.refuted_focuses; candidate MappingFocus options — Select(MappingFocus) or Reframe(description); fires once per activation for the INITIAL focus selection before Map, where a Reframe answer may still re-decompose the domain pair because nothing yet stands on it (¬pair_committed); the EmptyConstruction retry re-enters settlement and fires it again for a refuted focus — a distinct trigger, not a second initial selection, so the once-per-activation cardinality scopes the initial selection alone; the separate focus-CHANGE disposition (Phase 1 FocusChange below) fires conditionally, whenever a revision would strand judgments already terminal under the outgoing focus)
-Phase 1 FocusStore (track) → Internal state update (Λ.focus := φ' once settled via FocusReadback or FocusSelector, and only after any focus-change disposition has resolved. This commit runs on every settlement that COMPLETES, the first included, where Λ.focus is still None. A post-commitment Reframe replacing a domain does not complete one — it leaves as DomainSuperseded before reaching here — which is the only way settlement ends without this commit. The domain pair is committed at the first Map and does not move inside an activation, so this commit is the only basis transition there is and the disposition guard reads the focus alone)
-Phase 1 FocusChange (constitution) → present (conditional: focus_change_requires_disposition(Λ, φ') — the outgoing focus, the successor focus, and the affected already-terminal judgments as pre-gate relay. ParkPriorJudgments / RevalidatePriorJudgments)
-Phase 1 FocusChangeApply (track) → Internal state update (ParkPriorJudgments → identity over confirmed/dismissed/remaining; RevalidatePriorJudgments → return_pending(affected(Λ)))
-Phase 1 Map/AssessFit (observe) → artifact read, artifact search (stored knowledge extraction: domain structure and fit analysis, scoped by the settled focus φ); external fetch (conditional: external domain knowledge)
-Phase 1        (track)      → Internal state update (conditional: Λ.reopen_seed = Some(q) — fold q into F.open at fit-map assembly. The seed is cleared at Phase 2 entry, not here)
-Phase 1 EmptyConstruction (extension) → TextPresent+Proceed (conditional: M = ∅ — relay that no correspondence was constructed along φ', citing F.missing as the basis; add φ' to Λ.refuted_focuses — keyed by the focus alone, the pair being fixed for the activation — clear Λ.partition_reading, seed candidate derivation with F.missing, then test attempts_exhausted(Λ) and either exit as AttemptExhausted or re-enter focus settlement)
-Phase 1 PartitionRead (sense) → Internal analysis (no external tool; DERIVED split-vs-trim reading over F's misfit instances; self-grounding case ONLY; verdict = Split → route to the /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; basis cited from F; surfaced as pre-surface relay text within Phase 2 Qs, no separate gate)
-Phase 1 PartitionStore (track) → Internal state update (conditional: self_grounding — the Phase 1 store; None when ¬self_grounding or when invalidate_derived fires)
-Phase 2 Draft    (sense)             → Internal analysis (no external tool; construct the whole MappingDraft with fit label, evidence, example, and standing for every current correspondence)
-Phase 2 Qs       (constitution)      → present (mandatory; the whole repairable draft + visible affordances to continue from it, directly repair or withdraw named parts, or continue dialogue without disposition; no response-constructor menu, and the reading premise stated so a departure from it is recognizable at the surface. Yield, then interpret the natural user turn; an ambiguous reading opens a narrow clarification over only the viable readings, while a turn determinately carrying different dispositions for different correspondences reads as Explore with the premise restated — no branch is forced and the split is never returned to the user to make. An off-axis turn preserves resumption cues and returns to this surface after enclosing-session handling. Silence accepts nothing)
-Phase 3 TurnApply (track)            → Internal state update (Uptake confirms every pending correspondence and preserves its continuation for handoff; Repair reopens named targets, confirms unmentioned pending correspondences by exception, and reconstructs; Withdraw dismisses named targets and confirms unmentioned pending correspondences; Explore preserves all standing and either re-presents or returns to evidence loading when its answer changes the basis)
-converge     (extension)       → TextPresent+Proceed (convergence evidence trace incl. PartitionReading relay when self_grounding; proceed with validated mapping)
-exhausted    (extension)       → TextPresent+Proceed (conditional: attempts_exhausted(Λ); partial transformation trace + unresolved-correspondence declaration; terminate as AttemptExhausted, not ValidatedMapping)
-superseded   (extension)       → TextPresent+Proceed (conditional: domain_superseded(Λ) — an Explore utterance or a post-commitment Reframe description replaced Sₐ or Sₜ — report the correspondences already addressed and declare the rest superseded, terminate as DomainSuperseded rather than ValidatedMapping, and seed a fresh Analogia activation from that utterance and the accumulated context; evidence crosses as context, standing does not)
-seam         (extension)       → TextPresent+Proceed (fires at deactivation/handoff: an Uptake that carried a continuation hands it back to the enclosing interaction after convergence, and one that did not simply converges; otherwise a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — the self-grounding PartitionReading routing (Split → the /conduct decompose-recovery recipe; Trim → /induce Narrow) — settles the next move. Proceed directly, citing the settling source; every genuine Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
-── MODE STATE ──
-Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
-      focus: Option(MappingFocus),   -- the settled comparison focus Map consumes; None before the Phase 1 focus checkpoint resolves it
-      zero_gap_confirmed: Bool,   -- set when the Phase 0 zero-gap surface receives Uptake, whether or not it carried a continuation; the provenance that identifies trivial convergence, since the state it leaves behind is indistinguishable from a run not yet started
-      refuted_focuses: Set(MappingFocus),   -- focus values that already constructed an empty mapping against this activation's committed domain pair; a refuted entry never relays via FocusReadback, so the retry reaches a different comparison rather than replaying the failure. The pair is fixed for the activation, so it is not part of the key — every entry stands against the same pair. Cleared on activation ONLY, so a Reframe cycling back to an earlier focus cannot replay a comparison already shown to produce nothing
-      self_grounding: Bool, partition_reading: Option(PartitionReading),
-      reopen_seed: Option(StructuralQuestion),   -- the zero-gap Reopen(q) question the Phase 0 scan missed — the one entry Phase 1 cannot be assumed to re-derive; folded into F.open at every Phase 1 fit-map assembly and cleared only at Phase 2 entry, so a construction that comes back empty and retries does not lose it
-      mappings: Set(Correspondence), confirmed: Set(Correspondence),
-      dismissed: Set(Correspondence), remaining: Set(Correspondence),
-      fit_map: Option(F), draft: Option(MappingDraft), continuation: Option(Continuation),   -- fit_map is None until this activation's Map/AssessFit has run; draft is Some only after Phase 2 assembles the whole repairable surface for that fit map. Both are cleared when the focus changes so no exit can report evidence or a draft belonging to a focus already left. continuation is Some only after an Uptake that actually carried one forward — an outright affirmation is a full uptake with None here — and is handed back after convergence rather than swallowed as a validation token
-      superseded_by: Option(UserUtterance ∪ description),   -- whatever named the replacement, from either route: the Explore utterance at the draft surface, or the Reframe description at the Phase 1 selector. Set once and never cleared: it is what the superseded exit reports and what seeds the successor activation. None on every other path, which is what keeps domain_superseded(Λ) false there
-      validations: List<ValidationRecord>,   -- APPEND-ONLY, in close order. A record is written when a correspondence becomes terminal and nothing removes one: no terminal condition reads this list (all_addressed reads Λ.mappings and the standing sets), so a deletion could only serve trace tidiness — and tidying it is what forced the contract to carve every provenance claim around a missing record. One correspondence may therefore hold several records, and its CURRENT standing is read from confirmed/dismissed rather than from which records survive
-      attempts: Nat, active: Bool }
--- Invariant: mappings = confirmed ∪ dismissed ∪ remaining (pairwise disjoint) — holds in steady state, suspended across the reconstruction window that opens whenever mappings is emptied without the standing sets being rebuilt — invalidate_derived at a focus change just ahead of the focus-change checkpoint, and the empty-construction branch that sets Λ.mappings := ∅ after a Map that built nothing. It clears mappings with the focus that produced it while remaining, confirmed and dismissed all keep standing — whether the judgments survive a focus change is the focus-change checkpoint's to decide, not the transition's, and the un-judged remainder is what the exits inside this window report. carry_over(M) closes the window at the next non-empty Map.
--- Invariant: Λ.focus is set (via FocusReadback relay or the FocusSelector gate's FocusAnswer) before Map(Sₐ, Sₜ, φ) runs in Phase 1 — Map never runs against Λ.focus = None. An Explore utterance may revise the comparison focus without overwriting Λ.focus immediately: the stored focus is preserved until the Phase 1 focus-change checkpoint has resolved the fate of any terminal judgments standing under it, and only then does Λ.focus := φ' run. The domain pair admits no such transition — it is committed at the first Map and an utterance replacing it leaves as DomainSuperseded — so the focus commit is the only way Λ.focus moves
--- Invariant: fit_partition(F, M)  -- PartitionReading is SECOND-ORDER over misfit instances, not a partition of M, so it does not enter this invariant
--- Invariant: (Sₐ, Sₜ) is settled by the first Map and does not change thereafter. Settling is a WINDOW, not an instant: while attempts is still 0 a Reframe may re-decompose freely, and admission to the first Map closes it. Λ.attempts, Λ.refuted_focuses, Λ.fit_map, Λ.draft and every standing set therefore answer for ONE mapping question throughout, which is what lets the cap bound the loop: a run visiting a second pair would have an unbounded reconstruction total, so a domain replacement terminates as DomainSuperseded and its successor starts a fresh budget rather than continuing this one
--- Invariant: draft = Some(D) ⟹ fit_map = Some(D.fit_map) ∧ D.mappings = mappings ∧ focus = Some(D.focus)  -- a repairable draft belongs only to the current assessed basis; every transition that leaves that basis clears draft before reconstruction
--- Invariant (always holds): partition_reading = Some(PartitionReading) ⟹ self_grounding. Steady-state converse (after Phase 1 computes the reading for the current F): self_grounding ⟹ partition_reading = Some(...) with verdict ∈ {Split, Trim, Hold}. Before Phase 1 computes it — Phase 0, or a Phase 1 re-entry via Repair until recompute — partition_reading = None even under self_grounding (Pending). So None means ¬self_grounding OR not-yet-computed-for-current-F; the verdict Hold (no-misfit) stays a distinct value, never conflated with the Option None
+inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
-── COMPOSITION ──
+inductive Op | detect | zeroGapRelay | focusDerive | focusReadback | focusSelector
+             | inferenceSettle | inferenceReadback | mapAssessFit | checkRead | runChecks
+             | warrantRead | judge | partitionRead | surface | converge | inconclusive
+             | superseded | seam
+
+def grounding : Op → Annot × String
+  | .detect            => (.sense, "Internal analysis: licensing uncertainty and whether self-grounding holds")
+  | .zeroGapRelay      => (.extension, "TextPresent+Proceed: when nothing is uncertain, the finding with its reasoning; proceed with R unchanged")
+  | .focusDerive       => (.sense, "Internal analysis: MappingFocus candidates and each axis's standing, before any correspondence is constructed")
+  | .focusReadback     => (.extension, "TextPresent+Proceed: when every axis is settled, relay the focus with the citation that settles each axis")
+  | .focusSelector     => (.constitution, "present: when an axis is unsettled or K was narrowed without basis, the candidate foci with their consequences visible before choice, including the committed-domain replacement exit")
+  | .inferenceSettle   => (.sense, "Internal analysis: K from R, the settled purpose, and the context")
+  | .inferenceReadback => (.extension, "TextPresent+Proceed: K and its basis beside the settled focus, with what a revision added, removed, or reformulated; no approval required")
+  | .mapAssessFit      => (.observe, "artifact read, artifact search, external fetch (conditional): construct correspondences along the focus and assert their fit")
+  | .checkRead         => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, defeater, and reach")
+  | .runChecks         => (.observe, "artifact read, artifact search, external fetch, environment run: the reachable checks, including exercising an artifact whose behavior the claim turns on; results enter the context as observations")
+  | .warrantRead       => (.sense, "Internal analysis: each claim's warrant read off its check")
+  | .judge             => (.sense, "Internal analysis: per inference, Licensed with limits, Blocked, or Undetermined with what is missing")
+  | .partitionRead     => (.sense, "Internal analysis: under self-grounding, a supported partition or its missing basis; no separate gate")
+  | .surface           => (.extension, "TextPresent+Proceed: the assessment with its trace and what a later turn would change; no verdict answer is required")
+  | .converge          => (.extension, "TextPresent+Proceed: when converged, the convergence evidence trace; proceed with the assessment")
+  | .inconclusive      => (.extension, "TextPresent+Proceed: the same trace with every Undetermined verdict naming what is missing, every unmet check with its reach, and why the run closed")
+  | .superseded        => (.extension, "TextPresent+Proceed: report what was assessed, declare the question superseded, and seed a fresh activation; evidence crosses as context, verdicts do not")
+  | .seam              => (.extension, "TextPresent+Proceed: at a user-declared chain or a declared edge (the partition route partitionRoute names, or remaining checks all user-held to /inquire), proceed citing the settling source")
+
+/-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
+-/
+
+end
+
+end Analogia
 ```
 
 ## Mode Activation
@@ -222,42 +523,53 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 
 ### Activation heuristics and exceptions
 
-Treat an abstract framework applied across domains, a request to make an abstraction concrete, a possible structural mismatch, or a located abstraction tested against its own members as mapping-uncertainty signals. Prior-session recall indices may seed domain decomposition; they do not settle a constitutive judgment.
+Activate where a target account is already in play and what the mapping licenses about it is open: an abstract framework being applied to a concrete case, a possible structural mismatch, or a located abstraction tested against its own members. Prior-session recall indices may seed domain decomposition; they do not settle a constitutive judgment.
 
-Skip AI-guided activation when the mapping is already established in the current context, the output is purely concrete, or no abstract framework is being applied. Route an unlocated, merely sensed essence over accumulated instances to `/induce`; retain a located abstraction tested against its own members as self-grounding. A request for commitment futures routes elsewhere when no faithful familiar-domain mapping exists. Framework selection and factual context insufficiency remain their own primary deficits rather than mapping validation.
+The reader's first encounter with either domain is a different deficit. Where the target account is not yet in play — where what is wanted is to come to hold an account rather than to audit one — that is explanation, and it hands off to a capability that explains the unfamiliar domain; this protocol stops there rather than teaching the domain it was invoked to audit. Absence of evidence that an account is in play establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
+
+Skip AI-guided activation when what the mapping licenses is already settled in context, the output is purely concrete, or no abstract framework is being applied. Route an unlocated, merely sensed essence over accumulated instances to `/induce`; retain a located abstraction tested against its own members as self-grounding. Framework selection and factual context insufficiency remain their own primary deficits.
 
 ### Evidence loading
 
-Read code, configuration, documentation, and other available artifacts when the target domain is recorded there. When the relevant source or target structure exists primarily in external APIs, standards, scholarship, or industry material, fetch that evidence and keep its source address visible in the mapping trace.
+Read code, configuration, documentation, and other available artifacts when the target domain is recorded there. When the relevant source or target structure exists primarily in external APIs, standards, scholarship, or industry material, fetch that evidence and keep its source address visible in the trace.
+
+Where a claim turns on what an artifact does rather than on what it says about itself, exercise it over the case that separates the readings and cite the result.
 
 ## Protocol
 
 ### User-facing realization
 
-Present the whole current mapping draft in everyday language: the settled mapping focus; every abstract↔concrete correspondence with its fit judgment, evidence, and one concrete scenario; and any mismatch or open fact that could change the mapping. Show which correspondences already stand and which remain pending, so a repair can name an exception against a visible whole rather than forcing serial triage.
+Before assessing, read back the intended conclusions beside the comparison focus and cite the request or settled purpose they come from. When that question changes, show what was added, removed or reformulated and why; a removed unanswered question is outside the revised scope, not resolved. At the focus gate, show each option's consequence before asking: a reframe within the committed pair revises that comparison, while replacing a committed domain ends this audit and starts a new question.
 
-For self-grounding, render the derived partition reading beside the mapping as relay evidence. A split names every rival cell, the genuinely fitting core, and all unclustered outliers so no member disappears; a trim distinguishes scattered removal from one-cell reorientation; a hold states that the members preserve the abstraction. Keep this reading outside the validation question.
+Present the whole assessment in everyday language: the comparison focus; what the mapping is being asked to license; every correspondence with its fit claim, one concrete scenario, and what actually warrants that claim; and for each intended inference, whether it holds, is blocked, or is undetermined, with how far it reaches.
 
-Then state the premise this surface reads by — one turn is taken as one decision about the whole draft — and the standing affordances, and yield without rendering response constructors as a menu. A next move that actually uses the draft as a premise establishes uptake, and so does saying outright that it is right; a direct correction repairs the named correspondence(s); an explicit withdrawal removes the named correspondence(s); and any question or other non-dispositive turn leaves every standing set unchanged. If the turn instead says one of the two domains is the wrong one, say plainly that this ends the current mapping question rather than adjusting it — what was compared no longer holds once a side is replaced — and start the new one from what the user just said, carrying the evidence already gathered but none of what was settled. State that unmentioned correspondences stand when the user names repair or withdrawal exceptions. Silence and mere non-contradiction accept nothing. When one turn asks for different things about different correspondences, it falls outside that premise: nothing is recorded either way, the premise is said plainly beside what was heard, and the draft is put back — the turn is never split by guesswork, and the user is never asked to sort their own sentence into categories. When the mapping exposes a genuine domain decision with materially different futures, present those domain alternatives and implications at that point rather than asking the user to classify their response to the draft.
+Beside each claim that matters, state the scope its grounds were checked within, what would change it, and who can reach that evidence or why neither party currently can. Carry out the ones this session can reach before presenting, and put the ones only the user holds as the questions they are. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
-Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
+For self-grounding, render a partition only with the grounds supporting its full member allocation and grouping. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
+
+Then state what a later turn would change, and proceed without asking for a verdict. When a revision of the intended conclusions narrows them with no basis in the request or the settled purpose, do not re-read the same context: put the comparison focus to the user at the focus gate. Read all its determinate acts together; a changed purpose or intended conclusion reopens settlement and readback, retaining the mapping when only the intended conclusions changed, while evidence reopens the earliest affected assessment step. Evidence moves the assessment: a fact, a source, a counterexample, a result from running something. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption and withdrawal are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did. If the turn says one of the two domains is the wrong one, say plainly that this ends the current question rather than adjusting it, and start the new one from what was just said, carrying the evidence but none of the verdicts.
+
+Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing a focus gate requires placing evidence before its question and option-specific consequences inside the options.
 
 ### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Single obvious correspondence | Brief repairable draft and standing affordances |
-| Medium | Multiple or partial correspondences | Whole mapping, concrete evidence, and exception-ready standing |
-| Heavy | Complex transfer or structural mismatch | Domain decomposition, whole-draft instantiations, and bounded gaps |
+| Light | One inference, one obvious correspondence | Compact rendering of the same required assessment trace |
+| Medium | Several inferences or partial correspondences | Required assessment trace grouped by inference and bearing claim |
+| Heavy | Complex transfer or structural mismatch | Required assessment trace with expanded domain decomposition and instantiations |
 
 ## Rules
 
-- **Recognition over Recall**: Present structured alternatives with anticipatable futures only for a genuine domain decision. Keep the draft's turn-reading constructors internal and make repair, withdrawal, exploration, and uptake visible as standing affordances, so the user acts in their own language instead of recalling or selecting a meta-label.
-- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, standing, and next-move implication inside the whole draft. A question about the draft is exploration rather than a disposition; answer it without forcing the user to classify the turn, then preserve or re-present the current draft.
-- **Option-set relay test**: Present a single dominant trajectory as Extension. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
-- **Positive uptake only**: Interpret Uptake only on positive assent to the whole surfaced mapping — the user either carries it forward as a premise or affirms it outright. Silence, absence of objection, exploration, and unrelated continuation do not establish standing. Requiring a continuation is not what makes uptake positive: an outright affirmation is as positive as a use, and excluding it would put the draft back to a user who just confirmed it.
-- **Exception-scoped repair on a stated premise**: The surface declares the premise it reads by — one turn, one decision about the whole draft — rather than leaving it to be inferred from the forms. Under that premise a Repair or Withdraw utterance names the correspondence set it changes; unmentioned pending correspondences stand by that exception-scoped utterance, while a targeted correspondence is reopened or dismissed, its utterance landing as TurnReading states. Records are append-only either way, so reopening withdraws standing without erasing what was already judged. A turn that departs the premise is carried by the open, non-dispositive form and changes no standing, with the premise stated beside the departure — never resolved by forcing a form, and never handed back as a request to re-classify.
-- **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation.
-- **Self-grounding visibility**: Surface the full member partition and its fit basis before routing split to the `/conduct` decompose-recovery recipe or trim to `/induce`; Analogia supplies the partition evidence while the downstream checkpoint constitutes cell membership.
+- **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
+- **Convergence is over inferences, not correspondences**: Derive and read back what the mapping is being asked to license from the request and settled purpose before constructing or reassessing it, and read completion over those inferences. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it.
+- **Every bearing claim carries its own defeater**: For each fit claim an intended inference turns on, state what evidence, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
+- **Audit, not instruction**: This protocol takes a target account already in play. Where the reader does not yet hold one, the deficit is explanation and routes there; do not teach the domain under audit.
+- **Recognition over Recall**: Present structured alternatives with anticipatable futures only for a genuine domain decision. Keep the turn-reading constructors internal, so the reader acts in their own language rather than selecting a meta-label.
+- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question about the assessment is exploration; answer it without asking the reader to classify their own turn.
+- **Option-set relay test**: Relay a focus axis only where the user's words, a citable standing rule, or a source turn of the text under audit showing that one value is admissible settles it; the decomposition's own output settles nothing. The AI never supplies the comparison purpose: this audit closes on evidence, so no later utterance of the user's would cover a purpose the AI chose. A purpose the user's own words settle is read back like any settled axis; otherwise it is asked at the focus gate. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
+- **Bounded reach**: State the limits supported by the cited grounds and their checked scopes in the same breath as every Licensed verdict. A mapping presented without its breaking point produces confident wrong inference, which is the failure this protocol exists to catch.
+- **Self-grounding visibility**: Treat a case as self-grounding only where the source abstraction is located and its member instances are the target. Surface the full member partition and the grounds supporting it before routing split to the `/conduct` decompose-recovery recipe or trim to `/induce`. An unresolved basis carries no partition recommendation. Analogia supplies the partition evidence while the downstream checkpoint constitutes cell membership.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Zero-gap surfacing**: Present a zero-gap finding with its reasoning for user confirmation before deactivation.
+- **Zero-gap surfacing**: Present a zero-gap finding with its reasoning before deactivation.

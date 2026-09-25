@@ -32,3 +32,15 @@ docs/audit-delta-*.md
 .claude/skills/realize/results/
 .claude/skills/realize/.work/
 .claude/skills/realize/.codex/
+
+# Answers the advisory-channel harnesses record from a live run. Like the
+# /realize results above, each is a recorded observation rather than a derived
+# view — it carries the model version that answered and the moment it answered,
+# and it belongs to whoever ran it, not to the checkout.
+route/evals/recorded/
+route/evals/smoke-recorded/
+
+# Lean: Lake build output, and the Contract/Audit modules lean-contract.js
+# generates from each SKILL.md Lean block (the block is the source).
+.lake/
+lean/.contract/

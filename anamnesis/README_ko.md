@@ -44,7 +44,7 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 
 | 프로토콜 | 개시자 | 타입 시그니처 |
 |----------|--------|---------------|
-| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Anamnesis** | **AI-guided** | **`RecallAmbiguous → RecalledContext`** |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |

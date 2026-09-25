@@ -23,15 +23,15 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 | Direction | AI talks, user listens | AI verifies, user confirms |
 | Entry point | AI decides what to explain | User selects an intent-scented path |
 | Confirmation | Assumed after explanation | Verified through questions |
-| Progress | Undefined | Tracked via tasks |
+| Progress | Undefined | Each selected entry point is a task the user closes |
 
 ## Protocol Flow
 
 ```
 Phase 0: Orient       → Infer likely comprehension intents from the result and user signal
 Phase 1: Entry Point  → Present intent-scented paths, user selects (gate interaction)
-Phase 2: Ground       → Materialize artifact basis and create tasks (record)
-Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction + record update)
+Phase 2: Ground       → Materialize artifact basis; each selected entry point becomes a task
+Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction)
 ```
 
 ## When to Use
@@ -68,6 +68,7 @@ claude plugin install katalepsis@epistemic-protocols
 | **Scope** | User doesn't see full impact of changes |
 | **Sequence** | User doesn't understand execution order |
 | **Horizon** | A co-intended but unspoken edge of the current entry point the user could not name from within their own framing — surfaced only when evidence-bound, material, and unspoken (false-positive guarded) |
+| **Contradiction** | Two statements in the session that cannot both hold, each quoted where it stands — taken up by whose it is: one the user holds a side of asks first for their explanation, one inside the target is shown as a finding about it, one against an earlier AI explanation is the AI's to correct |
 | **Emergent** | Gap outside the canonical types, adapted to the specific comprehension deficit |
 
 ## Author

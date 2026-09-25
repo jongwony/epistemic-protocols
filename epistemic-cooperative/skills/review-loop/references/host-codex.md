@@ -11,6 +11,11 @@ process's authentication and advertised skills in that environment.
   matching invocation evidence, and launch the read-only review below. Confirm the
   selected `/code-review` implementation from the print-mode session's startup and
   skill expansion; a matching plugin display name alone leaves that identity open.
+- Writer (Phase 4): at apply-pass entry, resolve whether the running session
+  advertises a full-context fork of the driving conversation — one observed form
+  is a `spawn_agent` tool with `fork_turns: all`; another may be advertised. Where none
+  is advertised, or the spawn fails, the brief route applies with a fresh `codex exec`
+  child as its writer.
 
 ## Claude print-mode call
 

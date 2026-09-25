@@ -1,7 +1,8 @@
 #!/bin/bash
 # Install every core protocol plugin in the epistemic-protocols marketplace for
 # Claude Code. Utility plugins are opt-in — see SKIP_PLUGINS below.
-# Idempotent: safe to re-run when new plugins are added
+# Idempotent: a re-run adds new plugins and brings installed ones to the
+# marketplace's current version.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
@@ -30,6 +31,9 @@ command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found." >&2; ex
 
 echo "Adding marketplace..."
 claude plugin marketplace add "https://github.com/$REPO" < /dev/null 2>/dev/null || true
+# `add` leaves an existing clone at the commit it first fetched; `update`
+# brings it to the source's current head.
+claude plugin marketplace update "$MARKETPLACE" < /dev/null || true
 
 echo "Fetching plugin list..."
 plugins=$(curl -fsSL "$MANIFEST_URL" \
@@ -46,6 +50,8 @@ for p in $plugins; do
   fi
   if claude plugin install "$p@$MARKETPLACE" < /dev/null 2>/dev/null; then
     installed=$((installed + 1))
+    # Install leaves an already-installed plugin at its installed version.
+    claude plugin update "$p@$MARKETPLACE" < /dev/null 2>/dev/null || true
     # Install does not guarantee activation: a plugin that was already
     # installed and later disabled (via /plugin, or a project-scope
     # `enabledPlugins: false`) reports "already installed" and stays off.

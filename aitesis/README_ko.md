@@ -1,39 +1,39 @@
 # Aitesis — /inquire (αἴτησις)
 
-실행 전 맥락 부족 추론 (αἴτησις: 요청)
+AI가 스스로 닿을 수 있는 맥락은 다 모으고, 나머지는 사용자의 Unknown으로 돌려준다 (αἴτησις: 요청)
 
 > [English](./README.md)
 
 ## Aitesis란?
 
-그리스어 αἴτησις(요청)의 현대적 재해석 — **실행 전에 맥락 부족을 추론하고, 코드베이스 탐색으로 맥락을 수집하여 질문 품질을 높인 뒤, 남은 불확실성만 사용자에게 요청하는** 프로토콜.
+그리스어 αἴτησις(요청)의 현대적 재해석 — **AI가 스스로 닿을 수 있는 한계까지 맥락을 수집하고, 불확실성마다 어디까지 닿았고 왜 더 못 갔는지를 적고, 사용자만 풀 수 있는 것 — 또는 아직 아무도 모르는 것 — 을 사용자 자신의 Unknown으로 돌려주는** 프로토콜.
 
 ### 핵심 문제
 
-AI 시스템은 맥락이 불충분한 상태(`ContextInsufficient`)에서도 실행을 진행하는 경우가 많습니다 — 필요한 도메인 지식이 없거나, 암묵적 요구사항이 검증되지 않거나, 환경 의존성을 가정하거나, 범위가 모호할 때. 묵시적 가정은 낭비와 오류 누적으로 이어집니다.
+AI 시스템은 맥락이 불충분한 상태(`ContextInsufficient`)에서도 진행하는 경우가 많습니다 — 필요한 도메인 지식이 없거나, 암묵적 요구사항이 검증되지 않거나, 환경 의존성을 가정하거나, 범위가 모호할 때. 묵시적 가정은 낭비와 오류 누적으로 이어집니다. 그리고 사람은 자기 Unknown을 스스로 잘 보지 못합니다 — 그럴듯한 설명이 서면 탐색이 멈춥니다.
 
 ### 해결책
 
-**증거 > 추론 > 감지(Evidence over Inference over Detection)**: 두 경계를 가진 3단계 위계입니다. 실행 전에 AI는 고정 taxonomy로 감지하는 대신 맥락 부족을 추론하고(Inference > Detection), 코드베이스 탐색으로 맥락 신호를 수집하며 사실이 직접 관찰 가능할 때는 추론 대신 증거를 수집한 뒤(Evidence > Inference), 남은 불확실성을 구조화된 미니 선택지로 사용자에게 표면화합니다. Read-only evidence는 referent, source-kind, scope가 해당 claim을 권위화할 때만 claim을 해소합니다. 표적화된 요청을 통해 불충분한 맥락을 정보에 기반한 실행으로 변환합니다.
+**증거 > 추론 > 감지(Evidence over Inference over Detection)**: AI는 고정 taxonomy로 감지하는 대신 prospect가 열어둔 불확실성을 추론하고(Inference > Detection), 각 불확실성을 스스로 읽거나 돌릴 수 있는 모든 채널 — 코드베이스, 기록, 외부 출처, 이력, 관측 실행 — 로 밀어 추론 대신 증거를 모읍니다(Evidence > Inference). 항목의 수집은 AI가 닿을 수 있는 채널이 하나도 남지 않았을 때만 멈춥니다. 그때 각 항목은 네 상태 중 하나에 놓이고, 이유와 근거가 항목에 적힙니다: 증거로 **해소됨**; **잠정** — 발견은 있으나 근거가 모자란 지점을 AI가 스스로 선언한 것; **사용자의 Unknown** — 사용자만 풀 수 있거나 아직 아무도 모름; **탐지 전용** — 제기된 어떤 불확실성에도 답하지 않는 발견. 남은 것은 사용자 자신의 Unknown으로 돌려주고 프로토콜은 진행합니다; 답이 오면 그것은 하나의 채널이 되어 수집이 다시 열립니다. 수혜자는 사용자의 인식 상태이고, AI의 수집은 그 도구입니다.
 
 ### 다른 프로토콜과의 차이
 
 | 프로토콜 | 모드 | 타입 시그니처 |
 |----------|------|---------------|
-| **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
+| **Aitesis** | **INQUIRE** | **`ContextInsufficient → SufficientContext`** |
 | Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-**핵심 구분**: Aitesis는 실행 전에 AI 자체의 맥락 부족을 추론합니다 — 정보 흐름 사용자→AI (이타인지: "내가 충분한 맥락을 가지고 있는가?").
+**핵심 구분**: Aitesis는 AI에게 부족한 것을 모으고 사용자만 쥔 것을 이름 붙입니다 — AI가 스스로 맥락에 닿고 닿지 못한 것을 돌려줍니다 (이타인지: "내가 닿을 수 있는 것은 무엇이고, 당신 몫은 무엇인가?").
 
-Proplasma(`/preview`)는 방향 축의 Planning 클러스터 형제입니다: Aitesis는 실행 전 부족한 사실을 공급하고, Proplasma는 후보가 이미 알려져 있으나 서술로 인식되지 않을 때 폐기 전제의 placeholder 대비로 방향의 미래를 물질화합니다.
+Proplasma(`/preview`)는 방향 축의 Planning 클러스터 형제입니다: Aitesis는 부족한 사실을 공급하고 사용자의 Unknown을 이름 붙이며, Proplasma는 후보가 이미 알려져 있으나 서술로 인식되지 않을 때 폐기 전제의 placeholder 대비로 방향의 미래를 물질화합니다.
 
 ## 프로토콜 흐름
 
 ```
-Phase 0: Gate               → 맥락 충분성 스캔 (무성)
-Phase 1: Context Collection  → Read/Grep 코드베이스 탐색으로 맥락 수집, 질문 품질 향상
-Phase 2: Surfacing           → 남은 불확실성 제시 (gate interaction)
-Phase 3: Integration         → 사용자 응답으로 Prospect 갱신
+Phase 0: Checkpoint         → 맥락 충분성 스캔 (무성)
+Phase 1: Collection          → 각 불확실성을 AI가 닿을 수 있는 모든 채널로 밀고, 상태·이유·근거를 적음
+Phase 2: Surfacing           → 남은 것을 돌려줌 — 근거 모자란 발견, 사용자의 Unknown, 탐지 — 그리고 진행
+Phase 3: Integration         → 답이 오면 하나의 채널로 수집이 다시 열림
 ```
 
 ## 불확실성 식별
@@ -52,7 +52,7 @@ Phase 3: Integration         → 사용자 응답으로 Prospect 갱신
 Aitesis → Prothesis → Analogia → Katalepsis
 ```
 
-Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 매핑 검증(Analogia) 전에 AI가 필요한 맥락을 갖추도록 합니다.
+Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 유비 추론 감사(Analogia) 전에 AI가 모을 수 있는 것을 다 모읍니다.
 
 ## 사용 시기
 
@@ -63,7 +63,7 @@ Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 매핑 검증
 - 세션에서 이전에 다루지 않은 새로운 도메인에 진입할 때
 
 **건너뛰기**:
-- 실행 맥락이 완전히 명시되어 있을 때 (관점 분석은 Prothesis — /frame)
+- 맥락이 완전히 명시되어 있을 때 (관점 분석은 Prothesis — /frame)
 - 위임 범위가 불명확할 때
 
 ## 사용법

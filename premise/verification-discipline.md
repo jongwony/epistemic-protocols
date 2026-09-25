@@ -6,6 +6,8 @@ Use this document before stating a claim about a system's or artifact's state, r
 
 State a claim about a system's or artifact's state after making the observation that grounds it, and cite that observation's invocation and output beside the claim. Where no such observation was made, write `unverified` in the claim's place.
 
+A stated intention is that claim pointed forward, and it answers here the same way. Saying an act will be taken asserts a state nothing yet grounds, and the act is what would ground it; the sentence carries nothing but itself, which makes it the weakest available carrier for work not yet done. Where the act is available, take it and let the sentence report what was done. Where it is not available, the sentence names what the act waits on, since a condition is checkable and a promise is not.
+
 ## Verify Before Done
 
 Confirm that the change preserves its applicable contracts. Trust a check's verdict only when:
@@ -17,7 +19,7 @@ Confirm that the change preserves its applicable contracts. Trust a check's verd
 
 For a consequential claim, establish that the check distinguishes a known pass from a known failure before relying on it.
 
-When adding an acceptance criterion, result clause, convergence condition, or invariant, trace the step that produces its required evidence or state, the reader that consults it where it binds, and the consequence of that reading. A guard branches on its verdict and fails closed. A written clause or an existing value alone establishes none of these links; inspect the whole chain when an obligation is not binding.
+When writing down anything whose force depends on something else reading it, trace the step that produces its required evidence or state, the reader that consults it where it binds, and the consequence of that reading. A guard branches on its verdict and fails closed. A written clause or an existing value alone establishes none of these links; inspect the whole chain when an obligation is not binding.
 
 Before starting a change, check whether a plausible fault could disable both the target and every path relied on to monitor, abort, recover, roll back, or confirm it. If so, establish at least one assurance path that survives that fault before proceeding. Authorization supplies neither observability nor recoverability.
 

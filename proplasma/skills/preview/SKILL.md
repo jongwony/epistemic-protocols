@@ -102,8 +102,8 @@ DownstreamRoute = PreCommit  -- a pre-commit check the USER carries once the set
                              --   alternative, or step is the user's to raise, and this tag is what reminds them the check is theirs
                 | Inquire    -- a factual unknown needing real evidence now (placeholders can never ground it)
 GroundTag = optional annotation ON THE CONSTITUTED DIRECTION (not an ExposedUnknown route): when the surviving
-                           --   direction maps onto a familiar domain, it is tagged at harvest for /ground
-                           --   structural-mapping validation; the tag rides Harvest.direction into
+                           --   direction has a mapping against a target account already in play and its intended inferences
+                           --   need an audit, it is tagged at harvest for /ground; the tag rides Harvest.direction into
                            --   DirectionalContrast.direction
 CommonCommitment = a design decision forced uniformly across ALL probes during instantiation (not on a divergence axis);
                    must be reported at present so the user does not mistake a shared premise for a divergence axis
@@ -152,7 +152,7 @@ DissolutionExit = deficit dissolved at the spec relay or at a gate: deriving the
             dispositions plus the pending re-fan target set (the user-authored composition on a materialization
             re-entry, the revised candidate set on a gap re-fan) relayed as live candidates for the regular gate.
             A success stand-down: no unresolved residual remains
-RoutingRow = ① a structural mapping onto a familiar domain would carry the futures → MappingUncertain (hint: /ground)
+RoutingRow = ① a mapping against a target account already in play leaves its intended inferences uncertain → MappingUncertain (hint: /ground)
            | ② real evidence is required before the directions can be judged       → ContextInsufficient (hint: /inquire)
            | ③ the candidate field is thin — one or none — → CandidateFieldUnderexpanded (hint: /ideate); the frame itself is
                absent → FrameworkAbsent (hint: /frame); the coordinates live implicit in externalized substrate → AbstractAporia
@@ -423,7 +423,7 @@ Keep placeholder status visible in every probe and contrast. A Mockup is sandbox
 
 ## Rules
 
-- **Direction-gate response discipline**: `Select` accepts only an accumulated probe direction; an unprobed candidate follows the typed free-response branch. Name probe questions, insufficiency, a send-back of the drafted spec, withdrawal, and unprobed candidates before `Qdir`, not as peer options. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route the pre-commit check to `/inquire` as well once the direction becomes committed; attach `/ground` as a tag on a familiar-domain direction.
+- **Direction-gate response discipline**: `Select` accepts only an accumulated probe direction; an unprobed candidate follows the typed free-response branch. Name probe questions, insufficiency, a send-back of the drafted spec, withdrawal, and unprobed candidates before `Qdir`, not as peer options. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route the pre-commit check to `/inquire` as well once the direction becomes committed; attach `/ground` when a direction's mapping against an account already in play needs its intended inferences audited.
 - **Draft relayed with its basis**: relay every axis, the policy, the target set, and the tier with the basis that chose it and the affordance to send it back, then generate; the first send-back of the draft re-fans without spending the shared budget, and a later one rides it.
 - **One shared re-fan**: gap repair and synthesis materialization consume the same budget. Its recorded `RefanKind` determines the exhausted-budget ending exactly as LOOP and PHASE TRANSITIONS specify; a materialized synthesis remains among the accumulated selectable probes.
 - **Harvest before discard**: retain only the constituted direction, deciding contrast rows, and routed unknowns before cleanup. Cleanup produces the discard trace; assemble the durable record afterward, leaving probe detail session-local.

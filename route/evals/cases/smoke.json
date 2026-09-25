@@ -1,0 +1,164 @@
+[
+  {
+    "id": "reach-inquire",
+    "protocol": "inquire",
+    "conversation": [
+      { "role": "user", "text": "The billing exporter is finished. It reads from the warehouse replica and writes a CSV per account." },
+      { "role": "assistant", "text": "It runs clean against the replica — one file per account into the staging bucket. There is no schedule config anywhere in the repo, and nothing in it says when this is meant to run." }
+    ],
+    "prompt": "Right. Put it on the schedule.",
+    "note": "Constructed so the facts needed to execute sit only with the user: the window, the timezone that window means, what a partial run should do, who hears about a failure. The repository answers none of them, and none is a judgement the assistant could make well by itself. The instruction is a single move on purpose, so what is missing is a fact rather than an order — a multi-move instruction would fire /conduct's own trigger instead."
+  },
+  {
+    "id": "reach-ground",
+    "protocol": "ground",
+    "conversation": [
+      { "role": "assistant", "text": "The pattern I described has three stages: accept and park, transform under a lease, then commit or return to the park." },
+      { "role": "user", "text": "Our ingest module is right here in the tree, and I've read both." }
+    ],
+    "prompt": "Walk that three-stage picture against what ingest actually does, stage by stage, and tell me where the correspondence breaks.",
+    "note": "Constructed as an abstract structure and a concrete application present together, with the user asking for the correspondence to be checked rather than for a missing fact. Whether the structure holds over the substrate is exactly what is open."
+  },
+  {
+    "id": "reach-recollect",
+    "protocol": "recollect",
+    "conversation": [
+      { "role": "user", "text": "We argued about the retry shape at some length a few weeks ago and landed somewhere. It was a different session — none of it is in front of us now." },
+      { "role": "assistant", "text": "Nothing in this context carries that conclusion." }
+    ],
+    "prompt": "What did we settle on? I'd rather not reopen an argument we already finished.",
+    "note": "Constructed so an earlier conclusion exists, is named as existing, and is not in the present context. The user is asking for it back, not for a fresh decision."
+  },
+  {
+    "id": "reach-sublate",
+    "protocol": "sublate",
+    "conversation": [
+      { "role": "user", "text": "The auth middleware was written before the gateway existed. Back then it was the only thing checking a token." },
+      { "role": "assistant", "text": "The gateway now rejects an unsigned request before anything reaches the service." }
+    ],
+    "prompt": "So go back over what that middleware still assumes, given what's in front of it now.",
+    "note": "Constructed so existing context was sound when written and may not survive what has since changed. The user wants what is carried re-examined rather than extended."
+  },
+  {
+    "id": "reach-contextualize",
+    "protocol": "contextualize",
+    "conversation": [
+      { "role": "assistant", "text": "I applied the repository-wide convention: every exported symbol gets a doc comment." },
+      { "role": "user", "text": "That directory is generated. The generator rewrites it on every build." }
+    ],
+    "prompt": "You've applied a rule without asking whether it means anything here. Redo it against what this directory actually is.",
+    "note": "Constructed as a general rule applied with its situation stripped off. The rule is real and the application is what has come loose from it."
+  },
+  {
+    "id": "reach-elicit",
+    "protocol": "elicit",
+    "conversation": [
+      { "role": "user", "text": "The dashboard isn't working for the team." },
+      { "role": "assistant", "text": "Which part — the load time, what it shows, or who can reach it?" },
+      { "role": "user", "text": "All of it, sort of. It just isn't good." }
+    ],
+    "prompt": "Let's make the dashboard better.",
+    "note": "Constructed so the endpoint is named only in the abstract and every attempt to fix it as coordinates has slid. What 'better' would have to be is undetermined, and the user has not been able to say it."
+  },
+  {
+    "id": "reach-ideate",
+    "protocol": "ideate",
+    "conversation": [
+      { "role": "user", "text": "The nightly reconciliation has to fire somehow." },
+      { "role": "assistant", "text": "A cron entry on the worker box would do it." },
+      { "role": "user", "text": "Right, that's where I keep landing too." }
+    ],
+    "prompt": "A cron job is the only approach either of us has put on the table, and I don't trust that.",
+    "note": "Constructed so exactly one candidate is in view and the user says so. Nothing is wrong with the candidate; what is missing is the rest of the field."
+  },
+  {
+    "id": "reach-bound",
+    "protocol": "bound",
+    "conversation": [
+      { "role": "user", "text": "We're cleaning up the logging." },
+      { "role": "assistant", "text": "The service writes four different formats, and two of them are also read by the alerting rules." }
+    ],
+    "prompt": "I can't tell where this stops. Does it reach the alerting rules? The client SDK? Tell me what's inside this and what isn't.",
+    "note": "Constructed so the work's edges are what is open: the goal is stated and its extent is not, and the user names the extent as the thing they cannot fix."
+  },
+  {
+    "id": "reach-conduct",
+    "protocol": "conduct",
+    "conversation": [
+      { "role": "user", "text": "We're moving the session store off the single Redis node onto the cluster. Same key space, same TTLs, and no live session can drop during the cutover." },
+      { "role": "assistant", "text": "The pieces are known: a dual-write window, a backfill of the existing keys, the read-path switch, and retiring the old node." }
+    ],
+    "prompt": "Right, those four. What I don't have is how to run them so nothing drops in between.",
+    "note": "Constructed so the target, the endpoint and the pieces are all settled and only their sequence is open. The pieces are named in the conversation rather than left to be derived, which separates this from a goal still to be compiled; the endpoint is fixed by the constraint the user states, which separates it from an endpoint still undetermined. The deficit is shown by the situation rather than declared in the protocol's own vocabulary."
+  },
+  {
+    "id": "reach-sketch",
+    "protocol": "sketch",
+    "conversation": [
+      { "role": "user", "text": "There are six boolean flags on this record and four of them are never true at the same time." },
+      { "role": "assistant", "text": "Three functions branch on combinations of those four." }
+    ],
+    "prompt": "There's a shape in here I can't name. Something about those four wants to be one thing and I can't see what.",
+    "note": "Constructed so the material is fully present and what form fits it is unrecognised. Not a missing fact and not an unexpanded option set — the user is looking at everything and cannot see the form."
+  },
+  {
+    "id": "reach-grasp",
+    "protocol": "grasp",
+    "conversation": [
+      { "role": "assistant", "text": "So the reconciler takes the last committed watermark, replays every event after it, and drops any whose key it has already seen in this pass." },
+      { "role": "user", "text": "Right. I think I followed that." }
+    ],
+    "prompt": "I'd rather find out now if I've only half got it. Check whether I actually understand the reconciler.",
+    "note": "Constructed so the explanation has landed and its uptake is what is unverified. The user is asking about their own comprehension, not about the reconciler."
+  },
+  {
+    "id": "reach-apportion",
+    "protocol": "apportion",
+    "conversation": [
+      { "role": "user", "text": "We're off the old broker by the end of the quarter. That part is decided and I'm not reopening it." },
+      { "role": "assistant", "text": "Six services publish to it and two of them also consume." }
+    ],
+    "prompt": "Break this into pieces I can actually start on, each one saying what has to hold before it and what it leaves behind.",
+    "note": "Constructed so the goal is settled and no unit of work has been compiled out of it. The user asks for units carrying their own conditions, which is the shape of what is missing."
+  },
+  {
+    "id": "reach-induce",
+    "protocol": "induce",
+    "conversation": [
+      { "role": "user", "text": "The exporter, the reconciler and the webhook sender each wrap their call in the same retry-and-log block." },
+      { "role": "assistant", "text": "The fourth one, in the notifier, is the same block with a different log prefix." }
+    ],
+    "prompt": "Four times now. There's something underneath these we haven't named, and I keep almost seeing it.",
+    "note": "Constructed so a pattern has recurred across instances and has not been crystallised into anything nameable. The instances are all in view; the abstraction over them is the part in process."
+  },
+  {
+    "id": "reach-preview",
+    "protocol": "preview",
+    "conversation": [
+      { "role": "user", "text": "Two ways to lay out the settings page: one long scroll with headings, or a left rail of sections." },
+      { "role": "assistant", "text": "Both are describable in a sentence and neither description settles it." }
+    ],
+    "prompt": "I can't tell which of these I want from the description. I'd have to see them next to each other before I could say.",
+    "note": "Constructed so the options are stated, the descriptions do not discriminate, and the user says recognition would take seeing them contrasted. The direction is what cannot be recognised from words."
+  },
+  {
+    "id": "reach-frame",
+    "protocol": "frame",
+    "conversation": [
+      { "role": "user", "text": "Someone's asked me to assess our observability and report back." },
+      { "role": "assistant", "text": "There's no prior assessment in the repository and no standard named anywhere." }
+    ],
+    "prompt": "I don't know what questions this is even supposed to ask. There's no frame here for me to work inside.",
+    "note": "Constructed so the inquiry has no structure to be conducted within — not a missing answer but a missing set of questions, which the user states directly."
+  },
+  {
+    "id": "control-settled-ground",
+    "protocol": null,
+    "conversation": [
+      { "role": "assistant", "text": "The field is read in three files: the config loader, the transport and the hook. Renaming it means editing those three." },
+      { "role": "user", "text": "That matches what I found." }
+    ],
+    "prompt": "Yes — rename it across those three and run the tests.",
+    "note": "The control. Constructed so what to do and what would settle it are both already determined: an approval on a mechanical change with the extent already established in the conversation. If this reaches a name, the run has shown the channel lighting up rather than reaching."
+  }
+]

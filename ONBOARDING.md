@@ -60,20 +60,19 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
 - [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
-- [ ] `/analogia:ground` — validate abstract-concrete mappings
+- [ ] `/analogia:ground` — audit what an abstract-concrete mapping licenses about an account already in play
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, on a recorded acceptance where none compiles, or on a recorded reservation where a judgment rather than a check settles it
-- [ ] [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) — one-shot commit + push + PR + task registration. Optional convenience; lives in the external `jongwony/ClaudePanel.spoon` plugin, not this repo. Plain `git push` + `gh pr create` also works.
 
 ## Contribution Workflow
 
-1. **Scope** — read the premise document(s) for the area you're touching (`premise/AGENTS.md` routes by concern), plus `.claude/rules/project-profile.md` and `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
+1. **Scope** — read the premise document(s) for the area you're touching (`premise/AGENTS.md` routes by concern), plus `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first — its assumptions and missing facts, not whether every alternative or trade-off was considered, which stays yours to raise; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `.claude/skills/verify/references/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
-7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
+7. **Ship** — `git push -u origin <branch>` then `gh pr create`; PR body language is Korean
 8. **Address review** — run `/formal-review` for the fixed formal-triple review of protocol changes, which posts a single consolidated PR comment, and `/review-loop` for code review; use `/gh-address-comments` to respond to posted comments
 9. **Merge** — the maintainer merges manually via web after final review
 
@@ -81,7 +80,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 - **Notation in formal blocks**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
 - **Verb usage in TOOL GROUNDING**: `call` for tool references, `present` for gate operations (tool-agnostic per Semantic Autonomy, `premise/interaction-factorization.md`)
-- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
+- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`; where an issue anchors the unit, its identifier follows the type — `feat/<issue-id>-description` — and one branch carries one unit (`CLAUDE.md` §Settled Directions, Intent binding)
 - **Release tags**: CalVer `v{YYYY}.{MM}.{DD}[.{N}]`; tag push triggers `release.yml` draft
 - **README sync**: `README.md` and `README_ko.md` must stay in sync
 - **SKILL.md self-containment**: No external references to axiom identifiers, rule file paths, or contributor-only concepts — end users see only SKILL.md via the plugin system
@@ -124,7 +123,7 @@ standard flow afterwards:
   over `CLAUDE.md` or a specific `SKILL.md` they just read
 - Already has a personal Claude Code workflow and wants this project mapped
   onto it → `/ground` (analogia), with their existing usage as the concrete
-  domain and this project's protocols as the abstract domain being validated
+  domain and a familiar account of this project's protocols as the abstract domain; audit the conclusions that comparison supports
 - Needs a fast when-to-use-which-protocol reference → the protocol table in `README.md`, or the `route` plugin's session-start table
   (epistemic-cooperative)
 - Prefers to go straight to environment setup → skip routing, proceed to

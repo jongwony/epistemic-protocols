@@ -1,6 +1,6 @@
 # Project Profile Calibration
 
-- When calibrating work in this project, apply `premise/calibration-methodology.md` to the relevant correction costs and authority. `.claude/rules/project-profile.md` supplies the project's posture; the profile does not itself answer a protocol checkpoint.
+- When calibrating work in this project, apply `premise/calibration-methodology.md` to the relevant correction costs and authority. `premise/recognition-and-authority.md` §Decision Tiering supplies the posture frame the calibration reads against; a calibrated posture does not itself answer a protocol checkpoint.
 
 ## Profile Variables and Calibration Rule
 

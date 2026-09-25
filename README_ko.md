@@ -71,7 +71,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Proplasma](./proplasma) | `/preview` | 결정 직전인데 방향 후보들이 말로는 판단이 안 서고 직접 봐야 알 것 같을 때 — 폐기 전제의 값싼 probe들로 먼저 대비 |
 | [Hypotyposis](./hypotyposis) | `/sketch` | 형태를 만들어야 하는데 무엇이어야 하는지는 말할 수 없고 보면 알아볼 수 있을 때 — 스케치하고, 맞지 않는 곳을 표시하고, 보존된 버전을 고쳐, 알아본 버전으로 마무리 |
 | [Prothesis](./prothesis) | `/frame` | 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 — 렌즈가 하나든 여럿이든 |
-| [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
+| [Analogia](./analogia) | `/ground` | 이미 있는 대상 설명에 대한 매핑이 어떤 결론을 어디까지 뒷받침하는지 불확실할 때 |
 | [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
 | [Merismos](./merismos) | `/apportion` | 자율 실행에 목표를 넘기기 직전 — 한 구간에 맞는 단위로 자르고 각 단위를 먼저 닫을 때 — 컴파일되면 자기 완료 조건으로, 안 되면 기록한 수용으로, 검사가 아니라 판단이 정하는 항목이면 유보로 |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
@@ -109,7 +109,6 @@ claude plugin install route@epistemic-protocols
 | **변경 리뷰** | |
 | `/review-loop` | 모든 finding이 코드베이스에 대해 검증되고 처분될 때까지 매 라운드 재리뷰하며 변경을 리뷰로 끌고 갈 때 |
 | **지시문 산문 감사** | |
-| `/place` | 지시문 파일이 계속 불어날 때 — 절 각각을 있어야 할 자리(로드 계층, ledger, 삭제)로 라우팅 |
 | `/white-bear` | 에이전트에게 하지 말 것을 말하는 산문 — 잘못된 대상을 계속 시야에 두는 금지 프레이밍과 부정 앵커링을 찾기 |
 | `/zero-shot` | 원칙이면 일반화될 자리에 예시로 앵커링한 산문 — 그 자리를 찾아 명명 |
 | **프로젝트 조타** | |
@@ -133,7 +132,7 @@ claude plugin install route@epistemic-protocols
 
 - **이 프로토콜 자체가 처음, 사전 컨텍스트 없음** → `/onboard` (epistemic-cooperative) — 빠른 추천 + 시나리오/실행/퀴즈 가이드
 - **프로젝트 자체에 대한 이해를 검증하고 싶음** → `/grasp` (katalepsis) — `CLAUDE.md` 또는 특정 `SKILL.md` 대상
-- **이미 나만의 Claude Code 워크플로우가 있고 이 프로젝트를 그 위에 매핑하고 싶음** → `/ground` (analogia) — 본인의 사용 패턴을 concrete domain 으로
+- **Claude Code 워크플로우와 이 프로토콜의 설명을 이미 갖고 있고 둘의 비교가 뒷받침하는 결론을 감사하고 싶음** → `/ground` (analogia) — 본인의 사용 패턴을 대상 설명으로
 - **어떤 프로토콜을 언제 쓰는지 빠른 레퍼런스가 필요** → 위의 프로토콜 표, 또는 `route` 플러그인의 세션 시작 테이블
 
 프로토콜 자체의 아키텍처와 원칙은 [CLAUDE.md](./CLAUDE.md)와 [`.claude/rules/`](./.claude/rules/) 아래의 axiom 파일들을 참고하세요.

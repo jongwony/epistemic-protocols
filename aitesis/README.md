@@ -1,39 +1,39 @@
 # Aitesis — /inquire (αἴτησις)
 
-Infer context insufficiency before execution (αἴτησις: a requesting)
+Collect what the AI can reach on its own, hand back the rest as the user's unknown (αἴτησις: a requesting)
 
 > [한국어](./README_ko.md)
 
 ## What is Aitesis?
 
-A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **infers context insufficiency before execution, collects contextual signals via codebase exploration to sharpen question quality, and inquires about what remains uncertain rather than assuming defaults silently**.
+A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **collects context to the limit of what the AI can reach on its own, writes down for each uncertainty what that reached and why it reached no further, and hands what only the user can settle — or nobody yet knows — back to the user as their own unknown**.
 
 ### The Core Problem
 
-AI systems often proceed with execution despite insufficient context (`ContextInsufficient`) — required domain knowledge is missing, implicit requirements go unverified, environmental dependencies are assumed, or scope remains ambiguous. Silent assumptions lead to wasted effort and compounding errors.
+AI systems often proceed despite insufficient context (`ContextInsufficient`) — required domain knowledge is missing, implicit requirements go unverified, environmental dependencies are assumed, or scope remains ambiguous. Silent assumptions lead to wasted effort and compounding errors. And people are poor at seeing their own unknowns: once a plausible account forms, the search stops.
 
 ### The Solution
 
-**Evidence over Inference over Detection**: A three-level hierarchy with two boundaries. Before execution, AI infers areas of context insufficiency rather than detecting via a fixed taxonomy (Inference > Detection), collects contextual signals through codebase exploration and, when a fact is directly observable, gathers evidence rather than substituting inference (Evidence > Inference), then surfaces remaining uncertainties as structured mini-choices for the user. Read-only evidence resolves a claim only when its referent, source-kind, and scope authorize that claim. Transforms insufficient context into informed execution through targeted inquiry.
+**Evidence over Inference over Detection**: AI infers what the prospect leaves uncertain rather than detecting via a fixed taxonomy (Inference > Detection), then pushes each uncertainty through every channel it can read or run on its own — the codebase, records, external sources, history, an observation run — and gathers evidence rather than substituting inference (Evidence > Inference). Collection stops for an item only when no channel the AI can reach is left. Each item then lands in one of four states, with the reason and the basis written on it: **resolved** by evidence; **provisional** — a finding whose ground the AI declares short; the **user's unknown** — only the user can settle it, or nobody yet knows; **detect-only** — a finding that answers no uncertainty raised. What remains is handed back as the user's own unknown and the protocol proceeds; an answer, when it comes, is one more channel and reopens collection. The beneficiary is the user's epistemic state; the AI's collection is the instrument.
 
 ### Difference from Other Protocols
 
 | Protocol | Mode | Type Signature |
 |----------|------|---------------|
-| **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
+| **Aitesis** | **INQUIRE** | **`ContextInsufficient → SufficientContext`** |
 | Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-**Key distinction**: Aitesis infers what context the AI lacks before execution — information flows user→AI (heterocognitive: "do I have enough context?").
+**Key distinction**: Aitesis collects what the AI lacks and names what only the user holds — the AI reaches for context on its own and hands back what it cannot reach (heterocognitive: "what can I reach, and what is yours?").
 
-Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Aitesis supplies missing facts before execution; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
+Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Aitesis supplies missing facts and names the user's unknowns; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
 
 ## Protocol Flow
 
 ```
-Phase 0: Gate               → Scan context sufficiency (silent)
-Phase 1: Context Collection  → Collect contextual signals via Read/Grep to improve question quality
-Phase 2: Surfacing           → Present remaining uncertainties (gate interaction)
-Phase 3: Integration         → Update prospect with user's resolution
+Phase 0: Checkpoint         → Scan context sufficiency (silent)
+Phase 1: Collection          → Push each uncertainty through every channel the AI can reach; write its state, reason, basis
+Phase 2: Surfacing           → Hand back what remains — findings with their shortfalls, the user's unknowns, detections — and proceed
+Phase 3: Integration         → An answer, when it comes, reopens collection as one more channel
 ```
 
 ## Uncertainty Identification
@@ -52,7 +52,7 @@ Uncertainties are identified dynamically per task — no fixed taxonomy:
 Aitesis → Prothesis → Analogia → Katalepsis
 ```
 
-Aitesis runs early: verify execution context is sufficient before perspective framing (Prothesis) and mapping validation (Analogia).
+Aitesis runs early: exhaust what the AI can collect before perspective framing (Prothesis) and analogical-inference auditing (Analogia).
 
 ## When to Use
 
@@ -63,7 +63,7 @@ Aitesis runs early: verify execution context is sufficient before perspective fr
 - When entering a novel domain not previously discussed in session
 
 **Skip**:
-- When execution context is fully specified (use Prothesis — /frame for perspective)
+- When the context is fully specified (use Prothesis — /frame for perspective)
 - When delegation scope is unclear
 
 ## Install

@@ -1,0 +1,44 @@
+name: Lean
+
+# Builds the Lean package — the contract modules generated from each SKILL.md Lean
+# block, the canonical GROUND, and the proofs — then runs the static checks with a
+# toolchain reachable, so the lean-definition verdict here is never the warn.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lean-definition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Generate the contract modules from the SKILL.md Lean blocks
+        run: node .claude/skills/verify/scripts/lean-contract.js generate .
+
+      # Installs the toolchain lean-toolchain pins and runs `lake build`.
+      - uses: leanprover/lean-action@v1
+        with:
+          build-args: '--wfail'
+
+      - name: Static checks
+        run: |
+          set +e
+          node .claude/skills/verify/scripts/static-checks.js . > static-checks.json
+          set -e
+          node -e '
+            const r = require("./static-checks.json");
+            const lean = [...r.fail, ...r.warn].filter(x => x.check === "lean-definition");
+            for (const x of r.fail) console.log(`::error file=${x.file}::${x.check}: ${x.message}`);
+            for (const x of lean) if (r.warn.includes(x)) console.log(`::error file=${x.file}::${x.check}: ${x.message}`);
+            process.exit(r.fail.length > 0 || lean.length > 0 ? 1 : 0);
+          '

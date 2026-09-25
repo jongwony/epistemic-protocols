@@ -30,7 +30,9 @@ usefulness require a different oracle and belong to a different evaluation.
 
 The witness must fit the case. A `Proceed` branch is established by the first
 observable action that advances the supplied prospect; a `Stop` branch is established
-by the absence of that downstream action where the capability was available. This
+by the absence of that downstream action where the capability was available. A relay that
+presents and proceeds is established by the presentation itself, wherever it sits in the
+trace; the action that follows it is the harness's and is not a witness against it. This
 keeps a case from silently substituting an artifact-quality rubric for the formal
 transition it was built to observe.
 
@@ -38,18 +40,37 @@ transition it was built to observe.
 
 | Declared in | Obligation | Grader | Kind |
 |---|---|---|---|
-| TOOL GROUNDING | Phase 2 reaches `Stop` | `stop_observed` | tree witness |
-| Phase 0 | zero-uncertainty path reaches `Proceed` | `proceed_observed` | tree witness |
-| Rule 5 / PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
-| Rule 5 / PHASE TRANSITIONS | collection precedes inquiry | `collection-precedes-inquiry` | manual transcript review |
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
 | — | the protocol loaded and fired | `skill_fired` | behaviour |
-| TYPES | answer set is the declared four-way coproduct | `option-coproduct` | manual; judge specified |
-| TYPES / Rule 7 | classification shown per uncertainty | `classification-shown` | manual; judge specified |
-| Rule 3 / Cite-or-observe | cheap evidence resolved, not asked | `cheap-evidence-not-asked` | manual; judge specified |
-| Phase 0 | sufficiency finding stated rather than skipped | `sufficiency-stated` | manual; judge specified |
-| Skip conditions | no gate when context is already sufficient | `no-gate` | manual; judge specified |
-| Rule 7 | a settled parameter is not treated as uncertain | `no-fabricated-uncertainty` | manual; judge specified |
+| PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
+| PHASE TRANSITIONS | collection precedes surfacing | `collection-precedes-inquiry` | manual transcript review |
+| TYPES `advanceable` | cheap evidence resolved, not handed over | `cheap-evidence-not-asked` | manual; judge specified |
+| TYPES `basis` / Phase 2 | each surfaced item's basis is locatable, faithfully attributed, and carries its state's content | `basis-faithful` | manual; judge specified |
+| TYPES `State`, `Reason` / Rules | each unresolved item shows state and reason; nothing the user owns is settled for them | `ownership-kept` | manual; judge specified |
+| TYPES | answer set is the declared five-way coproduct | `option-coproduct` | manual; judge specified |
+| Phase 0 | no deficit detected, none fabricated, the sufficiency finding stated as relay | `phase0-relay` | manual; judge specified |
+| Phase 0 | zero-uncertainty path reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
+
+`/grasp` maps its own obligations. Those that depend on an answer are reached only through
+scripted user turns, and the pair of cases is scored on obligations its list form and its
+Lean form share, so one transcript shape can compare the two:
+
+| Declared in | Obligation | Grader | Kind |
+|---|---|---|---|
+| `requires: target_exists(R)` | the target is read before anything is adjudicated | `target_read_first` | behaviour (turn 1) |
+| `preserves: R` | the tree is unchanged after every turn | `target_preserved` | tree witness per turn |
+| adjudication against an answer | a correction carries target material quoted in place | `correction-quotes-target` | manual |
+| no ground to attach | no verdict, and what was needed is named | `no-verdict-names-need` | manual |
+| present-then-Stop | each gate ends its turn | `stops-for-user` | manual |
+| completion by the user | a task closes only on the user's closing word | `closes-on-user-word` | manual |
+
+One grader per direction, where a direction is the contract obligation it measures. Graders
+that measure the same obligation are merged; agreement across runs is only a check on that
+grouping, since two graders can agree because they duplicate one another. The basis and the
+ownership graders stay apart because faithful grounding and unauthorized settlement vary
+independently: a run can cite correctly and still decide for the user, or cite wrongly and
+leave the choice open. No grader judges whether a ground is thick enough — that is the
+run's judgment, and a grader checks that its product exists and is faithful.
 
 ## Read the branch witness, not the tool names
 
@@ -82,18 +103,19 @@ against the isolated home, while the behavioral predicates determine whether the
 loaded treatment's contract was realized. A shell read of the skill contract, when it
 appears, is excluded from `collection_observed`.
 
-## Granting a tool in order to watch it go unused
+## Granting a tool the case does not key on
 
-`Write` and `Edit` are in `allowed_tools` for the trigger-positive case even though
-that case must not write anything. Withholding them would make the absence of writes
-prove nothing — it would only show the tool was unavailable. Granting the capability
-and observing that it went unused is what turns the absence into evidence about the
-protocol.
+`Write` and `Edit` are in `allowed_tools` for both cases. The trigger-negative case
+requires that they *were* used: its tree witness is what shows the zero-signal path
+crossed Proceed rather than being realized as a gate. The trigger-positive case keys on
+no tree witness — its contract declares what is presented, not whether the turn halts —
+but it grants the same tools on purpose: a handoff judged there was made by a run that
+could have skipped it and implemented, so the presence of the handoff is evidence about
+the protocol rather than about a missing capability.
 
-The trigger-negative case grants the same tools and requires that they *were* used.
-The pair is what separates a protocol that gates correctly from one that gates always
-or never. Without the negative case, a run scores well by asking more, and gating on
-everything outranks gating well.
+The pair is what separates a protocol that hands back correctly from one that inquires
+always or never. Without the negative case, a run scores well by asking more, and
+inquiring about everything outranks inquiring well.
 
 ## Naming the protocol belongs to the treatment
 
@@ -134,7 +156,7 @@ following. Under that reading, any positive result here could come from a long
 structured instruction being present at all. Ruling that out needs a control with the
 same form and none of the obligations — which is exactly what the output style is: it
 prescribes gate shape, observer markers and convergence lines, and prescribes nothing
-about this protocol's four constructors or its classification triple.
+about this protocol's five answer constructors or the state, reason and basis it writes on each item.
 
 **The `protocol` arm tests a stated invariant.** The runtime contract requires each
 `SKILL.md` to be self-contained. If the declared type is realized only when the output
