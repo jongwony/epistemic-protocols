@@ -66,58 +66,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -125,7 +124,7 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
@@ -159,8 +158,8 @@ inductive Axis | sourceScope | targetScope | relation | purpose
 axiom AxisSupported : Axis → Context P → Turn P → String → Prop
 
 def axisCoord : Axis → Coord P String
-  | .purpose => { admits := (· = .utterance), supports := AxisSupported .purpose }
-  | a        => { admits := fun _ => True,     supports := AxisSupported a }
+  | .purpose => { admits := (·.val = .person), supports := AxisSupported .purpose }
+  | a        => { admits := fun _ => True,        supports := AxisSupported a }
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _ => false
@@ -220,11 +219,13 @@ inductive Reach
 inductive Bearing | supports | defeats
 
 /-- **Your judgment**: the cited turn establishes, within `scope`, that it supports or defeats
-    `x`. A citation's stated bearing is read against its source and scope. -/
+    `x`. A citation's stated bearing is read against its source and scope. A person's turn
+    bears only where it reports what they observed — a result they ran, a source they read;
+    their assent, agreement, or bare assertion establishes nothing here, whatever its form. -/
 axiom CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
 
 def checkCoord (x : FitClaim) (scope : String) : Coord P Bearing :=
-  { admits := (· ≠ .utterance), supports := CheckSupported x scope }
+  { admits := fun _ => True, supports := CheckSupported x scope }
 
 structure Check (c : Context P) where
   claim        : FitClaim
@@ -254,8 +255,10 @@ def Check.warrant {c : Context P} (ch : Check c) : Warrant :=
   | .filled .supports _ _ _   => .supported
   | .filled .defeats _ _ _    => .defeated
 
+/-- The grounds a verdict cites, each read as evidence — a person's report of what they observed
+    among them, never their assent (`CheckSupported`). -/
 def Grounds (c : Context P) :=
-  {g : List (Cite c) // g ≠ [] ∧ ∀ s ∈ g, s.kind ≠ .utterance}
+  {g : List (Cite c) // g ≠ []}
 
 inductive Verdict (c : Context P)
   /-- grounds support the whole requested inference at its requested scope, with a met check
@@ -278,12 +281,12 @@ def converged (c : Context P) : Prop := ∀ k ∈ inferences c, (judge c k).deci
 
 inductive Pref | adopted | withdrawn
 
-/-- **Your judgment**: the cited utterance adopts or withdraws `x`. -/
+/-- **Your judgment**: the cited turn of the person's adopts or withdraws `x`. -/
 axiom PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
 
 /-- What the reader takes up. -/
 def prefCoord (x : Correspondence) : Coord P Pref :=
-  { admits := (· = .utterance), supports := PrefSupported x }
+  { admits := (·.val = .person), supports := PrefSupported x }
 
 /-- **Your judgment**: how the user's adoption of `x` stands in `c`. -/
 axiom preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
@@ -400,7 +403,7 @@ noncomputable def report (c : Context P) : Report c :=
   else .inconclusive .openEvidence
 
 /-- **Your evidence moves** for a pass: what the reachable checks returned — artifact reads,
-    searches, fetches, and runs — each an observation turn. -/
+    searches, fetches, and runs — each an evidence turn. -/
 axiom observe : Context P → List (Evidence P)
 
 def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
@@ -465,13 +468,9 @@ demonstrated, not asserted.
 theorem assessment_converged (c : Context P) (h : report c = .assessment) :
     focusSettled c ∧ converged c
 
-Assent never meets a check: what fills a check state is evidence, never an utterance.
-theorem check_never_assent {c : Context P} {x : FitClaim} {scope : String} (s : Cite c)
-    (ok : (checkCoord (P := P) x scope).admits s.kind) : s.kind ≠ .utterance
-
 The comparison purpose is filled only by the user's own words.
-theorem purpose_by_utterance {c : Context P} {s : Cite c}
-    (ok : (axisCoord (P := P) .purpose).admits s.kind) : s.kind = .utterance
+theorem purpose_by_person {c : Context P} {s : Cite c}
+    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person
 
 A replacement of a committed domain closes the activation at once.
 theorem superseded_first (respond : Context P → Response P) (c : Context P)

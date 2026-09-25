@@ -73,58 +73,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -132,7 +131,7 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
@@ -400,7 +399,7 @@ structure Reading where
 axiom read : Context P → Utterance P → Reading
 
 def asUtterance : Turn P → Option (Utterance P)
-  | ⟨.person, f, x⟩ => some ⟨⟨.person, f, x⟩, rfl⟩
+  | ⟨.person, x⟩ => some ⟨⟨.person, x⟩, rfl⟩
   | _               => none
 
 /-- Every person turn of `c`, by position, each read against the context up to and including it. -/
@@ -488,10 +487,10 @@ axiom dissent : Context P → List String
     values. -/
 axiom FeasibilitySupported : Region → Context P → Turn P → Bool → Prop
 
-/-- Realizability is read from an observation of the loaded inventory. Text injected into the
-    session, the system prompt among it, grounds no verdict. -/
+/-- Realizability is read from an observation of the loaded inventory: a turn the environment
+    returned. Text injected into the session, the system prompt among it, grounds no verdict. -/
 def feasibilityCoord (r : Region) : Coord P Bool :=
-  { admits := (· = .observation), supports := FeasibilitySupported r }
+  { admits := (·.val = .external), supports := FeasibilitySupported r }
 
 /-- **Your reading** for `r`: filled with whether the inventory realizes `r`'s values, citing the
     observation; open where nothing observed it, and the map and trace say so. A region whose
@@ -607,7 +606,7 @@ axiom introducedAt : Context P → Entry → Nat
 /-- Who first put `e` forward is the origin of that turn: the person's, or the draft's. -/
 def proposer (c : Context P) (e : Entry) : Proposer :=
   match c[introducedAt c e]? with
-  | some ⟨.person, _, _⟩ => .person
+  | some ⟨.person, _⟩    => .person
   | _                    => .draft
 
 /-- How the move set or the cut came into force: the person's statement set it — named or
@@ -986,12 +985,10 @@ theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : 
     (hr : r ∈ rs) (h : owesSynthesis c r = true) :
     ∃ k ∈ checkpoints c rs, k.region = r ∧ k.decision = .synthesisOutputShape
 
-A realizability verdict is filled only by an observation.
+A realizability verdict is filled only by what the environment returned; text injected into the
+session, the system prompt included, is never cited (GROUND `cited_not_injected`).
 theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
-    (ok : (feasibilityCoord (P := P) r).admits s.kind) : s.kind = .observation
-
-Text injected into the session grounds nothing, the system prompt included.
-theorem injected_grounds_nothing (e : Turn P) (h : e.origin = .injected) : e.basis = none
+    (ok : (feasibilityCoord (P := P) r).admits s.src) : s.src.val = .external
 -/
 
 /-! ── TOOL GROUNDING ── -/

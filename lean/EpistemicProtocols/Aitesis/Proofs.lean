@@ -31,10 +31,7 @@ theorem no_reentry (c : Context P) (i : Item) (hreg : Registered c i) (hself : S
 theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
     {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
     (c[s.idx]'s.lt).origin ≠ .assistant := by
-  intro ho
-  have hk := s.ok
-  rw [ai_never_grounds _ ho] at hk
-  cases hk
+  exact cited_not_assistant s
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(push c).map (·.val) ++ (passRecord (c ++ (push c).map (·.val))).map (·.val), by

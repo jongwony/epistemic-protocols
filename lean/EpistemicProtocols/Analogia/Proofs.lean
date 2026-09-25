@@ -52,11 +52,8 @@ theorem assessment_converged (c : Context P) (h : report c = .assessment) :
             exact h2 (.inl hn)
           · cases h
 
-theorem check_never_assent {c : Context P} {x : FitClaim} {scope : String} (s : Cite c)
-    (ok : (checkCoord (P := P) x scope).admits s.kind) : s.kind ≠ .utterance := ok
-
-theorem purpose_by_utterance {c : Context P} {s : Cite c}
-    (ok : (axisCoord (P := P) .purpose).admits s.kind) : s.kind = .utterance := ok
+theorem purpose_by_person {c : Context P} {s : Cite c}
+    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person := ok
 
 theorem superseded_first (respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (h : Supersedes (fuse c u)) :

@@ -127,7 +127,7 @@ theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) =
 
 theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c := by
   have hr : asUtterance r.val = none := by
-    obtain ⟨⟨o, f, x⟩, ho⟩ := r
+    obtain ⟨⟨o, x⟩, ho⟩ := r
     simp only at ho; subst ho; rfl
   have key : ∀ l : List Nat, (∀ i ∈ l, i < c.length) →
       l.filterMap (fun i => ((c ++ [r.val])[i]?.bind asUtterance).map
@@ -151,13 +151,13 @@ theorem said_by_person (c : Context P) (i : Nat) (x : Reading) (h : (i, x) ∈ s
   simp only [said, List.mem_filterMap, Option.map_eq_some_iff, Option.bind_eq_some_iff] at h
   obtain ⟨j, -, u, ⟨e, he, hu⟩, hji⟩ := h
   cases hji
-  obtain ⟨o, f, x'⟩ := e
+  obtain ⟨o, x'⟩ := e
   cases o <;> simp [asUtterance] at hu
-  exact ⟨⟨⟨.person, f, x'⟩, rfl⟩, he⟩
+  exact ⟨⟨⟨.person, x'⟩, rfl⟩, he⟩
 
 theorem proposer_by_origin (c : Context P) (e : Entry) (t : Turn P)
     (h : c[introducedAt c e]? = some t) (ho : t.origin = .person) : proposer c e = .person := by
-  obtain ⟨o, f, x⟩ := t
+  obtain ⟨o, x⟩ := t
   simp only at ho; subst ho
   simp [proposer, h]
 
@@ -195,13 +195,6 @@ theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : 
   exact ⟨r, hr, .synthesisOutputShape, by simp [deferred, h], rfl⟩
 
 theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
-    (ok : (feasibilityCoord (P := P) r).admits s.kind) : s.kind = .observation := ok
-
-theorem injected_grounds_nothing (e : Turn P) (h : e.origin = .injected) : e.basis = none := by
-  cases e with
-  | mk o f x =>
-    simp only at h
-    subst h
-    cases f <;> rfl
+    (ok : (feasibilityCoord (P := P) r).admits s.src) : s.src.val = .external := ok
 
 end Hyphegesis

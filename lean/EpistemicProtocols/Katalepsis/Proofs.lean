@@ -28,7 +28,7 @@ theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) =
 
 theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c := by
   have hr : asUtterance r.val = none := by
-    obtain ⟨⟨o, f, x⟩, ho⟩ := r
+    obtain ⟨⟨o, x⟩, ho⟩ := r
     simp only at ho; subst ho; rfl
   have key : ∀ l : List Nat, (∀ i ∈ l, i < c.length) →
       l.filterMap (fun i => ((c ++ [r.val])[i]?.bind asUtterance).map
@@ -52,9 +52,9 @@ theorem said_by_person (c : Context P) (i : Nat) (x : Record) (h : (i, x) ∈ sa
   simp only [said, List.mem_filterMap, Option.map_eq_some_iff, Option.bind_eq_some_iff] at h
   obtain ⟨j, -, u, ⟨e, he, hu⟩, hji⟩ := h
   cases hji
-  obtain ⟨o, f, x'⟩ := e
+  obtain ⟨o, x'⟩ := e
   cases o <;> simp [asUtterance] at hu
-  exact ⟨⟨⟨.person, f, x'⟩, rfl⟩, he⟩
+  exact ⟨⟨⟨.person, x'⟩, rfl⟩, he⟩
 
 
 theorem silence (respond : (c : Context P) → Round c → Response P)
