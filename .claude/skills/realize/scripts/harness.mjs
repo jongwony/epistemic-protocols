@@ -21,10 +21,10 @@
 import { spawnSync } from 'node:child_process';
 import {
   mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync,
-  readdirSync,
+  readdirSync, lstatSync, readlinkSync, symlinkSync, unlinkSync, statSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir, tmpdir } from 'node:os';
 
@@ -57,6 +57,21 @@ if (!['claude', 'codex'].includes(RUNNER)) {
 if (RUNNER === 'codex') {
   if (!CFG.codex) { console.error('missing codex configuration'); process.exit(1); }
   CFG.models = CFG.codex.models;
+}
+
+// How a `codex exec` child authenticates. `api-key` forwards a process-scoped CODEX_API_KEY
+// and nothing else. `login` reuses the login already on this machine by symlinking its
+// auth.json into the disposable home for exactly the span of one `codex exec`: never a copy,
+// because a ChatGPT login rotates its refresh token, and a refresh written into a copy would
+// leave the real login holding a token the server has already retired.
+const CODEX_AUTH = process.env.REALIZE_CODEX_AUTH || 'api-key';
+if (!['api-key', 'login'].includes(CODEX_AUTH)) {
+  console.error(`REALIZE_CODEX_AUTH: expected "api-key" or "login", got ${JSON.stringify(CODEX_AUTH)}`);
+  process.exit(1);
+}
+if (CODEX_AUTH === 'login' && RUNNER !== 'codex') {
+  console.error('REALIZE_CODEX_AUTH applies only to the codex runner');
+  process.exit(1);
 }
 
 // Environment overrides exist for one caller: a workflow that is dispatched by hand
@@ -130,6 +145,9 @@ for (const forbidden of [homedir(), join(homedir(), '.codex'), '/', REPO, SKILL]
     process.exit(1);
   }
 }
+// The login the `login` mode borrows is the one codex itself would use for this user.
+const LOGIN_SOURCE = join(
+  (process.env.CODEX_HOME || join(homedir(), '.codex')).replace(/^~/, homedir()), 'auth.json');
 const EVALS = join(SKILL, 'evals');
 const RESULTS = process.env.REALIZE_RESULTS_DIR
   ? resolve(process.env.REALIZE_RESULTS_DIR)
@@ -205,8 +223,27 @@ function treatmentId(arm) {
 // same project slug and can read what the previous run left behind.
 const VOLATILE = ['projects', 'sessions', 'session-env', 'shell-snapshots', 'backups'];
 
+// A Codex home keeps what setup built -- its config and installed plugin -- and loses the
+// rest before every cell. A multi-turn cell cannot run --ephemeral (resume needs the session
+// on disk), and the home also accumulates state and memory databases a later cell could read,
+// so the reset is by what survives rather than by a list of what to remove. auth.json is
+// never touched here: the login link below owns it, and a regular file there is not ours.
+const CODEX_KEEP = new Set(['config.toml', 'plugins', '.tmp', 'auth.json']);
+
+function codexHomes() {
+  return ['bare', 'protocol'].map((name) => join(CODEX_STATE_DIR, name));
+}
+
 function resetVolatile() {
-  if (RUNNER === 'codex') return; // --ephemeral plus a fresh workdir carries no session state across cells.
+  if (RUNNER === 'codex') {
+    for (const home of codexHomes()) {
+      if (!existsSync(home)) continue;
+      for (const entry of readdirSync(home)) {
+        if (!CODEX_KEEP.has(entry)) rmSync(join(home, entry), { recursive: true, force: true });
+      }
+    }
+    return;
+  }
   for (const d of VOLATILE) rmSync(join(CONFIG_DIR, d), { recursive: true, force: true });
   // .claude.json carries per-run state too. Cached feature flags are left alone:
   // refetching them every run costs a network round trip and buys nothing, since
@@ -254,8 +291,123 @@ function codexEnv(home, { credential = false } = {}) {
   const env = { ...process.env, CODEX_HOME: home };
   delete env.OPENAI_API_KEY;
   delete env.CODEX_ACCESS_TOKEN;
-  if (!credential) delete env.CODEX_API_KEY;
+  // In login mode the credential is the link, so no key reaches any child.
+  if (!credential || CODEX_AUTH === 'login') delete env.CODEX_API_KEY;
   return env;
+}
+
+// ---------------------------------------------------------------- login link
+//
+// The link exists only while one `codex exec` runs: created immediately before the spawn,
+// checked immediately after it, removed before anything else happens. Setup, the plugin
+// integrity check and grading therefore run against a home with no credential in it, as in
+// api-key mode. Cells are spawned synchronously, one after another, so at most one child
+// holds the login at a time; the lock below extends that to concurrent `run` processes,
+// since every checkout borrowing this machine's login shares the one file.
+
+const LOGIN_LOCK = join(tmpdir(),
+  `epistemic-realize-codex-login-${createHash('sha256').update(LOGIN_SOURCE).digest('hex').slice(0, 12)}.lock`);
+
+function authPath(home) { return join(home, 'auth.json'); }
+
+function authState(home) {
+  let st;
+  try { st = lstatSync(authPath(home)); } catch { return 'absent'; }
+  if (!st.isSymbolicLink()) return 'file';
+  return readlinkSync(authPath(home)) === LOGIN_SOURCE ? 'link' : 'foreign-link';
+}
+
+// A regular auth.json in a disposable home is never deleted: in login mode it can only mean
+// codex replaced the link with a file, and that file may hold a refresh newer than the one
+// the real login has. Moving it back is the owner's decision; the harness only names it.
+function strayAuthFiles() {
+  return codexHomes().filter((home) => authState(home) === 'file').map(authPath);
+}
+
+function strayAuthMessage(files) {
+  return `a regular auth.json sits in a disposable Codex home: ${files.join(', ')}. `
+    + `In login mode that means codex replaced the link with a file, which may hold a login `
+    + `newer than ${LOGIN_SOURCE}. It was left in place; move it over ${LOGIN_SOURCE} yourself `
+    + `if it is newer, or delete it, then re-run.`;
+}
+
+function linkLogin(home) {
+  const state = authState(home);
+  if (state === 'file') throw new Error(strayAuthMessage([authPath(home)]));
+  if (state !== 'absent') unlinkSync(authPath(home));
+  symlinkSync(LOGIN_SOURCE, authPath(home));
+}
+
+// Removes every link this mode could have left, in every home under this target, and
+// reports any regular file it refused to touch. Idempotent: run.sh's exit trap and teardown
+// call it after the run's own cleanup already has.
+function releaseLogins() {
+  for (const home of codexHomes()) {
+    const state = authState(home);
+    if (state === 'link' || state === 'foreign-link') unlinkSync(authPath(home));
+  }
+  return strayAuthFiles();
+}
+
+function acquireLoginLock() {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      writeFileSync(LOGIN_LOCK, `${process.pid}\n`, { flag: 'wx' });
+      return true;
+    } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      const holder = Number(readFileSync(LOGIN_LOCK, 'utf8').trim());
+      let alive = false;
+      try { process.kill(holder, 0); alive = true; } catch (err) { alive = err.code === 'EPERM'; }
+      if (alive && holder !== process.pid) return false;
+      rmSync(LOGIN_LOCK, { force: true }); // the holder is gone; its lock is stale
+    }
+  }
+  return false;
+}
+
+function releaseLoginLock() {
+  try {
+    if (Number(readFileSync(LOGIN_LOCK, 'utf8').trim()) === process.pid) rmSync(LOGIN_LOCK, { force: true });
+  } catch { /* already gone */ }
+}
+
+function loginPreflight() {
+  let st;
+  try { st = statSync(LOGIN_SOURCE); } catch {
+    return `login mode needs an existing codex login at ${LOGIN_SOURCE} (run \`codex login\` there first)`;
+  }
+  if (!st.isFile()) return `login mode: ${LOGIN_SOURCE} is not a regular file`;
+  const rel = relative(codexStateBase, LOGIN_SOURCE);
+  if (!rel.startsWith('..') && !isAbsolute(rel)) {
+    return `login mode: ${LOGIN_SOURCE} lies inside the disposable state directory ${codexStateBase}`;
+  }
+  const stray = strayAuthFiles();
+  if (stray.length) return strayAuthMessage(stray);
+  return null;
+}
+
+// One `codex exec` with the login borrowed for exactly its duration. A link that did not
+// survive the child intact is fatal to the whole run, not to the cell: the next child would
+// otherwise run against whatever codex left in its place.
+class LoginLinkBroken extends Error {}
+
+function spawnCodex(args, options, home) {
+  if (CODEX_AUTH !== 'login') return spawnSync('codex', args, options);
+  linkLogin(home);
+  let r;
+  try {
+    r = spawnSync('codex', args, options);
+  } finally {
+    const state = authState(home);
+    if (state === 'link' || state === 'foreign-link') unlinkSync(authPath(home));
+    if (state !== 'link') {
+      throw new LoginLinkBroken(state === 'file'
+        ? strayAuthMessage([authPath(home)])
+        : `the login link in ${home} was ${state === 'absent' ? 'removed' : 'repointed'} during codex exec; stopping before another child runs`);
+    }
+  }
+  return r;
 }
 
 function runSetupCommand(args, home) {
@@ -270,6 +422,11 @@ function runSetupCommand(args, home) {
 }
 
 function setupCodex() {
+  // Rebuilding removes the homes wholesale. A leftover link goes with them harmlessly; a
+  // regular auth.json may be the only copy of a refreshed login, so setup stops instead.
+  const stray = strayAuthFiles();
+  if (stray.length) throw new Error(strayAuthMessage(stray));
+  releaseLogins();
   rmSync(CODEX_STATE_DIR, { recursive: true, force: true });
   mkdirSync(CODEX_STATE_DIR, { recursive: true });
 
@@ -290,7 +447,8 @@ function setupCodex() {
   console.log(`target      : ${TARGET}`);
   console.log(`state homes : ${[...homes.keys()].join(', ')}`);
   console.log(`model       : ${CFG.models.join(', ')} (${CFG.codex.reasoningEffort})`);
-  console.log('setup consumed and stored no credential; run requires process-scoped CODEX_API_KEY');
+  console.log('setup consumed and stored no credential; run requires process-scoped CODEX_API_KEY,');
+  console.log('or REALIZE_CODEX_AUTH=login to borrow this machine\'s codex login for each exec only');
 }
 
 function setup() {
@@ -392,13 +550,16 @@ function runOne({ model, armName, arm, caseName, rep }) {
     env = { ...process.env, CLAUDE_CONFIG_DIR: CONFIG_DIR };
   }
 
-  const r = spawnSync(command, args, {
+  const options = {
     cwd: wd,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
     env,
     timeout,
-  });
+  };
+  const r = RUNNER === 'codex'
+    ? spawnCodex(args, options, codexHome(arm))
+    : spawnSync(command, args, options);
   if (r.stderr) writeFileSync(outFile.replace(/\.jsonl$/, '.err'), r.stderr);
 
   // Existence of the transcript IS the cache, so an empty one written here would freeze
@@ -432,12 +593,7 @@ function runOne({ model, armName, arm, caseName, rep }) {
   return { skipped: false, outFile, exit: r.status };
 }
 
-function run() {
-  if (RUNNER === 'codex' && !process.env.CODEX_API_KEY) {
-    console.error('Codex run requires CODEX_API_KEY; setup never reads or stores a credential');
-    process.exitCode = 1;
-    return;
-  }
+function runCells() {
   const failures = [];
   for (const model of CFG.models) {
     for (const [armName, arm] of Object.entries(CFG.arms)) {
@@ -454,10 +610,51 @@ function run() {
           } catch (e) {
             failures.push(`${model}/${armName}/${caseName}/${rep}: ${e.message}`);
             console.log(`FAILED: ${e.message}`);
+            // A broken login link stops the run: the next child would meet what codex left.
+            if (e instanceof LoginLinkBroken) return failures;
           }
         }
       }
     }
+  }
+  return failures;
+}
+
+function run() {
+  let failures;
+  if (RUNNER === 'codex' && CODEX_AUTH === 'login') {
+    const problem = loginPreflight();
+    if (problem) { console.error(problem); process.exitCode = 1; return; }
+    if (!acquireLoginLock()) {
+      console.error(`another login-mode run holds ${LOGIN_LOCK}; runs sharing one login run one at a time`);
+      process.exitCode = 1;
+      return;
+    }
+    // spawnSync blocks, so a signal lands after the running child has exited; the handlers
+    // then clear any link before the process goes. run.sh's exit trap and teardown repeat
+    // the release for the case where this process never got that far.
+    const release = () => {
+      const stray = releaseLogins();
+      if (stray.length) console.error(strayAuthMessage(stray));
+      releaseLoginLock();
+    };
+    const onSignal = (signal) => { release(); process.exit(signal === 'SIGINT' ? 130 : 143); };
+    process.on('SIGINT', onSignal);
+    process.on('SIGTERM', onSignal);
+    try {
+      failures = runCells();
+    } finally {
+      release();
+      process.off('SIGINT', onSignal);
+      process.off('SIGTERM', onSignal);
+    }
+  } else {
+    if (RUNNER === 'codex' && !process.env.CODEX_API_KEY) {
+      console.error('Codex run requires CODEX_API_KEY, or REALIZE_CODEX_AUTH=login to borrow this machine\'s codex login; setup never reads or stores a credential');
+      process.exitCode = 1;
+      return;
+    }
+    failures = runCells();
   }
   if (failures.length) {
     console.error(`\n${failures.length} requested cell(s) did not produce a gradeable run:`);
@@ -785,13 +982,31 @@ function report() {
 
 // ---------------------------------------------------------------- main
 
+function releaseLoginCommand() {
+  // run.sh's exit trap. Removes any login link the run left and reports a regular file
+  // left in a link's place; never prints or reads the login itself.
+  if (RUNNER !== 'codex') return;
+  const stray = releaseLogins();
+  if (stray.length) { console.error(strayAuthMessage(stray)); process.exitCode = 1; }
+}
+
 function teardown() {
   const all = process.argv.includes('--all');
   const purge = process.argv.includes('--purge');
+  let stray = [];
+  if (RUNNER === 'codex') {
+    // Whatever mode the last run used, no link survives a teardown.
+    stray = releaseLogins();
+    if (stray.length) { console.error(strayAuthMessage(stray)); process.exitCode = 1; }
+  }
   resetVolatile();
   if (RUNNER === 'claude') console.log(`reset volatile state in ${CONFIG_DIR}`);
-  else console.log('codex runs are ephemeral; no session rollout state to reset');
+  else console.log(`reset per-cell state in ${CODEX_STATE_DIR}; no login link left in it`);
   if (all || purge) {
+    if (stray.length) {
+      console.error(`kept ${CODEX_STATE_DIR}: it holds the auth.json named above`);
+      return;
+    }
     if (RUNNER === 'codex') rmSync(CODEX_STATE_DIR, { recursive: true, force: true });
     else rmSync(CONFIG_DIR, { recursive: true, force: true });
     rmSync(WORK, { recursive: true, force: true });
@@ -810,7 +1025,8 @@ if (cmd === 'setup') setup();
 else if (cmd === 'run') run();
 else if (cmd === 'report') report();
 else if (cmd === 'teardown') teardown();
+else if (cmd === 'release-login') releaseLoginCommand();
 else {
-  console.log('usage: node harness.mjs <setup|run|report|teardown> <skill> [--markdown|--all|--purge]');
+  console.log('usage: node harness.mjs <setup|run|report|teardown|release-login> <skill> [--markdown|--all|--purge]');
   process.exit(1);
 }

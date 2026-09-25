@@ -25,8 +25,9 @@ Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` check
 active runner and refuses rather than failing halfway.
 
 Claude needs one human step once: obtaining a token against the target-specific
-isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active;
-setup neither consumes nor stores it.
+isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active, or,
+with `REALIZE_CODEX_AUTH=login`, a codex login already on the machine; setup neither
+consumes nor stores either.
 
 ```bash
 CLAUDE_CONFIG_DIR=~/.claude-eval/inquire claude setup-token
@@ -63,6 +64,7 @@ For the Codex Luna xhigh profile:
 ```bash
 REALIZE_RUNNER=codex ./setup.sh inquire
 CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
+REALIZE_CODEX_AUTH=login REALIZE_RUNNER=codex ./run.sh inquire   # borrow this machine's login instead
 REALIZE_RUNNER=codex node ./harness.mjs report inquire
 REALIZE_RUNNER=codex ./teardown.sh inquire
 ```
@@ -73,6 +75,7 @@ the selected plugin. The bare home has no marketplace or plugin state. `run` rem
 `OPENAI_API_KEY` and `CODEX_ACCESS_TOKEN` from child environments and supplies
 `CODEX_API_KEY` only to `codex exec`; plugin setup and integrity checks receive no
 credential.
+
 Codex supports only the `bare` and `protocol` arms because it has no deployed analogue
 of Claude's output-style treatment. Codex case worktrees live under the system temporary
 directory rather than below this repository, so parent `AGENTS.md` and git state cannot
@@ -83,6 +86,38 @@ Editing prose for an ablation therefore creates a new cell instead of reusing th
 pre-ablation transcript. Codex also compares the installed cache's `SKILL.md` digest
 to the source immediately before spending a run; an edit made after setup fails closed
 with an instruction to rerun setup instead of measuring stale treatment bytes.
+
+### Login mode
+
+`REALIZE_CODEX_AUTH=login` authenticates each `codex exec` child with the login already at
+`$CODEX_HOME/auth.json` (default `~/.codex/auth.json`) instead of an API key. What keeps the
+homes disposable:
+
+- **The link lives for one child.** It is created in the arm's home immediately before a
+  `codex exec` and removed immediately after, before the tree digest, the next cell's
+  plugin integrity check, or grading. Setup, `codex plugin list` and the report therefore
+  meet a home with no credential, exactly as in API-key mode, and no API key reaches any
+  child.
+- **A link, never a copy.** A ChatGPT login rotates its refresh token. A refresh written
+  into a copy would retire the token the real file still holds and sign the user out; a
+  refresh written through the link lands in the real file. The login itself is never read,
+  printed or copied by the harness.
+- **Checked after every child.** If the link is not still a link to the same file once the
+  child exits, the run stops before another child starts. A regular `auth.json` found in its
+  place may hold a refresh newer than the real login, so it is named and never deleted —
+  not by the run, the exit trap, setup or teardown. Moving it back is the owner's call.
+- **No overlap.** Cells are spawned synchronously, so one run has at most one child holding
+  the login. A lock under the system temporary directory, keyed by the login's path, refuses
+  a second login-mode run — another checkout's included — until the first finishes; a lock
+  whose holder has exited is taken over. An interactive codex session using the same login
+  is outside the lock, which is the same condition as two terminals signed in at once.
+- **Removed on every exit path.** The run clears links in `finally` and on `SIGINT` /
+  `SIGTERM`; `run.sh` repeats that from an exit trap (`harness.mjs release-login`) for a
+  harness that never reached its own cleanup; `teardown.sh` does it at every depth.
+
+A cell's home also loses everything but its config, installed plugin and `auth.json` slot
+before the cell starts, in either mode, so nothing one cell wrote to its home is readable
+by the next.
 
 ## Where isolation lives
 
@@ -164,9 +199,9 @@ it. It reads `n/a` in an arm with no plugin, where `integrity` already asserts t
 absence, and `trace-unavailable` for Codex, whose JSONL carries no skill-invocation
 event; a model naming the skill counts as invocation evidence nowhere.
 
-Codex rows report token use from `turn.completed`. They leave cost blank because the
-CLI does not emit a dollar value for the API-key run. Claude rows retain the emitted
-cost. A Codex timeout is a failed launch and is not cached or graded.
+Codex rows report token use from `turn.completed`. They leave cost blank because the CLI
+emits no dollar value, whichever way it authenticated. Claude rows retain the emitted cost.
+A Codex timeout is a failed launch and is not cached or graded.
 
 A cell whose launch never produced a transcript is not written or counted. `run` and
 `report` both propagate that incompleteness, so a re-run still picks the cell up.

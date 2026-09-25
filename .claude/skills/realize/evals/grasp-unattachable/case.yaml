@@ -1,0 +1,19 @@
+schema_version: "1.1"
+name: grasp-unattachable
+
+context:
+  # Both /grasp cases mount the same substrate on purpose. What separates them is what the
+  # user asks to understand, not what the tree contains: this case asks about a rationale the
+  # tree does not record, its pair asks about behaviour the tree settles. Different substrates
+  # would turn this case's question into "is a file missing" rather than "does the protocol
+  # notice it has no ground".
+  scaffold_script: ../scaffold-grasp.sh
+
+multi_turn:
+  # The user's turns after the first are a fixed script, sent by the harness one per subject
+  # turn: reply-1.md, reply-2.md, ... in order, until the first gap. oracle.md states the
+  # policy and why it reads nothing of what the subject said.
+  oracle: oracle.md
+  driver: harness
+  # The harness digests the tree after every subject turn; target-preserved reads them all.
+  snapshot_tree_per_turn: true

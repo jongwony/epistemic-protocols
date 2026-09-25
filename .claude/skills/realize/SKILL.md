@@ -61,6 +61,7 @@ export CLAUDE_CODE_OAUTH_TOKEN="$(...)" && ./run.sh inquire
 
 REALIZE_RUNNER=codex ./setup.sh inquire      # no credential consumed or stored
 CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
+REALIZE_CODEX_AUTH=login REALIZE_RUNNER=codex ./run.sh inquire   # or: this machine's codex login
 REALIZE_RUNNER=codex ./teardown.sh inquire
 
 ./teardown.sh inquire                        # Claude volatile state
@@ -69,8 +70,15 @@ REALIZE_RUNNER=codex ./teardown.sh inquire
 For Claude, `setup.sh` prints the one interactive step — obtaining a token against the
 target-specific isolated config directory. For Codex, setup creates bare/protocol homes
 and installs the local protocol plugin only into the protocol home without reading or
-writing a credential. `run.sh` requires `CODEX_API_KEY` and forwards it only to each
-`codex exec` child; `codex login` is never called.
+writing a credential. `run.sh` authenticates each `codex exec` child one of two ways, and
+`codex login` is never called by either:
+
+- **API key** (default): `CODEX_API_KEY` from the run process, forwarded only to each
+  `codex exec` child.
+- **Login** (`REALIZE_CODEX_AUTH=login`): the codex login already on this machine,
+  symlinked into the arm's disposable home only for the span of each `codex exec` — never
+  copied, because a ChatGPT login rotates its refresh token and a copy would strand the real
+  one. `references/runbook.md` carries why that keeps the homes isolated.
 
 Read `references/runbook.md` before the first run. It records where runner isolation
 lives, where the budget floor sits, and what each column of the report asserts.
