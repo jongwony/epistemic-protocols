@@ -24,8 +24,6 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
-The `/frame` utility (epistemic-cooperative) frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The same arrangement functor Hyphegesis runs over the moves it identifies also arranges the perspectives `/frame` supplies.
-
 ## Install
 
 ```

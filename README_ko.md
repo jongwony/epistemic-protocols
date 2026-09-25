@@ -102,7 +102,6 @@ claude plugin install route@epistemic-protocols
 | `/probe` | 뭔가 어긋났는데 어떤 결핍인지 이름 붙일 수 없을 때 — 가설 여럿을 제시하고 당신의 인식으로 라우팅 |
 | **작업 빚기** | |
 | `/triage` | 쌓인 GitHub 이슈를 프로젝트 northstar와 융합한 focused work unit으로 만들고, 각 unit을 포인터로 세션에 넘겨야 할 때 |
-| `/frame` | 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 — 렌즈를 선택지로 놓고, 고른 렌즈마다 필요한 substrate 를 붙여 넘김 |
 | `/forge` | 기억이 아니라 벤더 레퍼런스(모델 prompt guide, Codex Goals 스펙)에 grounding된 prompt나 상주 skill recipe가 필요할 때 |
 | `/reduced-space-test` | 대리물이 실제 대상처럼 동작한다는 주장 — bounded 공간 안에서 검증하고 검증 안 된 나머지를 명시적으로 이월 |
 | `/gate-check` | 옵션 집합이 당신에게 제시되기 직전 — 독립 advisor가 genuine / collapsed / malformed를 판정하고 인용 근거를 먼저 검증 |

@@ -5,6 +5,5 @@
 - When a familiar workflow is transferred to local roles, tools or constraints, audit the permissions and expectations the transfer would justify.
 - When a cross-domain analogy suggests a prediction, check the bearing structural claims and report the supported scope, defeating evidence or missing grounds.
 - When the reader needs an account of either domain first, hand off to an explanation capability before auditing the mapping.
-- When the missing operation is selecting a lens, route to the `/frame` utility.
 - When the deficit is factual context only the user can supply after reachable evidence has been collected, route to `/inquire`.
 - When the result already exists and the concern is its applicability in the actual context, route to `/contextualize`.

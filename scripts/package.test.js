@@ -1304,7 +1304,6 @@ describe('package.js CLI', () => {
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',
-        'frame.zip',
         'gate-check.zip',
         'goal-research.zip',
         'grasp.zip',

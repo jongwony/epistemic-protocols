@@ -15,7 +15,6 @@
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/probe` | 결핍 인식 fit review — 역증거 조건이 붙은 복수의 결핍 가설을 제시하고 사용자 인식으로 라우팅 | 프로토콜 route |
 | `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, 기판 레코드로 외재화 후 포인터로 전달 |
-| `/frame` | 다관점 프레이밍 — 분석 렌즈를 선택지로 놓고, 고른 렌즈마다 필요한 substrate 를 묶음 | 상세 렌즈, 또는 `/conduct` nudge 와 함께 넘기는 lens↔substrate 쌍 |
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 — 프로젝트가 표방한 목표로 아티팩트를 수렴 | 적용된 수정 + 인계 + 수렴 trace |
@@ -71,20 +70,6 @@ RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE 
 - route choice는 현재 세션에서 사용자가 결정: independent session, re-triage
 - independent session으로 routed된 unit은 레코드를 외재화하고 포인터로 전달; re-triage는 레코드를 외재화하지 않음
 
-### /frame — 다관점 프레이밍
-
-질문에 맞는 프레임워크가 없을 때 분석 렌즈를 선택지로 놓고, 고른 렌즈마다 필요한 substrate 를 선언한다 — 권위 있는 `substrate_need` (추상 페르소나·능력)와 참고용 `binding_hints` (후보 목록) — 그리고 프레이밍된 대상을 넘긴다. frame 은 렌즈를 만들고 넘기는 데서 멈춘다: 렌즈를 격리·배열·실행·종합하지 않는다. 특화 substrate 가 필요한 렌즈가 여럿이면 격리·배열·종합 장치를 맡을 `/conduct` nudge 를 함께 넘긴다.
-
-```
-Mission Brief → Gather → 렌즈 선택 → substrate 묶기 → LensReturn | SubstrateCorrespondence (+ /conduct nudge)
-```
-
-주요 특징:
-- recognition over recall: 렌즈를 열린 질문으로 묻지 않고 선택지로 놓는다
-- 렌즈 하나도 유효하다; 특화 substrate 가 필요 없는 렌즈는 상세 렌즈로 바로 돌아온다
-- substrate-invariant: 필요를 선언할 뿐 구체 에이전트를 묶지 않는다
-- 수렴은 렌즈를 격리 실행한 substrate 만 주장할 수 있고, 프레이밍한 컨텍스트는 주장하지 않는다
-
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
 대상 레퍼런스 문서(벤더 모델 prompt guide, Codex Goals 스펙)를 읽고, 사용자의 미명세 의도를 modality-aware IR로 역귀납한 뒤, canonical-external 동적 fetch + staleness guard로 레퍼런스에 grounding하고, 후속 세션/도구용 prompt artifact(후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe)를 projection한다.
@@ -129,7 +114,6 @@ epistemic-cooperative/
     ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
     ├── probe/SKILL.md            # /probe 결핍 인식 fit review
     ├── triage/SKILL.md           # /triage work-unit formation
-    ├── frame/SKILL.md            # /frame 다관점 프레이밍
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop 수렴 페이스 리뷰-resolve 루프
@@ -148,7 +132,6 @@ epistemic-cooperative/
 | 체험을 통한 프로토콜 학습 | `/onboard` |
 | 워크플로우 변경 후 재평가할 때 | `/onboard` |
 | 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
-| 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 | `/frame` |
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
 | 뭔가 어긋났는데 어떤 결핍인지 아직 이름 붙이지 못할 때 | `/probe` |
 | 모든 finding 이 처분될 때까지 변경을 리뷰로 끌고 갈 때 | `/review-loop` |
@@ -163,7 +146,6 @@ epistemic-cooperative/
 /probe
 /triage
 /triage #41 #52 #60
-/frame [your question]
 /review-loop codex 123
 /goal-research <question>
 ```

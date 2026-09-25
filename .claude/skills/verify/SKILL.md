@@ -130,10 +130,6 @@ Consult `references/review-checklists.md` for:
 
 ## Integration Notes
 
-### With /frame
-
-Verification may trigger perspective selection if findings require analysis approach decision.
-
 ### Standalone Usage
 
 Most common pattern: invoke `/verify` before `/commit` command.
@@ -160,14 +156,14 @@ Ready to commit.
 ## Verification Results
 
 ### Critical (1 issue)
-- State machine totality: epistemic-cooperative/skills/frame/SKILL.md - Undefined transition when |perspectives(C)| < 2
+- State machine totality: hyphegesis/skills/conduct/SKILL.md - Undefined transition when the work prospect names fewer than two moves
 
 ### Concerns (2 issues)
-- Categorical terminology: epistemic-cooperative/skills/frame/SKILL.md - limit/colimit may not match intended semantics
-- Directive verb: epistemic-cooperative/skills/frame/SKILL.md - "Invoke AskUserQuestion" should be "call"
+- Categorical terminology: hyphegesis/skills/conduct/SKILL.md - limit/colimit may not match intended semantics
+- Directive verb: hyphegesis/skills/conduct/SKILL.md - "Invoke AskUserQuestion" should be "call"
 
 ### Notes (1 observation)
-- Version: epistemic-cooperative plugin.json version not bumped since last change
+- Version: hyphegesis plugin.json version not bumped since last change
 
 ---
 How to proceed?

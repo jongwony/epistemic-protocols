@@ -10,7 +10,6 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 
 | Chain | Frequency | Pattern |
 |-------|-----------|---------|
-| `/frame` (utility) → `/conduct` | Common | Frame derives the lenses → Conduct runs them as the session's method |
 
 ## Multi-Protocol Sessions
 

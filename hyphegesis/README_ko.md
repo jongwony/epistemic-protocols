@@ -24,8 +24,6 @@
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
-`/frame` 유틸리티(epistemic-cooperative)는 한 탐구를 위한 *어떤 관점*을 프레이밍하고, Hyphegesis는 세션 전체 이동들이 *어떻게* 관계 맺는지를 지휘합니다. Hyphegesis가 식별한 이동들 위에서 인스턴스화하는 그 배열 functor가 `/frame`이 공급하는 관점도 배열합니다.
-
 ## 설치
 
 ```
