@@ -61,6 +61,7 @@ Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + re
 | **Scope** | 사용자가 변경의 전체 영향을 보지 못함 |
 | **Sequence** | 사용자가 실행 순서를 이해하지 못함 |
 | **Horizon** | 현재 entry point의 co-intended but unspoken edge — 사용자가 자신의 프레임 안에서는 이름 붙일 수 없는 지점. evidence-bound·material·unspoken 조건(false-positive guard)을 만족할 때만 surface |
+| **Contradiction** | 세션 안에서 함께 성립할 수 없는 두 진술(각각 선 자리에서 인용) — 누구의 것인지에 따라 다룸: 사용자가 한쪽을 쥔 모순은 먼저 사용자의 설명을 청하고, 대상 안의 모순은 대상에 대한 발견으로 보이고, 앞선 AI 설명과의 모순은 AI 가 바로잡음 |
 | **Emergent** | 정형 유형에 속하지 않는 gap — 구체적 comprehension deficit에 맞춰 적응 |
 
 ## 저자

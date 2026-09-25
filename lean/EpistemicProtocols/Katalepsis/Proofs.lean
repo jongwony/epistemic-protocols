@@ -17,13 +17,42 @@ theorem silence (respond : Context P → Gate → Response P) (trace : Context P
     (c : Context P) : grasp respond trace c [] = .holding c := by
   simp [grasp]
 
-theorem horizon_preempts (c : Context P) (t : RecordId) (hd : HorizonDue c t) :
-    gateFor c t = .horizonProbe t := by
-  simp [gateFor, hd]
+theorem user_conflict_first (c : Context P) (t : RecordId) (hu : UserConflictDue c t) :
+    gateFor c t = .conflict t := by
+  simp [gateFor, hu]
+
+theorem user_conflict_preempts_return (c : Context P) (t : RecordId) (g : Gate)
+    (hu : UserConflictDue c t) : settle c t g = .conflict t := by
+  simp [settle, hu]
+
+theorem conflict_only_user (c : Context P) (t : RecordId) (h : gateFor c t = .conflict t) :
+    UserConflictDue c t := by
+  by_cases hu : UserConflictDue c t
+  · exact hu
+  · exfalso
+    simp only [gateFor, hu, ↓reduceIte] at h
+    split at h
+    · exact Gate.noConfusion h
+    · split at h
+      · exact Gate.noConfusion h
+      · split at h <;> exact Gate.noConfusion h
+
+theorem conflict_dissolved (c : Context P) (t : RecordId) (hd : Dissolved c) :
+    advance c (.conflict t) .cont = .gate c (settle c t (.coverage t)) := by
+  simp [advance, hd]
+
+theorem conflict_standing_resolves (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
+    (hi : otherIntent c = none) :
+    advance c (.conflict t) .cont = .gate (c ++ (attach c).map (·.val)) (.resolve t) := by
+  simp [advance, hd, hi]
+
+theorem horizon_preempts (c : Context P) (t : RecordId) (hu : ¬ UserConflictDue c t)
+    (hd : HorizonDue c t) : gateFor c t = .horizonProbe t := by
+  simp [gateFor, hu, hd]
 
 theorem horizon_preempts_return (c : Context P) (t : RecordId) (g : Gate)
-    (hd : HorizonDue c t) : settle c t g = .horizonProbe t := by
-  simp [settle, hd]
+    (hu : ¬ UserConflictDue c t) (hd : HorizonDue c t) : settle c t g = .horizonProbe t := by
+  simp [settle, hu, hd]
 
 theorem asked_not_reasked (c : Context P) (t : RecordId) (hc : HorizonCandidate)
     (ha : admissible c t = some hc) (hk : Asked c t hc) : gateFor c t ≠ .horizonProbe t := by
@@ -32,10 +61,12 @@ theorem asked_not_reasked (c : Context P) (t : RecordId) (hc : HorizonCandidate)
     rw [ha] at ha'
     cases ha'
     exact hk' hk
-  simp only [gateFor, hnd, ↓reduceIte]
-  split
-  · exact fun h => Gate.noConfusion h
-  · split <;> exact fun h => Gate.noConfusion h
+  by_cases hu : UserConflictDue c t
+  · simp [gateFor, hu]
+  · simp only [gateFor, hu, hnd, ↓reduceIte]
+    split
+    · exact fun h => Gate.noConfusion h
+    · split <;> exact fun h => Gate.noConfusion h
 
 theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : ¬ AsksSteps c)
     (hi : otherIntent c = none) :
@@ -54,7 +85,9 @@ theorem other_intent_no_disclosure (c : Context P) (t : RecordId) (e : EntryPoin
     · exact fun h => Gate.noConfusion h
     · split
       · exact fun h => Gate.noConfusion h
-      · split <;> exact fun h => Gate.noConfusion h
+      · split
+        · exact fun h => Gate.noConfusion h
+        · split <;> exact fun h => Gate.noConfusion h
   · exact fun h => Gate.noConfusion h
 
 theorem probe_other_intent (c : Context P) (t : RecordId) (g : Selectable) (e : EntryPoint)
@@ -74,9 +107,10 @@ theorem steps_cue (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : AsksS
   simp [advance, horizonAnswer, hm, hs]
 
 theorem choice_yields_to_horizon (c : Context P) (g : Gate) (t : RecordId)
-    (hd : HorizonDue c t) : aspectStep c g t = .gate c (.horizonProbe t) := by
+    (hu : ¬ UserConflictDue c t) (hd : HorizonDue c t) :
+    aspectStep c g t = .gate c (.horizonProbe t) := by
   unfold aspectStep
-  split <;> simp [settle, hd]
+  split <;> simp [settle, hu, hd]
 
 theorem reached_taken (c : Context P) (t : RecordId) (hr : Reached c) :
     advance c (.horizonProbe t) .cont = .gate c (settle c t (.coverage t)) := by
@@ -169,6 +203,18 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
       · split
         · exact ⟨_, _, rfl⟩
         · exact ⟨_, _, rfl⟩
+    | conflict t =>
+      left; simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
+    | resolve t =>
+      left; simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
     | startAspect t => exact Or.inl (ha c (.startAspect t) t)
     | probe t g =>
       left; simp only [advance]; split
@@ -188,6 +234,18 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     | horizonProbe t => simp only [advance]; exact hh t
     | cue t => simp only [advance]; exact hh t
     | reveal t =>
+      simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
+    | conflict t =>
+      simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
+    | resolve t =>
       simp only [advance]; split
       · exact ⟨_, _, rfl⟩
       · split
@@ -267,6 +325,16 @@ theorem selected_by_utterance {c : Context P} {s : Cite c}
 theorem aspect_by_utterance {c : Context P} {s : Cite c}
     (ok : (aspectCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
 
-theorem selectable_not_horizon (g : Selectable) : g.val ≠ .horizon := g.property
+theorem selectable_not_horizon (g : Selectable) : g.val ≠ .horizon := by
+  intro h
+  have hp := g.property
+  rw [h] at hp
+  simp [offered] at hp
+
+theorem selectable_not_contradiction (g : Selectable) : g.val ≠ .contradiction := by
+  intro h
+  have hp := g.property
+  rw [h] at hp
+  simp [offered] at hp
 
 end Katalepsis

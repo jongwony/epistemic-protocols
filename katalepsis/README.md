@@ -68,6 +68,7 @@ claude plugin install katalepsis@epistemic-protocols
 | **Scope** | User doesn't see full impact of changes |
 | **Sequence** | User doesn't understand execution order |
 | **Horizon** | A co-intended but unspoken edge of the current entry point the user could not name from within their own framing — surfaced only when evidence-bound, material, and unspoken (false-positive guarded) |
+| **Contradiction** | Two statements in the session that cannot both hold, each quoted where it stands — taken up by whose it is: one the user holds a side of asks first for their explanation, one inside the target is shown as a finding about it, one against an earlier AI explanation is the AI's to correct |
 | **Emergent** | Gap outside the canonical types, adapted to the specific comprehension deficit |
 
 ## Author
