@@ -849,13 +849,11 @@ function parseCodex(events) {
   const skillInvocations = turns.flatMap((t) => t.skillInvocations);
   const messages = turns.flatMap((t) => t.messages);
   const done = turns.every((t) => t.completed);
-  // Token use is summed over every turn; a resumed turn reports its own usage.
-  const usage = turns.some((t) => t.completed?.usage)
-    ? turns.reduce((s, t) => ({
-        input_tokens: s.input_tokens + (t.completed?.usage?.input_tokens || 0),
-        output_tokens: s.output_tokens + (t.completed?.usage?.output_tokens || 0),
-      }), { input_tokens: 0, output_tokens: 0 })
-    : null;
+  // A resumed thread's turn.completed reports the thread's running total, not the turn's
+  // own use (observed on codex-cli 0.155.1: each resume's output_tokens already includes
+  // every earlier turn's), so the last turn's figure is the cell's total. Summing would
+  // count turn 1 once per turn.
+  const usage = [...turns].reverse().find((t) => t.completed?.usage)?.completed.usage || null;
   return {
     init: { plugins: skillInvocations.length ? [{ name: PLUGIN_NAME }] : [], output_style: 'default' },
     result: done ? { is_error: false, total_cost_usd: null, num_turns: turns.length } : null,

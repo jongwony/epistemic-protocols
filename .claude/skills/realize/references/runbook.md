@@ -202,7 +202,8 @@ it. It reads `n/a` in an arm with no plugin, where `integrity` already asserts t
 absence, and `trace-unavailable` for Codex, whose JSONL carries no skill-invocation
 event; a model naming the skill counts as invocation evidence nowhere.
 
-Codex rows report token use from `turn.completed`, summed over every turn of the cell.
+Codex rows report token use from `turn.completed`; a resumed thread reports its running
+total there, so a multi-turn cell's figure is its last turn's.
 They leave cost blank because the CLI emits no dollar value, whichever way it
 authenticated. Claude rows retain the emitted cost. A Codex timeout is a failed launch and is not cached or graded.
 
