@@ -28,10 +28,10 @@ Hyphegesis(WP) → conduct(c, utterances), where c is the fused session context:
     support: relay(handoff unreadable) → report | not warranted: relay-route — the single
     protocol, or the evident method, as a recommendation → report] → the map → Stop
   next utterance u: c' := observe(fuse(c, u)) →
-    verdict(c') = withdraw → what stood, reported; no method
-    verdict(c') = route(target) → proceed to the protocol the person named, citing their words
+    read(u).verdict = withdraw → what stood, reported; no method
+    read(u).verdict = route(target) → proceed to the protocol the person named, citing their words
     the pointer does not resolve, or conduction is no longer warranted → relay → report
-    verdict(c') = sufficient ∧ Covered(c') → the conduct trace → handoff → ConductedMethod
+    read(u).verdict = sufficient ∧ Covered(c') → the conduct trace → handoff → ConductedMethod
     otherwise → the map again, drawn from c', with a ledger of what the answer changed
   no utterance: the map holds; nothing is taken
   after handoff: the substrate runs the method and returns one consolidated summary of every
@@ -136,6 +136,8 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+
 variable {P : Type}
 
 /-- `WP`, `WorkProspect`: the work or goal facing object-level cognition, its method not yet
@@ -202,10 +204,6 @@ opaque PointerUnreadable : Context P → Prop
 -- elab: an open witness lets the occupancy readings below be declared `opaque`.
 instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
 
-def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
-  | .open_ _   => false
-  | .filled .. => true
-
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
   | .filled a .. => some a
@@ -230,22 +228,6 @@ abbrev MoveSet := List Move
     resolution, and the analysis passes and delegations the session affords: the move set the
     draft proposes. It settles nothing. -/
 opaque candidates : Context P → MoveSet
-
-/-- **Your judgment**: the cited utterance confirms or revises the move set to `ms`. -/
-opaque MovesSupported : Context P → Turn P → MoveSet → Prop
-
-/-- The move set is the person's where they set it: only their statement fills it. -/
-def moveSetCoord : Coord P MoveSet := { admits := (· = .utterance), supports := MovesSupported }
-
-/-- **Your judgment**: the move set the person's utterances set — confirming, adding, or removing
-    moves; open where they have not touched it. -/
-opaque moveSet : (c : Context P) → Occ (moveSetCoord (P := P)) c
-
-/-- The moves the map holds: the person's set where they set one, the draft's otherwise; a move
-    named twice is one move. -/
-def moves (c : Context P) : MoveSet := ((filledValue (moveSet c)).getD (candidates c)).eraseDups
-
-inductive Axis | order | independence | reconciliation | termination | routing
 
 /-- The classes every downstream obligation dispatches on, never a value's name. -/
 inductive ObligationClass | relaxesIsolation | needsStopGround | crossesSpan
@@ -309,7 +291,7 @@ inductive Routing
 
 /-- `MoveRegion`: moves sharing one conduct treatment. Whether a decision the person made on one
     region covers another — a region renamed, split, or merged — is read from what their
-    utterance denoted (`SlotSupported`, `CutSupported`), never from equality of this structure. -/
+    utterance denoted (`read`, `reach`), never from equality of this structure. -/
 structure Region where
   name    : String
   members : List Move
@@ -323,21 +305,6 @@ def IsPartition (ms : MoveSet) (rs : List Region) : Prop :=
 /-- **Your proposal**: a cut that partitions `ms`, citing the non-uniformity you read to cut that
     way. -/
 opaque proposedCut : Context P → MoveSet → List Region
-
-/-- **Your judgment**: the cited utterance supplies `rs` as the cut, and `rs` partitions the move
-    set the map holds. A supplied cut that does not is answered with why and fills nothing;
-    rejecting a cut never requires the person to author its replacement. -/
-opaque CutSupported : Context P → Turn P → List Region → Prop
-
-def cutCoord : Coord P (List Region) := { admits := (· = .utterance), supports := CutSupported }
-
-/-- **Your judgment**: the cut the person's utterances set; open where they have not set one, or
-    where a later change to the moves leaves it no partition — the proposal then stands and names
-    the cut they had set. -/
-opaque cutSet : (c : Context P) → Occ (cutCoord (P := P)) c
-
-/-- The cut in force: the person's where they set one, your proposal otherwise. -/
-def cut (c : Context P) : List Region := (filledValue (cutSet c)).getD (proposedCut c (moves c))
 
 inductive EdgeAxis | independence | reconciliation | termination | routing
 
@@ -390,31 +357,33 @@ instance {s : Slot} : Inhabited (DraftSlot s) := ⟨⟨defaultValue s, none, [],
     stop is wanted. -/
 opaque draft : Context P → (s : Slot) → DraftSlot s
 
-/-- **Your judgment**: the cited utterance sets `v` on `s` — a named value selected, a composite
-    composed, or a value no presented set named, with the classes it declares — and what it
-    denoted covers `s`. A decision made on a region the cut has since renamed, split, or merged
-    covers `s` where that is what the person meant, and does not where their words leave it
-    open. -/
-opaque SlotSupported : (s : Slot) → Context P → Turn P → SlotVal s → Prop
+/-! What the person said. Each person turn is read once, against the context that stood when they
+    sent it; everything the person constitutes — the verdict, the move set, the cut, a slot's value —
+    is read off those readings and nothing else. -/
 
-/-- A slot value is the person's only through their statement. -/
-def slotCoord (s : Slot) : Coord P (SlotVal s) :=
-  { admits := (· = .utterance), supports := SlotSupported s }
+/-- Whether a decision made on slot `s₀` carries to slot `s`: the same axis, and then a value of
+    one is a value of the other. -/
+def transfer : (s₀ s : Slot) → SlotVal s₀ → Option (SlotVal s)
+  | .order, .order, v                                         => some v
+  | .edge .independence _, .edge .independence _, v           => some v
+  | .edge .reconciliation _, .edge .reconciliation _, v       => some v
+  | .edge .termination _, .edge .termination _, v             => some v
+  | .edge .routing _, .edge .routing _, v                     => some v
+  | _, _, _                                                   => none
 
-/-- **Your judgment**: the value the person set on `s`. It stays theirs when a later utterance
-    changes something upstream, on the scope they set it for; open where they never set one,
-    where they returned it to the draft, and where an upstream change leaves unclear whether
-    their decision reaches `s`. -/
-opaque slot : (c : Context P) → (s : Slot) → Occ (slotCoord (P := P) s) c
+/-- One edit a person turn makes, with the slot or scope it was made on. -/
+inductive Edit
+  /-- the move set as the turn leaves it — confirmed, added to, or removed from -/
+  | moves (ms : MoveSet)
+  /-- a cut the person supplies -/
+  | cut (rs : List Region)
+  /-- a value set on `s` — a named value selected, a composite composed, or a value no presented
+      set named, with the classes it declares -/
+  | set (s : Slot) (v : SlotVal s)
+  /-- a value returned to the draft -/
+  | release (s : Slot)
 
-/-- One slot of the method: the person's value where they set one, the draft's otherwise. -/
-def take (c : Context P) (s : Slot) : SlotVal s :=
-  match filledValue (slot c s) with
-  | some v => v
-  | none   => (draft c s).value
-
-/-- What the fused context says the person did with the map. Premise: one utterance carries one
-    of these; the edits it also makes are read by the coordinates above. -/
+/-- What the person did with the map. Premise: one utterance carries one of these. -/
 inductive Verdict
   /-- a correction, a value set, a slot opened for a fuller look, a question, or any other
       reading that does not end the run -/
@@ -425,10 +394,92 @@ inductive Verdict
   | withdraw
   /-- go to the protocol the person names instead -/
   | route (target : String)
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
-/-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+structure Reading where
+  verdict : Verdict
+  edits   : List Edit
+
+-- elab: a witness lets `read` be declared `opaque`; it adds no meaning.
+instance : Inhabited Reading := ⟨⟨.cont, []⟩⟩
+
+/-- **Your reading** of the person's turn `u`, against the context `h` that stood when they sent it,
+    `u` last: what they did with the map, and every edit it makes with the slot or scope each
+    denotes. Whatever the turn's form — a request or an instruction constitutes as a statement does.
+    A later turn never reads it again. -/
+opaque read : Context P → Utterance P → Reading
+
+def asUtterance : Turn P → Option (Utterance P)
+  | ⟨.person, f, x⟩ => some ⟨⟨.person, f, x⟩, rfl⟩
+  | _               => none
+
+/-- Every person turn of `c`, by position, each read against the context up to and including it. -/
+def said (c : Context P) : List (Nat × Reading) :=
+  (List.range c.length).filterMap (fun i =>
+    (c[i]?.bind asUtterance).map (fun u => (i, read (c.take (i + 1)) u)))
+
+/-- Every edit the person made, oldest first, with the position of the turn that made it. -/
+def edits (c : Context P) : List (Nat × Edit) :=
+  (said c).flatMap (fun p => p.2.edits.map (p.1, ·))
+
+def lastMoves (c : Context P) : Option MoveSet :=
+  (edits c).foldl (fun acc e => match e.2 with | .moves ms => some ms | _ => acc) none
+
+def lastCut (c : Context P) : Option (List Region) :=
+  (edits c).foldl (fun acc e => match e.2 with | .cut rs => some rs | _ => acc) none
+
+/-- The moves the map holds: the person's set where they set one, the draft's otherwise; a move
+    named twice is one move. -/
+def moves (c : Context P) : MoveSet := ((lastMoves c).getD (candidates c)).eraseDups
+
+open Classical in
+/-- The cut the person set, while it still partitions the moves the map holds; where a later change
+    to the moves leaves it no partition, the proposal stands and names the cut they had set. -/
+noncomputable def cutSet (c : Context P) : Option (List Region) :=
+  (lastCut c).filter (fun rs => decide (IsPartition (moves c) rs))
+
+/-- The cut in force: the person's where they set one, your proposal otherwise. -/
+noncomputable def cut (c : Context P) : List Region := (cutSet c).getD (proposedCut c (moves c))
+
+inductive Reach | reaches | unclear | lapses
+  deriving DecidableEq, Inhabited
+
+/-- **Your judgment**, on the context now standing: whether a decision the person made on slot `s₀`
+    reaches slot `s`. `reaches` where it is the same slot or what they meant covers it — a region
+    renamed, split, or merged; `unclear` where their words leave it open; `lapses` where it plainly
+    does not, the ledger showing what lapsed. -/
+opaque reach : Context P → Slot → Slot → Reach
+
+/-- Where a slot's value comes from. `unclear`: a decision the person made may reach the slot and
+    their words leave it open; the slot is open, and the map names that decision. -/
+inductive SlotState (s : Slot)
+  | draft
+  | set (v : SlotVal s) (turn : Nat)
+  | unclear (turn : Nat)
+
+def SlotState.isSet {s : Slot} : SlotState s → Bool
+  | .set .. => true
+  | _       => false
+
+/-- The latest decision the person made that reaches `s`, or leaves open whether it does; a
+    decision that lapses is passed over. -/
+noncomputable def slotState (c : Context P) (s : Slot) : SlotState s :=
+  go (edits c).reverse
+where
+  go : List (Nat × Edit) → SlotState s
+    | [] => .draft
+    | (i, .set s₀ v) :: rest =>
+      match transfer s₀ s v, reach c s₀ s with
+      | some w, .reaches => .set w i
+      | some _, .unclear => .unclear i
+      | _, _             => go rest
+    | (_, .release s₀) :: rest => if reach c s₀ s = .reaches then .draft else go rest
+    | _ :: rest => go rest
+
+/-- One slot of the method: the person's value where they set one, the draft's otherwise. -/
+noncomputable def take (c : Context P) (s : Slot) : SlotVal s :=
+  match slotState c s with
+  | .set v _ => v
+  | _        => (draft c s).value
 
 /-- **Your judgment**, the adoption condition: every value the method would take was shown on a
     map the person answered, with who proposed it and whether the person set it, its ground, the
@@ -558,18 +609,22 @@ inductive Entry
   | cut
   | slot (s : Slot)
 
--- elab: a witness lets `proposer` be declared `opaque`; it adds no meaning.
-instance : Inhabited Proposer := ⟨.draft⟩
+/-- **Your reading** from the context: the position of the turn that first put forward what `e`
+    holds now. -/
+opaque introducedAt : Context P → Entry → Nat
 
-/-- **Your reading** from the context: who first put forward what `e` holds now. -/
-opaque proposer : Context P → Entry → Proposer
+/-- Who first put `e` forward is the origin of that turn: the person's, or the draft's. -/
+def proposer (c : Context P) (e : Entry) : Proposer :=
+  match c[introducedAt c e]? with
+  | some ⟨.person, _, _⟩ => .person
+  | _                    => .draft
 
 /-- How the move set or the cut came into force: the person's statement set it — named or
     edited — or the closing utterance adopted the draft's. -/
 inductive Standing | set | adopted
 
-def standingOf {A : Type} {q : Coord P A} {c : Context P} (o : Occ q c) : Standing :=
-  if isFilled o then .set else .adopted
+def standingOf {A : Type} (o : Option A) : Standing :=
+  if o.isSome then .set else .adopted
 
 /-- How a slot's value came into force. Kept apart from who proposed it: a drafted value the
     closing utterance took is adopted, never unconstituted. -/
@@ -582,7 +637,7 @@ inductive Adoption
   | defaulted
 
 def adoption (c : Context P) (s : Slot) : Adoption :=
-  if isFilled (slot c s) then .set
+  if (slotState c s).isSet then .set
   else match (draft c s).ground with
     | some g => .adopted g
     | none   => .defaulted
@@ -650,12 +705,18 @@ structure Checkpoint where
 def owesSynthesis (c : Context P) (r : Region) : Bool :=
   containsSynthesis (take c (.edge .reconciliation r)) && returnsOrCrosses (take c (.edge .routing r))
 
-/-- **Your reading**: the non-axis decisions for `r` whose deciding evidence does not exist at
-    design time and does at the checkpoint — `synthesisOutputShape` whenever `owesSynthesis`;
-    among the emergent ones, the cell membership of the decompose-recovery instance, and a need the
-    plan anticipates that only the person can supply before `r` can run — a secret or credential
-    to set, a deployment handed to runtime — registered before the move that needs it. -/
-opaque deferred : Context P → Region → List DeferredDecision
+/-- **Your reading**: the other non-axis decisions for `r` whose deciding evidence does not exist at
+    design time and does at the checkpoint — the cell membership of the decompose-recovery
+    instance, and a need the plan anticipates that only the person can supply before `r` can run —
+    a secret or credential to set, a deployment handed to runtime — registered before the move that
+    needs it. -/
+opaque emergentDeferred : Context P → Region → List String
+
+/-- The decisions `r` defers: `synthesisOutputShape` whenever `owesSynthesis`, then the emergent
+    ones. -/
+noncomputable def deferred (c : Context P) (r : Region) : List DeferredDecision :=
+  (if owesSynthesis c r then [.synthesisOutputShape] else []) ++
+    (emergentDeferred c r).map .emergent
 
 /-- **Your compilation** of the brief the decision calls for, from the current topology and move
     set: structure, never a copy of execution content. -/
@@ -695,6 +756,7 @@ def spanAnnotations (c : Context P) (rs : List Region) : List SpanExternalizatio
     resolve in, and is not part of what the handoff dispatches: a record the pointer names stays
     where its locator names. -/
 structure ConductedMethod (P : Type) (c : Context P) where
+  brief       : MethodBrief
   topology    : (s : Slot) → SlotVal s
   moves       : MoveSet
   regions     : List Region
@@ -711,14 +773,15 @@ structure ConductedMethod (P : Type) (c : Context P) where
 def method (c : Context P) : ConductedMethod P c :=
   let ms := moves c
   let rs := cut c
-  { topology    := take c
+  { brief       := brief c
+    topology    := take c
     moves       := ms
     regions     := rs
     assignment  := assignment c ms rs
     checkpoints := checkpoints c rs
     feasibility := feasibility c
     spans       := spanAnnotations c rs
-    trace       := { moves := (standingOf (moveSet c), ms.map (fun m => (m, proposer c (.move m))))
+    trace       := { moves := (standingOf (lastMoves c), ms.map (fun m => (m, proposer c (.move m))))
                      cut := (standingOf (cutSet c), proposer c .cut)
                      slots := (slotsOf rs).map (fun s => (s, proposer c (.slot s), adoption c s))
                      degradations := degradations c rs
@@ -787,7 +850,7 @@ noncomputable def conduct (respond : Context P → Response P) :
   | c, []      => .holding c
   | c, u :: us =>
     let c₁ := observe (fuse c u)
-    match verdict c₁ with
+    match (read (fuse c u) u).verdict with
     | .withdraw => .withdrawn c₁
     | .route t  => .routed t c₁
     | v =>
@@ -839,29 +902,31 @@ theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
     (h : conduct respond c us = .conducted c₁ t) :
     ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      verdict c₁ = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
+      (read (fuse c₀ u) u).verdict = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
       relayAt c₁ = none ∧ t = respond c₁
 
 The run ends without a method on the person's word only through their `withdraw`.
 theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (h : conduct respond c us = .withdrawn c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧ verdict c₁ = .withdraw
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
+      (read (fuse c₀ u) u).verdict = .withdraw
 
 Another protocol is taken up only where the person named it.
 theorem routed_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (t : String) (c₁ : Context P)
     (h : conduct respond c us = .routed t c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧ verdict c₁ = .route t
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
+      (read (fuse c₀ u) u).verdict = .route t
 
 A person's `withdraw` is read before your relay test.
 theorem withdraw_precedes_relay (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : verdict (observe (fuse c u)) = .withdraw) :
+    (u : Utterance P) (us : List (Utterance P)) (h : (read (fuse c u) u).verdict = .withdraw) :
     conduct respond c (u :: us) = .withdrawn (observe (fuse c u))
 
 A `sufficient` judged not covered does not close: the run continues with your next response
 appended, which `.map` requires to be the map drawn again.
 theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (hs : verdict (observe (fuse c u)) = .sufficient)
+    (us : List (Utterance P)) (hs : (read (fuse c u) u).verdict = .sufficient)
     (hr : relayAt (observe (fuse c u)) = none) (hn : ¬ Covered (observe (fuse c u))) :
     conduct respond c (u :: us) =
       conduct respond (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us
@@ -886,21 +951,35 @@ every other answer's change is. Demonstrated, not asserted.
 -/
 
 /-!
-What `slot` reads as the person's is the method's value and is recorded as theirs; the contract
-proves no more than this about a value set before an upstream change — whether that decision
-still reaches the slot is the judgment `slot` makes.
-theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s)
-    (h : filledValue (slot c s) = some v) : (method c).topology s = v
+What the person set is the method's value and is recorded as theirs; whether a decision made
+before an upstream change still reaches the slot is the judgment `reach` makes, and a decision it
+leaves unclear keeps the slot open and named rather than handing it to the draft.
+theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s) (i : Nat)
+    (h : slotState c s = .set v i) : (method c).topology s = v
 
-theorem person_value_recorded (c : Context P) (s : Slot) (h : isFilled (slot c s) = true) :
+theorem person_value_recorded (c : Context P) (s : Slot) (h : (slotState c s).isSet = true) :
     adoption c s = .set
+
+What the person said is read once: whatever follows — your maps, observations, their later turns
+— never reads an earlier turn again, and your own turns say nothing.
+theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) = said c ++ more
+
+theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c
+
+Every reading is of a turn the person sent.
+theorem said_by_person (c : Context P) (i : Nat) (x : Reading) (h : (i, x) ∈ said c) :
+    ∃ u : Utterance P, c[i]? = some u.val
+
+Who first put an entry forward is read off that turn's origin.
+theorem proposer_by_origin (c : Context P) (e : Entry) (t : Turn P)
+    (h : c[introducedAt c e]? = some t) (ho : t.origin = .person) : proposer c e = .person
 
 Over a cut that partitions the moves, every move of the method lands in a region.
 theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
     ∀ p ∈ (method c).assignment, p.region.isSome = true
 
 A slot nothing grounded carries the default, whatever else the draft holds.
-theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : isFilled (slot c s) = false)
+theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : (slotState c s).isSet = false)
     (hg : (draft c s).ground = none) : take c s = defaultValue s
 
 An emergent termination value declaring `needsStopGround` never leaves its region's ground silent.
@@ -911,17 +990,15 @@ theorem emergent_stop_never_silent (e : Emergent)
 The pointer travels onto the method unchanged.
 theorem pointer_carried (c : Context P) : (method c).pointer = pointer c
 
-The move set, the cut, and every slot value are each filled only by a person's statement; a
-realizability verdict only by an observation.
-theorem moves_by_utterance {c : Context P} {s : Cite c}
-    (ok : (moveSetCoord (P := P)).admits s.kind) : s.kind = .utterance
+The brief travels onto the method: what the work is for, what it hands off, and its span.
+theorem brief_carried (c : Context P) : (method c).brief = brief c
 
-theorem cut_by_utterance {c : Context P} {s : Cite c}
-    (ok : (cutCoord (P := P)).admits s.kind) : s.kind = .utterance
+A region that owes the synthesis checkpoint has one.
+theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : Region)
+    (hr : r ∈ rs) (h : owesSynthesis c r = true) :
+    ∃ k ∈ checkpoints c rs, k.region = r ∧ k.decision = .synthesisOutputShape
 
-theorem slot_by_utterance {c : Context P} {x : Slot} {s : Cite c}
-    (ok : (slotCoord (P := P) x).admits s.kind) : s.kind = .utterance
-
+A realizability verdict is filled only by an observation.
 theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
     (ok : (feasibilityCoord (P := P) r).admits s.kind) : s.kind = .observation
 
@@ -967,6 +1044,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
+
+end
 
 end Hyphegesis
 ```

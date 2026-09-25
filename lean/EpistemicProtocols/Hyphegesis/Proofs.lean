@@ -21,7 +21,7 @@ theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
     (h : conduct respond c us = .conducted c₁ t) :
     ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      verdict c₁ = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
+      (read (fuse c₀ u) u).verdict = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
       relayAt c₁ = none ∧ t = respond c₁ := by
   induction us generalizing c with
   | nil => simp [conduct] at h
@@ -42,7 +42,8 @@ theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
 
 theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (h : conduct respond c us = .withdrawn c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧ verdict c₁ = .withdraw := by
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
+      (read (fuse c₀ u) u).verdict = .withdraw := by
   induction us generalizing c with
   | nil => simp [conduct] at h
   | cons u us ih =>
@@ -61,7 +62,8 @@ theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
 theorem routed_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (t : String) (c₁ : Context P)
     (h : conduct respond c us = .routed t c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧ verdict c₁ = .route t := by
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
+      (read (fuse c₀ u) u).verdict = .route t := by
   induction us generalizing c with
   | nil => simp [conduct] at h
   | cons u us ih =>
@@ -78,24 +80,76 @@ theorem routed_by_person (respond : Context P → Response P) (c : Context P)
         · exact ih _ h
 
 theorem withdraw_precedes_relay (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : verdict (observe (fuse c u)) = .withdraw) :
+    (u : Utterance P) (us : List (Utterance P)) (h : (read (fuse c u) u).verdict = .withdraw) :
     conduct respond c (u :: us) = .withdrawn (observe (fuse c u)) := by
   simp [conduct, h]
 
 theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (hs : verdict (observe (fuse c u)) = .sufficient)
+    (us : List (Utterance P)) (hs : (read (fuse c u) u).verdict = .sufficient)
     (hr : relayAt (observe (fuse c u)) = none) (hn : ¬ Covered (observe (fuse c u))) :
     conduct respond c (u :: us) =
       conduct respond (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
   simp [conduct, hs, hr, hn]
 
-theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s)
-    (h : filledValue (slot c s) = some v) : (method c).topology s = v := by
+theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s) (i : Nat)
+    (h : slotState c s = .set v i) : (method c).topology s = v := by
   simp [method, take, h]
 
-theorem person_value_recorded (c : Context P) (s : Slot) (h : isFilled (slot c s) = true) :
+theorem person_value_recorded (c : Context P) (s : Slot) (h : (slotState c s).isSet = true) :
     adoption c s = .set := by
   simp [adoption, h]
+
+theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) = said c ++ more := by
+  have key : ∀ l : List Nat, (∀ i ∈ l, i < c.length) →
+      l.filterMap (fun i => ((c ++ t)[i]?.bind asUtterance).map
+        (fun u => (i, read ((c ++ t).take (i + 1)) u))) =
+      l.filterMap (fun i => (c[i]?.bind asUtterance).map (fun u => (i, read (c.take (i + 1)) u))) := by
+    intro l hl
+    induction l with
+    | nil => rfl
+    | cons i l ih =>
+      have hi := hl i (by simp)
+      simp only [List.filterMap_cons, List.getElem?_append_left hi,
+        List.take_append_of_le_length (show i + 1 ≤ c.length by omega),
+        ih (fun j hj => hl j (List.mem_cons_of_mem i hj))]
+  simp only [said, List.length_append, List.range_add, List.filterMap_append]
+  exact ⟨_, congrArg (· ++ _) (key _ (fun i hi => List.mem_range.mp hi))⟩
+
+theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c := by
+  have hr : asUtterance r.val = none := by
+    obtain ⟨⟨o, f, x⟩, ho⟩ := r
+    simp only at ho; subst ho; rfl
+  have key : ∀ l : List Nat, (∀ i ∈ l, i < c.length) →
+      l.filterMap (fun i => ((c ++ [r.val])[i]?.bind asUtterance).map
+        (fun u => (i, read ((c ++ [r.val]).take (i + 1)) u))) =
+      l.filterMap (fun i => (c[i]?.bind asUtterance).map (fun u => (i, read (c.take (i + 1)) u))) := by
+    intro l hl
+    induction l with
+    | nil => rfl
+    | cons i l ih =>
+      have hi := hl i (by simp)
+      simp only [List.filterMap_cons, List.getElem?_append_left hi,
+        List.take_append_of_le_length (show i + 1 ≤ c.length by omega),
+        ih (fun j hj => hl j (List.mem_cons_of_mem i hj))]
+  simp only [said, List.length_append, List.length_singleton, List.range_succ,
+    List.filterMap_append]
+  rw [key _ (fun i hi => List.mem_range.mp hi)]
+  simp [hr]
+
+theorem said_by_person (c : Context P) (i : Nat) (x : Reading) (h : (i, x) ∈ said c) :
+    ∃ u : Utterance P, c[i]? = some u.val := by
+  simp only [said, List.mem_filterMap, Option.map_eq_some_iff, Option.bind_eq_some_iff] at h
+  obtain ⟨j, -, u, ⟨e, he, hu⟩, hji⟩ := h
+  cases hji
+  obtain ⟨o, f, x'⟩ := e
+  cases o <;> simp [asUtterance] at hu
+  exact ⟨⟨⟨.person, f, x'⟩, rfl⟩, he⟩
+
+theorem proposer_by_origin (c : Context P) (e : Entry) (t : Turn P)
+    (h : c[introducedAt c e]? = some t) (ho : t.origin = .person) : proposer c e = .person := by
+  obtain ⟨o, f, x⟩ := t
+  simp only at ho; subst ho
+  simp [proposer, h]
 
 theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
     ∀ p ∈ (method c).assignment, p.region.isSome = true := by
@@ -106,12 +160,12 @@ theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
   simp only [regionOf, List.find?_isSome]
   exact ⟨r, hr, List.elem_iff.mpr hmr⟩
 
-theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : isFilled (slot c s) = false)
+theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : (slotState c s).isSet = false)
     (hg : (draft c s).ground = none) : take c s = defaultValue s := by
   unfold take
-  cases h : slot c s with
-  | open_ _ => exact (draft c s).fallback hg
-  | filled a src allowed supported => rw [h] at hs; simp [isFilled] at hs
+  split
+  · simp_all [SlotState.isSet]
+  · exact (draft c s).fallback hg
 
 theorem emergent_stop_never_silent (e : Emergent)
     (h : ObligationClass.needsStopGround ∈ e.classes) :
@@ -120,14 +174,15 @@ theorem emergent_stop_never_silent (e : Emergent)
 
 theorem pointer_carried (c : Context P) : (method c).pointer = pointer c := rfl
 
-theorem moves_by_utterance {c : Context P} {s : Cite c}
-    (ok : (moveSetCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
+theorem brief_carried (c : Context P) : (method c).brief = brief c := rfl
 
-theorem cut_by_utterance {c : Context P} {s : Cite c}
-    (ok : (cutCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
-
-theorem slot_by_utterance {c : Context P} {x : Slot} {s : Cite c}
-    (ok : (slotCoord (P := P) x).admits s.kind) : s.kind = .utterance := ok
+theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : Region)
+    (hr : r ∈ rs) (h : owesSynthesis c r = true) :
+    ∃ k ∈ checkpoints c rs, k.region = r ∧ k.decision = .synthesisOutputShape := by
+  refine ⟨⟨r, .synthesisOutputShape, compileBrief c r .synthesisOutputShape,
+    CheckpointUnrealizable c r .synthesisOutputShape⟩, ?_, rfl, rfl⟩
+  simp only [checkpoints, orderCheckpoints, List.mem_mergeSort, List.mem_flatMap, List.mem_map]
+  exact ⟨r, hr, .synthesisOutputShape, by simp [deferred, h], rfl⟩
 
 theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
     (ok : (feasibilityCoord (P := P) r).admits s.kind) : s.kind = .observation := ok
