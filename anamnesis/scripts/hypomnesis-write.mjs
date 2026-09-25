@@ -602,7 +602,7 @@ function extractCrossRefs(userMsgs, allTexts) {
 //
 // Output: entropy.md (IdentifierTuples), markers.md (MarkerProfile), coinage.md (CoinageSet).
 
-// extract: Session → Set(IdentifierTuple) — entropy-track anchors
+// extract: Session → Set(IdentifierTuple) — identifier anchors
 // ORDER INVARIANT: "url" must precede "path_ref". extractEntropyRefs records url
 // spans during iteration and suppresses path_ref matches that fall inside them.
 // Reordering without updating the dedup logic will silently break URL-substring

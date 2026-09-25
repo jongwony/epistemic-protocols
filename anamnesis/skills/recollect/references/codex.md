@@ -1,79 +1,33 @@
 # Codex realization
 
-Read this reference before scanning the Codex store or emitting a Codex resume handle.
+Read this reference before searching Codex conversation records or emitting a Codex resume handle. It binds where the records live, how a record identifies its session and its speakers, and how to reopen one; where to look and how far is the protocol's judgment.
 
-## Store binding
+## Where the records live
 
-- Resolve `{codex_home}` from `CODEX_HOME`, falling back to `~/.codex`.
-- Compact catalog: `{codex_home}/hypomnesis/catalog/*.json`.
-- Current per-session pointer: `{codex_home}/hypomnesis/{session-id}/current.json`. It tracks the
-  highest transcript revision captured for the session, where revisions are ordered by modification
-  time first and then by size. A rollout rewritten smaller at the same or an earlier modification
-  time produces its own generation and the pointer declines to move back to it; a declined move is
-  recorded in the session log rather than passing as a no-op. Because modification time is compared
-  first, a rewrite that is both smaller and later does advance the pointer — being thinner is not on
-  its own what holds a revision back. The generation it replaces stays on disk under its own
-  revision key either way.
+- Resolve `{codex_home}` from `CODEX_HOME`, falling back to `~/.codex`. This is the first root searched; another Codex home is a further root when the recall points at it, and every candidate is labeled with the root it was found under.
+- Conversation records: `{codex_home}/sessions/**/rollout-*.jsonl` plus `{codex_home}/archived_sessions/**/rollout-*.jsonl`.
+- Compact catalog: `{codex_home}/hypomnesis/catalog/*.json` — a gist per session, a cue and never evidence.
+- Current per-session pointer: `{codex_home}/hypomnesis/{session-id}/current.json`, naming the generation built from the highest transcript revision captured, where revisions are ordered by modification time first and then by size. The generation it replaces stays on disk under its own revision key.
 - Immutable semantic generations: `{codex_home}/hypomnesis/{session-id}/generations/*/record.json`.
-- Raw SSOT: `{codex_home}/sessions/**/rollout-*.jsonl` plus `{codex_home}/archived_sessions/**/rollout-*.jsonl`.
+- Capture outcomes: before qualifying a member, read `capture-outcome.md`; bind `{store-root}` to `{codex_home}/hypomnesis` and the session ID to the rollout's `session_meta.payload.id` or the catalog's `session_id`.
 
-The compact catalog and the rollout spines are the initial scan surface together. Ground opens the rollout of each member of the recognizable about to be presented at `Candidate.record` — one named record per member, at any scope — and takes the excerpt the cue reaches, with that path as `Excerpt.locator`; `record_path` dereferences to the generation that indexed it. Rollout **bodies** are *scanned* across the store only through the StoreExpansion checkpoint in Phase 1.
+## What a record says of itself
 
-Bind `Candidate.runtime = codex`; bind `session_id`, `cwd`, topic, keywords, `cross_refs`, narrative, and temporal fields directly from the catalog entry, with `Candidate.record` bound to the rollout path the spine read enumerated (the catalog's `record_path` dereferences to the generation that indexed it, not to the record Ground opens) and `Candidate.recency` to the rollout's `session_meta` timestamp — or, where the catalog entry outlives its rollout, to the entry's own `last_turn_at`, and Null where neither carries one, along with `evidence_mode` from the entry's `evidence_modes` and `source_scan` from its `source_scan` (absent in an entry written before either was captured — bind Null, which is neutral in ranking). Both must be bound here or the emit cannot qualify what it presents: `source_scan` is what `Recalled context currency is not fidelity` reads to say a record was built from a partially readable source. The catalog publishes `cross_refs` as bare strings, so each binds as a `LegacyAnchor` — kind-unknown, extending an edge and never rejected; binding it is what gives this realization the stored-anchor channel that edge inference reads above session scope, where an unbound field would leave Codex candidates joinable by shared keywords, topic, cwd and recency alone. Codex records have no substitute-channel or fork-parent realization, so `fork_marker = false`, `parent_pointer = Null`, and `parent_cwd = Null`.
+The first line of a rollout is `{"type":"session_meta"}`, whose `payload` carries `id`, `cwd`, `timestamp`, and `originator`. For a record found, bind `Member.locator` to the rollout path under its root — the catalog's `record_path` dereferences to the generation that indexed it, not to the record Ground opens — the session id and working directory from `session_meta`, and recency from its `timestamp`, or from the catalog entry's `last_turn_at` where the entry outlives its rollout. A catalog entry's `source_scan`, where present, records how much of the source its extraction did not receive; it is what `Reach.omitted` carries for that record. Codex records have no substitute channel and no fork parent.
 
-## Capture outcome binding
+**Speakers.** The person's turns are `response_item` entries with `role == "user"` — the channel that is always present; `event_msg`/`user_message`, which an interactive session may not emit at all, is a cross-check only. Skip an entry whose text (its content items joined with newlines, then trimmed of leading whitespace) begins with one of these injected-envelope prefixes: `# AGENTS.md instructions`, `<environment_context>`, `<codex_internal_context`, `<skill`, `<turn_aborted>`, `<recommended_plugins>` (kept identical to `SYNTHETIC_USER_TEXT_PREFIXES` in `hypomnesis-codex-write.mjs`). Assistant entries are the assistant's; a claim resting on one is what the assistant said, not what the person decided.
 
-- Before reading capture outcomes for the sessions Find actually scanned, read `capture-outcome.md`. Bind its rollout `session_meta.payload.id` or catalog `session_id` for the session ID and `{codex_home}/hypomnesis` for `{store-root}`.
-
-## Spine tier
-
-`SSOT_spine` joins the initial scan alongside the catalog, and it is the surface that carries this realization before its catalog exists at all — the writer below populates the catalog going forward, while rollouts already on disk predate it. Scanning spines unconditionally is what makes those reachable without sending every recall through the checkpoint.
-
-The first line of a rollout is `{"type":"session_meta"}`, whose `payload` carries `id`, `cwd`, `timestamp`, and `originator`. One line yields the whole spine, so this tier costs less here than on Claude, where the origin label sits further into the record.
-
-First human utterance: read `response_item` entries with `role == "user"` — the channel that is always present, unlike `event_msg`/`user_message`, which a `codex-tui` interactive session emits zero of even though every genuine human turn still lives in `response_item`. Skip an entry whose text (its content items joined with newlines, then trimmed of leading whitespace) begins with one of these injected-envelope prefixes: `# AGENTS.md instructions`, `<environment_context>`, `<codex_internal_context`, `<skill`, `<turn_aborted>`, `<recommended_plugins>` (kept identical to `SYNTHETIC_USER_TEXT_PREFIXES` in `hypomnesis-codex-write.mjs`). "First" means first AFTER that filtering, not first in file order — in an exec rollout the first unfiltered `response_item` user entry is typically the `<recommended_plugins>` envelope. `event_msg`/`user_message`, where present, is a cross-check only; it must never be read as the source, since interactive sessions carry none.
-
-**Spine scan.** Enumerate recency-first across live and archived rollouts, then read each record's head:
-
-```bash
-find "{codex_home}/sessions" "{codex_home}/archived_sessions" -name 'rollout-*.jsonl' -print0 2>/dev/null \
-  | xargs -0 ls -t | head -n <N>
-```
-
-```bash
-head -1 "<rollout>" | jq -c 'select(.type=="session_meta") | .payload | {id, cwd, timestamp, originator}'
-head -n 600 "<rollout>" | jq -rs '
-  [ .[]?
-    | select(.type=="response_item" and .payload.type=="message" and .payload.role=="user")
-    | ([.payload.content[]? | .text? // empty] | join("\n") | sub("^\\s+";""))
-    | select(length > 0)
-    | select(
-        (startswith("# AGENTS.md instructions") or
-         startswith("<environment_context>") or
-         startswith("<codex_internal_context") or
-         startswith("<skill") or
-         startswith("<turn_aborted>") or
-         startswith("<recommended_plugins>")) | not)
-  ] | .[0] // ""'
-```
+**Cost.** Reading `session_meta` is one line. A search for a field across many rollouts reads each to wherever the field sits, or to the end where it is absent; bound such reads explicitly.
 
 ## Writer lifecycle
 
-The shared hook dispatcher recognizes Codex rollout paths on Stop, PreCompact, and SessionEnd. Hook-side work writes an immutable queue job and detaches a worker. The worker:
+The shared hook dispatcher recognizes Codex rollout paths on Stop, PreCompact, and SessionEnd. A worker serializes work per session, coalesces queued events to the newest transcript revision, extracts, writes an immutable generation, refreshes the catalog entry, and advances `current.json` last — so a partial publication leaves the pointer where it was. `agents/openai.yaml` supplies Codex skill discovery metadata only.
 
-1. serializes work with a per-session recoverable lock;
-2. coalesces queued events to the newest transcript revision;
-3. invokes an ephemeral `gpt-5.6-luna` Codex extraction at `xhigh` reasoning with hooks disabled;
-4. writes an immutable generation;
-5. atomically refreshes the compact catalog entry, then advances `current.json` — the pointer moves last so a partial publication leaves it un-advanced and the next run republishes, rather than certifying a stale read surface.
+## Opening and resuming
 
-A generation never changes after publication. A later lifecycle event at the same transcript revision reuses that generation. Nested extraction runs disable hooks, preventing recursive capture.
+Ground opens the member's rollout at its locator and takes the span the cue reaches, each turn with its speaker under the rule above, with that path as the excerpt's locator.
 
-`agents/openai.yaml` supplies Codex skill discovery metadata only. Hook registration remains in the plugin's default `hooks/hooks.json` surface.
-
-## Resume
-
-For a candidate whose `cwd` is recorded **and still present on disk**, emit the literal handle:
+For a candidate whose working directory is recorded **and still present on disk**, emit the literal handle:
 
 ```text
 cd <cwd> && codex resume <session_id>
@@ -85,4 +39,4 @@ Check the directory before emitting the `cd`. When the recorded path is gone —
 codex resume <session_id>
 ```
 
-When `cwd` was never recorded, report the candidate as identified and omit the resume command.
+When the working directory was never recorded, report the candidate as identified and omit the resume command. A record found under another root resumes only with that root as `CODEX_HOME`; say so beside the handle.

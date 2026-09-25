@@ -1,76 +1,62 @@
 # Failure modes — cause, detection, recovery
 
-Read when a find returns zero candidates, when a presented candidate is corrected despite a scan match, when `INDEX_semantic` is empty, or when a capture outcome qualifies the searched scope. This is the operative body of the `── KNOWN FAILURE MODES ──` formal block: runtime-normative contract, not commentary. The mode names stay in `SKILL.md` so a mode is recognizable without a read; cause, detection, and recovery live here.
+Read when a pass finds nothing to present, when a presented candidate is corrected despite a match, when an index is empty or its capture failed, or when a capture outcome qualifies the searched scope. This is the operative body of SKILL.md's Known failure modes: runtime-normative contract, not commentary. The mode names stay in SKILL.md so a mode is recognizable without a read; cause, detection, and recovery live here.
 
 ```
 ── KNOWN FAILURE MODES ──
-FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_target
-                    -- cause: precision threshold locally calibrated but semantically wrong, or source_namespace does not authorize this recall claim's kind
-                    -- detection: the user corrects the cue despite a scan_entropy match
+FalseAnchor        : an identifier matched, and its record is not the one meant — or the identifier names a different kind of thing than the cue claims
+                     -- cause: a match on the literal alone. An identifier anchors a candidate only where the kind of thing it names fits what the cue claims — an issue number anchors an issue or the changes that cite it, not an arbitrary commit; a path anchors the artifact at that path. A bare number carries no repository until one is read from the record around it, and a number that labels a list item, a rule, a finding, or an image placeholder names nothing at all
+                     -- detection: the person corrects the cue despite the match, or the record around the identifier shows it names something else
+                     -- recovery: drop the anchor, keep the record only if other axes still reach it, and search the corrected cue as given
 
-ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)
-                    -- cause: domain-specific extractor absent from registry
-                    -- detection: NullMatch on scan_entropy ∧ user can cite literal
+IndexLacking       : the record carries the past meant, and its index entry does not
+                     -- cause: the index is a lossy extraction; an extractor did not capture what the cue names
+                     -- detection: the person can name a literal the index does not hold; the records reached by other axes carry it
+                     -- recovery: search the records themselves along the cue's axes; an index miss is never a record miss
 
-PartialExtract    : extract/detect produces well-formed but semantically partial INDEX from corrupted/truncated source
-                    -- cause: continue-on-error parser tolerates malformed lines; anomalous shape logged but not write-gated
-                    -- detection: invisible to reader without schema version field or observability log surface
+PartialExtract     : an index entry built from a source its capture did not read whole
+                     -- cause: a malformed line skipped, a bounded extraction that dropped part of a long session, an extraction that failed while others succeeded
+                     -- detection: the member's capture outcome — an extractor state other than succeeded, or a recorded count of characters not received
+                     -- recovery: disclose it on the member (Reach); ground on the record, never on the partial index
 
-SidechainNoSSOT   : scan_entropy(Store, trace).candidates ≠ ∅ via INDEX_substitute ∧ no top-level SSOT for the recalled id (the id is a sidechain/derived record)
-                    -- cause: the recalled id is a sidechain/derived record whose turns live in the originating record + the substitute channel; no top-level SSOT for the id ever existed — distinct from NullMatch₁ (pre-store/lifecycle gap): here the scan SUCCEEDS on the substitute channel, only the top-level SSOT is absent by design
-                    -- detection: the recalled id matches a substitute-channel record with no sibling top-level SSOT of its own (substrate mechanism in TOOL GROUNDING)
-                    -- recovery: the id is not independently resumable (no top-level record of its own); read the orchestrating parent from the substitute record (backtrace_parent → parent_pointer, parent_cwd) and offer the parent as the resumable candidate; when the parent's record has aged out, mark non-resumable and surface the recoverable artifacts (substitute record + memory)
+SidechainNoSSOT    : the id found belongs to a fork with no record of its own
+                     -- cause: forked work's turns live in the orchestrating record and the substitute channel; no top-level record for the id ever existed
+                     -- detection: the id matches a substitute-channel capture with no sibling top-level record
+                     -- recovery: the id is not resumable; read the orchestrating parent from the capture and offer the parent (fork-resume.md); where the parent's record has aged out, mark it non-resumable and surface the capture and any memory
 
-NullMatch₁        : scan_entropy(Store, trace).candidates = ∅ ∧ InputType = StructuredIdentifier
-                    -- cause: literal absent from the searched scope. Use Λ.capture for any claim about capture execution; an unknown outcome leaves that cause unknown. Spine matching remains independent of semantic-index availability, and its miss establishes only no match in the heads actually read
-                    -- recovery: the open question on a first miss (a correction already counts as the round-trip), then StoreExpansion; after accepted full-text exhaustion, offer Aitesis handoff with accumulated trace
+Ungroundable       : candidates found, and no member's record opens
+                     -- cause: the records the candidates point at are gone, rotated out, moved to another root, or were never written; the index or a head outlived the record
+                     -- detection: `opened` returns none for every member of the leading recognizable, so its story is empty
+                     -- recovery: never present it — the story is composed from opened records, and with none there is nothing to assert; the next recognizable found is grounded instead. Whatever the round presents names the records that did not open, because "found nothing" and "found it and could not open it" are different answers, and only the second tells the person a record was lost. Consider whether another root holds them
 
-NullMatch₂        : scan_salience(Store, trace).candidates = ∅ ∧ InputType = NaturalRecall
-                    -- cause: profile too vague or target session lacks distinctive markers
-                    -- recovery: the open question → recue → Phase 1 re-find
+IndexAsEvidence    : a presented sentence rests on what only an index's gist carried
+                     -- structural guard: every sentence of a story is a Claim citing an opened record, so the mode arises only where grounding was skipped or a record was read past
+                     -- recovery: ground again; never hedge the gist
 
-MutualNull        : scan_entropy.candidates = ∅ ∧ scan_salience.candidates = ∅ on Track = hybrid
-                    -- structural risk: recall target absent from the searched scope
-                    -- action: NullMatch pathway with source-labeled scope disclosure (principal failure mode)
+ChronologyFromHits : a line or a history composed from the changes a search happened to match, as if they were every change
+                     -- cause: a content search returns only the changes that touched the searched text; a change that shaped the same thing without touching that text is not among them
+                     -- detection: gaps in the story's order, a development the matched changes cannot explain, a later record that names an earlier step not found
+                     -- recovery: before telling an order, read the history of the span itself — every change to it, not only the matched ones — or say that the order covers only the matched changes
+
+AttributionLoss    : a past statement read as the person's decision because a tool returned it, its speaker dropped
+                     -- cause: a record opened is evidence of what was recorded; the speaker inside it is part of the evidence
+                     -- detection: a story sentence says "decided" or "agreed" where the opened span shows only the assistant saying it
+                     -- recovery: tell who said it; a decision is the person's only where the person's own turn in the record carries it
 ```
 
-## Degraded scan
+## When nothing can be presented
 
-Read when `INDEX_semantic = ∅`. The `degraded_scan` equation and the partial-INDEX guard stay in `── STORE TOPOLOGY ──`, because the guard binds on every scan; what follows binds once the StoreExpansion checkpoint is reached.
-
-```
-degraded_scan rationale:
-  -- an empty INDEX_semantic no longer empties the realization: SSOT_spine is already in the initial
-     scope, so recency, cwd, origin, and the first human turn still reach ranking. What is lost is the
-     extracted semantics, not the realization
-  -- SSOT_body broadens coverage further but stays outside initial scope. After one round-trip — the open question's answer or a correction —
-     Qx lets the user admit the unbounded body scan or stop with a NullMatch scoped to the indexes
-     and spines already searched. Ground opens one named record per member at any scope; that
-     bounded read is not what the checkpoint governs.
-     INDEX_substitute is a separate primary channel (not derived from INDEX_semantic), so the
-     sidechain/derived-id match persists before full-text expansion — SidechainNoSSOT stays reachable
-     when INDEX_semantic is empty
-  -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for
-     the Cold-Start invariant
-```
-
-## Ungroundable
-
-Read when `Find` returned candidates but `Ground` opened no member's record for the top recognizable (`¬grounded(O[top])`).
+A pass that leaves nothing to present runs in the turn the searches ran in; nothing needs carrying to a later turn.
 
 ```
-cause      -- the records the candidates point at are gone, rotated out, or were never written: the
-              INDEX or the spine indexed a session whose transcript no longer exists at Candidate.record.
-              This is a store-lifecycle gap, not a miss — the find was right and the evidence is absent
-detection  -- after Ground, every Excerpt in O[top] carries text = ∅. At session scope one member is
-              every member, so a single missing transcript is the whole of it
-recovery   -- drop O[top] from O[ranked] and ground the next; the ordering Rank produced is exactly
-              the order to try. When none is left the |O[ranked]| = 0 guards receive it: at attempts = 0
-              the open question, then the checkpoint, then NullMatch. Whichever of them emits names the
-              records that could not be opened, because "found nothing" and "found it and could not
-              open it" are different answers and only the second tells the user their store lost a record
-      -- never present the recognizable anyway. The narrative is composed FROM the excerpts, so with
-         none there is nothing it may assert; presenting the INDEX gist instead is exactly IndexAsEvidence
-      -- nothing is carried: the drop, the re-ground, and whatever guard receives the empty list all
-         run in the turn the Find ran in, so the list of unopenable records needs no carrier
+before the person has added to the cue
+  -- report what was searched, per root, and which records did not open, then the one open question
+after the person has added to the cue
+  -- a search past the boundary still worth offering: the wider search with what it would read and its cost, against stopping here
+  -- nothing further worth reaching for: close unresolved with the scope searched per root and the causes the evidence supports
+an index that is empty or whose capture failed
+  -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round reports about it
+  -- an empty index says nothing about whether the past took place
+the substitute channel
+  -- a separate capture, not derived from the index: a fork's id stays findable there when the index is empty; its loss is not recoverable from the conversation records
 ```
