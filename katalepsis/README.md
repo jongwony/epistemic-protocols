@@ -23,15 +23,15 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 | Direction | AI talks, user listens | AI verifies, user confirms |
 | Entry point | AI decides what to explain | User selects an intent-scented path |
 | Confirmation | Assumed after explanation | Verified through questions |
-| Progress | Undefined | Tracked via tasks |
+| Progress | Undefined | Each selected entry point is a task the user closes |
 
 ## Protocol Flow
 
 ```
 Phase 0: Orient       → Infer likely comprehension intents from the result and user signal
 Phase 1: Entry Point  → Present intent-scented paths, user selects (gate interaction)
-Phase 2: Ground       → Materialize artifact basis and create tasks (record)
-Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction + record update)
+Phase 2: Ground       → Materialize artifact basis; each selected entry point becomes a task
+Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction)
 ```
 
 ## When to Use
