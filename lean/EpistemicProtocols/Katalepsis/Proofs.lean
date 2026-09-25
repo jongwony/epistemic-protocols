@@ -13,114 +13,194 @@ namespace Katalepsis
 
 variable {P : Type}
 
-theorem silence (respond : Context P → Gate → Response P)
-    (trace : Context P → Horizon → Response P) (c : Context P) (h : Horizon) :
-    grasp respond trace c h [] = .holding c h := by
+theorem silence (respond : Context P → Gate → Response P) (trace : Context P → Response P)
+    (c : Context P) : grasp respond trace c [] = .holding c := by
   simp [grasp]
 
-theorem horizon_preempts (c : Context P) (h : Horizon) (t : RecordId)
-    (hd : t ∈ h.detected) (hp : t ∉ h.probed) :
-    gateFor c h t = .horizonProbe t := by
-  simp [gateFor, hd, hp]
+theorem horizon_preempts (c : Context P) (t : RecordId) (hd : HorizonDue c t) :
+    gateFor c t = .horizonProbe t := by
+  simp [gateFor, hd]
 
-theorem horizon_once (c : Context P) (h : Horizon) (t : RecordId)
-    (hg : gateFor c h t = .horizonProbe t) : t ∉ h.probed := by
-  unfold gateFor at hg
-  split at hg
-  · rename_i hc
-    exact hc.2
-  · split at hg
-    · cases hg
-    · split at hg <;> cases hg
+theorem horizon_preempts_return (c : Context P) (t : RecordId) (g : Gate)
+    (hd : HorizonDue c t) : settle c t g = .horizonProbe t := by
+  simp [settle, hd]
 
-theorem horizon_taken (c : Context P) (h : Horizon) (t : RecordId) :
-    advance c h (.horizonProbe t) .cont = .gate c h (.coverage t) := by
-  simp [advance]
+theorem asked_not_reasked (c : Context P) (t : RecordId) (hc : HorizonCandidate)
+    (ha : admissible c t = some hc) (hk : Asked c t hc) : gateFor c t ≠ .horizonProbe t := by
+  have hnd : ¬ HorizonDue c t := by
+    rintro ⟨hc', ha', hk'⟩
+    rw [ha] at ha'
+    cases ha'
+    exact hk' hk
+  simp only [gateFor, hnd, ↓reduceIte]
+  split
+  · exact fun h => Gate.noConfusion h
+  · split <;> exact fun h => Gate.noConfusion h
 
-theorem no_adjudication_at_probe (c : Context P) (h : Horizon) (t : RecordId) (g : Selectable) :
-    advance c h (.probe t g) .cont = .gate c h (.inquiry t g) ∨
-      advance c h (.probe t g) .cont = .gate c h (.coverage t) := by
+theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) :
+    advance c (.horizonProbe t) .cont = .gate (c ++ (attach c).map (·.val)) (.reveal t) := by
+  simp [advance, hm]
+
+theorem reached_taken (c : Context P) (t : RecordId) (hr : Reached c) :
+    advance c (.horizonProbe t) .cont = .gate c (settle c t (.coverage t)) := by
+  simp [advance, hr]
+
+theorem no_adjudication_at_probe (c : Context P) (t : RecordId) (g : Selectable) :
+    advance c (.probe t g) .cont = .gate c (.inquiry t g.val) ∨
+      advance c (.probe t g) .cont = .gate c (settle c t (.coverage t)) := by
   by_cases ho : Objection c
   · left; simp [advance, ho]
   · right; simp [advance, ho]
 
-theorem proposal_resumes (c : Context P) (h : Horizon) (g : Gate) :
-    advance c h g .propose = .gate (c ++ (eject c).map (·.val)) h (resumeOf g) := by
+theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
+    (∃ c₁ g₁, advance c g v = .gate c₁ g₁) ∨
+      (v = .complete ∧ ∃ t, advance c g v = .done (c ++ t)) ∨
+      (v = .withdraw ∧ advance c g v = .withdrawn c) := by
+  have hb : ∀ (c : Context P) (t : Task), ∃ c₁ g₁, beginTask c t = .gate c₁ g₁ :=
+    fun _ _ => ⟨_, _, rfl⟩
+  have ha : ∀ (c : Context P) (g : Gate) (t : RecordId),
+      ∃ c₁ g₁, aspectStep c g t = .gate c₁ g₁ := by
+    intro c g t
+    unfold aspectStep
+    split
+    · exact ⟨_, _, rfl⟩
+    · exact ⟨_, _, rfl⟩
+  have hc : ∀ (c : Context P),
+      (∃ t, completeStep c = .done (c ++ t)) ∨ ∃ c₁ g₁, completeStep c = .gate c₁ g₁ := by
+    intro c
+    simp only [completeStep]
+    generalize current (c ++ (update c).map (·.val)) = o
+    cases o with
+    | none => exact Or.inl ⟨_, rfl⟩
+    | some t => exact Or.inr (hb _ _)
+  have hcomplete : ∀ (g : Gate), advance c g .complete = completeStep c →
+      (∃ c₁ g₁, advance c g .complete = .gate c₁ g₁) ∨
+        (Verdict.complete = .complete ∧ ∃ t, advance c g .complete = .done (c ++ t)) ∨
+        (Verdict.complete = .withdraw ∧ advance c g .complete = .withdrawn c) := by
+    intro g hg
+    rw [hg]
+    rcases hc c with ⟨t, ht⟩ | ⟨c₁, g₁, ht⟩
+    · exact Or.inr (Or.inl ⟨rfl, t, ht⟩)
+    · exact Or.inl ⟨c₁, g₁, ht⟩
+  have hentry : ∀ (v : Verdict), v ≠ .propose → v ≠ .withdraw →
+      ∃ c₁ g₁, advance c .entrySelection v = .gate c₁ g₁ := by
+    intro v hp hw
+    cases v with
+    | propose => exact absurd rfl hp
+    | withdraw => exact absurd rfl hw
+    | cont =>
+      simp only [advance]
+      split
+      · split
+        · exact hb _ _
+        · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | complete =>
+      simp only [advance]
+      split
+      · split
+        · exact hb _ _
+        · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+  cases v with
+  | propose => exact Or.inl ⟨_, _, by cases g <;> rfl⟩
+  | withdraw => exact Or.inr (Or.inr ⟨rfl, by cases g <;> rfl⟩)
+  | complete =>
+    cases g with
+    | zeroGap t => exact hcomplete _ rfl
+    | coverage t => exact hcomplete _ rfl
+    | entrySelection => exact Or.inl (hentry _ (by simp) (by simp))
+    | horizonProbe t =>
+      left; simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | reveal t =>
+      left; simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | startAspect t => exact Or.inl (ha c (.startAspect t) t)
+    | probe t g =>
+      left; simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | inquiry t g =>
+      left; simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+  | cont =>
+    left
+    cases g with
+    | entrySelection => exact hentry _ (by simp) (by simp)
+    | zeroGap t => exact ⟨_, _, rfl⟩
+    | horizonProbe t =>
+      simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | reveal t =>
+      simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | startAspect t => exact ha c (.startAspect t) t
+    | probe t g =>
+      simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | inquiry t g =>
+      simp only [advance]; split
+      · exact ⟨_, _, rfl⟩
+      · exact ⟨_, _, rfl⟩
+    | coverage t => exact ha c (.coverage t) t
+
+theorem proposal_resumes (c : Context P) (g : Gate) :
+    advance c g .propose = .gate (c ++ (eject c).map (·.val)) (resumeOf g) := by
   cases g <;> simp [advance]
 
-theorem defeated_attaches_nothing (c : Context P) (h : Horizon) (t : RecordId) (g : Selectable)
-    (hs : ¬ Stands c) :
-    advance c h (.inquiry t g) .cont = .gate c h (.coverage t) := by
+theorem defeated_attaches_nothing (c : Context P) (t : RecordId) (g : GapType)
+    (hs : ¬ Stands c) : advance c (.inquiry t g) .cont = .gate c (settle c t (.coverage t)) := by
   simp [advance, hs]
 
 theorem verified_by_person (respond : Context P → Gate → Response P)
-    (trace : Context P → Horizon → Response P) (c : Context P)
-    (h : Horizon) (us : List (Utterance P)) (v : VerifiedUnderstanding P)
-    (hv : grasp respond trace c h us = .verified v) :
+    (trace : Context P → Response P) (c : Context P) (us : List (Utterance P))
+    (v : VerifiedUnderstanding P) (hv : grasp respond trace c us = .verified v) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .complete ∧
       ∃ t, v.context = fuse c₀ u ++ t := by
-  have beginTask_gate : ∀ (c : Context P) (h : Horizon) (t : Task) (c₁ : Context P)
-      (h₁ : Horizon), beginTask c h t ≠ .done c₁ h₁ := by
-    intro c h t c₁ h₁; simp [beginTask]
-  have aspectStep_gate : ∀ (c : Context P) (h : Horizon) (g : Gate) (t : RecordId)
-      (c₁ : Context P) (h₁ : Horizon), aspectStep c h g t ≠ .done c₁ h₁ := by
-    intro c h g t c₁ h₁; unfold aspectStep; split <;> simp
-  have completeStep_done : ∀ (c : Context P) (h : Horizon) (c₁ : Context P) (h₁ : Horizon),
-      completeStep c h = .done c₁ h₁ → ∃ t, c₁ = c ++ t := by
-    intro c h c₁ h₁ hd
-    simp only [completeStep] at hd
-    generalize current (c ++ (update c).map (·.val)) = o at hd
-    cases o with
-    | none => cases hd; exact ⟨_, rfl⟩
-    | some t => exact absurd hd (beginTask_gate _ _ _ _ _)
-  have advance_done : ∀ (c : Context P) (h : Horizon) (g : Gate) (v : Verdict)
-      (c₁ : Context P) (h₁ : Horizon), advance c h g v = .done c₁ h₁ →
-      v = .complete ∧ ∃ t, c₁ = c ++ t := by
-    intro c h g v c₁ h₁ hd
-    cases v with
-    | propose => cases g <;> simp [advance] at hd
-    | complete =>
-      refine ⟨rfl, ?_⟩
-      cases g with
-      | zeroGap t => exact completeStep_done c h c₁ h₁ (by simpa [advance] using hd)
-      | coverage t => exact completeStep_done c h c₁ h₁ (by simpa [advance] using hd)
-      | entrySelection =>
-        simp only [advance] at hd
-        split at hd
-        · split at hd
-          · exact absurd hd (beginTask_gate _ _ _ _ _)
-          · cases hd
-        · cases hd
-      | horizonProbe t => simp [advance] at hd
-      | startAspect t => exact absurd (by simpa [advance] using hd) (aspectStep_gate _ _ _ _ _ _)
-      | probe t g => simp only [advance] at hd; split at hd <;> cases hd
-      | inquiry t g => simp only [advance] at hd; split at hd <;> cases hd
-    | cont =>
-      exfalso
-      cases g with
-      | entrySelection =>
-        simp only [advance] at hd
-        split at hd
-        · split at hd
-          · exact beginTask_gate _ _ _ _ _ hd
-          · cases hd
-        · cases hd
-      | zeroGap t => simp [advance] at hd
-      | horizonProbe t => simp [advance] at hd
-      | startAspect t => exact aspectStep_gate _ _ _ _ _ _ (by simpa [advance] using hd)
-      | probe t g => simp only [advance] at hd; split at hd <;> cases hd
-      | inquiry t g => simp only [advance] at hd; split at hd <;> cases hd
-      | coverage t => exact aspectStep_gate _ _ _ _ _ _ (by simpa [advance] using hd)
-  induction us generalizing c h with
+  induction us generalizing c with
   | nil => simp [grasp] at hv
   | cons u us ih =>
     simp only [grasp] at hv
     split at hv
-    · rename_i c₁ h₁ hd
-      obtain ⟨hvc, t, rfl⟩ := advance_done _ _ _ _ _ _ hd
-      cases hv
-      exact ⟨c, u, hvc, t ++ [(trace (fuse c u ++ t) h₁).val], by simp [understanding]⟩
-    · exact ih _ _ hv
+    · rename_i c₁ hd
+      rcases advance_shape (fuse c u) (answered c) (verdict (fuse c u)) with
+        ⟨_, _, hg⟩ | ⟨hvc, t, ht⟩ | ⟨_, hw⟩
+      · rw [hg] at hd; cases hd
+      · rw [ht] at hd
+        cases hd
+        cases hv
+        exact ⟨c, u, hvc, t ++ [(trace (fuse c u ++ t)).val], by simp [understanding]⟩
+      · rw [hw] at hd; cases hd
+    · cases hv
+    · exact ih _ hv
+
+theorem withdrawn_by_person (respond : Context P → Gate → Response P)
+    (trace : Context P → Response P) (c : Context P) (us : List (Utterance P))
+    (c₁ : Context P) (d : List String) (hw : grasp respond trace c us = .withdrawn c₁ d) :
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = fuse c₀ u ∧ verdict c₁ = .withdraw := by
+  induction us generalizing c with
+  | nil => simp [grasp] at hw
+  | cons u us ih =>
+    simp only [grasp] at hw
+    split at hw
+    · cases hw
+    · rename_i c₂ hd
+      rcases advance_shape (fuse c u) (answered c) (verdict (fuse c u)) with
+        ⟨_, _, hg⟩ | ⟨_, t, ht⟩ | ⟨hvw, hx⟩
+      · rw [hg] at hd; cases hd
+      · rw [ht] at hd; cases hd
+      · rw [hx] at hd
+        cases hd
+        cases hw
+        exact ⟨c, u, rfl, hvw⟩
+    · exact ih _ hw
 
 theorem completed_by_utterance {c : Context P} {t : RecordId} {s : Cite c}
     (ok : (completionCoord (P := P) t).admits s.kind) : s.kind = .utterance := ok
