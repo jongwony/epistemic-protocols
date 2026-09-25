@@ -36,7 +36,8 @@ Katalepsis(R, U) → grasp(c, utterances), where c is the fused session context:
       entry selection: materialize the basis, register one task per selected entry point →
         the task the selection opens begins
       a task begins: record update naming it → the task's gate, in priority order, the order
-        you read said with its basis when a gate opens ahead of another item due:
+        you read said with its basis when a contradiction opens ahead of another item due, and,
+        for a Horizon opening ahead of a chosen aspect, only after its answer:
         a contradiction the user holds a side of: both sides, and a request to explain how they
           fit — no verdict yet
         an admissible Horizon not yet asked: the Horizon probe (its scenario only)
@@ -47,8 +48,10 @@ Katalepsis(R, U) → grasp(c, utterances), where c is the fused session context:
         the target shown as a finding about it, one against your earlier explanation shown as your
         correction; neither is handed to the user to settle
       the contradiction's explanation: it shows how the sides fit → closure → back to the task;
-        aimed at another intent → moved there as below; otherwise → read and quote the target's
-        material → both sides, that material, the reason, and an application question
+        aimed at another intent → moved there as below; left standing where the target or a
+        cited source settles it → read and quote that material → both sides, that material, the
+        reason, and an application question; left standing with nothing to settle it → said so,
+        no verdict, the user's to settle → back to the task
       the Horizon probe, or a cue: the answer reached the edge → closure → back to the task;
         the user asked for a step instead → a cue that still does not name the edge;
         it missed, aimed at another intent than the probe's → that reading offered as a
@@ -371,10 +374,18 @@ def UserConflictDue (c : Context P) (t : RecordId) : Prop :=
     shows how they fit — the two do not conflict once read as they meant them. -/
 opaque Dissolved : Context P → Prop
 
+/-- **Your judgment**, read where the user's explanation left a contradiction standing: the
+    target, or a source the user cited that can be read now, holds material that settles which
+    side holds. Where nothing does, no verdict is given: that is said, and the contradiction stays
+    the user's to settle. -/
+opaque Settles : Context P → Prop
+
 /-- How a contradiction ended: the user's explanation dissolved it; it was resolved through an
-    application after both sides were shown with the target's material; a contradiction inside
-    the target itself shown as a finding about it; or your own earlier explanation corrected. -/
-inductive ConflictOutcome | dissolved | afterDisclosure | targetFinding | yourCorrection
+    application after both sides were shown with the target's material; it was left standing
+    with nothing in the target or a cited source to settle it, said so and left to the user; a
+    contradiction inside the target itself shown as a finding about it; or your own earlier
+    explanation corrected. -/
+inductive ConflictOutcome | dissolved | afterDisclosure | unsettled | targetFinding | yourCorrection
 
 /-- **Your record**, read from the context: for task `t`, each contradiction taken up, where its
     sides came from, and how it ended. One still standing when its task closed is carried in the
@@ -491,9 +502,9 @@ inductive Gate
   /-- a contradiction the user holds a side of: both sides quoted where they stand, and a request
       to explain how they fit — no verdict yet -/
   | conflict (t : RecordId)
-  /-- the contradiction the user's explanation left standing: both sides, the material from the
-      target that bears on it quoted in place, the reason one side does not hold, and an
-      application question -/
+  /-- the contradiction the user's explanation left standing, where the target or a source they
+      cited settles it: both sides, that material quoted in place, the reason one side does not
+      hold, and an application question -/
   | resolve (t : RecordId)
   /-- which aspect to start with, over the task's gaps -/
   | startAspect (t : RecordId)
@@ -596,9 +607,10 @@ contradiction due for the task that the user holds no side of rides the next pre
 relay: one inside the target itself shown as a finding about the target, saying which side holds
 only where evidence outside it settles that, and one against an explanation of yours shown as your
 correction of that explanation, with the target's material — neither asks the user to settle it.
-Where a gate opens ahead of another item due for the task — a contradiction the user holds a side
-of ahead of the Horizon, the Horizon ahead of an aspect the user chose — the presentation says the
-order you read and why. Every turn of an active run ends in one `Gate`; a withdrawal ends the run
+Where a contradiction the user holds a side of opens ahead of another item due for the task, the
+presentation says the order you read and why. A Horizon probe that opens ahead of an aspect the
+user chose says only that their aspect comes next: the probe carries its scenario and nothing
+else, so why it came first is said in the closure after its answer. Every turn of an active run ends in one `Gate`; a withdrawal ends the run
 instead, with what was shown presented.
 -/
 
@@ -717,7 +729,9 @@ noncomputable def advance (c : Context P) : Gate → Verdict → Step P
     if Dissolved c then .gate c (settle c t (.coverage t))
     else match otherIntent c with
       | some e => .gate c (redirect c e)
-      | none   => .gate (c ++ (attach c).map (·.val)) (.resolve t)
+      | none   =>
+        if Settles c then .gate (c ++ (attach c).map (·.val)) (.resolve t)
+        else .gate c (settle c t (.coverage t))
   | .resolve t, _ =>
     match otherIntent c with
     | some e => .gate c (redirect c e)
@@ -785,7 +799,8 @@ read again after every utterance: an edge the user has since spoken is not asked
 bring a new one into view, and one already asked is not asked again. Contradictions are read
 again the same way, and taken up by whose they are: one the user holds a side of comes before
 the Horizon and asks first for their explanation of how the sides fit, a verdict following only
-where that explanation leaves it standing; one inside the target is a finding about the target,
+where that explanation leaves it standing and the target or a cited source settles it — with
+nothing to settle it, none is given and that is said; one inside the target is a finding about the target,
 and one against an explanation of yours is yours to correct — neither is handed to the user to
 settle. Before anything is disclosed, a missed answer is read for its intent: one aimed at
 another question or purpose than the probe's moves to the task or entry that intent points at,
@@ -820,13 +835,18 @@ theorem conflict_only_user (c : Context P) (t : RecordId) (h : gateFor c t = .co
 
 At a contradiction the user holds a side of, their explanation comes before any verdict: where it
 shows how the sides fit, nothing is read or attached; where it leaves them standing within the
-question's own intent, the target's material is read and both sides are shown with it.
+question's own intent and material settles it, that material is read and both sides are shown
+with it; where nothing settles it, nothing is read or attached and no verdict follows.
 theorem conflict_dissolved (c : Context P) (t : RecordId) (hd : Dissolved c) :
     advance c (.conflict t) .cont = .gate c (settle c t (.coverage t))
 
 theorem conflict_standing_resolves (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
-    (hi : otherIntent c = none) :
+    (hi : otherIntent c = none) (hs : Settles c) :
     advance c (.conflict t) .cont = .gate (c ++ (attach c).map (·.val)) (.resolve t)
+
+theorem conflict_unsettled_no_verdict (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
+    (hi : otherIntent c = none) (hs : ¬ Settles c) :
+    advance c (.conflict t) .cont = .gate c (settle c t (.coverage t))
 
 An admissible Horizon not yet asked preempts every other gate of its task but a contradiction the
 user holds a side of.
@@ -980,19 +1000,19 @@ def grounding : Op → Annot × String
   | .reveal         => (.constitution, "present (conditional: the answer to a Horizon probe or a cue missed the edge, asked for no step, and was not read as aimed at another intent): the disclosure — the edge named, the material from the target it rests on quoted in place at the narrowest span, and an application question; never a second concealed scenario")
   | .zeroGap        => (.constitution, "present (conditional: no gap for the task): the zero-gap finding with its reasoning; Confirm completes the task, Reopen(description) adds the named gap and resumes verification")
   | .contradiction  => (.sense, "Internal analysis: the contradiction due for the task, read again after every utterance over the fused context — two statements that cannot both hold, each quoted where it stands, admitted only where both sides are in the context with their sources and speak to the same scope under the same premises, one claim appearing again (the target, your quote of it, an explanation of yours drawn from it) counting as one side — and where its sides come from: two of the user's statements, the user's understanding against the target, two places in the target, or an explanation of yours against the target")
-  | .order          => (.sense, "Internal analysis: which due item the task takes up next — a contradiction the user holds a side of first, then an admissible Horizon, then the task's gates — said in the presentation with its basis whenever a gate opens ahead of another item due")
-  | .conflict       => (.constitution, "present (conditional: a contradiction the user holds a side of is due): both sides quoted where they stand, and a request to explain how they fit — no verdict yet; an explanation that shows how they fit dissolves it, one aimed at another intent moves there, and one that leaves it standing is followed by its resolution")
-  | .resolve        => (.constitution, "present (conditional: the user's explanation left a contradiction standing within the question's own intent): both sides, the material from the target that bears on it quoted in place at the narrowest span, the reason one side does not hold, and an application question")
+  | .order          => (.sense, "Internal analysis: which due item the task takes up next — a contradiction the user holds a side of first, then an admissible Horizon, then the task's gates — said in the presentation with its basis whenever a contradiction opens ahead of another item due; a Horizon opening ahead of a chosen aspect says only that the aspect comes next, its precedence said in the closure after its answer")
+  | .conflict       => (.constitution, "present (conditional: a contradiction the user holds a side of is due): both sides quoted where they stand, and a request to explain how they fit — no verdict yet; an explanation that shows how they fit dissolves it, one aimed at another intent moves there, one that leaves it standing is followed by its resolution where the target or a cited source settles it, and otherwise by a closure saying nothing settles it, with no verdict")
+  | .resolve        => (.constitution, "present (conditional: the user's explanation left a contradiction standing within the question's own intent, and the target or a source they cited settles it): both sides, the material from the target that bears on it quoted in place at the narrowest span, the reason one side does not hold, and an application question")
   | .conflictRelay  => (.extension, "TextPresent+Proceed: before the next gate, a contradiction the user holds no side of — one inside the target shown as a finding about the target, saying which side holds only where evidence outside it settles that; one against an explanation of yours shown as your correction of that explanation with the target's material — never handed to the user to settle")
   | .startAspect    => (.constitution, "present (conditional: gaps to offer, nothing probed yet for the task): which aspect to start with, over the task's gaps")
   | .probe          => (.constitution, "present: the probe of the bound aspect in the form probeKind gives it — Qc for Expectation and Sequence, Qs for Causality, Scope, and Emergent — after the selected artifact context and a concrete scenario, with a free-response path")
   | .inquiry        => (.constitution, "present: the reasoning inquiry on an objection to the answer, whole or partial, opened before anything is settled")
-  | .attach         => (.observe, "artifact read + excerpt attachment: read whatever the standing adjudication, the missed Horizon, or the contradiction left standing rests on — the target itself, or a source the user cited that can be read now, in any form — and quote in place the narrowest span it rests on — only once an adjudication stands after the user's reasoning, a Horizon answer missed the edge within the probe's own intent asking for no step, or the user's explanation left a contradiction standing within its own intent; a locator the user must open is not an attachment")
+  | .attach         => (.observe, "artifact read + excerpt attachment: read whatever the standing adjudication, the missed Horizon, or the contradiction left standing rests on — the target itself, or a source the user cited that can be read now, in any form — and quote in place the narrowest span it rests on — only once an adjudication stands after the user's reasoning, a Horizon answer missed the edge within the probe's own intent asking for no step, or the user's explanation left a contradiction standing within its own intent and that material settles it; a locator the user must open is not an attachment")
   | .closure        => (.extension, "TextPresent+Proceed: the continuation closure — the round's outcome, any side branch with its record, a missed answer read as aimed at another intent offered as that candidate reading with what it was read from and an invitation to say otherwise, a contradiction dissolved or resolved, the task's status, the return point, and the next moves — before coverage or the resumed gate, never in place of a gate")
   | .coverage       => (.constitution, "present: aspect coverage — probed and unprobed aspects, the Horizon never among the offers; sufficient, another aspect, or a proposal")
   | .update         => (.track, "record update: marks the closed task completed, naming the identity its registration returned")
   | .eject          => (.track, "record: a proposal verbatim, outside the task set; the closure says it was read as a proposal and the gate it came from opens again")
-  | .readAnswer     => (.sense, "Internal analysis: the whole latest utterance read with the context — its verdict, the selection, the chosen aspect, whether a Horizon answer reached the edge, whether an explanation dissolved a contradiction, whether a missed answer was aimed at another intent, the objection, and whether an adjudication stands")
+  | .readAnswer     => (.sense, "Internal analysis: the whole latest utterance read with the context — its verdict, the selection, the chosen aspect, whether a Horizon answer reached the edge, whether an explanation dissolved a contradiction and whether material settles one it left standing, whether a missed answer was aimed at another intent, the objection, and whether an adjudication stands")
   | .withdrawal     => (.extension, "TextPresent+Proceed: on the user's withdrawal, what was shown so far — each aspect with how it was shown, each contradiction taken up with how it ended, and each missed answer read as aimed at another intent — and any dissent; no task the user did not close is completed")
   | .converge       => (.extension, "TextPresent+Proceed: the convergence trace, presented before VerifiedUnderstanding is returned — each task with its status, the aspects detected for it (the Horizon among them where one was asked), and each aspect shown with how it was shown: independently, or through an application after a disclosure or a cue; each contradiction taken up, where its sides came from, and how it ended — dissolved by the user's explanation, resolved after its disclosure, a finding about the target, or your correction; each missed answer read as aimed at another intent, with what was read; any dissent attached to a closure")
   | .seam           => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate inside this protocol and the next fires unchanged")
@@ -1022,7 +1042,7 @@ Present the selected artifact context and a concrete scenario before each probe.
 
 Read whether a Horizon is due again after every answer, over the whole context: an edge the user has since spoken is not asked, an answer can bring a new one into view, and one already asked is not asked again. Ask it through its everyday scenario only, never its label, suspected edge, expected answer, or rationale before the answer. An answer that reaches the edge is taken. Before disclosing anything after a missed answer — at a Horizon probe, a cue, an ordinary probe, or a disclosure's application question — read from the whole context whether it was aimed at a different intent than the probe's task serves: another question or purpose the user is actually pursuing. That reading is yours, made without asking, and you offer it as a candidate rather than assert it: where you read another intent, say in the closure what you read and from what, move to the task serving it — or reopen entry selection with that intent named when no task does — and in the same turn invite the user to say otherwise ("this reads as asking about X, so I am moving there — say so if not"); disclose nothing. The user's next utterance corrects a wrong reading: where it says the answer was aimed at the original question after all, read that answer again at the gate it answered, as a miss within its own intent. An answer that misses the edge within the probe's own intent is followed at once by the disclosure: name the edge, quote the material from the target it rests on at the narrowest span, and ask an application question — no second concealed scenario. Where the user asks to go step by step, give a cue first; their utterance steers the next presentation. Record how each aspect was shown — on their own, or through an application after a disclosure or a cue — and never present what followed a disclosure as independent detection. An answer you have an objection to first opens a reasoning inquiry grounded in the user's actual answer. Where that reasoning defeats the objection, nothing is corrected and the round closes as any other unadjudicated one does. Where an adjudication stands after it, target the correction at what that adjudication actually reaches — the disclosed mental model where that is what is wrong, the part it bears on where the rest of the answer stood — and re-probe that aspect.
 
-Read the context for contradictions again after every answer as well: two statements that cannot both hold, each quoted where it stands. Admit one only where both sides are in the context with their sources and speak to the same scope under the same premises; one claim appearing again — the target, your quote of it, an explanation of yours drawn from it — is one side, not two. Take each up by whose it is. Where the user holds a side of it — two of their own statements, or their understanding against the target — it comes before the Horizon: show both sides and ask them to explain how the two fit, with no verdict yet. Where their explanation shows how the sides fit, record it as dissolved and move on. Where it leaves them standing within the question's own intent, show both sides again with the material from the target that bears on it, quoted in place, and the reason one side does not hold, then ask an application question. A contradiction inside the target itself is a finding about the target: show it before the next gate and say which side holds only where evidence outside the target settles that. One between an explanation you gave earlier and the target is yours: correct your explanation with the target's material before the next gate, and do not hand it to the user to settle. Whenever a gate opens ahead of another item due for the task — a contradiction ahead of the Horizon, the Horizon ahead of an aspect the user chose — say the order you read and why ("I am taking this first because …").
+Read the context for contradictions again after every answer as well: two statements that cannot both hold, each quoted where it stands. Admit one only where both sides are in the context with their sources and speak to the same scope under the same premises; one claim appearing again — the target, your quote of it, an explanation of yours drawn from it — is one side, not two. Take each up by whose it is. Where the user holds a side of it — two of their own statements, or their understanding against the target — it comes before the Horizon: show both sides and ask them to explain how the two fit, with no verdict yet. Where their explanation shows how the sides fit, record it as dissolved and move on. Where it leaves them standing within the question's own intent and the target, or a source they cited that you can read now, settles which side holds, show both sides again with that material quoted in place and the reason one side does not hold, then ask an application question. Where nothing you can attach settles it, give no verdict: say that both sides stand and that you have nothing to settle it with, and leave it theirs. A contradiction inside the target itself is a finding about the target: show it before the next gate and say which side holds only where evidence outside the target settles that. One between an explanation you gave earlier and the target is yours: correct your explanation with the target's material before the next gate, and do not hand it to the user to settle. Whenever a contradiction the user holds a side of opens ahead of another item due for the task, say the order you read and why ("I am taking this first because …"). A Horizon probe that opens ahead of an aspect the user chose says only that their aspect comes next; why the Horizon came first waits for the closure after its answer, since the probe carries its scenario and nothing else.
 
 Treat a response as a proposal side branch only when it suggests a system change and either introduces matter outside `R` or directs action at the system; explanation, navigation, and clarification requests remain in the comprehension loop. Record a proposal verbatim, emit the side-branch closure saying the answer was read as a proposal, and open again the gate it came from — a proposal at the Horizon probe resumes at that task's coverage — without turning it into a comprehension task. The reading is yours and closes nothing: an answer the user meant as an answer is answered at that gate.
 
@@ -1052,6 +1072,6 @@ When grounding an explanation or correction, cite concrete locations in the targ
 9b. **Active-turn fail-closed**: While a run is active, end every turn in one `Gate`; relay context and continuation metadata may precede it but never replace it.
 - **Zero-gap surfacing**: The zero-gap finding carries its reasoning to its gate; only `Confirm` completes the entry, while `Reopen(description)` adds the named Emergent gap and resumes verification.
 - **Intent before disclosure**: After a missed answer, read its intent before disclosing or objecting: an answer aimed at another question or purpose than the probe's moves there, and nothing is disclosed against it. Offer the reading as a candidate — what you read, from what, where you move — with an invitation to say otherwise in the same turn; it adds no question and yields to the user's next utterance.
-- **Contradictions by whose they are**: A contradiction the user holds a side of comes first and asks for their explanation before any verdict; one left standing is shown with both sides, the target's material, and the reason, then applied. One inside the target is a finding about the target; one against your own earlier explanation is yours to correct. Admit one only where both sides stand in the context with sources, same scope, same premises. Say the order you read whenever a gate opens ahead of another item due.
+- **Contradictions by whose they are**: A contradiction the user holds a side of comes first and asks for their explanation before any verdict; one left standing is shown with both sides, the target's material, and the reason, then applied — only where the target or a cited source settles it, and with nothing to settle it no verdict is given. One inside the target is a finding about the target; one against your own earlier explanation is yours to correct. Admit one only where both sides stand in the context with sources, same scope, same premises. Say the order you read whenever such a contradiction opens ahead of another item due; a Horizon's precedence is said only after its answer.
 14a. **Horizon boundary**: Horizon is an evidence-bound comprehension edge inside the selected entry point, not route selection, a decision gap, reframing, or perspective fusion. Admit it only through `admissible`, read again on the fused context after every answer; ask each edge once, through its scenario only; disclose it with its material when the answer misses it; and demote or revise the instrumentation after repeated applicable opportunities if detections remain absent, speculative, or unhelpful.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

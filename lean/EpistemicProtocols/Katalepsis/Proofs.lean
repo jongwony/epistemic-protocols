@@ -42,9 +42,14 @@ theorem conflict_dissolved (c : Context P) (t : RecordId) (hd : Dissolved c) :
   simp [advance, hd]
 
 theorem conflict_standing_resolves (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
-    (hi : otherIntent c = none) :
+    (hi : otherIntent c = none) (hs : Settles c) :
     advance c (.conflict t) .cont = .gate (c ++ (attach c).map (·.val)) (.resolve t) := by
-  simp [advance, hd, hi]
+  simp [advance, hd, hi, hs]
+
+theorem conflict_unsettled_no_verdict (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
+    (hi : otherIntent c = none) (hs : ¬ Settles c) :
+    advance c (.conflict t) .cont = .gate c (settle c t (.coverage t)) := by
+  simp [advance, hd, hi, hs]
 
 theorem horizon_preempts (c : Context P) (t : RecordId) (hu : ¬ UserConflictDue c t)
     (hd : HorizonDue c t) : gateFor c t = .horizonProbe t := by
@@ -208,7 +213,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
       · exact ⟨_, _, rfl⟩
       · split
         · exact ⟨_, _, rfl⟩
-        · exact ⟨_, _, rfl⟩
+        · split
+          · exact ⟨_, _, rfl⟩
+          · exact ⟨_, _, rfl⟩
     | resolve t =>
       left; simp only [advance]; split
       · exact ⟨_, _, rfl⟩
@@ -244,7 +251,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
       · exact ⟨_, _, rfl⟩
       · split
         · exact ⟨_, _, rfl⟩
-        · exact ⟨_, _, rfl⟩
+        · split
+          · exact ⟨_, _, rfl⟩
+          · exact ⟨_, _, rfl⟩
     | resolve t =>
       simp only [advance]; split
       · exact ⟨_, _, rfl⟩
