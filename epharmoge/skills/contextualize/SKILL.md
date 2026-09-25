@@ -325,9 +325,9 @@ axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
     write, not from what is still found, since the replaced result may leave nothing to find. -/
 axiom withdrawal : Context P → Option (Option Result)
 
-/-- **Your reading**: since the person's latest turn, a write changed the result — an adaptation
-    landed. The changed result is then shown before the run can end. -/
-axiom ResultChanged : Context P → Prop
+/-- **Your reading**: the person's latest turn asked for an adaptation, and its write has landed —
+    whether or not the mismatch it aimed at is still found afterwards. -/
+axiom AdaptedAtLast : Context P → Prop
 
 /-- **Your record**, read from the context: the locator the carrier-creating write returned — the
     one durable record every mismatch and its standing is written into; `none` where nothing was
@@ -407,14 +407,16 @@ def resolvedAt {c : Context P} (m : Mismatch c) : Option Nat :=
   | .filled _ src _ _ => some src.idx
   | .open_ _          => none
 
-/-- The person has closed: they said the run is done, or their latest turn resolved a mismatch
-    that is still found — left as it is, or handed on — and no write has changed the result since.
-    Where nothing was found, where every mismatch was handed on or withdrawn without the person,
-    and wherever an adaptation landed after the person's latest turn, only the first holds, so
-    the list and the changed result are seen before the run ends. -/
+/-- The person has closed: they said the run is done, or their latest turn resolved something —
+    a mismatch still found, left as it is or handed on, or an adaptation whose write has landed.
+    A turn whose adaptation landed and left nothing open therefore closes the run, and the changed
+    result is shown in the closing trace. Where nothing was found, or every mismatch was handed on
+    or withdrawn without the person, only the first holds, so the list is seen before the run
+    ends. -/
 def PersonClosed (c : Context P) : Prop :=
   filledValue (closing c) = some .done ∨
-  (¬ ResultChanged c ∧ ∃ m ∈ mismatches c, (resolvedAt m).isSome ∧ resolvedAt m = lastPerson c)
+  AdaptedAtLast c ∨
+  (∃ m ∈ mismatches c, (resolvedAt m).isSome ∧ resolvedAt m = lastPerson c)
 
 def NothingOpen (c : Context P) : Prop := ∀ m ∈ mismatches c, standing c m ≠ .open_
 
@@ -483,17 +485,18 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
 
 /-! ── CONVERGENCE ──
 Every closure is read where it fires and nowhere else. done: nothing open, and the person closed —
-by resolving the last open mismatch in their latest turn, or by saying the run is done after seeing
-the list, which is the only way a run closes where nothing was found, where nothing was the
-person's to resolve, or after an adaptation landed. discarded: the withdrawal the person asked for landed; the replacement is carried with
-no claim of fit. stopped: the result stays as it is and every open mismatch is recorded unresolved.
+by resolving the last open mismatch in their latest turn, an adaptation whose write landed
+included, or by saying the run is done after seeing the list, which is the only way a run closes
+where nothing was found or nothing was the person's to resolve. discarded: the withdrawal the
+person asked for landed; the replacement is carried with no claim of fit. stopped: the result stays as it is and every open mismatch is recorded unresolved.
 routed: the person named the next protocol. Fit is claimed only for the mismatches found, and fit
 is not correctness, which was presupposed at entry and is not re-checked here. A mismatch left as
 it is carries the person's reason and no claim that it does or does not stand.
 Convergence evidence: one line per mismatch found — what did not fit, where, and how it stood at
 the close: the person's resolution with the turn it came from, the certificate's handoff with its
-fit, or evidence's withdrawal with that evidence — beside the adaptations made, any that did not
-repair what they aimed at, and the dissent attached to the closure. Demonstrated, not asserted.
+fit, or evidence's withdrawal with that evidence — beside the adaptations made with what each
+changed in the result, any that did not repair what they aimed at, and the dissent attached to the
+closure. Demonstrated, not asserted.
 -/
 
 /-!
@@ -598,7 +601,7 @@ What should happen?
 
 The person may answer in their own words, and one answer may settle more than one mismatch. Leaving a mismatch as it is records the reason they gave and makes no claim that the mismatch does or does not stand. Where the owner is unclear, the options name the concrete split, for example "install mail in this image as part of this work" beside "hand it to whoever owns the image (/bound)".
 
-With nothing open, show the list, how far the judgment reached, and ask whether the run is done; the person may also name something that does not fit. After an adaptation, say that the changed result was judged again and that no correctness claim is made for it. After a withdrawal, say that the replacement is carried with no claim of fit.
+With nothing open, show the list, how far the judgment reached, and ask whether the run is done; the person may also name something that does not fit. After an adaptation, say that the changed result was judged again and that no correctness claim is made for it; where it left nothing open, the run closes on that turn and the closing trace shows what the adaptation changed. After a withdrawal, say that the replacement is carried with no claim of fit.
 
 ## Rules
 
@@ -609,5 +612,5 @@ With nothing open, show the list, how far the judgment reached, and ask whether 
 - **The person resolves and closes**: A mismatch is resolved only by the person's turn, whatever its form, and the person's resolution stands over anything evidence or the certificate read. Evidence alone may withdraw the AI's own flag, reported with that evidence, or show that a mismatch does not fit before the gate; a person's turn that disputes a withdrawal puts it back. Where nothing was found, or nothing was the person's to resolve, the run ends only when the person says it is done after seeing the list.
 - **Significant requires demonstrable behavioral impact**: Severity = Significant requires that the mismatch produces a demonstrable behavioral consequence — downstream-decision impact, runtime divergence, gate-trajectory change. Structural-change extent (line count, file count, scope size) alone is insufficient grounds — categorize as Minor when behavioral impact is undemonstrated. This guards against false-positive gating arising from conflation of structural-change extent with applicability impact
 - **Unclear owners surface first**: A mismatch the certificate cannot place is put to the person before anything else happens to it, with the claims its evidence supports; the certificate never places a mismatch it could not place, and evidence does not withdraw it first.
-- **Judge afresh after every write**: An adaptation changes the result, so the next pass judges the whole result against the whole context again; the run can have more open after a resolution than before it. A mismatch an adaptation aimed at and that is still found is said to be unrepaired; a write that did not land resolves nothing. Once an adaptation lands, the changed result is shown and the run ends only when the person says it is done.
+- **Judge afresh after every write**: An adaptation changes the result, so the next pass judges the whole result against the whole context again; the run can have more open after a resolution than before it. A mismatch an adaptation aimed at and that is still found is said to be unrepaired; a write that did not land resolves nothing. A turn whose adaptation landed and left nothing open closes the run; the changed result and any adaptation that did not repair what it aimed at appear in the closing trace.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
