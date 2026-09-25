@@ -51,6 +51,19 @@ transition it was built to observe.
 | Phase 0 | no deficit detected, none fabricated, the sufficiency finding stated as relay | `phase0-relay` | manual; judge specified |
 | Phase 0 | zero-uncertainty path reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
 
+`/grasp` maps its own obligations. Those that depend on an answer are reached only through
+scripted user turns, and the pair of cases is scored on obligations its list form and its
+Lean form share, so one transcript shape can compare the two:
+
+| Declared in | Obligation | Grader | Kind |
+|---|---|---|---|
+| `requires: target_exists(R)` | the target is read before anything is adjudicated | `target_read_first` | behaviour (turn 1) |
+| `preserves: R` | the tree is unchanged after every turn | `target_preserved` | tree witness per turn |
+| adjudication against an answer | a correction carries target material quoted in place | `correction-quotes-target` | manual |
+| no ground to attach | no verdict, and what was needed is named | `no-verdict-names-need` | manual |
+| present-then-Stop | each gate ends its turn | `stops-for-user` | manual |
+| completion by the user | a task closes only on the user's closing word | `closes-on-user-word` | manual |
+
 One grader per direction, where a direction is the contract obligation it measures. Graders
 that measure the same obligation are merged; agreement across runs is only a check on that
 grouping, since two graders can agree because they duplicate one another. The basis and the
