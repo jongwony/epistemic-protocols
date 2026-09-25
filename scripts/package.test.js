@@ -1291,7 +1291,7 @@ describe('package.js CLI', () => {
     // warnings for anamnesis (distinct from non-blocking style warnings like line
     // guidelines). A silent skip of anamnesis would drop results.length without
     // surfacing the cause — this filter catches that specific failure mode.
-    const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
+    const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w) && !/-line guideline\)$/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
     assert.equal(result.results.length, PLUGINS.length + 1); // every skill plus the bundle
     assert.deepEqual(
