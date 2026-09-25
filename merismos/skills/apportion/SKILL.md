@@ -855,8 +855,9 @@ open Classical in
     checks, residuals, reservations with their grounds; the plan conditions with the requirement
     that makes each safe to discharge; the acceptance question — the person's settling, or the
     draft's criterion marked as the draft's; the out-of-scope obligations with their substrates;
-    what was subtracted as the host's standing contract; any hole; each value marked the person's
-    or the draft's. Then the ledger, the person's edits first, each re-fill pointing to its cause
+    what was subtracted as the host's standing contract; any hole; each field labelled by the
+    question it answers, in the person's everyday words; each value marked the person's or the
+    draft's. Then the ledger, the person's edits first, each re-fill pointing to its cause
     and marked necessary or proposal. Then your contrary grounds. Then the focus with its actions,
     each with its consequence, an action marked recommended only as `recommend` carries it; with
     nothing open, whether to take the plan, and what a taking would not yet satisfy. After a
@@ -1061,7 +1062,7 @@ Relay and deactivate when there is no autonomous interval, the request bundles s
 
 ### The sheet
 
-Every turn shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field carries its label and reads on its own, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
+Every turn shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field reads on its own under a label that is the question it answers, worded in the person's everyday language, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
 
 Under the sheet, the ledger of what the last turn changed: the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it and marked as forced by that edit or as your proposal. A removed unit and a replaced value stay in the ledger with what they were. Then your contrary grounds, each beside the value it bears on.
 
