@@ -173,22 +173,27 @@ structure Correspondence where
 def unmatched (m : Correspondence) : List String :=
   (m.slots.filter (fun s => s.inSecond.isNone)).map (·.role)
 
-/-- **Your record**, read from the context: every correspondence the person committed with
-    AsShown, in order, each as the presentation they answered showed it. A correspondence left
-    behind by a repartnering stays. -/
+/-- **Your record**, read from the context since this activation bound its seed: every
+    correspondence the person committed with AsShown, in order, each as the presentation they
+    answered showed it. A correspondence left behind by a repartnering stays. -/
 opaque correspondences : Context P → List Correspondence
 
 /-- One reading of what the correspondence carries. Whether an axis a person names again is
     one already ruled out is read from their words. -/
 abbrev Axis := String
 
+/-- **Your judgment**: the cited turn refutes `axis` on this ground, the person's reason as
+    they gave it. -/
+opaque RefutesSupported : Axis → String → Context P → Turn P → Prop
+
 /-- A ruled-out axis with the ground that ruled it out: the person's reason, verbatim, and the
     utterance that gave it. -/
 structure RuledOut (c : Context P) where
-  axis     : Axis
-  ground   : String
-  src      : Cite c
-  byPerson : src.kind = .utterance
+  axis      : Axis
+  ground    : String
+  src       : Cite c
+  byPerson  : src.kind = .utterance
+  supported : RefutesSupported axis ground c (c[src.idx]'src.lt)
 
 /-- `H`: what the correspondence has not yet decided between, and what was dropped and why. -/
 structure Space (c : Context P) where
@@ -243,8 +248,8 @@ inductive AlignAnswer
   | repartner (ref : String)
   | abandon
 
-/-- `W`: the answer at the Probe gate. `judged` carries one verdict for every axis the probe
-    separates; the others are run-level. -/
+/-- `W`: the answer at the Probe gate. `judged` carries exactly one verdict for each axis the
+    probe separates and none for any other axis; the others are run-level. -/
 inductive ProbeAnswer
   | judged (verdicts : List (Axis × AxisVerdict))
   /-- what the probe case actually is; the case is drawn again, no axis judged -/
@@ -280,8 +285,9 @@ structure ProbeRecord (c : Context P) where
   src      : Cite c
   byPerson : src.kind = .utterance
 
-/-- **Your record**, read from the context: every probe answered, in order, with its answer. A
-    Redraw appends none, since no axis was judged. -/
+/-- **Your record**, read from the context since this activation bound its seed: every probe
+    answered, in order, with its answer — a Probe-gate Repartner, AxisMissing, or Abandon
+    included. A Redraw appends none, since no axis was judged. The cap is per abstraction seed. -/
 opaque probes : (c : Context P) → List (ProbeRecord c)
 
 /-- A resource bound on the person's attention, not a sufficiency criterion: reaching it says
@@ -293,7 +299,8 @@ def BudgetSpent (c : Context P) : Prop := maxProbes ≤ (probes c).length
 /-- The run carries a probe the person judged. -/
 def Probed (c : Context P) : Prop := ∃ r ∈ probes c, ∃ vs, r.answer = .judged vs
 
-def Settled (c : Context P) : Prop := (liveAxes c).length = 1
+/-- Exactly one distinct live reading. -/
+def Settled (c : Context P) : Prop := (liveAxes c).eraseDups.length = 1
 
 /-- Every axis ruled out and none supplied: the seed did not carry one. -/
 def Unalignable (c : Context P) : Prop := ∃ s, space c = some s ∧ s.live = []
@@ -388,7 +395,7 @@ opaque dissent : Context P → List String
     disposed of by `disposition`. -/
 structure CrystallizedAbstraction (P : Type) where
   context   : Context P
-  naming    : Option Naming
+  naming    : Naming
   openTrace : List OpenItem
   dissent   : List String
 
@@ -435,8 +442,9 @@ one in hand, and present what the scan found as candidates to recognize or repla
 abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
-A round is one step of a structural recursion over the person's utterances. `present` is the
-presentation of the gate `nextGate` names — Align (the two cases side by side, every slot filled
+A round is one step of a structural recursion over the person's utterances. `declare` is the
+terminal declaration of the alignment trace and the open trace, at either terminal. `present` is
+the presentation of the gate `nextGate` names — Align (the two cases side by side, every slot filled
 from the cases themselves), Probe (the probe case with every live axis it separates, drawn from
 the person's domain and seeded by a NotYet's gap where one opened it), or Name (name, rule,
 boundary, whatever stayed live, and whether the budget is spent) — ending at that gate.
@@ -445,7 +453,9 @@ boundary, whatever stayed live, and whether the budget is spent) — ending at t
 inductive Gate | align | probe | name
   deriving Inhabited  -- elab: lets `openGate` be declared `opaque`
 
-/-- **Your record**: the gate your latest presentation opened. -/
+/-- **Your record**: the gate your latest presentation in this activation opened; Align when
+    this activation has presented nothing yet, so the first presentation pairs the cases and
+    opens Align. -/
 opaque openGate : Context P → Gate
 
 open Classical in
@@ -463,51 +473,57 @@ noncomputable def nextGate (c : Context P) : Gate :=
     fetch where the cases' domain lies outside the person's artifacts. -/
 opaque gather : Context P → List (Evidence P)
 
-/-- At a suspension no rule was taken, so every live axis is open. -/
-def suspend (c : Context P) (gap : Option String) : AlignmentSuspended P :=
-  { context := c, gap := gap, openTrace := openItems c none gap, dissent := dissent c }
+/-- At a suspension no rule was taken, so every live axis is open. The terminal's context ends in
+    the declaration (`declare`) of the alignment trace and the open trace. -/
+def suspend (declare : Context P → Response P) (c : Context P) (gap : Option String) :
+    AlignmentSuspended P :=
+  { context := c ++ [(declare c).val], gap := gap, openTrace := openItems c none gap,
+    dissent := dissent c }
 
 /-- At Confirm the naming stands as presented, and only the live axes its rule did not take stay
-    open. -/
-def crystallize (c : Context P) : CrystallizedAbstraction P :=
-  let n := proposal c
-  { context := c, naming := n, openTrace := openItems c (n.map (·.axis)) none,
+    open; the context ends in the declaration. -/
+def crystallize (declare : Context P → Response P) (c : Context P) (n : Naming) :
+    CrystallizedAbstraction P :=
+  { context := c ++ [(declare c).val], naming := n, openTrace := openItems c (some n.axis) none,
     dissent := dissent c }
 
 open Classical in
-noncomputable def induce (present : Context P → Response P) :
+noncomputable def induce (present declare : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     let c' := fuse c u
     match answer c' with
     | some (.align .abandon) | some (.probe .abandon) | some (.name .abandon) =>
-      .suspended .abandoned (suspend c' none)
-    | some (.name .confirm) => .crystallized (crystallize c')
+      .suspended .abandoned (suspend declare c' none)
+    | some (.name .confirm) =>
+      match proposal c' with
+      | some n => .crystallized (crystallize declare c' n)
+      | none   => induce present declare (c' ++ [(present c').val]) us
     | some (.name (.notYet g)) =>
-      if BudgetSpent c' then .suspended .capped (suspend c' (some g))
-      else induce present (c' ++ [(present c').val]) us
+      if BudgetSpent c' then .suspended .capped (suspend declare c' (some g))
+      else induce present declare (c' ++ [(present c').val]) us
     | some (.align .asShown) | some (.probe (.axisMissing _)) =>
       let c₁ := c' ++ (extract c').map (·.val)
-      if Unalignable c₁ then .suspended .unalignable (suspend c₁ none)
-      else induce present (c₁ ++ [(present c₁).val]) us
+      if Unalignable c₁ then .suspended .unalignable (suspend declare c₁ none)
+      else induce present declare (c₁ ++ [(present c₁).val]) us
     | some (.probe (.judged _)) =>
-      if Unalignable c' then .suspended .unalignable (suspend c' none)
-      else induce present (c' ++ [(present c').val]) us
-    | _ => induce present (c' ++ [(present c').val]) us
+      if Unalignable c' then .suspended .unalignable (suspend declare c' none)
+      else induce present declare (c' ++ [(present c').val]) us
+    | _ => induce present declare (c' ++ [(present c').val]) us
 
 open Classical in
-noncomputable def start (present : Context P → Response P) (c : Context P)
+noncomputable def start (present declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   if ¬ inProcess c then .notActivated c
   else
     let c₁ := c ++ (gather c).map (·.val)
-    induce present (c₁ ++ [(present c₁).val]) us
+    induce present declare (c₁ ++ [(present c₁).val]) us
 
 /-! ── LOOP ──
-Correct, Repartner, Redraw, Rename, RuleWrong, and a free response each present their gate
-again with the utterance read; none spends a probe. Every other probe answer is recorded and
-counts toward `maxProbes`. When a round rules no axis out, say so before the next probe, and
+Correct and Repartner at the Align gate, Redraw, Rename, RuleWrong, and a free response each
+present a gate again with the utterance read; none spends a probe. Every other probe answer —
+Judged, AxisMissing, a Probe-gate Repartner, Abandon — is recorded and counts toward `maxProbes`. When a round rules no axis out, say so before the next probe, and
 which axes were kept by scoping the case out of their claim and which were left undecided. When
 the Name gate opens on the spent budget, say before the gate that NotYet there records the gap
 and suspends rather than drawing another probe. An axis the person names again returns to live
@@ -516,24 +532,26 @@ with the ground that ruled it out shown beside it.
 
 /-!
 Silence commits, judges, names, and disposes of nothing.
-theorem silence (present : Context P → Response P) (c : Context P) :
-    induce present c [] = .holding c
+theorem silence (present declare : Context P → Response P) (c : Context P) :
+    induce present declare c [] = .holding c
 
-No answer at the spent budget draws another probe.
+At the spent budget the draw guard is closed: an answer read against the space draws no further
+probe. A Redraw re-presents the probe already drawn and spends none.
 theorem no_draw_at_cap (c : Context P) (h : BudgetSpent c) : ¬ Draws c
 
-A NotYet with budget left draws a probe seeded by its gap.
+A NotYet with budget left opens the draw guard; the probe drawn is seeded by its gap.
 theorem notYet_draws (c : Context P) (g : String)
     (h : answer c = some (.name (.notYet g))) (hb : ¬ BudgetSpent c) : Draws c
 
 A NotYet at the spent budget suspends the run with its gap on record.
-theorem notYet_at_cap_suspends (present : Context P → Response P) (c : Context P)
+theorem notYet_at_cap_suspends (present declare : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (g : String)
     (h : answer (fuse c u) = some (.name (.notYet g))) (hb : BudgetSpent (fuse c u)) :
-    induce present c (u :: us) = .suspended .capped (suspend (fuse c u) (some g))
+    induce present declare c (u :: us) = .suspended .capped (suspend declare (fuse c u) (some g))
 
-With budget left, the Name gate opens only on a settled space past a probe the person judged,
-and never on a NotYet, whose gap draws a probe instead.
+With budget left, where an answer read against the space closes the draw guard, the space is
+settled past a probe the person judged, and the answer was no NotYet. Rename, RuleWrong, and a
+free response re-present the Name gate already open without consulting the guard.
 theorem name_has_judged (c : Context P) (h : ¬ Draws c) (hb : ¬ BudgetSpent c) :
     ¬ GapSeeded c ∧ Settled c ∧ Probed c
 -/
@@ -552,21 +570,23 @@ closure. Demonstrated, not asserted.
 
 /-!
 A crystallization is closed only by a person's Confirm.
-theorem crystallized_by_person (present : Context P → Response P) (c : Context P)
+theorem crystallized_by_person (present declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce present c us = .crystallized r) :
+    (h : induce present declare c us = .crystallized r) :
     ∃ (c₀ : Context P) (u : Utterance P),
-      answer (fuse c₀ u) = some (.name .confirm) ∧ r = crystallize (fuse c₀ u)
+      answer (fuse c₀ u) = some (.name .confirm) ∧ proposal (fuse c₀ u) = some r.naming ∧
+        r = crystallize declare (fuse c₀ u) r.naming
 
 An abandonment is the person's Abandon at a gate.
-theorem abandoned_by_person (present : Context P → Response P) (c : Context P)
+theorem abandoned_by_person (present declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : AlignmentSuspended P)
-    (h : induce present c us = .suspended .abandoned r) :
+    (h : induce present declare c us = .suspended .abandoned r) :
     ∃ (c₀ : Context P) (u : Utterance P),
       (answer (fuse c₀ u) = some (.align .abandon) ∨ answer (fuse c₀ u) = some (.probe .abandon) ∨
-        answer (fuse c₀ u) = some (.name .abandon)) ∧ r = suspend (fuse c₀ u) none
+        answer (fuse c₀ u) = some (.name .abandon)) ∧ r = suspend declare (fuse c₀ u) none
 
-A ruled-out axis and an open item's disposition each stand on a person's statement.
+A ruled-out axis cites a person's statement the model reads as refuting it on that ground
+(`RefutesSupported`); an open item's disposition likewise stands only on a person's statement.
 theorem ruled_out_by_person {c : Context P} (r : RuledOut c) : r.src.kind = .utterance
 
 theorem disposed_by_utterance {c : Context P} {i : OpenItem} {s : Cite c}

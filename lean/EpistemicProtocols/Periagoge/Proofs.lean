@@ -13,8 +13,8 @@ namespace Periagoge
 
 variable {P : Type}
 
-theorem silence (present : Context P → Response P) (c : Context P) :
-    induce present c [] = .holding c := by
+theorem silence (present declare : Context P → Response P) (c : Context P) :
+    induce present declare c [] = .holding c := by
   simp [induce]
 
 theorem no_draw_at_cap (c : Context P) (h : BudgetSpent c) : ¬ Draws c :=
@@ -24,10 +24,10 @@ theorem notYet_draws (c : Context P) (g : String)
     (h : answer c = some (.name (.notYet g))) (hb : ¬ BudgetSpent c) : Draws c :=
   ⟨hb, Or.inl ⟨g, h⟩⟩
 
-theorem notYet_at_cap_suspends (present : Context P → Response P) (c : Context P)
+theorem notYet_at_cap_suspends (present declare : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (g : String)
     (h : answer (fuse c u) = some (.name (.notYet g))) (hb : BudgetSpent (fuse c u)) :
-    induce present c (u :: us) = .suspended .capped (suspend (fuse c u) (some g)) := by
+    induce present declare c (u :: us) = .suspended .capped (suspend declare (fuse c u) (some g)) := by
   simp [induce, h, hb]
 
 theorem name_has_judged (c : Context P) (h : ¬ Draws c) (hb : ¬ BudgetSpent c) :
@@ -36,11 +36,12 @@ theorem name_has_judged (c : Context P) (h : ¬ Draws c) (hb : ¬ BudgetSpent c)
   refine ⟨fun hg => h ⟨hb, Or.inl hg⟩, ?_⟩
   exact Classical.byContradiction fun hn => h ⟨hb, Or.inr hn⟩
 
-theorem crystallized_by_person (present : Context P → Response P) (c : Context P)
+theorem crystallized_by_person (present declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce present c us = .crystallized r) :
+    (h : induce present declare c us = .crystallized r) :
     ∃ (c₀ : Context P) (u : Utterance P),
-      answer (fuse c₀ u) = some (.name .confirm) ∧ r = crystallize (fuse c₀ u) := by
+      answer (fuse c₀ u) = some (.name .confirm) ∧ proposal (fuse c₀ u) = some r.naming ∧
+        r = crystallize declare (fuse c₀ u) r.naming := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -50,8 +51,11 @@ theorem crystallized_by_person (present : Context P → Response P) (c : Context
     · cases h
     · cases h
     · rename_i ha
-      cases h
-      exact ⟨c, u, ha, rfl⟩
+      split at h
+      · rename_i n hn
+        cases h
+        exact ⟨c, u, ha, hn, rfl⟩
+      · exact ih _ h
     · split at h
       · cases h
       · exact ih _ h
@@ -66,12 +70,12 @@ theorem crystallized_by_person (present : Context P → Response P) (c : Context
       · exact ih _ h
     · exact ih _ h
 
-theorem abandoned_by_person (present : Context P → Response P) (c : Context P)
+theorem abandoned_by_person (present declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : AlignmentSuspended P)
-    (h : induce present c us = .suspended .abandoned r) :
+    (h : induce present declare c us = .suspended .abandoned r) :
     ∃ (c₀ : Context P) (u : Utterance P),
       (answer (fuse c₀ u) = some (.align .abandon) ∨ answer (fuse c₀ u) = some (.probe .abandon) ∨
-        answer (fuse c₀ u) = some (.name .abandon)) ∧ r = suspend (fuse c₀ u) none := by
+        answer (fuse c₀ u) = some (.name .abandon)) ∧ r = suspend declare (fuse c₀ u) none := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -86,7 +90,9 @@ theorem abandoned_by_person (present : Context P → Response P) (c : Context P)
     · rename_i ha
       cases h
       exact ⟨c, u, Or.inr (Or.inr ha), rfl⟩
-    · cases h
+    · split at h
+      · cases h
+      · exact ih _ h
     · split at h
       · cases h
       · exact ih _ h
