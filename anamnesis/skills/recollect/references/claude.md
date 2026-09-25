@@ -8,7 +8,7 @@ Read this reference before searching Claude Code conversation records or emittin
 - Conversation records: `{config_dir}/projects/{slug}/*.jsonl`, one partition per project slug. A session record sits directly inside a partition; anything nested deeper is a subordinate capture, not a session, and is excluded by depth rather than by name.
 - Semantic index: `{config_dir}/projects/{slug}/hypomnesis/{session-id}/` — a gist per session, a cue and never evidence.
 - Substitute channel: `{config_dir}/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl`, the capture of forked work.
-- Capture outcomes: `{config_dir}/projects/{slug}/hypomnesis/.outcomes/`. Before qualifying a member, read `capture-outcome.md`; bind `{store-root}` to `{config_dir}/projects/{record-slug}/hypomnesis`, using the partition the record or index entry was found in.
+- Capture outcomes: `{config_dir}/projects/{slug}/hypomnesis/.outcomes/`. Before reading them for the records a search examined, read `capture-outcome.md`; bind `{store-root}` to `{config_dir}/projects/{record-slug}/hypomnesis`, using the partition the record or index entry was found in. Claude index entries record no source scan, so `SourceScan` is unknown for them; a transcript line that failed to parse shows as the `input` extraction recorded `input_failed`, without a count.
 - `memory/` holds user-curated notes. It is not enumerated as conversation records; a cue that points at a decision recorded there reaches it like any other record the past work left.
 
 A session whose working directory has since been removed keeps its record under a partition no current directory selects, so a search that is to reach it cannot be limited to the active partition.

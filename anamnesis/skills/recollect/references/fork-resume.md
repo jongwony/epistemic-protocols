@@ -19,7 +19,7 @@ The fork id is never a valid resume handle: a fork has no top-level transcript, 
 2. **`parent_pointer` present, `parent_cwd` absent** (parent identified, its cwd unknown) — omit the copy-paste command and surface the parent session id with a note to resume from the parent's own project directory.
 3. **`parent_pointer = Null`** (parent record aged out) — mark the candidate non-resumable and surface the recoverable artifacts (the substitute log path plus any memory) rather than a broken command.
 4. **Non-fork candidate with the member's recorded `cwd` absent or empty** — omit the resume line and note the omission in the prose.
-5. **Recorded cwd no longer on disk** (non-fork the member's recorded `cwd`, or a fork's `parent_cwd`, naming a directory that has since been removed) — drop the `cd` prefix and emit the resumable handle alone: `<session_id>` for a non-fork candidate,
+5. **Recorded cwd no longer on disk** (a non-fork member's recorded `cwd`, or a fork's `parent_cwd`, naming a directory that has since been removed) — drop the `cd` prefix and emit the resumable handle alone: `<session_id>` for a non-fork candidate,
 
    ```text
    claude --resume <session_id>
