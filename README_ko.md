@@ -136,7 +136,7 @@ claude plugin install route@epistemic-protocols
 - **Claude Code 워크플로우와 이 프로토콜의 설명을 이미 갖고 있고 둘의 비교가 뒷받침하는 결론을 감사하고 싶음** → `/ground` (analogia) — 본인의 사용 패턴을 대상 설명으로
 - **어떤 프로토콜을 언제 쓰는지 빠른 레퍼런스가 필요** → 위의 프로토콜 표, 또는 `route` 플러그인의 세션 시작 테이블
 
-프로토콜 자체의 아키텍처와 원칙은 [CLAUDE.md](./CLAUDE.md)와 [`.claude/rules/`](./.claude/rules/) 아래의 axiom 파일들을 참고하세요.
+아키텍처는 [CLAUDE.md](./CLAUDE.md), 협업의 바탕이 되는 원칙은 [premise/](./premise/)에서 살펴보세요.
 
 <details>
 <summary>Greek Codex</summary>

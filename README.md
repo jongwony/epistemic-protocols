@@ -136,7 +136,7 @@ Entry-point routing happens up front, so you can experience the protocols while 
 - **Already have accounts of your Claude Code workflow and these protocols, and want to audit what comparing them supports** → `/ground` (analogia), with your existing usage as the target account
 - **Need a fast when-to-use-which reference** → the protocol table above, or the `route` plugin's session-start table
 
-For the architecture and principles behind the protocols themselves, read [CLAUDE.md](./CLAUDE.md) and the axiom files under [`.claude/rules/`](./.claude/rules/).
+For architecture, read [CLAUDE.md](./CLAUDE.md). For the underlying collaboration principles, explore [premise/](./premise/).
 
 <details>
 <summary>Greek Codex</summary>
