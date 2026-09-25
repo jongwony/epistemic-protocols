@@ -13,12 +13,13 @@ Audit what a mapping licenses: construct the correspondences between an abstract
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -129,6 +130,8 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+
 variable {P : Type}
 
 /-- `R`: text carrying an abstract structure and a target account already in play —
@@ -153,7 +156,7 @@ inductive Axis | sourceScope | targetScope | relation | purpose
     `determined` — fixed by the user's words or a citable standing rule — or `forced` — the
     decomposition admits exactly one value, and the citation is a source turn of `R` showing
     that uniqueness, never the decomposition's own output. -/
-opaque AxisSupported : Axis → Context P → Turn P → String → Prop
+axiom AxisSupported : Axis → Context P → Turn P → String → Prop
 
 def axisCoord : Axis → Coord P String
   | .purpose => { admits := (· = .utterance), supports := AxisSupported .purpose }
@@ -163,11 +166,8 @@ def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _ => false
   | .filled .. => true
 
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
-
 /-- **Your judgment**: how axis `a` of the comparison focus stands in `c`. -/
-opaque focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
+axiom focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
 
 /-- One axis the protocol would otherwise pick among viable alternatives fires the focus
     gate. -/
@@ -180,11 +180,11 @@ structure Inference where
 
 /-- **Your judgment**: `K`, what this activation audits, derived from the request and the
     settled purpose before construction; non-empty once activated. -/
-opaque inferences : Context P → List Inference
+axiom inferences : Context P → List Inference
 
 /-- **Your judgment**: the latest settlement narrows `K` with no basis in the request or the
     settled purpose. -/
-opaque UnsupportedNarrowing : Context P → Prop
+axiom UnsupportedNarrowing : Context P → Prop
 
 inductive FitLabel
   /-- the target structure preserves the source relation -/
@@ -201,15 +201,15 @@ inductive FitClaim
   | missing (x : Component)
 
 /-- **Your judgment**: the correspondences constructed along the settled focus. -/
-opaque mapping : Context P → List Correspondence
+axiom mapping : Context P → List Correspondence
 
 /-- **Your judgment**: the fit claims over the current mapping — each correspondence in
     exactly one cell, and every source component with no evidenced correspondent missing. -/
-opaque fitClaims : Context P → List FitClaim
+axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed.
     Direction: `references/judgments.md` §BearsOn. -/
-opaque BearsOn : Context P → FitClaim → Inference → Prop
+axiom BearsOn : Context P → FitClaim → Inference → Prop
 
 /-- Who can carry a check out. `userHeld` is context only the user holds; it is met by what
     the user reports observing, and otherwise it is `/inquire`'s deficit. -/
@@ -221,7 +221,7 @@ inductive Bearing | supports | defeats
 
 /-- **Your judgment**: the cited turn establishes, within `scope`, that it supports or defeats
     `x`. A citation's stated bearing is read against its source and scope. -/
-opaque CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
+axiom CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
 
 def checkCoord (x : FitClaim) (scope : String) : Coord P Bearing :=
   { admits := (· ≠ .utterance), supports := CheckSupported x scope }
@@ -240,7 +240,7 @@ structure Check (c : Context P) where
 /-- **Your judgment**: the checks for the current fit claims bearing on `K`, each with its
     state read off the grounds the context now holds. Direction: `references/judgments.md`
     §checks. -/
-opaque checks : (c : Context P) → List (Check c)
+axiom checks : (c : Context P) → List (Check c)
 
 def ChecksExact (c : Context P) : Prop :=
   (∀ x ∈ fitClaims c, (∃ k ∈ inferences c, BearsOn c x k) → ∃ ch ∈ checks c, ch.claim = x) ∧
@@ -265,11 +265,10 @@ inductive Verdict (c : Context P)
   | blocked      (g : Grounds c)
   | undetermined (missing : String)
 
-instance {c : Context P} : Inhabited (Verdict c) := ⟨.undetermined ""⟩  -- elab: for `opaque judge`
 
 /-- **Your judgment** per inference, reading the grounds' bearing on `k` rather than a
     label-to-verdict polarity. -/
-opaque judge : (c : Context P) → Inference → Verdict c
+axiom judge : (c : Context P) → Inference → Verdict c
 
 def Verdict.decisive {c : Context P} : Verdict c → Bool
   | .undetermined _ => false
@@ -280,19 +279,19 @@ def converged (c : Context P) : Prop := ∀ k ∈ inferences c, (judge c k).deci
 inductive Pref | adopted | withdrawn
 
 /-- **Your judgment**: the cited utterance adopts or withdraws `x`. -/
-opaque PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
+axiom PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
 
 /-- What the reader takes up. -/
 def prefCoord (x : Correspondence) : Coord P Pref :=
   { admits := (· = .utterance), supports := PrefSupported x }
 
 /-- **Your judgment**: how the user's adoption of `x` stands in `c`. -/
-opaque preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
+axiom preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
 
-/-- **Your judgments**: the source abstraction is located; its member instances are exactly
-    the target. -/
-opaque Located : Context P → Prop
-opaque InstancesAreTarget : Context P → Prop
+/-- **Your judgment**: the source abstraction is located. -/
+axiom Located : Context P → Prop
+/-- **Your judgment**: the source abstraction's member instances are exactly the target. -/
+axiom InstancesAreTarget : Context P → Prop
 
 def selfGrounding (c : Context P) : Prop := Located c ∧ InstancesAreTarget c
 
@@ -320,7 +319,7 @@ def PartitionVerdict.route : PartitionVerdict → Option String
   | .hold  => none
 
 /-- **Your judgment**: the partition reading, or `none` with its missing basis reported. -/
-opaque partition : (c : Context P) → Option (PartitionReading c)
+axiom partition : (c : Context P) → Option (PartitionReading c)
 
 def PartitionScoped (c : Context P) : Prop := (partition c).isSome → selfGrounding c
 
@@ -329,20 +328,20 @@ def partitionRoute {c : Context P} (r : PartitionReading c) : Option String := r
 /-- **Your judgment**: the latest utterance replaces a committed domain — a different question,
     not an advance of this one. The domain pair is committed once a mapping has been constructed
     against it; before that, a reframe may replace either domain and settlement starts again. -/
-opaque Supersedes : Context P → Prop
+axiom Supersedes : Context P → Prop
 
 /-- **Your judgment**: an earlier dependency still needs revision and no evidence move this
     activation can make remains to bring it up to date. -/
-opaque PendingRevision : Context P → Prop
+axiom PendingRevision : Context P → Prop
 
 /-- **Your judgment**: what mapping licenses is uncertain here, with a target account in play. -/
-opaque Uncertain : Context P → Prop
+axiom Uncertain : Context P → Prop
 
 /-- **Your count**, read from the record: construction or fit passes run in this activation. -/
-opaque reconstructions : Context P → Nat
+axiom reconstructions : Context P → Nat
 
 /-- **Your judgment**: the pending request needs another construction or fit pass. -/
-opaque NeedsReconstruction : Context P → Prop
+axiom NeedsReconstruction : Context P → Prop
 
 def maxReconstructions : Nat := 3
 
@@ -402,7 +401,7 @@ noncomputable def report (c : Context P) : Report c :=
 
 /-- **Your evidence moves** for a pass: what the reachable checks returned — artifact reads,
     searches, fetches, and runs — each an observation turn. -/
-opaque observe : Context P → List (Evidence P)
+axiom observe : Context P → List (Evidence P)
 
 def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
 
@@ -513,6 +512,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
+
+end
 
 end Analogia
 ```

@@ -13,12 +13,13 @@ Resolve abstract aporia through Extended-Mind reverse induction. Type: `(Abstrac
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -125,6 +126,8 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+
 variable {P : Type}
 
 /-- `I`: the user's intent seed. The seed utterance is a turn of the context and is never
@@ -160,10 +163,10 @@ structure DimensionProjection where
 /-- **Your judgment**: the decision coordinates the user's externalized substrate implies for
     the intent, read from the whole fused context — the seed, every answer since, and what
     the substrate reads returned. -/
-opaque reverseTrace : Context P → List DimensionProjection
+axiom reverseTrace : Context P → List DimensionProjection
 
 /-- **Your judgment**: the projection's substrate basis is concrete enough to surface. -/
-opaque concreteBasis : DimensionProjection → Bool
+axiom concreteBasis : DimensionProjection → Bool
 
 /-- `filter_confidence`; what is held back is tried again on a later re-trace. -/
 def surfaced (c : Context P) : List DimensionProjection := (reverseTrace c).filter concreteBasis
@@ -181,14 +184,13 @@ inductive Answer
   | dismiss
   /-- the user judges the endpoint resolved; this utterance is the closing citation -/
   | resolved
-  deriving Inhabited  -- elab: lets `answer` be declared `opaque`
 
 /-- **Your judgment** on the latest utterance read with the context. -/
-opaque answer : Context P → Answer
+axiom answer : Context P → Answer
 
 /-- **Your judgment**: the value this person's utterance gives coordinate `x`, read with the
     context before it; `none` when it gives none. -/
-opaque provided : Context P → Turn P → Coordinate → Option Value
+axiom provided : Context P → Turn P → Coordinate → Option Value
 
 /-- The accepted value of `x`: the latest value a person's utterance gave it. -/
 def acceptedAux (x : Coordinate) : Context P → Context P → Option Value → Option Value
@@ -205,22 +207,21 @@ def accepted (c : Context P) (x : Coordinate) : Option Value := acceptedAux x []
 
 /-- **Your judgment**: the coordinates the user deferred and has not since given a value
     (`Leftover`), each returning as itself — the same question with the same basis. -/
-opaque parked : Context P → List Coordinate
+axiom parked : Context P → List Coordinate
 
 def Leftover (c : Context P) : Prop := ∀ x ∈ parked c, accepted c x = none
 
 /-- **Your judgment**: the axes still unresolved when the user dismisses. -/
-opaque unresolvedAxes : Context P → List String
+axiom unresolvedAxes : Context P → List String
 
 /-- **Your count**, read from the record: which cycle this is. -/
-opaque cycleOf : Context P → Nat
+axiom cycleOf : Context P → Nat
 
 inductive Initiator | userInvoked | aiDetected
-  deriving Inhabited  -- elab: lets `initiatorOf` be declared `opaque`
 
 /-- **Your reading** of how this activation began. On an AI-detected activation the first
     surface is an implicit confirm-or-decline. -/
-opaque initiatorOf : Context P → Initiator
+axiom initiatorOf : Context P → Initiator
 
 /-- None is reduced to a bare axis label. -/
 inductive ResidualItem
@@ -233,7 +234,7 @@ inductive ResidualItem
 
 /-- **Your judgment**: the intent as resolved — every coordinate with its accepted value, and
     every value relayed as the single dominant one, which the resolving utterance covers. -/
-opaque resolvedIntent : Context P → List (Coordinate × Value)
+axiom resolvedIntent : Context P → List (Coordinate × Value)
 
 structure ResolvedEndpoint (P : Type) where
   context  : Context P
@@ -251,10 +252,11 @@ inductive Outcome (P : Type)
   | resolved (r : ResolvedEndpoint P)
   | holding  (c : Context P)
 
-/-- **Your judgments** at Phase 0: the intent's axis is undetermined; the signal comes from
-    the external substrate — the utterance alone cannot activate. -/
-opaque Aporia : Context P → Prop
-opaque ExternalSignal : Context P → Prop
+/-- **Your judgment** at Phase 0: the intent's axis is undetermined. -/
+axiom Aporia : Context P → Prop
+/-- **Your judgment** at Phase 0: the signal comes from the external substrate — the utterance
+    alone cannot activate. -/
+axiom ExternalSignal : Context P → Prop
 
 def activates (c : Context P) : Prop := Aporia c ∧ ExternalSignal c
 
@@ -362,6 +364,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.
 -/
+
+end
 
 end Euporia
 ```
