@@ -19,162 +19,163 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 instance : Nonempty Derivation := ⟨⟨[], [], []⟩⟩
-instance : Nonempty Verdict := ⟨.cont⟩
 
 theorem silence (respond : Context P → Response P) (c : Context P) :
     apportion respond c [] = .holding c := by
   simp [apportion]
 
-theorem apportioned_by_person (respond : Context P → Response P) (c : Context P)
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
+  let c₁ := c ++ (collect c).map (·.val)
+  exact ⟨(collect c).map (·.val) ++ (passRecord c₁).map (·.val), by simp [pass, c₁]⟩
+
+theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .confirm ∧
-      closable (fuse c₀ u) = true ∧ a = close (fuse c₀ u) ∧ HandoffRecorded a.navigation a.context := by
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .take ∧ Closable c₁ ∧ a = close c₁ ∧
+      HandoffRecorded a.navigation a.context := by
   induction us generalizing c with
   | nil => simp [apportion] at h
   | cons u us ih =>
     simp only [apportion] at h
     split at h
     · cases h
-    · rename_i hv
+    · cases h
+    · rename_i hk
       split at h
       · rename_i hc
         split at h
         · rename_i hr
           cases h
-          exact ⟨c, u, hv, hc, rfl, hr⟩
-        · cases h
+          exact ⟨_, hk, hc, rfl, hr⟩
+        · exact ih _ h
       · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
+    · exact ih _ h
 
-theorem rerouted_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (h : apportion respond c us = .rerouted c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = fuse c₀ u ∧ verdict c₁ = .routeBound := by
+theorem withdrawn_on_stop (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (c₁ : Context P) (h : apportion respond c us = .withdrawn c₁) :
+    filledValue (closing c₁) = some .stop := by
   induction us generalizing c with
   | nil => simp [apportion] at h
   | cons u us ih =>
     simp only [apportion] at h
     split at h
-    · rename_i hv
+    · rename_i hk
       cases h
-      exact ⟨c, u, rfl, hv⟩
+      exact hk
+    · cases h
     · split at h
-      · split at h <;> cases h
+      · split at h
+        · cases h
+        · exact ih _ h
       · exact ih _ h
+    · exact ih _ h
+
+theorem routed_on_route (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (t : String) (c₁ : Context P)
+    (h : apportion respond c us = .routed t c₁) : filledValue (closing c₁) = some (.route t) := by
+  induction us generalizing c with
+  | nil => simp [apportion] at h
+  | cons u us ih =>
+    simp only [apportion] at h
+    split at h
+    · cases h
+    · rename_i hk
+      cases h
+      exact hk
     · split at h
-      · cases h
+      · split at h
+        · cases h
+        · exact ih _ h
       · exact ih _ h
+    · exact ih _ h
+
+theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+  cases hc : closing c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
 theorem acceptance_by_person {c : Context P} {s : Cite c}
     (ok : (acceptanceCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-theorem unfit_offers_no_accept (f : SpanFit) (b : Bool) (h : f ≠ .fits) :
-    UnitForm.acceptUnit ∉ unitOptions f b := by
-  cases f <;> cases b <;> simp_all [unitOptions]
+theorem override_by_person {c : Context P} {u : PlanUnit} {s : Cite c}
+    (ok : (overrideCoord (P := P) u).admits s.src) : s.src.val = .person := ok
 
-theorem fit_offers_no_override (b : Bool) : UnitForm.overrideFit ∉ unitOptions .fits b := by
-  cases b <;> simp [unitOptions]
-
-theorem heuristic_sends_whole_draft (c : Context P) (y x : ProposedUnit) (hy : y ∈ draft c)
-    (hh : y.seam.isHeuristic = true) : relays c x = false := by
-  have : (draft c).any (fun y => y.seam.isHeuristic) = true := List.any_eq_true.mpr ⟨y, hy, hh⟩
-  simp [relays, this]
+theorem recommended_separates (c : Context P) (f : Focus) (i : {i : Nat // Separates c f i})
+    (_ : recommend c f = some i) : Separates c f i.val := i.property
 
 theorem residual_empty_iff_covered (c : Context P) :
     residual c = [] ↔ coverageComplete c = true := by
   simp [residual, coverageComplete, List.filter_eq_nil_iff, List.all_eq_true]
 
-theorem resolve_total (u : PlanUnit) (d : Derivation) (h : hasCompletion u d = true) :
-    (resolveUnit u d.accept).isSome = true := by
-  unfold resolveUnit
-  split
-  · rfl
-  · rename_i hk
-    split
-    · rfl
-    · rename_i hacc
-      split
-      · rfl
-      · rename_i hres
-        exfalso
-        simp only [Derivation.accept] at hk hres hacc
-        simp only [hasCompletion, Bool.or_eq_true] at h
-        rcases h with (h | h) | h
-        · exact hk h
-        · simp only [acceptedCompletion, List.map_eq_nil_iff, List.filter_eq_nil_iff,
-            List.mem_map] at hacc
-          obtain ⟨r, hr, hr'⟩ := List.any_eq_true.mp h
-          have := hacc _ ⟨r, hr, rfl⟩
-          simp_all
-        · simp only [reservedCompletion, List.map_eq_nil_iff, List.filter_eq_nil_iff] at hres
-          obtain ⟨s, hs, hs'⟩ := List.any_eq_true.mp h
-          exact hres s hs hs'
-
-theorem every_unit_certified (c : Context P) (h : closable c = true) (u : PlanUnit)
-    (hu : u ∈ units c) : (resolveUnit u (derivation c u).accept).isSome = true := by
-  apply resolve_total
-  simp only [closable, status, Bool.and_eq_true] at h
-  have ht := h.1.1.1.1.2
+theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c) :
+    (certificate (derivation c u)).terminates = true := by
+  have hs := h.1
+  simp only [Structural, status, Bool.and_eq_true] at hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [terminationCovered, List.all_eq_true] at ht
   exact ht u hu
 
-theorem emitted_units_join (c : Context P) (e : UnitEntry) (he : e ∈ (emit c).units) :
-    ∃ u ∈ units c, ∃ r, resolveUnit u (derivation c u).accept = some r ∧ e = entry u r := by
-  simp only [emit, List.mem_filterMap, Option.map_eq_some_iff] at he
-  obtain ⟨u, hu, r, hr, rfl⟩ := he
-  exact ⟨u, hu, r, hr, rfl⟩
+theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved)
+    (hk : s.kind = .completion) : s.obligation ∈ (certificate d).reserved := by
+  simp only [certificate, List.mem_map, List.mem_filter]
+  exact ⟨s, ⟨hs, by simp [hk]⟩, rfl⟩
 
-theorem unit_has_entry (c : Context P) (h : closable c = true) (u : PlanUnit) (hu : u ∈ units c) :
-    ∃ r, entry u r ∈ (emit c).units := by
-  have hs := every_unit_certified c h u hu
-  obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp hs
-  refine ⟨r, ?_⟩
-  simp only [emit, List.mem_filterMap]
-  exact ⟨u, hu, by simp [hr]⟩
+theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ [] := by
+  have hs := h.1
+  simp only [Structural, status, Bool.and_eq_true] at hs
+  obtain ⟨_, hn⟩ := hs
+  cases hu : units c with
+  | nil => cases ho : oos c with
+    | nil => simp [hu, ho] at hn
+    | cons _ _ => exact Or.inr (by simp)
+  | cons _ _ => exact Or.inl (by simp)
 
-theorem emitted_refs_nodup (c : Context P) (h : ((units c).map (·.ref)).Nodup) :
-    ((emit c).units.map (·.ref)).Nodup := by
-  have hsub : ((emit c).units.map (·.ref)).Sublist ((units c).map (·.ref)) := by
+theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c)
+    (hf : u.fit ≠ .fits) : ∃ s : Cite c, s.src.val = .person := by
+  have hs := h.1
+  simp only [Structural, status, Bool.and_eq_true] at hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  simp only [fitSettled, List.all_eq_true] at hfit
+  have hu' := hfit u hu
+  cases ho : override c u with
+  | open_ _ => simp [ho, isFilled, hf] at hu'
+  | filled a src ok _ => exact ⟨src, ok⟩
+
+theorem emitted_refs_nodup (c : Context P) : ((emit c).units.map (·.ref)).Nodup := by
+  have key : ∀ (f : Nat × PlanUnit → UnitEntry), (∀ x, (f x).ref = x.1) →
+      ∀ l : List (Nat × PlanUnit), (l.map f).map (·.ref) = l.map Prod.fst := by
+    intro f hf l
+    induction l with
+    | nil => rfl
+    | cons x l ih => simp [ih, hf]
+  have h : ((emit c).units.map (·.ref)) = List.range (units c).length := by
     simp only [emit]
-    generalize units c = us
-    induction us with
-    | nil => simp
-    | cons u us ih =>
-      simp only [List.filterMap_cons, List.map_cons]
-      cases resolveUnit u (derivation c u).accept with
-      | none => exact ih.cons _
-      | some r => exact ih.cons_cons _
-  exact hsub.nodup h
+    rw [key _ (fun x => by obtain ⟨i, u⟩ := x; rfl)]
+    exact List.map_fst_zip (by simp)
+  rw [h]
+  exact List.nodup_range
 
 theorem acceptance_bound_to_units (c : Context P) (p : PlanCondition) (hp : p ∈ planOf c)
     (hs : p.scope = .wholeGoalAcceptance) :
     p.dischargeableWhen = planTerminal (units c).length := by
   simp only [planOf, List.mem_map] at hp
   obtain ⟨q, _, rfl⟩ := hp
-  unfold bindPlan at hs ⊢
-  split
-  · rfl
-  · rename_i hq
-    simp_all
+  by_cases hq : q.scope = .wholeGoalAcceptance
+  · simp [bindPlan, hq]
+  · simp [bindPlan, hq] at hs
 
 theorem waiver_reservation_exclusive (c : Context P) :
-    ¬ ((envelope c).unboundedApproved = true ∧
-      (envelope c).reserved.any (·.subject.isAcceptance) = true) := by
-  intro ⟨hu, hr⟩
-  simp only [envelope] at hu hr
-  by_cases hd : derivedAcceptance c = true
-  · simp [hd] at hu
-  · cases ha : filledValue (acceptance c) with
-    | none => simp [hd, ha] at hu
-    | some a =>
-      cases a <;> simp_all [Acceptance.isUnbounded, Acceptance.isReserved,
-        List.any_flatMap, List.any_map, ReservedSubject.isAcceptance, Function.comp_def]
+    ¬ ((envelope c).waived = true ∧ (envelope c).reserved.any (·.subject.isAcceptance) = true) := by
+  simp only [envelope]
+  cases filledValue (acceptance c) with
+  | none => simp
+  | some a =>
+    cases a <;> simp [List.any_flatMap, List.any_map, ReservedSubject.isAcceptance]
 
-theorem plan_reads_back (e : Emission) (ds : List String) :
-    (package e ds).units = e.units ∧ (package e ds).planConditions = e.planConditions ∧
-      (package e ds).reserved = e.envelope.reserved ∧
-      (package e ds).unboundedApproved = e.envelope.unboundedApproved :=
+theorem plan_reads_back (e : Emission) (ds : List String) (pv : List Provenance) :
+    (package e ds pv).units = e.units ∧ (package e ds pv).planConditions = e.planConditions ∧
+      (package e ds pv).reserved = e.envelope.reserved ∧
+      (package e ds pv).waived = e.envelope.waived :=
   ⟨rfl, rfl, rfl, rfl⟩
 
 theorem navigation_locates_carrier (c : Context P) :
