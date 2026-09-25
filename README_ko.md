@@ -70,7 +70,6 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Heuresis](./heuresis) | `/ideate` | 결정을 위한 후보군이 비어 있거나 너무 일찍 하나로 수렴했을 때 — 선택하기 전에 다양한 후보군으로 먼저 넓힐 때 |
 | [Proplasma](./proplasma) | `/preview` | 결정 직전인데 방향 후보들이 말로는 판단이 안 서고 직접 봐야 알 것 같을 때 — 폐기 전제의 값싼 probe들로 먼저 대비 |
 | [Hypotyposis](./hypotyposis) | `/sketch` | 형태를 만들어야 하는데 무엇이어야 하는지는 말할 수 없고 보면 알아볼 수 있을 때 — 스케치하고, 맞지 않는 곳을 표시하고, 보존된 버전을 고쳐, 알아본 버전으로 마무리 |
-| [Prothesis](./prothesis) | `/frame` | 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 — 렌즈가 하나든 여럿이든 |
 | [Analogia](./analogia) | `/ground` | 이미 있는 대상 설명에 대한 매핑이 어떤 결론을 어디까지 뒷받침하는지 불확실할 때 |
 | [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
 | [Merismos](./merismos) | `/apportion` | 자율 실행에 목표를 넘기기 직전 — 한 구간에 맞는 단위로 자르고 각 단위를 먼저 닫을 때 — 컴파일되면 자기 완료 조건으로, 안 되면 기록한 수용으로, 검사가 아니라 판단이 정하는 항목이면 유보로 |
@@ -81,7 +80,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Katalepsis](./katalepsis) | `/grasp` | 코드·논문·큰 변경을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없거나 — 승인·활용 전에 이해가 진짜인지 검증 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/frame`, `/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## 유틸리티
 
@@ -103,6 +102,7 @@ claude plugin install route@epistemic-protocols
 | `/probe` | 뭔가 어긋났는데 어떤 결핍인지 이름 붙일 수 없을 때 — 가설 여럿을 제시하고 당신의 인식으로 라우팅 |
 | **작업 빚기** | |
 | `/triage` | 쌓인 GitHub 이슈를 프로젝트 northstar와 융합한 focused work unit으로 만들고, 각 unit을 포인터로 세션에 넘겨야 할 때 |
+| `/frame` | 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 — 렌즈를 선택지로 놓고, 고른 렌즈마다 필요한 substrate 를 붙여 넘김 |
 | `/forge` | 기억이 아니라 벤더 레퍼런스(모델 prompt guide, Codex Goals 스펙)에 grounding된 prompt나 상주 skill recipe가 필요할 때 |
 | `/reduced-space-test` | 대리물이 실제 대상처럼 동작한다는 주장 — bounded 공간 안에서 검증하고 검증 안 된 나머지를 명시적으로 이월 |
 | `/gate-check` | 옵션 집합이 당신에게 제시되기 직전 — 독립 advisor가 genuine / collapsed / malformed를 판정하고 인용 근거를 먼저 검증 |
@@ -142,7 +142,6 @@ claude plugin install route@epistemic-protocols
 
 | 프로토콜 | 그리스어 | 의미 |
 |----------|---------|------|
-| Prothesis | πρόθεσις | 앞에 놓음 (제시) |
 | Katalepsis | κατάληψις | 움켜잡음 (이해) |
 | Horismos | ὁρισμός | 경계 짓기 |
 | Aitesis | αἴτησις | 요청, 질의 |

@@ -49,10 +49,10 @@ Uncertainties are identified dynamically per task — no fixed taxonomy:
 ## Protocol Precedence
 
 ```
-Aitesis → Prothesis → Analogia → Katalepsis
+Aitesis → Analogia → Katalepsis
 ```
 
-Aitesis runs early: exhaust what the AI can collect before perspective framing (Prothesis) and analogical-inference auditing (Analogia).
+Aitesis runs early: exhaust what the AI can collect before analogical-inference auditing (Analogia).
 
 ## When to Use
 
@@ -63,7 +63,7 @@ Aitesis runs early: exhaust what the AI can collect before perspective framing (
 - When entering a novel domain not previously discussed in session
 
 **Skip**:
-- When the context is fully specified (use Prothesis — /frame for perspective)
+- When the context is fully specified
 - When delegation scope is unclear
 
 ## Install

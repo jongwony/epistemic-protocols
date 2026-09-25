@@ -130,7 +130,7 @@ Consult `references/review-checklists.md` for:
 
 ## Integration Notes
 
-### With Prothesis
+### With /frame
 
 Verification may trigger perspective selection if findings require analysis approach decision.
 
@@ -160,14 +160,14 @@ Ready to commit.
 ## Verification Results
 
 ### Critical (1 issue)
-- State machine totality: prothesis/skills/frame/SKILL.md - Undefined transition when |perspectives(C)| < 2
+- State machine totality: epistemic-cooperative/skills/frame/SKILL.md - Undefined transition when |perspectives(C)| < 2
 
 ### Concerns (2 issues)
-- Categorical terminology: prothesis/skills/frame/SKILL.md - limit/colimit may not match intended semantics
-- Directive verb: prothesis/skills/frame/SKILL.md - "Invoke AskUserQuestion" should be "call"
+- Categorical terminology: epistemic-cooperative/skills/frame/SKILL.md - limit/colimit may not match intended semantics
+- Directive verb: epistemic-cooperative/skills/frame/SKILL.md - "Invoke AskUserQuestion" should be "call"
 
 ### Notes (1 observation)
-- Version: prothesis plugin.json version not bumped since last change
+- Version: epistemic-cooperative plugin.json version not bumped since last change
 
 ---
 How to proceed?

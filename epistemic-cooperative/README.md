@@ -15,6 +15,7 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/probe` | Deficit recognition fit review — multiple deficit hypotheses with reverse-evidence conditions, routed by user recognition | Protocol route |
 | `/triage` | Work-unit triage from GitHub issues | Routed work units, externalized to substrate records a collaborator session is pointed at |
+| `/frame` | Multi-perspective framing — analytical lenses placed for selection, each bound to the substrate it needs | Detailed lens(es), or lens↔substrate pairs handed off with a `/conduct` nudge |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop — converges the artifact on the project's stated goal | Applied fixes + handovers + convergence trace |
@@ -40,7 +41,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |-------|-------------|
 | 0. Entry | Choose path: quick recommendation / targeted learning / browse all |
 | 1. Quick Scan | Collect recent session metadata inline (Glob + Read) |
-| 2a. Pick-1 | Quick path: select 1 recommendation from `/elicit`, `/inquire`, `/frame` |
+| 2a. Pick-1 | Quick path: select 1 recommendation from `/elicit`, `/inquire` |
 | 2b. Evidence | Quick path: show 1 evidence card (max 2 lines) |
 | 2. Map | Targeted path: match patterns to protocols via compact mapping |
 | 3. Scenario | Targeted path: present intervention point with preset scenarios |
@@ -51,7 +52,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 Key features:
 - **Value before learning**: quick path proves value in under 3 minutes
 - **One at a time**: 1 recommendation, 1 evidence card, 1 trial — no catalog required
-- **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` — unified for Quick and Targeted fallback
+- **Onboarding Pool**: `/elicit`, `/inquire` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
 
@@ -69,6 +70,20 @@ Key features:
 - `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
 - route choice belongs to the current session: independent session or re-triage
 - a unit routed to an independent session externalizes its record and is handed over by pointer; re-triage externalizes no record
+
+### /frame — Multi-Perspective Framing
+
+Places analytical lenses before you when the right framework for a question is absent, then for each selected lens declares the substrate it needs — an authoritative `substrate_need` (the abstract persona/capability) plus advisory `binding_hints` (a candidate shortlist) — and hands the framed object off. frame forms lenses and stops at handoff: it never isolates, arranges, executes, or synthesizes them. When several lenses need specialized substrates, the handoff carries a `/conduct` nudge for the isolation + arrangement + synthesis apparatus.
+
+```
+Mission Brief → Gather → Lens selection → Bind substrate → LensReturn | SubstrateCorrespondence (+ /conduct nudge)
+```
+
+Key features:
+- recognition over recall: lenses are offered as options, never asked for as an open question
+- single lens is valid; a lens needing no specialized substrate returns directly as a detailed lens
+- substrate-invariant: declares the need, never binds a concrete agent
+- convergence is claimable only by the isolated substrate that ran the lenses, never by the framing context
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
@@ -114,6 +129,7 @@ epistemic-cooperative/
     ├── onboard/SKILL.md          # /onboard quest-based protocol learning
     ├── probe/SKILL.md            # /probe deficit recognition fit review
     ├── triage/SKILL.md           # /triage work-unit formation
+    ├── frame/SKILL.md            # /frame multi-perspective framing
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop convergence-paced review-resolve loop
@@ -132,6 +148,7 @@ epistemic-cooperative/
 | Want hands-on protocol learning | `/onboard` |
 | Re-evaluating protocol fit after workflow changes | `/onboard` |
 | Turning related GitHub issues into focused work units | `/triage` |
+| Settling which analytical lens to look through before an analysis starts | `/frame` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 | Something feels off but the deficit is not yet named | `/probe` |
 | Driving a change through review until every finding is disposed of | `/review-loop` |
@@ -154,6 +171,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /probe
 /triage
 /triage #41 #52 #60
+/frame [your question]
 /review-loop codex 123
 /goal-research <question>
 ```

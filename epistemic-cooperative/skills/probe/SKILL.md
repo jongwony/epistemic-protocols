@@ -63,7 +63,7 @@ When `Λ.coverage_constraint` is set (from a prior `Narrow(CoverageSubset)`), fi
 
 Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
 
-**Substrate-implicit disambiguation** (Rule 18): Before defaulting a candidate to a missing-information framing (e.g., ContextInsufficient/`/inquire`, FrameworkAbsent/`/frame`), check Euporia's own `aporia(I)` gate: the situation is not already committed to a single specific protocol, AND its substrate — current-session evidence (Rule 3 default scope), the user's own codebase, project rules or Northstar documents, or environment (cross-session recall stays opt-in per Rule 4) — already carries an implicit, not-yet-articulated decision signal relevant to the utterance (`axis_undetermined(r) ∧ substrate_implicit(r)`, per `euporia/skills/elicit/SKILL.md` Gate predicate). When both hold, include AbstractAporia (`/elicit`) in the candidate set — an implicit-but-unarticulated decision coordinate is intent-decoding, not external-fact supply, and belongs to `/elicit` rather than `/inquire`. Utterance-only ambiguity without an external substrate signal still routes to `/inquire`, consistent with that same boundary.
+**Substrate-implicit disambiguation** (Rule 18): Before defaulting a candidate to a missing-information framing (e.g., ContextInsufficient/`/inquire`), check Euporia's own `aporia(I)` gate: the situation is not already committed to a single specific protocol, AND its substrate — current-session evidence (Rule 3 default scope), the user's own codebase, project rules or Northstar documents, or environment (cross-session recall stays opt-in per Rule 4) — already carries an implicit, not-yet-articulated decision signal relevant to the utterance (`axis_undetermined(r) ∧ substrate_implicit(r)`, per `euporia/skills/elicit/SKILL.md` Gate predicate). When both hold, include AbstractAporia (`/elicit`) in the candidate set — an implicit-but-unarticulated decision coordinate is intent-decoding, not external-fact supply, and belongs to `/elicit` rather than `/inquire`. Utterance-only ambiguity without an external substrate signal still routes to `/inquire`, consistent with that same boundary.
 
 **Single-pass routing scope**: Phase 1 enumerates named deficits across the catalog as a one-shot fit review. Per-protocol convergence dynamics — including cycle iteration within a routed protocol such as `/elicit`'s reverse-induction loop — remain internal to that destination protocol; Probe does not surface, measure, or aggregate convergence efficiency across uses (Rule 7 reinforcement; cycle-counter visibility is the destination protocol's UX surface, not Probe's).
 
@@ -175,14 +175,14 @@ ProtocolRoute    = session text { target_coverage: Set(CoverageEntry) }    -- |t
                    -- recognized_deficits = π_deficit(target_coverage); evidence_trace = π_evidence(target_coverage)
                    --   (derived projections, not separate fields)
 FitReviewNote    = session text { presented_hypotheses, dismissed: true }
-DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
+DeficitName      ∈ {BoundaryUndefined, ContextInsufficient,
                     MappingUncertain, AbstractionInProcess, AbstractAporia,
                     GoalPlanUncompiled, ApplicationDecontextualized,
                     ContextSuspect, RecallAmbiguous, TargetUngrasped,
                     MethodUnderdetermined,
                     DirectionUnrecognizable, CandidateFieldUnderexpanded,
                     FitUnrecognized} ∪ Emergent
-ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit,
+ProtocolId       ∈ {bound, inquire, ground, induce, elicit,
                     apportion, contextualize, sublate, recollect,
                     grasp, conduct, preview, ideate, sketch} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
@@ -268,7 +268,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug
     - **Architectural inscription**: addition of a new core protocol, category-level promotion. Deferral pending accumulated use evidence applies.
     - **Type-level realization**: type-level realization of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope. Internal iteration; deferral framing does not apply.
     The distinction informs `evidence` / `reverse_evidence` formulation when structural-change extent (line count, file count, scope size) is the apparent signal — extent alone does not determine architectural status. Maps approximately onto the downstream-remediation axis a candidate is also classified on — *surgical* (a deterministic 1–2 line edit) versus *design* (a decision-bearing structural change): type-level realization ≈ surgical, architectural inscription ≈ design (`≈` denotes approximate analogical mapping between vocabulary axes; not formal type-isomorphism — `≅` is reserved for the latter, e.g., Katalepsis `P'≅R`).
-18. **Substrate-implicit disambiguation** — When constructing Phase 1 candidates, a missing-information framing (ContextInsufficient/`/inquire`, FrameworkAbsent/`/frame`) must not crowd out AbstractAporia/`/elicit` by default: include `/elicit` in the candidate set when the situation is not already committed to a single specific protocol AND its substrate — current-session evidence (Rule 3 default scope) or an external channel (codebase, project rules, environment; cross-session recall stays opt-in per Rule 4) — already carries an implicit, not-yet-articulated decision signal, per Euporia's own `aporia(I)` gate (`axis_undetermined(r) ∧ substrate_implicit(r)`, `euporia/skills/elicit/SKILL.md` Gate predicate).
+18. **Substrate-implicit disambiguation** — When constructing Phase 1 candidates, a missing-information framing (ContextInsufficient/`/inquire`) must not crowd out AbstractAporia/`/elicit` by default: include `/elicit` in the candidate set when the situation is not already committed to a single specific protocol AND its substrate — current-session evidence (Rule 3 default scope) or an external channel (codebase, project rules, environment; cross-session recall stays opt-in per Rule 4) — already carries an implicit, not-yet-articulated decision signal, per Euporia's own `aporia(I)` gate (`axis_undetermined(r) ∧ substrate_implicit(r)`, `euporia/skills/elicit/SKILL.md` Gate predicate).
 
 ## UX Safeguards
 

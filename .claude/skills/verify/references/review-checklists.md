@@ -117,7 +117,6 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 
 #### Epistemological Soundness
 - [ ] Correct epistemic type signature declared:
-  - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, DESIGN)
   - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
   - Aitesis: ContextInsufficient → SufficientContext (AI-guided, INQUIRE)
   - Analogia: MappingUncertain → MappingAssessment (AI-guided, GROUND)

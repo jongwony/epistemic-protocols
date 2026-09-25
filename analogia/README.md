@@ -22,7 +22,6 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → MappingAssessment`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
@@ -31,12 +30,11 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **Key differences**:
-- **vs. Prothesis**: Prothesis selects which framework to apply when none exists. Analogia audits which conclusions a selected framework supports about an account already in play.
 - **vs. Aitesis**: Aitesis collects the facts the AI can reach and names what only the user holds (factual). Analogia audits what a mapping licenses from the evidence for its structural claims (relational).
 - **vs. Epharmoge**: Epharmoge checks post-execution applicability. Analogia audits the conclusions licensed by a mapping between abstraction levels.
 - **vs. Proplasma**: Proplasma contrasts discard-committed placeholder probes when direction futures remain unrecognizable from descriptions after its routing checks. Analogia audits a mapping against an account already in play — a direction that survives the contrast flows to Analogia when its intended inferences need that audit.
 
-**Litmus test**: If the uncertainty is about *what a mapping from structure A licenses about an account of B already in play*, it's Analogia. If it's about *which facts the AI can still reach and which only the user holds*, it's Aitesis. If it's about *which framework to apply*, it's Prothesis.
+**Litmus test**: If the uncertainty is about *what a mapping from structure A licenses about an account of B already in play*, it's Analogia. If it's about *which facts the AI can still reach and which only the user holds*, it's Aitesis.
 
 ## Protocol Flow
 

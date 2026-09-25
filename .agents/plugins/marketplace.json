@@ -5,18 +5,6 @@
   },
   "plugins": [
     {
-      "name": "prothesis",
-      "source": {
-        "source": "local",
-        "path": "./prothesis"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "katalepsis",
       "source": {
         "source": "local",

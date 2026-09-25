@@ -3,7 +3,7 @@ name: formal-review
 description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", or invokes /formal-review. A fixed-lens PR review for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Project-local contributor tooling."
 allowed-tools: Bash, Read, Grep, Glob, Task, Skill
 skills:
-  - prothesis:frame
+  - epistemic-cooperative:frame
 ---
 
 # Formal Lens Review
@@ -76,7 +76,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 `/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. This skill fixes all five conduct axes — order, independence, reconciliation, termination, routing — so the method is not underdetermined and `/conduct`'s own activation precondition is unmet: declining it here IS that warrant relaying, not a shortcut past it. Review **only the changed files**.
 
-**Lens framing.** Call `/frame` (prothesis) to frame the perspectives. This skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
+**Lens framing.** Call `/frame` (epistemic-cooperative) to frame the perspectives. This skill **pins** the panel: `/frame` is framed onto the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
 
 - **Category Theory** — morphism coherence, composition laws, functor consistency
 - **Type Theory** — type-signature soundness, variance, type safety

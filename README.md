@@ -70,7 +70,6 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Heuresis](./heuresis) | `/ideate` | The candidate field for a decision is empty or has prematurely converged — widen it into a diverse set before any selection, not after |
 | [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
 | [Hypotyposis](./hypotyposis) | `/sketch` | A form has to be made and you cannot say what it should be, but you'd know it on sight — sketch it, mark what does not fit, revise the kept version, and finish on the one you recognize |
-| [Prothesis](./prothesis) | `/frame` | Need to settle which lens to look through before the analysis starts — one lens or several |
 | [Analogia](./analogia) | `/ground` | A mapping against an account already in play leaves its intended conclusions or supported limits uncertain |
 | [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does, or on a reservation where a judgment rather than a check settles it |
@@ -81,7 +80,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Katalepsis](./katalepsis) | `/grasp` | Code, a paper, or a big change you need to actually understand — you can't follow it yet, or you nod along and aren't sure. Verify your understanding is genuine before you approve or build on it |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/frame`, `/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## Utilities
 
@@ -103,6 +102,7 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/probe` | Something feels off but you cannot name which deficit it is — several hypotheses, routed by your recognition |
 | **Shaping the work** | |
 | `/triage` | A pile of GitHub issues needs to become focused work units, each fused with the project's northstar and handed to a session by pointer |
+| `/frame` | You need to settle which lens to look through before an analysis starts — lenses are placed for your selection, and each selected lens is handed off with the substrate it needs |
 | `/forge` | You need a prompt or a standing skill recipe grounded in a vendor reference (a model prompt guide, the Codex Goals spec), not one written from memory |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
 | `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
@@ -142,7 +142,6 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 
 | Protocol | Greek | Meaning |
 |----------|-------|---------|
-| Prothesis | πρόθεσις | Setting forth |
 | Katalepsis | κατάληψις | Grasping, comprehension |
 | Horismos | ὁρισμός | A bounding |
 | Aitesis | αἴτησις | Request, inquiry |

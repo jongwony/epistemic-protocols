@@ -1468,7 +1468,7 @@ function checkCrossRefScan() {
         if (Array.isArray(marketplace.plugins)) {
           const marketplaceDirs = new Set(
             marketplace.plugins.map(p => {
-              // source is like "./prothesis" — extract dir name
+              // source is like "./aitesis" — extract dir name
               const src = p.source || '';
               return src.replace(/^\.\//, '');
             }).filter(Boolean)
@@ -1532,7 +1532,7 @@ function checkOnboardSync() {
   let subCheckFailed = false;
 
   // Build protocol metadata from PROTOCOL_FILES
-  // e.g., 'prothesis/skills/frame/SKILL.md' → { name: 'Prothesis', command: 'frame' }
+  // e.g., 'aitesis/skills/inquire/SKILL.md' → { name: 'Aitesis', command: 'inquire' }
   const protocols = PROTOCOL_FILES.map(relPath => {
     const parts = relPath.split('/');
     return {
