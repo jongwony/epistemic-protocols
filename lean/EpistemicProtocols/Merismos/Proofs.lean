@@ -31,7 +31,7 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
 theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
     ∃ c₁ : Context P, filledValue (closing c₁) = some .take ∧ Closable c₁ ∧ a = close c₁ ∧
-      HandoffRecorded a.navigation a.context := by
+      Recorded a.navigation a.context := by
   induction us generalizing c with
   | nil => simp [apportion] at h
   | cons u us ih =>
@@ -115,10 +115,8 @@ theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
   simp only [terminationCovered, List.all_eq_true] at ht
   exact ht u hu
 
-theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved)
-    (hk : s.kind = .completion) : s.obligation ∈ (certificate d).reserved := by
-  simp only [certificate, List.mem_map, List.mem_filter]
-  exact ⟨s, ⟨hs, by simp [hk]⟩, rfl⟩
+theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
+    s ∈ (certificate d).reserved := hs
 
 theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ [] := by
   have hs := h.1
@@ -131,7 +129,9 @@ theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ 
   | cons _ _ => exact Or.inl (by simp)
 
 theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c)
-    (hf : u.fit ≠ .fits) : ∃ s : Cite c, s.src.val = .person := by
+    (hf : u.fit ≠ .fits) :
+    ∃ (a : Override) (s : Cite c) (ok : (overrideCoord (P := P) u).admits s.src)
+      (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
   obtain ⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
@@ -139,7 +139,7 @@ theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
   have hu' := hfit u hu
   cases ho : override c u with
   | open_ _ => simp [ho, isFilled, hf] at hu'
-  | filled a src ok _ => exact ⟨src, ok⟩
+  | filled a src ok sup => exact ⟨a, src, ok, sup, rfl⟩
 
 theorem emitted_refs_nodup (c : Context P) : ((emit c).units.map (·.ref)).Nodup := by
   have key : ∀ (f : Nat × PlanUnit → UnitEntry), (∀ x, (f x).ref = x.1) →

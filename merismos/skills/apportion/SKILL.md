@@ -238,8 +238,12 @@ def residual (c : Context P) : List Obligation := (obligations c).filter (fun o 
 /-- `coverage_complete`. -/
 def coverageComplete (c : Context P) : Bool := (obligations c).all (covered c)
 
-/-- No obligation sits in two units. -/
-def disjoint (c : Context P) : Bool := decide ((units c).flatMap (·.obligations)).Nodup
+/-- The units and the out-of-scope declarations partition what they hold: no obligation sits in two
+    units, or in a unit and out of scope, and nothing they hold lies outside `O_G`. -/
+def partitioned (c : Context P) : Bool :=
+  decide (((units c).flatMap (·.obligations) ++ (oos c).map (·.obligation)).Nodup) &&
+    (units c).all (fun u => u.obligations.all (obligations c).contains) &&
+    (oos c).all (fun d => (obligations c).contains d.obligation)
 
 /-- What the person's turn took a unit with, over a fit verdict that is not `fits`: the reason, and
     for an `indeterminate` verdict the uncertainty named. -/
@@ -328,24 +332,25 @@ structure LeafConjunct where
   condition : String
   kind      : PredicateKind
 
-/-- The unit's certificate: every compiled check, every completion obligation accepted as
-    uncovered, and every completion obligation reserved, together. A passing check never stands
-    for the unit's done while a reserved completion judgment is still open, and a reservation
-    never hides an accepted gap. -/
+/-- The unit's certificate: every compiled check, every gap accepted as uncovered, and every
+    reservation with the ground that settles it, completion and invariant alike, together. A
+    passing check never stands for the unit's done while a reserved judgment is still open, and a
+    reservation never hides an accepted gap. -/
 structure Certificate where
   checks   : List LeafConjunct
-  accepted : List Obligation
-  reserved : List Obligation
+  accepted : List Residual
+  reserved : List Reservation
 
 def certificate (d : Derivation) : Certificate :=
   { checks := d.compiled.map (fun k => ⟨k.condition, k.kind⟩)
-    accepted := (d.residuals.filter (·.kind == .completion)).map (·.obligation)
-    reserved := (d.reserved.filter (·.kind == .completion)).map (·.obligation) }
+    accepted := d.residuals
+    reserved := d.reserved }
 
 /-- The certificate says when the unit is done: some completion check, accepted completion gap, or
     completion reservation stands. -/
 def Certificate.terminates (k : Certificate) : Bool :=
-  k.checks.any (·.kind == .completion) || !k.accepted.isEmpty || !k.reserved.isEmpty
+  k.checks.any (·.kind == .completion) || k.accepted.any (·.kind == .completion) ||
+    k.reserved.any (·.kind == .completion)
 
 /-- `termination_covered`. -/
 def terminationCovered (c : Context P) : Bool :=
@@ -442,7 +447,7 @@ axiom TopologyFree : Context P → PlanStateRequirement → Bool
 /-- What the sheet shows about the plan's shape. -/
 structure Status where
   coverageComplete       : Bool
-  disjoint               : Bool
+  partitioned            : Bool
   fitSettled             : Bool
   obligationsDerived     : Bool
   terminationCovered     : Bool
@@ -454,7 +459,7 @@ structure Status where
 
 def status (c : Context P) : Status :=
   { coverageComplete := coverageComplete c
-    disjoint := disjoint c
+    partitioned := partitioned c
     fitSettled := fitSettled c
     obligationsDerived := obligationsDerived c
     terminationCovered := terminationCovered c
@@ -469,7 +474,7 @@ def status (c : Context P) : Status :=
     contrary ground. -/
 def Structural (c : Context P) : Bool :=
   let s := status c
-  s.coverageComplete && s.disjoint && s.fitSettled && s.obligationsDerived &&
+  s.coverageComplete && s.partitioned && s.fitSettled && s.obligationsDerived &&
     s.terminationCovered && s.oosSubstrateNamed && s.reservationGroundNamed && s.acceptanceSettled &&
     s.planNonempty
 
@@ -730,6 +735,10 @@ axiom ConditionBearing : Context P → Prop
 /-- **Your record**: the identity the carrier-creating write returned; empty where none returned. -/
 axiom carrierRecord : Context P → String
 
+/-- **Your reading** of what the writes returned: the emission was recorded and the carrier holds
+    the whole packaged plan — not only an identity allocated for it. -/
+axiom CarrierComplete : Context P → Prop
+
 /-- **Your record**: this session's id. -/
 axiom sessionId : Context P → String
 
@@ -756,6 +765,9 @@ def navigation (c : Context P) : NavigationBlock :=
 def HandoffRecorded (n : NavigationBlock) (c : Context P) : Prop :=
   n.purposeFrame ≠ "" ∧ n.canonicalLocator = ⟨carrierRecord c, sessionId c⟩ ∧
     n.canonicalLocator.record ≠ "" ∧ n.canonicalLocator.session ≠ ""
+
+/-- The writes landed: the carrier holds the plan, and the block locates it. -/
+def Recorded (n : NavigationBlock) (c : Context P) : Prop := CarrierComplete c ∧ HandoffRecorded n c
 
 /-- Why the run ends without a plan, on your judgment rather than the person's. -/
 inductive RelayKind
@@ -789,9 +801,10 @@ inductive Outcome (P : Type)
 /-! ── MODE STATE ──
 Λ is the fused context and nothing else; every reading above is taken from it. Coverage
 partition: the units' obligations, the out-of-scope obligations, and the holes together are
-`O_G` on every pass — the holes by construction, the units disjoint as `disjoint` checks. The host's
-standing contract is subtracted before `O_G` exists, and a reservation stays in the unit it
-belongs to, so neither is a fourth cell. Nothing persists into the execution interval.
+`O_G` — the holes by construction, and no obligation in two cells nor outside `O_G` wherever a
+taking is read, as `partitioned` checks. The host's standing contract is subtracted before `O_G`
+exists, and a reservation stays in the unit it belongs to, so neither is a fourth cell. Nothing persists
+into the execution interval.
 -/
 
 abbrev Mode (P : Type) := Context P
@@ -859,7 +872,7 @@ def apportion (respond : Context P → Response P) :
     | some (.route t) => .routed t c₁
     | some .take =>
       if Closable c₁ then
-        if HandoffRecorded (close c₁).navigation (close c₁).context then .apportioned (close c₁)
+        if Recorded (close c₁).navigation (close c₁).context then .apportioned (close c₁)
         else apportion respond ((close c₁).context ++ [(respond (close c₁).context).val]) us
       else apportion respond (c₁ ++ [(respond c₁).val]) us
     | none => apportion respond (c₁ ++ [(respond c₁).val]) us
@@ -896,7 +909,7 @@ block recording its carrier.
 theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
     ∃ c₁ : Context P, filledValue (closing c₁) = some .take ∧ Closable c₁ ∧ a = close c₁ ∧
-      HandoffRecorded a.navigation a.context
+      Recorded a.navigation a.context
 
 A withdrawal is the person's stop, and a route the protocol the person named.
 theorem withdrawn_on_stop (respond : Context P → Response P) (c : Context P)
@@ -925,7 +938,8 @@ theorem recommended_separates (c : Context P) (f : Focus) (i : {i : Nat // Separ
 
 /-! ── CONVERGENCE ──
 apportioned(G): the person took the plan with everything it holds in view, its structure held —
-never an empty plan — and the navigation block over its carrier presented and `HandoffRecorded`.
+never an empty plan — the carrier holding the whole plan, and the navigation block over it
+presented (`Recorded`).
 The taking adopted what the draft proposed and accepted every residual shown; it established
 nothing about whether a check is the right one, and a contrary ground it was taken over rides the
 plan as dissent.
@@ -951,17 +965,18 @@ On a closable plan every unit's certificate says when it is done.
 theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c) :
     (certificate (derivation c u)).terminates = true
 
-A reserved completion obligation is never hidden by a passing check: it stands in the
-certificate.
-theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved)
-    (hk : s.kind = .completion) : s.obligation ∈ (certificate d).reserved
+A reservation is never hidden by a passing check: it stands in the certificate with its ground.
+theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
+    s ∈ (certificate d).reserved
 
 A closable plan is never empty: it holds a unit or an out-of-scope declaration.
 theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ []
 
 A unit that does not fit stands on a closable plan only by the person's taking over its verdict.
 theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c)
-    (hf : u.fit ≠ .fits) : ∃ s : Cite c, s.src.val = .person
+    (hf : u.fit ≠ .fits) :
+    ∃ (a : Override) (s : Cite c) (ok : (overrideCoord (P := P) u).admits s.src)
+      (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup
 
 Every unit carries its own ref, and no two share one.
 theorem emitted_refs_nodup (c : Context P) : ((emit c).units.map (·.ref)).Nodup
@@ -1005,7 +1020,7 @@ def grounding : Op → Annot × String
   | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
   | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the dissent the taking carried and each value's provenance")
   | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
-  | .recordHandoff => (.extension, "TextPresent+Proceed: the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity, or a block missing a half, closes nothing: the sheet shows what is missing")
+  | .recordHandoff => (.extension, "TextPresent+Proceed: the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet shows what is missing")
   | .converge      => (.extension, "TextPresent+Proceed: the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; and the dissent the plan carries")
   | .seam          => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; a composition edge this file declares — /bound or /conduct into /apportion, /apportion into /conduct — is offered as a hint, never taken on its own; the edge to predicate enforcement needs its own activation; every Constitution gate here and in the next protocol fires unchanged")
 
