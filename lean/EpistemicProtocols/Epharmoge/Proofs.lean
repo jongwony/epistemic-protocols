@@ -40,6 +40,10 @@ theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution)
     (h : filledValue (resolution c m) = some r) : standing c m = .resolved r := by
   simp [standing, h]
 
+theorem unclear_waits (c : Context P) (m : Mismatch c) (hr : filledValue (resolution c m) = none)
+    (hu : (certify c m).whose = .unclear) : standing c m = .open_ := by
+  simp [standing, hr, hu]
+
 theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution)
     (h : standing c m = .resolved r) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
@@ -62,11 +66,12 @@ theorem closing_by_person {c : Context P} {s : Cite c}
 theorem done_closed_by_person (c : Context P) (v : ApplicabilityVerdict P) (hc : Closable c)
     (h : close c = .done v) : NothingOpen c ∧ PersonClosed c := by
   unfold close at h
-  by_cases hw : Withdrawn c
-  · simp [hw] at h
-  · simp only [hw, ↓reduceIte] at h
+  cases hw : withdrawal c with
+  | some r => simp [hw] at h
+  | none =>
+    simp only [hw] at h
     rcases hc with hw' | hs | ⟨t, ht⟩ | hdone
-    · exact absurd hw' hw
+    · simp [hw] at hw'
     · simp [hs] at h
     · simp [ht] at h
     · exact hdone
