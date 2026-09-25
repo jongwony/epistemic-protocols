@@ -20,7 +20,6 @@
 
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
-| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | Merismos | User-initiated | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |

@@ -1059,8 +1059,8 @@ describe('codex-submit artifact profile', () => {
       assert.ok(!artifact.entries.some(name => name.endsWith('/Skill.md')));
     }
     assert.ok(
-      first.results.find(result => result.plugin === 'prothesis').entries
-        .includes('frame/references/conceptual-foundations.md')
+      first.results.find(result => result.plugin === 'analogia').entries
+        .includes('ground/references/best-practices.md')
     );
     assert.deepEqual(snapshotTree(profileDir), before);
   });
@@ -1164,7 +1164,7 @@ describe('generateReleaseNotes', () => {
   const mockResults = [
     { plugin: 'aitesis', skill: 'inquire', version: '1.17.2', zip: 'inquire.zip', files: 1, bytes: 100 },
     { plugin: 'horismos', skill: 'bound', version: '1.8.1', zip: 'bound.zip', files: 1, bytes: 100 },
-    { plugin: 'prothesis', skill: 'frame', version: '5.8.1', zip: 'frame.zip', files: 1, bytes: 100 },
+    { plugin: 'analogia', skill: 'ground', version: '5.8.1', zip: 'ground.zip', files: 1, bytes: 100 },
     { plugin: 'bundle', skill: 'epistemic-protocols-bundle', zip: 'epistemic-protocols-bundle.zip', files: 19, bytes: 5000 },
   ];
 
@@ -1197,7 +1197,7 @@ describe('generateReleaseNotes', () => {
     const notes = generateReleaseNotes(mockResults);
     assert.ok(notes.includes('ContextInsufficient → SufficientContext'));
     assert.ok(notes.includes('BoundaryUndefined → DefinedBoundary'));
-    assert.ok(notes.includes('FrameworkAbsent → FramedInquiry'));
+    assert.ok(notes.includes('MappingUncertain → MappingAssessment'));
   });
 
   it('shows versions from buildResults in protocols table', () => {
@@ -1222,11 +1222,11 @@ describe('generateReleaseNotes', () => {
     const notes = generateReleaseNotes(mockResults);
     const horismosPos = notes.indexOf('Horismos');
     const aitesisPos = notes.indexOf('Aitesis');
-    const prothesisPos = notes.indexOf('Prothesis');
+    const analogiaPos = notes.indexOf('Analogia');
     const katalepsisPos = notes.indexOf('Katalepsis');
     assert.ok(horismosPos < aitesisPos, 'Horismos should precede Aitesis');
-    assert.ok(aitesisPos < prothesisPos, 'Aitesis should precede Prothesis');
-    assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
+    assert.ok(aitesisPos < analogiaPos, 'Aitesis should precede Analogia');
+    assert.ok(analogiaPos < katalepsisPos, 'Katalepsis should be last');
   });
 
   it('includes all core protocols in protocols table', () => {
@@ -1239,7 +1239,7 @@ describe('generateReleaseNotes', () => {
   it('uses computed highlights when changelog provided', () => {
     const changelog = {
       groups: {
-        prothesis: [{ hash: 'abc1234', type: 'feat', message: 'Two-mode redesign' }],
+        analogia: [{ hash: 'abc1234', type: 'feat', message: 'Two-mode redesign' }],
         elenchus: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
       },
       ungrouped: [],
@@ -1247,7 +1247,7 @@ describe('generateReleaseNotes', () => {
     const notes = generateReleaseNotes(mockResults, { changelog });
     assert.ok(notes.includes('### New'));
     assert.ok(notes.includes('### Fixed'));
-    assert.ok(notes.includes('**prothesis**: Two-mode redesign'));
+    assert.ok(notes.includes('**analogia**: Two-mode redesign'));
     assert.ok(!notes.includes(`### ${EXPECTED_PROTOCOL_COUNT} Epistemic Protocols`));
   });
 
@@ -1304,7 +1304,6 @@ describe('package.js CLI', () => {
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',
-        'frame.zip',
         'gate-check.zip',
         'goal-research.zip',
         'grasp.zip',

@@ -10,7 +10,6 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 
 | Chain | Frequency | Pattern |
 |-------|-----------|---------|
-| `/frame` → `/conduct` | Common | Frame derives the lenses → Conduct runs them as the session's method |
 
 ## Multi-Protocol Sessions
 
@@ -31,7 +30,7 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Pattern | Description |
 |---------|-------------|
 | Free-text depth | Typing custom text in "Other" often leads to deeper protocol engagement than selecting options |
-| Challenge responses | Challenging a protocol's framing (e.g., "isn't /frame better here?") triggers nuanced distinction explanations |
+| Challenge responses | Challenging a protocol's framing (e.g., "isn't /inquire better here?") triggers nuanced distinction explanations |
 | Multi-paragraph input | Extended free-text responses with analysis and evidence — protocols accept and process any length |
 
 ## Non-Sequential Invocation

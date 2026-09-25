@@ -22,7 +22,6 @@ AI는 한 도메인의 패턴, 모델, 유비를 다른 도메인에 적용하�
 
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
-| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Aitesis | AI-guided | `ContextInsufficient → SufficientContext` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → MappingAssessment`** |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
@@ -31,12 +30,11 @@ AI는 한 도메인의 패턴, 모델, 유비를 다른 도메인에 적용하�
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
 
 **핵심 차이**:
-- **vs. Prothesis**: Prothesis는 프레임워크가 없을 때 어떤 것을 적용할지 선택한다. Analogia는 선택된 프레임워크가 이미 있는 대상 설명에 대해 어떤 결론을 뒷받침하는지 감사한다.
 - **vs. Aitesis**: Aitesis는 AI가 닿을 수 있는 사실을 모으고 사용자만 쥔 것을 이름 붙인다 (사실 관계). Analogia는 구조적 주장에 대한 증거에서 매핑이 무엇을 허가하는지 감사한다 (관계 구조).
 - **vs. Epharmoge**: Epharmoge는 실행 후 적용성을 확인한다. Analogia는 추상화 수준 사이의 매핑이 허가하는 결론을 감사한다.
 - **vs. Proplasma**: Proplasma는 라우팅 검사를 거친 뒤에도 방향의 미래가 서술로 인식되지 않을 때 폐기 전제의 placeholder probe로 대비한다. Analogia는 이미 있는 대상 설명에 대해 매핑을 감사한다 — 대비에서 생존한 방향의 의도된 추론에 감사가 필요하면 Analogia로 흐른다.
 
-**판별 기준**: 불확실성이 *구조 A의 매핑이 이미 있는 B의 설명에 대해 무엇을 허가하는가*에 관한 것이면 Analogia다. *AI가 아직 닿을 수 있는 사실은 무엇이고 사용자만 쥔 것은 무엇인가*에 관한 것이면 Aitesis다. *어떤 프레임워크를 적용할지*에 관한 것이면 Prothesis다.
+**판별 기준**: 불확실성이 *구조 A의 매핑이 이미 있는 B의 설명에 대해 무엇을 허가하는가*에 관한 것이면 Analogia다. *AI가 아직 닿을 수 있는 사실은 무엇이고 사용자만 쥔 것은 무엇인가*에 관한 것이면 Aitesis다.
 
 ## 프로토콜 흐름
 

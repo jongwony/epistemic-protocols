@@ -79,7 +79,7 @@ const protocolMap = {
   "/bound": ["bound", "horismos"], "/conduct": ["conduct", "hyphegesis"],
   "/grasp": ["grasp", "katalepsis"], "/apportion": ["apportion", "merismos"],
   "/induce": ["induce", "periagoge"], "/preview": ["preview", "proplasma"],
-  "/frame": ["frame", "prothesis"], "/sketch": ["sketch", "hypotyposis"],
+  "/sketch": ["sketch", "hypotyposis"],
   "/route": ["route", "route"],
   "/clarify": ["clarify", null], "/goal": ["goal", null],
   "/reflect": ["reflect", null], "/write": ["write", null],

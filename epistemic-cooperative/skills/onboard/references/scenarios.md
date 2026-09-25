@@ -30,30 +30,13 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Pick up where we left off yesterday' and I'll show how /recollect surfaces narrative candidates"
 
 **Quiz Q (situation)**: You start with "what was that book Claude recommended last time?" — you remember the conversation happened but not the title, genre, or why it stood out.
-- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Anamnesis `/recollect` — D) Katalepsis `/grasp`
+- A) Euporia `/elicit` — B) Aitesis `/inquire` — C) Anamnesis `/recollect` — D) Katalepsis `/grasp`
 - Answer: C
 
 **Quiz Q (design)**: You reference "the direction we agreed on" from a past session but have no specific pointer. How would you surface the right prior context for recognition — rather than asking Claude to guess?
 - Hint: The problem isn't missing external facts — it's that prior session context is vague and needs resolution into something recognizable. Cross-session state recovery lives here, not in `/inquire`.
 
 **Philosophy**: ἀνάμνησις (recollection) — Plato's theory of knowledge as recollection of what the soul already knew. Core principle: **Recognition over Retrieval**. Vague cues become concrete when candidates are surfaced as narratives for user recognition, not retrieved by keyword. Workflow position: cross-cutting — best invoked at session start. Advisory enrichment from `/recollect` is most effective before downstream protocols' phases have progressed; once a downstream protocol's gate has been answered, its results are already shaped without that enrichment. Session-start recall is the practical ordering mechanism. Game feel: "Something we talked about before..." → narrative candidates surface → you recognize the right one → grounded continuation.
-
-## Prothesis `/frame`
-
-**Situation**: You drafted a tough email to send — asking your manager for time off during a busy season. You think it reads fine, but you're not sure how it lands. "Fine to me" doesn't tell you how a tired manager or a peer in HR might read it.
-
-**Intervention**: `/frame` recommends analytical perspectives (e.g., "manager under deadline pressure," "HR fairness lens," "peer comparing workloads") and hands off the lenses for the session (via `/conduct`) to execute and synthesize, so you see the email from each angle before hitting send.
-
-**Trial prompt**: "Let's practice: say 'Review this email draft for me' and I'll show how /frame recommends audience perspectives"
-
-**Quiz Q (situation)**: You're writing a group chat message announcing a decision. It seems clear to you, but the chat has coworkers, close friends, and your partner. Some will read it as casual, some as formal. You're unsure which lens to evaluate through.
-- A) Horismos `/bound` — B) Prothesis `/frame` — C) Analogia `/ground` — D) Aitesis `/inquire`
-- Answer: B
-
-**Quiz Q (design)**: You're about to publish a blog post but only checked it from your own reading angle. How would you structure the review to surface how different readers receive it?
-- Hint: The problem isn't missing information — it's not knowing which analytical lens or audience perspective to apply.
-
-**Philosophy**: πρόθεσις (a placing before, setting forth) — the act of laying out options for examination. Core principle: **Recognition over Recall**. You don't need to invent frameworks from scratch — you select from curated lenses. Workflow position: Analysis cluster — now choose how to look at the problem. Game feel: "Too many valid angles" → AI recommends lenses → you pick → structured multi-perspective analysis.
 
 ## Aitesis `/inquire`
 
@@ -64,7 +47,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Is the National Museum open next Friday afternoon?' and I'll show how /inquire grounds the answer in observable facts"
 
 **Quiz Q (situation)**: You ask Claude "can my MacBook Air run this 70B model locally?" — the answer depends on your exact spec and the model's published requirements. Claude starts recommending settings without confirming either.
-- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Merismos `/apportion`
+- A) Analogia `/ground` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Merismos `/apportion`
 - Answer: B
 
 **Quiz Q (design)**: You want to ask "will flight KE123 be on time tomorrow?" — a verifiable external fact. How would you make sure Claude checks rather than guesses?
@@ -81,7 +64,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Compare the two routines already described: which expected benefits does the analogy support, and what evidence or limits would change that assessment?"
 
 **Quiz Q (situation)**: A popular study method swears by "90-minute deep focus sessions with no breaks." Your schedule is interrupted, your attention span is different, and your subjects aren't the same kind. You already understand both the method and your study conditions, but are unsure which promised benefits their structural comparison supports.
-- A) Prothesis `/frame` — B) Katalepsis `/grasp` — C) Analogia `/ground` — D) Aitesis `/inquire`
+- A) Periagoge `/induce` — B) Katalepsis `/grasp` — C) Analogia `/ground` — D) Aitesis `/inquire`
 - Answer: C
 
 **Quiz Q (design)**: Someone says "just treat your side project like a startup." With both accounts in play, how would you audit the conclusions that comparison supports about your setup?
@@ -98,7 +81,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: describe 3-4 cases you're noticing a pattern across, and I'll show how /induce proposes a candidate abstraction you can shape"
 
 **Quiz Q (situation)**: You keep running into the same feeling across unrelated tasks — a bug fix that bloated into a refactor, a meeting that drifted into planning, a PR review that turned into a redesign. You sense a pattern but don't have the word for it yet.
-- A) Analogia `/ground` — B) Periagoge `/induce` — C) Prothesis `/frame` — D) Aitesis `/inquire`
+- A) Analogia `/ground` — B) Periagoge `/induce` — C) Euporia `/elicit` — D) Aitesis `/inquire`
 - Answer: B
 
 **Quiz Q (design)**: You have three examples of a phenomenon but no name for it. How would you get a candidate abstraction proposed — one you can test, widen, narrow, or discard — rather than staring at the cases until something clicks?
@@ -115,7 +98,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'I want to make X more usable / accessible / robust' and I'll show how /elicit reverse-traces dimension projections from your codebase and rules"
 
 **Quiz Q (situation)**: You say "let's tighten the build pipeline" — but "tighten" could mean faster runs, fewer flaky retries, smaller artifacts, or stricter quality gates. Each is a different axis with values implicit in your CI configs and past green/red history.
-- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Euporia `/elicit` — D) Periagoge `/induce`
+- A) Horismos `/bound` — B) Aitesis `/inquire` — C) Euporia `/elicit` — D) Periagoge `/induce`
 - Answer: C
 
 **Quiz Q (design)**: Your intent is articulated but the axis it commits to depends on coordinates implicit in your externalized cognition (codebase, rules, past sessions). How would you surface those coordinates without forcing a single axis upfront?
@@ -132,7 +115,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: name a direction decision you keep deferring because the options read fine but you can't picture them — I'll show how /preview contrasts discard-committed probes before you commit"
 
 **Quiz Q (situation)**: You're choosing between three onboarding flows. Each is clearly described, yet you keep stalling and finally say "honestly I'd have to see them side by side."
-- A) Prothesis `/frame` — B) Euporia `/elicit` — C) Proplasma `/preview` — D) Heuresis `/ideate`
+- A) Hypotyposis `/sketch` — B) Euporia `/elicit` — C) Proplasma `/preview` — D) Heuresis `/ideate`
 - Answer: C
 
 **Quiz Q (design)**: The candidate directions are known and no real evidence is needed — the futures just don't come through in words. How do you make them recognizable without committing to any direction or leaving artifacts behind?
@@ -166,11 +149,11 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: name a topic where your options feel thin or you keep circling the same one or two ideas — I'll show how /ideate opens a frame map and generates across it"
 
 **Quiz Q (situation)**: You have one idea for your team's offsite theme and you keep refining it — better name, better schedule, nicer venue — but you haven't actually generated a genuinely different second idea to compare it against.
-- A) Prothesis `/frame` — B) Proplasma `/preview` — C) Heuresis `/ideate` — D) Euporia `/elicit`
+- A) Hypotyposis `/sketch` — B) Proplasma `/preview` — C) Heuresis `/ideate` — D) Euporia `/elicit`
 - Answer: C
 
 **Quiz Q (design)**: You want a wide field of genuinely different ideas without your own first instinct anchoring everything that follows. How do you get divergence without narrowing too soon?
-- Hint: The problem isn't choosing between existing options (that's `/preview`) or picking an analytical lens on a fixed question (that's `/frame`) — it's that the candidate field itself is too thin. Open an abstract frame map before any concrete idea appears, and don't eliminate or rank anything a round produces.
+- Hint: The problem isn't choosing between existing options (that's `/preview`) — it's that the candidate field itself is too thin. Open an abstract frame map before any concrete idea appears, and don't eliminate or rank anything a round produces.
 
 **Philosophy**: εὕρεσις (finding, discovery) — the older, broader sense of turning up something not yet in view, prior to its later narrowing into a term of rhetorical technique. Core principle: **Divergence over Selection**. A candidate is raw material, not a selection-ready alternative — heuresis never discards, scores, or ranks what a round produces; that judgment belongs downstream, entirely out of its scope. Workflow position: Planning cluster, immediately upstream of `/preview` — heuresis widens a thin or converged field into a diverse one; `/preview` picks up only once two or more candidates already exist and need their futures contrasted. Game feel: "I've only got one idea, and it's getting stale" → frame map opens → candidates generate in parallel, untouched by ranking → you stop when the field is wide enough → a diverse set, ready for whatever comes next.
 
@@ -234,7 +217,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Help me understand what I need to approve in this AI-generated plan' and I'll show how /grasp routes through an intent entry point before verifying comprehension"
 
 **Quiz Q (situation)**: You skimmed a long article and nodded along. A colleague asks you to summarize the main argument in one sentence and you freeze — you realize skimming wasn't the same as grasping.
-- A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Anamnesis `/recollect`
+- A) Periagoge `/induce` — B) Analogia `/ground` — C) Katalepsis `/grasp` — D) Anamnesis `/recollect`
 - Answer: C
 
 **Quiz Q (design)**: After quickly consuming a complex explanation, how would you verify you actually grasped the core — rather than that you could nod along?
@@ -251,11 +234,11 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'I'm about to migrate this service across two framework versions — conduct how I should run the whole thing' and I'll show how /conduct designs the move topology before any object-level work starts"
 
 **Quiz Q (situation)**: You have a clear goal but five interdependent steps, and you keep second-guessing the order and whether to run them in isolation or let them see each other. You haven't started because the *method*, not the goal, is unsettled.
-- A) Prothesis `/frame` — B) Horismos `/bound` — C) Hyphegesis `/conduct` — D) Aitesis `/inquire`
+- A) Merismos `/apportion` — B) Horismos `/bound` — C) Hyphegesis `/conduct` — D) Aitesis `/inquire`
 - Answer: C
 
 **Quiz Q (design)**: You face a multi-move task where the order, independence, and stopping criterion all genuinely divide the plan. How would you settle the method before starting, without locking choices that depend on what you'll only learn mid-way?
-- Hint: The problem isn't which perspectives to use for one inquiry (that's `/frame`) or who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, let the rest bind to their defaults, and give an in-session checkpoint only to a decision whose evidence doesn't exist yet.
+- Hint: The problem isn't who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, let the rest bind to their defaults, and give an in-session checkpoint only to a decision whose evidence doesn't exist yet.
 
 **Philosophy**: ὑφήγησις (leading from just ahead, guiding) — conducting the method of the work, not doing the work. Core principle: **Conduction over Substrate**. How a session's moves are ordered, isolated, reconciled, and stopped is substrate-invariant — it survives deleting every runtime noun — so the conduct form is designed independently and only then matched to a substrate, declaring degradation rather than binding one it cannot realize. Workflow position: cross-cutting, Hybrid initiator — conducts the session's whole move set before object-level cognition. Game feel: "I know what I want, but how do I run this?" → confirm it's multi-move → design the topology impact-first → hand off a method plan with checkpoints.
 

@@ -90,8 +90,8 @@ Candidate = { content: String, frame: Frame, origin ∈ {User, AI} }
          -- a generated idea item (raw material for divergence) — NOT a selection-ready alternative; carries no score,
          --   rank, or preference signal
 Frame  = GenerationFrame { label: String, angle: String }
-         -- a partition for parallel candidate production; distinct from Prothesis's
-         --   FramedInquiry lens — GenerationFrame carries no substrate_need, no per-perspective directive, no
+         -- a partition for parallel candidate production; distinct from an analytical
+         --   lens — GenerationFrame carries no substrate_need, no per-perspective directive, no
          --   epistemic-perspective machinery. It organizes divergent generation only — derived at Phase 1, extended
          --   only for a user-named new angle, opened progressively across rounds (never re-derived by a bare
          --   continue) — and is never handed off as a framed inquiry object

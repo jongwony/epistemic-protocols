@@ -24,12 +24,11 @@
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Euporia | Hybrid | `AbstractAporia → ResolvedEndpoint` |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | **Heuresis** | **User-initiated** | **`CandidateFieldUnderexpanded → DiverseCandidateField`** |
 
-**위치**: Prothesis는 이미 고정된 탐구 위에 분석적 *렌즈*를 놓습니다 — heuresis의 `GenerationFrame`은 전혀 다른 것으로, 병렬 발상 생성을 위한 임시 분할일 뿐 분석적 관점으로 이관되지 않습니다. Proplasma는 후보가 이미 2개 이상 있고 선택 전에 직접 봐야 할 때 미리보기를 제공합니다 — heuresis는 그보다 상류, 후보장 자체를 넓혀야 하는 지점에 있습니다. Euporia는 외재화된 substrate(코드베이스·규칙·과거 세션)에서 결정 좌표를 역추적합니다 — heuresis는 그 substrate를 스캔하지 않으며, 호출 발화와 사용자가 명시적으로 체인한 이전 산출물만 읽습니다.
+**위치**: heuresis의 `GenerationFrame`은 고정된 탐구 위에 놓는 분석적 렌즈가 아니라, 병렬 발상 생성을 위한 임시 분할일 뿐 분석적 관점으로 이관되지 않습니다. Proplasma는 후보가 이미 2개 이상 있고 선택 전에 직접 봐야 할 때 미리보기를 제공합니다 — heuresis는 그보다 상류, 후보장 자체를 넓혀야 하는 지점에 있습니다. Euporia는 외재화된 substrate(코드베이스·규칙·과거 세션)에서 결정 좌표를 역추적합니다 — heuresis는 그 substrate를 스캔하지 않으며, 호출 발화와 사용자가 명시적으로 체인한 이전 산출물만 읽습니다.
 
 **라우팅 우선순위**: 후보가 이미 2개 이상 있고 보기만 하면 될 때 → `/preview`; 씨앗 재료가 이 대화 밖에 있을 때 → 수집 프로토콜(예: `/inquire`)을 먼저 돌리고 그 산출을 체인으로 실어옴; 후보장 자체가 얇거나 정체됐을 때 → **`/ideate`**.
 
