@@ -14,7 +14,7 @@ Achieve certain comprehension of a target in play — code, a document, a result
 ```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
+Every `axiom` declaration is a judgment that is yours to make from the material in front of
 you; its doc comment says what you judge there, and nothing in this block decides it for you.
 Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
 doc comment states a consequence the contract already has; it is proved outside this block
@@ -22,57 +22,11 @@ and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
-Katalepsis(R, U) → grasp(c, utterances), where c is the fused session context:
-  Phase 0 (silent): orient on R and U → derive intent-scented entries → assess the route map
-  Phase 1: the entries with the route map → entry selection → Stop
-  next utterance u: c' := fuse(c, u) → an utterance that sets aside your reading of a missed
-    answer as aimed at another intent reopens the gate that answer answered → verdict(c') →
-    propose: record the proposal → side-branch closure → the gate it came from again
-      (a proposal at the Horizon probe resumes at that task's coverage)
-    withdraw: what was shown stays on record → Withdrawn
-    complete, at the zero-gap finding (Confirm) or at coverage (sufficient): record the task
-      completed → the next task begins, or converge once every task is completed
-    cont, by the gate it answers:
-      entry selection: materialize the basis, register one task per selected entry point →
-        the task the selection opens begins
-      a task begins: record update naming it → the task's gate, in priority order, the order
-        you read said with its basis when a contradiction opens ahead of another item due, and,
-        for a Horizon opening ahead of a chosen aspect, only after its answer:
-        a contradiction the user holds a side of: both sides, and a request to explain how they
-          fit — no verdict yet
-        an admissible Horizon not yet asked: the Horizon probe (its scenario only)
-        no gap at all: the zero-gap finding with its reasoning
-        nothing probed and no Horizon asked: the start-aspect selector
-        otherwise: coverage
-      a contradiction the user holds no side of rides the next presentation as relay: one inside
-        the target shown as a finding about it, one against your earlier explanation shown as your
-        correction; neither is handed to the user to settle
-      the contradiction's explanation: it shows how the sides fit → closure → back to the task;
-        aimed at another intent → moved there as below; left standing where the target or a
-        cited source settles it → read and quote that material → both sides, that material, the
-        reason, and an application question; left standing with nothing to settle it → said so,
-        no verdict, the user's to settle → back to the task
-      the Horizon probe, or a cue: the answer reached the edge → closure → back to the task;
-        the user asked for a step instead → a cue that still does not name the edge;
-        it missed, aimed at another intent than the probe's → that reading offered as a
-        candidate, with what it was read from and an invitation to say otherwise → the task
-        serving it, or entry selection with it named; nothing disclosed
-        it missed within the probe's own intent → read and quote the material the edge rests on
-        → the disclosure: the edge, that material, and an application question
-      a disclosure's application question, or a probe: an answer aimed at another intent →
-        moved there as above; otherwise an objection you have ground to raise → the reasoning
-        inquiry; none → closure → back to the task
-      the reasoning inquiry: an adjudication stands → read and quote the material it rests
-        on → the correction with that material → the same aspect asked again;
-        none stands → closure → back to the task
-      the start-aspect selector or coverage: an aspect chosen → its probe, unless a contradiction
-        the user holds a side of, or an admissible Horizon not yet asked, is due first; none →
-        back to the task
-      the zero-gap finding (Reopen): the named gap joins the task's gaps → the task's gate
-    back to the task: a contradiction the user holds a side of, then an admissible Horizon not
-      yet asked, read on the fused context, preempts the task's gate; otherwise that gate
-  every task completed: the convergence trace → VerifiedUnderstanding
-  no utterance: the gate holds; nothing is completed
+Orient silently → present intent-scented entries and route adequacy → Stop.
+Fuse the next utterance → read it once at that context → advance → present the resulting Round.
+Task priority and answer handling are defined below, in settle and advance respectively.
+A final person's closure → certified task trace → VerifiedUnderstanding.
+Withdrawal → the trace so far. Silence → the existing gate holds.
 -/
 
 /-! ── MORPHISM ──
@@ -82,7 +36,7 @@ Target
   → assess_route(intents, entries, context) -- annotate entry-point adequacy before user selection
   → select(intent_entry_point, route_map) -- user chooses the closest intent-scented entry point
   → materialize(artifact_basis)        -- derive concrete artifact anchors for the chosen intent
-  → register(tasks)                    -- track selected entry points as tasks
+  → register(tasks)                    -- identify selected tasks by their selection turn and position
   → verify(comprehension)              -- Socratic probing per gap type, each adjudication against an answer attaching the material it was drawn from; a Horizon the answer missed is disclosed with its material and applied; a contradiction in the context is taken up by whose it is
   → confirm(coverage)                  -- aspect coverage check per entry point
   → VerifiedUnderstanding
@@ -164,863 +118,635 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+open Classical
 variable {P : Type}
 
-/-- `R` with `U`: the comprehension target — the code, document, result, or other material
-    whose understanding is sought, present in the context and quotable, whatever produced it —
-    and the user's signal about what feels ungrasped, which may be empty on a bare `/grasp`.
-    Both are read from the context. -/
+/-- The target is material present and quotable, regardless of its producer. -/
 abbrev Target (P : Type) := Context P
 
-/-- `I`: the comprehension intent an entry point serves. -/
 inductive Intent
-  | orientation | rationale | impact | approval | transfer
-  | emergent (name : String)
+  | orientation | rationale | impact | approval | transfer | emergent (name : String)
+  deriving DecidableEq
 
-/-- An entry point, phrased as what the user will understand, decide, explain, or change by
-    taking it; `anchor` is the artifact basis kept behind it as a grounding hint. -/
 structure EntryPoint where
-  label  : String
+  label : String
   intent : Intent
   anchor : String
 
-/-- A question whose answer could change which entry point the user selects. -/
 structure RouteQuestion where
-  route        : String
-  reason       : String
+  route : String
+  reason : String
   signalNeeded : String
 
-/-- `Fᵣ`: annotations over the entries, filtering, creating, or suppressing none of them.
-    `cheapestProbe` names, per entry, the aspect a probe would most usefully target — never its
-    expected answer or reasoning path. `hiddenRoutes` are entries the target supports that the
-    user's signal did not name. -/
 structure RouteMap where
-  entries       : List EntryPoint
+  entries : List EntryPoint
   cheapestProbe : List (String × String)
-  hiddenRoutes  : List String
+  hiddenRoutes : List String
   openQuestions : List RouteQuestion
 
--- elab: an empty witness lets `routeMap` be declared `opaque`; it adds no meaning.
-instance : Inhabited RouteMap := ⟨⟨[], [], [], []⟩⟩
+/-- Judge likely comprehension intents from target and user signal, deriving high-scent entries
+    and adequacy annotations. Preserve the user's paths and distinguish entry fit without
+    exposing expected probe answers. Materialize anchors when an entry is selected. -/
+axiom routeMap : Context P → RouteMap
 
-/-- **Your judgment** at Phase 0, from the target, the user's wording, and the context: the
-    likely intents, the entries derived from them, and their route annotations. -/
-opaque routeMap : Context P → RouteMap
+/-- Selection turn and position within its ordered entries; identity is local to this run. -/
+abbrev RecordId := Nat × Nat
 
-/-- **Your judgment**: the cited utterance selects these entry points, in order — offered
-    entries, or a path the user wrote that stays within TargetUngrasped → VerifiedUnderstanding.
-    Distinct concerns the user already named become the ordered list directly. -/
-opaque SelectionSupported : Context P → Turn P → List EntryPoint → Prop
-
-/-- The selection is the user's: only their statement fills it. -/
-def selectionCoord : Coord P (List EntryPoint) :=
-  { admits := (· = .utterance), supports := SelectionSupported }
-
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
-
-/-- **Your judgment**: the selection the user's latest answer at entry selection made; open
-    where it made none. -/
-opaque selection : (c : Context P) → Occ (selectionCoord (P := P)) c
-
-def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
-  | .open_ _   => false
-  | .filled .. => true
-
-def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
-  | .open_ _     => none
-  | .filled a .. => some a
-
-/-- The identity a record-creating write returned; every later record update names it. -/
-abbrev RecordId := String
-
-/-- One task per selected entry point. -/
 structure Task where
-  id    : RecordId
+  id : RecordId
   entry : EntryPoint
 
-/-- **Your record**, read from the context: the registered tasks in selection order, each keyed
-    by the identity its registration write returned. -/
-opaque tasks : Context P → List Task
-
-/-- **Your judgment**: the cited utterance closes task `t` — `Confirm` at its zero-gap finding,
-    or `sufficient` at its coverage gate. -/
-opaque CompletionSupported : RecordId → Context P → Turn P → Unit → Prop
-
-/-- A task is completed only by the user's statement. -/
-def completionCoord (t : RecordId) : Coord P Unit :=
-  { admits := (· = .utterance), supports := CompletionSupported t }
-
-/-- **Your judgment**: whether the user has closed task `t`. -/
-opaque completion : (c : Context P) → (t : RecordId) → Occ (completionCoord (P := P) t) c
-
-/-- The task verification is on: the first registered task the user has not closed. -/
-def current (c : Context P) : Option Task :=
-  (tasks c).find? (fun t => !isFilled (completion c t.id))
-
-/-- **Your record**, read from the context: the task the latest selection opens — at the first
-    selection, the first entry selected; at a selection made after a missed answer was read as
-    aimed at another intent, the entry that selection named — the first such task the user has
-    not closed. -/
-opaque selectedTask : Context P → Option Task
-
-/-- A comprehension gap type. -/
 inductive GapType
   | expectation | causality | scope | sequence | horizon | contradiction
   | emergent (description : String)
+  deriving DecidableEq
 
-/-- Whether a gap type can be offered at the start-aspect selector or at coverage: the Horizon
-    and a contradiction are read from the context and taken up there, never offered. -/
 def offered : GapType → Bool
-  | .horizon       => false
-  | .contradiction => false
-  | _              => true
+  | .horizon | .contradiction => false
+  | _ => true
 
-/-- An aspect the user can be offered and choose. -/
 abbrev Selectable := {g : GapType // offered g = true}
-
 inductive ProbeForm | qc | qs
 
-/-- Qc for Expectation and Sequence (classificatory), Qs for Causality, Scope, and Emergent
-    (open). The Horizon and a contradiction map to no form: the Horizon is probed only by its own
-    scenario, and a contradiction by the request to explain how its two sides fit. -/
-def probeKind : GapType → Option ProbeForm
-  | .expectation   => some .qc
-  | .sequence      => some .qc
-  | .causality     => some .qs
-  | .scope         => some .qs
-  | .emergent _    => some .qs
-  | .horizon       => none
-  | .contradiction => none
+def probeKind (g : Selectable) : ProbeForm :=
+  match g.val with
+  | .expectation | .sequence => .qc
+  | _ => .qs
 
-/-- **Your reading** of the gap types relevant to task `t`'s entry point, the Horizon apart —
-    an Emergent one included where a Reopen named it. -/
-opaque gaps : Context P → RecordId → List Selectable
-
-/-- **Your record**, read from the context: the aspects already probed for task `t`, the
-    Horizon probe apart. -/
-opaque probed : Context P → RecordId → List Selectable
-
-/-- `HC`: a co-intended but unspoken edge inside the selected entry point. -/
+/-- `edge` is a stable name for the same edge across its contextual re-descriptions. -/
 structure HorizonCandidate where
-  edge        : String
-  anchors     : List String
+  edge : String
+  anchors : List String
   failureMode : String
 
-/-- **Your judgment**, read again over the whole fused context after every utterance: the
-    candidates that qualify for task `t` — each bound to evidence in the materialized basis,
-    material (leaving the edge unprobed is predicted to keep the achievable understanding short
-    of R), unspoken in the user's signal, the entry labels, and every answer so far, and neither
-    a route-selection question nor a decision gap. An edge the user has since spoken no longer
-    qualifies, and an answer can bring a new one into view. Whether two candidates are the same
-    edge is read here. -/
-opaque qualifying : Context P → RecordId → List HorizonCandidate
-
-/-- A Horizon is admissible only where exactly one candidate qualifies; several weak ones
-    competing detect none. -/
-def admissible (c : Context P) (t : RecordId) : Option HorizonCandidate :=
-  match qualifying c t with
-  | [hc] => some hc
-  | _    => none
-
-/-- **Your judgment**, read from your own turns in the context: a Horizon probe for `hc`'s edge
-    on task `t` has already been presented. The user saw only its scenario; your own turn is
-    what tells you which edge it was for. -/
-opaque Asked : Context P → RecordId → HorizonCandidate → Prop
-
-/-- An admissible Horizon not yet asked. -/
-def HorizonDue (c : Context P) (t : RecordId) : Prop :=
-  ∃ hc, admissible c t = some hc ∧ ¬ Asked c t hc
-
-/-- Where a contradiction's two sides come from, which decides whose it is to settle: two of the
-    user's own statements, the user's stated understanding against the target, two places in the
-    target itself, or an explanation you gave earlier against the target. -/
-inductive ConflictSource | userUser | userTarget | targetTarget | yoursTarget
-
-/-- A contradiction the user holds a side of — theirs to work through; the other two are the
-    target's own and yours. -/
-def ConflictSource.involvesUser : ConflictSource → Bool
-  | .userUser   => true
-  | .userTarget => true
-  | _           => false
-
-/-- One side of a contradiction, located in the context and quoted where it stands. A side is
-    located, not cited as ground: the target itself or an explanation of yours can be one. -/
+/-- Location is distinct from eligibility as evidence: an AI explanation can be a side. -/
 structure Side (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
+  idx : Nat
+  lt : idx < c.length
   span : String
 
 structure Contradiction (c : Context P) where
-  source : ConflictSource
-  one    : Side c
-  other  : Side c
+  one : Side c
+  other : Side c
 
-/-- **Your judgment**, read again over the whole fused context after every utterance: the
-    contradiction to take up now for task `t` — two statements in the context that cannot both
-    hold, each quoted where it stands, with where each comes from. Admit one only where both sides
-    are in the context with their sources and speak to the same scope under the same premises;
-    one claim appearing again — the target, your quote of it, an explanation of yours drawn from
-    it — is one side, not two. One your own turns show already taken up is not taken up again;
-    one whose recognition needs something the task has not yet shown waits; which of several
-    comes first is yours to read. `none` where none is due. -/
-opaque conflictDue : (c : Context P) → RecordId → Option (Contradiction c)
+/-- Judge that the located turn carries the target itself, with the quoted span, rather than
+    the reasoning that produced it. Target provenance is unrestricted. -/
+axiom IsTarget : (c : Context P) → Side c → Prop
 
-/-- A contradiction the user holds a side of is due for task `t`. -/
-def UserConflictDue (c : Context P) (t : RecordId) : Prop :=
-  ∃ k, conflictDue c t = some k ∧ k.source.involvesUser = true
+/-- Judge that the person's cited turn identifies this source and that the observation reads
+    that source now. The span is the narrowest material supporting the judgment, quoted in place. -/
+axiom SourceRead : (c : Context P) → Cite c → Cite c → String → Prop
 
-/-- **Your judgment**, read at the user's explanation of how a contradiction's two sides fit: it
-    shows how they fit — the two do not conflict once read as they meant them. -/
-opaque Dissolved : Context P → Prop
-
-/-- **Your judgment**, read where the user's explanation left a contradiction standing: the
-    target, or a source the user cited that can be read now, holds material that settles which
-    side holds. Where nothing does, no verdict is given: that is said, and the contradiction stays
-    the user's to settle. -/
-opaque Settles : Context P → Prop
-
-/-- How a contradiction ended: the user's explanation dissolved it; it was resolved through an
-    application after both sides were shown with the target's material; it was left standing
-    with nothing in the target or a cited source to settle it, said so and left to the user; a
-    contradiction inside the target itself shown as a finding about it; or your own earlier
-    explanation corrected. -/
-inductive ConflictOutcome | dissolved | afterDisclosure | unsettled | targetFinding | yourCorrection
-
-/-- **Your record**, read from the context: for task `t`, each contradiction taken up, where its
-    sides came from, and how it ended. One still standing when its task closed is carried in the
-    dissent instead. -/
-opaque conflicts : Context P → RecordId → List (ConflictSource × ConflictOutcome)
-
-/-- **Your judgment**, read at the answer to a Horizon probe or a cue: the answer reaches the
-    edge. -/
-opaque Reached : Context P → Prop
-
-/-- **Your judgment**, read at the answer to a Horizon probe or a cue: instead of answering, the
-    user asks to go step by step — a hint, a smaller step. -/
-opaque AsksSteps : Context P → Prop
-
-/-- **Your reading**, at an answer that missed what its question was after — a Horizon answer
-    that neither reached the edge nor asked for a step, the answer to a probe, an explanation at a
-    contradiction that did not dissolve it, or the answer to a disclosure's application question —
-    of whether it was aimed at a different intent: another question or purpose than the probe's
-    task serves, named as the entry point it points at, read from the whole fused context with
-    what you read it from. `none` where the answer engaged the probe's own question. It is read,
-    never asked, and offered as a candidate understanding rather than asserted: the presentation
-    says what you read and from what, moves there, and invites the user to say otherwise in the
-    same turn; their next utterance corrects a wrong reading. -/
-opaque otherIntent : Context P → Option EntryPoint
-
-/-- **Your reading** of which registered task the user has not closed serves `e`'s intent;
-    `none` where no registered task does. -/
-opaque taskFor : Context P → EntryPoint → Option Task
-
-/-- **Your record**, read from the context: for task `t`, each answer you read as aimed at another
-    intent — the aspect it answered and the intent you read, with what you read it from — and
-    whether the user's next utterance set that reading aside. -/
-opaque misreadings : Context P → RecordId → List (GapType × String)
-
-/-- **Your reading** of the latest utterance: it sets aside your preceding reading of a missed
-    answer as aimed at another intent — that answer was aimed at its question's own intent after
-    all — and so names the gate that answer answered, to be read again as a miss within its own
-    intent; `none` otherwise. -/
-opaque restored : Context P → Option Gate
-
-/-- How an aspect came to be shown: by the user on their own, through an application after you
-    disclosed the edge, or through an application after a cue the user asked for. What follows a
-    disclosure or a cue never reads as independent detection. -/
-inductive Demonstration | independent | afterDisclosure | afterCue
-
-/-- **Your record**, read from the context: for task `t`, each aspect shown and how — a Horizon
-    edge an answer reached, on its own or after a cue, or an application after its disclosure
-    that you read as reaching it; and an aspect whose adjudication the user's answer met. An
-    answer merely taken, with nothing to check it against, is not shown. -/
-opaque demonstrated : Context P → RecordId → List (GapType × Demonstration)
-
-/-- **Your judgment**: turn `idx` carries the target itself — its text, or an observation of
-    reading it — rather than reasoning about it. -/
-opaque IsTarget : Context P → Nat → Prop
-
-/-- What an adjudication against an answer is drawn from, quoted in place at the narrowest span
-    that supports it: the target itself, in the turn that carries it — whoever produced it,
-    since here it is the object being understood rather than a claim standing as evidence — or
-    a source the user cited, read now. The reasoning that produced the target, and what the
-    session said about it earlier, are neither. -/
 inductive Measure (c : Context P)
-  | target (idx : Nat) (lt : idx < c.length) (span : String) (isTarget : IsTarget c idx)
-  | source (src : Cite c) (span : String) (read : src.kind = .observation)
+  | target (s : Side c) (object : IsTarget c s)
+      (material : (c[s.idx]'s.lt).origin = .assistant → (c[s.idx]'s.lt).form ≠ .reasoning)
+  | source (citation : Cite c) (user : citation.kind = .utterance)
+      (observed : Cite c) (readNow : observed.kind = .observation)
+      (span : String) (linked : SourceRead c citation observed span)
 
-/-- An adjudication that stands against an answer. `otherReading` is the other reading the
-    material admits, said beside it; empty when there is none. -/
+/-- The actual material consumed by disclosure or correction, including the reading it supports.
+    Any alternative reading of the material is said beside it. -/
 structure Adjudication (c : Context P) where
-  correction   : String
-  measure      : Measure c
+  correction : String
+  measure : Measure c
   otherReading : String
 
-/-- **Your judgment**, read at the answer and once: you have an objection to it, in whole or in
-    part, with material you could attach, and have not settled it. It is not a verdict; the
-    inquiry exists to hear the user's reasoning before anything is settled. -/
-opaque Objection : Context P → Prop
+/-- The ownership distinction determines the obligation; your correction already carries its
+    measure, while a finding about the target may leave both sides unsettled. -/
+inductive ConflictReading (c : Context P)
+  | user (conflict : Contradiction c)
+  | target (conflict : Contradiction c) (settled : Option (Adjudication c))
+  | yours (conflict : Contradiction c) (correction : Adjudication c)
 
-/-- **Your judgment**, read at the user's reasoning at the inquiry: an adjudication against the
-    answer still stands — the reasoning did not defeat the objection, and there is material to
-    attach. -/
-opaque Stands : Context P → Prop
+inductive Demonstration | independent | afterCue | afterDisclosure
+  deriving DecidableEq
 
-/-- **Your judgment**, read once the material it rests on has been read: the adjudication that
-    stands, with what it is drawn from. -/
-opaque adjudication : (c : Context P) → Option (Adjudication c)
+/-- Horizon edges have separate identities even when both belong to the Horizon gap type.
+    Ordinary gap types use the empty key. -/
+abbrev Aspect := GapType × String
 
-/-- **Your judgment**: the cited utterance chooses this aspect at the start-aspect selector or at
-    coverage. -/
-opaque AspectSupported : Context P → Turn P → Selectable → Prop
-
-def aspectCoord : Coord P Selectable :=
-  { admits := (· = .utterance), supports := AspectSupported }
-
-/-- **Your judgment**: the aspect the latest answer chose; open where it chose none. -/
-opaque aspectChoice : (c : Context P) → Occ (aspectCoord (P := P)) c
-
-/-- The one shape every turn of an active run ends in. -/
+/-- Gate names identify obligations, not the wording or material of their presentation. -/
 inductive Gate
-  /-- Phase 1: the entries, enriched by the route map where it has anything to add; opened again
-      when a missed answer is read as aimed at an intent no registered task serves, with that
-      intent named among the entries -/
   | entrySelection
-  /-- no gap for the task: the finding with its reasoning; Confirm or Reopen(description) -/
   | zeroGap (t : RecordId)
-  /-- the preempting Horizon probe: an everyday scenario and nothing else — no edge, no expected
-      answer, no reason for asking -/
-  | horizonProbe (t : RecordId)
-  /-- the step the user asked for at a Horizon probe: a cue toward the edge that still does not
-      name it -/
-  | cue (t : RecordId)
-  /-- the disclosure owed after a Horizon answer that missed the edge within the probe's own
-      intent: the edge named, the material from the target it rests on quoted in place, and an
-      application question -/
-  | reveal (t : RecordId)
-  /-- a contradiction the user holds a side of: both sides quoted where they stand, and a request
-      to explain how they fit — no verdict yet -/
-  | conflict (t : RecordId)
-  /-- the contradiction the user's explanation left standing, where the target or a source they
-      cited settles it: both sides, that material quoted in place, the reason one side does not
-      hold, and an application question -/
-  | resolve (t : RecordId)
-  /-- which aspect to start with, over the task's gaps -/
   | startAspect (t : RecordId)
-  /-- the probe of one aspect, in the form `probeKind` gives it, with a free-response path -/
-  | probe (t : RecordId) (g : Selectable)
-  /-- the reasoning inquiry on an objection to the answer to a probe, or to the application
-      question after a disclosure (`g` is then the Horizon, or the contradiction) -/
-  | inquiry (t : RecordId) (g : GapType)
-  /-- coverage: probed and unprobed aspects; sufficient, another aspect, or a proposal -/
   | coverage (t : RecordId)
-  deriving Inhabited  -- elab: lets `answered` be declared `opaque`
+  | horizonProbe (t : RecordId) (edge : String)
+  | cue (t : RecordId) (edge : String)
+  | reveal (t : RecordId) (edge : String)
+  | conflict (t : RecordId)
+  | resolve (t : RecordId)
+  | probe (t : RecordId) (g : Selectable)
+  | inquiry (t : RecordId) (g : Aspect)
 
-/-- The gate that asks aspect `g` again once an adjudication against its answer stands: the
-    Horizon's or the contradiction's application question, or the same aspect's probe. -/
-def again (t : RecordId) : GapType → Gate
-  | .horizon       => .reveal t
-  | .contradiction => .resolve t
-  | .expectation   => .probe t ⟨.expectation, rfl⟩
-  | .causality     => .probe t ⟨.causality, rfl⟩
-  | .scope         => .probe t ⟨.scope, rfl⟩
-  | .sequence      => .probe t ⟨.sequence, rfl⟩
-  | .emergent d    => .probe t ⟨.emergent d, rfl⟩
+def Gate.task : Gate → Option RecordId
+  | .entrySelection => none
+  | .zeroGap t | .startAspect t | .coverage t | .horizonProbe t _ | .cue t _
+  | .reveal t _ | .conflict t | .resolve t | .probe t _ | .inquiry t _ => some t
 
-/-- **Your record**, read from the context: the gate your latest presentation opened, a Horizon
-    probe included — your own turn shows which it was, though the user saw only a scenario. -/
-opaque answered : Context P → Gate
+def Gate.aspect : Gate → Option Aspect
+  | .horizonProbe _ edge | .cue _ edge | .reveal _ edge => some (.horizon, edge)
+  | .conflict .. | .resolve .. => some (.contradiction, "")
+  | .probe _ g => some (g.val, "")
+  | .inquiry _ g => some g
+  | _ => none
 
-/-- Relay metadata emitted before a gate, never in place of one. `outcome` says how the round
-    ended: nothing to object to, an objection the user's reasoning defeated, nothing to check
-    the answer against — none of them a demonstrated aspect — a Horizon edge the user reached,
-    on their own or after a cue, or one disclosed and applied, each shown and recorded with how;
-    a contradiction dissolved by the user's explanation or resolved after its disclosure; a missed
-    answer read as aimed at another intent, offered as that candidate reading with what it was
-    read from, where the loop moves, and the invitation to say otherwise; or, for a side branch,
-    that the answer was read as a proposal and recorded. -/
-structure ContinuationClosure where
-  outcome   : String
-  branch    : Option RecordId
-  nextMoves : List String
+def Gate.closable : Gate → Bool
+  | .zeroGap _ | .coverage _ => true
+  | _ => false
 
-/-- What the fused context says the user did at the gate. Premise: one utterance carries one
-    disposition; silence is none of them. -/
-inductive Verdict
-  /-- a selection, an answer, a reasoning, a chosen aspect, a Reopen, a question, or any
-      reading not yet settled -/
-  | cont
-  /-- Confirm at the zero-gap finding, or sufficient at coverage: the user closes the task -/
-  | complete
-  /-- a system change that brings in matter outside the target or directs action at the
-      system; explanation, navigation, and clarification requests are not proposals -/
-  | propose
-  /-- the user stops verifying: what the rounds so far showed stays on record, and no task the
-      user did not close is completed -/
+inductive Choice
+  | entries (es : List EntryPoint)
+  | aspect (g : Selectable)
+  | close
+
+/-- The mutually exclusive handling forms of one utterance. A compound or unsettled utterance
+    stays `pending` with its full content in context; the person is never asked to classify it.
+    `met` carries the measure of what was shown. `accepted` carries what remains unattested.
+    `correct` carries a standing adjudication after reasoning, or the material of an in-intent
+    Horizon miss or standing contradiction. With unavailable material use `accepted`, naming
+    what is missing and carrying the unverified edge to coverage. -/
+inductive Answer (c : Context P)
+  | pending
+  | choose (value : Choice)
+  | reopen (description : String)
+  | steps
+  | other (entry : EntryPoint) (basis : String)
+  | met (measure : Measure c)
+  | accepted (reason : String)
+  | dissolved
+  | object (reason : String)
+  | correct (judgment : Adjudication c)
+  | propose (verbatim : String)
   | withdraw
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
-/-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+structure Reading (c : Context P) where
+  gate : Gate
+  answer : Answer c
 
-/-- **Your record**: contrary grounds you presented before the gate a closing utterance answered —
-    an aspect you hold undemonstrated, an adjudication still standing — attached to the
-    closure; empty when there were none. -/
-opaque dissent : Context P → List String
+/-- **Your read**, before judging person turn `u`, of any source it cites, now — observed. Empty
+    where the answer rests on nothing outside the context. -/
+axiom consult : Context P → Utterance P → List (Evidence P)
 
-/-- `VerifiedUnderstanding`: the context once every task is completed, carrying exactly what the
-    rounds established and no more — for each task, each aspect shown and how, each contradiction
-    taken up and how it ended, and each missed answer you read as aimed at another intent — with
-    the dissent attached to the closures. -/
-structure VerifiedUnderstanding (P : Type) where
-  context     : Context P
-  shown       : List (RecordId × List (GapType × Demonstration))
-  conflicts   : List (RecordId × List (ConflictSource × ConflictOutcome))
-  misreadings : List (RecordId × List (GapType × String))
-  dissent     : List String
+/-- The context an answer is judged against: the turn fused, then what `consult` observed. -/
+def consulted (c : Context P) (u : Utterance P) : Context P :=
+  fuse c u ++ (consult c u).map (·.val)
 
-inductive Outcome (P : Type)
-  | verified  (v : VerifiedUnderstanding P)
-  /-- the user stopped; the context ends in the trace of what was shown, presented at the stop,
-      and the dissent is attached -/
-  | withdrawn (c : Context P) (dissent : List String)
-  /-- the gate holds -/
-  | holding   (c : Context P)
+/-- Read the whole person turn, whatever its form, once against the context that stood when it
+    was sent and what `consult` observed for it. Selecting entries, choosing an aspect, and
+    closing the task (Confirm at zero-gap, sufficient at coverage) are `choose`. `gate` is
+    the presentation it answered; if it sets aside your preceding candidate intent reading,
+    restore the original gate and read the original missed answer with this correction.
+    At a Horizon answer: reached → met; request for steps → steps; otherwise read intent before
+    disclosure. At any missed answer, including reasoning, another intent → other, offered as
+    a candidate with its basis, destination, and invitation to correct it. Within intent:
+    Horizon miss → correct; contradiction explanation → dissolved, correct if material settles
+    it, accepted otherwise; probe/application → object before any adjudication, met only with
+    material verifying it, accepted otherwise; inquiry → correct only if the objection stands.
+    No knowledge is inferred from completion. A proposal changes the system outside the target;
+    explanation, navigation and clarification stay within this loop. -/
+axiom read : (c : Context P) → (u : Utterance P) → Reading (consulted c u)
+
+/-- A projection for the trace, never a second state store. Ground remains at the original turn. -/
+inductive Act
+  | hold | select (entries : List EntryPoint) | close | reopen (description : String)
+  | steps | other (entry : EntryPoint) (basis : String) | met | accepted (reason : String)
+  | dissolved | object (reason : String) | correct | propose (verbatim : String) | withdraw
+
+structure Record where
+  gate : Gate
+  act : Act
+
+def recorded {c : Context P} (r : Reading c) : Record :=
+  ⟨r.gate, match r.answer with
+    | .pending => .hold
+    | .choose v => match r.gate, v with
+      | .entrySelection, .entries es => .select es
+      | .zeroGap _, .close | .coverage _, .close => .close
+      | _, _ => .hold
+    | .reopen d => .reopen d
+    | .steps => match r.gate with
+      | .horizonProbe .. | .cue .. => .steps
+      | _ => .hold
+    | .other e b => .other e b
+    | .met _ => .met
+    | .accepted s => .accepted s
+    | .dissolved => .dissolved
+    | .object s => .object s
+    | .correct _ => match r.gate with
+      | .horizonProbe .. | .cue .. | .conflict .. | .inquiry .. => .correct
+      | _ => .hold
+    | .propose s => .propose s
+    | .withdraw => .withdraw⟩
+
+def readRecord (c : Context P) (u : Utterance P) : Record := recorded (read c u)
+
+def asUtterance (e : Turn P) : Option (Utterance P) :=
+  match e with
+  | ⟨.person, f, p⟩ => some ⟨⟨.person, f, p⟩, rfl⟩
+  | _ => none
+
+/-- Historical choices and outcomes are read at their original prefix; fresh task assessment
+    below still uses the entire fused context. These are two different temporal obligations. -/
+def said (c : Context P) : List (Nat × Record) :=
+  (List.range c.length).filterMap fun i =>
+    (c[i]?.bind asUtterance).map fun u => (i, readRecord (c.take i) u)
+
+def tasks (c : Context P) : List Task :=
+  (said c).flatMap fun (i, r) => match r.act with
+    | .select es => es.zipIdx.map fun (e, j) => ⟨(i, j), e⟩
+    | _ => []
+
+def completed (c : Context P) (t : RecordId) : Prop :=
+  ∃ i r, (i, r) ∈ said c ∧ r.gate.task = some t ∧ r.act = .close
+
+def current (c : Context P) : Option Task :=
+  (tasks c).find? fun t => decide (¬ completed c t.id)
+
+/-- Judge whether the registered entry serves the candidate intent, including emergent intents
+    with different wording. Identity of labels alone does not decide this. -/
+axiom Serves : EntryPoint → EntryPoint → Prop
+
+def taskFor (c : Context P) (e : EntryPoint) : Option Task :=
+  (tasks c).find? fun t => decide (Serves t.entry e ∧ ¬ completed c t.id)
+
+/-- Entry selection opens its own first selected task, even after an intent redirect. -/
+def selectedTask (c : Context P) : Option Task :=
+  (tasks c).find? fun t => t.id.1 + 1 == c.length && decide (¬ completed c t.id)
+
+def Asked (c : Context P) (t : RecordId) (edge : String) : Prop :=
+  ∃ i r, (i, r) ∈ said c ∧ r.gate = .horizonProbe t edge
+
+def probed (c : Context P) (t : RecordId) : Bool :=
+  (said c).any fun (_, r) => match r.gate with
+    | .probe task _ => task == t
+    | _ => false
+
+def reopenedGaps (c : Context P) (t : RecordId) : List Selectable :=
+  (said c).filterMap fun (_, r) => match r.gate, r.act with
+    | .zeroGap task, .reopen d => if task = t then some ⟨.emergent d, rfl⟩ else none
+    | _, _ => none
+
+/-- Judge the gaps, qualifying Horizon candidates and due contradiction afresh over the whole
+    context. Candidates are evidence-bound, material, unspoken across signal, labels and answers,
+    and belong to comprehension of this entry; exactly one will be admitted by `admissible`.
+    Keep stable names for identical edges. A Reopen adds its emergent gap. Contradictions require
+    distinct sourced sides, the same scope and premises, and readiness to be understood; a
+    repeated claim is one side. A contradiction already taken up is absent from `conflict`.
+    Explicit Reopen gaps and prior probes are derived separately from history. -/
+structure Assessment (c : Context P) where
+  gaps : List Selectable
+  candidates : List HorizonCandidate
+  conflict : Option (ConflictReading c)
+
+/-- Assess task `t` under the constraints of `Assessment`, from the fused context. -/
+axiom assess : (c : Context P) → RecordId → Assessment c
+
+def admissible (a : Assessment (P := P) c) : Option HorizonCandidate :=
+  match a.candidates with
+  | [h] => some h
+  | _ => none
+
+def dueHorizon (c : Context P) (t : RecordId) : Option HorizonCandidate :=
+  (admissible (assess c t)).filter fun h => decide (¬ Asked c t h.edge)
+
+def userConflict (c : Context P) (t : RecordId) : Option (Contradiction c) :=
+  match (assess c t).conflict with
+  | some (.user k) => some k
+  | _ => none
+
+/-- The history fixes assistance provenance; a later answer cannot turn assisted performance
+    into independent detection. -/
+def assistance (c : Context P) (t : RecordId) (g : Aspect) : Demonstration :=
+  if (said c).any (fun (_, r) => r.gate.task == some t && r.gate.aspect == some g &&
+      match r.act with | .correct => true | _ => false) then .afterDisclosure
+  else if (said c).any (fun (_, r) => r.gate.task == some t && r.gate.aspect == some g &&
+      match r.act with | .steps => true | _ => false) then .afterCue
+  else .independent
+
+/-- Trace rows retain source-turn positions: material and the full reading are recoverable there.
+    Only `met` demonstrates an aspect; accepting, closing and failing to refute do not. -/
+def shown (c : Context P) : List (RecordId × Aspect × Demonstration) :=
+  (said c).filterMap fun (i, r) => match r.act, r.gate.task, r.gate.aspect with
+    | .met, some t, some g => some (t, g, assistance (c.take i) t g)
+    | _, _, _ => none
+
+def AllClosed (c : Context P) : Prop :=
+  tasks c ≠ [] ∧ ∀ t ∈ tasks c, completed c t.id
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else; every reading above is taken from it, the Horizon and
-contradictions included — whether one is due, whether it was taken up, and how an answer met it
-are read again after every utterance.
+The state is the fused context alone. `said`, `tasks`, `shown` and the live assessment are
+projections of it. Records identify the selection that created a task, not an external writer.
 -/
 
-abbrev Mode (P : Type) := Context P
+/-! ── PHASE TRANSITIONS ── -/
 
-/-! ── PHASE TRANSITIONS ──
-A round is one step of a structural recursion over the user's utterances. `respond` is your
-presentation of a gate, read from the context: the closure the round owes before it — a
-`ContinuationClosure` after an answer no adjudication stands against, or the side-branch one
-after a proposal — or the correction with its attached material after an adjudication, or the
-disclosure of a missed Horizon or of a contradiction left standing with its material, or the
-candidate reading of the intent a missed answer was aimed at, then the gate itself. A
-contradiction due for the task that the user holds no side of rides the next presentation as
-relay: one inside the target itself shown as a finding about the target, saying which side holds
-only where evidence outside it settles that, and one against an explanation of yours shown as your
-correction of that explanation, with the target's material — neither asks the user to settle it.
-Where a contradiction the user holds a side of opens ahead of another item due for the task, the
-presentation says the order you read and why. A Horizon probe that opens ahead of an aspect the
-user chose says only that their aspect comes next: the probe carries its scenario and nothing
-else, so why it came first is said in the closure after its answer. Every turn of an active run ends in one `Gate`; a withdrawal ends the run
-instead, with what was shown presented.
--/
+/-- Relay carried with the next gate. Render evidence beside its judgment and implication.
+    `intent` includes the invitation to correct the candidate reading, adding no question.
+    `finding` is the target's contradiction; `correction` is your own explanation's correction.
+    `order` is said with its basis when a user contradiction preempts. For a Horizon ahead of a
+    chosen aspect, say only that the chosen aspect comes next; explain precedence after the answer. -/
+inductive Notice (c : Context P)
+  | routes (map : RouteMap)
+  | closure (outcome : String)
+  | intent (entry : EntryPoint) (basis : String)
+  | material (judgment : Adjudication c)
+  | demonstration (measure : Measure c)
+  | sides (conflict : Contradiction c)
+  | scenario (candidate : HorizonCandidate)
+  | finding (conflict : Contradiction c)
+  | correction (conflict : Contradiction c)
+  | order
+  | proposal (verbatim : String)
 
-/-- **Your registration** at Phase 2: the artifact basis materialized for every selected entry
-    point, and one record written per entry point; each write's returned identity enters the
-    context as observed. -/
-opaque register : Context P → List (Evidence P)
+structure Round (c : Context P) where
+  gate : Gate
+  notices : List (Notice c) := []
 
-/-- **Your record update** naming a task as its verification begins. -/
-opaque touch : Context P → List (Evidence P)
+def entryRound (c : Context P) : Round c := ⟨.entrySelection, [.routes (routeMap c)]⟩
 
-/-- **Your record update** marking the closed task completed. -/
-opaque update : Context P → List (Evidence P)
+/-- Centralized task priority. Non-user contradictions ride the next presentation as relay.
+    A Horizon presentation is an everyday scenario only: conceal its edge and rationale until
+    the answer. A chosen aspect remains in context and is offered at subsequent coverage. -/
+def settle (c : Context P) (t : RecordId) (fallback : Gate) : Round c :=
+  let relay := match (assess c t).conflict with
+    | some (.target k a) => .finding k :: (a.toList.map Notice.material)
+    | some (.yours k a) => [.correction k, .material a]
+    | _ => []
+  match userConflict c t with
+  | some k => ⟨.conflict t, [.sides k, .order]⟩
+  | none => match dueHorizon c t with
+    | some h => ⟨.horizonProbe t h.edge, .scenario h :: relay⟩
+    | none => ⟨fallback, relay⟩
 
-/-- **Your read**, once an adjudication stands, a missed Horizon is to be disclosed, or a
-    contradiction the user's explanation left standing is to be shown, of whatever it rests on —
-    the target, or a source the user cited that can be read now — observed and quoted at the
-    narrowest span. -/
-opaque attach : Context P → List (Evidence P)
+def gateFor (c : Context P) (t : RecordId) : Round c :=
+  let a := assess c t
+  settle c t (if (a.gaps ++ reopenedGaps c t).isEmpty ∧ admissible a = none then .zeroGap t
+    else if probed c t = false ∧ ¬ ∃ edge, Asked c t edge then .startAspect t
+    else .coverage t)
 
-/-- **Your record** of a proposal, verbatim, outside the task set; the write's returned identity
-    enters the context as observed. -/
-opaque eject : Context P → List (Evidence P)
+def redirect (c : Context P) (e : EntryPoint) (basis : String) : Round c :=
+  let r := match taskFor c e with
+    | some t => gateFor c t.id
+    | none => entryRound c
+  { r with notices := .intent e basis :: r.notices }
 
-inductive Step (P : Type)
-  | gate      (c : Context P) (g : Gate)
-  | done      (c : Context P)
-  | withdrawn (c : Context P)
-
-open Classical in
-/-- Where task `t`'s verification stands, in priority order: a contradiction the user holds a side
-    of comes first; then an admissible Horizon not yet asked; no gap at all is the zero-gap
-    finding; nothing probed and no Horizon asked opens the start-aspect selector; otherwise
-    coverage. -/
-noncomputable def gateFor (c : Context P) (t : RecordId) : Gate :=
-  if UserConflictDue c t then .conflict t
-  else if HorizonDue c t then .horizonProbe t
-  else if (gaps c t).isEmpty ∧ admissible c t = none then .zeroGap t
-  else if (probed c t).isEmpty ∧ ¬ ∃ hc, Asked c t hc then .startAspect t
-  else .coverage t
-
-open Classical in
-/-- A return to a task-level gate, or the probe of an aspect the user just chose: a contradiction
-    the user holds a side of, then an admissible Horizon not yet asked, preempts it, read on the
-    context the latest answer fused. A choice it preempts stays in the context, and the task's
-    next coverage offers it again. -/
-noncomputable def settle (c : Context P) (t : RecordId) (g : Gate) : Gate :=
-  if UserConflictDue c t then .conflict t
-  else if HorizonDue c t then .horizonProbe t else g
-
-/-- Where a missed answer read as aimed at another intent moves: the gate of the task that serves
-    it, or entry selection with that intent named where no registered task does — never a
-    disclosure. -/
-noncomputable def redirect (c : Context P) (e : EntryPoint) : Gate :=
-  match taskFor c e with
-  | some t => gateFor c t.id
-  | none   => .entrySelection
-
-open Classical in
-/-- An answer to a Horizon probe or a cue: one that reaches the edge is taken and the loop
-    returns to the task; a request for a step gets a cue; a miss read as aimed at another intent
-    moves there, with nothing disclosed; any other miss is disclosed at once with the material
-    it rests on read — never a second concealed scenario. -/
-noncomputable def horizonAnswer (c : Context P) (t : RecordId) : Step P :=
-  if Reached c then .gate c (settle c t (.coverage t))
-  else if AsksSteps c then .gate c (.cue t)
-  else match otherIntent c with
-    | some e => .gate c (redirect c e)
-    | none   => .gate (c ++ (attach c).map (·.val)) (.reveal t)
-
-/-- A task begins: the record update naming it, then the task's gate. -/
-noncomputable def beginTask (c : Context P) (t : Task) : Step P :=
-  let c₁ := c ++ (touch c).map (·.val)
-  .gate c₁ (gateFor c₁ t.id)
-
-/-- The user closed the current task: its record updated, then the next task, or convergence. -/
-noncomputable def completeStep (c : Context P) : Step P :=
-  let c₁ := c ++ (update c).map (·.val)
-  match current c₁ with
-  | none   => .done c₁
-  | some t => beginTask c₁ t
-
-/-- The gate a proposal returns to: the one it came from, or coverage for a Horizon probe. -/
 def resumeOf : Gate → Gate
-  | .horizonProbe t => .coverage t
-  | g               => g
+  | .horizonProbe t _ => .coverage t
+  | g => g
 
-noncomputable def aspectStep (c : Context P) (g : Gate) (t : RecordId) : Step P :=
-  match filledValue (aspectChoice c) with
-  | some a => .gate c (settle c t (.probe t a))
-  | none   => .gate c (settle c t g)
+def again (t : RecordId) (a : Aspect) : Gate :=
+  match a.1 with
+  | .horizon => .reveal t a.2
+  | .contradiction => .resolve t
+  | .expectation => .probe t ⟨.expectation, rfl⟩
+  | .causality => .probe t ⟨.causality, rfl⟩
+  | .scope => .probe t ⟨.scope, rfl⟩
+  | .sequence => .probe t ⟨.sequence, rfl⟩
+  | .emergent d => .probe t ⟨.emergent d, rfl⟩
 
-open Classical in
-/-- One answer, read at the gate it answers. -/
-noncomputable def advance (c : Context P) : Gate → Verdict → Step P
-  | g, .propose => .gate (c ++ (eject c).map (·.val)) (resumeOf g)
-  | _, .withdraw => .withdrawn c
-  | .zeroGap _, .complete => completeStep c
-  | .coverage _, .complete => completeStep c
-  | .entrySelection, _ =>
-    if isFilled (selection c) then
-      let c₁ := c ++ (register c).map (·.val)
-      match selectedTask c₁ with
-      | some t => beginTask c₁ t
-      | none   => .gate c₁ .entrySelection
-    else .gate c .entrySelection
-  | .zeroGap t, _ => .gate c (gateFor c t)
-  | .horizonProbe t, _ => horizonAnswer c t
-  | .cue t, _ => horizonAnswer c t
-  | .reveal t, _ =>
-    match otherIntent c with
-    | some e => .gate c (redirect c e)
-    | none   =>
-      if Objection c then .gate c (.inquiry t .horizon) else .gate c (settle c t (.coverage t))
-  | .conflict t, _ =>
-    if Dissolved c then .gate c (settle c t (.coverage t))
-    else match otherIntent c with
-      | some e => .gate c (redirect c e)
-      | none   =>
-        if Settles c then .gate (c ++ (attach c).map (·.val)) (.resolve t)
-        else .gate c (settle c t (.coverage t))
-  | .resolve t, _ =>
-    match otherIntent c with
-    | some e => .gate c (redirect c e)
-    | none   =>
-      if Objection c then .gate c (.inquiry t .contradiction)
-      else .gate c (settle c t (.coverage t))
-  | .probe t g, _ =>
-    match otherIntent c with
-    | some e => .gate c (redirect c e)
-    | none   =>
-      if Objection c then .gate c (.inquiry t g.val) else .gate c (settle c t (.coverage t))
-  | .inquiry t g, _ =>
-    if Stands c then .gate (c ++ (attach c).map (·.val)) (again t g)
-    else .gate c (settle c t (.coverage t))
-  | .startAspect t, _ => aspectStep c (.startAspect t) t
-  | .coverage t, _ => aspectStep c (.coverage t) t
+def returning (c : Context P) (g : Gate) (outcome : String) : Round c :=
+  let r := match g.task with
+    | some t => settle c t (.coverage t)
+    | none => entryRound c
+  { r with notices := .closure outcome :: r.notices }
 
-/-- The gate the latest utterance answers: the one your latest presentation opened, or, where the
-    utterance sets aside your reading of a missed answer as aimed at another intent, the gate that
-    answer answered. -/
-def reopened (c : Context P) (g : Gate) : Gate :=
-  match restored c with
-  | some g₀ => g₀
-  | none    => g
+inductive Step (c : Context P)
+  | gate (round : Round c)
+  | done (closed : AllClosed c)
+  | withdrawn
 
-/-- Presenting a gate. -/
-def present (respond : Context P → Gate → Response P) (c : Context P) (g : Gate) : Context P :=
-  c ++ [(respond c g).val]
+/-- The single source of transition policy. Only an actual latest-person choice at a closure
+    gate enters completion; material-bearing correction consumes its adjudication directly.
+    A question re-entered after insufficient ground stays open and explains what is missing. -/
+def advance (c : Context P) (r : Reading c) : Step c :=
+  match r.answer with
+  | .withdraw => .withdrawn
+  | .propose s => .gate ⟨resumeOf r.gate, [.proposal s]⟩
+  | .other e b => .gate (redirect c e b)
+  | .choose v => match r.gate, v with
+    | .entrySelection, .entries _ =>
+      .gate (match selectedTask c with | some t => gateFor c t.id | none => entryRound c)
+    | .zeroGap _, .close | .coverage _, .close =>
+      if h : AllClosed c then .done h
+      else .gate (match current c with | some t => gateFor c t.id | none => ⟨r.gate, []⟩)
+    | .startAspect t, .aspect g | .coverage t, .aspect g =>
+      .gate (settle c t (.probe t g))
+    | _, _ => .gate ⟨r.gate, []⟩
+  | .steps => match r.gate with
+    | .horizonProbe t e | .cue t e => .gate ⟨.cue t e, []⟩
+    | _ => .gate ⟨r.gate, []⟩
+  | .correct a => match r.gate with
+    | .horizonProbe t edge | .cue t edge => .gate ⟨.reveal t edge, [.material a]⟩
+    | .conflict t => .gate ⟨.resolve t, [.material a]⟩
+    | .inquiry t g => .gate ⟨again t g, [.material a]⟩
+    | _ => .gate ⟨r.gate, []⟩
+  | .object reason => match r.gate with
+    | .probe t g => .gate ⟨.inquiry t (g.val, ""), [.closure reason]⟩
+    | .reveal t edge => .gate ⟨.inquiry t (.horizon, edge), [.closure reason]⟩
+    | .resolve t => .gate ⟨.inquiry t (.contradiction, ""), [.closure reason]⟩
+    | _ => .gate ⟨r.gate, []⟩
+  | .met m =>
+    let next := returning c r.gate "Shown against this measure; record assistance."
+    .gate { next with notices := .demonstration m :: next.notices }
+  | .dissolved => .gate (returning c r.gate "The user's explanation dissolved the contradiction.")
+  | .accepted reason => .gate (returning c r.gate reason)
+  | .reopen _ => .gate (match r.gate.task with
+    | some t => gateFor c t | none => ⟨r.gate, []⟩)
+  | .pending => .gate ⟨r.gate, []⟩
 
-/-- Convergence: the trace presented, then the resolution; `trace` is your convergence
-    presentation — each task with its status, the aspects detected for it, the Horizon among them
-    where one was asked, each aspect shown with how it was shown, each contradiction taken up with
-    where its sides came from and how it ended, and each missed answer read as aimed at another
-    intent. A withdrawal presents the same trace at the stop. -/
-def understanding (trace : Context P → Response P) (c : Context P) : VerifiedUnderstanding P :=
-  { context     := c ++ [(trace c).val]
-    shown       := (tasks c).map (fun t => (t.id, demonstrated c t.id))
-    conflicts   := (tasks c).map (fun t => (t.id, conflicts c t.id))
-    misreadings := (tasks c).map (fun t => (t.id, misreadings c t.id))
-    dissent     := dissent c }
+/-- Present the whole packet: its closure/evidence/intent relay followed by its single gate.
+    At zero-gap give reasoning and Confirm/Reopen; at coverage show probed/unprobed aspects and
+    sufficient/another aspect/proposal; at an ordinary probe give artifact context and a concrete
+    scenario, Qc/Qs from probeKind, and free response. Inquiry hears reasoning before judgment;
+    disclosure names the edge and asks for application. A closure includes task status, the
+    return gate and available next moves. Conflict asks how both quoted sides fit
+    before a verdict. A target finding judges a side only with settling material outside it;
+    your own correction quotes the target. Relay never replaces an active gate. -/
+def present (respond : (c : Context P) → Round c → Response P)
+    (c : Context P) (r : Round c) : Context P :=
+  c ++ [(respond c r).val]
 
-noncomputable def grasp (respond : Context P → Gate → Response P)
-    (trace : Context P → Response P) : Context P → List (Utterance P) → Outcome P
-  | c, []      => .holding c
+/-- What the trace renderer receives, computed from the same context it narrates. -/
+structure Trace where
+  selected : List Task
+  records : List (Nat × Record)
+  demonstrated : List (RecordId × Aspect × Demonstration)
+
+def traceOf (c : Context P) : Trace := ⟨tasks c, said c, shown c⟩
+
+/-- The closure certificate applies before the trace's assistant presentation. The trace shows
+    each selected task, its closure, every aspect shown with assistance, contradictions and their
+    ownership/outcomes, candidate intent readings and subsequent corrections, and any dissent
+    that stood before the person's closure. It certifies traversal, not omniscient comprehension. -/
+structure VerifiedUnderstanding (P : Type) where
+  basis : Context P
+  closed : AllClosed basis
+  presentation : Response P
+
+inductive Outcome (P : Type)
+  | verified (value : VerifiedUnderstanding P)
+  | withdrawn (basis : Context P) (presentation : Response P)
+  | holding (context : Context P)
+
+def grasp (respond : (c : Context P) → Round c → Response P)
+    (trace : Context P → Trace → Response P) :
+    Context P → List (Utterance P) → Outcome P
+  | c, [] => .holding c
   | c, u :: us =>
-    let c' := fuse c u
-    match advance c' (reopened c' (answered c)) (verdict c') with
-    | .done c₁      => .verified (understanding trace c₁)
-    | .withdrawn c₁ => .withdrawn (c₁ ++ [(trace c₁).val]) (dissent c₁)
-    | .gate c₁ g    => grasp respond trace (present respond c₁ g) us
+    let c' := consulted c u
+    match advance c' (read c u) with
+    | .done h => .verified ⟨c', h, trace c' (traceOf c')⟩
+    | .withdrawn => .withdrawn c' (trace c' (traceOf c'))
+    | .gate r => grasp respond trace (present respond c' r) us
 
-/-- The run begins at entry selection, over the route map Phase 0 assessed in silence. -/
-noncomputable def start (respond : Context P → Gate → Response P)
-    (trace : Context P → Response P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
-  grasp respond trace (present respond c .entrySelection) us
+def start (respond : (c : Context P) → Round c → Response P)
+    (trace : Context P → Trace → Response P)
+    (c : Context P) (us : List (Utterance P)) : Outcome P :=
+  grasp respond trace (present respond c (entryRound c)) us
 
 /-! ── LOOP ──
-Every answer is read with the whole context; nothing the user said is narrowed to the gate's
-options. An answer that stays in the comprehension loop takes exactly one of adjudicated or
-unadjudicated; a proposal is recorded and the loop resumes where it was. No gate holds a round
-cap: re-entering a gate is dialogue. A user who stops says so, and the withdrawal ends the run
-with what was shown on record; leaving without saying so is the host's to deliver.
-Continue until every selected task is completed, or the user withdraws. The Horizon judgment is
-read again after every utterance: an edge the user has since spoken is not asked, an answer can
-bring a new one into view, and one already asked is not asked again. Contradictions are read
-again the same way, and taken up by whose they are: one the user holds a side of comes before
-the Horizon and asks first for their explanation of how the sides fit, a verdict following only
-where that explanation leaves it standing and the target or a cited source settles it — with
-nothing to settle it, none is given and that is said; one inside the target is a finding about the target,
-and one against an explanation of yours is yours to correct — neither is handed to the user to
-settle. Before anything is disclosed, a missed answer is read for its intent: one aimed at
-another question or purpose than the probe's moves to the task or entry that intent points at,
-the reading offered as a candidate with what it was read from and an invitation to say otherwise,
-and nothing is disclosed; the user's next utterance corrects a wrong reading. An answer that
-misses the edge within the probe's own intent is followed by its disclosure, not by a second
-concealed scenario; a user who asks to go step by step gets a cue first, because their utterance
-steers the next presentation. Convergence
-evidence: for each task, TargetUngrasped(t) → its status, with the aspects detected for it — the
-Horizon among them where one was asked — and each aspect shown with how it was shown; how each
-probe ended was said in the closure of the round that ran it and does not travel here.
-Demonstrated, not asserted.
--/
-
-/-!
-Silence completes nothing.
-theorem silence (respond : Context P → Gate → Response P) (trace : Context P → Response P)
-    (c : Context P) : grasp respond trace c [] = .holding c
-
-A contradiction the user holds a side of comes first among its task's gates, and preempts a
-return to them the same way.
-theorem user_conflict_first (c : Context P) (t : RecordId) (hu : UserConflictDue c t) :
-    gateFor c t = .conflict t
-
-theorem user_conflict_preempts_return (c : Context P) (t : RecordId) (g : Gate)
-    (hu : UserConflictDue c t) : settle c t g = .conflict t
-
-The gate that asks for the user's explanation opens only for a contradiction the user holds a
-side of: one inside the target, or one against your own explanation, is never handed to them.
-theorem conflict_only_user (c : Context P) (t : RecordId) (h : gateFor c t = .conflict t) :
-    UserConflictDue c t
-
-At a contradiction the user holds a side of, their explanation comes before any verdict: where it
-shows how the sides fit, nothing is read or attached; where it leaves them standing within the
-question's own intent and material settles it, that material is read and both sides are shown
-with it; where nothing settles it, nothing is read or attached and no verdict follows.
-theorem conflict_dissolved (c : Context P) (t : RecordId) (hd : Dissolved c) :
-    advance c (.conflict t) .cont = .gate c (settle c t (.coverage t))
-
-theorem conflict_standing_resolves (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
-    (hi : otherIntent c = none) (hs : Settles c) :
-    advance c (.conflict t) .cont = .gate (c ++ (attach c).map (·.val)) (.resolve t)
-
-theorem conflict_unsettled_no_verdict (c : Context P) (t : RecordId) (hd : ¬ Dissolved c)
-    (hi : otherIntent c = none) (hs : ¬ Settles c) :
-    advance c (.conflict t) .cont = .gate c (settle c t (.coverage t))
-
-An admissible Horizon not yet asked preempts every other gate of its task but a contradiction the
-user holds a side of.
-theorem horizon_preempts (c : Context P) (t : RecordId) (hu : ¬ UserConflictDue c t)
-    (hd : HorizonDue c t) : gateFor c t = .horizonProbe t
-
-It preempts a return to the task's gates the same way, read on the context the latest answer
-fused.
-theorem horizon_preempts_return (c : Context P) (t : RecordId) (g : Gate)
-    (hu : ¬ UserConflictDue c t) (hd : HorizonDue c t) : settle c t g = .horizonProbe t
-
-An edge already asked is not asked again.
-theorem asked_not_reasked (c : Context P) (t : RecordId) (hc : HorizonCandidate)
-    (ha : admissible c t = some hc) (hk : Asked c t hc) : gateFor c t ≠ .horizonProbe t
-
-A Horizon answer that missed the edge within the probe's own intent, and asked for no step, is
-followed by its disclosure, with the material it rests on read, and never by a second concealed
-scenario.
-theorem miss_discloses (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : ¬ AsksSteps c)
-    (hi : otherIntent c = none) :
-    advance c (.horizonProbe t) .cont = .gate (c ++ (attach c).map (·.val)) (.reveal t)
-
-A missed Horizon answer read as aimed at another intent moves where that intent points, with
-nothing read or attached, and that move is never a disclosure.
-theorem other_intent_no_disclosure (c : Context P) (t : RecordId) (e : EntryPoint)
-    (hm : ¬ Reached c) (hs : ¬ AsksSteps c) (hi : otherIntent c = some e) :
-    advance c (.horizonProbe t) .cont = .gate c (redirect c e) ∧ ∀ t', redirect c e ≠ .reveal t'
-
-A probe's answer, or the answer to a disclosure's application question, read as aimed at another
-intent moves there the same way, before any objection is raised against it.
-theorem probe_other_intent (c : Context P) (t : RecordId) (g : Selectable) (e : EntryPoint)
-    (hi : otherIntent c = some e) : advance c (.probe t g) .cont = .gate c (redirect c e)
-
-theorem reveal_other_intent (c : Context P) (t : RecordId) (e : EntryPoint)
-    (hi : otherIntent c = some e) : advance c (.reveal t) .cont = .gate c (redirect c e)
-
-An utterance that sets aside your intent reading is read at the gate the missed answer answered.
-theorem correction_reopens (c : Context P) (g g₀ : Gate) (h : restored c = some g₀) :
-    reopened c g = g₀
-
-A user who asks for a step instead of answering gets a cue that still does not name the edge.
-theorem steps_cue (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : AsksSteps c) :
-    advance c (.horizonProbe t) .cont = .gate c (.cue t)
-
-An aspect the user chose yields to an admissible Horizon not yet asked, where no contradiction the
-user holds a side of comes first.
-theorem choice_yields_to_horizon (c : Context P) (g : Gate) (t : RecordId)
-    (hu : ¬ UserConflictDue c t) (hd : HorizonDue c t) :
-    aspectStep c g t = .gate c (.horizonProbe t)
-
-A Horizon answer that reached the edge is taken; the loop returns to the task.
-theorem reached_taken (c : Context P) (t : RecordId) (hr : Reached c) :
-    advance c (.horizonProbe t) .cont = .gate c (settle c t (.coverage t))
-
-No adjudication is reached at a probe's answer: nothing is read or attached there, and the next
-gate is the inquiry, a return to the task, or where an intent read in the answer points.
-theorem no_adjudication_at_probe (c : Context P) (t : RecordId) (g : Selectable) :
-    advance c (.probe t g) .cont = .gate c (.inquiry t g.val) ∨
-      advance c (.probe t g) .cont = .gate c (settle c t (.coverage t)) ∨
-      ∃ e, advance c (.probe t g) .cont = .gate c (redirect c e)
-
-Every answer yields the next gate, convergence only on the user's completion, or the end only on
-the user's withdrawal.
-theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
-    (∃ c₁ g₁, advance c g v = .gate c₁ g₁) ∨
-      (v = .complete ∧ ∃ t, advance c g v = .done (c ++ t)) ∨
-      (v = .withdraw ∧ advance c g v = .withdrawn c)
-
-A proposal is recorded and the loop resumes where it was.
-theorem proposal_resumes (c : Context P) (g : Gate) :
-    advance c g .propose = .gate (c ++ (eject c).map (·.val)) (resumeOf g)
-
-Where the user's reasoning defeats the objection, nothing is read or attached.
-theorem defeated_attaches_nothing (c : Context P) (t : RecordId) (g : GapType)
-    (hs : ¬ Stands c) : advance c (.inquiry t g) .cont = .gate c (settle c t (.coverage t))
+Recursion consumes only actual utterances. An unanswered gate holds. A round returns a gate,
+certified completion, or withdrawal with the trace. Live priority is centralized in `settle`;
+an owed cue, disclosure or reasoning question completes the current answer's handling before
+returning to that priority. A task's closure respects the person's sufficient/Confirm judgment.
 -/
 
 /-! ── CONVERGENCE ──
-converged: every selected task completed — each carried to where the user closed it. What
-convergence establishes is that the loop ran out over the aspects in play: those the user
-selected, every admissible Horizon, which is asked before any selection and never offered at
-one, and every contradiction the context showed, taken up by whose it was. It re-evaluates no round: an aspect closed with sufficient was closed on the user's judgment
-rather than by a demonstration, and an answer merely taken — nothing to object to, or nothing to
-check it against — was never demonstrated. What is shown is what you read an answer to reach
-against the target: a Horizon edge reached on the user's own or after a cue, an application
-after a disclosure, an aspect whose adjudication the user's answer met — each recorded with how,
-and what followed a disclosure or a cue never as independent detection; each round's closure said
-which. Where a round settled an aspect or disclosed an edge, it did so
-against your reading of the target, quoted from the target itself, so the user weighed that
-material rather than your account of it. A withdrawal is its own ending: what was shown stays on
-record and nothing the user did not close is completed.
+`VerifiedUnderstanding.closed` requires a nonempty selected roster and a person's closure for
+every task. The trace derives from historical readings: accepting an answer, accepting a task,
+and demonstrating an aspect remain different. None substitutes for another.
 -/
 
 /-!
-Verified understanding follows only a user's utterance that closed the last task.
-theorem verified_by_person (respond : Context P → Gate → Response P)
-    (trace : Context P → Response P) (c : Context P) (us : List (Utterance P))
+The transition, history, grounding and convergence laws.
+theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) = said c ++ more
+
+theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c
+
+theorem said_by_person (c : Context P) (i : Nat) (x : Record) (h : (i, x) ∈ said c) :
+    ∃ u : Utterance P, c[i]? = some u.val
+
+theorem silence (respond : (c : Context P) → Round c → Response P)
+    (trace : Context P → Trace → Response P) (c : Context P) :
+    grasp respond trace c [] = .holding c
+
+theorem user_conflict_first (c : Context P) (t : RecordId) (g : Gate)
+    (k : Contradiction c) (h : userConflict c t = some k) :
+    (settle c t g).gate = .conflict t
+
+theorem horizon_preempts (c : Context P) (t : RecordId) (g : Gate)
+    (hu : userConflict c t = none) (h : HorizonCandidate)
+    (hd : dueHorizon c t = some h) :
+    (settle c t g).gate = .horizonProbe t h.edge
+
+theorem asked_not_due (c : Context P) (t : RecordId) (h : HorizonCandidate)
+    (ha : admissible (assess c t) = some h) (hk : Asked c t h.edge) :
+    dueHorizon c t = none
+
+theorem singleton_admission (a : Assessment (P := P) c) (h : HorizonCandidate)
+    (ha : admissible a = some h) : a.candidates = [h]
+
+theorem miss_discloses_material (c : Context P) (t : RecordId) (edge : String)
+    (a : Adjudication c) :
+    advance c ⟨.horizonProbe t edge, .correct a⟩ = .gate ⟨.reveal t edge, [.material a]⟩
+
+theorem conflict_resolves_material (c : Context P) (t : RecordId) (a : Adjudication c) :
+    advance c ⟨.conflict t, .correct a⟩ = .gate ⟨.resolve t, [.material a]⟩
+
+theorem inquiry_corrects_material (c : Context P) (t : RecordId) (g : Aspect)
+    (a : Adjudication c) :
+    advance c ⟨.inquiry t g, .correct a⟩ = .gate ⟨again t g, [.material a]⟩
+
+theorem other_intent_redirects (c : Context P) (g : Gate) (e : EntryPoint) (basis : String) :
+    advance c ⟨g, .other e basis⟩ = .gate (redirect c e basis)
+
+theorem steps_cue (c : Context P) (t : RecordId) (edge : String) :
+    advance c ⟨.horizonProbe t edge, .steps⟩ = .gate ⟨.cue t edge, []⟩
+
+theorem proposal_recorded (c : Context P) (g : Gate) (s : String) :
+    advance c ⟨g, .propose s⟩ = .gate ⟨resumeOf g, [.proposal s]⟩
+
+theorem no_verdict_without_measure (c : Context P) (g : Gate) (why : String) :
+    advance c ⟨g, .accepted why⟩ = .gate (returning c g why)
+
+theorem no_adjudication_at_probe (c : Context P) (t : RecordId) (g : Selectable)
+    (a : Adjudication c) :
+    advance c ⟨.probe t g, .correct a⟩ = .gate ⟨.probe t g, []⟩
+
+theorem completed_persists (c more : Context P) (t : RecordId) (h : completed c t) :
+    completed (c ++ more) t
+
+theorem tasks_persist (c more : Context P) : ∃ ts, tasks (c ++ more) = tasks c ++ ts
+
+theorem certified_nonempty (v : VerifiedUnderstanding P) : tasks v.basis ≠ []
+
+theorem certified_all_closed (v : VerifiedUnderstanding P) :
+    ∀ t ∈ tasks v.basis, completed v.basis t.id
+
+theorem completed_by_person (c : Context P) (t : RecordId) (h : completed c t) :
+    ∃ i r, ∃ u : Utterance P, c[i]? = some u.val ∧ (i, r) ∈ said c ∧
+      r.gate.task = some t ∧ r.act = .close
+
+theorem advance_done_closed (c : Context P) (r : Reading c) (h : AllClosed c)
+    (hd : advance c r = .done h) : (recorded r).act = .close
+
+theorem advance_withdrawn (c : Context P) (r : Reading c)
+    (h : advance c r = .withdrawn) : r.answer = .withdraw
+
+theorem verified_by_person (respond : (c : Context P) → Round c → Response P)
+    (trace : Context P → Trace → Response P) (c : Context P) (us : List (Utterance P))
     (v : VerifiedUnderstanding P) (hv : grasp respond trace c us = .verified v) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .complete ∧
-      ∃ t, v.context = fuse c₀ u ++ t
+    ∃ (c₀ : Context P) (u : Utterance P), v.basis = consulted c₀ u ∧
+      (recorded (read c₀ u)).act = .close ∧ AllClosed v.basis
 
-A run ends withdrawn only on the user's own withdrawal.
-theorem withdrawn_by_person (respond : Context P → Gate → Response P)
-    (trace : Context P → Response P) (c : Context P) (us : List (Utterance P))
-    (c₁ : Context P) (d : List String) (hw : grasp respond trace c us = .withdrawn c₁ d) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .withdraw ∧
-      ∃ t, c₁ = fuse c₀ u ++ t
+theorem withdrawn_by_person (respond : (c : Context P) → Round c → Response P)
+    (trace : Context P → Trace → Response P) (c : Context P) (us : List (Utterance P))
+    (basis : Context P) (presentation : Response P)
+    (hw : grasp respond trace c us = .withdrawn basis presentation) :
+    ∃ (c₀ : Context P) (u : Utterance P), basis = consulted c₀ u ∧ (read c₀ u).answer = .withdraw
 
-A task, a selection, and a chosen aspect are each filled only by the user's statement.
-theorem completed_by_utterance {c : Context P} {t : RecordId} {s : Cite c}
-    (ok : (completionCoord (P := P) t).admits s.kind) : s.kind = .utterance
+theorem selection_never_horizon (g : Selectable) : g.val ≠ .horizon
 
-theorem selected_by_utterance {c : Context P} {s : Cite c}
-    (ok : (selectionCoord (P := P)).admits s.kind) : s.kind = .utterance
+theorem selection_never_conflict (g : Selectable) : g.val ≠ .contradiction
 
-theorem aspect_by_utterance {c : Context P} {s : Cite c}
-    (ok : (aspectCoord (P := P)).admits s.kind) : s.kind = .utterance
+theorem close_at_closing_gate (c : Context P) (r : Reading c)
+    (h : (recorded r).act = .close) : r.gate.closable = true ∧ r.answer = .choose .close
 
-An offered or chosen aspect is never the Horizon, and never a contradiction.
-theorem selectable_not_horizon (g : Selectable) : g.val ≠ .horizon
+theorem shown_requires_measure (c : Context P) (r : Reading c)
+    (h : (recorded r).act = .met) : ∃ m, r.answer = .met m
 
-theorem selectable_not_contradiction (g : Selectable) : g.val ≠ .contradiction
+theorem disclosure_stays_assisted (c : Context P) (t : RecordId) (g : Aspect)
+    (h : (said c).any (fun (_, r) => r.gate.task == some t && r.gate.aspect == some g &&
+      match r.act with | .correct => true | _ => false) = true) :
+    assistance c t g = .afterDisclosure
+
+theorem other_intent_no_disclosure (c : Context P) (e : EntryPoint) (basis : String)
+    (t : RecordId) (edge : String) :
+    (redirect c e basis).gate ≠ .reveal t edge ∧ (redirect c e basis).gate ≠ .resolve t
 -/
 
 /-! ── TOOL GROUNDING ── -/
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
--- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity. Attaching the material an adjudication was drawn from is a separate axis and is not suppressed by that declaration: it fires only after an answer, only where an adjudication stands against it or a Horizon answer missed the edge, and it carries the material adjudicated or disclosed from rather than the reasoning path that selected it. Stated cost, taken rather than solved: an excerpt attached at one aspect can contain what a later probe on another aspect would have asked for; the narrowest span reduces that and nothing removes it
-
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
-
-inductive Op | orient | deriveEntries | assessRoute | routeRelay | entrySelection | materialize
-             | register | touch | detect | horizon | horizonProbe | cue | intent | reveal | zeroGap
-             | contradiction | order | conflict | resolve | conflictRelay | startAspect
-             | probe | inquiry | attach | closure | coverage | update | eject | readAnswer
-             | withdrawal | converge | seam
+inductive Annot | sense | observe | track | constitution | extension
+inductive Op | route | read | assess | record | present | material | converge | seam
 
 def grounding : Op → Annot × String
-  | .orient         => (.observe, "artifact read (if needed): infer likely comprehension intents from the target and the user's wording")
-  | .deriveEntries  => (.sense, "Internal analysis: intent-scented entry points derived from the intents and the target")
-  | .assessRoute    => (.sense, "Internal analysis: entry-point adequacy annotations — the intent each serves, its anchor hint, the cheapest probe target, hidden routes, and bounded open questions; opacity-preserving, exposing selection scent and never a probe answer")
-  | .routeRelay     => (.extension, "TextPresent+Proceed: entry-fit distinctions, hidden routes, and bounded open questions from the route map; omitted when empty")
-  | .entrySelection => (.constitution, "present: entry selection enriched by the route map; single by default, an ordered list when the user names several concerns; a path the user writes stays valid; opened again when a missed answer is read as aimed at an intent no registered task serves, with that intent named among the entries and the task the user then selects opened first")
-  | .materialize    => (.sense, "Internal analysis: the artifact basis for every selected entry point, a path the user wrote included")
-  | .register       => (.track, "record: one per selected entry point; each write returns the identity every later record update names")
-  | .touch          => (.track, "record update: names the task as its verification begins")
-  | .detect         => (.sense, "Internal analysis: the gap types relevant to the task's entry point, read on the fused context")
-  | .horizon        => (.sense, "Internal analysis: the admissible-Horizon guard, read again after every utterance — exactly one qualifying candidate, evidence-bound, material, unspoken in the signal and every answer so far, neither a route-selection question nor a decision gap — and whether that edge was already asked, read from your own turns; never exposed before a miss")
-  | .horizonProbe   => (.constitution, "present (conditional: an admissible Horizon not yet asked for the task): the preempting Horizon probe, before the start-aspect selector and before a return to the task's gates — an everyday scenario only, never a Horizon label, the edge, an expected answer, or the rationale; an answer that reaches the edge is taken, one that misses it is disclosed")
-  | .cue            => (.constitution, "present (conditional: the user asked to go step by step instead of answering a Horizon probe or a cue): a cue toward the edge that still does not name it; its answer is read as a Horizon answer is")
-  | .intent         => (.sense, "Internal analysis: at an answer that missed what its question was after — a Horizon answer that neither reached the edge nor asked for a step, a probe's answer, an explanation that did not dissolve a contradiction, or the answer to a disclosure's application question — whether it was aimed at a different intent than the question's task serves, read from the fused context and never asked; where it was, the closure offers that reading as a candidate — what was read, from what, and where the loop moves — with an invitation to say otherwise in the same turn, the loop moves to the task or entry that intent points at, and nothing is disclosed; an utterance that sets that reading aside reopens the gate the missed answer answered, where it is read again as a miss within its own intent")
-  | .reveal         => (.constitution, "present (conditional: the answer to a Horizon probe or a cue missed the edge, asked for no step, and was not read as aimed at another intent): the disclosure — the edge named, the material from the target it rests on quoted in place at the narrowest span, and an application question; never a second concealed scenario")
-  | .zeroGap        => (.constitution, "present (conditional: no gap for the task): the zero-gap finding with its reasoning; Confirm completes the task, Reopen(description) adds the named gap and resumes verification")
-  | .contradiction  => (.sense, "Internal analysis: the contradiction due for the task, read again after every utterance over the fused context — two statements that cannot both hold, each quoted where it stands, admitted only where both sides are in the context with their sources and speak to the same scope under the same premises, one claim appearing again (the target, your quote of it, an explanation of yours drawn from it) counting as one side — and where its sides come from: two of the user's statements, the user's understanding against the target, two places in the target, or an explanation of yours against the target")
-  | .order          => (.sense, "Internal analysis: which due item the task takes up next — a contradiction the user holds a side of first, then an admissible Horizon, then the task's gates — said in the presentation with its basis whenever a contradiction opens ahead of another item due; a Horizon opening ahead of a chosen aspect says only that the aspect comes next, its precedence said in the closure after its answer")
-  | .conflict       => (.constitution, "present (conditional: a contradiction the user holds a side of is due): both sides quoted where they stand, and a request to explain how they fit — no verdict yet; an explanation that shows how they fit dissolves it, one aimed at another intent moves there, one that leaves it standing is followed by its resolution where the target or a cited source settles it, and otherwise by a closure saying nothing settles it, with no verdict")
-  | .resolve        => (.constitution, "present (conditional: the user's explanation left a contradiction standing within the question's own intent, and the target or a source they cited settles it): both sides, the material from the target that bears on it quoted in place at the narrowest span, the reason one side does not hold, and an application question")
-  | .conflictRelay  => (.extension, "TextPresent+Proceed: before the next gate, a contradiction the user holds no side of — one inside the target shown as a finding about the target, saying which side holds only where evidence outside it settles that; one against an explanation of yours shown as your correction of that explanation with the target's material — never handed to the user to settle")
-  | .startAspect    => (.constitution, "present (conditional: gaps to offer, nothing probed yet for the task): which aspect to start with, over the task's gaps")
-  | .probe          => (.constitution, "present: the probe of the bound aspect in the form probeKind gives it — Qc for Expectation and Sequence, Qs for Causality, Scope, and Emergent — after the selected artifact context and a concrete scenario, with a free-response path")
-  | .inquiry        => (.constitution, "present: the reasoning inquiry on an objection to the answer, whole or partial, opened before anything is settled")
-  | .attach         => (.observe, "artifact read + excerpt attachment: read whatever the standing adjudication, the missed Horizon, or the contradiction left standing rests on — the target itself, or a source the user cited that can be read now, in any form — and quote in place the narrowest span it rests on — only once an adjudication stands after the user's reasoning, a Horizon answer missed the edge within the probe's own intent asking for no step, or the user's explanation left a contradiction standing within its own intent and that material settles it; a locator the user must open is not an attachment")
-  | .closure        => (.extension, "TextPresent+Proceed: the continuation closure — the round's outcome, any side branch with its record, a missed answer read as aimed at another intent offered as that candidate reading with what it was read from and an invitation to say otherwise, a contradiction dissolved or resolved, the task's status, the return point, and the next moves — before coverage or the resumed gate, never in place of a gate")
-  | .coverage       => (.constitution, "present: aspect coverage — probed and unprobed aspects, the Horizon never among the offers; sufficient, another aspect, or a proposal")
-  | .update         => (.track, "record update: marks the closed task completed, naming the identity its registration returned")
-  | .eject          => (.track, "record: a proposal verbatim, outside the task set; the closure says it was read as a proposal and the gate it came from opens again")
-  | .readAnswer     => (.sense, "Internal analysis: the whole latest utterance read with the context — its verdict, the selection, the chosen aspect, whether a Horizon answer reached the edge, whether an explanation dissolved a contradiction and whether material settles one it left standing, whether a missed answer was aimed at another intent, the objection, and whether an adjudication stands")
-  | .withdrawal     => (.extension, "TextPresent+Proceed: on the user's withdrawal, what was shown so far — each aspect with how it was shown, each contradiction taken up with how it ended, and each missed answer read as aimed at another intent — and any dissent; no task the user did not close is completed")
-  | .converge       => (.extension, "TextPresent+Proceed: the convergence trace, presented before VerifiedUnderstanding is returned — each task with its status, the aspects detected for it (the Horizon among them where one was asked), and each aspect shown with how it was shown: independently, or through an application after a disclosure or a cue; each contradiction taken up, where its sides came from, and how it ended — dissolved by the user's explanation, resolved after its disclosure, a finding about the target, or your correction; each missed answer read as aimed at another intent, with what was read; any dissent attached to a closure")
-  | .seam           => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate inside this protocol and the next fires unchanged")
+  | .route => (.observe, "Read target if needed, then routeMap: silent intent-scented orientation and route adequacy")
+  | .read => (.observe, "consult: read any source the answer cites, now; then read the whole answer once against that context")
+  | .assess => (.sense, "Assess the fused context afresh, under Assessment")
+  | .record => (.track, "Context records selections, answers and presentations; said projects their history")
+  | .present => (.constitution, "present the Round under present's contract, then Stop")
+  | .material => (.sense, "Quote in place the Measure carried by the adjudication, at the narrowest span")
+  | .converge => (.extension, "TextPresent+Proceed: show the completed or withdrawn trace under VerifiedUnderstanding")
+  | .seam => (.extension, "Proceed to a next protocol only on a user-declared chain, citing that declaration; this contract declares no wired outbound edge")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
 
+end
 end Katalepsis
 ```
 
@@ -1040,15 +766,7 @@ Derive up to three first-turn labels from the user's likely comprehension intent
 
 Present the selected artifact context and a concrete scenario before each probe. For non-Horizon classificatory probes, render recognizable correct, partial, and misconception trajectories with domain-specific consequences; constitutive probes invite the user's own reasoning, and every probe preserves a free-response path.
 
-Read whether a Horizon is due again after every answer, over the whole context: an edge the user has since spoken is not asked, an answer can bring a new one into view, and one already asked is not asked again. Ask it through its everyday scenario only, never its label, suspected edge, expected answer, or rationale before the answer. An answer that reaches the edge is taken. Before disclosing anything after a missed answer — at a Horizon probe, a cue, an ordinary probe, or a disclosure's application question — read from the whole context whether it was aimed at a different intent than the probe's task serves: another question or purpose the user is actually pursuing. That reading is yours, made without asking, and you offer it as a candidate rather than assert it: where you read another intent, say in the closure what you read and from what, move to the task serving it — or reopen entry selection with that intent named when no task does — and in the same turn invite the user to say otherwise ("this reads as asking about X, so I am moving there — say so if not"); disclose nothing. The user's next utterance corrects a wrong reading: where it says the answer was aimed at the original question after all, read that answer again at the gate it answered, as a miss within its own intent. An answer that misses the edge within the probe's own intent is followed at once by the disclosure: name the edge, quote the material from the target it rests on at the narrowest span, and ask an application question — no second concealed scenario. Where the user asks to go step by step, give a cue first; their utterance steers the next presentation. Record how each aspect was shown — on their own, or through an application after a disclosure or a cue — and never present what followed a disclosure as independent detection. An answer you have an objection to first opens a reasoning inquiry grounded in the user's actual answer. Where that reasoning defeats the objection, nothing is corrected and the round closes as any other unadjudicated one does. Where an adjudication stands after it, target the correction at what that adjudication actually reaches — the disclosed mental model where that is what is wrong, the part it bears on where the rest of the answer stood — and re-probe that aspect.
-
-Read the context for contradictions again after every answer as well: two statements that cannot both hold, each quoted where it stands. Admit one only where both sides are in the context with their sources and speak to the same scope under the same premises; one claim appearing again — the target, your quote of it, an explanation of yours drawn from it — is one side, not two. Take each up by whose it is. Where the user holds a side of it — two of their own statements, or their understanding against the target — it comes before the Horizon: show both sides and ask them to explain how the two fit, with no verdict yet. Where their explanation shows how the sides fit, record it as dissolved and move on. Where it leaves them standing within the question's own intent and the target, or a source they cited that you can read now, settles which side holds, show both sides again with that material quoted in place and the reason one side does not hold, then ask an application question. Where nothing you can attach settles it, give no verdict: say that both sides stand and that you have nothing to settle it with, and leave it theirs. A contradiction inside the target itself is a finding about the target: show it before the next gate and say which side holds only where evidence outside the target settles that. One between an explanation you gave earlier and the target is yours: correct your explanation with the target's material before the next gate, and do not hand it to the user to settle. Whenever a contradiction the user holds a side of opens ahead of another item due for the task, say the order you read and why ("I am taking this first because …"). A Horizon probe that opens ahead of an aspect the user chose says only that their aspect comes next; why the Horizon came first waits for the closure after its answer, since the probe carries its scenario and nothing else.
-
-Treat a response as a proposal side branch only when it suggests a system change and either introduces matter outside `R` or directs action at the system; explanation, navigation, and clarification requests remain in the comprehension loop. Record a proposal verbatim, emit the side-branch closure saying the answer was read as a proposal, and open again the gate it came from — a proposal at the Horizon probe resumes at that task's coverage — without turning it into a comprehension task. The reading is yours and closes nothing: an answer the user meant as an answer is answered at that gate.
-
-When you adjudicate against the user's answer, attach what you adjudicated from. Quote that material in place, at the narrowest span that actually supports the correction — enough that they can read it where they are and argue with it, and no wider, since a dump costs them the reading and buries what the verdict turned on. A pointer they have to go open is not an attachment. The accumulated context and what the user says steer which reading is in play; they are not what you adjudicate from. An ordinary assertion about the target does not license you to adjudicate that same assertion, and something the session said earlier does not stand as the measure against what the target says now. What does stand is the target itself, or a source they cited that you can read now. A ground you cannot attach is not a ground you can adjudicate from here — this instrument admits exactly what it can quote.
-
-Where the attached material admits more than one reading, say which one you took and that it could go another way — beside the excerpt, so they weigh your reading against the same material rather than against your confidence in it. Where you have nothing to attach, do not adjudicate at all: take the answer, say you have no ground to check it against, and name what you would have needed. They may let the aspect stand on their own account, or move on to another; neither is a demonstrated aspect and the closure says so.
+Apply `read` and `advance` for answer handling, `settle` for priority, and `present` for the round's obligations. Scope a correction to the part the material actually settles, preserving what the answer already got right.
 
 When grounding an explanation or correction, cite concrete locations in the target — file and line where it is code, the equivalent anchor where it is not. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
 
@@ -1065,13 +783,7 @@ When grounding an explanation or correction, cite concrete locations in the targ
 - **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; a withdrawal during a run ends it with what was shown on record, and leaving without saying so is the host's to deliver.
 - **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension outcome; artifact categories remain grounding material.
 - **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again.
-- **Rebuttable adjudication**: When you adjudicate against the user's answer, attach the material you adjudicated from — the target itself, or a source they cited that you can read now — quoted in place, at the narrowest span that supports the correction, never a locator they must open and never wider than the verdict. Where that material admits another reading, say which one you took, beside it. Where you have nothing to attach, do not adjudicate: take the answer, say you cannot check it, and name what you would have needed; what follows is attested or set aside, never demonstrated.
-- **Proposal ejection and continuation**: Externalize a qualifying proposal without closing Katalepsis. Keep its record reference outside the task set, say in the closure that it was read as a proposal and where the loop resumes, then open again the gate it came from.
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
-9a. **Post-answer closure**: After an answer the comprehension loop kept and no adjudication stands against — an ejected proposal takes the continuation closure named above instead — emit the aspect's outcome as the closure records it, with current task status, the gate the loop returns to, and next available moves before coverage routing.
-9b. **Active-turn fail-closed**: While a run is active, end every turn in one `Gate`; relay context and continuation metadata may precede it but never replace it.
-- **Zero-gap surfacing**: The zero-gap finding carries its reasoning to its gate; only `Confirm` completes the entry, while `Reopen(description)` adds the named Emergent gap and resumes verification.
-- **Intent before disclosure**: After a missed answer, read its intent before disclosing or objecting: an answer aimed at another question or purpose than the probe's moves there, and nothing is disclosed against it. Offer the reading as a candidate — what you read, from what, where you move — with an invitation to say otherwise in the same turn; it adds no question and yields to the user's next utterance.
-- **Contradictions by whose they are**: A contradiction the user holds a side of comes first and asks for their explanation before any verdict; one left standing is shown with both sides, the target's material, and the reason, then applied — only where the target or a cited source settles it, and with nothing to settle it no verdict is given. One inside the target is a finding about the target; one against your own earlier explanation is yours to correct. Admit one only where both sides stand in the context with sources, same scope, same premises. Say the order you read whenever such a contradiction opens ahead of another item due; a Horizon's precedence is said only after its answer.
-14a. **Horizon boundary**: Horizon is an evidence-bound comprehension edge inside the selected entry point, not route selection, a decision gap, reframing, or perspective fusion. Admit it only through `admissible`, read again on the fused context after every answer; ask each edge once, through its scenario only; disclose it with its material when the answer misses it; and demote or revise the instrumentation after repeated applicable opportunities if detections remain absent, speculative, or unhelpful.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Contract execution**: Read each utterance under `read`; apply `advance`, with task priority from `settle`. Present the entire `Round` under `present`, and the terminal trace under `VerifiedUnderstanding`. These definitions carry the intent correction, ownership, grounding, closure, and continuation obligations.
+- **Horizon calibration**: Demote or revise the instrumentation after repeated applicable opportunities if detections remain absent, speculative, or unhelpful.
