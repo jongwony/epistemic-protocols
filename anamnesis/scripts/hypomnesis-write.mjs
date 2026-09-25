@@ -13,7 +13,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { randomUUID, createHash } from "node:crypto";
-import { beginAttempt, finishAttempt, readOutcome, captureArtifacts, errorEvidence, boundedText, formatOutcome, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+import { beginAttempt, finishAttempt, readOutcome, latestAttempt, captureArtifacts, errorEvidence, boundedText, formatOutcome, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 function logErr(msg) {
   try { process.stderr.write(`[hypomnesis-write] ${msg}\n`); } catch {}
@@ -204,10 +204,12 @@ function parseSession(raw) {
   let parseFailed = false;
   let totalChars = 0;
 
-  for (const line of raw.split("\n")) {
+  const lines = raw.split("\n");
+  const tornTail = raw.endsWith("\n") ? -1 : lines.length - 1;
+  for (const [index, line] of lines.entries()) {
     if (!line.trim()) continue;
     let entry;
-    try { entry = JSON.parse(line); } catch { parseFailed = true; continue; }
+    try { entry = JSON.parse(line); } catch { if (index !== tornTail) parseFailed = true; continue; }
 
     const ts = entry.timestamp ?? "";
     if (ts) timestamps.push(ts);
@@ -885,7 +887,37 @@ function readClaudeSnapshot(filename) {
   } finally { fs.closeSync(fd); }
 }
 
-function processClaudeInput(input, { run = execFileSync, publish = writeStore } = {}) {
+// A capture that finds the session lock held leaves its event here; whoever holds the lock when that
+// capture gives up drains it after releasing, so an event raised during another capture is not lost.
+const PENDING_DEPTH = 4;
+const pendingPath = (root, sessionId) => path.join(root, ".locks", `${sessionId}.pending.json`);
+
+function leavePending(root, sessionId, input) {
+  const target = pendingPath(root, sessionId);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const tmp = `${target}.${process.pid}.${randomUUID()}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(input));
+  fs.renameSync(tmp, target);
+}
+
+function claimPending(root, sessionId) {
+  const target = pendingPath(root, sessionId);
+  const claimed = `${target}.${process.pid}.${randomUUID()}.claimed`;
+  try { fs.renameSync(target, claimed); } catch { return null; }
+  try { return JSON.parse(fs.readFileSync(claimed, "utf8")); } catch { return null; }
+  finally { try { fs.unlinkSync(claimed); } catch {} }
+}
+
+function drainPending(root, sessionId, options) {
+  const depth = options.depth ?? 0;
+  if (depth >= PENDING_DEPTH) return null;
+  const pending = claimPending(root, sessionId);
+  if (!pending) return null;
+  return processClaudeInput(pending, { ...options, afterCapture: true, depth: depth + 1 });
+}
+
+function processClaudeInput(input, options = {}) {
+  const { run = execFileSync, publish = writeStore, afterCapture = false } = options;
   const sessionId = input?.session_id;
   const transcriptPath = input?.transcript_path;
   if (typeof sessionId !== "string" || !/^[A-Za-z0-9_-]+$/.test(sessionId)
@@ -898,7 +930,13 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
   const root = path.join(path.dirname(transcriptPath), "hypomnesis");
   const storeDir = path.join(root, sessionId);
   const release = takeSessionLock(root, sessionId);
-  if (!release) return readOutcome(root, sessionId);
+  if (!release) {
+    try { leavePending(root, sessionId, input); } catch { return readOutcome(root, sessionId); }
+    const retry = takeSessionLock(root, sessionId);
+    if (!retry) return readOutcome(root, sessionId);
+    retry();
+    return drainPending(root, sessionId, options) ?? readOutcome(root, sessionId);
+  }
   let attempt;
   const extractors = {};
   let publication = { state: "none", artifacts: [] };
@@ -909,7 +947,9 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
     try { snapshot = readClaudeSnapshot(transcriptPath); revision = snapshot.revision; } catch (error) { inputError = error; }
     const previous = readOutcome(root, sessionId, "claude");
     const published = previous.attempt?.last_publication;
-    const cooldown = event === "SessionEnd" && published?.state === "complete" && published.artifacts.length > 0
+    const pr = previous.published_revision;
+    const advanced = !!revision && !!pr && (revision.size !== pr.size || revision.mtime_ms !== pr.mtime_ms);
+    const cooldown = !(afterCapture && advanced) && event === "SessionEnd" && published?.state === "complete" && published.artifacts.length > 0
       && Date.now() - Date.parse(published.at) < COOLDOWN_MS
       && published.artifacts.every((artifact) => previous.artifacts.some((item) => item.path === artifact.path && item.sha256 === artifact.sha256 && !["missing", "mismatch", "outside_scope"].includes(item.verification)));
     attempt = beginAttempt(root, sessionId, { runtime: "claude", revision, source_transcript: transcriptPath, source_event: event });
@@ -987,7 +1027,7 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
         if (markers && (extractors.marker.state === "succeeded" || coinage.coinage.length)) files["markers.md"] = buildMarkersMd(sessionId, date, markers, coinage, MARKER_EXTRACTION_METHOD);
       }
     } catch (error) { extractors.coinage = { state: "validation_failed", evidence: errorEvidence(error) }; }
-    if (!release.owned() || readOutcome(root, sessionId, "claude").attempt?.attempt_id !== attempt.attempt_id) {
+    if (!release.owned() || latestAttempt(root, sessionId, "claude")?.attempt_id !== attempt.attempt_id) {
       return readOutcome(root, sessionId, "claude");
     }
     if (Object.keys(files).length) {
@@ -1006,7 +1046,10 @@ function processClaudeInput(input, { run = execFileSync, publish = writeStore } 
       return readOutcome(root, sessionId);
     }
     throw error;
-  } finally { release(); }
+  } finally {
+    release();
+    try { drainPending(root, sessionId, options); } catch (error) { logErr(`pending capture: ${error.message}`); }
+  }
 }
 
 function main() {

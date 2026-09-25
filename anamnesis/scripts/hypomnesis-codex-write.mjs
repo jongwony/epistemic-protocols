@@ -521,6 +521,7 @@ function processJob(root, job, { extract = callCodexExtractor, owns } = {}) {
   const extractors = {};
   let publishing = false;
   let reuseReceiptId;
+  let reusing = false;
   const finish = (result, publication = { state: "none", artifacts: [] }) => {
     if (attempt) finishAttempt(root, attempt, { state: result.stale || result.declined ? "superseded" : "complete", extractors, publication });
     return result;
@@ -536,7 +537,7 @@ function processJob(root, job, { extract = callCodexExtractor, owns } = {}) {
     publishing = true;
     const published = publishRecord(root, job, record);
     const publication = {
-      state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job).map((artifact) => ({ ...artifact, ...(reuseReceiptId ? { receipt_id: reuseReceiptId } : {}) })) : [],
+      state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job).map((artifact) => ({ ...artifact, ...(reusing ? { receipt_id: reuseReceiptId } : {}) })) : [],
     };
     publishing = false;
     return finish({ published, declined: !published, ...extra }, publication);
@@ -555,7 +556,8 @@ function processJob(root, job, { extract = callCodexExtractor, owns } = {}) {
       const generationPath = path.join(root, safeId(job.session_id), "generations", revisionKey(job.revision), "record.json");
       const descriptor = captureArtifacts([generationPath])[0];
       const prior = [...(attempt.retained_artifacts || []), ...(attempt.last_publication?.artifacts || [])].find((artifact) => artifact.path === descriptor.path && artifact.sha256 === descriptor.sha256);
-      reuseReceiptId = prior?.receipt_id;
+      reuseReceiptId = prior?.receipt_id ?? null;
+      reusing = true;
       extractors.codex = { state: "skipped", reason: "reused immutable generation; original extraction not rerun" };
       if (existingRecord.source_scan?.skipped_lines > 0) extractors.input = { state: "input_failed", reason: "reused generation records malformed JSONL input" };
       return publish(existingRecord, { reused: true });
@@ -589,7 +591,7 @@ function processJob(root, job, { extract = callCodexExtractor, owns } = {}) {
     let artifacts = [];
     let artifactError;
     if (publishing) {
-      try { artifacts = publicationArtifacts(root, job, true).map((artifact) => ({ ...artifact, ...(reuseReceiptId ? { receipt_id: reuseReceiptId } : {}) })); }
+      try { artifacts = publicationArtifacts(root, job, true).map((artifact) => ({ ...artifact, ...(reusing ? { receipt_id: reuseReceiptId } : {}) })); }
       catch (failure) { artifactError = errorEvidence(failure); }
     } else if (error.stage) {
       const component = error.stage === "input_failed" ? "input" : "codex";

@@ -834,6 +834,25 @@ test("atomic outcome replacement checks actual UTF-8 readback before publishing"
   assert.deepEqual(fs.readdirSync(path.dirname(filename)), [path.basename(filename)]);
 });
 
+test("a capture arriving while another holds the session lock is run after it, past the cooldown", (t) => {
+  const f = fixture(t);
+  const run = extractionRun([...successfulOutputs(), ...successfulOutputs()]);
+  let nested = false;
+  processClaudeInput(f.input, { run: (...args) => {
+    if (!nested) {
+      nested = true;
+      fs.appendFileSync(f.transcript, JSON.stringify({ type: "user", message: { content: "LATER_TURN ".repeat(40) } }) + "\n");
+      processClaudeInput({ ...f.input, hook_event_name: "SessionEnd" }, { run });
+    }
+    return run(...args);
+  } });
+  const latest = readOutcome(f.root, "session");
+  assert.equal(latest.attempt.source_event, "SessionEnd");
+  assert.equal(latest.attempt.revision.size, fs.statSync(f.transcript).size);
+  assert.notEqual(latest.attempt.extractors.input?.state, "skipped");
+  assert.equal(fs.existsSync(path.join(f.root, ".locks", "session.pending.json")), false);
+});
+
 test("the dispatcher closes an attempt its killed writer left in progress", (t) => {
   const f = fixture(t);
   const projects = path.join(f.directory, "projects", "repo");
@@ -859,4 +878,25 @@ test("the dispatcher closes an attempt its killed writer left in progress", (t) 
   } finally { process.stderr.write = previousWrite; }
   const later = readOutcome(root, "session");
   assert.equal(later.attempt.extractors.writer.evidence.status, 3);
+});
+
+test("a skip attempt does not make stale published bytes read as current", (t) => {
+  const f = fixture(t);
+  const published = processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
+  assert.equal(published.attempt.publication.state, "complete");
+  fs.appendFileSync(f.transcript, JSON.stringify({ type: "user", message: { content: "grown" } }) + "\n");
+  const skipped = processClaudeInput({ ...f.input, hook_event_name: "SessionEnd" }, { run: () => { throw new Error("cooldown must skip"); } });
+  assert.equal(skipped.attempt.extractors.input.state, "skipped");
+  assert.equal(skipped.source_changed, true);
+});
+
+test("a torn trailing line at the snapshot's end is not an input failure", (t) => {
+  const f = fixture(t);
+  fs.appendFileSync(f.transcript, '{"type":"user","message":{"content":"half wri');
+  const result = processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
+  assert.equal(result.attempt.extractors.input, undefined);
+  fs.appendFileSync(f.transcript, 'tten"}}\nmalformed middle\n' + JSON.stringify({ type: "user", message: { content: "after" } }) + "\n");
+  fs.utimesSync(f.transcript, new Date(), new Date(Date.now() + 1000));
+  const corrupt = processClaudeInput(f.input, { run: extractionRun(successfulOutputs()) });
+  assert.equal(corrupt.attempt.extractors.input.state, "input_failed");
 });

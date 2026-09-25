@@ -956,3 +956,16 @@ test('a live pid holds its lock only within the age ceiling, and EPERM is not pr
   assert.equal(typeof foreign, 'function');
   foreign();
 });
+
+test('Codex generation reuse without its originating receipt leaves production unknown', (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  processJob(root, job, { extract: () => extraction() });
+  fs.rmSync(path.join(root, '.outcomes'), { recursive: true, force: true });
+  processJob(root, job, { extract: () => { throw new Error('must reuse'); } });
+  const reused = readOutcome(root, 'session-a', 'codex');
+  assert.equal(reused.attempt.extractors.codex.state, 'skipped');
+  const generation = reused.artifacts.find((artifact) => artifact.path.endsWith('/record.json'));
+  assert.ok(generation);
+  assert.equal(generation.receipt_id, undefined, 'no receipt may be attributed to bytes this attempt did not produce');
+});

@@ -230,8 +230,11 @@ function finishAttempt(root, attempt, result) {
     const at = final.finished_at ?? new Date().toISOString();
     final.receipts = { ...(current.receipts ?? {}) };
     final.publication = { ...result.publication, artifacts: result.publication.artifacts.map((artifact) => {
-      const { revision: _revision, appended_from_sha256, ...descriptor } = artifact;
-      const receipt_id = artifact.receipt_id && final.receipts[artifact.receipt_id] ? artifact.receipt_id : final.attempt_id;
+      const { revision: _revision, appended_from_sha256, receipt_id: inherited, ...descriptor } = artifact;
+      if (Object.hasOwn(artifact, 'receipt_id')) {
+        return inherited && final.receipts[inherited] ? { ...descriptor, receipt_id: inherited } : descriptor;
+      }
+      const receipt_id = final.attempt_id;
       if (!final.receipts[receipt_id]) final.receipts[receipt_id] = {
         attempt_id: final.attempt_id, revision: final.revision, source_transcript: final.source_transcript,
         source_event: final.source_event, at, extractors: final.extractors,
@@ -288,24 +291,27 @@ function verifyArtifact(root, id, runtime, artifact) {
 
 function readOutcome(root, id, runtime) {
   const attempt = loadAttempt(root, id, runtime);
-  if (!attempt) return { record_state: 'unknown', session_id: String(id), attempt: null, artifacts: [], source_revision: null, source_changed: null };
+  if (!attempt) return { record_state: 'unknown', session_id: String(id), attempt: null, artifacts: [], published_revision: null, source_revision: null, source_changed: null };
   const artifacts = effectiveArtifacts(attempt).map((artifact) => {
     const receipt = attempt.receipts?.[artifact.receipt_id] ?? null;
     return { ...verifyArtifact(root, id, attempt.runtime, artifact), revision: receipt?.revision ?? artifact.revision ?? null };
   });
+  const revisions = artifacts.map((artifact) => artifact.revision).filter(Boolean);
+  const published_revision = revisions.length ? revisions.reduce((a, b) => (compareRevision(a, b) >= 0 ? a : b)) : null;
   let source_revision = null;
   let source_changed = null;
   try {
     const stat = fs.statSync(attempt.source_transcript);
     source_revision = { mtime_ms: Math.floor(stat.mtimeMs), size: stat.size };
-    if (attempt.revision) source_changed = compareRevision(source_revision, attempt.revision) !== 0;
+    const basis = artifacts.length ? published_revision : attempt.revision;
+    if (basis) source_changed = compareRevision(source_revision, basis) !== 0;
   } catch {}
-  return { record_state: 'known', session_id: String(id), attempt, artifacts, source_revision, source_changed };
+  return { record_state: 'known', session_id: String(id), attempt, artifacts, published_revision, source_revision, source_changed };
 }
 
 function formatOutcome(result) {
   return JSON.stringify({ session_id: result.session_id, record_state: result.record_state,
-    state: result.attempt?.state ?? null, attempt_id: result.attempt?.attempt_id ?? null, started_at: result.attempt?.started_at ?? null, revision: result.attempt?.revision ?? null, source_changed: result.source_changed ?? null, source_revision: result.source_revision ?? null, extractors: result.attempt?.extractors ?? {},
+    state: result.attempt?.state ?? null, attempt_id: result.attempt?.attempt_id ?? null, started_at: result.attempt?.started_at ?? null, attempt_revision: result.attempt?.revision ?? null, published_revision: result.published_revision ?? null, source_changed: result.source_changed ?? null, source_revision: result.source_revision ?? null, extractors: result.attempt?.extractors ?? {},
     publication: result.attempt?.publication ?? null, receipts: result.attempt?.receipts ?? {}, execution: result.attempt?.execution ?? null, artifacts: result.artifacts });
 }
 
