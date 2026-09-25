@@ -212,8 +212,10 @@ inductive MoveStep
   | delegation (name : String)
   deriving DecidableEq
 
-/-- `CognitiveMove`. -/
+/-- `CognitiveMove`: one invocation. `id` is its short name on the map (`M1`, `M2`); two
+    invocations of one protocol — `/induce` on two cells — are two moves. -/
 structure Move where
+  id   : String
   step : MoveStep
   deriving DecidableEq
 
@@ -310,7 +312,8 @@ def IsPartition (ms : MoveSet) (rs : List Region) : Prop :=
   (∀ r ∈ rs, r.members ≠ [] ∧ ∀ m ∈ r.members, m ∈ ms) ∧
   (∀ r ∈ rs, ∀ r' ∈ rs, ∀ m, m ∈ r.members → m ∈ r'.members → r = r')
 
-/-- **Your proposal**: a cut over `ms`, citing the non-uniformity you read to cut that way. -/
+/-- **Your proposal**: a cut that partitions `ms`, citing the non-uniformity you read to cut that
+    way. -/
 opaque proposedCut : Context P → MoveSet → List Region
 
 /-- **Your judgment**: the cited utterance supplies `rs` as the cut, and `rs` partitions the move
@@ -371,8 +374,8 @@ structure DraftSlot (s : Slot) where
 instance {s : Slot} : Inhabited (DraftSlot s) := ⟨⟨defaultValue s, none, [], fun _ => rfl⟩⟩
 
 /-- **Your draft**: every slot over the cut in force, filled from the whole context — the brief,
-    the moves, the cut, every value the person set — and drawn again after every utterance, so a
-    change upstream re-fills what depends on it. Where a decision the person made may bear on a
+    the moves, the cut, every value the person set — laid out most-constrained first, and drawn
+    again after every utterance, so a change upstream re-fills what depends on it. Where a decision the person made may bear on a
     slot it no longer plainly covers, the ground names that decision and the region it was made
     on; where several land on one slot, it names each. A termination filled with
     `resolutionRequired` says in its ground whether that resolver can reach the region before its
@@ -732,8 +735,9 @@ fused, then observed (`.groundPointer`, `.inventory`): what the pointer's record
 loaded inventory enter the context before the presentation they inform. `respond` is the next map
 (`.map`, then `.mapGate`), or, when the person's `sufficient` is covered, the conduct trace
 presented before `method` is handed off (`.converge`, then `.handoff`). A person's closure is
-read before your relay test. A cut the person supplies is in force only where it `IsPartition`
-the moves the map holds.
+read before your relay test. A method is taken only over a cut that `IsPartition` the moves it
+holds, so every move lands in a region; a cut the person supplies is in force only where it
+does.
 -/
 
 open Classical in
@@ -755,7 +759,8 @@ noncomputable def conduct (respond : Context P → Response P) :
       match relayAt c₁ with
       | some k => .relayed k c₁
       | none   =>
-        if v = .sufficient ∧ Covered c₁ then .conducted c₁ (respond c₁)
+        if v = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) then
+          .conducted c₁ (respond c₁)
         else conduct respond (c₁ ++ [(respond c₁).val]) us
 
 noncomputable def start (respond : Context P → Response P) (c : Context P)
@@ -786,13 +791,16 @@ Silence takes nothing.
 theorem silence (respond : Context P → Response P) (c : Context P) :
     conduct respond c [] = .holding c
 
-A method is handed off only on the person's `sufficient`, covered by what the maps showed, after
-your relay test passed and with the conduct trace over that context.
+The run reaches `conducted` only on the person's `sufficient`, judged covered, over a cut that
+partitions the moves, with your relay test passed; its trace is your response over that context.
+That the response is the conduct trace, and that the handoff follows it, are the obligations
+`.converge` and `.handoff` carry — this theorem does not prove them.
 theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
     (h : conduct respond c us = .conducted c₁ t) :
     ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      verdict c₁ = .sufficient ∧ Covered c₁ ∧ relayAt c₁ = none ∧ t = respond c₁
+      verdict c₁ = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
+      relayAt c₁ = none ∧ t = respond c₁
 
 The run ends without a method on the person's word only through their `withdraw`.
 theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
@@ -810,7 +818,8 @@ theorem withdraw_precedes_relay (respond : Context P → Response P) (c : Contex
     (u : Utterance P) (us : List (Utterance P)) (h : verdict (observe (fuse c u)) = .withdraw) :
     conduct respond c (u :: us) = .withdrawn (observe (fuse c u))
 
-A `sufficient` that would take something unseen draws the map again.
+A `sufficient` judged not covered does not close: the run continues with your next response
+appended, which `.map` requires to be the map drawn again.
 theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hs : verdict (observe (fuse c u)) = .sufficient)
     (hr : relayAt (observe (fuse c u)) = none) (hn : ¬ Covered (observe (fuse c u))) :
@@ -830,7 +839,8 @@ checkpoint with its compiled brief; and the trace contract — every adoption, d
 coverage cap, and termination ground, a `resolutionRequired` ground shown with its resolver and
 marked unroutable where that resolver cannot reach the region before its stop is wanted, the
 basis shown with it. The dissent attached to the method is shown beside it. Any tally is read
-off the rows shown. Demonstrated, not asserted.
+off the rows shown. What the closing utterance itself changed is shown first, before → after on
+the graph, as every other answer's change is. Demonstrated, not asserted.
 -/
 
 /-!
@@ -842,6 +852,10 @@ theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s)
 
 theorem person_value_recorded (c : Context P) (s : Slot) (h : isFilled (slot c s) = true) :
     adoption c s = .set
+
+Over a cut that partitions the moves, every move of the method lands in a region.
+theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
+    ∀ p ∈ (method c).assignment, p.region.isSome = true
 
 A slot nothing grounded carries the default, whatever else the draft holds.
 theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : isFilled (slot c s) = false)
@@ -904,7 +918,7 @@ def grounding : Op → Annot × String
   | .surfaceAnnotations => (.extension, "TextPresent+Proceed: every span externalization obligation, the empty set surfaced as empty")
   | .surfaceTrace       => (.extension, "TextPresent+Proceed: every adoption, degradation, coverage cap, and termination ground with what it was read against; a resolutionRequired ground with its resolver, marked unroutable where the resolver cannot reach the region before its stop is wanted, with that reading's basis")
   | .surfaceBriefs      => (.extension, "TextPresent+Proceed: each compiled checkpoint brief, an advisory one shown as advisory")
-  | .converge           => (.extension, "TextPresent+Proceed: the conduct trace whole before the dispatch — placements, per-slot adoptions, feasibility, span annotations, checkpoint briefs, the trace contract, and the dissent attached to the method")
+  | .converge           => (.extension, "TextPresent+Proceed: the conduct trace whole before the dispatch — what the closing utterance itself changed, before → after on the graph; placements, per-slot adoptions, feasibility, span annotations, checkpoint briefs, the trace contract, and the dissent attached to the method")
   | .handoff            => (.dispatch, "delegate: after the conduct trace, the ConductedMethod handed to the substrate, which executes it — its fields, never the session context its citations resolve in; the span annotations delegate the record and navigation-block production a crossing region owes, and an incoming pointer rides the method unchanged while the record it names stays where its locator names")
   | .seam               => (.extension, "TextPresent+Proceed: at a chain the person declared naming the next protocol, proceed to it citing that source; a composition edge this file declares is offered as a hint, never taken on its own; a region crossing the span wall names no next protocol — its record's producer supplies the navigation block; every Constitution gate inside this protocol and the next fires unchanged")
 
@@ -926,6 +940,8 @@ When `/ground` self-grounding returns a Split partition reading, read `reference
 ### User-facing realization
 
 Present one map of the whole method at activation and again after every answer. Its first line is the work prospect's brief — what the work is for, what it hands off, and its span, from this invocation through the next planned `/compact` or `/clear` (an execution stop instruction bounds the current run without shortening that horizon) — with whether conduction is warranted. Below it are the move set, the region cut with the non-uniformity that grounds it and an affordance to replace it, and every axis·region slot. Prior-session recall indices may seed the moves but never settle them.
+
+Order the candidate moves by salience against the session aim, so confirming them is recognizing the accumulated shape rather than recalling a graph the user no longer holds in view. Lay the slots out most-constrained first — the axis·region whose values most divide the downstream plans leads — and expand opened slots in that same order.
 
 Draw the map as a graph: moves as nodes with short ASCII ids (`M1`, `M2`), order as edges, regions as labelled groups (`R1`), and each slot's value as an annotation on its region. Put everyday-language names in a legend beside the drawing rather than inside it: display width is not character count, and a label padded by counting characters breaks the drawing. For every slot, show its value, its ground, every named alternative, an emergent-value affordance, the composition affordance on reconciliation, and the differential for the alternative that most changes the plan. Mark each value the person set as theirs. Show each region's observed realizability, or say it is unobserved. Where you would set a slot otherwise, doubt the cut, or expect the inventory cannot realize a region, say so with its ground before the gate; a method taken over it carries that dissent. Then ask what is wrong, anywhere on the map, or whether to take it; silence holds and takes nothing.
 

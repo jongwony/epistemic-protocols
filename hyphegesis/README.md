@@ -48,7 +48,7 @@ Hyphegesis lays out one map of the whole method before asking anything — the w
 
 | Axis | Question | Values |
 |------|----------|--------|
-| order | In what sequence do the moves run? | single_move, sequential_chain, parallel_fan, dependency_dag |
+| order | In what sequence do the moves run? | sequential_chain, parallel_fan, dependency_dag |
 | independence | Do moves see each other before reconciliation? | isolated, shared |
 | reconciliation | How are separately-produced results combined? | aggregate, dialectic, adversarial_refute, synthesis |
 | termination | When does a move stop? | single_pass, bounded_rounds, until_dry_ceiling, until_goal_met |

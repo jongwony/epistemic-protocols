@@ -48,7 +48,7 @@ Hyphegesis는 아무것도 묻기 전에 방법 전체를 **지도 한 장**으�
 
 | 축 | 질문 | 값 |
 |----|------|-----|
-| order | 이동들이 어떤 순서로 실행되는가? | single_move, sequential_chain, parallel_fan, dependency_dag |
+| order | 이동들이 어떤 순서로 실행되는가? | sequential_chain, parallel_fan, dependency_dag |
 | independence | 화해 전에 이동들이 서로를 보는가? | isolated, shared |
 | reconciliation | 분리 산출된 결과를 어떻게 통합하는가? | aggregate, dialectic, adversarial_refute, synthesis |
 | termination | 이동은 언제 멈추는가? | single_pass, bounded_rounds, until_dry_ceiling, until_goal_met |

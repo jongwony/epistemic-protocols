@@ -21,7 +21,8 @@ theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
     (h : conduct respond c us = .conducted c₁ t) :
     ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      verdict c₁ = .sufficient ∧ Covered c₁ ∧ relayAt c₁ = none ∧ t = respond c₁ := by
+      verdict c₁ = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
+      relayAt c₁ = none ∧ t = respond c₁ := by
   induction us generalizing c with
   | nil => simp [conduct] at h
   | cons u us ih =>
@@ -36,7 +37,7 @@ theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
         split at h
         · rename_i hc
           cases h
-          exact ⟨c, u, rfl, hc.1, hc.2, hrel, rfl⟩
+          exact ⟨c, u, rfl, hc.1, hc.2.1, hc.2.2, hrel, rfl⟩
         · exact ih _ h
 
 theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
@@ -95,6 +96,15 @@ theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s)
 theorem person_value_recorded (c : Context P) (s : Slot) (h : isFilled (slot c s) = true) :
     adoption c s = .set := by
   simp [adoption, h]
+
+theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
+    ∀ p ∈ (method c).assignment, p.region.isSome = true := by
+  intro p hp
+  simp only [method, assignment, List.mem_map] at hp
+  obtain ⟨m, hm, rfl⟩ := hp
+  obtain ⟨r, hr, hmr⟩ := h.1 m hm
+  simp only [regionOf, List.find?_isSome]
+  exact ⟨r, hr, List.elem_iff.mpr hmr⟩
 
 theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : isFilled (slot c s) = false)
     (hg : (draft c s).ground = none) : take c s = defaultValue s := by
