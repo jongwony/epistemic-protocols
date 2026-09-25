@@ -17,9 +17,9 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──

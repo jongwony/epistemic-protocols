@@ -13,6 +13,12 @@ namespace Analogia
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
+instance {c : Context P} : Nonempty (Verdict c) := ⟨.undetermined ""⟩
+
 theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c := by
   simp [collect, h]
 

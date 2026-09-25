@@ -13,12 +13,13 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -130,6 +131,8 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+
 variable {P : Type}
 
 /-- `X`: the prospect for action — planning, task execution, analysis, investigation, or any
@@ -145,7 +148,7 @@ structure Item where
 
 /-- **Your judgment**: `i` and `j` are the same uncertainty, read from the material — for a
     dismissed item, from the person's dismissal utterance. -/
-opaque SameItem : Context P → Item → Item → Prop
+axiom SameItem : Context P → Item → Item → Prop
 
 /-- `Scan`: **your judgment** of what the context leaves uncertain — a missing fact, a
     contradiction between the utterance and what was collected, a relevance gap; no fixed
@@ -153,11 +156,11 @@ opaque SameItem : Context P → Item → Item → Prop
     answers nothing raised: that item lands `detectOnly`, and the question the material was
     collected for keeps its own record beside it. Run after collection, it reads what the pass
     itself collected, so a discovery is registered in the pass that made it, before landing. -/
-opaque Scanned : Context P → Item → Prop
+axiom Scanned : Context P → Item → Prop
 
 /-- **Your record**, read from the context: every item raised so far. Cumulative: an item
     once raised is never replaced. -/
-opaque Registered : Context P → Item → Prop
+axiom Registered : Context P → Item → Prop
 
 structure Dismissal (c : Context P) where
   src : Cite c
@@ -166,7 +169,7 @@ structure Dismissal (c : Context P) where
 /-- **Your reading** of the person's dismissal utterance for `i` — a dismissal of that item,
     or a declaration of sufficiency reaching it — with its citation; `none` while there is
     none. -/
-opaque dismissal : (c : Context P) → Item → Option (Dismissal c)
+axiom dismissal : (c : Context P) → Item → Option (Dismissal c)
 
 def live (c : Context P) (i : Item) : Prop := Registered c i ∧ dismissal c i = none
 
@@ -201,13 +204,13 @@ structure Channel where
 /-- **Your record**, read from the context: the channels already read for `i`, the user
     counting as one when an utterance answered `i`, and a channel declined under an
     `EscapeCondition` counting as read. It only grows. -/
-opaque tried : Context P → Item → List Channel
+axiom tried : Context P → Item → List Channel
 
 /-- **Your judgment**: the item admits this channel. A channel whose expected yield no longer
     justifies pushing it on the AI's own is not one it admits; it admits none when its answer
     lives only with the user or it is not the AI's to collect. Record which way this fell in
     the item's basis. Direction: `references/judgments.md` §Stopping. -/
-opaque Admits : Context P → Item → Channel → Prop
+axiom Admits : Context P → Item → Channel → Prop
 
 /-- False ends collection for the item and hands it to the user. -/
 def advanceable (c : Context P) (i : Item) : Prop := ∃ ch, Admits c i ch ∧ ch ∉ tried c i
@@ -226,7 +229,7 @@ inductive Reason
 
 /-- **Your judgment**: the cited turn settles `i` with this finding. A person's report of what
     they observed and their statement both reach it as turns; which one bears is read. -/
-opaque LandSupported : Item → Context P → Turn P → String → Prop
+axiom LandSupported : Item → Context P → Turn P → String → Prop
 
 def itemCoord (i : Item) : Coord P String :=
   { admits := fun _ => True, supports := LandSupported i }
@@ -255,15 +258,12 @@ def Landing.toOcc {c : Context P} {i : Item} : Landing c i → Occ (itemCoord i)
   | .userUnknown ..        => .open_ none
   | .detectOnly ..         => .open_ none
 
--- elab: a witness lets `landing` be declared `opaque`; it adds no meaning.
-instance {c : Context P} {i : Item} : Inhabited (Landing c i) := ⟨.userUnknown .couldNot ""⟩
-
 /-- `land(u)`: **your judgment** from the whole material as it now stands. A web page that may
     be stale lands provisional rather than resolved; an observation run that resolved nothing
     is never the sole ground of a landing. A contradiction no channel settles lands
     `userUnknown` with the contradiction quoted — `onlyYou` where it is one of intent,
     `couldNot` where it is one of fact. The item's coordinate is `(landing c i).toOcc`. -/
-opaque landing : (c : Context P) → (i : Item) → Landing c i
+axiom landing : (c : Context P) → (i : Item) → Landing c i
 
 /-- `A`, read from a later utterance that addresses a surfaced item. Every answer but
     `sufficient` opens the next pass, which re-reads every live item on the fused context.
@@ -284,7 +284,7 @@ inductive Answer
 /-- **Your reading** of the latest utterance; `none` when it answers no surfaced item. Every
     later utterance opens a pass, `none` included — answering a surfaced item is one case;
     only `sufficient` opens none. -/
-opaque answer : Context P → Option Answer
+axiom answer : Context P → Option Answer
 
 /-- `ObservationSpec`: an observation run is one channel; it yields evidence or nothing, never a
     disposition. -/
@@ -300,7 +300,7 @@ inductive EscapeCondition | environmentMutation | riskElevated
 
 /-- **Your record**, read from the context: observation channels declined before running,
     each with its escape and rationale — the audit trail. -/
-opaque skips : Context P → List (Item × EscapeCondition × String)
+axiom skips : Context P → List (Item × EscapeCondition × String)
 
 /-- `SufficientContext`: the context once collection has ended, with every live item landed in
     the pass that ended it, or the trivial one Phase 0 proceeds with. -/
@@ -334,14 +334,14 @@ proceeds.
 
 /-- **Your collection** for one pass from `c`: what the channels returned, each an observation
     turn — a run that observed nothing returns its null result. -/
-opaque push : Context P → List (Evidence P)
+axiom push : Context P → List (Evidence P)
 
 /-- **Your record** of a pass, written once its collection has entered the context: the items
     registered, the channels tried and those declined under an `EscapeCondition`, and every
     landing. `Registered`, `tried`, `landing`, and `skips` are read from these turns, so a
     declined channel is recorded even when collection returned nothing. A record grounds
     nothing. -/
-opaque passRecord : Context P → List (Response P)
+axiom passRecord : Context P → List (Response P)
 
 def pass (c : Context P) : Context P :=
   let c₁ := c ++ (push c).map (·.val)
@@ -350,11 +350,11 @@ def pass (c : Context P) : Context P :=
 /-- **Your judgment**, made once for the pass: another pass is still worth reaching for on the
     AI's own. No pass cap bounds it; this judgment and the growing `tried` sets do. Direction:
     `references/judgments.md` §Stopping. -/
-opaque WorthAnotherPass : Context P → Prop
+axiom WorthAnotherPass : Context P → Prop
 
 /-- **Your judgment**: from `c` to `c'` the pass opened an item, tried a channel, or changed a
     landing. -/
-opaque PassChanged : Context P → Context P → Prop
+axiom PassChanged : Context P → Context P → Prop
 
 inductive CollectionEnds : Context P → Context P → Prop
   | stop (c : Context P)
@@ -365,7 +365,7 @@ inductive CollectionEnds : Context P → Context P → Prop
       CollectionEnds c c'
 
 /-- **Your collection** from `c` to where it ends: `CollectionEnds c (collected c)`. -/
-opaque collected : Context P → Context P
+axiom collected : Context P → Context P
 
 /-- `respond` is the relay presented after collection: every landed item that is not resolved,
     in priority order, beside its state, reason, basis, and what an answer would change. -/
@@ -453,6 +453,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
+
+end
 
 end Aitesis
 ```

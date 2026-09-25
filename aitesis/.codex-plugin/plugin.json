@@ -1,6 +1,6 @@
 {
   "name": "aitesis",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "description": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
   "author": {
     "name": "Jongwon Choi",

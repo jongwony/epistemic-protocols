@@ -12,6 +12,12 @@ open Ground
 namespace Horismos
 
 variable {P : Type}
+
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance {c : Context P} : Nonempty (BoundaryEssence c) := ⟨⟨[], [], "", [], []⟩⟩
+instance : Nonempty Verdict := ⟨.cont⟩
 variable (respond : Context P → Response P)
 
 theorem silence (c : Context P) : bound respond c [] = .holding c := rfl

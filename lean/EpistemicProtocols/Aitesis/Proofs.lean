@@ -14,6 +14,11 @@ namespace Aitesis
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance {c : Context P} {i : Item} : Nonempty (Landing c i) := ⟨.userUnknown .couldNot ""⟩
+
 theorem state_unique {c : Context P} {i : Item} {s s' : State}
     (h : inState c s i) (h' : inState c s' i) : s = s' := h.2.symm.trans h'.2
 
