@@ -61,6 +61,14 @@ theorem probe_other_intent (c : Context P) (t : RecordId) (g : Selectable) (e : 
     (hi : otherIntent c = some e) : advance c (.probe t g) .cont = .gate c (redirect c e) := by
   simp [advance, hi]
 
+theorem reveal_other_intent (c : Context P) (t : RecordId) (e : EntryPoint)
+    (hi : otherIntent c = some e) : advance c (.reveal t) .cont = .gate c (redirect c e) := by
+  simp [advance, hi]
+
+theorem correction_reopens (c : Context P) (g g₀ : Gate) (h : restored c = some g₀) :
+    reopened c g = g₀ := by
+  simp [reopened, h]
+
 theorem steps_cue (c : Context P) (t : RecordId) (hm : ¬ Reached c) (hs : AsksSteps c) :
     advance c (.horizonProbe t) .cont = .gate c (.cue t) := by
   simp [advance, horizonAnswer, hm, hs]
@@ -158,7 +166,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     | reveal t =>
       left; simp only [advance]; split
       · exact ⟨_, _, rfl⟩
-      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
     | startAspect t => exact Or.inl (ha c (.startAspect t) t)
     | probe t g =>
       left; simp only [advance]; split
@@ -180,7 +190,9 @@ theorem advance_shape (c : Context P) (g : Gate) (v : Verdict) :
     | reveal t =>
       simp only [advance]; split
       · exact ⟨_, _, rfl⟩
-      · exact ⟨_, _, rfl⟩
+      · split
+        · exact ⟨_, _, rfl⟩
+        · exact ⟨_, _, rfl⟩
     | startAspect t => exact ha c (.startAspect t) t
     | probe t g =>
       simp only [advance]; split
@@ -213,7 +225,7 @@ theorem verified_by_person (respond : Context P → Gate → Response P)
     simp only [grasp] at hv
     split at hv
     · rename_i c₁ hd
-      rcases advance_shape (fuse c u) (answered c) (verdict (fuse c u)) with
+      rcases advance_shape (fuse c u) (reopened (fuse c u) (answered c)) (verdict (fuse c u)) with
         ⟨_, _, hg⟩ | ⟨hvc, t, ht⟩ | ⟨_, hw⟩
       · rw [hg] at hd; cases hd
       · rw [ht] at hd
@@ -236,7 +248,7 @@ theorem withdrawn_by_person (respond : Context P → Gate → Response P)
     split at hw
     · cases hw
     · rename_i c₂ hd
-      rcases advance_shape (fuse c u) (answered c) (verdict (fuse c u)) with
+      rcases advance_shape (fuse c u) (reopened (fuse c u) (answered c)) (verdict (fuse c u)) with
         ⟨_, _, hg⟩ | ⟨_, t, ht⟩ | ⟨hvw, hx⟩
       · rw [hg] at hd; cases hd
       · rw [ht] at hd; cases hd
