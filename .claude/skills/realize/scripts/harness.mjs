@@ -24,7 +24,7 @@ import {
   readdirSync, lstatSync, readlinkSync, symlinkSync, unlinkSync, statSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname, resolve, relative, isAbsolute } from 'node:path';
+import { join, dirname, resolve, basename, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir, tmpdir } from 'node:os';
 
@@ -58,7 +58,6 @@ if (RUNNER === 'codex') {
   if (!CFG.codex) { console.error('missing codex configuration'); process.exit(1); }
   CFG.models = CFG.codex.models;
 }
-
 // How a `codex exec` child authenticates. `api-key` forwards a process-scoped CODEX_API_KEY
 // and nothing else. `login` reuses the login already on this machine by symlinking its
 // auth.json into the disposable home for exactly the span of one `codex exec`: never a copy,
@@ -458,10 +457,13 @@ function setup() {
 
 // ---------------------------------------------------------------- run
 
-function promptBody(caseName, arm) {
-  const raw = readFileSync(join(EVALS, caseName, 'prompt.md'), 'utf8');
+function stripFrontmatter(raw) {
   // Frontmatter is for the plugin-eval schema; the CLI takes the body only.
-  const task = raw.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+  return raw.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+}
+
+function promptBody(caseName, arm) {
+  const task = stripFrontmatter(readFileSync(join(EVALS, caseName, 'prompt.md'), 'utf8'));
   // Naming the protocol belongs to the treatment, not to the task. A prompt that
   // names the command hands an arm without the plugin a second problem -- the
   // command is missing -- and the arm then gates on the missing tool rather than
@@ -469,10 +471,43 @@ function promptBody(caseName, arm) {
   return arm.protocol && INVOCATION ? `${task}\n\n${INVOCATION}` : task;
 }
 
-function scaffold(dir) {
+// What case.yaml declares, read where the harness acts on it. Only two fields are read, so
+// a line match stands in for a YAML parser the stdlib does not have.
+//
+// A case with `multi_turn` has user turns after the first. Where its oracle is a fixed
+// script -- `driver: harness`, the replies in reply-1.md, reply-2.md, ... -- the harness
+// sends them itself, one per subject turn, whatever the subject's last message said. An
+// oracle whose replies depend on what the subject surfaced (elicit's) cannot be executed
+// here and is walked by hand with turn.sh; registering one fails before anything is spent.
+const CASE_SPECS = new Map();
+function caseSpec(caseName) {
+  if (CASE_SPECS.has(caseName)) return CASE_SPECS.get(caseName);
+  const caseFile = join(EVALS, caseName, 'case.yaml');
+  const yaml = existsSync(caseFile) ? readFileSync(caseFile, 'utf8') : '';
+  const declared = /^\s*scaffold_script:\s*(\S+)\s*$/m.exec(yaml);
+  const replies = [];
+  for (let n = 1; existsSync(join(EVALS, caseName, `reply-${n}.md`)); n++) {
+    const body = stripFrontmatter(readFileSync(join(EVALS, caseName, `reply-${n}.md`), 'utf8'));
+    if (!body) throw new Error(`${caseName}/reply-${n}.md is empty; a scripted turn must carry text`);
+    replies.push({ name: `reply-${n}.md`, body });
+  }
+  const spec = {
+    // join normalises the leading `../`, so the value stays written relative to the case
+    // directory it is declared in -- where a reader of case.yaml expects it to be.
+    scaffold: declared ? join(EVALS, caseName, declared[1]) : join(EVALS, 'scaffold.sh'),
+    multiTurn: /^multi_turn:/m.test(yaml),
+    driver: /^\s*driver:\s*(\S+)\s*$/m.exec(yaml)?.[1] || null,
+    replies,
+  };
+  CASE_SPECS.set(caseName, spec);
+  return spec;
+}
+
+function scaffold(dir, caseName) {
+  const script = caseSpec(caseName).scaffold;
   mkdirSync(dir, { recursive: true });
-  const r = spawnSync('bash', [join(EVALS, 'scaffold.sh')], { cwd: dir, encoding: 'utf8' });
-  if (r.status !== 0) throw new Error(`scaffold failed: ${r.stderr}`);
+  const r = spawnSync('bash', [script], { cwd: dir, encoding: 'utf8' });
+  if (r.status !== 0) throw new Error(`scaffold failed (${script}): ${r.stderr}`);
 }
 
 function codexTreatmentIntegrity(arm) {
@@ -499,6 +534,30 @@ function codexTreatmentIntegrity(arm) {
   }
 }
 
+// Existence of the transcript IS the cache, so an empty one written here would freeze
+// the cell: every later invocation reports `cached` and grading reads the emptiness as
+// the protocol failing. Require evidence that the runner actually started and actually
+// reported. A budget-exhausted or errored turn has both and is a real observation; a
+// missing binary, unusable authentication, timeout, or overrun buffer has neither
+// runner's complete start/end pair. Every scripted turn is held to the same pair: a
+// partial later turn cannot be told apart from a short observation, so it is a failure.
+function turnRan(r) {
+  const out = r.stdout || '';
+  return r.error == null && (RUNNER === 'codex'
+    ? r.status === 0 && out.includes('"type":"thread.started"') && out.includes('"type":"turn.completed"')
+    : out.includes('"subtype":"init"') && out.includes('"type":"result"'));
+}
+
+function sessionIdOf(out) {
+  for (const line of out.split('\n')) {
+    let e;
+    try { e = JSON.parse(line); } catch { continue; }
+    if (RUNNER === 'codex' && e.type === 'thread.started' && e.thread_id) return e.thread_id;
+    if (RUNNER === 'claude' && e.type === 'system' && e.subtype === 'init' && e.session_id) return e.session_id;
+  }
+  return null;
+}
+
 function runOne({ model, armName, arm, caseName, rep }) {
   const treatment = treatmentId(arm);
   const outDir = join(RESULTS, model, armName, caseName, treatment);
@@ -515,29 +574,39 @@ function runOne({ model, armName, arm, caseName, rep }) {
 
   const wd = join(WORK, `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_'));
   if (existsSync(wd)) rmSync(wd, { recursive: true, force: true });
-  scaffold(wd);
+  scaffold(wd, caseName);
 
-  let command;
-  let args;
-  let env;
-  let timeout;
-  if (RUNNER === 'codex') {
-    command = 'codex';
-    args = [
-      '-a', 'never', 'exec', '--ephemeral', '--strict-config',
-      '--model', model,
-      '-c', `model_reasoning_effort=${JSON.stringify(CFG.codex.reasoningEffort)}`,
-      '--sandbox', 'workspace-write',
-      '--cd', wd,
-      '--skip-git-repo-check', '--json',
-      promptBody(caseName, arm),
-    ];
-    env = codexEnv(codexHome(arm), { credential: true });
-    timeout = CFG.codex.timeoutSeconds * 1000;
-  } else {
-    command = 'claude';
-    args = [
-      '-p', '--verbose', '--no-session-persistence',
+  const { replies } = caseSpec(caseName);
+  const scripted = replies.length > 0;
+  const home = RUNNER === 'codex' ? codexHome(arm) : null;
+  const effort = `model_reasoning_effort=${JSON.stringify(CFG.codex?.reasoningEffort)}`;
+
+  // The first turn and every resumed turn share one flag set, so no turn runs under a
+  // treatment the others did not. Only the message and the session it resumes differ.
+  const turnArgs = (message, sessionId) => {
+    if (RUNNER === 'codex') {
+      if (!sessionId) {
+        return [
+          '-a', 'never', 'exec',
+          // Resume reads the session from disk; a cell with nothing to resume stays ephemeral.
+          ...(scripted ? [] : ['--ephemeral']),
+          '--strict-config', '--model', model, '-c', effort,
+          '--sandbox', 'workspace-write', '--cd', wd,
+          '--skip-git-repo-check', '--json', message,
+        ];
+      }
+      return [
+        '-a', 'never', 'exec', 'resume', '--strict-config', '--model', model, '-c', effort,
+        // `exec resume` takes no --sandbox or --cd: the policy goes in as config, and the
+        // child is spawned in the cell's directory.
+        '-c', 'sandbox_mode="workspace-write"',
+        '--skip-git-repo-check', '--json', sessionId, message,
+      ];
+    }
+    const args = [
+      '-p', '--verbose',
+      // Persistence is what --resume reaches; kept off wherever nothing resumes.
+      ...(scripted ? [] : ['--no-session-persistence']),
       '--output-format', 'stream-json',
       '--model', model,
       '--max-budget-usd', String(CFG.maxBudgetUsd),
@@ -546,39 +615,64 @@ function runOne({ model, armName, arm, caseName, rep }) {
       '--settings', join(SKILL, 'arms', `${armName.replace('+', '-')}.json`),
     ];
     if (arm.protocol) args.push('--plugin-dir', expand(CFG.pluginDir));
-    args.push(promptBody(caseName, arm));
-    env = { ...process.env, CLAUDE_CONFIG_DIR: CONFIG_DIR };
-  }
-
+    if (sessionId) args.push('--resume', sessionId);
+    args.push(message);
+    return args;
+  };
   const options = {
     cwd: wd,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
-    env,
-    timeout,
+    env: RUNNER === 'codex'
+      ? codexEnv(home, { credential: true })
+      : { ...process.env, CLAUDE_CONFIG_DIR: CONFIG_DIR },
+    timeout: RUNNER === 'codex' ? CFG.codex.timeoutSeconds * 1000 : undefined,
   };
-  const r = RUNNER === 'codex'
-    ? spawnCodex(args, options, codexHome(arm))
-    : spawnSync(command, args, options);
-  if (r.stderr) writeFileSync(outFile.replace(/\.jsonl$/, '.err'), r.stderr);
+  const launch = (args) => (RUNNER === 'codex'
+    ? spawnCodex(args, options, home)
+    : spawnSync('claude', args, options));
 
-  // Existence of the transcript IS the cache, so an empty one written here would freeze
-  // the cell: every later invocation reports `cached` and grading reads the emptiness as
-  // the protocol failing. Require evidence that claude actually started (init) and
-  // actually reported (result). A budget-exhausted or errored turn has both and is a real
-  // observation; a missing binary, unusable authentication, timeout, or overrun buffer
-  // has neither runner's complete start/end pair.
-  const out = r.stdout || '';
-  const ran = r.error == null && (RUNNER === 'codex'
-    ? r.status === 0 && out.includes('"type":"thread.started"') && out.includes('"type":"turn.completed"')
-    : out.includes('"subtype":"init"') && out.includes('"type":"result"'));
-  if (!ran) {
-    writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), out);
-    return { skipped: false, launchFailed: true, outFile, exit: r.status,
-             reason: r.error ? r.error.message : `no complete ${RUNNER} start/end event pair in the stream` };
+  const messages = [{ name: 'prompt.md', body: promptBody(caseName, arm) }, ...replies];
+  const turnMutated = [];
+  let stream = '';
+  let sessionId = null;
+  let lastExit = null;
+  let ended = scripted ? 'replies-exhausted' : 'single-turn';
+  for (const [i, message] of messages.entries()) {
+    const turn = i + 1;
+    const r = launch(turnArgs(message.body, sessionId));
+    lastExit = r.status;
+    const suffix = turn === 1 ? '' : `.turn${turn}`;
+    if (r.stderr) writeFileSync(outFile.replace(/\.jsonl$/, `${suffix}.err`), r.stderr);
+    const out = r.stdout || '';
+    // A marker ahead of each scripted turn records which message opened it; graders split
+    // the stream on it. A single-turn transcript carries none and reads as before.
+    const marker = scripted
+      ? `${JSON.stringify({ type: 'realize.turn', turn, message: message.name })}\n` : '';
+    if (!turnRan(r)) {
+      writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), stream + marker + out);
+      return { skipped: false, launchFailed: true, outFile, exit: r.status,
+               reason: r.error ? r.error.message
+                 : `turn ${turn} produced no complete ${RUNNER} start/end event pair in the stream` };
+    }
+    stream += marker + out;
+    // Read now, while the working directory exists; see the sidecar note below.
+    turnMutated.push(treeMutated(wd, caseName));
+    if (i === 0) sessionId = sessionIdOf(out);
+    if (i + 1 < messages.length) {
+      if (!sessionId) {
+        writeFileSync(outFile.replace(/\.jsonl$/, '.failed.jsonl'), stream);
+        return { skipped: false, launchFailed: true, outFile, exit: r.status,
+                 reason: 'the first turn reported no session id, so no scripted turn can reach it' };
+      }
+      // The one reply rule the harness applies itself, because it needs no reading of the
+      // subject's words: a turn that changed the tree has left the gate, and a scripted
+      // answer sent after it would answer nothing the subject asked.
+      if (turnMutated[i]) { ended = `tree-changed-at-turn-${turn}`; break; }
+    }
   }
 
-  writeFileSync(outFile, out);
+  writeFileSync(outFile, stream);
   // Whether the run changed anything is read now, while the working directory still
   // exists. Deferring it to grading ties the verdict to a directory that is gitignored,
   // never uploaded by CI, and gone once teardown has run -- so a later re-read of the
@@ -586,11 +680,12 @@ function runOne({ model, armName, arm, caseName, rep }) {
   writeFileSync(outFile.replace(/\.jsonl$/, '.meta.json'),
     JSON.stringify({
       runner: RUNNER, model, treatment, treatmentIntegrity,
-      exit: r.status, mutated: treeMutated(wd),
+      exit: lastExit, mutated: turnMutated[turnMutated.length - 1],
+      ...(scripted ? { turns: turnMutated.length, scripted: messages.length, turnMutated, ended } : {}),
     }, null, 2) + '\n');
   // The working directory is kept: a grader that wants to inspect what the run
   // actually wrote needs the files, and a failed run is worth reading by hand.
-  return { skipped: false, outFile, exit: r.status };
+  return { skipped: false, outFile, exit: lastExit, ended };
 }
 
 function runCells() {
@@ -601,12 +696,12 @@ function runCells() {
         for (let rep = 1; rep <= CFG.runs; rep++) {
           process.stdout.write(`${RUNNER} | ${model} | ${armName} | ${caseName} | ${rep}/${CFG.runs} ... `);
           try {
-            const { skipped, exit, launchFailed, reason } = runOne({ model, armName, arm, caseName, rep });
+            const { skipped, exit, launchFailed, reason, ended } = runOne({ model, armName, arm, caseName, rep });
             if (launchFailed) {
               failures.push(`${model}/${armName}/${caseName}/${rep}: ${reason}`);
               console.log(`LAUNCH FAILED (${reason}) -- not cached, not graded`);
             }
-            else console.log(skipped ? 'cached' : `done (exit ${exit})`);
+            else console.log(skipped ? 'cached' : `done (exit ${exit}${ended && ended !== 'single-turn' ? `, ${ended}` : ''})`);
           } catch (e) {
             failures.push(`${model}/${armName}/${caseName}/${rep}: ${e.message}`);
             console.log(`FAILED: ${e.message}`);
@@ -672,7 +767,19 @@ function readEvents(file) {
     .filter(Boolean);
 }
 
-function parseClaude(events) {
+// A scripted cell's transcript carries a `realize.turn` marker ahead of each subject turn;
+// a single-turn transcript has none and is one turn.
+function splitTurns(events) {
+  if (!events.some((e) => e.type === 'realize.turn')) return [events];
+  const turns = [];
+  for (const e of events) {
+    if (e.type === 'realize.turn') turns.push([]);
+    else if (turns.length) turns[turns.length - 1].push(e);
+  }
+  return turns;
+}
+
+function parseClaudeTurn(events) {
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
   const result = events.find((e) => e.type === 'result');
   const toolUses = [];
@@ -693,10 +800,33 @@ function parseClaude(events) {
   const texts = events.filter((e) => e.type === 'assistant' && Array.isArray(e?.message?.content))
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
-  return { init, result, toolUses, skillInvocations, lastMessage: texts[texts.length - 1] || '' };
+  return { init, result, toolUses, skillInvocations, texts };
 }
 
-function parseCodex(events) {
+function parseClaude(events) {
+  const turns = splitTurns(events).map(parseClaudeTurn);
+  const results = turns.map((t) => t.result);
+  // Every turn must have reported; the run's outcome is an error if any turn's was.
+  const result = results.every(Boolean)
+    ? {
+        is_error: results.some((r) => r.is_error !== false),
+        total_cost_usd: results.every((r) => typeof r.total_cost_usd === 'number')
+          ? results.reduce((s, r) => s + r.total_cost_usd, 0) : null,
+        num_turns: results.reduce((s, r) => s + (r.num_turns || 0), 0),
+      }
+    : null;
+  const texts = turns.flatMap((t) => t.texts);
+  return {
+    init: turns[0]?.init,
+    result,
+    toolUses: turns.flatMap((t) => t.toolUses),
+    skillInvocations: turns.flatMap((t) => t.skillInvocations),
+    turns: turns.map((t) => ({ toolUses: t.toolUses })),
+    lastMessage: texts[texts.length - 1] || '',
+  };
+}
+
+function parseCodexTurn(events) {
   const items = events.filter((e) => e.type === 'item.completed').map((e) => e.item).filter(Boolean);
   const commands = items.filter((item) => item.type === 'command_execution');
   const skillNeedle = `/skills/${CFG.protocolSkill}/SKILL.md`;
@@ -711,12 +841,28 @@ function parseCodex(events) {
     .map(() => 'Read');
   const messages = items.filter((item) => item.type === 'agent_message').map((item) => item.text).filter(Boolean);
   const completed = events.find((e) => e.type === 'turn.completed');
+  return { toolUses, skillInvocations, messages, completed };
+}
+
+function parseCodex(events) {
+  const turns = splitTurns(events).map(parseCodexTurn);
+  const skillInvocations = turns.flatMap((t) => t.skillInvocations);
+  const messages = turns.flatMap((t) => t.messages);
+  const done = turns.every((t) => t.completed);
+  // Token use is summed over every turn; a resumed turn reports its own usage.
+  const usage = turns.some((t) => t.completed?.usage)
+    ? turns.reduce((s, t) => ({
+        input_tokens: s.input_tokens + (t.completed?.usage?.input_tokens || 0),
+        output_tokens: s.output_tokens + (t.completed?.usage?.output_tokens || 0),
+      }), { input_tokens: 0, output_tokens: 0 })
+    : null;
   return {
     init: { plugins: skillInvocations.length ? [{ name: PLUGIN_NAME }] : [], output_style: 'default' },
-    result: completed ? { is_error: false, total_cost_usd: null, num_turns: 1 } : null,
-    usage: completed?.usage || null,
-    toolUses,
+    result: done ? { is_error: false, total_cost_usd: null, num_turns: turns.length } : null,
+    usage,
+    toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations,
+    turns: turns.map((t) => ({ toolUses: t.toolUses })),
     lastMessage: messages[messages.length - 1] || '',
   };
 }
@@ -741,24 +887,31 @@ function treeDigest(dir) {
   return out.join('\n');
 }
 
-let REFERENCE = null;
-function referenceDigest() {
-  if (REFERENCE !== null) return REFERENCE;
-  const tmp = join(WORK, 'reference-tree');
+// Keyed by the scaffold script, not the case: cases sharing one fixture -- which the pairing
+// discipline asks of every target -- share one reference, and a target mounting a different
+// fixture is never compared against another target's tree.
+const REFERENCE = new Map();
+function referenceDigest(caseName) {
+  const script = caseSpec(caseName).scaffold;
+  if (REFERENCE.has(script)) return REFERENCE.get(script);
+  const tmp = join(WORK, `reference-tree-${basename(script, '.sh')}`);
   rmSync(tmp, { recursive: true, force: true });
-  scaffold(tmp);
-  REFERENCE = treeDigest(tmp);
+  scaffold(tmp, caseName);
+  const digest = treeDigest(tmp);
   rmSync(tmp, { recursive: true, force: true });
-  return REFERENCE;
+  REFERENCE.set(script, digest);
+  return digest;
 }
 
 // Whether the run changed the working tree at all, against the scaffold it started
 // from. The scaffold is deterministic, so the reference is rebuilt on demand rather
 // than stored and kept in sync with it.
-function treeMutated(workdir) {
+function treeMutated(workdir, caseName) {
   if (!existsSync(workdir)) return null;
-  return treeDigest(workdir) !== referenceDigest();
+  return treeDigest(workdir) !== referenceDigest(caseName);
 }
+
+const isRead = (t) => t === 'Read' || t === 'Grep' || t === 'Glob';
 
 // Deterministic graders. Each returns true / false / null (not applicable).
 // These read behaviour, not wording: the protocols are required to render in the
@@ -798,14 +951,30 @@ const GRADERS = {
   proceed_observed: ({ mutated }) => mutated === true,
   // A read occurred somewhere in the turn. This does not establish its order relative
   // to inquiry; that semantic ordering remains a transcript-review item.
-  collection_observed: ({ parsed }) =>
-    parsed.toolUses.some((t) => t === 'Read' || t === 'Grep' || t === 'Glob'),
+  collection_observed: ({ parsed }) => parsed.toolUses.some(isRead),
+  // The target is read before anything could be adjudicated. An adjudication needs an
+  // answer, and the first answer arrives only after turn 1, so a fixture read inside turn 1
+  // precedes every adjudication the run could make. Whether a later correction rested on
+  // what was read is the manual graders' question.
+  target_read_first: ({ parsed }) => (parsed.turns?.length ? parsed.turns[0].toolUses.some(isRead) : null),
+  // `preserves: R` -- the tree the case mounted is unchanged after every turn, not only at
+  // the end, so a write undone later still counts. Unreadable when a turn went unrecorded.
+  target_preserved: ({ mutated, turnMutated }) => {
+    const seq = turnMutated || [mutated];
+    if (seq.some((v) => v === null || v === undefined)) return null;
+    return seq.every((v) => v === false);
+  },
   completed: ({ parsed }) => parsed.result?.is_error === false,
 };
 
 const CASE_PREDICATES = {
   'inquire-underspecified': ['collection_observed', 'completed'],
   'inquire-fully-specified': ['proceed_observed', 'completed'],
+  // The /grasp pair shares its automatic set: what is mechanically decidable is the common
+  // precondition of both -- the target read, the tree left alone, every turn reported.
+  // Everything that separates them is a transcript judgment.
+  'grasp-adjudicable': ['target_read_first', 'target_preserved', 'completed'],
+  'grasp-unattachable': ['target_read_first', 'target_preserved', 'completed'],
 };
 
 // One grader per contract obligation. proceed-observed appears in both maps: its tree
@@ -818,12 +987,31 @@ const CASE_MANUAL_REVIEWS = {
   'inquire-fully-specified': [
     'phase0-relay', 'proceed-observed',
   ],
+  'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
+  'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
 };
 
 // Checked before anything is spent. A case added under evals/ without a predicate set
 // here would otherwise run the whole matrix and then throw during grading, after the
 // model budget is gone and, in CI, after the run step has already reported success.
 for (const c of CFG.cases) {
+  const spec = caseSpec(c);
+  if (!existsSync(spec.scaffold)) {
+    console.error(`case "${c}" declares a scaffold script that does not exist: ${spec.scaffold}`);
+    process.exit(1);
+  }
+  if (spec.multiTurn && spec.driver !== 'harness') {
+    console.error(`case "${c}" is multi-turn with an oracle the harness cannot execute; walk it by hand with turn.sh`);
+    process.exit(1);
+  }
+  if (spec.driver === 'harness' && !spec.replies.length) {
+    console.error(`case "${c}" declares driver: harness but ships no reply-1.md`);
+    process.exit(1);
+  }
+  if (spec.replies.length && !spec.multiTurn) {
+    console.error(`case "${c}" ships scripted replies without declaring multi_turn in case.yaml`);
+    process.exit(1);
+  }
   if (!CASE_PREDICATES[c]) {
     console.error(`case "${c}" has no predicate set in CASE_PREDICATES -- add one before running it`);
     process.exit(1);
@@ -859,16 +1047,20 @@ function gradeRun(model, armName, arm, caseName, rep) {
   // a fallback, for transcripts written before the sidecar existed and for a local regrade.
   let mutated = null;
   let treatmentIntegrity = null;
+  let turnMutated = null;
+  let delivered = null;
   if (existsSync(`${base}.meta.json`)) {
     const meta = JSON.parse(readFileSync(`${base}.meta.json`, 'utf8'));
     mutated = meta.mutated ?? null;
     treatmentIntegrity = meta.treatmentIntegrity ?? null;
+    turnMutated = meta.turnMutated ?? null;
+    if (meta.scripted) delivered = { turns: meta.turns, scripted: meta.scripted };
   } else {
     const wd = `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_');
-    mutated = treeMutated(join(WORK, wd));
+    mutated = treeMutated(join(WORK, wd), caseName);
   }
 
-  const ctx = { parsed, arm, caseName, cfg: CFG, mutated, treatmentIntegrity };
+  const ctx = { parsed, arm, caseName, cfg: CFG, mutated, turnMutated, treatmentIntegrity };
   const scores = {};
   for (const [name, fn] of Object.entries(GRADERS)) scores[name] = fn(ctx);
   // A predicate with nothing to read is not a failing predicate but an unreadable one,
@@ -881,7 +1073,7 @@ function gradeRun(model, armName, arm, caseName, rep) {
     ? (usage.input_tokens || 0) + (usage.output_tokens || 0)
     : null;
   return { scores, composite, cost: parsed.result?.total_cost_usd ?? null,
-           tokens, turns: parsed.result?.num_turns ?? null };
+           tokens, turns: parsed.result?.num_turns ?? null, delivered };
 }
 
 function report() {
@@ -918,6 +1110,16 @@ function report() {
           skill: arm.protocol
             ? (RUNNER === 'codex' ? 'trace-unavailable' : `${skill}/${graded.length}`)
             : 'n/a',
+          // Per predicate, so a composite zero says which transition failed.
+          predicates: CASE_PREDICATES[caseName].map((k) => {
+            const read = graded.filter((g) => g.scores[k] !== null && g.scores[k] !== undefined);
+            return `${k} ${read.filter((g) => g.scores[k] === true).length}/${read.length}`;
+          }).join(', '),
+          // Subject turns reached out of those the script holds. Short of it means a turn
+          // changed the tree and the harness stopped answering.
+          turns: graded.every((g) => g.delivered)
+            ? `${graded.reduce((s, g) => s + g.delivered.turns, 0)}/${graded.reduce((s, g) => s + g.delivered.scripted, 0)}`
+            : '-',
           manual: CASE_MANUAL_REVIEWS[caseName]?.length || 0,
           unreadable,
           tokens: tokens.length ? tokens.reduce((s, v) => s + v, 0) : '-',
@@ -941,7 +1143,7 @@ function report() {
     .map((caseName) => `${caseName}: ${(CASE_MANUAL_REVIEWS[caseName] || []).join(', ') || 'none'}`);
 
   if (process.argv.includes('--markdown')) {
-    const cols = ['runner', 'model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'manual', 'unreadable', 'tokens', 'cost'];
+    const cols = ['runner', 'model', 'arm', 'case', 'n', 'pass_k', 'rate', 'integrity', 'skill', 'predicates', 'turns', 'manual', 'unreadable', 'tokens', 'cost'];
     const line = (cells) => `| ${cells.join(' | ')} |`;
     console.log(line(cols));
     console.log(line(cols.map(() => '---')));

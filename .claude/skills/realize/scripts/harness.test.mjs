@@ -362,3 +362,104 @@ test('teardown and the exit-trap command remove a leftover login link', () => {
   }
 });
 
+test('a scripted multi-turn case resumes one session and reports every turn', () => {
+  const { root, env } = fixture();
+  env.CODEX_API_KEY = 'codex-secret';
+  env.FAKE_CODEX_MODE = 'complete';
+  env.REALIZE_CASES = 'grasp-adjudicable';
+  try {
+    assert.equal(invoke(env, 'setup', 'grasp').status, 0);
+    const run = invoke(env, 'run', 'grasp');
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+
+    const execs = logged(root).filter((c) => c.kind === 'exec');
+    assert.equal(execs.length, 5, 'the prompt and four scripted replies');
+    assert.equal(execs[0].resume, false);
+    assert.equal(execs[0].ephemeral, false, 'a cell that resumes keeps its session on disk');
+    for (const c of execs.slice(1)) {
+      assert.equal(c.resume, true);
+      assert.equal(c.session, 'test-thread');
+    }
+    assert.match(execs[4].message, /I'm done here/);
+
+    const report = invoke(env, 'report', 'grasp', '--markdown');
+    assert.equal(report.status, 0, report.stderr || report.stdout);
+    assert.match(report.stdout,
+      /target_read_first 1\/1, target_preserved 1\/1, completed 1\/1 \| 5\/5 \|/);
+    assert.match(report.stdout, /correction-quotes-target/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a turn that changes the tree ends the script and fails preservation', () => {
+  const { root, env } = fixture();
+  env.CODEX_API_KEY = 'codex-secret';
+  env.FAKE_CODEX_MODE = 'mutate-on-resume';
+  env.REALIZE_CASES = 'grasp-unattachable';
+  try {
+    assert.equal(invoke(env, 'setup', 'grasp').status, 0);
+    const run = invoke(env, 'run', 'grasp');
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.match(run.stdout, /tree-changed-at-turn-2/);
+    assert.equal(logged(root).filter((c) => c.kind === 'exec').length, 2);
+
+    const report = invoke(env, 'report', 'grasp', '--markdown');
+    assert.match(report.stdout,
+      /\| 0 \| 0\/1 \| 1 \| n\/a \| target_read_first 1\/1, target_preserved 0\/1, completed 1\/1 \| 2\/5 \|/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a multi-turn case whose oracle needs a reader is refused before anything runs', () => {
+  const { root, env } = fixture();
+  env.REALIZE_CASES = 'elicit-aporia';
+  try {
+    const setup = invoke(env, 'setup', 'inquire');
+    assert.notEqual(setup.status, 0);
+    assert.match(setup.stderr, /walk it by hand with turn\.sh/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the Claude runner resumes a scripted case with the same flags on every turn', () => {
+  const { root, env } = fixture();
+  const fakeClaude = join(root, 'bin', 'claude');
+  writeFileSync(fakeClaude, `#!/usr/bin/env node
+const { appendFileSync } = require('node:fs');
+const args = process.argv.slice(2);
+appendFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify(args) + '\\n');
+console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 'claude-session',
+  plugins: [], output_style: 'default' }));
+console.log(JSON.stringify({ type: 'assistant', message: { content: [
+  { type: 'tool_use', name: 'Read', input: { file_path: 'app/limiter.py' } }] } }));
+console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
+`);
+  chmodSync(fakeClaude, 0o755);
+  env.REALIZE_RUNNER = 'claude';
+  env.REALIZE_CASES = 'grasp-adjudicable';
+  env.HOME = root;
+  env.FAKE_CLAUDE_LOG = join(root, 'claude.log');
+  try {
+    const run = invoke(env, 'run', 'grasp');
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    const calls = readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n').map(JSON.parse);
+    assert.equal(calls.length, 5);
+    assert.equal(calls[0].includes('--resume'), false);
+    for (const args of calls) assert.equal(args.includes('--no-session-persistence'), false);
+    for (const args of calls.slice(1)) {
+      assert.equal(args[args.indexOf('--resume') + 1], 'claude-session');
+      // Identical flags apart from the resume pair and the message.
+      assert.deepEqual(args.filter((a, i) => a !== '--resume' && a !== 'claude-session' && i !== args.length - 1),
+        calls[0].slice(0, -1));
+    }
+    const report = invoke(env, 'report', 'grasp', '--markdown');
+    assert.equal(report.status, 0, report.stderr || report.stdout);
+    assert.match(report.stdout, /\| 5\/5 \|/);
+    assert.match(report.stdout, /\| 0\.0500 \|/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

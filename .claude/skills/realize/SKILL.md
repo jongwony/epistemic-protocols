@@ -130,10 +130,12 @@ rather than inferring invocation from the model's prose.
 ## Cases
 
 Every case runs under explicit invocation. Each registered target needs at least a case
-where the protocol's Phase 0 finds a deficit and its obligations must be realized, and one
-where Phase 0 must find none and relay. Whether a protocol is selected at all, or stays
-silent, is measured by route's own eval, not here. `inquire` is the only registered target
-today; no result is implied for an unregistered protocol.
+where the protocol's obligations must be realized, and one that holds the counterpart the
+protocol must not fabricate — for `/inquire`, a Phase 0 that finds no deficit and relays;
+for `/grasp`, an answer with nothing to check it against. Whether a protocol is selected at
+all, or stays silent, is measured by route's own eval, not here. The registered targets are
+the keys of `targets` in `harness.config.json`; no result is implied for a protocol absent
+there.
 
 Both cases mount the same scaffold, deliberately: one observes whether a
 file-discoverable fact was asked, the other whether a supplied parameter was re-asked,
@@ -154,6 +156,15 @@ frontmatter and the user's words, and one grader per obligation under `graders/`
 checks that the fields a judgment produces exist and are faithful to their sources; it
 does not grade the judgment itself, such as whether a ground is sufficient.
 
+A protocol whose obligations fire only after the user answers needs turns past the first
+`Stop`. A case reaches them by declaring `multi_turn` in `case.yaml`. Where its user side
+can be written as a fixed script — `driver: harness`, the replies in `reply-1.md`,
+`reply-2.md`, … — the harness sends them itself, on either runner, resuming one session;
+`evals/grasp-adjudicable/` and `evals/grasp-unattachable/` are that pair for `/grasp`, and
+their `oracle.md` says why every reply is written to stand at whichever gate it lands on.
+An oracle that must read the subject's turn to compose a reply, as `/elicit`'s does, is
+walked by hand (`references/runbook.md`) and refused if registered.
+
 ## Reading results
 
 Read `integrity` first. It reports whether each arm's treatment actually applied — both
@@ -167,7 +178,11 @@ predicates. The `manual` column counts scenario-specific transcript judgments ex
 composite; the report names them. For `inquire`, collection-before-surfacing order,
 unasked cheap evidence, faithful basis, kept ownership, constructor coverage, the Phase 0
 relay, and the absence of a design gate remain manual observations grounded by the grader
-files.
+files. For `grasp`, the automatic set is what both cases share — the target read in the
+first turn, the tree unchanged after every turn, every turn reported — and the quoted
+correction, the withheld verdict with its named need, the stop at each gate, and closure on
+the user's word are manual. The `predicates` column breaks `pass_k` down by predicate;
+`turns` shows how many scripted turns a multi-turn cell reached.
 
 On Claude, `skill` says whether the protocol fired where it was available, and `n/a`
 where there was no plugin to fire. Codex reports `trace-unavailable` for that column and

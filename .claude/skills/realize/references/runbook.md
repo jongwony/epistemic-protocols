@@ -116,8 +116,8 @@ homes disposable:
   harness that never reached its own cleanup; `teardown.sh` does it at every depth.
 
 A cell's home also loses everything but its config, installed plugin and `auth.json` slot
-before the cell starts, in either mode, so nothing one cell wrote to its home is readable
-by the next.
+before the cell starts, in either mode: a multi-turn cell keeps its session on disk so it
+can be resumed, and nothing one cell wrote should be readable by the next.
 
 ## Where isolation lives
 
@@ -126,7 +126,7 @@ Arm isolation is a property of the config directory rather than of a flag: an em
 what `setup.sh` builds per target. Codex takes the same shape through a separate
 `CODEX_HOME` per arm, with `codex plugin list` confirming what that home holds before a
 run is spent. The harness clears volatile state before each run and passes
-`--no-session-persistence`, so a re-run reads its own environment.
+`--no-session-persistence` wherever nothing resumes, so a re-run reads its own environment.
 
 Set `maxBudgetUsd` above the one-time system-prompt cache creation that a session's
 first turn pays; later turns read that cache cheaply, so the floor is per session
@@ -188,7 +188,10 @@ the report prints those rows again under a separate heading so they are not read
 results.
 
 `pass_k` is one when every repetition passed the deterministic transition composite,
-zero otherwise. The `manual` column is separate: it counts transcript judgments whose
+zero otherwise. `predicates` breaks it down — each predicate's passes over the repetitions it
+could read — so a zero names the transition that failed. `turns`, on a scripted multi-turn
+case, is the subject turns reached over those the script holds; short of it means a turn
+changed the tree and the dialogue stopped there. The `manual` column is separate: it counts transcript judgments whose
 grader files fix the observation criteria but which no automated judge executed.
 Constructor coverage, semantic question ordering, and user-facing classification are
 therefore never implied by an automatic pass.
@@ -199,20 +202,37 @@ it. It reads `n/a` in an arm with no plugin, where `integrity` already asserts t
 absence, and `trace-unavailable` for Codex, whose JSONL carries no skill-invocation
 event; a model naming the skill counts as invocation evidence nowhere.
 
-Codex rows report token use from `turn.completed`. They leave cost blank because the CLI
-emits no dollar value, whichever way it authenticated. Claude rows retain the emitted cost.
-A Codex timeout is a failed launch and is not cached or graded.
+Codex rows report token use from `turn.completed`, summed over every turn of the cell.
+They leave cost blank because the CLI emits no dollar value, whichever way it
+authenticated. Claude rows retain the emitted cost. A Codex timeout is a failed launch and is not cached or graded.
 
 A cell whose launch never produced a transcript is not written or counted. `run` and
 `report` both propagate that incompleteness, so a re-run still picks the cell up.
 
+## Multi-turn cases, scripted
+
+A case whose `case.yaml` declares `multi_turn` with `driver: harness` ships its user turns
+as `reply-1.md`, `reply-2.md`, … and the harness sends them itself, on either runner: the
+first turn opens a session (Codex without `--ephemeral`, Claude without
+`--no-session-persistence`), and each reply resumes it with the same model and flags. The
+transcript holds every turn, each preceded by a `realize.turn` marker naming the message that
+opened it; the sidecar records the tree verdict after every turn. The one reply rule the
+harness applies itself is mechanical: a turn that changed the tree ends the dialogue, since
+it has left the gate. Every turn must produce its runner's complete start/end pair, or the
+cell is a launch failure.
+
+The script reads nothing of what the subject said, so each reply must stand at whichever
+gate it lands on; the case's `oracle.md` shows how its replies were written to do that.
+`grasp-adjudicable` and `grasp-unattachable` are the worked pair.
+
 ## Multi-turn cases, by hand
 
-A case whose `case.yaml` declares `multi_turn` is graded on turns after the first, or
-on tool-call inputs. `harness.mjs` runs one turn per cell and records tool names only,
-so such a case is not registered in `harness.config.json` and is walked by hand with
-`scripts/turn.sh` (Claude runner only). The case's `oracle.md` plays the user; the
-person running the case composes nothing.
+A case whose `oracle.md` must read the subject's turn to compose a reply is graded on turns
+after the first, or on tool-call inputs, that no script can reach. Such a case declares
+`multi_turn` without `driver: harness`; the harness refuses to run it, so it is not
+registered in `harness.config.json` and is walked by hand with `scripts/turn.sh` (Claude
+runner only). The case's `oracle.md` plays the user; the person running the case composes
+nothing.
 
 ```bash
 cd .claude/skills/realize/scripts
