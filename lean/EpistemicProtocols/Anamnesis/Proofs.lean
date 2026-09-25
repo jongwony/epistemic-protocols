@@ -65,13 +65,24 @@ theorem invocation_activates (respond : Context P → Response P) (c : Context P
 
 theorem identified_by_person (c : Context P) (v : RecalledContext P)
     (h : closing c = some (.identified v)) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+    ∃ s : Cite c, s.idx = v.identifiedAt ∧ (c[s.idx]'s.lt).origin = .person ∧
+      AnswerSupported c (c[s.idx]'s.lt) .identified := by
   unfold closing at h
   cases hA : answer c with
   | open_ x =>
     rw [hA] at h
     simp at h
-  | filled a s ok _ => exact ⟨s, ok, s.ok.trans ok⟩
+  | filled a s ok sup =>
+    rw [hA] at h
+    cases a with
+    | stopped => simp at h
+    | identified =>
+      cases hp : presented c with
+      | none => simp [hp] at h
+      | some r =>
+        simp only [hp, Option.some.injEq, Outcome.identified.injEq] at h
+        subst h
+        exact ⟨s, rfl, s.ok.trans ok, sup⟩
 
 theorem answer_by_person {c : Context P} {s : Cite c}
     (ok : (answerCoord (P := P)).admits s.src) : s.src.val = .person := ok

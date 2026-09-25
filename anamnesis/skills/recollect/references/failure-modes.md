@@ -16,7 +16,7 @@ IndexLacking       : the record carries the past meant, and its index entry does
 
 PartialExtract     : an index entry built from a source its capture did not read whole
                      -- cause: a malformed line skipped, a bounded extraction that dropped part of a long session, an extraction that failed while others succeeded
-                     -- detection: the member's capture outcome — an extractor state other than succeeded, or a recorded count of characters not received
+                     -- detection: the member's capture outcome shows actual incompleteness — an extractor that failed or was skipped where the record carries output from others, or a recorded count of characters not received above zero. A validated empty result and a count of zero are complete captures, not partial ones
                      -- recovery: disclose it on the member (Reach); ground on the record, never on the partial index
 
 SidechainNoSSOT    : the id found belongs to a fork with no record of its own

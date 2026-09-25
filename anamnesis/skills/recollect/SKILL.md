@@ -444,10 +444,12 @@ asserted.
 -/
 
 /-!
-Identification always rests on a turn the person sent.
+The turn a RecalledContext names as identifying it is the person's, and it supports the
+identification.
 theorem identified_by_person (c : Context P) (v : RecalledContext P)
     (h : closing c = some (.identified v)) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
+    ∃ s : Cite c, s.idx = v.identifiedAt ∧ (c[s.idx]'s.lt).origin = .person ∧
+      AnswerSupported c (c[s.idx]'s.lt) .identified
 
 Only the person closes the recall by an answer.
 theorem answer_by_person {c : Context P} {s : Cite c}
