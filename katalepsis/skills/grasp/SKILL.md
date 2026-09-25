@@ -40,12 +40,13 @@ Katalepsis(R, U) → grasp(c, utterances), where c is the fused session context:
       the Horizon probe: the answer is taken → closure → coverage
       a probe: an objection you have ground to raise → the reasoning inquiry;
         none → closure → coverage
-      the reasoning inquiry: read what the objection rests on → an adjudication stands:
-        the correction with that material attached → the same aspect probed again;
+      the reasoning inquiry: an adjudication stands → read and quote the material it rests
+        on → the correction with that material → the same aspect probed again;
         none stands → closure → coverage
       the start-aspect selector or coverage: an aspect chosen → its probe; none → the gate again
       the zero-gap finding (Reopen): the named gap joins the task's gaps → the task's gate
-  no utterance: the gate holds; nothing is completed
+  every task completed: the convergence trace → VerifiedUnderstanding
+  no utterance: the gate holds, with the hidden record; nothing is completed
 -/
 
 /-! ── MORPHISM ──
@@ -320,9 +321,13 @@ structure Adjudication (c : Context P) where
     inquiry exists to hear the user's reasoning before anything is settled. -/
 opaque Objection : Context P → Prop
 
-/-- **Your judgment**, read after the user's reasoning at the inquiry and the material read for
-    it: the adjudication that stands, with what it is drawn from; `none` where the reasoning
-    defeated the objection or there was nothing to attach. -/
+/-- **Your judgment**, read at the user's reasoning at the inquiry: an adjudication against the
+    answer still stands — the reasoning did not defeat the objection, and there is material to
+    attach. -/
+opaque Stands : Context P → Prop
+
+/-- **Your judgment**, read once the material it rests on has been read: the adjudication that
+    stands, with what it is drawn from. -/
 opaque adjudication : (c : Context P) → Option (Adjudication c)
 
 /-- **Your judgment**: the cited utterance chooses this aspect at the start-aspect selector or at
@@ -391,11 +396,13 @@ opaque dissent : Context P → List String
     rounds established and no more, with the dissent attached to the closures. -/
 structure VerifiedUnderstanding (P : Type) where
   context : Context P
+  horizon : Horizon
   dissent : List String
 
 inductive Outcome (P : Type)
   | verified (v : VerifiedUnderstanding P)
-  | holding  (c : Context P)
+  /-- the gate holds; the hidden record is kept with the context it stands beside -/
+  | holding  (c : Context P) (h : Horizon)
 
 /-! ── MODE STATE ──
 Λ is the fused context, with one exception: the hidden `Horizon` record, carried beside it
@@ -424,9 +431,8 @@ opaque touch : Context P → List (Evidence P)
 /-- **Your record update** marking the closed task completed. -/
 opaque update : Context P → List (Evidence P)
 
-/-- **Your read**, at the inquiry's answer, of whatever your objection rests on — the target, or
-    a source the user cited that can be read now — observed and quoted; nothing where there is
-    nothing to read. -/
+/-- **Your read**, once an adjudication stands, of whatever it rests on — the target, or a source
+    the user cited that can be read now — observed and quoted at the narrowest span. -/
 opaque attach : Context P → List (Evidence P)
 
 /-- **Your record** of a proposal, verbatim, outside the task set; the write's returned identity
@@ -435,7 +441,7 @@ opaque eject : Context P → List (Evidence P)
 
 inductive Step (P : Type)
   | gate (c : Context P) (h : Horizon) (g : Gate)
-  | done (c : Context P)
+  | done (c : Context P) (h : Horizon)
 
 /-- Where task `t`'s verification stands, in priority order: an admissible Horizon not yet
     probed preempts everything; no gap at all is the zero-gap finding; nothing probed yet opens
@@ -461,7 +467,7 @@ def beginTask (c : Context P) (h : Horizon) (t : Task) : Step P :=
 def completeStep (c : Context P) (h : Horizon) : Step P :=
   let c₁ := c ++ (update c).map (·.val)
   match current c₁ with
-  | none   => .done c₁
+  | none   => .done c₁ h
   | some t => beginTask c₁ h t
 
 /-- The gate a proposal returns to: the one it came from, or coverage for a Horizon probe. -/
@@ -491,10 +497,8 @@ noncomputable def advance (c : Context P) (h : Horizon) : Gate → Verdict → S
   | .horizonProbe t, _ => .gate c h (.coverage t)
   | .probe t g, _ => if Objection c then .gate c h (.inquiry t g) else .gate c h (.coverage t)
   | .inquiry t g, _ =>
-    let c₁ := c ++ (attach c).map (·.val)
-    match adjudication c₁ with
-    | some _ => .gate c₁ h (.probe t g)
-    | none   => .gate c₁ h (.coverage t)
+    if Stands c then .gate (c ++ (attach c).map (·.val)) h (.probe t g)
+    else .gate c h (.coverage t)
   | .startAspect t, _ => aspectStep c h (.startAspect t) t
   | .coverage t, _ => aspectStep c h (.coverage t) t
 
@@ -514,23 +518,29 @@ def openGate (c : Context P) (h : Horizon) : Gate :=
     | none   => answered c
   else answered c
 
-def understanding (c : Context P) : VerifiedUnderstanding P :=
-  { context := c, dissent := dissent c }
+/-- Convergence: the trace presented, then the resolution; `trace` is your convergence
+    presentation — each task with its status, the aspects detected for it, the Horizon among them
+    where the hidden record holds one, and which were probed. -/
+def understanding (trace : Context P → Horizon → Response P) (c : Context P) (h : Horizon) :
+    VerifiedUnderstanding P :=
+  { context := c ++ [(trace c h).val], horizon := h, dissent := dissent c }
 
-noncomputable def grasp (respond : Context P → Gate → Response P) :
+noncomputable def grasp (respond : Context P → Gate → Response P)
+    (trace : Context P → Horizon → Response P) :
     Context P → Horizon → List (Utterance P) → Outcome P
-  | c, _, []      => .holding c
+  | c, h, []      => .holding c h
   | c, h, u :: us =>
     let c' := fuse c u
     match advance c' { h with asking := false } (openGate c h) (verdict c') with
-    | .done c₁      => .verified (understanding c₁)
+    | .done c₁ h₁   => .verified (understanding trace c₁ h₁)
     | .gate c₁ h₁ g =>
-      grasp respond (present respond c₁ h₁ g).1 (present respond c₁ h₁ g).2 us
+      grasp respond trace (present respond c₁ h₁ g).1 (present respond c₁ h₁ g).2 us
 
 /-- The run begins at entry selection, over the route map Phase 0 assessed in silence. -/
-noncomputable def start (respond : Context P → Gate → Response P) (c : Context P)
+noncomputable def start (respond : Context P → Gate → Response P)
+    (trace : Context P → Horizon → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
-  grasp respond (present respond c Horizon.empty .entrySelection).1
+  grasp respond trace (present respond c Horizon.empty .entrySelection).1
     (present respond c Horizon.empty .entrySelection).2 us
 
 /-! ── LOOP ──
@@ -546,8 +556,9 @@ of the round that ran it and does not travel here. Demonstrated, not asserted.
 
 /-!
 Silence completes nothing.
-theorem silence (respond : Context P → Gate → Response P) (c : Context P) (h : Horizon) :
-    grasp respond c h [] = .holding c
+theorem silence (respond : Context P → Gate → Response P)
+    (trace : Context P → Horizon → Response P) (c : Context P) (h : Horizon) :
+    grasp respond trace c h [] = .holding c h
 
 An admissible Horizon not yet probed preempts every other gate of its task.
 theorem horizon_preempts (c : Context P) (h : Horizon) (t : RecordId)
@@ -562,8 +573,8 @@ A Horizon answer is taken: it goes to coverage, never to the inquiry.
 theorem horizon_taken (c : Context P) (h : Horizon) (t : RecordId) :
     advance c h (.horizonProbe t) .cont = .gate c h (.coverage t)
 
-No adjudication is reached at a probe's answer: the context is unchanged and the next gate is
-the inquiry or coverage.
+No adjudication is reached at a probe's answer: nothing is read or attached there, and the next
+gate is the inquiry or coverage.
 theorem no_adjudication_at_probe (c : Context P) (h : Horizon) (t : RecordId) (g : Selectable) :
     advance c h (.probe t g) .cont = .gate c h (.inquiry t g) ∨
       advance c h (.probe t g) .cont = .gate c h (.coverage t)
@@ -571,6 +582,11 @@ theorem no_adjudication_at_probe (c : Context P) (h : Horizon) (t : RecordId) (g
 A proposal is recorded and the loop resumes where it was.
 theorem proposal_resumes (c : Context P) (h : Horizon) (g : Gate) :
     advance c h g .propose = .gate (c ++ (eject c).map (·.val)) h (resumeOf g)
+
+Where the user's reasoning defeats the objection, nothing is read or attached.
+theorem defeated_attaches_nothing (c : Context P) (h : Horizon) (t : RecordId) (g : Selectable)
+    (hs : ¬ Stands c) :
+    advance c h (.inquiry t g) .cont = .gate c h (.coverage t)
 -/
 
 /-! ── CONVERGENCE ──
@@ -586,9 +602,10 @@ account of it.
 
 /-!
 Verified understanding follows only a user's utterance that closed the last task.
-theorem verified_by_person (respond : Context P → Gate → Response P) (c : Context P)
+theorem verified_by_person (respond : Context P → Gate → Response P)
+    (trace : Context P → Horizon → Response P) (c : Context P)
     (h : Horizon) (us : List (Utterance P)) (v : VerifiedUnderstanding P)
-    (hv : grasp respond c h us = .verified v) :
+    (hv : grasp respond trace c h us = .verified v) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .complete ∧
       ∃ t, v.context = fuse c₀ u ++ t
 
@@ -633,13 +650,13 @@ def grounding : Op → Annot × String
   | .startAspect    => (.constitution, "present (conditional: gaps to offer, nothing probed yet for the task): which aspect to start with, over the task's gaps")
   | .probe          => (.constitution, "present: the probe of the bound aspect in the form probeKind gives it — Qc for Expectation and Sequence, Qs for Causality, Scope, and Emergent — after the selected artifact context and a concrete scenario, with a free-response path")
   | .inquiry        => (.constitution, "present: the reasoning inquiry on an objection to the answer, whole or partial, opened before anything is settled")
-  | .attach         => (.observe, "artifact read + excerpt attachment: read whatever the objection rests on — the target itself, or a source the user cited that can be read now, in any form — and quote in place the narrowest span an adjudication would rest on; a locator the user must open is not an attachment")
+  | .attach         => (.observe, "artifact read + excerpt attachment: read whatever the standing adjudication rests on — the target itself, or a source the user cited that can be read now, in any form — and quote in place the narrowest span it rests on — only once an adjudication stands after the user's reasoning; a locator the user must open is not an attachment")
   | .closure        => (.extension, "TextPresent+Proceed: the continuation closure — the round's outcome, any side branch with its record, the task's status, the return point, and the next moves — before coverage or the resumed gate, never in place of a gate")
   | .coverage       => (.constitution, "present: aspect coverage — probed and unprobed aspects, the Horizon never among the offers; sufficient, another aspect, or a proposal")
   | .update         => (.track, "record update: marks the closed task completed, naming the identity its registration returned")
   | .eject          => (.track, "record: a proposal verbatim, outside the task set; the closure says it was read as a proposal and the gate it came from opens again")
   | .readAnswer     => (.sense, "Internal analysis: the whole latest utterance read with the context — its verdict, the selection, the chosen aspect, the objection, and whether an adjudication stands")
-  | .converge       => (.extension, "TextPresent+Proceed: the convergence trace — each task with its status, the aspects detected for it and which were probed — then VerifiedUnderstanding, with any dissent attached to a closure")
+  | .converge       => (.extension, "TextPresent+Proceed: the convergence trace, presented before VerifiedUnderstanding is returned — each task with its status, the aspects detected for it (the Horizon among them where the hidden record holds one) and which were probed; the hidden record rides the result; any dissent attached to a closure")
   | .seam           => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate inside this protocol and the next fires unchanged")
 
 /-! ── COMPOSITION ──
