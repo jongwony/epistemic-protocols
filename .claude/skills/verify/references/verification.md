@@ -31,7 +31,7 @@ When a check fires, the fix is usually one of these:
 |---|---|
 | `codex-manifest-sync` | Bump the Codex manifest to the Claude version in the same commit |
 | `framing-readout-enforcement` | Delete the progress-bar glyph, or restore the guard kernel within the affected Output Style's Cognitive work element |
-| `lean-definition` | Prove or remove the `sorry`; restate an `axiom` as an `opaque` judgment or a parameter; move an in-block proof to `lean/EpistemicProtocols/<Namespace>/Proofs.lean` and state its signature in the block; make each proved theorem imply its stated signature with no extra premise; fix the error the message quotes (`node .claude/skills/verify/scripts/lean-contract.js generate . && lake build`, then `lake env lean lean/.contract/Audit/<Namespace>.lean`) |
+| `lean-definition` | Prove or remove the `sorry`; give an axiom judgment in the block a doc comment saying what is judged, and a `Nonempty` instance for its type in the proofs module; restate any other `axiom` as a judgment or a parameter; move an in-block proof to `lean/EpistemicProtocols/<Namespace>/Proofs.lean` and state its signature in the block; make each proved theorem imply its stated signature with no extra premise; fix the error the message quotes (`node .claude/skills/verify/scripts/lean-contract.js generate . && lake build`, then `lake env lean lean/.contract/Audit/<Namespace>.lean`) |
 | `ink-body-identity` | Re-sync the sibling's reproduced body to match the canonical file exactly |
 | `packaged-agent-contract-sync` | Sync the drifted surface — agent or `SKILL.md` — named in the message |
 | `routing-index-contract` | Restore the Protocol Index routing pointers (`route/README.md`, `SKILL.md`, `README`), or remove the reintroduced inline catalog |

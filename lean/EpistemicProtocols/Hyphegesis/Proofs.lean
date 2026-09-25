@@ -13,6 +13,16 @@ namespace Hyphegesis
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
+instance : Nonempty MethodBrief := ⟨⟨"", "", ""⟩⟩
+instance {s : Slot} : Nonempty (DraftSlot s) := ⟨⟨defaultValue s, none, [], fun _ => rfl⟩⟩
+instance : Nonempty Reading := ⟨⟨.cont, []⟩⟩
+instance : Nonempty Reach := ⟨.reaches⟩
+instance : Nonempty CheckpointBrief := ⟨.emergent ⟨"", [], [], ⟨""⟩⟩⟩
+
 theorem silence (respond : Context P → Response P) (c : Context P) :
     conduct respond c [] = .holding c := by
   simp [conduct]

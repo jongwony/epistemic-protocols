@@ -13,10 +13,11 @@ Conduct how a session's epistemic work will be carried out — the order, indepe
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
 doc comment states a consequence the contract already has; it is proved outside this block
 and asks nothing further of you.
 -/
@@ -150,18 +151,17 @@ structure MethodBrief where
   workIntent      : String
   expectedHandoff : String
   span            : String
-  deriving Inhabited  -- elab: lets `brief` be declared `opaque`
 
 /-- **Your reading** of the prospect's method brief, from the whole context, again after every
     utterance. -/
-opaque brief : Context P → MethodBrief
+axiom brief : Context P → MethodBrief
 
 /-- **Your judgment** (the relay test), after every utterance, on the map now standing:
     conduction is warranted — two or more moves in the move set the map holds, the person's
     revision included, and a real fork in their order, independence, reconciliation,
     termination, or routing. Single-move work and a self-evident method are not; scale and budget
     alone never are, and Hyphegesis never conducts itself. -/
-opaque Warranted : Context P → Prop
+axiom Warranted : Context P → Prop
 
 structure HandoffLocator where
   record  : String
@@ -178,17 +178,17 @@ structure NavigationBlock where
 /-- **Your reading**: the navigation block the context supplies over the record the work was
     parked in, a sibling protocol's emitted block included; `none` otherwise. It is carried
     unchanged, and nothing it names is copied into this protocol's output. -/
-opaque pointer : Context P → Option NavigationBlock
+axiom pointer : Context P → Option NavigationBlock
 
 /-- **Your reading** while a pointer is held: follow the block's dereference instruction at its
     locator and run its grounding instruction; what the record returns enters the context as
     observation. Nothing when there is no pointer. -/
-opaque groundPointer : Context P → List (Evidence P)
+axiom groundPointer : Context P → List (Evidence P)
 
 /-- **Your observation**: the session's actually loaded inventory — its agents, skills, MCP
     servers, and the tools each exposes — read for the method the map now holds, before the map
     that shows it. The inventory is the authority, never a fixed list. -/
-opaque inventory : Context P → List (Evidence P)
+axiom inventory : Context P → List (Evidence P)
 
 /-- What is observed enters the context before the presentation it informs. -/
 def observe (c : Context P) : Context P :=
@@ -199,10 +199,7 @@ def observe (c : Context P) : Context P :=
     would need a premise its record does not support. An unresolved downstream item the method
     can leave open is not this: it is preserved and the design continues. False without a
     pointer. -/
-opaque PointerUnreadable : Context P → Prop
-
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
+axiom PointerUnreadable : Context P → Prop
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
@@ -227,7 +224,7 @@ abbrev MoveSet := List Move
 /-- **Your reading** of the move ground — the context, each available protocol's own deficit and
     resolution, and the analysis passes and delegations the session affords: the move set the
     draft proposes. It settles nothing. -/
-opaque candidates : Context P → MoveSet
+axiom candidates : Context P → MoveSet
 
 /-- The classes every downstream obligation dispatches on, never a value's name. -/
 inductive ObligationClass | relaxesIsolation | needsStopGround | crossesSpan
@@ -304,7 +301,7 @@ def IsPartition (ms : MoveSet) (rs : List Region) : Prop :=
 
 /-- **Your proposal**: a cut that partitions `ms`, citing the non-uniformity you read to cut that
     way. -/
-opaque proposedCut : Context P → MoveSet → List Region
+axiom proposedCut : Context P → MoveSet → List Region
 
 inductive EdgeAxis | independence | reconciliation | termination | routing
 
@@ -345,9 +342,6 @@ structure DraftSlot (s : Slot) where
   differential : List (String × String)
   fallback     : ground = none → value = defaultValue s
 
--- elab: a witness lets `draft` be declared `opaque`; it adds no meaning.
-instance {s : Slot} : Inhabited (DraftSlot s) := ⟨⟨defaultValue s, none, [], fun _ => rfl⟩⟩
-
 /-- **Your draft**: every slot over the cut in force, filled from the whole context — the brief,
     the moves, the cut, every value the person set — laid out most-constrained first, and drawn
     again after every utterance, so a change upstream re-fills what depends on it. Where a decision the person made may bear on a
@@ -355,7 +349,7 @@ instance {s : Slot} : Inhabited (DraftSlot s) := ⟨⟨defaultValue s, none, [],
     on; where several land on one slot, it names each. A termination filled with
     `resolutionRequired` says in its ground whether that resolver can reach the region before its
     stop is wanted. -/
-opaque draft : Context P → (s : Slot) → DraftSlot s
+axiom draft : Context P → (s : Slot) → DraftSlot s
 
 /-! What the person said. Each person turn is read once, against the context that stood when they
     sent it; everything the person constitutes — the verdict, the move set, the cut, a slot's value —
@@ -399,14 +393,11 @@ structure Reading where
   verdict : Verdict
   edits   : List Edit
 
--- elab: a witness lets `read` be declared `opaque`; it adds no meaning.
-instance : Inhabited Reading := ⟨⟨.cont, []⟩⟩
-
 /-- **Your reading** of the person's turn `u`, against the context `h` that stood when they sent it,
     `u` last: what they did with the map, and every edit it makes with the slot or scope each
     denotes. Whatever the turn's form — a request or an instruction constitutes as a statement does.
     A later turn never reads it again. -/
-opaque read : Context P → Utterance P → Reading
+axiom read : Context P → Utterance P → Reading
 
 def asUtterance : Turn P → Option (Utterance P)
   | ⟨.person, f, x⟩ => some ⟨⟨.person, f, x⟩, rfl⟩
@@ -441,13 +432,13 @@ noncomputable def cutSet (c : Context P) : Option (List Region) :=
 noncomputable def cut (c : Context P) : List Region := (cutSet c).getD (proposedCut c (moves c))
 
 inductive Reach | reaches | unclear | lapses
-  deriving DecidableEq, Inhabited
+  deriving DecidableEq
 
 /-- **Your judgment**, on the context now standing: whether a decision the person made on slot `s₀`
     reaches slot `s`. `reaches` where it is the same slot or what they meant covers it — a region
     renamed, split, or merged; `unclear` where their words leave it open; `lapses` where it plainly
     does not, the ledger showing what lapsed. -/
-opaque reach : Context P → Slot → Slot → Reach
+axiom reach : Context P → Slot → Slot → Reach
 
 /-- Where a slot's value comes from. `unclear`: a decision the person made may reach the slot and
     their words leave it open; the slot is open, and the map names that decision. -/
@@ -486,16 +477,16 @@ noncomputable def take (c : Context P) (s : Slot) : SlotVal s :=
     observed realizability of its region, and your contrary grounds; a value the closing utterance
     itself sets counts where its consequences were in view. Where anything would be taken unseen,
     the map is drawn again. -/
-opaque Covered : Context P → Prop
+axiom Covered : Context P → Prop
 
 /-- **Your record**: the contrary grounds you presented before the utterance that closes — a slot
     you would set otherwise, a cut you doubt, a region you expect the inventory cannot realize —
     attached to the method; empty when there were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- **Your judgment**: the observation cited shows whether the inventory can realize `r`'s
     values. -/
-opaque FeasibilitySupported : Region → Context P → Turn P → Bool → Prop
+axiom FeasibilitySupported : Region → Context P → Turn P → Bool → Prop
 
 /-- Realizability is read from an observation of the loaded inventory. Text injected into the
     session, the system prompt among it, grounds no verdict. -/
@@ -506,14 +497,14 @@ def feasibilityCoord (r : Region) : Coord P Bool :=
     observation; open where nothing observed it, and the map and trace say so. A region whose
     routing crosses the span wall needs a durable record surface its output can be externalized
     to. -/
-opaque feasibility : (c : Context P) → (r : Region) → Occ (feasibilityCoord (P := P) r) c
+axiom feasibility : (c : Context P) → (r : Region) → Occ (feasibilityCoord (P := P) r) c
 
 /-- **Your reading**: the durable record surface the observed inventory offers a region whose
     output crosses the span wall; `none` where none was observed. -/
-opaque recordSurface : Context P → Region → Option String
+axiom recordSurface : Context P → Region → Option String
 
 /-- **Your placement**: the move's slot in the sequence the resolved order gives. -/
-opaque position : Context P → Move → Nat
+axiom position : Context P → Move → Nat
 
 structure Placement where
   move     : Move
@@ -596,7 +587,7 @@ structure CoverageLimit where
 /-- **Your reading** of the caps the topology imposes: `singlePass` → `noRetry`, a bounded or
     dry-ceiling termination → `topN`, an intra-region sampling → `sampling`, any other cap →
     `emergent`. -/
-opaque coverageLimits : Context P → List CoverageLimit
+axiom coverageLimits : Context P → List CoverageLimit
 
 /-- Who first put a value forward: the draft, or the person naming one the draft did not offer.
     Kept apart from how the value came into force — a move the draft proposed and the person kept
@@ -611,7 +602,7 @@ inductive Entry
 
 /-- **Your reading** from the context: the position of the turn that first put forward what `e`
     holds now. -/
-opaque introducedAt : Context P → Entry → Nat
+axiom introducedAt : Context P → Entry → Nat
 
 /-- Who first put `e` forward is the origin of that turn: the person's, or the draft's. -/
 def proposer (c : Context P) (e : Entry) : Proposer :=
@@ -689,9 +680,6 @@ inductive CheckpointBrief
   | synthesis (b : SynthesisBrief)
   | emergent (b : EmergentBrief)
 
--- elab: a witness lets `compileBrief` be declared `opaque`; it adds no meaning.
-instance : Inhabited CheckpointBrief := ⟨.emergent ⟨"", [], [], ⟨""⟩⟩⟩
-
 /-- `advisory`: an infeasibility the inventory observation shows reaching this in-session
     checkpoint; a downstream-only one leaves it binding. -/
 structure Checkpoint where
@@ -710,7 +698,7 @@ def owesSynthesis (c : Context P) (r : Region) : Bool :=
     instance, and a need the plan anticipates that only the person can supply before `r` can run —
     a secret or credential to set, a deployment handed to runtime — registered before the move that
     needs it. -/
-opaque emergentDeferred : Context P → Region → List String
+axiom emergentDeferred : Context P → Region → List String
 
 /-- The decisions `r` defers: `synthesisOutputShape` whenever `owesSynthesis`, then the emergent
     ones. -/
@@ -720,15 +708,15 @@ noncomputable def deferred (c : Context P) (r : Region) : List DeferredDecision 
 
 /-- **Your compilation** of the brief the decision calls for, from the current topology and move
     set: structure, never a copy of execution content. -/
-opaque compileBrief : Context P → Region → DeferredDecision → CheckpointBrief
+axiom compileBrief : Context P → Region → DeferredDecision → CheckpointBrief
 
 /-- **Your judgment**, from the inventory observation: an infeasibility reaches the checkpoint for
     `d` on `r` itself, rather than only the routing or externalization downstream of it. -/
-opaque CheckpointUnrealizable : Context P → Region → DeferredDecision → Bool
+axiom CheckpointUnrealizable : Context P → Region → DeferredDecision → Bool
 
 /-- **Your reading**: `r`'s place in the sequence the resolved order gives; regions the order
     leaves unranked against each other share a place. -/
-opaque regionRank : Context P → Region → Nat
+axiom regionRank : Context P → Region → Nat
 
 /-- Topology order between regions, registration order breaking ties: a stable sort by place over
     the checkpoints in the order they were registered. -/

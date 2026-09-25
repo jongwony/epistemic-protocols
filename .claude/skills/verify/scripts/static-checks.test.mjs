@@ -274,6 +274,11 @@ describe('lean-definition', () => {
       expectSome(failures(), `declares \`theorem ${ns}.mutation_extra\``);
       restore();
 
+      // A judgment is a documented axiom of the block, and its type must be inhabited.
+      write(target, withBlock(`${block}\n/-- **Your judgment**: nothing. -/\naxiom mutationEmpty : Empty`));
+      expectSome(failures(), 'has no `Nonempty` instance');
+      restore();
+
       // Two commands on one line escape a line-anchored axiom pattern; the
       // environment still holds the axiom.
       write(proofRelative, beforeEnd('example : True := trivial axiom mutationSneaky : False'));
