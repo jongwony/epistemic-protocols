@@ -20,12 +20,12 @@ instance : Nonempty Answer := ⟨.dismiss⟩
 instance : Nonempty Initiator := ⟨.userInvoked⟩
 
 theorem acceptedAux_skip (x : Coordinate) (pre ts : Context P) (acc : Option Value)
-    (h : ∀ t ∈ ts, t.basis ≠ some .utterance) :
+    (h : ∀ t ∈ ts, t.origin ≠ .person) :
     acceptedAux x pre ts acc = acc := by
   induction ts generalizing pre acc with
   | nil => rfl
   | cons t ts ih =>
-    have hn : ¬ (t.basis = some .utterance) := h t (by simp)
+    have hn : ¬ (t.origin = .person) := h t (by simp)
     simp only [acceptedAux, hn, ↓reduceIte]
     exact ih _ _ (fun t' ht' => h t' (by simp [ht']))
 
@@ -39,7 +39,7 @@ theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option 
     simp
 
 theorem accepted_revised_only_by_utterance (c e : Context P) (x : Coordinate)
-    (h : ∀ t ∈ e, t.basis ≠ some .utterance) : accepted (c ++ e) x = accepted c x := by
+    (h : ∀ t ∈ e, t.origin ≠ .person) : accepted (c ++ e) x = accepted c x := by
   simp only [accepted]
   rw [acceptedAux_append]
   exact acceptedAux_skip x _ e _ h

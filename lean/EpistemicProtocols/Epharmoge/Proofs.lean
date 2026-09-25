@@ -164,12 +164,12 @@ theorem confirmed_by_person (respond : Context P → Response P) (c : Context P)
     · exact ih _ h
 
 theorem attributed_by_utterance {c : Context P} {i : MismatchId} {s : Cite c}
-    (ok : (attributionCoord (P := P) i).admits s.kind) : s.kind = .utterance := ok
+    (ok : (attributionCoord (P := P) i).admits s.src) : s.src.val = .person := ok
 
 theorem answered_by_utterance {c : Context P} {i : MismatchId} {s : Cite c}
-    (ok : (answerCoord (P := P) i).admits s.kind) : s.kind = .utterance := ok
+    (ok : (answerCoord (P := P) i).admits s.src) : s.src.val = .person := ok
 
 theorem accepted_by_utterance {c : Context P} {s : Cite c}
-    (ok : (zeroCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
+    (ok : (zeroCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 end Epharmoge

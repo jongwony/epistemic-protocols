@@ -62,58 +62,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -121,7 +120,7 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
@@ -197,7 +196,7 @@ def acceptedAux (x : Coordinate) : Context P → Context P → Option Value → 
   | _,   [],      acc => acc
   | pre, t :: ts, acc =>
     acceptedAux x (pre ++ [t]) ts
-      (if t.basis = some .utterance then
+      (if t.origin = .person then
         match provided pre t x with
         | some v => some v
         | none   => acc
@@ -305,7 +304,7 @@ is demonstrated, not asserted.
 
 /-!
 theorem acceptedAux_skip (x : Coordinate) (pre ts : Context P) (acc : Option Value)
-    (h : ∀ t ∈ ts, t.basis ≠ some .utterance) :
+    (h : ∀ t ∈ ts, t.origin ≠ .person) :
     acceptedAux x pre ts acc = acc
 
 theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option Value) :
@@ -314,7 +313,7 @@ theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option 
 Coordinate Monotonicity: turns that are not a person's utterance — a re-trace, a substrate
 read, an AI response — leave every accepted value as it was.
 theorem accepted_revised_only_by_utterance (c e : Context P) (x : Coordinate)
-    (h : ∀ t ∈ e, t.basis ≠ some .utterance) : accepted (c ++ e) x = accepted c x
+    (h : ∀ t ∈ e, t.origin ≠ .person) : accepted (c ++ e) x = accepted c x
 
 theorem silence (respond : Context P → Response P) (c : Context P) :
     elicit respond c [] = .holding c

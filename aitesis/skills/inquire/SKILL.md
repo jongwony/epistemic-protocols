@@ -67,58 +67,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -126,7 +125,7 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
@@ -164,11 +163,11 @@ axiom Registered : Context P → Item → Prop
 
 structure Dismissal (c : Context P) where
   src : Cite c
-  byPerson : src.kind = .utterance
+  byPerson : src.src.val = .person
 
-/-- **Your reading** of the person's dismissal utterance for `i` — a dismissal of that item,
-    or a declaration of sufficiency reaching it — with its citation; `none` while there is
-    none. -/
+/-- **Your reading** of the person's dismissal for `i` — a dismissal of that item, or a
+    declaration of sufficiency reaching it, whatever form the turn takes — with its citation;
+    `none` while there is none. -/
 axiom dismissal : (c : Context P) → Item → Option (Dismissal c)
 
 def live (c : Context P) (i : Item) : Prop := Registered c i ∧ dismissal c i = none
@@ -326,13 +325,13 @@ theorem state_unique {c : Context P} {i : Item} {s s' : State}
 /-! ── PHASE TRANSITIONS ──
 Phase 0 scans the context; with nothing uncertain it presents the sufficiency finding with its
 reasoning and proceeds, not activated. Otherwise each pass runs: Step₀ registers `working`;
-Step₁ pushes each item while `advanceable`, its evidence entering the context as observation
+Step₁ pushes each item while `advanceable`, its evidence entering the context as evidence
 turns [Tool]; Step₂ scans what the pass collected; Step₃ lands every live item; Step₄'s records
 join the context. Collection ends by `CollectionEnds`, the relay is presented, and the turn
 proceeds.
 -/
 
-/-- **Your collection** for one pass from `c`: what the channels returned, each an observation
+/-- **Your collection** for one pass from `c`: what the channels returned, each an evidence
     turn — a run that observed nothing returns its null result. -/
 axiom push : Context P → List (Evidence P)
 
