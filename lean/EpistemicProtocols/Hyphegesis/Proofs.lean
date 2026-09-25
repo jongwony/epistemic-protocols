@@ -20,33 +20,81 @@ theorem silence (respond : Context P → Response P) (c : Context P) :
 theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
     (h : conduct respond c us = .conducted c₁ t) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = fuse c₀ u ∧ stage c₁ = .design ∧
-      verdict c₁ = .sufficient ∧ ¬ Unshown c₁ ∧ t = respond (handoffContext c₁) := by
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
+      verdict c₁ = .sufficient ∧ Covered c₁ ∧ relayAt c₁ = none ∧ t = respond c₁ := by
   induction us generalizing c with
   | nil => simp [conduct] at h
   | cons u us ih =>
     simp only [conduct] at h
     split at h
+    · cases h
+    · cases h
+    · rename_i v hw hr
+      split at h
+      · cases h
+      · rename_i hrel
+        split at h
+        · rename_i hc
+          cases h
+          exact ⟨c, u, rfl, hc.1, hc.2, hrel, rfl⟩
+        · exact ih _ h
+
+theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (c₁ : Context P) (h : conduct respond c us = .withdrawn c₁) :
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧ verdict c₁ = .withdraw := by
+  induction us generalizing c with
+  | nil => simp [conduct] at h
+  | cons u us ih =>
+    simp only [conduct] at h
+    split at h
+    · rename_i hv
+      cases h
+      exact ⟨c, u, rfl, hv⟩
+    · cases h
     · split at h
       · cases h
-      · exact ih _ h
-    · exact ih _ h
-    · cases h
-    · rename_i hs
-      split at h
-      · rename_i hv
-        cases h
-        exact ⟨c, u, rfl, hs, hv.1, hv.2, rfl⟩
-      · exact ih _ h
+      · split at h
+        · cases h
+        · exact ih _ h
 
-theorem exit_only_shown (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (hs : stage (fuse c u) = .design) (hn : Unshown (fuse c u)) :
-    conduct respond c (u :: us) = conduct respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [conduct, hs, hn]
+theorem routed_by_person (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (t : String) (c₁ : Context P)
+    (h : conduct respond c us = .routed t c₁) :
+    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧ verdict c₁ = .route t := by
+  induction us generalizing c with
+  | nil => simp [conduct] at h
+  | cons u us ih =>
+    simp only [conduct] at h
+    split at h
+    · cases h
+    · rename_i t' hv
+      cases h
+      exact ⟨c, u, rfl, hv⟩
+    · split at h
+      · cases h
+      · split at h
+        · cases h
+        · exact ih _ h
+
+theorem withdraw_precedes_relay (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : verdict (observe (fuse c u)) = .withdraw) :
+    conduct respond c (u :: us) = .withdrawn (observe (fuse c u)) := by
+  simp [conduct, h]
+
+theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (hs : verdict (observe (fuse c u)) = .sufficient)
+    (hr : relayAt (observe (fuse c u)) = none) (hn : ¬ Covered (observe (fuse c u))) :
+    conduct respond c (u :: us) =
+      conduct respond (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
+  simp [conduct, hs, hr, hn]
 
 theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s)
     (h : filledValue (slot c s) = some v) : (method c).topology s = v := by
   simp [method, take, h]
+
+theorem person_value_recorded (c : Context P) (s : Slot) (h : isFilled (slot c s) = true) :
+    adoption c s = .set := by
+  simp [adoption, h]
 
 theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : isFilled (slot c s) = false)
     (hg : (draft c s).ground = none) : take c s = defaultValue s := by
@@ -62,11 +110,11 @@ theorem emergent_stop_never_silent (e : Emergent)
 
 theorem pointer_carried (c : Context P) : (method c).pointer = pointer c := rfl
 
-theorem accepted_by_utterance {c : Context P} {s : Cite c}
-    (ok : (briefCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
-
 theorem moves_by_utterance {c : Context P} {s : Cite c}
     (ok : (moveSetCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
+
+theorem cut_by_utterance {c : Context P} {s : Cite c}
+    (ok : (cutCoord (P := P)).admits s.kind) : s.kind = .utterance := ok
 
 theorem slot_by_utterance {c : Context P} {x : Slot} {s : Cite c}
     (ok : (slotCoord (P := P) x).admits s.kind) : s.kind = .utterance := ok
