@@ -308,8 +308,9 @@ inductive Closing
   /-- go on to the protocol the person names -/
   | route (target : String)
 
-/-- **Your judgment**: the cited turn closes the run this way. Only the person's latest turn is
-    read here: a closing said before the latest round was presented was answered by that round. -/
+/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
+    stands, the order of its turns included: a closing said before a later round was presented was
+    answered by that round. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -325,9 +326,10 @@ axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
     write, not from what is still found, since the replaced result may leave nothing to find. -/
 axiom withdrawal : Context P → Option (Option Result)
 
-/-- **Your reading**: the person's latest turn asked for an adaptation, and its write has landed —
-    whether or not the mismatch it aimed at is still found afterwards. -/
-axiom AdaptedAtLast : Context P → Prop
+/-- **Your reading**: an adaptation a person's turn in this run asked for has been written and has
+    landed — whether or not the mismatch it aimed at is still found afterwards. Read against the
+    context as it now stands, from any of the person's turns, not only the latest. -/
+axiom AdaptationLanded : Context P → Prop
 
 /-- **Your record**, read from the context: the locator the carrier-creating write returned — the
     one durable record every mismatch and its standing is written into; `none` where nothing was
@@ -348,8 +350,8 @@ structure ApplicabilityVerdict (P : Type) where
   dissent : List String
 
 inductive Outcome (P : Type)
-  /-- nothing open and the person closed: by the resolution in their latest turn, or by saying
-      the run is done -/
+  /-- nothing open and the person closed: by resolutions of theirs that have taken effect, or by
+      saying the run is done -/
   | done (v : ApplicabilityVerdict P)
   /-- the person withdrew the result and the withdrawal landed; the replacement is carried with no
       claim of fit -/
@@ -394,29 +396,17 @@ def pass (c : Context P) : Context P :=
   let c₂ := c₁ ++ (passRecord c₁).map (·.val)
   c₂ ++ (persist c₂).map (·.val)
 
-/-- The position of the latest turn the person sent. -/
-def lastPerson (c : Context P) : Option Nat :=
-  ((List.range c.length).filter fun i =>
-    match c[i]? with
-    | some t => decide (t.origin = .person)
-    | none   => false).getLast?
-
-/-- Where the person's resolution of `m` was said. -/
-def resolvedAt {c : Context P} (m : Mismatch c) : Option Nat :=
-  match resolution c m with
-  | .filled _ src _ _ => some src.idx
-  | .open_ _          => none
-
-/-- The person has closed: they said the run is done, or their latest turn resolved something —
-    a mismatch still found, left as it is or handed on, or an adaptation whose write has landed.
-    A turn whose adaptation landed and left nothing open therefore closes the run, and the changed
-    result is shown in the closing trace. Where nothing was found, or every mismatch was handed on
-    or withdrawn without the person, only the first holds, so the list is seen before the run
-    ends. -/
+/-- The person has closed: they said the run is done, or some turn of theirs in this run resolved
+    something that has taken effect — a mismatch still found that stands resolved by their turn, or
+    an adaptation they asked for whose write has landed. No particular turn anchors this: which of
+    their turns carries the resolution is read from the context as it now stands, and the round or
+    the closing trace says which turn was read and what intent was taken from it. Where nothing was
+    found, or every mismatch was handed on or withdrawn without the person, only the first holds,
+    so the list is seen before the run ends. -/
 def PersonClosed (c : Context P) : Prop :=
   filledValue (closing c) = some .done ∨
-  AdaptedAtLast c ∨
-  (∃ m ∈ mismatches c, (resolvedAt m).isSome ∧ resolvedAt m = lastPerson c)
+  (∃ m ∈ mismatches c, ∃ r, standing c m = .resolved r) ∨
+  AdaptationLanded c
 
 def NothingOpen (c : Context P) : Prop := ∀ m ∈ mismatches c, standing c m ≠ .open_
 
@@ -444,7 +434,9 @@ open Classical in
     handoff with its fit and the command only as a hint. Then one gate. For `selectNext`: what does
     not fit, where in the result, the turn of the context it does not fit, how much it matters, and
     evidence that it does not fit where evidence showed that; then `actions`, each with its
-    consequence. With nothing open, the list, how far the judgment reached, and whether the run is
+    consequence. Wherever a person's earlier turn is read as the resolution of a mismatch, or as
+    what lets the run close, say which turn was read and the intent taken from it, quoting their
+    words. With nothing open, the list, how far the judgment reached, and whether the run is
     done. -/
 def contextualize (respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
@@ -485,15 +477,16 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
 
 /-! ── CONVERGENCE ──
 Every closure is read where it fires and nowhere else. done: nothing open, and the person closed —
-by resolving the last open mismatch in their latest turn, an adaptation whose write landed
-included, or by saying the run is done after seeing the list, which is the only way a run closes
-where nothing was found or nothing was the person's to resolve. discarded: the withdrawal the
+by resolutions of theirs that have taken effect — an adaptation whose write landed included —
+read from any of their turns, or by saying the run is done after seeing the list, which is the only
+way a run closes where nothing was found or nothing was the person's to resolve. discarded: the withdrawal the
 person asked for landed; the replacement is carried with no claim of fit. stopped: the result stays as it is and every open mismatch is recorded unresolved.
 routed: the person named the next protocol. Fit is claimed only for the mismatches found, and fit
 is not correctness, which was presupposed at entry and is not re-checked here. A mismatch left as
 it is carries the person's reason and no claim that it does or does not stand.
 Convergence evidence: one line per mismatch found — what did not fit, where, and how it stood at
-the close: the person's resolution with the turn it came from, the certificate's handoff with its
+the close: the person's resolution with the turn it came from, quoted, and the intent taken from
+it, the certificate's handoff with its
 fit, or evidence's withdrawal with that evidence — beside the adaptations made with what each
 changed in the result, any that did not repair what they aimed at, and the dissent attached to the
 closure. Demonstrated, not asserted.
@@ -549,8 +542,8 @@ def grounding : Op → Annot × String
   | .adapt            => (.transform, "artifact write: the person's adaptation applied to the result; the write's result returns into the context and the next pass judges it")
   | .discard          => (.transform, "artifact write: withdraw the result and put the replacement in its place, or remove it when nothing takes its place")
   | .persist          => (.track, "record, record update: the one carrier entry — created when a mismatch is first found, brought into line every pass, one line per mismatch with its standing and what it stood on; its locator is carried out on the verdict")
-  | .readTurn         => (.sense, "Internal analysis: the latest turn read whole against the fused context — a resolution, a closing, something named as not fitting, a correction, a question — whatever form it takes")
-  | .converge         => (.extension, "TextPresent+Proceed: the per-mismatch trace with who settled each line and what it stood on, the adaptations made and any that did not repair what they aimed at, the dissent attached to the closure, and what the verdict does not claim")
+  | .readTurn         => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — a resolution, a closing, something named as not fitting, a correction, a question — whatever form it takes")
+  | .converge         => (.extension, "TextPresent+Proceed: the per-mismatch trace with who settled each line and what it stood on — for a person's resolution, the turn read, quoted, and the intent taken from it — the adaptations made and any that did not repair what they aimed at, the dissent attached to the closure, and what the verdict does not claim")
   | .seam             => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
@@ -601,7 +594,7 @@ What should happen?
 
 The person may answer in their own words, and one answer may settle more than one mismatch. Leaving a mismatch as it is records the reason they gave and makes no claim that the mismatch does or does not stand. Where the owner is unclear, the options name the concrete split, for example "install mail in this image as part of this work" beside "hand it to whoever owns the image (/bound)".
 
-With nothing open, show the list, how far the judgment reached, and ask whether the run is done; the person may also name something that does not fit. After an adaptation, say that the changed result was judged again and that no correctness claim is made for it; where it left nothing open, the run closes on that turn and the closing trace shows what the adaptation changed. After a withdrawal, say that the replacement is carried with no claim of fit.
+With nothing open, show the list, how far the judgment reached, and ask whether the run is done; the person may also name something that does not fit. After an adaptation, say that the changed result was judged again and that no correctness claim is made for it; where it left nothing open, the run closes and the closing trace shows what the adaptation changed. Wherever you read one of the person's earlier turns as resolving a mismatch or as what lets the run close, say which turn and what you took from it, quoting their words — for example: "Your 'leave the 18:00 arrival, the team reads it in the morning' — taken as: keep the schedule as it is." This disclosure stands in place of asking again. After a withdrawal, say that the replacement is carried with no claim of fit.
 
 ## Rules
 
@@ -609,7 +602,7 @@ With nothing open, show the list, how far the judgment reached, and ask whether 
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 - **Recognition over categories**: Offer actions concrete to the mismatch in front of the person, each with its consequence. The person's own words settle what a category would have asked them to choose.
 - **Verdict scope**: Present the per-mismatch trace before the verdict. Fit is claimed only for the mismatches found, and an adapted result claims fit, not correctness; a withdrawal claims neither for its replacement.
-- **The person resolves and closes**: A mismatch is resolved only by the person's turn, whatever its form, and the person's resolution stands over anything evidence or the certificate read. Evidence alone may withdraw the AI's own flag, reported with that evidence, or show that a mismatch does not fit before the gate; a person's turn that disputes a withdrawal puts it back. Where nothing was found, or nothing was the person's to resolve, the run ends only when the person says it is done after seeing the list.
+- **The person resolves and closes**: A mismatch is resolved only by the person's turn, whatever its form, and the person's resolution stands over anything evidence or the certificate read. Evidence alone may withdraw the AI's own flag, reported with that evidence, or show that a mismatch does not fit before the gate; a person's turn that disputes a withdrawal puts it back. Which of the person's turns resolves a mismatch, or lets the run close, is read from the context as it now stands and is not tied to their latest turn; wherever such a reading is made, the round or the closing trace says which turn was read and what intent was taken from it, quoting their words, in place of asking again. Where nothing was found, or nothing was the person's to resolve, the run ends only when the person says it is done after seeing the list.
 - **Significant requires demonstrable behavioral impact**: Severity = Significant requires that the mismatch produces a demonstrable behavioral consequence — downstream-decision impact, runtime divergence, gate-trajectory change. Structural-change extent (line count, file count, scope size) alone is insufficient grounds — categorize as Minor when behavioral impact is undemonstrated. This guards against false-positive gating arising from conflation of structural-change extent with applicability impact
 - **Unclear owners surface first**: A mismatch the certificate cannot place is put to the person before anything else happens to it, with the claims its evidence supports; the certificate never places a mismatch it could not place, and evidence does not withdraw it first.
 - **Judge afresh after every write**: An adaptation changes the result, so the next pass judges the whole result against the whole context again; the run can have more open after a resolution than before it. A mismatch an adaptation aimed at and that is still found is said to be unrepaired; a write that did not land resolves nothing. A turn whose adaptation landed and left nothing open closes the run; the changed result and any adaptation that did not repair what it aimed at appear in the closing trace.
