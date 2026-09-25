@@ -13,12 +13,13 @@ Apportion an autonomous goal into coarse execution units and derive each unit's 
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -86,58 +87,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -145,10 +145,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -158,7 +160,7 @@ abbrev AutonomousGoal (P : Type) := Context P
 
 /-- **Your reading** of `H`, the `ExecutionHorizon`: the budget one autonomous run is expected to
     fit, read from the context with its cue cited. -/
-opaque horizon : Context P → String
+axiom horizon : Context P → String
 
 /-- A cited piece of material: where it is and what it says. -/
 structure Cited where
@@ -173,14 +175,14 @@ structure Obligation where
   deriving DecidableEq  -- elab: membership over obligation lists
 
 /-- **Your reading** of the requirements the goal states or implies, before the subtraction. -/
-opaque candidates : Context P → List Obligation
+axiom candidates : Context P → List Obligation
 
 /-- **Your judgment** (`host_standing_contract(G, o)`): `o` is goal-independent in the host the
     work is carried out in — the host's standing procedural contract attaches it to every change
     it accepts (its version or manifest discipline, its verification command, its branch,
     worktree, or review path, its merge authority) — and `o` is not itself the outcome the goal
     states. -/
-opaque HostStanding : Context P → Obligation → Bool
+axiom HostStanding : Context P → Obligation → Bool
 
 /-- `O_G`, `ReadObligations`: the candidates with the host's standing contract subtracted. What
     is subtracted is never packed, derived, or counted by coverage: every emitted unit inherits
@@ -202,7 +204,7 @@ structure OOSDeclaration where
 /-- **Your judgment** (`VelocityFilter`): the obligations of `O_G` guardable only by pre-action
     interception, each with its substrate — made before anything is drafted, so none enters a
     unit, and read back from the pass record that made it; a Reopen does not remake it. -/
-opaque oos : Context P → List OOSDeclaration
+axiom oos : Context P → List OOSDeclaration
 
 /-- `SpanFit`. -/
 inductive SpanFit | fits | overflows | indeterminate
@@ -248,7 +250,7 @@ structure PlanUnit extends ProposedUnit where
     context shows surfaced whole, and a unit whose fit is not `fits` entered only through
     OverrideFit. A Reopen takes its unit out. The units hold pairwise disjoint obligations, and
     their `UnitRef`s are pairwise distinct: one is never reused. -/
-opaque units : Context P → List PlanUnit
+axiom units : Context P → List PlanUnit
 
 /-- An obligation some unit holds or some out-of-scope declaration names. -/
 def covered (c : Context P) (o : Obligation) : Bool :=
@@ -275,12 +277,12 @@ def IsPartition (res : List Obligation) (d : List ProposedUnit) : Prop :=
     It owns nothing and settles nothing; the next pass drafts what is left afresh — except after a
     Sufficient, when the displayed draft stands: its still-unsettled cuts, none of them fitting,
     are what Qu presents next, and it is not redrawn until those are settled. -/
-opaque draft : Context P → List ProposedUnit
+axiom draft : Context P → List ProposedUnit
 
 /-- **Your judgment** (the option-set relay test, read live at dispatch): no alternative cut of the
     cut's obligations stands up to the same evidence. What it weighs is never a member of the
     draft. -/
-opaque Uncontested : Context P → ProposedUnit → Bool
+axiom Uncontested : Context P → ProposedUnit → Bool
 
 def Seam.isHeuristic : Seam → Bool
   | .heuristic  => true
@@ -341,7 +343,6 @@ structure Derivation where
   compiled  : List Compiled
   residuals : List Residual
   reserved  : List Reservation
-  deriving Inhabited  -- elab: lets `derivation` be declared `opaque`
 
 /-- Every record of `d` names an obligation of `u`: κ and σ bound as ρ is. -/
 def Derivation.Bound (u : PlanUnit) (d : Derivation) : Prop :=
@@ -356,7 +357,7 @@ def Derivation.Bound (u : PlanUnit) (d : Derivation) : Prop :=
     direction rewrites it over the same units — a withdrawn condition becoming a residual, a
     residual re-read as judgment-settled a reservation; a Reopen takes it out with its unit. The
     read is fallible and lands at Qc, where an Adjust can move an item either way. -/
-opaque derivation : Context P → PlanUnit → Derivation
+axiom derivation : Context P → PlanUnit → Derivation
 
 /-- `obligation_derived`: a residual counts for `u` only where it is keyed to `u`. -/
 def Derivation.derives (u : PlanUnit) (d : Derivation) (o : Obligation) : Bool :=
@@ -452,7 +453,7 @@ structure PlanCondition where
     re-derived on Reopen. A completion criterion for the whole goal may be among them, read from
     the goal or introduced by an Adjust: it closes the acceptance question, Qt does not fire, and it
     reaches the person at Qc, whose Confirm covers it. -/
-opaque planConditions : Context P → List PlanCondition
+axiom planConditions : Context P → List PlanCondition
 
 /-- `acceptance_present`, derived: a whole-goal condition of kind completion stands among the
     derived conditions. A whole-goal invariant does not answer the acceptance question. -/
@@ -471,19 +472,16 @@ inductive Acceptance
   | unbounded
 
 /-- **Your judgment**: the cited statement closes the acceptance question this way. -/
-opaque AcceptanceSupported : Context P → Turn P → Acceptance → Prop
+axiom AcceptanceSupported : Context P → Turn P → Acceptance → Prop
 
-/-- Only a person's statement answers Qt. -/
+/-- Only a person's turn answers Qt. -/
 def acceptanceCoord : Coord P Acceptance :=
-  { admits := (· = .utterance), supports := AcceptanceSupported }
-
--- elab: an open witness lets the occupancy reading below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
+  { admits := (·.val = .person), supports := AcceptanceSupported }
 
 /-- **Your judgment**: how the latest answer at Qt closed the question; open where none has, and
     where an Adjust withdrew the defined criterion. Each answer revises the one before it, so one
     value stands. -/
-opaque acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
+axiom acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _   => false
@@ -535,7 +533,7 @@ def planOf (c : Context P) : List PlanCondition :=
 
 /-- **Your judgment** (`topology_free`) over a requirement's content: it names no UnitRef, move,
     move region, or order position. A reading over content, not a structural proof. -/
-opaque TopologyFree : Context P → PlanStateRequirement → Bool
+axiom TopologyFree : Context P → PlanStateRequirement → Bool
 
 /-- `InvariantStatus`, computed over the current apportionment and shown at Qc. -/
 structure InvariantStatus where
@@ -567,11 +565,11 @@ def closable (c : Context P) : Bool :=
 
 /-- **Your reading**: a Reopen in the context postdates the plan conditions' derivation or their
     last Adjust. Surfaced before Qc; only an Adjust clears it, and it forces no re-derivation. -/
-opaque Stale : Context P → Bool
+axiom Stale : Context P → Bool
 
 /-- **Your reading**: the latest pass entered the condition phase — the apportionment loop just
     emptied the residual, or the latest utterance was an Adjust at Qc. -/
-opaque EnteredConditions : Context P → Bool
+axiom EnteredConditions : Context P → Bool
 
 /-- The gate the next presentation opens. -/
 inductive Gate | qu | qt | qc
@@ -596,15 +594,14 @@ inductive Verdict
   | routeBound
   /-- Confirm at Qc, taking the plan as Qc showed it -/
   | confirm
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
 /-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+axiom verdict : Context P → Verdict
 
 /-- **Your record**: the contrary grounds you presented before the Qc the Confirm answered — a
     plan condition you read as naming topology, a cut you doubt, a subtraction or a classification
     you would make otherwise — attached to the plan; empty when there were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- `ReservedSubject`. -/
 inductive ReservedSubject
@@ -710,43 +707,43 @@ structure NavigationBlock where
 
 /-- **Your reading**: the navigation block the context supplies — a prior `/apportion` block over
     the goal, or another protocol's; `none` otherwise. -/
-opaque pointer : Context P → Option NavigationBlock
+axiom pointer : Context P → Option NavigationBlock
 
 /-- **Your reading** at Phase 0: follow the block's dereference instruction at its locator and run
     its grounding instruction; what the carrier returns enters the context as observation.
     Nothing when there is no pointer. -/
-opaque groundPointer : Context P → List (Evidence P)
+axiom groundPointer : Context P → List (Evidence P)
 
 def bindPointer (c : Context P) : Context P := c ++ (groundPointer c).map (·.val)
 
 /-- **Your judgment**: the pointer is unreachable or missing half its locator, or compiling this
     goal needs a premise its record does not support. An unsupported downstream judgment the
     compilation can leave open is not this: it stays reserved. False without a pointer. -/
-opaque PointerUnreadable : Context P → Prop
+axiom PointerUnreadable : Context P → Prop
 
 /-- **Your judgment**: an autonomous interval is in scope. -/
-opaque AutonomousIntent : Context P → Prop
+axiom AutonomousIntent : Context P → Prop
 
 /-- **Your judgment**, read off what the goal states: one outcome. Several stated outcomes bound
     only by the host's standing procedural contract are a bundle. -/
-opaque SingleGoal : Context P → Prop
+axiom SingleGoal : Context P → Prop
 
 /-- **Your judgment**, against the plan read back from the carrier the pointer names: its units
     and conditions are already present, every unit closed by a predicate, an accepted residual, or
     a reservation. -/
-opaque ConditionBearing : Context P → Prop
+axiom ConditionBearing : Context P → Prop
 
 /-- **Your record**: the identity the carrier-creating write returned for `C`. -/
-opaque carrierRecord : Context P → String
+axiom carrierRecord : Context P → String
 
 /-- **Your record**: this session's id. -/
-opaque sessionId : Context P → String
+axiom sessionId : Context P → String
 
 /-- **Your reading**: what a receiving session needs to know the plan is for. -/
-opaque purposeFrame : Context P → String
+axiom purposeFrame : Context P → String
 
 /-- **Your reading**: a snapshot anchor, only where exact-state determinacy is needed. -/
-opaque snapshotAnchor : Context P → Option String
+axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
@@ -824,12 +821,12 @@ subtracted obligations, the invariant status with any violation named, and your 
 
 /-- **Your reads** for a pass: ReadObligations' record and artifact reads at activation, Scan's
     seam evidence over the goal's cited substrate while drafting. -/
-opaque collect : Context P → List (Evidence P)
+axiom collect : Context P → List (Evidence P)
 
 /-- **Your record** of a pass, once its reads have entered the context: what the pass above
     read, drafted, relayed, integrated, and derived. `units`, `oos`, `derivation`,
     `planConditions`, and `Stale` are read from these turns. A record grounds nothing. -/
-opaque passRecord : Context P → List (Response P)
+axiom passRecord : Context P → List (Response P)
 
 def pass (c : Context P) : Context P :=
   let c₁ := c ++ (collect c).map (·.val)
@@ -837,7 +834,7 @@ def pass (c : Context P) : Context P :=
 
 /-- **Your action** at Phase 3: the Emit record write of `emit c`, then park_carrier's write of the
     packaged plan into one new carrier record; each returns what it wrote and its identity. -/
-opaque persist : Context P → List (Evidence P)
+axiom persist : Context P → List (Evidence P)
 
 def close (c : Context P) : Apportioned P :=
   let c₃ := c ++ (persist c).map (·.val)
@@ -916,9 +913,9 @@ theorem rerouted_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (h : apportion respond c us = .rerouted c₁) :
     ∃ (c₀ : Context P) (u : Utterance P), c₁ = fuse c₀ u ∧ verdict c₁ = .routeBound
 
-Only a person's statement closes the acceptance question.
-theorem acceptance_by_utterance {c : Context P} {s : Cite c}
-    (ok : (acceptanceCoord (P := P)).admits s.kind) : s.kind = .utterance
+Only a person's turn closes the acceptance question.
+theorem acceptance_by_person {c : Context P} {s : Cite c}
+    (ok : (acceptanceCoord (P := P)).admits s.src) : s.src.val = .person
 
 An unfitting cut is never offered AcceptUnit, and a fitting one never OverrideFit.
 theorem unfit_offers_no_accept (f : SpanFit) (b : Bool) (h : f ≠ .fits) :
@@ -1044,6 +1041,8 @@ Two-way advisory with /conduct, neither direction a precondition, both guarded a
 The receiving session runs the block's grounding instruction against the work at hand; the
 emission supplies no answer to a reserved judgment.
 -/
+
+end
 
 end Merismos
 ```
