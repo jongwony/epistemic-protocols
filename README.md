@@ -8,7 +8,7 @@ When AI collaboration goes off-track, you redo everything. These protocols catch
 
 Correcting a wrong direction at the plan level can cost one conversation turn.
 Once it hardens into code, rollout steps, or downstream explanations, it can cost hours of rework.
-These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution, applicability, recall, and comprehension — so you and AI can surface, judge, and adapt misalignment before it compounds.
+These protocols add structured checkpoints to help you and the AI catch and correct a wrong direction before more work depends on it.
 
 ## Mission and Machinery
 
@@ -28,7 +28,7 @@ Install every protocol:
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` before a refactor that crosses several domains.
+Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
 
 The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and deficit recognition (`/onboard`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, at session start the installed-protocol deficit table with the [premise](./premise) index beneath it, and again at the tool calls the matcher can see are a premise document's moment — an instruction surface changing, work handed to an agent — that document's entry. Add either on its own:
 
@@ -65,7 +65,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 
 | Protocol | Command | When to use |
 |----------|---------|-------------|
-| [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
+| [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown |
 | [Euporia](./euporia) | `/elicit` | You have intent but the decision coordinates are implicit — reverse-trace them from the externalized substrate (codebase, rules, past sessions) until intent crystallizes |
 | [Heuresis](./heuresis) | `/ideate` | The candidate field for a decision is empty or has prematurely converged — widen it into a diverse set before any selection, not after |
 | [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
@@ -75,7 +75,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does, or on a reservation where a judgment rather than a check settles it |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
-| [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
+| [Horismos](./horismos) | `/bound` | You cannot yet see what needs deciding in a task, or which decisions to keep or entrust |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it — one session, or a line of work, topic, or concept spread across several |
 | [Katalepsis](./katalepsis) | `/grasp` | Code, a paper, or a big change you need to actually understand — you can't follow it yet, or you nod along and aren't sure. Verify your understanding is genuine before you approve or build on it |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
@@ -116,6 +116,8 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/goal-research` | A factual research question you want scoped and externally verified in a background Codex session, with the full trace returned |
 
 ### [Route](./route)
+
+> **Experimental.** The hook set and the injected wording can change between releases, and the optional advisory channel is unvalidated — see [route/README.md](./route/README.md) before depending on either.
 
 Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
 
