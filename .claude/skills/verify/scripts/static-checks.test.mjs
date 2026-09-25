@@ -98,7 +98,14 @@ describe('gate-answer-reference', () => {
       const anamnesisPath = path.join(root, 'anamnesis/skills/recollect/SKILL.md');
       const anamnesis = readFileSync(anamnesisPath, 'utf-8');
       assert.ok(anamnesis.includes('→ Stop → U '), 'Anamnesis mutation anchor moved');
-      writeFileSync(anamnesisPath, anamnesis.replaceAll('→ Stop → U ', '→ Stop → Zeta '));
+      const inlineAnchor = '→ Stop → X   -- store-expansion';
+      assert.ok(anamnesis.includes(inlineAnchor), 'Anamnesis inline type anchor moved');
+      writeFileSync(
+        anamnesisPath,
+        anamnesis
+          .replaceAll('→ Stop → U ', '→ Stop → Zeta ')
+          .replace(inlineAnchor, '→ Stop → X ∈ Zeta   -- store-expansion')
+      );
 
       const katalepsisPath = path.join(root, 'katalepsis/skills/grasp/SKILL.md');
       const katalepsis = readFileSync(katalepsisPath, 'utf-8');
@@ -107,11 +114,6 @@ describe('gate-answer-reference', () => {
         katalepsisPath,
         katalepsis.replace('→ Stop → ZeroGapConfirmation ', '→ Stop → Λ.missing_gate_answers ')
       );
-
-      const hyphegesisPath = path.join(root, 'hyphegesis/skills/conduct/SKILL.md');
-      const hyphegesis = readFileSync(hyphegesisPath, 'utf-8');
-      assert.ok(hyphegesis.includes('→ Stop → DM ∈ {'), 'Hyphegesis inline type anchor moved');
-      writeFileSync(hyphegesisPath, hyphegesis.replace('→ Stop → DM ∈ {', '→ Stop → DM ∈ Zeta {'));
 
       const mutated = run(root);
       const failures = mutated.fail
@@ -270,6 +272,11 @@ describe('lean-definition', () => {
 
       write(proofRelative, beforeEnd('private theorem mutation_extra : True := trivial'));
       expectSome(failures(), `declares \`theorem ${ns}.mutation_extra\``);
+      restore();
+
+      // A judgment is a documented axiom of the block, and its type must be inhabited.
+      write(target, withBlock(`${block}\n/-- **Your judgment**: nothing. -/\naxiom mutationEmpty : Empty`));
+      expectSome(failures(), 'has no `Nonempty` instance');
       restore();
 
       // Two commands on one line escape a line-anchored axiom pattern; the

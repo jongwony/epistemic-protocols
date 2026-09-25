@@ -13,6 +13,12 @@ namespace Euporia
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance : Nonempty Answer := ⟨.dismiss⟩
+instance : Nonempty Initiator := ⟨.userInvoked⟩
+
 theorem acceptedAux_skip (x : Coordinate) (pre ts : Context P) (acc : Option Value)
     (h : ∀ t ∈ ts, t.basis ≠ some .utterance) :
     acceptedAux x pre ts acc = acc := by

@@ -17,12 +17,13 @@ Define epistemic boundaries through a recognizable whole map and progressive exa
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -122,6 +123,8 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+
 variable {P : Type}
 
 /-- `TaskScope`: the task or concern needing a boundary; its goal, structure, scope, and
@@ -144,12 +147,12 @@ inductive BoundaryClassification
 
 /-- **Your judgment**: the cited turn establishes this disposition for domain `d` in `c` —
     an instruction, an informed acceptance, or an authorized choice that names it. -/
-opaque DispositionSupported : Domain → Context P → Turn P → BoundaryClassification → Prop
+axiom DispositionSupported : Domain → Context P → Turn P → BoundaryClassification → Prop
 
 /-- **Your judgment**: the cited turn sets this decision content for `d` in `c`. Under an
     `aiAutonomous` grant, the grant is the cited turn and the content must lie within its
     limits. -/
-opaque ContentSupported : Domain → Context P → Turn P → String → Prop
+axiom ContentSupported : Domain → Context P → Turn P → String → Prop
 
 def dispositionOf (d : Domain) : Coord P BoundaryClassification :=
   { admits := (· = .utterance), supports := DispositionSupported d }
@@ -190,9 +193,6 @@ structure BoundaryEssence (c : Context P) where
   openChoices   : List String
   irreversible  : List Domain
 
--- elab: an empty witness lets `readout` be declared `opaque`; it adds no meaning.
-instance {c : Context P} : Inhabited (BoundaryEssence c) := ⟨⟨[], [], "", [], []⟩⟩
-
 /-- The fixed closing offer that ends every round, rendered in the user's language. -/
 def closingOffer : String :=
   "Say \"as is\" and I will stop here and set the boundary."
@@ -200,14 +200,14 @@ def closingOffer : String :=
 /-- **Your judgment**: construct the relevant whole provisional structure from the task and
     everything reachable — decisions, obligations, assumptions, dependencies, and what is
     unknown. -/
-opaque readout : (c : Context P) → BoundaryEssence c
+axiom readout : (c : Context P) → BoundaryEssence c
 
 /-- **Your judgment**: the proposal for `d` would entrust to AI a later act that cannot be
     undone. -/
-opaque Irreversible : Context P → Domain → Prop
+axiom Irreversible : Context P → Domain → Prop
 
 /-- **Your judgment**: `s` is a choice still open at this round. -/
-opaque OpenChoice : Context P → String → Prop
+axiom OpenChoice : Context P → String → Prop
 
 /-- What every round presentation owes, with no extra turn. -/
 def RoundOwes (c : Context P) (r : BoundaryEssence c) : Prop :=
@@ -239,11 +239,10 @@ inductive Verdict
   | withdraw
   /-- the request is a different deficit -/
   | route (d : Deficit)
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
 /-- **Your judgment** on the whole latest utterance read with the context; a request to inspect
     adopts nothing. -/
-opaque verdict : Context P → Verdict
+axiom verdict : Context P → Verdict
 
 abbrev Residual := List (Domain × String)
 
@@ -251,7 +250,7 @@ abbrev Residual := List (Domain × String)
     it. Where the latest utterance accepts the closing offer, that utterance is the citation
     that fills every disposition it covers, proposals shown in the last round included. What
     the acceptance does not cover stays open, with its remainder. -/
-opaque settled : (c : Context P) → BoundaryMap c
+axiom settled : (c : Context P) → BoundaryMap c
 
 def residualOf {c : Context P} (m : BoundaryMap c) : Residual :=
   (m.filter (fun e => e.remainder ≠ "")).map (fun e => (e.domain, e.remainder))
@@ -385,6 +384,8 @@ the affected boundary before dependent settlement. A grant to perform work prese
 checkpoint whose own contract requires the user's response, and reassignment does not enlarge
 authority. This protocol defines the boundary; it does not execute or enforce downstream work.
 -/
+
+end
 
 end Horismos
 ```
