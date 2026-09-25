@@ -14,7 +14,7 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 
 ### The Solution
 
-**Conduction over Substrate**: When two or more moves carry a non-trivial conduct, Hyphegesis drafts the conduct topology over the moves it identifies — the whole method filled in at once, each value shown beside the alternatives it displaces, laid out impact/leverage-first, as one map on one sheet — redraws it after every answer with a ledger of what changed, and hands off a method plan. Only a decision whose deciding evidence does not exist yet is deferred, to an in-session checkpoint. It does not execute the moves, and it never binds a substrate it cannot realize. Single-move work relays to that one protocol instead of being conducted.
+**Conduction over Substrate**: When two or more moves carry a non-trivial conduct, Hyphegesis drafts the conduct topology over the moves it identifies — the whole method filled in at once, each value shown beside the alternatives it displaces, laid out impact/leverage-first, as one map on one sheet — redraws it after every answer with a ledger of what changed, and hands off a method plan. Only a decision whose deciding evidence does not exist yet, or a need the plan foresees that only the user can supply (a secret to set, a deployment handed to runtime), is deferred, to an in-session checkpoint; otherwise the run returns once, with one consolidated summary when the method has run. It does not execute the moves, and it never binds a substrate it cannot realize. Single-move work relays to that one protocol instead of being conducted.
 
 ### Difference from Other Protocols
 
