@@ -98,21 +98,16 @@ describe('gate-answer-reference', () => {
       const anamnesisPath = path.join(root, 'anamnesis/skills/recollect/SKILL.md');
       const anamnesis = readFileSync(anamnesisPath, 'utf-8');
       assert.ok(anamnesis.includes('→ Stop → U '), 'Anamnesis mutation anchor moved');
+      const stateAnchor = '→ Stop → H → recue(V, H) → set(attempts = attempts + 1) → Phase 1';
+      assert.ok(anamnesis.includes(stateAnchor), 'Anamnesis MODE STATE mutation anchor moved');
       const inlineAnchor = '→ Stop → X   -- store-expansion';
       assert.ok(anamnesis.includes(inlineAnchor), 'Anamnesis inline type anchor moved');
       writeFileSync(
         anamnesisPath,
         anamnesis
           .replaceAll('→ Stop → U ', '→ Stop → Zeta ')
+          .replace(stateAnchor, stateAnchor.replace('→ Stop → H ', '→ Stop → Λ.missing_gate_answers '))
           .replace(inlineAnchor, '→ Stop → X ∈ Zeta   -- store-expansion')
-      );
-
-      const katalepsisPath = path.join(root, 'katalepsis/skills/grasp/SKILL.md');
-      const katalepsis = readFileSync(katalepsisPath, 'utf-8');
-      assert.ok(katalepsis.includes('→ Stop → ZeroGapConfirmation '), 'Katalepsis mutation anchor moved');
-      writeFileSync(
-        katalepsisPath,
-        katalepsis.replace('→ Stop → ZeroGapConfirmation ', '→ Stop → Λ.missing_gate_answers ')
       );
 
       const mutated = run(root);
