@@ -484,11 +484,12 @@ def Structural (c : Context P) : Bool :=
     view. Where anything would be taken unseen, the sheet is drawn again. -/
 axiom Covered : Context P → Prop
 
-/-- A line of the sheet, named as the sheet shows it — a unit, a condition, a plan condition, the
-    acceptance criterion, a subtraction, an out-of-scope declaration. -/
+/-- A line of the sheet, named as the sheet shows it — the goal, a unit, a condition, a plan
+    condition, the acceptance criterion, a subtraction, an out-of-scope declaration. -/
 abbrev Entry := String
 
-/-- **Your reading**: the lines the sheet shows as the context now stands. -/
+/-- **Your reading**: the lines the sheet shows as the context now stands — every line on every
+    sheet, an unchanged one drawn again rather than pointed back to on an earlier sheet. -/
 axiom entries : Context P → List Entry
 
 /-- Who first put a value forward. Kept apart from how the value came to stand: a unit the draft
@@ -1060,20 +1061,27 @@ Relay and deactivate when there is no autonomous interval, the request bundles s
 
 ### The sheet
 
-Every turn shows the whole plan on one sheet, in everyday language: each unit with the obligations it owns, whether it fits one run and why, the seam it was cut at with its citation or "no seam in the goal — cut by judgment", what carrying it out needs, and its conditions — the checks that say it is done, the boundaries it keeps, the gaps left unguarded, and the items held open for a later judgment with what will settle them. Below the units stand the whole-goal conditions, the acceptance criterion — the person's, or the draft's marked as the draft's — the obligations set out of scope with who must catch them, and what was left out as the host's own standing procedure. Mark every value as the person's or the draft's. A host that can fold the sheet may; the contract shows it whole.
+Every turn shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence: each unit with the obligations it owns, stated by what they require, whether it fits one run and why, the seam it was cut at with its citation or "no seam in the goal — cut by judgment", what carrying it out needs, and its conditions — the checks that say it is done, the boundaries it keeps, the gaps left unguarded, and the items held open for a later judgment with what will settle them. Below the units stand the whole-goal conditions, the acceptance criterion — the person's, or the draft's marked as the draft's — the obligations set out of scope with who must catch them, and what was left out as the host's own standing procedure. Each field carries its label, so a line reads without knowing the layout. Mark every value as the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
 
 Under the sheet, the ledger of what the last turn changed: the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it and marked as forced by that edit or as your proposal. A removed unit and a replaced value stay in the ledger with what they were. Then your contrary grounds — a cut a second reading backs as well, a whole-goal condition you read as naming an order, a classification you would make otherwise, a unit you expect not to fit.
 
 Then one focus, with concrete actions and what each would do. Mark one action as recommended only where the ground clearly separates it from the others; where the actions are comparable, leave them side by side with their consequences. For a goal to add CSV export to a reports service:
 
 ```
+Goal: customers can download any report as CSV
 Plan — 3 units                                           (you) your value · (draft) proposed
- 1. Export endpoint        obligations: O1 O2    fits    seam: API contract (issue #41)   (draft)
+ 1. Export endpoint                                                                     (draft)
+      obligations: O1 a CSV route per report · O2 the same auth as the JSON route
+      fit: fits one run    seam: API contract ("CSV export" issue, the export API spec)
       done when: GET /reports/{id}.csv returns 200 with the header row          check
       keeps:     existing JSON endpoint unchanged                               check
- 2. Large-report streaming obligations: O3       overflows  seam: none in the goal — judgment (draft)
+ 2. Large-report streaming                                                              (draft)
+      obligations: O3 reports of 100k rows export without timing out
+      fit: overflows one run    seam: none in the goal — cut by judgment
       done when: 100k-row report streams under 30 s                             check
- 3. Docs and changelog     obligations: O4       fits    seam: deliverable     (draft)
+ 3. Docs and changelog                                                                  (draft)
+      obligations: O4 the export is documented for customers
+      fit: fits one run    seam: deliverable
       held open: whether the changelog wording suits customers — settled by the release owner
 Whole goal: all three units done and the JSON suite still green                         (draft)
 Acceptance: "a customer downloads any report as CSV" — draft's criterion                (draft)
@@ -1114,7 +1122,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 - **Separate activation**: Emission completes the epistemic work. Starting the autonomous interval is a separate constitutive act by the user.
 - **No-reentry across the `/conduct` seam**: Carry the parked plan by navigation block rather than copying it. Fixed topology is not re-conducted, and a trivial unit arrangement bypasses `/conduct`.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-- **One sheet, every turn**: Show the whole plan every turn — units, conditions, whole-goal conditions, the acceptance question, out-of-scope and subtracted obligations — with the ledger of what the last turn changed. Do not split the plan across turns or stage it into gates.
+- **One sheet, every turn**: Show the whole plan every turn — the goal, units, conditions, whole-goal conditions, the acceptance question, out-of-scope and subtracted obligations — with the ledger of what the last turn changed. Draw an unchanged line again rather than pointing back to an earlier sheet. Do not split the plan across turns or stage it into gates.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
 - **The person takes and closes**: The plan is taken, stopped, or routed only by the person's turn, whatever its form. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
 - **Contrary grounds ride the plan**: Show your contrary grounds before the focus. A reading of yours — a whole-goal condition that names an order, a cut a second reading backs as well — never refuses a taking; a plan taken over it carries it as dissent.
