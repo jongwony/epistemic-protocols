@@ -9,7 +9,7 @@ Conduct how a session's epistemic work will be carried out — the order, indepe
 
 ## Definition
 
-**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work — deciding how its multiple cognitive moves relate in order, independence, reconciliation, termination, and routing — when the method is underdetermined while the goal is clear. The protocol's lexical verb is `/conduct`. It activates only when the work needs two or more moves whose conduct is non-trivial (single-move work relays to that one protocol). It lays out one map of the whole method before anything is asked — the work prospect's brief, the move set, a proposed region cut with what it read to cut that way, and every axis·region filled with a reasoned value shown beside the alternatives it displaces — drawn as a graph, and draws it again after every answer with what changed shown before and after, so a correction upstream re-fills what depends on it while every value the user set stays theirs. It takes the method on the user's word once everything taken was shown with its evidence, registers an in-session checkpoint when a constitutive decision's evidence does not yet exist (synthesis output shape generally; cell membership in the decompose-recovery instance), surfaces substrate feasibility on the map before the method is taken, compiles a decision-typed Recognition brief into every checkpoint, assembles a cross-cutting trace contract (its disclosure overlay over the five axes — adoptions, degradations, coverage caps, never silent), and hands off a method plan that the substrate — not Hyphegesis — executes.
+**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work — deciding how its multiple cognitive moves relate in order, independence, reconciliation, termination, and routing — when the method is underdetermined while the goal is clear. The protocol's lexical verb is `/conduct`. It activates only when the work needs two or more moves whose conduct is non-trivial (single-move work relays to that one protocol). It lays out one map of the whole method before anything is asked — the work prospect's brief, the move set, a proposed region cut with what it read to cut that way, and every axis·region filled with a reasoned value shown beside the alternatives it displaces — on one sheet, and draws it again after every answer with a ledger of what changed, so a correction upstream re-fills what depends on it while every value the user set stays theirs. It takes the method on the user's word once everything taken was shown with its evidence, registers an in-session checkpoint when a constitutive decision's evidence does not yet exist (synthesis output shape generally; cell membership in the decompose-recovery instance), surfaces substrate feasibility on the map before the method is taken, compiles a decision-typed Recognition brief into every checkpoint, assembles a cross-cutting trace contract (its disclosure overlay over the five axes — adoptions, degradations, coverage caps, never silent), and hands off a method plan that the substrate — not Hyphegesis — executes.
 
 ```lean
 /-!
@@ -32,11 +32,15 @@ Hyphegesis(WP) → conduct(c, utterances), where c is the fused session context:
     verdict(c') = route(target) → proceed to the protocol the person named, citing their words
     the pointer does not resolve, or conduction is no longer warranted → relay → report
     verdict(c') = sufficient ∧ Covered(c') → the conduct trace → handoff → ConductedMethod
-    otherwise → the map again, drawn from c', with what the answer changed shown before → after
+    otherwise → the map again, drawn from c', with a ledger of what the answer changed
   no utterance: the map holds; nothing is taken
-The map is one graph of the whole method: the brief, the move set, the region cut, and every
-axis·region slot — each value with its ground, the other values by name, and the differential
-where the plan turns; each value the person set marked as theirs.
+  after handoff: the substrate runs the method and returns one consolidated summary of every
+    region's results; it returns mid-run only at a registered checkpoint, or where execution needs
+    what only the person can supply
+The map is one sheet of the whole method: the brief; the moves as an outline under their regions,
+links drawn only where a move joins more than one predecessor; the region cut; and every
+axis·region slot in a table — each value with its ground, the other values by name, and the
+differential where the plan turns; each value marked as the person's or the draft's.
 -/
 
 /-! ── MORPHISM ──
@@ -44,15 +48,15 @@ WorkProspect × MoveGround
   → brief(method, conduction_warrant)         -- infer the work prospect's method-brief; judge whether conduction is warranted, at activation and after every utterance
   → guard(relay_test, anti_self_application)  -- work that does not need conducting relays as a recommendation; Hyphegesis does not conduct Hyphegesis
   → identify(moves)                           -- candidate cognitive moves read off the move ground; they enter the map as the draft's move set, for Recognition (`Recognition over Recall`)
-  → draft(map)                                -- one map of the whole method — brief, moves, cut, every axis·region — each value beside the alternatives it displaces, drawn as a graph before anything is answered
-  → design(map)                               -- the person points at what the map got wrong, in any layer, or sets values directly; every value they set is theirs, and the map is drawn again around it with what changed shown before → after
+  → draft(map)                                -- one map of the whole method — brief, moves, cut, every axis·region — each value beside the alternatives it displaces, laid out on one sheet before anything is answered
+  → design(map)                               -- the person points at what the map got wrong, in any layer, or sets values directly; every value they set is theirs, and the map is drawn again around it with a ledger of what changed and why
   → settle(map)                               -- on the person's sufficient, each value the method takes is recorded as set, adopted on closure with its ground, or adopted as the default — only once every one of them was shown with its evidence
   → assign(moves, topology) → move_assignment  -- place every move into its region and into its slot under the resolved order
   → annotate(substrate_feasibility)           -- realizability read from an observation of the loaded inventory, shown on the map before the method is taken
   → carry(work_pointer)                       -- carry the navigation block the work arrived under onto the emitted method, whole and unchanged
   → compile(checkpoint_briefs)                -- for every deferred decision, compile the decision-typed Recognition presentation contract the substrate executes there (structure, not content)
   → contract(trace_disclosure)                -- adoptions + degradations + coverage caps + termination grounds; surfaced, never silent
-  → handoff(conducted_method)                 -- emit the method plan + in-session checkpoints, then stop (substrate executes)
+  → handoff(conducted_method)                 -- emit the method plan + in-session checkpoints, then stop (substrate executes, and returns one consolidated summary when the method has run)
   → ConductedMethod
 requires: method_underdetermined(WP)           -- runtime checkpoint (Phase 0)
 deficit:  MethodUnderdetermined                -- activation precondition (Layer 1/2)
@@ -292,10 +296,14 @@ inductive Termination
   | untilGoalMet (g : GoalGround)
   | emergent (e : Emergent)
 
-/-- `handoffToProtocol` carries the protocol it routes to; `handoffToSpan` sends the output across
-    the span wall to a future span that does not share this session's context. -/
+/-- Where a region's output goes. `handoffToProtocol` carries the protocol it routes to;
+    `handoffToSpan` sends the output across the span wall to a future span that does not share
+    this session's context. -/
 inductive Routing
-  | returnToUser | chainToNext | handoffToProtocol (target : String) | deepenOnFinding
+  /-- the region's result is included in the one consolidated summary returned to the person
+      after the whole method has run; it does not pause execution -/
+  | returnToUser
+  | chainToNext | handoffToProtocol (target : String) | deepenOnFinding
   | handoffToSpan
   | emergent (e : Emergent)
 
@@ -538,14 +546,32 @@ structure CoverageLimit where
     `emergent`. -/
 opaque coverageLimits : Context P → List CoverageLimit
 
-/-- Who put a layer of the map in force: the person, or the draft the closing utterance took. -/
-inductive Source | person | draft
+/-- Who first put a value forward: the draft, or the person naming one the draft did not offer.
+    Kept apart from how the value came into force — a move the draft proposed and the person kept
+    while removing another was proposed by the draft and set by the person. -/
+inductive Proposer | draft | person
 
-def sourceOf {A : Type} {q : Coord P A} {c : Context P} (o : Occ q c) : Source :=
-  if isFilled o then .person else .draft
+/-- What the closing record names a proposer for. -/
+inductive Entry
+  | move (m : Move)
+  | cut
+  | slot (s : Slot)
 
-/-- How a slot's value became the method's. The proposal's origin is kept apart from its
-    adoption: a drafted value the closing utterance took is adopted, never unconstituted. -/
+-- elab: a witness lets `proposer` be declared `opaque`; it adds no meaning.
+instance : Inhabited Proposer := ⟨.draft⟩
+
+/-- **Your reading** from the context: who first put forward what `e` holds now. -/
+opaque proposer : Context P → Entry → Proposer
+
+/-- How the move set or the cut came into force: the person's statement set it — named or
+    edited — or the closing utterance adopted the draft's. -/
+inductive Standing | set | adopted
+
+def standingOf {A : Type} {q : Coord P A} {c : Context P} (o : Occ q c) : Standing :=
+  if isFilled o then .set else .adopted
+
+/-- How a slot's value came into force. Kept apart from who proposed it: a drafted value the
+    closing utterance took is adopted, never unconstituted. -/
 inductive Adoption
   /-- the person set it -/
   | set
@@ -560,16 +586,18 @@ def adoption (c : Context P) (s : Slot) : Adoption :=
     | some g => .adopted g
     | none   => .defaulted
 
-/-- The method's cross-cutting disclosure overlay; surfaced, never silent. -/
+/-- The method's cross-cutting disclosure overlay; surfaced, never silent. Every entry carries who
+    proposed it apart from how it came into force. -/
 structure TraceContract where
-  moves              : Source
-  cut                : Source
-  slots              : List (Slot × Adoption)
+  moves              : Standing × List (Move × Proposer)
+  cut                : Standing × Proposer
+  slots              : List (Slot × Proposer × Adoption)
   degradations       : List Degradation
   coverageLimits     : List CoverageLimit
   terminationGrounds : List (Region × TerminationGround)
 
-/-- A decision whose deciding evidence exists only at the checkpoint. -/
+/-- A decision, or a supply, whose deciding evidence exists only at the checkpoint. The run pauses
+    for the person only here or where execution needs what only the person can supply. -/
 inductive DeferredDecision | synthesisOutputShape | emergent (name : String)
 
 /-- `Slot(T)`: a typed placeholder compiled at design time and filled by the substrate at
@@ -617,13 +645,15 @@ structure Checkpoint where
   advisory : Bool
 
 /-- A region owes the synthesis checkpoint when its reconciliation contains `synthesis` and its
-    output returns to the person or crosses the span wall. -/
+    output goes to the person's end-of-run summary or crosses the span wall. -/
 def owesSynthesis (c : Context P) (r : Region) : Bool :=
   containsSynthesis (take c (.edge .reconciliation r)) && returnsOrCrosses (take c (.edge .routing r))
 
 /-- **Your reading**: the non-axis decisions for `r` whose deciding evidence does not exist at
-    design time and does at the checkpoint — `synthesisOutputShape` whenever `owesSynthesis`,
-    the cell membership of the decompose-recovery instance among the emergent ones. -/
+    design time and does at the checkpoint — `synthesisOutputShape` whenever `owesSynthesis`;
+    among the emergent ones, the cell membership of the decompose-recovery instance, and a need the
+    plan anticipates that only the person can supply before `r` can run — a secret or credential
+    to set, a deployment handed to runtime — registered before the move that needs it. -/
 opaque deferred : Context P → Region → List DeferredDecision
 
 /-- **Your compilation** of the brief the decision calls for, from the current topology and move
@@ -656,9 +686,13 @@ structure SpanExternalization where
 def spanAnnotations (c : Context P) (rs : List Region) : List SpanExternalization :=
   (rs.filter (fun r => crossesSpan (take c (.edge .routing r)))).map (fun r => ⟨r, recordSurface c r⟩)
 
-/-- `ConductedMethod`: the plan handed off; the substrate executes it. `c` is the session context
-    its citations resolve in, and is not part of what the handoff dispatches: a record the pointer
-    names stays where its locator names. -/
+/-- `ConductedMethod`: the plan handed off; the substrate executes it and, when the method has
+    run, returns one consolidated summary of every region's results to the person. Mid-run it
+    returns to the person only at a registered checkpoint, or where execution needs what only the
+    person can supply and no checkpoint anticipated it — a secret or credential, a runtime error
+    it cannot resolve, a deployment handed to runtime. `c` is the session context its citations
+    resolve in, and is not part of what the handoff dispatches: a record the pointer names stays
+    where its locator names. -/
 structure ConductedMethod (P : Type) (c : Context P) where
   topology    : (s : Slot) → SlotVal s
   moves       : MoveSet
@@ -683,9 +717,9 @@ def method (c : Context P) : ConductedMethod P c :=
     checkpoints := checkpoints c rs
     feasibility := feasibility c
     spans       := spanAnnotations c rs
-    trace       := { moves := sourceOf (moveSet c)
-                     cut := sourceOf (cutSet c)
-                     slots := (slotsOf rs).map (fun s => (s, adoption c s))
+    trace       := { moves := (standingOf (moveSet c), ms.map (fun m => (m, proposer c (.move m))))
+                     cut := (standingOf (cutSet c), proposer c .cut)
+                     slots := (slotsOf rs).map (fun s => (s, proposer c (.slot s), adoption c s))
                      degradations := degradations c rs
                      coverageLimits := coverageLimits c
                      terminationGrounds := terminationGrounds c rs }
@@ -771,19 +805,24 @@ noncomputable def start (respond : Context P → Response P) (c : Context P)
   | none   => conduct respond (c₁ ++ [(respond c₁).val]) us
 
 /-! ── LOOP ──
-Every map re-reads the whole context. It shows the method whole, as a graph: the brief and its
-warrant, the moves, the cut with what was read to cut that way and the affordance to replace it,
-and every slot — each value the person set marked as theirs and not re-offered; every other value
-with its ground, the other values of its axis by name, the affordance to propose a value no list
-names (and, on reconciliation, to compose two), and the differential for the alternative that
-most changes the plan; each region's observed realizability, or that it is unobserved. After an
-answer, the part of the graph it moved is shown as it stood and as it stands. A slot the person
-opens for a fuller look is expanded in the next map with every value of its axis. No round cap:
-the person ends the run with `sufficient`, `withdraw`, or a named protocol. A decision whose
-evidence does not exist at design time is never drafted as an axis value; it registers as a
-checkpoint. After handoff, the substrate conducts to the last checkpoint and executes; a
-checkpoint may re-open Constitution mid-execution. The span ends at the next planned `/compact`
-or `/clear`, which the person types.
+Every map re-reads the whole context. It shows the method whole, on one sheet: the brief and its
+warrant; the moves as an outline under their regions, links drawn only where a move joins more
+than one predecessor, placed as they were last turn; the cut with what was read to cut that way
+and the affordance to replace it; and every slot in a table — each value the person set marked as
+theirs and not re-offered; every other value marked as the draft's, with its ground, the other
+values of its axis by name, the affordance to propose a value no list names (and, on
+reconciliation, to compose two), and the differential for the alternative that most changes the
+plan; each region's observed realizability, or that it is unobserved. After an answer, a ledger
+says what it changed: the person's edits first, then each value the draft re-filled because of
+them, pointing to the edit that caused it, each marked a necessary consequence or a proposal. A
+slot the person opens for a fuller look is expanded in the next map with every value of its axis.
+No round cap: the person ends the run with `sufficient`, `withdraw`, or a named protocol. A
+decision whose evidence does not exist at design time is never drafted as an axis value; it
+registers as a checkpoint, as does a need the plan anticipates that only the person can supply.
+After handoff, the substrate conducts to the last checkpoint and executes; a checkpoint may
+re-open Constitution mid-execution; when the method has run, the substrate returns one
+consolidated summary. The span ends at the next planned `/compact` or `/clear`, which the person
+types.
 -/
 
 /-!
@@ -829,18 +868,20 @@ theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (
 
 /-! ── CONVERGENCE ──
 conducted(WP): the method handed off on the person's covered `sufficient`, after the conduct
-trace reached them. Convergence evidence, before the dispatch: the move set and the cut, each
-with whether the person set it or took the draft's; for each move, its region and its slot under
-the resolved order; for each slot, (slot → the value the person set), (slot → the draft's value →
-its ground → adopted on closure), or (slot → `defaultValue` → nothing grounded a preference →
-adopted on closure) — three different facts, never flattened; the feasibility of every region, an
+trace reached them. Convergence evidence, before the dispatch: the full state to be taken, every
+entry with who proposed it — the draft or the person — recorded apart from how it came into
+force; the move set and the cut, each set by the person's statement (named or edited) or adopted
+from the draft; for each move, who proposed it, its region, and its slot under the resolved
+order; for each slot, (slot → the value the person set), (slot → the draft's value → its ground
+→ adopted on closure), or (slot → `defaultValue` → nothing grounded a preference → adopted on
+closure) — three different facts, never flattened; the feasibility of every region, an
 unobserved one said to be unobserved; the span annotations, an empty set shown as empty; every
 checkpoint with its compiled brief; and the trace contract — every adoption, degradation,
 coverage cap, and termination ground, a `resolutionRequired` ground shown with its resolver and
 marked unroutable where that resolver cannot reach the region before its stop is wanted, the
 basis shown with it. The dissent attached to the method is shown beside it. Any tally is read
-off the rows shown. What the closing utterance itself changed is shown first, before → after on
-the graph, as every other answer's change is. Demonstrated, not asserted.
+off the rows shown. What the closing utterance itself changed is shown first, as a ledger, as
+every other answer's change is. Demonstrated, not asserted.
 -/
 
 /-!
@@ -907,19 +948,19 @@ def grounding : Op → Annot × String
   | .moveId             => (.observe, "artifact read, artifact search: the move ground — the context together with each available protocol's own deficit and resolution — read for the draft's move set")
   | .readAnswer         => (.sense, "Internal analysis: the latest utterance read whole with the context — the verdict, and every edit it makes to the brief, the moves, the cut, or a slot, with the scope each denotes")
   | .draft              => (.sense, "Internal analysis: the whole method drafted from the context — the proposed cut read from the moves' non-uniformity, every slot with its value, ground, and the differential where the plan turns — around every value the person set, naming a decision whose reach an upstream change left unclear")
-  | .map                => (.extension, "TextPresent+Proceed: the whole map as a graph — moves as nodes with short ids, order as edges, regions as groups, slot values as annotations, everyday names in a legend beside the drawing; each value the person set marked as theirs, every other value with its ground, every named alternative, the emergent affordance, the composition affordance on reconciliation, and the differential that most changes the plan; each region's observed realizability or that it is unobserved; your contrary grounds; after an answer, the part of the graph it moved shown before → after")
+  | .map                => (.extension, "TextPresent+Proceed: the whole map on one sheet — the brief first; the moves as a named, indented outline under their regions, each line an id with its short everyday name in place and `after` naming what it follows, ASCII links drawn only where a move joins more than one predecessor, placement held from turn to turn; the slot values as a table, region by axis, each cell marked you or draft and a changed cell written old → new; each value the person set marked as theirs, every other value with its ground, every named alternative, the emergent affordance, the composition affordance on reconciliation, and the differential that most changes the plan; each region's observed realizability or that it is unobserved; your contrary grounds; after an answer, the change ledger — the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it, written changed input → affected slot → consequence and marked a necessary consequence or your proposal; a removed move and a replaced value stay in the ledger")
   | .mapGate            => (.constitution, "present: what the map got wrong, anywhere on it — or sufficient to take the method as shown, withdraw, or another protocol by name; silence holds and takes nothing")
   | .withdrawal         => (.extension, "TextPresent+Proceed: on the person's withdraw, what stood — the map as last shown — reported with nothing handed off")
   | .routeExit          => (.extension, "TextPresent+Proceed: on the person's named protocol, proceed to it citing their words; its Constitution gates fire unchanged")
-  | .settle             => (.sense, "Internal analysis: on a covered sufficient, each value the method takes with how it became the method's — set by the person, adopted on closure with the draft's ground, or adopted as the default — and the move placements and checkpoints it induces")
+  | .settle             => (.sense, "Internal analysis: on a covered sufficient, each value the method takes with who proposed it and, apart from that, how it came into force — set by the person, adopted on closure with the draft's ground, or adopted as the default — and the move placements and checkpoints it induces")
   | .compileBriefs      => (.sense, "Internal analysis: for every checkpoint, the decision-typed brief compiled from the topology and move set taken — structure, never a copy of execution content — marked advisory where an observed infeasibility reaches the checkpoint itself")
-  | .assembleTrace      => (.sense, "Internal analysis: the trace contract — the moves' and cut's source, every slot's adoption, degradations, coverage caps, termination grounds — assembled from the method taken; never gated")
+  | .assembleTrace      => (.sense, "Internal analysis: the trace contract — the moves' and cut's proposer and standing, every slot's proposer and adoption, degradations, coverage caps, termination grounds — assembled from the method taken; never gated")
   | .surfaceAssignment  => (.extension, "TextPresent+Proceed: every move with its region and its slot under the resolved order")
   | .surfaceAnnotations => (.extension, "TextPresent+Proceed: every span externalization obligation, the empty set surfaced as empty")
   | .surfaceTrace       => (.extension, "TextPresent+Proceed: every adoption, degradation, coverage cap, and termination ground with what it was read against; a resolutionRequired ground with its resolver, marked unroutable where the resolver cannot reach the region before its stop is wanted, with that reading's basis")
   | .surfaceBriefs      => (.extension, "TextPresent+Proceed: each compiled checkpoint brief, an advisory one shown as advisory")
-  | .converge           => (.extension, "TextPresent+Proceed: the conduct trace whole before the dispatch — what the closing utterance itself changed, before → after on the graph; placements, per-slot adoptions, feasibility, span annotations, checkpoint briefs, the trace contract, and the dissent attached to the method")
-  | .handoff            => (.dispatch, "delegate: after the conduct trace, the ConductedMethod handed to the substrate, which executes it — its fields, never the session context its citations resolve in; the span annotations delegate the record and navigation-block production a crossing region owes, and an incoming pointer rides the method unchanged while the record it names stays where its locator names")
+  | .converge           => (.extension, "TextPresent+Proceed: the conduct trace whole before the dispatch — what the closing utterance itself changed, as a ledger; the full state to be taken, each entry with who proposed it apart from how it came into force; placements, per-slot adoptions, feasibility, span annotations, checkpoint briefs, the trace contract, and the dissent attached to the method")
+  | .handoff            => (.dispatch, "delegate: after the conduct trace, the ConductedMethod handed to the substrate, which executes it — its fields, never the session context its citations resolve in; when the method has run, the substrate returns one consolidated summary of every region's results to the person; mid-run it returns to the person only at a registered checkpoint, or where execution needs what only the person can supply and no checkpoint anticipated it — a secret or credential, a runtime error it cannot resolve, a deployment handed to runtime — naming what it needs; the span annotations delegate the record and navigation-block production a crossing region owes, and an incoming pointer rides the method unchanged while the record it names stays where its locator names")
   | .seam               => (.extension, "TextPresent+Proceed: at a chain the person declared naming the next protocol, proceed to it citing that source; a composition edge this file declares is offered as a hint, never taken on its own; a region crossing the span wall names no next protocol — its record's producer supplies the navigation block; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-! ── COMPOSITION ──
@@ -943,11 +984,13 @@ Present one map of the whole method at activation and again after every answer. 
 
 Order the candidate moves by salience against the session aim, so confirming them is recognizing the accumulated shape rather than recalling a graph the user no longer holds in view. Lay the slots out most-constrained first — the axis·region whose values most divide the downstream plans leads — and expand opened slots in that same order.
 
-Draw the map as a graph: moves as nodes with short ASCII ids (`M1`, `M2`), order as edges, regions as labelled groups (`R1`), and each slot's value as an annotation on its region. Put everyday-language names in a legend beside the drawing rather than inside it: display width is not character count, and a label padded by counting characters breaks the drawing. For every slot, show its value, its ground, every named alternative, an emergent-value affordance, the composition affordance on reconciliation, and the differential for the alternative that most changes the plan. Mark each value the person set as theirs. Show each region's observed realizability, or say it is unobserved. Where you would set a slot otherwise, doubt the cut, or expect the inventory cannot realize a region, say so with its ground before the gate; a method taken over it carries that dissent. Then ask what is wrong, anywhere on the map, or whether to take it; silence holds and takes nothing.
+Lay the map out on one sheet. Write the moves as a named, indented outline nested under their regions — each line an id with its short everyday name in place (`M1 audit each PR`) and `after M1` naming what it follows — so no legend has to be looked up. Draw ASCII links only where a move joins more than one predecessor, where a list would have to repeat it; keep every move where it stood last turn. Put the slot values in a table, region by axis, each cell marked `you` or `draft`, with a changed cell written `old → new`; keep labels short, since display width is not character count and a column padded by counting characters breaks. For every slot, show its value, its ground, every named alternative, an emergent-value affordance, the composition affordance on reconciliation, and the differential for the alternative that most changes the plan. Show each region's observed realizability, or say it is unobserved. Where you would set a slot otherwise, doubt the cut, or expect the inventory cannot realize a region, say so with its ground before the gate; a method taken over it carries that dissent. Then ask what is wrong, anywhere on the map, or whether to take it; silence holds and takes nothing.
 
-After an answer, draw the map again from the whole context and show what the answer changed, before → after: the part of the graph it moved, first as it stood and then as it stands, so the person checks the change instead of re-reading the map. A change upstream re-fills what depends on it. A value the person set stays theirs on the scope they set it for; where the change leaves that scope unclear, name the decision and the slots it may reach, and leave them open. A slot the person opens for a fuller look is expanded in the next map with every value of its axis and each value's differential.
+After an answer, draw the map again from the whole context and put a change ledger under it, so the person checks the change instead of re-reading the map. List the person's own edits first, then each value the draft re-filled because of them, each line pointing to the edit that caused it and written as changed input → affected slot → consequence, marked as a necessary consequence of that edit or as your proposal. A removed move and a replaced value stay in the ledger with what they were. A value the person set stays theirs on the scope they set it for; where the change leaves that scope unclear, name the decision and the slots it may reach, and leave them open. A slot the person opens for a fuller look is expanded in the next map with every value of its axis and each value's differential.
 
-Take the method only when every value it takes was shown with its ground, its region's realizability, and your contrary grounds; otherwise draw the map again. On a withdrawal, report what stood and hand nothing off. On a protocol the person names, go to it citing their words. Read `references/round-composition.md` before composing when terminology or wording must remain stable, material belongs to another turn or the trace, or where a sentence sits relative to the gate is in question.
+Take the method only when every value it takes was shown with its ground, its region's realizability, and your contrary grounds; otherwise draw the map again. Before handing it off, show the full state to be taken, each entry with who proposed it — the draft or the person — kept apart from how it came into force: set by the person, or adopted on closure. On a withdrawal, report what stood and hand nothing off.
+
+A region routed back to the person does not pause the run: its result goes into the one consolidated summary returned when the whole method has run. The run returns to the person mid-way only at a checkpoint or where execution needs what only the person can supply — a secret or credential to set, a runtime error it cannot resolve, a deployment handed to runtime. Register such a need as a checkpoint before the move that needs it when the plan can see it coming; one it cannot is the substrate's to bring back, naming what it needs. On a protocol the person names, go to it citing their words. Read `references/round-composition.md` before composing when terminology or wording must remain stable, material belongs to another turn or the trace, or where a sentence sits relative to the gate is in question.
 
 Text injected into the session, the system prompt among it, grounds no realizability verdict: where nothing observed a region's realizability, say it is unobserved. Record infeasibility instead of silently binding an unrealizable substrate. Cross-span routing declares only the durable-record externalization obligation; author-side portability auditing and far-side compile-back remain outside this protocol.
 
@@ -958,8 +1001,9 @@ At a synthesis checkpoint, present the compiled references and slots rather than
 - **Conduction warrant**: Require a genuinely underdetermined, non-trivial conduct over at least two moves, judged again after every answer. Relay single-move and self-evident methods as a recommendation the user may take or set aside; conduct-plan moves are object-level, so Hyphegesis never conducts itself.
 - **Recognition over Recall**: Present genuinely viable options with differential futures and yield at every Constitution interaction. Collapse shared-trajectory candidates before presentation, while preserving the map's yield through which the user constitutes the whole method — brief, moves, cut, and slots together.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn or trace, or placement relative to the gate is in question.
-- **Map change shown**: After every answer, show what it changed as the moved part of the graph before and after. A value the user set stays theirs on its scope; an upstream change that leaves its reach unclear is named and left open, never silently re-drafted.
-- **Adoption covered**: Take the method only on the user's `sufficient` over a map that showed every value taken with its ground, its region's observed realizability, and your contrary grounds. Record each drafted value it takes as adopted on closure, apart from the values the user set.
+- **Map change shown**: After every answer, show what it changed as a ledger under the current map — the user's edits first, then each re-drafted value pointing to the edit that caused it, marked necessary consequence or proposal. A value the user set stays theirs on its scope; an upstream change that leaves its reach unclear is named and left open, never silently re-drafted.
+- **Adoption covered**: Take the method only on the user's `sufficient` over a map that showed every value taken with its ground, its region's observed realizability, and your contrary grounds. Record who proposed each value apart from how it came into force: set by the user, or adopted on closure.
+- **Return at the end**: A region routed back to the user adds its result to the one consolidated summary returned after the method has run; it does not pause execution. The run returns mid-way only at a checkpoint or where execution needs what only the user can supply.
 - **Convergence evidence**: Before dispatch, demonstrate the final move assignment, the moves' and cut's source, each axis·region's set / adopted / default disposition, substrate annotations, compiled checkpoints, and trace contract. Derive any tally from the rows actually shown; `order` has one `{whole}` row while the other axes are edge-local.
 - **Trace contract**: Surface the adoption dispositions, current degradations, coverage caps, and carried termination grounds as one cross-cutting overlay, never as a sixth gated axis. Mark `resolution_required` as unroutable only from the final plan's resolver-reachability evidence; cross-span output routing alone does not make its in-region resolver unreachable.
 - **Decompose recovery**: Read `references/decompose-recovery.md` before the `/ground` Split → cell-assignment checkpoint → per-cell `/induce` instance. The split remains object-level and owns no orchestration.
