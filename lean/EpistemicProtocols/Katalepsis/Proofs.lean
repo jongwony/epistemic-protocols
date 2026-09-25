@@ -13,6 +13,14 @@ namespace Katalepsis
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance : Nonempty RouteMap := ⟨⟨[], [], [], []⟩⟩
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
+instance : Nonempty Gate := ⟨.entrySelection⟩
+instance : Nonempty Verdict := ⟨.cont⟩
+
 theorem silence (respond : Context P → Gate → Response P) (trace : Context P → Response P)
     (c : Context P) : grasp respond trace c [] = .holding c := by
   simp [grasp]

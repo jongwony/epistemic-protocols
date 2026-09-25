@@ -13,12 +13,13 @@ Achieve certain comprehension of a target in play — code, a document, a result
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -164,6 +165,8 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 
 /-! ── TYPES ── -/
 
+noncomputable section
+
 variable {P : Type}
 
 /-- `R` with `U`: the comprehension target — the code, document, result, or other material
@@ -200,28 +203,22 @@ structure RouteMap where
   hiddenRoutes  : List String
   openQuestions : List RouteQuestion
 
--- elab: an empty witness lets `routeMap` be declared `opaque`; it adds no meaning.
-instance : Inhabited RouteMap := ⟨⟨[], [], [], []⟩⟩
-
 /-- **Your judgment** at Phase 0, from the target, the user's wording, and the context: the
     likely intents, the entries derived from them, and their route annotations. -/
-opaque routeMap : Context P → RouteMap
+axiom routeMap : Context P → RouteMap
 
 /-- **Your judgment**: the cited utterance selects these entry points, in order — offered
     entries, or a path the user wrote that stays within TargetUngrasped → VerifiedUnderstanding.
     Distinct concerns the user already named become the ordered list directly. -/
-opaque SelectionSupported : Context P → Turn P → List EntryPoint → Prop
+axiom SelectionSupported : Context P → Turn P → List EntryPoint → Prop
 
 /-- The selection is the user's: only their statement fills it. -/
 def selectionCoord : Coord P (List EntryPoint) :=
   { admits := (· = .utterance), supports := SelectionSupported }
 
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
-
 /-- **Your judgment**: the selection the user's latest answer at entry selection made; open
     where it made none. -/
-opaque selection : (c : Context P) → Occ (selectionCoord (P := P)) c
+axiom selection : (c : Context P) → Occ (selectionCoord (P := P)) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _   => false
@@ -241,18 +238,18 @@ structure Task where
 
 /-- **Your record**, read from the context: the registered tasks in selection order, each keyed
     by the identity its registration write returned. -/
-opaque tasks : Context P → List Task
+axiom tasks : Context P → List Task
 
 /-- **Your judgment**: the cited utterance closes task `t` — `Confirm` at its zero-gap finding,
     or `sufficient` at its coverage gate. -/
-opaque CompletionSupported : RecordId → Context P → Turn P → Unit → Prop
+axiom CompletionSupported : RecordId → Context P → Turn P → Unit → Prop
 
 /-- A task is completed only by the user's statement. -/
 def completionCoord (t : RecordId) : Coord P Unit :=
   { admits := (· = .utterance), supports := CompletionSupported t }
 
 /-- **Your judgment**: whether the user has closed task `t`. -/
-opaque completion : (c : Context P) → (t : RecordId) → Occ (completionCoord (P := P) t) c
+axiom completion : (c : Context P) → (t : RecordId) → Occ (completionCoord (P := P) t) c
 
 /-- The task verification is on: the first registered task the user has not closed. -/
 def current (c : Context P) : Option Task :=
@@ -262,7 +259,7 @@ def current (c : Context P) : Option Task :=
     selection, the first entry selected; at a selection made after a missed answer was read as
     aimed at another intent, the entry that selection named — the first such task the user has
     not closed. -/
-opaque selectedTask : Context P → Option Task
+axiom selectedTask : Context P → Option Task
 
 /-- A comprehension gap type. -/
 inductive GapType
@@ -295,11 +292,11 @@ def probeKind : GapType → Option ProbeForm
 
 /-- **Your reading** of the gap types relevant to task `t`'s entry point, the Horizon apart —
     an Emergent one included where a Reopen named it. -/
-opaque gaps : Context P → RecordId → List Selectable
+axiom gaps : Context P → RecordId → List Selectable
 
 /-- **Your record**, read from the context: the aspects already probed for task `t`, the
     Horizon probe apart. -/
-opaque probed : Context P → RecordId → List Selectable
+axiom probed : Context P → RecordId → List Selectable
 
 /-- `HC`: a co-intended but unspoken edge inside the selected entry point. -/
 structure HorizonCandidate where
@@ -314,7 +311,7 @@ structure HorizonCandidate where
     a route-selection question nor a decision gap. An edge the user has since spoken no longer
     qualifies, and an answer can bring a new one into view. Whether two candidates are the same
     edge is read here. -/
-opaque qualifying : Context P → RecordId → List HorizonCandidate
+axiom qualifying : Context P → RecordId → List HorizonCandidate
 
 /-- A Horizon is admissible only where exactly one candidate qualifies; several weak ones
     competing detect none. -/
@@ -326,7 +323,7 @@ def admissible (c : Context P) (t : RecordId) : Option HorizonCandidate :=
 /-- **Your judgment**, read from your own turns in the context: a Horizon probe for `hc`'s edge
     on task `t` has already been presented. The user saw only its scenario; your own turn is
     what tells you which edge it was for. -/
-opaque Asked : Context P → RecordId → HorizonCandidate → Prop
+axiom Asked : Context P → RecordId → HorizonCandidate → Prop
 
 /-- An admissible Horizon not yet asked. -/
 def HorizonDue (c : Context P) (t : RecordId) : Prop :=
@@ -364,7 +361,7 @@ structure Contradiction (c : Context P) where
     it — is one side, not two. One your own turns show already taken up is not taken up again;
     one whose recognition needs something the task has not yet shown waits; which of several
     comes first is yours to read. `none` where none is due. -/
-opaque conflictDue : (c : Context P) → RecordId → Option (Contradiction c)
+axiom conflictDue : (c : Context P) → RecordId → Option (Contradiction c)
 
 /-- A contradiction the user holds a side of is due for task `t`. -/
 def UserConflictDue (c : Context P) (t : RecordId) : Prop :=
@@ -372,13 +369,13 @@ def UserConflictDue (c : Context P) (t : RecordId) : Prop :=
 
 /-- **Your judgment**, read at the user's explanation of how a contradiction's two sides fit: it
     shows how they fit — the two do not conflict once read as they meant them. -/
-opaque Dissolved : Context P → Prop
+axiom Dissolved : Context P → Prop
 
 /-- **Your judgment**, read where the user's explanation left a contradiction standing: the
     target, or a source the user cited that can be read now, holds material that settles which
     side holds. Where nothing does, no verdict is given: that is said, and the contradiction stays
     the user's to settle. -/
-opaque Settles : Context P → Prop
+axiom Settles : Context P → Prop
 
 /-- How a contradiction ended: the user's explanation dissolved it; it was resolved through an
     application after both sides were shown with the target's material; it was left standing
@@ -390,15 +387,15 @@ inductive ConflictOutcome | dissolved | afterDisclosure | unsettled | targetFind
 /-- **Your record**, read from the context: for task `t`, each contradiction taken up, where its
     sides came from, and how it ended. One still standing when its task closed is carried in the
     dissent instead. -/
-opaque conflicts : Context P → RecordId → List (ConflictSource × ConflictOutcome)
+axiom conflicts : Context P → RecordId → List (ConflictSource × ConflictOutcome)
 
 /-- **Your judgment**, read at the answer to a Horizon probe or a cue: the answer reaches the
     edge. -/
-opaque Reached : Context P → Prop
+axiom Reached : Context P → Prop
 
 /-- **Your judgment**, read at the answer to a Horizon probe or a cue: instead of answering, the
     user asks to go step by step — a hint, a smaller step. -/
-opaque AsksSteps : Context P → Prop
+axiom AsksSteps : Context P → Prop
 
 /-- **Your reading**, at an answer that missed what its question was after — a Horizon answer
     that neither reached the edge nor asked for a step, the answer to a probe, an explanation at a
@@ -409,22 +406,22 @@ opaque AsksSteps : Context P → Prop
     never asked, and offered as a candidate understanding rather than asserted: the presentation
     says what you read and from what, moves there, and invites the user to say otherwise in the
     same turn; their next utterance corrects a wrong reading. -/
-opaque otherIntent : Context P → Option EntryPoint
+axiom otherIntent : Context P → Option EntryPoint
 
 /-- **Your reading** of which registered task the user has not closed serves `e`'s intent;
     `none` where no registered task does. -/
-opaque taskFor : Context P → EntryPoint → Option Task
+axiom taskFor : Context P → EntryPoint → Option Task
 
 /-- **Your record**, read from the context: for task `t`, each answer you read as aimed at another
     intent — the aspect it answered and the intent you read, with what you read it from — and
     whether the user's next utterance set that reading aside. -/
-opaque misreadings : Context P → RecordId → List (GapType × String)
+axiom misreadings : Context P → RecordId → List (GapType × String)
 
 /-- **Your reading** of the latest utterance: it sets aside your preceding reading of a missed
     answer as aimed at another intent — that answer was aimed at its question's own intent after
     all — and so names the gate that answer answered, to be read again as a miss within its own
     intent; `none` otherwise. -/
-opaque restored : Context P → Option Gate
+axiom restored : Context P → Option Gate
 
 /-- How an aspect came to be shown: by the user on their own, through an application after you
     disclosed the edge, or through an application after a cue the user asked for. What follows a
@@ -435,11 +432,11 @@ inductive Demonstration | independent | afterDisclosure | afterCue
     edge an answer reached, on its own or after a cue, or an application after its disclosure
     that you read as reaching it; and an aspect whose adjudication the user's answer met. An
     answer merely taken, with nothing to check it against, is not shown. -/
-opaque demonstrated : Context P → RecordId → List (GapType × Demonstration)
+axiom demonstrated : Context P → RecordId → List (GapType × Demonstration)
 
 /-- **Your judgment**: turn `idx` carries the target itself — its text, or an observation of
     reading it — rather than reasoning about it. -/
-opaque IsTarget : Context P → Nat → Prop
+axiom IsTarget : Context P → Nat → Prop
 
 /-- What an adjudication against an answer is drawn from, quoted in place at the narrowest span
     that supports it: the target itself, in the turn that carries it — whoever produced it,
@@ -460,26 +457,26 @@ structure Adjudication (c : Context P) where
 /-- **Your judgment**, read at the answer and once: you have an objection to it, in whole or in
     part, with material you could attach, and have not settled it. It is not a verdict; the
     inquiry exists to hear the user's reasoning before anything is settled. -/
-opaque Objection : Context P → Prop
+axiom Objection : Context P → Prop
 
 /-- **Your judgment**, read at the user's reasoning at the inquiry: an adjudication against the
     answer still stands — the reasoning did not defeat the objection, and there is material to
     attach. -/
-opaque Stands : Context P → Prop
+axiom Stands : Context P → Prop
 
 /-- **Your judgment**, read once the material it rests on has been read: the adjudication that
     stands, with what it is drawn from. -/
-opaque adjudication : (c : Context P) → Option (Adjudication c)
+axiom adjudication : (c : Context P) → Option (Adjudication c)
 
 /-- **Your judgment**: the cited utterance chooses this aspect at the start-aspect selector or at
     coverage. -/
-opaque AspectSupported : Context P → Turn P → Selectable → Prop
+axiom AspectSupported : Context P → Turn P → Selectable → Prop
 
 def aspectCoord : Coord P Selectable :=
   { admits := (· = .utterance), supports := AspectSupported }
 
 /-- **Your judgment**: the aspect the latest answer chose; open where it chose none. -/
-opaque aspectChoice : (c : Context P) → Occ (aspectCoord (P := P)) c
+axiom aspectChoice : (c : Context P) → Occ (aspectCoord (P := P)) c
 
 /-- The one shape every turn of an active run ends in. -/
 inductive Gate
@@ -515,7 +512,6 @@ inductive Gate
   | inquiry (t : RecordId) (g : GapType)
   /-- coverage: probed and unprobed aspects; sufficient, another aspect, or a proposal -/
   | coverage (t : RecordId)
-  deriving Inhabited  -- elab: lets `answered` be declared `opaque`
 
 /-- The gate that asks aspect `g` again once an adjudication against its answer stands: the
     Horizon's or the contradiction's application question, or the same aspect's probe. -/
@@ -530,7 +526,7 @@ def again (t : RecordId) : GapType → Gate
 
 /-- **Your record**, read from the context: the gate your latest presentation opened, a Horizon
     probe included — your own turn shows which it was, though the user saw only a scenario. -/
-opaque answered : Context P → Gate
+axiom answered : Context P → Gate
 
 /-- Relay metadata emitted before a gate, never in place of one. `outcome` says how the round
     ended: nothing to object to, an objection the user's reasoning defeated, nothing to check
@@ -559,15 +555,14 @@ inductive Verdict
   /-- the user stops verifying: what the rounds so far showed stays on record, and no task the
       user did not close is completed -/
   | withdraw
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
 /-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+axiom verdict : Context P → Verdict
 
 /-- **Your record**: contrary grounds you presented before the gate a closing utterance answered —
     an aspect you hold undemonstrated, an adjudication still standing — attached to the
     closure; empty when there were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- `VerifiedUnderstanding`: the context once every task is completed, carrying exactly what the
     rounds established and no more — for each task, each aspect shown and how, each contradiction
@@ -617,23 +612,23 @@ instead, with what was shown presented.
 /-- **Your registration** at Phase 2: the artifact basis materialized for every selected entry
     point, and one record written per entry point; each write's returned identity enters the
     context as observed. -/
-opaque register : Context P → List (Evidence P)
+axiom register : Context P → List (Evidence P)
 
 /-- **Your record update** naming a task as its verification begins. -/
-opaque touch : Context P → List (Evidence P)
+axiom touch : Context P → List (Evidence P)
 
 /-- **Your record update** marking the closed task completed. -/
-opaque update : Context P → List (Evidence P)
+axiom update : Context P → List (Evidence P)
 
 /-- **Your read**, once an adjudication stands, a missed Horizon is to be disclosed, or a
     contradiction the user's explanation left standing is to be shown, of whatever it rests on —
     the target, or a source the user cited that can be read now — observed and quoted at the
     narrowest span. -/
-opaque attach : Context P → List (Evidence P)
+axiom attach : Context P → List (Evidence P)
 
 /-- **Your record** of a proposal, verbatim, outside the task set; the write's returned identity
     enters the context as observed. -/
-opaque eject : Context P → List (Evidence P)
+axiom eject : Context P → List (Evidence P)
 
 inductive Step (P : Type)
   | gate      (c : Context P) (g : Gate)
@@ -1020,6 +1015,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
+
+end
 
 end Katalepsis
 ```
