@@ -5,11 +5,11 @@ description: "Vet working context by dialectical antithesis before action. Type:
 
 # Elenchus Protocol
 
-Vet working context by dialectical antithesis before action through structured per-claim disposition judgment, resolving suspect context into vetted context. Type: `(ContextSuspect, User, VET, WorkingContext) → VettedContext`.
+Vet working context by dialectical antithesis before action: each suspect claim is met by a concrete challenge, and the user's own answer to it is what the context carries forward, resolving suspect context into vetted context. Type: `(ContextSuspect, User, VET, WorkingContext) → VettedContext`.
 
 ## Definition
 
-**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, cross-source consistency check, and inference-fallacy archetype scan before pre-execution sync. The protocol's lexical verb is `/sublate`. Each audit — a source under one claim it is read as authority for — undergoes the motion of stating that claim, surfacing what would shake it, and then deciding what to make of it in light of that challenge (the Hegelian *Aufhebung* — preserve + negate + lift up — supplies the source vocabulary).
+**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, cross-source consistency check, and inference-fallacy archetype scan before pre-execution sync. The protocol's lexical verb is `/sublate`. Each claim the pending action leans on is stated as it stands (thesis), met by what would shake it (antithesis), and then the person says what they make of it in light of that challenge (synthesis) — the Hegelian *Aufhebung*, preserve + negate + lift up, supplies the source vocabulary. The protocol exists to help that thinking reach its synthesis; the synthesis is the person's.
 
 ```lean
 /-!
@@ -23,39 +23,35 @@ outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
-Elenchus(W) → pass(c) → sublate(c, utterances), where c is the fused session context:
-  pass(c): identify the sources that warrant audit → bind each to the claim it is read as
-    authority for → split a binding that bundles several claims → certify each claim against
-    the claims this contract inscribes →
-      pass:      narrow → tag → posit an antithesis
-      route:     relay the handoff with its fit (the command only as a hint)
-      ambiguous: owed to the person at Qa
-    → record
-  [nothing owed] close: no candidate | none claimed | vetted, with the trace
-  [something owed] present the next gate — Qa for the earliest ambiguous candidate, otherwise Qs
-    for a batch of admitted claims whose judgment is open — → Stop
-  next utterance u: c' := pass(fuse(c, u)) → the same reading, whatever u said
-    (an attribution, a judgment with its optional instruction, a correction, a question: each
-     joins the context whole, and the next pass reads it)
-  a met Revisit: the next pass re-binds and re-certifies that audit, posits again, and asks again
+Elenchus(W) → start(c) → sublate(c, utterances), where c is the fused session context and W, the
+working context, is c itself:
+  pass(c): judge afresh, against the context as it now stands and from this run's invocation on,
+    which claims the pending action leans on are suspect, whose each one is, and — for each claim
+    still waiting on the person — a concrete antithesis with its basis → record
+  [the person stops]                                           close: stopped
+  [the person goes on to a protocol they name]                 close: routed
+  [nothing open ∧ the person has answered in this run]         close: vetted
+  [otherwise] present the current list and what this turn changed, then every open claim with its
+    antithesis and concrete actions for it — with nothing open, what was searched and what was
+    found, handed on or not — → Stop
+  next utterance u: c' := pass(fuse(c, u)) → the same reading, whatever u says
   no utterance: the gate holds; nothing is judged and nothing closes
 -/
 
 /-! ── MORPHISM ──
 WorkingContext
-  → identify(high_leverage_sources)            -- silent scan for sources warranting audit
-  → bind_kind(source) → split_binding(binding, source) → certify(binding, local_claims) → bind_value_space(audit, prospect)   -- the admission backbone, in that order, before any tagging, antithesis, or surfacing
-  → tag(provenance, freshness, leverage)       -- metadata triple per admitted audit
-  → posit(antithesis per admitted audit)       -- Pattern A ∪ Pattern B ∪ Pattern C ∪ Pattern D ∪ Emergent(Pattern)
-  → present(antitheses as text, then the reach of a judgment, then the question)
-  → judge(disposition per audit)               -- the person's, at Qs: an open verdict and an optional instruction
-  → emit(VettedContext with disposition ledger)
+  → select(claims)               -- the claims the pending action leans on that warrant a challenge; afresh every pass, the person's words about what to vet included
+  → certify(claim)               -- whose it is: a suspect claim here, another deficit's, or unclear (fail-closed)
+  → posit(antithesis)            -- a concrete challenge to each claim waiting on the person, with its basis
+  → surface(list, changes, open) -- the current list and this turn's changes, then each open claim with its challenge and concrete actions
+  → sublate(person's turn)       -- what the person makes of each claim in light of its antithesis, in their words; or that it is another deficit's; or close
   → VettedContext
-requires: working_context_pre_execution_committed   -- runtime checkpoint (Phase 0)
+requires: working_context_pre_execution_committed   -- runtime checkpoint
 deficit:  ContextSuspect                            -- activation precondition (Layer 1)
-preserves: source_chain                             -- the context is read and never rewritten; binding, antithesis, and disposition annotate it
+preserves: every turn of the context -- the context only grows (pass_extends); an answer annotates a claim and never rewrites its source
 invariant: Dialectical Vetting over Silent Trust
-invariant: certificate-before-surfacing             -- only a passing certificate, or the person's Own attribution, lets a claim be tagged, challenged, or asked
+invariant: antithesis before synthesis -- a claim's challenge is shown before the person is asked what they make of it
+invariant: the person answers and closes; the certificate alone only hands on what it places elsewhere, and says so
 -/
 
 namespace Elenchus
@@ -132,9 +128,9 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `W`, `WorkingContext`: the context the pending action was committed against. Every source
-    it rests on is a turn of it — a statement, a document or tool read, an inference, a record
-    of an earlier session — and its origin and form are that turn's own. Read, never rewritten. -/
+/-- `W`, `WorkingContext`: the context the pending action was committed against. Every source a
+    claim rests on is a turn of it — a statement, a document or tool read, an inference, a record
+    of an earlier session, the assistant's own earlier output — and it is read, never rewritten. -/
 abbrev WorkingContext (P : Type) := Context P
 
 /-- The pending action: what is about to be done, and the turns it leans on. -/
@@ -145,46 +141,43 @@ structure Prospect where
 /-- **Your reading** of the pending action the working context was committed against. -/
 axiom prospect : Context P → Prospect
 
-/-- A source, named by the index of the turn that carries it; the context only grows, so the
-    index names it permanently. -/
-abbrev SourceRef := Nat
-
-/-- **Your judgment**, silent: the sources that warrant audit — unusually load-bearing, older
-    than the horizon for their origin, reached through a long provenance chain, in tension with
-    another source about the same referent, or an inference used as a premise. -/
-axiom identify : Context P → List SourceRef
-
-/-- The claim a source is read as authority for: what it is about, its category, how far it
-    reaches, and its wording verbatim — the text a provenance challenge must confront. -/
+/-- A claim as it stands: what it is about, its category, how far it reaches, and its wording
+    verbatim — the text a challenge must confront. -/
 structure ClaimRef where
   referent  : String
   claimKind : String
   scope     : String
   text      : String
 
-/-- An audit's identity: a source under the claim it was admitted for, fixed at formation. The
-    claim under test is the binding's label, which a re-binding may move; where the two have come
-    apart, both are shown. -/
-structure AuditRef where
-  source           : SourceRef
-  claimAtAdmission : ClaimRef
-
-/-- An observable indicator in the context supporting a binding. -/
+/-- An observable indicator in the context bearing on a claim, with the channel it came through. -/
 structure Indicator where
-  source  : String
+  channel : String
   content : String
 
-inductive Atomicity | atomic | nonAtomic
+/-- A claim under vetting: the turn that carries its source — by index, since the assistant's own
+    earlier output can be a source — the claim that source is read as authority for, what makes
+    it suspect, and the evidence for that. -/
+structure Claim where
+  source    : Nat
+  claim     : ClaimRef
+  suspicion : String
+  evidence  : List Indicator
 
-/-- The claim a candidate is read as authority for, what makes it suspect, and how many distinct
-    claims the binding bundles. A binding that bundles several is split, reading the source
-    again, before anything is certified; one claim standing on evidence in several places is one
-    audit. -/
-structure KindBinding where
-  label             : ClaimRef
-  positivePredicate : String
-  evidence          : List Indicator
-  atomicity         : Atomicity
+/-- **Your judgment**, made afresh on every pass: the claims the pending action leans on that
+    warrant a challenge, read from the context as it now stands and from this run's invocation on.
+    A working order that serves it: identify the sources that warrant a look — unusually
+    load-bearing, older than the horizon for their origin, reached through a long provenance chain,
+    in tension with another source about the same referent, or an inference used as a premise — then
+    bind each to the claim it is read as authority for, and split a binding that bundles several
+    distinct claims, one claim each; where the suspicion cannot be factored per claim, it was one
+    claim after all. One claim standing on evidence in several places is one claim. Binding is
+    total: a source whose claim you cannot settle still yields a claim, whose owner the
+    certificate then finds unclear, so nothing selected is dropped silently. The person's words
+    about what to vet are part of the context: a correction of the target moves it on the next
+    pass. Whether a claim is the same one an earlier pass selected is your judgment too — changed
+    wording alone does not make it new, and a claim that continues after a split is still that
+    claim for whatever it owes. What an earlier run or session selected is not this run's. -/
+axiom claims : Context P → List Claim
 
 /-- A deficit label. A certificate assigns only the ones this contract inscribes; the person may
     name any. -/
@@ -203,96 +196,102 @@ def Inscribed : Deficit → Prop
   | .emergent _ => False
   | _           => True
 
-/-- The admission-time fit of a binding against this contract's own claim and its route claims,
-    reading nothing outside this contract: every inscribed claim the evidence supports, and the
-    cited fit. -/
+/-- Every inscribed claim a claim's evidence supports, and the cited fit. It certifies this
+    contract's gate over its own activation and nothing about claims anywhere else. -/
 structure Certificate where
   claimedBy : List Deficit
   distinct  : claimedBy.Nodup
   inscribed : ∀ d ∈ claimedBy, Inscribed d
   fit       : String
 
-inductive Status
-  | pass
-  | route (d : Deficit)
-  | ambiguous
-  | unattributable
+inductive Whose
+  | here
+  | elsewhere (d : Deficit)
+  | unclear
 
-/-- Read off `claimedBy`, so nothing stored beside it can disagree: the own claim alone passes; a
-    single route claim routes; several claims, or none, leave it ambiguous. -/
-def Certificate.status (k : Certificate) : Status :=
+/-- Read off `claimedBy`, so nothing stored beside it can disagree: the own claim alone is here; a
+    single other claim is elsewhere; several claims, or none, leave it unclear. -/
+def Certificate.whose (k : Certificate) : Whose :=
   match k.claimedBy with
-  | [.contextSuspect] => .pass
-  | [d]               => .route d
-  | _                 => .ambiguous
+  | [.contextSuspect] => .here
+  | [d]               => .elsewhere d
+  | _                 => .unclear
 
-/-- A formed audit: its identity, and the binding and certificate its latest pass gave it. -/
-structure Audit where
-  ref         : AuditRef
-  binding     : KindBinding
-  certificate : Certificate
+/-- **Your judgment**: fit the claim against this contract's own claim and its route claims,
+    reading nothing outside this contract. The own claim holds only where the claim is suspect and
+    vetting it here can carry it to a vetted context; a pass certifies admissibility here, not
+    the absence of a claim anywhere else — where two protocols' scopes both reach, each one's own
+    gate governs. Evidence that supports no claim, or several, leaves it unclear, and an unclear
+    claim is put to the person like any other, never dropped. The person's words about whose a
+    claim is are part of the context: one they say is to be vetted here is here. -/
+axiom certify : Context P → Claim → Certificate
 
-/-- **Your record**, read from the context: every audit formed so far, in formation order, each
-    with the binding and certificate its latest pass gave it. Cumulative: an audit once formed
-    stays; a split parent stays beside the children it produced; a source under a claim that
-    already names an audit is that audit. A binding that bundles several claims forms no audit
-    until it is split — only a loop-time split leaves a parent, which already carries its
-    record. -/
-axiom audits : Context P → List Audit
-
-/-- The person's answer at Qa: whose the candidate is. -/
-inductive Attribution
-  /-- a suspect claim: vetted here -/
-  | own
+/-- What the person's turn settles for one claim. There is no verdict category beside it: what the
+    claim IS stays theirs to say. -/
+inductive Answer
+  /-- what the person makes of the claim in light of its antithesis, in their words — the
+      synthesis — with whatever they said alongside it carried in those words: an instruction to
+      stop relying on the source for it, a condition under which to look again, an order to act -/
+  | synthesis (words : String)
   /-- another deficit's: handed to it -/
-  | route (d : Deficit)
-  /-- none of these: several claims stand, or none does -/
-  | unattributable
+  | elsewhere (d : Deficit)
 
-/-- **Your judgment**: the cited turn attributes audit `r`, as its claim now stands. -/
-axiom AttributionSupported : AuditRef → Context P → Turn P → Attribution → Prop
+/-- **Your judgment**: the cited turn answers claim `a`, as it now stands, this way — read against
+    the context that now stands, the order of its turns included, and only from this run's
+    invocation on. One turn may answer several claims, and may answer some and leave others. An
+    answer reaches the claim it covers: changed wording alone does not void it, while a
+    materially changed claim, or a fresh antithesis, is not covered by an answer given before it.
+    Where the person set a condition for looking at the claim again and the context now shows it
+    met, the earlier answer no longer covers it, and the claim is challenged afresh. -/
+axiom AnswerSupported : Claim → Context P → Turn P → Answer → Prop
 
-/-- A candidate the certificate could not place is placed only by a turn the person sent. -/
-def attributionCoord (r : AuditRef) : Coord P Attribution :=
-  { admits := (·.val = .person), supports := AttributionSupported r }
+/-- A claim is answered only by the person's turn, whatever form that turn takes. -/
+def answerCoord (a : Claim) : Coord P Answer :=
+  { admits := (·.val = .person), supports := AnswerSupported a }
 
-/-- **Your reading**: the person's latest attribution of `r` that still reaches its claim as now
-    bound; `open_` where none does. It may come at Qa or in any later utterance. -/
-axiom attribution : (c : Context P) → (r : AuditRef) → Occ (attributionCoord r) c
+/-- **Your reading**: the person's answer to `a` that still covers it; `open_` until one does. -/
+axiom answer : (c : Context P) → (a : Claim) → Occ (answerCoord a) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
   | .filled a .. => some a
 
-/-- How an audit stands: the person's attribution settles it where one reaches it; otherwise
-    the certificate's own reading does. -/
-def status (c : Context P) (a : Audit) : Status :=
-  match filledValue (attribution c a.ref) with
-  | some .own            => .pass
-  | some (.route d)      => .route d
-  | some .unattributable => .unattributable
-  | none                 => a.certificate.status
+/-- How a claim stands. -/
+inductive Standing
+  /-- waits on the person -/
+  | open_
+  /-- the person's turn answered it -/
+  | answered (a : Answer)
+  /-- the certificate alone handed it to another deficit -/
+  | handed (d : Deficit)
 
-/-- Admitted: passing and atomic — what can be tagged, challenged, and asked. -/
-def Admitted (c : Context P) (a : Audit) : Prop :=
-  status c a = .pass ∧ a.binding.atomicity = .atomic
+/-- The person's answer first, whatever the certificate read. Without one, a claim the
+    certificate alone places elsewhere is handed on, and every other claim — its own, or one
+    whose owner is unclear — waits on the person. -/
+def standing (c : Context P) (a : Claim) : Standing :=
+  match filledValue (answer c a) with
+  | some w => .answered w
+  | none =>
+    match (certify c a).whose with
+    | .elsewhere d => .handed d
+    | _            => .open_
 
 /-- What the pending action does with a claim, and what follows if the claim does not hold. -/
 structure Stake where
   reads     : String
   ifItFails : String
 
-/-- The narrowing a judgment is made against. It narrows the question and fixes no answer. -/
+/-- The narrowing an answer is made against: the claim, what makes it suspect, and its evidence
+    off the claim, the stake off the pending action (`prospect`). It narrows the question and fixes
+    no answer. -/
 structure ValueSpace where
-  claim             : ClaimRef
-  positivePredicate : String
-  evidence          : List Indicator
-  stake             : Stake
+  claim     : ClaimRef
+  suspicion : String
+  evidence  : List Indicator
+  stake     : Stake
 
-/-- **Your reading** for an admitted audit: the claim, predicate, and evidence off its binding,
-    the stake off the pending action (`prospect`). Presented whole, and held for the cycle as
-    the presentation shows it. -/
-axiom narrowing : Context P → AuditRef → ValueSpace
+/-- **Your reading** of an open claim's narrowing, presented whole. -/
+axiom narrowing : Context P → Claim → ValueSpace
 
 inductive VerificationPath | directObserved | inferredFromN | externalCited | provisionalAssumption
 
@@ -307,8 +306,8 @@ structure Tags where
   horizon    : String
   branches   : List String
 
-/-- **Your reading** of an admitted audit's tags, from the verification reads (`tagReads`). -/
-axiom tags : Context P → AuditRef → Tags
+/-- **Your reading** of an open claim's tags, from the verification reads (`tagReads`). -/
+axiom tags : Context P → Claim → Tags
 
 inductive Pattern
   | provenanceAudit
@@ -317,131 +316,85 @@ inductive Pattern
   | inferenceFallacy
   | emergent (name : String)
 
-/-- A concrete counter-claim, counter-condition, counter-source, or counter-inference, posited
-    against the claim as it stood when it was put, with its cited basis. Where no concrete
-    challenge could be constructed, that result with the attempted pattern and basis. -/
+/-- A concrete counter-claim, counter-condition, counter-source, or counter-inference, put to the
+    claim as it stood when it was put, with its cited basis. Where no concrete challenge could be
+    constructed, that result with the attempted pattern and basis. -/
 structure Antithesis where
   claim      : ClaimRef
   pattern    : Pattern
   antithesis : String
   basis      : String
 
-/-- **Your record**, read from the context: every antithesis put to `r`, in cycle order. Only an
-    admitted audit is posited against; a met Revisit appends, and nothing is removed. -/
-axiom antitheses : Context P → AuditRef → List Antithesis
+/-- **Your record**, read from the context: every antithesis put to `a` in this run, in cycle
+    order. A claim that waits on the person and has no antithesis its current state has not
+    outrun gets one before it is presented — a claim whose owner is unclear included, its
+    antithesis provisional and shown beside the other deficits its evidence also supports.
+    Nothing is removed. -/
+axiom antitheses : Context P → Claim → List Antithesis
 
-/-- What the person instructs the run to do with an audit — only what this contract can itself
-    discharge. No instruction: the source stands under the recorded verdict. -/
-inductive Instruction
-  /-- stop downstream reliance on this source for the claim judged; the verdict stays -/
-  | withdraw
-  /-- return the audit when the condition is met — watched only while the run is active; an
-      unmet condition is reported open at convergence and not monitored afterwards -/
-  | revisit (on : String)
-  /-- report the named deficit at convergence, with its hint where this contract inscribes one -/
-  | handOff (to : Deficit)
+/-- One concrete action the gate offers for a claim: what it does, and what then happens. -/
+structure Action where
+  does        : String
+  consequence : String
 
-/-- The person's answer at Qs: what they make of the claim, in their words, and an optional
-    instruction. -/
-structure Judgment where
-  verdict      : String
-  continuation : Option Instruction
+/-- **Your judgment**: the actions to offer for `a`, each concrete to this claim — stop relying on
+    this source for this claim, look again once a named condition holds, keep it as it stands,
+    and for an unclear owner, hand it to the deficit each supported claim names — never a category
+    title; the person may answer in their own words instead. -/
+axiom actions : Context P → Claim → List Action
 
-/-- **Your judgment**: the cited turn gives this judgment of audit `r`, answering the latest
-    antithesis put to it. -/
-axiom JudgmentSupported : AuditRef → Context P → Turn P → Judgment → Prop
+/-- How the person ends the run. -/
+inductive Closing
+  /-- the run is finished; said while claims are still open, it reads as `stop` -/
+  | done
+  /-- stop here: what is open stays unanswered -/
+  | stop
+  /-- go on to the protocol the person names -/
+  | route (target : String)
 
-/-- A claim's standing is judged only by a turn the person sent. -/
-def judgmentCoord (r : AuditRef) : Coord P Judgment :=
-  { admits := (·.val = .person), supports := JudgmentSupported r }
+/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
+    stands, the order of its turns included: a closing said before a later round was presented was
+    answered by that round. An ordinary reply to a round with nothing open — an acknowledgement, a
+    go-ahead — reads as `done`. -/
+axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
-/-- **Your reading**: the person's judgment of `r` that answers its latest antithesis; `open_`
-    until one does. A met Revisit's fresh antithesis leaves it open again. -/
-axiom judgment : (c : Context P) → (r : AuditRef) → Occ (judgmentCoord r) c
+/-- Only the person closes. -/
+def closeCoord : Coord P Closing :=
+  { admits := (·.val = .person), supports := ClosingSupported }
 
-/-- **Your judgment**: the Revisit condition is now satisfied in `c`. -/
-axiom TriggerMet : Context P → String → Prop
+/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
+axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
-/-- What an audit still owes the person: the attribution the certificate left to them, a
-    judgment of the latest antithesis put to an admitted claim, or — for an admitted claim whose
-    Revisit condition is now met — a fresh antithesis and question. A split parent is no longer
-    admitted; what its condition set in motion is owed by its children. -/
-def Owed (c : Context P) (a : Audit) : Prop :=
-  status c a = .ambiguous ∨
-  (Admitted c a ∧
-    (filledValue (judgment c a.ref) = none ∨
-     ∃ cond, ((filledValue (judgment c a.ref)).bind (·.continuation)) = some (.revisit cond) ∧
-       TriggerMet c cond))
+/-- **Your reading**: conditions the person set in this run for looking at a claim again that the
+    context does not show met — reported open at the close, and not watched after it. -/
+axiom unmet : Context P → List String
 
-inductive Disposition
-  /-- the person's, at Qs -/
-  | judged (verdict : String) (continuation : Option Instruction)
-  /-- handed to another deficit — at admission, before any work was done on it, or by a loop
-      re-certification after it was judged -/
-  | handed (d : Deficit)
-  /-- the person found no claim that holds; the certificate never assigns this alone -/
-  | unattributable
-
-/-- Who wrote a record, and on what. -/
-inductive Assignment
-  /-- a relay on the certificate's cited fit -/
-  | certificate (fit : String)
-  /-- the person's attribution, cited in `attribution` -/
-  | attribution
-  /-- the person's answer at Qs; the verdict is where what they made of the claim is written -/
-  | judgment
-
-/-- One ledger entry: the disposition, the claim it was made against — the live claim then,
-    which a re-binding may have moved from the one at admission — and who wrote it. -/
-structure DispositionRecord where
-  disposition : Disposition
-  claimJudged : ClaimRef
-  assignedBy  : Assignment
-
-/-- The record an audit's standing gives it, read from the context; `none` while its attribution,
-    or the judgment of its latest antithesis, is still open. A judgment's claim is the one its
-    antithesis was put to, so a later re-binding does not move it. -/
-def record (c : Context P) (a : Audit) : Option DispositionRecord :=
-  match status c a with
-  | .route d =>
-    if (filledValue (attribution c a.ref)).isSome then
-      some ⟨.handed d, a.binding.label, .attribution⟩
-    else some ⟨.handed d, a.binding.label, .certificate a.certificate.fit⟩
-  | .unattributable => some ⟨.unattributable, a.binding.label, .attribution⟩
-  | .pass =>
-    (filledValue (judgment c a.ref)).map
-      (fun j => ⟨.judged j.verdict j.continuation,
-        ((antitheses c a.ref).getLast?.map (·.claim)).getD a.binding.label, .judgment⟩)
-  | .ambiguous => none
-
-/-- Every formed audit carries a record, and none owes the person anything. -/
-def Vetted (c : Context P) : Prop := ∀ a ∈ audits c, (record c a).isSome ∧ ¬ Owed c a
-
-/-- **Your record**: contrary grounds you presented before the gate the closing answer answered,
-    beyond the antithesis each claim already carries — attached to the closure; empty when there
-    were none. -/
+/-- **Your record**: contrary grounds you showed before the person's answers, beyond the
+    antithesis each claim already carries, still held where the person answered over them —
+    attached to the closure; empty when there were none. -/
 axiom dissent : Context P → List String
 
-/-- `VettedContext`: the context at closure, its ledger — one record per formed audit — and the
-    dissent attached to the closure. The trace is every antithesis put to each audit, read from
-    `context` in cycle order, and each answer beside the antithesis it answered; an answer a
-    later one replaced stays in the context. -/
+/-- `VettedContext`: the context at closure, every claim of this run with how it stood, the
+    conditions left unmet, and the dissent attached to the closure. The trace — every antithesis
+    put to each claim, and the answer that met it — is read from `context`; an answer a later one
+    replaced stays there too. -/
 structure VettedContext (P : Type) where
   context : Context P
-  ledger  : List (AuditRef × DispositionRecord)
+  ledger  : List (Claim × Standing)
+  unmet   : List String
   dissent : List String
 
-def ledgerOf (c : Context P) : List (AuditRef × DispositionRecord) :=
-  (audits c).filterMap (fun a => (record c a).map (a.ref, ·))
+def verdict (c : Context P) : VettedContext P :=
+  ⟨c, (claims c).map (fun a => (a, standing c a)), unmet c, dissent c⟩
 
 inductive Outcome (P : Type)
-  /-- no source met the criteria: nothing was formed, and the ledger is empty -/
-  | noCandidate (c : Context P)
-  /-- every formed candidate was handed elsewhere or left unattributable, and nothing was ever
-      posited against: reported apart from `noCandidate`, the handoffs named -/
-  | noneClaimed (v : VettedContext P)
-  /-- every formed audit discharged, claims having been put to the person -/
+  /-- nothing open, and the person closed: by answers of theirs in this run, or by saying the run
+      is done after seeing what was found -/
   | vetted (v : VettedContext P)
+  /-- the person stopped; what was open stays unanswered -/
+  | stopped (v : VettedContext P)
+  /-- the person went on to a protocol they named -/
+  | routed (target : String) (v : VettedContext P)
   | holding (c : Context P)
 
 /-! ── MODE STATE ──
@@ -451,67 +404,83 @@ inductive Outcome (P : Type)
 abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
-A pass is the silent work: Phase 0 admission (identify, bind, split, certify, narrow), Phase 1
-tagging and positing. Its verification reads enter the context as observation turns, then its
-record. Then either nothing is owed and the run closes, or `respond` presents the next gate:
-Phase 0 Qa for the earliest ambiguous candidate — one per turn — otherwise Phase 2 Qs for a batch
-of at most four admitted audits whose judgment is open. Each person utterance is fused, and the
-next pass reads it; that pass is Phase 3 and the loop scan together.
+A pass is the silent work: it judges afresh which claims warrant a challenge, whose each one is,
+and how each stands; it makes the verification reads, and posits an antithesis for each claim that
+waits on the person and has none its state has not outrun. The reads enter the context, then the
+pass's record. Either a closure fires, or `respond` presents the round. Each person utterance is
+fused, and the next pass reads it.
 -/
 
-/-- **Your collection**: the verification reads provenance tagging makes — artifact reads and
-    searches of a source's origin, the claim it authorizes, and its downstream references. -/
+/-- **Your collection**: the verification reads provenance tagging makes for the claims that wait
+    on the person — artifact reads and searches of a source's origin, the claim it authorizes, and
+    its downstream references. -/
 axiom tagReads : Context P → List (Evidence P)
 
-/-- **Your record** of a pass, written once its reads have entered the context: the sources
-    identified, bindings and splits, certificates with their fits, route handoffs with their fit,
-    narrowings, tags, and the antitheses posited — for admitted audits with no antithesis yet,
-    and for those a met Revisit returns, re-bound and re-certified first. While any candidate
-    is ambiguous, the pass records admission only: narrowing, tagging, and positing wait until
-    every attribution is in, so `Qa` comes first. `audits`, `narrowing`,
-    `tags`, and `antitheses` are read from these turns. A record grounds nothing. -/
+/-- **Your record** of a pass, written once its reads have entered the context: the claims and
+    their certificates, the narrowings, tags, and antitheses posited, how each claim stands, and
+    what changed since the last pass. `claims`, `antitheses`, `narrowing`, and `tags` are read
+    from these turns. A record grounds nothing. -/
 axiom passRecord : Context P → List (Response P)
 
 def pass (c : Context P) : Context P :=
   let c₁ := c ++ (tagReads c).map (·.val)
   c₁ ++ (passRecord c₁).map (·.val)
 
-open Classical in
-noncomputable def close (c : Context P) : Outcome P :=
-  if (audits c).isEmpty then .noCandidate c
-  else if ∀ a ∈ audits c, antitheses c a.ref = [] then .noneClaimed ⟨c, ledgerOf c, dissent c⟩
-  else .vetted ⟨c, ledgerOf c, dissent c⟩
+/-- The person has closed: they said the run is done, or some turn of theirs in this run answered
+    a claim. No particular turn anchors this: which of their turns carries the answer is read from
+    the context as it now stands. Where nothing was found, or every claim was handed on by the
+    certificate alone, only the first holds, so what was found is seen before the run ends. -/
+def PersonClosed (c : Context P) : Prop :=
+  filledValue (closing c) = some .done ∨ ∃ a ∈ claims c, ∃ w, standing c a = .answered w
+
+def NothingOpen (c : Context P) : Prop := ∀ a ∈ claims c, standing c a ≠ .open_
+
+def Closable (c : Context P) : Prop :=
+  filledValue (closing c) = some .stop ∨
+  (∃ t, filledValue (closing c) = some (.route t)) ∨
+  (NothingOpen c ∧ PersonClosed c)
+
+def close (c : Context P) : Outcome P :=
+  match filledValue (closing c) with
+  | some .stop      => .stopped (verdict c)
+  | some (.route t) => .routed t (verdict c)
+  | _               => .vetted (verdict c)
 
 open Classical in
-/-- `respond` presents the next gate. At Qa, before the question: the source, the bound claim,
-    its evidence and channel, and the claims that evidence supports, or that none does. At Qs,
-    before the question: per claim its narrowing whole, its tags, the antithesis with its basis,
-    and the certificate fit that admitted it; then once for the batch, that a judgment reaches
-    only the claim in its own slot. The pass's route handoffs are reported in the same turn. -/
-noncomputable def sublate (respond : Context P → Response P) :
+/-- `respond` presents the round. First the current list: every claim of this run, each with its
+    source and how it stands — waiting on the person, answered with what they said, or handed on
+    by the certificate with its fit and the command only as a hint. Then what this turn changed:
+    what the person's turn answered, what is newly found or re-targeted, a claim challenged afresh
+    because a condition the person set is now met. Then every open claim: its source and the
+    claim verbatim, what makes it suspect, the evidence with its channel, what the pending action
+    stakes on it, its tags, the antithesis with its basis, and the certificate's fit — for an
+    unclear owner, that the evidence also supports the other deficits it names — then `actions`,
+    each with its consequence; a few at a time where there are many, around four, so each is read.
+    Wherever a person's earlier turn is read as the answer to a claim,
+    or as what lets the run close, say which turn was read and what was taken from it, quoting
+    their words. With nothing open, what was searched and what was found, and whether the run is
+    done. -/
+def sublate (respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     let c₁ := pass (fuse c u)
-    if Vetted c₁ then close c₁
+    if Closable c₁ then close c₁
     else sublate respond (c₁ ++ [(respond c₁).val]) us
 
-open Classical in
-noncomputable def start (respond : Context P → Response P) (c : Context P)
+/-- The invocation opens the run: the first pass is always presented, and nothing closes before
+    the person has seen it. -/
+def start (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   let c₁ := pass c
-  if Vetted c₁ then close c₁
-  else sublate respond (c₁ ++ [(respond c₁).val]) us
+  sublate respond (c₁ ++ [(respond c₁).val]) us
 
 /-! ── LOOP ──
-Every utterance opens a pass over the fused context: an attribution, a judgment, a correction, or
-a question, read whole. The next batch is whatever the context leaves owed; nothing else counts
-batches. A met Revisit returns its audit: the pass re-binds it — the conditions that fired the
-trigger may have moved the claim — re-certifies it, and posits again, so the claim is asked as
-it now stands. A re-certification can split the audit, hand it elsewhere, or put it to Qa; the
-earlier antithesis and answer stay in the context. Where the person attributes a candidate — at
-Qa or in any later utterance, a handed one included — that attribution reaches it. The loop is
-dialogue: each cycle re-enters a Constitution gate, and the person ends it.
+Every utterance opens a pass over the fused context: an answer, a correction of the target, a
+question, a closing, read whole. Nothing counts rounds or batches; every pass judges the claims
+against the whole context again, so what is open is whatever the context leaves open. A condition
+the person set that the context now shows met leaves its claim open again, with a fresh
+antithesis. The loop is dialogue: each round ends at a gate, and the person ends the run.
 -/
 
 /-!
@@ -519,54 +488,60 @@ Silence judges nothing and closes nothing.
 theorem silence (respond : Context P → Response P) (c : Context P) :
     sublate respond c [] = .holding c
 
-While anything is owed, an utterance leads to the next gate and closes nothing.
-theorem owed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Vetted (pass (fuse c u))) :
+While no closure fires, an utterance leads to the next round and closes nothing.
+theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
     sublate respond c (u :: us) =
       sublate respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us
+
+The invocation alone closes nothing: without a person's utterance the run holds at its first round.
+theorem start_holds (respond : Context P → Response P) (c : Context P) :
+    start respond c [] = .holding (pass c ++ [(respond (pass c)).val])
 
 A pass only adds to the context.
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
 -/
 
 /-! ── CONVERGENCE ──
-vetted: every formed audit carries a record — the person's judgment, a handoff the certificate
-relayed on its fit or the person attributed, or the person's unattributable — and no admitted
-audit owes a judgment or a met Revisit (`Vetted`). An unmet Revisit at closure is reported as an
-instruction the run did not carry out. Every antithesis in the trace was put to an audit that was
-admitted when it was put; the ledger also holds the Handed and Unattributable records — those
-written at admission no antithesis reached, and one a loop re-certification wrote stands beside
-the judgment it replaced.
-Convergence evidence: for each audit an antithesis was put to, every antithesis in cycle order —
-the claim it was put to → the antithesis → the answer that answered it, read from the context,
-with a later answer that replaced it shown beside it — naming the source. One source that yielded
-several audits shows one line per claim. Apart from the trace, every Handed and Unattributable
-record, projected from the ledger: the deficit or what was left unresolved, who assigned it, the
-claim judged where it moved from admission, and the cited basis. An audit the loop handed away
-after it was judged appears in both. Demonstrated, not asserted.
+Every closure is read where it fires and nowhere else. vetted: nothing open, and the person
+closed — by answers of theirs in this run, read from any of their turns, or by saying the run is
+done after seeing the list, which is the only way a run closes where nothing was found or every
+claim was handed on by the certificate alone. stopped: what was open stays unanswered. routed: the
+person named the next protocol. The vetted context claims no more than the claims this run
+selected; an answer carries the person's words and no category the AI assigned to them.
+Convergence evidence: for each claim an antithesis was put to, every antithesis in cycle order —
+the claim it was put to → the antithesis with its basis → the answer that met it, quoted, with a
+later answer that replaced it shown beside it — naming the source; apart from the trace, every
+claim the certificate handed on, with its fit and hint; the conditions left unmet, reported open;
+and the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
 /-!
-Every closure after the first pass follows a person's utterance, and its context is the pass that
-read it.
+Every vetted closure follows a person's utterance, and its context is the pass that read it.
 theorem closes_after_utterance (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (v : VettedContext P) (h : sublate respond c us = .vetted v) :
     ∃ (c₀ : Context P) (u : Utterance P), v.context = pass (fuse c₀ u)
 
-A person's route attribution reads as a route, whatever deficit they named.
-theorem person_route_is_route (c : Context P) (a : Audit) (d : Deficit)
-    (h : filledValue (attribution c a.ref) = some (.route d)) : status c a = .route d
+The person's answer stands over anything the certificate read.
+theorem person_first (c : Context P) (a : Claim) (w : Answer)
+    (h : filledValue (answer c a) = some w) : standing c a = .answered w
 
-A handoff is never recorded as the person's judgment at Qs.
-theorem handed_not_judgment (c : Context P) (a : Audit) (r : DispositionRecord) (d : Deficit)
-    (h : record c a = some r) (hd : r.disposition = .handed d) : r.assignedBy ≠ .judgment
+A claim whose owner is unclear waits on the person until they answer it.
+theorem unclear_waits (c : Context P) (a : Claim) (hr : filledValue (answer c a) = none)
+    (hu : (certify c a).whose = .unclear) : standing c a = .open_
 
-An attribution and a judgment are each filled only by a turn the person sent.
-theorem attributed_by_person {c : Context P} {r : AuditRef} {s : Cite c}
-    (ok : (attributionCoord (P := P) r).admits s.src) : s.src.val = .person
+An answer always rests on a turn the person sent.
+theorem answered_by_person (c : Context P) (a : Claim) (w : Answer)
+    (h : standing c a = .answered w) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
 
-theorem judged_by_person {c : Context P} {r : AuditRef} {s : Cite c}
-    (ok : (judgmentCoord (P := P) r).admits s.src) : s.src.val = .person
+Only the person closes.
+theorem closing_by_person {c : Context P} {s : Cite c}
+    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person
+
+A vetted run has nothing open, and the person closed it.
+theorem vetted_closed_by_person (c : Context P) (v : VettedContext P) (hc : Closable c)
+    (h : close c = .vetted v) : NothingOpen c ∧ PersonClosed c
 -/
 
 /-! ── TOOL GROUNDING ── -/
@@ -574,24 +549,19 @@ theorem judged_by_person {c : Context P} {r : AuditRef} {s : Cite c}
 
 inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
-inductive Op | identify | bindKind | split | certify | certifyRoute | qa | narrow | tag | posit
-             | qs | readAnswer | trivialConverge | converge | seam
+inductive Op | select | certify | handoff | narrow | tag | posit | gate | readTurn | converge | seam
 
 def grounding : Op → Annot × String
-  | .identify        => (.sense, "Internal analysis: the silent scan for sources warranting audit — load-bearing, aged past their origin's horizon, reached through a long chain, in tension with another source about the same referent, or an inference used as a premise")
-  | .bindKind        => (.sense, "Internal analysis: bind each candidate to the claim it is read as authority for — referent, claim kind, scope, and verbatim text — with what makes it suspect, its evidence, and how many distinct claims the binding bundles; re-run for an audit a met Revisit returns, reading the context as it now stands")
-  | .split           => (.sense, "Internal analysis: a binding that bundles several distinct claims yields one atomic binding per claim, read from the source, each with the predicate and evidence bearing on its own claim; before any certificate, so no compound is admitted")
-  | .certify         => (.sense, "Internal analysis: fit each atomic binding against this contract's own claim and its route claims, reading nothing outside this contract; the claims the evidence supports, and the cited fit")
-  | .certifyRoute    => (.extension, "TextPresent+Proceed: where a route claim alone holds a candidate, report the deficit with the cited fit and the command only as a hint — a missing pre-execution fact (/inquire), a claim a convention or ownership question settles (/bound); nothing is dispatched, and no candidate leaves the person's view silently")
-  | .qa              => (.constitution, "present: one ambiguous candidate per turn, in formation order — before the gate the source, the bound claim, the evidence with its channel, and the claims it supports or that none does; the gate asks whose it is — vet it here, hand it to a named deficit, or none of these — with each option's consequence; a deficit the person names outside the set is a route emitted bare")
-  | .narrow          => (.sense, "Internal analysis: for each admitted audit, the narrowing its judgment is made against — the claim, predicate, and evidence off its binding, the stake off the pending action; the question, never an answer")
-  | .tag             => (.observe, "artifact read, artifact search: verify each admitted audit's source origin, the claim it authorizes, and its downstream references; provenance, freshness, and leverage")
-  | .posit           => (.sense, "Internal analysis: one concrete antithesis per admitted audit with no antithesis yet or a met Revisit — Pattern A, B, C, D, or emergent — against the claim its binding fixed, with its cited basis")
-  | .qs              => (.constitution, "present: mandatory, per batch of at most four admitted audits whose judgment is open — before the gate each claim's narrowing whole, its tags, the antithesis with its basis, and the certificate fit that admitted it, then once for the batch that a judgment reaches only the claim in its own slot; the gate carries the free-text question and the instruction list — Withdraw, Revisit(condition), HandOff(deficit), or none — each with its consequence; no answer is offered and no free response is mapped onto one")
-  | .readAnswer      => (.sense,"Internal analysis: the latest utterance read whole with the fused context — attributions, judgments with their instructions, and whatever else it says, for the next pass")
-  | .trivialConverge => (.extension, "TextPresent+Proceed: nothing owed and nothing ever posited — no source met the criteria (empty ledger), or every formed candidate was handed elsewhere or left unattributable, by the certificate's fit or the user's attribution (each handoff named with its hint, each residual with what was left unresolved); the two causes reported apart")
-  | .converge        => (.extension, "TextPresent+Proceed: the per-antithesis trace over every audit an antithesis was put to, each answer beside the antithesis it answered and a replaced answer beside it; the Handed and Unattributable records apart, with who assigned each; every handed deficit and HandOff emitted with its hint where this contract inscribes one, bare otherwise; unmet Revisits reported open; the dissent attached to the closure")
-  | .seam            => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate inside Elenchus and the next protocol fires unchanged")
+  | .select   => (.sense, "Internal analysis: the claims the pending action leans on that warrant a challenge, afresh every pass against the context as it now stands and from this run's invocation on; the person's words about what to vet included, and a source whose claim cannot be settled still selected, its owner unclear")
+  | .certify  => (.sense, "Internal analysis: each claim fitted against this contract's own claim and its route claims, reading nothing outside this contract; admissibility here only, and fail-closed, so evidence that supports no claim or several leaves it unclear")
+  | .handoff  => (.extension, "TextPresent+Proceed: a claim the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), a claim a convention or ownership question settles (/bound); nothing is dispatched, and no claim leaves the person's view silently")
+  | .narrow   => (.sense, "Internal analysis: for each open claim, the narrowing its answer is made against — the claim, what makes it suspect, and its evidence, the stake off the pending action; the question, never an answer")
+  | .tag      => (.observe, "artifact read, artifact search: verify each open claim's source origin, the claim it authorizes, and its downstream references; provenance, freshness, and leverage")
+  | .posit    => (.sense, "Internal analysis: one concrete antithesis per open claim its state has not outrun — Pattern A, B, C, D, or emergent — against the claim as it now stands, with its cited basis; provisional where the owner is unclear")
+  | .gate     => (.constitution, "present: the current list and this turn's changes, then every open claim with its narrowing, tags, antithesis and basis, and certificate fit, and concrete actions for it, each with its consequence and never a category title; the person answers in their own words; with nothing open, what was searched and found, and whether the run is done")
+  | .readTurn => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's in this run it bears on, read whole against the fused context as it now stands — an answer to one claim or several, a correction of the target, a question, a closing — whatever form it takes")
+  | .converge => (.extension, "TextPresent+Proceed: the per-antithesis trace with each answer beside the antithesis it met, quoted, and a replaced answer beside it; the claims the certificate handed on with fit and hint; the conditions left unmet, reported open; the dissent attached to the closure")
+  | .seam     => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; this protocol declares no outbound edge, and every Constitution gate inside Elenchus and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Pattern resolution emergent via session context.
@@ -604,71 +574,63 @@ end Elenchus
 
 ## Mode Activation
 
-`/sublate` is user-invoked over an existing working context before an action that depends on it is externalized or committed. Elenchus has no AI-guided activation: a model may answer an explicit invocation, but it does not initiate vetting from its own suspicion. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind. Empty or freshly arrived context can converge through the Definition's trivial path.
+`/sublate` is user-invoked over an existing working context before an action that depends on it is externalized or committed. Elenchus has no AI-guided activation: a model may answer an explicit invocation, but it does not initiate vetting from its own suspicion. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind. The run begins at the invocation: what an earlier run or session selected, answered, or set as a condition belongs to that run, and the context carries it only as material.
 
 ## Source Identification Criteria
 
-The silent scan selects a source when it is unusually load-bearing, older than the horizon appropriate to its origin, supported through a long provenance chain, in tension with another source about the same referent, or itself an inference being used as a premise. Thresholds and origin horizons remain working hypotheses; an emergent criterion may be used when it directly identifies suspect context.
+A source is worth a look when it is unusually load-bearing, older than the horizon appropriate to its origin, supported through a long provenance chain, in tension with another source about the same referent, or itself an inference being used as a premise — the assistant's own earlier output included. Thresholds and origin horizons remain working hypotheses; an emergent criterion may be used when it directly identifies suspect context.
 
 ## Antithesis Rendering
 
-Render the pattern that directly challenges the bound claim:
+Render the pattern that directly challenges the claim:
 
 - **Provenance**: test whether the source's verification path authorizes this claim. Freshness does not settle support-integrity when nothing couples the source to the behavior it asserts.
 - **Counterfactual**: use a condition the user has put in play to show where the current conclusion could fail.
-- **Cross-source**: compare separate sources only after their referent and claim-kind are compatible. Sibling audits split from one source are not a source pair.
+- **Cross-source**: compare separate sources only after their referent and claim-kind are compatible. Claims split from one source are not a source pair.
 - **Inference**: test the reasoning that produced a conclusion. Time-invariance from a present observation, over-generalization, surviving-sample reasoning, base-rate neglect, and correlation-as-cause are recognition seeds rather than a closed catalog; an emergent archetype remains available.
 
 Counterfactual rendering begins with the user's changed condition. Inference rendering reverse-derives the condition that would expose a reasoning flaw. Every antithesis is a concrete counter-claim, counter-condition, counter-source, or counter-inference with a cited basis.
 
 ## Protocol
 
-### User-facing realization
+The formal block defines execution. This section fixes the user-facing rendering.
 
-For each admitted audit, present the material before the Constitution gate in this order:
+### The round
 
-- the source and bound claim, including referent, claim kind, scope, and verbatim claim text;
-- what makes the claim suspect, the evidence with its channel, and what the pending action stakes on it;
-- the provenance, freshness, and leverage reading;
-- the antithesis and its cited basis, plus the certificate basis that admitted the audit.
+Open every round with the current list: each claim under vetting, its source, and how it stands now — waiting on you, what you said about it, or handed to another protocol with why. Follow it with what this turn changed: what your last answer settled, what is newly found, what moved because you corrected the target, and any claim challenged again because a condition you set is now met.
 
-Then state once for the batch that a judgment reaches only the claim in its own slot. Open the gate with the free-text question asking what the user makes of that claim. The optional instructions are presented with their consequences:
+Then present every open claim, a few at a time where there are many. For each, before the question: the source and the claim verbatim, what makes it suspect, the evidence and where it came from, what the pending action stakes on it, the provenance and freshness reading, and the antithesis with its basis. Where the owner is unclear, say which other kinds of problem the evidence also supports; the antithesis is then provisional.
 
-- **Withdraw** stops downstream reliance on this source for this claim and keeps the judgment in the record.
-- **Revisit(condition)** returns this audit only if the condition is met while the current run remains active; an unmet condition is reported open at convergence and is not monitored afterward.
-- **HandOff(deficit)** reports the named deficit at convergence; Elenchus performs no downstream resolution for it.
-- No instruction leaves the source in place under the recorded verdict.
-
-A rejected claim binding is recorded in the verdict; a later invocation performs any re-binding. Process at most four audits per Constitution turn; the next batch is the admitted audits the context still leaves unjudged.
-
-### Attribution of an ambiguous candidate
-
-When the certificate cannot say whose a candidate is, put it to the user before it is admitted, handed off, or dropped. Before the question, show the source, the bound claim, the evidence, and which of the inscribed claims that evidence supports — or that none does. The gate renders the `Attribution` answer space in plain language, one option per supported claim:
+The question asks what you make of each claim in light of its challenge. The options are concrete actions for that claim, each with what then happens — never category titles:
 
 ```
-This candidate could be more than one kind of problem, and the evidence doesn't settle which. Whose is it?
+"The staging DB mirrors prod schema" — from the runbook (edited 2025-11)
+  suspect   the migration you plan assumes it; the runbook predates two prod migrations
+  challenge prod ran migrations 0412 and 0419 after that edit; nothing shows staging received them
 
-Options:
-1. **A suspect claim — vet it here** — it is admitted and gets its own challenge in turn
-2. **Belongs to [deficit] — hand it off** — recorded as handed to that protocol: [command hint where one exists]
-3. **None of these** — recorded as unattributed; nothing is done with it here
+What do you make of it?
+1. Stop relying on the runbook for this — check the staging schema before migrating
+2. Look again once 0419 is confirmed on staging — the claim is re-challenged then
+3. It holds — say why, and the migration proceeds on it
 ```
 
-Ask about one candidate per turn. An answer here says whose the candidate is and nothing about what the user makes of the claim; only the first option leads to the challenge and the judgment gate above. Do not drop an ambiguous candidate without this question — a candidate the certificate could not place is the user's to place. Where the user says whose a candidate is in a later answer, a candidate the certificate handed elsewhere included, that statement is its attribution. Read `references/round-composition.md` before composing when terminology or wording must remain stable, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
+Answer in your own words; one answer may cover several claims, or only some of them — what it leaves stays open for the next round. An answer is recorded in your words, instructions included. Saying the claim is another protocol's matter hands it there with the command as a hint; nothing is dispatched. Saying the target itself is wrong moves what is vetted on the next pass.
+
+With nothing open, show what was searched and what was found — including every claim handed elsewhere, with why — and ask whether the run is done; an ordinary reply closes it, and you may name something to vet instead. Wherever an earlier answer of yours is read as covering a claim, or as what lets the run close, say which turn was read and what was taken from it, quoting your words — this disclosure stands in place of asking again.
 
 ## Rules
 
 - **User-initiated only**: Activate only on the user's pre-execution vetting invocation over existing working context.
-- **Recognition over Recall**: Present each complete narrowing and antithesis before the gate, then the batch reach note; the gate carries the free-text judgment question and the typed instruction list with differential implications.
-- **Round composition**: Use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before the gate. Use the referenced round-composition guide at the moments named above.
-- **Source chain preservation**: The working context is read and never rewritten. Withdraw reaches the audit's source only as authority for the record's `claimJudged`; sibling claims remain governed by their own audits, and after a loop re-binding `claimJudged`, not `claimAtAdmission`, is the operative scope.
-- **Dialectical antithesis**: Posit a concrete challenge to the claim rather than a procedural verification question. If no concrete challenge can be constructed, record that result with the attempted pattern and basis so the audit remains visible in the closing account.
-- **Narrowing identity**: Present the `ValueSpace` fields and the instruction list intact. Materialization fills this audit's concrete claim, evidence, and stake into those fields without changing their structure.
-- **Claim-relative provenance**: A provenance reading (`Tags`) authorizes one bound `ClaimRef`. Same-referent comparison requires compatible claim kinds and separate sources; a source used for several claims yields separately judged audits.
+- **Antithesis before synthesis**: Every open claim is met by a concrete challenge — a counter-claim, counter-condition, counter-source, or counter-inference with its cited basis — shown before the user is asked what they make of it. Where no concrete challenge can be constructed, say so with the attempted pattern and basis, so the claim stays visible in the closing account.
+- **The answer is the user's, in their words**: A claim is answered only by the user's turn, whatever its form, and that answer stands over anything the certificate read. It is recorded as said, with no category assigned to it; instructions, conditions, and orders it carries are read from those words.
+- **Recognition over categories**: Offer actions concrete to the claim in front of the user, each with its consequence. The user's own words settle what a category would have asked them to choose.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, each judgment beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before the question rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own round bears on where a sentence sits relative to the question.
+- **Judge afresh every pass**: Which claims are vetted, whose each one is, and which answer covers which claim are read from the whole context as it now stands. A correction of the target moves what is vetted; a condition the user set that is now met re-opens its claim with a fresh challenge; changed wording alone does not void an answer.
+- **Source chain preservation**: The working context is read and never rewritten. An answer reaches its source only as authority for the claim it answered; other claims from the same source stand on their own answers.
+- **Claim-relative provenance**: A provenance reading authorizes one claim. Same-referent comparison requires compatible claim kinds and separate sources; a source used for several claims yields separately answered claims.
 - **Currency and support-integrity**: A current source still receives a provenance antithesis when no observable coupling ties it to the behavior its claim asserts.
 - **Open inference archetypes**: The named reasoning flaws seed recognition without closing Pattern D to an emergent flaw condition.
-- **Declared continuation relay**: A user-declared chain settles the protocol after Elenchus; this contract declares no outbound edge. Cite that source and preserve every Constitution gate inside both protocols. A handoff the certificate finds is reported with its fit and the command only as a hint; nothing is dispatched.
+- **Unclear owners are shown, never dropped**: A claim the certificate cannot place is presented with a provisional challenge and the other deficits its evidence supports; the user's answer places it. A claim the certificate alone places elsewhere is reported with its fit and the command only as a hint.
+- **The user closes**: Nothing closes on the first pass. Where nothing was found, or every claim was handed elsewhere by the certificate alone, the run ends only when the user replies after seeing what was found. Contrary ground still held when the user answers over it is attached to the closure record.
+- **Declared continuation relay**: A user-declared chain settles the protocol after Elenchus; this contract declares no outbound edge. Cite that source and preserve every Constitution gate inside both protocols.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Admission-time certificate**: For each atomic claim, run `KindBinding → Certificate → ValueSpace` in that order before tagging or antithesis generation, including on loop re-entry. Only `pass` is admitted; a route is recorded by the certificate, and an ambiguous fit is put to the user at `Qa`, whose attribution is recorded — every formed audit ref carries one record or the other.
-- **Judgment stays the user's; the challenge stays on the record**: A claim's standing is settled only by the user's answer at `Qs`, and whose a candidate is only by the user's attribution or by the certificate's fit where that fit alone decides it — recorded as the certificate's, and replaced by the user's statement wherever one reaches it. The antithesis goes before the gate and stays in the trace beside the answer that met it; any further contrary ground still held at closure is attached to the closure record.
-- **Ambiguity surfaces**: An ambiguous certificate is put to the user at `Qa` with the claims its evidence supports, one candidate per turn, before the candidate is admitted, handed off, or dropped. The user's attribution — vet it here, hand it to a named deficit, or none of these — is what settles pass, route, or `Unattributable`; the certificate never drops a candidate it could not place, and the AI takes no second look at ground that has not moved.

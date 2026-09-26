@@ -19,6 +19,7 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 instance : Nonempty Prospect := ⟨⟨"", []⟩⟩
+instance : Nonempty Certificate := ⟨⟨[], List.nodup_nil, by simp, ""⟩⟩
 instance : Nonempty ValueSpace := ⟨⟨⟨"", "", "", ""⟩, "", [], ⟨"", ""⟩⟩⟩
 instance : Nonempty Tags := ⟨⟨⟨"", "", "", ""⟩, .provisionalAssumption, "", "", "", []⟩⟩
 
@@ -26,11 +27,15 @@ theorem silence (respond : Context P → Response P) (c : Context P) :
     sublate respond c [] = .holding c := by
   simp [sublate]
 
-theorem owed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Vetted (pass (fuse c u))) :
+theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
     sublate respond c (u :: us) =
       sublate respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
   simp [sublate, h]
+
+theorem start_holds (respond : Context P → Response P) (c : Context P) :
+    start respond c [] = .holding (pass c ++ [(respond (pass c)).val]) := by
+  simp [start, sublate]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(tagReads c).map (·.val) ++ (passRecord (c ++ (tagReads c).map (·.val))).map (·.val), by
@@ -47,36 +52,38 @@ theorem closes_after_utterance (respond : Context P → Response P) (c : Context
     · unfold close at h
       split at h
       · cases h
-      · split at h
-        · cases h
-        · cases h
-          exact ⟨c, u, rfl⟩
+      · cases h
+      · cases h
+        exact ⟨c, u, rfl⟩
     · exact ih _ h
 
-theorem person_route_is_route (c : Context P) (a : Audit) (d : Deficit)
-    (h : filledValue (attribution c a.ref) = some (.route d)) : status c a = .route d := by
-  simp [status, h]
+theorem person_first (c : Context P) (a : Claim) (w : Answer)
+    (h : filledValue (answer c a) = some w) : standing c a = .answered w := by
+  simp [standing, h]
 
-theorem handed_not_judgment (c : Context P) (a : Audit) (r : DispositionRecord) (d : Deficit)
-    (h : record c a = some r) (hd : r.disposition = .handed d) : r.assignedBy ≠ .judgment := by
-  unfold record at h
-  split at h
-  · split at h
-    · cases h; simp
-    · cases h; simp
-  · cases h; simp
-  · cases hj : filledValue (judgment c a.ref) with
-    | none => simp [hj] at h
-    | some j =>
-      simp [hj] at h
-      subst h
-      simp at hd
-  · cases h
+theorem unclear_waits (c : Context P) (a : Claim) (hr : filledValue (answer c a) = none)
+    (hu : (certify c a).whose = .unclear) : standing c a = .open_ := by
+  simp [standing, hr, hu]
 
-theorem attributed_by_person {c : Context P} {r : AuditRef} {s : Cite c}
-    (ok : (attributionCoord (P := P) r).admits s.src) : s.src.val = .person := ok
+theorem answered_by_person (c : Context P) (a : Claim) (w : Answer)
+    (h : standing c a = .answered w) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+  unfold standing at h
+  cases hr : answer c a with
+  | filled b src ok _ =>
+    exact ⟨src, ok, src.ok.trans ok⟩
+  | open_ _ =>
+    simp only [hr, filledValue] at h
+    split at h <;> cases h
 
-theorem judged_by_person {c : Context P} {r : AuditRef} {s : Cite c}
-    (ok : (judgmentCoord (P := P) r).admits s.src) : s.src.val = .person := ok
+theorem closing_by_person {c : Context P} {s : Cite c}
+    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem vetted_closed_by_person (c : Context P) (v : VettedContext P) (hc : Closable c)
+    (h : close c = .vetted v) : NothingOpen c ∧ PersonClosed c := by
+  rcases hc with hs | ⟨t, ht⟩ | hn
+  · simp [close, hs] at h
+  · simp [close, ht] at h
+  · exact hn
 
 end Elenchus
