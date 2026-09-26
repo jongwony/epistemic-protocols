@@ -25,8 +25,9 @@ Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` check
 active runner and refuses rather than failing halfway.
 
 Claude needs one human step once: obtaining a token against the target-specific
-isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active;
-setup neither consumes nor stores it.
+isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active, or,
+with `REALIZE_CODEX_AUTH=login`, a codex login already on the machine; setup neither
+consumes nor stores either.
 
 ```bash
 CLAUDE_CONFIG_DIR=~/.claude-eval/inquire claude setup-token
@@ -63,6 +64,7 @@ For the Codex Luna xhigh profile:
 ```bash
 REALIZE_RUNNER=codex ./setup.sh inquire
 CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
+REALIZE_CODEX_AUTH=login REALIZE_RUNNER=codex ./run.sh inquire   # borrow this machine's login instead
 REALIZE_RUNNER=codex node ./harness.mjs report inquire
 REALIZE_RUNNER=codex ./teardown.sh inquire
 ```
@@ -73,6 +75,7 @@ the selected plugin. The bare home has no marketplace or plugin state. `run` rem
 `OPENAI_API_KEY` and `CODEX_ACCESS_TOKEN` from child environments and supplies
 `CODEX_API_KEY` only to `codex exec`; plugin setup and integrity checks receive no
 credential.
+
 Codex supports only the `bare` and `protocol` arms because it has no deployed analogue
 of Claude's output-style treatment. Codex case worktrees live under the system temporary
 directory rather than below this repository, so parent `AGENTS.md` and git state cannot
@@ -84,6 +87,38 @@ pre-ablation transcript. Codex also compares the installed cache's `SKILL.md` di
 to the source immediately before spending a run; an edit made after setup fails closed
 with an instruction to rerun setup instead of measuring stale treatment bytes.
 
+### Login mode
+
+`REALIZE_CODEX_AUTH=login` authenticates each `codex exec` child with the login already at
+`$CODEX_HOME/auth.json` (default `~/.codex/auth.json`) instead of an API key. What keeps the
+homes disposable:
+
+- **The link lives for one child.** It is created in the arm's home immediately before a
+  `codex exec` and removed immediately after, before the tree digest, the next cell's
+  plugin integrity check, or grading. Setup, `codex plugin list` and the report therefore
+  meet a home with no credential, exactly as in API-key mode, and no API key reaches any
+  child.
+- **A link, never a copy.** A ChatGPT login rotates its refresh token. A refresh written
+  into a copy would retire the token the real file still holds and sign the user out; a
+  refresh written through the link lands in the real file. The login itself is never read,
+  printed or copied by the harness.
+- **Checked after every child.** If the link is not still a link to the same file once the
+  child exits, the run stops before another child starts. A regular `auth.json` found in its
+  place may hold a refresh newer than the real login, so it is named and never deleted —
+  not by the run, the exit trap, setup or teardown. Moving it back is the owner's call.
+- **No overlap.** Cells are spawned synchronously, so one run has at most one child holding
+  the login. A lock under the system temporary directory, keyed by the login's path, refuses
+  a second login-mode run — another checkout's included — until the first finishes; a lock
+  whose holder has exited is taken over. An interactive codex session using the same login
+  is outside the lock, which is the same condition as two terminals signed in at once.
+- **Removed on every exit path.** The run clears links in `finally` and on `SIGINT` /
+  `SIGTERM`; `run.sh` repeats that from an exit trap (`harness.mjs release-login`) for a
+  harness that never reached its own cleanup; `teardown.sh` does it at every depth.
+
+A cell's home also loses everything but its config, installed plugin and `auth.json` slot
+before the cell starts, in either mode: a multi-turn cell keeps its session on disk so it
+can be resumed, and nothing one cell wrote should be readable by the next.
+
 ## Where isolation lives
 
 Arm isolation is a property of the config directory rather than of a flag: an empty
@@ -91,7 +126,7 @@ Arm isolation is a property of the config directory rather than of a flag: an em
 what `setup.sh` builds per target. Codex takes the same shape through a separate
 `CODEX_HOME` per arm, with `codex plugin list` confirming what that home holds before a
 run is spent. The harness clears volatile state before each run and passes
-`--no-session-persistence`, so a re-run reads its own environment.
+`--no-session-persistence` wherever nothing resumes, so a re-run reads its own environment.
 
 Set `maxBudgetUsd` above the one-time system-prompt cache creation that a session's
 first turn pays; later turns read that cache cheaply, so the floor is per session
@@ -153,7 +188,10 @@ the report prints those rows again under a separate heading so they are not read
 results.
 
 `pass_k` is one when every repetition passed the deterministic transition composite,
-zero otherwise. The `manual` column is separate: it counts transcript judgments whose
+zero otherwise. `predicates` breaks it down — each predicate's passes over the repetitions it
+could read — so a zero names the transition that failed. `turns`, on a scripted multi-turn
+case, is the subject turns reached over those the script holds; short of it means a turn
+changed the tree and the dialogue stopped there. The `manual` column is separate: it counts transcript judgments whose
 grader files fix the observation criteria but which no automated judge executed.
 Constructor coverage, semantic question ordering, and user-facing classification are
 therefore never implied by an automatic pass.
@@ -164,20 +202,38 @@ it. It reads `n/a` in an arm with no plugin, where `integrity` already asserts t
 absence, and `trace-unavailable` for Codex, whose JSONL carries no skill-invocation
 event; a model naming the skill counts as invocation evidence nowhere.
 
-Codex rows report token use from `turn.completed`. They leave cost blank because the
-CLI does not emit a dollar value for the API-key run. Claude rows retain the emitted
-cost. A Codex timeout is a failed launch and is not cached or graded.
+Codex rows report token use from `turn.completed`; a resumed thread reports its running
+total there, so a multi-turn cell's figure is its last turn's.
+They leave cost blank because the CLI emits no dollar value, whichever way it
+authenticated. Claude rows retain the emitted cost. A Codex timeout is a failed launch and is not cached or graded.
 
 A cell whose launch never produced a transcript is not written or counted. `run` and
 `report` both propagate that incompleteness, so a re-run still picks the cell up.
 
+## Multi-turn cases, scripted
+
+A case whose `case.yaml` declares `multi_turn` with `driver: harness` ships its user turns
+as `reply-1.md`, `reply-2.md`, … and the harness sends them itself, on either runner: the
+first turn opens a session (Codex without `--ephemeral`, Claude without
+`--no-session-persistence`), and each reply resumes it with the same model and flags. The
+transcript holds every turn, each preceded by a `realize.turn` marker naming the message that
+opened it; the sidecar records the tree verdict after every turn. The one reply rule the
+harness applies itself is mechanical: a turn that changed the tree ends the dialogue, since
+it has left the gate. Every turn must produce its runner's complete start/end pair, or the
+cell is a launch failure.
+
+The script reads nothing of what the subject said, so each reply must stand at whichever
+gate it lands on; the case's `oracle.md` shows how its replies were written to do that.
+`grasp-adjudicable` and `grasp-unattachable` are the worked pair.
+
 ## Multi-turn cases, by hand
 
-A case whose `case.yaml` declares `multi_turn` is graded on turns after the first, or
-on tool-call inputs. `harness.mjs` runs one turn per cell and records tool names only,
-so such a case is not registered in `harness.config.json` and is walked by hand with
-`scripts/turn.sh` (Claude runner only). The case's `oracle.md` plays the user; the
-person running the case composes nothing.
+A case whose `oracle.md` must read the subject's turn to compose a reply is graded on turns
+after the first, or on tool-call inputs, that no script can reach. Such a case declares
+`multi_turn` without `driver: harness`; the harness refuses to run it, so it is not
+registered in `harness.config.json` and is walked by hand with `scripts/turn.sh` (Claude
+runner only). The case's `oracle.md` plays the user; the person running the case composes
+nothing.
 
 ```bash
 cd .claude/skills/realize/scripts

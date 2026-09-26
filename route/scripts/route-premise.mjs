@@ -89,7 +89,7 @@ const TOOL_HEADER =
 // and carries every moment. `at` names a matcher-decided moment (a key of
 // MOMENTS) and the clause for the line delivered again at that call.
 const PREMISE_INDEX = [
-  { file: "recognition-and-authority.md", when: "when deciding whether to settle something yourself or put it to the person you are working with, when presenting a set of options for someone to choose from, and when deciding whether a rule may fix an answer before the situation it applies to is known." },
+  { file: "recognition-and-authority.md", when: "when deciding whether to settle something yourself or put it to the person you are working with, when setting up work that will continue without that person present, when presenting a set of options for someone to choose from, and when deciding whether a rule may fix an answer before the situation it applies to is known." },
   { file: "interaction-factorization.md", when: "when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several." },
   { file: "gate-design.md", when: "when designing or defending a checkpoint, when deciding what that checkpoint should present, when deciding what counts as done and when to stop, and when checking whether a required step can be skipped." },
   { file: "tiering-and-scope.md", when: "when deciding a principle's role, scope, loading moment, or revision basis, including after a model change." },

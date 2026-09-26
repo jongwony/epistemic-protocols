@@ -100,7 +100,7 @@ function leanStringList(names) {
   return `[${names.map((n) => `\`${n}`).join(', ')}]`;
 }
 
-function auditModule({ importModule, ns, events, proofsModule, contractModules }) {
+function auditModule({ importModule, ns, events, proofsModule, contractModules, judgmentModule = null }) {
   const body = [];
   const stated = [];
   for (const event of events) {
@@ -131,14 +131,24 @@ open Lean Elab Command in
   let mut provedUser : Array Name := #[]
   let mut contract : Array Name := #[]
   let mut axiomDecls : Array Name := #[]
+  let mut judgments : Array Json := #[]
   for (n, ci) in env.constants.toList do
     let some m := modOf n | continue
     unless inPackage m do continue
     match ci with
-    | .axiomInfo _ => axiomDecls := axiomDecls.push n
+    | .axiomInfo ai =>
+      axiomDecls := axiomDecls.push n
+      if ${judgmentModule ? `m == \`${judgmentModule}` : 'false'} then
+        -- A judgment the model makes: its type must be inhabited, or it assumes the impossible.
+        let inhabited ← liftTermElabM do
+          let goal ← Meta.mkAppM \`\`Nonempty #[ai.type]
+          return (← Meta.synthInstance? goal).isSome
+        judgments := judgments.push <| Json.mkObj [("name", toJson n.toString), ("inhabited", toJson inhabited)]
     | .thmInfo _ =>
-      -- A Prop-valued structure field is a projection, not a stated theorem.
-      if (← findDeclarationRanges? n).isSome && !env.isProjectionFn n then
+      -- A Prop-valued structure field is a projection, and a Nonempty instance a
+      -- judgment's inhabitation witness; neither is a stated theorem.
+      if (← findDeclarationRanges? n).isSome && !env.isProjectionFn n &&
+          !(Meta.isInstanceCore env n && ci.type.getForallBody.isAppOf \`\`Nonempty) then
         if m == \`${proofsModule} then
           proved := proved.push n
           provedUser := provedUser.push ((privateToUserName? n).getD n)
@@ -153,6 +163,7 @@ open Lean Elab Command in
     ("proved", toJson (provedUser.map (·.toString))),
     ("contract", toJson (contract.map (·.toString))),
     ("axiomDecls", toJson (axiomDecls.map (·.toString))),
+    ("judgments", Json.arr judgments),
     ("axioms", Json.arr axioms)]
   logInfo m!"AUDIT {out.compress}"
 `;
@@ -178,6 +189,7 @@ function planContracts(root, blocks) {
         events,
         proofsModule: `EpistemicProtocols.${ns}.Proofs`,
         contractModules: [`Contract.${ns}`, 'EpistemicProtocols.Ground'],
+        judgmentModule: `Contract.${ns}`,
       }),
     });
     audits.push({ relPath, ns, auditPath, stated: events.filter((e) => e.name).map((e) => `${ns}.${e.name}`) });

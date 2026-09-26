@@ -8,15 +8,11 @@ When AI collaboration goes off-track, you redo everything. These protocols catch
 
 Correcting a wrong direction at the plan level can cost one conversation turn.
 Once it hardens into code, rollout steps, or downstream explanations, it can cost hours of rework.
-These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution, applicability, recall, and comprehension — so you and AI can surface, judge, and adapt misalignment before it compounds.
+These protocols add structured checkpoints to help you and the AI catch and correct a wrong direction before more work depends on it.
 
-## Mission and Machinery
+## Where the protocols help
 
-**Stated Mission** — the public hook: catch wrong directions early, especially at the plan level. This is the clearest entry story and how most users reach for the protocols.
-
-**Realized Machinery** — the actual coverage: structured checkpoints span planning, analysis, decision, execution, verification, recall, and comprehension. Protocols such as Merismos (goal apportionment into conditioned execution units), Epharmoge (post-execution applicability), Anamnesis (session recall), and Katalepsis (comprehension verification) extend beyond plan-level alone.
-
-The two layers serve different audiences: the README carries the narrow public contract; `SKILL.md` and `CLAUDE.md` describe the full machinery. See [docs/mission-bridge.md](./docs/mission-bridge.md) for the governance rules that keep these layers aligned.
+Use the protocols to catch a wrong direction while planning, before it shapes later work. The same structured checkpoints also help when you hand work to an autonomous run, check a result against your actual situation, recall an earlier discussion, or make sure you understand something before building on it.
 
 ## Quick Start
 
@@ -28,9 +24,9 @@ Install every protocol:
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` before a refactor that crosses several domains.
+Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
 
-The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and deficit recognition (`/onboard`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, at session start the installed-protocol deficit table with the [premise](./premise) index beneath it, and again at the tool calls the matcher can see are a premise document's moment — an instruction surface changing, work handed to an agent — that document's entry. Add either on its own:
+Utility plugins are opt-in and installed separately. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. The experimental [`route`](#route) plugin helps the agent invoke a suitable protocol from the conversation context and find relevant collaboration principles when needed. Add either plugin:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -65,32 +61,26 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 
 | Protocol | Command | When to use |
 |----------|---------|-------------|
-| [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
-| [Euporia](./euporia) | `/elicit` | You have intent but the decision coordinates are implicit — reverse-trace them from the externalized substrate (codebase, rules, past sessions) until intent crystallizes |
-| [Heuresis](./heuresis) | `/ideate` | The candidate field for a decision is empty or has prematurely converged — widen it into a diverse set before any selection, not after |
-| [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
-| [Hypotyposis](./hypotyposis) | `/sketch` | A form has to be made and you cannot say what it should be, but you'd know it on sight — sketch it, mark what does not fit, revise the kept version, and finish on the one you recognize |
-| [Prothesis](./prothesis) | `/frame` | Need to settle which lens to look through before the analysis starts — one lens or several |
-| [Analogia](./analogia) | `/ground` | A mapping against an account already in play leaves its intended conclusions or supported limits uncertain |
-| [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
-| [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does, or on a reservation where a judgment rather than a check settles it |
-| [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
-| [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
-| [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
+| [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown |
+| [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) holds the clues |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or they narrowed to one too early — widen the field before choosing any |
+| [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first |
+| [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight |
+| [Analogia](./analogia) | `/ground` | You're carrying a framework or an analogy over to a case already in front of you, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports |
+| [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something you can't name yet — pin down what they have in common |
+| [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and can tell when they are done |
+| [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but may not fit your actual situation |
+| [Elenchus](./elenchus) | `/sublate` | The context you are about to act on may no longer hold — stale, weakly sourced, or contradicted — vet it dialectically before acting |
+| [Horismos](./horismos) | `/bound` | You cannot yet see what needs deciding in a task, or which decisions to keep or entrust |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it — one session, or a line of work, topic, or concept spread across several |
-| [Katalepsis](./katalepsis) | `/grasp` | Code, a paper, or a big change you need to actually understand — you can't follow it yet, or you nod along and aren't sure. Verify your understanding is genuine before you approve or build on it |
-| [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
+| [Katalepsis](./katalepsis) | `/grasp` | Something in front of you — code, a document, a result — needs to be actually understood: you can't follow it yet, or you nod along and aren't sure |
+| [Hyphegesis](./hyphegesis) | `/conduct` | The work takes several lines of thinking, and it isn't obvious what order they run in, which can run apart, how their results combine, when to stop, or where each result goes — settle how it runs before starting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/frame`, `/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## Utilities
 
-Two plugins sit beside the protocols. Both are opt-in for the Claude Code one-liner:
-
-```bash
-claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
-```
+For utility plugin installation in Claude Code, see [Quick Start](#claude-code).
 
 ### [Epistemic Cooperative](./epistemic-cooperative)
 
@@ -102,7 +92,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/onboard` | New here — get one recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
 | `/probe` | Something feels off but you cannot name which deficit it is — several hypotheses, routed by your recognition |
 | **Shaping the work** | |
-| `/triage` | A pile of GitHub issues needs to become focused work units, each fused with the project's northstar and handed to a session by pointer |
 | `/forge` | You need a prompt or a standing skill recipe grounded in a vendor reference (a model prompt guide, the Codex Goals spec), not one written from memory |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
 | `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
@@ -118,31 +107,23 @@ Skills that act at their own decision points — around the protocols, on the wo
 
 ### [Route](./route)
 
+> **Experimental.** The hook set and the injected wording can change between releases, and the optional advisory channel is unvalidated — see [route/README.md](./route/README.md) before depending on either.
+
 Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
-
-## Design
-
-Each protocol targets a specific decision point where human-AI collaboration can drift. Public docs lead with the plan-level hook because it is the clearest entry story; contributor docs explain the broader machinery spanning planning, execution, verification, recall, and comprehension. For the bridge between those layers, see [docs/mission-bridge.md](./docs/mission-bridge.md). For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
 
 ## For Contributors
 
-New to the repo? Start with [ONBOARDING.md](./ONBOARDING.md). The intended usage: paste it into a fresh Claude Code session — the file carries an embedded instruction block that turns Claude into an onboarding buddy. Claude checks your environment against the setup checklist, routes you to the protocol that best matches your current stance, walks you through the core docs in order, and surfaces the contribution workflow and conventions.
+Start with [ONBOARDING.md](./ONBOARDING.md). Paste the full file into a fresh Claude Code session to use Claude as an onboarding buddy for environment setup, core docs, and the contribution workflow.
 
-Entry-point routing happens up front, so you can experience the protocols while onboarding onto them:
+For architecture, read [CLAUDE.md](./CLAUDE.md). For the underlying collaboration principles, explore [premise/](./premise/).
 
-- **First encounter, no prior context** → `/onboard` (epistemic-cooperative) for a quick recommendation plus scenario/trial/quiz walkthrough
-- **Want comprehension of the project itself verified** → `/grasp` (katalepsis) over `CLAUDE.md` or a specific `SKILL.md`
-- **Already have accounts of your Claude Code workflow and these protocols, and want to audit what comparing them supports** → `/ground` (analogia), with your existing usage as the target account
-- **Need a fast when-to-use-which reference** → the protocol table above, or the `route` plugin's session-start table
-
-For the architecture and principles behind the protocols themselves, read [CLAUDE.md](./CLAUDE.md) and the axiom files under [`.claude/rules/`](./.claude/rules/).
+When editing the project's public description, follow the guidance in [Mission Bridge](./docs/mission-bridge.md).
 
 <details>
 <summary>Greek Codex</summary>
 
 | Protocol | Greek | Meaning |
 |----------|-------|---------|
-| Prothesis | πρόθεσις | Setting forth |
 | Katalepsis | κατάληψις | Grasping, comprehension |
 | Horismos | ὁρισμός | A bounding |
 | Aitesis | αἴτησις | Request, inquiry |

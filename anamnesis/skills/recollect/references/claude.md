@@ -1,81 +1,51 @@
 # Claude Code realization
 
-Read this reference before scanning the Claude Code store or emitting a Claude resume handle.
+Read this reference before searching Claude Code conversation records or emitting a Claude resume handle. It binds where the records live, how a record identifies its session and its speakers, and how to reopen one; where to look and how far is the protocol's judgment.
 
-## Store binding
+## Where the records live
 
-- Resolve `{config_dir}` from `CLAUDE_CONFIG_DIR`, falling back to `~/.claude`.
-- Resolve `{slug}` from the project partition containing the active transcript.
-- Semantic INDEX: `{config_dir}/projects/{slug}/hypomnesis/{session-id}/`.
-- Substitute INDEX: `{config_dir}/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl`.
-- Raw SSOT: `{config_dir}/projects/{slug}/*.jsonl`.
-- `memory/` is a user-curated adjunct and is outside the scan store.
+- Resolve `{config_dir}` from `CLAUDE_CONFIG_DIR`, falling back to `~/.claude`. This is the first root searched. Another configuration directory — an older copy moved aside, for example — is a further root when the recall points at it; search it the same way and label every candidate with the root it was found under.
+- Conversation records: `{config_dir}/projects/{slug}/*.jsonl`, one partition per project slug. A session record sits directly inside a partition; anything nested deeper is a subordinate capture, not a session, and is excluded by depth rather than by name.
+- Semantic index: `{config_dir}/projects/{slug}/hypomnesis/{session-id}/` — a gist per session, a cue and never evidence.
+- Substitute channel: `{config_dir}/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl`, the capture of forked work.
+- Capture outcomes: `{config_dir}/projects/{slug}/hypomnesis/.outcomes/`. Before reading them for the records a search examined, read `capture-outcome.md`; bind `{store-root}` to `{config_dir}/projects/{record-slug}/hypomnesis`, using the partition the record or index entry was found in. Claude index entries record no source scan, so `SourceScan` is unknown for them; a transcript line that failed to parse shows as the `input` extraction recorded `input_failed`, without a count.
+- `memory/` holds user-curated notes. It is not enumerated as conversation records; a cue that points at a decision recorded there reaches it like any other record the past work left.
 
-Bind `Candidate.runtime = claude`. Bind the remaining candidate fields from INDEX frontmatter: `session_id`, optional `cwd`, `cross_refs`, and the highest evidence tier over matched artifacts. Bind `Candidate.record` to the record's own path, `{config_dir}/projects/{slug}/{session_id}.jsonl`, using the slug of the partition the candidate was FOUND in — not the active transcript's, since the spine scan below is not slug-partitioned and the two differ exactly when the recall is hardest. Legacy entries without evidence metadata remain neutral in ranking.
+A session whose working directory has since been removed keeps its record under a partition no current directory selects, so a search that is to reach it cannot be limited to the active partition.
 
-Claude partitions INDEX by project slug. A cross-cwd scan reaches the canonical partition selected by the session transcript rather than searching cwd-scattered copies.
+## What a record says of itself
 
-## Spine tier
+For a record found, bind:
 
-`SSOT_spine` joins the initial scan alongside the INDEX. Unlike the INDEX lookup, the spine scan is **not** slug-partitioned — it reaches every project directory under `{config_dir}/projects/`. A session whose working directory has since been removed keeps its record under a partition that no current cwd selects, so a partitioned spine scan would make exactly the sessions hardest to recall the ones it cannot see.
+- `Member.locator` to the record's own path under its root — the path the record was found at, never one re-resolved later, since the active partition does not locate a record found in another;
+- the session id from the filename, the working directory from the record's `cwd`, and its recency from the file's modification time; where an index entry survives a record already deleted, keep the path the entry names and take recency from the entry, so the member is still found and is the one Ground cannot open;
+- the origin label from the **first** `entrypoint` value in the record — first match wins, as the runtime classifies it;
+- `bridgeSessionId` when a `{"type":"bridge-session"}` line is present.
 
-A session record sits directly inside a project directory. Anything nested deeper is a subordinate capture, not a session, and is excluded by depth rather than by name — the naming of those subdirectories is not stable enough to filter on.
+**Speakers.** A turn is the person's when `type` is `user`, `isMeta` and `isCompactSummary` are both absent, and the text neither opens with `<` nor is a bare control marker such as `[Request interrupted by user]`. Hook injections and cross-session envelopes arrive in the same `user` stream while written by something else; read as the person's, they put words in the person's mouth. One turn is the person's despite failing that test: a **relayed turn**, where `origin.kind` is `channel`. A transport carrying the person's words wraps them and marks the record `isMeta`; admit it on `origin.kind`, and take as the utterance what remains once the envelope and the machine-written blocks nested inside it are set aside. `type: assistant` turns are the assistant's; a claim resting on one is what the assistant said, not what the person decided.
 
-Per record, bind:
+**Cost.** A read of a record's head is bounded only where it is bounded by bytes or lines; a search for a field that a record does not carry reads to the end of the file. Bound head reads explicitly when reading across many records.
 
-- `recency` from the file's modification time, and `record` from the file's own path — both are what makes this candidate openable later, since nothing re-resolves the path at grounding time. Where the INDEX entry survives a transcript already deleted, bind `record` to the path the entry names anyway and take `recency` from the entry's own timestamp; bind Null only where neither carries one. Such a candidate is still constructed and still ranked — it is the one Ground cannot open, which is what the Ungroundable path receives;
-- `session_id` from the filename, `cwd` from the record;
-- the origin label from the **first** `entrypoint` value within the record's leading window — first match wins, which is how the runtime itself classifies the record, so a later value in the same file does not reclassify it;
-- `bridgeSessionId` when a `{"type":"bridge-session"}` line is present;
-- the topic from the first human turn, under the filter below.
-
-**Human-turn filter.** A turn is the session's own human when `type` is `user`, `isMeta` and `isCompactSummary` are both absent, and the text neither opens with `<` nor is a bare control marker such as `[Request interrupted by user]`. Hook injections and cross-session envelopes arrive in that same `user` stream while being written by something other than the person; without the filter the spine attributes machine text to them, and the candidate presented for recognition is one the user never said. One turn is the person's despite failing that test: a **relayed turn**, where `origin.kind` is `channel`. A transport carrying the person's words into the session wraps them and marks the record `isMeta`, because the envelope is machine-written even though its contents are not — so the `isMeta` rejection above discards it unread. Admit it on that field rather than on its text: `origin.server` merely names which transport carried it, so keying on `origin.kind` admits every transport without enumerating any. The utterance is what remains once the envelope and the machine-written context blocks nested inside it are set aside, and that remainder is what the spine takes as the topic and what Ground takes as the excerpt span.
-
-**Bridge handle.** `cse_…` and `session_…` are one identifier in two spellings. A recorded `bridgeSessionId` therefore yields the session's web address by prefix substitution:
+**Bridge handle.** `cse_…` and `session_…` are one identifier in two spellings. A recorded `bridgeSessionId` yields the session's web address by prefix substitution:
 
 ```text
 https://claude.ai/code/session_<suffix>
 ```
 
-**Spine scan.** Enumerate recency-first across all partitions, then read each record's head:
-
-```bash
-find "{config_dir}/projects" -mindepth 2 -maxdepth 2 -name '*.jsonl' -print0 \
-  | xargs -0 ls -t | head -n <N>
-```
-
-```bash
-head -c 65536 "<record>" | grep -om1 '"entrypoint":"[^"]*"'
-grep -m1 '"type":"bridge-session"' "<record>"
-head -n 400 "<record>" | jq -rs '
-  [ .[]?
-    | select(.type=="user")
-    | select((.isCompactSummary // false) | not)
-    | select((.origin.kind == "channel") or ((.isMeta // false) | not))
-    | (.origin.kind == "channel") as $relayed
-    | ( .message.content
-        | if type=="string" then . else ([ .[]? | select(.type=="text") | .text ] | join(" ")) end )
-    | select(type=="string" and ($relayed or (startswith("<") | not)))
-    | select(length > 0)
-  ] | .[0] // ""'
-```
-
-Both reads are bounded per record. Neither opens a transcript body: a body is opened by Ground, one named record per member of the recognizable about to be presented, and scanned across the store only after ExpandFullText.
-
 ## Fork candidates
 
-Claude substitute-channel records can identify a sidechain whose own ID is not resumable. For any such hit, read `fork-resume.md` before candidate presentation. It defines the deterministic parent back-trace and the five resume branches.
+Substitute-channel records can identify forked work whose own ID is not resumable. For any such hit, read `fork-resume.md` before presenting it. It defines the parent back-trace and the five resume branches.
 
-## Ground and resume
+## Opening and resuming
 
-Ground opens the member's record at `Candidate.record` (a fork member: its substitute capture, per `fork-resume.md`) and takes the excerpt the cue reaches — the human and assistant turns at that span, under the human-turn filter above — with the record path as `Excerpt.locator`.
+Ground opens the member's record at its locator (a fork member: its substitute capture, per `fork-resume.md`) and takes the span the cue reaches — the turns there, each with its speaker under the rule above — with the record path as the excerpt's locator.
 
-For a non-fork candidate whose `cwd` is recorded **and still present on disk**, emit the literal handle:
+For a non-fork candidate whose working directory is recorded **and still present on disk**, emit the literal handle:
 
 ```text
 cd <cwd> && claude --resume <session_id>
 ```
 
-Check the directory before emitting the `cd`. A recorded path that no longer exists is the ordinary end state for work done in a worktree retired at the close of its unit, and the handle dies at the `cd` rather than at the resume.
+Check the directory before emitting the `cd`. A recorded path that no longer exists is the ordinary end state for work done in a worktree retired at the close of its unit, and the handle dies at the `cd` rather than at the resume. A record found under another root resumes only with that root as `CLAUDE_CONFIG_DIR`; say so beside the handle.
 
-Apply `fork-resume.md` whenever the candidate is a fork, its cwd is absent from the record, or its recorded cwd is gone from disk.
+Apply `fork-resume.md` whenever the candidate is a fork, its working directory is absent from the record, or its recorded directory is gone from disk.

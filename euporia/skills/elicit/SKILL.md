@@ -13,12 +13,13 @@ Resolve abstract aporia through Extended-Mind reverse induction. Type: `(Abstrac
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -61,58 +62,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -120,10 +120,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -160,10 +162,10 @@ structure DimensionProjection where
 /-- **Your judgment**: the decision coordinates the user's externalized substrate implies for
     the intent, read from the whole fused context — the seed, every answer since, and what
     the substrate reads returned. -/
-opaque reverseTrace : Context P → List DimensionProjection
+axiom reverseTrace : Context P → List DimensionProjection
 
 /-- **Your judgment**: the projection's substrate basis is concrete enough to surface. -/
-opaque concreteBasis : DimensionProjection → Bool
+axiom concreteBasis : DimensionProjection → Bool
 
 /-- `filter_confidence`; what is held back is tried again on a later re-trace. -/
 def surfaced (c : Context P) : List DimensionProjection := (reverseTrace c).filter concreteBasis
@@ -181,21 +183,20 @@ inductive Answer
   | dismiss
   /-- the user judges the endpoint resolved; this utterance is the closing citation -/
   | resolved
-  deriving Inhabited  -- elab: lets `answer` be declared `opaque`
 
 /-- **Your judgment** on the latest utterance read with the context. -/
-opaque answer : Context P → Answer
+axiom answer : Context P → Answer
 
 /-- **Your judgment**: the value this person's utterance gives coordinate `x`, read with the
     context before it; `none` when it gives none. -/
-opaque provided : Context P → Turn P → Coordinate → Option Value
+axiom provided : Context P → Turn P → Coordinate → Option Value
 
 /-- The accepted value of `x`: the latest value a person's utterance gave it. -/
 def acceptedAux (x : Coordinate) : Context P → Context P → Option Value → Option Value
   | _,   [],      acc => acc
   | pre, t :: ts, acc =>
     acceptedAux x (pre ++ [t]) ts
-      (if t.basis = some .utterance then
+      (if t.origin = .person then
         match provided pre t x with
         | some v => some v
         | none   => acc
@@ -205,22 +206,21 @@ def accepted (c : Context P) (x : Coordinate) : Option Value := acceptedAux x []
 
 /-- **Your judgment**: the coordinates the user deferred and has not since given a value
     (`Leftover`), each returning as itself — the same question with the same basis. -/
-opaque parked : Context P → List Coordinate
+axiom parked : Context P → List Coordinate
 
 def Leftover (c : Context P) : Prop := ∀ x ∈ parked c, accepted c x = none
 
 /-- **Your judgment**: the axes still unresolved when the user dismisses. -/
-opaque unresolvedAxes : Context P → List String
+axiom unresolvedAxes : Context P → List String
 
 /-- **Your count**, read from the record: which cycle this is. -/
-opaque cycleOf : Context P → Nat
+axiom cycleOf : Context P → Nat
 
 inductive Initiator | userInvoked | aiDetected
-  deriving Inhabited  -- elab: lets `initiatorOf` be declared `opaque`
 
 /-- **Your reading** of how this activation began. On an AI-detected activation the first
     surface is an implicit confirm-or-decline. -/
-opaque initiatorOf : Context P → Initiator
+axiom initiatorOf : Context P → Initiator
 
 /-- None is reduced to a bare axis label. -/
 inductive ResidualItem
@@ -233,7 +233,7 @@ inductive ResidualItem
 
 /-- **Your judgment**: the intent as resolved — every coordinate with its accepted value, and
     every value relayed as the single dominant one, which the resolving utterance covers. -/
-opaque resolvedIntent : Context P → List (Coordinate × Value)
+axiom resolvedIntent : Context P → List (Coordinate × Value)
 
 structure ResolvedEndpoint (P : Type) where
   context  : Context P
@@ -251,10 +251,11 @@ inductive Outcome (P : Type)
   | resolved (r : ResolvedEndpoint P)
   | holding  (c : Context P)
 
-/-- **Your judgments** at Phase 0: the intent's axis is undetermined; the signal comes from
-    the external substrate — the utterance alone cannot activate. -/
-opaque Aporia : Context P → Prop
-opaque ExternalSignal : Context P → Prop
+/-- **Your judgment** at Phase 0: the intent's axis is undetermined. -/
+axiom Aporia : Context P → Prop
+/-- **Your judgment** at Phase 0: the signal comes from the external substrate — the utterance
+    alone cannot activate. -/
+axiom ExternalSignal : Context P → Prop
 
 def activates (c : Context P) : Prop := Aporia c ∧ ExternalSignal c
 
@@ -303,7 +304,7 @@ is demonstrated, not asserted.
 
 /-!
 theorem acceptedAux_skip (x : Coordinate) (pre ts : Context P) (acc : Option Value)
-    (h : ∀ t ∈ ts, t.basis ≠ some .utterance) :
+    (h : ∀ t ∈ ts, t.origin ≠ .person) :
     acceptedAux x pre ts acc = acc
 
 theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option Value) :
@@ -312,7 +313,7 @@ theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option 
 Coordinate Monotonicity: turns that are not a person's utterance — a re-trace, a substrate
 read, an AI response — leave every accepted value as it was.
 theorem accepted_revised_only_by_utterance (c e : Context P) (x : Coordinate)
-    (h : ∀ t ∈ e, t.basis ≠ some .utterance) : accepted (c ++ e) x = accepted c x
+    (h : ∀ t ∈ e, t.origin ≠ .person) : accepted (c ++ e) x = accepted c x
 
 theorem silence (respond : Context P → Response P) (c : Context P) :
     elicit respond c [] = .holding c
@@ -362,6 +363,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.
 -/
+
+end
 
 end Euporia
 ```

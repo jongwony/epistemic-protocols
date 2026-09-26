@@ -142,16 +142,6 @@
     "note": "Constructed so the options are stated, the descriptions do not discriminate, and the user says recognition would take seeing them contrasted. The direction is what cannot be recognised from words."
   },
   {
-    "id": "reach-frame",
-    "protocol": "frame",
-    "conversation": [
-      { "role": "user", "text": "Someone's asked me to assess our observability and report back." },
-      { "role": "assistant", "text": "There's no prior assessment in the repository and no standard named anywhere." }
-    ],
-    "prompt": "I don't know what questions this is even supposed to ask. There's no frame here for me to work inside.",
-    "note": "Constructed so the inquiry has no structure to be conducted within — not a missing answer but a missing set of questions, which the user states directly."
-  },
-  {
     "id": "control-settled-ground",
     "protocol": null,
     "conversation": [
