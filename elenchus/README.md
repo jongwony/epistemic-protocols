@@ -12,7 +12,7 @@ Vet working context by dialectical antithesis before pre-execution sync. Tests c
 
 ## What It Does
 
-Elenchus runs before you commit your working context to an external sync — a meeting, a PR for review, a deploy decision, a Slack thread. The protocol scans accumulated session context for sources whose apparent sufficiency has become suspect through age, weak provenance, downstream concentration, or cross-source contradiction, then posits a dialectical antithesis per claim under test — one per source in the ordinary case, and one each where a source is read as authority for several — and lets you judge each disposition. The motion is Hegelian *Aufhebung* (preserve + negate + lift up): thesis → antithesis → synthesis applied claim by claim.
+Elenchus runs before you commit your working context to an external sync — a meeting, a PR for review, a deploy decision, a Slack thread. The protocol scans accumulated session context for sources whose apparent sufficiency has become suspect through age, weak provenance, downstream concentration, or cross-source contradiction, then posits a dialectical antithesis per claim under test — one per source in the ordinary case, and one each where a source is read as authority for several — and lets you say, in your own words, what you make of each claim. The motion is Hegelian *Aufhebung* (preserve + negate + lift up): thesis → antithesis → synthesis applied claim by claim.
 
 **Four dialectical patterns**:
 
@@ -29,22 +29,15 @@ Elenchus runs before you commit your working context to an external sync — a m
 
 The deficit-awareness sits with the user — Elenchus does not auto-activate. AI auto-detection of "this context smells stale" carries a false-positive cost that outweighs its savings; the user is best positioned to know when their context is about to externalize.
 
-## Disposition Coproduct
+## The Answer
 
-Each suspect source is judged per claim: the user says in their own words what they make of the claim once the antithesis has been put to it, and may add one instruction the run can act on. What is presented per claim is the material the judgment is made against — the bound claim, what makes it suspect, the evidence, the stake, and the antithesis with its cited basis — so the judgment is recognizable rather than recalled from memory, and no answer is written for the user before they are asked.
+Each suspect claim is answered in the user's own words once its antithesis has been put to it. What is presented per claim is the material the answer is made against — the claim as it stands, what makes it suspect, the evidence, the stake, and the antithesis with its cited basis — so the answer is recognized rather than recalled, and no answer is written for the user before they are asked.
 
-The verdict itself is free text and deliberately untyped — nothing downstream is entitled to rely on how a judgment came out, and a type there would be the protocol writing the answer before anyone was asked. What *is* typed is the optional instruction, and only because the protocol can itself carry each one out with what it already produces — a mark on the ledger it emits, or control of its own loop:
-
-| Instruction | What the run does with it |
-|-------------|---------------------------|
-| *(none)* | The run carries on with the source as it stands. Saying nothing here is an answer, not a blank. |
-| **Withdraw** | The source stops being relied on **for that one claim**, and is kept in the run's history with your verdict as you gave it. The same source read as authority for another claim is a separate audit, judged on its own, and is untouched here. |
-| **Revisit(condition)** | You name the condition; the loop returns to this claim when it is met, for as long as the run is still going. A condition still unmet when the run ends is reported as still open — nothing watches for it afterwards. |
-| **HandOff(deficit)** | The question is handed to another deficit, reported at convergence — with that deficit's command hint where this protocol inscribes one, and bare where you named a deficit it does not. |
+The answer is free text and deliberately untyped: nothing downstream is entitled to rely on how it came out, and a type there would be the protocol writing the answer before anyone was asked. Whatever the user wants done with the claim rides in the same words — stop relying on the source for that one claim, look at it again once a condition holds (for as long as the run is going; a condition still unmet at the close is reported open), or hand it to another kind of problem (with that protocol's command as a hint where Elenchus names one, bare otherwise). The round offers such actions concretely for each claim, never as category titles, and one answer may cover several claims or only some.
 
 ## Source Identification Criteria
 
-Phase 0 silently selects audit-candidate sources from the working context per:
+Each pass silently selects the sources worth a look from the working context per:
 
 | Criterion | Condition |
 |-----------|-----------|
@@ -54,13 +47,13 @@ Phase 0 silently selects audit-candidate sources from the working context per:
 | Cross-source contradiction | Two sources nominally pointing at the same referent diverge |
 | Inference-character conclusion | Source is itself a conclusion reached by inference (origin `AIInference`, or a conclusion functioning as a standing premise) |
 
-Sources matching none of the criteria are not surfaced — the protocol focuses attention on warranted audit candidates.
+Sources matching none of the criteria are not surfaced — the protocol focuses attention on the claims that warrant a challenge.
 
 ## Known Limitations
 
 - **Working hypothesis thresholds**: `N` (high-leverage threshold) and horizon defaults per origin are residual variables, refined through accumulated use evidence rather than fixed at inscription.
 - **Pattern set closure**: Four patterns (A, B, C, D) are inscribed; Emergent admits a further pattern, not pre-named, whose challenge directly confronts the source's claim rather than standing as a side verification check.
-- **Single-pass per audit**: Each audit — a source under one claim — receives one antithesis per loop iteration, and a source read as authority for several claims is several audits, each with its own. False-negative antithesis construction (failure to surface a real challenge) propagates without intra-iteration recovery; the LOOP's Revisit re-trigger affords cross-iteration correction.
+- **One challenge until the claim moves**: Each claim — a source under one claim it is read as authority for — keeps the antithesis it was given until the claim, or a condition the user set, moves; a source read as authority for several claims yields several claims, each with its own. A challenge that missed the real weakness is not recovered on its own; the user's answer, or a condition they set, is what brings the claim back.
 
 ## Install
 

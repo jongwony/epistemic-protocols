@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence (the r
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
-Analysis, evidence, and the contrast presentation are text output before each gate; the gate contains the essential question and option-specific differential implications only.
+Analysis, evidence, the contrast presentation, and any contrary ground the AI holds about a direction — a reading that the futures are already recognizable included — are text output before each gate; the gate contains the essential question and option-specific differential implications only.
