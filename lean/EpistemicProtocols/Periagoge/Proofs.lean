@@ -110,18 +110,50 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
 theorem cap_bounds_probes (c : Context P) (h : CapReached c) (hr : ¬ ProbeRequested c)
-    (p : ProbeCase) : focus c ≠ .probe p := by
+    (p : ProbeCase) : focus c ≠ .probe p ∧ focus c ≠ .plainCorrespondence p := by
+  have hc : CapReached c ∧ ¬ ProbeRequested c := ⟨h, hr⟩
   unfold focus
-  cases hs : selectFocus c with
+  cases selectFocus c with
   | probe q =>
     dsimp only
     split
     · split <;> simp
     · rename_i hn
-      exact absurd ⟨h, hr⟩ hn
+      exact absurd hc hn
+  | plainCorrespondence q =>
+    dsimp only
+    split
+    · rename_i hp
+      exact absurd hc hp.2
+    · simp
   | correspondence => simp
   | naming => simp
   | exhausted => simp
+
+theorem probe_rides_only_plain (c : Context P) (p : ProbeCase)
+    (h : focus c = .plainCorrespondence p) : CorrespondencePlain c := by
+  unfold focus at h
+  cases hs : selectFocus c with
+  | probe q =>
+    rw [hs] at h
+    dsimp only at h
+    split at h
+    · split at h <;> cases h
+    · cases h
+  | plainCorrespondence q =>
+    rw [hs] at h
+    dsimp only at h
+    split at h
+    · rename_i hp
+      exact hp.1
+    · cases h
+  | correspondence => rw [hs] at h; cases h
+  | naming => rw [hs] at h; cases h
+  | exhausted => rw [hs] at h; cases h
+
+theorem stale_verdict_uncounted (c : Context P) (p : ProbeCase) (r : Reading)
+    (h : Stale c p r = true) : standingVerdict c p r = none := by
+  simp [standingVerdict, h]
 
 theorem live_leaves_only_by_refutes (c : Context P) (r : Reading) (hr : r ∈ readings c)
     (hn : r ∉ live c) : refuted c r = true := by

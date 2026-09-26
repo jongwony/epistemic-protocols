@@ -240,23 +240,31 @@ def verdictCoord (p : ProbeCase) (r : Reading) : Coord P Verdict :=
     reaches it. -/
 axiom verdict : (c : Context P) → (p : ProbeCase) → (r : Reading) → Occ (verdictCoord (P := P) p r) c
 
-def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
-  | .open_ _   => false
-  | .filled .. => true
-
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
   | .filled a .. => some a
 
-/-- The probes the person judged: every reading the probe separates carries the person's verdict,
+/-- **Your judgment**: the verdict on reading `r` against probe `p` rested on a slot of the
+    correspondence the person corrected after giving it, and they have not confirmed it again since.
+    A verdict reaches only the reading it was given for: it takes up no slot of the
+    correspondence. -/
+axiom Stale : Context P → ProbeCase → Reading → Bool
+
+/-- The verdict that counts: the person's verdict, unless a later slot correction left it
+    unconfirmed; such a verdict is asked again. -/
+def standingVerdict (c : Context P) (p : ProbeCase) (r : Reading) : Option Verdict :=
+  if Stale c p r then none else filledValue (verdict c p r)
+
+/-- The probes the person judged: every reading the probe separates carries a verdict that counts,
     an explicit undecided included. -/
 def judged (c : Context P) : List ProbeCase :=
-  (probes c).filter (fun p => !p.separates.isEmpty && p.separates.all (fun r => isFilled (verdict c p r)))
+  (probes c).filter (fun p =>
+    !p.separates.isEmpty && p.separates.all (fun r => (standingVerdict c p r).isSome))
 
 /-- Every reading the person ruled out, with the probe and their ground. -/
 def ruledOut (c : Context P) : List (Reading × ProbeCase × String) :=
   (probes c).flatMap (fun p => p.separates.filterMap (fun r =>
-    match filledValue (verdict c p r) with
+    match standingVerdict c p r with
     | some (.refutes g) => some (r, p, g)
     | _ => none))
 
@@ -282,7 +290,7 @@ def live (c : Context P) : List Reading :=
 /-- Every case the person placed outside a surviving reading's claim, with their ground. -/
 def boundary (c : Context P) : List (ProbeCase × String) :=
   (probes c).flatMap (fun p => p.separates.filterMap (fun r =>
-    match filledValue (verdict c p r) with
+    match standingVerdict c p r with
     | some (.bounds g) => if r ∈ live c then some (p, g) else none
     | _ => none))
 
@@ -420,6 +428,9 @@ axiom ledger : Context P → List LedgerLine
 inductive Focus
   /-- the correspondence, where it is new or corrected -/
   | correspondence
+  /-- the correspondence with the first probe on the same sheet, where the correspondence is
+      plain -/
+  | plainCorrespondence (p : ProbeCase)
   /-- a probe case, with every reading it separates -/
   | probe (p : ProbeCase)
   /-- the naming to confirm -/
@@ -433,18 +444,27 @@ inductive Focus
     by what the person said is still missing; a case that separates nothing is not a probe. -/
 axiom selectFocus : Context P → Focus
 
+/-- **Your judgment**: the correspondence is plain — every slot copied from what the cases say, no
+    role without a counterpart, and no slot that needs a reading chosen to fill it. The judgment and
+    its ground open the sheet as a trace the person can contest. -/
+axiom CorrespondencePlain : Context P → Prop
+
 /-- **Your judgment**: the person's words ask for another probe. -/
 axiom ProbeRequested : Context P → Prop
 
 open Classical in
-/-- The focus the sheet shows. Once your bound is reached, you draw no further probe on your own:
-    the focus turns to the naming, or to the exhausted readings where none is live, unless the
-    person asked for another probe. -/
+/-- The focus the sheet shows. The first probe rides the correspondence's sheet only where the
+    correspondence is plain. Once your bound is reached, you draw no further probe on your own: the
+    focus turns to the naming, or to the exhausted readings where none is live, unless the person
+    asked for another probe. -/
 def focus (c : Context P) : Focus :=
   match selectFocus c with
   | .probe p =>
     if CapReached c ∧ ¬ ProbeRequested c then (if live c = [] then .exhausted else .naming)
     else .probe p
+  | .plainCorrespondence p =>
+    if CorrespondencePlain c ∧ ¬ (CapReached c ∧ ¬ ProbeRequested c) then .plainCorrespondence p
+    else .correspondence
   | f => f
 
 /-- **Your record**: the contrary grounds you showed before the person's answers — a reading the
@@ -474,10 +494,11 @@ def closeCoord : Coord P Closing :=
 /-- **Your reading**: the person's closing; `open_` until one reaches it. -/
 axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
-/-- **Your judgment**, the adoption condition: everything a confirm would take was shown on a sheet
-    the person answered — the name and rule, the boundary, the readings the rule does not take,
-    every case with who brought it, every slot with who set it — together with your contrary
-    grounds. Where anything would be taken unseen, the sheet is drawn again. -/
+/-- **Your judgment**, the adoption condition: everything a confirm would take was shown on the sheet
+    the confirm answered — the name and rule, the boundary, the readings the rule does not take,
+    every case with who brought it, every slot with who set it, the probe record — together with
+    your contrary grounds. Where anything would be taken unseen, the sheet is drawn again with the
+    whole basis. -/
 axiom Covered : Context P → Prop
 
 /-- **Your judgment**: the latest utterance bears on this run — a verdict, a correction, a case, a
@@ -557,16 +578,20 @@ def withdraw (declare : Context P → Response P) (c : Context P) : Withdrawn P 
     dissent := dissent c }
 
 open Classical in
-/-- `respond` presents the sheet: first any case you found, marked as yours; then the cases with
-    who brought each, the correspondence with every slot and who set it and every unmatched role,
-    the relation, the live readings each with what supports it and the case that breaks it, the
-    ruled-out readings each beside the person's ground, the probe record and the boundary, and the
-    naming where it may be shown — each value marked the person's or yours, each field labelled by
-    the question it answers in the person's everyday words. Then the ledger, the person's edits
-    first. Then your contrary grounds. Then the focus (`focus`): for a probe, every reading it separates on
-    screen together with its own verdict slot and what each verdict does, and what the live set
-    becomes on each way the round can close; once your bound is reached, that you draw no further
-    probe on your own. -/
+/-- `respond` presents the sheet, carrying what the current judgment needs. First any case you
+    found, marked as yours; where the first probe rides this sheet, your judgment that the
+    correspondence is plain and its ground. Then the pair with the correspondence, every slot and who
+    set it and every unmatched role; the relation; every live reading with what supports it and the
+    case that breaks it; the current probe; and any case, inside the pair or outside it, that counters
+    the current inference. The full case list with who brought each, the ruled-out readings beside
+    the person's ground, the probe record and the boundary appear when they change, when
+    reconsidering needs them, and on the sheet a confirm would answer; the naming where it may be
+    shown. Each value is marked the person's or yours, each field labelled by the question it
+    answers, and each term of this block rendered as the concrete question it stands for, in the
+    person's everyday words. Then the ledger, the person's edits first. Then your contrary grounds.
+    Then the focus (`focus`): for a probe, every reading it separates on screen together with its
+    own verdict slot and what each verdict does, and what the live set becomes on each way the round
+    can close; once your bound is reached, that you draw no further probe on your own. -/
 def induce (respond declare : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -641,7 +666,15 @@ theorem proposal_only_when_showable (c : Context P) (n : Naming) (h : shownNamin
 Once the person judged as many probes as the bound, the sheet asks about no further probe unless
 the person asked for one.
 theorem cap_bounds_probes (c : Context P) (h : CapReached c) (hr : ¬ ProbeRequested c)
-    (p : ProbeCase) : focus c ≠ .probe p
+    (p : ProbeCase) : focus c ≠ .probe p ∧ focus c ≠ .plainCorrespondence p
+
+The first probe rides the correspondence's sheet only where you judged the correspondence plain.
+theorem probe_rides_only_plain (c : Context P) (p : ProbeCase)
+    (h : focus c = .plainCorrespondence p) : CorrespondencePlain c
+
+A verdict a later slot correction left unconfirmed does not count.
+theorem stale_verdict_uncounted (c : Context P) (p : ProbeCase) (r : Reading)
+    (h : Stale c p r = true) : standingVerdict c p r = none
 
 A reading leaves the live set only by the person's refuting verdict.
 theorem live_leaves_only_by_refutes (c : Context P) (r : Reading) (hr : r ∈ readings c)
@@ -683,7 +716,7 @@ def grounding : Op → Annot × String
   | .collect  => (.observe, "artifact read, artifact search: the cases' own context and probe material from the person's domain; external fetch (conditional: that domain lies outside the person's artifacts), its URL cited where it is used")
   | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context — the cases and who brought each, the correspondence, the relation, the live readings, the probe to draw, the naming where it may be shown, and your contrary grounds; a person's correction stands on the scope their words reach")
   | .record   => (.track, "record: the pass's record of the run as judged, the ledger, and the focus")
-  | .sheet    => (.constitution, "present: any case you found, first and marked as yours; the whole run on one sheet, each value marked the person's or yours; the ledger; your contrary grounds; then one focus — the correspondence, a probe with every reading it separates and each reading's verdict slot, or the naming (mandatory)")
+  | .sheet    => (.constitution, "present: any case you found, first and marked as yours; the sheet carrying what the current judgment needs, the whole basis whenever a confirm would answer it, each value marked the person's or yours; the ledger; your contrary grounds; then one focus — the correspondence, the correspondence with the first probe where you judged it plain and said why, a probe with every reading it separates and each reading's verdict slot, or the naming (mandatory)")
   | .readTurn => (.sense, "Internal analysis: the new turn and every earlier turn of the person's it bears on, read against the fused context as it now stands — whether it bears on the run at all, a verdict, a correction and its scope, a case, a rename, a closing — whatever form it takes")
   | .declare  => (.extension, "TextPresent+Proceed: at a withdrawal or a route, the trace and the open trace, with the relation and live readings as your extraction, and the dissent; what a later run resumes from")
   | .converge => (.extension, "TextPresent+Proceed: at a crystallization, the trace, the boundary, every ruled-out reading beside its ground, every case with who brought it, the open trace, and the dissent; proceed with the crystallized abstraction")
@@ -708,13 +741,13 @@ Bind the seed from an explicit argument first, then the most recent cluster of c
 
 ### The sheet
 
-Every turn shows the whole run on one sheet, in everyday language. It opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up, and a confirm that covers it adopts it as yours. Then the cases with who brought each; the two paired cases side by side with the correspondence filled slot by slot from what the cases themselves carry, each slot marked as filled by you or set by the user, and each role the second case has no counterpart for marked as such; the relation the correspondence carries; the live readings, each with what supports it and the case that breaks it; the readings the user ruled out, each beside the user's own words; the probes so far with the verdicts they received; the boundary those verdicts drew; and the name and rule once a name may be shown. Label each field with the question it answers, in the user's words, and draw the fields with the structure the host renders — headings, tables, lists.
+Every turn shows one sheet carrying what the current judgment needs, in everyday language. It opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up, and a confirm that covers it adopts it as yours. Where the first probe rides this sheet, the sheet then states your judgment that the correspondence is plain and its ground — every slot copied from what the cases say, no role without a counterpart, no slot that needs a reading chosen to fill it — so the user can contest it. Then the two paired cases side by side with the correspondence filled slot by slot from what the cases themselves carry, each slot marked as filled by you or set by the user, and each role the second case has no counterpart for marked as such; the relation the correspondence carries; every live reading, with what supports it and the case that breaks it; the current probe; and any case, inside the pair or outside it, that counters the current inference. The full list of cases with who brought each, the readings the user ruled out beside the user's own words, the probes so far with their verdicts, and the boundary those verdicts drew appear when they change, when reconsidering needs them, and on the sheet a confirm would answer; the name and rule appear once a name may be shown. Label each field with the question it answers, in the user's words, and say each term this file uses — a reading, a probe, a boundary — as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
 Under the sheet, the ledger of what the last turn changed: the user's verdicts and corrections first, then what you re-drew because of them, each marked as forced by that turn or as your proposal. A round that ruled no reading out says so, and which readings the case was placed outside of and which were left undecided. A reading you would no longer hold stays live until the user rules it out; dropping it is your proposal, shown in the ledger. Then your contrary grounds, each beside the value it bears on.
 
-Then one focus. Where the correspondence is new or corrected, the focus is the correspondence: the user corrects a filling that is wrong rather than supplying one that is missing, and saying the second case carries no counterpart there is such a correction. Where a probe is drawn, put every reading it separates on screen at once, each row carrying the reading, what supports it, the case that breaks it, and its own verdict slot — rules it out, places the case outside it, or settles neither — with what that verdict does beside it; say that the rows are answered against each other; and before the question, say what the live set becomes on each way the round can close. Where a name may be shown, the focus is the naming: the name, the rule, the boundary the near-misses drew, and what stays live. Where every reading was ruled out, say that every reading drawn so far was ruled out on the grounds shown, and ask whether to name a distinction the readings missed, align another pair, or stop.
+Then one focus. Where the correspondence is new or corrected, the focus is the correspondence: the user corrects a filling that is wrong rather than supplying one that is missing, and saying the second case carries no counterpart there is such a correction. Where you judge the correspondence plain, the first probe rides the same sheet; where filling it took a judgment, the correspondence is asked on its own, so a probe does not hide an error in it. Where a probe is drawn, put every reading it separates on screen at once, each row carrying the reading, what supports it, the case that breaks it, and its own verdict slot — rules it out, places the case outside it, or settles neither — with what that verdict does beside it; say that the rows are answered against each other; and before the question, say what the live set becomes on each way the round can close. Where a name may be shown, the focus is the naming: the name, the rule, the boundary the near-misses drew, and what stays live. Where every reading was ruled out, say that every reading drawn so far was ruled out on the grounds shown, and ask whether to name a distinction the readings missed, align another pair, or stop.
 
-A probe counts as judged once every reading it separates carries the user's verdict, undecided included. A name may be shown once a correspondence stands, the user has judged a probe, and one reading is left or the user has judged as many probes as your bound with readings still live; the rule is read off a reading that is still live. Draw at most five probes on your own; at the bound, the focus turns to the naming and says that you draw no further probe unless the user asks for one. The user may keep going past it.
+A probe counts as judged once every reading it separates carries the user's verdict, undecided included. A verdict reaches only the reading it was given for and takes up no slot of the correspondence; where the user later corrects a slot a verdict rested on, that verdict stops counting until it is asked again and confirmed. A name may be shown once a correspondence stands, the user has judged a probe, and one reading is left or the user has judged as many probes as your bound with readings still live; the rule is read off a reading that is still live. Draw at most five probes on your own; at the bound, the focus turns to the naming and says that you draw no further probe unless the user asks for one. The user may keep going past it.
 
 The user may answer in their own words, and one answer may reach several parts of the sheet. A correction reaches what its words reach. An utterance about other work leaves the sheet as it stands; the sheet returns when the user comes back to the run. Only the user closes the run: confirming the naming, stopping, or going on to a protocol they name. A confirm takes the naming as the sheet it followed showed it, with everything it rests on in view; where something it would take was never shown, draw the sheet again instead, and a confirm said before that later sheet does not reach it.
 
