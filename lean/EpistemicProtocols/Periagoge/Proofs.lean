@@ -98,11 +98,6 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
-    (r, row c r) ∈ crossView c := by
-  simp only [crossView, List.mem_map]
-  exact ⟨r, h, rfl⟩
-
 theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ readings c)
     (hn : r ∉ live c) : ∃ g, filledValue (setAside c r) = some g := by
   unfold live at hn
@@ -111,23 +106,6 @@ theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ rea
   cases hs : filledValue (setAside c r) with
   | none => simp_all
   | some g => exact ⟨g, rfl⟩
-
-theorem row_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ rowCases c) :
-    (i, unfoldCase c i) ∈ casesSection c := by
-  simp only [casesSection, List.mem_map]
-  exact ⟨i, h, rfl⟩
-
-theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate c = some k) :
-    k.reading ∈ live c := by
-  unfold shownCandidate at h
-  split at h
-  · rename_i hl
-    cases h
-    exact hl
-  · cases h
-
-theorem exhausted_when_none_live (c : Context P) (h : live c = []) : focus c = .exhausted := by
-  simp [focus, h]
 
 theorem nothing_adopted_before_confirm (c : Context P) (p : Provenance) (h : p ∈ provenance c) :
     p.standing ≠ .adopted := by
