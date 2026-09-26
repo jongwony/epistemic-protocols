@@ -14,8 +14,9 @@ Discover what a form should be by encountering concrete sketches and marking wha
 ```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
+Every `axiom` is one of those judgments — a black box to the contract, yours to make from the
+material in front of you; its doc comment says what you judge there, and nothing in this block
+decides it for you.
 Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
 doc comment states a consequence the contract already has; it is proved outside this block
 and asks nothing further of you.
@@ -71,58 +72,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -130,10 +130,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -146,7 +148,7 @@ abbrev FormIntentSeed (P : Type) := Context P
     remains underdetermined, encountering and revising a concrete proposal is what would
     constitute that intent, and the resolution sought is a recognized form with its
     commitments and residuals. -/
-opaque fitUnrecognized : Context P → Prop
+axiom fitUnrecognized : Context P → Prop
 
 /-- An emergent label: "information unit", "reading order", "density", "tone". -/
 abbrev Axis := String
@@ -208,10 +210,10 @@ structure Sketch where
 
 /-- **Your record**, read from the context: every version produced so far, each retained for
     revision until account. -/
-opaque sketches : Context P → List Sketch
+axiom sketches : Context P → List Sketch
 
 /-- **Your record**: the round spec your latest relay presented; `none` before the first. -/
-opaque spec : Context P → Option RoundSpec
+axiom spec : Context P → Option RoundSpec
 
 /-- Where on a sketch a mark points. `whole` admits "something is missing here" with nothing to
     point at, and a property recurring across the sketch, carried in the mark's own words. -/
@@ -229,26 +231,23 @@ inductive Mark
 
 /-- **Your reading** of every mark the person's utterances placed, each with the utterance it
     came from, carried as said. -/
-opaque marks : (c : Context P) → List (Mark × Cite c)
+axiom marks : (c : Context P) → List (Mark × Cite c)
 
 /-- **Your judgment**: the cited turn states or settles value `v` on axis `a` — a settlement of
     a reading shown beside a version, a replacement the person stated, or a commitment they
     made earlier in this context. -/
-opaque AxisSupported : Axis → Context P → Turn P → Value → Prop
+axiom AxisSupported : Axis → Context P → Turn P → Value → Prop
 
 /-- A coordinate is settled only by a person's statement. A record of a commitment made in an
     earlier session is a candidate for it, never its fill. -/
 def axisCoord (a : Axis) : Coord P Value :=
-  { admits := (· = .utterance), supports := AxisSupported a }
-
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
+  { admits := (·.val = .person), supports := AxisSupported a }
 
 /-- **Your judgment**: how axis `a` stands in `c` — filled by the person's latest utterance that
     settles or replaces it; open where nothing settles it, and where the person retired it with
     nothing in its place. An open axis carries as candidate the material that proposes a value
     without settling it, a record of an earlier session's commitment included. -/
-opaque operative : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
+axiom operative : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
 
 /-- A determination the AI puts forward: read from a mark, or rendered into a sketch that no
     settled coordinate covered. It settles nothing; it is shown at the spec relay and again
@@ -263,22 +262,22 @@ structure Proposal (c : Context P) where
 
 /-- **Your record**, read from the context: the provisional coordinates — every proposal the
     person has neither settled, replaced, nor rejected. -/
-opaque provisional : (c : Context P) → List (Proposal c)
+axiom provisional : (c : Context P) → List (Proposal c)
 
 /-- Adequacy on one focus for one version, as the person said it. -/
 structure FitWitness (c : Context P) where
   sketch   : SketchRef
   scope    : Focus
   src      : Cite c
-  byPerson : src.kind = .utterance
+  byPerson : src.src.val = .person
 
 /-- **Your reading** of every fit the person gave on a focus. -/
-opaque witnesses : (c : Context P) → List (FitWitness c)
+axiom witnesses : (c : Context P) → List (FitWitness c)
 
 /-- **Your judgment**: the witness no longer holds as given — the version it names was
     superseded, or the context has moved on it since. A stale witness is shown as stale and
     never reused silently; what supersedes a version is read here. -/
-opaque Stale : (c : Context P) → FitWitness c → Prop
+axiom Stale : (c : Context P) → FitWitness c → Prop
 
 /-- Finish is recognition of the assembled form, not of one focus. -/
 structure Recognition where
@@ -290,14 +289,14 @@ structure Recognition where
     still retained, for the purpose it states. A response carrying marks and a finish is
     marks: recognition names an unmarked version, and a version that was not presented is
     answered, never recognized. -/
-opaque RecognitionSupported : Context P → Turn P → Recognition → Prop
+axiom RecognitionSupported : Context P → Turn P → Recognition → Prop
 
 def recognitionCoord : Coord P Recognition :=
-  { admits := (· = .utterance), supports := RecognitionSupported }
+  { admits := (·.val = .person), supports := RecognitionSupported }
 
 /-- **Your judgment**: the recognition the person's finish gave, standing until the run ends;
     `open_` before a finish. -/
-opaque recognition : (c : Context P) → Occ (recognitionCoord (P := P)) c
+axiom recognition : (c : Context P) → Occ (recognitionCoord (P := P)) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _   => false
@@ -322,14 +321,14 @@ structure Placement where
   kept     : List (SketchRef × Location)
 
 /-- **Your judgment**: the cited utterance names this placement. -/
-opaque PlacementSupported : Context P → Turn P → Placement → Prop
+axiom PlacementSupported : Context P → Turn P → Placement → Prop
 
 /-- Placement has no default: only the person's statement fills it. -/
 def placementCoord : Coord P Placement :=
-  { admits := (· = .utterance), supports := PlacementSupported }
+  { admits := (·.val = .person), supports := PlacementSupported }
 
 /-- **Your judgment**: the placement the person's latest answer at Qplace named. -/
-opaque placement : (c : Context P) → Occ (placementCoord (P := P)) c
+axiom placement : (c : Context P) → Occ (placementCoord (P := P)) c
 
 /-- `Fixture`: a recognition witness. It carries no implementation commitment and is not an
     executable specification. -/
@@ -354,7 +353,7 @@ inductive Disposition
 /-- **Your reading** of the account observations: a sketch's latest disposition. `retained` is
     read only where the observation shows the reference resolving to that version's exact
     concretum. -/
-opaque disposition : Context P → SketchRef → Option Disposition
+axiom disposition : Context P → SketchRef → Option Disposition
 
 /-- Every sketch has a declared disposition. -/
 def Accounted (c : Context P) : Prop := ∀ s ∈ sketches c, (disposition c s.ref).isSome
@@ -387,30 +386,29 @@ inductive Verdict
   /-- the person names a sibling deficit, or a realization this session cannot supply -/
   | boundary
   | withdraw
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
 /-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+axiom verdict : Context P → Verdict
 
 /-- **Your judgment**, before anything further is produced or presented: a realization this
     round requires, or one the placement needs, is one this session cannot supply, or a sibling
     deficit is demonstrated. The boundary relay then takes the place of the next presentation. -/
-opaque AIBoundary : Context P → Prop
+axiom AIBoundary : Context P → Prop
 
 /-- **Your judgment**: the latest answer calls for a new round — marks, a fit on this focus, a
     fresh start, or a spec revision. An answer with no marks and no acts, and an interrogation
     answered within the sketch's placeholder status, present the gate again with nothing
     produced. -/
-opaque Redraws : Context P → Prop
+axiom Redraws : Context P → Prop
 
 /-- **Your record**: the contrary grounds you presented before the gate the closing utterance
     answered — a version failing a referent it was checked against, a commitment it breaks, a
     dissolution you doubt — attached to the closure; empty when there were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- **Your count**, read from the record: which round this is. A marks or fit answer opens the
     next round; a spec revision re-drafts the same one. -/
-opaque roundOf : Context P → Nat
+axiom roundOf : Context P → Nat
 
 /-- The record an exit that recognizes nothing carries: the context after account, and the
     dissent attached to the closure. -/
@@ -466,7 +464,7 @@ presentation ending at Qfit, or at Qplace while a recognition stands.
 /-- **Your production** under the relayed spec: each Artifact sketch as observed at creation,
     its versioned reference registered then. A Text sketch is narration the presentation
     (`respond`) carries as recorded. Existing project files stay unchanged. -/
-opaque produce : Context P → List (Evidence P)
+axiom produce : Context P → List (Evidence P)
 
 def runRound (relay : Context P → Response P) (c : Context P) : Context P :=
   let c₁ := c ++ [(relay c).val]
@@ -475,13 +473,13 @@ def runRound (relay : Context P → Response P) (c : Context P) : Context P :=
 /-- **Your account** at a placement: retain the recognized version and each kept one at its
     location, and verify that each reference resolves to that version's exact concretum — one
     retry, then the failure is observed. -/
-opaque retain : Context P → List (Evidence P)
+axiom retain : Context P → List (Evidence P)
 
 /-- **Your account** at a terminal: release every sketch the context leaves unplaced — all of
     them on a withdrawal, a dissolution, or a boundary — and verify each absence; a failure
     retries once, then is observed and declared with a handoff. What it leaves is `Accounted`:
     every sketch with a declared disposition. -/
-opaque release : Context P → List (Evidence P)
+axiom release : Context P → List (Evidence P)
 
 def settle (c : Context P) : Context P := c ++ (retain c).map (·.val)
 
@@ -492,7 +490,7 @@ def recognize (c : Context P) (f : Fixture) : RecognizedForm P :=
   { context := c ++ (release c).map (·.val), fixture := f, dissent := dissent c }
 
 open Classical in
-noncomputable def sketch (relay respond : Context P → Response P) :
+def sketch (relay respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -516,7 +514,7 @@ noncomputable def sketch (relay respond : Context P → Response P) :
         sketch relay respond (c₁ ++ [(respond c₁).val]) us
 
 open Classical in
-noncomputable def start (relay respond : Context P → Response P) (c : Context P)
+def start (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   if ¬ fitUnrecognized c then .notActivated c
   else if AIBoundary c then .boundary (closing (c ++ [(relay c).val]))
@@ -586,13 +584,13 @@ theorem dissolved_by_person (relay respond : Context P → Response P) (c : Cont
 
 A coordinate, a recognition, and a placement are each filled only by a person's statement.
 theorem settled_by_utterance {c : Context P} {a : Axis} {s : Cite c}
-    (ok : (axisCoord (P := P) a).admits s.kind) : s.kind = .utterance
+    (ok : (axisCoord (P := P) a).admits s.src) : s.src.val = .person
 
 theorem recognized_by_utterance {c : Context P} {s : Cite c}
-    (ok : (recognitionCoord (P := P)).admits s.kind) : s.kind = .utterance
+    (ok : (recognitionCoord (P := P)).admits s.src) : s.src.val = .person
 
 theorem placed_by_utterance {c : Context P} {s : Cite c}
-    (ok : (placementCoord (P := P)).admits s.kind) : s.kind = .utterance
+    (ok : (placementCoord (P := P)).admits s.src) : s.src.val = .person
 -/
 
 /-! ── TOOL GROUNDING ── -/
@@ -629,6 +627,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Form resolution emergent via session context.
 -/
+
+end
 
 end Hypotyposis
 ```
