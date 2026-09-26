@@ -19,7 +19,6 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 instance : Nonempty Contrast := ⟨⟨[], [], []⟩⟩
-instance : Nonempty Verdict := ⟨.withdraw⟩
 
 theorem silence (ai : AITurns P) (c : Context P) : preview ai c [] = .holding c := by
   simp [preview]
@@ -30,125 +29,87 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
   simp only [List.append_assoc]
   exact ⟨_, rfl⟩
 
-theorem spent_budget_no_refan (ai : AITurns P) (c : Context P) (h : ¬ BudgetLeft c) :
-    insufficiencyArms ai c = spentArms c := by
-  simp [insufficiencyArms, h]
-
-theorem materialize_unavailable (ai : AITurns P) (c c' : Context P)
-    (hv : verdict c' = .materialize) (hb : ¬ BudgetLeft c') : step ai c c' = .gate c' := by
-  simp [step, hv, hb]
-
-theorem harvest_before_discard (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Utterance P))
     (r : DirectionalContrast P) (h : preview ai c us = .contrasted r) :
-    ∃ c₀, harvestOf c₀ = some r.harvest ∧ r.context = discard c₀ := by
-  have spent : ∀ c₁, spentArms (P := P) c₁ ≠ .done (.contrasted r) := by
-    intro c₁ hs
-    unfold spentArms at hs
-    split at hs <;> (split at hs <;> cases hs)
-  have arms : ∀ c₁, insufficiencyArms ai c₁ ≠ .done (.contrasted r) := by
-    intro c₁ hs
-    unfold insufficiencyArms at hs
-    split at hs
-    · dsimp only at hs
-      split at hs
-      · exact spent _ hs
-      · cases hs
-    · exact spent _ hs
-  have after : ∀ c₁, afterFan ai c₁ ≠ .done (.contrasted r) := by
-    intro c₁ hs
-    unfold afterFan at hs
-    split at hs
-    · exact arms _ hs
-    · cases hs
-  have key : ∀ c₁ c₂, step ai c₁ c₂ = .done (.contrasted r) →
-      ∃ c₀, harvestOf c₀ = some r.harvest ∧ r.context = discard c₀ := by
-    intro c₁ c₂ hs
-    unfold step at hs
-    split at hs
-    · split at hs
-      · rename_i hh
-        simp only [constituted] at hs
-        cases hs
-        exact ⟨c₂, hh, rfl⟩
-      · cases hs
-    · cases hs
-    · cases hs
-    · split at hs
-      · exact absurd hs (after _)
-      · cases hs
-    · split at hs
-      · exact absurd hs (arms _)
-      · exact absurd hs (after _)
-    · exact absurd hs (arms _)
-    · split at hs
-      · exact absurd hs (after _)
-      · cases hs
-    · cases hs
-    · cases hs
+    ∃ (c₁ : Context P) (d : Direction), filledValue (closing c₁) = some (.constitute d) ∧
+      Covered c₁ ∧ r.harvest = harvestOf c₁ d ∧ r.context = discard c₁ := by
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
     simp only [preview] at h
     split at h
+    · rename_i d hk
+      split at h
+      · rename_i hc
+        cases h
+        exact ⟨_, d, hk, hc, rfl, rfl⟩
+      · exact ih _ h
+    · cases h
+    · cases h
+    · cases h
     · exact ih _ h
-    · rename_i o hs
-      cases h
-      exact key _ _ hs
 
-theorem dissolved_by_person (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (c₁ : Context P) (d : List String) (h : preview ai c us = .dissolved c₁ d) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .dissolve ∧ c₁ = discard (fuse c₀ u) := by
-  have spent : ∀ c₂, spentArms (P := P) c₂ ≠ .done (.dissolved c₁ d) := by
-    intro c₂ hs
-    unfold spentArms at hs
-    split at hs <;> (split at hs <;> cases hs)
-  have arms : ∀ c₂, insufficiencyArms ai c₂ ≠ .done (.dissolved c₁ d) := by
-    intro c₂ hs
-    unfold insufficiencyArms at hs
-    split at hs
-    · dsimp only at hs
-      split at hs
-      · exact spent _ hs
-      · cases hs
-    · exact spent _ hs
-  have after : ∀ c₂, afterFan ai c₂ ≠ .done (.dissolved c₁ d) := by
-    intro c₂ hs
-    unfold afterFan at hs
-    split at hs
-    · exact arms _ hs
-    · cases hs
+theorem dissolved_on_dissolve (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (r : Closed P) (h : preview ai c us = .dissolved r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .dissolve ∧ r = closed c₁ := by
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
     simp only [preview] at h
     split at h
-    · exact ih _ h
-    · rename_i o hs
+    · split at h
+      · cases h
+      · exact ih _ h
+    · rename_i hk
       cases h
-      unfold step at hs
-      split at hs
-      · split at hs
-        · simp only [constituted] at hs
-          cases hs
-        · cases hs
-      · cases hs
-      · cases hs
-      · split at hs
-        · exact absurd hs (after _)
-        · cases hs
-      · split at hs
-        · exact absurd hs (arms _)
-        · exact absurd hs (after _)
-      · exact absurd hs (arms _)
-      · split at hs
-        · exact absurd hs (after _)
-        · cases hs
-      · rename_i hv
-        cases hs
-        exact ⟨c, u, hv, rfl⟩
-      · cases hs
+      exact ⟨_, hk, rfl⟩
+    · cases h
+    · cases h
+    · exact ih _ h
 
-theorem direction_by_person {c : Context P} {s : Cite c}
-    (ok : (directionCoord (P := P)).admits s.src) : s.src.val = .person := ok
+theorem withdrawn_on_stop (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (r : Closed P) (h : preview ai c us = .withdrawn r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = closed c₁ := by
+  induction us generalizing c with
+  | nil => simp [preview] at h
+  | cons u us ih =>
+    simp only [preview] at h
+    split at h
+    · split at h
+      · cases h
+      · exact ih _ h
+    · cases h
+    · rename_i hk
+      cases h
+      exact ⟨_, hk, rfl⟩
+    · cases h
+    · exact ih _ h
+
+theorem routed_on_route (ai : AITurns P) (c : Context P) (us : List (Utterance P)) (t : String)
+    (r : Closed P) (h : preview ai c us = .routed t r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = closed c₁ := by
+  induction us generalizing c with
+  | nil => simp [preview] at h
+  | cons u us ih =>
+    simp only [preview] at h
+    split at h
+    · split at h
+      · cases h
+      · exact ih _ h
+    · cases h
+    · cases h
+    · rename_i t' hk
+      cases h
+      exact ⟨_, hk, rfl⟩
+    · exact ih _ h
+
+theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+  cases hc : closing c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
+
+theorem trace_total (c : Context P) : (discardTrace c).length = (probes c).length := by
+  simp [discardTrace]
 
 end Proplasma
