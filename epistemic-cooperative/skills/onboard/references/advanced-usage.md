@@ -1,21 +1,25 @@
 # Advanced Usage Patterns
 
-Curated protocol usage patterns for Phase 6 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days.
+Curated protocol usage patterns for Phase 6 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days, except Protocol Chaining, which lists the edges the protocols' own contracts declare.
 
-Provenance caveat: those sessions ran before `/apportion` existed. The two rows naming it are projections onto the workflow slot a predecessor protocol occupied, carried forward because the slot is the same, and they are NOT observations under `/apportion`'s own contract — that predecessor compiled conditions for an already-bounded interval, while `/apportion` cuts a goal into units first. Read them as candidate chains until sessions under the current contract accumulate.
+Provenance caveat: those sessions ran before `/apportion` existed. The rows marked *projected* that name it are projections onto the workflow slot a predecessor protocol occupied, carried forward because the slot is the same, and they are NOT observations under `/apportion`'s own contract — that predecessor compiled conditions for an already-bounded interval, while `/apportion` cuts a goal into units first. Read them as candidate chains until sessions under the current contract accumulate.
 
 ## Protocol Chaining
 
-Protocols whose output naturally feeds into the next. These are observed chains, not prescribed sequences.
+Composition edges a protocol's own contract declares — where one protocol's output is written to be picked up by the next. Declared, not observed frequencies, and not a prescribed sequence: each edge fires only when its condition holds.
 
-| Chain | Frequency | Pattern |
-|-------|-----------|---------|
+| Chain | Pattern |
+|-------|---------|
+| `/preview` → `/ground` | A chosen direction that maps onto an account already in play, and whose intended inferences need an audit, is tagged at harvest for `/ground` |
+| `/apportion` ⇄ `/conduct` | A non-trivial multi-unit plan passes to `/conduct` as a navigation block; an unresolved autonomous region from `/conduct` passes back for apportionment — advisory both ways |
+| `/ground` → `/conduct` | When `/ground` audits an abstraction against its own cases and the members split into rival groups, the fan goes to `/conduct` to be conducted |
+| `/sublate` → `/inquire` / `/bound` | A missing pre-execution fact is routed to `/inquire`; a question a convention or ownership decision settles is routed to `/bound` |
 
 ## Multi-Protocol Sessions
 
 | Pattern | Description |
 |---------|-------------|
-| Full workflow traversal | Up to 8 protocols in one session: inquire → apportion → contextualize → grasp (apportion slot projected; see the provenance caveat) |
+| Full workflow traversal | Several protocols in one session, e.g. inquire → apportion → contextualize → grasp (apportion slot *projected*; see the provenance caveat) |
 | On-demand invocation | Protocols are independent tools — invoke whenever the need arises, not in prescribed order |
 | Mid-session protocol switch | Start with one protocol, switch to another when a different deficit emerges |
 
@@ -53,4 +57,4 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Pattern |
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
-| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each closed before the run — by its own completion condition, by a recorded acceptance where none compiles, or by a recorded reservation where a judgment settles it (projected; see the provenance caveat) |
+| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each closed before the run — by its own completion condition, by a recorded acceptance where none compiles, or by a recorded reservation where a judgment settles it (*projected*; see the provenance caveat) |

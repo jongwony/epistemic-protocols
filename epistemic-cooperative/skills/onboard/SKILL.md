@@ -98,9 +98,9 @@ Present a condensed catalog as text output: render the Data Sources table groupe
 Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
-  - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview, /sketch
+  - Pre-execution (Planning) — /inquire, /elicit, /ideate, /preview, /sketch
   - Analysis — /ground, /induce
-  - Execution/Verification/Understanding — /apportion, /contextualize, /sublate, /recollect, /conduct, /grasp
+  - Execution / Verification / Cross-cutting — /apportion, /contextualize, /sublate, /bound, /recollect, /conduct, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection
@@ -261,7 +261,7 @@ Present via gate interaction:
   - Try a different protocol
   - Continue to full onboarding
 
-Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (all 3 recommended in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
+Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (every pool protocol recommended in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
@@ -332,6 +332,8 @@ Present via gate interaction:
 
 #### Multi-Protocol Path
 
+Applies when the targeted flow was entered from the Quick path ("Continue to full onboarding", or the pool-exhausted transition) without a single target protocol, so MAP selected 2-3 protocols.
+
 **Type 1 — Situation recognition** (3-4 questions):
 
 Present via gate interaction for each:
@@ -372,7 +374,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 4. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/inquire` vs `/apportion`, show the two-step chain: context → unit apportionment (inquire → apportion).
+   Present 3-5 tips from `references/advanced-usage.md` (declared protocol chains, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ — a declared chain that touches a protocol they experienced comes first.
 
 5. **Continue exploring** (when MAP results contain unexplored protocols):
 
