@@ -1,11 +1,11 @@
 ---
 name: goal-research
-description: Delegate factual research to a Codex CLI session that uses Codex's builtin `goal` command and invokes Aitesis (`$inquire`) for Tavily-based external verification. User-invoked via /goal-research.
+description: Delegate factual research to a Codex CLI session that scopes with its builtin `goal` command and verifies via direct Tavily calls under Aitesis evidence discipline. User-invoked via /goal-research.
 ---
 
 # Goal Research
 
-Invoke directly with `/goal-research <research question>` when the user wants to delegate fact-finding or external verification to a Codex CLI session that pairs Codex's builtin `goal` scoping with Aitesis-driven Tavily search.
+Invoke directly with `/goal-research <research question>` when the user wants to delegate fact-finding or external verification to a Codex CLI session that pairs Codex's builtin `goal` scoping with Tavily search held to Aitesis-style evidence discipline.
 
 **Architecture**:
 ```
@@ -13,11 +13,11 @@ goal-research
 ├── Research question (argument or one-time prompt)
 ├── Codex CLI (background)
 │   ├── builtin `goal` — scope the research endpoint
-│   └── `$inquire` — Aitesis skill drives Tavily-based external verification
+│   └── direct Tavily MCP calls — external verification under Aitesis-style evidence discipline
 └── Trace presentation (codex output + temp-file cleanup)
 ```
 
-**Why this composition**: Codex's builtin `goal` command provides a clean scoping primitive for endpoint-defined research; invoking Aitesis (`$inquire`) inside that scope routes verification through Tavily for grounded external sourcing. Running it in Codex isolates the research session from the main Claude Code conversation while still surfacing the full trace back.
+**Why this composition**: Codex's builtin `goal` command provides a clean scoping primitive for endpoint-defined research; researching inside that scope with direct Tavily calls, held to Aitesis-style evidence discipline, grounds the answer in external sources. Running it in Codex isolates the research session from the main Claude Code conversation while still surfacing the full trace back.
 
 ## Phase 1: Argument Capture
 
@@ -32,7 +32,7 @@ Check `which codex 2>/dev/null`. If Codex CLI is not found, expose the missing-b
 
 Generate a unique suffix: `SUFFIX=$(openssl rand -hex 4)`
 
-Write the research prompt to `/tmp/goal_research_${SUFFIX}.txt`. The prompt **must begin with `/goal`** so Codex's builtin goal-scoping engages explicitly (the `Goal:` label form also works, but the slash form makes the convention unambiguous and aligns with how `$inquire` is invoked):
+Write the research prompt to `/tmp/goal_research_${SUFFIX}.txt`. The prompt **must begin with `/goal`** so Codex's builtin goal-scoping engages explicitly (the `Goal:` label form also works, but the slash form makes the convention unambiguous):
 
 ```
 /goal Research and externally verify the target below.
@@ -42,8 +42,8 @@ Research target:
 
 Workflow:
 1. The `/goal` prefix above scopes this Codex session as a research endpoint.
-2. Inside that scope, invoke `$inquire` (the Aitesis skill) to drive Tavily-based external verification searches.
-3. Cite each external source used.
+2. Research in this session with direct Tavily MCP tool calls. Do not invoke any installed skill (goal-research, `$inquire`, or any other) and do not spawn `codex exec` or any other subprocess session.
+3. Cite each external source used, keep official documentation apart from community reports, and state a confidence for each claim.
 
 Report:
 - Findings with cited sources
