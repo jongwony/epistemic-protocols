@@ -176,7 +176,9 @@ structure Claim where
     about what to vet are part of the context: a correction of the target moves it on the next
     pass. Whether a claim is the same one an earlier pass selected is your judgment too — changed
     wording alone does not make it new, and a claim that continues after a split is still that
-    claim for whatever it owes. What an earlier run or session selected is not this run's. -/
+    claim for whatever it owes. The list is the run's: a claim once selected in this run stays in
+    it with whatever answered it, and a correction of the target adds what it points at beside
+    the claims already there. What an earlier run or session selected is not this run's. -/
 axiom claims : Context P → List Claim
 
 /-- A deficit label. A certificate assigns only the ones this contract inscribes; the person may
@@ -241,8 +243,9 @@ inductive Answer
     invocation on. One turn may answer several claims, and may answer some and leave others. An
     answer reaches the claim it covers: changed wording alone does not void it, while a
     materially changed claim, or a fresh antithesis, is not covered by an answer given before it.
-    Where the person set a condition for looking at the claim again and the context now shows it
-    met, the earlier answer no longer covers it, and the claim is challenged afresh. -/
+    A correction of the target answers the claims it sets aside, in the person's words. Where the
+    person set a condition for looking at the claim again and the context now shows it met, the
+    earlier answer no longer covers it, and the claim is challenged afresh. -/
 axiom AnswerSupported : Claim → Context P → Turn P → Answer → Prop
 
 /-- A claim is answered only by the person's turn, whatever form that turn takes. -/
@@ -614,7 +617,7 @@ What do you make of it?
 3. It holds — say why, and the migration proceeds on it
 ```
 
-Answer in your own words; one answer may cover several claims, or only some of them — what it leaves stays open for the next round. An answer is recorded in your words, instructions included. Saying the claim is another protocol's matter hands it there with the command as a hint; nothing is dispatched. Saying the target itself is wrong moves what is vetted on the next pass.
+Answer in your own words; one answer may cover several claims, or only some of them — what it leaves stays open for the next round. An answer is recorded in your words, instructions included. Saying the claim is another protocol's matter hands it there — with the command as a hint where this protocol names one, and as you named it otherwise; nothing is dispatched. Saying the target itself is wrong moves what is vetted on the next pass.
 
 With nothing open, show what was searched and what was found — including every claim handed elsewhere, with why — and ask whether the run is done; an ordinary reply closes it, and you may name something to vet instead. Wherever an earlier answer of yours is read as covering a claim, or as what lets the run close, say which turn was read and what was taken from it, quoting your words — this disclosure stands in place of asking again.
 
