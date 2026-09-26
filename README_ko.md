@@ -62,19 +62,19 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | 프로토콜 | 명령어 | 사용 시점 |
 |----------|--------|----------|
 | [Aitesis](./aitesis) | `/inquire` | 작업에 필요한 맥락이 빠져 있거나 확인하지 않은 전제가 있어, 무엇이 아직 불확실한지 짚어야 할 때 |
-| [Euporia](./euporia) | `/elicit` | 의도는 있지만 결정 좌표가 externalized substrate(코드베이스·규칙·과거 세션)에 암묵적으로만 존재할 때 — 역추적(reverse-trace)하여 의도를 결정화 |
-| [Heuresis](./heuresis) | `/ideate` | 결정을 위한 후보군이 비어 있거나 너무 일찍 하나로 수렴했을 때 — 선택하기 전에 다양한 후보군으로 먼저 넓힐 때 |
-| [Proplasma](./proplasma) | `/preview` | 결정 직전인데 방향 후보들이 말로는 판단이 안 서고 직접 봐야 알 것 같을 때 — 폐기 전제의 값싼 probe들로 먼저 대비 |
-| [Hypotyposis](./hypotyposis) | `/sketch` | 형태를 만들어야 하는데 무엇이어야 하는지는 말할 수 없고 보면 알아볼 수 있을 때 — 스케치하고, 맞지 않는 곳을 표시하고, 보존된 버전을 고쳐, 알아본 버전으로 마무리 |
-| [Analogia](./analogia) | `/ground` | 이미 있는 대상 설명에 대한 매핑이 어떤 결론을 어디까지 뒷받침하는지 불확실할 때 |
-| [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
-| [Merismos](./merismos) | `/apportion` | 자율 실행에 목표를 넘기기 직전 — 한 구간에 맞는 단위로 자르고 각 단위를 먼저 닫을 때 — 컴파일되면 자기 완료 조건으로, 안 되면 기록한 수용으로, 검사가 아니라 판단이 정하는 항목이면 유보로 |
-| [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
+| [Euporia](./euporia) | `/elicit` | 하고 싶은 것은 대략 있는데 어떤 결정들이 걸려 있는지 아직 짚지 못할 때 — 단서는 코드베이스·규칙·과거 세션 같은 내 자료에 있을 때 |
+| [Heuresis](./heuresis) | `/ideate` | 후보가 아직 없거나 너무 일찍 하나로 좁혀졌을 때 — 고르기 전에 후보를 먼저 넓게 펼칠 때 |
+| [Proplasma](./proplasma) | `/preview` | 여러 방향 중 하나로 정하기 직전인데 설명만으로는 판단이 안 서고 직접 봐야 알 것 같을 때 |
+| [Hypotyposis](./hypotyposis) | `/sketch` | 무언가를 만들어야 하는데 어떤 모습이어야 하는지 말로는 못 하지만 보면 알아볼 수 있을 때 |
+| [Analogia](./analogia) | `/ground` | 어떤 틀이나 유비를 이미 눈앞에 있는 사례에 가져다 쓰는데, 그 비교가 실제로 무엇을 어디까지 뒷받침하는지 분명하지 않을 때 |
+| [Periagoge](./periagoge) | `/induce` | 여러 구체적 사례가 무언가를 공유하는 것 같은데 아직 이름 붙이지 못했을 때 — 그 공통점을 붙잡을 때 |
+| [Merismos](./merismos) | `/apportion` | 목표 하나를 자율 실행에 넘기기 직전 — 한 번의 실행 구간에 들어가는 단위로 자르고, 단위마다 언제 끝났는지 판단할 수 있게 할 때 |
+| [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 실제 상황에 안 맞을 수 있을 때 |
 | [Elenchus](./elenchus) | `/sublate` | 행동의 근거로 삼으려는 작업 맥락이 여전히 유효한지 의심스러울 때 — 낡았거나 출처가 약하거나 서로 어긋나는 부분을 행동 전에 변증법적으로 검증 |
 | [Horismos](./horismos) | `/bound` | 작업에서 무엇을 결정해야 하는지, 어떤 결정은 직접 내리고 어떤 결정은 맡길지 아직 분명하지 않을 때 |
 | [Anamnesis](./anamnesis) | `/recollect` | 이전에 논의했던 무언가가 막연히 기억나지만 구체적으로 짚어낼 수 없을 때 — 한 세션이든, 여러 세션에 걸친 작업 라인·토픽·개념이든 |
-| [Katalepsis](./katalepsis) | `/grasp` | 코드·논문·큰 변경을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없거나 — 승인·활용 전에 이해가 진짜인지 검증 |
-| [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
+| [Katalepsis](./katalepsis) | `/grasp` | 코드·문서·결과처럼 눈앞에 있는 것을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없을 때 |
+| [Hyphegesis](./hyphegesis) | `/conduct` | 여러 갈래의 사고가 필요한데 그 순서, 따로 돌릴 수 있는지, 결과를 어떻게 합칠지, 언제 멈출지, 각 결과가 어디로 갈지가 자명하지 않을 때 — 시작하기 전에 작업 방식을 정할 때 |
 
 관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
