@@ -27,7 +27,8 @@ Heuresis(U) → start(c) → ideate(c, utterances), where c is the fused session
   start: a record outside the session the request names is read → the classification relay →
     Blank: the frame map, abstract frames and no concrete candidate → gate
     Seeded: a first pass → the map → gate
-  next utterance u: c' := fuse(c, u) → the person's closing, read from c' —
+  next utterance u: c' := fuse(c, u), then any record outside the session u names, read →
+    the person's closing, read from c' —
     stop: candidates in c' → DiverseCandidateField | none → EarlyExit
     withdraw → withdrawn · a protocol they name → routed
     none: the frames the answer opens — some: a pass over them → the map → gate
@@ -128,9 +129,10 @@ variable {P : Type}
     preceding message as the utterance. -/
 abbrev IdeationRequest (P : Type) := Context P
 
-/-- **Your reads** before the relay: when the bound request names a record outside the session —
-    an issue, a document — that record, read by a tool. Nothing the request does not name is read,
-    and nothing wider is scanned. Empty when it names none. -/
+/-- **Your reads**: when the latest of the person's turns — the bound request, or an answer at any
+    gate — names a record outside the session, such as an issue or a document, that record, read
+    by a tool. Nothing the person does not name is read, and nothing wider is scanned. Empty when
+    the turn names none. -/
 axiom reference : Context P → List (Evidence P)
 
 /-- **Your reading** of the bound request: its topic. -/
@@ -191,7 +193,28 @@ axiom Opened : Context P → Frame → Bool
 /-- The explored frames: the registered ones a pass opened, so none lies outside the register. -/
 def explored (c : Context P) : List Frame := (frames c).filter (Opened c)
 
-def Unexplored (c : Context P) (f : Frame) : Prop := f ∈ frames c ∧ Opened c f = false
+/-- A frame the person put out of scope, with the turn in which they did — its branches and
+    candidates go with it. -/
+structure Exclusion (c : Context P) where
+  frame    : Frame
+  request  : Cite c
+  byPerson : request.src.val = .person
+
+/-- **Your reading** of every exclusion in the person's turns, each citing the turn that made it.
+    A boundary the person states — "only this area" — reaches particular frames only once the
+    person takes that application; until then it stands in `proposedExclusions`. An excluded frame
+    is never deleted: it stays on the map marked out of scope with the turn quoted, and it is never
+    widened. -/
+axiom excluded : (c : Context P) → List (Exclusion c)
+
+/-- **Your reading**: frames you read as outside a boundary the person stated, shown on the map as
+    your proposal until the person takes it. -/
+axiom proposedExclusions : Context P → List Frame
+
+def Excluded (c : Context P) (f : Frame) : Prop := ∃ e ∈ excluded c, e.frame = f
+
+def Unexplored (c : Context P) (f : Frame) : Prop :=
+  f ∈ frames c ∧ Opened c f = false ∧ ¬ Excluded c f
 
 /-- A generated idea: raw material for divergence, not a selection-ready alternative. It carries
     no score, rank, or preference. -/
@@ -202,8 +225,10 @@ structure Candidate where
 
 /-- **Your record**: every candidate the passes produced, under the frame or branch it came from —
     on a Seeded entry's first pass the seeds, each keeping its own origin, and every generated one
-    as `assistant`; a chained field's candidates under their own frames and origins. Never
-    removed, re-ranked, or relabeled. -/
+    as `assistant`; a chained field's candidates under their own frames and origins; the items of
+    material the person names at a later turn under their frames, with their own origin —
+    `external` for a tool read — at the pass after they are read. Never removed, re-ranked, or
+    relabeled, an excluded frame's included. -/
 axiom candidates : Context P → List Candidate
 
 /-- **Your judgment**, remade at each presentation from the candidates and signals as they stand:
@@ -237,7 +262,8 @@ axiom dissent : Context P → List String
 /-- **Your reading** of the latest answer: the frames the next pass opens — at the frame map, the
     frames selected and any the person named, shaped into frames; at a round, the named unexplored
     frames, a new angle shaped into frames, or a branch under an open frame or candidate the
-    person asked to deepen. A continue that names nothing takes every unexplored frame. On a
+    person asked to deepen. An excluded frame is never among them. A continue that names nothing
+    takes every unexplored frame. On a
     Seeded entry's first pass, how many derived frames to open is yours; the rest stay unexplored
     and show as such. Empty when the answer opens nothing — a deferral alone, a question, a
     correction, a pick among candidates, or a continue with nothing left to open. -/
@@ -269,16 +295,18 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
   | .filled a .. => some a
 
 /-- `DiverseCandidateField`, read from `context`: the topic, every candidate with its frame or
-    branch and its origin, the explored frames, the unexplored ones, the parked follow-ups with
-    their citations, the unaddressed signals, and your contrary grounds (`dissent`).
+    branch and its origin, the explored frames, the unexplored ones, the frames the person put out
+    of scope with their turns quoted, the parked follow-ups with their citations, the unaddressed
+    signals, and your contrary grounds (`dissent`).
     Frame-distributed, never scored; complete for whatever unfolds it next, a later /ideate
     resuming from it included. -/
 structure DiverseCandidateField (P : Type) where
   context  : Context P
   nonempty : (candidates context).isEmpty = false
 
-/-- `EarlyExit`: a Stop while no candidate exists, read from `context` — the frames offered, the
-    parked follow-ups, every signal, since no candidate answered any, and your contrary grounds. -/
+/-- `EarlyExit`: a Stop while no candidate exists, read from `context` — the frames offered, those
+    the person put out of scope, the parked follow-ups, every signal, since no candidate answered
+    any, and your contrary grounds. -/
 structure EarlyExit (P : Type) where
   context : Context P
   empty   : (candidates context).isEmpty = true
@@ -330,10 +358,16 @@ def assemble (c : Context P) : Outcome P :=
   | true  => .early ⟨c, h⟩
   | false => .field ⟨c, h⟩
 
+/-- The person's turn fused, then any record outside the session it names, read. -/
+def receive (c : Context P) (u : Utterance P) : Context P :=
+  let c' := fuse c u
+  c' ++ (reference c').map (·.val)
+
 /-- `respond` presents the map and ends at the gate. Every round, one map of the whole field: the
     frames and the branches under them, the candidates under each with their origins, the
-    unexplored frames, what is parked, every signal still unaddressed, and your contrary grounds —
-    with what this round added marked. The map is re-read from the context, never stored; when it
+    unexplored frames, the frames out of scope marked as such with the person's turn quoted, your
+    proposed exclusions marked as proposals, what is parked, every signal still unaddressed, and
+    your contrary grounds — with what this round added marked. The map is re-read from the context, never stored; when it
     grows large it compresses to branches and counts while this round's additions show in full,
     the density yours to judge. Then what continuing would cost to review and what stopping keeps,
     and the gate: at a round, continue first and stop second; on a Blank entry's first
@@ -342,7 +376,7 @@ def ideate (generate respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
-    let c' := fuse c u
+    let c' := receive c u
     match filledValue (closing c') with
     | some .stop      => assemble c'
     | some .withdraw  => .withdrawn c'
@@ -383,10 +417,10 @@ theorem blank_frame_map_first (relay generate respond : Context P → Response P
 
 An answer that closes nothing and opens nothing runs no pass: the gate is presented again.
 theorem no_empty_pass (generate respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (fuse c u)) = none)
-    (ht : (targets (fuse c u)).isEmpty = true) :
+    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (receive c u)) = none)
+    (ht : (targets (receive c u)).isEmpty = true) :
     ideate generate respond c (u :: us) =
-      ideate generate respond (fuse c u ++ [(respond (fuse c u)).val]) us
+      ideate generate respond (receive c u ++ [(respond (receive c u)).val]) us
 
 Every closing rests on a turn the person sent.
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
@@ -395,6 +429,10 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
 Every parked follow-up cites a turn the person sent.
 theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
     (c[p.request.idx]'p.request.lt).origin = .person
+
+Every exclusion cites a turn the person sent.
+theorem excluded_by_person (c : Context P) (e : Exclusion c) :
+    (c[e.request.idx]'e.request.lt).origin = .person
 
 No explored frame lies outside the register, and none is also unexplored.
 theorem explored_registered {c : Context P} {f : Frame} (h : f ∈ explored c) : f ∈ frames c
@@ -409,8 +447,10 @@ ideation; routed: they named the next protocol. Their Stop is the completion its
 layered on a built object, and it takes the field with the map's dissent in view.
 Convergence evidence: at DiverseCandidateField, present the trace — the topic, then the map: every
 registered frame and its branches, each marked explored or unexplored, with every candidate under
-the frame it sits in and its origin, the parked follow-ups with the requests quoted, the unaddressed signals, and your contrary grounds; at
-EarlyExit, the frames offered, the parked follow-ups, every signal, and your contrary grounds.
+the frame it sits in and its origin, the frames out of scope marked as such with the person's
+turn quoted, the parked follow-ups with the requests quoted, the unaddressed signals, and your
+contrary grounds; at EarlyExit, the frames offered, those out of scope, the parked follow-ups,
+every signal, and your contrary grounds.
 Demonstrated, not asserted. Nothing is held beyond the context, so nothing needs cleanup; the
 parked set's durable record is the host's after the protocol ends.
 -/
@@ -435,7 +475,7 @@ inductive Op | bind | readReference | classify | extractSignals | classifyRelay 
 
 def grounding : Op → Annot × String
   | .bind           => (.sense, "Internal analysis: the invocation utterance and a chain reference it names; nothing unnamed is scanned")
-  | .readReference  => (.observe, "Tool read, conditional: fires only when the bound request names a record outside the session — that record and nothing else; what it returns enters with its external origin")
+  | .readReference  => (.observe, "Tool read, conditional: fires only when a turn of the person's — the bound request or an answer at any gate — names a record outside the session: that record and nothing else; what it returns enters with its external origin")
   | .classify       => (.sense, "Internal analysis: the entry, Blank or Seeded, inferred from the bound request; zero entry questions")
   | .extractSignals => (.sense, "Internal analysis: signals — concerns, weaknesses, requirements — read from the bound request, named material, and what the person says later, each tagged by its source; never scored or ranked")
   | .classifyRelay  => (.extension, "TextPresent+Proceed: the inferred entry and its basis, quoting the utterance fragment, why the field reads thin, and the signals with their sources; relay, not a gate")
@@ -444,10 +484,10 @@ def grounding : Op → Annot × String
   | .generate       => (.sense, "Internal generation: parallel over the frames the pass opens; a host may realize it through isolated parallel agents, and the meaning does not depend on that; no elimination, ranking, or scoring")
   | .present        => (.extension, "TextPresent+Proceed: the map of the whole field with this round's additions marked, the unaddressed signals, your contrary grounds, what continuing would cost to review and what stopping keeps; precedes the gate")
   | .qround         => (.constitution, "present: every round, continue first and stop second at every presentation; continue opens unexplored frames, a new angle, or a branch under what the person asks to deepen; an answer that opens nothing presents the gate again")
-  | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's closing if any, the frames it opens, any new angle or branch, any deferral, any new signal")
+  | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's closing if any, the frames it opens, any new angle or branch, any deferral, any exclusion or taken proposal, any record it names, any new signal")
   | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
   | .park           => (.extension, "TextPresent+Proceed: something the person set aside for later acknowledged as parked, quoting their request; declared at either terminal; its durable record is the host's after the protocol ends")
-  | .converge       => (.extension, "TextPresent+Proceed: DiverseCandidateField — the topic and the map, every registered frame and branch marked explored or unexplored with every candidate under it and its origin, the parked follow-ups, the unaddressed signals, your contrary grounds; EarlyExit — the frames offered, the parked follow-ups, every signal, your contrary grounds")
+  | .converge       => (.extension, "TextPresent+Proceed: DiverseCandidateField — the topic and the map, every registered frame and branch marked explored, unexplored, or out of scope with every candidate under it and its origin, the parked follow-ups, the unaddressed signals, your contrary grounds; EarlyExit — the frames offered, those out of scope, the parked follow-ups, every signal, your contrary grounds")
   | .seam           => (.extension, "TextPresent+Proceed: after the person's Stop, at either terminal, a user-declared chain naming the next protocol settles the next move; proceed to it citing that source. A route the person names at a gate is the routed outcome itself. This protocol declares no wired outbound edge. The assembled terminal crosses whole, every origin, branch, park, signal, and contrary ground intact, and the seam never selects, ranks, or trims; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-! ── COMPOSITION ──
@@ -485,8 +525,9 @@ Read `references/round-composition.md` before composing when terminology must re
 - **User-initiated, zero entry questions**: `/ideate` activates only on direct invocation (Layer 1); `Entry` (Blank vs. Seeded) is inferred from the request alone — never asked. The classification is a relay, not a gate.
 - **Frame-first ownership**: On `Blank`, read `references/blank-entry.md` before presenting abstract frames or any concrete candidate. Preserve every candidate's origin thereafter.
 - **The person closes**: Stop, withdrawal, or a protocol the person names ends the run, and only the person's own turn does. A pick among candidates, a judgment on one, or a correction does not take the field; it is read for the frames it opens and the signals it adds, and the gate stays. Stop returns `DiverseCandidateField` only with candidates and otherwise the fully declared `EarlyExit`, and it closes on what the map it answered showed.
-- **Named material only**: heuresis reads the request, material the person explicitly names — a prior protocol's output in the session, or a record outside it such as an issue or a document, read by a tool — and what the person says as the run goes on. A bare invocation binds the immediately preceding user message as the request (a one-turn U-BINDING rule, not a session scan). It never scans unnamed material — the wider session, codebase, or rules — and never reverse-traces hidden decision coordinates from externalized substrate; that is `/elicit`'s territory.
-- **Chain semantics**: Named material folds in as seeds, each keeping the origin tag it carries or else the origin of the turn it was read from — `external` for a record a tool read; naming it is the person's adoption, recorded apart. A chained field this protocol assembled resumes: its frames, branches, and candidates carry over as the map stood at its Stop. Read `references/chain-reference.md` after classification and before the first pass; the ownership trade-off remains declared under Known Limitations.
+- **Out of scope, never erased**: A frame the person puts out of scope stays on the map with its branches and candidates, marked out of scope and citing their turn, and is never widened. Applying a boundary the person stated to particular frames is your proposal, shown as such, until the person takes it.
+- **Named material only**: heuresis reads the request, material the person explicitly names at invocation or at any later turn — a prior protocol's output in the session, or a record outside it such as an issue or a document, read by a tool — and what the person says as the run goes on. A bare invocation binds the immediately preceding user message as the request (a one-turn U-BINDING rule, not a session scan). It never scans unnamed material — the wider session, codebase, or rules — and never reverse-traces hidden decision coordinates from externalized substrate; that is `/elicit`'s territory.
+- **Chain semantics**: Named material folds in as seeds, each keeping the origin tag it carries or else the origin of the turn it was read from — `external` for a record a tool read; naming it is the person's adoption, recorded apart. A record named at a later turn is read then, and its items land under their frames with that origin at the next pass. A chained field this protocol assembled resumes: its frames, branches, and candidates carry over as the map stood at its Stop. Read `references/chain-reference.md` after classification and before the first pass; the ownership trade-off remains declared under Known Limitations.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 - **Width and depth both widen**: A request for more on an open frame or on one candidate opens a branch under it, registered with its parent, and the next pass fills it; nothing is ranked or chosen. Only what the person themselves sets aside for later parks, citing their turn, and is declared at either terminal.
 - **One map every round**: The whole field is redrawn from the context before each gate, this round's additions marked; a large map compresses to branches and counts while the additions show in full.

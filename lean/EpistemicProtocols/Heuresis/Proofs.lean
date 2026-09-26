@@ -35,10 +35,10 @@ theorem blank_frame_map_first (relay generate respond : Context P → Response P
   simp only [start, h]
 
 theorem no_empty_pass (generate respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (fuse c u)) = none)
-    (ht : (targets (fuse c u)).isEmpty = true) :
+    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (receive c u)) = none)
+    (ht : (targets (receive c u)).isEmpty = true) :
     ideate generate respond c (u :: us) =
-      ideate generate respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
+      ideate generate respond (receive c u ++ [(respond (receive c u)).val]) us := by
   simp [ideate, hk, ht]
 
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
@@ -50,6 +50,10 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
 theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
     (c[p.request.idx]'p.request.lt).origin = .person :=
   p.request.ok.trans p.byPerson
+
+theorem excluded_by_person (c : Context P) (e : Exclusion c) :
+    (c[e.request.idx]'e.request.lt).origin = .person :=
+  e.request.ok.trans e.byPerson
 
 theorem explored_registered {c : Context P} {f : Frame} (h : f ∈ explored c) : f ∈ frames c :=
   (List.mem_filter.mp h).1

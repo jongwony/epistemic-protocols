@@ -9,7 +9,8 @@ Named material folds in as seeds and is promoted to candidates on the first pass
 the user's own fragments, gaining the frame each lands under. Each seed keeps the origin tag
 the material already carries, or otherwise the origin of the turn it was read from —
 `external` for a record a tool read — so an assistant's output never becomes the user's by
-being chained. Only the record the user named is read; nothing beside it is scanned.
+being chained. Only the record the user named is read; nothing beside it is scanned. A record
+named at a later gate is read then, and its items land under their frames at the next pass.
 
 A field this protocol assembled resumes when chained: its frames, branches, and candidates
 carry over with their origins as the map stood at its Stop, and the run digs on from there.
