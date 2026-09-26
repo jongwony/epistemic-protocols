@@ -11,508 +11,552 @@ Detect application-context mismatch after execution through AI-guided applicabil
 
 **Epharmoge** (ἐφαρμογή): A dialogical act of verifying that results fit the actual application context — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness through structured mismatch surfacing and user-directed adaptation.
 
-```
-── FLOW ──
-Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
-  Mᵢ = ∅: Qz(zero_mismatch_finding) → Stop → [AcceptNoMismatch: R_final := Some(Λ.R), deactivate (no aspect ¬warranted; execution stands as-is) | Reopen(aspect): re-scan Eval focused on it (one attempt: any detection → the SAME Phase 0 pipeline as the Mᵢ ≠ ∅ arm below — bind_kind, split, absorb, certify, value space — and then whichever Phase 0 exit that pipeline reaches, Phase 1 where anything passed the certificate and trivial convergence where nothing did; still-∅ → relay finding, deactivate)]
-  Mᵢ ≠ ∅: bind_kind each [split where non-atomic] → absorb into ∅ (same claim → merge, new → init_occurrence) → Mᵢ → ∀m ∈ Mᵢ: certify(m, local_claims) → [status = route: close m as Route(routed_deficit), value_space := None, m never registering | status = ambiguous: Qa(m, claims_supported(m)) → Stop → Attribution → attribute(m, ·) — Own: m now passes on the user's attribution; Route(d): close m as Route(d), attribution-assigned; Unattributable: close m as Residual, attribution-assigned — value_space := None on either close] → keep(status = pass) → Mᵢ_passed → ∀m ∈ Mᵢ_passed: m.value_space := Some(bind_value_space(m)) →
-    Mᵢ_passed = ∅ ∧ adjudicated(Λ.R, X) (every flagged aspect carries a disposition assigned at registration — Route(routed_deficit) or Residual, by the certificate where the fit was unambiguous and by the user's attribution at Qa where it was not — via the typed disposed(a) predicate): → emit routing recommendations + surface any Residual (each flagged aspect either handed to a deficit or left unattributable by the user) → R_final := Some(Λ.R) → deactivate (trivial convergence: adjudicated by disposition, Λ.R unadapted)
-    Mᵢ_passed ≠ ∅: AssessFit(R, X, Mᵢ_passed) → F → Λ.fit_map := F → Register(Mᵢ_passed) → Λ.carrier := Some(locator(C)) → SelectNext(pending, Λ.fit_map) → Mₛ → judgment_settled(Mₛ, Λ.fit_map)? →
-      [Some(Overruled): judgment_relay_overruled → report the retraction + the cited fit evidence → close Mₛ as (Overruled, Keep), relay-assigned → NO Qc, no turn yielded, Λ.R untouched → next pending, or converge]
-      [Some(Upheld): judgment_relay_upheld → judgment_state := Some((Upheld, basis)), Overruled/Keep dropped from the presented set]
-      [None: judgment_state := None — the verdict is the user's this cycle, and the reset is what stops last cycle's relayed Upheld from being read onto this mismatch] →
-      -- DISPOSITION HALF. The judgment half above has already run; what becomes of the result is always the user's:
-      Qc(Mₛ scoped by the CURRENT Λ.fit_map, judgment_state) → Stop → A = (j, d) →
-      [d = Adapt(direction)] adapt → R' → Λ.R := R' → close Mₛ (the act having happened, and ahead of the fold, which needs it out of pending) → Eval(Λ.R, X) → bind_kind each [split where non-atomic] → absorb into pending (same claim → merge, new → init_occurrence) → Mₑ (what the fold opened) → ∀m ∈ touched: certify(m, local_claims) → ∀m ∈ touched where status = ambiguous: Qa(m, claims_supported(m)) → Stop → Attribution → attribute(m, ·) → ∀m ∈ touched: m.value_space := Some(bind_value_space(m)) where status = pass, None otherwise (total on both outcomes, so a merged element that had a space and stopped passing does not keep it) → ∀m ∈ touched where status ≠ pass: route → close m as Route(routed_deficit); Unattributable → close m as Residual — and every such close completes the entry of an m registered before this fold, so it LEAVES pending, while an m that was not never enters → Mₑ_passed := the passing members of Mₑ (registration is for what the fold OPENED; an element registered before this fold has nothing to register) → record update(Λ.carrier: add Mₑ_passed AND bring into line the entry of every touched element ALREADY REGISTERED before this fold, whose reading, evidence, certificate, value space and stamp the fold moved — Register reaches only what the fold OPENED) → AssessFit(Λ.R, X, pending) → F' → Λ.fit_map := F' → (loop: back to Phase 1 above — judgment half, then disposition half — until control reaches a named terminal)
-      [d = Keep] close Mₛ (nothing has to happen first) → no re-scan, no Mₑ; R_final is bound at convergence, not here → (pending non-empty: back to Phase 1 above; emptied by this close: the ordered terminal check)
-      [d = Discard(replacement)] discard → close Mₛ as Discard (ahead of the sweep, or the mismatch the user actually withdrew is recorded Moot) → R_final := replacement, every mismatch REMAINING pending → unjudged Moot, no re-scan → deactivate (withdrawal convergence: the evaluated target is withdrawn; the replacement is carried, not adjudicated)
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
+-/
 
-── MORPHISM ──
+/-! ── FLOW ──
+Epharmoge(R, X) → start(c) → contextualize(c, utterances), where c is the fused session context and
+X, the application context, is c itself:
+  pass(c): carry out what a person's resolution asked and the context does not yet show done — an
+    adaptation, a withdrawal — and take in what the write returned; then judge afresh where the
+    result as it now stands does not fit the context as it now stands, whose each mismatch is,
+    and how each one stands → write the carrier
+  [a withdrawal the person asked for has landed]              close: discarded
+  [the person stops]                                          close: stopped
+  [the person goes on to a protocol they name]                close: routed
+  [nothing open ∧ the person has closed]                      close: done
+  [otherwise] present the current list and what this turn changed, then one gate: the next open
+    mismatch — one whose owner is unclear first — with concrete actions for it; with nothing
+    open, the list and whether this is done → Stop
+  next utterance u: c' := pass(fuse(c, u)) → the same reading, whatever u says
+  no utterance: the gate holds; nothing is judged and nothing closes
+-/
+
+/-! ── MORPHISM ──
 (R, X)
-  → evaluate(result, context)          -- detect applicability mismatch
-  → bind_kind(mismatch) [split where non-atomic] → absorb(detections, carried) → certify(element, local_claims) -- shared meta-backbone: bind each mismatch as a kind, fold the detections into what is already carried (same claim → merge, none → open one), then certify deficit fit (fail-closed) per ELEMENT against the claims inscribed in this SKILL.md, BEFORE it enters the pending/disposition flow
-  → assess_fit(result, context, mismatches) -- sort applicability fit before user judgment
-  → surface(fit_scoped_mismatch) -- present mismatch with fit basis and evidence
-  → judge(mismatch) → dispose(result, judgment, disposition) -- TWO AXES: whether the flagged aspect stands, then what becomes of the result (adapt / keep / discard)
+  → perform(requested)          -- carry out the adaptation or withdrawal a person asked for; what the write returned enters the context
+  → judge(result, context)      -- where the result as it now stands does not fit the accumulated context; afresh on every pass
+  → certify(mismatch)           -- whose it is: a fit problem here, another deficit's, or unclear (fail-closed)
+  → surface(list, changes, one) -- the current list and this turn's changes, then concrete actions for one mismatch
+  → resolve(person's turn)      -- adapt it, leave it as it is with their reason, stop using the result, hand it on; or close
   → ContextualizedExecution
-requires: mismatch_detected(R, X)       -- runtime checkpoint (Phase 0), and the AUTO-ACTIVATION condition ONLY (Layer 2). A user-invoked run
-                                        -- (/contextualize, Layer 1) enters WITHOUT it: its Phase 0 may find Mᵢ = ∅, and that run then owes the
-                                        -- zero-mismatch confirmation (Qz, `Zero-mismatch surfacing`) rather than declining to have started — which is why
-                                        -- ContextualizedExecution's own guard names that confirmation as a conjunct
-deficit:  ApplicationDecontextualized    -- the deficit this morphism takes, and the certificate's own_claim deficit for in-scope mismatches. It gates
-                                        -- Layer 2 auto-activation; it does not gate Layer 1 invocation
-preserves: X                             -- application context is fixed reference; morphism transforms R only
-                                         -- WITHIN THE RUN. X is bound fresh at each activation off a session context that ACCUMULATES, so a later activation
-                                         --   binds a moved X rather than the same one again — a result this run judged, and the judging itself, are among what it moved
-                                         --   (Scan scope reads session context; Λ.X is bound once per activation). Reading `fixed` as `static in the world` gets a
-                                         --   read-only run exactly backwards: it produces no artifact and still shifts the ground every later fit judgment is made on
+requires: mismatch_detected(R, X)   -- the auto-activation condition only (Layer 2); a user-invoked run enters without it
+deficit:  ApplicationDecontextualized
+preserves: every turn of the context -- the context only grows (pass_extends); adapt and discard change the result alone
 invariant: Applicability over Correctness
-invariant: certificate-before-registration  -- status(m.certificate) = pass strictly precedes registering a mismatch into pending, and STRICTLY PRECEDES ITS STAYING THERE where the registration already exists: an element whose evidence the fold grew is re-certified, and a status that stops passing keeps it out of pending — taking it out where it was registered before the fold, keeping it from entering where it was not. So nothing sits in pending on a certificate that does not currently pass AT ANY POINT pending IS READ, whether the element arrived by opening or by merging — not asserted mid-pass, since the re-scan writes the non-passing status and closes the element out of pending as steps of one uninterrupted pass and AssessFit, the first reader of pending after it, runs once both have happened (shared meta-backbone order, on both scans)
-invariant: transformative revalidation (NON-MONOTONE) -- an Adapt disposition mutates the Eval(R, X) target into R', breeding emergent mismatches into Mₑ; re-scan mandatory; a run can have more left to settle after a disposition than before it
-invariant: judgment-disposition separation -- the judgment (does the aspect stand?) and the disposition (what becomes of the result) are separate answers, the judgment relay-eligible on cited evidence, the disposition never relay-eligible on its own account — what becomes of the result is answered against the target in front of the user
-invariant: relay closes only what leaves the artifact unchanged -- a relay may close a mismatch only where the close changes nothing about the result
+invariant: the person resolves and closes; evidence only withdraws the AI's own flag or shows what it found
+invariant: transformative revalidation (NON-MONOTONE) -- an adaptation changes what the next pass judges, so a run can have more open after a resolution than before it
+-/
 
-── TYPES ──
-R      = Result to be evaluated (source-agnostic: AI output, analysis conclusion, decision outcome, or any completed work product)
-           -- Input type: morphism processes R uniformly; enumeration scopes the definition, not behavioral dispatch
-X      = Application context (environment, constraints, user situation) — type name Context; Λ.X is its one binding, fixed at activation (preserves: X), which is why a bare X appears below rather than Λ.X. ContextChannel's Context member is an evidence source, not this type
-Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
-MismatchId = a run-local handle naming ONE OCCURRENCE the protocol carries — assigned in ascending order at the moment the occurrence is kept
-                 — on absorb's not-same arm, the same arm on either scan — and never reassigned or reused within the run
-                 -- NOTHING DISPATCHES ON IT: no phase branches on its value, no convergence predicate reads it, and it never decides whether two
-                 --   mismatches are the same claim — that stays identity(m). It is a handle for pointing, and pointing only (`Identity, occurrence, and reading stay distinct`)
-                 -- A detection that MERGES into an element already carried is not a new occurrence and takes no id; that element keeps its own (absorb)
-absorb = HOW A SCAN'S DETECTIONS BECOME WHAT THE PROTOCOL CARRIES: Set(Mismatch) × Set(Mismatch) → Set(Mismatch), folding the detections into the carried set ONE AT A
-                 TIME. FIXED POSITION, and every block that scans states it at that position: AFTER bind_kind + split (so the fold ranges over atomic claims and each
-                 side of the judgment below is one claim) and BEFORE certify (so whatever the fold yields is already a complete Mismatch when a certificate-assigned
-                 close — Route, Residual — or a later Moot inherits one). Each detection takes one of two arms, and WHAT IS JUDGED IS WHICH CARRIED ELEMENT, IF ANY, STATES THIS
-                 CLAIM — not whether some element does. The judgment yields the element itself, because that is what the merge below needs; a yes/no would
-                 leave the target to be invented wherever more than one carried element reads plausibly, which uniqueness and transitivity being
-                 disclaimed above makes a live possibility rather than a corner. HOW the run reaches that element is its own; THAT it names one is the
-                 contract's:
-                 --   an element → merge(carried, d) on the element the judgment named: it absorbs the detection and stays the element. THE MERGED ELEMENT IS WHAT THE NEXT DETECTION
-                 --                MEETS, so several detections of one claim fold to one and nothing a detection carried is overwritten by a later one — merge
-                 --                combines, and there is no last write to win. What that does NOT buy is order-independence: whichever detection opens the
-                 --                element is the one whose id and whose STATEMENT of the claim it keeps — not its whole binding, since the evidence takes in every later detection's and the certificate and value space are re-derived over the result (merge) — and a judgment of sameness need not be transitive, so a different arrival
-                 --                order can partition the same detections differently. That follows from sameness being judged, not from the fold
-                 --   none      → init_occurrence(d): it enters the set as an element of its own
-                 -- THE STAMP RIDES EVERY DETECTION, ahead of both arms: match_identity decides unrepaired for each one by the single rule (does it read as the
-                 --   same claim as Mₛ, off identity), and absorb only routes where that answer lands — onto the element the new arm opens, or into the carried
-                 --   element through merge's disjunction. NEITHER ARM DECIDES IT, which is what lets a detection reading as Mₛ's claim AND as one already
-                 --   carried record both facts instead of losing the first to the second
-                 -- THE SET FOLDED INTO IS WHATEVER THE PROTOCOL ALREADY CARRIES: ∅ at Phase 0, pending at the Phase 2 re-scan. "Already pending" is therefore NOT a
-                 --   case this step handles apart — it is the accumulator having survived an earlier scan, and a detection meeting it takes the same two arms as one
-                 --   meeting an element opened a moment ago. One operation, stated once, is what every scan path runs
-                 -- ONE ELEMENT PER CLAIM is what the fold is directed to reach, not a property the contract can guarantee: sameness is judged, and a judgment carries
-                 --   no invariant. What the type layer contributes is the narrowing identity(m) ranges over, which is what raises the odds the judgment lands right
-merge  = Mismatch × Mismatch → Mismatch, combining two readings of ONE claim. The carried element is the left side and stays the element
-                 --   id : the carried element's, untouched — the same occurrence taking on more of what is known about it
-                 --   aspect, description, evidence, severity : the CURRENT READING, combined. What the combination comes out as is read at that turn from what the
-                 --                two sides actually say; the protocol fixes THAT they are combined, never what the combination is
-                 --   unrepaired : the disjunction of the two, the detection's side being the value match_identity decided for it (absorb, above) — a
-                 --                set-only stamp, so a claim stamped on either side stays stamped
-                 --   kind_binding : positive_predicate is the carried element's — it is ONE claim and this arm was taken because the run read the detection
-                 --                as that claim, so it is stated once — while evidence is the UNION. The claim now stands on what both sides found it standing
-                 --                on, which is the whole of what a second detection of one claim contributes to identity
-                 --   certificate, value_space : RE-DERIVED from the merged binding, by the same certify and bind_value_space steps that derive them anywhere,
-                 --                and never carried across unchanged. THE REPLACEMENT IS TOTAL ON BOTH PATHS: a re-derived pass writes the new space,
-                 --                and a re-derived route close, or an Unattributable attribution at Qa, writes value_space := None, since a mismatch closed at
-                 --                registration carries none (below) — an element that had a space before the merge must not keep it after one; a re-derived
-                 --                ambiguous is put to Qa before either. The reason is that status is not fitted from the predicate alone: claimed_by collects the
-                 --                claims THE EVIDENCE supports and ambiguous is "none holds on the evidence at hand", so evidence moving can move pass → route
-                 --                or → ambiguous. Carrying the earlier certificate would let a stale pass route into adaptation a mismatch that now belongs to
-                 --                a sibling deficit, which is the fail-closed invariant going out through the merge arm. Where the re-derived certificate no
-                 --                longer passes — on the fit, or on the user's attribution where the fit was ambiguous — the element is closed exactly as any other is, and LEAVES pending if it was in it
-                 -- SO IDENTITY DOES MOVE UNDER MERGING, in its evidence component: the claim is the same claim and stands on more. The certificate follows it
-                 --   because the certificate was always fitted to the binding, and the binding is what grew
-                 -- The field list is TOTAL: merge names every field of Mismatch and leaves none to the caller
-init_occurrence = the step that turns a detection the fold judged NEW into an occurrence the protocol carries: Mismatch → Mismatch, producing every field no earlier
-                 step could produce. Reached on absorb's not-same arm alone, so a detection that folds into an element already carried never passes through it. It
-                 writes exactly two fields:
-                 --   id        := the next handle in this run's order
-                 --   unrepaired := the value match_identity already decided for this detection (absorb) — false on a Phase 0 scan for want of an Mₛ, by that same rule rather than by a separate default
-Mismatch = { id: MismatchId, aspect: String, description: String, evidence: String, severity: Severity, unrepaired: Bool, kind_binding: KindBinding, certificate: DeficitFitCertificate, value_space: Option(ValueSpace) }
-                 -- ASSEMBLED ACROSS THE REGISTRATION PIPELINE, not built by the scan: Eval detects an aspect and its reading, and bind_kind,
-                 --   absorb (whose not-same arm runs init_occurrence), certify and bind_value_space each add what only they can produce, in the
-                 --   order `Certificate before registration; revalidate after adaptation` fixes. So the whole
-                 --   form is what a REGISTERED mismatch carries, and a detection on its way through has only what its stage has reached
-                 -- object_ref: the per-mismatch anchor the certificate evaluates and the value-space binds over (epharmoge-local instantiation of the shared backbone's object_ref)
-                 -- the mismatch's kind/domain is carried by kind_binding.label (Axis = String, emergent) — the single source of the kind label,
-                 --   and a DISPLAY NAME only: which registration a mismatch IS is settled by identity(m) below, never by this label
-                 -- Mismatch.evidence is the human-facing indicator shown at surfacing (a String). The typed set the certificate and identity(m)
-                 --   range over is kind_binding.evidence (Set(Evidence)) — two different fields, and only the second one decides anything
-                 -- THE FIELDS SPLIT FIVE WAYS, and merge (above) treats each accordingly: id is PRESERVED, the carried element's and
-                 --   untouched; aspect, description, evidence and severity are the CURRENT READING and are combined; kind_binding is
-                 --   IDENTITY, whose predicate cannot move while its evidence unions; unrepaired is a monotone stamp that merge takes the
-                 --   disjunction of; certificate and value_space are DERIVED and are re-run over the merged binding rather than carried
-                 -- value_space is Option-valued: a mismatch closed at registration (Route, Residual) is complete with None — never having had a space where the close came at its first certification, and having had its space replaced by None where a re-derived certificate stopped passing.
-                 --   The invariant readers depend on is narrower than the field — a mismatch IN pending always carries Some wherever pending is READ. Registration
-                 --   follows bind_value_space on both scans, and on the re-scan the None and the close that takes the element out of pending are
-                 --   steps of ONE pass with no reader between them — the Qa Stop sits BEFORE that pass, since attribute runs on the far side of it and the
-                 --   value-space leg runs after every attribution is in. A re-derived ambiguous therefore reaches the same two exits a route does, through the
-                 --   user's attribution, and neither leaves anything standing in pending on a None
-                 -- unrepaired: Bool is a STAMP, not a derived flag (CONVERGENCE, unrepaired(m)). ONE RULE PRODUCES IT ON EVERY PATH, which is what
-                 --   makes the field total: unrepaired := (m reads as the same claim as Mₛ, off identity) against the Mₛ this cycle's dispose closed by adapting; at
-                 --   Phase 0 there is no Mₛ, so every initial mismatch takes false from that same rule rather than from a default no step writes
-                 --   THE FOLD CARRIES IT (absorb): a detection opening an element takes the stamp there, one merging into an element contributes it
-                 --   through merge's disjunction. Set-only, never cleared: what it records happened
-Severity ∈ {Critical, Significant, Minor}                      -- Significant requires demonstrable behavioral impact (current-session task graph / downstream protocol activations)
+namespace Epharmoge
 
--- Shared meta-backbone (KIND dispatch, registration-time / cycle-emergent). One canonical schema; epharmoge-local instantiation ONLY for object_ref (= Mismatch), local_value_space (= the two-axis answer space Judgment × Disposition under well_formed), the label field's type (Axis), the own claim, and the local route claims.
-KindBinding    = { label: Axis, positive_predicate: String, evidence: Set(Evidence), atomicity ∈ {atomic, non-atomic} }
-                 -- label: no predicate here reads it, it is shown. Axis = String and open, since this protocol declares no seed kinds and naming
-                 --   example kinds to give the label work would close a taxonomy it deliberately leaves open
-                 -- captures the mismatch as a kind; if atomicity = non-atomic (the mismatch bundles two distinct aspects) → split BEFORE certify (no registration, no surfacing on a compound mismatch)
-                 -- atomicity IS THE BACKBONE'S QUESTION AND CARRIES THE BACKBONE'S MEANING: how many distinct claims this binding bundles —
-                 --   the same question the sibling protocols sharing this schema ask of it. It never asks WHERE a repair would land. Repair locus
-                 --   is RepairSite (below), which is projected from a disposition already answered and types no mismatch (`Kind → resolution form → repair locus`)
-                 -- an empty evidence set fails closed downstream — certify finds no claim it supports and lands ambiguous, which puts it to the user at Qa
-                 --   with nothing supported, so nothing registers on no evidence unless the user attributes it themselves
-identity(m: Mismatch) = (m.kind_binding.positive_predicate, m.kind_binding.evidence)
-                 -- WHAT TO LOOK AT when judging whether a re-detected mismatch is the claim a record already closed, and the only thing to
-                 --   look at: the claim ITSELF rather than a name for it, together with what that claim stands on. Never the label, which is a
-                 --   display name and is written afresh at every detection
-                 -- NARROWING IS THE WHOLE OF WHAT THE TYPE LAYER DOES HERE. Each side is cut to ONE claim (atomicity splits a binding carrying
-                 --   two) and its evidence is typed by channel (Evidence.source), so two of these can be set beside each other and an overlap
-                 --   between them means something. That is what raises the odds the judgment lands right. It does not make the judgment.
-                 -- JUDGE WHETHER IT IS THE SAME CLAIM — that reading is the turn's, made on the accumulated context and what the user has said
-                 --   this run. Semantic sameness is not decidable, so no comparison here settles it and no case split stands in for it
-                 -- WHO READS IT: match_identity, which settles both readings taken on it — absorb's arm, and whether unrepaired is stamped (TYPES, TOOL GROUNDING) — and the
-                 --   trace's RETURNED and CIRCLING rows, which judge the ledger by it at their own turn (CONVERGENCE). unrepaired(m) is NOT a reader: it reads the stamp
-                 -- WHAT IT DOES NOT DO: transfer that record's close. A record answers for the registration it closed and for no other, so a match
-                 --   locates a predecessor and never completes a new registration's entry (status↔ledger equivalence, pending)
-OwnClaim       = { deficit: ApplicationDecontextualized, resolution: ContextualizedExecution, in_scope_if: String }
-                 -- the claim epharmoge makes, stated as the WHOLE local morphism: the deficit it takes AND the resolution it produces. A mismatch is claimed here when its positive_predicate instantiates ApplicationDecontextualized AND the local value-space can carry it to ContextualizedExecution — the bare deficit label is a name, the morphism is the predicate
-DeficitFitCertificate = { own_claim: OwnClaim, route_claims: List<RouteClaim>, claimed_by: Set(Deficit), evidence: Set(Evidence), attribution_by ∈ {certificate, user} }
-                 -- fail-closed: status ≠ pass BLOCKS registration into pending AND surfacing this mismatch for judgment. Generated for every element the fold touched, whose binding it opened or grew — at registration where the element was not registered before this fold, re-derived over the existing registration where it was — by fitting KindBinding.positive_predicate against own_claim and every route_claim inscribed below — the certificate reads nothing outside this SKILL.md
-                 -- claimed_by collects every claim the evidence supports; a SET, so "no claim holds" is the value ∅ rather than a hole in the type
-                 -- attribution_by records WHO SETTLED claimed_by: `certificate` where the fit alone settled it, `user` where the fit was ambiguous and the user's Attribution at Qa rewrote claimed_by to the one claim they named (or to ∅, closing it Unattributable). It is what lets assigned_by and the convergence trace tell a certificate's close from the user's, and it is written by attribute and nowhere else
-                 -- NO SECOND LOOK BY THE AI, AND THE REASON IS THE GROUND RATHER THAN THE BUDGET: the certificate reads a detection state this phase has already
-                 --   fixed — (R, X) at Phase 0, (R', X) at the re-scan — and the AI has no channel through which anything new could arrive between a first
-                 --   read and a second. A re-read of unchanged ground yields whatever it yields, and a step whose answer can move with no new evidence behind it
-                 --   is a case machine standing where a judgment belongs: it would admit or dismiss a mismatch arbitrarily. THE USER'S UTTERANCE IS THE ONE NEW
-                 --   GROUND THAT CAN ARRIVE, which is why ambiguity goes to a gate and not to a second pass: Qa puts the element to the user with the claims its
-                 --   evidence supports, once, and their attribution is what settles it. A claim closed as unattributable is closed on the user's reading, never on
-                 --   the certificate's silence — the true report that attribution did not settle is made BY the person it did not settle for
-                 -- what a pass certifies is LOCAL ADMISSIBILITY: epharmoge's own gate governing epharmoge's own activation, not the absence of a claim anywhere in the wider protocol set. Where two protocols' scopes both reach a situation, each protocol's own gate governs
-status(c)      = pass       when c.claimed_by = {ApplicationDecontextualized}             -- the own claim holds alone → eligible for registration
-                 route      when c.claimed_by = {d}, d a single route_claim's routed_deficit  -- backward misfit → emit d as the typed handoff, drop the mismatch from registration (it never enters pending — or, where the element was registered already, its entry is completed and it leaves pending)
-                 ambiguous  otherwise                                                     -- |c.claimed_by| ≠ 1: several claims hold, or none holds on the evidence at hand → Qa: put the element to the user with the claims its evidence supports; their Attribution rewrites claimed_by (attribute), and status is then re-read as pass or route, or the element closes Residual. Never registered under an ambiguous fit, and never closed without the user having seen it
-                 -- read off claimed_by rather than kept beside it, so no field can drift from the claim set it is fitted from; a bare `status = pass` below is this function at the certificate in hand — which is why an Own attribution needs no separate pass predicate downstream: it rewrites claimed_by, and every reader of status sees a pass
-claims_supported(m) = { d ∈ {ApplicationDecontextualized} ∪ { rc.routed_deficit : rc ∈ route_claims } : the evidence supports d's predicate }   -- what Qa presents: the inscribed claims m's evidence supports, each with what attributing m to it would mean. Equal to claimed_by at the moment Qa fires; named separately because Qa also presents the case none of them holds
-Attribution    = Own | Route(routed_deficit: Deficit) | Unattributable   -- the user's answer at Qa. A CLOSED coproduct because each constructor is a distinct processing path (PHASE TRANSITIONS, attribute): Own makes the element pass and register like any other; Route(d) takes the route_away arm; Unattributable closes it Residual. Route's payload is the deficit the user named — one of the claims Qa presented, or a deficit they name themselves, which is emitted bare where this file inscribes no hint for it
-attribute(m, a) = the step that writes the user's Attribution onto m's certificate: Own → claimed_by := {ApplicationDecontextualized}; Route(d) → claimed_by := {d}; Unattributable → claimed_by := ∅ — and attribution_by := user on every arm. It rewrites the certificate rather than bypassing it so that every downstream reader of status(c) — the pass filter, the invariants, the trace — reads the attributed value through the same function it always read. Runs on the far side of Qa's Stop, over Λ.attribution_target
-RouteClaim     = (route_if_predicate: String, routed_deficit: Deficit)
-                 -- epharmoge-local route claims — BACKWARD misfit the loop routes away rather than adapting in-place. routed_deficit is the BINDING field; the command in parentheses is a non-binding hint for the user, not the relation this guard composes on:
-                 --   a missing pre-execution fact (no observable value, requires supply)  → ContextInsufficient (hint: /inquire)
-                 --   undefined convention/dependency ownership for the decision           → BoundaryUndefined   (hint: /bound)
-local_claims   = (OwnClaim, the RouteClaim list above)          -- what certify fits KindBinding.positive_predicate against; inscribed in this file and nowhere else
-Evidence       = { source: ContextChannel, content: String }
-ContextChannel ∈ {Result, Context, Convention, Environment, Session}  -- observable sources for the certificate's deficit-fit basis (R itself + observable X)
-V              = bind_value_space : Mismatch → ValueSpace       -- the mismatch's answer constructors; generated ONLY after status(certificate) = pass, and generated WHENEVER that pass arrives — including the re-derivation over a merged element, which replaces the None a non-pass leg wrote along with the status that wrote it, on both scans; frozen for the cycle
-                 -- PRODUCED on both scans between the pass filter and Register, for every element the fold touched — the third leg of `Certificate before registration; revalidate after adaptation`'s strict order (KindBinding, certificate,
-                 --   value space) — and written to that mismatch's own value_space field, never at selection: every reader downstream needs it to already exist —
-                 --   the Phase 1 relay close reasons about which pairings well_formed leaves, and Qc draws A ∈ V from it
-ValueSpace     = the mismatch's answer space (local_value_space; epharmoge-local instantiation point) = { (j, d) : j ∈ Judgment, d ∈ {Adapt(direction), Keep, Discard(replacement)}, well_formed(j, d) }
-                 -- a two-axis PRODUCT: whether the flagged aspect stands and what becomes of the result are separate answers, so a judgment can be settled without settling the repair
-Deficit        = a deficit label a mismatch may be claimed by — epharmoge's own ApplicationDecontextualized, or one of the sibling deficits named in the route claims above. Every label this certificate can assign is inscribed in THIS SKILL.md; nothing outside this file supplies one
-Axis           = String                                        -- emergent kind label; examples: "convention", "environment", "audience", "dependency"
-Mᵢ_passed = { m ∈ Mᵢ : status(certificate(m)) = pass }          -- initial mismatches that passed the fail-closed certificate at registration
-Mₑ_passed = { m ∈ Mₑ : status(certificate(m)) = pass }          -- emerged mismatches that passed the fail-closed certificate at re-scan registration
-AssessFit = Applicability fit assessment: R × X × Set(Mismatch) → F
-           -- classifier over input_mismatches; does not generate new Mismatch objects
-F      = ApplicabilityFitMap { fit_justifications, conflicts, depends, adaptation_options, open }
-fit_justifications = Set(AspectFit) — for each input mismatch the assessment finds warranted in X after all, the evidence that warrants it
-AspectFit = { target: Mismatch, evidence: String }
-           -- invariant: target ∈ input_mismatches
-           -- keyed to the mismatch, not to its aspect label: one aspect can carry several registrations at once (entry(m) already turns on the
-           --   same distinction), so an entry found by label could hand judgment_relay_overruled another registration's fit evidence — and that
-           --   relay closes without a gate, leaving a retraction whose cited basis answers for a mismatch the user was never shown
-conflicts = Set(Mismatch) where evidence shows result behavior or meaning conflicts with X
-           -- invariant: conflicts ⊆ input_mismatches
-depends = Set(ContextCondition) where fitness hinges on an observable but unverified condition that could change which disposition is chosen
-ContextCondition = { target: Mismatch, condition: String, evidence: String, consequence: String }
-                 -- invariant: target ∈ input_mismatches
-adaptation_options = Set(AdaptationOption) where each option is tied to a conflict or dependency
-AdaptationOption = { target: Mismatch ∪ ContextCondition, direction: String, effect: String }
-open   = Set(ApplicabilityQuestion) where the answer could materially change the next adaptation judgment
-ApplicabilityQuestion = { target: Mismatch, condition: String, reason: String, evidence_needed: String }
-                       -- invariant: target ∈ input_mismatches
-fit_category(m, F) =
-  Conflict if m ∈ F.conflicts
-  Dependent if ∃d ∈ F.depends : d.target = m
-  Open if ∃q ∈ F.open : q.target = m
-  Supported otherwise
-FitRank = Conflict > Dependent > Open > Supported
-SelectNext = pending × F → Mₛ
-           -- priority: severity(Critical > Significant > Minor), then FitRank, then oldest registered mismatch — READ OFF THE CARRIER, whose entry is one line per registration in registration order. Not off MismatchId, which is assigned when the fold keeps an occurrence and not when the element registers, so an element the fold opened early and registered late carries an id earlier than elements registered before it
-Mₛ     = Selected mismatch
-Mᵢ     = What Phase 0 carries: Eval(R, X) bound, split, and absorbed  -- one element per claim as far as the fold's judgment reached, which is what it is directed to and not an invariant it can hold (absorb); each certified at registration. Eval(R, X) = ∅ ⟺ Mᵢ = ∅, the fold neither creating nor emptying
-Mₑ     = What the Phase 2 fold OPENED — the elements absorb entered on their own rather than merged into something carried. OPENING IS NOT ENTERING pending: only Register puts an element there, and only the passing members reach it  -- the REGISTRATION set, and membership turns on having been opened this fold, not on having escaped merging: an element opened here and merged into later this same scan is still one of these: a detection that merged carries no separate member, its content being in the element it merged into
-touched = the elements this fold OPENED OR MERGED INTO                 -- what certify and bind_value_space range over on either scan; at Phase 0 it coincides with Mᵢ, the accumulator having started empty, and only at the re-scan is it wider than what the fold opened. THE TWO ARE NOT DISJOINT: a detection can open an element that a later detection this same scan merges into, so nothing downstream may branch on which of the two it was. What every downstream clause turns on instead is registered(e) — whether this element was in pending BEFORE this fold ran — which is a property of the element, settled before the fold and unmoved by how many detections landed on it. An element opened this scan is not registered however often it was merged into; one carried in from an earlier scan is. What puts a merged element in touched at all is that its binding grew, leaving its earlier fit stale until re-run (merge). An element pending but untouched by this fold kept its binding, so nothing re-fits it. Register still ranges over the passing members of Mₑ alone — an element registered before this fold has its entry, and re-registering it would open the second entry the fold exists to prevent
-Register = { m ∈ Set(Mismatch) : status(certificate(m)) = pass } → C [Tool: record] -- registration of ONLY certificate-passing mismatches into the ONE carrier; status ≠ pass blocks registration (fail-closed)
-C          = MismatchCarrier: the ONE durable entry every registered mismatch is written into — a single dereferenceable record, so one read reconstructs the whole registered set rather than reassembling it from scattered records or from session memory
-Entry      = the record C carries for one registered mismatch  -- distinct from DispositionRecord, which is the ledger's own member; the equivalence below relates the two
-EntryLocator = whatever a host needs in order to reach C again later  -- an OPAQUE handle: this contract requires that the carrier stay reachable after the run and says nothing about the handle's shape, because what makes a record findable again is the host's to settle and differs between them. Held at Λ.carrier, which is what every amendment names
-locator(C) = the handle the carrier-creating call handed back  -- the value Λ.carrier holds, taken as opaque; which call creates the carrier is named in TOOL GROUNDING, so a host without that capability still types this
-registered = the mismatches C carries  -- certificate-passing only; a Route/Residual close on an element not yet registered fires before registration and never enters C, while the same close on a registered one lands on an entry C already carries and completes it
-entry(m)   = the Entry C carries for m's CURRENT registration, reached by reading C at Λ.carrier when the durable record itself is wanted  -- keyed by the registration, not by the aspect: a mismatch re-registering after an Adapt appends a FRESH entry rather than reusing its closed one, which is what stops pending from reading a stale completed status off a target the run has moved past (the same reason disposed(a) treats re-registration as un-disposing)  -- within a run the status↔ledger equivalence below settles its status from Σ.dispositions, so no read is owed per cycle; there is no per-mismatch entry and no per-mismatch LOCATOR to hold, Λ.carrier naming the whole carrier at once. That is a statement about locators and not about MismatchId: every carried occurrence keeps its id, which is what the trace heads its rows by and what Phase 1 points with
-pending    = Set(Mismatch) where entry(m).status ≠ completed  -- a view over the carrier C, reached at Λ.carrier, which is where registration status lives; Σ holds the ledger and never held this. A routed mismatch, or one the user left unattributable, never enters pending, or leaves it where the element was registered before this fold and its re-derived certificate no longer passes; an ambiguous one enters only through the user's Own attribution at Qa, which makes it certificate-passing; only certificate-passing mismatches are registered
-             -- every disposition completes its entry, so `completed` is the single resolved status; there is no separate dismissed state (a Keep is a disposition, not a discard of the entry)
-             -- status↔ledger equivalence, SCOPED TO REGISTERED MISMATCHES AND TO THE REGISTRATION AT HAND: ∀ m registered, entry(m).status = completed ⟺ Σ.dispositions holds the record that CLOSED THIS REGISTRATION of m. Every close of a REGISTERED mismatch writes the disposition and completes its entry as ONE action — the Phase 2 dispose step (TOOL GROUNDING dispose), the Phase 1 judgment_relay_overruled close alike — and that single action is what binds a record to the one registration it answers for
-             -- NOT keyed on identity, and this is the load-bearing half: identity(m) (TYPES) matches a re-detected mismatch to the registration it SUCCEEDS, and a match discharges nothing. A re-registration always opens its own entry and sits in pending until its own close — whether the return reads as the claim that record closed (unrepaired(m): the repair did not land) or as a claim of its own (owed its own surfacing).
-             -- a registration-time close (Route, Residual — by the certificate or by the user's attribution at Qa) on an element not yet registered fires BEFORE registration, so its mismatch has a ledger entry and no tracked entry to complete, and the unscoped statement that holds for it is the Ledger invariant under MODE STATE. On a registered element whose re-derived certificate no longer passes, that close lands on a registration that does exist: it completes that entry and the element leaves pending, exactly as a disposition-assigned close does
-Q      = Applicability inquiry (gate interaction) — the family the three concrete gates below instantiate
-Qa     = Q at registration, on either scan: the ATTRIBUTION gate. Fires per element whose certificate is ambiguous, one element per turn in id order off Λ.unattributed. Presents the element — its aspect, description and evidence — and claims_supported(m) with what attributing it to each would mean: the own claim, handled here as a fit question; each supported route claim, handed to that deficit with its command hint; and none of these. Answer type Attribution. It asks whose the mismatch is and nothing about whether it stands — that is Qc's, and only an Own attribution ever reaches Qc
-Qc     = Q at Phase 1: the MISMATCH gate. Presents the selected mismatch scoped by the CURRENT Λ.fit_map — the evidence, fit basis, and adaptation options the user weighs are read at presentation time, so after an Adapt they describe the advanced target and not the one it replaced; answer type A = (Judgment, Disposition)
-Qz     = Q at Phase 0: the ZERO-MISMATCH gate. Presents that the scan found no unwarranted aspect AND what the scan reached to say so — both read off the scan that just ran, since an empty Set(Mismatch) says what was found and never how far the looking went; answer type ZeroMismatchConfirmation
-Judgment    ∈ {Upheld, Overruled}                              -- EPISTEMIC axis: does the flagged aspect genuinely fail to fit X?
-                                                               -- an ESTABLISHED verdict only: reachable via a user answer at Qc or via either judgment_relay arm's cited basis
-judgment_settled : Mismatch × F → Option((Judgment, basis: String))   -- judgment-level entropy → 0 with a citable basis (`Judgment-only relay`); evaluated against the EVALUATED TARGET Λ.R
-              -- the basis comes back WITH the verdict: record well-formedness requires judgment_basis ≠ "" wherever judgment_by = relay, and both
-              --   relay arms report it before writing, so a bare verdict would leave that citation with no producer
-              Some((Upheld, basis))    when the evidence admits no reading under which aspect(m) stands warranted in Λ.R
-              Some((Overruled, basis)) when it admits no reading under which aspect(m) FAILS to stand — read off m's own AspectFit entry in
-                              Λ.fit_map.fit_justifications, whose own definition is "warranted in X"; basis = that entry's evidence. Membership
-                              locates the evidence; the bar above is the condition — an entry whose evidence still admits a reading under which the
-                              aspect fails to stand yields None and the judgment stays the user's
-              None                     otherwise: the evidence admits more than one reading, so the judgment is the user's
-judgment_state = Option((Judgment, basis: String))             -- CYCLE-LOCAL: the relayed judgment for this cycle's Mₛ together with its cited basis
-              -- HOLDS A FIELD IN Λ (MODE STATE): cycle-local is not turn-local. It is written at Phase 1, Qc then STOPS and yields the turn, and
-              --   the close that follows reads it on the far side of that boundary — so it has to be somewhere in between
-              -- written by the Phase 1 judgment dispatch on both arms, so every cycle binds it before its disposition half runs
-Disposition ∈ {Adapt(direction: String), Keep, Discard(replacement: Option(Result)), Route(routed_deficit: Deficit), Residual, Moot}
-              -- REPAIR axis: what becomes of the result, and how this mismatch is closed
-              -- Discard's payload is Option(Result): Some(r) when something takes the withdrawn result's place, None when the withdrawal leaves nothing behind
-              --   user-answered at Phase 1        : Adapt(direction), Keep, Discard(replacement)
-              --   relay-assigned at Phase 1       : Keep — and ONLY Keep, from its one producer, which edits nothing:
-              --     judgment_relay_overruled — well_formed forces the pairing once the evidence settles Overruled
-              --   assigned at registration        : Route(routed_deficit) — by the certificate where a single route claim held the element (never surfaced for answer), or by the user's Route(d) attribution at Qa where the fit was ambiguous; Residual — ONLY by the user's Unattributable attribution at Qa, the certificate never assigning it on its own
-              --   loop-assigned                   : Moot (a Discard withdrew the Eval target while this mismatch was still pending)
-              -- Route/Residual live on THIS axis, so the convergence predicate quantifies over one disposition ledger
-ResolutionForm = the axis Disposition ranges over — the SHAPE a resolution takes, answering what becomes of the result. Kind (kind_binding.label
-                 and the predicate under it) says what sort of misfit this is; ResolutionForm says what is done about it; RepairSite below says
-                 where that lands. THREE ORDERED AXES, and the order is the point (`Kind → resolution form → repair locus`)
-RepairSite     = THE NAME OF THE THIRD AXIS — where a resolution lands on Λ.R when adapt or discard executes it. A NAME AND NOT A CARRIER:
-                 nothing produces it as a value, stores it, or reads it. The locus is settled by the executing tool call and seen by the user in
-                 the edit, so a field for it would be state with no reader
-                 -- what the axis forbids is upstream use: it does not individuate a mismatch, does not decide how many mismatches there are,
-                 --   does not gate registration, and appears in no convergence predicate. Asking it first is the failure `Kind → resolution form → repair locus` names
-A      = Answer = (j: Judgment, d: Disposition) where d ∈ {Adapt(direction), Keep, Discard(replacement)}
-         -- A ∈ V; drawn from the mismatch's value-space (local_value_space = the two-axis space above)
-         -- PRODUCED AT Qc ONLY. The one Phase 1 relay close that closes a mismatch (judgment_relay_overruled) writes its DispositionRecord straight to the ledger and produces no A; judgment_relay_upheld closes nothing, settling the judgment half and handing the disposition half to Qc
-well_formed(j, d) =                                            -- governs the ANSWER space (what Qc may present, and which pairings a relay close may write); an unjudged close has no pair to check here and is governed by the ledger constraint below
-    (j = Overruled ⟹ d = Keep)                                 -- an overruled aspect leaves R untouched: nothing to repair
-  -- Upheld × Keep is a REACHABLE and distinct state: the mismatch stands and the user accepts the result anyway (an accepted residual)
-  -- Route/Residual/Moot are never Qc answers; their judgment status is constrained at the record level. Route and Residual CAN be the user's Attribution at Qa — a different gate on a different axis, answering whose the mismatch is and not whether it stands
-ZeroMismatchConfirmation = user's answer to a zero-mismatch finding ∈ {AcceptNoMismatch, Reopen(aspect)}
-         -- AcceptNoMismatch accepts that no aspect is unwarranted (`Zero-mismatch surfacing`); Reopen names an aspect the Phase 0 scan missed, re-entering Eval focused on it
-R'     = Result after an Adapt disposition -- temporal succession of R; the Eval target the non-monotone re-scan re-aims at. Λ.R is re-bound to it (MODE STATE), so the EVALUATED TARGET is always Λ.R
-R_final : Option(Result) = the verdict's target field — what the user is left with. Some(Λ.R) on every non-withdrawal path (the evaluated target, adapted or not), or the Discard's replacement payload on the withdrawal path (None when that withdrawal left nothing in its place). Option-valued because "no result survives" is a reachable success state, not an error
-         -- DISTINCT from the evaluated target Λ.R, and only on the withdrawal path do the two come apart
-DispositionRecord = { mismatch: Mismatch, judgment: Option(Judgment), judgment_by ∈ {user, relay, unjudged},
-                      disposition: Disposition,
-                      judgment_basis: String, disposition_basis: String }
-         -- ONE ledger entry per closed mismatch. routed / residual / moot are VIEWS over the ledger
-         -- judgment is Option-valued: a mismatch can be CLOSED without ever being JUDGED
-         -- ONE GROUND PER AXIS: why the aspect stands or fails, and why it is disposed of this way, are different claims with different
-         --   producers — the verdict's ground is cited by whoever settled the verdict, the disposition's by whoever assigned it. A single
-         --   fused ground would silently drop one of the two wherever the axes were settled separately, and every later reader of a carried
-         --   record wants the DISPOSITION half specifically. They coincide only where one follows from the other (judgment_relay_overruled)
-         -- record well-formedness:
-         --   judgment_by = user      ⟹ judgment = Some(_)                                  -- answered at Qc
-         --   judgment_by = relay     ⟹ judgment = Some(_) ∧ judgment_basis ≠ ""            -- either judgment_relay arm; the cited basis is what makes the verdict checkable
-         --     Some(Upheld)   from judgment_relay_upheld — the disposition beside it is still whatever the user then answered
-         --     Some(Overruled) from judgment_relay_overruled — necessarily paired with Keep
-         --   judgment_by = unjudged  ⟹ judgment = None ∧ judgment_basis = ""               -- no verdict was reached, so there is no verdict to ground
-         --   disposition ∈ {Route(_), Residual, Moot} ⟹ judgment_by = unjudged           -- an attribution at Qa is not a verdict on fit: the user answered whose the mismatch is, not whether it stands, so a record closed on it is still unjudged
-assigned_by(r) = certificate  if r.disposition = Route(_) ∧ r.mismatch.certificate.attribution_by = certificate   -- closed at registration on the fit alone, never surfaced for answer
-                 attribution  if r.disposition ∈ {Route(_), Residual} ∧ r.mismatch.certificate.attribution_by = user   -- closed at registration on the user's Attribution at Qa; disposition_basis = that attribution. Residual has no other producer
-                 loop         if r.disposition = Moot                                  -- withdrawal fallout
-                 relay        if r.judgment_by = relay ∧ r.judgment = Some(Overruled)  -- judgment_relay_overruled, the ONE producer of a relayed close: disposition = Keep, disposition_basis ≠ "", reporting before it writes
-                 user         otherwise                                                 -- answered at Qc, on the mismatch the gate presented: disposition ∈ {Adapt(_), Keep, Discard(_)}
-         -- who assigned the disposition, read off the record rather than stored beside it, so nothing can disagree with the close that wrote it
-ApplicabilityVerdict = { target: R_final, dispositions: List(DispositionRecord), scan_count: Nat, carrier: Option(EntryLocator) }
-         -- the protocol's terminal object: the result TOGETHER WITH how every flagged aspect was closed.
-         -- Keep, Discard, Route, Residual and Moot are terminal exactly as Adapt is; adaptation is ONE disposition among them
-         -- ASSEMBLY — every field has a producing step, and they are not the same step:
-         --   target      := R_final, bound by whichever terminal fires (the LOOP convergence step, Phase 2 → withdraw,
-         --                  Phase 0 → confirm_no_mismatch / deactivate)
-         --   dispositions := Σ.dispositions      -- the ledger as it stands at that terminal, whole; the trace ranges over this same list
-         --   scan_count   := |{r ∈ Σ.dispositions : r.disposition = Adapt(_)}|   -- one re-scan per Adapt close (LOOP), so the count is read off the ledger rather than kept beside it
-         --   carrier      := Λ.carrier           -- the locator the Phase 1 registration bound, carried out so the durable record stays reachable after the run; None wherever nothing registered. Emitting it is the whole of what this protocol does across a session boundary: Σ is bound fresh at activation BY DESIGN — nothing this run closed governs a later one, and re-entry returning a mismatch to the gate is a stated property — so no step here dereferences a locator and none is owed
-         -- The last three are bound identically at EVERY terminal, so a terminal states only its own R_final and assembles the rest: dispositions and scan_count from Σ.dispositions, carrier from Λ
-ContextualizedExecution = ApplicabilityVerdict where adjudicated(Λ.R, X) ∧ (∀ m ∈ registered: entry(m).status = completed) ∧ (Mᵢ = ∅ ⟹ zero-mismatch confirmation obtained: ZeroMismatchConfirmation = AcceptNoMismatch, or Reopen(aspect) whose focused re-scan still yields Mᵢ = ∅ → reopen_relay(finding) — `Zero-mismatch surfacing`)
-                 -- registered = certificate-passing mismatches only, the pass read off claimed_by whether the fit or the user's Own attribution wrote it; Route/Residual mismatches are closed by disposition, not adapted in-place
-                 -- adjudicated is what the terminal rests on, and the registered half does NOT carry it: registered ranges over certificate-PASSING mismatches, so a run whose every detection routed or was left unattributable has registered = ∅ and satisfies that half with nothing in it while its flagged aspects went unclosed. adjudicated quantifies over every FLAGGED aspect and discharges each through disposed(a), which demands the DispositionRecord exist — so the closes the certificate and the user's attributions assign are a condition of the terminal rather than something the type takes on trust
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
 
-── PHASE TRANSITIONS ──
-Phase 0: R → Eval(R, X) → Mᵢ? → bind_kind each [split where non-atomic] → absorb into ∅ [TYPES: the fold every scan path runs — a detection judged the same claim as one already folded in merges into it, one judged new takes init_occurrence's id and unrepaired = false; before certify either way, so a route/Residual close holds a complete Mismatch] → Mᵢ → ∀m ∈ Mᵢ: certify(m, local_claims) → Λ.unattributed := [m ∈ Mᵢ : status = ambiguous] in id order → [Λ.unattributed ≠ []] Qa(head(Λ.unattributed), claims_supported) → Stop → Attribution → attribute(head, ·) → pop → repeat until Λ.unattributed = [] [Tool] → (status = pass) → Mᵢ_passed → ∀m ∈ Mᵢ_passed: m.value_space := Some(bind_value_space(m)) [the third leg of the registration pipeline `Certificate before registration; revalidate after adaptation` fixes in strict order — KindBinding, then the passing certificate — passing on the fit, or on the user's attribution where the fit was ambiguous — then the value space — so it runs on the pass filter's own output and ahead of the Phase 1 registration, never at selection: every reader downstream needs it to already exist. The Phase 1 relay close reasons about which pairings well_formed leaves, and Qc draws A ∈ V from it] → [Mᵢ_passed ≠ ∅] AssessFit(R, X, Mᵢ_passed) → F → Λ.fit_map := F  -- applicability checkpoint + registration-time KIND dispatch (fail-closed) + attribution of what the fit left ambiguous + value-space binding + fit map (silent apart from Qa); certify runs WITHIN Phase 0, at registration, not as a separate phase, and Qa runs where certify leaves an element ambiguous, before anything downstream reads its status
-Phase 0 → confirm_no_mismatch: Mᵢ = ∅ → Qz(zero_mismatch_finding) → Stop → ZeroMismatchConfirmation  -- true zero-mismatch case (distinct from the Mᵢ≠∅∧Mᵢ_passed=∅ trivial-convergence-by-routing case below); AcceptNoMismatch → R_final := Some(Λ.R), deactivate (execution stands as-is, `Zero-mismatch surfacing`); Reopen(aspect) → re-scan Eval focused on that aspect; [Mᵢ ≠ ∅] re-enter the Phase 0 pipeline above at bind_kind, this path having already run its own focused Eval, and run it through the rest of that pipeline with nothing added or dropped for it, then take whichever Phase 0 exit it reaches — Phase 1 where Mᵢ_passed ≠ ∅, the trivial-convergence transition below where the focused scan's detections all routed or landed Residual, since pending is empty on this path and Phase 1 would have nothing to select; [Mᵢ still ∅] reopen_relay(finding) → R_final := Some(Λ.R), deactivate (one attempt per aspect) [Tool]
-Phase 0 → route_away (mismatch-local): status(certify(m)) = route        -- a local route claim holds the mismatch (backward misfit) → emit that claim's routed_deficit (ContextInsufficient, BoundaryUndefined — with its command hint), close m with DispositionRecord { judgment = None, judgment_by = unjudged, disposition = Route(routed_deficit), judgment_basis = "", disposition_basis = the matched local route claim } and value_space := None on the same non-pass leg, this being where a Mismatch that never passes gets that field at all (bind_value_space runs only after a pass), drop m from registration — m never enters pending, this fold having found nothing registered to take back out; scan continues with remaining mismatches
-Phase 0 → attribute (mismatch-local, CONSTITUTION): status(certify(m)) = ambiguous  -- |claimed_by| ≠ 1, several claims holding or none: attribution does not settle on the evidence at hand → Λ.attribution_target := m → Qa(m, claims_supported(m)) → Stop → Attribution → attribute(m, ·), on the far side of the Stop, over Λ.attribution_target:
-         Own            → claimed_by := {ApplicationDecontextualized}, attribution_by := user; m now reads as pass to every downstream reader and continues into the value-space leg and Phase 1 registration like any element the fit passed
-         Route(d)       → claimed_by := {d}, attribution_by := user; then the Phase 0 → route_away arm above, with disposition_basis = the user's attribution rather than a matched route claim, and a command hint only where this file inscribes one for d
-         Unattributable → claimed_by := ∅, attribution_by := user; close m with DispositionRecord { judgment = None, judgment_by = unjudged, disposition = Residual, judgment_basis = "", disposition_basis = the user's attribution — what they saw as unresolved: several claims standing, or none } and value_space := None on the same non-pass leg, drop m from registration — m never enters pending, this fold having found nothing registered to take back out
-         Then pop Λ.unattributed and present the next, until it is empty; the scan's value-space leg runs only once it is. NO SECOND LOOK BY THE AI: the detection state (R, X) is already fixed, so nothing the certificate could re-read would move the fit, and an answer that could move without new evidence behind it would admit or dismiss a mismatch arbitrarily. The user's utterance is the one new ground that can arrive, which is why this arm is a gate and not a re-read — asked once per element, and Residual reached only on their word [Tool]
-Phase 0 → split (pre-certify): KindBinding.atomicity = non-atomic  -- a compound mismatch bundles two distinct aspects → split into atomic sub-mismatches and re-run bind_kind → absorb → certify on each (same Phase 0 pass, before any pass/route/Residual decision) — each child is folded in on its own and is a distinct occurrence where the fold opens one, while the compound never is, absorb running after the split for exactly that reason; recursive until atomic, and terminating because each split strictly decreases the number of bundled aspects. A non-atomic mismatch is split pre-registration, never registered as a compound. WHAT IT SPLITS ON is claim multiplicity and nothing else: one claim standing on evidence that lies in several places is ONE mismatch and is not split here, because how far a repair must reach is a question for the disposition and not for registration (`Kind → resolution form → repair locus`)
-Phase 0 → deactivate (no in-scope mismatch): Mᵢ ≠ ∅ ∧ Mᵢ_passed = ∅ ∧ adjudicated(Λ.R, X) ∧ pending = ∅  -- mismatches WERE detected but EVERY one carries a disposition assigned at registration, Route(routed_deficit) or Residual — by the certificate where the fit was unambiguous, by the user's attribution at Qa where it was not (discharged via disposed(a), CONVERGENCE) — no mismatch the own claim holds enters the disposition loop → trivial convergence: R_final := Some(Λ.R), emit the routed deficits with their command hints (/inquire, /bound) and any Residual, and deactivate without adapting Λ.R. An ambiguous certificate reaches this path only through the user's Route or Unattributable attribution; an Own attribution makes Mᵢ_passed non-empty and takes the Phase 1 edge instead
-Phase 1: Mᵢ_passed → record[C ← all certificate-passing initial mismatches, each carrying its id] → Λ.carrier := Some(locator(C)) → pending → SelectNext(pending, Λ.fit_map) → Mₛ → judgment_settled(Mₛ, Λ.fit_map)? →  -- register all certificate-passing initial mismatches, surface selected mismatch with fit basis [Tool]; reached only when Mᵢ_passed ≠ ∅, every element arriving with the value space Phase 0 bound (`Certificate before registration; revalidate after adaptation`'s strict order). TWO-LEVEL DISPATCH — the JUDGMENT half resolves first, then the DISPOSITION half; the gate is where the disposition half always lands:
-         JUDGMENT HALF, off judgment_settled(Mₛ, Λ.fit_map) — always computed against the CURRENT Λ.R and Λ.fit_map:
-         [Some(Overruled)] judgment_relay_overruled (below) closes BOTH halves — NO Qc, no Stop, no turn yielded; control returns to SelectNext over the remaining pending
-         [Some(Upheld)]    judgment_relay_upheld (below) settles the judgment half: judgment_state := Some((Upheld, basis)) → DISPOSITION HALF
-         [None]            no judgment settles; judgment_state := None → DISPOSITION HALF
-         DISPOSITION HALF, reached from either arm above and having ONE arm: Qc(Mₛ scoped by the CURRENT Λ.fit_map, evidence, judgment_state) → Stop → A = (j, d)
-                                -- the disposition is user-answered, and the judgment half with it when judgment_state = None. NO RELAY REACHES THIS HALF
-                                -- on its own account: what becomes of the result turns on what the user weighs, and no evidence collapses that
-Phase 1 → judgment_relay_upheld (mismatch-local): judgment_settled(Mₛ, Λ.fit_map) = Some(Upheld) — the evidence for ¬warranted(aspect(Mₛ), Λ.R, X) admits no reading under which the aspect stands warranted; judgment-level entropy → 0 with a citable basis (`Judgment-only relay`)  -- relay j := Upheld with the basis cited: judgment_state := Some((Upheld, basis)), which the close downstream reads as judgment_by = relay. Drop the Overruled/Keep pairing from the presented set and hand to the DISPOSITION HALF: Qc fires and yields turn. The turn is not yielded for the judgment half. When judgment_settled(Mₛ, Λ.fit_map) = None, judgment_state := None, the full two-axis set is presented, and j is user-answered (judgment_by = user)
-Phase 1 → judgment_relay_overruled (mismatch-local, CLOSES the mismatch): judgment_settled(Mₛ, Λ.fit_map) = Some(Overruled) — the evidence admits no reading under which aspect(Mₛ) FAILS to stand, read off that aspect's own AspectFit entry in Λ.fit_map.fit_justifications and the evidence it cites (the membership/condition distinction: TYPES). well_formed(Overruled, d) leaves d = Keep as the sole pairing, so the answer set has collapsed to one and no gate is owed (`Judgment-only relay`)  -- REQUIRED FIRST: report the flagged aspect, that it is being retracted, and the cited fit evidence, as text. THEN close Mₛ with DispositionRecord { judgment = Some(Overruled), judgment_by = relay, disposition = Keep, judgment_basis = the cited fit evidence, disposition_basis = that same evidence — the ONE close where the two grounds coincide, because Keep is what well_formed leaves once the verdict is Overruled } AND record update(Λ.carrier, entry(Mₛ).status := completed) as ONE step, so Mₛ leaves pending before anything else runs. Λ.R is untouched, no Mₑ, no re-scan; the turn is NOT yielded. Continue to SelectNext over the remaining pending — or, when this close empties it, to convergence (CONVERGENCE: gateless convergence) [Tool]
-Phase 2: A = (j, d) → [ORDER: dispose appends DispositionRecord{ mismatch = Mₛ, judgment = Some(j), judgment_by = relay when judgment_state = Some((Upheld, _)) for this cycle else user, disposition = d, judgment_basis = that relayed basis when the verdict was relayed, else the ground the user gave for the VERDICT, disposition_basis = the ground the user gave for the DISPOSITION } to Σ.dispositions AND record update(Λ.carrier, entry(Mₛ).status := completed) as ONE step. WHEN that step runs depends on what d is, and the reason is that a record asserts what happened: on d = Keep it runs here, nothing being owed before it; on d = Adapt or Discard it runs AFTER the arm below has performed the act, as that act's postcondition — appending it first would leave a ledger reading "adapted" or "withdrawn" at a state where nothing had been, and the trace would report an act no step took. Where the arm below reads pending — the Adapt re-scan's fold does — the close still precedes that read, and WHAT THAT PROTECTS is the recurrence accounting: the fold matches a detection against pending and against Mₛ separately, and with Mₛ already out of pending a detection reading as Mₛ's claim can no longer merge into it — it goes to whichever pending element states that claim, or opens on its own carrying unrepaired, and either way the adaptation that failed is visible as a claim that came back. Close after the fold instead and that detection lands in Mₛ's still-open entry, where nothing marks a return at all. Order: adapt, then close Mₛ, then Eval. Reached only from Qc; the relay-assigned close is written by judgment_relay_overruled at Phase 1] →
-         [d = Adapt(direction)] adapt(direction, Λ.R) → R' [mutating — transformative revalidation] → Λ.R := R' [TARGET SUCCESSION] → dispose's close of Mₛ lands HERE, the act having happened, and before the fold below reads pending → Eval(Λ.R, X) → ∀ detected m: bind_kind(m) [split where non-atomic] → match_identity(m) against pending and against Mₛ → absorb into pending [TYPES: the SAME fold Phase 0 runs, the only difference being that the set folded into is non-empty here. A detection judged the same claim as an element already carried merges into it — that element keeps its id and its statement of the claim while its evidence takes in the detection's, takes the combined current reading, and takes the detection's stamp through merge's disjunction; the detection itself registers nothing, and whether the element it merged into registers turns on registered(e): one carried in from an earlier scan has its entry already, while one this same fold opened does not and still registers as a member of Mₑ_passed. Every detection carries a stamp decided before either arm, unrepaired := (m reads as the same claim as Mₛ, off identity) — Mₛ being the mismatch THIS cycle's dispose just closed by adapting, and no other record (CONVERGENCE, unrepaired(m)); a detection judged new takes init_occurrence's id and carries its stamp onto the element it opens, one judged the same contributes its stamp through merge's disjunction. Merging rather than leaving the carried element on its earlier reading is REQUIRED, not cosmetic: disposed(a) is aspect-keyed, so an element left holding a superseded aspect can never be discharged] → Mₑ := what the fold opened → [BEFORE certify: every m ∈ Mₑ is closed one way or another, so the stamp is not gated on the certificate filter] → ∀m ∈ touched: certify(m, local_claims) → Λ.unattributed := [m ∈ touched : status = ambiguous] in id order → [Λ.unattributed ≠ []] Qa(head, claims_supported) → Stop → Attribution → attribute(head, ·) → pop → repeat until empty [Tool] (Phase 2 → attribute, below) → ∀m ∈ touched: m.value_space := Some(bind_value_space(m)) where status = pass, None otherwise — total on both outcomes, since a merged element that carried a space and stopped passing must not keep it [same registration leg as Phase 0, `Certificate before registration; revalidate after adaptation`] → Mₑ_passed := the passing members of Mₑ — registration is for what the fold OPENED, an element already registered before this fold having nothing to register → record update(Λ.carrier, add all Mₑ_passed AND bring into line the entry of every touched element that was ALREADY REGISTERED before this fold — registered(e), never "was merged into", since an element opened and then merged into this same scan has no prior entry to bring into line and is added as one of Mₑ_passed instead) [Tool] — one write, because a carrier entry is a separate copy outside Σ and an element left behind would show a superseded target on a durable record, which disposed(a) being aspect-keyed would then never discharge → pending   -- Λ.carrier is Some here by construction: this arm is reached only through a Qc answer, and Qc is reached only after the Phase 1 registration that binds it → AssessFit(Λ.R, X, pending) → F' → Λ.fit_map := F'
-         [d = Keep] non-mutating adjudication — no adapt, no Mₑ, no re-scan; Λ.R stands as whatever earlier Adapt dispositions left it as
-         [d = Discard(replacement)] → Phase 2 → withdraw (below), whose own step is what the close of Mₛ follows
-         -- Adapt alone advances the evaluated target as a succession of it (Λ.R := R'), which is what triggers the re-scan + registration-time certify of emerged mismatches; the re-scan table is LOOP's [Tool]
-Phase 2 → withdraw (run-terminal): d = Discard(replacement)  -- the user upholds the mismatch and WITHDRAWS the evaluated result instead of adapting it. discard(replacement, Λ.R) [mutating, TOOL GROUNDING discard → artifact write: the artifact is actually withdrawn and the replacement put in its place, or removed outright when replacement = None] → THEN R_final := replacement (already Option(Result): None when the withdrawal leaves nothing in its place); then EVERY mismatch REMAINING in pending — Mₛ already left it at the dispose step above, so it cannot be closed twice — is closed with DispositionRecord { judgment = None, judgment_by = unjudged, disposition = Moot, judgment_basis = "", disposition_basis = the withdrawal record } and record update(Λ.carrier, entry(m).status := completed for each). NO re-scan; deactivate. The adjudication claim stays on Λ.R (the object actually evaluated): every flagged aspect of it carries a ledger entry, and NO claim is made about the replacement
-Phase 2 → route_away (mismatch-local): status(certify(m)) = route        -- an emerged mismatch a local route claim holds → emit that claim's routed_deficit, close m with disposition Route(routed_deficit); where m is not yet registered it is dropped before registration, and where it is, the close completes that entry and m leaves pending; re-scan continues
-Phase 2 → attribute (mismatch-local, CONSTITUTION): status(certify(m)) = ambiguous  -- an emerged or re-certified element whose claims do not resolve to one → Λ.attribution_target := m → Qa(m, claims_supported(m)) → Stop → Attribution → attribute(m, ·), with the same three arms as the Phase 0 arm and one difference in what each reaches: Own → m passes; where the fold OPENED it, it registers as a member of Mₑ_passed, and where it was registered before this fold, its entry is brought into line by the record update; Route(d) / Unattributable → close m as Route(d) / Residual with the Phase 0 record shape (disposition_basis = the user's attribution); where m is not yet registered it is dropped before registration, and where it IS registered — a merged element whose grown evidence moved its status — the close completes that entry and m leaves pending, its value_space having been set to None on the same non-pass leg; re-scan continues once Λ.unattributed is empty. Same fixed-ground reasoning as Phase 0: (R', X) is fixed at this re-scan, so there is nothing a second certification could read that the first did not — the user's attribution is the one thing that can move it, and it is asked for once [Tool]
-Phase 2 → split (pre-certify): KindBinding.atomicity = non-atomic  -- emerged compound mismatch → split into atomic sub-mismatches, then re-bind_kind → absorb → certify each (same re-scan pass); never registered as a compound. The split runs BEFORE absorb, which reads identity(m)
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
 
-── LOOP ──
-Transformative revalidation (NON-MONOTONE): this loop mutates the very object its detector evaluates. An Adapt disposition produces R', and Eval(R', X) re-targets the detector at the mutated result — so an adaptation can BREED new mismatches Mₑ that did not exist before. "Transformative revalidation" labels the ADAPT disposition; the table below gives each disposition's re-scan behavior.
-After Phase 2, re-scan is disposition-keyed, not answer-keyed:
-  Adapt(direction)      → re-scan R' against X for remaining AND newly emerged mismatches (mandatory)
-  Keep                  → non-mutating; breeds no Mₑ; no re-scan
-  Discard(replacement)  → the Eval target is gone; no re-scan is possible or meaningful; run terminates via Phase 2 → withdraw
-  Route / Residual      → assigned at registration — by the certificate, or by the user's attribution at Qa where the fit was ambiguous; never a Qc answer; the scan continues with the remaining mismatches
-A relay-assigned Keep never reaches Phase 2 at all: judgment_relay_overruled closes its mismatch inside Phase 1, non-mutating, breeding no Mₑ and triggering no re-scan, and control returns directly to SelectNext over the remaining pending.
-ONE ELEMENT PER CLAIM IN pending is what every scan is directed to reach, not a property the contract can guarantee — sameness is judged, and a judgment carries no invariant.
-Mₑ is what the fold OPENED. Eval's output is bound and split FIRST, since everything below reads the binding, then absorbed one detection at a time into what this pass carries — the set starting as pending and growing by whatever the fold opens (TYPES, absorb): a detection judged the same claim as an element already carried merges into it and opens nothing, one judged new enters on its own and is a member of Mₑ. A merge is not a drop — the detection carries this target's reading of a claim registered against an earlier one, and merge combines that reading into the element rather than discarding it, field by field (TYPES, merge, whose field list is total). Because each merge feeds the element the next detection meets, two detections of one claim cannot race to overwrite each other. A mismatch CLOSED earlier in this run is not excluded from the fold either, and which arm it takes is judged like any other detection's: where it opens an element it re-registers, which un-disposes its aspect (disposed(a), CONVERGENCE) so no record written for an earlier registration can carry a terminal; where it instead reads as a claim already pending it merges, opening nothing, and that element was never disposed to begin with. Re-registration follows the open arm and is not owed by a return as such. The ledger match locates the record a return succeeds and discharges nothing (status↔ledger equivalence, pending); what it settles is whether unrepaired is stamped — where m reads as the same claim as Mₛ. A re-registration reaches Qc like any other pending mismatch, whatever the user answered for an earlier one: the target has moved, so the question is new.
-Bind + certify each element the fold TOUCHED (fail-closed) — whatever it opened or merged into, the two overlapping rather than dividing, and a merged element's evidence having grown so its earlier fit no longer answers for it: only certificate-passing members of what the fold OPENED (Mₑ_passed) are registered into pending, an element carried in already registered having nothing to register; a routed mismatch is closed with Route(routed_deficit) and handed to that deficit (ContextInsufficient, BoundaryUndefined — command hints /inquire, /bound); a non-atomic compound mismatch is split into atomic sub-mismatches and re-certified; an atomic ambiguous mismatch is put to the user at Qa before registration, and their attribution settles whether it passes, routes, or closes Residual. AssessFit classifies tracked mismatches but never suppresses them.
-Recompute the fit map over pending and re-bind Λ.fit_map to it before selecting the next surfaced mismatch, even when Mₑ_passed = ∅. FIT-MAP SUCCESSION, the counterpart of TARGET SUCCESSION: every reader takes Λ.fit_map at the moment it reads, never a fit map computed against an earlier Λ.R.
-CHECKED IN THIS ORDER:
-  1. If pending non-empty: return to Phase 1 (SelectNext by severity, then FitRank, then oldest registered mismatch).
-  2. Otherwise, if adjudicated(Λ.R, X): every flagged aspect carries a DispositionRecord → R_final := Some(Λ.R) → assemble the verdict (below) → convergence.
-Step 1 runs first so a re-registered aspect can never be read past. Step 2 is the SOLE R_final binding on the ordinary path — a Keep answered mid-loop leaves it unbound, since a later Adapt still advances Λ.R; the withdrawal path is excluded because Phase 2 → withdraw already bound R_final to the replacement
-THE LOOP DOES NOT ONLY SHRINK: a re-scan over a mutated R' can register newly certified mismatches, so a run can have more left to settle after a disposition than before it — expected, not an error, and the reason nothing here counts down.
-Continue until control REACHES a named terminal — the ordered check above, Phase 0's two exits, the gateless close, Phase 2 → withdraw. Convergence is read where one of those fires and nowhere else: `ContextualizedExecution` is the condition the emitted verdict must satisfy, not a state to test the run against between two steps. The Adapt arm is why that distinction is load-bearing — it closes Mₛ before the re-scan, so a run polled there would find pending empty with revalidation still owed.
-Mode remains active until convergence.
-Convergence evidence: At adjudicated(Λ.R, X), present the transformation trace ranging over Σ.dispositions — ONE ledger, since every close writes a record there whoever assigned it. ONE ROW PER DispositionRecord, GROUPED UNDER THE ASPECT, EACH ROW HEADED BY ITS id — the range and the row unit are the same thing, so a registration-time close (Route, Residual — the certificate's or the user's attribution) takes a row like any other, whether or not it ever registered — it may close an element registered before that fold, completing that element's entry — since absorb ran before certify and every element it yields carries an id — taken at init_occurrence or inherited through a merge — so there is one to head the row. An aspect closed more than once across TARGET SUCCESSION carries a record per close, and each keeps its own row in close order under that aspect rather than collapsing into the last one. Where consecutive rows under one aspect stand on different evidence, each says what its own close rested on, since that is what separates them — the aspect name does not. The id is what a reader points AT: it is the one thing on the row that is unique to it, so a decision taken about a row (carry this one on, split it out, leave it) survives being written down away from the trace.
-  Each row also carries two readings the ledger supports and a label cannot. RETURNED: where this row's identity matches an occurrence already closed, the row names the MOST RECENTLY CLOSED such occurrence — one id, chosen by close order, so the reading stays decidable when several share that identity. CIRCLING: where one identity has accumulated several occurrences across the run, the count is stated once beside them — A FRAMING SIGNAL AND NOT A SCORE, saying the run keeps returning to this claim and nothing about how near convergence is (`Identity, occurrence, and reading stay distinct`).
-  Each row still notes whether the occurrence it closed was stamped unrepaired — an adaptation the user asked for that did not take is the one thing a converged run must not report as simply resolved; the stamp answers only for the occurrence it was written on. For each row show (id → aspect → judgment → disposition) at its close, reading:
-  Upheld → Adapt(direction)     : in-scope, adapted in place — ApplicationDecontextualized(m) resolved by adaptation
-  Upheld → Keep                 : in-scope and accepted as-is — an ACCEPTED RESIDUAL, distinct from Overruled → Keep
-  Overruled → Keep              : the aspect did not stand; nothing to repair — the user's own retraction, answered at Qc
-  Overruled → Keep (relayed)    : the same close reached without a gate, because the fit evidence admitted no other reading (judgment_by = relay, so assigned_by(r) = relay; basis cited). Printed apart from the row above so the user can tell which retractions were theirs and which the protocol made on cited evidence
-  Upheld → Discard(replacement) : the evaluated result was withdrawn rather than adapted; the replacement is what the user is left with (not itself adjudicated)
-  (unjudged) → Route(routed_deficit) : a local route claim holds m on the certificate's own reading — an attribution finding, not a verdict on fit (assigned_by = certificate)
-  (unjudged) → Route(d) (attributed) : the fit was ambiguous and the user attributed m to d at Qa (assigned_by = attribution; the attribution cited). Printed apart from the row above for the same reason the two Overruled → Keep rows are: the user can see which handoffs the certificate made and which were theirs
-  (unjudged) → Residual         : the fit was ambiguous and the user found no claim that holds — closed on their attribution at Qa, never on the certificate's silence; surfaced as a non-blocking residual with what they saw as unresolved
-  (unjudged) → Moot             : still pending when a Discard withdrew the target; never judged
-Convergence is demonstrated, not asserted.
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
 
-── CONVERGENCE ──
--- DOMAIN NOTE: warranted / adjudicated both range over the EVALUATED TARGET Λ.R — always a Result, never
---   Option-valued — and never over ApplicabilityVerdict.target. The two coincide on every path except withdrawal, where target is the
---   replacement and Λ.R is the withdrawn result. The protocol claims fit only for the object it actually evaluated.
-warranted(a, R, X) = fits(a, R, X)                          -- the per-aspect fit judgment, and NOTHING ELSE. Correctness is not a conjunct here
-                     -- WHY THERE IS NO correct(R) HALF: every reader of this predicate substitutes the CURRENT target — adjudicated(Λ.R, X) does,
-                     -- and Λ.R advances at every Adapt — so a correct(R) conjunct would read correct(R') after an adaptation. Nothing in the run
-                     -- can produce that: Eval reports applicability mismatch and never correctness. Convergence would then rest on a fact no step
-                     -- discharges, and a run whose adaptation broke the result would stall with pending empty and no terminal reachable. Worse in
-                     -- the ordinary case, converging would ASSERT correct(Λ.R) for every aspect never flagged — the exact claim the adapted verdict
-                     -- below declines to make. The conjunct did two wrong things at once and neither survives its removal
-                     -- WHERE CORRECTNESS ACTUALLY LIVES: in the deficit and the activation guard, both read at ENTRY of the result this protocol
-                     -- received, and both already carry their own correct(R) conjunct (the deficit ApplicationDecontextualized and the Layer 2 guard mismatch_detected(R, X), both read at entry; Core Principle states the presupposition). It is a
-                     -- PRESUPPOSITION of activation — a result that is not correct is not this protocol's case — and target succession neither
-                     -- re-opens it nor re-asserts it. What an adaptation did to correctness is OUTSIDE WHAT THIS PROTOCOL ESTABLISHES
-                     -- (COMPOSITION), which states that boundary as its own silence rather than as anyone else's duty
-                     -- FITS RANGES OVER THE ASPECT, which is what lets one aspect fail while its siblings stand. An aspect-invariant predicate here
-                     -- would make adjudicated — quantified per aspect — unsatisfiable the moment any mismatch is left standing, since aspects never
-                     -- flagged carry no record and fail disposed(a) too. A run that adapts nothing must converge as fully as one that adapts everything
-disposed(a)        = (∃ r ∈ Σ.dispositions : aspect(r.mismatch) = a) ∧ a ∉ { aspect(m) : m ∈ pending }
-                     -- ONE disjunct covering every way a flagged aspect is closed — Adapt, Keep, Discard, Route, Residual, Moot — since all
-                     -- six are members of the Disposition axis and every close writes one ledger entry
-                     -- SECOND CONJUNCT: re-registration UN-DISPOSES the aspect. A record is written about the target as it stood when the
-                     -- close happened, and TARGET SUCCESSION then advances Λ.R past it, so an aspect adapted at one cycle and re-registered
-                     -- at the next is pending again rather than disposed from a record written for the registration before it
-                     -- WHAT THE LABEL DOES HERE, AND WHAT IT DOES NOT: it names the aspect this predicate quantifies over, and decides nothing
-                     -- else. Whether a re-detected mismatch is one a record already closed is settled by identity(m) (TYPES) — the predicate the
-                     -- binding asserts together with the evidence it stands on — and a match locates that predecessor WITHOUT transferring its
-                     -- close, so the return is in pending either way — in an entry the fold opened for it, or in the entry of the
-                     -- element it merged into — which is what fails the second conjunct while it is open.
-                     -- TWO CONJUNCTS AND NO MORE: every flagged mismatch is either closed with its own record or in pending, an ambiguous
-                     -- certificate closing at registration exactly as a route does, so there is no third place an aspect can be waiting in. It costs no reachability, the attempt resolving on every arm. Nothing here assumes aspects stay stable or uniquely labelled across the R→R' trajectory
-unrepaired(m)      = m.unrepaired                              -- READS THE STAMP the re-scan wrote; it is NOT re-derived from the ledger here
-                     -- A REPAIR THAT DID NOT LAND: m came back from the re-scan reading as the claim a record closed by adapting. This is what
-                     -- re-scanning alone cannot say — a re-scan reports that the mismatch is there, not that an answer already given failed to
-                     -- land. The stamp answers that and no more: it does not separate an adaptation that did nothing from one that landed in part
-                     -- WRITTEN at one turn and one only: the re-scan immediately following the close, which is where the absence or return of the
-                     -- identity is observable and where match_identity already runs (TOOL GROUNDING). A query over the ledger afterwards cannot
-                     -- replace it — the ledger only appends, so it cannot separate a repair that failed from an identity a later Adapt re-introduced
-                     -- DECIDED AGAINST Mₛ ALONE at that turn — the mismatch this cycle's dispose closed by adapting, and no other record. Widening
-                     -- the comparison to the ledger reachable there puts that same conflation back inside the stamp (PHASE TRANSITIONS)
-                     -- READ BY the Phase 1 surfacing, which reports it so the user is not asked to re-answer blind, and by the convergence trace.
-                     -- It GATES nothing: the mismatch is surfaced on its own merits either way, and what this changes is what the user is told
-adjudicated(Λ.R, X) = ∀ aspect(a, Λ.R, X) : warranted(a, Λ.R, X) ∨ disposed(a)
-trivial convergence (all-disposed at registration): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND every flagged aspect is closed with a registration-time disposition, Route(routed_deficit) or Residual — by the certificate or by the user's attribution at Qa; aspect-keyed via disposed(a) over the atomic (post-split) aspects — (pending = ∅), adjudicated(Λ.R, X) holds by disposed(a) for every flagged aspect (and warranted for the rest) — Λ.R is unadapted, R_final := Some(Λ.R). This is the Phase 0 → deactivate (all-routed) path. Distinct from the no-mismatch case (Mᵢ = ∅, every aspect warranted from the start) — here aspects were flagged but every one is held by a local route claim, or was handed elsewhere or left unattributable by the user, rather than held by the own claim
-gateless convergence: when the Phase 1 relay judgment_relay_overruled closes the last mismatch in pending, adjudicated(Λ.R, X) follows from disposed(a) for every flagged aspect, and R_final := Some(Λ.R) — the ordinary non-withdrawal result equation, reached without a final gate. Neither relay close performs an adaptation, so Λ.R stands as whatever earlier Adapt dispositions left it as
--- WHAT AN ADAPTED VERDICT DOES NOT CLAIM: where any Adapt disposition fired, R_final is the adapted result and the verdict claims FIT for it — every
---   flagged aspect closed, the result suiting X as adjudicated. It makes NO correctness claim about it: correctness was the presupposition the run
---   entered on (warranted, above), the adaptation moved the artifact, and no step here re-established it. Checking that the adapted result still works
---   rests on a different ground than fit and is NOT ESTABLISHED ANYWHERE IN THIS PROTOCOL — deliberately, this artifact being built to run inside
---   another loop (COMPOSITION, contextualize ∘ caller-loop). The contract names no one who must do it instead, having no way to bind them; what it
---   states is its own silence. The trace says so, for the same reason withdrawal convergence says it of the replacement: a reader
---   handed a fit finding must not read a correctness finding out of it
-withdrawal convergence: when a Discard(replacement) disposition fires (Phase 2 → withdraw), every mismatch remaining in pending is closed as Moot, so disposed(a) holds for every flagged aspect of Λ.R and adjudicated(Λ.R, X) follows without any re-scan. R_final := replacement records what the user is left with, and the verdict makes NO adjudication claim about it — the protocol never evaluated it. Re-entering Epharmoge with the replacement as R is how it gets checked
-certificate gate:  every registered mismatch carried status(certificate) = pass (fail-closed, at registration) — a routed mismatch, or one the user left unattributable, never entered pending, or left it when a re-derived certificate stopped passing on an element registered before that fold; an ambiguous one entered only on the user's Own attribution, which sets its claimed_by to the own claim — so an adapted R' is assembled only from mismatches the own claim holds (claimed_by = {ApplicationDecontextualized}), fit-certified on the evidence or on the user's word; backward misfit was handed forward as its routed_deficit (ContextInsufficient, BoundaryUndefined, or a deficit the user named), not adapted in-place. The pass certifies LOCAL admissibility — epharmoge's own gate over epharmoge's own activation — not the absence of a claim anywhere in the wider protocol set
--- operational proxy: (∀ m ∈ registered: entry(m).status = completed) ∧ (∀ a flagged and closed at registration: disposed(a)) ⟹ adjudicated(Λ.R, X)
---   BOTH conjuncts are owed and the first does not imply the second: a flagged aspect closed at registration as Route or Residual never entered registered,
---   so quantifying over registered says nothing about it — and where nothing registered at all, says nothing about any of them
---   the first conjunct rests on the status↔ledger equivalence at pending, scoped to registered mismatches. A registration-time close carries no
---   record in the carrier where the element was never registered — covered by disposed(a) directly; where it WAS
---   registered before that fold, the close completes its existing entry as any other close does
+abbrev Context (P : Type) := List (Turn P)
 
-── TOOL GROUNDING ──
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
+
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
+
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
+
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
+
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-!
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t
+
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
+-/
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- `R`, the result under review: any completed work product — an AI output, an analysis
+    conclusion, a decision outcome. The morphism treats every kind alike. -/
+abbrev Result := String
+
+/-- **Your reading**: the result as the context now shows it, every adaptation whose write has
+    landed applied — each write returns its result into the context. Correctness is presupposed
+    at entry and never re-checked here. -/
+axiom target : Context P → Result
+
+/-- `significant` requires a demonstrable behavioral consequence — a downstream decision, a
+    runtime divergence, a changed gate trajectory; structural extent alone is `minor`. -/
+inductive Severity | critical | significant | minor
+
+/-- One place the result does not fit: what does not fit, in plain words; where in the result;
+    the turn of the context it does not fit, which is never the assistant's own (`Cite`), so the
+    comparison stays non-circular; and how much it matters. -/
+structure Mismatch (c : Context P) where
+  what     : String
+  inResult : String
+  against  : Cite c
+  severity : Severity
+
+/-- **Your judgment**, made afresh on every pass: where the result as it now stands does not fit
+    the context as it now stands — the context is the application context, the person's own
+    account of their situation and every earlier answer included. One mismatch per claim is the
+    direction; a claim standing on evidence in several places is one mismatch, since how far a
+    repair reaches is the resolution's question. Something the person names as not fitting is
+    judged here like anything else. A mismatch an adaptation aimed at and that is still here
+    after the write landed is one that adaptation did not repair. -/
+axiom mismatches : (c : Context P) → List (Mismatch c)
+
+/-- A deficit label. A certificate assigns only the ones this contract inscribes; the person may
+    name any. -/
+inductive Deficit
+  /-- this contract's own: a correct result that does not fit its application context -/
+  | applicationDecontextualized
+  /-- a missing pre-execution fact, with no observable value to adapt to (hint: /inquire) -/
+  | contextInsufficient
+  /-- undefined convention or dependency ownership for the decision (hint: /bound) -/
+  | boundaryUndefined
+  /-- a deficit the person names that no constructor above names; emitted bare -/
+  | emergent (name : String)
+
+/-- The deficits this contract inscribes. -/
+def Inscribed : Deficit → Prop
+  | .emergent _ => False
+  | _           => True
+
+/-- Every inscribed claim a mismatch's evidence supports, and the cited fit. It certifies this
+    contract's gate over its own activation and nothing about claims anywhere else. -/
+structure Certificate where
+  claimedBy : List Deficit
+  distinct  : claimedBy.Nodup
+  inscribed : ∀ d ∈ claimedBy, Inscribed d
+  fit       : String
+
+inductive Whose
+  | here
+  | elsewhere (d : Deficit)
+  | unclear
+
+/-- Read off `claimedBy`, so nothing stored beside it can disagree: the own claim alone is here; a
+    single other claim is elsewhere; several claims, or none, leave it unclear. -/
+def Certificate.whose (k : Certificate) : Whose :=
+  match k.claimedBy with
+  | [.applicationDecontextualized] => .here
+  | [d]                            => .elsewhere d
+  | _                              => .unclear
+
+/-- **Your judgment**: fit the mismatch's claim against this contract's own claim and its route
+    claims, reading nothing outside this contract. Evidence that supports no claim leaves it
+    unclear, and an unclear mismatch is put to the person before anything else happens to it. -/
+axiom certify : (c : Context P) → Mismatch c → Certificate
+
+/-- What a person's turn settles for one mismatch. There is no verdict beside it: whether the
+    mismatch "really" stands is not asked, and nothing here asserts it either way. -/
+inductive Resolution
+  /-- change the result this way; resolves the mismatch until the write lands, after which the
+      next pass judges the new result -/
+  | adapt (direction : String)
+  /-- leave the result as it is here, with the reason the person gave where they gave one -/
+  | keep (reason : Option String)
+  /-- stop using the result; `none` when nothing takes its place -/
+  | discard (replacement : Option Result)
+  /-- another deficit's: handed to it -/
+  | elsewhere (d : Deficit)
+
+/-- **Your judgment**: the cited turn resolves `m`, as it now stands, this way. Read against the
+    context that now stands, the order of its turns included. An adaptation that has landed no
+    longer resolves a mismatch still found afterwards; a write that failed resolves nothing. -/
+axiom ResolutionSupported : {c : Context P} → Mismatch c → Context P → Turn P → Resolution → Prop
+
+/-- A mismatch is resolved only by the person's turn, whatever form that turn takes. -/
+def resolutionCoord {c : Context P} (m : Mismatch c) : Coord P Resolution :=
+  { admits := (·.val = .person), supports := ResolutionSupported m }
+
+/-- **Your reading**: the person's resolution of `m`; `open_` until one reaches it. -/
+axiom resolution : (c : Context P) → (m : Mismatch c) → Occ (resolutionCoord m) c
+
+/-- What evidence alone settled about a mismatch. -/
+inductive Shown
+  /-- it fits after all: the AI withdraws its own flag -/
+  | fits
+  /-- it does not fit: shown before the gate, and the person still resolves it -/
+  | fails
+
+/-- **Your judgment**: the cited evidence, read against the result and the context as they now
+    stand, admits this reading of `m` alone. Where it admits more than one, it settles nothing.
+    A person's turn that disputes it leaves it unsettled: evidence settles only what nothing the
+    person said contests. -/
+axiom ShownSupported : {c : Context P} → Mismatch c → Context P → Turn P → Shown → Prop
+
+/-- Evidence stands on what was observed or reported, never on the person's say-so, which is a
+    resolution. -/
+def evidenceCoord {c : Context P} (m : Mismatch c) : Coord P Shown :=
+  { admits := (·.val ≠ .person), supports := ShownSupported m }
+
+/-- **Your reading**: what evidence alone settled for `m`, with the evidence cited; `open_`
+    where it settled nothing. -/
+axiom byEvidence : (c : Context P) → (m : Mismatch c) → Occ (evidenceCoord m) c
+
+def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
+  | .open_ _     => none
+  | .filled a .. => some a
+
+/-- How a mismatch stands. -/
+inductive Standing
+  /-- waits on the person -/
+  | open_
+  /-- the person's turn resolved it -/
+  | resolved (r : Resolution)
+  /-- the certificate alone handed it to another deficit -/
+  | handed (d : Deficit)
+  /-- evidence showed it fits; the AI withdrew its own flag -/
+  | withdrawn
+
+/-- The person's resolution first, whatever evidence or the certificate read. Without one, a
+    mismatch whose owner is unclear waits on the person before anything else happens to it —
+    evidence does not withdraw it; otherwise evidence that it fits withdraws it, the
+    certificate's handoff hands it on, and what is left waits. -/
+def standing (c : Context P) (m : Mismatch c) : Standing :=
+  match filledValue (resolution c m) with
+  | some r => .resolved r
+  | none =>
+    match (certify c m).whose with
+    | .unclear => .open_
+    | w =>
+      match filledValue (byEvidence c m), w with
+      | some .fits, _         => .withdrawn
+      | _, .elsewhere d       => .handed d
+      | _, _                  => .open_
+
+/-- One concrete action the gate offers for a mismatch: what it does, as the resolution it would
+    record, and what then happens. -/
+structure Action where
+  resolution  : Resolution
+  consequence : String
+
+/-- **Your judgment**: the actions to offer for `m`, each concrete to this mismatch — the change
+    that would make it fit where one is evident, leaving it as it is and what then happens, not
+    using the result and what would take its place, and for an unclear owner the deficit each
+    supported claim would hand it to. Never a category title; the person may answer in their own
+    words instead. -/
+axiom actions : (c : Context P) → Mismatch c → List Action
+
+/-- **Your selection** of the open mismatch the gate presents next: one whose owner is unclear
+    first, then by severity, critical first. -/
+axiom selectNext : (c : Context P) → Option (Mismatch c)
+
+/-- How the person ends the run. -/
+inductive Closing
+  /-- the run is finished; said while mismatches are still open, it reads as `stop` -/
+  | done
+  /-- stop here: the result stays as it is, and what is open stays unresolved -/
+  | stop
+  /-- go on to the protocol the person names -/
+  | route (target : String)
+
+/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
+    stands, the order of its turns included: a closing said before a later round was presented was
+    answered by that round. -/
+axiom ClosingSupported : Context P → Turn P → Closing → Prop
+
+/-- Only the person closes. -/
+def closeCoord : Coord P Closing :=
+  { admits := (·.val = .person), supports := ClosingSupported }
+
+/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
+axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
+
+/-- **Your reading**: a withdrawal a person's resolution asked for, carried out — the write that
+    removed or replaced the result returned — with the replacement now in the result's place,
+    `none` when nothing took it; the outer `none` while no withdrawal has landed. Read from the
+    write, not from what is still found, since the replaced result may leave nothing to find. -/
+axiom withdrawal : Context P → Option (Option Result)
+
+/-- **Your reading**: an adaptation a person's turn in this run asked for has been written and has
+    landed — whether or not the mismatch it aimed at is still found afterwards. Read against the
+    context as it now stands, from any of the person's turns, not only the latest. -/
+axiom AdaptationLanded : Context P → Prop
+
+/-- **Your record**, read from the context: the locator the carrier-creating write returned — the
+    one durable record every mismatch and its standing is written into; `none` where nothing was
+    ever written. -/
+axiom carrier : Context P → Option String
+
+/-- **Your record**: contrary grounds you showed before the person's resolutions — evidence that
+    a mismatch does not fit, beside a resolution that left it as it is, among them — attached to
+    the closure; empty when there were none. -/
+axiom dissent : Context P → List String
+
+/-- `ContextualizedExecution`: the context at closure, what the person is left with (`none` when a
+    withdrawal left nothing), the carrier's locator, and the dissent attached to the closure. -/
+structure ApplicabilityVerdict (P : Type) where
+  context : Context P
+  target  : Option Result
+  carrier : Option String
+  dissent : List String
+
+inductive Outcome (P : Type)
+  /-- nothing open and the person closed: by resolutions of theirs that have taken effect, or by
+      saying the run is done -/
+  | done (v : ApplicabilityVerdict P)
+  /-- the person withdrew the result and the withdrawal landed; the replacement is carried with no
+      claim of fit -/
+  | discarded (v : ApplicabilityVerdict P)
+  /-- the person stopped; the result stays as it is and what was open stays unresolved -/
+  | stopped (v : ApplicabilityVerdict P)
+  /-- the person went on to a protocol they named -/
+  | routed (target : String) (v : ApplicabilityVerdict P)
+  | holding (c : Context P)
+
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else; every reading above is taken from it.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-! ── PHASE TRANSITIONS ──
+A pass is the silent work. It first carries out what a person's resolution asked and the context
+does not yet show done, and the write's result returns into the context. It then judges afresh:
+the mismatches, whose each one is, what evidence alone settles, and how each stands. The pass's
+record follows, then the carrier write. Either a closure fires, or `respond` presents the current
+list and one gate. Each person utterance is fused, and the next pass reads it; after an adaptation
+that pass judges the new result.
+-/
+
+/-- **Your action** for a pass, before anything is judged: where a person's resolution asks for an
+    adaptation or a withdrawal the context does not yet show carried out, the artifact write that
+    carries it out, returning what the write returned. -/
+axiom perform : Context P → List (Evidence P)
+
+/-- **Your record** of a pass, written once its writes have entered the context: what the pass
+    judged — the mismatches, their certificates, what evidence settled, their standing — and what
+    changed since the last pass. A record grounds nothing. -/
+axiom passRecord : Context P → List (Response P)
+
+/-- **Your action**: the carrier write — created the first time a mismatch is found, brought into
+    line on every later pass — returning its locator. -/
+axiom persist : Context P → List (Evidence P)
+
+def pass (c : Context P) : Context P :=
+  let c₁ := c ++ (perform c).map (·.val)
+  let c₂ := c₁ ++ (passRecord c₁).map (·.val)
+  c₂ ++ (persist c₂).map (·.val)
+
+/-- The person has closed: they said the run is done, or some turn of theirs in this run resolved
+    something that has taken effect — a mismatch still found that stands resolved by their turn, or
+    an adaptation they asked for whose write has landed. No particular turn anchors this: which of
+    their turns carries the resolution is read from the context as it now stands, and the round or
+    the closing trace says which turn was read and what intent was taken from it. Where nothing was
+    found, or every mismatch was handed on or withdrawn without the person, only the first holds,
+    so the list is seen before the run ends. -/
+def PersonClosed (c : Context P) : Prop :=
+  filledValue (closing c) = some .done ∨
+  (∃ m ∈ mismatches c, ∃ r, standing c m = .resolved r) ∨
+  AdaptationLanded c
+
+def NothingOpen (c : Context P) : Prop := ∀ m ∈ mismatches c, standing c m ≠ .open_
+
+def Closable (c : Context P) : Prop :=
+  (withdrawal c).isSome ∨
+  filledValue (closing c) = some .stop ∨
+  (∃ t, filledValue (closing c) = some (.route t)) ∨
+  (NothingOpen c ∧ PersonClosed c)
+
+open Classical in
+def close (c : Context P) : Outcome P :=
+  match withdrawal c with
+  | some r => .discarded ⟨c, r, carrier c, dissent c⟩
+  | none =>
+    match filledValue (closing c) with
+    | some .stop      => .stopped ⟨c, some (target c), carrier c, dissent c⟩
+    | some (.route t) => .routed t ⟨c, some (target c), carrier c, dissent c⟩
+    | _               => .done ⟨c, some (target c), carrier c, dissent c⟩
+
+open Classical in
+/-- `respond` presents the round. First the current list: every mismatch found, each with what does
+    not fit, where, and how it stands, in plain words. Then what this turn changed: what the
+    person's turn resolved, what an adaptation changed in the result, what is newly found, what an
+    adaptation aimed at and did not repair, a flag evidence withdrew with that evidence, and a
+    handoff with its fit and the command only as a hint. Then one gate. For `selectNext`: what does
+    not fit, where in the result, the turn of the context it does not fit, how much it matters, and
+    evidence that it does not fit where evidence showed that; then `actions`, each with its
+    consequence. Wherever a person's earlier turn is read as the resolution of a mismatch, or as
+    what lets the run close, say which turn was read and the intent taken from it, quoting their
+    words. With nothing open, the list, how far the judgment reached, and whether the run is
+    done. -/
+def contextualize (respond : Context P → Response P) :
+    Context P → List (Utterance P) → Outcome P
+  | c, []      => .holding c
+  | c, u :: us =>
+    let c₁ := pass (fuse c u)
+    if Closable c₁ then close c₁
+    else contextualize respond (c₁ ++ [(respond c₁).val]) us
+
+open Classical in
+def start (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  let c₁ := pass c
+  if Closable c₁ then close c₁
+  else contextualize respond (c₁ ++ [(respond c₁).val]) us
+
+/-! ── LOOP ──
+Transformative revalidation (NON-MONOTONE): an adaptation produces a new result, and the next pass
+judges it, so an adaptation can breed mismatches that did not exist before, and can leave the one
+it aimed at in place. Nothing counts down; every pass judges the whole result against the whole
+context. The loop is dialogue: each round ends at a gate, and the person ends the run.
+-/
+
+/-!
+Silence judges nothing and closes nothing.
+theorem silence (respond : Context P → Response P) (c : Context P) :
+    contextualize respond c [] = .holding c
+
+While no closure fires, an utterance leads to the next gate and closes nothing.
+theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
+    contextualize respond c (u :: us) =
+      contextualize respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us
+
+A pass only adds to the context.
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
+-/
+
+/-! ── CONVERGENCE ──
+Every closure is read where it fires and nowhere else. done: nothing open, and the person closed —
+by resolutions of theirs that have taken effect — an adaptation whose write landed included —
+read from any of their turns, or by saying the run is done after seeing the list, which is the only
+way a run closes where nothing was found or nothing was the person's to resolve. discarded: the withdrawal the
+person asked for landed; the replacement is carried with no claim of fit. stopped: the result stays as it is and every open mismatch is recorded unresolved.
+routed: the person named the next protocol. Fit is claimed only for the mismatches found, and fit
+is not correctness, which was presupposed at entry and is not re-checked here. A mismatch left as
+it is carries the person's reason and no claim that it does or does not stand.
+Convergence evidence: one line per mismatch found — what did not fit, where, and how it stood at
+the close: the person's resolution with the turn it came from, quoted, and the intent taken from
+it, the certificate's handoff with its
+fit, or evidence's withdrawal with that evidence — beside the adaptations made with what each
+changed in the result, any that did not repair what they aimed at, and the dissent attached to the
+closure. Demonstrated, not asserted.
+-/
+
+/-!
+The person's resolution stands over anything evidence or the certificate read.
+theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution)
+    (h : filledValue (resolution c m) = some r) : standing c m = .resolved r
+
+A mismatch whose owner is unclear waits on the person until they resolve it; evidence does not
+withdraw it first.
+theorem unclear_waits (c : Context P) (m : Mismatch c) (hr : filledValue (resolution c m) = none)
+    (hu : (certify c m).whose = .unclear) : standing c m = .open_
+
+A resolution always rests on a turn the person sent.
+theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution)
+    (h : standing c m = .resolved r) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
+
+Evidence never rests on the person's say-so.
+theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
+    (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person
+
+Only the person closes.
+theorem closing_by_person {c : Context P} {s : Cite c}
+    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person
+
+A done run has nothing open, and the person closed it.
+theorem done_closed_by_person (c : Context P) (v : ApplicabilityVerdict P) (hc : Closable c)
+    (h : close c = .done v) : NothingOpen c ∧ PersonClosed c
+
+A mismatch never stands against the assistant's own turn.
+theorem against_not_assistant {c : Context P} (m : Mismatch c) :
+    (c[m.against.idx]'m.against.lt).origin ≠ .assistant
+-/
+
+/-! ── TOOL GROUNDING ── -/
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Eval   (sense)   → Internal analysis (no external tool: the scan RE-EXECUTES NOTHING and WRITES NOTHING — it reads the completed result and the observable context, which is also what keeps the information source non-circular, `Non-circularity`)
-Qz / confirm_no_mismatch (constitution) → present (conditional: Mᵢ = ∅; zero-mismatch finding + reasoning; AcceptNoMismatch / Reopen(aspect) — `Zero-mismatch surfacing`)
-reopen_relay (extension) → TextPresent+Proceed (conditional: Reopen(aspect) focused re-scan still yields Mᵢ = ∅ → relay the still-zero finding and deactivate; one attempt per aspect, basis = the focused Eval re-scan)
-bind_kind (sense)   → Internal analysis (capture each detected mismatch as a KindBinding {label, positive_predicate, evidence, atomicity}. atomicity carries the backbone's meaning — how many distinct aspects this binding bundles — so a detector output asserting two claims lands non-atomic and is split into one atomic sub-mismatch per claim before certify. It is never asked how far a repair would reach: one claim standing on evidence in several places is atomic, and where a repair lands is projected later from an answered disposition (RepairSite, `Kind → resolution form → repair locus`). Runs before certify and before absorb — both read the binding)
-absorb (track)      → Internal state update (folds this scan's detections into what the protocol already carries, one at a time, at the one position every scan path states: after split, before certify. Per detection it routes on a judgment it does not make itself — match_identity names the carried element that states this claim, or none — and then either merges the detection into the element named or hands it to init_occurrence. The merged element is what the next detection is judged against, so nothing an earlier detection carried is overwritten by a later one — which is what it buys, and not order-independence (TYPES, absorb). It performs no user interaction and touches no artifact: the carrier write happens later, at the registration leg, because absorb runs BEFORE certification and a write here would persist detections the fail-closed filter has not seen — and at Phase 0 there is no carrier yet to write to)
-init_occurrence (track) → Internal state update (writes id and unrepaired onto a detection absorb judged NEW, and is reached on that arm alone. It is the sole producer of the handle. It performs no user interaction and touches no artifact)
-bind_value_space (track) → Internal state update (generates a mismatch's answer space from its passing certificate and writes it to that mismatch's own value_space field, which is what associates the space with the occurrence its readers will look it up on; the third leg of the registration pipeline, running between the pass filter and registration on BOTH scans, over every element the fold TOUCHED and passing — which is all of Mᵢ_passed at Phase 0 and is wider than Mₑ_passed at the re-scan, an element whose evidence the fold grew having its space re-derived from the grown binding, and registering only if it was not registered before this fold — per the strict order `Certificate before registration; revalidate after adaptation` fixes. Every downstream reader needs it already bound: the Phase 1 relay close reasons about which pairings well_formed leaves, and Qc draws A ∈ V from it)
-match_identity (sense) → Internal analysis (on EITHER scan, after bind_kind + split and before certify — it is the judgment absorb routes on, so it runs wherever the fold does: compare identity(m) — the binding's positive_predicate together with the evidence set it stands on — against what the fold already carries, and against Mₛ. Those are the two readings it settles and it settles nothing else: WHICH carried element, if any, states this claim (absorb's arm — merge into the one it names, a new element where it names none), and whether unrepaired is stamped. It yields the element rather than a yes/no, because that is what merge takes and because nothing here guarantees only one carried element could read plausibly. It does NOT scan the rest of Σ.dispositions: RETURNED and CIRCLING judge the ledger at their own turn, on the target standing then, so a judgment made here against those records would have nowhere to land and no reader — m read as the same claim as Mₛ and nothing weaker. It reads no id and assigns none (TYPES, MismatchId). THIS TURN IS WHERE unrepaired IS DECIDED and the only one where it can be (CONVERGENCE, unrepaired(m)). It never completes the new registration's entry — a record answers only for the registration it closed)
-certify (extension) → Internal analysis (fail-closed DeficitFitCertificate; fit of KindBinding.positive_predicate against the own claim and the route claims inscribed in this SKILL.md, reading nothing outside this file: claimed_by = {ApplicationDecontextualized} when the own claim holds alone; status(c) ∈ {pass, route, ambiguous}, read off claimed_by (TYPES); basis = the cited claim fit, surfaced with whatever this certificate produced — at the mismatch's Phase 1 gate where it passed and reached one, and with the Route or Residual close itself where it did not, those firing before Phase 1. Relay (Extension): the fit is grounded in a citable source, and an unclear fit returns status = ambiguous, which puts the element to the user at Qa (Phase 0 → attribute, Phase 2 → attribute) — the certificate itself closes nothing under ambiguity. Runs over every element the fold TOUCHED — within Phase 0 for Mᵢ, within the Phase 2 re-scan for what that fold opened or merged into — before an opened mismatch enters pending, and on a merged one against the evidence its binding has just taken in)
-Qa     (constitution)    → present (conditional: status(certify(m)) = ambiguous on either scan — Phase 0 → attribute, Phase 2 → attribute. Fires per element, one per turn, in id order off Λ.unattributed, with Λ.attribution_target holding the element across the Stop. Presents, as text before the gate, the element's aspect, description and evidence with its channel, and what the certificate found — the claims its evidence supports, or that none does; the gate itself carries the question "whose is this?" and the Attribution options with their differential implications: the own claim → handled here as a fit question and put to Qc in its turn; each supported route claim → handed to that deficit, with the command hint this file inscribes for it; none of these → recorded as unattributed, nothing done with it here. A deficit the user names outside the presented set is a Route(d) answer emitted bare. The user's Attribution is written by attribute and read by every downstream reader of status(c); the turn is yielded, once per element, and the scan's value-space leg waits until Λ.unattributed is empty. Constitution because the certificate has already said what the evidence settles, and what it does not settle is not the AI's to decide — `Ambiguity surfaces`)
-attribute (track)   → Internal state update (writes the user's Attribution onto Λ.attribution_target's certificate — claimed_by rewritten to {own deficit} / {d} / ∅ and attribution_by := user — then pops Λ.unattributed. Runs on the far side of Qa's Stop and nowhere else. It performs no user interaction and touches no artifact; where the attribution closes the element, the close itself goes through dispose)
-AssessFit (sense) → Internal analysis (no external tool)
-judgment_relay_upheld (extension) → TextPresent+Proceed (conditional: judgment_settled(Mₛ, Λ.fit_map) = Some(Upheld) — the evidence for ¬warranted(aspect(Mₛ), Λ.R, X) admits no reading under which the aspect stands warranted, i.e. judgment-level entropy → 0 with a citable basis, `Judgment-only relay`. Relay j := Upheld with the basis shown (judgment_state := Some((Upheld, basis))), drop the Overruled/Keep pairing from the presented set, and PROCEED to the DISPOSITION HALF without yielding the turn for the judgment half. Covers the JUDGMENT axis only — the Phase 1 dispatcher routes that half, to Qc)
-judgment_relay_overruled (extension) → TextPresent+Proceed (conditional: judgment_settled(Mₛ, Λ.fit_map) = Some(Overruled) — the evidence admits no reading under which aspect(Mₛ) fails to stand, read off that aspect's AspectFit entry in Λ.fit_map.fit_justifications (the membership/condition distinction: TYPES). well_formed leaves (Overruled, Keep) as the sole pairing, so the option set has collapsed and no gate is owed, `Judgment-only relay`. REQUIRED: report the flagged aspect, the retraction, and the cited fit evidence as text BEFORE writing anything; a retraction relayed without that report is a protocol violation. Then close Mₛ with an (Overruled, Keep) DispositionRecord (judgment_by = relay) + record update(Λ.carrier, entry(Mₛ).status := completed) as one step, and PROCEED without yielding the turn. Λ.R is untouched, so no artifact permission is exercised. CORRECTING a disputed retraction is DELEGATED, not compiled: this guard reads Λ.fit_map, derived from (Λ.R, X), so re-entering on the same input reproduces the same close. Within the run the aspect returns to judgment only where a later Adapt re-registers it, and then against the recomputed Λ.fit_map — never on the strength of an objection. This is what makes the report required rather than optional — it puts the reading in front of the user while this close is still unwritten)
-Qc     (constitution)    → present (fires wherever the disposition is still open, because there the answer turns on what the user weighs and the turn is owed: Adapt(direction) / Keep / Discard(replacement), with the Overruled/Keep pairing included when the judgment is not settled. Where well_formed has already collapsed the answer to a single pairing that edits nothing, the disposition is not open and that close relays instead — the same test reaching its other value)
-adapt  (transform) → artifact write (Adapt(direction) disposition: result adaptation based on user direction)
-discard (transform) → artifact write (Discard(replacement) disposition: withdraw the result and put the replacement in its place, or remove it outright when the withdrawal leaves nothing behind)
-                    -- these two are the ONLY steps that touch the artifact, so they are the only place a repair locus exists at all. It exists as
-                    --   the edit this call makes and nowhere else: no field on Mismatch, KindBinding or DispositionRecord holds it, and no
-                    --   predicate reads it. That is what keeps the three axes ordered rather than merely named (RepairSite, `Kind → resolution form → repair locus`)
-                    -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
-route  (extension)   → TextPresent+Proceed (status(certificate) = route → emit the routed_deficit as a backward-misfit recommendation: missing pre-execution fact → ContextInsufficient (hint /inquire), undefined convention/dependency ownership → BoundaryUndefined (hint /bound); the deficit is read off the matched local route claim, basis cited, and the command travels only as a hint; closes the mismatch with disposition Route(routed_deficit). Reached also through the user's Route(d) attribution at Qa, where the deficit is the one they named, disposition_basis is that attribution, and the hint travels only where this file inscribes one for d)
-dispose (track)  → Internal state update + record update(Λ.carrier), performed as ONE step (append the DispositionRecord for the closed mismatch to Σ.dispositions — user-, relay-, certificate-, attribution-, or loop-assigned — and, in the same amendment, write that record onto the mismatch's entry and complete it. The record goes to BOTH: Σ is what this run reads, and the entry is what outlives it — a relayed judgment the MODE STATE note sends across a session boundary is recoverable only because the amendment puts it there). Every close in the protocol goes through this step, whichever phase invokes it: the record half is unconditional, and the record update half fires exactly when the mismatch was REGISTERED. A registration-time close (Route, Residual) on an element not yet registered runs before registration and so has no tracked entry to complete — it appends its record and stops there; on a registered one both halves fire and the element leaves pending. For a registered mismatch, doing both halves together is what removes the mismatch from pending before a later answer could close it a second time. This ledger is what the convergence trace ranges over, and what the terminal verdict's dispositions field is assembled from
-Mᵢ/Mₑ (track)   → record/record update (mismatch tracking in ONE carrier entry: the creating write at Phase 1 returns the identity Λ.carrier holds, and re-scan registration amends that same entry. Per-mismatch entries are NOT written — a single dereferenceable record is what lets one read reconstruct the registered set. Framing visibility is preserved; only certificate-passing mismatches are registered — passing on the fit, or on the user's Own attribution at Qa)
-converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
-Seam transition to a declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares, settles the next move — proceed directly to it, citing that settling source; every Constitution gate inside Epharmoge and inside the next protocol fires unchanged)
 
-── MODE STATE ──
-Λ = { R: Result,   -- the CURRENT EVALUATED TARGET, re-bound to R' by each Adapt disposition
-                   -- (Phase 2, TARGET SUCCESSION). Every R_final binding and every convergence predicate reads THIS field, so an Adapt
-                   -- followed later by a Keep yields the adapted result
-      X: Context,   -- bound once at activation and never re-bound (preserves: X); the bare X in every predicate and Eval call IS this field
-      fit_map: Option(F),   -- the fit assessment for what is pending. Stays None wherever nothing ever registered (Mᵢ = ∅, or Mᵢ_passed = ∅ trivial convergence), exactly as Λ.carrier does: bound on the arm that registers, there being no pending element for it to answer for on the others
-      judgment_state: Option((Judgment, basis: String)),   -- this cycle's relayed verdict with its cited basis (TYPES): written by the Phase 1 judgment dispatch on both arms, read after the Qc Stop by the close that follows
-      unattributed: List(Mismatch),   -- the elements this scan's certify left ambiguous, in id order; written by certify on either scan, drained by Qa one element per turn. The scan's value-space leg and registration wait on it being empty, which is what keeps the fail-closed order holding across a Stop
-      attribution_target: Option(Mismatch),   -- the element Qa is asking about, written before its Stop and read by attribute on the far side; None outside a Qa turn. It HOLDS A FIELD IN Λ for the same reason judgment_state does — across a Stop nothing survives but Λ
-      carrier: Option(EntryLocator) }   -- the identity the carrier-creating write returned at Phase 1 registration; every later amendment names it. Stays None wherever nothing ever registered (Mᵢ = ∅, or Mᵢ_passed = ∅ trivial convergence), since no carrier is written when there is nothing to carry
-Σ = { dispositions: List(DispositionRecord) }
-                 -- the SINGLE disposition ledger. Every close writes here — user-answered, certificate-assigned, or loop-assigned — so the
-                 -- convergence trace ranges over one list
-                 -- each Mismatch in a record carries its kind_binding + certificate (object_ref = Mismatch), which is what makes identity(r.mismatch)
-                 -- readable straight off the ledger at the re-scan
--- INITIAL BINDING at activation: Λ.R := the result under review; Λ.X := the application context it is to be applied in;
---   Λ.judgment_state := None; Λ.unattributed := []; Λ.attribution_target := None; Λ.carrier := None; Λ.fit_map := None;
---   Σ := { dispositions = [] }
--- Views over Σ.dispositions (derived, NOT parallel state):
---   routed(Λ)   = { r ∈ Σ.dispositions : r.disposition = Route(_) }
---   residual(Λ) = { r ∈ Σ.dispositions : r.disposition = Residual }
---   moot(Λ)     = { r ∈ Σ.dispositions : r.disposition = Moot }
--- Certificate invariant: ∀ m ∈ pending : status(m.certificate) = pass, AT EVERY POINT pending IS READ (fail-closed — a routed mismatch, or one the user left unattributable, never enters pending; an ambiguous one enters only once the user's Own attribution has made it pass; and one whose re-derived certificate stops passing after a merge leaves it). Not asserted mid-pass: the re-scan re-certifies a registered element and closes it out in one uninterrupted pass, and AssessFit, the first reader of pending after it, runs once both have happened
--- Fit-map invariant: pending ≠ ∅ ⟹ Λ.fit_map = Some(_), AT EVERY POINT pending IS READ — the arm that registers is the arm that binds it (Mᵢ_passed ≠ ∅ at Phase 0), and every re-scan re-binds it (LOOP, FIT-MAP SUCCESSION), so nothing ever registers onto a None. This is what licenses the three readers to take the fit map itself: SelectNext, judgment_settled and Qc each take Mₛ or pending, and the LOOP's ordered check reaches Phase 1 only under pending ≠ ∅ — the same way Λ.carrier, None on the same arms, is read only where a registration exists
--- Ledger invariant: every mismatch leaving pending, and every mismatch closed at registration, appends exactly one DispositionRecord (no close without a record; no record without a close). PER REGISTRATION: a mismatch that registers twice leaves pending twice and appends two records, one per close, which is why a mismatch that registers twice carries two records rather than one amended. THE TWO PLACES A FLAGGED MISMATCH CAN BE — closed with its own record, or in pending — DO NOT PARTITION IT: between its certification and Register a passing element is in neither. This is why disposed(a) tests its two conditions separately instead of reading one off the other
+inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
-── COMPOSITION ──
+inductive Op | judge | certify | handoff | evidenceWithdraw | evidenceShow | gate | adapt
+             | discard | persist | readTurn | converge | seam
+
+def grounding : Op → Annot × String
+  | .judge            => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass; it re-executes nothing and reads the completed result and the observable context, never the assistant's own words, as what the result must fit")
+  | .certify          => (.sense, "Internal analysis: each mismatch's claim fitted against this contract's own claim and its route claims, reading nothing outside this contract; fail-closed, so evidence that supports no claim leaves it unclear")
+  | .handoff          => (.extension, "TextPresent+Proceed: a mismatch the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), undefined convention or dependency ownership (/bound); nothing is dispatched")
+  | .evidenceWithdraw => (.extension, "TextPresent+Proceed: where evidence alone shows a flagged place fits, withdraw the flag and say so with that evidence; a person's turn that disputes it puts it back")
+  | .evidenceShow     => (.extension, "TextPresent+Proceed: where evidence alone shows a mismatch does not fit, show that evidence before the gate; the person still resolves it")
+  | .gate             => (.constitution, "present: the current list and this turn's changes, then one mismatch — an unclear owner first — with concrete actions, each with its consequence and never a category title; with nothing open, whether the run is done")
+  | .adapt            => (.transform, "artifact write: the person's adaptation applied to the result; the write's result returns into the context and the next pass judges it")
+  | .discard          => (.transform, "artifact write: withdraw the result and put the replacement in its place, or remove it when nothing takes its place")
+  | .persist          => (.track, "record, record update: the one carrier entry — created when a mismatch is first found, brought into line every pass, one line per mismatch with its standing and what it stood on; its locator is carried out on the verdict")
+  | .readTurn         => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — a resolution, a closing, something named as not fitting, a correction, a question — whatever form it takes")
+  | .converge         => (.extension, "TextPresent+Proceed: the per-mismatch trace with who settled each line and what it stood on — for a person's resolution, the turn read, quoted, and the intent taken from it — the adaptations made and any that did not repair what they aimed at, the dissent attached to the closure, and what the verdict does not claim")
+  | .seam             => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
+
+/-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.
-certificate-before-registration ∘ transformative-revalidation: the fail-closed certificate order composes with the NON-MONOTONE loop — when an Adapt disposition mutates R and Eval(R', X) breeds emergent detections, those detections are bound, split, and ABSORBED into pending, and the certificate then runs over every element that fold touched — the ones it opened and the ones it merged into, whose evidence grew. So only in-scope (ApplicationDecontextualized-owned) elements register or stay registered, even as R mutates across cycles: a certificate that stops passing takes its element out of pending as readily as it kept a new one from entering. The gate holds under mutation-induced revalidation because it is re-asked of every element the fold touched, not only of what it opened.
-contextualize ∘ caller-loop: THIS PROTOCOL IS BUILT TO RUN INSIDE ANOTHER LOOP — a statement about this artifact's design, and the only half of any division it is in a position to make. WHAT IT OWNS: as the artifact changes, keep collating it against the ACCUMULATED CONTEXT and surface where the two conflict, one mismatch at a time, for as long as changes keep landing. WHAT IT DOES NOT ESTABLISH: that the artifact is correct — not at entry, where correctness is presupposed rather than checked, and not after an Adapt, where no step re-checks it. Hence Eval reporting applicability mismatch and never correctness, and an adapted verdict claiming fit and no more. IT ASSIGNS NO ONE ELSE A DUTY, BECAUSE IT CANNOT: nothing reaching this protocol establishes that a caller exists, nothing it returns carries an obligation for one to discharge, and no transition here waits on anyone's verdict. A duty written against a party the contract cannot bind would read as a guarantee while being a hope. So the boundary is stated as this protocol's own silence — the verdict says what it does not claim, and a reader wanting correctness checked can see it was not checked here.
-attribution-gate ∘ certificate: the certificate decides alone only where it decides. Where the fit settles claimed_by to one claim, that is relay on cited ground and no turn is owed; where it does not, the same fixed ground is put to the user at Qa, once, and their attribution rewrites claimed_by before anything registers. The fail-closed order is preserved rather than loosened: nothing registers on an ambiguous certificate — it registers on a certificate the user has resolved, and the AI still takes no second look at ground that has not moved.
-judgment-relay ∘ disposition-gate: the two axes compose so that a relay reaches the disposition half only where that half has collapsed to a no-op. judgment_relay_upheld discharges the epistemic half at entropy → 0 with a cited basis and leaves the repair half where it was: at Qc, the one place it is answered. judgment_relay_overruled reaches both halves, because well_formed leaves Keep as the sole pairing and a Keep edits nothing; the retraction is reported with its cited basis while the target still stands untouched. No relay reaches the disposition half on any other ground: what becomes of the result is answered against the target in front of the user, and an answer given about an earlier target is not re-applied to a later one. The composite's guarantee is that Adapt and Discard stay outside relay reach. It is stable under the non-monotone loop: an emergent Mₑ re-enters at Phase 1 and is judged and disposed on the same two axes, with its own relay eligibility computed afresh against the advanced target.
+contextualize ∘ caller-loop: this protocol is built to run inside another loop. It keeps
+collating the result against the accumulated context as the result changes; it does not
+establish that the result is correct, and assigns no one else that duty — the verdict states
+its own silence.
+-/
+
+end
+
+end Epharmoge
 ```
 
 ## Core Principle
@@ -523,57 +567,43 @@ judgment-relay ∘ disposition-gate: the two axes compose so that a relay reache
 
 ### Activation
 
-Layer 1 activates whenever the user invokes `/contextualize`, including when the scan may find no mismatch. Layer 2 may activate only after Aitesis operational evidence has established the recurring pattern “context gathered but application mismatched,” and only when the post-execution result satisfies the formal auto-activation guard. Prior-session recall indices may seed the silent scan when available; they never settle the user's judgment.
+Layer 1 activates whenever the user invokes `/contextualize`, including when nothing may turn out not to fit. Layer 2 may activate only after Aitesis operational evidence has established the recurring pattern “context gathered but application mismatched,” and only when the post-execution result satisfies the formal auto-activation guard. Prior-session recall indices may inform the judgment when available; they never settle the user's resolution.
 
 ## Protocol
 
 The formal blocks define execution. This section fixes the user-facing rendering.
 
-### Mismatch judgment and disposition
+### The round
 
-Surface one selected mismatch at a time. Before its question, show its description, result-and-context evidence, fit basis, deficit-fit basis, and severity. When `unrepaired` is set, say that the prior requested adaptation did not resolve this claim. Keep one carrier entry for the evaluated result, one line per registration keyed by `id`; each line projects the mismatch, status, and completed disposition record, including who settled each axis and both grounds.
+Open every round with the current list: each place the result does not fit, where it is, and how it stands now — waiting on you, what you decided, handed to another protocol, or withdrawn because evidence showed it fits. Follow it with what this turn changed: what your last answer settled, what an adaptation changed in the result, what is newly found, what an adaptation aimed at and did not repair, and any flag withdrawn with the evidence that withdrew it. Keep one carrier entry for the result, one line per mismatch with its standing and what it stood on.
 
-The gate renders the `Judgment × Disposition` value space in plain language:
+Then ask about one mismatch. Before the question, show what does not fit, where in the result, the part of the context it does not fit (quoted with where it came from), how much it matters, and evidence that it does not fit where evidence showed that. Ask first about a mismatch whose owner is unclear.
 
-```
-How would you like to handle this applicability mismatch?
-
-Options:
-1. **Doesn't actually apply** — the flagged aspect fits after all; the result stands unchanged
-2. **Real, but fine as-is** — the mismatch stands and the result is accepted anyway: [stated assumption about context fit]
-3. **Adapt it** — the mismatch stands; change the result: [brief direction prompt]
-4. **Withdraw it** — the mismatch stands and the result should not be used: [what takes its place, if anything]
-```
-
-Options 1 and 2 remain visibly distinct: one retracts the mismatch; the other accepts a mismatch that stands. Materialize an evident adaptation direction or replacement without changing its formal constructor. If the judgment is relayed `Upheld`, cite its basis before the gate and present options 2–4. If it is relayed `Overruled`, report the retracted aspect and cited fit evidence before closing it as `(Overruled, Keep)` without a gate. A relay never authorizes an edit.
-
-After `Adapt`, report that the changed result is re-scanned for fit and that Epharmoge establishes no correctness claim for it. After `Discard`, report that the replacement is carried without a fit claim. The convergence trace distinguishes user and relay retractions, accepted mismatches, adaptations, withdrawals, returns, unresolved adaptations, and — among the handoffs — those the certificate made from those the user attributed.
-
-### Attribution of an ambiguous mismatch
-
-When the certificate cannot say whose a mismatch is, put it to the user before anything else happens to it. Before the question, show the mismatch, its evidence, and which of the inscribed claims that evidence supports — or that none does. The gate renders the `Attribution` answer space in plain language, one option per supported claim:
+The options are concrete actions for this mismatch, each with what then happens — never category titles. For a schedule that lands after working hours:
 
 ```
-This mismatch could be more than one kind of problem, and the evidence doesn't settle which. Whose is it?
+The report goes out at 18:00 Seoul time — after the team has left.
+  result   `0 9 * * *` (server in UTC)
+  context  "the team works in Seoul" (your message)
 
-Options:
-1. **A fit problem — handle it here** — it stays in this review and gets its own judgment later
-2. **Belongs to [deficit] — hand it off** — recorded as handed to that protocol: [command hint where one exists]
-3. **None of these** — recorded as unattributed; nothing is done with it here
+What should happen?
+1. Send it at 09:00 Seoul time — `0 0 * * *`; this overlaps the 00:00–00:30 UTC backup window, so it is checked again
+2. Leave the 18:00 arrival as it is — the report goes out unchanged
+3. Stop using this cron — say what should replace it
 ```
 
-Ask about one mismatch per turn. An answer here says whose the mismatch is and nothing about whether it stands; only the first option leads to the judgment gate above. Do not close an ambiguous mismatch without this question — a mismatch the certificate could not place is the user's to place.
+The person may answer in their own words, and one answer may settle more than one mismatch. Leaving a mismatch as it is records the reason they gave and makes no claim that the mismatch does or does not stand. Where the owner is unclear, the options name the concrete split, for example "install mail in this image as part of this work" beside "hand it to whoever owns the image (/bound)".
+
+With nothing open, show the list, how far the judgment reached, and ask whether the run is done; the person may also name something that does not fit. After an adaptation, say that the changed result was judged again and that no correctness claim is made for it; where it left nothing open, the run closes and the closing trace shows what the adaptation changed. Wherever you read one of the person's earlier turns as resolving a mismatch or as what lets the run close, say which turn and what you took from it, quoting their words — for example: "Your 'leave the 18:00 arrival, the team reads it in the morning' — taken as: keep the schedule as it is." This disclosure stands in place of asking again. After a withdrawal, say that the replacement is carried with no claim of fit.
 
 ## Rules
 
-- **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans
+- **Non-circularity**: What the result must fit is the context the person and the environment supplied — never the assistant's own words, which a mismatch cannot cite.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-- **Verdict scope**: Present the per-mismatch transformation trace before the verdict. An adapted verdict claims fit, not correctness; a withdrawal verdict claims neither fit nor correctness for its replacement.
-- **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation
-- **Judgment-only relay**: `judgment_settled` may relay `Upheld` or `Overruled` only from the current target's cited fit evidence. `Upheld` still yields the disposition gate; `Overruled` reaches `(Overruled, Keep)` only because `well_formed` leaves that artifact-preserving pairing alone. `Qz` and every value-bearing disposition remain constitutive.
+- **Recognition over categories**: Offer actions concrete to the mismatch in front of the person, each with its consequence. The person's own words settle what a category would have asked them to choose.
+- **Verdict scope**: Present the per-mismatch trace before the verdict. Fit is claimed only for the mismatches found, and an adapted result claims fit, not correctness; a withdrawal claims neither for its replacement.
+- **The person resolves and closes**: A mismatch is resolved only by the person's turn, whatever its form, and the person's resolution stands over anything evidence or the certificate read. Evidence alone may withdraw the AI's own flag, reported with that evidence, or show that a mismatch does not fit before the gate; a person's turn that disputes a withdrawal puts it back. Which of the person's turns resolves a mismatch, or lets the run close, is read from the context as it now stands and is not tied to their latest turn; wherever such a reading is made, the round or the closing trace says which turn was read and what intent was taken from it, quoting their words, in place of asking again. Where nothing was found, or nothing was the person's to resolve, the run ends only when the person says it is done after seeing the list.
 - **Significant requires demonstrable behavioral impact**: Severity = Significant requires that the mismatch produces a demonstrable behavioral consequence — downstream-decision impact, runtime divergence, gate-trajectory change. Structural-change extent (line count, file count, scope size) alone is insufficient grounds — categorize as Minor when behavioral impact is undemonstrated. This guards against false-positive gating arising from conflation of structural-change extent with applicability impact
-- **Ambiguity surfaces**: An ambiguous certificate is put to the user at `Qa` with the claims its evidence supports, one mismatch per turn, before the mismatch registers or closes. The user's attribution — handle it here, hand it to a named deficit, or none of these — is what settles pass, route, or `Residual`; the certificate never closes a mismatch it could not place, and the AI takes no second look at ground that has not moved.
-- **Certificate before registration; revalidate after adaptation**: On both scans, run KindBinding → fail-closed DeficitFitCertificate → value-space over every element the fold touched before it enters or remains in `pending`. Route a matched sibling deficit; put an ambiguous claim to the user at `Qa`. `Adapt` mutates the evaluation target, so re-scan it, re-derive every touched element's certificate and value space, remove any element that no longer passes, and register newly passing elements. The loop may therefore gain mismatches after a disposition.
+- **Unclear owners surface first**: A mismatch the certificate cannot place is put to the person before anything else happens to it, with the claims its evidence supports; the certificate never places a mismatch it could not place, and evidence does not withdraw it first.
+- **Judge afresh after every write**: An adaptation changes the result, so the next pass judges the whole result against the whole context again; the run can have more open after a resolution than before it. A mismatch an adaptation aimed at and that is still found is said to be unrepaired; a write that did not land resolves nothing. A turn whose adaptation landed and left nothing open closes the run; the changed result and any adaptation that did not repair what it aimed at appear in the closing trace.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
-- **Kind → resolution form → repair locus**: Bind the mismatch kind first, settle its resolution form second, and derive `RepairSite` only when `Adapt` or `Discard` executes. Repair extent never determines `atomicity`, mismatch identity, registration, or convergence; a partial repair remains visible through the re-scan.
-- **Identity, occurrence, and reading stay distinct**: `identity(m)` names the claim and its supporting evidence, `id` names one run-local occurrence, and `aspect` is its current display reading. Match returns by identity, give every re-registration its own occurrence, surface `unrepaired` when an adaptation did not land, and merge a same-claim detection into the carried element without replacing its identity or handle.

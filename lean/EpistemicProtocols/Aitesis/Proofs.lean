@@ -14,6 +14,11 @@ namespace Aitesis
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance {c : Context P} {i : Item} : Nonempty (Landing c i) := ⟨.userUnknown .couldNot ""⟩
+
 theorem state_unique {c : Context P} {i : Item} {s s' : State}
     (h : inState c s i) (h' : inState c s' i) : s = s' := h.2.symm.trans h'.2
 
@@ -26,10 +31,7 @@ theorem no_reentry (c : Context P) (i : Item) (hreg : Registered c i) (hself : S
 theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
     {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
     (c[s.idx]'s.lt).origin ≠ .assistant := by
-  intro ho
-  have hk := s.ok
-  rw [ai_never_grounds _ ho] at hk
-  cases hk
+  exact cited_not_assistant s
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(push c).map (·.val) ++ (passRecord (c ++ (push c).map (·.val))).map (·.val), by

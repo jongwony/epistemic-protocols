@@ -13,12 +13,13 @@ Audit what a mapping licenses: construct the correspondences between an abstract
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -65,58 +66,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -124,10 +124,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -153,21 +155,18 @@ inductive Axis | sourceScope | targetScope | relation | purpose
     `determined` — fixed by the user's words or a citable standing rule — or `forced` — the
     decomposition admits exactly one value, and the citation is a source turn of `R` showing
     that uniqueness, never the decomposition's own output. -/
-opaque AxisSupported : Axis → Context P → Turn P → String → Prop
+axiom AxisSupported : Axis → Context P → Turn P → String → Prop
 
 def axisCoord : Axis → Coord P String
-  | .purpose => { admits := (· = .utterance), supports := AxisSupported .purpose }
-  | a        => { admits := fun _ => True,     supports := AxisSupported a }
+  | .purpose => { admits := (·.val = .person), supports := AxisSupported .purpose }
+  | a        => { admits := fun _ => True,        supports := AxisSupported a }
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _ => false
   | .filled .. => true
 
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
-
 /-- **Your judgment**: how axis `a` of the comparison focus stands in `c`. -/
-opaque focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
+axiom focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
 
 /-- One axis the protocol would otherwise pick among viable alternatives fires the focus
     gate. -/
@@ -180,11 +179,11 @@ structure Inference where
 
 /-- **Your judgment**: `K`, what this activation audits, derived from the request and the
     settled purpose before construction; non-empty once activated. -/
-opaque inferences : Context P → List Inference
+axiom inferences : Context P → List Inference
 
 /-- **Your judgment**: the latest settlement narrows `K` with no basis in the request or the
     settled purpose. -/
-opaque UnsupportedNarrowing : Context P → Prop
+axiom UnsupportedNarrowing : Context P → Prop
 
 inductive FitLabel
   /-- the target structure preserves the source relation -/
@@ -201,15 +200,15 @@ inductive FitClaim
   | missing (x : Component)
 
 /-- **Your judgment**: the correspondences constructed along the settled focus. -/
-opaque mapping : Context P → List Correspondence
+axiom mapping : Context P → List Correspondence
 
 /-- **Your judgment**: the fit claims over the current mapping — each correspondence in
     exactly one cell, and every source component with no evidenced correspondent missing. -/
-opaque fitClaims : Context P → List FitClaim
+axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed.
     Direction: `references/judgments.md` §BearsOn. -/
-opaque BearsOn : Context P → FitClaim → Inference → Prop
+axiom BearsOn : Context P → FitClaim → Inference → Prop
 
 /-- Who can carry a check out. `userHeld` is context only the user holds; it is met by what
     the user reports observing, and otherwise it is `/inquire`'s deficit. -/
@@ -220,11 +219,13 @@ inductive Reach
 inductive Bearing | supports | defeats
 
 /-- **Your judgment**: the cited turn establishes, within `scope`, that it supports or defeats
-    `x`. A citation's stated bearing is read against its source and scope. -/
-opaque CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
+    `x`. A citation's stated bearing is read against its source and scope. A person's turn
+    bears only where it reports what they observed — a result they ran, a source they read;
+    their assent, agreement, or bare assertion establishes nothing here, whatever its form. -/
+axiom CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
 
 def checkCoord (x : FitClaim) (scope : String) : Coord P Bearing :=
-  { admits := (· ≠ .utterance), supports := CheckSupported x scope }
+  { admits := fun _ => True, supports := CheckSupported x scope }
 
 structure Check (c : Context P) where
   claim        : FitClaim
@@ -240,7 +241,7 @@ structure Check (c : Context P) where
 /-- **Your judgment**: the checks for the current fit claims bearing on `K`, each with its
     state read off the grounds the context now holds. Direction: `references/judgments.md`
     §checks. -/
-opaque checks : (c : Context P) → List (Check c)
+axiom checks : (c : Context P) → List (Check c)
 
 def ChecksExact (c : Context P) : Prop :=
   (∀ x ∈ fitClaims c, (∃ k ∈ inferences c, BearsOn c x k) → ∃ ch ∈ checks c, ch.claim = x) ∧
@@ -254,8 +255,10 @@ def Check.warrant {c : Context P} (ch : Check c) : Warrant :=
   | .filled .supports _ _ _   => .supported
   | .filled .defeats _ _ _    => .defeated
 
+/-- The grounds a verdict cites, each read as evidence — a person's report of what they observed
+    among them, never their assent (`CheckSupported`). -/
 def Grounds (c : Context P) :=
-  {g : List (Cite c) // g ≠ [] ∧ ∀ s ∈ g, s.kind ≠ .utterance}
+  {g : List (Cite c) // g ≠ []}
 
 inductive Verdict (c : Context P)
   /-- grounds support the whole requested inference at its requested scope, with a met check
@@ -265,11 +268,10 @@ inductive Verdict (c : Context P)
   | blocked      (g : Grounds c)
   | undetermined (missing : String)
 
-instance {c : Context P} : Inhabited (Verdict c) := ⟨.undetermined ""⟩  -- elab: for `opaque judge`
 
 /-- **Your judgment** per inference, reading the grounds' bearing on `k` rather than a
     label-to-verdict polarity. -/
-opaque judge : (c : Context P) → Inference → Verdict c
+axiom judge : (c : Context P) → Inference → Verdict c
 
 def Verdict.decisive {c : Context P} : Verdict c → Bool
   | .undetermined _ => false
@@ -279,20 +281,20 @@ def converged (c : Context P) : Prop := ∀ k ∈ inferences c, (judge c k).deci
 
 inductive Pref | adopted | withdrawn
 
-/-- **Your judgment**: the cited utterance adopts or withdraws `x`. -/
-opaque PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
+/-- **Your judgment**: the cited turn of the person's adopts or withdraws `x`. -/
+axiom PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
 
 /-- What the reader takes up. -/
 def prefCoord (x : Correspondence) : Coord P Pref :=
-  { admits := (· = .utterance), supports := PrefSupported x }
+  { admits := (·.val = .person), supports := PrefSupported x }
 
 /-- **Your judgment**: how the user's adoption of `x` stands in `c`. -/
-opaque preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
+axiom preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
 
-/-- **Your judgments**: the source abstraction is located; its member instances are exactly
-    the target. -/
-opaque Located : Context P → Prop
-opaque InstancesAreTarget : Context P → Prop
+/-- **Your judgment**: the source abstraction is located. -/
+axiom Located : Context P → Prop
+/-- **Your judgment**: the source abstraction's member instances are exactly the target. -/
+axiom InstancesAreTarget : Context P → Prop
 
 def selfGrounding (c : Context P) : Prop := Located c ∧ InstancesAreTarget c
 
@@ -320,7 +322,7 @@ def PartitionVerdict.route : PartitionVerdict → Option String
   | .hold  => none
 
 /-- **Your judgment**: the partition reading, or `none` with its missing basis reported. -/
-opaque partition : (c : Context P) → Option (PartitionReading c)
+axiom partition : (c : Context P) → Option (PartitionReading c)
 
 def PartitionScoped (c : Context P) : Prop := (partition c).isSome → selfGrounding c
 
@@ -329,20 +331,20 @@ def partitionRoute {c : Context P} (r : PartitionReading c) : Option String := r
 /-- **Your judgment**: the latest utterance replaces a committed domain — a different question,
     not an advance of this one. The domain pair is committed once a mapping has been constructed
     against it; before that, a reframe may replace either domain and settlement starts again. -/
-opaque Supersedes : Context P → Prop
+axiom Supersedes : Context P → Prop
 
 /-- **Your judgment**: an earlier dependency still needs revision and no evidence move this
     activation can make remains to bring it up to date. -/
-opaque PendingRevision : Context P → Prop
+axiom PendingRevision : Context P → Prop
 
 /-- **Your judgment**: what mapping licenses is uncertain here, with a target account in play. -/
-opaque Uncertain : Context P → Prop
+axiom Uncertain : Context P → Prop
 
 /-- **Your count**, read from the record: construction or fit passes run in this activation. -/
-opaque reconstructions : Context P → Nat
+axiom reconstructions : Context P → Nat
 
 /-- **Your judgment**: the pending request needs another construction or fit pass. -/
-opaque NeedsReconstruction : Context P → Prop
+axiom NeedsReconstruction : Context P → Prop
 
 def maxReconstructions : Nat := 3
 
@@ -401,8 +403,8 @@ noncomputable def report (c : Context P) : Report c :=
   else .inconclusive .openEvidence
 
 /-- **Your evidence moves** for a pass: what the reachable checks returned — artifact reads,
-    searches, fetches, and runs — each an observation turn. -/
-opaque observe : Context P → List (Evidence P)
+    searches, fetches, and runs — each an evidence turn. -/
+axiom observe : Context P → List (Evidence P)
 
 def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
 
@@ -466,13 +468,9 @@ demonstrated, not asserted.
 theorem assessment_converged (c : Context P) (h : report c = .assessment) :
     focusSettled c ∧ converged c
 
-Assent never meets a check: what fills a check state is evidence, never an utterance.
-theorem check_never_assent {c : Context P} {x : FitClaim} {scope : String} (s : Cite c)
-    (ok : (checkCoord (P := P) x scope).admits s.kind) : s.kind ≠ .utterance
-
 The comparison purpose is filled only by the user's own words.
-theorem purpose_by_utterance {c : Context P} {s : Cite c}
-    (ok : (axisCoord (P := P) .purpose).admits s.kind) : s.kind = .utterance
+theorem purpose_by_person {c : Context P} {s : Cite c}
+    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person
 
 A replacement of a committed domain closes the activation at once.
 theorem superseded_first (respond : Context P → Response P) (c : Context P)
@@ -513,6 +511,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
+
+end
 
 end Analogia
 ```

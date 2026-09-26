@@ -1,12 +1,12 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-Protocol learning, work-unit triage, and decision-point utilities for Claude Code and Codex.
+Protocol learning, work orchestration, and decision-point utilities for Claude Code and Codex.
 
 > [한국어](./README_ko.md)
 
 ## What is Epistemic Cooperative?
 
-A utility plugin spanning epistemic protocol onboarding, work orchestration, and decision-point utilities. It is where you start — hands-on protocol learning, work units formed from issues — and also where several skills act at specific decision points of their own, checking a drafted gate's option set and driving a review to convergence.
+A utility plugin spanning epistemic protocol onboarding, work orchestration, and decision-point utilities. It is where you start — hands-on protocol learning — and also where several skills act at specific decision points of their own, checking a drafted gate's option set and driving a review to convergence.
 
 ### Skills
 
@@ -14,7 +14,6 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/probe` | Deficit recognition fit review — multiple deficit hypotheses with reverse-evidence conditions, routed by user recognition | Protocol route |
-| `/triage` | Work-unit triage from GitHub issues | Routed work units, externalized to substrate records a collaborator session is pointed at |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop — converges the artifact on the project's stated goal | Applied fixes + handovers + convergence trace |
@@ -40,7 +39,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |-------|-------------|
 | 0. Entry | Choose path: quick recommendation / targeted learning / browse all |
 | 1. Quick Scan | Collect recent session metadata inline (Glob + Read) |
-| 2a. Pick-1 | Quick path: select 1 recommendation from `/elicit`, `/inquire`, `/frame` |
+| 2a. Pick-1 | Quick path: select 1 recommendation from `/elicit`, `/inquire` |
 | 2b. Evidence | Quick path: show 1 evidence card (max 2 lines) |
 | 2. Map | Targeted path: match patterns to protocols via compact mapping |
 | 3. Scenario | Targeted path: present intervention point with preset scenarios |
@@ -51,24 +50,9 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 Key features:
 - **Value before learning**: quick path proves value in under 3 minutes
 - **One at a time**: 1 recommendation, 1 evidence card, 1 trial — no catalog required
-- **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` — unified for Quick and Targeted fallback
+- **Onboarding Pool**: `/elicit`, `/inquire` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
-
-### /triage — Work-Unit Formation
-
-Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and forms focused work units. Once the user picks a route, `/triage` externalizes each routed unit to a substrate-owned record and hands the receiving session a navigation block over it. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
-
-```
-RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → EXTERNALIZE (WorkUnitRecord) → POINT
-```
-
-Key features:
-- bare `/triage` performs lightweight open-backlog metadata intake, then classifies small / medium / large posture from issue load, repo load, mapping load, and intent ambiguity
-- similarity grouping by problem pressure rather than labels alone
-- `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
-- route choice belongs to the current session: independent session or re-triage
-- a unit routed to an independent session externalizes its record and is handed over by pointer; re-triage externalizes no record
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
@@ -113,7 +97,6 @@ epistemic-cooperative/
 └── skills/
     ├── onboard/SKILL.md          # /onboard quest-based protocol learning
     ├── probe/SKILL.md            # /probe deficit recognition fit review
-    ├── triage/SKILL.md           # /triage work-unit formation
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop convergence-paced review-resolve loop
@@ -131,7 +114,6 @@ epistemic-cooperative/
 | New to epistemic protocols | `/onboard` |
 | Want hands-on protocol learning | `/onboard` |
 | Re-evaluating protocol fit after workflow changes | `/onboard` |
-| Turning related GitHub issues into focused work units | `/triage` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 | Something feels off but the deficit is not yet named | `/probe` |
 | Driving a change through review until every finding is disposed of | `/review-loop` |
@@ -152,8 +134,6 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 ```
 /onboard
 /probe
-/triage
-/triage #41 #52 #60
 /review-loop codex 123
 /goal-research <question>
 ```

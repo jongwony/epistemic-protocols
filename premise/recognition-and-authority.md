@@ -49,4 +49,6 @@ Separate authority to settle a question from allocation of the work that informs
 
 At assignment and reception, derive the applicable grant from its reachable source and current revisions. Reassignment neither enlarges the grant nor substitutes the coordinator for a retained judgment holder. A delegate can settle what the source actually entrusts and report its decision with the basis.
 
+Where the work will proceed without the person present, solicit the grant it needs at assignment rather than at the moment of need. Anticipate the open judgments and effects the work will reach and ask for each grant then, stated by kind, target, and limit, since the exact content forms only at runtime. Soliciting early changes when a grant is given, never how far it reaches: what was not anticipated, and what the holder retains, stays a runtime question.
+
 Keep a pointer to that ground. If it cannot be recovered, leave the affected judgment unresolved while continuing independent work. A grant to perform work is not an answer to a checkpoint whose contract still requires the person's response.

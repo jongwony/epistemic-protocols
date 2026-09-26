@@ -16,6 +16,10 @@ import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { beginAttempt, finishAttempt, captureArtifacts, errorEvidence, readOutcome, sessionKey } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
+
+import { takeSessionLock } from "../skills/recollect/scripts/session-lock.mjs";
+
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = path.dirname(SCRIPT_PATH);
 const SCHEMA_PATH = path.join(SCRIPT_DIR, "hypomnesis-codex-schema.json");
@@ -38,9 +42,7 @@ function log(root, sessionId, message) {
   } catch {}
 }
 
-function safeId(value) {
-  return String(value ?? "unknown").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 160) || "unknown";
-}
+const safeId = (value) => sessionKey("codex", value);
 
 function resolveCodexHome(env = process.env) {
   return env.CODEX_HOME || path.join(os.homedir(), ".codex");
@@ -87,8 +89,19 @@ function enqueueCodexJob(input, { root = resolveStoreRoot() } = {}) {
   const transcriptPath = input?.transcript_path;
   if (!EVENTS.has(event) || !sessionId || !isCodexTranscript(transcriptPath)) return null;
 
-  const revision = statRevision(transcriptPath);
-  if (!revision) return null;
+  let revision;
+  let inputError;
+  try { revision = statRevision(transcriptPath); }
+  catch (error) { inputError = error; }
+  if (!revision) {
+    const release = takeSessionLock(root, safeId(sessionId), { staleAfterMs: WORKER_TIMEOUT_MS * 2 });
+    if (!release) return null;
+    try {
+      const attempt = beginAttempt(root, sessionId, { runtime: "codex", revision: null, source_transcript: transcriptPath, source_event: event });
+      if (attempt) finishAttempt(root, attempt, { state: "complete", extractors: { codex: { state: "input_failed", reason: "transcript unavailable", ...(inputError ? { evidence: errorEvidence(inputError) } : {}) } }, publication: { state: "none", artifacts: [] } });
+    } finally { release(); }
+    return null;
+  }
   const jobDir = path.join(root, ".queue", safeId(sessionId));
   fs.mkdirSync(jobDir, { recursive: true });
   const job = {
@@ -274,7 +287,7 @@ function callCodexExtractor(session, { root, run = spawnSync }) {
   const outputPath = path.join(workDir, "result.json");
   try {
     const prompt = buildExtractionPrompt(session);
-    const result = run("codex", buildCodexCommandArgs({
+    const args = buildCodexCommandArgs({
       // Extract from the empty work directory, never the session's own cwd:
       // an AGENTS.md at the working directory is injected as authoritative
       // instruction, which neither --ignore-rules nor --ignore-user-config
@@ -286,17 +299,21 @@ function callCodexExtractor(session, { root, run = spawnSync }) {
       cwd: workDir,
       outputPath,
       prompt,
-    }), {
+    });
+    let result;
+    try { result = run("codex", args, {
       encoding: "utf8",
       timeout: WORKER_TIMEOUT_MS,
       maxBuffer: 8 * 1024 * 1024,
       stdio: ["ignore", "pipe", "pipe"],
-    });
-    if (result.error) throw result.error;
-    if (result.status !== 0) {
-      throw new Error(`codex exec exited ${result.status}: ${(result.stderr ?? "").slice(-2000)}`);
+    }); } catch (error) { throw Object.assign(error, { stage: "invocation_failed" }); }
+    if (result.error || result.status !== 0) {
+      throw Object.assign(result.error || new Error(`codex exec exited ${result.status}`), {
+        stage: "invocation_failed", stderr: result.stderr, status: result.status, signal: result.signal,
+      });
     }
-    return JSON.parse(fs.readFileSync(outputPath, "utf8"));
+    try { return JSON.parse(fs.readFileSync(outputPath, "utf8")); }
+    catch (error) { throw Object.assign(error, { stage: "validation_failed", stderr: result.stderr }); }
   } finally {
     fs.rmSync(workDir, { recursive: true, force: true });
   }
@@ -451,47 +468,153 @@ function publishRecord(root, job, record) {
   return true;
 }
 
-function processJob(root, job, { extract = callCodexExtractor } = {}) {
-  const before = statRevision(job.transcript_path);
-  if (!before) throw new Error("transcript disappeared before extraction");
-  // Any difference, not only growth: a truncated or replaced transcript is a
-  // different source than the one queued, and extracting it under the queued
-  // revision would publish a partial record as that revision's own.
-  if (compareRevision(before, job.revision) !== 0) {
+function validateExtraction(value) {
+  const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
+  const check = (item, rule, location) => {
+    const type = Array.isArray(item) ? "array" : item === null ? "null" : typeof item;
+    if (type !== rule.type) throw new Error(`${location}: expected ${rule.type}`);
+    if (type === "object") {
+      for (const key of rule.required || []) if (!Object.hasOwn(item, key)) throw new Error(`${location}.${key}: required`);
+      for (const key of Object.keys(item)) {
+        if (!rule.properties[key]) throw new Error(`${location}.${key}: unexpected property`);
+        check(item[key], rule.properties[key], `${location}.${key}`);
+      }
+    }
+    if (type === "array") {
+      if (item.length > rule.maxItems) throw new Error(`${location}: exceeds maxItems`);
+      item.forEach((entry, index) => check(entry, rule.items, `${location}[${index}]`));
+    }
+  };
+  try { check(value, schema, "extraction"); }
+  catch (error) { throw Object.assign(error, { stage: "validation_failed" }); }
+  return value;
+}
+
+function hasSemanticContent(value) {
+  if (typeof value === "string") return value.trim().length > 0;
+  return value && typeof value === "object" && Object.values(value).some(hasSemanticContent);
+}
+
+function publicationArtifacts(root, job, tolerateMissing = false) {
+  return [
+    path.join(root, safeId(job.session_id), "generations", revisionKey(job.revision), "record.json"),
+    path.join(root, "catalog", `${safeId(job.session_id)}.json`),
+    path.join(root, safeId(job.session_id), "current.json"),
+  ].flatMap((filename) => {
+    try {
+      const value = JSON.parse(fs.readFileSync(filename, "utf8"));
+      if (compareRevision(value.revision, job.revision) !== 0) return [];
+      return captureArtifacts([filename]);
+    } catch (error) {
+      if (tolerateMissing) return [];
+      throw error;
+    }
+  });
+}
+
+function processJob(root, job, { extract = callCodexExtractor, owns } = {}) {
+  const attempt = beginAttempt(root, job.session_id, {
+    runtime: "codex", revision: job.revision,
+    source_transcript: job.transcript_path, source_event: job.hook_event_name,
+  });
+  if (!attempt) return { published: false, declined: true };
+  const extractors = {};
+  let publishing = false;
+  let reuseReceiptId;
+  let reusing = false;
+  const finish = (result, publication = { state: "none", artifacts: [] }) => {
+    if (attempt) finishAttempt(root, attempt, { state: result.stale || result.declined ? "superseded" : "complete", extractors, publication });
+    return result;
+  };
+  const supersede = (counts = {}) => {
+    extractors.codex ||= { state: "skipped", reason: "source revision changed" };
+    finish({ stale: true });
     const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true, requeued: requeued?.path ?? null };
-  }
+    return { stale: true, requeued: requeued?.path ?? null, ...counts };
+  };
+  const publish = (record, extra) => {
+    if (owns && !owns()) return finish({ stale: true, ...extra });
+    publishing = true;
+    const published = publishRecord(root, job, record);
+    const publication = {
+      state: published ? "complete" : "none", artifacts: published ? publicationArtifacts(root, job).map((artifact) => ({ ...artifact, ...(reusing ? { receipt_id: reuseReceiptId } : {}) })) : [],
+    };
+    publishing = false;
+    return finish({ published, declined: !published, ...extra }, publication);
+  };
+  try {
+    let before;
+    try { before = statRevision(job.transcript_path); }
+    catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    if (!before) throw Object.assign(new Error("transcript disappeared before extraction"), { stage: "input_failed" });
+    if (compareRevision(before, job.revision) !== 0) return supersede();
 
-  const existingRecord = readGenerationRecord(root, job);
-  if (existingRecord) {
-    const published = publishRecord(root, job, existingRecord);
-    return { published, declined: !published, reused: true };
-  }
+    const existingRecord = readGenerationRecord(root, job);
+    if (existingRecord) {
+      const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
+      validateExtraction(Object.fromEntries(Object.keys(schema.properties).map((key) => [key, existingRecord[key]])));
+      const generationPath = path.join(root, safeId(job.session_id), "generations", revisionKey(job.revision), "record.json");
+      const descriptor = captureArtifacts([generationPath])[0];
+      const prior = [...(attempt.retained_artifacts || []), ...(attempt.last_publication?.artifacts || [])].find((artifact) => artifact.path === descriptor.path && artifact.sha256 === descriptor.sha256);
+      reuseReceiptId = prior?.receipt_id ?? null;
+      reusing = true;
+      extractors.codex = { state: "skipped", reason: "reused immutable generation; original extraction not rerun" };
+      if (existingRecord.source_scan?.skipped_lines > 0) extractors.input = { state: "input_failed", reason: "reused generation records malformed JSONL input" };
+      return publish(existingRecord, { reused: true });
+    }
 
-  const session = parseCodexRollout(job.transcript_path);
-  const parseCounts = { skipped_lines: session.skipped_lines, unverified_user_turns: session.unverified_user_turns };
-  if (session.user_messages.length === 0) return { empty: true, ...parseCounts };
-  const extraction = extract(session, { root, job });
-  const record = recordFor(job, session, extraction);
-
-  const after = statRevision(job.transcript_path);
-  if (compareRevision(after, job.revision) !== 0) {
-    const requeued = enqueueCodexJob({ ...job, revision: undefined }, { root });
-    return { stale: true, requeued: requeued?.path ?? null, ...parseCounts };
+    let session;
+    try { session = parseCodexRollout(job.transcript_path); }
+    catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    const parseCounts = { skipped_lines: session.skipped_lines, unverified_user_turns: session.unverified_user_turns };
+    if (session.skipped_lines > 0) extractors.input = { state: "input_failed", reason: "malformed JSONL input" };
+    if (session.user_messages.length === 0) {
+      extractors.codex = { state: "empty", reason: "no user messages" };
+      return finish({ empty: true, ...parseCounts });
+    }
+    const extraction = validateExtraction(extract(session, { root, job }));
+    extractors.codex = { state: hasSemanticContent(extraction) ? "succeeded" : "empty" };
+    const record = recordFor(job, session, extraction);
+    let after;
+    try { after = statRevision(job.transcript_path); }
+    catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    if (!after) throw Object.assign(new Error("transcript disappeared during extraction"), { stage: "input_failed" });
+    if (compareRevision(after, job.revision) !== 0) return supersede(parseCounts);
+    const latest = chooseLatestJob(readJobs(root, job.session_id));
+    if (latest && compareRevision(latest.revision, job.revision) > 0) return finish({ stale: true, ...parseCounts });
+    return publish(record, { record, ...parseCounts });
+  } catch (error) {
+    if (error.operation === "outcome_persistence") {
+      error.attempt_id = attempt.attempt_id;
+      throw error;
+    }
+    let artifacts = [];
+    let artifactError;
+    if (publishing) {
+      try { artifacts = publicationArtifacts(root, job, true).map((artifact) => ({ ...artifact, ...(reusing ? { receipt_id: reuseReceiptId } : {}) })); }
+      catch (failure) { artifactError = errorEvidence(failure); }
+    } else if (error.stage) {
+      const component = error.stage === "input_failed" ? "input" : "codex";
+      extractors[component] = { state: error.stage, evidence: errorEvidence(error) };
+    }
+    try { finishAttempt(root, attempt, {
+      state: "complete", extractors,
+      ...(!publishing && !error.stage ? { execution: { state: "failed", evidence: errorEvidence(error) } } : {}),
+      publication: { state: publishing ? (artifacts.length ? "partial" : "failed") : "none", artifacts, ...(publishing ? { evidence: errorEvidence(error), ...(artifactError ? { artifact_error: artifactError } : {}) } : {}) },
+    }); } catch (persistenceError) {
+      persistenceError.attempt_id = attempt.attempt_id;
+      persistenceError.cause ??= error;
+      throw persistenceError;
+    }
+    error.attempt_id = attempt.attempt_id;
+    throw error;
   }
-  const latest = chooseLatestJob(readJobs(root, job.session_id));
-  if (latest && compareRevision(latest.revision, job.revision) > 0) return { stale: true, ...parseCounts };
-  const published = publishRecord(root, job, record);
-  // A false here is the pointer declining an older revision, which is the
-  // forward-only contract working, not a no-op — the two must not report alike.
-  return { published, declined: !published, record, ...parseCounts };
 }
 
 function runWorker(root, sessionId, options = {}) {
   fs.mkdirSync(root, { recursive: true });
-  const lockDir = path.join(root, ".locks", safeId(sessionId));
-  fs.mkdirSync(path.dirname(lockDir), { recursive: true });
-  if (!acquireLock(lockDir)) return false;
+  const release = takeSessionLock(root, safeId(sessionId), { staleAfterMs: WORKER_TIMEOUT_MS * 2 });
+  if (!release) return false;
 
   // Bounds each job path to at most one retry before quarantine (FIX 4): a
   // job left in the queue after its first failure is picked up again by the
@@ -500,10 +623,11 @@ function runWorker(root, sessionId, options = {}) {
   const failureCounts = new Map();
   try {
     for (;;) {
+      if (!release.owned()) break;
       const job = chooseLatestJob(readJobs(root, sessionId));
       if (!job) break;
       try {
-        const result = processJob(root, job, options);
+        const result = processJob(root, job, { ...options, owns: release.owned });
         const outcome = result.published ? "published" : result.stale ? "stale" : result.empty ? "empty" : result.declined ? "declined-older-revision" : "unchanged";
         const counts = result.skipped_lines != null
           ? ` skipped_lines=${result.skipped_lines} unverified_user_turns=${result.unverified_user_turns}`
@@ -513,6 +637,16 @@ function runWorker(root, sessionId, options = {}) {
       } catch (error) {
         const failureCount = (failureCounts.get(job._path) ?? 0) + 1;
         failureCounts.set(job._path, failureCount);
+        const failedAttempt = readOutcome(root, job.session_id, "codex").attempt;
+        if (error.operation !== "outcome_persistence" && failedAttempt && error.attempt_id === failedAttempt.attempt_id) {
+          try {
+            finishAttempt(root, failedAttempt, {
+              retry: { failures: failureCount, disposition: failureCount < 2 ? "pending" : "quarantined" },
+            });
+          } catch (persistenceError) {
+            log(root, sessionId, `retry annotation failed: ${persistenceError.stack ?? persistenceError.message}`);
+          }
+        }
         if (failureCount < 2) {
           log(root, sessionId, `failed ${job._path} (retry ${failureCount}): ${error.stack ?? error.message}`);
           continue;
@@ -525,80 +659,13 @@ function runWorker(root, sessionId, options = {}) {
       }
     }
   } finally {
-    try {
-      const owner = JSON.parse(fs.readFileSync(path.join(lockDir, "owner.json"), "utf8"));
-      if (owner.pid === process.pid) fs.rmSync(lockDir, { recursive: true, force: true });
-    } catch {}
+    release();
   }
 
   // Close the lost-wakeup window: a hook may have queued work after the final
   // empty scan but before lock release, while its own worker saw this lock.
   if (readJobs(root, sessionId).length > 0) spawnWorker(root, sessionId);
   return true;
-}
-
-function acquireLock(lockDir) {
-  const create = () => {
-    fs.mkdirSync(lockDir);
-    atomicWriteJson(path.join(lockDir, "owner.json"), {
-      pid: process.pid,
-      acquired_at: new Date().toISOString(),
-    });
-    return true;
-  };
-  try { return create(); }
-  catch (error) {
-    if (error.code !== "EEXIST") throw error;
-  }
-
-  let stale = false;
-  let judgedOwner = null;   // the exact owner record the staleness verdict was made about
-  try {
-    judgedOwner = fs.readFileSync(path.join(lockDir, "owner.json"), "utf8");
-    const owner = JSON.parse(judgedOwner);
-    // Liveness decides, and age on its own never does: a worker draining
-    // several jobs can outlive any fixed age bound while still publishing, and
-    // stealing its lock puts two writers on one session's catalog and pointer.
-    // A wedged owner is bounded instead by the extraction timeout each job
-    // already carries. Residual: a recycled pid reads as alive, which holds the
-    // lock rather than corrupting anything.
-    let ownerAlive = true;
-    try { process.kill(owner.pid, 0); }
-    catch (error) { ownerAlive = error.code !== "ESRCH"; }
-    stale = !ownerAlive;
-  } catch {
-    // No readable owner record, so liveness cannot be tested — age is all there is.
-    try {
-      stale = Date.now() - fs.statSync(lockDir).mtimeMs > WORKER_TIMEOUT_MS * 2;
-    } catch { stale = true; }
-  }
-  if (!stale) return false;
-  // Rename-to-steal: the rename is atomic, so exactly one racer observes it
-  // succeed. A racer that loses finds lockDir already gone and backs off
-  // instead of deleting the winner's brand-new lock out from under it.
-  const stolenDir = `${lockDir}.stale.${process.pid}.${randomUUID()}`;
-  try { fs.renameSync(lockDir, stolenDir); }
-  catch { return false; }
-  // ABA guard: between judging that lock stale and renaming it, another racer
-  // can have taken the same one and put its own live lock at the same path, so
-  // an atomic rename alone only proves something was taken — not that it was
-  // the thing judged. Confirm the record taken is the record the verdict was
-  // about; otherwise put it back and back off rather than displacing a live
-  // owner. Residual: if a third contender claims the path between the restore's
-  // two steps, the restore fails and the taken lock is left in place as
-  // evidence rather than removed.
-  let stolenOwner = null;
-  try { stolenOwner = fs.readFileSync(path.join(stolenDir, "owner.json"), "utf8"); } catch {}
-  if (stolenOwner !== judgedOwner) {
-    try { fs.renameSync(stolenDir, lockDir); } catch {}
-    return false;
-  }
-  fs.rmSync(stolenDir, { recursive: true, force: true });
-  try { return create(); }
-  catch (error) {
-    if (error.code === "EEXIST") return false;
-    throw error;
-  }
 }
 
 export {

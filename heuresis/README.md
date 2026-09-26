@@ -24,12 +24,11 @@ Some candidate fields are underexpanded (`CandidateFieldUnderexpanded`): the goa
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Euporia | Hybrid | `AbstractAporia → ResolvedEndpoint` |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | **Heuresis** | **User-initiated** | **`CandidateFieldUnderexpanded → DiverseCandidateField`** |
 
-**Where it sits**: Prothesis places analytical *lenses* on a fixed inquiry — heuresis's `GenerationFrame` is a different thing entirely, a temporary partition for parallel idea production, never handed off as an analytical perspective. Proplasma previews *directions* once two or more candidates already exist and need to be seen before choosing — heuresis sits upstream of that, at the point where the field itself needs widening. Euporia reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions) — heuresis never scans that substrate; it reads only the invocation utterance and whatever prior output you explicitly chain in.
+**Where it sits**: heuresis's `GenerationFrame` is not an analytical lens on a fixed inquiry — it is a temporary partition for parallel idea production, never handed off as an analytical perspective. Proplasma previews *directions* once two or more candidates already exist and need to be seen before choosing — heuresis sits upstream of that, at the point where the field itself needs widening. Euporia reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions) — heuresis never scans that substrate; it reads only the invocation utterance and whatever prior output you explicitly chain in.
 
 **Routing precedence**: two or more candidates already exist and just need to be seen → `/preview`; the seed material lives outside this conversation → run a collection protocol first (e.g. `/inquire`) and chain its output in; the candidate field itself is thin or stalled → **`/ideate`**.
 

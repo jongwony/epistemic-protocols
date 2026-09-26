@@ -8,15 +8,11 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 
 잘못된 방향을 계획 단계에서 고치면 대화 한 턴이면 될 수 있습니다.
 그 어긋남이 코드, 배포 단계, 후속 설명으로 굳어지면 몇 시간의 재작업이 될 수 있습니다.
-이 프로토콜은 의도, 목표, 맥락, 관점, 실행, 적용성, 회상, 이해 같은 결정 지점에 구조화된 체크포인트를 삽입해, 어긋남을 커지기 전에 드러내고 판단하고 조정하게 합니다.
+이 프로토콜은 중요한 결정 지점마다 구조화된 점검 절차를 두어, 잘못된 방향 위에 후속 작업이 쌓이기 전에 사람과 AI가 함께 방향을 바로잡도록 돕습니다.
 
-## 미션과 구조 (Mission and Machinery)
+## 프로토콜이 도움이 되는 순간
 
-**명시된 미션 (Stated Mission)** — 공개 진입점: 잘못된 방향을 일찍, 특히 계획 단계에서 잡는 것. 가장 명확한 진입 스토리이며 대부분의 사용자가 프로토콜에 이르는 경로입니다.
-
-**실제 구조 (Realized Machinery)** — 실제 커버리지: 구조화된 체크포인트가 계획, 분석, 결정, 실행, 검증, 회상, 이해에 걸쳐 작동합니다. Merismos(목표를 조건 붙은 실행 단위로 분배), Epharmoge(사후 적용성), Anamnesis(세션 회상), Katalepsis(이해 검증) 같은 프로토콜은 계획 단계 너머까지 확장됩니다.
-
-두 층은 다른 청중을 대상으로 합니다: README는 좁은 공개 계약을 운반하고, `SKILL.md`와 `CLAUDE.md`는 전체 구조를 서술합니다. 두 층을 정합하게 유지하는 거버넌스 규칙은 [docs/mission-bridge.md](./docs/mission-bridge.md)를 참조하세요.
+계획 단계에서 잘못된 방향을 발견하고, 후속 작업으로 이어지기 전에 바로잡으세요. 같은 구조화된 점검 절차는 작업을 자율 실행에 넘길 때, 결과가 실제 상황에 맞는지 확인할 때, 이전 논의를 떠올릴 때, 무언가를 이해했는지 확인하고 그 위에 쌓아 올리기 전에도 도움이 됩니다.
 
 ## 빠른 시작
 
@@ -28,9 +24,9 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 여러 영역에 걸친 리팩터링 전에 `/bound`.
+그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 작업에서 무엇을 결정해야 할지 아직 보이지 않을 때 `/bound`.
 
-유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·결핍 인식(`/onboard`, `/probe`)과 컨트리뷰터 도구를, `route`는 세션 훅들 — 매 프롬프트 라우팅 지시문, 세션 시작에 설치된 프로토콜의 결핍 테이블과 그 아래 [premise](./premise) 색인, 그리고 매처가 premise 문서의 순간이라고 볼 수 있는 도구 호출 — 바뀌는 지시 표면, 에이전트에게 넘기는 일 — 시점에 그 문서의 항목을 한 번 더 — 담습니다. 필요한 쪽을 따로 추가하세요:
+유틸리티 플러그인은 opt-in으로, 별도로 설치합니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 결핍 인식(`/probe`), 컨트리뷰터 도구를 제공합니다. 실험 단계인 [`route`](#route)는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 필요한 플러그인을 추가하세요:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -65,32 +61,26 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 | 프로토콜 | 명령어 | 사용 시점 |
 |----------|--------|----------|
-| [Aitesis](./aitesis) | `/inquire` | AI가 필요한 걸 묻지 않고 바로 실행할 때 |
-| [Euporia](./euporia) | `/elicit` | 의도는 있지만 결정 좌표가 externalized substrate(코드베이스·규칙·과거 세션)에 암묵적으로만 존재할 때 — 역추적(reverse-trace)하여 의도를 결정화 |
-| [Heuresis](./heuresis) | `/ideate` | 결정을 위한 후보군이 비어 있거나 너무 일찍 하나로 수렴했을 때 — 선택하기 전에 다양한 후보군으로 먼저 넓힐 때 |
-| [Proplasma](./proplasma) | `/preview` | 결정 직전인데 방향 후보들이 말로는 판단이 안 서고 직접 봐야 알 것 같을 때 — 폐기 전제의 값싼 probe들로 먼저 대비 |
-| [Hypotyposis](./hypotyposis) | `/sketch` | 형태를 만들어야 하는데 무엇이어야 하는지는 말할 수 없고 보면 알아볼 수 있을 때 — 스케치하고, 맞지 않는 곳을 표시하고, 보존된 버전을 고쳐, 알아본 버전으로 마무리 |
-| [Prothesis](./prothesis) | `/frame` | 분석을 시작하기 전에 어떤 렌즈로 볼지 정해야 할 때 — 렌즈가 하나든 여럿이든 |
-| [Analogia](./analogia) | `/ground` | 이미 있는 대상 설명에 대한 매핑이 어떤 결론을 어디까지 뒷받침하는지 불확실할 때 |
-| [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
-| [Merismos](./merismos) | `/apportion` | 자율 실행에 목표를 넘기기 직전 — 한 구간에 맞는 단위로 자르고 각 단위를 먼저 닫을 때 — 컴파일되면 자기 완료 조건으로, 안 되면 기록한 수용으로, 검사가 아니라 판단이 정하는 항목이면 유보로 |
-| [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
-| [Elenchus](./elenchus) | `/sublate` | working context를 외부화하기 직전, 변증법적으로 검증이 필요할 때 |
-| [Horismos](./horismos) | `/bound` | 인식론적 경계가 정의되지 않았을 때 — 방향/우선순위, 범위, 유형/개념, 또는 누가 결정할지(ownership) |
+| [Aitesis](./aitesis) | `/inquire` | 작업에 필요한 맥락이 빠져 있거나 확인하지 않은 전제가 있어, 무엇이 아직 불확실한지 짚어야 할 때 |
+| [Euporia](./euporia) | `/elicit` | 하고 싶은 것은 대략 있는데 어떤 결정들이 걸려 있는지 아직 짚지 못할 때 — 단서는 코드베이스·규칙·과거 세션 같은 내 자료에 있을 때 |
+| [Heuresis](./heuresis) | `/ideate` | 후보가 아직 없거나 너무 일찍 하나로 좁혀졌을 때 — 고르기 전에 후보를 먼저 넓게 펼칠 때 |
+| [Proplasma](./proplasma) | `/preview` | 여러 방향 중 하나로 정하기 직전인데 설명만으로는 판단이 안 서고 직접 봐야 알 것 같을 때 |
+| [Hypotyposis](./hypotyposis) | `/sketch` | 무언가를 만들어야 하는데 어떤 모습이어야 하는지 말로는 못 하지만 보면 알아볼 수 있을 때 |
+| [Analogia](./analogia) | `/ground` | 어떤 틀이나 유비를 이미 눈앞에 있는 사례에 가져다 쓰거나 추상을 그 사례들에 비춰 보는데, 그 비교가 실제로 무엇을 어디까지 뒷받침하는지 분명하지 않을 때 |
+| [Periagoge](./periagoge) | `/induce` | 여러 구체적 사례가 무언가를 공유하는 것 같은데 아직 이름 붙이지 못했을 때 — 그 공통점을 붙잡을 때 |
+| [Merismos](./merismos) | `/apportion` | 목표 하나를 자율 실행에 넘기기 직전 — 한 번의 실행 구간에 들어가는 단위로 자르고, 단위마다 언제 끝났는지 판단할 수 있게 할 때 |
+| [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 실제 상황에 안 맞을 수 있을 때 |
+| [Elenchus](./elenchus) | `/sublate` | 행동의 근거로 삼으려는 작업 맥락이 여전히 유효한지 의심스러울 때 — 낡았거나 출처가 약하거나 서로 어긋나는 부분을 행동 전에 변증법적으로 검증 |
+| [Horismos](./horismos) | `/bound` | 작업에서 무엇을 결정해야 하는지, 어떤 결정은 직접 내리고 어떤 결정은 맡길지 아직 분명하지 않을 때 |
 | [Anamnesis](./anamnesis) | `/recollect` | 이전에 논의했던 무언가가 막연히 기억나지만 구체적으로 짚어낼 수 없을 때 — 한 세션이든, 여러 세션에 걸친 작업 라인·토픽·개념이든 |
-| [Katalepsis](./katalepsis) | `/grasp` | 코드·논문·큰 변경을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없거나 — 승인·활용 전에 이해가 진짜인지 검증 |
-| [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
+| [Katalepsis](./katalepsis) | `/grasp` | 코드·문서·결과처럼 눈앞에 있는 것을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없을 때 |
+| [Hyphegesis](./hyphegesis) | `/conduct` | 여러 갈래의 사고가 필요한데 그 순서, 따로 돌릴 수 있는지, 결과를 어떻게 합칠지, 언제 멈출지, 각 결과가 어디로 갈지가 자명하지 않을 때 — 시작하기 전에 작업 방식을 정할 때 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/frame`, `/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## 유틸리티
 
-프로토콜 옆에 플러그인 둘이 있습니다. 둘 다 Claude Code 한 줄 설치에서는 opt-in입니다:
-
-```bash
-claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
-```
+Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claude-code)을 참고하세요.
 
 ### [Epistemic Cooperative](./epistemic-cooperative)
 
@@ -102,7 +92,6 @@ claude plugin install route@epistemic-protocols
 | `/onboard` | 처음 왔을 때 — 최근 세션에서 추천 하나를 받고, 원하면 시나리오·실행·퀴즈로 학습 |
 | `/probe` | 뭔가 어긋났는데 어떤 결핍인지 이름 붙일 수 없을 때 — 가설 여럿을 제시하고 당신의 인식으로 라우팅 |
 | **작업 빚기** | |
-| `/triage` | 쌓인 GitHub 이슈를 프로젝트 northstar와 융합한 focused work unit으로 만들고, 각 unit을 포인터로 세션에 넘겨야 할 때 |
 | `/forge` | 기억이 아니라 벤더 레퍼런스(모델 prompt guide, Codex Goals 스펙)에 grounding된 prompt나 상주 skill recipe가 필요할 때 |
 | `/reduced-space-test` | 대리물이 실제 대상처럼 동작한다는 주장 — bounded 공간 안에서 검증하고 검증 안 된 나머지를 명시적으로 이월 |
 | `/gate-check` | 옵션 집합이 당신에게 제시되기 직전 — 독립 advisor가 genuine / collapsed / malformed를 판정하고 인용 근거를 먼저 검증 |
@@ -118,31 +107,23 @@ claude plugin install route@epistemic-protocols
 
 ### [Route](./route)
 
+> **실험 단계.** 훅 구성과 주입되는 문구는 릴리스마다 바뀔 수 있고, 선택형 권고 채널은 아직 검증되지 않았습니다 — 어느 쪽이든 기대기 전에 [route/README_ko.md](./route/README_ko.md)를 확인하세요.
+
 컨텍스트 기반 프로토콜 라우팅. 세션 시작 훅이 설치된 프로토콜의 결핍 테이블과 [premise](./premise) 색인을 컨텍스트 머리에, 컨텍스트 에포크마다 한 번 놓고, 매 프롬프트 훅이 프롬프트 옆에 짧은 지시문을 놓습니다. 쌓인 컨텍스트가 설치된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출하고, 여럿이 맞으면 넛지하고, 없으면 침묵합니다. 호출된 프로토콜의 첫 게이트가 당신의 판단을 그 자리에 그대로 둡니다.
-
-## 설계
-
-각 프로토콜은 인간-AI 협업이 어긋날 수 있는 특정 결정 지점을 다룹니다. 공개 문서는 계획 단계의 진입 훅을 앞세우고, 컨트리뷰터 문서는 계획/실행/검증/회상/이해까지 포괄하는 더 넓은 구조를 설명합니다. 두 층을 잇는 설명은 [docs/mission-bridge.md](./docs/mission-bridge.md), 아키텍처와 설계 철학의 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
 
 ## 컨트리뷰터를 위해
 
-이 레포에 처음이신가요? [ONBOARDING.md](./ONBOARDING.md)부터 시작하세요. 의도된 사용 방법: 새 Claude Code 세션에 파일 전체를 붙여넣으세요 — 문서에 내장된 지시문 블록이 Claude를 온보딩 버디로 전환합니다. Claude가 환경을 셋업 체크리스트와 대조하고, 현재 상태에 가장 잘 맞는 프로토콜로 라우팅하며, 핵심 문서를 순서대로 안내하고, 컨트리뷰션 워크플로우와 컨벤션을 함께 살펴봅니다.
+[ONBOARDING.md](./ONBOARDING.md)부터 시작하세요. 새 Claude Code 세션에 파일 전체를 붙여넣으면 Claude가 온보딩 버디가 되어 환경 셋업, 핵심 문서, 컨트리뷰션 워크플로우를 안내합니다.
 
-온보딩 진행 중에 프로토콜을 직접 경험할 수 있도록, 초반에 진입점 라우팅이 제공됩니다:
+아키텍처는 [CLAUDE.md](./CLAUDE.md), 협업의 바탕이 되는 원칙은 [premise/](./premise/)에서 살펴보세요.
 
-- **이 프로토콜 자체가 처음, 사전 컨텍스트 없음** → `/onboard` (epistemic-cooperative) — 빠른 추천 + 시나리오/실행/퀴즈 가이드
-- **프로젝트 자체에 대한 이해를 검증하고 싶음** → `/grasp` (katalepsis) — `CLAUDE.md` 또는 특정 `SKILL.md` 대상
-- **Claude Code 워크플로우와 이 프로토콜의 설명을 이미 갖고 있고 둘의 비교가 뒷받침하는 결론을 감사하고 싶음** → `/ground` (analogia) — 본인의 사용 패턴을 대상 설명으로
-- **어떤 프로토콜을 언제 쓰는지 빠른 레퍼런스가 필요** → 위의 프로토콜 표, 또는 `route` 플러그인의 세션 시작 테이블
-
-프로토콜 자체의 아키텍처와 원칙은 [CLAUDE.md](./CLAUDE.md)와 [`.claude/rules/`](./.claude/rules/) 아래의 axiom 파일들을 참고하세요.
+프로젝트를 소개하는 공개 문구를 고칠 때는 [Mission Bridge](./docs/mission-bridge.md)의 작성 기준을 따르세요.
 
 <details>
 <summary>Greek Codex</summary>
 
 | 프로토콜 | 그리스어 | 의미 |
 |----------|---------|------|
-| Prothesis | πρόθεσις | 앞에 놓음 (제시) |
 | Katalepsis | κατάληψις | 움켜잡음 (이해) |
 | Horismos | ὁρισμός | 경계 짓기 |
 | Aitesis | αἴτησις | 요청, 질의 |

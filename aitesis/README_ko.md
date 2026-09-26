@@ -49,10 +49,10 @@ Phase 3: Integration         → 답이 오면 하나의 채널로 수집이 다
 ## 프로토콜 우선순위
 
 ```
-Aitesis → Prothesis → Analogia → Katalepsis
+Aitesis → Analogia → Katalepsis
 ```
 
-Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 유비 추론 감사(Analogia) 전에 AI가 모을 수 있는 것을 다 모읍니다.
+Aitesis는 일찍 실행됩니다: 유비 추론 감사(Analogia) 전에 AI가 모을 수 있는 것을 다 모읍니다.
 
 ## 사용 시기
 
@@ -63,7 +63,7 @@ Aitesis는 일찍 실행됩니다: 관점 프레이밍(Prothesis), 유비 추론
 - 세션에서 이전에 다루지 않은 새로운 도메인에 진입할 때
 
 **건너뛰기**:
-- 맥락이 완전히 명시되어 있을 때 (관점 분석은 Prothesis — /frame)
+- 맥락이 완전히 명시되어 있을 때
 - 위임 범위가 불명확할 때
 
 ## 사용법

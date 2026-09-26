@@ -154,9 +154,8 @@ DissolutionExit = deficit dissolved at the spec relay or at a gate: deriving the
             A success stand-down: no unresolved residual remains
 RoutingRow = ① a mapping against a target account already in play leaves its intended inferences uncertain → MappingUncertain (hint: /ground)
            | ② real evidence is required before the directions can be judged       → ContextInsufficient (hint: /inquire)
-           | ③ the candidate field is thin — one or none — → CandidateFieldUnderexpanded (hint: /ideate); the frame itself is
-               absent → FrameworkAbsent (hint: /frame); the coordinates live implicit in externalized substrate → AbstractAporia
-               (hint: /elicit)
+           | ③ the candidate field is thin — one or none — → CandidateFieldUnderexpanded (hint: /ideate); the coordinates
+               live implicit in externalized substrate → AbstractAporia (hint: /elicit)
        -- the rows Phase 0 and MisdiagnosisRoute dispatch on, first match wins: read after the requires checkpoint and before the type
        --   guards, and what no row takes — candidates ≥ 2, evidence-free, placeholder-carriable — is this protocol's own case. Each row
        --   names the sibling deficit as the binding and its command as the hint
@@ -297,7 +296,7 @@ Phase 0 detect (sense)             → Internal analysis (deficit predicate + 4-
 Phase 0 no_deficit_relay (extension) → TextPresent+Proceed (futures recognizable from text: present the finding with reasoning; regular gate suffices; not activated)
 Phase 0 route_away_relay (extension) → TextPresent+Proceed (routing rows ①–③: present the matched row with its basis; hand off to the cited protocol; not activated)
 Phase 0 unfit_relay (extension)    → TextPresent+Proceed (a type guard fails and no routing row matches: state the failed guard and why; the decision stays at a regular gate; not activated)
-Phase 0 requires_fail_relay (extension) → TextPresent+Proceed (no imminent commitment, or fewer than two candidates: state the failed requirement; one or zero candidates is handed to row ③'s targets — /ideate primary for the thin field, /frame · /elicit for their own narrower cases (frame absent; substrate-implicit coordinates); not activated)
+Phase 0 requires_fail_relay (extension) → TextPresent+Proceed (no imminent commitment, or fewer than two candidates: state the failed requirement; one or zero candidates is handed to row ③'s targets — /ideate primary for the thin field, /elicit for its own narrower case (substrate-implicit coordinates); not activated)
 Phase 1 derive_axes (sense)        → Internal analysis (divergence axis candidates from the candidate directions)
 Phase 1 draft_policy (sense)       → Internal analysis (placeholder policy draft: visible synthesis, non-evidence stamp, skeleton-data split)
 Phase 1 spec_relay (extension)     → TextPresent+Proceed (the drafted spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where the target set leaves a candidate unprobed, why; fires BEFORE any probe generation, so no axis commits a probe value before it was relayed with its basis; yields no turn, and carries the standing affordance to send any of it back at the direction gate, the first send-back riding no budget; RE-ENTERED from a refan carrying a SpecRevision — whichever drafted element it changes — scoped to that revision, before that refan generates anything)

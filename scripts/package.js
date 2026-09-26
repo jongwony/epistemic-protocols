@@ -151,7 +151,6 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'proplasma', skill: 'preview' },
   { dir: 'hypotyposis', skill: 'sketch' },
   { dir: 'merismos', skill: 'apportion' },
-  { dir: 'prothesis', skill: 'frame' },
 ]);
 const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis', 'epistemic-cooperative']);
 const CODEX_SUPPORT_DIRS = Object.freeze(['references', 'scripts', 'assets']);

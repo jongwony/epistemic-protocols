@@ -22,7 +22,6 @@ Protocols the Maintainer Dogfoods:
   /euporia:elicit                     █████░░░░░░░░░░░░░░░   5x   design-dimension elicitation
   /formal-review                      ████░░░░░░░░░░░░░░░░   4x   formal-triple review of protocol changes
   /release                            ████░░░░░░░░░░░░░░░░   4x   CalVer tag + draft release
-  /epistemic-cooperative:triage       ████░░░░░░░░░░░░░░░░   4x   route incoming findings to a protocol
   /gh-address-comments                ███░░░░░░░░░░░░░░░░░   3x   PR feedback loop
   /codex-plus:codex                   ███░░░░░░░░░░░░░░░░░   3x   cross-vendor second opinion
 
@@ -36,6 +35,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
 - [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` — it is opt-in for the default installer: `claude plugin install epistemic-cooperative@epistemic-protocols`
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
+- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
@@ -44,7 +44,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
-- [ ] `premise/AGENTS.md` — what the portable premise collection is and what each document covers; start here (~2 min)
+- [ ] `premise/README.md` — how the premise layer is adopted and verified; each document and the moment that calls for it is indexed in `route/scripts/route-premise.mjs` (~2 min)
 - [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins; the ones that do presuppose protocols, and this repo's own instances of the portable ones, live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
@@ -59,15 +59,14 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
-- [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
 - [ ] `/analogia:ground` — audit what an abstract-concrete mapping licenses about an account already in play
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, on a recorded acceptance where none compiles, or on a recorded reservation where a judgment rather than a check settles it
 
 ## Contribution Workflow
 
-1. **Scope** — read the premise document(s) for the area you're touching (`premise/AGENTS.md` routes by concern), plus `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
-2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first — its assumptions and missing facts, not whether every alternative or trade-off was considered, which stays yours to raise; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
+1. **Scope** — read the premise document(s) for the area you're touching (the index in `route/scripts/route-premise.mjs` routes by moment), plus `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
+2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first — its assumptions and missing facts, not whether every alternative or trade-off was considered, which stays yours to raise
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `.claude/skills/verify/references/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
@@ -96,7 +95,7 @@ Two principles to internalize before your first PR:
 
 1. Clone the repo and open it in Claude Code
 2. Read `CLAUDE.md` end-to-end
-3. Read `premise/AGENTS.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
+3. Read `premise/README.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
 4. Run `/verify` to confirm your environment
 5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
 6. Browse recent merged PRs to see the actual pattern of contribution

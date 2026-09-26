@@ -41,16 +41,7 @@ This is a layered core, not a dual mission. The wording changes by audience; the
 
 ## Protocol Coverage
 
-Under the canonical umbrella, the protocol set covers decision points across the collaboration lifecycle:
-
-- Planning: clarify intent, define goals, infer missing context
-- Analysis: frame perspectives, ground abstract advice
-- Decision: surface unnoticed gaps before commitment
-- Execution: cut an autonomous goal into units each closed before the run begins — by its own settled completion condition, by a recorded acceptance where none compiles, or by a recorded reservation where a judgment rather than a check settles it
-- Verification: check applicability after execution
-- Cross-cutting: define epistemic boundaries, recover prior context, verify comprehension
-
-This is why the public hook can stay narrow while the project still legitimately includes Merismos, Epharmoge, Anamnesis, and Katalepsis.
+For current protocol coverage and concern clusters, consult the [protocol table in README.md](../README.md#protocols); its concern-cluster line is held to `CANONICAL_CLUSTERS` in `scripts/load-protocols.js` by `/verify`. When editing public wording, preserve the early-correction entry story and make room for execution, verification, recall, and comprehension.
 
 ## Editing Rule
 

@@ -2,7 +2,9 @@
 # Remove what a run leaves behind, at one of three depths.
 #
 # Nothing here is irreplaceable. Authentication arrives only through the run
-# process environment; neither runner's disposable state holds a credential.
+# process environment; neither runner's disposable state holds a credential. Codex
+# login mode's per-exec link to the real auth.json is removed here too, whatever the
+# depth; a regular auth.json found in its place is named and left alone.
 #
 #   (default)  volatile state only; the fixture survives, `run` works immediately
 #   --all      the config directory and scratch trees; `setup` must run again
