@@ -30,7 +30,7 @@ Some candidate fields are underexpanded (`CandidateFieldUnderexpanded`): the goa
 
 **Where it sits**: heuresis's `GenerationFrame` is not an analytical lens on a fixed inquiry — it is a temporary partition for parallel idea production, never handed off as an analytical perspective. Proplasma previews *directions* once two or more candidates already exist and need to be seen before choosing — heuresis sits upstream of that, at the point where the field itself needs widening. Euporia reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions) — heuresis never scans that substrate; it reads your own words and whatever material you explicitly name — a prior protocol's output, or a record such as an issue that it reads for you.
 
-**Routing precedence**: two or more candidates already exist and just need to be seen → `/preview`; the seed material lives outside this conversation → run a collection protocol first (e.g. `/inquire`) and chain its output in; the candidate field itself is thin or stalled → **`/ideate`**.
+**Routing precedence**: two or more candidates already exist and just need to be seen → `/preview`; the seed material still has to be found or gathered → run a collection protocol first (e.g. `/inquire`) and chain its output in, while a record you can name (an issue, a document) enters `/ideate` directly; the candidate field itself is thin or stalled → **`/ideate`**.
 
 ## The Chain Boundary
 

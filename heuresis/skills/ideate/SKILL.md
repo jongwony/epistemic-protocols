@@ -336,7 +336,8 @@ def assemble (c : Context P) : Outcome P :=
     with what this round added marked. The map is re-read from the context, never stored; when it
     grows large it compresses to branches and counts while this round's additions show in full,
     the density yours to judge. Then what continuing would cost to review and what stopping keeps,
-    and the gate: continue first, stop second. -/
+    and the gate: at a round, continue first and stop second; on a Blank entry's first
+    presentation, the frame map and its selector, before any candidate. -/
 def ideate (generate respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -406,9 +407,9 @@ theorem explored_not_unexplored {c : Context P} {f : Frame} (h : f ∈ explored 
 field: the person's Stop with candidates; early: their Stop with none; withdrawn: they dropped the
 ideation; routed: they named the next protocol. Their Stop is the completion itself, not a judgment
 layered on a built object, and it takes the field with the map's dissent in view.
-Convergence evidence: at DiverseCandidateField, present the trace — the topic, then the map: each
-explored frame and its branches with their candidates and origins, the unexplored frames, the
-parked follow-ups with the requests quoted, the unaddressed signals, and your contrary grounds; at
+Convergence evidence: at DiverseCandidateField, present the trace — the topic, then the map: every
+registered frame and its branches, each marked explored or unexplored, with every candidate under
+the frame it sits in and its origin, the parked follow-ups with the requests quoted, the unaddressed signals, and your contrary grounds; at
 EarlyExit, the frames offered, the parked follow-ups, every signal, and your contrary grounds.
 Demonstrated, not asserted. Nothing is held beyond the context, so nothing needs cleanup; the
 parked set's durable record is the host's after the protocol ends.
@@ -446,7 +447,7 @@ def grounding : Op → Annot × String
   | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's closing if any, the frames it opens, any new angle or branch, any deferral, any new signal")
   | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
   | .park           => (.extension, "TextPresent+Proceed: something the person set aside for later acknowledged as parked, quoting their request; declared at either terminal; its durable record is the host's after the protocol ends")
-  | .converge       => (.extension, "TextPresent+Proceed: DiverseCandidateField — the topic and the map, each frame and branch with its candidates and origins, the unexplored frames, the parked follow-ups, the unaddressed signals, your contrary grounds; EarlyExit — the frames offered, the parked follow-ups, every signal, your contrary grounds")
+  | .converge       => (.extension, "TextPresent+Proceed: DiverseCandidateField — the topic and the map, every registered frame and branch marked explored or unexplored with every candidate under it and its origin, the parked follow-ups, the unaddressed signals, your contrary grounds; EarlyExit — the frames offered, the parked follow-ups, every signal, your contrary grounds")
   | .seam           => (.extension, "TextPresent+Proceed: after the person's Stop, at either terminal, a user-declared chain naming the next protocol settles the next move; proceed to it citing that source. A route the person names at a gate is the routed outcome itself. This protocol declares no wired outbound edge. The assembled terminal crosses whole, every origin, branch, park, signal, and contrary ground intact, and the seam never selects, ranks, or trims; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-! ── COMPOSITION ──
@@ -468,7 +469,7 @@ end Heuresis
 
 Present the classification as a short basis-cited relay: the inferred entry, why the field reads thin, and source-tagged signals. For `Blank`, read `references/blank-entry.md` before presenting abstract frames and the pre-generation Stop path; for `Seeded`, read `references/seeded-entry.md` before the first pass. When named material supplied seeds or a chained field, also read `references/chain-reference.md` after classification and before the first pass.
 
-Before every gate, present one map of the whole field — frames and the branches dug under them, candidates with their origins, unexplored frames, parked follow-ups, every signal still unaddressed, and your contrary grounds — with this round's additions marked. State the extra review load and what Stop will keep. Then present continue first and stop second with symmetric specificity: continue opens unexplored frames, a new angle, or a branch under whatever the person asks to deepen; an answer that opens nothing presents the question again. Render Stop as `DiverseCandidateField` only when candidates exist and otherwise as `EarlyExit`.
+Before every gate, present one map of the whole field — frames and the branches dug under them, candidates with their origins, unexplored frames, parked follow-ups, every signal still unaddressed, and your contrary grounds — with this round's additions marked. State the extra review load and what Stop will keep. At the Blank frame map the gate is the frame selector `references/blank-entry.md` carries. At every round gate, present continue first and stop second with symmetric specificity: continue opens unexplored frames, a new angle, or a branch under whatever the person asks to deepen; an answer that opens nothing presents the question again. Render Stop as `DiverseCandidateField` only when candidates exist and otherwise as `EarlyExit`.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order determines placement around a gate.
 
@@ -490,5 +491,5 @@ Read `references/round-composition.md` before composing when terminology must re
 - **Width and depth both widen**: A request for more on an open frame or on one candidate opens a branch under it, registered with its parent, and the next pass fills it; nothing is ranked or chosen. Only what the person themselves sets aside for later parks, citing their turn, and is declared at either terminal.
 - **One map every round**: The whole field is redrawn from the context before each gate, this round's additions marked; a large map compresses to branches and counts while the additions show in full.
 - **Decision delta**: Before every gate, surface unaddressed signals, your contrary grounds, the explored/unexplored directional contrast, continuing's review cost, and what stopping keeps. Continue names its widening target and Stop names its live terminal.
-- **Neutral option order**: Continue is always first and Stop second, with symmetric specificity. Any novelty or coverage observation, and every contrary ground, stays basis-cited pre-gate state and does not recommend or reorder either answer.
+- **Neutral option order**: At every round gate, Continue is always first and Stop second, with symmetric specificity. Any novelty or coverage observation, and every contrary ground, stays basis-cited pre-gate state and does not recommend or reorder either answer.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
