@@ -8,7 +8,8 @@
  *
  *   Contract.<NS>  = module header + the block, with its GROUND section replaced
  *                    by `open Ground` (the canonical `EpistemicProtocols.Ground`).
- *   Audit/<NS>     = the block's stated theorems re-derived from the proved ones,
+ *   Audit/<NS>     = the protocol's stated theorems — its Theorem module's where
+ *                    one exists, else the block's — re-derived from the proved ones,
  *                    plus an environment readout (declared theorems, project
  *                    axioms, transitive axioms) printed as one `AUDIT {json}` line.
  *
@@ -96,6 +97,24 @@ function statedCheck(event) {
   ].join('\n');
 }
 
+// A protocol may state its theorems in a Theorem module beside its proofs
+// instead of in the block, so the runtime surface carries only what the model
+// reads. The module takes the block's own form: `theorem` signatures inside doc
+// comments, with the `variable` lines they need.
+function theoremModulePath(ns) {
+  return path.join('lean', 'EpistemicProtocols', ...ns.split('.'), 'Theorems.lean');
+}
+
+// The stated theorems of a protocol: from its Theorem module where one exists,
+// otherwise from the block after GROUND. `source` names where they were read.
+function protocolStatements(root, ns, block) {
+  const rel = theoremModulePath(ns);
+  const full = path.join(root, rel);
+  if (fs.existsSync(full)) return { source: rel, events: statedTheorems(fs.readFileSync(full, 'utf8')) };
+  const ground = groundSpan(block);
+  return { source: null, events: ground ? statedTheorems(block.slice(ground.end)) : [] };
+}
+
 function leanStringList(names) {
   return `[${names.map((n) => `\`${n}`).join(', ')}]`;
 }
@@ -179,7 +198,7 @@ function planContracts(root, blocks) {
     const ground = groundSpan(block);
     if (!ns || !ground || block.indexOf(`namespace ${ns}`) > ground.start) continue;
     files.push({ path: path.join(GENERATED_DIR, 'Contract', `${ns}.lean`), text: contractModule(block, ns) });
-    const events = statedTheorems(block.slice(ground.end));
+    const { source, events } = protocolStatements(root, ns, block);
     const auditPath = path.join(GENERATED_DIR, 'Audit', `${ns}.lean`);
     files.push({
       path: auditPath,
@@ -192,7 +211,7 @@ function planContracts(root, blocks) {
         judgmentModule: `Contract.${ns}`,
       }),
     });
-    audits.push({ relPath, ns, auditPath, stated: events.filter((e) => e.name).map((e) => `${ns}.${e.name}`) });
+    audits.push({ relPath, ns, auditPath, statedIn: source, stated: events.filter((e) => e.name).map((e) => `${ns}.${e.name}`) });
   }
   const groundFile = path.join(root, CANONICAL_GROUND);
   if (fs.existsSync(groundFile)) {
@@ -245,7 +264,9 @@ module.exports = {
   groundSpan,
   leanBlocksFrom,
   planContracts,
+  protocolStatements,
   statedTheorems,
+  theoremModulePath,
   writeContracts,
 };
 

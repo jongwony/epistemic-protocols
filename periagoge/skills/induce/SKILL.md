@@ -509,52 +509,6 @@ def start (respond declare : Context P → Response P) (c : Context P)
     let c₂ := pass c₁
     induce respond declare (c₂ ++ [(respond c₂).val]) us
 
-/-!
-Silence moves, sets aside, disposes of, and closes nothing.
-theorem silence (respond declare : Context P → Response P) (c : Context P) :
-    induce respond declare c [] = .holding c
-
-A pass only adds to the context.
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
-
-A crystallization is the person's confirm over a covered sheet whose candidate is read off a live
-reading.
-theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce respond declare c us = .crystallized r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .confirm ∧ CandidateLive c₁ ∧ Covered c₁ ∧
-      r = crystallize declare c₁
-
-A withdrawal is the person's stop, and a route the protocol the person named.
-theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Withdrawn P) (h : induce respond declare c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = withdraw declare c₁
-
-theorem routed_on_route (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (r : Withdrawn P)
-    (h : induce respond declare c us = .routed t r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = withdraw declare c₁
-
-Every closing rests on a turn the person sent.
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
-
-Among the readings drawn, one is out of the live set only where the person set it aside.
-theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ readings c)
-    (hn : r ∉ live c) : ∃ g, filledValue (setAside c r) = some g
-
-Before a confirm, nothing of yours stands as adopted.
-theorem nothing_adopted_before_confirm (c : Context P) (p : Provenance) (h : p ∈ provenance c) :
-    p.standing ≠ .adopted
-
-A setting-aside and an open item's disposition each rest on the person's turn.
-theorem set_aside_by_person {c : Context P} {r : Reading} {s : Cite c}
-    (ok : (setAsideCoord (P := P) r).admits s.src) : s.src.val = .person
-
-theorem disposed_by_person {c : Context P} {i : OpenItem} {s : Cite c}
-    (ok : (dispositionCoord (P := P) i).admits s.src) : s.src.val = .person
--/
-
 /-! ── CONVERGENCE ──
 crystallized, withdrawn, routed — the three closings of `Outcome`, each the person's; the trace each
 carries is its structure's fields, and at a withdrawal they stand as your reading.

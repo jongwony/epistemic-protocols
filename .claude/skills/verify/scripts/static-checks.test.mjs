@@ -232,9 +232,48 @@ describe('lean-definition', () => {
     withCopy(({ write, restore, failures }) => {
       for (const orphan of ['lean/Orphan.lean', `lean/EpistemicProtocols/${ns}/Nested/Orphan.lean`]) {
         write(orphan, 'theorem orphan : True := trivial\n');
-        expectSome(failures(), 'neither the canonical GROUND nor the proofs module');
+        expectSome(failures(), 'neither the canonical GROUND nor the proofs or Theorem module');
         restore();
       }
+    });
+  });
+
+  // A protocol may state its theorems in a Theorem module instead of its block.
+  const { theoremModulePath } = require(path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js'));
+  const moduled = leanFiles.map((file) => {
+    const text = readFileSync(path.join(projectRoot, file), 'utf-8');
+    const hostNs = /^namespace (\w+)/m.exec(/^```lean\n([\s\S]*?)^```$/m.exec(text)[1])[1];
+    return existsSync(path.join(projectRoot, theoremModulePath(hostNs))) && { file, text, hostNs };
+  }).find(Boolean);
+
+  it('keeps a Theorem module to stating, in one place', { skip: !moduled && 'no protocol states its theorems in a Theorem module' }, () => {
+    const moduleRelative = theoremModulePath(moduled.hostNs);
+    const moduleText = readFileSync(path.join(projectRoot, moduleRelative), 'utf-8');
+    const closing = moduled.text.indexOf('\n/-! ── CONVERGENCE ──');
+    assert.ok(closing !== -1, 'no CONVERGENCE section found to place a statement before');
+    withCopy(({ write, restore, failures }) => {
+      write(moduled.file, `${moduled.text.slice(0, closing)}\n/-!\ntheorem mutation_twice : True\n-/\n${moduled.text.slice(closing)}`);
+      expectSome(failures(), 'a protocol states its theorems in one place');
+      restore();
+
+      write(moduleRelative, moduleText.replace(`\nend ${moduled.hostNs}`, `\ntheorem mutation_proved : True := trivial\n\nend ${moduled.hostNs}`));
+      expectSome(failures(), 'a Theorem module states signatures in doc comments');
+      restore();
+
+      write(moduleRelative, moduleText.replace(/^(public import [^\n]*)$/m, '$1\nimport Lean'));
+      expectSome(failures(), 'a Theorem module imports only');
+      restore();
+    });
+  });
+
+  it('reads the stated set from the Theorem module', { skip: (!elaborated || !moduled) && 'no Lean toolchain reachable, or no Theorem module' }, () => {
+    const moduleRelative = theoremModulePath(moduled.hostNs);
+    const moduleText = readFileSync(path.join(projectRoot, moduleRelative), 'utf-8');
+    withCopy(({ write, restore, failures }) => {
+      write(moduleRelative, moduleText.replace(/\n-\/\n\nend /, '\n\ntheorem mutation_unproved : True\n-/\n\nend '));
+      // A statement no proof carries: the audit cannot re-derive it, as with a block's.
+      expectSome(failures(), 'does not follow from the proved theorem');
+      restore();
     });
   });
 
