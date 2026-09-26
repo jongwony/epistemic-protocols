@@ -17,9 +17,7 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
-`theorem` line inside a doc comment states a consequence the contract already has; it is proved
-outside this block and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -116,17 +114,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/

@@ -54,17 +54,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
-
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
