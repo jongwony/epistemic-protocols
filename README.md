@@ -62,19 +62,19 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | Protocol | Command | When to use |
 |----------|---------|-------------|
 | [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown |
-| [Euporia](./euporia) | `/elicit` | You have intent but the decision coordinates are implicit — reverse-trace them from the externalized substrate (codebase, rules, past sessions) until intent crystallizes |
-| [Heuresis](./heuresis) | `/ideate` | The candidate field for a decision is empty or has prematurely converged — widen it into a diverse set before any selection, not after |
-| [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
-| [Hypotyposis](./hypotyposis) | `/sketch` | A form has to be made and you cannot say what it should be, but you'd know it on sight — sketch it, mark what does not fit, revise the kept version, and finish on the one you recognize |
-| [Analogia](./analogia) | `/ground` | A mapping against an account already in play leaves its intended conclusions or supported limits uncertain |
-| [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
-| [Merismos](./merismos) | `/apportion` | About to hand a goal to an autonomous run — cut it into units that each fit one interval and close each unit first — on its own done-condition where one compiles, on your recorded acceptance where none does, or on a reservation where a judgment rather than a check settles it |
-| [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
-| [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
+| [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) holds the clues |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or they narrowed to one too early — widen the field before choosing any |
+| [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first |
+| [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight |
+| [Analogia](./analogia) | `/ground` | You're carrying a framework or an analogy over to a case already in front of you, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports |
+| [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something you can't name yet — pin down what they have in common |
+| [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and can tell when they are done |
+| [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but may not fit your actual situation |
+| [Elenchus](./elenchus) | `/sublate` | The context you are about to act on may no longer hold — stale, weakly sourced, or contradicted — vet it dialectically before acting |
 | [Horismos](./horismos) | `/bound` | You cannot yet see what needs deciding in a task, or which decisions to keep or entrust |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it — one session, or a line of work, topic, or concept spread across several |
-| [Katalepsis](./katalepsis) | `/grasp` | Code, a paper, or a big change you need to actually understand — you can't follow it yet, or you nod along and aren't sure. Verify your understanding is genuine before you approve or build on it |
-| [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
+| [Katalepsis](./katalepsis) | `/grasp` | Something in front of you — code, a document, a result — needs to be actually understood: you can't follow it yet, or you nod along and aren't sure |
+| [Hyphegesis](./hyphegesis) | `/conduct` | The work takes several lines of thinking, and it isn't obvious what order they run in, which can run apart, how their results combine, when to stop, or where each result goes — settle how it runs before starting |
 
 Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
