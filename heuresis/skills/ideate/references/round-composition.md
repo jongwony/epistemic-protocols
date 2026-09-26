@@ -8,8 +8,8 @@ User-facing emit (round presentations, frame maps, convergence traces, gate opti
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each round bundles its own candidates, the frames they came from, and the next-move implication (which frames remain to open, what has parked, what signals remain unaddressed, whether to continue or stop). Keep adjacent material together so the user can recognize the decision without context-switching; defer earlier rounds' detail to the convergence trace.
+Each round redraws the whole field as one map and marks what this round added; the additions carry the candidates in full, while earlier rounds compress to branches and counts when the map grows large. Keep the next-move implication beside the map (which frames remain to open, where a branch could be dug, what is parked, what signals remain unaddressed, your contrary grounds, whether to continue or stop) so the user can recognize the decision without context-switching.
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
-Output round results (candidates by frame, explored/unexplored frames, unaddressed signals) as text before presenting via Cognitive Partnership Move (Constitution). The gate itself contains only the essential question — continue (which frames) or stop.
+Output the map (frames and branches with their candidates, unexplored frames, unaddressed signals, contrary grounds) as text before presenting via Cognitive Partnership Move (Constitution). The gate itself contains only the essential question — continue (which frames, or which branch to dig) or stop.

@@ -18,7 +18,7 @@ Some candidate fields are underexpanded (`CandidateFieldUnderexpanded`): the goa
 
 ### The Solution
 
-**Divergence over Selection**: infer blank vs. seeded entry from the utterance alone, then fork — blank entries see an abstract frame map before any concrete idea exists (ownership stays with you, and nothing anchors your own thinking early); seeded entries expand straight from what you already gave, since the anchoring risk doesn't apply the same way to material you supplied yourself. Each round generates candidates in parallel across the open frames, every candidate tagged with its origin (you or the AI), nothing discarded or ranked. There is no round quota — your own stop is what bounds the field, and a stop before anything was generated is typed honestly as an empty result, never dressed up as a candidate field that was never built.
+**Divergence over Selection**: infer blank vs. seeded entry from the utterance alone, then fork — blank entries see an abstract frame map before any concrete idea exists (ownership stays with you, and nothing anchors your own thinking early); seeded entries expand straight from what you already gave, since the anchoring risk doesn't apply the same way to material you supplied yourself. Each round generates candidates in parallel across the open frames, every candidate tagged with its origin (you, the AI, or the source chained material came from), nothing discarded or ranked. There is no round quota — your own stop is what bounds the field, and a stop before anything was generated is typed honestly as an empty result, never dressed up as a candidate field that was never built.
 
 ### Difference from Other Protocols
 
@@ -28,13 +28,13 @@ Some candidate fields are underexpanded (`CandidateFieldUnderexpanded`): the goa
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | **Heuresis** | **User-initiated** | **`CandidateFieldUnderexpanded → DiverseCandidateField`** |
 
-**Where it sits**: heuresis's `GenerationFrame` is not an analytical lens on a fixed inquiry — it is a temporary partition for parallel idea production, never handed off as an analytical perspective. Proplasma previews *directions* once two or more candidates already exist and need to be seen before choosing — heuresis sits upstream of that, at the point where the field itself needs widening. Euporia reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions) — heuresis never scans that substrate; it reads only the invocation utterance and whatever prior output you explicitly chain in.
+**Where it sits**: heuresis's `GenerationFrame` is not an analytical lens on a fixed inquiry — it is a temporary partition for parallel idea production, never handed off as an analytical perspective. Proplasma previews *directions* once two or more candidates already exist and need to be seen before choosing — heuresis sits upstream of that, at the point where the field itself needs widening. Euporia reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions) — heuresis never scans that substrate; it reads your own words and whatever material you explicitly name — a prior protocol's output, or a record such as an issue that it reads for you.
 
-**Routing precedence**: two or more candidates already exist and just need to be seen → `/preview`; the seed material lives outside this conversation → run a collection protocol first (e.g. `/inquire`) and chain its output in; the candidate field itself is thin or stalled → **`/ideate`**.
+**Routing precedence**: two or more candidates already exist and just need to be seen → `/preview`; the seed material still has to be found or gathered → run a collection protocol first (e.g. `/inquire`) and chain its output in, while a record you can name (an issue, a document) enters `/ideate` directly; the candidate field itself is thin or stalled → **`/ideate`**.
 
 ## The Chain Boundary
 
-heuresis reads only what the invocation carries: the utterance itself, plus a prior protocol's output you explicitly name. It never scans the wider session, codebase, or rules on its own. If you chain material in this way, that's a deliberate substrate-first choice — you read the material before writing the invocation, so the ownership/diversity benefit of ideating *before* seeing prior material doesn't hold on that path. heuresis states this plainly; it adds no workaround.
+heuresis reads what you give it: your request, what you say as the run goes on, and material you explicitly name — a prior protocol's output, or a record outside the session such as an issue or a document, which it reads for you. It never scans anything you did not name — the wider session, codebase, or rules. If you chain material in this way, that's a deliberate substrate-first choice — you read the material before writing the invocation, so the ownership/diversity benefit of ideating *before* seeing prior material doesn't hold on that path. heuresis states this plainly; it adds no workaround.
 
 ## Install
 
@@ -49,7 +49,7 @@ claude plugin install heuresis@epistemic-protocols
 /ideate [a topic, or a few fragments you already have]
 ```
 
-heuresis reads your invocation, infers blank or seeded entry, and — on blank — opens an abstract frame map for you to pick from before generating anything. Each round then produces candidates in parallel across the open frames, tagged with origin, presented with what's still unexplored. Continue by opening more frames or naming your own; a wish to go deeper on an already-open frame parks as a typed follow-up instead of narrowing the live loop — depth belongs to a later invocation chaining on the assembled field. Stop whenever the field is wide enough. The candidate field — topic, tagged candidates, explored/unexplored frames, parked follow-ups — is an endpoint-neutral contract that flows into `/preview`, your own direct judgment, an issue tracker, or whatever evaluation work comes next.
+heuresis reads your invocation, infers blank or seeded entry, and — on blank — opens an abstract frame map for you to pick from before generating anything. Each round then produces candidates in parallel across the open frames, tagged with origin, presented with what's still unexplored. Continue by opening more frames, naming your own, or asking to dig deeper under a frame or a single candidate — that opens a branch beneath it, and every round redraws the whole field as one map, with what the round added marked. Stop whenever the field is wide and deep enough; where you stop is a checkpoint a later `/ideate` can resume from. The candidate field — topic, tagged candidates, frames and branches, what is still unexplored, anything you set aside for later — is an endpoint-neutral contract that flows into `/preview`, your own direct judgment, an issue tracker, or whatever evaluation work comes next.
 
 ## Author
 
