@@ -22,7 +22,6 @@ Protocols the Maintainer Dogfoods:
   /euporia:elicit                     █████░░░░░░░░░░░░░░░   5x   design-dimension elicitation
   /formal-review                      ████░░░░░░░░░░░░░░░░   4x   formal-triple review of protocol changes
   /release                            ████░░░░░░░░░░░░░░░░   4x   CalVer tag + draft release
-  /epistemic-cooperative:triage       ████░░░░░░░░░░░░░░░░   4x   route incoming findings to a protocol
   /gh-address-comments                ███░░░░░░░░░░░░░░░░░   3x   PR feedback loop
   /codex-plus:codex                   ███░░░░░░░░░░░░░░░░░   3x   cross-vendor second opinion
 

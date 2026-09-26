@@ -1321,7 +1321,6 @@ describe('package.js CLI', () => {
         'route.zip',
         'sketch.zip',
         'sublate.zip',
-        'triage.zip',
         'white-bear.zip',
         'zero-shot.zip',
       ].sort(),
