@@ -74,7 +74,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Periagoge](./periagoge) | `/induce` | 구체적 사례가 하나 이상 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
 | [Merismos](./merismos) | `/apportion` | 자율 실행에 목표를 넘기기 직전 — 한 구간에 맞는 단위로 자르고 각 단위를 먼저 닫을 때 — 컴파일되면 자기 완료 조건으로, 안 되면 기록한 수용으로, 검사가 아니라 판단이 정하는 항목이면 유보로 |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
-| [Elenchus](./elenchus) | `/sublate` | 낡았을 수 있는 작업 맥락을 밖으로 내보내기 직전 — 먼저 변증법적으로 검증할 때 |
+| [Elenchus](./elenchus) | `/sublate` | 행동의 근거로 삼으려는 작업 맥락이 여전히 유효한지 의심스러울 때 — 낡았거나 출처가 약하거나 서로 어긋나는 부분을 행동 전에 변증법적으로 검증 |
 | [Horismos](./horismos) | `/bound` | 작업에서 무엇을 결정해야 하는지, 어떤 결정은 직접 내리고 어떤 결정은 맡길지 아직 분명하지 않을 때 |
 | [Anamnesis](./anamnesis) | `/recollect` | 이전에 논의했던 무언가가 막연히 기억나지만 구체적으로 짚어낼 수 없을 때 — 한 세션이든, 여러 세션에 걸친 작업 라인·토픽·개념이든 |
 | [Katalepsis](./katalepsis) | `/grasp` | 코드·논문·큰 변경을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없거나 — 승인·활용 전에 이해가 진짜인지 검증 |
