@@ -14,7 +14,6 @@
 |------|------|------|
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/probe` | 결핍 인식 fit review — 역증거 조건이 붙은 복수의 결핍 가설을 제시하고 사용자 인식으로 라우팅 | 프로토콜 route |
-| `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 — 프로젝트가 표방한 목표로 아티팩트를 수렴 | 적용된 수정 + 인계 + 수렴 trace |
 | `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 재구성된 옵션 집합, 또는 검사가 닫지 못한 경우 수리 공간·다툼 있는 읽기·어느 쪽도 답이 아닌 두 집합 |
@@ -54,20 +53,6 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
 
-### /forge — Reference-Grounded Prompt-Artifact Formation
-
-대상 레퍼런스 문서(벤더 모델 prompt guide, Codex Goals 스펙)를 읽고, 사용자의 미명세 의도를 modality-aware IR로 역귀납한 뒤, canonical-external 동적 fetch + staleness guard로 레퍼런스에 grounding하고, 후속 세션/도구용 prompt artifact(후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe)를 projection한다.
-
-```
-ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → PromptArtifact
-```
-
-주요 특징:
-- 벤더-무관 core(의도 IR + staleness 정책) + 인자화 adapter seam; Higgsfield·gpt-image·codex-goals·claude-session·dia 어댑터 동봉
-- core는 IR까지; 산출물 형태는 adapter-결정(core 승격 금지)
-- relay 슬롯 인용·constitution 슬롯 플래그된 채워진 초안 — 빈 질문 목록도 맹목 완성초안도 아님
-- 교차-adapter 추상은 의도적으로 유예된 colimit(triage-gated-vendor-harness의 형제), 누적 사용 전 미추출
-
 ### /reduced-space-test — Scoped Empirical Validation
 
 추론만으로 불확실한 명제(동작/성능/전이/가치)를 사용자와 동기화한 constraint-bounded 대리 공간에서 검증하고, 미커버 여집합을 후속 프로토콜로 carry-forward한다. 핵심 행위는 목표↔대리 동등성 주장을 검증가능한 facet으로 분해하는 것 — 대리 공간을 "만드는" 것이 아니다.
@@ -97,7 +82,6 @@ epistemic-cooperative/
 └── skills/
     ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
     ├── probe/SKILL.md            # /probe 결핍 인식 fit review
-    ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop 수렴 페이스 리뷰-resolve 루프
     ├── gate-check/SKILL.md       # /gate-check 자문 검증 결정 게이트

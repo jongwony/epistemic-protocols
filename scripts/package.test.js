@@ -1109,8 +1109,8 @@ describe('unified release artifact contract', () => {
 
   it('retains utility sidecars in the release superset', () => {
     const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
-    assert.ok(entriesFor('epistemic-cooperative', 'forge')
-      .includes('forge/adapters/codex-goals.md'));
+    assert.ok(entriesFor('epistemic-cooperative', 'review-loop')
+      .includes('review-loop/references/pr-scope.md'));
   });
 
   it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
@@ -1303,7 +1303,6 @@ describe('package.js CLI', () => {
         'contextualize.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
-        'forge.zip',
         'gate-check.zip',
         'goal-research.zip',
         'grasp.zip',

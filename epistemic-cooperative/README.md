@@ -14,7 +14,6 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/probe` | Deficit recognition fit review — multiple deficit hypotheses with reverse-evidence conditions, routed by user recognition | Protocol route |
-| `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop — converges the artifact on the project's stated goal | Applied fixes + handovers + convergence trace |
 | `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, a rebuilt option set, or — where the check could not close — the repair space, the contested reading, or both sets with neither presented as the answer |
@@ -54,20 +53,6 @@ Key features:
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
 
-### /forge — Reference-Grounded Prompt-Artifact Formation
-
-Reads a target reference document (a vendor model prompt guide, the Codex Goals spec), reverse-induces the user's under-determined intent into a modality-aware IR, grounds it against the reference via canonical-external dynamic fetch with a staleness guard, and projects a ready-to-use prompt artifact — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe.
-
-```
-ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → PromptArtifact
-```
-
-Key features:
-- vendor-agnostic core (intent IR + staleness policy) + parameterized adapter seam; ships Higgsfield, gpt-image, codex-goals, and claude-session adapters
-- core stops at IR; artifact form is adapter-determined (no core promotion)
-- filled draft with relay slots cited and constitution slots flagged — not a blank question list, not a blind full draft
-- cross-adapter abstraction is a deliberately deferred colimit (sibling of triage-gated-vendor-harness), not extracted ahead of accumulated use
-
 ### /reduced-space-test — Scoped Empirical Validation
 
 Validates an inference-uncertain proposition (does it behave / perform / transfer / hold value) inside a constraint-bounded stand-in space synchronized with the user, then carries the uncovered complement forward. The core act is decomposing the target↔surrogate equivalence claim into verifiable facets — not building the stand-in space.
@@ -97,7 +82,6 @@ epistemic-cooperative/
 └── skills/
     ├── onboard/SKILL.md          # /onboard quest-based protocol learning
     ├── probe/SKILL.md            # /probe deficit recognition fit review
-    ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop convergence-paced review-resolve loop
     ├── gate-check/SKILL.md       # /gate-check advisor-checked decision gates
