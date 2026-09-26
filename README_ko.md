@@ -26,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 작업에서 무엇을 결정해야 할지 아직 보이지 않을 때 `/bound`.
 
-유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·결핍 인식(`/onboard`, `/probe`)과 컨트리뷰터 도구를, `route`는 세션 훅들 — 매 프롬프트 라우팅 지시문, 세션 시작에 설치된 프로토콜의 결핍 테이블과 그 아래 [premise](./premise) 색인, 그리고 매처가 premise 문서의 순간이라고 볼 수 있는 도구 호출 — 바뀌는 지시 표면, 에이전트에게 넘기는 일 — 시점에 그 문서의 항목을 한 번 더 — 담습니다. 필요한 쪽을 따로 추가하세요:
+유틸리티 플러그인은 opt-in으로, 별도로 설치합니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 결핍 인식(`/probe`), 컨트리뷰터 도구를 제공합니다. 실험 단계인 [`route`](#route)는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 필요한 플러그인을 추가하세요:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -80,12 +80,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 ## 유틸리티
 
-프로토콜 옆에 플러그인 둘이 있습니다. 둘 다 Claude Code 한 줄 설치에서는 opt-in입니다:
-
-```bash
-claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
-```
+Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claude-code)을 참고하세요.
 
 ### [Epistemic Cooperative](./epistemic-cooperative)
 

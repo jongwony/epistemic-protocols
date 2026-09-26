@@ -26,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
 
-The two utility plugins are opt-in, so the one-liner leaves them out. `epistemic-cooperative` adds learning and deficit recognition (`/onboard`, `/probe`) plus contributor tooling; `route` carries the session hooks — a per-prompt routing directive, at session start the installed-protocol deficit table with the [premise](./premise) index beneath it, and again at the tool calls the matcher can see are a premise document's moment — an instruction surface changing, work handed to an agent — that document's entry. Add either on its own:
+Utility plugins are opt-in and installed separately. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. The experimental [`route`](#route) plugin helps the agent invoke a suitable protocol from the conversation context and find relevant collaboration principles when needed. Add either plugin:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -80,12 +80,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sket
 
 ## Utilities
 
-Two plugins sit beside the protocols. Both are opt-in for the Claude Code one-liner:
-
-```bash
-claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
-```
+For utility plugin installation in Claude Code, see [Quick Start](#claude-code).
 
 ### [Epistemic Cooperative](./epistemic-cooperative)
 
