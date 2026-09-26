@@ -10,13 +10,9 @@ Correcting a wrong direction at the plan level can cost one conversation turn.
 Once it hardens into code, rollout steps, or downstream explanations, it can cost hours of rework.
 These protocols add structured checkpoints to help you and the AI catch and correct a wrong direction before more work depends on it.
 
-## Mission and Machinery
+## Where the protocols help
 
-**Stated Mission** — the public hook: catch wrong directions early, especially at the plan level. This is the clearest entry story and how most users reach for the protocols.
-
-**Realized Machinery** — the actual coverage: structured checkpoints span planning, analysis, decision, execution, verification, recall, and comprehension. Protocols such as Merismos (goal apportionment into conditioned execution units), Epharmoge (post-execution applicability), Anamnesis (session recall), and Katalepsis (comprehension verification) extend beyond plan-level alone.
-
-The two layers serve different audiences: the README carries the narrow public contract; `SKILL.md` and `CLAUDE.md` describe the full machinery. See [docs/mission-bridge.md](./docs/mission-bridge.md) for the governance rules that keep these layers aligned.
+Use the protocols to catch a wrong direction while planning, before it shapes later work. The same structured checkpoints also help when you hand work to an autonomous run, check a result against your actual situation, recall an earlier discussion, or make sure you understand something before building on it.
 
 ## Quick Start
 
@@ -121,22 +117,13 @@ Skills that act at their own decision points — around the protocols, on the wo
 
 Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
 
-## Design
-
-Each protocol targets a specific decision point where human-AI collaboration can drift. Public docs lead with the plan-level hook because it is the clearest entry story; contributor docs explain the broader machinery spanning planning, execution, verification, recall, and comprehension. For the bridge between those layers, see [docs/mission-bridge.md](./docs/mission-bridge.md). For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
-
 ## For Contributors
 
-New to the repo? Start with [ONBOARDING.md](./ONBOARDING.md). The intended usage: paste it into a fresh Claude Code session — the file carries an embedded instruction block that turns Claude into an onboarding buddy. Claude checks your environment against the setup checklist, routes you to the protocol that best matches your current stance, walks you through the core docs in order, and surfaces the contribution workflow and conventions.
-
-Entry-point routing happens up front, so you can experience the protocols while onboarding onto them:
-
-- **First encounter, no prior context** → `/onboard` (epistemic-cooperative) for a quick recommendation plus scenario/trial/quiz walkthrough
-- **Want comprehension of the project itself verified** → `/grasp` (katalepsis) over `CLAUDE.md` or a specific `SKILL.md`
-- **Already have accounts of your Claude Code workflow and these protocols, and want to audit what comparing them supports** → `/ground` (analogia), with your existing usage as the target account
-- **Need a fast when-to-use-which reference** → the protocol table above, or the `route` plugin's session-start table
+Start with [ONBOARDING.md](./ONBOARDING.md). Paste the full file into a fresh Claude Code session to use Claude as an onboarding buddy for environment setup, core docs, and the contribution workflow.
 
 For architecture, read [CLAUDE.md](./CLAUDE.md). For the underlying collaboration principles, explore [premise/](./premise/).
+
+When editing the project's public description, follow the guidance in [Mission Bridge](./docs/mission-bridge.md).
 
 <details>
 <summary>Greek Codex</summary>
