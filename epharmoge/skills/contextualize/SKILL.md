@@ -17,9 +17,7 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
-`theorem` line inside a doc comment states a consequence the contract already has; it is proved
-outside this block and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -104,17 +102,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
@@ -460,21 +447,6 @@ it aimed at in place. Nothing counts down; every pass judges the whole result ag
 context. The loop is dialogue: each round ends at a gate, and the person ends the run.
 -/
 
-/-!
-Silence judges nothing and closes nothing.
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    contextualize respond c [] = .holding c
-
-While no closure fires, an utterance leads to the next gate and closes nothing.
-theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
-    contextualize respond c (u :: us) =
-      contextualize respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us
-
-A pass only adds to the context.
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
--/
-
 /-! ── CONVERGENCE ──
 Every closure is read where it fires and nowhere else. done: nothing open, and the person closed —
 by resolutions of theirs that have taken effect — an adaptation whose write landed included —
@@ -490,38 +462,6 @@ it, the certificate's handoff with its
 fit, or evidence's withdrawal with that evidence — beside the adaptations made with what each
 changed in the result, any that did not repair what they aimed at, and the dissent attached to the
 closure. Demonstrated, not asserted.
--/
-
-/-!
-The person's resolution stands over anything evidence or the certificate read.
-theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution)
-    (h : filledValue (resolution c m) = some r) : standing c m = .resolved r
-
-A mismatch whose owner is unclear waits on the person until they resolve it; evidence does not
-withdraw it first.
-theorem unclear_waits (c : Context P) (m : Mismatch c) (hr : filledValue (resolution c m) = none)
-    (hu : (certify c m).whose = .unclear) : standing c m = .open_
-
-A resolution always rests on a turn the person sent.
-theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution)
-    (h : standing c m = .resolved r) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
-
-Evidence never rests on the person's say-so.
-theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
-    (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person
-
-Only the person closes.
-theorem closing_by_person {c : Context P} {s : Cite c}
-    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person
-
-A done run has nothing open, and the person closed it.
-theorem done_closed_by_person (c : Context P) (v : ApplicabilityVerdict P) (hc : Closable c)
-    (h : close c = .done v) : NothingOpen c ∧ PersonClosed c
-
-A mismatch never stands against the assistant's own turn.
-theorem against_not_assistant {c : Context P} (m : Mismatch c) :
-    (c[m.against.idx]'m.against.lt).origin ≠ .assistant
 -/
 
 /-! ── TOOL GROUNDING ── -/

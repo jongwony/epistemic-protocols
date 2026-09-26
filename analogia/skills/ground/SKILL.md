@@ -17,9 +17,7 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
-`theorem` line inside a doc comment states a consequence the contract already has; it is proved
-outside this block and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -107,17 +105,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
@@ -430,22 +417,6 @@ checks-only reassessment, focus settlement, and read-back spend none. An empty m
 assessed like any other. Preference changes no warrant or verdict.
 -/
 
-/-!
-With no new evidence, collection leaves the context, and so every reading, unchanged.
-theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c
-
-A settlement that narrows `K` without basis holds at the focus gate rather than reading the
-unchanged context again.
-theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
-    (hn : UnsupportedNarrowing c) : report c = .focusGate
-
-While the focus gate holds, a later utterance collects no evidence.
-theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Supersedes (fuse c u))
-    (hf : FocusHeld (fuse c u)) :
-    ground respond c (u :: us) = ground respond (fuse c u ++ [(respond (fuse c u)).val]) us
--/
-
 /-! ── CONVERGENCE ──
 converged(K): every intended inference carries a Licensed or a Blocked verdict with its grounds.
 Convergence evidence: for each k in K, one pair (MappingUncertain(k) → verdict(k)) showing the
@@ -462,20 +433,6 @@ its basis remains unresolved. An Inconclusive close keeps the same trace with ev
 Undetermined verdict naming what is missing; at the cap, the requested revision is named as
 unassessed and any retained assessment is labelled by its earlier focus and K. Convergence is
 demonstrated, not asserted.
--/
-
-/-!
-theorem assessment_converged (c : Context P) (h : report c = .assessment) :
-    focusSettled c ∧ converged c
-
-The comparison purpose is filled only by the user's own words.
-theorem purpose_by_person {c : Context P} {s : Cite c}
-    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person
-
-A replacement of a committed domain closes the activation at once.
-theorem superseded_first (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : Supersedes (fuse c u)) :
-    ground respond c (u :: us) = ⟨fuse c u, .superseded⟩
 -/
 
 /-! ── TOOL GROUNDING ── -/

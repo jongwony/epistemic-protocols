@@ -2,7 +2,8 @@ module
 
 public import EpistemicProtocols.Ground
 
-/-! Proofs of the theorems the GROUND section states. -/
+/-! The theorems GROUND guarantees, each stated and proved here; every public theorem is a guarantee
+    the audit lists. -/
 
 public section
 

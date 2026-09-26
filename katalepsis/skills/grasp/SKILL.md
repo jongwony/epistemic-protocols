@@ -16,9 +16,7 @@ Achieve certain comprehension of a target in play — code, a document, a result
 How to read this block. It is core Lean 4 and elaborates as written.
 Every `axiom` declaration is a judgment that is yours to make from the material in front of
 you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -95,17 +93,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
@@ -616,114 +603,6 @@ returning to that priority. A task's closure respects the person's sufficient/Co
 `VerifiedUnderstanding.closed` requires a nonempty selected roster and a person's closure for
 every task. The trace derives from historical readings: accepting an answer, accepting a task,
 and demonstrating an aspect remain different. None substitutes for another.
--/
-
-/-!
-The transition, history, grounding and convergence laws.
-theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) = said c ++ more
-
-theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c
-
-theorem said_by_person (c : Context P) (i : Nat) (x : Record) (h : (i, x) ∈ said c) :
-    ∃ u : Utterance P, c[i]? = some u.val
-
-theorem silence (respond : (c : Context P) → Round c → Response P)
-    (trace : Context P → Trace → Response P) (c : Context P) :
-    grasp respond trace c [] = .holding c
-
-theorem user_conflict_first (c : Context P) (t : RecordId) (g : Gate)
-    (k : Contradiction c) (h : userConflict c t = some k) :
-    (settle c t g).gate = .conflict t
-
-theorem horizon_preempts (c : Context P) (t : RecordId) (g : Gate)
-    (hu : userConflict c t = none) (h : HorizonCandidate)
-    (hd : dueHorizon c t = some h) :
-    (settle c t g).gate = .horizonProbe t h.edge
-
-theorem asked_not_due (c : Context P) (t : RecordId) (h : HorizonCandidate)
-    (ha : admissible (assess c t) = some h) (hk : Asked c t h.edge) :
-    dueHorizon c t = none
-
-theorem singleton_admission (a : Assessment (P := P) c) (h : HorizonCandidate)
-    (ha : admissible a = some h) : a.candidates = [h]
-
-theorem miss_discloses_material (c : Context P) (t : RecordId) (edge : String)
-    (a : Adjudication c) :
-    advance c ⟨.horizonProbe t edge, .correct a⟩ = .gate ⟨.reveal t edge, [.material a]⟩
-
-theorem conflict_resolves_material (c : Context P) (t : RecordId) (a : Adjudication c) :
-    advance c ⟨.conflict t, .correct a⟩ = .gate ⟨.resolve t, [.material a]⟩
-
-theorem inquiry_corrects_material (c : Context P) (t : RecordId) (g : Aspect)
-    (a : Adjudication c) :
-    advance c ⟨.inquiry t g, .correct a⟩ = .gate ⟨again t g, [.material a]⟩
-
-theorem other_intent_redirects (c : Context P) (g : Gate) (e : EntryPoint) (basis : String) :
-    advance c ⟨g, .other e basis⟩ = .gate (redirect c e basis)
-
-theorem steps_cue (c : Context P) (t : RecordId) (edge : String) :
-    advance c ⟨.horizonProbe t edge, .steps⟩ = .gate ⟨.cue t edge, []⟩
-
-theorem proposal_recorded (c : Context P) (g : Gate) (s : String) :
-    advance c ⟨g, .propose s⟩ = .gate ⟨resumeOf g, [.proposal s]⟩
-
-theorem no_verdict_without_measure (c : Context P) (g : Gate) (why : String) :
-    advance c ⟨g, .accepted why⟩ = .gate (returning c g why)
-
-theorem no_adjudication_at_probe (c : Context P) (t : RecordId) (g : Selectable)
-    (a : Adjudication c) :
-    advance c ⟨.probe t g, .correct a⟩ = .gate ⟨.probe t g, []⟩
-
-theorem completed_persists (c more : Context P) (t : RecordId) (h : completed c t) :
-    completed (c ++ more) t
-
-theorem tasks_persist (c more : Context P) : ∃ ts, tasks (c ++ more) = tasks c ++ ts
-
-theorem certified_nonempty (v : VerifiedUnderstanding P) : tasks v.basis ≠ []
-
-theorem certified_all_closed (v : VerifiedUnderstanding P) :
-    ∀ t ∈ tasks v.basis, completed v.basis t.id
-
-theorem completed_by_person (c : Context P) (t : RecordId) (h : completed c t) :
-    ∃ i r, ∃ u : Utterance P, c[i]? = some u.val ∧ (i, r) ∈ said c ∧
-      r.gate.task = some t ∧ r.act = .close
-
-theorem advance_done_closed (c : Context P) (r : Reading c) (h : AllClosed c)
-    (hd : advance c r = .done h) : (recorded r).act = .close
-
-theorem advance_withdrawn (c : Context P) (r : Reading c)
-    (h : advance c r = .withdrawn) : r.answer = .withdraw
-
-theorem verified_by_person (respond : (c : Context P) → Round c → Response P)
-    (trace : Context P → Trace → Response P) (c : Context P) (us : List (Utterance P))
-    (v : VerifiedUnderstanding P) (hv : grasp respond trace c us = .verified v) :
-    ∃ (c₀ : Context P) (u : Utterance P), v.basis = consulted c₀ u ∧
-      (recorded (read c₀ u)).act = .close ∧ AllClosed v.basis
-
-theorem withdrawn_by_person (respond : (c : Context P) → Round c → Response P)
-    (trace : Context P → Trace → Response P) (c : Context P) (us : List (Utterance P))
-    (basis : Context P) (presentation : Response P)
-    (hw : grasp respond trace c us = .withdrawn basis presentation) :
-    ∃ (c₀ : Context P) (u : Utterance P), basis = consulted c₀ u ∧ (read c₀ u).answer = .withdraw
-
-theorem selection_never_horizon (g : Selectable) : g.val ≠ .horizon
-
-theorem selection_never_conflict (g : Selectable) : g.val ≠ .contradiction
-
-theorem close_at_closing_gate (c : Context P) (r : Reading c)
-    (h : (recorded r).act = .close) : r.gate.closable = true ∧ r.answer = .choose .close
-
-theorem shown_requires_measure (c : Context P) (r : Reading c)
-    (h : (recorded r).act = .met) : ∃ m, r.answer = .met m
-
-theorem disclosure_stays_assisted (c : Context P) (t : RecordId) (g : Aspect)
-    (h : (said c).any (fun (_, r) => r.gate.task == some t && r.gate.aspect == some g &&
-      match r.act with | .correct => true | _ => false) = true) :
-    assistance c t g = .afterDisclosure
-
-theorem other_intent_no_disclosure (c : Context P) (e : EntryPoint) (basis : String)
-    (t : RecordId) (edge : String) :
-    (redirect c e basis).gate ≠ .reveal t edge ∧ (redirect c e basis).gate ≠ .resolve t
 -/
 
 /-! ── TOOL GROUNDING ── -/

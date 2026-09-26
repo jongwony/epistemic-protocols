@@ -17,9 +17,7 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
-`theorem` line inside a doc comment states a consequence the contract already has; it is proved
-outside this block and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -116,17 +114,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
@@ -898,46 +885,6 @@ reopened, a condition adjusted are all edits of the same kind. The loop is dialo
 ends at the focus, and the person ends the run. The run holds no state into the execution interval.
 -/
 
-/-!
-Silence takes nothing and emits nothing.
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    apportion respond c [] = .holding c
-
-A pass only adds to the context.
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
-
-The plan is apportioned only on the person's taking, over a closable plan, with the navigation
-block recording its carrier.
-theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .take ∧ Closable c₁ ∧ a = close c₁ ∧
-      Recorded a.navigation a.context
-
-A withdrawal is the person's stop, and a route the protocol the person named.
-theorem withdrawn_on_stop (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (h : apportion respond c us = .withdrawn c₁) :
-    filledValue (closing c₁) = some .stop
-
-theorem routed_on_route (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (c₁ : Context P)
-    (h : apportion respond c us = .routed t c₁) : filledValue (closing c₁) = some (.route t)
-
-Every closing rests on a turn the person sent.
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
-
-Only a person's turn settles the acceptance question, or takes a unit over its fit.
-theorem acceptance_by_person {c : Context P} {s : Cite c}
-    (ok : (acceptanceCoord (P := P)).admits s.src) : s.src.val = .person
-
-theorem override_by_person {c : Context P} {u : PlanUnit} {s : Cite c}
-    (ok : (overrideCoord (P := P) u).admits s.src) : s.src.val = .person
-
-A recommendation is always one the ground clearly separates.
-theorem recommended_separates (c : Context P) (f : Focus) (i : {i : Nat // Separates c f i})
-    (_ : recommend c f = some i) : Separates c f i.val
--/
-
 /-! ── CONVERGENCE ──
 apportioned(G): the person took the plan with everything it holds in view, its structure held —
 never an empty plan — the carrier holding the whole plan, and the navigation block over it
@@ -956,51 +903,6 @@ acceptance question as settled — the criterion and whose it was, the reservati
 open on purpose, or the waiver — never two of these; (f) how each value came to stand — who
 proposed it, set or adopted — and the turns read as setting values, quoted; (g) the dissent the
 plan carries. Demonstrated, not asserted.
--/
-
-/-!
-Coverage is complete exactly when no hole remains.
-theorem residual_empty_iff_covered (c : Context P) :
-    residual c = [] ↔ coverageComplete c = true
-
-On a closable plan every unit's certificate says when it is done.
-theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c) :
-    (certificate (derivation c u)).terminates = true
-
-A reservation is never hidden by a passing check: it stands in the certificate with its ground.
-theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
-    s ∈ (certificate d).reserved
-
-A closable plan is never empty: it holds a unit or an out-of-scope declaration.
-theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ []
-
-A unit that does not fit stands on a closable plan only by the person's taking over its verdict.
-theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c)
-    (hf : u.fit ≠ .fits) :
-    ∃ (a : Override) (s : Cite c) (ok : (overrideCoord (P := P) u).admits s.src)
-      (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup
-
-Every unit carries its own ref, and no two share one.
-theorem emitted_refs_nodup (c : Context P) : ((emit c).units.map (·.ref)).Nodup
-
-Every whole-goal acceptance requirement is plan-terminal over the current unit count.
-theorem acceptance_bound_to_units (c : Context P) (p : PlanCondition) (hp : p ∈ planOf c)
-    (hs : p.scope = .wholeGoalAcceptance) :
-    p.dischargeableWhen = planTerminal (units c).length
-
-The waiver and the reserved criterion never stand together in what is emitted.
-theorem waiver_reservation_exclusive (c : Context P) :
-    ¬ ((envelope c).waived = true ∧ (envelope c).reserved.any (·.subject.isAcceptance) = true)
-
-The returned plan reads back what was emitted.
-theorem plan_reads_back (e : Emission) (ds : List String) (pv : List Provenance) :
-    (package e ds pv).units = e.units ∧ (package e ds pv).planConditions = e.planConditions ∧
-      (package e ds pv).reserved = e.envelope.reserved ∧
-      (package e ds pv).waived = e.envelope.waived
-
-The navigation block locates the carrier the write returned.
-theorem navigation_locates_carrier (c : Context P) :
-    (navigation c).canonicalLocator = ⟨carrierRecord c, sessionId c⟩
 -/
 
 /-! ── TOOL GROUNDING ── -/

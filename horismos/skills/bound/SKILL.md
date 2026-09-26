@@ -21,9 +21,7 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
-`theorem` line inside a doc comment states a consequence the contract already has; it is proved
-outside this block and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -100,17 +98,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
@@ -314,16 +301,6 @@ def foldRounds : Context P → List (Utterance P) → Context P
   | c, []      => c
   | c, u :: us => foldRounds (roundStep respond c u) us
 
-/-!
-Silence sets no boundary.
-theorem silence (c : Context P) : bound respond c [] = .holding c
-
-Continued rounds fold into the context: what follows depends on the context alone.
-theorem continue_folds (c : Context P) (xs ys : List (Utterance P))
-    (h : AllCont respond c xs) :
-    bound respond c (xs ++ ys) = bound respond (foldRounds respond c xs) ys
--/
-
 /-! ── CONVERGENCE ──
 converge only on `finish`: the boundary is `close` of the context at the accepting utterance.
   final readout: read the current map and its cited sources; derive the residual from every
@@ -334,19 +311,6 @@ converge only on `finish`: the boundary is `close` of the context at the accepti
   limits: closure defines a boundary at its constituted scope and depth; it supplies neither a
     fixed project goal nor proof of the user's comprehension or exhaustive discovery.
   non-convergent exits keep their finding or partial record.
--/
-
-/-!
-The boundary is set where the user accepted the closing offer, from the context at that
-point; later utterances do not reach it.
-theorem stop_here (c : Context P) (u : Utterance P) (us : List (Utterance P))
-    (h : verdict (fuse c u) = .finish) :
-    bound respond c (u :: us) = .defined (close (fuse c u))
-
-A DefinedBoundary always follows a person's utterance: its context ends with one.
-theorem defined_ends_in_utterance (c : Context P) (us : List (Utterance P))
-    (b : DefinedBoundary P) (h : bound respond c us = .defined b) :
-    ∃ (c₀ : Context P) (u : Utterance P), b.context = fuse c₀ u
 -/
 
 /-! ── TOOL GROUNDING ── -/

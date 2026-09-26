@@ -17,9 +17,7 @@ How to read this block. It is core Lean 4 and elaborates as written, and you are
 written for: you read it, and by inference over the context you settle each element it leaves
 open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
 the material in front of you; its doc comment says what you judge there, and nothing in this
-block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
-`theorem` line inside a doc comment states a consequence the contract already has; it is proved
-outside this block and asks nothing further of you.
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
@@ -122,17 +120,6 @@ inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
   | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
-
-/-!
-theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
-    ∃ t, fuse c u = c ++ t
-
-theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
-    (c[s.idx]'s.lt).origin ≠ .injected
--/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
     context that now stands. -/
@@ -547,43 +534,6 @@ materialized, and nowhere else: an insufficiency you find is shown with the revi
 and you fan over it once the person takes it up. Each fan relays the spec whole with its ledger
 before it generates. A question about a probe and a send-back are turns of the same kind as a
 closing. The loop is dialogue: each round ends at the gate, and the person ends the run.
--/
-
-/-!
-Silence constitutes, generates, and discards nothing.
-theorem silence (ai : AITurns P) (c : Context P) : preview ai c [] = .holding c
-
-No probe commits a value before the spec relay: every fan holds the relay turn ahead of what the
-probes wrote.
-theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
-    ∃ t, fan ai c = c ++ [(ai.relay c).val] ++ t
-
-A DirectionalContrast is the person's constitution of a direction, covered, and its harvest is
-read before discard.
-theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : DirectionalContrast P) (h : preview ai c us = .contrasted r) :
-    ∃ (c₁ : Context P) (d : Direction), filledValue (closing c₁) = some (.constitute d) ∧
-      Covered c₁ ∧ r.harvest = harvestOf c₁ d ∧ r.context = discard c₁
-
-A dissolution, a stop, and a route are each the person's closing.
-theorem dissolved_on_dissolve (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .dissolved r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .dissolve ∧ r = closed c₁
-
-theorem withdrawn_on_stop (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = closed c₁
-
-theorem routed_on_route (ai : AITurns P) (c : Context P) (us : List (Utterance P)) (t : String)
-    (r : Closed P) (h : preview ai c us = .routed t r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = closed c₁
-
-Every closing rests on a turn the person sent.
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
-
-Every probe has a line in the discard trace.
-theorem trace_total (c : Context P) : (discardTrace c).length = (probes c).length
 -/
 
 /-! ── CONVERGENCE ──

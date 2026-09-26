@@ -1,8 +1,10 @@
 name: Lean
 
-# Builds the Lean package — the contract modules generated from each SKILL.md Lean
-# block, the canonical GROUND, and the proofs — then runs the static checks with a
-# toolchain reachable, so the lean-definition verdict here is never the warn.
+# Installs the pinned toolchain and runs the Lean audit's fixtures (`lake test`),
+# then the static checks. lean-definition runs the one driver in
+# lean-contract.js — generate the contract modules from each SKILL.md Lean block,
+# `lake build --wfail`, then the checked-in audit as `lake lint` — with a
+# toolchain reachable, so its verdict here is never the warn.
 
 on:
   pull_request:
@@ -22,13 +24,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Generate the contract modules from the SKILL.md Lean blocks
-        run: node .claude/skills/verify/scripts/lean-contract.js generate .
-
-      # Installs the toolchain lean-toolchain pins and runs `lake build`.
+      # Installs the toolchain lean-toolchain pins and runs `lake test`. The build
+      # and the audit need the generated contracts, so the static checks run them.
       - uses: leanprover/lean-action@v1
         with:
-          build-args: '--wfail'
+          build: 'false'
+          test: 'true'
+          lint: 'false'
 
       - name: Static checks
         run: |

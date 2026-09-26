@@ -26,10 +26,10 @@ One protocol per run. Anchor chart: the protocol's own `ROO-*` chart; suite-wide
 7. **Decides** — one per settled point: protocol-local → the protocol chart; suite-wide → ROO-67; a principle that holds beyond this repository → a proposal on the premise chart (ROO-77), never a `premise/` edit in this PR. Each via `/unfold decide`.
 8. **Edit in a fork** — a fork in a worktree on the PR branch, given the decide ids as its spec:
    - rebase onto `origin/main`;
-   - commit A: GROUND copied from `lean/EpistemicProtocols/Ground.lean`, model judgments as documented `axiom`, a `Nonempty` instance per axiom type in `lean/EpistemicProtocols/<Namespace>/Proofs.lean`;
+   - commit A: GROUND copied from `lean/EpistemicProtocols/Ground.lean`, model judgments as documented `axiom`, a `Nonempty` instance per axiom type and each guarantee stated and proved together in `lean/EpistemicProtocols/<Namespace>/Theorems.lean`;
    - commit B: the re-derivation;
    - plugin version: one minor step over main's (ROO-67 decide db1de854);
-   - verify: `lean-contract.js generate` + `lake build --wfail`, static checks, the `AGENTS.md` §Development test bundle, and `static-checks.test.mjs` in its own `node --test` run;
+   - verify: `lean-contract.js check` (generate, `lake build --wfail`, `lake lint`) and `lake test`, static checks, the `AGENTS.md` §Development test bundle, and `static-checks.test.mjs` in its own `node --test` run;
    - one codex review round; PR body carries the record and `Part of ROO-67`; no merge.
    Check the fork's report against the branch and CI before relaying it.
 9. **Dogfood** — run the new `SKILL.md` by hand in this session on a live target. Each mismatch → a gate → choi's answer → a decide → a fork fix → re-judge. Close the run with the intents taken, quoting choi's words. A `/realize` before/after comparison waits on ROO-67 axis 4; until it settles, this dogfood is the run's runtime evidence.

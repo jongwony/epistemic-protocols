@@ -1,13 +1,8 @@
 #!/usr/bin/env node
 /**
- * Known-pass / known-fail proof for gate-answer-reference and lean-definition.
- *
- * The former gate-type-soundness check went inert when its prose anchor was
- * ablated. This test establishes that the replacement reaches every protocol
- * and rejects exact dangling references without asking a static parser to judge
- * context-dependent gate semantics. A protocol whose Definition block is Lean 4
- * resolves its references by elaboration instead, so lean-definition carries
- * that protocol, and the two checks together reach every protocol.
+ * Known-pass / known-fail proof for lean-definition: it reaches every protocol
+ * whose Definition block is Lean 4 — every protocol, now that none keeps the
+ * DSL — and each rule it holds is shown rejecting a mutated copy of the tree.
  *
  * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
  */
@@ -26,7 +21,6 @@ const projectRoot = path.resolve(here, '../../../..');
 const checkerRelative = '.claude/skills/verify/scripts/static-checks.js';
 const require = createRequire(import.meta.url);
 const { protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
-const CHECK = 'gate-answer-reference';
 
 function run(root) {
   try {
@@ -40,20 +34,8 @@ function run(root) {
   }
 }
 
-function counts(message) {
-  const read = (label) => {
-    const match = new RegExp(`(\\d+) ${label}`).exec(message);
-    assert.ok(match, `pass message lost its "${label}" count: ${message}`);
-    return Number(match[1]);
-  };
-  return {
-    resolved: read('resolved formal answers'),
-    unresolved: read('unresolved formal answers')
-  };
-}
-
 function copyWorkingTree() {
-  const root = mkdtempSync(path.join(tmpdir(), 'gate-answer-reference-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'lean-definition-'));
   cpSync(projectRoot, root, {
     recursive: true,
     filter: (source) => {
@@ -70,8 +52,6 @@ function copyWorkingTree() {
 }
 
 const clean = run(projectRoot);
-const cleanPasses = clean.pass.filter((result) => result.check === CHECK);
-const cleanFailures = clean.fail.filter((result) => result.check === CHECK);
 const LEAN = 'lean-definition';
 const leanVerdicts = [...clean.pass, ...clean.warn].filter((result) => result.check === LEAN);
 const leanFailures = clean.fail.filter((result) => result.check === LEAN);
@@ -79,55 +59,6 @@ const leanFailures = clean.fail.filter((result) => result.check === LEAN);
 function isLeanProtocol(file) {
   return /^## Definition$(?:(?!^```)[\s\S])*?^```lean$/m.test(readFileSync(path.join(projectRoot, file), 'utf-8'));
 }
-
-describe('gate-answer-reference', () => {
-  it('reports a clean known-pass result for every canonical DSL protocol', () => {
-    const expected = protocolFiles({ projectRoot }).filter((file) => !isLeanProtocol(file)).sort();
-    const actual = cleanPasses.map((result) => result.file).sort();
-    assert.deepEqual(actual, expected);
-    assert.deepEqual(cleanFailures, []);
-    assert.ok(
-      cleanPasses.some((result) => counts(result.message).resolved > 0),
-      'no formal gate answer was resolved — extraction is inert'
-    );
-  });
-
-  it('rejects dangling TYPES, MODE STATE, and inline type references', (t) => {
-    // Any protocol still in the DSL serves as the fixture: three probe arrows are
-    // added to its PHASE TRANSITIONS, so the test outlives each move to Lean.
-    const target = protocolFiles({ projectRoot })
-      .filter((file) => !isLeanProtocol(file))
-      .find((file) => /── PHASE TRANSITIONS ──[\s\S]*?→\s*Stop\s*→/.test(
-        readFileSync(path.join(projectRoot, file), 'utf-8')));
-    if (!target) {
-      t.skip('no protocol with a DSL gate arrow remains');
-      return;
-    }
-    const root = copyWorkingTree();
-    try {
-      const targetPath = path.join(root, target);
-      const source = readFileSync(targetPath, 'utf-8');
-      const header = '── PHASE TRANSITIONS ──\n';
-      assert.ok(source.includes(header), `${target}: PHASE TRANSITIONS header moved`);
-      const probes = [
-        'Probe₁: Q → Stop → Zeta',
-        'Probe₂: Q → Stop → Λ.missing_gate_answers',
-        'Probe₃: Q → Stop → X ∈ Zeta   -- inline',
-      ].join('\n');
-      writeFileSync(targetPath, source.replace(header, `${header}${probes}\n`));
-
-      const mutated = run(root);
-      const failures = mutated.fail
-        .filter((result) => result.check === CHECK)
-        .map((result) => `${result.file}: ${result.message}`);
-      assert.ok(failures.some((message) => message.includes('`Zeta`')), failures.join('\n'));
-      assert.ok(failures.some((message) => message.includes('`Λ.missing_gate_answers`')), failures.join('\n'));
-      assert.ok(failures.some((message) => message.includes('inline gate answer type `Zeta`')), failures.join('\n'));
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
-  });
-});
 
 describe('lean-definition', () => {
   const leanFiles = protocolFiles({ projectRoot }).filter(isLeanProtocol).sort();
@@ -146,6 +77,10 @@ describe('lean-definition', () => {
       mkdirSync(path.dirname(file(relative)), { recursive: true });
       writeFileSync(file(relative), text);
     };
+    const remove = (relative) => {
+      if (!originals.has(relative)) originals.set(relative, read(relative));
+      rmSync(file(relative), { force: true });
+    };
     const restore = () => {
       for (const [relative, text] of originals) {
         if (text === null) rmSync(file(relative), { force: true });
@@ -155,7 +90,7 @@ describe('lean-definition', () => {
     };
     const failures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
     try {
-      body({ read, write, restore, failures, verdict: () => run(root) });
+      body({ read, write, remove, restore, failures, verdict: () => run(root) });
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -167,11 +102,10 @@ describe('lean-definition', () => {
   const block = skill.slice(fence, close);
   const withBlock = (body) => skill.slice(0, fence) + body + skill.slice(close);
   const ns = /^namespace (\w+)/m.exec(block)[1];
-  const proofRelative = `lean/EpistemicProtocols/${ns}/Proofs.lean`;
-  const proof = readFileSync(path.join(projectRoot, proofRelative), 'utf-8');
-  const endNs = proof.lastIndexOf(`\nend ${ns}`);
-  const beforeEnd = (text) => `${proof.slice(0, endNs)}\n${text}\n${proof.slice(endNs)}`;
-  const firstTheorem = /^theorem\s+(\S+)[^\n]*$/m.exec(proof);
+  const theoremsRelative = `lean/EpistemicProtocols/${ns}/Theorems.lean`;
+  const theorems = readFileSync(path.join(projectRoot, theoremsRelative), 'utf-8');
+  const endNs = theorems.lastIndexOf(`\nend ${ns}`);
+  const beforeEnd = (text) => `${theorems.slice(0, endNs)}\n${text}\n${theorems.slice(endNs)}`;
   const expectSome = (messages, needle) => assert.ok(messages.some((m) => m.includes(needle)), `expected "${needle}" in:\n${messages.join('\n')}`);
 
   it('reaches every protocol whose Definition block is Lean, with no failure', () => {
@@ -181,19 +115,10 @@ describe('lean-definition', () => {
     assert.deepEqual(leanFailures, []);
   });
 
-  it('rejects proofs in the block, sorry, axioms, forks of GROUND, and forbidden escapes', () => {
-    assert.ok(firstTheorem, 'no proved theorem found to mutate');
+  it('rejects sorry, forks of GROUND, forbidden escapes, and foreign imports before any build', () => {
     withCopy(({ write, restore, failures, verdict }) => {
-      write(target, withBlock(`${block}\n@[simp] theorem mutation_inline : True := trivial`));
-      expectSome(failures(), 'proves `theorem mutation_inline` in place');
-      restore();
-
       write(target, withBlock(`${block}\ntheorem mutation_open : 1 = 2 := sorry`));
       expectSome(failures(), '`sorry`');
-      restore();
-
-      write(target, withBlock(`${block}\naxiom mutation_assumed : 1 = 2`));
-      expectSome(failures(), '`axiom mutation_assumed`');
       restore();
 
       write(target, skill.replace('── GROUND ──', '── GROUND ──\nA forked primitive.'));
@@ -210,20 +135,38 @@ describe('lean-definition', () => {
       const escapes = [
         ['set_option warn.sorry false in\ntheorem mutation_cheat : 1 = 2 := by admit', '`set_option`'],
         ['theorem mutation_cheat : 1 = 2 := sorryAx _ true', '`sorryAx`'],
-        ['@[simp] axiom mutation_false : False', '`axiom mutation_false`'],
         ['macro "mutation_axiom" : command => `(axiom mutationFalse : False)\nmutation_axiom', 'a metaprogramming command'],
         ['@[implemented_by id] def mutation_impl (n : Nat) : Nat := n\ntheorem mutation_native : False := by native_decide', '`native_decide`'],
         ['unsafe def mutation_unsafe : Nat := 0', '`unsafe`'],
         ['set_option debug.skipKernelTC true in\ntheorem mutation_skip : True := trivial', 'a `debug.` option'],
       ];
       for (const [text, needle] of escapes) {
-        write(proofRelative, beforeEnd(text));
+        write(theoremsRelative, beforeEnd(text));
         expectSome(failures(), needle);
         restore();
       }
 
-      write(proofRelative, proof.replace(/^(public import [^\n]*)$/m, '$1\nimport Lean'));
+      write(theoremsRelative, theorems.replace(/^(public import [^\n]*)$/m, '$1\nimport Lean'));
       expectSome(failures(), 'imports `Lean`');
+      restore();
+    });
+  });
+
+  it('keeps theorem statements out of the block, and requires the Theorems module', () => {
+    const closing = skill.indexOf('\n/-! ── CONVERGENCE ──');
+    const grounded = skill.indexOf('/-! ── GROUND ──');
+    assert.ok(closing !== -1 && grounded !== -1, 'no GROUND or CONVERGENCE section found to place a statement near');
+    withCopy(({ write, remove, restore, failures }) => {
+      write(target, `${skill.slice(0, closing)}\n/-!\ntheorem mutation_stated : True\n-/\n${skill.slice(closing)}`);
+      expectSome(failures(), 'states `theorem mutation_stated` in a doc comment');
+      restore();
+
+      write(target, `${skill.slice(0, grounded)}/-!\ntheorem mutation_early : True\n-/\n\n${skill.slice(grounded)}`);
+      expectSome(failures(), 'states `theorem mutation_early` in a doc comment');
+      restore();
+
+      remove(theoremsRelative);
+      expectSome(failures(), `${theoremsRelative} does not exist`);
       restore();
     });
   });
@@ -232,106 +175,20 @@ describe('lean-definition', () => {
     withCopy(({ write, restore, failures }) => {
       for (const orphan of ['lean/Orphan.lean', `lean/EpistemicProtocols/${ns}/Nested/Orphan.lean`]) {
         write(orphan, 'theorem orphan : True := trivial\n');
-        expectSome(failures(), 'neither the canonical GROUND nor the proofs or Theorem module');
+        expectSome(failures(), 'neither the canonical GROUND, a Theorems module');
         restore();
       }
     });
   });
 
-  // A protocol may state its theorems in a Theorem module instead of its block.
-  const { theoremModulePath } = require(path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js'));
-  const moduled = leanFiles.map((file) => {
-    const text = readFileSync(path.join(projectRoot, file), 'utf-8');
-    const hostNs = /^namespace (\w+)/m.exec(/^```lean\n([\s\S]*?)^```$/m.exec(text)[1])[1];
-    return existsSync(path.join(projectRoot, theoremModulePath(hostNs))) && { file, text, hostNs };
-  }).find(Boolean);
-
-  it('keeps a Theorem module to stating, in one place', { skip: !moduled && 'no protocol states its theorems in a Theorem module' }, () => {
-    const moduleRelative = theoremModulePath(moduled.hostNs);
-    const moduleText = readFileSync(path.join(projectRoot, moduleRelative), 'utf-8');
-    const closing = moduled.text.indexOf('\n/-! ── CONVERGENCE ──');
-    assert.ok(closing !== -1, 'no CONVERGENCE section found to place a statement before');
-    withCopy(({ write, restore, failures }) => {
-      write(moduled.file, `${moduled.text.slice(0, closing)}\n/-!\ntheorem mutation_twice : True\n-/\n${moduled.text.slice(closing)}`);
-      expectSome(failures(), 'a protocol states its theorems in one place');
+  it('reads guarantees, judgments, and axioms from elaboration, not from text', { skip: !elaborated && 'no Lean toolchain reachable' }, () => {
+    withCopy(({ write, restore, failures, verdict }) => {
+      write(target, withBlock(`${block}\n@[simp] theorem mutation_inline : True := trivial`));
+      expectSome(failures(), `\`theorem mutation_inline\` is proved in \`Contract.${ns}\``);
       restore();
 
-      write(moduleRelative, moduleText.replace(`\nend ${moduled.hostNs}`, `\ntheorem mutation_proved : True := trivial\n\nend ${moduled.hostNs}`));
-      expectSome(failures(), 'a Theorem module states signatures in doc comments');
-      restore();
-
-      write(moduleRelative, moduleText.replace(/^(public import [^\n]*)$/m, '$1\nimport Lean'));
-      expectSome(failures(), 'a Theorem module imports only');
-      restore();
-
-      write(moduleRelative, moduleText.replace(/^public import [^\n]*\n/m, ''));
-      expectSome(failures(), `does not import \`Contract.${moduled.hostNs}\``);
-      restore();
-
-      write(moduleRelative, moduleText.replace(`namespace ${moduled.hostNs}`, 'namespace MutationWrong').replace(`end ${moduled.hostNs}`, 'end MutationWrong'));
-      expectSome(failures(), `states inside \`namespace ${moduled.hostNs}\` alone`);
-      restore();
-
-      // A statement placed before GROUND is read by no audit.
-      const grounded = moduled.text.indexOf('/-! ── GROUND ──');
-      write(moduled.file, `${moduled.text.slice(0, grounded)}/-!\ntheorem mutation_early : True\n-/\n\n${moduled.text.slice(grounded)}`);
-      expectSome(failures(), 'before GROUND');
-      restore();
-    });
-  });
-
-  it('reads the stated set from the Theorem module', { skip: (!elaborated || !moduled) && 'no Lean toolchain reachable, or no Theorem module' }, () => {
-    const moduleRelative = theoremModulePath(moduled.hostNs);
-    const moduleText = readFileSync(path.join(projectRoot, moduleRelative), 'utf-8');
-    withCopy(({ write, restore, failures }) => {
-      write(moduleRelative, moduleText.replace(/\n-\/\n\nend /, '\n\ntheorem mutation_unproved : True\n-/\n\nend '));
-      // A statement no proof carries: the audit cannot re-derive it, as with a block's.
-      expectSome(failures(), 'does not follow from the proved theorem');
-      restore();
-
-      // Two commands on one line escape the line-anchored lint; the audit imports the
-      // Theorem module, so the environment still holds the axiom.
-      write(moduleRelative, moduleText.replace(`\nend ${moduled.hostNs}`, `\nexample : True := trivial axiom mutationSneaky : False\n\nend ${moduled.hostNs}`));
-      expectSome(failures(), `${moduled.hostNs}.mutationSneaky\` is declared in the Lean package`);
-      restore();
-    });
-  });
-
-  it('reads theorems and axioms from elaboration, not from text', { skip: !elaborated && 'no Lean toolchain reachable' }, () => {
-    withCopy(({ write, restore, failures }) => {
-      // A hidden premise keeps the signature text intact but not its meaning —
-      // the Codex counterexample, on a stated theorem with no hypothesis of its
-      // own so that no unused-variable warning stops the build first.
-      const { statedTheorems, groundSpan } = require(path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js'));
-      const host = leanFiles.map((file) => {
-        const text = readFileSync(path.join(projectRoot, file), 'utf-8');
-        const hostBlock = /^```lean\n([\s\S]*?)^```$/m.exec(text)[1];
-        const hostNs = /^namespace (\w+)/m.exec(hostBlock)[1];
-        const stated = statedTheorems(hostBlock.slice(groundSpan(hostBlock).end)).find((e) => e.name && !/\(h\w*\s*:/.test(e.signature));
-        return stated && { hostNs, stated };
-      }).find(Boolean);
-      assert.ok(host, 'no hypothesis-free stated theorem found to carry a hidden premise');
-      const hostProofRelative = `lean/EpistemicProtocols/${host.hostNs}/Proofs.lean`;
-      const hostProof = readFileSync(path.join(projectRoot, hostProofRelative), 'utf-8');
-      const hostOpened = hostProof.search(new RegExp(`^theorem ${host.stated.name}\\b`, 'm'));
-      const hostClosed = Math.min(...['\n\n', '\nend '].map((mark) => hostProof.indexOf(mark, hostOpened)).filter((at) => at !== -1));
-      write(hostProofRelative, `${hostProof.slice(0, hostOpened)}section\nvariable (mutationFalse : False)\ninclude mutationFalse\n${host.stated.signature} :=\n  False.elim mutationFalse\nend${hostProof.slice(hostClosed)}`);
-      expectSome(failures(), 'does not follow from the proved theorem');
-      restore();
-
-      const name = firstTheorem[1];
-      write(proofRelative, proof.replace(firstTheorem[0], firstTheorem[0].replace(name, `${name} (_mutationBinder : Nat)`)));
-      expectSome(failures(), 'does not follow from the proved theorem');
-      restore();
-
-      // Proofs commented out: the text still reads as theorems; the environment does not.
-      const opened = proof.indexOf(firstTheorem[0]);
-      write(proofRelative, `${proof.slice(0, opened)}/-\n${proof.slice(opened, endNs)}\n-/${proof.slice(endNs)}`);
-      expectSome(failures(), 'does not follow from the proved theorem');
-      restore();
-
-      write(proofRelative, beforeEnd('private theorem mutation_extra : True := trivial'));
-      expectSome(failures(), `declares \`theorem ${ns}.mutation_extra\``);
+      write(target, withBlock(`${block}\naxiom mutation_assumed : 1 = 2`));
+      expectSome(failures(), "`axiom mutation_assumed` has no doc comment");
       restore();
 
       // A judgment is a documented axiom of the block, and its type must be inhabited.
@@ -339,10 +196,35 @@ describe('lean-definition', () => {
       expectSome(failures(), 'has no `Nonempty` instance');
       restore();
 
-      // Two commands on one line escape a line-anchored axiom pattern; the
+      // Two commands on one line escape any line-anchored pattern; the
       // environment still holds the axiom.
-      write(proofRelative, beforeEnd('example : True := trivial axiom mutationSneaky : False'));
-      expectSome(failures(), `\`axiom ${ns}.mutationSneaky\` is declared`);
+      write(theoremsRelative, beforeEnd('example : True := trivial axiom mutationSneaky : False'));
+      expectSome(failures(), `\`axiom ${ns}.mutationSneaky\` is declared in \`EpistemicProtocols.${ns}.Theorems\``);
+      restore();
+
+      // An underscore-prefixed name hides nothing (codex review of this change).
+      write(theoremsRelative, beforeEnd('axiom _mutationCheat : False\ntheorem _mutation_unchecked : False := _mutationCheat'));
+      expectSome(failures(), `\`axiom ${ns}._mutationCheat\` is declared in \`EpistemicProtocols.${ns}.Theorems\``);
+      restore();
+
+      write(theoremsRelative, beforeEnd('theorem mutation_unrelated : 1 + 1 = 2 := rfl'));
+      expectSome(failures(), `guarantee \`${ns}.mutation_unrelated\` states nothing about the contract`);
+      restore();
+
+      write(theoremsRelative, beforeEnd('def mutation_def : Nat := 0'));
+      expectSome(failures(), `\`${ns}.mutation_def\` is a public definition`);
+      restore();
+
+      // A private theorem is a helper, not a guarantee, and is admitted.
+      write(theoremsRelative, beforeEnd('private theorem mutation_helper : True := trivial'));
+      const helped = verdict();
+      assert.deepEqual(helped.fail.filter((r) => r.check === LEAN), []);
+      expectSome(helped.pass.filter((r) => r.check === LEAN && r.file === target).map((r) => r.message), '1 private helper(s)');
+      restore();
+
+      // With every theorem private, the contract guarantees nothing.
+      write(theoremsRelative, theorems.replace(/^theorem /gm, 'private theorem '));
+      expectSome(failures(), 'states no public theorem');
       restore();
 
       write(target, withBlock(`${block}\ndef mutation_dangling : Nat := undeclaredReference`));
