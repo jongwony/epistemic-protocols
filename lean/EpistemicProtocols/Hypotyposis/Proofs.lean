@@ -18,7 +18,6 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty Verdict := ⟨.cont⟩
 
 theorem silence (relay respond : Context P → Response P) (c : Context P) :
     sketch relay respond c [] = .holding c := by
@@ -29,77 +28,156 @@ theorem relay_before_production (relay : Context P → Response P) (c : Context 
   ⟨_, rfl⟩
 
 theorem held_gate_produces_nothing (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hv : verdict (fuse c u) = .cont)
-    (hb : ¬ AIBoundary (fuse c u)) (hh : Placing (fuse c u) ∨ ¬ Redraws (fuse c u)) :
+    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (fuse c u)) = none)
+    (hb : ¬ Unsuppliable (fuse c u)) (hf : fixture (fuse c u) = none)
+    (hh : Placing (fuse c u) ∨ ¬ Redraws (fuse c u)) :
     sketch relay respond c (u :: us) =
       sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [sketch, hv, hb, hh]
+  simp [sketch, hk, hb, hf, hh]
+
+theorem uncovered_retains_nothing (relay respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
+    (hk : filledValue (closing (fuse c u)) = none) (hb : ¬ Unsuppliable (fuse c u))
+    (hf : fixture (fuse c u) = some f) (hc : ¬ Covered (fuse c u)) :
+    sketch relay respond c (u :: us) =
+      sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
+  simp [sketch, hk, hb, hf, hc]
 
 theorem unverified_returns_to_placement (relay respond : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
-    (hv : verdict (fuse c u) = .place) (hf : fixture (settle (fuse c u)) = some f)
+    (hk : filledValue (closing (fuse c u)) = none) (hb : ¬ Unsuppliable (fuse c u))
+    (hf : fixture (fuse c u) = some f) (hc : Covered (fuse c u))
     (hn : ¬ Verified (settle (fuse c u)) f) :
     sketch relay respond c (u :: us) =
       sketch relay respond (settle (fuse c u) ++ [(respond (settle (fuse c u))).val]) us := by
-  simp [sketch, hv, hf, hn]
+  simp [sketch, hk, hb, hf, hc, hn]
+
+theorem each_step_continues_or_closes (relay respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
+    (h : sketch relay respond c (u :: us) = o) :
+    (∃ c', sketch relay respond c' us = o) ∨
+    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) ∨
+    (filledValue (closing (fuse c u)) = some .dissolve ∧ o = .dissolved (closed (fuse c u))) ∨
+    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧
+      o = .routed t (closed (fuse c u))) ∨
+    (Unsuppliable (fuse c u) ∧ o = .boundary (closed (fuse c u ++ [(relay (fuse c u)).val]))) ∨
+    (∃ f, fixture (fuse c u) = some f ∧ Covered (fuse c u) ∧ Verified (settle (fuse c u)) f ∧
+      o = .recognized (recognize (settle (fuse c u)) f)) := by
+  simp only [sketch] at h
+  split at h
+  · exact .inr (.inl ⟨by assumption, h.symm⟩)
+  · exact .inr (.inr (.inl ⟨by assumption, h.symm⟩))
+  · rename_i t ht
+    exact .inr (.inr (.inr (.inl ⟨t, ht, h.symm⟩)))
+  · split at h
+    · rename_i hu
+      exact .inr (.inr (.inr (.inr (.inl ⟨hu, h.symm⟩))))
+    · split at h
+      · rename_i f hf
+        split at h
+        · rename_i hc
+          split at h
+          · rename_i hv
+            exact .inr (.inr (.inr (.inr (.inr ⟨f, hf, hc, hv, h.symm⟩))))
+          · exact .inl ⟨_, h⟩
+        · exact .inl ⟨_, h⟩
+      · split at h
+        · exact .inl ⟨_, h⟩
+        · exact .inl ⟨_, h⟩
 
 theorem recognized_verified (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : RecognizedForm P)
     (h : sketch relay respond c us = .recognized r) :
-    ∃ c₁, Verified c₁ r.fixture ∧ r = recognize c₁ r.fixture := by
+    ∃ c₀, fixture c₀ = some r.fixture ∧ Covered c₀ ∧ Verified (settle c₀) r.fixture ∧
+      r = recognize (settle c₀) r.fixture := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    simp only [sketch] at h
-    split at h
-    · cases h
-    · cases h
-    · cases h
-    · split at h
-      · rename_i f _
-        split at h
-        · rename_i hver
-          cases h
-          exact ⟨_, hver, rfl⟩
-        · exact ih _ h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · split at h
-        · exact ih _ h
-        · exact ih _ h
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ |
+        ⟨_, h'⟩ | ⟨f, hf, hc, hv, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+    · cases h'
+    · cases h'
+    · cases h'
+      exact ⟨_, hf, hc, hv, rfl⟩
 
 theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closing P) (h : sketch relay respond c us = .dissolved r) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .dissolve ∧ r = closing (fuse c₀ u) := by
+    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .dissolved r) :
+    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ r = closed c₀ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    simp only [sketch] at h
-    split at h
-    · cases h
-    · rename_i hd
-      cases h
-      exact ⟨c, u, hd, rfl⟩
-    · cases h
-    · split at h
-      · split at h
-        · cases h
-        · exact ih _ h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · split at h
-        · exact ih _ h
-        · exact ih _ h
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hk, h'⟩ | ⟨_, _, h'⟩ |
+        ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+      exact ⟨_, hk, rfl⟩
+    · cases h'
+    · cases h'
+    · cases h'
 
-theorem settled_by_utterance {c : Context P} {a : Axis} {s : Cite c}
+theorem routed_by_person (relay respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (t : String) (r : Closed P)
+    (h : sketch relay respond c us = .routed t r) :
+    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ r = closed c₀ := by
+  induction us generalizing c with
+  | nil => simp [sketch] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩ | ⟨t', hk, h'⟩ |
+        ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+    · cases h'
+      exact ⟨_, hk, rfl⟩
+    · cases h'
+    · cases h'
+
+theorem withdrawn_by_person (relay respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .withdrawn r) :
+    ∃ c₀, filledValue (closing c₀) = some .withdraw ∧ r = closed c₀ := by
+  induction us generalizing c with
+  | nil => simp [sketch] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨hk, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ |
+        ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
+    · exact ih c' h'
+    · cases h'
+      exact ⟨_, hk, rfl⟩
+    · cases h'
+    · cases h'
+    · cases h'
+    · cases h'
+
+theorem boundary_on_evidence (relay respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .boundary r) :
+    ∃ c₀, Unsuppliable c₀ ∧ r = closed (c₀ ++ [(relay c₀).val]) := by
+  induction us generalizing c with
+  | nil => simp [sketch] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ |
+        ⟨hu, h'⟩ | ⟨_, _, _, _, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+    · cases h'
+    · cases h'
+      exact ⟨_, hu, rfl⟩
+    · cases h'
+
+theorem settled_by_person {c : Context P} {a : Axis} {s : Cite c}
     (ok : (axisCoord (P := P) a).admits s.src) : s.src.val = .person := ok
 
-theorem recognized_by_utterance {c : Context P} {s : Cite c}
+theorem recognized_by_person {c : Context P} {s : Cite c}
     (ok : (recognitionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-theorem placed_by_utterance {c : Context P} {s : Cite c}
+theorem placed_by_person {c : Context P} {s : Cite c}
     (ok : (placementCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem closed_by_person {c : Context P} {s : Cite c}
+    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 end Hypotyposis
