@@ -18,6 +18,7 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
+instance : Nonempty Focus := ⟨.naming⟩
 
 theorem silence (respond declare : Context P → Response P) (c : Context P) :
     induce respond declare c [] = .holding c := by
@@ -108,8 +109,26 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-theorem cap_bounds_draws (c : Context P) (h : CapReached c) : draw c = none := by
-  simp [draw, h]
+theorem cap_bounds_probes (c : Context P) (h : CapReached c) (hr : ¬ ProbeRequested c)
+    (p : ProbeCase) : focus c ≠ .probe p := by
+  unfold focus
+  cases hs : selectFocus c with
+  | probe q =>
+    dsimp only
+    split
+    · split <;> simp
+    · rename_i hn
+      exact absurd ⟨h, hr⟩ hn
+  | correspondence => simp
+  | naming => simp
+  | exhausted => simp
+
+theorem live_leaves_only_by_refutes (c : Context P) (r : Reading) (hr : r ∈ readings c)
+    (hn : r ∉ live c) : refuted c r = true := by
+  unfold live at hn
+  simp only [List.mem_filter, not_and] at hn
+  have := hn hr
+  cases h : refuted c r <;> simp_all
 
 theorem verdict_by_person {c : Context P} {p : ProbeCase} {r : Reading} {s : Cite c}
     (ok : (verdictCoord (P := P) p r).admits s.src) : s.src.val = .person := ok
