@@ -21,6 +21,7 @@ instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.
 instance : Nonempty Candidate := ⟨⟨"", "", "", none⟩⟩
 instance : Nonempty Row := ⟨⟨"", ⟨"", ⟨"", ""⟩⟩, ⟨"", ⟨"", ""⟩⟩, ""⟩⟩
 instance : Nonempty Move := ⟨.confirm⟩
+instance : Nonempty CaseUnfolding := ⟨⟨"", "", "", "", ""⟩⟩
 
 theorem silence (respond declare : Context P → Response P) (c : Context P) :
     induce respond declare c [] = .holding c := by
@@ -110,6 +111,30 @@ theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ rea
   cases hs : filledValue (setAside c r) with
   | none => simp_all
   | some g => exact ⟨g, rfl⟩
+
+theorem row_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ rowCases c) :
+    (i, unfoldCase c i) ∈ casesSection c := by
+  simp only [casesSection, List.mem_map]
+  exact ⟨i, h, rfl⟩
+
+theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate c = some k) :
+    k.reading ∈ live c := by
+  unfold shownCandidate at h
+  split at h
+  · rename_i hl
+    cases h
+    exact hl
+  · cases h
+
+theorem exhausted_when_none_live (c : Context P) (h : live c = []) : focus c = .exhausted := by
+  simp [focus, h]
+
+theorem nothing_adopted_before_confirm (c : Context P) (p : Provenance) (h : p ∈ provenance c) :
+    p.standing ≠ .adopted := by
+  simp only [provenance, List.mem_map] at h
+  obtain ⟨e, _, rfl⟩ := h
+  simp only [standing]
+  split <;> simp
 
 theorem set_aside_by_person {c : Context P} {r : Reading} {s : Cite c}
     (ok : (setAsideCoord (P := P) r).admits s.src) : s.src.val = .person := ok

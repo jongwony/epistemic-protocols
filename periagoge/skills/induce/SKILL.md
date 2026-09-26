@@ -146,6 +146,7 @@ abbrev AbstractionSeed (P : Type) := Context P
 structure Instance where
   content : String
   context : String
+  deriving DecidableEq  -- elab: lets the sheet gather each case once
 
 /-- **Your judgment**: an essence is sensed whose name, scope, or position is still unsettled, and
     at least two concrete cases can be read together. An abstraction already located — one awaiting
@@ -244,15 +245,45 @@ structure Row where
     readings rather than ones every reading treats alike, drawn from the person's own domain: pair
     the cases that align most readily, not the most distant, since distance is what a separating
     example is for; align what they carry slot by slot from the cases themselves; and draw a case
-    that tells readings apart. A correction the person makes reaches the example or the row its
-    words reach. -/
+    that tells readings apart. A row's examples stay as the last sheet showed them until a move of
+    the person's reaches them — a swap, a move of the goal, the candidate, or the reading they cross,
+    a correction, a case they brought; an example you would change otherwise is your proposal in the
+    ledger, not a swap. -/
 axiom row : Context P → Reading → Row
 
 /-- The cross view: every live reading with its row. -/
 def crossView (c : Context P) : List (Reading × Row) := (live c).map (fun r => (r, row c r))
 
+/-- A case unfolded on the sheet, a few lines: what happened, what was seen and what was not, how
+    it surfaced, and who brought it. -/
+structure CaseUnfolding where
+  happened  : String
+  seen      : String
+  unseen    : String
+  surfaced  : String
+  broughtBy : String
+
+/-- **Your reading** of case `i`, unfolded. -/
+axiom unfoldCase : Context P → Instance → CaseUnfolding
+
+/-- Every case the cross view uses, once each. -/
+def rowCases (c : Context P) : List Instance :=
+  ((crossView c).flatMap (fun x => [x.2.catches.source, x.2.misses.source])).eraseDups
+
+/-- The cases section of the sheet: every case the cross view uses, unfolded, so the person never
+    leaves the sheet to see one. -/
+def casesSection (c : Context P) : List (Instance × CaseUnfolding) :=
+  (rowCases c).map (fun i => (i, unfoldCase c i))
+
 /-- The candidate is read off a reading still in play. -/
 def CandidateLive (c : Context P) : Prop := (candidate c).reading ∈ live c
+
+open Classical in
+/-- The candidate the sheet shows: only while its reading is in play. Where the person set that
+    reading aside, you propose a candidate on a live reading; where none is live, the sheet shows
+    none. -/
+def shownCandidate (c : Context P) : Option Candidate :=
+  if CandidateLive c then some (candidate c) else none
 
 /-- **Your reading**: what the person said is still missing, each point in their words. -/
 axiom missing : Context P → List String
@@ -310,14 +341,15 @@ def proposer (c : Context P) (e : Entry) : Proposer :=
   | some ⟨.person, _⟩ => .person
   | _                 => .ai
 
-/-- How a value came to stand: the person's turn set it, or a confirm adopted yours. -/
-inductive Standing | set | adopted
+/-- How a value came to stand: the person's turn set it; it is yours and still proposed; or a
+    confirm adopted yours. -/
+inductive Standing | set | proposed | adopted
 
 /-- **Your reading**: the person's turn set what `e` holds now — stated it, moved it, corrected it,
     or brought it — on the scope their words reach. -/
 axiom setByPerson : Context P → Entry → Bool
 
-def standing (c : Context P) (e : Entry) : Standing := if setByPerson c e then .set else .adopted
+def standing (c : Context P) (e : Entry) : Standing := if setByPerson c e then .set else .proposed
 
 structure Provenance where
   entry    : Entry
@@ -326,6 +358,12 @@ structure Provenance where
 
 def provenance (c : Context P) : List Provenance :=
   (entries c).map (fun e => ⟨e, proposer c e, standing c e⟩)
+
+/-- A confirm adopts what was still proposed. -/
+def adopt (p : Provenance) : Provenance :=
+  match p.standing with
+  | .proposed => { p with standing := .adopted }
+  | _         => p
 
 /-- What a ledger line records. -/
 inductive LedgerKind
@@ -356,12 +394,20 @@ inductive Move
   /-- swap an example on a reading's row for one that separates better -/
   | swapExample (r : Reading)
   | confirm
+  /-- every reading drawn so far was set aside: name a distinction the readings missed, read
+      another set of cases, or move the goal -/
+  | exhausted
 
 /-- **Your selection** of the move to ask about: the one whose answer would most change how goal and
     readings cross — confirm only where the candidate fits the goal on every example shown, and a
     move that would show a separating case the person has not seen before a confirm that would take
     the candidate unseen. -/
-axiom focus : Context P → Move
+axiom selectMove : Context P → Move
+
+open Classical in
+/-- The move the sheet asks about; where no reading is live, the exhausted readings — the sheet says
+    that every reading drawn so far was set aside on the grounds shown. -/
+def focus (c : Context P) : Move := if live c = [] then .exhausted else selectMove c
 
 /-- **Your record**: the contrary grounds you showed before the person's answers — a reading the
     examples back better than the candidate's, a goal the candidate misses on an example shown, a
@@ -392,8 +438,9 @@ def closeCoord : Coord P Closing :=
 axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
 /-- **Your judgment**, the adoption condition: everything a confirm would take was shown on the sheet
-    the confirm answered — the goal with who set it, the candidate, every live reading's row, the
-    readings set aside with their grounds, every case with who brought it — together with your
+    the confirm answered — the goal with who set it, the candidate, every live reading's row, every
+    case the rows use unfolded, the readings set aside with their grounds, every case with who
+    brought it — together with your
     contrary grounds. A confirm adopts the goal as shown. Where anything would be taken unseen, the
     sheet is drawn again with the whole basis. -/
 axiom Covered : Context P → Prop
@@ -410,6 +457,7 @@ structure CrystallizedAbstraction (P : Type) where
   goal       : String
   candidate  : Candidate
   crossView  : List (Reading × Row)
+  cases      : List (Instance × CaseUnfolding)
   setAside   : List (Reading × String)
   openTrace  : List OpenItem
   dissent    : List String
@@ -468,9 +516,9 @@ def pass (c : Context P) : Context P :=
 /-- The crystallized abstraction; the context ends in the declaration. -/
 def crystallize (declare : Context P → Response P) (c : Context P) : CrystallizedAbstraction P :=
   { context := c ++ [(declare c).val], goal := goal c, candidate := candidate c,
-    crossView := crossView c, setAside := setAsideReadings c,
+    crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
     openTrace := openItems c (some (candidate c).reading), dissent := dissent c,
-    provenance := provenance c }
+    provenance := (provenance c).map adopt }
 
 /-- What the run established; no candidate was taken, so every live reading stays open. -/
 def withdraw (declare : Context P → Response P) (c : Context P) : Withdrawn P :=
@@ -479,12 +527,15 @@ def withdraw (declare : Context P → Response P) (c : Context P) : Withdrawn P 
 
 open Classical in
 /-- `respond` presents the sheet. First any case you found, marked as yours. Then the goal — the
-    person's words quoted, or marked as your reading — and the working candidate, name and rule.
-    Then the cross view: one row per live reading, each saying what the reading becomes against the
-    goal, an example it catches and one it misses — each named by a phrase that carries the feature
-    being judged, never a bare number — and where the candidate sits on it. The full case list with
-    who brought each, and the readings set aside beside the person's ground, appear when they
-    change, when reconsidering needs them, and on the sheet a confirm would answer. Each value is
+    person's words quoted, or marked as your reading — and the working candidate (`shownCandidate`),
+    name and rule. Then the cross view: one row per live reading, each saying what the reading
+    becomes against the goal, an example it catches and one it misses — each named by a phrase that
+    carries the feature being judged, never a bare number — and where the candidate sits on it.
+    Then the cases section (`casesSection`): every case the rows use, unfolded in a few lines; a new
+    or changed case is unfolded again, an unchanged one may be folded as the same as the last sheet,
+    and all are unfolded on the sheet a confirm would answer. The full case list with who brought
+    each, and the readings set aside beside the person's ground, appear when they change, when
+    reconsidering needs them, and on the sheet a confirm would answer. Each value is
     marked the person's or yours, each field labelled by the question it answers, and each term of
     this block rendered as the concrete question it stands for, in the person's everyday words. Then
     the ledger, the person's moves first. Then your contrary grounds. Then the one move (`focus`),
@@ -558,9 +609,24 @@ Every live reading has its row on the sheet: the alternatives stay in view.
 theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
     (r, row c r) ∈ crossView c
 
-A reading leaves the live set only by the person's setting-aside.
+Among the readings drawn, one is out of the live set only where the person set it aside.
 theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ readings c)
     (hn : r ∉ live c) : ∃ g, filledValue (setAside c r) = some g
+
+Every case the cross view uses is unfolded on the same sheet.
+theorem row_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ rowCases c) :
+    (i, unfoldCase c i) ∈ casesSection c
+
+The sheet shows a candidate only on a reading still in play.
+theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate c = some k) :
+    k.reading ∈ live c
+
+Where no reading is live, the sheet asks about the exhausted readings.
+theorem exhausted_when_none_live (c : Context P) (h : live c = []) : focus c = .exhausted
+
+Before a confirm, nothing of yours stands as adopted.
+theorem nothing_adopted_before_confirm (c : Context P) (p : Provenance) (h : p ∈ provenance c) :
+    p.standing ≠ .adopted
 
 A setting-aside and an open item's disposition each rest on the person's turn.
 theorem set_aside_by_person {c : Context P} {r : Reading} {s : Cite c}
@@ -625,17 +691,17 @@ Bind the seed from an explicit argument first, then the most recent cluster of c
 
 Every turn shows one sheet, in everyday language. It opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up, and a confirm that covers it adopts it as yours.
 
-Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading and mark it as yours. Under it, the working candidate — a name and a rule — from the first sheet on. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
+Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading and mark it as yours. Under it, the working candidate — a name and a rule — from the first sheet on, always on a reading still in play: where the user sets that reading aside, propose a candidate on a live one. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 
-Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — an example it catches and an example it misses, and where the candidate sits on that reading. Name every case by a short phrase that carries the feature being judged, never by a number alone. Choose examples that tell the goal and the readings apart rather than ones every reading treats alike: pair the cases that align most readily, align what they carry from the cases themselves, and reach for a separating case from the user's own domain. The full list of cases with who brought each, and the readings the user set aside beside the user's own words, appear when they change, when reconsidering needs them, and on the sheet a confirm would answer. Label each field with the question it answers, in the user's words, and say each term this file uses — a reading, a row, an example — as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
+Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — an example it catches and an example it misses, and where the candidate sits on that reading. Name every case by a short phrase that carries the feature being judged, never by a number alone. Then a cases section: every case the rows use, unfolded in a few lines — what happened, what was seen and what was not, how it surfaced, who brought it — so the user never leaves the sheet to see one. Unfold a new or changed case again; an unchanged one may be folded as the same as the last sheet; unfold them all on the sheet a confirm would answer. Choose examples that tell the goal and the readings apart rather than ones every reading treats alike: pair the cases that align most readily, align what they carry from the cases themselves, and reach for a separating case from the user's own domain. The full list of cases with who brought each, and the readings the user set aside beside the user's own words, appear when they change, when reconsidering needs them, and on the sheet a confirm would answer. Label each field with the question it answers, in the user's words, and say each term this file uses — a reading, a row, an example — as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
-Under the sheet, the ledger of what the last turn changed: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown in the ledger. Then your contrary grounds, each beside the value it bears on.
+Under the sheet, the ledger of what the last turn changed: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown in the ledger. A row's examples stay as the last sheet showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal in the ledger. Then your contrary grounds, each beside the value it bears on.
 
-Then one move to ask about: narrow or widen the goal, move the candidate onto another reading or merge two readings, swap an example for one that separates better, or confirm. Say what each way of answering does to the goal and the candidate. Stopping, and going on to a protocol the user names, stay open on every sheet.
+Then one move to ask about: narrow or widen the goal, move the candidate onto another reading or merge two readings, swap an example for one that separates better, or confirm. Say what each way of answering does to the goal and the candidate. Where every reading was set aside, say that every reading drawn so far was set aside on the grounds shown, and ask whether to name a distinction the readings missed, read another set of cases, or move the goal. Stopping, and going on to a protocol the user names, stay open on every sheet.
 
 The user may answer in their own words, and one answer may reach several parts of the sheet. A move reaches what its words reach. An utterance about other work leaves the sheet as it stands; the sheet returns when the user comes back to the run. A reading leaves the cross view only by the user's words setting it aside, and returns when the user names it again, with their earlier ground shown beside it. Only the user closes the run: confirming, stopping, or going on to a protocol they name. A confirm takes the goal and the candidate as the sheet it followed showed them, with the whole basis in view, and only while the candidate's reading is still in play; where something it would take was never shown, draw the sheet again with the whole basis, and a confirm said before that later sheet does not reach it.
 
-At the close, declare the trace before proceeding: the goal and who set it, the candidate, the cross view, the readings set aside with their grounds, every case with who brought it, and the open trace. The open items are the live readings the candidate does not take and what the user said is still missing. Each open item takes its disposition from the user's closing turn: not blocking where the turn takes the run with the item shown open, deferred where it names the item for later work beside deferral words. An item no turn covered is shown as undisposed. At a withdrawal, show the goal, the candidate, and the readings as your reading, not as established.
+At the close, declare the trace before proceeding: the goal and who set it, the candidate, the cross view with its cases unfolded, the readings set aside with their grounds, every case with who brought it, and the open trace. The open items are the live readings the candidate does not take and what the user said is still missing. Each open item takes its disposition from the user's closing turn: not blocking where the turn takes the run with the item shown open, deferred where it names the item for later work beside deferral words. An item no turn covered is shown as undisposed. At a withdrawal, show the goal, the candidate, and the readings as your reading, not as established.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or the order of the sheet bears on where a sentence sits.
 
