@@ -316,12 +316,6 @@ abbrev Mode (P : Type) := Context P
 
 def inState (c : Context P) (s : State) (i : Item) : Prop := live c i ∧ (landing c i).state = s
 
-/-!
-The sets are disjoint by construction: an item's landing names one state.
-theorem state_unique {c : Context P} {i : Item} {s s' : State}
-    (h : inState c s i) (h' : inState c s' i) : s = s'
--/
-
 /-! ── PHASE TRANSITIONS ──
 Phase 0 scans the context; with nothing uncertain it presents the sufficiency finding with its
 reasoning and proceeds, not activated. Otherwise each pass runs: Step₀ registers `working`;
@@ -397,35 +391,10 @@ recorded. No item is declared out of scope without its own line. Convergence is 
 not asserted.
 -/
 
-/-!
-A dismissed item never re-enters a pass: the person's dismissal keeps it out of `live`, and
-registration keeps it out of what the scan raises.
-theorem no_reentry (c : Context P) (i : Item) (hreg : Registered c i) (hself : SameItem c i i)
-    (hd : (dismissal c i).isSome = true) : ¬ working c i
-
-What sufficed for a resolved item is never an AI turn.
-theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
-    {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
-    (c[s.idx]'s.lt).origin ≠ .assistant
-
-A pass only adds to the context: what collection returned, then the pass's record.
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
--/
-
 /-! ── CONVERGENCE ──
 sufficient(c) = `CollectionEnds`: the AI's own reach is exhausted as the stopping judgment
 reads it, and every landing stands on the whole material. `user_unknown ≠ ∅` does not block
 convergence: what remains is surfaced as the user's, which is the product.
--/
-
-/-!
-theorem ends_sufficient {c c' : Context P} (h : CollectionEnds c c') :
-    ∃ c₀, c' = pass c₀ ∧ (¬ PassChanged c₀ (pass c₀) ∨ ¬ WorthAnotherPass (pass c₀))
-
-The Sufficient answer converges at once, with no further pass.
-theorem sufficient_opens_no_pass (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : answer (fuse c u) = some .sufficient) :
-    inquire respond c (u :: us) = .declared (fuse c u)
 -/
 
 /-! ── TOOL GROUNDING ── -/

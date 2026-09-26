@@ -314,16 +314,6 @@ def foldRounds : Context P → List (Utterance P) → Context P
   | c, []      => c
   | c, u :: us => foldRounds (roundStep respond c u) us
 
-/-!
-Silence sets no boundary.
-theorem silence (c : Context P) : bound respond c [] = .holding c
-
-Continued rounds fold into the context: what follows depends on the context alone.
-theorem continue_folds (c : Context P) (xs ys : List (Utterance P))
-    (h : AllCont respond c xs) :
-    bound respond c (xs ++ ys) = bound respond (foldRounds respond c xs) ys
--/
-
 /-! ── CONVERGENCE ──
 converge only on `finish`: the boundary is `close` of the context at the accepting utterance.
   final readout: read the current map and its cited sources; derive the residual from every
@@ -334,19 +324,6 @@ converge only on `finish`: the boundary is `close` of the context at the accepti
   limits: closure defines a boundary at its constituted scope and depth; it supplies neither a
     fixed project goal nor proof of the user's comprehension or exhaustive discovery.
   non-convergent exits keep their finding or partial record.
--/
-
-/-!
-The boundary is set where the user accepted the closing offer, from the context at that
-point; later utterances do not reach it.
-theorem stop_here (c : Context P) (u : Utterance P) (us : List (Utterance P))
-    (h : verdict (fuse c u) = .finish) :
-    bound respond c (u :: us) = .defined (close (fuse c u))
-
-A DefinedBoundary always follows a person's utterance: its context ends with one.
-theorem defined_ends_in_utterance (c : Context P) (us : List (Utterance P))
-    (b : DefinedBoundary P) (h : bound respond c us = .defined b) :
-    ∃ (c₀ : Context P) (u : Utterance P), b.context = fuse c₀ u
 -/
 
 /-! ── TOOL GROUNDING ── -/
