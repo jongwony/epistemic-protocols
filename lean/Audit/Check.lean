@@ -44,11 +44,11 @@ structure Report where
 def moduleOf (env : Environment) (n : Name) : Option Name :=
   (env.getModuleIdxFor? n).bind fun i => env.header.moduleNames[i.toNat]?
 
-/-- A declaration the author wrote: it has source ranges, and it is neither a structure projection
-    nor a compiler-generated auxiliary. -/
+/-- A declaration the author wrote: it has source ranges and is not a structure projection. Only
+    what is listed turns on this; the axiom, dependency and escape readouts cover every declaration a
+    module owns, so a name — an underscore-prefixed one among them — hides nothing from them. -/
 def authored (n : Name) : MetaM Bool := do
-  let env ← getEnv
-  if ((privateToUserName? n).getD n).isInternalDetail || env.isProjectionFn n then return false
+  if (← getEnv).isProjectionFn n then return false
   return (← findDeclarationRanges? n).isSome
 
 /-- An instance of `Nonempty _`: the witness a judgment's type needs. -/
@@ -115,12 +115,20 @@ def auditTarget (u : Target) : MetaM Report := do
   -- contract's judgments.
   let judgmentList := judgments.toList
   for (n, ci) in theoremDecls do
+    if let .axiomInfo _ := ci then
+      r := { r with problems := r.problems.push s!"`axiom {userName n}` is declared in `{u.theorems}` — only the block declares an axiom, and there it is a documented model judgment" }
+      continue
+    let outside ← axiomsOutside n judgmentList
+    if outside.contains ``sorryAx then
+      r := { r with problems := r.problems.push s!"`{userName n}` uses `sorry`" }
+    let rest := outside.filter (· != ``sorryAx)
+    if !rest.isEmpty then
+      r := { r with problems := r.problems.push s!"`{userName n}` depends on {showNames rest} — only {showNames allowedAxioms.toArray} and the block's own judgments are admitted" }
+    for e in ← escapes n ci do
+      r := { r with problems := r.problems.push s!"`{userName n}` in `{u.theorems}` {e}" }
     if !(← authored n) then continue
     let isWitness ← isNonemptyWitness n ci
     match ci with
-    | .axiomInfo _ =>
-      r := { r with problems := r.problems.push s!"`axiom {userName n}` is declared in `{u.theorems}` — only the block declares an axiom, and there it is a documented model judgment" }
-      continue
     | .thmInfo _ =>
       if isWitness then r := { r with witnesses := r.witnesses.push (userName n).toString }
       else if isPrivateName n then r := { r with helpers := r.helpers.push (userName n).toString }
@@ -138,14 +146,6 @@ def auditTarget (u : Target) : MetaM Report := do
       if isWitness then r := { r with witnesses := r.witnesses.push (userName n).toString }
       else if !isPrivateName n then
         r := { r with problems := r.problems.push s!"`{n}` is a public definition in `{u.theorems}` — a definition of the contract lives in the block; a helper is `private`" }
-    let outside ← axiomsOutside n judgmentList
-    if outside.contains ``sorryAx then
-      r := { r with problems := r.problems.push s!"`{userName n}` uses `sorry`" }
-    let rest := outside.filter (· != ``sorryAx)
-    if !rest.isEmpty then
-      r := { r with problems := r.problems.push s!"`{userName n}` depends on {showNames rest} — only {showNames allowedAxioms.toArray} and the block's own judgments are admitted" }
-    for e in ← escapes n ci do
-      r := { r with problems := r.problems.push s!"`{userName n}` in `{u.theorems}` {e}" }
 
   if u.judgmentsAllowed && r.guarantees.isEmpty then
     r := { r with problems := r.problems.push s!"`{u.theorems}` states no public theorem — the contract's guarantees are its public theorems" }
@@ -161,9 +161,16 @@ def auditTarget (u : Target) : MetaM Report := do
     if ← forallTelescopeReducing ci.type fun _ body => return body.isSort then formers := j :: formers
   for j in judgments do
     let some ci := env.find? j | continue
-    -- Inhabited under every instantiation of its binders: the codomain, in their context.
-    let witness? ← forallTelescopeReducing ci.type fun _ body => do
-      try synthInstance? (← mkAppM ``Nonempty #[body]) catch _ => pure none
+    -- A witness for the whole type first; failing that, inhabited under every instantiation of
+    -- its binders: evidence a binder already carries, or an instance for the codomain in their
+    -- context. A binder is a variable, so it brings no declaration to audit.
+    let full? ← try synthInstance? (← mkAppM ``Nonempty #[ci.type]) catch _ => pure none
+    let witness? ← match full? with
+      | some w => pure (some w)
+      | none => forallTelescopeReducing ci.type fun xs body => do
+        for x in xs do
+          if ← isDefEq (← inferType x) body then return some x
+        try synthInstance? (← mkAppM ``Nonempty #[body]) catch _ => pure none
     match witness? with
     | none =>
       r := { r with problems := r.problems.push s!"`axiom {j}` is a judgment whose type has no `Nonempty` instance — declare one in `{u.theorems}`, so the judgment cannot assume what nothing inhabits" }

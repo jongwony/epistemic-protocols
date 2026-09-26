@@ -271,6 +271,20 @@ describe('lean-definition', () => {
       expectSome(failures(), `\`axiom ${ns}.mutationSneaky\` is declared in \`EpistemicProtocols.${ns}.Theorems\``);
       restore();
 
+      // An underscore-prefixed name hides nothing (codex review of this change).
+      write(theoremsRelative, beforeEnd('axiom _mutationCheat : False\ntheorem _mutation_unchecked : False := _mutationCheat'));
+      expectSome(failures(), `\`axiom ${ns}._mutationCheat\` is declared in \`EpistemicProtocols.${ns}.Theorems\``);
+      restore();
+
+      // GROUND's stated theorems are re-derived from their proofs: a weakened proof fails.
+      const groundTheorems = 'lean/EpistemicProtocols/Ground/Theorems.lean';
+      const groundText = readFileSync(path.join(projectRoot, groundTheorems), 'utf-8');
+      const weakened = groundText.replace(/theorem cited_not_injected[\s\S]*?(?=\n\nend Ground)/, 'theorem cited_not_injected {P : Type} {c : Context P}\n    (s : Cite c) : s.idx = s.idx := rfl');
+      assert.notEqual(weakened, groundText, 'no cited_not_injected proof found to weaken');
+      write(groundTheorems, weakened);
+      expectSome(failures(), 'Lean package does not build cleanly');
+      restore();
+
       write(theoremsRelative, beforeEnd('theorem mutation_unrelated : 1 + 1 = 2 := rfl'));
       expectSome(failures(), `guarantee \`${ns}.mutation_unrelated\` states nothing about the contract`);
       restore();

@@ -2025,7 +2025,7 @@ function checkLeanDefinition() {
     const attributed = new Set();
     for (const { relPath, ns } of units) {
       const own = result.build.diagnostics.filter(line => ns === 'Ground'
-        ? /EpistemicProtocols\/Ground/.test(line)
+        ? /EpistemicProtocols\/Ground|GroundStated\.lean/.test(line)
         : line.includes(`Contract/${ns}.lean`) || line.includes(`EpistemicProtocols/${ns}/`));
       if (own.length === 0) continue;
       own.forEach(line => attributed.add(line));

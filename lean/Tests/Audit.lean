@@ -21,19 +21,22 @@ def bad : Target := { ns := `Bad, contract := `Tests.Fixture.Bad.Contract, theor
 /--
 info: guarantees: #[Good.tagged_is_judged]
 helpers: #[Good.helper]
-judgments: #[Good.Wanted, Good.tagOf]
+judgments: #[Good.Wanted, Good.reuse, Good.tagOf]
 witnesses: #[Good.instNonemptyTag]
 -/
 #guard_msgs in
 #eval report good
 
 /--
-info: guarantees: #[Bad.rests_on_cheat, Bad.rests_on_sorry, Bad.unrelated]
+info: guarantees: #[Bad._unchecked, Bad.rests_on_cheat, Bad.rests_on_sorry, Bad.unrelated]
 helpers: #[Bad.hidden_cheat]
 judgments: #[Bad.never, Bad.tagOf]
 witnesses: #[Bad.instNonemptyTag]
 problem: `theorem Bad.inContract` is proved in `Tests.Fixture.Bad.Contract` — a proof is verification, not contract: state and prove it in `Tests.Fixture.Bad.Theorems`
 problem: `axiom Bad.undocumented` has no doc comment — an axiom in the block is a model judgment, and its doc comment says what is judged
+problem: `axiom Bad._cheat` is declared in `Tests.Fixture.Bad.Theorems` — only the block declares an axiom, and there it is a documented model judgment
+problem: `Bad._unchecked` depends on `Bad._cheat` — only `propext`, `Classical.choice`, `Quot.sound` and the block's own judgments are admitted
+problem: guarantee `Bad._unchecked` states nothing about the contract — its statement mentions no declaration of `Tests.Fixture.Bad.Contract` or GROUND; a lemma it needs is `private`
 problem: `axiom Bad.cheat` is declared in `Tests.Fixture.Bad.Theorems` — only the block declares an axiom, and there it is a documented model judgment
 problem: `Bad.publicDef` is a public definition in `Tests.Fixture.Bad.Theorems` — a definition of the contract lives in the block; a helper is `private`
 problem: `Bad.rests_on_cheat` depends on `Bad.cheat` — only `propext`, `Classical.choice`, `Quot.sound` and the block's own judgments are admitted
@@ -53,6 +56,7 @@ helpers: #[Good.helper]
 judgments: #[]
 witnesses: #[Good.instNonemptyTag]
 problem: `axiom Good.Wanted` is declared in `Tests.Fixture.Good.Contract` — GROUND declares no judgment
+problem: `axiom Good.reuse` is declared in `Tests.Fixture.Good.Contract` — GROUND declares no judgment
 problem: `axiom Good.tagOf` is declared in `Tests.Fixture.Good.Contract` — GROUND declares no judgment
 problem: `Good.tagged_is_judged` depends on `Good.tagOf` — only `propext`, `Classical.choice`, `Quot.sound` and the block's own judgments are admitted
 problem: `Good.helper` depends on `Good.tagOf` — only `propext`, `Classical.choice`, `Quot.sound` and the block's own judgments are admitted

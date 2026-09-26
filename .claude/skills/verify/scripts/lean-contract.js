@@ -9,6 +9,8 @@
  *
  *   Contract.<NS>  = module header + the block, with its GROUND section replaced
  *                    by `open Ground` (the canonical `EpistemicProtocols.Ground`).
+ *   GroundStated   = each theorem GROUND's canonical text states, re-derived from
+ *                    the public theorem of its name in Ground/Theorems.lean.
  *
  * One driver runs the whole path, locally, in the static checks, and in CI:
  *   generate → `lake build --wfail` → `lake lint` (prints `AUDIT {json}`).
@@ -65,6 +67,38 @@ function docTheoremNames(text) {
   return names;
 }
 
+// The `theorem` signatures inside `/-! … -/` doc comments of `text`, each with
+// its name, continuation lines kept as written.
+function docTheoremSignatures(text) {
+  const out = [];
+  for (const doc of text.matchAll(/\/-!([\s\S]*?)-\//g)) {
+    const lines = doc[1].split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (!/^theorem\s/.test(lines[i])) continue;
+      const sig = [lines[i]];
+      while (i + 1 < lines.length && /^\s+\S/.test(lines[i + 1])) sig.push(lines[++i]);
+      const signature = sig.join('\n').trimEnd();
+      out.push({ name: /^theorem\s+([^\s:({[]+)/.exec(signature)[1], signature });
+    }
+  }
+  return out;
+}
+
+// GROUND's canonical text names three theorems in a doc comment, copied into
+// every block; until the suite decides whether they leave the block (ROO-67
+// Open questions), each stated signature must follow from the public theorem
+// of its name in Ground/Theorems.lean alone — a weakened proof fails the build.
+const GROUND_STATED = 'GroundStated';
+function groundStatedModule(groundText) {
+  const checks = docTheoremSignatures(groundText).map(({ name, signature }) => [
+    `theorem ${name}.stated${signature.slice(`theorem ${name}`.length)} := by`,
+    '  first',
+    `  | exact ${name} ..`,
+    `  | (apply ${name} <;> assumption)`,
+  ].join('\n'));
+  return ['import EpistemicProtocols.Ground.Theorems', '', 'namespace Ground', '', checks.join('\n\n'), '', 'end Ground', ''].join('\n');
+}
+
 // Where a protocol's guarantees are stated and proved.
 function theoremsModulePath(ns) {
   return path.join('lean', 'EpistemicProtocols', ...ns.split('.'), 'Theorems.lean');
@@ -97,6 +131,9 @@ function planContracts(root, blocks) {
     files.push({ path: path.join(GENERATED_DIR, 'Contract', `${ns}.lean`), text: contractModule(block, ns) });
     units.push({ relPath, ns });
   }
+  const groundFile = path.join(root, CANONICAL_GROUND);
+  const groundText = fs.existsSync(groundFile) ? canonicalGroundText(fs.readFileSync(groundFile, 'utf8')) : null;
+  if (groundText !== null) files.push({ path: path.join(GENERATED_DIR, `${GROUND_STATED}.lean`), text: groundStatedModule(groundText) });
   return { files, units };
 }
 
@@ -163,6 +200,7 @@ function check(root, blocks, lake) {
 module.exports = {
   CANONICAL_GROUND,
   GENERATED_DIR,
+  GROUND_STATED,
   GROUND_THEOREMS,
   LEAN_TOOLING_DIRS,
   blockNamespace,
@@ -170,6 +208,7 @@ module.exports = {
   check,
   diagnostics,
   docTheoremNames,
+  docTheoremSignatures,
   extractLeanBlock,
   groundSpan,
   leanBlocksFrom,

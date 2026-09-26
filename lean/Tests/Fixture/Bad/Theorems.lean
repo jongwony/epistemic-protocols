@@ -19,4 +19,9 @@ private theorem hidden_cheat : False := cheat
 
 def publicDef : Nat := 0
 
+/-- An underscore-prefixed name hides nothing from the audit. -/
+axiom _cheat : False
+
+theorem _unchecked : False := _cheat
+
 end Bad
