@@ -46,7 +46,7 @@ VagueRecall
   → cue(meant, whole, axes)        -- what past, at which whole, along which axes: read from the utterance and the fused context, afresh on every utterance
   → find(records, cue)             -- the records the past work left that may bear the cue, within the boundary the context has established
   → ground(recognizable)           -- open each member's own record at the span the cue reaches; the story is composed from what those records carry
-  → present(recognizable)          -- the story, each excerpt beside where it is and how to reopen it, the qualifications; the turn yields
+  → present(recognizable)          -- the story, each claim with the record it rests on and how to reopen it, the qualifications; the turn yields
   → identify(recognizable, person) -- synthesis of identification (Husserl CM §18) fulfilling the empty horizon (CM §19): the person's observable act, never inferred from silence
   → emit(RecalledContext)          -- the identified recognizable with its story, excerpts, locators, qualifications, and the scope searched, as session text
   → RecalledContext
@@ -135,18 +135,16 @@ variable {P : Type}
     they cannot name. What they mean is read from it, never stored beside it. -/
 abbrev VagueRecall (P : Type) := Context P
 
-/-- The whole the person means; its shape is the shape the story takes. A single record may be a
-    whole, and several may be one. A recall matching none of the named shapes is named as it
-    comes. -/
+/-- The whole the person means. A single record may be a whole, and several may be one. A recall
+    matching none of the named wholes is named as it comes. -/
 inductive Whole
-  /-- one conversation: origin → direction → outcome -/
+  /-- one conversation -/
   | session
-  /-- a line of work: where it began → how it developed → where it arrived -/
+  /-- a succession of work across records -/
   | line
-  /-- a topic worked out in pieces: the fragments → where the records say it last stood -/
+  /-- pieces worked out on one subject -/
   | topic
-  /-- a settled concept: where it was forged → where it was settled; recognized only where a
-      record carries it as settled -/
+  /-- a settled idea; recognized only where a record carries it as settled -/
   | concept
   | emergent (name : String)
 
@@ -203,7 +201,7 @@ structure Claim (c : Context P) where
   evidence  : src.src.val ≠ .person
   supported : ClaimSupported c (c[src.idx]'src.lt) text
 
-/-- **Your composition**: the story of `r` in its whole's shape, each sentence resting on a record
+/-- **Your composition**: the story the records carry of `r`, each sentence resting on a record
     opened at the span the cue reaches — for an artifact, the change history of that span. What no
     opened record carries is not written, and a concept is not told without the record that
     carries it as settled. -/
@@ -402,14 +400,16 @@ def settle (c : Context P) : Option (Outcome P) :=
     some (.unresolved c (searched c) ((scopeQualifications c).map (·.finding)))
   else none
 
-/-- `respond` presents the round the pass leaves. With a leading recognizable: its story in the
-    whole's shape, each excerpt beside its locator and handle, the adjacent candidates named in a
-    phrase each, the members' qualifications, and that recall establishes that the past took place
-    and not that it still holds — then the turn yields, with no option list. With nothing to
-    present and nothing yet added to the cue: what was searched with the capture evidence of the
-    records examined, then one open question — what else do you remember? Otherwise: what was
-    searched so far, which records did not open, and the capture evidence of the records examined,
-    then the wider search with what it would read and its cost, against stopping here. -/
+/-- `respond` presents the round the pass leaves. With a leading recognizable: its story, each
+    claim with the record it rests on and that record's handle, the members whose records did not
+    open, the adjacent candidates named so a correction can point at them, the members'
+    qualifications, and that recall establishes that the past took place and not that it still
+    holds — then the turn yields, with no option list. With nothing to present and nothing yet
+    added to the cue: what was searched with the capture evidence of the records examined, then one
+    open question asking for more of what the person remembers. Otherwise: what was searched so
+    far — above one record, the relations that led nowhere — which records did not open, and the
+    capture evidence of the records examined, then the wider search with what it would read and its
+    cost, against stopping here. -/
 def recollect (respond : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -506,9 +506,9 @@ def grounding : Op → Annot × String
   | .group             => (.sense, "Internal analysis: found records joined into the cue's whole by relations the records support, and ordered; a method that computes groups may propose, and the judgment decides")
   | .ground            => (.sense, "Internal analysis: the story composed from the opened records, one supported claim per sentence, each speaker kept as the record names it")
   | .qualify           => (.observe, "artifact read, environment run: the capture outcome for every record the searches examined, one that matched nothing included, associated by runtime, store root, and session identity, per the capture-outcome reference; read-only")
-  | .ask               => (.constitution, "present: with nothing to present and nothing yet added to the cue, what was searched with the capture evidence of the records examined, then one open question in everyday words — what else do you remember?")
+  | .ask               => (.constitution, "present: with nothing to present and nothing yet added to the cue, what was searched with the capture evidence of the records examined, then one open question asking for more of what the person remembers")
   | .expand            => (.constitution, "present: what was searched so far, which records did not open, and the capture evidence of the records examined, then the wider search with what it would read and its cost, against stopping here")
-  | .present           => (.constitution, "present: the story in the whole's shape, each excerpt beside its locator and handle, the adjacent candidates named, the members' qualifications, and the currency caveat; no option list")
+  | .present           => (.constitution, "present: the story, each claim with the record it rests on and that record's handle, the members whose records did not open, the adjacent candidates named, the members' qualifications, and the currency caveat; no option list")
   | .readTurn          => (.sense, "Internal analysis: the latest utterance read against the fused context — an identification, a stop, or more cue: a correction, a place to look, an admission of the wider search")
   | .resolve           => (.extension, "TextPresent+Proceed: on identification, RecalledContext — the story, the excerpts with locators and handles, the qualifications, the scope searched, the identifying turn quoted, and the currency caveat")
   | .unresolved        => (.extension, "TextPresent+Proceed: on a stop or an unresolved close, the scope searched per root, the records that did not open, the capture evidence of the records examined, and the causes the evidence supports; no absence claimed")
@@ -543,23 +543,6 @@ Before searching a runtime's conversation records, read its realization referenc
 
 The records the past work left are wherever it left them: its conversations, the artifacts it changed and their change history, the decisions it recorded. Read from the cue the axes it can be reached along — a time, a person, an artifact, an identifier, a coined term — and follow them. Start from the current configuration's records; when the recall points at another root — a record names it, the records here begin after the time the cue names, or the person says so — search there too, and say which roots were searched. Reading named spans of named records and finding candidates across a population the context has bounded run without asking; a search whose extent passes that boundary is offered with its cost and run only on the person's word.
 
-### User-facing realization
-
-Present a recognizable as the story of the past in the records' own words, not a result-only hit and not an index's paraphrase:
-
-- locate it in time and source, preserving the realization label and the root;
-- tell it in the whole's shape — one conversation: origin, direction, outcome; a line: where it began, how it developed, where it arrived; a topic: the fragments and where the records say it last stood; a concept: where it was forged and where it settled — every sentence resting on an opened record, each speaker as the record names it;
-- put each member's excerpt beside its locator and emit only the resume handle the realization reference validates; where a record could not be opened, say so rather than filling the gap from an index;
-- when more than one candidate was found, name the adjacent ones in a phrase each, so a correction has something to point at;
-- qualify the members' capture availability from the capture outcomes read for them;
-- then yield the turn without an option list.
-
-Read the next utterance as identification, a stop, or more cue. Identification is what the person says or does — "that's it", or going on with it as the past they meant; going on with its topic alone, using it hypothetically, or moving on while a search is still open is not identification, and silence never is. Name the turn read as identification and the intent taken from it. Anything else is more cue and is searched as given: an earlier one, a narrower one, the whole line rather than one conversation, a place to look.
-
-Emit `RecalledContext` with the story, each member's excerpt, locator, validated resume handle, the capture qualifications that bear on the members, and the scope searched. State that recognition establishes historical identity rather than current truth. When a member's capture reports that an extraction received less than its whole source, name what was left out so downstream readers can weigh the record accordingly.
-
-When nothing can be presented and the person has not yet added to the cue, say what was searched — with what the capture outcomes of the records examined say, since an index that failed to build is a different miss from one that holds nothing — and ask one open question in everyday words — what else they remember — and take the answer as the next cue. After the person has added to the cue, offer a search past the boundary where one is still worth running, stating what has been searched so far — above one record including which relations led nowhere — with the capture evidence of the records examined, and what the wider search would read and cost, against stopping here. When nothing further is worth reaching for, close unresolved: report the scope actually searched per root, the records that did not open, the capture evidence of the records examined, and the causes the evidence supports; claim no absence.
-
 ## Known failure modes
 
 The names and their triggers are here so a mode is recognizable without a read. Once one is suspected, read `references/failure-modes.md` before acting: it carries each mode's cause, detection, and recovery. Emergent modes are admitted.
@@ -577,7 +560,7 @@ The names and their triggers are here so a mode is recognizable without a read. 
 
 - **Source-grounded recognition**: An index's gist is a cue that wakes recall, never evidence of it. Before a recognizable is presented, open each member's own record at the span the cue reaches and compose the story from what those records carry, one supported claim per sentence; assert nothing they do not. A RecalledContext is constituted by the person's observable identification and by nothing else.
 - **Speaker kept**: A record returned by a read is evidence of what was recorded and who said it. A past assistant statement supports that it was said, never that the person decided it or that it held.
-- **Narrative recognition**: Present candidates as stories whose origin, direction, and outcome make identity recognizable — in the records' words, with each member's locator and handle beside its excerpt.
+- **Narrative recognition**: Present a candidate as a story that makes its identity recognizable, in the records' words — not a result list and not an index's paraphrase.
 - **Correction is orienteering**: When the person turns the cue, show what lies adjacent — the other candidates found, the neighbouring wholes — rather than asking them to reconstruct the answer; their own words are the next cue and are searched as given.
 - **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before the gate. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-candidate context across rounds; distinguish a new candidate from the one last presented.
