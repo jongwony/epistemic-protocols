@@ -13,12 +13,13 @@ Vet working context by dialectical antithesis before action through structured p
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -64,58 +65,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -123,10 +123,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -139,10 +141,9 @@ abbrev WorkingContext (P : Type) := Context P
 structure Prospect where
   intent  : String
   leansOn : List Nat
-  deriving Inhabited  -- elab: lets `prospect` be declared `opaque`
 
 /-- **Your reading** of the pending action the working context was committed against. -/
-opaque prospect : Context P → Prospect
+axiom prospect : Context P → Prospect
 
 /-- A source, named by the index of the turn that carries it; the context only grows, so the
     index names it permanently. -/
@@ -151,7 +152,7 @@ abbrev SourceRef := Nat
 /-- **Your judgment**, silent: the sources that warrant audit — unusually load-bearing, older
     than the horizon for their origin, reached through a long provenance chain, in tension with
     another source about the same referent, or an inference used as a premise. -/
-opaque identify : Context P → List SourceRef
+axiom identify : Context P → List SourceRef
 
 /-- The claim a source is read as authority for: what it is about, its category, how far it
     reaches, and its wording verbatim — the text a provenance challenge must confront. -/
@@ -237,7 +238,7 @@ structure Audit where
     already names an audit is that audit. A binding that bundles several claims forms no audit
     until it is split — only a loop-time split leaves a parent, which already carries its
     record. -/
-opaque audits : Context P → List Audit
+axiom audits : Context P → List Audit
 
 /-- The person's answer at Qa: whose the candidate is. -/
 inductive Attribution
@@ -249,18 +250,15 @@ inductive Attribution
   | unattributable
 
 /-- **Your judgment**: the cited turn attributes audit `r`, as its claim now stands. -/
-opaque AttributionSupported : AuditRef → Context P → Turn P → Attribution → Prop
+axiom AttributionSupported : AuditRef → Context P → Turn P → Attribution → Prop
 
-/-- A candidate the certificate could not place is placed only by the person's statement. -/
+/-- A candidate the certificate could not place is placed only by a turn the person sent. -/
 def attributionCoord (r : AuditRef) : Coord P Attribution :=
-  { admits := (· = .utterance), supports := AttributionSupported r }
-
--- elab: an open witness lets the occupancy readings below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
+  { admits := (·.val = .person), supports := AttributionSupported r }
 
 /-- **Your reading**: the person's latest attribution of `r` that still reaches its claim as now
     bound; `open_` where none does. It may come at Qa or in any later utterance. -/
-opaque attribution : (c : Context P) → (r : AuditRef) → Occ (attributionCoord r) c
+axiom attribution : (c : Context P) → (r : AuditRef) → Occ (attributionCoord r) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
@@ -291,14 +289,10 @@ structure ValueSpace where
   evidence          : List Indicator
   stake             : Stake
 
--- elab: empty witnesses let the readings below be declared `opaque`; they add no meaning.
-instance : Inhabited ClaimRef := ⟨⟨"", "", "", ""⟩⟩
-instance : Inhabited ValueSpace := ⟨⟨default, "", [], ⟨"", ""⟩⟩⟩
-
 /-- **Your reading** for an admitted audit: the claim, predicate, and evidence off its binding,
     the stake off the pending action (`prospect`). Presented whole, and held for the cycle as
     the presentation shows it. -/
-opaque narrowing : Context P → AuditRef → ValueSpace
+axiom narrowing : Context P → AuditRef → ValueSpace
 
 inductive VerificationPath | directObserved | inferredFromN | externalCited | provisionalAssumption
 
@@ -313,11 +307,8 @@ structure Tags where
   horizon    : String
   branches   : List String
 
--- elab: an empty witness lets `tags` be declared `opaque`; it adds no meaning.
-instance : Inhabited Tags := ⟨⟨default, .provisionalAssumption, "", "", "", []⟩⟩
-
 /-- **Your reading** of an admitted audit's tags, from the verification reads (`tagReads`). -/
-opaque tags : Context P → AuditRef → Tags
+axiom tags : Context P → AuditRef → Tags
 
 inductive Pattern
   | provenanceAudit
@@ -337,7 +328,7 @@ structure Antithesis where
 
 /-- **Your record**, read from the context: every antithesis put to `r`, in cycle order. Only an
     admitted audit is posited against; a met Revisit appends, and nothing is removed. -/
-opaque antitheses : Context P → AuditRef → List Antithesis
+axiom antitheses : Context P → AuditRef → List Antithesis
 
 /-- What the person instructs the run to do with an audit — only what this contract can itself
     discharge. No instruction: the source stands under the recorded verdict. -/
@@ -358,18 +349,18 @@ structure Judgment where
 
 /-- **Your judgment**: the cited turn gives this judgment of audit `r`, answering the latest
     antithesis put to it. -/
-opaque JudgmentSupported : AuditRef → Context P → Turn P → Judgment → Prop
+axiom JudgmentSupported : AuditRef → Context P → Turn P → Judgment → Prop
 
-/-- A claim's standing is judged only by the person's statement. -/
+/-- A claim's standing is judged only by a turn the person sent. -/
 def judgmentCoord (r : AuditRef) : Coord P Judgment :=
-  { admits := (· = .utterance), supports := JudgmentSupported r }
+  { admits := (·.val = .person), supports := JudgmentSupported r }
 
 /-- **Your reading**: the person's judgment of `r` that answers its latest antithesis; `open_`
     until one does. A met Revisit's fresh antithesis leaves it open again. -/
-opaque judgment : (c : Context P) → (r : AuditRef) → Occ (judgmentCoord r) c
+axiom judgment : (c : Context P) → (r : AuditRef) → Occ (judgmentCoord r) c
 
 /-- **Your judgment**: the Revisit condition is now satisfied in `c`. -/
-opaque TriggerMet : Context P → String → Prop
+axiom TriggerMet : Context P → String → Prop
 
 /-- What an audit still owes the person: the attribution the certificate left to them, a
     judgment of the latest antithesis put to an admitted claim, or — for an admitted claim whose
@@ -429,7 +420,7 @@ def Vetted (c : Context P) : Prop := ∀ a ∈ audits c, (record c a).isSome ∧
 /-- **Your record**: contrary grounds you presented before the gate the closing answer answered,
     beyond the antithesis each claim already carries — attached to the closure; empty when there
     were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- `VettedContext`: the context at closure, its ledger — one record per formed audit — and the
     dissent attached to the closure. The trace is every antithesis put to each audit, read from
@@ -470,7 +461,7 @@ next pass reads it; that pass is Phase 3 and the loop scan together.
 
 /-- **Your collection**: the verification reads provenance tagging makes — artifact reads and
     searches of a source's origin, the claim it authorizes, and its downstream references. -/
-opaque tagReads : Context P → List (Evidence P)
+axiom tagReads : Context P → List (Evidence P)
 
 /-- **Your record** of a pass, written once its reads have entered the context: the sources
     identified, bindings and splits, certificates with their fits, route handoffs with their fit,
@@ -479,7 +470,7 @@ opaque tagReads : Context P → List (Evidence P)
     is ambiguous, the pass records admission only: narrowing, tagging, and positing wait until
     every attribution is in, so `Qa` comes first. `audits`, `narrowing`,
     `tags`, and `antitheses` are read from these turns. A record grounds nothing. -/
-opaque passRecord : Context P → List (Response P)
+axiom passRecord : Context P → List (Response P)
 
 def pass (c : Context P) : Context P :=
   let c₁ := c ++ (tagReads c).map (·.val)
@@ -570,12 +561,12 @@ A handoff is never recorded as the person's judgment at Qs.
 theorem handed_not_judgment (c : Context P) (a : Audit) (r : DispositionRecord) (d : Deficit)
     (h : record c a = some r) (hd : r.disposition = .handed d) : r.assignedBy ≠ .judgment
 
-An attribution and a judgment are each filled only by a person's statement.
-theorem attributed_by_utterance {c : Context P} {r : AuditRef} {s : Cite c}
-    (ok : (attributionCoord (P := P) r).admits s.kind) : s.kind = .utterance
+An attribution and a judgment are each filled only by a turn the person sent.
+theorem attributed_by_person {c : Context P} {r : AuditRef} {s : Cite c}
+    (ok : (attributionCoord (P := P) r).admits s.src) : s.src.val = .person
 
-theorem judged_by_utterance {c : Context P} {r : AuditRef} {s : Cite c}
-    (ok : (judgmentCoord (P := P) r).admits s.kind) : s.kind = .utterance
+theorem judged_by_person {c : Context P} {r : AuditRef} {s : Cite c}
+    (ok : (judgmentCoord (P := P) r).admits s.src) : s.src.val = .person
 -/
 
 /-! ── TOOL GROUNDING ── -/
@@ -605,6 +596,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Pattern resolution emergent via session context.
 -/
+
+end
 
 end Elenchus
 ```
