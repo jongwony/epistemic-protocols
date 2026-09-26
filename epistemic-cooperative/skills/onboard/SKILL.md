@@ -31,7 +31,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
 | 0. Entry | Main | Gate | Path selection: quick/targeted |
-| 1. Quick Scan | Main | Glob, Read | User Context Profile extraction |
+| 1. Quick Scan | Main | Glob, bounded head read | User Context Profile extraction |
 | 2a. Pick-1 | Main | — | Quick path: select 1 recommendation |
 | 2b. Evidence | Main | — | Quick path: show 1 evidence card |
 | 2. Map | Main | — | Targeted path: Profile → Protocol matching |
@@ -117,20 +117,23 @@ State after Phase 0:
 
 ### Phase 1: Quick Scan (User Context Profile) — Inline
 
-Build a User Context Profile from recent session metadata. Runs inline with Glob + Read (no subagent delegation). Both Quick and Targeted paths share this phase.
+Build a User Context Profile from the person's own opening turns in their recent Claude Code conversations. Runs inline (no subagent delegation). Both Quick and Targeted paths share this phase.
 
-**Step 1: Collect session metadata**
+**Step 1: Collect recent opening turns**
 
-Glob `{config_dir}/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
+- **Records**: Glob `{config_dir}/projects/*/*.jsonl` — a session record sits directly inside a project partition; anything nested deeper is a subordinate capture and is excluded by depth. Exclude partitions whose name contains `-worktrees-`, which hold delegated work rather than the person's own sessions. Take the ~10 most recently modified records.
+- **Bounded head read**: read only the first 256 KB of each record (a byte-bounded read such as `head -c 262144 <record>`), never the whole file. Skip a line that does not parse — the last one may be cut by the bound.
+- **Person turns only**: a line is the person's turn when its `type` is `user`, `isMeta` and `isCompactSummary` are both absent, and its text (`message.content` as a string, or the `text` parts of a content list — tool results are not text parts) neither opens with `<` nor is a bare control marker such as `[Request interrupted by user]`. Hook output, command wrappers, and injected envelopes arrive in the same `user` stream and are excluded by this rule.
+- From each record keep its first 2-3 person turns. A record whose head holds none contributes nothing.
 
 **Step 2: Infer User Context Profile**
 
-From collected metadata, infer:
+From the collected turns, infer:
 - **Work domains**: What areas the user works in (e.g., API development, infrastructure, data pipeline)
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/inquire`).
+If no person turns were collected — a fresh install, or a host that keeps no such records: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/inquire`).
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization.
 
@@ -148,11 +151,11 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 | `/inquire` | Hand-off or finalization language ("go ahead", "just do it", "ready", "ship", "merge") — the AI is about to execute on the context it has; tasks with implicit requirements or environment dependencies in summary. It checks what the imminent execution rests on (assumptions, missing facts, environment dependencies); it does not audit the decision for unconsidered trade-offs, alternatives, or omitted steps | Medium |
 
 **Decision logic**:
-1. Score each protocol by signal match count from `firstPrompt` and `summary` fields
+1. Score each protocol by signal match count across the collected person turns
 2. **Ideation route-away**: ideation asks ("ideas for", "brainstorm") score no pool protocol — when they are the only matched signals, relay in one sentence that the ask itself maps to `/ideate` (user-initiated: named as the route for that ask, not presented as the onboarding recommendation), then continue via the Fallback rule; the Phase 2b evidence card follows its fallback form, since the recommendation rests on the default, not on a matched signal
 3. Select the single strongest match
 4. Tie-break: `/elicit` > `/inquire`
-5. **Fallback**: If no signals detected (no sessions, sparse metadata) — or every detected signal was routed away — recommend `/elicit`
+5. **Fallback**: If no signals detected (no records, or too few person turns) — or every detected signal was routed away — recommend `/elicit`
 
 **Output**: Present exactly one recommendation as a single sentence.
 
@@ -189,7 +192,7 @@ Branch: Try it now → Phase 4 (quick trial), Learn more about this recommendati
 
 1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/elicit`, `/inquire`).
 2. **Targeted sub-path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
-3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/elicit`, `/inquire`). Proceed immediately without blocking the onboarding flow.
+3. **Fallback**: If Profile quality is insufficient (no records, or too few person turns) → use **Onboarding Pool** (`/elicit`, `/inquire`). Proceed immediately without blocking the onboarding flow.
 
 ### Phase 3: Scenario (Targeted Path — Intervention Point)
 
@@ -419,7 +422,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 7. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
 8. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
 9. **No auto-install**: Guide installation but never install plugins automatically.
-10. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
+10. **Session record access**: Read a conversation record only through a byte-bounded head read, never the whole file, and keep only the person's turns as Phase 1 defines them. Assistant turns, tool output, and injected text are not read into the profile.
 11. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
 12. **Single session**: The entire onboarding completes in one session. No cross-session state required.
 
