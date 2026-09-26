@@ -1,42 +1,33 @@
-# Find above session scope — shapes, edge inference, assembly
+# Wholes above one record — shapes, relations, assembly
 
-Read when `V.unit ≠ session` — the user names a whole line of work, a topic worked out in scattered pieces, or a concept prior sessions already settled. This is the realization of the `── FIND ABOVE SESSION SCOPE ──` formal block: runtime-normative contract, not commentary. It supplies how `Find` joins the candidates `Scan_{Track}` returns into recognizables at that scope and the connectivity term `Rank` adds there. Everything else — `Recognizable`, `Excerpt`, `Ground`, `Present`, the answers, the budget, both terminals — is typed in SKILL.md and is the same at every scope; this file adds no type the SKILL.md object does not already carry. Ground at this scope is one read per member: each composing session's own record, opened for the excerpt the cue reaches.
-
-Not this reference: `V.unit = session` (the default path); the cases must be newly found (`/inquire`); the concept is not yet formed and must be crystallized (`/induce`); the recall is of decision intent to be reverse-traced (`/elicit`).
+Read when the whole the person means stands above one record — a line of work, a topic worked out in scattered pieces, or a concept prior work already settled. This is runtime-normative contract, not commentary. It supplies how found records are joined into one recognizable at that scope. Everything else — `Recognizable`, `Claim`, the story, the presentation, the answers, the closes — is typed in SKILL.md and is the same at every scope; this file adds no type the SKILL.md block does not already carry. Grounding at this scope is one read per member: each member's own record, opened at the span the cue reaches.
 
 ```
-── FIND ABOVE SESSION SCOPE (realization) ──
-Find(Store, V) = Assemble_{V.unit}(Traverse(C, infer_edges(C, Σ)))  where C = Scan_{Track}(Store, trace(V))
+── WHOLES ABOVE ONE RECORD ──
+members          -- the composing element IS SKILL.md's Member: a conversation, an artifact with its change history, a decision record, named by where it is and its root. There is no second type
+Relation         = { from: Member, to: Member | Locator, what: String, support: String }
+                  -- what joins two members, INFERRED at read time from what they carry: a shared identifier or reference, a change that touches what a conversation discussed, shared terms, time and place, a succession one record names; never read from a stored field
+                  -- support names what in the records carries the relation. An inferred relation stays an inference: reading both endpoints does not by itself prove it
+Locator          = { root: String, identity: Optional(String) }   -- the target of a relation that points at no record reached: a reference naming a record not found. A projection only, never a member: nothing is opened for it
+assemble(found, cue) → List(Recognizable)   -- the judgment: which found records make one whole in the cue's shape, by the relations the records support, stated in Recognizable.joins
+                  -- a method that computes groups (co-occurrence, spectral, diffusion from the cue's records) may propose candidates; it does not decide what the whole is
+                  -- no fixed route: follow whichever relations the cue's axes make worth following, from the records found or across the population the context has bounded; a reach past that boundary is offered, not run
 
-members          -- the composing element IS Candidate (session_id, runtime, record, recency, cwd, topic, keywords, fingerprint, cross_refs): no second type. Edge inference reads only these fields — recency among them, as a field Candidate carries rather than a value the scan left behind; it never assumes a field Candidate lacks
-Locator          = { runtime: Source, session_id: Optional(SessionId) }   -- the target of an edge that points at no candidate: an anchor naming a record the store does not hold. Ground opens Candidate.record, not this — a Locator names nothing to open. session_id = Null ⇒ the member is carried (its anchors and keywords still count for edges) but no record can be opened for it: Ground yields an empty excerpt, the narrative asserts nothing from it, and the prose says it is non-resumable; a fork member's record is its substitute capture and its handle is its parent's (references/fork-resume.md). A projection only, never a node key: nodes are candidates, so two non-resumable members never collapse into one
+shape by Whole    -- the story is told in this shape, each sentence resting on an opened record
+  line     : origin → development → arrival across the members, in the order the records attest
+  topic    : the fragments, then where the records say it last stood
+  concept  : where it was forged, then the member carrying it as settled   -- recognized only where a record carries it as settled; without that record this is not the shape
 
-shape by Unit    -- Recognizable.narrative is composed from the members' excerpts in this shape, put first
-  line     : members ordered origin → development → arrival      -- where it began, how it developed across sessions, where it arrived
-  topic    : members as the fragments on one topic, then its standing   -- the fragments + where the records attest the topic last stood
-  concept  : the members that forged the concept, then the member carrying it as settled   -- recognized only, never formed here: absent a member whose record carries the concept as settled, the recall is not this shape (formation → /induce)
+── INVARIANTS ──
+  read-only               : assembly reads the records it joins and writes to none of them, nor to any index
+  supported-relations     : a recognizable joins only members whose relations a record supports, and says what joins them
+  partial-recovery        : a relation to a record not reached is kept as a Locator and reported; what it points at is unknown — not yet written, moved, or lost is not claimed without evidence
+  disclosed-coverage      : what was followed, what was not reached, and which roots were searched are reported beside the story or in the round that offers the wider search
 
-Edge             = { from: Candidate, to: Candidate | Locator, kind: ∈ {succession, topic, concept, plain} }
-                  -- kind and to are INFERRED at read time from stored anchors (cross_refs) + shared keywords/topic + cwd + Candidate.recency; never read from a stored field — the inputs are candidate fields, the edge is not. recency = Null contributes nothing to succession ordering and is never a penalty, the same way it is neutral in ranking
-                  -- cross_refs hold StructuredAnchor {memory, github_issue, github_pr} and LegacyAnchor strings (SKILL.md TYPES: Anchor); a legacy string extends an edge as kind-unknown, never rejected. succession/topic/concept/plain are traversal ROLES, not stored kinds
-                  -- to is a Locator when the anchor points at no written record: not-yet-written knowledge, skipped, never an error
-Graph            = (Set(Candidate), Set(Edge))   -- STRUCTURAL TYPE: the edge set is reconstructed by traversal, never pre-materialized; invariants in ── GRAPH INVARIANTS ──
-infer_edges      = (Set(Candidate), Σ) → Set(Edge)
-Traverse         = (Set(Candidate), Set(Edge)) → (Set(Candidate), Set(Edge))   -- Unit-dispatched: follow inferred edges outward to the sub-graph reachable from the entry candidates, reading across partitions and writing to none. What it returned and which links were broken is reported in the same turn — in Present's pre-gate text when a recognizable was assembled, in Qx's pre-gate text when none was — so nothing has to survive a turn yield
-Assemble_{Unit}  = (Set(Candidate), Set(Edge)) → List(Recognizable)   -- recognizables in Unit's shape from the edge-connected sub-graph, never from a global join over the store: unit = V.unit, members ⊆ the traversed candidates, narrative = the members' index gist in the shape (a cue for ordering; Ground replaces it), excerpts = ∅, assembly = the edges that joined these members and the links that resolved to no written record (SKILL.md TYPES: Assembly) — carried on the object, so the coverage survives the turn yield with it
-connectivity     -- the term Rank adds at this scope: recall-trace alignment + inferred-edge connectivity strength order the recognizables (SKILL.md TYPES: Rank). Ordering only — it decides which recognizable Ground opens first, and no gate reads it
-
-── GRAPH INVARIANTS ──
-Graph is a STRUCTURAL TYPE (sourced from partitioned stores + lifecycle churn, not a knowledge-federation ontology). Four invariants hold:
-  no-central-aggregator : no central index; the graph exists only as the inferred union of per-candidate read-time connections, reconstructed by traversal
-  edge-based            : a recognizable is assembled by FOLLOWING inferred edges between candidates, never by a global join over a flat store
-  isolation-preserving  : each partition owns its own writes; traversal reads across partitions (in the Claude realization, the per-project hypomnesis directories references/claude.md declares) and writes to none
-  broken-link-tolerant  : an edge to a missing record is not-yet-written knowledge — skipped, surfaced as a traversal note, never a failure
-
-── KNOWN FAILURE MODES (find above session scope) ──
-SparseEdges          : entry candidates exist but too few shared anchors/keywords/metadata infer edges joining them; Assemble = ∅ with a non-empty entry — |O[]| = 0 as for any Find (SKILL.md FLOW): the open question, then the checkpoint, each reporting the traversal beside the coverage; ExpandFullText re-enters Find with bodies joined to the spine, where the joining anchor may sit
-BrokenLinkChain      : inferred edges resolve mostly to records never written (lifecycle gap) — report the traversal as a note, not an error; assembled recognizables may be too thin to identify
-UnitMismatch         : V.unit read as the wrong whole — detected as a correction describing a different shape; recue re-reads V.unit and Find re-runs at the new scope
--- One session would have answered: no case here. A recognizable of one member IS the session-scope object, and a V.unit misjudged above session is UnitMismatch
--- Index taken as evidence: no case here either. Ground composes the narrative from each member's excerpt at this scope as at session scope (SKILL.md ── KNOWN FAILURE MODES ── IndexAsEvidence), so a cross-session claim — "this is where it began", "first coined here" — is asserted only where a member's record carries it
+── KNOWN FAILURE MODES (wholes above one record) ──
+SparseRelations      : records found, and too few supported relations join them into the whole meant — nothing to present: the open question while the person has added nothing, then the wider search where one is worth offering, each reporting what was followed
+BrokenReference      : relations resolve mostly to records not reached — report them as notes; the assembled whole may be too thin to recognize
+WholeMisread         : the whole read as the wrong shape — seen when a correction describes a different shape; the next pass re-reads the cue and assembles again
+-- One record would have answered: no case here. A recognizable of one member is the whole, and a whole misread above one record is WholeMisread
+-- Index taken as evidence: no case here either. The story is composed from opened records at this scope as at every scope (SKILL.md IndexAsEvidence), so a claim across records — "this is where it began", "first coined here" — is asserted only where a member's record carries it
 ```

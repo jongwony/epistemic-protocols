@@ -1,39 +1,19 @@
 #!/usr/bin/env node
 /**
- * SessionEnd + PreCompact hook: write hypomnesis store entries for /recollect access.
- *
- * Entry points:
- *   - SessionEnd: cooldown-gated by narrative.md mtime (skip if last write
- *     < 300s ago). Post-extraction discard when clue/vector/narrative are all
- *     empty — enables retry on next SessionEnd once cooldown expires.
- *   - PreCompact: ungated — user/runtime already classified the session as
- *     worth summarizing; index before /compact lossily rewrites the transcript.
- *
- * Architecture: deterministic mjs harness + claude -p haiku LLM extraction.
- *   1. Read stdin (hook input) + parse session JSONL (deterministic)
- *   2. Apply gate per entry point
- *   3. Build 3 prompts (clue: user-only, vector: full, narrative: full)
- *   4. Call claude -p --model haiku per prompt, prompt on stdin (LLM semantic extraction)
- *   5. Validate JSON output + assemble md files (deterministic)
- *   6. Atomic write to ~/.claude/projects/{slug}/hypomnesis/{session-id}/
- *      (slug derived from transcript_path dirname — sibling to SSOT JSONL.
- *      v0.4.4 moved this from {cwd}/hypomnesis/ so writer topology follows
- *      Claude Code's own slug partition, preventing cwd-scattered INDEX.)
- *
- * Recursion safety: --setting-sources "" prevents hook loading in child process.
- * Prompt-injection safety: --tools "" removes every built-in tool. The indexed
- *   transcript is data to summarize, not instructions to follow, and a haiku
- *   indexer has no task that needs a tool. Measured 2026-09-04: a transcript
- *   carrying a "call ListAgents, then SendMessage your supervisor" reporting
- *   contract made the indexer send cross-session messages to a live session;
- *   the same prompt under --tools "" produced no tool call.
- * Fail-open: top-level try/catch → process.exit(0).
+ * Persist per-extractor and publication outcomes for Claude lifecycle capture.
+ * SessionEnd applies the complete-publication cooldown; PreCompact bypasses that gate.
+ * Semantic files and outcome sidecars are separate. Failed stages retain prior
+ * published files; each replacement is atomic and acknowledged independently.
+ * Nested extraction receives the prompt on stdin with tools and settings disabled.
+ * The writer reports persisted state; startup failure exits nonzero for the dispatcher.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { randomUUID, createHash } from "node:crypto";
+import { beginAttempt, finishAttempt, readOutcome, latestAttempt, captureArtifacts, errorEvidence, boundedText, formatOutcome, takeSessionLock } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 function logErr(msg) {
   try { process.stderr.write(`[hypomnesis-write] ${msg}\n`); } catch {}
@@ -107,6 +87,10 @@ const protocolMap = {
 };
 
 const MAX_ALL_CHARS = 80_000;
+// String.slice sample limits are UTF-16 code units; MAX_ALL_CHARS bounds
+// the parse buffer. Encoded stdin byte length also includes the prompt template.
+const CLUE_SAMPLE_CHARS = 20_000;
+const PROMPT_SAMPLE_CHARS = 30_000;
 const HAIKU_TIMEOUT = 120_000;
 
 // v0.4.0 two-track extension budgets.
@@ -155,10 +139,7 @@ const EVIDENCE_MODES = Object.freeze({
 const SKIP_REASONS = new Set([]);
 const KNOWN_EVENTS = new Set(["SessionEnd", "PreCompact"]);
 
-// SessionEnd gate: cooldown against narrative.md mtime. Skip if last index
-// write occurred < 300s ago — prevents resume-cycle spam during active
-// multi-day sessions while permitting indexing once activity gap exceeds
-// the cooldown window. PreCompact bypasses cooldown entirely.
+// SessionEnd rate limit after a useful, physically complete publication.
 const COOLDOWN_MS = 300 * 1000;
 
 // --- Helpers ---
@@ -208,7 +189,7 @@ function cleanText(text) {
 
 // --- JSONL Parsing ---
 
-function parseSession(transcriptPath) {
+function parseSession(raw) {
   const userMsgs = [];
   const allTexts = [];
   const timestamps = [];
@@ -220,22 +201,15 @@ function parseSession(transcriptPath) {
   // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
-  let raw;
-  try {
-    raw = fs.readFileSync(transcriptPath, "utf8");
-  } catch (e) {
-    logErr(`failed to read transcript ${transcriptPath}: ${e.message}`);
-    return {
-      userMsgs, allTexts, timestamps, protocols: [],
-      tokenEstimate: 0, cwd: "",
-    };
-  }
+  let parseFailed = false;
   let totalChars = 0;
 
-  for (const line of raw.split("\n")) {
+  const lines = raw.split("\n");
+  const tornTail = raw.endsWith("\n") ? -1 : lines.length - 1;
+  for (const [index, line] of lines.entries()) {
     if (!line.trim()) continue;
     let entry;
-    try { entry = JSON.parse(line); } catch { continue; }
+    try { entry = JSON.parse(line); } catch { if (index !== tornTail) parseFailed = true; continue; }
 
     const ts = entry.timestamp ?? "";
     if (ts) timestamps.push(ts);
@@ -293,6 +267,7 @@ function parseSession(transcriptPath) {
   return {
     userMsgs, allTexts, timestamps,
     protocols: [...protocols].sort(),
+    parseFailed,
     tokenEstimate,
     lastTurnHadFreshInput,
     sawAnyAssistantUsage,
@@ -308,7 +283,7 @@ function buildCluePrompt(userMsgs) {
     .map((m) => cleanText(m.text))
     .filter((t) => t.length > 5);
 
-  const sample = cleaned.slice(0, 30).join("\n---\n").slice(0, 20_000);
+  const sample = cleaned.slice(0, 30).join("\n---\n").slice(0, CLUE_SAMPLE_CHARS);
 
   return `You are a session indexer. Extract recall anchors from user messages only.
 
@@ -332,7 +307,7 @@ ${sample}`;
 }
 
 function buildVectorPrompt(allTexts) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const sample = allTexts.join("\n---\n").slice(0, PROMPT_SAMPLE_CHARS);
 
   return `You are a session indexer. Extract decisions and direction changes from the full session.
 
@@ -354,7 +329,7 @@ ${sample}`;
 }
 
 function buildNarrativePrompt(allTexts, protocols) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const sample = allTexts.join("\n---\n").slice(0, PROMPT_SAMPLE_CHARS);
   const protoList = protocols.length > 0 ? protocols.join(", ") : "none detected";
 
   return `You are a session indexer. Write a concise session narrative from the full conversation.
@@ -376,7 +351,7 @@ ${sample}`;
 }
 
 function buildMarkerPrompt(allTexts, startedAt) {
-  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const sample = allTexts.join("\n---\n").slice(0, PROMPT_SAMPLE_CHARS);
   const dateAnchor = toDateString(startedAt);
 
   return `You are a session indexer. Extract salience markers as concrete, anchored entities.
@@ -408,8 +383,8 @@ ${sample}`;
 // --- Haiku Invocation ---
 
 // The prompt is absent from argv by contract: --tools is variadic, so a
-// positional prompt following it is consumed as a tool-name list. Stdin is the
-// other input channel --print accepts, and it is not reachable by flag parsing.
+// positional prompt following it is consumed as a tool-name list.
+//
 function buildHaikuArgs() {
   return [
     "-p",
@@ -424,16 +399,12 @@ function buildHaikuArgs() {
 }
 
 function callHaiku(prompt, { run = execFileSync } = {}) {
-  const output = run("claude", buildHaikuArgs(), {
-    encoding: "utf8",
-    input: prompt,
-    timeout: HAIKU_TIMEOUT,
-    stdio: ["pipe", "pipe", "pipe"],
-    maxBuffer: 8 * 1024 * 1024,
-    cwd: "/tmp",
-  });
-  return output.trim();
+  return run("claude", buildHaikuArgs(), {
+    encoding: "utf8", input: prompt, timeout: HAIKU_TIMEOUT,
+    stdio: ["pipe", "pipe", "pipe"], maxBuffer: 8 * 1024 * 1024, cwd: "/tmp",
+  }).trim();
 }
+
 
 function extractJson(raw) {
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -633,7 +604,7 @@ function extractCrossRefs(userMsgs, allTexts) {
 //
 // Output: entropy.md (IdentifierTuples), markers.md (MarkerProfile), coinage.md (CoinageSet).
 
-// extract: Session → Set(IdentifierTuple) — entropy-track anchors
+// extract: Session → Set(IdentifierTuple) — identifier anchors
 // ORDER INVARIANT: "url" must precede "path_ref". extractEntropyRefs records url
 // spans during iteration and suppresses path_ref matches that fall inside them.
 // Reordering without updating the dedup logic will silently break URL-substring
@@ -882,256 +853,208 @@ function escMd(s) {
 
 // --- Atomic Writer ---
 
-function writeStore(targetDir, files) {
-  const parent = path.dirname(targetDir);
-  fs.mkdirSync(parent, { recursive: true });
-
-  if (fs.existsSync(targetDir)) {
-    fs.chmodSync(targetDir, 0o755);
-    for (const [name, content] of Object.entries(files)) {
-      const dest = path.join(targetDir, name);
-      try {
-        if (name === "narrative.md" && fs.existsSync(dest)) {
-          fs.appendFileSync(dest, "\n" + content, "utf8");
-        } else {
-          fs.writeFileSync(dest, content, "utf8");
-        }
-      } catch (e) {
-        logErr(`write ${dest} failed: ${e.message}`);
-      }
-    }
-  } else {
-    // mkdtempSync defaults to 0o700, which makes ripgrep traversal silently
-    // empty the INDEX — /recollect then falls back to SSOT-only via
-    // degraded_scan. Chmod to 0o755 after rename so the INDEX stays
-    // readable as a sibling of the slug-level JSONL.
-    const tmp = fs.mkdtempSync(path.join(parent, ".hyp-"));
+function writeStore(targetDir, files, revision) {
+  fs.mkdirSync(targetDir, { recursive: true, mode: 0o755 });
+  const artifacts = [];
+  const errors = {};
+  for (const [name, content] of Object.entries(files)) {
+    const dest = path.join(targetDir, name);
+    const tmp = path.join(targetDir, `.${name}.${randomUUID()}.tmp`);
     try {
-      for (const [name, content] of Object.entries(files)) {
-        fs.writeFileSync(path.join(tmp, name), content, "utf8");
-      }
-      fs.renameSync(tmp, targetDir);
-      fs.chmodSync(targetDir, 0o755);
-    } catch (e) {
-      fs.rmSync(tmp, { recursive: true, force: true });
-      throw e;
+      const priorBytes = name === "narrative.md" && fs.existsSync(dest) ? fs.readFileSync(dest) : null;
+      const previous = priorBytes ? priorBytes.toString("utf8") + "\n" : "";
+      fs.writeFileSync(tmp, previous + content, "utf8");
+      const acknowledged = captureArtifacts([tmp]).map((artifact) => ({ ...artifact, path: path.resolve(dest), revision,
+        ...(priorBytes?.length ? { appended_from_sha256: createHash("sha256").update(priorBytes).digest("hex") } : {}),
+      }));
+      fs.renameSync(tmp, dest);
+      artifacts.push(...acknowledged);
+    } catch (error) { errors[name] = errorEvidence(error); }
+    finally { try { fs.unlinkSync(tmp); } catch {} }
+  }
+  return { state: Object.keys(errors).length ? artifacts.length ? "partial" : "failed" : "complete", artifacts, errors };
+}
+
+function readClaudeSnapshot(filename) {
+  const fd = fs.openSync(filename, "r");
+  try {
+    const stat = fs.fstatSync(fd);
+    const bytes = fs.readFileSync(fd).subarray(0, stat.size);
+    return { raw: bytes.toString("utf8"), revision: {
+      mtime_ms: Math.floor(stat.mtimeMs), size: bytes.length,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+    } };
+  } finally { fs.closeSync(fd); }
+}
+
+// A capture that finds the session lock held leaves its event here; whoever holds the lock when that
+// capture gives up drains it after releasing, so an event raised during another capture is not lost.
+const PENDING_DEPTH = 4;
+const pendingPath = (root, sessionId) => path.join(root, ".locks", `${sessionId}.pending.json`);
+
+function leavePending(root, sessionId, input) {
+  const target = pendingPath(root, sessionId);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const tmp = `${target}.${process.pid}.${randomUUID()}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(input));
+  fs.renameSync(tmp, target);
+}
+
+function claimPending(root, sessionId) {
+  const target = pendingPath(root, sessionId);
+  const claimed = `${target}.${process.pid}.${randomUUID()}.claimed`;
+  try { fs.renameSync(target, claimed); } catch { return null; }
+  try { return JSON.parse(fs.readFileSync(claimed, "utf8")); } catch { return null; }
+  finally { try { fs.unlinkSync(claimed); } catch {} }
+}
+
+function drainPending(root, sessionId, options) {
+  const depth = options.depth ?? 0;
+  if (depth >= PENDING_DEPTH) return null;
+  const pending = claimPending(root, sessionId);
+  if (!pending) return null;
+  return processClaudeInput(pending, { ...options, afterCapture: true, depth: depth + 1 });
+}
+
+function processClaudeInput(input, options = {}) {
+  const { run = execFileSync, publish = writeStore, afterCapture = false } = options;
+  const sessionId = input?.session_id;
+  const transcriptPath = input?.transcript_path;
+  if (typeof sessionId !== "string" || !/^[A-Za-z0-9_-]+$/.test(sessionId)
+    || typeof transcriptPath !== "string" || !path.isAbsolute(transcriptPath)) {
+    logErr("invalid hook input: no trustworthy session/store locator");
+    return null;
+  }
+  const event = input.hook_event_name ?? "SessionEnd";
+  if (!KNOWN_EVENTS.has(event) || (event === "SessionEnd" && SKIP_REASONS.has(input.reason))) return null;
+  const root = path.join(path.dirname(transcriptPath), "hypomnesis");
+  const storeDir = path.join(root, sessionId);
+  const release = takeSessionLock(root, sessionId);
+  if (!release) {
+    try { leavePending(root, sessionId, input); } catch { return readOutcome(root, sessionId); }
+    const retry = takeSessionLock(root, sessionId);
+    if (!retry) return readOutcome(root, sessionId);
+    retry();
+    return drainPending(root, sessionId, options) ?? readOutcome(root, sessionId);
+  }
+  let attempt;
+  const extractors = {};
+  let publication = { state: "none", artifacts: [] };
+  try {
+    let revision = null;
+    let snapshot;
+    let inputError;
+    try { snapshot = readClaudeSnapshot(transcriptPath); revision = snapshot.revision; } catch (error) { inputError = error; }
+    const previous = readOutcome(root, sessionId, "claude");
+    const published = previous.attempt?.last_publication;
+    const pr = previous.published_revision;
+    const advanced = !!revision && !!pr && (revision.size !== pr.size || revision.mtime_ms !== pr.mtime_ms);
+    const cooldown = !(afterCapture && advanced) && event === "SessionEnd" && published?.state === "complete" && published.artifacts.length > 0
+      && Date.now() - Date.parse(published.at) < COOLDOWN_MS
+      && published.artifacts.every((artifact) => previous.artifacts.some((item) => item.path === artifact.path && item.sha256 === artifact.sha256 && !["missing", "mismatch", "outside_scope"].includes(item.verification)));
+    attempt = beginAttempt(root, sessionId, { runtime: "claude", revision, source_transcript: transcriptPath, source_event: event });
+    if (!attempt) return readOutcome(root, sessionId);
+    if (inputError) throw Object.assign(inputError, { stage: "input_failed" });
+    if (cooldown) {
+      extractors.input = { state: "skipped", reason: "complete capture cooldown active" };
+      finishAttempt(root, attempt, { state: "complete", extractors, publication });
+      return readOutcome(root, sessionId);
     }
+    if (revision.size < MIN_SESSION_BYTES) {
+      extractors.input = { state: "skipped", reason: "transcript below minimum capture size" };
+      finishAttempt(root, attempt, { state: "complete", extractors, publication });
+      return readOutcome(root, sessionId);
+    }
+    let session;
+    try { session = parseSession(snapshot.raw); } catch (error) { throw Object.assign(error, { stage: "input_failed" }); }
+    if (session.parseFailed) extractors.input = { state: "input_failed", reason: "malformed JSONL input" };
+    if (session.userMsgs.length === 0) {
+      extractors.input ??= { state: "empty", reason: "no user messages" };
+      finishAttempt(root, attempt, { state: "complete", extractors, publication });
+      return readOutcome(root, sessionId);
+    }
+    const { userMsgs, allTexts, timestamps, protocols, cwd } = session;
+    const startedAt = timestamps[0] ?? "";
+    const lastTurnAt = timestamps.at(-1) ?? "";
+    const date = toDateString(startedAt);
+    const crossRefs = extractCrossRefs(userMsgs, allTexts);
+    const files = {};
+    const extract = (name, prompt, validate, empty, filename, build) => {
+      let raw;
+      try { raw = callHaiku(prompt, { run }); }
+      catch (error) { extractors[name] = { state: "invocation_failed", evidence: errorEvidence(error) }; return null; }
+      try {
+        const data = parseHaikuOutput(raw);
+        if (!validate(data)) throw new Error("extraction schema rejected");
+        const isEmpty = empty(data);
+        extractors[name] = { state: isEmpty ? "empty" : "succeeded" };
+        if (!isEmpty) files[filename] = build(data);
+        return data;
+      } catch (error) {
+        extractors[name] = { state: "validation_failed", evidence: errorEvidence(error), output: boundedText(raw) };
+        return null;
+      }
+    };
+    const clue = extract("clue", buildCluePrompt(userMsgs), validateClue,
+      (data) => !data.initial_request.trim() && !data.key_utterances.length && !data.topics.length && !data.keywords.length,
+      "clue.md", (data) => buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRefs));
+    extract("vector", buildVectorPrompt(allTexts), validateVector,
+      (data) => !data.decisions.length, "vector.md", (data) => buildVectorMd(sessionId, date, data));
+    extract("narrative", buildNarrativePrompt(allTexts, protocols), validateNarrative,
+      (data) => !data.origin.trim() && !data.direction.trim() && !data.outcome.trim(), "narrative.md",
+      (data) => buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, clue?.topics ?? [], protocols, data));
+    if (["clue", "vector", "narrative"].every((name) => extractors[name].state === "empty")) {
+      extractors.marker = extractors.entropy = extractors.coinage = { state: "skipped", reason: "validated-empty primary extraction" };
+      finishAttempt(root, attempt, { state: "complete", extractors, publication });
+      return readOutcome(root, sessionId);
+    }
+    const markers = extract("marker", buildMarkerPrompt(allTexts, startedAt), validateMarkers,
+      (data) => Object.values(data).every((items) => Array.isArray(items) && !items.length), "markers.md",
+      (data) => buildMarkersMd(sessionId, date, data, null, MARKER_EXTRACTION_METHOD));
+    const started = Date.now();
+    try {
+      const refs = extractEntropyRefs(allTexts);
+      extractors.entropy = { state: refs.length ? "succeeded" : "empty" };
+      if (refs.length) files["entropy.md"] = buildEntropyMd(sessionId, date, refs);
+    } catch (error) { extractors.entropy = { state: "validation_failed", evidence: errorEvidence(error) }; }
+    try {
+      const remaining = TWO_TRACK_BUDGET_MS - (Date.now() - started);
+      if (remaining < COINAGE_MIN_REMAINING_MS) extractors.coinage = { state: "skipped", reason: "computation budget exhausted" };
+      else {
+        const coinage = computeCoinage(userMsgs, allTexts, root, sessionId, remaining);
+        extractors.coinage = { state: coinage.coinage.length ? "succeeded" : "empty" };
+        if (coinage.coinage.length) files["coinage.md"] = buildCoinageMd(sessionId, date, coinage, false, null);
+        if (markers && (extractors.marker.state === "succeeded" || coinage.coinage.length)) files["markers.md"] = buildMarkersMd(sessionId, date, markers, coinage, MARKER_EXTRACTION_METHOD);
+      }
+    } catch (error) { extractors.coinage = { state: "validation_failed", evidence: errorEvidence(error) }; }
+    if (!release.owned() || latestAttempt(root, sessionId, "claude")?.attempt_id !== attempt.attempt_id) {
+      return readOutcome(root, sessionId, "claude");
+    }
+    if (Object.keys(files).length) {
+      try { publication = publish(storeDir, files, revision); }
+      catch (error) { publication = { state: "failed", artifacts: [], evidence: errorEvidence(error) }; }
+    }
+    finishAttempt(root, attempt, { state: "complete", extractors, publication });
+    return readOutcome(root, sessionId);
+  } catch (error) {
+    if (error.operation === "outcome_persistence") throw error;
+    const failure = error.stage === "input_failed"
+      ? { extractors: { ...extractors, input: { state: "input_failed", evidence: errorEvidence(error) } } }
+      : { execution: { state: "failed", evidence: errorEvidence(error) } };
+    if (attempt) {
+      finishAttempt(root, attempt, { state: "complete", extractors, publication, ...failure });
+      return readOutcome(root, sessionId);
+    }
+    throw error;
+  } finally {
+    release();
+    try { drainPending(root, sessionId, options); } catch (error) { logErr(`pending capture: ${error.message}`); }
   }
 }
-
-// --- Gate ---
-
-function isLowInfo(clue, vector, narrative) {
-  const clueEmpty = !clue?.initial_request?.trim() && !clue?.key_utterances?.length;
-  const vectorEmpty = !vector?.decisions?.length;
-  const narrativeEmpty = !narrative?.origin?.trim() && !narrative?.outcome?.trim();
-  // Discard ONLY when all 3 are empty (conservative — retry via next SessionEnd
-  // once cooldown expires). Missing extraction (null) is treated as empty.
-  return clueEmpty && vectorEmpty && narrativeEmpty;
-}
-
-// --- Main ---
 
 function main() {
-  const input = readHookInput();
-  if (!input) return;
-
-  const {
-    session_id: sessionId,
-    transcript_path: transcriptPath,
-    reason,
-    hook_event_name: eventName,
-  } = input;
-  if (!sessionId || !transcriptPath) return;
-
-  const event = eventName ?? "SessionEnd";
-  if (!KNOWN_EVENTS.has(event)) {
-    logErr(`unrecognized hook_event_name "${event}"; skipping`);
-    return;
-  }
-  if (event === "SessionEnd" && SKIP_REASONS.has(reason)) return;
-
-  const stat = fs.statSync(transcriptPath, { throwIfNoEntry: false });
-  if (!stat || stat.size < MIN_SESSION_BYTES) return;
-
-  // INDEX is sibling to SSOT under ~/.claude/projects/{slug}/ so that /recollect
-  // reaches a single canonical location regardless of invocation cwd. transcript_path
-  // is always ~/.claude/projects/{slug}/{session-id}.jsonl, so dirname is the slug dir.
-  // Shape guard: unexpected transcript_path format makes dirname return "." (writes
-  // to ./hypomnesis/, defeating the v0.4.4 migration silently). Log but fail-open
-  // so indexing still proceeds when the assumption breaks.
-  const slugDir = path.dirname(transcriptPath);
-  if (!slugDir || slugDir === ".") {
-    logErr(`transcript_path "${transcriptPath}" lacks directory component; slugDir="${slugDir}" — INDEX may write to wrong location`);
-  }
-  const storeDir = path.join(slugDir, "hypomnesis", sessionId);
-
-  const {
-    userMsgs, allTexts, timestamps, protocols, tokenEstimate,
-    lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
-  } = parseSession(transcriptPath);
-  if (userMsgs.length === 0) return;
-
-  // Observability for stale token estimates (final assistant turn had no fresh
-  // input_tokens — full cache hit or tool-use-only turn can leave the estimate
-  // based on an earlier turn).
-  if (sawAnyAssistantUsage && !lastTurnHadFreshInput && tokenEstimate > 0) {
-    logErr(`last assistant turn lacked fresh input_tokens; tokenEstimate ${tokenEstimate} may use stale value`);
-  }
-  // Diagnostic: zero tokenEstimate despite observed assistant usage indicates
-  // corrupted JSONL or format change. No longer gates the write (cooldown gate
-  // replaces tokens threshold), but retained as an anomaly signal.
-  if (sawAnyAssistantUsage && tokenEstimate === 0) {
-    logErr(`tokenEstimate is 0 despite observed assistant usage; possible corrupted JSONL or format change`);
-  }
-
-  // PreCompact: runtime already classified the session as worth summarizing
-  // (manual = user accepted "Resume from summary"; auto = context-fill).
-  // SessionEnd: cooldown gate against narrative.md mtime — silent skip if
-  // last write < 300s ago. ENOENT returns undefined via throwIfNoEntry
-  // (first-write path); unexpected errors (EACCES, EIO) are logged and fail open.
-  if (event === "SessionEnd") {
-    const narrativePath = path.join(storeDir, "narrative.md");
-    let narrativeStat;
-    try {
-      narrativeStat = fs.statSync(narrativePath, { throwIfNoEntry: false });
-    } catch (e) {
-      logErr(`narrative.md stat failed unexpectedly (${e.code ?? e.message}); failing open`);
-    }
-    if (narrativeStat && Date.now() - narrativeStat.mtimeMs < COOLDOWN_MS) {
-      const remainingSec = Math.round((COOLDOWN_MS - (Date.now() - narrativeStat.mtimeMs)) / 1000);
-      logErr(`cooldown active — skipping SessionEnd (${remainingSec}s remaining)`);
-      return;
-    }
-  }
-
-  const startedAt = timestamps[0] ?? "";
-  const lastTurnAt = timestamps.at(-1) ?? "";
-  const date = toDateString(startedAt);
-  const crossRefs = extractCrossRefs(userMsgs, allTexts);
-
-  const files = {};
-  let clueData = null;
-  let vectorData = null;
-  let narrativeData = null;
-
-  // --- Clue: user messages only ---
-  try {
-    const clueRaw = callHaiku(buildCluePrompt(userMsgs));
-    clueData = parseHaikuOutput(clueRaw);
-    if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs);
-    } else {
-      logErr(`clue validation failed: invalid schema`);
-    }
-  } catch (e) {
-    logErr(`clue extraction failed: ${e.message}`);
-  }
-
-  // --- Vector: full context ---
-  try {
-    const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
-    vectorData = parseHaikuOutput(vectorRaw);
-    if (validateVector(vectorData)) {
-      files["vector.md"] = buildVectorMd(sessionId, date, vectorData);
-    } else {
-      logErr(`vector validation failed: invalid schema`);
-    }
-  } catch (e) {
-    logErr(`vector extraction failed: ${e.message}`);
-  }
-
-  // --- Narrative: full context ---
-  try {
-    const narrativeRaw = callHaiku(buildNarrativePrompt(allTexts, protocols));
-    narrativeData = parseHaikuOutput(narrativeRaw);
-    if (validateNarrative(narrativeData)) {
-      const topics = clueData?.topics ?? [];
-      files["narrative.md"] = buildNarrativeMd(
-        sessionId, date, startedAt, lastTurnAt, sessionCwd,
-        topics, protocols, narrativeData,
-      );
-    } else {
-      logErr(`narrative validation failed: invalid schema`);
-    }
-  } catch (e) {
-    logErr(`narrative extraction failed: ${e.message}`);
-  }
-
-  // Post-extraction low-info discard: silent skip when all 3 haiku extractions
-  // produced empty payloads — enables retry via next SessionEnd once cooldown
-  // expires. Two-track extensions (entropy/coinage) and the Haiku marker call
-  // are also skipped since ghost sessions lack the semantic content they
-  // depend on.
-  if (isLowInfo(clueData, vectorData, narrativeData)) {
-    logErr(`low-info discard: all 3 extractions produced empty payloads — skipping write, retry eligible at next SessionEnd`);
-    return;
-  }
-
-  // --- Haiku Marker Extraction (v0.4.24) ---
-  // 4th Haiku call — extracts 5 semantic salience categories
-  // (actor/temporal/emotional/cognitive/singularity). Bound by HAIKU_TIMEOUT
-  // separately, NOT by TWO_TRACK_BUDGET_MS. Fail-open: marker absence does not
-  // abort the write.
-  let markerData = null;
-  try {
-    const markerRaw = callHaiku(buildMarkerPrompt(allTexts, startedAt));
-    markerData = parseHaikuOutput(markerRaw);
-    if (!validateMarkers(markerData)) {
-      logErr(`marker validation failed: invalid schema`);
-      markerData = null;
-    }
-  } catch (e) {
-    logErr(`marker extraction failed: ${e.message}`);
-    markerData = null;
-  }
-
-  // --- Deterministic Two-Track Extension ---
-  // Entropy refs are O(n) over text; coinage is corpus-comparative under
-  // TWO_TRACK_BUDGET_MS soft cap. On exhaustion, coinage is skipped while
-  // entropy refs remain intact (Anamnesis R1 fallback).
-  const twoTrackStart = Date.now();
-
-  try {
-    const refs = extractEntropyRefs(allTexts);
-    files["entropy.md"] = buildEntropyMd(sessionId, date, refs);
-  } catch (e) {
-    logErr(`entropy extraction failed: ${e.message}`);
-  }
-
-  let coinageResult = null;
-  try {
-    const elapsed = Date.now() - twoTrackStart;
-    const remaining = TWO_TRACK_BUDGET_MS - elapsed;
-    let skipped = false;
-    let skipReason = null;
-    if (remaining < COINAGE_MIN_REMAINING_MS) {
-      skipped = true;
-      skipReason = `budget ${TWO_TRACK_BUDGET_MS}ms exhausted after ${elapsed}ms`;
-    } else {
-      const corpusRoot = path.join(slugDir, "hypomnesis");
-      coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
-    }
-    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason);
-  } catch (e) {
-    logErr(`coinage extraction failed: ${e.message}`);
-  }
-
-  // markers.md combines Haiku semantic categories + deterministic coinage
-  // statistics. Built after both inputs settle.
-  if (markerData) {
-    try {
-      files["markers.md"] = buildMarkersMd(
-        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD,
-      );
-    } catch (e) {
-      logErr(`markers assembly failed: ${e.message}`);
-    }
-  }
-
-  if (Object.keys(files).length > 0) {
-    writeStore(storeDir, files);
-  }
+  const result = processClaudeInput(readHookInput());
+  if (result) process.stderr.write(formatOutcome(result) + "\n");
 }
 
 export {
@@ -1139,11 +1062,14 @@ export {
   buildClueMd,
   buildMarkersMd,
   buildHaikuArgs,
+  processClaudeInput,
+  writeStore,
   callHaiku,
   invokes,
   skillCalls,
   resolveSkillProtocol,
   protocolMap,
+  PROMPT_SAMPLE_CHARS,
 };
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
@@ -1151,6 +1077,5 @@ try {
   isMain = !!process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
 } catch { isMain = true; }
 if (isMain) {
-  try { main(); } catch (e) { logErr(`top-level: ${e.message}`); }
-  process.exit(0);
+  try { main(); } catch (e) { logErr(`top-level: ${e.message}`); process.exitCode = 1; }
 }

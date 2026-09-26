@@ -92,23 +92,29 @@ describe('gate-answer-reference', () => {
     );
   });
 
-  it('rejects dangling TYPES, MODE STATE, and inline type references', () => {
+  it('rejects dangling TYPES, MODE STATE, and inline type references', (t) => {
+    // Any protocol still in the DSL serves as the fixture: three probe arrows are
+    // added to its PHASE TRANSITIONS, so the test outlives each move to Lean.
+    const target = protocolFiles({ projectRoot })
+      .filter((file) => !isLeanProtocol(file))
+      .find((file) => /── PHASE TRANSITIONS ──[\s\S]*?→\s*Stop\s*→/.test(
+        readFileSync(path.join(projectRoot, file), 'utf-8')));
+    if (!target) {
+      t.skip('no protocol with a DSL gate arrow remains');
+      return;
+    }
     const root = copyWorkingTree();
     try {
-      const anamnesisPath = path.join(root, 'anamnesis/skills/recollect/SKILL.md');
-      const anamnesis = readFileSync(anamnesisPath, 'utf-8');
-      assert.ok(anamnesis.includes('→ Stop → U '), 'Anamnesis mutation anchor moved');
-      const stateAnchor = '→ Stop → H → recue(V, H) → set(attempts = attempts + 1) → Phase 1';
-      assert.ok(anamnesis.includes(stateAnchor), 'Anamnesis MODE STATE mutation anchor moved');
-      const inlineAnchor = '→ Stop → X   -- store-expansion';
-      assert.ok(anamnesis.includes(inlineAnchor), 'Anamnesis inline type anchor moved');
-      writeFileSync(
-        anamnesisPath,
-        anamnesis
-          .replaceAll('→ Stop → U ', '→ Stop → Zeta ')
-          .replace(stateAnchor, stateAnchor.replace('→ Stop → H ', '→ Stop → Λ.missing_gate_answers '))
-          .replace(inlineAnchor, '→ Stop → X ∈ Zeta   -- store-expansion')
-      );
+      const targetPath = path.join(root, target);
+      const source = readFileSync(targetPath, 'utf-8');
+      const header = '── PHASE TRANSITIONS ──\n';
+      assert.ok(source.includes(header), `${target}: PHASE TRANSITIONS header moved`);
+      const probes = [
+        'Probe₁: Q → Stop → Zeta',
+        'Probe₂: Q → Stop → Λ.missing_gate_answers',
+        'Probe₃: Q → Stop → X ∈ Zeta   -- inline',
+      ].join('\n');
+      writeFileSync(targetPath, source.replace(header, `${header}${probes}\n`));
 
       const mutated = run(root);
       const failures = mutated.fail

@@ -1291,7 +1291,7 @@ describe('package.js CLI', () => {
     // warnings for anamnesis (distinct from non-blocking style warnings like line
     // guidelines). A silent skip of anamnesis would drop results.length without
     // surfacing the cause — this filter catches that specific failure mode.
-    const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
+    const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w) && !/-line guideline\)$/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
     assert.equal(result.results.length, PLUGINS.length + 1); // every skill plus the bundle
     assert.deepEqual(
@@ -1443,4 +1443,20 @@ describe('packaged discovery metadata', () => {
     }
     assert.deepEqual(offenders, [], `over ${DESCRIPTION_LIMIT}-char discovery limit: ${offenders.join('; ')}`);
   });
+});
+
+it('ships an executable standalone capture-outcome reader with recollect', () => {
+  const { zipEntries } = buildSkillArtifact({ dir: 'anamnesis', skill: 'recollect' });
+  const reader = zipEntries.find((entry) => entry.name === 'recollect/scripts/hypomnesis-outcome.mjs');
+  assert.ok(reader, 'the runtime reference requires the reader in the release artifact');
+  const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'recollect-reader-package-'));
+  try {
+    const filename = path.join(root, 'hypomnesis-outcome.mjs');
+    for (const entry of zipEntries.filter((entry) => entry.name.startsWith('recollect/scripts/'))) {
+      fs.writeFileSync(path.join(root, path.basename(entry.name)), entry.data);
+    }
+    const result = JSON.parse(execFileSync(process.execPath, [filename, root, 'legacy-session'], { encoding: 'utf8' }));
+    assert.equal(result.record_state, 'unknown');
+    assert.deepEqual(result.artifacts, []);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
