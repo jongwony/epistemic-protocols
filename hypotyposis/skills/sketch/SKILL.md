@@ -618,60 +618,6 @@ relay, re-present the material the person entrusted to later sketches; a later a
 takes it up or withdraws it.
 -/
 
-/-!
-Silence recognizes, places, and releases nothing.
-theorem silence (relay respond : Context P → Response P) (c : Context P) :
-    sketch relay respond c [] = .holding c
-
-No sketch is produced before the spec relay: every round holds the relay turn ahead of what
-production wrote.
-theorem relay_before_production (relay : Context P → Response P) (c : Context P) :
-    ∃ t, runRound relay c = c ++ [(relay c).val] ++ t
-
-While a recognition stands unplaced, or the answer calls for no new sketches, an answer that
-closes nothing produces nothing: the gate is presented again.
-theorem held_gate_produces_nothing (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (fuse c u)) = none)
-    (hb : ¬ Unsuppliable (fuse c u)) (hf : fixture (fuse c u) = none)
-    (hh : Placing (fuse c u) ∨ ¬ Redraws (fuse c u)) :
-    sketch relay respond c (u :: us) =
-      sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us
-
-Nothing is retained on a placement taken without what it needs in view: the gate is drawn
-again.
-theorem uncovered_retains_nothing (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
-    (hk : filledValue (closing (fuse c u)) = none) (hb : ¬ Unsuppliable (fuse c u))
-    (hf : fixture (fuse c u) = some f) (hc : ¬ Covered (fuse c u)) :
-    sketch relay respond c (u :: us) =
-      sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us
-
-An answer either continues the run or closes it in one of these ways only: the person's
-withdrawal, dissolution, or route; a realization shown unsuppliable; or a recognition and
-placement taken with what they need in view, every placed reference verified.
-theorem each_step_continues_or_closes (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
-    (h : sketch relay respond c (u :: us) = o) :
-    (∃ c', sketch relay respond c' us = o) ∨
-    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) ∨
-    (filledValue (closing (fuse c u)) = some .dissolve ∧ Covered (fuse c u) ∧
-      o = .dissolved (closed (fuse c u))) ∨
-    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧ Covered (fuse c u) ∧
-      o = .routed t (closed (fuse c u))) ∨
-    (Unsuppliable (fuse c u) ∧ o = .boundary (closed (fuse c u ++ [(relay (fuse c u)).val]))) ∨
-    (∃ f, fixture (fuse c u) = some f ∧ Covered (fuse c u) ∧ Verified (settle (fuse c u)) f ∧
-      o = .recognized (recognize (settle (fuse c u)) f))
-
-A reference that does not resolve returns the placement to the person, with nothing released.
-theorem unverified_returns_to_placement (relay respond : Context P → Response P)
-    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
-    (hk : filledValue (closing (fuse c u)) = none) (hb : ¬ Unsuppliable (fuse c u))
-    (hf : fixture (fuse c u) = some f) (hc : Covered (fuse c u))
-    (hn : ¬ Verified (settle (fuse c u)) f) :
-    sketch relay respond c (u :: us) =
-      sketch relay respond (settle (fuse c u) ++ [(respond (settle (fuse c u))).val]) us
--/
-
 /-! ── CONVERGENCE ──
 converged: a recognized form, its recognition and placement taken with what they need in view
 (`Covered`) and every placed reference verified (`Verified`); or a dissolution the person closed,
@@ -684,49 +630,6 @@ sketches that never came — every copy written with its disposition, and the di
 the closure. Every sketch's disposition is shown (`Accounted`); a failure is declared with its
 handoff, never silent. Each other terminal presents its own payload (TOOL GROUNDING).
 Demonstrated, not asserted.
--/
-
-/-!
-A recognized form is closed only on a recognition and a placement taken with what they need in
-view, with every placed reference verified and no revert point the recognized version.
-theorem recognized_verified (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : RecognizedForm P)
-    (h : sketch relay respond c us = .recognized r) :
-    ∃ c₀, fixture c₀ = some r.fixture ∧ Covered c₀ ∧ Verified (settle c₀) r.fixture ∧
-      r = recognize (settle c₀) r.fixture
-
-A dissolution and a route each rest on the person's closing, taken with its ground and your
-contrary grounds in view; a withdrawal rests on the person's closing alone.
-theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .dissolved r) :
-    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ Covered c₀ ∧ r = closed c₀
-
-theorem routed_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (r : Closed P)
-    (h : sketch relay respond c us = .routed t r) :
-    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ Covered c₀ ∧ r = closed c₀
-
-theorem withdrawn_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .withdrawn r) :
-    ∃ c₀, filledValue (closing c₀) = some .withdraw ∧ r = closed c₀
-
-The AI ends the run on its own only at a realization shown unsuppliable.
-theorem boundary_on_evidence (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .boundary r) :
-    ∃ c₀, Unsuppliable c₀ ∧ r = closed (c₀ ++ [(relay c₀).val])
-
-A value, a recognition, a placement, and a closing are each filled only by a person's turn.
-theorem settled_by_person {c : Context P} {a : Axis} {s : Cite c}
-    (ok : (axisCoord (P := P) a).admits s.src) : s.src.val = .person
-
-theorem recognized_by_person {c : Context P} {s : Cite c}
-    (ok : (recognitionCoord (P := P)).admits s.src) : s.src.val = .person
-
-theorem placed_by_person {c : Context P} {s : Cite c}
-    (ok : (placementCoord (P := P)).admits s.src) : s.src.val = .person
-
-theorem closed_by_person {c : Context P} {s : Cite c}
-    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person
 -/
 
 /-! ── TOOL GROUNDING ── -/
