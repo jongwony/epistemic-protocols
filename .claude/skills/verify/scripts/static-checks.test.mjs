@@ -302,12 +302,12 @@ describe('lean-definition', () => {
       // A hidden premise keeps the signature text intact but not its meaning —
       // the Codex counterexample, on a stated theorem with no hypothesis of its
       // own so that no unused-variable warning stops the build first.
-      const { statedTheorems, groundSpan } = require(path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js'));
+      const { protocolStatements } = require(path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js'));
       const host = leanFiles.map((file) => {
         const text = readFileSync(path.join(projectRoot, file), 'utf-8');
         const hostBlock = /^```lean\n([\s\S]*?)^```$/m.exec(text)[1];
         const hostNs = /^namespace (\w+)/m.exec(hostBlock)[1];
-        const stated = statedTheorems(hostBlock.slice(groundSpan(hostBlock).end)).find((e) => e.name && !/\(h\w*\s*:/.test(e.signature));
+        const stated = protocolStatements(projectRoot, hostNs, hostBlock).events.find((e) => e.name && !/\(h\w*\s*:/.test(e.signature));
         return stated && { hostNs, stated };
       }).find(Boolean);
       assert.ok(host, 'no hypothesis-free stated theorem found to carry a hidden premise');
