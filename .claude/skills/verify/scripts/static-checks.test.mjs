@@ -1,13 +1,8 @@
 #!/usr/bin/env node
 /**
- * Known-pass / known-fail proof for gate-answer-reference and lean-definition.
- *
- * The former gate-type-soundness check went inert when its prose anchor was
- * ablated. This test establishes that the replacement reaches every protocol
- * and rejects exact dangling references without asking a static parser to judge
- * context-dependent gate semantics. A protocol whose Definition block is Lean 4
- * resolves its references by elaboration instead, so lean-definition carries
- * that protocol, and the two checks together reach every protocol.
+ * Known-pass / known-fail proof for lean-definition: it reaches every protocol
+ * whose Definition block is Lean 4 — every protocol, now that none keeps the
+ * DSL — and each rule it holds is shown rejecting a mutated copy of the tree.
  *
  * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
  */
@@ -26,7 +21,6 @@ const projectRoot = path.resolve(here, '../../../..');
 const checkerRelative = '.claude/skills/verify/scripts/static-checks.js';
 const require = createRequire(import.meta.url);
 const { protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
-const CHECK = 'gate-answer-reference';
 
 function run(root) {
   try {
@@ -40,20 +34,8 @@ function run(root) {
   }
 }
 
-function counts(message) {
-  const read = (label) => {
-    const match = new RegExp(`(\\d+) ${label}`).exec(message);
-    assert.ok(match, `pass message lost its "${label}" count: ${message}`);
-    return Number(match[1]);
-  };
-  return {
-    resolved: read('resolved formal answers'),
-    unresolved: read('unresolved formal answers')
-  };
-}
-
 function copyWorkingTree() {
-  const root = mkdtempSync(path.join(tmpdir(), 'gate-answer-reference-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'lean-definition-'));
   cpSync(projectRoot, root, {
     recursive: true,
     filter: (source) => {
@@ -70,8 +52,6 @@ function copyWorkingTree() {
 }
 
 const clean = run(projectRoot);
-const cleanPasses = clean.pass.filter((result) => result.check === CHECK);
-const cleanFailures = clean.fail.filter((result) => result.check === CHECK);
 const LEAN = 'lean-definition';
 const leanVerdicts = [...clean.pass, ...clean.warn].filter((result) => result.check === LEAN);
 const leanFailures = clean.fail.filter((result) => result.check === LEAN);
@@ -79,55 +59,6 @@ const leanFailures = clean.fail.filter((result) => result.check === LEAN);
 function isLeanProtocol(file) {
   return /^## Definition$(?:(?!^```)[\s\S])*?^```lean$/m.test(readFileSync(path.join(projectRoot, file), 'utf-8'));
 }
-
-describe('gate-answer-reference', () => {
-  it('reports a clean known-pass result for every canonical DSL protocol', () => {
-    const expected = protocolFiles({ projectRoot }).filter((file) => !isLeanProtocol(file)).sort();
-    const actual = cleanPasses.map((result) => result.file).sort();
-    assert.deepEqual(actual, expected);
-    assert.deepEqual(cleanFailures, []);
-    assert.ok(
-      cleanPasses.some((result) => counts(result.message).resolved > 0),
-      'no formal gate answer was resolved — extraction is inert'
-    );
-  });
-
-  it('rejects dangling TYPES, MODE STATE, and inline type references', (t) => {
-    // Any protocol still in the DSL serves as the fixture: three probe arrows are
-    // added to its PHASE TRANSITIONS, so the test outlives each move to Lean.
-    const target = protocolFiles({ projectRoot })
-      .filter((file) => !isLeanProtocol(file))
-      .find((file) => /── PHASE TRANSITIONS ──[\s\S]*?→\s*Stop\s*→/.test(
-        readFileSync(path.join(projectRoot, file), 'utf-8')));
-    if (!target) {
-      t.skip('no protocol with a DSL gate arrow remains');
-      return;
-    }
-    const root = copyWorkingTree();
-    try {
-      const targetPath = path.join(root, target);
-      const source = readFileSync(targetPath, 'utf-8');
-      const header = '── PHASE TRANSITIONS ──\n';
-      assert.ok(source.includes(header), `${target}: PHASE TRANSITIONS header moved`);
-      const probes = [
-        'Probe₁: Q → Stop → Zeta',
-        'Probe₂: Q → Stop → Λ.missing_gate_answers',
-        'Probe₃: Q → Stop → X ∈ Zeta   -- inline',
-      ].join('\n');
-      writeFileSync(targetPath, source.replace(header, `${header}${probes}\n`));
-
-      const mutated = run(root);
-      const failures = mutated.fail
-        .filter((result) => result.check === CHECK)
-        .map((result) => `${result.file}: ${result.message}`);
-      assert.ok(failures.some((message) => message.includes('`Zeta`')), failures.join('\n'));
-      assert.ok(failures.some((message) => message.includes('`Λ.missing_gate_answers`')), failures.join('\n'));
-      assert.ok(failures.some((message) => message.includes('inline gate answer type `Zeta`')), failures.join('\n'));
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
-  });
-});
 
 describe('lean-definition', () => {
   const leanFiles = protocolFiles({ projectRoot }).filter(isLeanProtocol).sort();
@@ -274,15 +205,6 @@ describe('lean-definition', () => {
       // An underscore-prefixed name hides nothing (codex review of this change).
       write(theoremsRelative, beforeEnd('axiom _mutationCheat : False\ntheorem _mutation_unchecked : False := _mutationCheat'));
       expectSome(failures(), `\`axiom ${ns}._mutationCheat\` is declared in \`EpistemicProtocols.${ns}.Theorems\``);
-      restore();
-
-      // GROUND's stated theorems are re-derived from their proofs: a weakened proof fails.
-      const groundTheorems = 'lean/EpistemicProtocols/Ground/Theorems.lean';
-      const groundText = readFileSync(path.join(projectRoot, groundTheorems), 'utf-8');
-      const weakened = groundText.replace(/theorem cited_not_injected[\s\S]*?(?=\n\nend Ground)/, 'theorem cited_not_injected {P : Type} {c : Context P}\n    (s : Cite c) : s.idx = s.idx := rfl');
-      assert.notEqual(weakened, groundText, 'no cited_not_injected proof found to weaken');
-      write(groundTheorems, weakened);
-      expectSome(failures(), 'Lean package does not build cleanly');
       restore();
 
       write(theoremsRelative, beforeEnd('theorem mutation_unrelated : 1 + 1 = 2 := rfl'));

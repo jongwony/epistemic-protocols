@@ -1735,97 +1735,6 @@ function checkPartitionInvariant() {
 }
 
 // ============================================================
-// Check: Gate Answer Reference
-// Exact Definition-internal reference resolution only: a formal answer after
-// `Stop` must resolve to a TYPES or transition-local declaration, a MODE STATE
-// field, or a locally enumerated inline type. Runtime option materialization
-// depends on live context and belongs to /realize or review.
-// ============================================================
-
-const FORMAL_IDENTIFIER = /^(?:[\p{Lu}Λ_][\p{L}\p{N}_'’]*|[\p{L}][\p{L}\p{N}'’]*_[\p{L}\p{N}_'’]+)$/u;
-const STATE_REFERENCE = /^Λ\.([\p{L}_][\p{L}\p{N}_'’]*)$/u;
-
-function checkGateAnswerReference() {
-  for (const file of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, file);
-    let content;
-    try {
-      content = fs.readFileSync(fullPath, 'utf-8');
-    } catch { continue; }
-
-    // A Lean Definition block resolves its references by elaboration, which
-    // lean-definition runs; this check reads the DSL's `→ Stop → A` arrows.
-    if (isLeanDefinition(content)) continue;
-
-    const typesSection = extractFormalSection(content, 'TYPES') ?? '';
-    const modeStateSection = extractFormalSection(content, 'MODE STATE') ?? '';
-    const identifier = "[\\p{L}_][\\p{L}\\p{N}_'’]*";
-    const typeDeclarations = new Set(
-      [...typesSection.matchAll(new RegExp(`^\\s*(${identifier})\\s*(?:=|∈|:)`, 'gmu'))]
-        .map((m) => m[1])
-    );
-    const stateFields = new Set(
-      [...modeStateSection.matchAll(new RegExp(`(?:^|[,{])\\s*(${identifier})\\s*:`, 'gmu'))]
-        .map((m) => m[1])
-    );
-
-    const transitions = [
-      extractFormalSection(content, 'PHASE TRANSITIONS'),
-      extractFormalSection(content, 'LOOP')
-    ].filter(Boolean).join('\n');
-    const transitionDeclarations = new Set(
-      [...transitions.matchAll(new RegExp(`^\\s*(${identifier})\\s*(?:=|∈|:)`, 'gmu'))]
-        .map((m) => m[1])
-    );
-    let resolvedAnswers = 0;
-    let unresolvedAnswers = 0;
-    for (const m of transitions.matchAll(/→\s*Stop\s*→\s*([^\s→[\]|(){}]+)(?:\s*∈\s*(\{|[\p{L}_][\p{L}\p{N}_'’]*))?/gu)) {
-      const symbol = m[1].replace(/[.,;:]+$/, '');
-      if (m[2]) {
-        if (m[2] === '{' || typeDeclarations.has(m[2]) || transitionDeclarations.has(m[2])) {
-          resolvedAnswers += 1;
-          continue;
-        }
-        unresolvedAnswers += 1;
-        results.fail.push({
-          check: 'gate-answer-reference',
-          file,
-          message: `inline gate answer type \`${m[2]}\` does not resolve to a TYPES or transition-local declaration`
-        });
-        continue;
-      }
-      const stateReference = STATE_REFERENCE.exec(symbol);
-      if (stateReference) {
-        if (stateFields.has(stateReference[1])) {
-          resolvedAnswers += 1;
-          continue;
-        }
-      } else if (typeDeclarations.has(symbol) || transitionDeclarations.has(symbol) || stateFields.has(symbol)) {
-        resolvedAnswers += 1;
-        continue;
-      } else if (!FORMAL_IDENTIFIER.test(symbol)) {
-        continue; // prose continuation after Stop, not a formal reference
-      }
-
-      unresolvedAnswers += 1;
-      results.fail.push({
-        check: 'gate-answer-reference',
-        file,
-        message: `formal gate answer \`${symbol}\` does not resolve to a TYPES or transition-local declaration, MODE STATE field, or locally enumerated inline type`
-      });
-    }
-
-    if (unresolvedAnswers === 0) {
-      results.pass.push({
-        check: 'gate-answer-reference',
-        file,
-        message: `Gate answer reference check completed (${resolvedAnswers} resolved formal answers, ${unresolvedAnswers} unresolved formal answers)`
-      });
-    }
-  }
-}
-
-// ============================================================
 // Check: Lean Definition
 // ============================================================
 // A Definition block authored in Lean 4 is a contract only if it elaborates:
@@ -1937,9 +1846,9 @@ function checkLeanDefinition() {
     else if (ns && source.indexOf(`namespace ${ns}`) > ground.start) problems.push('Lean Definition block opens its namespace after GROUND');
     else if (canonicalGround === null) problems.push(`${leanContract.CANONICAL_GROUND} is missing or has no \`namespace Ground\` … \`end Ground\` text`);
     else if (ground.text !== canonicalGround) problems.push(`GROUND section differs from ${leanContract.CANONICAL_GROUND} — the session primitive is one text across Lean blocks`);
-    // Outside GROUND the block states no theorem: nothing reads a statement there.
-    if (ground) {
-      const stated = [...leanContract.docTheoremNames(source.slice(0, ground.start)), ...leanContract.docTheoremNames(source.slice(ground.end))];
+    // The block states no theorem, GROUND included: nothing reads a statement there.
+    {
+      const stated = leanContract.docTheoremNames(source);
       for (const name of stated) {
         problems.push(`Lean Definition block states \`theorem ${name}\` in a doc comment — no audit reads a statement there; state and prove it in ${ns ? leanContract.theoremsModulePath(ns) : 'the protocol\'s Theorems.lean'}`);
       }
@@ -2025,7 +1934,7 @@ function checkLeanDefinition() {
     const attributed = new Set();
     for (const { relPath, ns } of units) {
       const own = result.build.diagnostics.filter(line => ns === 'Ground'
-        ? /EpistemicProtocols\/Ground|GroundStated\.lean/.test(line)
+        ? /EpistemicProtocols\/Ground/.test(line)
         : line.includes(`Contract/${ns}.lean`) || line.includes(`EpistemicProtocols/${ns}/`));
       if (own.length === 0) continue;
       own.forEach(line => attributed.add(line));
@@ -2049,13 +1958,6 @@ function checkLeanDefinition() {
       continue;
     }
     const problems = [...report.problems];
-    // GROUND's canonical text still names the theorems its Theorems module proves.
-    if (ns === 'Ground' && canonicalGround !== null) {
-      const named = new Set(leanContract.docTheoremNames(canonicalGround).map(n => `Ground.${n}`));
-      const proved = new Set(report.guarantees);
-      for (const name of named) if (!proved.has(name)) problems.push(`GROUND names \`theorem ${name}\`, which ${leanContract.GROUND_THEOREMS} does not prove as a public theorem`);
-      for (const name of proved) if (!named.has(name)) problems.push(`${leanContract.GROUND_THEOREMS} proves \`theorem ${name}\`, which the GROUND text does not name`);
-    }
     if (problems.length > 0) {
       for (const message of problems) fail(relPath, message);
       continue;
@@ -2065,7 +1967,7 @@ function checkLeanDefinition() {
       check: CHECK,
       file: relPath,
       message: ns === 'Ground'
-        ? `Canonical GROUND elaborates, and ${leanContract.GROUND_THEOREMS} proves the ${report.guarantees.length} theorem(s) it names; the Lean audit finds no project axiom`
+        ? `Canonical GROUND elaborates, and ${leanContract.GROUND_THEOREMS} proves its ${report.guarantees.length} guarantee(s); the Lean audit finds no project axiom`
         : `Lean Definition block elaborates standalone, and ${block.theoremsRel} proves ${report.guarantees.length} guarantee(s)${report.helpers.length > 0 ? ` with ${report.helpers.length} private helper(s)` : ''}; the Lean audit admits only propext, Classical.choice, Quot.sound and ${report.judgments.length} documented judgment(s), each inhabited by a witness that assumes nothing`,
     });
   }
@@ -2842,7 +2744,6 @@ try {
   checkRoutingIndexContract();
   checkOnboardSync();
   checkPartitionInvariant();
-  checkGateAnswerReference();
   checkLeanDefinition();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
