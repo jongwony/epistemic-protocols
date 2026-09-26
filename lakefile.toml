@@ -1,5 +1,11 @@
 name = "epistemic-protocols"
 defaultTargets = ["EpistemicProtocols"]
+testDriver = "Tests"
+lintDriver = "audit"
+
+# Shared by the editor and every build: a warning fails the build as it does in CI.
+[leanOptions]
+warningAsError = true
 
 # The protocol Lean blocks, generated from each SKILL.md by
 # .claude/skills/verify/scripts/lean-contract.js (gitignored).
@@ -8,8 +14,30 @@ name = "Contract"
 srcDir = "lean/.contract"
 globs = ["Contract.+"]
 
-# The canonical GROUND module and the proofs of every stated theorem.
+# The canonical GROUND module, and each contract's guarantees stated and proved
+# together in `EpistemicProtocols.<NS>.Theorems`.
 [[lean_lib]]
 name = "EpistemicProtocols"
 srcDir = "lean"
 globs = ["EpistemicProtocols.+"]
+
+# The lean-definition audit, read from the elaborated environment.
+[[lean_lib]]
+name = "Audit"
+srcDir = "lean"
+roots = ["Audit.Check"]
+
+# `lake lint`: runs the audit over every generated contract and GROUND.
+[[lean_exe]]
+name = "audit"
+srcDir = "lean"
+root = "Audit.Main"
+supportInterpreter = true
+
+# `lake test`: the audit run against fixtures that break each rule.
+[[lean_lib]]
+name = "Tests"
+srcDir = "lean"
+globs = ["Tests.+"]
+# A fixture's `sorry` is the rule under test, so its warning stays a warning here.
+leanOptions = { warningAsError = false }
