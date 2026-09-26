@@ -442,19 +442,6 @@ ground, so no number of them ends the recall; the person does, or the evidence l
 further worth reaching for.
 -/
 
-/-!
-Silence identifies nothing and closes nothing.
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    recollect respond c [] = .holding c
-
-A pass only adds to the context.
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
-
-An invocation of the person's own is never refused.
-theorem invocation_activates (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (h : Invoked c) : start respond c us ≠ .notActivated c
--/
-
 /-! ── CONVERGENCE ──
 Every close is read where it fires. identified: the person's turn took the presented recognizable
 as the past they meant; the RecalledContext carries the story, each sentence resting on an opened
@@ -467,27 +454,6 @@ records examined are reported, with the causes the evidence supports, and no abs
 Convergence evidence: (VagueRecall → [cues] → Recognizable(story on opened records) →
 identification → RecalledContext), or the scope searched and what did not open. Demonstrated, not
 asserted.
--/
-
-/-!
-The turn a RecalledContext names as identifying it is the person's, and it supports the
-identification.
-theorem identified_by_person (c : Context P) (v : RecalledContext P)
-    (h : closing c = some (.identified v)) :
-    ∃ s : Cite c, s.idx = v.identifiedAt ∧ (c[s.idx]'s.lt).origin = .person ∧
-      AnswerSupported c (c[s.idx]'s.lt) .identified
-
-Only the person closes the recall by an answer.
-theorem answer_by_person {c : Context P} {s : Cite c}
-    (ok : (answerCoord (P := P)).admits s.src) : s.src.val = .person
-
-A story sentence never rests on the assistant's own turn or on the person's say-so.
-theorem claim_is_evidence {c : Context P} (k : Claim c) :
-    (c[k.src.idx]'k.src.lt).origin ≠ .assistant ∧ k.src.src.val ≠ .person
-
-The recall closes unresolved only after the person has added to the cue.
-theorem unresolved_after_cue (c c' : Context P) (s : String) (q : List String)
-    (h : settle c = some (.unresolved c' s q)) : AddedToCue c
 -/
 
 /-! ── TOOL GROUNDING ── -/

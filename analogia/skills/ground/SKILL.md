@@ -430,22 +430,6 @@ checks-only reassessment, focus settlement, and read-back spend none. An empty m
 assessed like any other. Preference changes no warrant or verdict.
 -/
 
-/-!
-With no new evidence, collection leaves the context, and so every reading, unchanged.
-theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c
-
-A settlement that narrows `K` without basis holds at the focus gate rather than reading the
-unchanged context again.
-theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
-    (hn : UnsupportedNarrowing c) : report c = .focusGate
-
-While the focus gate holds, a later utterance collects no evidence.
-theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Supersedes (fuse c u))
-    (hf : FocusHeld (fuse c u)) :
-    ground respond c (u :: us) = ground respond (fuse c u ++ [(respond (fuse c u)).val]) us
--/
-
 /-! ── CONVERGENCE ──
 converged(K): every intended inference carries a Licensed or a Blocked verdict with its grounds.
 Convergence evidence: for each k in K, one pair (MappingUncertain(k) → verdict(k)) showing the
@@ -462,20 +446,6 @@ its basis remains unresolved. An Inconclusive close keeps the same trace with ev
 Undetermined verdict naming what is missing; at the cap, the requested revision is named as
 unassessed and any retained assessment is labelled by its earlier focus and K. Convergence is
 demonstrated, not asserted.
--/
-
-/-!
-theorem assessment_converged (c : Context P) (h : report c = .assessment) :
-    focusSettled c ∧ converged c
-
-The comparison purpose is filled only by the user's own words.
-theorem purpose_by_person {c : Context P} {s : Cite c}
-    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person
-
-A replacement of a committed domain closes the activation at once.
-theorem superseded_first (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : Supersedes (fuse c u)) :
-    ground respond c (u :: us) = ⟨fuse c u, .superseded⟩
 -/
 
 /-! ── TOOL GROUNDING ── -/

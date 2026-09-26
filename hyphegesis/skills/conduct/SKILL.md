@@ -876,49 +876,6 @@ consolidated summary. The span ends at the next planned `/compact` or `/clear`, 
 types.
 -/
 
-/-!
-Silence takes nothing.
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    conduct respond c [] = .holding c
-
-The run reaches `conducted` only on the person's `sufficient`, judged covered, over a cut that
-partitions the moves, with your relay test passed; its trace is your response over that context.
-That the response is the conduct trace, and that the handoff follows it, are the obligations
-`.converge` and `.handoff` carry — this theorem does not prove them.
-theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
-    (h : conduct respond c us = .conducted c₁ t) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      (read (fuse c₀ u) u).verdict = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
-      relayAt c₁ = none ∧ t = respond c₁
-
-The run ends without a method on the person's word only through their `withdraw`.
-theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (h : conduct respond c us = .withdrawn c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      (read (fuse c₀ u) u).verdict = .withdraw
-
-Another protocol is taken up only where the person named it.
-theorem routed_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (c₁ : Context P)
-    (h : conduct respond c us = .routed t c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      (read (fuse c₀ u) u).verdict = .route t
-
-A person's `withdraw` is read before your relay test.
-theorem withdraw_precedes_relay (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : (read (fuse c u) u).verdict = .withdraw) :
-    conduct respond c (u :: us) = .withdrawn (observe (fuse c u))
-
-A `sufficient` judged not covered does not close: the run continues with your next response
-appended, which `.map` requires to be the map drawn again.
-theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (hs : (read (fuse c u) u).verdict = .sufficient)
-    (hr : relayAt (observe (fuse c u)) = none) (hn : ¬ Covered (observe (fuse c u))) :
-    conduct respond c (u :: us) =
-      conduct respond (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us
--/
-
 /-! ── CONVERGENCE ──
 conducted(WP): the method handed off on the person's covered `sufficient`, after the conduct
 trace reached them. Convergence evidence, before the dispatch: the full state to be taken, every
@@ -935,60 +892,6 @@ marked unroutable where that resolver cannot reach the region before its stop is
 basis shown with it. The dissent attached to the method is shown beside it. Any tally is read
 off the rows shown. What the closing utterance itself changed is shown first, as a ledger, as
 every other answer's change is. Demonstrated, not asserted.
--/
-
-/-!
-What the person set is the method's value and is recorded as theirs; whether a decision made
-before an upstream change still reaches the slot is the judgment `reach` makes, and a decision it
-leaves unclear keeps the slot open and named rather than handing it to the draft.
-theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s) (i : Nat)
-    (h : slotState c s = .set v i) : (method c).topology s = v
-
-theorem person_value_recorded (c : Context P) (s : Slot) (h : (slotState c s).isSet = true) :
-    adoption c s = .set
-
-What the person said is read once: whatever follows — your maps, observations, their later turns
-— never reads an earlier turn again, and your own turns say nothing.
-theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) = said c ++ more
-
-theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c
-
-Every reading is of a turn the person sent.
-theorem said_by_person (c : Context P) (i : Nat) (x : Reading) (h : (i, x) ∈ said c) :
-    ∃ u : Utterance P, c[i]? = some u.val
-
-Who first put an entry forward is read off that turn's origin.
-theorem proposer_by_origin (c : Context P) (e : Entry) (t : Turn P)
-    (h : c[introducedAt c e]? = some t) (ho : t.origin = .person) : proposer c e = .person
-
-Over a cut that partitions the moves, every move of the method lands in a region.
-theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
-    ∀ p ∈ (method c).assignment, p.region.isSome = true
-
-A slot nothing grounded carries the default, whatever else the draft holds.
-theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : (slotState c s).isSet = false)
-    (hg : (draft c s).ground = none) : take c s = defaultValue s
-
-An emergent termination value declaring `needsStopGround` never leaves its region's ground silent.
-theorem emergent_stop_never_silent (e : Emergent)
-    (h : ObligationClass.needsStopGround ∈ e.classes) :
-    (groundOf (.emergent e)).isSome = true
-
-The pointer travels onto the method unchanged.
-theorem pointer_carried (c : Context P) : (method c).pointer = pointer c
-
-The brief travels onto the method: what the work is for, what it hands off, and its span.
-theorem brief_carried (c : Context P) : (method c).brief = brief c
-
-A region that owes the synthesis checkpoint has one.
-theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : Region)
-    (hr : r ∈ rs) (h : owesSynthesis c r = true) :
-    ∃ k ∈ checkpoints c rs, k.region = r ∧ k.decision = .synthesisOutputShape
-
-A realizability verdict is filled only by what the environment returned; text injected into the
-session, the system prompt included, is never cited (GROUND `cited_not_injected`).
-theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
-    (ok : (feasibilityCoord (P := P) r).admits s.src) : s.src.val = .external
 -/
 
 /-! ── TOOL GROUNDING ── -/

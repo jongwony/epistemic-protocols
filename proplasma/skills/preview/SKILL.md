@@ -549,43 +549,6 @@ before it generates. A question about a probe and a send-back are turns of the s
 closing. The loop is dialogue: each round ends at the gate, and the person ends the run.
 -/
 
-/-!
-Silence constitutes, generates, and discards nothing.
-theorem silence (ai : AITurns P) (c : Context P) : preview ai c [] = .holding c
-
-No probe commits a value before the spec relay: every fan holds the relay turn ahead of what the
-probes wrote.
-theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
-    ∃ t, fan ai c = c ++ [(ai.relay c).val] ++ t
-
-A DirectionalContrast is the person's constitution of a direction, covered, and its harvest is
-read before discard.
-theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : DirectionalContrast P) (h : preview ai c us = .contrasted r) :
-    ∃ (c₁ : Context P) (d : Direction), filledValue (closing c₁) = some (.constitute d) ∧
-      Covered c₁ ∧ r.harvest = harvestOf c₁ d ∧ r.context = discard c₁
-
-A dissolution, a stop, and a route are each the person's closing.
-theorem dissolved_on_dissolve (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .dissolved r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .dissolve ∧ r = closed c₁
-
-theorem withdrawn_on_stop (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = closed c₁
-
-theorem routed_on_route (ai : AITurns P) (c : Context P) (us : List (Utterance P)) (t : String)
-    (r : Closed P) (h : preview ai c us = .routed t r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = closed c₁
-
-Every closing rests on a turn the person sent.
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
-
-Every probe has a line in the discard trace.
-theorem trace_total (c : Context P) : (discardTrace c).length = (probes c).length
--/
-
 /-! ── CONVERGENCE ──
 converged: a DirectionalContrast — a direction the person constituted with its deciding evidence
 and your contrary grounds in view, harvested before discard, every probe's disposition declared —

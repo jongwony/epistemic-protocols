@@ -486,25 +486,6 @@ the person set that the context now shows met leaves its claim open again, with 
 antithesis. The loop is dialogue: each round ends at a gate, and the person ends the run.
 -/
 
-/-!
-Silence judges nothing and closes nothing.
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    sublate respond c [] = .holding c
-
-While no closure fires, an utterance leads to the next round and closes nothing.
-theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
-    sublate respond c (u :: us) =
-      sublate respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us
-
-The invocation alone closes nothing: without a person's utterance the run holds at its first round.
-theorem start_holds (respond : Context P → Response P) (c : Context P) :
-    start respond c [] = .holding (pass c ++ [(respond (pass c)).val])
-
-A pass only adds to the context.
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
--/
-
 /-! ── CONVERGENCE ──
 Every closure is read where it fires and nowhere else. vetted: nothing open, and the person
 closed — by answers of theirs in this run, read from any of their turns, or by saying the run is
@@ -517,34 +498,6 @@ the claim it was put to → the antithesis with its basis → the answer that me
 later answer that replaced it shown beside it — naming the source; apart from the trace, every
 claim the certificate handed on, with its fit and hint; the conditions left unmet, reported open;
 and the dissent attached to the closure. Demonstrated, not asserted.
--/
-
-/-!
-Every vetted closure follows a person's utterance, and its context is the pass that read it.
-theorem closes_after_utterance (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (v : VettedContext P) (h : sublate respond c us = .vetted v) :
-    ∃ (c₀ : Context P) (u : Utterance P), v.context = pass (fuse c₀ u)
-
-The person's answer stands over anything the certificate read.
-theorem person_first (c : Context P) (a : Claim) (w : Answer)
-    (h : filledValue (answer c a) = some w) : standing c a = .answered w
-
-A claim whose owner is unclear waits on the person until they answer it.
-theorem unclear_waits (c : Context P) (a : Claim) (hr : filledValue (answer c a) = none)
-    (hu : (certify c a).whose = .unclear) : standing c a = .open_
-
-An answer always rests on a turn the person sent.
-theorem answered_by_person (c : Context P) (a : Claim) (w : Answer)
-    (h : standing c a = .answered w) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
-
-Only the person closes.
-theorem closing_by_person {c : Context P} {s : Cite c}
-    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person
-
-A vetted run has nothing open, and the person closed it.
-theorem vetted_closed_by_person (c : Context P) (v : VettedContext P) (hc : Closable c)
-    (h : close c = .vetted v) : NothingOpen c ∧ PersonClosed c
 -/
 
 /-! ── TOOL GROUNDING ── -/

@@ -2,7 +2,7 @@ module
 
 public import EpistemicProtocols.Ground
 
-/-! Proofs of the theorems the GROUND section states. -/
+/-! The theorems the GROUND section states, each proved here. -/
 
 public section
 
