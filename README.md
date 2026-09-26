@@ -101,7 +101,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/onboard` | New here — get one recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
 | `/probe` | Something feels off but you cannot name which deficit it is — several hypotheses, routed by your recognition |
 | **Shaping the work** | |
-| `/triage` | A pile of GitHub issues needs to become focused work units, each fused with the project's northstar and handed to a session by pointer |
 | `/forge` | You need a prompt or a standing skill recipe grounded in a vendor reference (a model prompt guide, the Codex Goals spec), not one written from memory |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
 | `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
