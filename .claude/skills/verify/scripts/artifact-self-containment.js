@@ -73,6 +73,9 @@ function hasRoutingCue(description, skill) {
 // invariant). Patterns added during the encapsulation expansion start at 'warn'
 // (Stage 1 surface posture); promotion to 'fail' is gated on accumulated
 // cleanup of pre-existing leaks.
+// inlineCode: 'include' keeps backticked spans in the scanned text for rules
+// whose target is conventionally written in backticks (a path); every other
+// rule reads prose with inline code stripped, so an example literal is not a leak.
 const BANNED_RUNTIME_DEPENDENCIES = [
   { pattern: /\bmission-bridge\.md\b/gi, message: 'references mission bridge from runtime contract surface', severity: 'fail' },
   { pattern: /\baxioms?\.md\b/gi, message: 'references axioms doc from runtime contract surface', severity: 'fail' },
@@ -81,10 +84,10 @@ const BANNED_RUNTIME_DEPENDENCIES = [
   { pattern: /\bsafeguards\.md\b/gi, message: 'references safeguards doc from runtime contract surface', severity: 'fail' },
   { pattern: /\bproject-profile(?:-calibration)?\.md\b/gi, message: 'references project-profile rule from runtime contract surface', severity: 'warn' },
   { pattern: /\bediting-conventions\.md\b/gi, message: 'references editing-conventions rule from runtime contract surface', severity: 'warn' },
-  { pattern: /(?<![\w/-])principles\//gm, message: 'references principles directory from runtime contract surface', severity: 'warn' },
+  { pattern: /(?<![\w/-])principles\//gm, message: 'references principles directory from runtime contract surface', severity: 'warn', inlineCode: 'include' },
   { pattern: /\bA[1-7]\b(?!\.\d)/g, message: 'references contributor-only axiom identifier from runtime contract surface', severity: 'fail', scanFenced: true },
-  { pattern: /(?<![\w/-])\.claude\//gm, message: 'references .claude contributor path from runtime contract surface', severity: 'fail' },
-  { pattern: /(?<![\w/-])docs\//gm, message: 'references repo docs path from runtime contract surface', severity: 'fail' },
+  { pattern: /(?<![\w/-])\.claude\//gm, message: 'references .claude contributor path from runtime contract surface', severity: 'fail', inlineCode: 'include' },
+  { pattern: /(?<![\w/-])docs\//gm, message: 'references repo docs path from runtime contract surface', severity: 'fail', inlineCode: 'include' },
   { pattern: /\bStage [12]\b/g, message: 'references Stage 1/2 contributor concept from runtime contract surface', severity: 'warn' },
   { pattern: /\bTier Factorization\b/gi, message: 'references Tier Factorization contributor concept from runtime contract surface', severity: 'warn' },
   { pattern: /\bDeficit Empiricism\b/gi, message: 'references Deficit Empiricism contributor concept from runtime contract surface', severity: 'warn' },
@@ -94,14 +97,22 @@ const BANNED_RUNTIME_DEPENDENCIES = [
 ];
 
 function checkSurfaceLeaks(text, fileLabel, checkName, bucket) {
-  const prose = stripCodeFromText(text);
-  // Formal blocks are fenced yet runtime-normative, so a `scanFenced` rule reads them;
-  // inline code literals (a backticked spreadsheet cell) stay excluded either way.
-  const proseWithFencedBlocks = text.replace(/`[^`\n]+`/g, '');
+  // Formal blocks are fenced yet runtime-normative, so a `scanFenced` rule reads them.
+  // Inline code is stripped unless the rule sets `inlineCode: 'include'`; the two axes compose.
+  const withoutInline = (t) => t.replace(/`[^`\n]+`/g, '');
+  const texts = {
+    strip: { fenced: withoutInline(text), unfenced: stripCodeFromText(text) },
+    include: { fenced: text, unfenced: stripFencedCode(text) },
+  };
   let anyFailMatch = false;
   for (const rule of BANNED_RUNTIME_DEPENDENCIES) {
     rule.pattern.lastIndex = 0;
-    const matches = [...(rule.scanFenced ? proseWithFencedBlocks : prose).matchAll(rule.pattern)];
+    const mode = texts[rule.inlineCode || 'strip'];
+    if (!mode) {
+      throw new Error(`[artifact-self-containment] unknown inlineCode "${rule.inlineCode}" on rule: ${rule.message}`);
+    }
+    const scanned = mode[rule.scanFenced ? 'fenced' : 'unfenced'];
+    const matches = [...scanned.matchAll(rule.pattern)];
     if (matches.length > 0) {
       const severity = rule.severity || 'fail';
       if (!bucket[severity]) {
@@ -202,4 +213,4 @@ if (require.main === module) {
   console.log(JSON.stringify(runArtifactSelfContainmentCheck(), null, 2));
 }
 
-module.exports = { runArtifactSelfContainmentCheck };
+module.exports = { runArtifactSelfContainmentCheck, checkSurfaceLeaks };

@@ -3,6 +3,7 @@
  * Known-pass / known-fail proof for lean-definition: it reaches every protocol
  * whose Definition block is Lean 4 — every protocol, now that none keeps the
  * DSL — and each rule it holds is shown rejecting a mutated copy of the tree.
+ * artifact-self-containment's path rules are shown firing on a backticked path.
  *
  * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
  */
@@ -231,5 +232,26 @@ describe('lean-definition', () => {
       expectSome(failures(), 'does not elaborate');
       restore();
     });
+  });
+});
+
+describe('artifact-self-containment path rules', () => {
+  const { checkSurfaceLeaks } = require(path.join(projectRoot, '.claude/skills/verify/scripts/artifact-self-containment.js'));
+  const leaks = (text) => {
+    const bucket = { pass: [], fail: [], warn: [] };
+    checkSurfaceLeaks(text, 'fixture:SKILL.md', 'artifact-self-containment', bucket);
+    return bucket;
+  };
+
+  it('fails a backticked docs/ or .claude/ path and warns on a backticked principles/ path', () => {
+    assert.match(leaks('Read `docs/guide.md` first.').fail.map((r) => r.message).join('\n'), /repo docs path/);
+    assert.match(leaks('See `.claude/rules/x.md`.').fail.map((r) => r.message).join('\n'), /\.claude contributor path/);
+    assert.match(leaks('See `principles/x.md`.').warn.map((r) => r.message).join('\n'), /principles directory/);
+  });
+
+  it('still ignores inline code for non-path rules and fenced examples for path rules', () => {
+    const bucket = leaks('Name `mission-bridge.md` as a literal.\n\n```\ndocs/example.md\n```\n');
+    assert.deepEqual(bucket.fail, []);
+    assert.deepEqual(bucket.warn, []);
   });
 });
