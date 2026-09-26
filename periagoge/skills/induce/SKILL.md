@@ -14,7 +14,7 @@ Crystallize in-process abstraction by aligning concrete cases first and naming l
 ```lean
 /-!
 How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
+Every `axiom` is a judgment that is yours to make from the material in front of
 you; its doc comment says what you judge there, and nothing in this block decides it for you.
 Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
 doc comment states a consequence the contract already has; it is proved outside this block
@@ -67,58 +67,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -126,10 +125,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -144,19 +145,19 @@ structure Instance where
 
 /-- **Your judgment** at Phase 0: an essence is sensed whose name, scope, or position is still
     unsettled, and at least two concrete cases can correspond. -/
-opaque inProcess : Context P → Prop
+axiom inProcess : Context P → Prop
 
 /-- **Your reading** of the context: the instance set `Iᵢ`. Read, never rewritten. -/
-opaque instances : Context P → List Instance
+axiom instances : Context P → List Instance
 
 /-- **Your reading** of the context: the essence intuition `E`, the variation-stable core the
     conversation signals. Where a routed colimit-shaped signal seeded it, it is that detection's
     reading, marked as the AI's, until the person's own words take it up. -/
-opaque essence : Context P → String
+axiom essence : Context P → String
 
 /-- **Your reading**: the provisional name or concept the person gave, if any. It grounds the
     name and its provenance without fixing either. -/
-opaque label : Context P → Option String
+axiom label : Context P → Option String
 
 /-- `inSecond` is `none` exactly where the second case carries no counterpart; filling it reads
     off the cases rather than choosing between readings, which Probe separates. -/
@@ -176,7 +177,7 @@ def unmatched (m : Correspondence) : List String :=
 /-- **Your record**, read from the context since this activation bound its seed: every
     correspondence the person committed with AsShown, in order, each as the presentation they
     answered showed it. A correspondence left behind by a repartnering stays. -/
-opaque correspondences : Context P → List Correspondence
+axiom correspondences : Context P → List Correspondence
 
 /-- One reading of what the correspondence carries. Whether an axis a person names again is
     one already ruled out is read from their words. -/
@@ -184,7 +185,7 @@ abbrev Axis := String
 
 /-- **Your judgment**: the cited turn refutes `axis` on this ground, the person's reason as
     they gave it. -/
-opaque RefutesSupported : Axis → String → Context P → Turn P → Prop
+axiom RefutesSupported : Axis → String → Context P → Turn P → Prop
 
 /-- A ruled-out axis with the ground that ruled it out: the person's reason, verbatim, and the
     utterance that gave it. -/
@@ -192,7 +193,7 @@ structure RuledOut (c : Context P) where
   axis      : Axis
   ground    : String
   src       : Cite c
-  byPerson  : src.kind = .utterance
+  byPerson  : src.src.val = .person
   supported : RefutesSupported axis ground c (c[src.idx]'src.lt)
 
 /-- `H`: what the correspondence has not yet decided between, and what was dropped and why. -/
@@ -205,7 +206,7 @@ structure Space (c : Context P) where
     person gave, and returns to it only by their AxisMissing naming it; an extraction on
     re-entry extends the language and keeps every live axis live. No axis is both live and
     ruled out. -/
-opaque space : (c : Context P) → Option (Space c)
+axiom space : (c : Context P) → Option (Space c)
 
 def liveAxes (c : Context P) : List Axis :=
   match space c with
@@ -219,11 +220,11 @@ structure Relation where
 
 /-- **Your reading** of your latest extraction record: the relation. It is your reading and
     grounds nothing; at AlignmentSuspended it is shown as such. -/
-opaque relation : Context P → Option Relation
+axiom relation : Context P → Option Relation
 
 /-- **Your record** of an extraction from `c`: the relation and the live axes over the committed
     correspondence and the space already built. It enters the context as your turns. -/
-opaque extract : Context P → List (Response P)
+axiom extract : Context P → List (Response P)
 
 /-- A probe case and the live axes it tells apart; a probe separating none is not presented. -/
 structure ProbeCase where
@@ -276,19 +277,19 @@ inductive Answer
 /-- **Your reading** of the person's latest utterance against the gate it answers; `none` when it
     answers no constructor — a free response the next presentation of that gate reads. Premise:
     one utterance carries one disposition; silence is none of them. -/
-opaque answer : Context P → Option Answer
+axiom answer : Context P → Option Answer
 
 /-- One probe with the answer it received, citing the utterance that gave it. -/
 structure ProbeRecord (c : Context P) where
   case     : ProbeCase
   answer   : ProbeAnswer
   src      : Cite c
-  byPerson : src.kind = .utterance
+  byPerson : src.src.val = .person
 
 /-- **Your record**, read from the context since this activation bound its seed: every probe
     answered, in order, with its answer — a Probe-gate Repartner, AxisMissing, or Abandon
     included. A Redraw appends none, since no axis was judged. The cap is per abstraction seed. -/
-opaque probes : (c : Context P) → List (ProbeRecord c)
+axiom probes : (c : Context P) → List (ProbeRecord c)
 
 /-- A resource bound on the person's attention, not a sufficiency criterion: reaching it says
     the run stopped, never that the abstraction formed. -/
@@ -334,7 +335,7 @@ structure Naming where
 
 /-- **Your record**: the naming your latest presentation put forward, with every Rename and
     RuleWrong the person made since. -/
-opaque proposal : Context P → Option Naming
+axiom proposal : Context P → Option Naming
 
 /-- What a run can still owe at its terminal, tagged by what it is. -/
 inductive OpenItem
@@ -355,14 +356,11 @@ inductive OpenDisposition
   deriving DecidableEq  -- elab: lets `status` compare dispositions
 
 /-- **Your judgment**: the cited utterance disposes of item `i` this way. -/
-opaque DispositionSupported : OpenItem → Context P → Turn P → OpenDisposition → Prop
+axiom DispositionSupported : OpenItem → Context P → Turn P → OpenDisposition → Prop
 
 /-- An open item is disposed of only by a person's statement. -/
 def dispositionCoord (i : OpenItem) : Coord P OpenDisposition :=
-  { admits := (· = .utterance), supports := DispositionSupported i }
-
--- elab: an open witness lets the occupancy reading below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
+  { admits := (·.val = .person), supports := DispositionSupported i }
 
 /-- **Your judgment**: how item `i` stands at the terminal. `free_response` is the context fused
     after the closing gate: filled `nonblocking` where the closing utterance takes the run with
@@ -371,7 +369,7 @@ instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨
     `deferred`, citing that NotYet, since the gate said beforehand that NotYet there records it.
     Open where no person's utterance covers the item — one no gate showed, or a terminal no gate
     closed. Ambiguous deferral words defer nothing. -/
-opaque disposition : (c : Context P) → (i : OpenItem) → Occ (dispositionCoord i) c
+axiom disposition : (c : Context P) → (i : OpenItem) → Occ (dispositionCoord i) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
@@ -388,7 +386,7 @@ def status (c : Context P) (items : List OpenItem) : TraceStatus :=
 /-- **Your record**: the contrary grounds you presented before the gate the closing utterance
     answered — a reading the probe record does not bear, a rule the boundary contradicts —
     attached to the closure; empty when there were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- `CrystallizedAbstraction`: closed by the person's Confirm. The naming, the boundary, and the
     alignment trace are read from `context`; `openTrace` is what the run still owes, each item
@@ -451,12 +449,11 @@ boundary, whatever stayed live, and whether the budget is spent) — ending at t
 -/
 
 inductive Gate | align | probe | name
-  deriving Inhabited  -- elab: lets `openGate` be declared `opaque`
 
 /-- **Your record**: the gate your latest presentation in this activation opened; Align when
     this activation has presented nothing yet, so the first presentation pairs the cases and
     opens Align. -/
-opaque openGate : Context P → Gate
+axiom openGate : Context P → Gate
 
 open Classical in
 /-- The gate the next presentation opens. -/
@@ -471,7 +468,7 @@ noncomputable def nextGate (c : Context P) : Gate :=
 
 /-- **Your collection** for the cases' own context: artifact read and search, and an external
     fetch where the cases' domain lies outside the person's artifacts. -/
-opaque gather : Context P → List (Evidence P)
+axiom gather : Context P → List (Evidence P)
 
 /-- At a suspension no rule was taken, so every live axis is open. The terminal's context ends in
     the declaration (`declare`) of the alignment trace and the open trace. -/
@@ -587,10 +584,10 @@ theorem abandoned_by_person (present declare : Context P → Response P) (c : Co
 
 A ruled-out axis cites a person's statement the model reads as refuting it on that ground
 (`RefutesSupported`); an open item's disposition likewise stands only on a person's statement.
-theorem ruled_out_by_person {c : Context P} (r : RuledOut c) : r.src.kind = .utterance
+theorem ruled_out_by_person {c : Context P} (r : RuledOut c) : r.src.src.val = .person
 
 theorem disposed_by_utterance {c : Context P} {i : OpenItem} {s : Cite c}
-    (ok : (dispositionCoord (P := P) i).admits s.kind) : s.kind = .utterance
+    (ok : (dispositionCoord (P := P) i).admits s.src) : s.src.val = .person
 -/
 
 /-! ── TOOL GROUNDING ── -/
@@ -617,6 +614,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
+
+end
 
 end Periagoge
 ```
