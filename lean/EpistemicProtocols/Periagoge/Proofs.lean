@@ -18,106 +18,103 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty Gate := ⟨.align⟩
 
-theorem silence (present declare : Context P → Response P) (c : Context P) :
-    induce present declare c [] = .holding c := by
+theorem silence (respond declare : Context P → Response P) (c : Context P) :
+    induce respond declare c [] = .holding c := by
   simp [induce]
 
-theorem no_draw_at_cap (c : Context P) (h : BudgetSpent c) : ¬ Draws c :=
-  fun hd => hd.1 h
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
+  let c₁ := c ++ (collect c).map (·.val)
+  exact ⟨(collect c).map (·.val) ++ (passRecord c₁).map (·.val), by simp [pass, c₁]⟩
 
-theorem notYet_draws (c : Context P) (g : String)
-    (h : answer c = some (.name (.notYet g))) (hb : ¬ BudgetSpent c) : Draws c :=
-  ⟨hb, Or.inl ⟨g, h⟩⟩
+theorem proposal_only_when_showable (c : Context P) (n : Naming) (h : shownNaming c = some n) :
+    Showable c := by
+  unfold shownNaming at h
+  split at h
+  · assumption
+  · cases h
 
-theorem notYet_at_cap_suspends (present declare : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (g : String)
-    (h : answer (fuse c u) = some (.name (.notYet g))) (hb : BudgetSpent (fuse c u)) :
-    induce present declare c (u :: us) = .suspended .capped (suspend declare (fuse c u) (some g)) := by
-  simp [induce, h, hb]
-
-theorem name_has_judged (c : Context P) (h : ¬ Draws c) (hb : ¬ BudgetSpent c) :
-    ¬ GapSeeded c ∧ Settled c ∧ Probed c := by
-  unfold Draws at h
-  refine ⟨fun hg => h ⟨hb, Or.inl hg⟩, ?_⟩
-  exact Classical.byContradiction fun hn => h ⟨hb, Or.inr hn⟩
-
-theorem crystallized_by_person (present declare : Context P → Response P) (c : Context P)
+theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce present declare c us = .crystallized r) :
-    ∃ (c₀ : Context P) (u : Utterance P),
-      answer (fuse c₀ u) = some (.name .confirm) ∧ proposal (fuse c₀ u) = some r.naming ∧
-        r = crystallize declare (fuse c₀ u) r.naming := by
+    (h : induce respond declare c us = .crystallized r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .confirm ∧ shownNaming c₁ = some r.naming ∧
+      Showable c₁ ∧ Covered c₁ ∧ r = crystallize declare c₁ r.naming := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
     simp only [induce] at h
     split at h
-    · cases h
-    · cases h
-    · cases h
-    · rename_i ha
-      split at h
-      · rename_i n hn
+    · exact ih _ h
+    · split at h
+      · cases h
+      · cases h
+      · rename_i hk
+        split at h
+        · rename_i n hn
+          split at h
+          · rename_i hc
+            cases h
+            exact ⟨_, hk, hn, proposal_only_when_showable _ _ hn, hc, rfl⟩
+          · exact ih _ h
+        · exact ih _ h
+      · exact ih _ h
+
+theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Withdrawn P) (h : induce respond declare c us = .withdrawn r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = withdraw declare c₁ := by
+  induction us generalizing c with
+  | nil => simp [induce] at h
+  | cons u us ih =>
+    simp only [induce] at h
+    split at h
+    · exact ih _ h
+    · split at h
+      · rename_i hk
         cases h
-        exact ⟨c, u, ha, hn, rfl⟩
-      · exact ih _ h
-    · split at h
+        exact ⟨_, hk, rfl⟩
       · cases h
+      · split at h
+        · split at h
+          · cases h
+          · exact ih _ h
+        · exact ih _ h
       · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · exact ih _ h
 
-theorem abandoned_by_person (present declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : AlignmentSuspended P)
-    (h : induce present declare c us = .suspended .abandoned r) :
-    ∃ (c₀ : Context P) (u : Utterance P),
-      (answer (fuse c₀ u) = some (.align .abandon) ∨ answer (fuse c₀ u) = some (.probe .abandon) ∨
-        answer (fuse c₀ u) = some (.name .abandon)) ∧ r = suspend declare (fuse c₀ u) none := by
+theorem routed_on_route (respond declare : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (t : String) (r : Withdrawn P)
+    (h : induce respond declare c us = .routed t r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = withdraw declare c₁ := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
     simp only [induce] at h
     split at h
-    · rename_i ha
-      cases h
-      exact ⟨c, u, Or.inl ha, rfl⟩
-    · rename_i ha
-      cases h
-      exact ⟨c, u, Or.inr (Or.inl ha), rfl⟩
-    · rename_i ha
-      cases h
-      exact ⟨c, u, Or.inr (Or.inr ha), rfl⟩
-    · split at h
-      · cases h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · split at h
-      · cases h
-      · exact ih _ h
     · exact ih _ h
+    · split at h
+      · cases h
+      · rename_i hk
+        cases h
+        exact ⟨_, hk, rfl⟩
+      · split at h
+        · split at h
+          · cases h
+          · exact ih _ h
+        · exact ih _ h
+      · exact ih _ h
 
-theorem ruled_out_by_person {c : Context P} (r : RuledOut c) : r.src.src.val = .person :=
-  r.byPerson
+theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+  cases hc : closing c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-theorem disposed_by_utterance {c : Context P} {i : OpenItem} {s : Cite c}
+theorem cap_bounds_draws (c : Context P) (h : CapReached c) : draw c = none := by
+  simp [draw, h]
+
+theorem verdict_by_person {c : Context P} {p : ProbeCase} {r : Reading} {s : Cite c}
+    (ok : (verdictCoord (P := P) p r).admits s.src) : s.src.val = .person := ok
+
+theorem disposed_by_person {c : Context P} {i : OpenItem} {s : Cite c}
     (ok : (dispositionCoord (P := P) i).admits s.src) : s.src.val = .person := ok
 
 end Periagoge
