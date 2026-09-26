@@ -13,12 +13,13 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -79,58 +80,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -138,10 +138,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -158,12 +160,13 @@ abbrev DirectionAxis := String
 
 /-- **Your judgments** at Phase 0: a direction commitment is imminent; the candidate
     directions. -/
-opaque PreCommit : Context P → Prop
-opaque candidates : Context P → List Direction
+axiom PreCommit : Context P → Prop
+/-- **Your judgment** at Phase 0: the candidate directions. -/
+axiom candidates : Context P → List Direction
 
 /-- **Your judgment**: the candidate futures are recognizable from their descriptions; a
     regular gate suffices. -/
-opaque RecognizableFromText : Context P → Prop
+axiom RecognizableFromText : Context P → Prop
 
 /-- The sibling deficits the routing rows name. Each is a binding with its command as the hint;
     which protocol takes it is the session's. -/
@@ -175,22 +178,22 @@ inductive Deficit
   | contextInsufficient
   /-- ③ the candidate field is thin — one or none (hint: /ideate) -/
   | candidateFieldUnderexpanded
-  /-- ③ the frame itself is absent (hint: /frame) -/
-  | frameworkAbsent
   /-- ③ the coordinates live implicit in externalized substrate (hint: /elicit) -/
   | abstractAporia
 
 /-- **Your judgment**: the routing row that matches, first match wins; `none` where no row
     takes the case — candidates ≥ 2, evidence-free, placeholder-carriable — which is this
     protocol's own. -/
-opaque routeRow : Context P → Option Deficit
+axiom routeRow : Context P → Option Deficit
 
 /-- **Your judgments**, the type guards, both required for activation: the direction contrast
     holds with placeholder concreta alone; placeholder concretization carries the differential
     futures on the divergence axes without distortion — divergence lives in the skeleton, and
     fake data does not blur it. -/
-opaque FakeDataSufficient : Context P → Prop
-opaque PlaceholderFidelity : Context P → Prop
+axiom FakeDataSufficient : Context P → Prop
+/-- **Your judgment**, the second type guard: placeholder concretization carries the differential
+    futures without distortion. -/
+axiom PlaceholderFidelity : Context P → Prop
 
 /-- Why Phase 0 does not activate; each is relayed with its basis. -/
 inductive NotActivated
@@ -203,7 +206,7 @@ inductive NotActivated
   | unfit
 
 open Classical in
-noncomputable def phase0 (c : Context P) : Option NotActivated :=
+def phase0 (c : Context P) : Option NotActivated :=
   if ¬ (PreCommit c ∧ 2 ≤ (candidates c).length) then some .requiresFail
   else if RecognizableFromText c then some .noDeficit
   else match routeRow c with
@@ -235,7 +238,7 @@ structure Spec where
   tier   : RealizationTier
 
 /-- **Your record**: the spec your latest relay presented; `none` before the first. -/
-opaque spec : Context P → Option Spec
+axiom spec : Context P → Option Spec
 
 /-- The target-set bound a fan owes: a contrast fan — the initial one or a gap refan — probes two
     to four directions; a materialization probes the composition alone, contrasted against
@@ -259,7 +262,7 @@ structure Probe where
 
 /-- **Your record**, read from the context: every probe instantiated so far, cumulative across
     re-fans; a discarded probe stays listed for the trace. -/
-opaque probes : Context P → List Probe
+axiom probes : Context P → List Probe
 
 def directions (c : Context P) : List Direction := (probes c).map (·.direction)
 
@@ -284,19 +287,18 @@ structure Contrast where
   map     : ContrastMap
   exposed : List ExposedUnknown
   common  : List String
-  deriving Inhabited  -- elab: lets `contrast` be declared `opaque`
 
 /-- **Your judgment**: the per-axis contrast over every probe so far. -/
-opaque contrast : Context P → Contrast
+axiom contrast : Context P → Contrast
 
 /-- **Your record**: every exposed unknown so far, with the route it was tagged with when it was
     recorded. -/
-opaque unknowns : Context P → List ExposedUnknown
+axiom unknowns : Context P → List ExposedUnknown
 
 /-- **Your judgment**: the contrast in force does not make the candidate futures recognizable on
     the axes in force — detected at contrast (an axis with no differentiated values across the
     probes), surfaced, never silently self-repaired. -/
-opaque Insufficient : Context P → Prop
+axiom Insufficient : Context P → Prop
 
 /-- What the single shared re-fan budget was spent on; it decides the still-insufficient
     branch. -/
@@ -304,34 +306,31 @@ inductive RefanKind | gap | materialization
 
 /-- **Your record**, read from the relays: what the one budgeted re-fan was spent on; `none`
     while it is unspent. The draft's own correction spends nothing. -/
-opaque refanKind : Context P → Option RefanKind
+axiom refanKind : Context P → Option RefanKind
 
 def BudgetLeft (c : Context P) : Prop := refanKind c = none
 
 /-- **Your reading**: the person has answered the direction gate — Select or Synthesize — sent
     the draft back once, or named an unprobed candidate once; the first of these is the draft's
     own correction. -/
-opaque SpecSettled : Context P → Prop
+axiom SpecSettled : Context P → Prop
 
 /-- **Your record**: an insufficiency relay has already re-presented the direction gate
     over the accumulated probes; each fires once. -/
-opaque InsufficiencyRelayed : Context P → Prop
+axiom InsufficiencyRelayed : Context P → Prop
 
 /-- **Your judgment**: the cited utterance settles direction `d` — a Select of a probed
     direction, or a Confirm at Qmicro of the synthesis the person composed. A response naming
     an unprobed candidate is never read as Select. -/
-opaque DirectionSupported : Context P → Turn P → Direction → Prop
+axiom DirectionSupported : Context P → Turn P → Direction → Prop
 
 /-- The direction is the person's to constitute. -/
 def directionCoord : Coord P Direction :=
-  { admits := (· = .utterance), supports := DirectionSupported }
-
--- elab: an open witness lets the occupancy reading below be declared `opaque`.
-instance {A : Type} {q : Coord P A} {c : Context P} : Inhabited (Occ q c) := ⟨.open_ none⟩
+  { admits := (·.val = .person), supports := DirectionSupported }
 
 /-- **Your judgment**: the direction the person's latest answer constituted; `open_`
     otherwise. -/
-opaque direction : (c : Context P) → Occ (directionCoord (P := P)) c
+axiom direction : (c : Context P) → Occ (directionCoord (P := P)) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
@@ -340,11 +339,11 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 /-- **Your reading** of the contrast rows that made the constituted direction's future
     recognizable. It is your reading, shown as such, unless the person's utterance names the
     rows. -/
-opaque decidingRows : Context P → ContrastMap
+axiom decidingRows : Context P → ContrastMap
 
 /-- **Your judgment**: the constituted direction has a mapping against a target account already in
     play whose intended inferences need an audit — a `/ground` next move to propose. -/
-opaque groundTag : Context P → Option String
+axiom groundTag : Context P → Option String
 
 /-- Read before discard; it carries no discard trace. -/
 structure Harvest where
@@ -368,7 +367,7 @@ inductive Disposition
   | discardFailed (reason : String)
 
 /-- **Your reading** of the cleanup observations: the disposition of the probe at this index. -/
-opaque disposition : Context P → Nat → Option Disposition
+axiom disposition : Context P → Nat → Option Disposition
 
 /-- Every probe has a declared disposition. -/
 def DiscardDeclared (c : Context P) : Prop :=
@@ -376,12 +375,12 @@ def DiscardDeclared (c : Context P) : Prop :=
 
 /-- **Your record**: the contrary grounds you presented before the gate the closing utterance
     answered; attached to the closure; empty when there were none. -/
-opaque dissent : Context P → List String
+axiom dissent : Context P → List String
 
 /-- **Your judgment**, at a misdiagnosis: the sibling deficit a routing row now names; `none`
     where no row matches — the candidates may simply not diverge — and the decision returns to a
     regular gate with the residual declared. -/
-opaque misdiagnosisRow : Context P → Option Deficit
+axiom misdiagnosisRow : Context P → Option Deficit
 
 /-- What the fused context says the person did at the gate. Premise: one utterance carries one
     disposition; silence is none of them. -/
@@ -406,10 +405,9 @@ inductive Verdict
       recognizable without probes, or that the activation premise collapsed -/
   | dissolve
   | withdraw
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
 /-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+axiom verdict : Context P → Verdict
 
 /-- `DirectionalContrast`, assembled after cleanup from the harvest read before it. What persists
     is the harvest, the per-probe discard trace, and the dissent; `context` is what their readings
@@ -469,7 +467,7 @@ structure AITurns (P : Type) where
 
 /-- **Your instantiation** of the Mockup probes under the relayed spec: each artifact as
     observed at creation, its path registered then. Existing project files stay unchanged. -/
-opaque instantiate : Context P → List (Evidence P)
+axiom instantiate : Context P → List (Evidence P)
 
 def fan (ai : AITurns P) (c : Context P) : Context P :=
   let c₁ := c ++ [(ai.relay c).val]
@@ -479,7 +477,7 @@ def fan (ai : AITurns P) (c : Context P) : Context P :=
 /-- **Your cleanup**: per probe, the destruction step read off its realization, then the
     verification of absence; a failure retries once, then is observed as `discardFailed`. What it
     leaves is `DiscardDeclared`. -/
-opaque cleanup : Context P → List (Evidence P)
+axiom cleanup : Context P → List (Evidence P)
 
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
@@ -493,7 +491,7 @@ inductive Next (P : Type)
 
 open Classical in
 /-- The budget already spent: what it was spent on decides. -/
-noncomputable def spentArms (c : Context P) : Next P :=
+def spentArms (c : Context P) : Next P :=
   match refanKind c with
   | some .materialization =>
     if InsufficiencyRelayed c then .done (.withdrawn (discard c) .insufficiencyStanddown)
@@ -505,14 +503,14 @@ noncomputable def spentArms (c : Context P) : Next P :=
 open Classical in
 /-- Entered with the contrast insufficient, whether detected at contrast or declared at the gate:
     one budgeted gap fan while the budget is unspent, and the spent arms otherwise. -/
-noncomputable def insufficiencyArms (ai : AITurns P) (c : Context P) : Next P :=
+def insufficiencyArms (ai : AITurns P) (c : Context P) : Next P :=
   if BudgetLeft c then
     let c₂ := fan ai c
     if Insufficient c₂ then spentArms c₂ else .gate c₂
   else spentArms c
 
 open Classical in
-noncomputable def afterFan (ai : AITurns P) (c : Context P) : Next P :=
+def afterFan (ai : AITurns P) (c : Context P) : Next P :=
   if Insufficient c then insufficiencyArms ai c else .gate c
 
 def constituted (c : Context P) (h : Harvest) : Outcome P :=
@@ -521,7 +519,7 @@ def constituted (c : Context P) (h : Harvest) : Outcome P :=
 
 open Classical in
 /-- One person utterance, read against `c`, the context before it. -/
-noncomputable def step (ai : AITurns P) (c c' : Context P) : Next P :=
+def step (ai : AITurns P) (c c' : Context P) : Next P :=
   match verdict c' with
   | .constitute   =>
     match harvestOf c' with
@@ -538,14 +536,14 @@ noncomputable def step (ai : AITurns P) (c c' : Context P) : Next P :=
   | .dissolve     => .done (.dissolved (discard c') (dissent c'))
   | .withdraw     => .done (.withdrawn (discard c') .explicit)
 
-noncomputable def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
+def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     match step ai c (fuse c u) with
     | .gate g => preview ai (g ++ [(ai.respond g).val]) us
     | .done o => o
 
-noncomputable def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
+def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   match phase0 c with
   | some why => .notActivated c why
   | none =>
@@ -606,9 +604,9 @@ theorem dissolved_by_person (ai : AITurns P) (c : Context P) (us : List (Utteran
     (c₁ : Context P) (d : List String) (h : preview ai c us = .dissolved c₁ d) :
     ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .dissolve ∧ c₁ = discard (fuse c₀ u)
 
-The direction is constituted only by a person's statement.
-theorem direction_by_utterance {c : Context P} {s : Cite c}
-    (ok : (directionCoord (P := P)).admits s.kind) : s.kind = .utterance
+The direction is constituted only by a turn the person sent.
+theorem direction_by_person {c : Context P} {s : Cite c}
+    (ok : (directionCoord (P := P)).admits s.src) : s.src.val = .person
 -/
 
 /-! ── TOOL GROUNDING ── -/
@@ -629,7 +627,7 @@ def grounding : Op → Annot × String
   | .noDeficitRelay    => (.extension, "TextPresent+Proceed: futures recognizable from text — the finding with its reasoning; a regular gate suffices; not activated")
   | .routeAwayRelay    => (.extension, "TextPresent+Proceed: routing rows ①–③ — the matched row with its basis and its command as a hint; which protocol takes it is the session's; not activated")
   | .unfitRelay        => (.extension, "TextPresent+Proceed: a type guard fails and no routing row matches — the failed guard and why; the decision stays at a regular gate; not activated")
-  | .requiresFailRelay => (.extension, "TextPresent+Proceed: no imminent commitment, or fewer than two candidates — the failed requirement; one or zero candidates points to row ③'s targets as hints — /ideate for the thin field, /frame and /elicit for their narrower cases; not activated")
+  | .requiresFailRelay => (.extension, "TextPresent+Proceed: no imminent commitment, or fewer than two candidates — the failed requirement; one or zero candidates points to row ③'s targets as hints — /ideate for the thin field, /elicit for its narrower case; not activated")
   | .deriveAxes        => (.sense, "Internal analysis: divergence axis candidates from the candidate directions")
   | .draftPolicy       => (.sense, "Internal analysis: the placeholder policy draft — visible synthesis, non-evidence stamp, skeleton-data split")
   | .specRelay         => (.extension, "TextPresent+Proceed: the drafted spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where the target set leaves a candidate unprobed, why; fires before any probe generation, so no axis commits a probe value before it was relayed with its basis; yields no turn and carries the standing affordance to send any of it back at the direction gate, the first send-back riding no budget; on a re-fan it is presented scoped to the SpecRevision that re-fan carries, before that re-fan generates anything, and it records what the re-fan spends; where you read the futures recognizable without probes, or the premise collapsed, it says so with its basis and closes nothing")
@@ -658,6 +656,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Direction resolution emergent via session context.
 -/
+
+end
 
 end Proplasma
 ```
