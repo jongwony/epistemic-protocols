@@ -13,12 +13,13 @@ Resolve an underexpanded candidate field through frame-parallel divergent genera
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `opaque` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract. A `theorem` line inside a
-doc comment states a consequence the contract already has; it is proved outside this block
-and asks nothing further of you.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
 -/
 
 /-! ── FLOW ──
@@ -63,58 +64,57 @@ The session primitive this contract reads.
 -/
 
 inductive Origin | person | assistant | external | peer | injected | unknown
-inductive Form | statement | observation | request | reasoning | summary | instruction
-inductive Basis | utterance | testimony | observation | report
   deriving DecidableEq
 
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
 structure Turn (P : Type) where
   origin  : Origin
-  form    : Form
   content : P
 
 abbrev Context (P : Type) := List (Turn P)
 
-/-- What a turn may ground directly: eligibility, not truth or instruction priority. -/
-def Turn.basis {P : Type} (e : Turn P) : Option Basis :=
-  match e.origin, e.form with
-  | .person, .statement     => some .utterance
-  | .person, .observation   => some .testimony
-  | .external, .observation => some .observation
-  | .peer, .statement       => some .report
-  | _, _                    => none
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-/-- Any turn a person sent, whatever its form; the form decides what it may ground
-    (`Turn.basis`). -/
+/-- Any turn a person sent, whatever it does. -/
 def Utterance (P : Type) := {e : Turn P // e.origin = .person}
 def Response (P : Type) := {e : Turn P // e.origin = .assistant}
-def Evidence (P : Type) := {e : Turn P //
-  e.basis = some .observation ∨ e.basis = some .report ∨ e.basis = some .testimony}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
 def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
+/-- One turn of the context, with the origin it grounds on. -/
 structure Cite {P : Type} (c : Context P) where
-  idx  : Nat
-  lt   : idx < c.length
-  kind : Basis
-  ok   : (c[idx]'lt).basis = some kind
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-/-- `supports` is the model's reading. -/
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
 structure Coord (P A : Type) where
-  admits   : Basis → Prop
+  admits   : Grounding → Prop
   supports : Context P → Turn P → A → Prop
 
 /-- `open_` may carry a candidate citation whose support is still short. -/
 inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
   | open_  (candidate : Option (Cite c))
-  | filled (a : A) (src : Cite c) (allowed : q.admits src.kind)
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
       (supported : q.supports c (c[src.idx]'src.lt) a)
 
 /-!
 theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
     ∃ t, fuse c u = c ++ t
 
-theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
-    e.basis = none
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
 -/
 
 /-- The same turn, cited from a longer context; what it supports is judged again against the
@@ -122,10 +122,12 @@ theorem ai_never_grounds {P : Type} (e : Turn P) (h : e.origin = .assistant) :
 def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
   { idx := s.idx
     lt := by have := s.lt; simp; omega
-    kind := s.kind
+    src := s.src
     ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
 
 /-! ── TYPES ── -/
+
+noncomputable section
 
 variable {P : Type}
 
@@ -136,7 +138,7 @@ variable {P : Type}
 abbrev IdeationRequest (P : Type) := Context P
 
 /-- **Your reading** of the bound request: its topic. -/
-opaque topic : Context P → String
+axiom topic : Context P → String
 
 /-- Why the field is underexpanded, cited as the classification relay's basis; it never gates
     activation, since invoking `/ideate` is the activation. -/
@@ -145,10 +147,9 @@ inductive ExpansionWitness
   | narrowAcrossFrames
   | prematurelyConverged
   | emergent (name : String)
-  deriving Inhabited  -- elab: lets `witness` be declared `opaque`
 
 /-- **Your reading** of the bound request: the expansion witness. -/
-opaque witness : Context P → ExpansionWitness
+axiom witness : Context P → ExpansionWitness
 
 /-- A fragment before any frame exists, and where it came from: `person` for the person's own
     fragments. Material a named chain reference supplied keeps the origin it already carries as a
@@ -164,10 +165,9 @@ structure Seed where
 inductive Entry
   | blank
   | seeded (seeds : List Seed)
-  deriving Inhabited  -- elab: lets `entry` be declared `opaque`
 
 /-- **Your reading** of the bound request: which entry it is — inferred, never asked. -/
-opaque entry : Context P → Entry
+axiom entry : Context P → Entry
 
 inductive SignalSource | utterance | chain
 
@@ -181,7 +181,7 @@ structure Signal where
     utterance and any named chain material and from nothing wider. Fixed from then on: none is
     removed or reinterpreted away, and a concern first voiced later in the run is not added; it
     stays in the context as it was said. -/
-opaque signals : Context P → List Signal
+axiom signals : Context P → List Signal
 
 /-- A partition for parallel generation. It organizes divergence only and is never handed off as
     a framed inquiry. -/
@@ -194,10 +194,10 @@ structure Frame where
     registered. On Seeded, at least one, seed-anchored and novel, with every seed landing under
     one; on Blank, novel and abstract. Whether the person's words name a registered frame is
     read here. -/
-opaque frames : Context P → List Frame
+axiom frames : Context P → List Frame
 
 /-- **Your record**: the frames a pass has opened. -/
-opaque opened : Context P → List Frame
+axiom opened : Context P → List Frame
 
 def Unexplored (c : Context P) (f : Frame) : Prop := f ∈ frames c ∧ f ∉ opened c
 
@@ -211,13 +211,13 @@ structure Candidate where
 /-- **Your record**: every candidate the passes produced, under the frame it came from — on a
     Seeded entry's first pass the seeds, each keeping its own origin, and every generated one as
     `assistant`. Never removed, re-ranked, or relabeled. -/
-opaque candidates : Context P → List Candidate
+axiom candidates : Context P → List Candidate
 
 /-- **Your judgment**, remade at each presentation from the candidates as they stand: the
     candidate responds to the signal. Never stored as a mapping and never a score on the
     candidate. Once the person stops, it stands as the presentation their Stop answered showed
     it; no reading after the Stop changes what they closed on. -/
-opaque Responds : Context P → Candidate → Signal → Prop
+axiom Responds : Context P → Candidate → Signal → Prop
 
 def Unaddressed (c : Context P) (s : Signal) : Prop :=
   s ∈ signals c ∧ ¬ ∃ x ∈ candidates c, Responds c x s
@@ -229,7 +229,7 @@ structure ParkedFollowUp where
 
 /-- **Your reading** of every request, in the person's utterances, for more on a frame already
     open — each relayed with the request quoted. A park never opens a pass. -/
-opaque parked : Context P → List ParkedFollowUp
+axiom parked : Context P → List ParkedFollowUp
 
 /-- **Your reading** of the latest answer: the frames the next pass opens. At the frame map, the
     frames selected among those offered. At a round, the named frames not yet open, and a new
@@ -237,7 +237,7 @@ opaque parked : Context P → List ParkedFollowUp
     unexplored frame. A named frame already open is never here: it parks. Empty when the answer
     opens nothing — a park alone, a question, or a Continue with nothing unexplored and no new
     angle. -/
-opaque targets : Context P → List Frame
+axiom targets : Context P → List Frame
 
 /-- What the fused context says the person did at the gate. Premise: one utterance carries one
     disposition, beside any number of parks; silence is neither. -/
@@ -246,10 +246,9 @@ inductive Verdict
   | cont
   /-- Stop, at the frame map or at a round -/
   | stop
-  deriving Inhabited  -- elab: lets `verdict` be declared `opaque`
 
 /-- **Your judgment** on the whole latest utterance read with the context. -/
-opaque verdict : Context P → Verdict
+axiom verdict : Context P → Verdict
 
 /-- `DiverseCandidateField`, read from `context`: the topic, every candidate with its frame and
     origin, the explored frames (`opened`), the unexplored ones (`Unexplored`), the parked
@@ -423,6 +422,8 @@ def grounding : Op → Annot × String
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
 -/
+
+end
 
 end Heuresis
 ```

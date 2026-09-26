@@ -13,6 +13,13 @@ namespace Heuresis
 
 variable {P : Type}
 
+/-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
+    meaning and exist so that no judgment can assume what nothing inhabits. -/
+
+instance : Nonempty ExpansionWitness := ⟨.empty⟩
+instance : Nonempty Entry := ⟨.blank⟩
+instance : Nonempty Verdict := ⟨.stop⟩
+
 theorem silence (generate respond : Context P → Response P) (c : Context P) :
     ideate generate respond c [] = .holding c := by
   simp [ideate]
