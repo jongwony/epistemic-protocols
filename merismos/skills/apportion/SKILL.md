@@ -9,393 +9,1038 @@ Apportion an autonomous goal into coarse execution units and derive each unit's 
 
 ## Definition
 
-**Merismos** (μερισμός: a dividing into parts, an apportionment): A dialogical act of apportioning one stated autonomous goal — deciding **which units the goal is carried out in** and **what each unit's done means** — when the goal is stated but its plan is uncompiled. The protocol's lexical verb is `/apportion`. It reads the goal's obligations — the host's own standing procedural contract subtracted, since that attaches to every change the host accepts whatever the goal is — cuts them into coarse units at seams it can cite, judges each unit against one execution horizon, derives a completion predicate and any invariant predicates per unit, separates the conditions whose subject is the whole goal rather than any one unit, and emits one goal entry per unit whose conditions are conjoined into a single leaf predicate — or, for a unit whose completion condition remains residual, an explicit accepted-uncovered certificate that still carries any compiled invariant conjuncts. An item no check could settle because what settles it is a judgment made against the context accumulated by then and what the user has actually said by then is reserved rather than compiled — recorded with the ground that settles it, at the unit level and for the whole-goal acceptance criterion alike, and kept apart from the waiver that records an acceptance criterion the plan simply lacks. Activation takes one goal: a request bundling several stated outcomes whose only common bond is that standing contract relays at the checkpoint instead, one apportionment per goal. Every goal obligation belongs to some unit or is visibly accounted for, and every unit fits one horizon or carries a recorded override; the MORPHISM block names these and the protocol's other invariants. Merismos apportions and conditions; it does **not** order — sequence, independence, reconciliation, termination topology and routing are outside its own scope, so the emitted plan is a **pre-conduct** artifact. The protocol holds no state during execution.
+**Merismos** (μερισμός: a dividing into parts, an apportionment): A dialogical act of apportioning one stated autonomous goal — deciding **which units the goal is carried out in** and **what each unit's done means** — when the goal is stated but its plan is uncompiled. The protocol's lexical verb is `/apportion`. It reads the goal's obligations — the host's own standing procedural contract subtracted, since that attaches to every change the host accepts whatever the goal is — cuts them into coarse units at seams it can cite, judges each unit against one execution horizon, derives a completion predicate and any invariant predicates per unit, separates the conditions whose subject is the whole goal rather than any one unit, and shows the whole plan on one sheet every turn, beside what the person's last turn changed. An item no check could settle because what settles it is a judgment made against the context accumulated by then and what the person has actually said by then is reserved rather than compiled — recorded with the ground that settles it, at the unit level and for the whole-goal acceptance criterion alike, and kept apart from the waiver that records an acceptance criterion the plan simply lacks. Each unit's certificate carries every compiled check, every accepted gap, and every reservation of its done together, so no one of them hides another. Activation takes one goal: a request bundling several stated outcomes whose only common bond is that standing contract relays at the checkpoint instead, one apportionment per goal. The person takes the plan, stops, or goes elsewhere; your contrary grounds stand before them and ride the plan when they take it over them. Merismos apportions and conditions; it does **not** order — sequence, independence, reconciliation, termination topology and routing are outside its own scope, so the emitted plan is a **pre-conduct** artifact. The protocol holds no state during execution.
 
-```
-── FLOW ──
-Merismos(G) → Probe(G) → goal_plan_uncompiled? →
-  ¬autonomous_intent(G):  → relay(no autonomous interval in scope) (extension) → deactivate
-  ¬single_goal(G):        → relay(composite goal — name each stated outcome it bundles and the shared-procedure bond that made them read as one; one apportionment per goal) (extension) → deactivate   -- fires BEFORE init_loop_state, so no Λ loop field is ever seeded and no unit is cut across outcomes that share only the host's standing contract
-  locator in scope — the goal's navigation block — ∧ (¬dereferenceable ∨ support-integrity failure affecting current compilation): → relay(handoff unreadable — locator unreachable, missing its session half, or a premise required for current compilation that the grounding pass could not support) (extension) → deactivate
-  condition_bearing(G):   → relay(units and conditions already present) (extension) → deactivate
-  uncompiled: ReadObligations(G) → O_G → VelocityFilter(O_G) → oos → init_loop_state: U=∅, residual=O_G \ {d.obligation | d∈oos}, K=∅, R=∅, S=∅, P=∅,
-                              plan_conditions_derived=⊥, plan_conditions_stale=⊥, invariant_status=⊥, unbounded_approved=⊥, loop:   -- init_loop_state runs EXACTLY ONCE, on this Phase 0 → Phase 1 edge; Phase 2's Reopen re-enters "loop:" directly without re-executing it
-    Phase 1 residual? →   -- the empty-residual arms are read off residual DIRECTLY, before anything is drafted: a draft that comes back with no cut cannot tell "nothing was there to cut" from "nothing could be cut", and only the first of those relays. The second arm is the ordinary completion edge every converging run leaves Phase 1 through
-      residual = ∅ ∧ U = ∅ ∧ oos = ∅:  → relay(goal's scope too thin to read any obligation) (extension) → deactivate
-      residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅):  → Phase 2
-      residual ≠ ∅:  draft(G, residual) → D → surface_draft(D) (extension) →   -- draft iterates Scan/Pack/fit/qualify/complete_unit over a workset copied from residual until every obligation in that workset sits in some completed cut, autonomous_pack absorbing at heuristic seams only what the seam evidence could not reach; it moves nothing out of residual, integrate remaining the sole owner-changing step. The WHOLE draft reaches the user before any cut is settled: what the user recognizes is the shape, and settling one cut at a time out of a visible whole is what keeps a misalignment found late from re-opening cuts already accepted blind
-        D holds no Heuristic cut ∧ ∀c ∈ D whose fit = Fits ∧ no alternative cut of c's obligations stands up to the same evidence: → relay(AcceptUnit) (extension) → integrate_unit(c) → c' → U := U ∪ {c'}, residual := residual \ c'.obligations   -- `Whole-draft relay test` read twice, in this order: the leading conjunct over the WHOLE draft — the relay path opens only where the goal's evidence reached every cut, one heuristic cut sending the draft to the gate entire — then the familiar per-cut reading inside it. What it weighs is NEVER a member of D: D is one partition, so no two of its cuts claim the same obligation and none of them stands against another. What the test asks is whether c's region could have been cut a second way the goal's evidence would back as well — a live reading made HERE, at dispatch, over that evidence and the accumulated context, which drafting neither draws nor records
-        D has no unsettled cut left ∧ residual = ∅:  → Phase 2
-        else:  → Qu(the first unsettled cut, U, D's still-unsettled cuts) → Stop → Aᵤ →
-          Aᵤ = AcceptUnit     → integrate_unit(the cut this firing presented) → loop   -- in Aᵤ's defined set iff SpanFit = Fits
-          Aᵤ = Recut(c, d)    → re-derive c's Anchor frame under d → loop   -- c ranges over the surfaced draft's still-unsettled cuts, not only the one this firing presented: same residual, different cut, and the next cycle drafts under d
-          Aᵤ = OverrideFit    → integrate_unit(the cut this firing presented) → loop  -- in Aᵤ's defined set iff SpanFit ≠ Fits
-          Aᵤ = Sufficient     → ∀c ∈ D still unsettled with fit = Fits: integrate_unit(c) → c' → U := U ∪ {c'}, residual := residual \ c'.obligations → [∃c still unsettled with fit ≠ Fits: → Qu over the first such cut, reason surfaced as relay first → Stop → Aᵤ → the same Aᵤ dispatch | none: residual = ∅ → surface (extension) → Phase 2]   -- blanket relay over the fitting cuts OF THE DISPLAYED DRAFT: Sufficient is the user's constitutive act over that whole, so what it accepts is what was shown — each cut's seam disposition included — rather than a remainder re-packed at heuristic seams the user never saw
-    Phase 2 ∀u∈U, ¬derived_already(u,K,R,S): Derive(u) → (Set(κ), Set(ρ), Set(σ)) → K:=K∪κs, R:=R∪ρs, S:=S∪σs ∥ [¬Λ.plan_conditions_derived: DerivePlan(G, U) → P; Λ.plan_conditions_derived := ⊤] →
-      oos ≠ ∅ → OOS(oos) (extension)                                            -- obligations needing pre-action interception: out of scope, substrate named
-      S ≠ ∅ → Reserved(S) (extension)                                           -- items held open to a judgment made outside compile time: the ground that settles each is named, and nothing is delegated to any substrate
-      ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ →
-        Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]; S := S \ {σ∈S : σ.subject = ReservedAcceptance}
-        Vₜ = RouteBound       → relay(the whole-goal acceptance criterion's definition is routed to /bound) (extension) → deactivate   -- Rerouted: the route is EMITTED, not merely exited on
-        Vₜ = ReserveJudgment  → S := S ∪ {acceptance_reservation()}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]   -- the criterion is constitutively open, not missing: it stays open to runtime resolution. This arm never SETS the waiver flag, and it CLEARS one an earlier firing on this same invocation left standing — the waiver and the reservation are mutually exclusive, so the arm answered last is the one that stands
-        Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤; S := S \ {σ∈S : σ.subject = ReservedAcceptance}   -- the symmetric retraction: drops a ReservedAcceptance member an earlier firing left standing, for the same exclusivity
-      BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, S, Pᵦ, oos) → Λ.invariant_status := InvariantStatus   -- coverage_complete ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ reservation_ground_named ∧ plan_conditions_topology_free
-      Λ.plan_conditions_stale → StaleNotice(P) (extension)                       -- pre-gate text before Qc: Adjust to update, or Confirm to keep as recorded
-      Qc(U, K, R, S, P, InvariantStatus, oos) → Stop → V →
-        V = Adjust(d)  → rederive(K, R, S, P, d) → (K, R, S, P) := (K', R', S', P') → Λ.plan_conditions_stale := ⊥ → [¬acceptance_present(P') → Qt(K', P') → Stop → Vₜ → P' and S' updated as at Phase 2 entry] → [acceptance_present(P') ∧ Λ.unbounded_approved: Λ.unbounded_approved := ⊥] → [acceptance_present(P') ∧ acceptance_reserved(Λ): S' := S' \ {σ : σ.subject = ReservedAcceptance}] → BindPlanRequirements(P', U) → P' := Pᵦ' → check(U, K', R', S', Pᵦ', oos) → Λ.invariant_status := InvariantStatus → Qc(...)   -- over the SAME U: K' ∪ R' ∪ S' spans every obligation of every unit; no removal — a withdrawn condition becomes a residual, and a residual the direction re-reads as judgment-settled becomes a reservation. rederive rewrites the unit-scoped members of S only; the ReservedAcceptance member is Qt's own record and carries through
-        V = Reopen(u)  → residual := residual ∪ u.obligations; U := U \ {u}; K := K \ {κ∈K:κ.unit=u}; R := R \ {ρ∈R:ρ.unit=Some(u)}; S := S \ {σ∈S:σ.unit=Some(u)}; Λ.plan_conditions_stale := ⊤ → Phase 1   -- residual is NOT reseeded from O_G \ oos; every other unit's obligations carry forward untouched; the whole-goal ReservedAcceptance member is unit-free and stays; plan-level P is NOT re-derived (`Back-edge state preservation`)
-        V = Confirm ∧ ¬hard_invariants_hold(Λ): → re-present Qc with the violated invariant named
-        V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered → Phase 3   -- P and S are read-only on this edge; AcceptResiduals supplies the non-empty accepted-completion witness resolve_unit reads at Phase 3, and touches no reservation — a reservation is not a residual awaiting acceptance
-    Phase 3 Emit(U, K, R, S, P, oos, unbounded_approved) → E [record] → package(E) → plan → park_carrier(plan) → C [record] → record_handoff(C) → N → converge(apportionment trace) → ConditionBearingUnitPlan
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
+-/
 
-── MORPHISM ──
+/-! ── FLOW ──
+Merismos(G) → start(c) → apportion(c, utterances), where c is the fused session context:
+  start: ground the goal's navigation block where one is in scope →
+    [no autonomous interval | a composite goal | the handoff unreadable | the plan already
+     condition-bearing: relay → report]
+  pass(c): read what the goal needs — its obligations, the host's standing contract subtracted,
+    the out-of-scope ones set apart, seam evidence — then judge the whole plan afresh against the
+    context as it now stands: the units, each unit's fit and seam, each unit's conditions, the
+    whole-goal conditions, the acceptance question, and how each value came to stand → record
+  [nothing could be read from the goal's scope: relay(too thin) → report]
+  present the whole plan on one sheet, the ledger of what this turn changed, your contrary
+    grounds, and one focus with concrete actions → Stop
+  next utterance u: c₁ := pass(fuse(c, u)) →
+    [the person stops]                                   withdrawn
+    [the person goes on to a protocol they name]         routed
+    [the person takes the plan ∧ it is closable]         emit → park the carrier → hand off →
+      [the block records the carrier: apportioned | the write came back incomplete: the sheet
+       again, the failure shown, nothing closed]
+    [otherwise] the sheet again, with the ledger of what u changed → Stop
+  no utterance: the sheet holds; nothing is taken, and nothing is emitted
+-/
+
+/-! ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
-  → probe(goal)                        -- detect ONE stated autonomous goal whose unit plan and conditions are uncompiled; a request bundling several stated outcomes bound only by the host's standing procedural contract is composite and relays here rather than activating
-  → read_obligations(goal) → O_G       -- construct the invocation-local obligation set and SUBTRACT the host's standing procedural contract: a requirement that host attaches to every change regardless of the goal is not a goal obligation but an ambient invariant every emitted unit inherits, so it is neither packed nor derived; G itself remains read-only
-  → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is declared out of scope with the delegated substrate recorded on the declaration; computed once over O_G before packing begins, so it never enters a unit
-  → draft(goal, residual) → D          -- THE WHOLE-DRAFT OPERATOR: iterate the next five steps over a workset copied from residual until every obligation in that workset sits in a completed cut, then stop. It owns nothing — no obligation leaves residual here — and it settles nothing; what it produces is the shape the reader has to see before any one cut can be judged. Iterating rather than cutting once is what lets each cut carry its own seam verdict, so a whole draft is not uniformly heuristic just because it was drafted at once
-  → scan(seams)                        -- read the REMAINING obligations (O_G minus the out-of-scope ones) for cuttable seams: dependency, deliverable, verification, ownership. Ordered after the filter, as FLOW and PHASE TRANSITIONS run it: a pre-action-only obligation is delegated out before any cut is shaped around it
-  → pack(seams, horizon) → (Anchor, DraftUnit when Anchor ≠ ∅)   -- THE IRREDUCIBLE CORE, part one (completed into a ProposedUnit by complete_unit once fit and seam exist): an empty Anchor IS this step's no-cut verdict and carries no draft, so the three judgments below have no operand on that return and drafting hands what is left to autonomous_pack instead; a goal whose obligations were every one delegated out never reaches drafting at all, the empty-residual arm having relayed first. apportion the obligations into coarse units such that each unit fits one execution horizon and every obligation lands in some unit; also reads each unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary)
-  → fit(unit, horizon) → SpanFit       -- per-cut horizon-fit predicate, run wherever a cut exists to judge, whether Pack found it at a seam or autonomous_pack placed it; Indeterminate is surfaced, never silently read as Fits
-  → qualify(cut) → Seam                -- Grounded when a seam is cited: a dependency, deliverable, verification or ownership seam, or another the goal evidences — the four are the scanning taxonomy, not the admissible set; Heuristic when the goal carries no such evidence — declared, not asserted as a natural joint
-  → complete_unit(draft, fit, seam) → ProposedUnit   -- writes the fit and seam judgments onto the cut, AFTER both exist; the sole constructor of ProposedUnit, seam-grounded cuts and autonomous_pack's alike, so no cut enters a draft without both judgments on it
-  → surface_draft(D)                   -- the whole draft goes out before the first cut is settled: every cut with its obligations, fit verdict and seam disposition, so the reader judges a shape rather than a fragment, AND the standing affordance to send any cut back, named on the surface where the cut is shown. Relay — it presents no fork, and the forks that follow are each read against what this made visible
-  → [the draft holding no Heuristic cut, a cut whose fit = Fits and over whose obligations no alternative cut stands up to the same evidence: relay(AcceptUnit) (extension) | else: present(proposed_unit, the draft's still-unsettled cuts) (constitution)]  -- the draft gate condition over the whole, then the option-set relay test per cut, read live at this point; the alternative it weighs never entered the draft, which carries one cut per obligation
-  → integrate(unit_judgment, U, residual) → (U', residual')   -- monotone in coverage: an obligation leaves residual only when it enters some unit; integrate_unit(ProposedUnit) → Unit is the only constructor Unit has, and assigns the accepted unit its fresh UnitRef in that same step
-  → derive(unit) → (Set(κ), Set(ρ), Set(σ))    -- THE IRREDUCIBLE CORE, part two: per obligation of the unit, a verifiable predicate (completion or invariant), a residual, or a reservation; every obligation of the unit lands in at least one of the three sets, and Derive writes it to exactly one — that single placement is how this step reads the obligation, not a property obligation_derived proves, which asks only for membership; a misplacement shows at the confirmation gate like any other read here. The third is for an obligation no check could settle because a judgment settles it — read at THIS step over candidates arriving like any other, so it is fallible and correctable at the confirmation gate; it is not an out-of-scope delegation, which hands an obligation to a substrate that must intercept before an action runs
-  → derive_plan(goal, U) → P           -- conditions whose subject is the whole goal, not any one unit; NOT distributed across units to fit the leaf type
-  → confirm(unit_plan)                 -- user judges the apportionment together with its conditions
-  → emit(goal_entries)                 -- one entry per unit; resolve_unit's single certificate — DeterminateResolution when a compiled COMPLETION condition exists, else AcceptedUncoveredResolution with a non-empty accepted-completion witness, else ReservedJudgmentResolution with a non-empty reserved-completion witness; either witnessed form still carries any compiled invariant conjuncts
-  → package(E)                         -- constructs the whole returned plan from E's own coproduct partition, envelope included — a read-back of what was emitted, never a second derivation beside it
-  → park_carrier(plan) → C             -- parks the packaged plan in ONE durable carrier record
-  → record_handoff(C) → N              -- emits the fixed-shape navigation block a later session dereferences to read that carrier back
+  → probe(goal)                        -- ONE stated autonomous goal whose unit plan is uncompiled; a bundle bound only by the host's standing procedural contract relays here rather than activating
+  → read_obligations(goal) → O_G       -- the goal's obligations with the host's standing contract subtracted — an ambient invariant every unit inherits — and what was subtracted shown on the sheet
+  → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is set out of scope with the substrate that must catch it
+  → cut(O_G \ oos, horizon) → units    -- the irreducible core, part one: coarse units, each fitting one execution horizon, together a partition of what is in scope; each cut declares its seam and its fit
+  → derive(unit) → certificate         -- the irreducible core, part two: per obligation a verifiable predicate, a residual left unguarded, or a reservation naming the ground that settles it
+  → derive_plan(goal, units) → P       -- conditions whose subject is the whole goal, never distributed across units, none naming an order
+  → sheet(plan, ledger, dissent, focus)  -- the whole plan every turn, what the last turn changed, your contrary grounds, and one focus
+  → take(person)                       -- the person takes the plan with everything it holds in view; that taking adopts what the draft proposed and accepts the residuals shown
+  → emit(goal_entries) → package → park_carrier → record_handoff
   → ConditionBearingUnitPlan
-requires: user_initiated(G)            -- user declares autonomous execution intent via /apportion
-requires: single_goal(G)               -- domain restriction: ONE stated outcome. Shared procedure is not a shared goal — the host's standing procedural contract attaches to any work there, so it can carry no seam and a bundle bound only by it relays at Phase 0 without activating
+requires: user_initiated(G)            -- the person declares autonomous execution intent via /apportion
+requires: single_goal(G)               -- ONE stated outcome; shared procedure is not a shared goal
 deficit:  GoalPlanUncompiled           -- activation precondition (Layer 1)
-preserves: G                           -- compile-time only; ReadObligations constructs O_G without mutating the goal; no execution-state mutation
+preserves: G                           -- compile-time only; the context only grows (pass_extends), and no execution state is touched
 invariant: Apportion over Order        -- Merismos cuts the units and conditions them; it does not sequence them
-invariant: Whole Draft over Serial Cut -- no cut is settled before the draft it belongs to has been surfaced whole. What the reader judges is a shape with its siblings beside it, never a fragment whose neighbours are still unwritten — an acceptance given without the rest in view is one a later cut can force back open
-invariant: Coverage over Convenience   -- every goal obligation belongs to some unit or is visibly delegated out of scope — the two arms coverage_complete reads; what a unit leaves unguarded is a residual accepted at Confirm; a plan that omits one converges locally and lies globally
-invariant: Fit over Ambition           -- every unit fits one execution horizon, or entered U through the user's OverrideFit over its verdict. Holds by construction of the Fit-indexed answer set Aᵤ: the accept option is AcceptUnit exactly when the fit is Fits and OverrideFit otherwise, and the relay arm and Sufficient integrate fitting cuts only, so no path admits an unfitting cut without that act — nothing records it beside the unit, and no check re-reads it
-invariant: Declared Seam over Asserted Joint  -- every cut DECLARES its seam quality: the evidence it cites, or heuristic where the goal carries none. What is invariant is the declaration, never which quality gets declared — a cut may honestly be heuristic, but it never claims a natural joint it cannot evidence
+invariant: Whole Plan over Serial Cut  -- nothing is taken before the plan it belongs to has been shown whole
+invariant: Coverage over Convenience   -- every goal obligation belongs to some unit or is visibly set out of scope
+invariant: Fit over Ambition           -- every unit fits one execution horizon, or the person took it over its verdict (unfit_needs_person)
+invariant: Declared Seam over Asserted Joint  -- every cut declares its seam: the evidence it cites, or heuristic
+invariant: the person takes and closes; your judgments stand as proposals and contrary grounds
+-/
 
-── TYPES ──
-G              = AutonomousGoal { utterance: String, obligations: Set(Obligation), prior: ProtocolOutput?, session: Context }
-O_G            = ReadObligations(G) = G.obligations \ { o | host_standing_contract(o) }   -- the subtraction is part of the read, not a later partition: what it removes never becomes residual, never enters a unit, and is never counted by coverage_complete
-ProtocolOutput = prior protocol's converged output in current session
-Obligation     = a stated or inferred requirement the goal must satisfy — the unit of coverage; each cites its evidence in G. A requirement the HOST attaches to every change it accepts regardless of the goal reaches this read as a candidate like any other, and host_standing_contract below is the judgment that keeps it out of O_G: it is an ambient invariant every unit inherits, not a goal obligation this goal generated. The exclusion is made AT the read — a judgment over candidates, as VelocityFilter's partition is — so the type does not guarantee it and a misjudgment is possible
-host_standing_contract(o) ≡ o is goal-independent in the host the work is carried out in — the same requirement would be read from ANY goal there, because the host's own standing procedural contract attaches it to every change it accepts (its version/manifest discipline, its verification command, its branch/worktree/review path, its merge authority) — AND o is not itself the outcome G states. Such an o is neither a goal obligation nor an out-of-scope delegation: an OOSDeclaration names a substrate that must intercept BEFORE an action runs, whereas this binds every emitted unit alike and the host's own process already enforces it, so ReadObligations subtracts it and nothing downstream sees it. A requirement G states AS its outcome fails the second conjunct and stays a goal obligation
-H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit; read from context, cue cited
-U              = Set(Unit)             -- the apportionment
-Anchor         = Set(Obligation) -- Pack's per-cycle focus region: the (possibly proper) subset of `residual` Scan's seam evidence gives Pack something to prioritize a cut around this cycle
-ProposedUnit   = { subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }   -- inhabited only after complete_unit writes fit and seam; Pack alone yields a draft missing both
-DraftUnit      = ProposedUnit without its fit and seam fields — what Pack yields before either judgment has run
-complete_unit(d: DraftUnit, f: SpanFit, s: Seam) : ProposedUnit = d with fit := f, seam := s
-D              = Set(ProposedUnit)     -- one Phase 1 cycle's whole draft: a PARTITION of the workset drafting ran over — its cuts pairwise obligation-disjoint, together covering that workset. This is what draft's own termination bound already rests on, since a workset that shrinks strictly as each obligation lands in a completed cut cannot also hand that obligation to a second cut; a draft carrying two claims on one obligation is therefore a defect in the draft, never a choice put to the reader. Where a region admits more than one workable apportionment, drafting draws ONE and records nothing about the other — whether that second reading deserves the reader is judged live at dispatch. Phase-local: built over a COPY of residual and discarded when the cycle settles, so no Λ field holds it
-Unit           = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
-SpanFit        ∈ {Fits, Overflows, Indeterminate}
-Seam           = Grounded(Evidence) ⊎ Heuristic
-Evidence       = { source: String, content: String }
-CapabilityRequirement = a functional description of what carrying out the unit's work requires — descriptive only
-FeasibilityNote = a free-text observation flagging a feasibility concern read from the goal — descriptive, not enforced; the empty set is valid when the unit carries no such concern
-Derive         = Unit → (Set(κ), Set(ρ), Set(σ))
-κ              = CompiledCondition { unit: Unit, obligation: Obligation, kind: PredicateKind, condition: VerifiablePredicate }
-PredicateKind  ∈ {completion, invariant}
-VerifiablePredicate = an executable check with a determinate pass/fail outcome
-ρ              = Residual { obligation: Obligation, unit: Option(Unit), kind: PredicateKind, disposition: Option(ResidualDisposition) }
-                 -- invariant: ρ.unit = Some(u) ⇒ ρ.obligation ∈ u.obligations — Derive residualizes a unit's OWN obligations, so an obligation no unit carries is never parked as some unit's residual; it is an uncovered obligation (coverage_complete) to be cut into a unit or declared out of scope, and the residual list and the invariant status cannot disagree about it
-ResidualDisposition ∈ {AcceptUncovered} ∪ Emergent(ResidualDisposition)   -- written only by Phase 2 AcceptResiduals; a residual carries None until that step runs, which is what the AcceptUncovered filters distinguish
-judgment_settled(x) ≡ what settles x is a judgment made against the context accumulated by the moment the question comes live and what the user has actually said by then, so no compile-time artifact can stand in for it: x is neither a predicate evaluable when an interval stops nor an obligation an interception could guard before an action runs. Fixing its answer now would close a live question where the user is not present, which is why leaving x open is the CORRECT disposition rather than a deferred shortfall. Judged AT the step that reaches x — Derive for an obligation of a unit, Qt for the whole-goal acceptance criterion — over candidates arriving there like any other, as VelocityFilter's partition is: the type does not guarantee it, a misjudgment is possible, and the confirmation gate is where one shows
-σ              = JudgmentReservation { subject: ReservedSubject, unit: Option(Unit), kind: PredicateKind, ground: JudgmentGround, basis: Evidence }   -- the record that an item is held open to a judgment made outside compile time. A SIBLING of Residual and of OOSDeclaration, never a widening of either: a residual is an obligation the plan leaves unguarded and the user accepts as such, an OOSDeclaration hands an obligation to a substrate that must intercept before an action runs, and a reservation hands nothing anywhere — it names the ground that settles the item once the question comes live
-ReservedSubject = ReservedObligation(Obligation) ⊎ ReservedAcceptance   -- ReservedAcceptance is the whole-goal acceptance criterion itself, which names no obligation; its reservation carries unit = None and kind = completion
-JudgmentGround = a statement of what settles the reserved item when it comes live — the accumulated context and the governing utterances, including any retained judgment or scoped grant. Its source is reached through the reservation's basis and the navigation block; a future answer does not imply an unknown owner. It remains a judgment rather than a predicate evaluable at compile time
-S              = Set(JudgmentReservation)        -- reservations, unit-scoped and whole-goal alike
-reserved_completion_obligations(u, S) = { o | σ ∈ S, σ.subject = ReservedObligation(o), σ.unit = Some(u), σ.kind = completion }
-acceptance_reserved(Λ) ≡ ∃ σ ∈ Λ.S : σ.subject = ReservedAcceptance   -- the whole-goal acceptance criterion is on record as constitutively open. DISTINCT from Λ.unbounded_approved, which records a waiver of a criterion the plan should have carried: one says the criterion is correctly left to resolve later, the other says a shortfall was accepted, and the convergence predicate keeps them apart
-acceptance_reservation() = JudgmentReservation { subject: ReservedAcceptance, unit: None, kind: completion, ground: "the context accumulated by the moment the goal is judged accepted, together with what the user has actually said by then", basis: Evidence { source: "the ReserveJudgment answer at the whole-goal acceptance gate", content: "the criterion's right answer varies with that ground, so fixing it now would settle a live question where the user is not present" } }   -- the ground is fixed by the constructor, which is why the gate arm carries no direction: what settles this criterion is the same ground in every plan that reserves it
-K              = Set(CompiledCondition)          -- unit-local conditions
-P              = Set(PlanCondition)              -- cross-unit conditions
-PlanCondition  = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, dischargeable_when: PlanStateRequirement }
-PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} ∪ Emergent(PlanScope)
-UnitRef        = a stable identity carried by an emitted unit, assigned at integration and never reused
-PlanStateRequirement = { predicate: VerifiablePredicate, basis: NonEmptySet(Evidence) }   -- cites the evidence the requirement rests on and is never empty, so a consumer placing this condition has a basis to judge it against; whether that evidence still tracks what it asserts is the receiving side's support-integrity judgment, not something this protocol certifies at compile time
-topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference
-LeafConjunct   = { condition: VerifiablePredicate, kind: PredicateKind }
-NonEmptySet(T) = { S: Set(T) | S ≠ ∅ }
-conjuncts(u)   = { { condition: κ.condition, kind: κ.kind } | κ ∈ K, κ.unit = u }
-accepted_completion_residuals(u, R) = { ρ.obligation | ρ ∈ R, ρ.unit = Some(u), ρ.kind = completion, ρ.disposition = AcceptUncovered }
-UnitResolution = DeterminateResolution { predicate: VerifiablePredicate, conjuncts: Set(LeafConjunct) } ⊎ AcceptedUncoveredResolution { accepted_completion_residuals: NonEmptySet(Obligation), conjuncts: Set(LeafConjunct) } ⊎ ReservedJudgmentResolution { reserved_completion_obligations: NonEmptySet(Obligation), conjuncts: Set(LeafConjunct) } -- THE CROSS-SEAM TERMINATION CERTIFICATE
-resolve_unit(u, K, R, S) : UnitResolution = DeterminateResolution { predicate: ⋀ { κ.condition | κ ∈ K, κ.unit = u }, conjuncts: conjuncts(u) } when ∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion
-                                        ; AcceptedUncoveredResolution { accepted_completion_residuals: accepted_completion_residuals(u, R), conjuncts: conjuncts(u) } when ∄ κ ∈ K : κ.unit = u ∧ κ.kind = completion ∧ accepted_completion_residuals(u, R) ≠ ∅
-                                        ; ReservedJudgmentResolution { reserved_completion_obligations: reserved_completion_obligations(u, S), conjuncts: conjuncts(u) } when ∄ κ ∈ K : κ.unit = u ∧ κ.kind = completion ∧ accepted_completion_residuals(u, R) = ∅ ∧ reserved_completion_obligations(u, S) ≠ ∅   -- the arms are tried in this order and are total over the units CONVERGENCE admits: a unit's completion is a compiled predicate, an accepted-uncovered residual, or a reservation, and the completion clause below requires at least one of the three. A unit carrying both an accepted completion residual and a reserved completion obligation takes the accepted arm, its reservation staying visible in the emitted reservation set keyed by σ.unit. The third certificate does not say the unit runs guarded — the interval is unguarded on that obligation exactly as in the accepted arm, and no step of this protocol makes anyone judge it. What it names is the ground that settles the unit's done, and what distinguishes it from the accepted arm is that nobody has accepted the gap
-E              = Set(GoalEntry)        -- emission
-GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), resolution: UnitResolution, capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) } ⊎ PlanEntry { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, dischargeable_when: PlanStateRequirement } ⊎ PlanEnvelopeEntry { accepted_residuals: Set(AcceptedResidualEntry), reserved: Set(JudgmentReservation), oos: Set(OOSDeclaration), unbounded_approved: Bool }
-oos            = Set(OOSDeclaration)   -- obligations guardable only by pre-action interception
-OOSDeclaration = { obligation: Obligation, substrate: String, basis: Evidence }   -- unchanged by the reservation slot: this declares an obligation whose violation must be caught BEFORE an action runs and names the substrate that must catch it. A reserved item names no substrate and asks nothing to intercept, so it is never written here and this set never widens to hold one
-ReadObligations = G → O_G
-VelocityFilter = O_G → oos
-InvariantStatus = { coverage_complete: Bool, termination_covered: Bool, obligations_derived: Bool, oos_substrate_named: Bool, reservation_ground_named: Bool, plan_conditions_topology_free: Bool }
-hard_invariants_hold(Λ) ≡ Λ.invariant_status.coverage_complete ∧ Λ.invariant_status.termination_covered ∧ Λ.invariant_status.obligations_derived ∧ Λ.invariant_status.oos_substrate_named ∧ Λ.invariant_status.reservation_ground_named ∧ Λ.invariant_status.plan_conditions_topology_free
-coverage_complete(U, O_G) ≡ ∀ o ∈ O_G : (∃ u ∈ U : o ∈ u.obligations) ∨ (∃ d ∈ oos : d.obligation = o)   -- a reserved obligation stays in the unit it was packed into, so it is covered by the FIRST disjunct and this predicate needs no reservation arm
-reservation_ground_named(S) ≡ ∀ σ ∈ S : σ.ground ≠ ""   -- the reservation's counterpart to oos_substrate_named: a reservation whose ground is unstated records nothing a later judgment could act on
-obligation_derived(u, K, R, S) ≡ ∀ o ∈ u.obligations : (∃ κ ∈ K : κ.unit = u ∧ κ.obligation = o) ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.obligation = o) ∨ (∃ σ ∈ S : σ.unit = Some(u) ∧ σ.subject = ReservedObligation(o))
-derived_already(u, K, R, S) ≡ (∃ κ ∈ K : κ.unit = u) ∨ (∃ ρ ∈ R : ρ.unit = Some(u)) ∨ (∃ σ ∈ S : σ.unit = Some(u))
-termination_covered(U, K, R, S) ≡ ∀ u ∈ U : (∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion) ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion) ∨ (∃ σ ∈ S : σ.unit = Some(u) ∧ σ.kind = completion)   -- the three arms are exactly resolve_unit's three, in its order, so every emitted unit has a defined certificate
-obligations_derived(U, K, R, S) ≡ ∀ u ∈ U : obligation_derived(u, K, R, S)
-oos_substrate_named(oos) ≡ ∀ d ∈ oos : d.substrate ≠ ""
-plan_conditions_topology_free(P) ≡ ∀ p ∈ P : topology_free(p.dischargeable_when)   -- an AI semantic judgment over each predicate's content, not a structural proof
-acceptance_present(P) ≡ ∃ p ∈ P : p.scope = WholeGoalAcceptance ∧ p.kind = completion   -- BOTH fields: a whole-goal INVARIANT is a boundary the run preserves, not a statement of when the goal is accepted, so it neither suppresses Qt nor stands in for the waiver at emission
-Aᵤ             = UnitJudgment ∈ {AcceptUnit, Recut(cut, direction), Sufficient} when SpanFit = Fits; {OverrideFit, Recut(cut, direction)} otherwise, joined by Sufficient while some still-unsettled cut of the draft has fit = Fits   -- Recut carries its TARGET as well as its direction: the gate presents one contested cut but ships the draft's other still-unsettled cuts with it, so the reader may send back any of those and not only the one in front of them. The target ranges over the surfaced draft's still-unsettled cuts; a cut this cycle already integrated is reached by Reopen at the confirmation gate instead, which is the one path that returns an owned obligation to residual   -- the accept/override pair is INDEXED by the fit verdict rather than deleted at presentation: the defined set for a firing IS what that firing presents, so `Fit-indexed answer set`'s intact-presentation invariant holds and an unfitting unit has no unguarded accept. Sufficient is indexed on that same principle one axis over: what it accepts is the draft's still-unsettled FITTING cuts, so on the unfitting arm it stands only while such a cut remains. With none left it would integrate the empty set and re-present the very cut already in front of the reader — an option with no future rather than a choice — and the ways forward there are the override and the recut, both of which move. On the fitting arm the presented cut is itself such a cut, so the condition holds by construction and never bites
-V              = Judgment ∈ {Confirm, Adjust(direction), Reopen(unit)}
-Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, ReserveJudgment, ApproveUnbounded}   -- ReserveJudgment and ApproveUnbounded are the two ways the plan proceeds without a defined criterion, and they assert opposite things: the first that the criterion is constitutively open and correctly stays so, the second that one the plan should have carried is waived. They write different Λ state, and each retracts the other's record, so the mutual exclusion at convergence holds by construction rather than being merely asserted
-plan_condition(d) = PlanCondition { scope: WholeGoalAcceptance, kind: completion, condition: [the predicate direction d states], dischargeable_when: PlanStateRequirement { predicate: λ candidate_plan. False, basis: {Evidence { source: "the DefineNow answer at the whole-goal acceptance gate", content: d }} } }   -- the placeholder predicate is False until BindPlanRequirements normalizes it against |U|; the basis is the user's own definition, which is what makes it inhabit NonEmptySet from construction rather than after a repair
-BindPlanRequirements(P, U) = { p with dischargeable_when := plan_terminal(|U|) when p.scope = WholeGoalAcceptance; p unchanged otherwise | p ∈ P }   -- scope alone, deliberately unlike acceptance_present: a whole-goal invariant is still discharged at plan-terminal — it just does not answer the acceptance question
-plan_terminal(n) = PlanStateRequirement { predicate: λ candidate_plan. |candidate_plan.units| = n ∧ ∀ r ∈ { e.resolution | e ∈ candidate_plan.units } : (r = DeterminateResolution { predicate: d, ... } ⟹ d holds) ∧ (r = AcceptedUncoveredResolution { accepted_completion_residuals: A, conjuncts: C } ⟹ A ≠ ∅ ∧ A ⊆ { a.obligation | a ∈ candidate_plan.accepted_residuals, a.kind = completion } ∧ ∀ c ∈ C : c.condition holds) ∧ (r = ReservedJudgmentResolution { reserved_completion_obligations: J, conjuncts: C } ⟹ J ≠ ∅ ∧ J ⊆ { o | s ∈ candidate_plan.reserved, s.subject = ReservedObligation(o), s.kind = completion } ∧ ∀ c ∈ C : c.condition holds), basis: {Evidence { source: "the current plan's UnitResolution, accepted-residual and reservation projections", content: "expected aggregate resolution count = " + String(n) + "; all executable resolution conditions; aggregate accepted-completion record; aggregate reserved-completion record" }} }
-Rerouted       = the non-emission terminal Vₜ = RouteBound reaches   -- produced by route_bound's relay emission, never by a bare deactivate: a declared route that no step emits would drop the continuation the user just chose
-Emit           = (U, K, R, S, P, oos, unbounded_approved) → E [Tool: record]   -- R feeds resolve_unit's accepted arm and S its reserved arm; S, oos and unbounded_approved feed the envelope
-Phase          ∈ {0, 1, 2, 3}
-Qu             = Per-cycle apportionment interaction with (proposed_unit: ProposedUnit, the cut set U as it stands at this firing, the still-unsettled cuts of the draft this cycle surfaced) [Tool: Constitution interaction]   -- the unsettled cuts travel because Sufficient settles THAT displayed draft; without them the answer would have nothing to accept but a re-derivation the user never saw, which is what would erase the seam dispositions drafting had already judged
-Qt             = Whole-goal acceptance interaction, conditional on ¬acceptance_present(P) [Tool: Constitution interaction]
-Qc             = Unit-plan confirmation interaction with (U, K, R, S, P, InvariantStatus, oos) [Tool: Constitution interaction]
-ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEntry), accepted_residuals: Set(AcceptedResidualEntry), reserved: Set(JudgmentReservation), oos: Set(OOSDeclaration), unbounded_approved: Bool }
-AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kind: PredicateKind }
-plan           = the ConditionBearingUnitPlan value returned by this invocation
-HandoffLocator = { record: the durable identity of the carrier record C, session: the id of the session that parked it }
-C              = PlanCarrier: the ONE durable record park_carrier writes the packaged plan into (record_handoff then emits N over it) — a single dereferenceable entry, distinct from E's per-unit entries, which exist for the downstream completion-predicate enforcer and carry no aggregate identity of their own
-locator(C)     = HandoffLocator { record: C's record identity as the carrier-creating call returned it; session: the id of the session running record_handoff }   -- substrate-neutral by construction: the identity is whatever the carrier-creating call returned, so this type never names what performs that call
-N              = NavigationBlock { purpose_frame: String, canonical_locator: HandoffLocator, dereference_instruction: DereferenceInstruction, snapshot_anchor: Option(String), grounding_instruction: GroundingInstruction }
-DereferenceInstruction = an instruction to read the carrier record at the canonical locator's record identity, within the session that locator names — one read yields the whole plan
-GroundingInstruction = the whole-record receiving procedure, using /inquire where available or an equivalent grounding pass: dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and judgment authority from the governing utterances and authorized revisions. Preserve those limits through reassignment. Then interpret each reservation under the recovered ground, following any further source its subject requires. Stop dependent work when a decision-bearing source is unreachable or a needed premise lacks support-integrity; a coordinator's summary does not substitute for source wording that settles authority. Surface the plan's reservations with their settling grounds. Resolve a live item within an applicable grant, or put its open question to the person retaining that judgment; where its question is still future, keep it open and continue independent work. A reservation itself supplies no answer, actor assignment, or blanket stop; a coordinator's response or a completed predicate supplies no act reserved to someone else.
-handoff_recorded(N, C) ≡ park_carrier wrote the packaged plan into C ∧ record_handoff presented N in the handoff output ∧ N.purpose_frame ≠ "" ∧ N.canonical_locator = locator(C) ∧ N.canonical_locator.session ≠ ""   -- the emission IS the text
-── PHASE TRANSITIONS ──
-Phase 0: G → Probe(G) [Tool] → goal_plan_uncompiled?                   -- activation checkpoint (observe): dereferences a prior navigation block when one is in scope, else internal analysis
-           ¬autonomous_intent(G) → relay → deactivate                  -- no autonomous interval in scope (extension)
-           ¬single_goal(G) → relay → deactivate                        -- composite goal: G bundles several stated outcomes whose only common bond is the host's standing procedural contract, and that contract attaches to any work there, so it evidences no shared outcome and can carry no seam. The relay names each constituent outcome and that bond; one apportionment per goal. Tested BEFORE the locator and condition_bearing arms, whose verdicts have no single subject over a bundle, and BEFORE init_loop_state, so no Λ loop field is seeded (extension)
-           locator in scope ∧ (¬dereferenceable ∨ support-integrity failure affecting current compilation) → relay → deactivate   -- handoff unreadable, for the locator that can be in scope here: the goal's navigation block. Covers a carrier that would not resolve, and a premise required for current compilation that the grounding pass could not support; the uncompiled arm is NOT taken (extension)
-           condition_bearing(G)  → relay → deactivate                  -- units and conditions already present (extension)
-           uncompiled            → ReadObligations(G) → O_G → VelocityFilter(O_G) → oos → init_loop_state (U=∅, residual=O_G \ {d.obligation | d∈oos}, K=∅, R=∅, S=∅, P=∅, plan_conditions_derived=⊥, plan_conditions_stale=⊥, invariant_status=⊥, unbounded_approved=⊥) → Phase 1   -- ONE-TIME init, fired only on this edge; Phase 2's Reopen re-enters Phase 1 without re-running it. ReadObligations SUBTRACTS the host's standing procedural contract at this same step, so residual is seeded from what THIS goal generated; G remains unchanged
-Phase 1: (G, residual) → residual?   -- the empty-residual arms are read off residual DIRECTLY, before anything is drafted: a draft coming back with no cut cannot distinguish "nothing was there to cut" from "nothing could be cut", and only the first of those relays. The second arm is the ordinary completion edge every converging run leaves Phase 1 through. apportionment loop (sense); residual/oos enter this phase either freshly seeded or as Reopen left them — never re-seeded on entry
-           residual = ∅ ∧ U = ∅ ∧ oos = ∅ → relay(goal's scope too thin to read any obligation) (extension) → deactivate
-           residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅) → Phase 2
-           residual ≠ ∅ → draft(G, residual) [Tool] → D → surface_draft(D) (extension)   -- draft iterates Scan/Pack/fit/qualify/complete_unit over a workset COPIED from residual until every obligation in that workset sits in a completed cut, autonomous_pack absorbing at heuristic seams only what the seam evidence could not reach; complete_unit still writes each cut's fit and seam, so a cut drafted in bulk carries the same two judgments an anchored one did and a whole draft is not uniformly heuristic. The copy is what keeps drafting owner-neutral: no obligation leaves residual here, integrate remaining the sole owner-changing step, so the coverage partition is untouched by anything drafting does. surface_draft then puts the WHOLE draft in front of the reader before a single cut is settled
-             D holds no Heuristic cut ∧ each c ∈ D with fit = Fits ∧ no alternative cut of c's obligations standing up to the same evidence → relay(AcceptUnit) (extension) → integrate(c, U, residual)   -- the leading conjunct is the draft gate condition, read over the whole draft: one heuristic cut sends the draft to the gate entire. The rest is the option-set relay test, applied HERE and read live: D is a partition, so what this weighs is a cut drafting did NOT draw, never a second member of D standing against the first
-             D has no unsettled cut left ∧ residual = ∅ → Phase 2
-             else → Qu → Stop → Aᵤ (constitution) [Tool]   -- Qu carries the first unsettled cut, U, and the draft's still-unsettled cuts
-               Aᵤ = AcceptUnit   → integrate(the cut this firing presented, U, residual) → Phase 1        -- in Aᵤ's defined set iff SpanFit = Fits
-               Aᵤ = Recut(c, d)  → re-derive c's Anchor frame under d → Phase 1   -- c is any still-unsettled cut of the surfaced draft, not only the presented one: same residual, different cut, and the next cycle drafts under d
-               Aᵤ = OverrideFit  → integrate(the cut this firing presented, U, residual) → Phase 1   -- in Aᵤ's defined set iff SpanFit ≠ Fits
-               Aᵤ = Sufficient   → ∀c ∈ D still unsettled with fit = Fits: integrate(c) → c' → U := U ∪ {c'}, residual := residual \ c'.obligations → [no cut still unsettled has fit ≠ Fits ∧ residual = ∅: surface (extension) → Phase 2 | else Qu over the first still-unsettled cut with fit ≠ Fits → Stop → Aᵤ → the same Aᵤ dispatch] → Phase 1   -- blanket relay over the fitting cuts OF THE DISPLAYED DRAFT: Sufficient is the user's constitutive act over that whole, so what it accepts is what was shown, each seam disposition intact, rather than a remainder re-packed at heuristic seams the user never saw
-Phase 2: U → ∀u∈U, ¬derived_already(u,K,R,S): Derive(u) → (Set(κ), Set(ρ), Set(σ)) → K:=K∪κs, R:=R∪ρs, S:=S∪σs ∥ [¬Λ.plan_conditions_derived: DerivePlan(G, U) → P; Λ.plan_conditions_derived := ⊤]   -- condition derivation (sense), scoped to units and plan conditions not yet derived this apportionment
-           oos ≠ ∅ → OOS(oos) (extension)                              -- out-of-scope declaration, substrate recorded on each OOSDeclaration
-           S ≠ ∅ → Reserved(S) (extension)                             -- reservation notice, ground recorded on each JudgmentReservation; no substrate is named because none is asked to intercept
-           ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ (constitution) [Tool]   -- fires at pass entry, and again after any Adjust that clears acceptance
-             Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]; S := S \ {σ∈S : σ.subject = ReservedAcceptance}
-             Vₜ = RouteBound       → route_bound (extension) → deactivate (Rerouted)
-             Vₜ = ReserveJudgment  → S := S ∪ {acceptance_reservation()}; [Λ.unbounded_approved: Λ.unbounded_approved := ⊥]   -- records the criterion as constitutively open; this arm never SETS the waiver flag, so no waiver is claimed, and it CLEARS one still standing from an earlier Qt firing on this same invocation
-             Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤; S := S \ {σ∈S : σ.subject = ReservedAcceptance}   -- the symmetric retraction: drops a ReservedAcceptance member still standing from an earlier Qt firing, so the arm answered last is the one that stands
-           BindPlanRequirements(P, U) → P := Pᵦ → check(U, K, R, S, Pᵦ, oos) → Λ.invariant_status := InvariantStatus (track)   -- the ONLY writer of Λ.invariant_status, which Confirm's hard_invariants_hold guard reads; normalize every WholeGoalAcceptance requirement against the current |U| BEFORE topology_free is checked; coverage_complete ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named ∧ reservation_ground_named ∧ plan_conditions_topology_free (track)
-           Λ.plan_conditions_stale → StaleNotice(P) (extension)        -- pre-Qc surfacing: review, Adjust, or Confirm as recorded
-           Qc(U, K, R, S, P, InvariantStatus, oos) → Stop → V (constitution) [Tool]
-             V = Adjust(d) → rederive over the SAME U → (K, R, S, P) := (K', R', S', P') → Λ.plan_conditions_stale := ⊥ → [¬acceptance_present(P') → Qt] → [acceptance_present(P') ∧ Λ.unbounded_approved: Λ.unbounded_approved := ⊥] → [acceptance_present(P') ∧ acceptance_reserved(Λ): S' := S' \ {σ : σ.subject = ReservedAcceptance}] → BindPlanRequirements(P', U) → P' := Pᵦ' → check(U, K', R', S', Pᵦ', oos) → Λ.invariant_status := InvariantStatus → re-present Qc   -- obligation_derived(u, K', R', S') holds for every u ∈ U; rederive rewrites the unit-scoped members of S only, the ReservedAcceptance member being Qt's own record; check is RE-RUN against the normalized adjusted state before Qc re-presents
-             V = Reopen(u) → residual := residual ∪ u.obligations; U := U \ {u}; K := K \ {κ∈K:κ.unit=u}; R := R \ {ρ∈R:ρ.unit=Some(u)}; S := S \ {σ∈S:σ.unit=Some(u)}; Λ.plan_conditions_stale := ⊤ → Phase 1   -- the reopened unit's derived conditions and reservations leave with it; the unit-free ReservedAcceptance member stays; P itself is not re-derived (`Back-edge state preservation`)
-             V = Confirm ∧ ¬hard_invariants_hold(Λ) → re-present Qc naming the violated invariant
-             V = Confirm ∧ hard_invariants_hold(Λ) → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered (track) → Phase 3   -- AcceptResiduals produces the accepted-completion witnesses resolve_unit reads during Emit; S is untouched, a reservation being a sibling of the residual rather than one awaiting acceptance
-Phase 3: (U, K, R, S, P, oos, unbounded_approved) → Emit → E [Tool: record] → package(E) → plan → park_carrier(plan) → C [Tool: record] (track) → record_handoff(C) → N (extension) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
+namespace Merismos
 
-Phase 0 → Phase 1: goal_plan_uncompiled(G)                             -- this edge alone performs the one-time VelocityFilter/residual init
-Phase 0 → deactivate: ¬autonomous_intent(G) ∨ ¬single_goal(G) ∨ condition_bearing(G) ∨ (locator in scope ∧ (¬dereferenceable ∨ support-integrity failure affecting current compilation))   -- relay the scan result; no activation. "Locator in scope" is the goal's navigation block, the only locator this phase can hold. ¬single_goal is the composite-goal termination path: it relays the constituent outcomes and deactivates, exactly as the other three non-activation arms do
-Phase 1 → deactivate: residual = ∅ ∧ U = ∅ ∧ oos = ∅                   -- nothing could be read from the goal's scope; relays rather than emitting an empty plan
-Phase 1 → Phase 1: next draft over the current residual                -- bounded by coverage (residual strictly shrinks on AcceptUnit/OverrideFit, and on every cut the relay arm integrates) and by user agency (Recut/Sufficient). Each cycle discards the previous draft and re-drafts what is left, so nothing carries a stale cut forward and no Λ field has to hold one
-Phase 1 → Phase 2: residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅)                    -- every obligation apportioned or visibly delegated
-Phase 2 → Phase 1: V = Reopen(u)                                       -- that unit's obligations return to residual; bounded by user agency exactly as Adjust is
-Phase 2 → Phase 2: V = Adjust(d)                                       -- rederive over the same apportionment; U unchanged
-Phase 2 → Phase 2: V = Confirm ∧ ¬hard_invariants_hold(Λ)              -- Qc re-presents with the violated invariant named; no state advances
-Phase 2 → deactivate: Vₜ = RouteBound                                  -- Rerouted; route_bound emits the route first; /bound → /apportion re-entry recompiles fresh
-Phase 2 → Phase 3: V = Confirm ∧ hard_invariants_hold(Λ)               -- residuals accepted on record; every clause of apportioned(G) that Qc can violate holds AT THE TRANSITION
-Phase 3 → converge: emitted(E) ∧ handoff_recorded(N, C)                -- ConditionBearingUnitPlan + apportionment trace + navigation block
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
 
-── LOOP ──
-Two bounded loops, one per irreducible part.
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
 
-Apportionment loop (Phase 1): one whole-residual draft per cycle.
-  Each cycle drafts the current residual to closure, surfaces that draft entire, then settles out of it — the
-  relay path opening only over a draft whose every cut cites a seam the goal evidences and, once open,
-  integrating every cut no second reading contests; the gate takes the rest one at a time, and takes the
-  draft entire where any cut is heuristic.
-  Two bounds, nested and independent. INSIDE a cycle, drafting terminates because it runs over a COPY of
-  residual that strictly shrinks as each obligation lands in a completed cut, autonomous_pack absorbing whatever
-  no seam evidence reaches, so the workset empties in finitely many steps and no cut is left without one.
-  ACROSS cycles, residual strictly shrinks on every AcceptUnit, every OverrideFit, every cut the relay arm
-  integrates, and every Sufficient — which stands only while the draft still holds an unsettled fitting cut, so
-  it always has one to integrate — and the loop therefore cannot cycle on coverage. Recut alone leaves residual
-  unchanged: it re-frames one still-unsettled cut of the surfaced draft under a user direction, whichever cut
-  the answer names, and the next cycle drafts under that direction, so it is bounded by user agency rather
-  than by coverage. A cycle entered via Reopen (the one back-edge from Phase 2) drafts residual exactly as
-  Reopen left it: that unit's restored obligations, every other already-packed unit's obligations untouched. No draft crosses a cycle boundary — each cycle discards
-  the last and re-drafts what remains, which is why no Λ field holds a draft and no transition has to hunt down
-  cuts a settlement made stale.
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
 
-Condition loop (Phase 2): Qt fires whenever the whole goal carries no acceptance criterion — at pass entry, and
-  again after an Adjust that clears one. Its two no-criterion arms assert opposite things and are kept apart end
-  to end: ReserveJudgment records the criterion as constitutively open, ApproveUnbounded records a waiver, and
-  each RETRACTS the other's record when it is still standing — so at most one of the two ever holds, by
-  construction rather than by assertion, and a user who answers one arm at a later firing has revised the earlier
-  answer rather than added to it. An Adjust that instead INTRODUCES whole-goal acceptance retracts
-  whichever of the two is still on record in that same transition — the waiver by clearing Λ.unbounded_approved,
-  the reservation by dropping its ReservedAcceptance member — and does not re-fire Qt; the SAME retraction of
-  both fires unconditionally on Qt's own DefineNow arm, on every firing.
-  Qc's Adjust rederives over the SAME apportionment — K' ∪ R' ∪ S' still spans every obligation of every unit
-  (obligation_derived, no removal; a withdrawn or weakened condition becomes a residual, and a residual the
-  direction re-reads as settled by judgment becomes a reservation). BindPlanRequirements
-  runs idempotently on every pass immediately before check, so every WholeGoalAcceptance condition carries
-  plan_terminal(|U|) before the guard reads it; check is RE-RUN in full against that normalized state before Qc
-  re-presents, so Confirm's hard_invariants_hold guard always consults an InvariantStatus computed against the
-  current K/R/S/P/U. Confirm performs no later P mutation and does not waive a hard invariant: a coverage or termination
-  violation re-presents Qc with the violation named rather than advancing to emission. Reopen is the one
-  back-edge to Phase 1: it returns exactly that unit's obligations to residual, clears that unit's own K/R/S
-  entries, and re-enters the apportionment loop. The back-edge is SCOPED: residual is never re-seeded from the
-  goal's full obligation set, and Derive/DerivePlan run only over what is not yet derived, so a unit's
-  Adjust-shaped conditions and any whole-goal conditions already on record survive the detour. Reopen also sets
-  Λ.plan_conditions_stale, and the next Qc surfaces that as a notice — Adjust or Confirm as recorded — clearing
-  once the user Adjusts. AcceptResiduals then accepts R and supplies the non-empty completion-residual witness
-  any AcceptedUncoveredResolution needs at Emit. Confirm terminates.
+abbrev Context (P : Type) := List (Turn P)
 
-Stateless: Merismos terminates at emission. No invocation-local state survives into the execution interval —
-no session approvals, no per-action classification, no mid-execution checkpoint. The emitted navigation
-block is the cross-session route to the carrier, not surviving Λ state.
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-Convergence evidence (relay, at emission): present the apportionment trace —
-  (a) Plan readback — the goal restated as its units in plain single-sentence form;
-  (b) Per-unit: (obligations covered, seam quality with its citation or heuristic declaration, horizon fit or
-      the recorded override) → the unit resolution certificate — the conjoined predicate plus typed conjuncts
-      when the unit has ≥1 compiled completion condition, an accepted-completion witness plus any invariant
-      conjuncts when it has none, or a reserved-completion witness plus any invariant conjuncts when what its
-      done means is held open to judgment — the unit's capability requirements and feasibility notes, and the
-      disposition that settled it: relayed as a cut no second reading contested, accepted at the gate, accepted
-      with a recorded override, or settled under a Sufficient over the displayed draft. This is REPORTED CONDUCT,
-      not a field read back — the run presenting this trace is the one that just took those arms, and no Λ cell
-      holds the answer. Making it one would buy nothing the ordering does not already give: Whole Draft over
-      Serial Cut is a property of WHEN surfacing happens relative to integration, so no predicate over the final
-      state can check it and a run that skipped the surfacing would write the same label as one that did not.
-      What the disposition earns its place by is showing the reader which cuts they settled and which the draft
-      settled for them;
-  (c) Plan-level conditions with the plan-state requirement that makes each safe to discharge;
-  (d) Each accepted-uncovered residual with its obligation, each reserved item with the ground that settles it,
-      and each out-of-scope obligation with its substrate;
-  (e) When unbounded_approved: the recorded whole-goal acceptance waiver with its gate site. When the whole-goal
-      acceptance criterion is reserved instead: that reservation with its ground, stated as a criterion left
-      open on purpose rather than as a gap — the two never appear together.
-(d) and (e) are additionally emitted as a plan-envelope entry alongside the unit and plan-condition entries.
-Convergence is demonstrated, not asserted.
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
-── CONVERGENCE ──
--- plan denotes the returned ConditionBearingUnitPlan (see TYPES); E is the record-emitted goal-entry set
-apportioned(G) = emitted(E) ∧ handoff_recorded(N, C)
-                 ∧ coverage_complete(U, O_G)
-                 ∧ (U ≠ ∅ ∨ oos ≠ ∅)                                                -- a goal with nothing read from it never claims apportionment occurred
-                 ∧ termination_covered(U, K, R, S)                                    -- every emitted unit has a defined certificate (see TYPES)
-                 ∧ obligations_derived(U, K, R, S)
-                 ∧ (∀u∈U: |{e ∈ E : e is UnitEntry ∧ e.unit_ref = u.unit_ref}| = 1)   -- the join rule holds: one unit entry per unit, keyed on unit_ref — subject is not unique across units
-                 ∧ (∀u∈U: ∀e∈E: (e is UnitEntry ∧ e.unit_ref = u.unit_ref) → (e.obligations = u.obligations ∧ e.resolution = resolve_unit(u, K, R, S) ∧ e.capability_requirements = u.capability_requirements ∧ e.feasibility_notes = u.feasibility_notes))   -- the join rule's durable certificate: resolve_unit jointly supplies the completion disposition, its accepted-completion or reserved-completion witness when needed, and every typed conjunct; the emitted obligations/capability/feasibility fields are exact reads from the owning unit
-                 ∧ (∀p∈P: ∃! e ∈ E : e is PlanEntry ∧ e.scope = p.scope ∧ e.kind = p.kind ∧ e.condition = p.condition ∧ e.dischargeable_when = p.dischargeable_when)
-                 ∧ (∀e∈E: e is UnitEntry → ∃! u∈U: e.unit_ref = u.unit_ref)          -- reverse correspondence: no unapproved UnitEntry can ride in E
-                 ∧ (∀e∈E: e is PlanEntry → ∃ p∈P: e.scope = p.scope ∧ e.kind = p.kind ∧ e.condition = p.condition ∧ e.dischargeable_when = p.dischargeable_when)   -- reverse correspondence: no unapproved PlanEntry can ride in E
-                 ∧ plan_conditions_topology_free(P)
-                 ∧ (∀p∈P: p.scope = WholeGoalAcceptance → p.dischargeable_when = plan_terminal(|U|))   -- produced by BindPlanRequirements before the final check; the captured aggregate count prevents a dropped-unit projection from satisfying the terminal universal vacuously
-                 ∧ plan.units = {e ∈ E : e is UnitEntry}                             -- the RETURNED plan's units are exactly E's UnitEntry partition — produced by Phase 3 package from E
-                 ∧ plan.plan_conditions = {e ∈ E : e is PlanEntry}                   -- the RETURNED plan's plan conditions are exactly E's PlanEntry partition — produced by Phase 3 package from E
-                 ∧ (acceptance_present(P) ∨ Λ.unbounded_approved ∨ acceptance_reserved(Λ))   -- the acceptance question is closed one of three ways: a defined criterion, a recorded waiver, or a recorded reservation
-                 ∧ ¬(acceptance_present(P) ∧ Λ.unbounded_approved)                  -- a real acceptance condition and an unbounded waiver never both hold at emission
-                 ∧ ¬(acceptance_present(P) ∧ acceptance_reserved(Λ))                -- nor a real acceptance condition and a reservation: DefineNow drops the reservation on the same edge that adds the condition
-                 ∧ ¬(Λ.unbounded_approved ∧ acceptance_reserved(Λ))                 -- THE WAIVER/RESERVATION DISCRIMINATOR: exactly one of the two can stand at emission, so the converged plan alone answers whether the criterion was WAIVED (plan.unbounded_approved) or CORRECTLY LEFT OPEN (a ReservedAcceptance member of plan.reserved) — the two are never both set and never stand in for each other. This holds by construction: each of the two arms retracts the other, and DefineNow and an acceptance-introducing Adjust retract both
-                 ∧ oos_substrate_named(oos)
-                 ∧ (∀σ∈S: σ.ground ≠ "")                                             -- reservation_ground_named: every reservation names what settles it, as every out-of-scope declaration names its substrate
-                 ∧ (∃! e ∈ E : e is PlanEnvelopeEntry)                               -- exactly one envelope per emission
-                 ∧ (∀e∈E: e is PlanEnvelopeEntry → e.accepted_residuals = { AcceptedResidualEntry(ρ.obligation, ρ.unit.map(u ↦ u.unit_ref), ρ.kind) | ρ ∈ R : ρ.disposition = AcceptUncovered } ∧ e.reserved = S ∧ e.oos = oos ∧ e.unbounded_approved = Λ.unbounded_approved)   -- exact correspondence in BOTH directions, keyed by unit_ref rather than by obligation+kind; the reservation set carries across whole, its subjects distinguishing the unit-scoped members from the whole-goal one
-                 ∧ plan.accepted_residuals = (the PlanEnvelopeEntry of E).accepted_residuals
-                 ∧ plan.reserved = (the PlanEnvelopeEntry of E).reserved
-                 ∧ plan.oos = (the PlanEnvelopeEntry of E).oos
-                 ∧ plan.unbounded_approved = (the PlanEnvelopeEntry of E).unbounded_approved   -- the returned value READS BACK the emitted envelope rather than being re-derived beside it; produced by Phase 3 package from E
--- Rerouted (Qt RouteBound) is a deliberate non-emission exit — it does not claim ConditionBearingUnitPlan (see TYPES): the emitted result is well-formed exactly when apportioned(G) holds.
--- Each Phase 0 relay (no autonomous intent, composite goal, unreadable handoff, already condition-bearing)
--- precedes activation: init_loop_state never runs, so no clause of this predicate is entered or owed.
--- The guarantee is compile-time and pre-conduct (see the Apportion over Order invariant).
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
-── TOOL GROUNDING ──
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
+
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-!
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t
+
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
+-/
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- `G`, `AutonomousGoal`: the one stated outcome and everything the context carries about it —
+    the utterance, a prior protocol's output, the session. Nothing here rewrites it. -/
+abbrev AutonomousGoal (P : Type) := Context P
+
+/-- **Your reading** of `H`, the `ExecutionHorizon`: the budget one autonomous run is expected to
+    fit, read from the context as it now stands, with its cue cited. -/
+axiom horizon : Context P → String
+
+/-- A cited piece of material: where it is and what it says. -/
+structure Cited where
+  source  : String
+  content : String
+
+/-- `Obligation`: a stated or inferred requirement the goal must satisfy — the unit of coverage —
+    citing its evidence in the goal. -/
+structure Obligation where
+  statement : String
+  evidence  : String
+  deriving DecidableEq  -- elab: membership over obligation lists
+
+/-- **Your reading** of the requirements the goal states or implies, before the subtraction, read
+    afresh on every pass: a later turn can add one, narrow one, or take one back. -/
+axiom candidates : Context P → List Obligation
+
+/-- **Your judgment** (`host_standing_contract(G, o)`): `o` is goal-independent in the host the
+    work is carried out in — the host's standing procedural contract attaches it to every change
+    it accepts (its version or manifest discipline, its verification command, its branch,
+    worktree, or review path, its merge authority) — and `o` is not itself the outcome the goal
+    states. Read against the context as it now stands; a person's turn that says otherwise moves
+    it. -/
+axiom HostStanding : Context P → Obligation → Bool
+
+/-- `O_G`: the candidates with the host's standing contract subtracted. What is subtracted is never
+    cut, derived, or counted by coverage: every emitted unit inherits it. -/
+def obligations (c : Context P) : List Obligation :=
+  (candidates c).filter (fun o => !HostStanding c o)
+
+/-- What the subtraction removed. It stands on the sheet and in the plan, so a misjudged
+    subtraction is correctable. -/
+def subtracted (c : Context P) : List Obligation := (candidates c).filter (HostStanding c)
+
+/-- `OOSDeclaration`: an obligation whose violation must be caught before an action runs, and the
+    substrate that must catch it. A reserved item names no substrate and is never written here. -/
+structure OOSDeclaration where
+  obligation : Obligation
+  substrate  : String
+  basis      : Cited
+
+/-- **Your judgment** (`VelocityFilter`): the obligations of `O_G` guardable only by pre-action
+    interception, each with its substrate — judged afresh on every pass, since a changed context
+    can change what only interception can guard. -/
+axiom oos : Context P → List OOSDeclaration
+
+inductive SpanFit | fits | overflows | indeterminate
+  deriving DecidableEq  -- elab: the fit check compares verdicts
+
+/-- `Seam`: `grounded` cites the seam the goal evidences — a dependency, deliverable,
+    verification, or ownership seam, or another the goal actually evidences; `heuristic` is
+    declared where the goal carries none. -/
+inductive Seam
+  | grounded (evidence : Cited)
+  | heuristic
+
+/-- A unit of the plan: what it is about, the obligations it owns — never none — its horizon fit,
+    its declared seam, and what carrying it out requires. Capability requirements and feasibility
+    notes are functional descriptions read from the goal's stated needs, never a concrete
+    executor, model, runtime, or tool. A unit carries no identity across turns: whether a unit on
+    this sheet is one on an earlier sheet is your reading of the context, and the ledger says what
+    became of each. -/
+structure PlanUnit where
+  subject      : String
+  obligations  : List Obligation
+  nonempty     : obligations ≠ []
+  fit          : SpanFit
+  seam         : Seam
+  capabilities : List String
+  feasibility  : List String
+
+/-- **Your judgment**, made afresh on every pass: the units the plan holds as the context now
+    stands — what a person's turn set, on the scope their words reach, and your draft for the rest.
+    Together they partition `O_G` less the out-of-scope obligations: each obligation in exactly one
+    unit. Where a region admits more than one workable cut, draw one; a second cut that the goal's
+    evidence backs as well is a contrary ground you show, never a second unit. -/
+axiom units : Context P → List PlanUnit
+
+/-- An obligation some unit holds or some out-of-scope declaration names. -/
+def covered (c : Context P) (o : Obligation) : Bool :=
+  (units c).any (fun u => u.obligations.contains o) || (oos c).any (fun d => d.obligation == o)
+
+/-- What of `O_G` no unit holds and nothing sets out of scope: a hole in the plan, shown on the
+    sheet, and a plan with one is not taken. -/
+def residual (c : Context P) : List Obligation := (obligations c).filter (fun o => !covered c o)
+
+/-- `coverage_complete`. -/
+def coverageComplete (c : Context P) : Bool := (obligations c).all (covered c)
+
+/-- The units and the out-of-scope declarations partition what they hold: no obligation sits in two
+    units, or in a unit and out of scope, and nothing they hold lies outside `O_G`. -/
+def partitioned (c : Context P) : Bool :=
+  decide (((units c).flatMap (·.obligations) ++ (oos c).map (·.obligation)).Nodup) &&
+    (units c).all (fun u => u.obligations.all (obligations c).contains) &&
+    (oos c).all (fun d => (obligations c).contains d.obligation)
+
+/-- What the person's turn took a unit with, over a fit verdict that is not `fits`: the reason, and
+    for an `indeterminate` verdict the uncertainty named. -/
+abbrev Override := String
+
+/-- **Your judgment**: the cited turn takes `u` over its fit verdict. A turn that takes the whole
+    plan covers it where the verdict and your contrary ground were in view on the sheet it
+    answered; an `indeterminate` verdict is covered only by words that name the uncertainty. -/
+axiom OverrideSupported : PlanUnit → Context P → Turn P → Override → Prop
+
+/-- A unit that does not fit is taken only by the person's turn. -/
+def overrideCoord (u : PlanUnit) : Coord P Override :=
+  { admits := (·.val = .person), supports := OverrideSupported u }
+
+/-- **Your reading**: the person's taking of `u` over its fit; `open_` until one reaches it. -/
+axiom override : (c : Context P) → (u : PlanUnit) → Occ (overrideCoord (P := P) u) c
+
+def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
+  | .open_ _   => false
+  | .filled .. => true
+
+def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
+  | .open_ _     => none
+  | .filled a .. => some a
+
+/-- Every unit fits, or the person took it over its verdict. -/
+def fitSettled (c : Context P) : Bool :=
+  (units c).all (fun u => u.fit == .fits || isFilled (override c u))
+
+inductive PredicateKind | completion | invariant
+  deriving DecidableEq  -- elab: the certificate filters on kind
+
+/-- `κ`: a verifiable predicate — an executable check with a determinate pass/fail outcome — for
+    one obligation of its unit; a completion predicate says when the unit is done, an invariant a
+    boundary the interval preserves while completing. -/
+structure Compiled where
+  obligation : Obligation
+  kind       : PredicateKind
+  condition  : String
+
+/-- `ρ`: an obligation of its unit with no verifiable predicate, left unguarded. A taking of the
+    plan with it shown accepts it as uncovered. -/
+structure Residual where
+  obligation : Obligation
+  kind       : PredicateKind
+
+/-- `σ`: an obligation of its unit that a judgment settles — made against the context accumulated
+    by the moment the question comes live and what the person has actually said by then, so no
+    compile-time artifact stands in for it. Leaving it open is the correct disposition, not a
+    shortfall; `ground` names what settles it. It is neither a residual nor an out-of-scope
+    delegation. -/
+structure Reservation where
+  obligation : Obligation
+  kind       : PredicateKind
+  ground     : String
+  basis      : Cited
+
+/-- What one unit's derivation holds. -/
+structure Derivation where
+  compiled  : List Compiled
+  residuals : List Residual
+  reserved  : List Reservation
+
+/-- Every record names an obligation of its own unit. -/
+def Derivation.Bound (u : PlanUnit) (d : Derivation) : Prop :=
+  (∀ k ∈ d.compiled, k.obligation ∈ u.obligations) ∧
+  (∀ r ∈ d.residuals, r.obligation ∈ u.obligations) ∧
+  (∀ s ∈ d.reserved, s.obligation ∈ u.obligations)
+
+/-- **Your judgment** for `u`, made afresh on every pass: per obligation a verifiable predicate — a
+    completion or an invariant — a residual, or a reservation; every obligation of `u` lands in at
+    least one, and `Derivation.Bound u`. A condition a person's turn set stands on the scope their
+    words reach; where a change upstream leaves that scope unclear, the sheet names it and it stays
+    open. -/
+axiom derivation : Context P → PlanUnit → Derivation
+
+def Derivation.derives (d : Derivation) (o : Obligation) : Bool :=
+  d.compiled.any (·.obligation == o) || d.residuals.any (·.obligation == o) ||
+    d.reserved.any (·.obligation == o)
+
+/-- `obligations_derived`. -/
+def obligationsDerived (c : Context P) : Bool :=
+  (units c).all (fun u => u.obligations.all ((derivation c u).derives))
+
+structure LeafConjunct where
+  condition : String
+  kind      : PredicateKind
+
+/-- The unit's certificate: every compiled check, every gap accepted as uncovered, and every
+    reservation with the ground that settles it, completion and invariant alike, together. A
+    passing check never stands for the unit's done while a reserved judgment is still open, and a
+    reservation never hides an accepted gap. -/
+structure Certificate where
+  checks   : List LeafConjunct
+  accepted : List Residual
+  reserved : List Reservation
+
+def certificate (d : Derivation) : Certificate :=
+  { checks := d.compiled.map (fun k => ⟨k.condition, k.kind⟩)
+    accepted := d.residuals
+    reserved := d.reserved }
+
+/-- The certificate says when the unit is done: some completion check, accepted completion gap, or
+    completion reservation stands. -/
+def Certificate.terminates (k : Certificate) : Bool :=
+  k.checks.any (·.kind == .completion) || k.accepted.any (·.kind == .completion) ||
+    k.reserved.any (·.kind == .completion)
+
+/-- `termination_covered`. -/
+def terminationCovered (c : Context P) : Bool :=
+  (units c).all (fun u => (certificate (derivation c u)).terminates)
+
+inductive PlanScope | finalIntegration | globalNonRegression | wholeGoalAcceptance
+  | emergent (name : String)
+  deriving DecidableEq  -- elab: binding reads the scope
+
+/-- The predicate of a `PlanStateRequirement`. -/
+inductive Requirement
+  /-- a condition over a candidate plan, as derived -/
+  | stated (check : String)
+  /-- `plan_terminal(n)`: the candidate plan has exactly `n` unit certificates and each holds —
+      every check passes, and every accepted gap and reservation is carried in the plan -/
+  | planTerminal (units : Nat)
+
+/-- `PlanStateRequirement`: never without the evidence it rests on. Whether that evidence still
+    tracks what it asserts is the receiving side's judgment, not certified here. -/
+structure PlanStateRequirement where
+  predicate : Requirement
+  basis     : {l : List Cited // l ≠ []}
+
+/-- `PlanCondition`: a condition whose subject is the whole goal. -/
+structure PlanCondition where
+  scope             : PlanScope
+  kind              : PredicateKind
+  condition         : String
+  dischargeableWhen : PlanStateRequirement
+
+/-- **Your judgment**, made afresh on every pass: the conditions whose subject is the whole goal —
+    final integration, global non-regression, a whole-goal invariant, or another scope the goal
+    carries — never distributed across units. The whole-goal acceptance criterion is not among
+    them: it is the acceptance question below. -/
+axiom planConditions : Context P → List PlanCondition
+
+/-- How the whole-goal acceptance question is settled. -/
+inductive Acceptance
+  /-- a completion criterion for the whole goal -/
+  | defined (criterion : String)
+  /-- constitutively open: its right answer varies with the context accumulated by the moment the
+      goal is judged accepted and with what the person has said by then -/
+  | reserved
+  /-- a criterion the plan should have carried is waived -/
+  | waived
+
+/-- **Your judgment**: the cited turn settles the acceptance question this way — a criterion the
+    person stated, in the goal itself or later; the draft's criterion taken, which a taking of the
+    whole plan with it shown does; a reservation; or a waiver. Read against the context as it now
+    stands: a later settling replaces an earlier one, so one value stands. -/
+axiom AcceptanceSupported : Context P → Turn P → Acceptance → Prop
+
+/-- Only a person's turn settles the acceptance question. -/
+def acceptanceCoord : Coord P Acceptance :=
+  { admits := (·.val = .person), supports := AcceptanceSupported }
+
+/-- **Your reading**: the person's settling of the acceptance question; `open_` until one reaches
+    it. -/
+axiom acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
+
+/-- **Your draft** of a whole-goal acceptance criterion, shown on the sheet as the draft's until
+    the person settles the question; `none` where the goal gives you none to propose. -/
+axiom draftCriterion : Context P → Option String
+
+/-- `plan_terminal(n)`, whole: its predicate and the evidence it rests on, both over `n`. -/
+def planTerminal (n : Nat) : PlanStateRequirement :=
+  let src : Cited := ⟨"the current plan's unit certificates",
+    "expected unit certificate count = " ++ toString n⟩
+  ⟨.planTerminal n, ⟨[src], List.cons_ne_nil src []⟩⟩
+
+/-- Every whole-goal acceptance requirement is bound to plan-terminal over the current unit
+    count, so a plan that drops a unit cannot satisfy it vacuously. -/
+def bindPlan (c : Context P) (p : PlanCondition) : PlanCondition :=
+  if p.scope == .wholeGoalAcceptance then { p with dischargeableWhen := planTerminal (units c).length }
+  else p
+
+/-- The defined criterion as a completion condition over the whole goal. -/
+def acceptanceCondition (c : Context P) : Option PlanCondition :=
+  match filledValue (acceptance c) with
+  | some (.defined d) =>
+    let src : Cited := ⟨"the turn that settled the whole-goal acceptance criterion", d⟩
+    some ⟨.wholeGoalAcceptance, .completion, d, ⟨.stated d, ⟨[src], List.cons_ne_nil src []⟩⟩⟩
+  | _ => none
+
+/-- `P`, bound. -/
+def planOf (c : Context P) : List PlanCondition :=
+  ((planConditions c) ++ (acceptanceCondition c).toList).map (bindPlan c)
+
+/-- **Your judgment** (`topology_free`) over a requirement's content: it names no unit identity,
+    move, move region, or order position. A reading over content, not a structural proof: where it
+    fails, it is a contrary ground on the sheet, never a refusal of the person's taking. -/
+axiom TopologyFree : Context P → PlanStateRequirement → Bool
+
+/-- What the sheet shows about the plan's shape. -/
+structure Status where
+  coverageComplete       : Bool
+  partitioned            : Bool
+  fitSettled             : Bool
+  obligationsDerived     : Bool
+  terminationCovered     : Bool
+  oosSubstrateNamed      : Bool
+  reservationGroundNamed : Bool
+  acceptanceSettled      : Bool
+  planNonempty           : Bool
+  topologyFree           : Bool
+
+def status (c : Context P) : Status :=
+  { coverageComplete := coverageComplete c
+    partitioned := partitioned c
+    fitSettled := fitSettled c
+    obligationsDerived := obligationsDerived c
+    terminationCovered := terminationCovered c
+    oosSubstrateNamed := (oos c).all (fun d => d.substrate != "")
+    reservationGroundNamed := (units c).all (fun u => (derivation c u).reserved.all (·.ground != ""))
+    acceptanceSettled := isFilled (acceptance c)
+    planNonempty := !(units c).isEmpty || !(oos c).isEmpty
+    topologyFree := (planOf c).all (fun p => TopologyFree c p.dischargeableWhen) }
+
+/-- What a taking needs from the plan's structure; a plan with nothing in it is never taken.
+    Topology-freedom is not among them: it is your reading over content, and it stands as a
+    contrary ground. -/
+def Structural (c : Context P) : Bool :=
+  let s := status c
+  s.coverageComplete && s.partitioned && s.fitSettled && s.obligationsDerived &&
+    s.terminationCovered && s.oosSubstrateNamed && s.reservationGroundNamed && s.acceptanceSettled &&
+    s.planNonempty
+
+/-- **Your judgment**, the adoption condition: every value the taking would take was shown on a
+    sheet the person answered — who proposed it and how it came to stand, its ground, and your
+    contrary grounds; a value the taking turn itself sets counts where its consequences were in
+    view. Where anything would be taken unseen, the sheet is drawn again. -/
+axiom Covered : Context P → Prop
+
+/-- A line of the sheet, named as the sheet shows it — the goal, a unit, a condition, a plan
+    condition, the acceptance criterion, a subtraction, an out-of-scope declaration. -/
+abbrev Entry := String
+
+/-- **Your reading**: the lines the sheet shows as the context now stands — every line on every
+    sheet, unchanged ones included. -/
+axiom entries : Context P → List Entry
+
+/-- Who first put a value forward. Kept apart from how the value came to stand: a unit the draft
+    proposed and the person kept while moving another was proposed by the draft and set by the
+    person. -/
+inductive Proposer | draft | person
+
+/-- **Your reading**: the position of the turn that first put forward what `e` holds now. -/
+axiom introducedAt : Context P → Entry → Nat
+
+def proposer (c : Context P) (e : Entry) : Proposer :=
+  match c[introducedAt c e]? with
+  | some ⟨.person, _⟩ => .person
+  | _                 => .draft
+
+/-- How a value came to stand: a person's turn set it, or the taking adopted the draft's. -/
+inductive Standing | set | adopted
+
+/-- **Your reading**: a person's turn set what `e` holds now — named it, edited it, or chose it —
+    on the scope their words reach. -/
+axiom setByPerson : Context P → Entry → Bool
+
+def standing (c : Context P) (e : Entry) : Standing := if setByPerson c e then .set else .adopted
+
+structure Provenance where
+  entry    : Entry
+  proposer : Proposer
+  standing : Standing
+
+def provenance (c : Context P) : List Provenance :=
+  (entries c).map (fun e => ⟨e, proposer c e, standing c e⟩)
+
+/-- What a ledger line records. -/
+inductive LedgerKind
+  /-- the person's own edit -/
+  | personEdit
+  /-- a value the draft re-filled because an edit forces it -/
+  | necessary
+  /-- a value the draft re-filled because you propose it -/
+  | proposal
+
+/-- One change since the last sheet: what changed, the edit that caused it, and its kind. A
+    removed unit and a replaced value stay in the ledger with what they were. -/
+structure LedgerLine where
+  change : String
+  cause  : Option Entry
+  kind   : LedgerKind
+
+/-- **Your record**: what the latest turn changed, the person's edits first. -/
+axiom ledger : Context P → List LedgerLine
+
+/-- One concrete action for the focus: what it would change, and what then happens. -/
+structure Action where
+  edit        : String
+  consequence : String
+
+/-- The one open point the sheet asks about. -/
+structure Focus where
+  item    : String
+  actions : List Action
+
+/-- **Your selection** of the focus: a hole in coverage first, then a unit that does not fit, then
+    the acceptance question, then the point whose change would most change the plan; `none` where
+    nothing is open and the question is whether to take the plan. -/
+axiom focus : Context P → Option Focus
+
+/-- **Your judgment**: the ground clearly separates action `i` of `f` from the others — not that it
+    is somewhat better. -/
+axiom Separates : Context P → Focus → Nat → Prop
+
+/-- **Your recommendation** for `f`: an action the ground clearly separates, carried with that
+    judgment; `none` where the actions are comparable, and then each stands beside its consequence
+    alone. -/
+axiom recommend : (c : Context P) → (f : Focus) → Option {i : Nat // Separates c f i}
+
+/-- **Your record**: the contrary grounds you showed before the person's answers — a plan
+    condition you read as naming topology, a cut a second reading backs as well, a subtraction or
+    a classification you would make otherwise, a unit you expect not to fit — attached to the plan
+    when the person takes it over them; empty when there were none. -/
+axiom dissent : Context P → List String
+
+/-- How the person ends the run. -/
+inductive Closing
+  /-- take the plan as the sheet shows it -/
+  | take
+  /-- stop here, with no plan -/
+  | stop
+  /-- go on to the protocol the person names -/
+  | route (target : String)
+
+/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
+    stands, the order of its turns included: a closing said before a later sheet was presented was
+    answered by that sheet. An answer to the focus closes nothing; taking the plan is said of the
+    plan. -/
+axiom ClosingSupported : Context P → Turn P → Closing → Prop
+
+/-- Only the person closes. -/
+def closeCoord : Coord P Closing :=
+  { admits := (·.val = .person), supports := ClosingSupported }
+
+/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
+axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
+
+/-- The plan may be taken: its structure holds and everything it takes was shown. -/
+def Closable (c : Context P) : Prop := Structural c = true ∧ Covered c
+
+/-- `UnitRef`: assigned at emission, one per unit, never shared. -/
+abbrev UnitRef := Nat
+
+/-- `JudgmentReservation` as emitted. -/
+inductive ReservedSubject
+  | obligation (o : Obligation)
+  /-- the whole-goal acceptance criterion itself, which names no obligation -/
+  | acceptance
+
+def ReservedSubject.isAcceptance : ReservedSubject → Bool
+  | .acceptance   => true
+  | .obligation _ => false
+
+structure JudgmentReservation where
+  subject : ReservedSubject
+  unit    : Option UnitRef
+  kind    : PredicateKind
+  ground  : String
+  basis   : Cited
+
+/-- The reserved acceptance criterion: its ground is the same in every plan that reserves it. -/
+def acceptanceReservation : JudgmentReservation :=
+  { subject := .acceptance, unit := none, kind := .completion,
+    ground := "the context accumulated by the moment the goal is judged accepted, together with what the person has actually said by then",
+    basis := ⟨"the person's reservation of the whole-goal acceptance criterion",
+      "the criterion's right answer varies with that ground, so fixing it now would settle a live question where the person is not present"⟩ }
+
+structure UnitEntry where
+  ref          : UnitRef
+  subject      : String
+  obligations  : List Obligation
+  certificate  : Certificate
+  capabilities : List String
+  feasibility  : List String
+
+structure AcceptedResidualEntry where
+  obligation : Obligation
+  unit       : UnitRef
+  kind       : PredicateKind
+
+/-- The envelope: the accepted gaps, the reservations, the out-of-scope set, the subtraction, and
+    the waiver kept apart from the reserved criterion, so a reader of the plan alone tells a
+    waived criterion from one correctly left open. -/
+structure Envelope where
+  acceptedResiduals : List AcceptedResidualEntry
+  reserved          : List JudgmentReservation
+  oos               : List OOSDeclaration
+  subtracted        : List Obligation
+  waived            : Bool
+
+/-- `E`: one entry per unit, one per plan condition, and exactly one envelope. -/
+structure Emission where
+  units          : List UnitEntry
+  planConditions : List PlanCondition
+  envelope       : Envelope
+
+def numbered {α : Type} (l : List α) : List (Nat × α) := (List.range l.length).zip l
+
+def entry (i : UnitRef) (u : PlanUnit) (k : Certificate) : UnitEntry :=
+  ⟨i, u.subject, u.obligations, k, u.capabilities, u.feasibility⟩
+
+def envelope (c : Context P) : Envelope :=
+  let a := filledValue (acceptance c)
+  { acceptedResiduals := (numbered (units c)).flatMap (fun (i, u) =>
+      (derivation c u).residuals.map (fun r => ⟨r.obligation, i, r.kind⟩))
+    reserved := (numbered (units c)).flatMap (fun (i, u) => (derivation c u).reserved.map (fun s =>
+        ⟨.obligation s.obligation, some i, s.kind, s.ground, s.basis⟩)) ++
+      (match a with | some .reserved => [acceptanceReservation] | _ => [])
+    oos := oos c
+    subtracted := subtracted c
+    waived := match a with | some .waived => true | _ => false }
+
+/-- `Emit`. -/
+def emit (c : Context P) : Emission :=
+  { units := (numbered (units c)).map (fun (i, u) => entry i u (certificate (derivation c u)))
+    planConditions := planOf c
+    envelope := envelope c }
+
+/-- `ConditionBearingUnitPlan`, with the dissent the taking carried and how each value came to
+    stand. -/
+structure ConditionBearingUnitPlan where
+  units             : List UnitEntry
+  planConditions    : List PlanCondition
+  acceptedResiduals : List AcceptedResidualEntry
+  reserved          : List JudgmentReservation
+  oos               : List OOSDeclaration
+  subtracted        : List Obligation
+  waived            : Bool
+  dissent           : List String
+  provenance        : List Provenance
+
+/-- `package`: the returned plan read back from what was emitted, never derived beside it. -/
+def package (e : Emission) (ds : List String) (pv : List Provenance) : ConditionBearingUnitPlan :=
+  { units := e.units, planConditions := e.planConditions,
+    acceptedResiduals := e.envelope.acceptedResiduals, reserved := e.envelope.reserved,
+    oos := e.envelope.oos, subtracted := e.envelope.subtracted, waived := e.envelope.waived,
+    dissent := ds, provenance := pv }
+
+structure HandoffLocator where
+  record  : String
+  session : String
+
+/-- `N`, `NavigationBlock`: the fixed cross-session shape — a pointer, never a copied record. -/
+structure NavigationBlock where
+  purposeFrame           : String
+  canonicalLocator       : HandoffLocator
+  dereferenceInstruction : String
+  snapshotAnchor         : Option String
+  groundingInstruction   : String
+
+/-- **Your reading**: the navigation block the context supplies — a prior `/apportion` block over
+    the goal, or another protocol's; `none` otherwise. -/
+axiom pointer : Context P → Option NavigationBlock
+
+/-- **Your reading** at activation: follow the block's dereference instruction at its locator and
+    run its grounding instruction; what the carrier returns enters the context. Nothing when there
+    is no pointer. -/
+axiom groundPointer : Context P → List (Evidence P)
+
+def bindPointer (c : Context P) : Context P := c ++ (groundPointer c).map (·.val)
+
+/-- **Your judgment**: the pointer is unreachable or missing half its locator, or compiling this
+    goal needs a premise its record does not support. An unsupported downstream judgment the
+    compilation can leave open is not this: it stays reserved. False without a pointer. -/
+axiom PointerUnreadable : Context P → Prop
+
+/-- **Your judgment**: an autonomous interval is in scope. -/
+axiom AutonomousIntent : Context P → Prop
+
+/-- **Your judgment**, read off what the goal states: one outcome. Several stated outcomes bound
+    only by the host's standing procedural contract are a bundle. -/
+axiom SingleGoal : Context P → Prop
+
+/-- **Your judgment**, against the plan read back from the carrier the pointer names: its units and
+    conditions are already present, every unit's certificate saying when it is done. -/
+axiom ConditionBearing : Context P → Prop
+
+/-- **Your record**: the identity the carrier-creating write returned; empty where none returned. -/
+axiom carrierRecord : Context P → String
+
+/-- **Your reading** of what the writes returned: the emission was recorded and the carrier holds
+    the whole packaged plan — not only an identity allocated for it. -/
+axiom CarrierComplete : Context P → Prop
+
+/-- **Your record**: this session's id. -/
+axiom sessionId : Context P → String
+
+/-- **Your reading**: what a receiving session needs to know the plan is for. -/
+axiom purposeFrame : Context P → String
+
+/-- **Your reading**: a snapshot anchor, only where exact-state determinacy is needed. -/
+axiom snapshotAnchor : Context P → Option String
+
+/-- `GroundingInstruction`: the receiving procedure the block carries. -/
+def receivingProcedure : String :=
+  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and judgment authority from the governing utterances and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires. Stop dependent work when a decision-bearing source is unreachable or a needed premise lacks support-integrity; a coordinator's summary does not substitute for source wording that settles authority. Surface the plan's reservations with their settling grounds and the dissent it carries. Resolve a live item within an applicable grant, or put its open question to the person retaining that judgment; where its question is still future, keep it open and continue independent work. A reservation supplies no answer, actor assignment, or blanket stop; a coordinator's response or a completed predicate supplies no act reserved to someone else."
+
+/-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
+def navigation (c : Context P) : NavigationBlock :=
+  { purposeFrame := purposeFrame c
+    canonicalLocator := ⟨carrierRecord c, sessionId c⟩
+    dereferenceInstruction := "read the carrier record at the canonical locator's record identity, within the session it names; one read yields the whole plan"
+    snapshotAnchor := snapshotAnchor c
+    groundingInstruction := receivingProcedure }
+
+/-- `handoff_recorded`, its structural half: the block locates the carrier the write returned, both
+    halves present, and states its purpose. That it was presented is the text itself. -/
+def HandoffRecorded (n : NavigationBlock) (c : Context P) : Prop :=
+  n.purposeFrame ≠ "" ∧ n.canonicalLocator = ⟨carrierRecord c, sessionId c⟩ ∧
+    n.canonicalLocator.record ≠ "" ∧ n.canonicalLocator.session ≠ ""
+
+/-- The writes landed: the carrier holds the plan, and the block locates it. -/
+def Recorded (n : NavigationBlock) (c : Context P) : Prop := CarrierComplete c ∧ HandoffRecorded n c
+
+/-- Why the run ends without a plan, on your judgment rather than the person's. -/
+inductive RelayKind
+  | noAutonomousInterval
+  /-- the relay names each stated outcome and the shared-procedure bond; one apportionment per
+      goal -/
+  | compositeGoal
+  | handoffUnreadable
+  | conditionBearing
+  /-- nothing could be read from the goal's scope -/
+  | tooThin
+
+/-- The emitted result: the context after the writes, what was emitted, the plan read back from
+    it, and the navigation block over its carrier. -/
+structure Apportioned (P : Type) where
+  context    : Context P
+  emission   : Emission
+  plan       : ConditionBearingUnitPlan
+  navigation : NavigationBlock
+
+inductive Outcome (P : Type)
+  | relayed     (kind : RelayKind) (c : Context P)
+  /-- the person stopped: nothing is emitted -/
+  | withdrawn   (c : Context P)
+  /-- the person named another protocol: proceed to it, citing their words -/
+  | routed      (target : String) (c : Context P)
+  /-- the person took the plan, and the navigation block records its carrier -/
+  | apportioned (a : Apportioned P)
+  | holding     (c : Context P)
+
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else; every reading above is taken from it. Coverage
+partition: the units' obligations, the out-of-scope obligations, and the holes together are
+`O_G` — the holes by construction, and no obligation in two cells nor outside `O_G` wherever a
+taking is read, as `partitioned` checks. The host's standing contract is subtracted before `O_G`
+exists, and a reservation stays in the unit it belongs to, so neither is a fourth cell. Nothing persists
+into the execution interval.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-! ── PHASE TRANSITIONS ──
+A step is one arm of a structural recursion over the person's utterances. A pass is the silent
+work: the reads the plan needs enter the context, then the pass's record — the plan judged afresh,
+each value with how it came to stand. `respond` presents the sheet; a taking over a closable plan
+writes the emission and the carrier instead.
+-/
+
+/-- **Your reads** for a pass: the goal's cited material, and seam evidence over its substrate. -/
+axiom collect : Context P → List (Evidence P)
+
+/-- **Your record** of a pass, once its reads have entered the context: the plan as judged —
+    units, conditions, plan conditions, the acceptance question, subtraction and out-of-scope
+    classification, provenance, the ledger, your contrary grounds, and the focus. A record grounds
+    nothing. -/
+axiom passRecord : Context P → List (Response P)
+
+def pass (c : Context P) : Context P :=
+  let c₁ := c ++ (collect c).map (·.val)
+  c₁ ++ (passRecord c₁).map (·.val)
+
+/-- **Your action** on a taking: the Emit record write of `emit c`, then the write of the packaged
+    plan into one new carrier record; each returns what it wrote and its identity. -/
+axiom persist : Context P → List (Evidence P)
+
+def close (c : Context P) : Apportioned P :=
+  let c₃ := c ++ (persist c).map (·.val)
+  { context := c₃, emission := emit c, plan := package (emit c) (dissent c) (provenance c),
+    navigation := navigation c₃ }
+
+def tooThin (c : Context P) : Bool := (obligations c).isEmpty
+
+open Classical in
+def relayAt (c : Context P) : Option RelayKind :=
+  if ¬ AutonomousIntent c then some .noAutonomousInterval
+  else if ¬ SingleGoal c then some .compositeGoal
+  else if PointerUnreadable c then some .handoffUnreadable
+  else if ConditionBearing c then some .conditionBearing
+  else none
+
+open Classical in
+/-- `respond` presents the sheet. First the whole plan: every unit with its obligations, fit, seam
+    with its citation or heuristic declaration, capabilities and feasibility, and its certificate —
+    checks, residuals, reservations with their grounds; the plan conditions with the requirement
+    that makes each safe to discharge; the acceptance question — the person's settling, or the
+    draft's criterion marked as the draft's; the out-of-scope obligations with their substrates;
+    what was subtracted as the host's standing contract; any hole; each field labelled by the
+    question it answers, in the person's everyday words; each value marked the person's or the
+    draft's. Then the ledger, the person's edits first, each re-fill pointing to its cause
+    and marked necessary or proposal. Then your contrary grounds. Then the focus with its actions,
+    each with its consequence, an action marked recommended only as `recommend` carries it; with
+    nothing open, whether to take the plan, and what a taking would not yet satisfy. After a
+    carrier write that came back incomplete, the sheet says what is missing and that nothing was
+    closed. Wherever a person's earlier turn is read as setting a value, the sheet says which turn
+    and what was taken from it, quoting their words. -/
+def apportion (respond : Context P → Response P) :
+    Context P → List (Utterance P) → Outcome P
+  | c, []      => .holding c
+  | c, u :: us =>
+    let c₁ := pass (fuse c u)
+    match filledValue (closing c₁) with
+    | some .stop      => .withdrawn c₁
+    | some (.route t) => .routed t c₁
+    | some .take =>
+      if Closable c₁ then
+        if Recorded (close c₁).navigation (close c₁).context then .apportioned (close c₁)
+        else apportion respond ((close c₁).context ++ [(respond (close c₁).context).val]) us
+      else apportion respond (c₁ ++ [(respond c₁).val]) us
+    | none => apportion respond (c₁ ++ [(respond c₁).val]) us
+
+def start (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  let c₁ := bindPointer c
+  match relayAt c₁ with
+  | some k => .relayed k c₁
+  | none =>
+    let c₂ := pass c₁
+    if tooThin c₂ then .relayed .tooThin c₂
+    else apportion respond (c₂ ++ [(respond c₂).val]) us
+
+/-! ── LOOP ──
+Every sheet re-judges the whole plan against the whole context: nothing counts down, no stage is
+entered, and no answer is held for a later gate. A person's edit reaches what their words reach —
+one unit, a region, a condition, the acceptance question — and the draft re-fills what depends on
+it, the ledger saying which re-fills are forced and which you propose. A cut sent back, a unit
+reopened, a condition adjusted are all edits of the same kind. The loop is dialogue: each sheet
+ends at the focus, and the person ends the run. The run holds no state into the execution interval.
+-/
+
+/-!
+Silence takes nothing and emits nothing.
+theorem silence (respond : Context P → Response P) (c : Context P) :
+    apportion respond c [] = .holding c
+
+A pass only adds to the context.
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
+
+The plan is apportioned only on the person's taking, over a closable plan, with the navigation
+block recording its carrier.
+theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .take ∧ Closable c₁ ∧ a = close c₁ ∧
+      Recorded a.navigation a.context
+
+A withdrawal is the person's stop, and a route the protocol the person named.
+theorem withdrawn_on_stop (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (c₁ : Context P) (h : apportion respond c us = .withdrawn c₁) :
+    filledValue (closing c₁) = some .stop
+
+theorem routed_on_route (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (t : String) (c₁ : Context P)
+    (h : apportion respond c us = .routed t c₁) : filledValue (closing c₁) = some (.route t)
+
+Every closing rests on a turn the person sent.
+theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
+
+Only a person's turn settles the acceptance question, or takes a unit over its fit.
+theorem acceptance_by_person {c : Context P} {s : Cite c}
+    (ok : (acceptanceCoord (P := P)).admits s.src) : s.src.val = .person
+
+theorem override_by_person {c : Context P} {u : PlanUnit} {s : Cite c}
+    (ok : (overrideCoord (P := P) u).admits s.src) : s.src.val = .person
+
+A recommendation is always one the ground clearly separates.
+theorem recommended_separates (c : Context P) (f : Focus) (i : {i : Nat // Separates c f i})
+    (_ : recommend c f = some i) : Separates c f i.val
+-/
+
+/-! ── CONVERGENCE ──
+apportioned(G): the person took the plan with everything it holds in view, its structure held —
+never an empty plan — the carrier holding the whole plan, and the navigation block over it
+presented (`Recorded`).
+The taking adopted what the draft proposed and accepted every residual shown; it established
+nothing about whether a check is the right one, and a contrary ground it was taken over rides the
+plan as dissent.
+withdrawn: the person stopped; nothing is emitted. routed: the person named the next protocol.
+Convergence evidence, at emission: (a) the goal restated as its units, one plain sentence each;
+(b) per unit, the obligations, the seam with its citation or heuristic declaration, the fit or the
+person's taking over it with their words, the certificate — every check, every accepted gap, every
+reservation with its ground — and the capability requirements and feasibility notes; (c) the plan
+conditions with the requirement that makes each safe to discharge; (d) every out-of-scope
+obligation with its substrate, and what was subtracted as the host's standing contract; (e) the
+acceptance question as settled — the criterion and whose it was, the reservation stated as left
+open on purpose, or the waiver — never two of these; (f) how each value came to stand — who
+proposed it, set or adopted — and the turns read as setting values, quoted; (g) the dissent the
+plan carries. Demonstrated, not asserted.
+-/
+
+/-!
+Coverage is complete exactly when no hole remains.
+theorem residual_empty_iff_covered (c : Context P) :
+    residual c = [] ↔ coverageComplete c = true
+
+On a closable plan every unit's certificate says when it is done.
+theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c) :
+    (certificate (derivation c u)).terminates = true
+
+A reservation is never hidden by a passing check: it stands in the certificate with its ground.
+theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
+    s ∈ (certificate d).reserved
+
+A closable plan is never empty: it holds a unit or an out-of-scope declaration.
+theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ []
+
+A unit that does not fit stands on a closable plan only by the person's taking over its verdict.
+theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c)
+    (hf : u.fit ≠ .fits) :
+    ∃ (a : Override) (s : Cite c) (ok : (overrideCoord (P := P) u).admits s.src)
+      (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup
+
+Every unit carries its own ref, and no two share one.
+theorem emitted_refs_nodup (c : Context P) : ((emit c).units.map (·.ref)).Nodup
+
+Every whole-goal acceptance requirement is plan-terminal over the current unit count.
+theorem acceptance_bound_to_units (c : Context P) (p : PlanCondition) (hp : p ∈ planOf c)
+    (hs : p.scope = .wholeGoalAcceptance) :
+    p.dischargeableWhen = planTerminal (units c).length
+
+The waiver and the reserved criterion never stand together in what is emitted.
+theorem waiver_reservation_exclusive (c : Context P) :
+    ¬ ((envelope c).waived = true ∧ (envelope c).reserved.any (·.subject.isAcceptance) = true)
+
+The returned plan reads back what was emitted.
+theorem plan_reads_back (e : Emission) (ds : List String) (pv : List Provenance) :
+    (package e ds pv).units = e.units ∧ (package e ds pv).planConditions = e.planConditions ∧
+      (package e ds pv).reserved = e.envelope.reserved ∧
+      (package e ds pv).waived = e.envelope.waived
+
+The navigation block locates the carrier the write returned.
+theorem navigation_locates_carrier (c : Context P) :
+    (navigation c).canonicalLocator = ⟨carrierRecord c, sessionId c⟩
+-/
+
+/-! ── TOOL GROUNDING ── -/
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Probe        (observe)      → record read, artifact read (autonomous intent + goal singleness + uncompiled-plan detection over the goal; cue cited. Singleness is read off what G states: several stated outcomes bound only by the host's standing procedural contract are a bundle, since that contract attaches to any work there — the verdict is about G, never about whether some individual obligation is derivable. When the scan finds a prior /apportion navigation block, this step DEREFERENCES it — reading the ONE carrier record at the locator's record identity within the session that locator names, then running the grounding instruction — and decides condition_bearing against the plan read back from that carrier, whose accepted_residuals and reserved fields are what close its accepted-uncovered and reserved units respectively. An unreachable carrier, a locator missing either half, or unsupported ground required to assess or compile this goal's plan surfaces the handoff as unreadable and deactivates; it never falls through to fresh compilation. Run the incoming grounding instruction once for this receiving record; apply its recovered grounds and authority limits to each reservation, following any additional source that item requires. An unsupported downstream judgment that current compilation can leave open remains reserved and does not block independent compilation. With no navigation block in scope at all the step is internal analysis over the goal alone, and the uncompiled path is correct)
-Phase 0 relay        (extension)    → TextPresent+Proceed (no autonomous interval in scope, a composite goal, or the plan already carries units and conditions: surface the scan result; deactivate without activating. On the composite arm the surfaced result names each stated outcome the request bundles and the shared-procedure bond that made them read as one, so the user re-invokes once per goal rather than receiving units cut across them)
-Phase 0 ReadObligations (observe)   → record read, artifact read (construct O_G once as G.obligations, a local read, never a G mutation. The same step SUBTRACTS every requirement the host attaches to any change regardless of the goal — its standing procedural contract — because such a requirement is an ambient invariant every emitted unit inherits rather than something this goal generated; leaving it in would make every goal in that host read the same inflated set and bury the goal's own obligations among them. The subtraction is not a delegation: no OOSDeclaration is written, since nothing is being handed to a pre-action interceptor. When it leaves nothing behind, the run reaches Phase 1 with residual = ∅, U = ∅ and oos = ∅ and takes the existing too-thin relay rather than emitting an empty plan. Produces the set VelocityFilter, residual seeding, and coverage_complete consume)
-Phase 0→1 VelocityFilter (sense)    → Internal analysis (obligations guardable only by pre-action interception; computed from O_G on the Phase 0 → Phase 1 edge alongside init_loop_state and only there, before residual is seeded, so an out-of-scope obligation never enters the packing loop and Phase 2's Reopen back-edge re-enters the packing loop without recomputing this partition; empty scope with no obligation and no delegation relays rather than proceeding)
-Phase 1 Scan         (observe)      → artifact read, artifact search (optional seam evidence gathering over the goal's cited substrate; read-only)
-Phase 1 Pack         (sense)        → Internal analysis (apportionment search: units fitting one horizon, coverage over obligations; produces a DRAFT when it finds a cut — an empty Anchor IS this step's no-cut verdict and yields no draft, which is why the exhaustion arms are decided before fit and qualify run — and fit and seam are written later by complete_unit, so what Pack yields does not yet inhabit ProposedUnit; reads each proposed unit's capability requirements and feasibility notes from the goal's stated needs — functional descriptions only, never a concrete executor/model/runtime/tool token (Substrate Boundary). The search may well turn up more than one workable cut of the same Anchor; what it does with that is DRAW ONE. The draft is a partition, so standing both in it would leave two cuts claiming one obligation — the defect draft's own termination bound forbids, not an option put on offer. It records nothing about the cut it did not draw: whether that second reading deserves the reader belongs to the relay step, made later against the surfaced whole, and a verdict fixed here would settle it before the reader had the draft in hand)
-Phase 1 fit          (sense)        → Internal analysis (per-unit horizon-fit verdict; Indeterminate surfaced, never read as Fits)
-Phase 1 qualify      (sense)        → Internal analysis (seam quality: Grounded with its citation — the four named seam kinds are what this scan looks for, and any other seam the goal actually evidences qualifies the same way — or Heuristic declared when no evidence is there)
-Phase 1 draft        (observe)      → artifact read, artifact search (the whole-draft pass: iterate Scan/Pack/fit/qualify/complete_unit over a workset COPIED from residual until every obligation in that workset sits in a completed cut, then stop. The substrate contact is Scan's alone and it is optional — a pass with no seam evidence to gather reads nothing — but what this entry names is the capability the pass MAY need, which is why the transition marks it as dispatching while the four steps it iterates beside Scan are internal. Each cut gets its own qualify verdict, so a Grounded seam stays Grounded and only what no seam evidence reaches falls to autonomous_pack — drafting at once is not drafting uniformly heuristic. This step OWNS NOTHING: the workset is a copy, no obligation leaves Λ.residual here, and integrate remains the sole owner-changing step, so the coverage partition sees nothing drafting does and gains no fourth cell. What it yields is a PARTITION of that workset — one cut per obligation, never two claims on one, which is the same fact its termination bound rests on. Where a region admits more than one workable apportionment it draws one way and records nothing about the other: it SETTLES nothing and stores no verdict, and whether a second reading deserves the user is judged downstream against the surfaced whole. Nothing it produces survives the cycle: the next cycle discards it and drafts the residual as it then stands)
-Phase 1 surface_draft (extension)   → TextPresent+Proceed (put the WHOLE draft in front of the reader before any one cut is settled — every cut with its obligations, its fit verdict, and its seam disposition with citation or heuristic declaration. Relay: it opens no fork, and the forks that follow are each judged against what it made visible. This is the step Whole Draft over Serial Cut names — without it the reader accepts a fragment whose siblings are still unwritten, and a cut found wrong later forces back open what was already accepted blind. It carries one thing beyond the cuts: the STANDING AFFORDANCE to send any of them back, stated here rather than left for the reader to discover at a later gate. A partition's alternatives cannot be enumerated the way an axis's named values can, so what discharges the cut's openness is not a list of rival cuts but this affordance travelling beside it. Naming it here is what makes the correction cheap: at this point nothing is derived, while the same correction taken at Qc invalidates conditions already compiled and marks the plan-level ones stale. It is a free-response pathway, not a gate option — it yields no turn of its own, and where it lands depends on what has happened to the cut: a still-unsettled one is reached by Recut at this cycle's Qu, which carries the target as well as the direction, and one this cycle already integrated is reached by Reopen at the confirmation gate, the one path that returns an owned obligation to residual. Both are named on the surface, so the affordance promises what the transitions actually admit)
-Phase 1 relay        (extension)    → TextPresent+Proceed (this path opens only where every cut in the surfaced draft cites a seam the goal evidences: a heuristic cut is the AI's own guess, and a guess is where anchoring bites — a drafted answer moving the reader from constituting the apportionment to approving one — so one of them sends the draft to the gate entire rather than only itself, a cut with an arbitrary boundary giving its neighbours arbitrary boundaries too. What makes relaying an evidenced draft safe is what this protocol can reach: nothing it relays touches a substrate, no obligation's ownership becomes durable until Phase 3 parks the plan, and Qc stands between the two — so a cut relayed here is still correctable at a gate the user holds, and a stop before that would spend attention on a confirmation the flow already provides. Within an open relay path, a cut that fits its horizon and that no second reading contests — no alternative apportionment of its obligations stands up to the same evidence — is accepted without a turn yield. This is the option-set relay test, read HERE and read LIVE rather than looked up from anything an earlier step computed: whether a region's other cut deserves the user's weighing varies with what the goal turned out to contain and with what the user has said, so fixing it before the draft existed would settle it where the reader is not yet present. The alternative is never IN D — D carries one cut per obligation — so this compares the drawn cut against a reading, never against a sibling standing beside it)
-Phase 1 autonomous_pack (sense)     → Internal analysis (drafting's own fallback, and now only that: INSIDE a draft pass, once the seam scan has run out of evidence over what is left of the workset, pack that remainder at Heuristic seams — judging fit and running complete_unit on each, so what it adds to the draft are completed ProposedUnit values built by the same constructor the seam-grounded cuts use, never a second inhabitant; capability requirements and feasibility notes read exactly as Pack reads them. EVERY obligation it touches lands in some completed cut — obligations no heuristic seam places become one final cut anchored on themselves, its fit judged like any other — which is what lets draft terminate with its workset empty and no obligation left uncut. Each cut it makes carries its Heuristic declaration to surface_draft, so the reader sees which parts of the draft the goal's own evidence shaped and which parts it could not. It integrates nothing and settles nothing: what it makes enters the draft, and every cut in that draft is then dispatched by the same relay-or-gate reading as any other. The Sufficient trigger this step used to carry is GONE — Sufficient now settles the draft the reader was shown, and routing it back through here would re-pack at heuristic seams a remainder the reader had already seen cut at grounded ones)
-Phase 1 Qu           (constitution) → present (the contested cut [ProposedUnit], carrying its own horizon-fit verdict and seam quality with its basis + current cut-set + the draft's still-unsettled cuts; the accept option is fit-complementary — AcceptUnit when the span fits, OverrideFit when it does not — and Sufficient rides the same indexing one axis over, standing only while the draft still holds an unsettled fitting cut for it to accept; Aᵤ carries both, and every firing hands its judgment to the one Aᵤ dispatch. The unsettled cuts travel with the gate for two reasons that are not the same one: Sufficient settles THAT displayed remainder, so without it the answer would have nothing determinate to accept; and the contested cut is only judgeable beside the neighbours it was cut against, which is Whole Draft over Serial Cut holding at the gate rather than only at surface_draft) [Tool]
-Phase 1 complete_unit (track)       → Internal state update (write the SpanFit fit produced and the Seam qualify produced onto Pack's draft, yielding the ProposedUnit the gate presents and integrate consumes — the only step that inhabits ProposedUnit's fit and seam fields)
-Phase 1 integrate    (track)        → Internal state update (consumes a ProposedUnit and produces a Unit — the only constructor Unit has: the accepted unit enters the apportionment and its obligations leave the residual; a fresh UnitRef is assigned in that same step, stable for the remainder of the apportionment. Which arm called is NOT written into the unit. The trace reports it because the run that presents the trace is the run that took the arm, and a cell holding it would only mirror a distinction the transitions already draw — the arms are four, the members would be four, and nothing downstream would branch on the copy)
-Phase 2 Derive       (sense)        → Internal analysis (per-unit completion and invariant predicates; an obligation with no verifiable predicate becomes a residual, EXCEPT where judgment_settled(o) holds — an obligation no check could settle because a judgment against the context accumulated by then and what the user has actually said by then settles it becomes a reservation instead, carrying the ground that settles it. The two are different findings: a residual says the plan leaves the obligation unguarded, a reservation says compiling it at all would fix a live answer where the user is not present. Neither is an out-of-scope delegation, which names a substrate that must intercept before an action runs, and this step writes no OOSDeclaration. The read is fallible and lands as pre-gate text at Qc, where an Adjust direction can move an item either way; scoped to units where ¬derived_already(u,K,R,S))
-Phase 2 DerivePlan   (sense)        → Internal analysis (conditions whose subject is the whole goal; never distributed across units; fires once per apportionment, guarded by ¬Λ.plan_conditions_derived)
-Phase 2 OOS          (extension)    → TextPresent+Proceed (out-of-scope declaration per obligation, with the delegated substrate named. Unchanged in scope by the reservation slot beside it: what is declared here is still exactly an obligation whose violation must be caught before an action runs, and a reserved item never routes through this step)
-Phase 2 Reserved     (extension)    → TextPresent+Proceed (reservation notice per held item, with the ground that settles it named — a unit obligation Derive reserved, and a whole-goal acceptance criterion an earlier Qt firing already reserved. It runs BEFORE Qt on every pass, so the ReservedAcceptance member Qt writes on THIS pass is not yet in S when this step reads it; that member reaches the user at Qc, which is handed the current S. Presented as relay rather than as a gate, exactly as the out-of-scope partition is and for the same reason: the finding is an analysis result the confirmation gate then carries, not a fork the user is asked to pick between. It states what stays open and why leaving it open is the correct disposition, so nothing here reads as a shortfall)
-Phase 2 Qt           (constitution) → present (conditional: the whole goal has no acceptance criterion — define it now / route its definition to /bound / reserve it as a criterion whose right answer is not fixable now / proceed unbounded on record; fires at pass entry and again after any Adjust that clears acceptance, always before Qc re-presents. The reserve and the unbounded options are NOT two wordings of one answer: reserving asserts the criterion is constitutively open — its right answer varies with the context accumulated by the moment the goal is judged accepted and with what the user has actually said by then, so fixing it now would settle a live question where the user is not present — while proceeding unbounded asserts the plan lacks a criterion it should have carried and the user accepts that shortfall. Each writes its own Λ state and neither is inferred from the other. DefineNow additionally retracts BOTH a Λ.unbounded_approved still reading ⊤ and a ReservedAcceptance member still in S from an earlier Qt firing on this same invocation) [Tool]
-Phase 2 ReserveJudgment (track)     → Internal state update (adds acceptance_reservation() to S, materializing the constitutively-open record for the convergence predicate; does NOT touch P; it never SETS Λ.unbounded_approved — so no waiver is claimed — and it RETRACTS one still standing from an earlier firing; a later Qt re-fire can still reach DefineNow while this stands)
-Phase 2 ApproveUnbounded (track)    → Internal state update (records Λ.unbounded_approved, materializing the informed acceptance for the convergence predicate; does NOT touch P; it drops the ReservedAcceptance member from S when one is standing, which is the symmetric retraction that keeps the waiver and the reservation mutually exclusive; a later Qt re-fire can still reach DefineNow while this reads ⊤)
-Phase 2 route_bound  (extension) → TextPresent+Proceed (conditional: Vₜ = RouteBound — emit the route to /bound naming the whole-goal acceptance criterion as what it is to define, so the chosen continuation leaves this protocol as a stated route rather than a silent exit; mutates no Λ field, then deactivate)
-Phase 2 BindPlanRequirements (track) → Internal state replacement (immediately before every check, replace P with the same conditions except that every WholeGoalAcceptance entry carries dischargeable_when = plan_terminal(|U|); runs after DerivePlan/Qt and after every Adjust/Qt re-fire. The sole producer of the scope-owned convergence clause and its identity-free expected count)
-Phase 2 check        (track)        → Internal state update (WRITE Λ.invariant_status — invariant status: coverage, termination coverage, obligation derivation, oos substrate-naming, reservation ground-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment; RE-RUN every time Qc is about to (re-)present, at pass entry and again after every Adjust plus any Qt re-fire it triggers)
-Phase 2 StaleNotice   (extension)   → TextPresent+Proceed (conditional: Λ.plan_conditions_stale = ⊤ — surface, as pre-gate text before Qc, that plan-level conditions were derived or last user-adjusted against a unit set a subsequent Reopen has since changed; relay only, mutates no Λ field)
-Phase 2 Qc           (constitution) → present (apportionment + derived conditions + residual dispositions + reservations with their grounds + invariant status + the staleness notice when present: Confirm / Adjust / Reopen. A reservation is shown as a held-open item rather than as an uncovered one, so an Adjust direction can move it either way with the distinction in view) [Tool]
-Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: write ρ.disposition := AcceptUncovered for each ρ ∈ R. This supplies accepted_completion_residuals(u,R), the non-empty witness resolve_unit's accepted constructor requires at Emit. P and S are untouched — a reservation is not a residual awaiting acceptance, and marking one AcceptUncovered would file a correct disposition as an accepted shortfall)
-Phase 3 Emit         (track)        → record (one goal entry per unit: unit_ref + subject + obligations + resolve_unit's single UnitResolution certificate — DeterminateResolution carries the conjoined predicate and every typed conjunct when a completion κ exists; AcceptedUncoveredResolution carries a non-empty accepted-completion witness plus any invariant conjuncts when no completion κ exists but an accepted completion residual does; ReservedJudgmentResolution carries a non-empty reserved-completion witness plus any invariant conjuncts when neither does — + capability requirements and feasibility notes carried verbatim; plan-level conditions as their own entries carrying scope + kind + condition + the already-checked dischargeable_when; AND exactly one plan-envelope entry carrying the accepted residuals, the reservation set S, the computed oos set, and Λ.unbounded_approved — the reservation field and the waiver flag staying separate is what lets a reader of the emitted plan alone tell a waived acceptance criterion from one correctly left open. sets Λ.emitted on completion — these entries serve the enforcer; the cross-session carrier is record_handoff's own, outside Λ) [Tool]
-Phase 3 package      (track)        → Internal state update (constructs the returned ConditionBearingUnitPlan as a VIEW of E, partitioned by constructor: units from the UnitEntry members, plan_conditions from the PlanEntry members, and accepted_residuals/reserved/oos/unbounded_approved read back off the emitted PlanEnvelopeEntry — never re-derived from Λ)
-Phase 3 park_carrier   (track)      → record (write package's plan value into ONE new record C — the whole plan in one entry, so a single dereference reconstructs it; C's own write returns the record identity locator(C) reads) [Tool]
-Phase 3 record_handoff (extension)  → TextPresent+Proceed (emit N in the fixed navigation-block shape with canonical_locator = locator(C) — record half from C's write, session half this session's own id — plus a dereference instruction, the optional snapshot anchor only when exact-state determinacy is needed, and GroundingInstruction as the receiving procedure. That procedure directs the receiver to recover the plan's reservations and governing sources at reception; it does not copy them into N. N is entry points only, never a re-authored plan; C and this emitted block are what handoff_recorded(N, C) reads)
-converge             (extension)    → TextPresent+Proceed (apportionment trace after the navigation block has been emitted; deactivate)
-seam                 (extension)    → TextPresent+Proceed (two seams, scoped separately. INBOUND activation seam (before this protocol activates): the `/bound → /apportion` and `/conduct → /apportion` legs of the `## Composition` chain relay when a user-declared chain names `/apportion` next, or an invocation follows that declared composition edge — proceed directly, citing the settling source. OUTBOUND emission seam (after this protocol emits): the `/apportion → enforcer` edge is EXCLUDED — `Separate activation` (Separate activation) governs it; the `/apportion → /conduct` edge relays only under a user-declared chain naming /conduct next, never automatically, and carries the no-reentry guard of `No-reentry across the `/conduct` seam`. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
-── MODE STATE ──
-Λ = { phase: Phase, G: AutonomousGoal, H: ExecutionHorizon,
-      O_G: Set(Obligation),              -- written once by Phase 0 ReadObligations; local narrowed read (the host's standing procedural contract subtracted), never a mutation of G; read by VelocityFilter, residual seeding, coverage_complete, and the coverage partition
-      U: Set(Unit), residual: Set(Obligation),
-      K: Set(CompiledCondition), R: Set(Residual), P: Set(PlanCondition), oos: Set(OOSDeclaration),
-      S: Set(JudgmentReservation),       -- seeded ∅ by init_loop_state; written by Phase 2 Derive (unit-scoped members) and by Qt's ReserveJudgment (the one ReservedAcceptance member); a reopened unit's members leave with it, as its K/R entries do, while the unit-free ReservedAcceptance member stays; DefineNow, an acceptance-introducing Adjust, and ApproveUnbounded each drop that member. Read by resolve_unit's reserved arm, obligation_derived, reservation_ground_named, acceptance_reserved, and the emitted envelope
-      plan_conditions_derived: Bool,     -- seeded ⊥ by init_loop_state; written ⊤ the one time Phase 2's DerivePlan runs; read by Phase 2's entry guard
-      plan_conditions_stale: Bool,       -- seeded ⊥ by init_loop_state; written ⊤ by Reopen; read by the pre-Qc StaleNotice surfacing; written ⊥ by Adjust — never auto-cleared by re-running check, and never forces a re-derivation itself
-      unbounded_approved: Bool,          -- written by Qt on ApproveUnbounded; RETRACTED (:= ⊥) by Adjust (when it introduces whole-goal acceptance while this still reads ⊤), by DefineNow (on any Qt firing, unconditionally), or by ReserveJudgment (on any Qt firing, when this still reads ⊤). Records a WAIVER only; the constitutively-open case is Λ.S's ReservedAcceptance member, retracted by the same Adjust and DefineNow edges plus ApproveUnbounded — each no-criterion arm retracting the other is what keeps the two from ever standing together at emission
-      invariant_status: InvariantStatus,
-      emitted: Bool,                     -- written by Phase 3 Emit; emitted(E) ≡ Λ.emitted
-      active: Bool, cause_tag: String }
--- Coverage partition invariant: residual, (⋃ᵤ u.obligations) and {d.obligation | d ∈ oos} are pairwise
---   disjoint and together equal O_G at every cycle boundary — an obligation is always exactly one of: still
---   residual, apportioned to a unit, or visibly delegated out of scope. The host's standing procedural contract
---   is not a fourth cell: ReadObligations subtracts it before O_G exists, so the partition never has to place it.
---   Λ.S is not a fourth cell either, for the same reason an accepted residual is not: a reserved obligation stays
---   in the unit it was packed into, so the partition still places it there and coverage_complete still reads it
---   off that unit — what the reservation adds is a marking that the unit carries no predicate for it because a
---   judgment settles it, as ρ.disposition marks one the unit leaves unguarded, and Λ.S's one ReservedAcceptance member names no obligation at all, so the partition never sees it
--- The draft is not a Λ field and not a fourth cell: it is phase-local to one Phase 1 cycle, built over a COPY
---   of residual, and it moves no obligation — integrate is still the only step that takes one out of residual.
---   So the partition above never has to place a drafted cut, and no transition has to invalidate one. A cycle
---   that settles anything discards its draft and the next cycle re-drafts what is left; holding a draft in Λ
---   instead would buy saved analysis at the price of making Recut and Reopen hunt down the cuts they invalidated
--- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval
+inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
-── COMPOSITION ──
+inductive Op | probe | relay | collect | judge | record | sheet | readTurn | emit | package
+             | parkCarrier | recordHandoff | converge | seam
+
+def grounding : Op → Annot × String
+  | .probe         => (.observe, "record read, artifact read: autonomous intent, goal singleness, and uncompiled-plan detection over the goal, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names — and its grounding instruction run once; condition-bearing is decided against the plan read back from that carrier")
+  | .relay         => (.extension, "TextPresent+Proceed: no autonomous interval; a composite goal, naming each stated outcome and the shared-procedure bond; an unreadable handoff, which never falls through to fresh compilation; a plan already condition-bearing; or nothing read from the goal's scope. No activation")
+  | .collect       => (.observe, "record read, artifact read, artifact search: the goal's cited material and seam evidence over its substrate; read-only")
+  | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, how each value came to stand, and your contrary grounds; a person's value stands on the scope their words reach")
+  | .record        => (.track, "record: the pass's record of the plan as judged, the ledger, and the focus")
+  | .sheet         => (.constitution, "present: the whole plan on one sheet, each value marked the person's or the draft's; the ledger of what the last turn changed, edits first and each re-fill marked necessary or proposal; your contrary grounds; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan")
+  | .readTurn      => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — an edit and its scope, an answer to the focus, a settling of the acceptance question, a taking over a fit, a closing — whatever form it takes")
+  | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
+  | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the dissent the taking carried and each value's provenance")
+  | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
+  | .recordHandoff => (.extension, "TextPresent+Proceed: the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet shows what is missing")
+  | .converge      => (.extension, "TextPresent+Proceed: the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; and the dissent the plan carries")
+  | .seam          => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; a composition edge this file declares — /bound or /conduct into /apportion, /apportion into /conduct — is offered as a hint, never taken on its own; the edge to predicate enforcement needs its own activation; every Constitution gate here and in the next protocol fires unchanged")
+
+/-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
-Two-way advisory with /conduct, neither direction a precondition, both guarded against reentry (`No-reentry across the `/conduct` seam`).
-The receiving session runs N.grounding_instruction against the work at hand. The compiler emits a
-condition-bearing plan; that emission supplies no answer to a reserved judgment.
+Two-way advisory with /conduct, neither direction a precondition, both guarded against reentry.
+The receiving session runs the block's grounding instruction against the work at hand; the
+emission supplies no answer to a reserved judgment.
+-/
+
+end
+
+end Merismos
 ```
 
 ## Core Principle
 
-Merismos compiles one autonomous goal into coarse, horizon-fit units and the conditions by which each unit is done. It apportions and conditions; order, independence, reconciliation, termination topology, routing, and execution belong downstream. The current residual is drafted and shown as one whole before any cut is settled, so coverage, fit, and seam quality remain inspectable together.
+Merismos compiles one autonomous goal into coarse, horizon-fit units and the conditions by which each unit is done. It apportions and conditions; order, independence, reconciliation, termination topology, routing, and execution belong downstream. The whole plan is shown on one sheet every turn, so coverage, fit, seam quality, and conditions stay inspectable together, and nothing is taken before it has been seen whole.
 
 ## Substrate Boundary
 
@@ -407,45 +1052,51 @@ Merismos stops after emitting and parking the condition-bearing plan. Units carr
 
 `/apportion` is user-initiated. Activate only for one stated autonomous goal with no condition-bearing unit plan. A host requirement that applies to every accepted change is inherited by every unit and is excluded from the goal's obligation set unless the goal itself states it as an outcome.
 
-Read prior protocol output first, then explicit arguments, then conversation context. A boundary map or an unresolved autonomous region may ground a fresh apportionment; an existing `/apportion` result is condition-bearing when its carrier closes every unit by predicate, accepted residual, or reservation.
+Read prior protocol output first, then explicit arguments, then conversation context. A boundary map or an unresolved autonomous region may ground a fresh apportionment; an existing `/apportion` result is condition-bearing when its carrier gives every unit a certificate that says when it is done.
 
 ### Activation exceptions
 
-Relay and deactivate when there is no autonomous interval, the request bundles several outcomes held together only by the host's standing procedure, the goal is already condition-bearing, or its scope yields neither a unit nor an out-of-scope declaration. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
+Relay and deactivate when there is no autonomous interval, the request bundles several outcomes held together only by the host's standing procedure, the goal is already condition-bearing, or its scope yields no obligation. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
 
 ## Protocol
 
-### User-facing realization
+### The sheet
 
-In Phase 1, render the whole current draft in everyday language: each cut beside its obligations, horizon-fit verdict, seam citation or heuristic disposition, and the affordance to send any unsettled cut back. Keep every contested cut beside the still-unsettled draft it was cut against. In Phase 2, render each unit beside its conditions, residuals, reservations, out-of-scope declarations, and current invariant status before opening the confirmation gate.
+Every turn shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field reads on its own under a label that is the question it answers, worded in the person's everyday language, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
 
-A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. An obligation that could become a predicate after sharpening is a residual. An item only live judgment can settle is a reservation carrying the ground that will settle it. An obligation requiring interception before action is out of scope and names the substrate that must intercept it.
+Under the sheet, the ledger of what the last turn changed: the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it and marked as forced by that edit or as your proposal. A removed unit and a replaced value stay in the ledger with what they were. Then your contrary grounds, each beside the value it bears on.
 
-On emission, show the unit's single resolution certificate with its typed conjuncts: determinate predicate, accepted-uncovered witness, or reserved-judgment witness. Keep reservations and the whole-goal acceptance waiver visibly separate. Park the packaged plan in one durable carrier and emit a navigation block that points to it; a receiving session dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover each reservation's retained or entrusted judgment. A live question is resolved within its applicable grant or surfaced to the person retaining it; a future question stays open while independent work proceeds.
+Then one focus, with concrete actions and what each would do. Mark one action as recommended only where the ground clearly separates it from the others; where the actions are comparable, leave them side by side with their consequences.
+
+The person may answer in their own words, and one answer may edit several units. An answer to the focus settles that point only; a taking is said of the plan and takes everything the sheet shows, adopting what the draft proposed and accepting the gaps shown. A unit that does not fit is taken only by words that take it over its fit; for a fit that could not be judged, those words name the uncertainty. With nothing open, the focus asks whether to take the plan and says what a taking would not yet satisfy. Wherever you read one of the person's earlier turns as setting a value, say which turn and what you took from it, quoting their words.
+
+A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. An obligation that could become a predicate after sharpening is a gap left unguarded. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
+
+On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it; a receiving session dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover each reservation's retained or entrusted judgment. Where the carrier write comes back incomplete, nothing closes: the sheet shows what is missing.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must travel unchanged, material belongs to another round or trace, or phase order determines placement.
 
 ## Composition
 
-A non-trivial multi-unit plan may pass to `/conduct` as a navigation block over its parked carrier; an unresolved autonomous region from `/conduct` may pass here for apportionment. Both directions are advisory and guarded against re-entry. `/bound` may supply an upstream boundary map. Predicate enforcement begins only through a separate user activation after Merismos emits.
+A non-trivial multi-unit plan may pass to `/conduct` as a navigation block over its parked carrier; an unresolved autonomous region from `/conduct` may pass here for apportionment. Both directions are advisory and guarded against re-entry: a chain the person declared moves along them, while an edge this file declares is offered only as a hint. `/bound` may supply an upstream boundary map, and the person may send the acceptance criterion's definition there. Predicate enforcement begins only through a separate user activation after Merismos emits.
 
 ## Known Limitations
 
-Goal singleness, seam quality, horizon fit, and the residual-versus-reservation classification are contextual judgments rather than proofs. They remain correctable at their gates; the formal invariants certify the resulting plan structure, not the infallibility of those readings.
+Goal singleness, the host-contract subtraction, the out-of-scope classification, seam quality, horizon fit, the residual-versus-reservation classification, and a whole-goal condition's freedom from order are contextual judgments rather than proofs. They stay on the sheet, correctable by the person's next turn; the formal invariants certify the resulting plan structure, not the infallibility of those readings. That every obligation was read is itself a judgment: coverage checks the plan against the obligations read, not the reading against the goal.
 
 ## Rules
 
 - **Separate activation**: Emission completes the epistemic work. Starting the autonomous interval is a separate constitutive act by the user.
 - **No-reentry across the `/conduct` seam**: Carry the parked plan by navigation block rather than copying it. Fixed topology is not re-conducted, and a trivial unit arrangement bypasses `/conduct`.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-- **Convergence evidence**: Before deactivation, present the plan readback; each unit's obligations, seam, fit, settlement, certificate, capabilities, and feasibility; plan conditions; accepted residuals; reservations with their settling grounds; out-of-scope declarations with substrates; acceptance disposition; and the navigation block over the parked carrier.
-- **Whole-draft relay test**: Relay settling opens only when every cut cites a seam the goal evidences. Inside it, accept a fitting cut only when no alternative cut of that region stands on equally live evidence; otherwise preserve the constitutive gate.
-- **Fit-indexed answer set**: Present the `Aᵤ` coproduct instantiated by the cut's fit verdict. `Sufficient` remains available only while it can integrate a displayed, still-unsettled fitting cut.
-- **Whole-goal acceptance**: When the plan lacks a completion-kind whole-goal acceptance condition, surface the gap before `Qc` and obtain one typed `Vₜ` answer. A defined condition, a reservation, and an unbounded waiver are mutually exclusive recorded states.
-- **Back-edge state preservation**: `Reopen(u)` resets only `u`'s obligations and derived unit state. Other units and plan-level state survive; the plan conditions are marked stale and surfaced before confirmation.
-- **Host contract subtraction**: Exclude goal-independent host procedure from `O_G`; it is inherited process, not an out-of-scope obligation. A requirement the goal states as its own outcome remains in scope.
+- **One sheet, every turn**: Show the whole plan every turn — the goal, units, conditions, whole-goal conditions, the acceptance question, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of what the last turn changed. The plan and every question about it share that one sheet.
+- **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
+- **The person takes and closes**: The plan is taken, stopped, or routed only by the person's turn, whatever its form. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
+- **Contrary grounds ride the plan**: Show your contrary grounds before the focus. A reading of yours never refuses a taking; a plan taken over it carries it as dissent.
+- **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
+- **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
+- **Host contract subtraction**: Exclude goal-independent host procedure from `O_G`; it is inherited process, not an out-of-scope obligation. A requirement the goal states as its own outcome remains in scope. Show what was subtracted on every sheet and in the trace, so a misjudged subtraction stays correctable.
 - **One goal per apportionment**: A composite request relays its constituent outcomes and their shared-procedure bond; each outcome requires its own apportionment.
-- **Reservation disposition**: Reserve an item only live judgment can settle, record the ground that settles it, and surface the classification for correction. A reservation is neither an accepted residual nor a delegated pre-action obligation.
-- **Reservation is not waiver**: Reserved acceptance records a deliberately open criterion; unbounded approval records an accepted shortfall. Emission carries at most one, and defining a real acceptance criterion retracts either.
+- **Reservation disposition**: Hold open an item only live judgment can settle, record the ground that settles it, and keep the classification on the sheet for correction. A reservation is neither an accepted gap nor a delegated pre-action obligation.
+- **Convergence evidence**: Before deactivation, present the plan readback; each unit's obligations, seam, fit or the person's taking over it, whole certificate, capabilities, and feasibility; plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; the dissent the plan carries; and the navigation block over the parked carrier.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
-- **Whole draft before settlement**: Surface one complete partition of the current residual, with one cut per obligation and the standing affordance to return any cut, before relay or Constitution settles a cut. `Sufficient` accepts only the fitting remainder of that displayed draft.

@@ -23,15 +23,15 @@
 | 방향 | AI가 말하고, 사용자가 듣는다 | AI가 검증하고, 사용자가 확인한다 |
 | 진입점 | AI가 무엇을 설명할지 결정 | 사용자가 의도 기반 경로 선택 |
 | 확인 | 설명 후 가정됨 | 질문을 통해 검증됨 |
-| 진행 상황 | 정의되지 않음 | 태스크로 추적됨 |
+| 진행 상황 | 정의되지 않음 | 고른 진입점마다 사용자가 닫는 태스크 |
 
 ## 프로토콜 흐름
 
 ```
 Phase 0: 방향 잡기   → 결과와 사용자 신호에서 이해 의도 추론
 Phase 1: 진입점     → 의도 기반 경로 제시, 사용자 선택 (gate interaction)
-Phase 2: 근거화     → 산출물 근거를 연결하고 태스크 생성 (record)
-Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + record update)
+Phase 2: 근거화     → 산출물 근거를 연결하고, 고른 진입점마다 태스크가 됨
+Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction)
 ```
 
 ## 사용 시점
@@ -61,6 +61,7 @@ Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + re
 | **Scope** | 사용자가 변경의 전체 영향을 보지 못함 |
 | **Sequence** | 사용자가 실행 순서를 이해하지 못함 |
 | **Horizon** | 현재 entry point의 co-intended but unspoken edge — 사용자가 자신의 프레임 안에서는 이름 붙일 수 없는 지점. evidence-bound·material·unspoken 조건(false-positive guard)을 만족할 때만 surface |
+| **Contradiction** | 세션 안에서 함께 성립할 수 없는 두 진술(각각 선 자리에서 인용) — 누구의 것인지에 따라 다룸: 사용자가 한쪽을 쥔 모순은 먼저 사용자의 설명을 청하고, 대상 안의 모순은 대상에 대한 발견으로 보이고, 앞선 AI 설명과의 모순은 AI 가 바로잡음 |
 | **Emergent** | 정형 유형에 속하지 않는 gap — 구체적 comprehension deficit에 맞춰 적응 |
 
 ## 저자

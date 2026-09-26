@@ -87,8 +87,8 @@
     "note": "Verbatim shape of a real turn from the session this was built in. Both fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. /contextualize does not fit on its object - it types over Result, the output of an execution just completed, not an artifact written in an earlier session."
   },
   {
-    "id": "several-fit-frame-ideate",
-    "outcome": "several",
+    "id": "singleton-ideate-unframed",
+    "outcome": "singleton",
     "prompt": "I don't think we've even framed this right, and I can only see one way to do it.",
     "conversation": [
       {
@@ -101,11 +101,10 @@
       }
     ],
     "expected": [
-      "frame",
       "ideate"
     ],
     "adjudicated": false,
-    "note": "Two deficits are stated in one sentence — an absent framework and an unexpanded candidate field. Neither dominates."
+    "note": "Two complaints are stated in one sentence — an absent framework and an unexpanded candidate field. Only the second is a core deficit: 'only one way' is a candidate field that has not been widened. The missing framework belongs to no core protocol, so routing does not reach it."
   },
   {
     "id": "monitor-gate-holds-free-response",

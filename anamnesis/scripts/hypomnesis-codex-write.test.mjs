@@ -1,3 +1,5 @@
+import { spawn } from "node:child_process";
+import { takeSessionLock } from "../skills/recollect/scripts/session-lock.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -18,6 +20,8 @@ import {
   spawnWorker,
 } from "./hypomnesis-codex-write.mjs";
 import { dispatchHook, isClaudeTranscript } from "./hypomnesis-dispatch.mjs";
+
+import { readOutcome } from "../skills/recollect/scripts/hypomnesis-outcome.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -150,13 +154,13 @@ test("a malformed transcript line is skipped and counted, not fatal to the parse
   const rows = [
     JSON.stringify({ timestamp: "2026-08-10T00:00:00Z", type: "session_meta", payload: { id: "session-c", cwd: "/repo", timestamp: "2026-08-10T00:00:00Z" } }),
     "{not valid json",
-    JSON.stringify({ timestamp: "2026-08-10T00:00:01Z", type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Still readable." }] } }),
+    JSON.stringify({ timestamp: "2026-08-10T00:00:01Z", type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Still verified." }] } }),
   ];
   fs.writeFileSync(transcript, `${rows.join("\n")}\n`, "utf8");
 
   const parsed = parseCodexRollout(transcript);
   assert.equal(parsed.skipped_lines, 1);
-  assert.deepEqual(parsed.user_messages.map((m) => m.text), ["Still readable."]);
+  assert.deepEqual(parsed.user_messages.map((m) => m.text), ["Still verified."]);
 });
 
 test("nested extraction is ephemeral, hooks-off, Luna xhigh, and schema-bound", () => {
@@ -433,4 +437,535 @@ test("worker launch returns before detached work completes", async (t) => {
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
   assert.equal(fs.readFileSync(marker, "utf8"), "done");
+});
+
+test("Codex outcome distinguishes legacy, unfinished, failure, retry, and retained success", (t) => {
+  const { root, transcript } = fixture(t);
+  assert.equal(readOutcome(root, "session-a", "codex").record_state, "unknown");
+  const input = { session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" };
+  enqueueCodexJob(input, { root });
+  runWorker(root, "session-a", { extract: () => {
+    assert.equal(readOutcome(root, "session-a", "codex").attempt.state, "in_progress");
+    return extraction();
+  } });
+  const success = readOutcome(root, "session-a", "codex");
+  assert.equal(success.attempt.publication.state, "complete");
+  assert.equal(success.attempt.publication.artifacts.length, 3);
+  fs.appendFileSync(transcript, "\n");
+  enqueueCodexJob(input, { root });
+  runWorker(root, "session-a", { extract: () => { throw Object.assign(new Error("process failed"), { stage: "invocation_failed", stderr: "raw stderr", status: 7 }); } });
+  const failed = readOutcome(root, "session-a", "codex");
+  assert.ok(failed.artifacts.some((artifact) => artifact.verified));
+  assert.deepEqual(failed.attempt.last_publication, success.attempt.last_publication);
+  assert.equal(failed.attempt.extractors.codex.state, "invocation_failed");
+  assert.deepEqual(failed.attempt.retry, { failures: 2, disposition: "quarantined" });
+  assert.equal(failed.attempt.extractors.codex.evidence.stderr.text, "raw stderr");
+  assert.equal(fs.readdirSync(path.join(root, "failures", "session-a")).length, 1);
+  enqueueCodexJob(input, { root });
+  runWorker(root, "session-a", { extract: () => extraction("recovered") });
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.publication.state, "complete");
+});
+
+test("Codex extraction rejects schema-invalid successful output before publication", (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
+  for (const value of [{}, { ...extraction(), topics: [42] }, { ...extraction(), extra: true }, { ...extraction(), decisions: [{ label: "only" }] }]) {
+    assert.throws(() => processJob(root, job, { extract: () => value }));
+    const outcome = readOutcome(root, "session-a", "codex");
+    assert.equal(outcome.attempt.publication.state, "none");
+    assert.equal(outcome.attempt.extractors.codex.state, "validation_failed");
+    assert.equal(fs.existsSync(path.join(root, "session-a", "current.json")), false);
+  }
+});
+
+test("Codex validated semantic emptiness differs from extraction failure", (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
+  const empty = { topic: "", topics: [], keywords: [], initial_request: "", key_utterances: [], cross_refs: [], decisions: [], narrative: { origin: "", direction: "", outcome: "" }, markers: { coinage: [], actor: [], temporal: [], emotional: [], cognitive: [], singularity: [] } };
+  processJob(root, job, { extract: () => empty });
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.extractors.codex.state, "empty");
+});
+
+for (const blocked of ["catalog", "pointer"]) {
+  test(`Codex ${blocked} publication failure records partial artifacts and retries reuse generation`, (t) => {
+    const { root, transcript } = fixture(t);
+    const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
+    const blocker = blocked === "catalog" ? path.join(root, "catalog") : path.join(root, "session-a", "current.json");
+    fs.mkdirSync(path.dirname(blocker), { recursive: true });
+    if (blocked === "catalog") fs.writeFileSync(blocker, "blocked");
+    else fs.mkdirSync(blocker);
+    assert.throws(() => processJob(root, job, { extract: () => extraction() }));
+    const partial = readOutcome(root, "session-a", "codex");
+    assert.equal(partial.attempt.publication.state, "partial");
+    assert.equal(partial.attempt.extractors.codex.state, "succeeded");
+    assert.equal(partial.attempt.publication.state, "partial");
+    fs.rmSync(blocker, { recursive: true, force: true });
+    const result = processJob(root, job, { extract: () => { throw new Error("must reuse"); } });
+    assert.equal(result.reused, true);
+    assert.equal(readOutcome(root, "session-a", "codex").attempt.publication.state, "complete");
+  });
+}
+
+test("Codex missing transcript records input failure and stale attempts cannot replace success", (t) => {
+  const { root, transcript } = fixture(t);
+  const input = { session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" };
+  const { job } = enqueueCodexJob(input, { root });
+  processJob(root, job, { extract: () => extraction() });
+  const outcome = readOutcome(root, "session-a", "codex").attempt;
+  assert.throws(() => processJob(root, { ...job, revision: { mtime_ms: job.revision.mtime_ms - 1, size: 0 }, transcript_path: `${transcript}.missing` }));
+  assert.notEqual(readOutcome(root, "session-a", "codex").attempt.attempt_id, outcome.attempt_id);
+  assert.deepEqual(readOutcome(root, "session-a", "codex").attempt.last_publication, outcome.last_publication);
+  fs.unlinkSync(transcript);
+  assert.throws(() => processJob(root, job));
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.extractors.input.state, "input_failed");
+});
+
+test("Codex records raw invocation and output-validation evidence without parsing messages", (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
+  const extract = (session) => callCodexExtractor(session, { root, run: () => ({ status: 9, signal: null, stderr: "first\nraw failure\nlast" }) });
+  assert.throws(() => processJob(root, job, { extract }));
+  let outcome = readOutcome(root, "session-a", "codex");
+  assert.equal(outcome.attempt.extractors.codex.evidence.status, 9);
+  assert.equal(outcome.attempt.extractors.codex.evidence.stderr.text, "first\nraw failure\nlast");
+  const malformed = (session) => callCodexExtractor(session, { root, run: (_bin, args) => {
+    fs.writeFileSync(args[args.indexOf("--output-last-message") + 1], "{broken");
+    return { status: 0, stderr: "validation context" };
+  } });
+  assert.throws(() => processJob(root, job, { extract: malformed }));
+  outcome = readOutcome(root, "session-a", "codex");
+  assert.equal(outcome.attempt.extractors.codex.state, "validation_failed");
+  assert.equal(outcome.attempt.extractors.codex.evidence.stderr.text, "validation context");
+});
+
+test("Codex source shrinking during extraction is reprocessed without publishing superseded output", (t) => {
+  const { root, transcript } = fixture(t);
+  enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
+  let calls = 0;
+  runWorker(root, "session-a", { extract: () => {
+    calls += 1;
+    if (calls === 1) {
+      const stat = fs.statSync(transcript);
+      const rows = fs.readFileSync(transcript, "utf8").trim().split("\n");
+      fs.writeFileSync(transcript, `${rows.slice(0, -2).join("\n")}\n`);
+      fs.utimesSync(transcript, stat.atime, stat.mtime);
+    }
+    return extraction(calls === 1 ? "superseded" : "replacement");
+  } });
+  assert.equal(calls, 2);
+  assert.equal(readOutcome(root, "session-a", "codex").attempt.publication.state, "complete");
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, "catalog", "session-a.json"), "utf8"));
+  assert.equal(catalog.topic, "replacement");
+});
+
+test("malformed Codex source is not a validated empty session", (t) => {
+  const { transcript, root } = fixture(t);
+  fs.writeFileSync(transcript, "malformed JSONL\n");
+  const queued = enqueueCodexJob({ session_id: "session-a", transcript_path: transcript, hook_event_name: "Stop" }, { root });
+  processJob(root, queued.job, { extract: () => { throw new Error("must not extract without user messages"); } });
+  const result = readOutcome(root, "session-a", "codex");
+  assert.equal(result.attempt.publication.state, "none");
+  assert.equal(result.attempt.extractors.input.state, "input_failed");
+});
+
+for (const owner of [null, '{malformed', JSON.stringify({ pid: 0 }), JSON.stringify({ pid: -1 })]) {
+  test(`shared lock bounds recovery for invalid owner ${owner}`, (t) => {
+    const { root } = fixture(t);
+    const directory = path.join(root, '.locks', 'session-a');
+    fs.mkdirSync(directory, { recursive: true });
+    if (owner !== null) fs.writeFileSync(path.join(directory, 'owner.json'), owner);
+    assert.equal(takeSessionLock(root, 'session-a'), null);
+    fs.utimesSync(directory, new Date(0), new Date(0));
+    const release = takeSessionLock(root, 'session-a');
+    assert.equal(typeof release, 'function');
+    assert.equal(release.owned(), true);
+    release();
+    assert.equal(fs.existsSync(directory), false);
+  });
+}
+
+test('shared lock keeps live owners past the unowned bound and immediately recovers dead owners', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  const ownerPath = path.join(directory, 'owner.json');
+  fs.writeFileSync(ownerPath, JSON.stringify({ pid: process.pid }));
+  const pastUnownedBound = new Date(Date.now() - 2 * 30 * 60 * 1000);
+  fs.utimesSync(directory, pastUnownedBound, pastUnownedBound);
+  assert.equal(takeSessionLock(root, 'session-a'), null);
+  fs.writeFileSync(ownerPath, JSON.stringify({ pid: 2147483647 }));
+  const release = takeSessionLock(root, 'session-a');
+  assert.equal(typeof release, 'function');
+  release();
+});
+
+test('shared lock owner write failure cleans its own newly-created directory', (t) => {
+  const { root } = fixture(t);
+  const original = fs.writeFileSync;
+  const mock = t.mock.method(fs, 'writeFileSync', (...args) => {
+    if (String(args[0]).endsWith('/owner.json')) throw Object.assign(new Error('full'), { code: 'ENOSPC' });
+    return original(...args);
+  });
+  assert.throws(() => takeSessionLock(root, 'session-a'), { code: 'ENOSPC' });
+  assert.equal(fs.existsSync(path.join(root, '.locks', 'session-a')), false);
+  mock.mock.restore();
+  takeSessionLock(root, 'session-a')();
+});
+
+test('shared lock release preserves a same-PID successor with a different token', (t) => {
+  const { root } = fixture(t);
+  const release = takeSessionLock(root, 'session-a');
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.rmSync(directory, { recursive: true });
+  const successor = takeSessionLock(root, 'session-a');
+  assert.equal(release.owned(), false);
+  release();
+  assert.equal(successor.owned(), true);
+  successor();
+});
+
+test('shared stale takeover restores a successor replaced between identity check and rename', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const original = fs.renameSync;
+  let successorOwner;
+  let replaced = false;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (from === directory && !replaced) {
+      replaced = true;
+      fs.rmSync(directory, { recursive: true });
+      fs.mkdirSync(directory);
+      successorOwner = JSON.stringify({ pid: process.pid, token: 'successor' });
+      fs.writeFileSync(path.join(directory, 'owner.json'), successorOwner);
+    }
+    return original(from, to);
+  });
+  assert.equal(takeSessionLock(root, 'session-a'), null);
+  mock.mock.restore();
+  assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
+});
+
+test('shared stale lock contenders preserve mutual exclusion and recover after backoff', async (t) => {
+  const { base, root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const releasePath = path.join(base, 'release');
+  const criticalPath = path.join(base, 'critical');
+  const moduleUrl = new URL('../skills/recollect/scripts/session-lock.mjs', import.meta.url).href;
+  const code = `import fs from 'node:fs'; import {takeSessionLock} from ${JSON.stringify(moduleUrl)};
+    const release = takeSessionLock(${JSON.stringify(root)}, 'session-a');
+    if (release) {
+      if (!release.owned()) throw new Error('acquisition lost ownership');
+      fs.writeFileSync(${JSON.stringify(criticalPath)}, String(process.pid), {flag:'wx'});
+      console.log('owned');
+      const timer = setInterval(() => {
+        if (fs.existsSync(${JSON.stringify(releasePath)})) {
+          if (!release.owned()) throw new Error('live owner replaced during contention');
+          fs.unlinkSync(${JSON.stringify(criticalPath)});
+          release(); clearInterval(timer);
+        }
+      }, 10);
+      setTimeout(() => { release(); process.exit(2); }, 5000).unref();
+    } else console.log('busy');`;
+  const children = Array.from({ length: 4 }, () => spawn(process.execPath, ['--input-type=module', '-e', code], { stdio: ['ignore', 'pipe', 'pipe'] }));
+  t.after(() => children.forEach((child) => child.kill()));
+  const completions = children.map((child) => new Promise((resolve) => child.on('exit', resolve)));
+  const states = await Promise.all(children.map((child) => new Promise((resolve, reject) => {
+    child.stdout.once('data', (chunk) => resolve(chunk.toString().trim()));
+    child.on('error', reject);
+    child.on('exit', (code) => { if (code) reject(new Error(`child exited ${code}`)); });
+  })));
+  assert.ok(states.every((state) => state === 'owned' || state === 'busy'));
+  assert.ok(states.filter((state) => state === 'owned').length <= 1);
+  fs.writeFileSync(releasePath, 'release');
+  assert.deepEqual(await Promise.all(completions), [0, 0, 0, 0]);
+  assert.equal(fs.existsSync(criticalPath), false);
+  const recovered = takeSessionLock(root, 'session-a');
+  assert.ok(recovered, 'settled contention must permit a subsequent acquisition');
+  try {
+    assert.equal(recovered.owned(), true);
+    assert.equal(takeSessionLock(root, 'session-a'), null, 'a recovered live owner must exclude another claimant');
+  } finally { recovered(); }
+  assert.equal(fs.existsSync(directory), false);
+});
+
+test('Codex writer and outcome reader use one normalized session key', (t) => {
+  const { root, transcript } = fixture(t);
+  const sessionId = `session/${'a'.repeat(180)}`;
+  enqueueCodexJob({ session_id: sessionId, transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  assert.equal(runWorker(root, sessionId, { extract: () => extraction() }), true);
+  const result = readOutcome(root, sessionId, 'codex');
+  assert.equal(result.record_state, 'known');
+  assert.equal(result.attempt.publication.state, 'complete');
+  assert.equal(result.artifacts.length, 3);
+  assert.ok(result.artifacts.every((artifact) => artifact.verified));
+});
+
+test('shared lock failed owner write preserves a replacement directory', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  const original = fs.writeFileSync;
+  const successorOwner = JSON.stringify({ pid: process.pid, token: 'replacement' });
+  const mock = t.mock.method(fs, 'writeFileSync', (...args) => {
+    if (String(args[0]) === path.join(directory, 'owner.json')) {
+      fs.rmSync(directory, { recursive: true });
+      fs.mkdirSync(directory);
+      original(path.join(directory, 'owner.json'), successorOwner);
+      throw Object.assign(new Error('full'), { code: 'ENOSPC' });
+    }
+    return original(...args);
+  });
+  assert.throws(() => takeSessionLock(root, 'session-a'), { code: 'ENOSPC' });
+  mock.mock.restore();
+  assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
+});
+
+test('shared lock release rechecks the detached identity before deletion', (t) => {
+  const { root } = fixture(t);
+  const release = takeSessionLock(root, 'session-a');
+  const directory = path.join(root, '.locks', 'session-a');
+  const original = fs.renameSync;
+  const successorOwner = JSON.stringify({ pid: process.pid, token: 'replacement' });
+  let replaced = false;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (from === directory && !replaced) {
+      replaced = true;
+      fs.rmSync(directory, { recursive: true });
+      fs.mkdirSync(directory);
+      fs.writeFileSync(path.join(directory, 'owner.json'), successorOwner);
+    }
+    return original(from, to);
+  });
+  release();
+  mock.mock.restore();
+  assert.equal(fs.readFileSync(path.join(directory, 'owner.json'), 'utf8'), successorOwner);
+});
+
+test('missing Codex enqueue source records input failure and releases shared lock', (t) => {
+  const { root, transcript } = fixture(t);
+  fs.unlinkSync(transcript);
+  assert.equal(enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root }), null);
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.equal(result.record_state, 'known');
+  assert.equal(result.attempt.extractors.codex.state, 'input_failed');
+  assert.equal(result.attempt.publication.state, 'none');
+  assert.equal(fs.existsSync(path.join(root, '.locks', 'session-a')), false);
+});
+
+test('source deleted during Codex extraction records observed input failure without model blame', (t) => {
+  const { root, transcript } = fixture(t);
+  enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  runWorker(root, 'session-a', { extract: () => { fs.unlinkSync(transcript); return extraction(); } });
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.equal(result.attempt.extractors.input.state, 'input_failed');
+  assert.equal(result.attempt.publication.state, 'none');
+  assert.equal(result.attempt.retry.disposition, 'quarantined');
+  assert.equal(fs.existsSync(path.join(root, 'session-a', 'current.json')), false);
+  assert.equal(fs.existsSync(path.join(root, '.locks', 'session-a')), false);
+});
+
+test('Codex internal extraction exception stays unclassified execution evidence', (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  assert.throws(() => processJob(root, job, { extract: () => { throw new ReferenceError('missing helper'); } }));
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.equal(result.attempt.execution.state, 'failed');
+  assert.match(result.attempt.execution.evidence.message.text, /missing helper/);
+  assert.equal(result.attempt.extractors.codex, undefined);
+});
+
+test('Codex failure before attempt creation cannot annotate a previous publication', (t) => {
+  const { root, transcript } = fixture(t);
+  const input = { session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' };
+  const { job } = enqueueCodexJob(input, { root });
+  processJob(root, job, { extract: () => extraction() });
+  const previous = readOutcome(root, 'session-a', 'codex').attempt;
+  const original = fs.renameSync;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/')) throw Object.assign(new Error('outcome unavailable'), { code: 'EACCES' });
+    return original(from, to);
+  });
+  runWorker(root, 'session-a', { extract: () => extraction() });
+  mock.mock.restore();
+  assert.deepEqual(readOutcome(root, 'session-a', 'codex').attempt, previous);
+});
+
+test('Codex generation reuse retains original capture receipt limitations', (t) => {
+  const { root, transcript } = fixture(t);
+  fs.appendFileSync(transcript, '{malformed\n');
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  processJob(root, job, { extract: () => extraction() });
+  const previous = readOutcome(root, 'session-a', 'codex');
+  const receiptId = previous.artifacts.find((artifact) => artifact.path.endsWith('/record.json')).receipt_id;
+  assert.ok(receiptId);
+  assert.equal(previous.attempt.receipts[receiptId].extractors.input.state, 'input_failed');
+  processJob(root, job, { extract: () => { throw new Error('must reuse'); } });
+  const reused = readOutcome(root, 'session-a', 'codex');
+  assert.notEqual(reused.attempt.attempt_id, previous.attempt.attempt_id);
+  assert.equal(reused.attempt.extractors.codex.state, 'skipped');
+  assert.ok(reused.artifacts.every((artifact) => artifact.receipt_id === receiptId));
+  assert.deepEqual(reused.attempt.receipts[receiptId], previous.attempt.receipts[receiptId]);
+});
+
+test('missing Codex enqueue does not release another active owner', (t) => {
+  const { root, transcript } = fixture(t);
+  fs.unlinkSync(transcript);
+  const release = takeSessionLock(root, 'session-a');
+  try {
+    assert.equal(enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root }), null);
+    assert.equal(release.owned(), true);
+    assert.equal(readOutcome(root, 'session-a', 'codex').record_state, 'unknown');
+  } finally { release(); }
+});
+
+test('Codex outcome persistence failure does not relabel acknowledged physical publication', (t) => {
+  const { root, transcript } = fixture(t);
+  const input = { session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' };
+  const first = enqueueCodexJob(input, { root });
+  processJob(root, first.job, { extract: () => extraction('prior') });
+  const prior = readOutcome(root, 'session-a', 'codex').attempt;
+  fs.appendFileSync(transcript, '\n');
+  const next = enqueueCodexJob(input, { root });
+  const original = fs.renameSync;
+  const failure = Object.assign(new Error('outcome storage full'), { code: 'ENOSPC' });
+  let rejected = 0;
+  let savedBeforeFailure;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/')) {
+      const pending = JSON.parse(fs.readFileSync(from, 'utf8'));
+      if (pending.state === 'complete') {
+        rejected += 1;
+        savedBeforeFailure = fs.readFileSync(to, 'utf8');
+        throw failure;
+      }
+    }
+    return original(from, to);
+  });
+  assert.throws(() => processJob(root, next.job, { extract: () => extraction('new physical record') }), (error) => {
+    assert.equal(error, failure);
+    assert.equal(error.operation, 'outcome_persistence');
+    return true;
+  });
+  mock.mock.restore();
+  assert.equal(rejected, 1, 'the failed persistence operation must not trigger a second partial publication record');
+  const after = readOutcome(root, 'session-a', 'codex');
+  assert.equal(after.attempt.state, 'in_progress');
+  assert.deepEqual(after.attempt.last_publication, prior.last_publication);
+  const outcomeFile = path.join(root, '.outcomes', 'session-a.json');
+  assert.equal(fs.readFileSync(outcomeFile, 'utf8'), savedBeforeFailure);
+  const current = JSON.parse(fs.readFileSync(path.join(root, 'session-a', 'current.json'), 'utf8'));
+  const record = JSON.parse(fs.readFileSync(path.join(root, 'session-a', current.generation), 'utf8'));
+  assert.equal(record.topic, 'new physical record');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'catalog', 'session-a.json'), 'utf8')).topic, record.topic);
+});
+
+test('Codex retry annotation persistence failure preserves the original processing failure', (t) => {
+  const { root, transcript } = fixture(t);
+  enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  const original = fs.renameSync;
+  let rejected = 0;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/')) {
+      const pending = JSON.parse(fs.readFileSync(from, 'utf8'));
+      if (pending.retry) {
+        rejected += 1;
+        throw Object.assign(new Error('annotation disk failure'), { code: 'EIO' });
+      }
+    }
+    return original(from, to);
+  });
+  assert.equal(runWorker(root, 'session-a', { extract: () => { throw new ReferenceError('original processing defect'); } }), true);
+  mock.mock.restore();
+  assert.equal(rejected, 2);
+  const result = readOutcome(root, 'session-a', 'codex');
+  assert.match(result.attempt.execution.evidence.message.text, /original processing defect/);
+  const log = fs.readFileSync(path.join(root, 'logs', 'session-a.log'), 'utf8');
+  assert.match(log, /annotation disk failure/);
+  assert.match(log, /original processing defect/);
+  assert.equal(fs.readdirSync(path.join(root, 'failures', 'session-a')).length, 1);
+});
+
+test('Codex error-record persistence failure carries the original execution cause', (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  const original = fs.renameSync;
+  const storageFailure = Object.assign(new Error('cannot store failure'), { code: 'EIO' });
+  const executionFailure = new ReferenceError('execution failed before publication');
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (String(to).includes('/.outcomes/') && JSON.parse(fs.readFileSync(from, 'utf8')).state === 'complete') throw storageFailure;
+    return original(from, to);
+  });
+  assert.throws(() => processJob(root, job, { extract: () => { throw executionFailure; } }), (error) => {
+    assert.equal(error, storageFailure);
+    assert.equal(error.operation, 'outcome_persistence');
+    assert.equal(error.cause, executionFailure);
+    return true;
+  });
+  mock.mock.restore();
+  assert.equal(readOutcome(root, 'session-a', 'codex').attempt.state, 'in_progress');
+});
+
+test('a second reaper of one stale lock cannot displace the first reaper, so one claimant holds', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const original = fs.renameSync;
+  let rival;
+  let inside = false;
+  const mock = t.mock.method(fs, 'renameSync', (from, to) => {
+    if (from === directory && !inside && rival === undefined) {
+      inside = true;
+      try { rival = takeSessionLock(root, 'session-a', { reapWaitMs: 0 }); } finally { inside = false; }
+    }
+    if (String(from).includes('.reap.') && to === directory && !inside) {
+      fs.mkdirSync(directory, { recursive: true });
+      fs.writeFileSync(path.join(directory, 'owner.json'), JSON.stringify({ pid: process.pid, token: 'third' }));
+    }
+    return original(from, to);
+  });
+  const first = takeSessionLock(root, 'session-a');
+  mock.mock.restore();
+  const claimants = [first, rival].filter((release) => typeof release === 'function' && release.owned());
+  const displaced = [first, rival].filter((release) => typeof release === 'function' && !release.owned());
+  assert.deepEqual(displaced, [], 'no acquirer may hold a release whose lock was moved away');
+  assert.ok(claimants.length <= 1);
+  claimants.forEach((release) => release());
+});
+
+test('a live pid holds its lock only within the age ceiling, and EPERM is not proof of life', (t) => {
+  const { root } = fixture(t);
+  const directory = path.join(root, '.locks', 'session-a');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'owner.json'), JSON.stringify({ pid: process.pid }));
+  assert.equal(takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 }), null);
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const recycled = takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 });
+  assert.equal(typeof recycled, 'function');
+  recycled();
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'owner.json'), JSON.stringify({ pid: 424242 }));
+  const kill = t.mock.method(process, 'kill', () => { throw Object.assign(new Error('perm'), { code: 'EPERM' }); });
+  assert.equal(takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 }), null);
+  fs.utimesSync(directory, new Date(0), new Date(0));
+  const foreign = takeSessionLock(root, 'session-a', { staleAfterMs: 60_000 });
+  kill.mock.restore();
+  assert.equal(typeof foreign, 'function');
+  foreign();
+});
+
+test('Codex generation reuse without its originating receipt leaves production unknown', (t) => {
+  const { root, transcript } = fixture(t);
+  const { job } = enqueueCodexJob({ session_id: 'session-a', transcript_path: transcript, hook_event_name: 'Stop' }, { root });
+  processJob(root, job, { extract: () => extraction() });
+  fs.rmSync(path.join(root, '.outcomes'), { recursive: true, force: true });
+  processJob(root, job, { extract: () => { throw new Error('must reuse'); } });
+  const reused = readOutcome(root, 'session-a', 'codex');
+  assert.equal(reused.attempt.extractors.codex.state, 'skipped');
+  const generation = reused.artifacts.find((artifact) => artifact.path.endsWith('/record.json'));
+  assert.ok(generation);
+  assert.equal(generation.receipt_id, undefined, 'no receipt may be attributed to bytes this attempt did not produce');
 });

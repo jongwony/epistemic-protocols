@@ -1468,7 +1468,7 @@ function checkCrossRefScan() {
         if (Array.isArray(marketplace.plugins)) {
           const marketplaceDirs = new Set(
             marketplace.plugins.map(p => {
-              // source is like "./prothesis" — extract dir name
+              // source is like "./aitesis" — extract dir name
               const src = p.source || '';
               return src.replace(/^\.\//, '');
             }).filter(Boolean)
@@ -1532,7 +1532,7 @@ function checkOnboardSync() {
   let subCheckFailed = false;
 
   // Build protocol metadata from PROTOCOL_FILES
-  // e.g., 'prothesis/skills/frame/SKILL.md' → { name: 'Prothesis', command: 'frame' }
+  // e.g., 'aitesis/skills/inquire/SKILL.md' → { name: 'Aitesis', command: 'inquire' }
   const protocols = PROTOCOL_FILES.map(relPath => {
     const parts = relPath.split('/');
     return {
@@ -1892,14 +1892,22 @@ const LEAN_FORBIDDEN = [
 const LEAN_AXIOM_DECL = /^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|public|noncomputable|partial|nonrec)\s+)*axiom\s+([^\s:({[]+)/gm;
 const LEAN_THEOREM_DECL = /^\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|public|noncomputable|nonrec)\s+)*(?:theorem|lemma)\s+([^\s:({[]+)/gm;
 
-function leanLint(label, source) {
+// A judgment is an `axiom` the Definition block documents: the doc comment says
+// what the model judges. Anywhere else, or undocumented, an axiom is an assumption.
+const LEAN_JUDGMENT_DECL = /\/--(?:(?!-\/)[\s\S])*-\/\s*\n\s*axiom\s+([^\s:({[]+)/g;
+
+function leanLint(label, source, { judgments = false } = {}) {
   const code = stripLeanComments(source);
   const problems = [];
   for (const [pattern, what] of LEAN_FORBIDDEN) {
     if (pattern.test(code)) problems.push(`${label} uses ${what} — a stated claim is proved in core Lean with nothing switched off`);
   }
+  const documented = judgments ? new Set([...source.matchAll(LEAN_JUDGMENT_DECL)].map(m => m[1])) : new Set();
   for (const m of code.matchAll(LEAN_AXIOM_DECL)) {
-    problems.push(`${label} declares \`axiom ${m[1]}\` — a contract assumes nothing without ground; state a judgment as \`opaque\` or a parameter`);
+    if (documented.has(m[1])) continue;
+    problems.push(judgments
+      ? `${label} declares \`axiom ${m[1]}\` with no doc comment — an axiom here is a model judgment, and its doc comment says what is judged`
+      : `${label} declares \`axiom ${m[1]}\` — only a Lean Definition block declares an axiom, and there it is a documented model judgment`);
   }
   return problems;
 }
@@ -1956,7 +1964,7 @@ function checkLeanDefinition() {
       fail(relPath, 'Definition opens a ```lean fence that never closes');
       continue;
     }
-    const problems = leanLint('Lean Definition block', source);
+    const problems = leanLint('Lean Definition block', source, { judgments: true });
     for (const m of stripLeanComments(source).matchAll(LEAN_THEOREM_DECL)) {
       problems.push(`Lean Definition block proves \`theorem ${m[1]}\` in place — a proof is verification, not contract: state the signature in a doc comment and prove it in the proofs module`);
     }
@@ -2075,10 +2083,14 @@ function checkLeanDefinition() {
     for (const name of stated) if (!proved.has(name)) problems.push(`Stated \`theorem ${name}\` is not a theorem the proofs module declares`);
     for (const name of proved) if (!stated.has(name)) problems.push(`The proofs module declares \`theorem ${name}\`, which the Lean block does not state`);
     for (const name of readout.contract) problems.push(`\`theorem ${name}\` is proved in the contract module — a proof is verification, not contract`);
-    for (const name of readout.axiomDecls) problems.push(`\`axiom ${name}\` is declared in the Lean package`);
+    const judgments = new Set((readout.judgments || []).map(j => j.name));
+    for (const name of readout.axiomDecls) if (!judgments.has(name)) problems.push(`\`axiom ${name}\` is declared in the Lean package`);
+    for (const { name, inhabited } of readout.judgments || []) {
+      if (!inhabited) problems.push(`\`axiom ${name}\` is a judgment whose type has no \`Nonempty\` instance — declare one in the proofs module, so the judgment cannot assume what nothing inhabits`);
+    }
     for (const { name, axioms } of readout.axioms) {
-      const outside = axioms.filter(a => !leanContract.ALLOWED_AXIOMS.includes(a));
-      if (outside.length > 0) problems.push(`\`${name}\` depends on ${outside.map(a => `\`${a}\``).join(', ')} — only ${leanContract.ALLOWED_AXIOMS.join(', ')} are admitted`);
+      const outside = axioms.filter(a => !leanContract.ALLOWED_AXIOMS.includes(a) && !judgments.has(a));
+      if (outside.length > 0) problems.push(`\`${name}\` depends on ${outside.map(a => `\`${a}\``).join(', ')} — only ${leanContract.ALLOWED_AXIOMS.join(', ')} and the block's own judgments are admitted`);
     }
     if (problems.length > 0) {
       for (const message of problems) fail(audit.relPath, message);
@@ -2089,7 +2101,7 @@ function checkLeanDefinition() {
       file: audit.relPath,
       message: audit.ns === 'Ground'
         ? `Canonical GROUND and its ${stated.size} stated theorem(s) elaborate; every proof uses only ${leanContract.ALLOWED_AXIOMS.join(', ')}`
-        : `Lean Definition block elaborates standalone, and its ${stated.size} stated theorem(s) follow from ${blocks.find(b => b.relPath === audit.relPath).proofRel} using only ${leanContract.ALLOWED_AXIOMS.join(', ')}`
+        : `Lean Definition block elaborates standalone, and its ${stated.size} stated theorem(s) follow from ${blocks.find(b => b.relPath === audit.relPath).proofRel} using only ${leanContract.ALLOWED_AXIOMS.join(', ')}${judgments.size > 0 ? ` and ${judgments.size} inhabited judgment(s)` : ''}`
     });
   }
 }

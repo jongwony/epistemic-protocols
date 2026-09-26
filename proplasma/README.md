@@ -20,7 +20,6 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Euporia | Hybrid | `AbstractAporia → ResolvedEndpoint` |
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Proplasma** | **Hybrid** | **`DirectionUnrecognizable → DirectionalContrast`** |
@@ -29,7 +28,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 **The trichotomy**: understanding lacking → `/grasp` (verify that I understood); boundary lacking → `/bound` (settle how far); **future unrecognizable → `/preview` (see the directions, then judge)**.
 
-**Routing precedence** (first match wins): a mapping against a target account already in play leaves its intended inferences uncertain → `/ground`; real evidence is required → `/inquire`; the candidate field is thin (one or none) → `/ideate`, the frame itself is absent → `/frame`, the coordinates live implicit in externalized substrate → `/elicit`; candidates ≥ 2, evidence-free, placeholder-carriable → **`/preview`**.
+**Routing precedence** (first match wins): a mapping against a target account already in play leaves its intended inferences uncertain → `/ground`; real evidence is required → `/inquire`; the candidate field is thin (one or none) → `/ideate`, the coordinates live implicit in externalized substrate → `/elicit`; candidates ≥ 2, evidence-free, placeholder-carriable → **`/preview`**.
 
 ## Three Breach Conditions
 

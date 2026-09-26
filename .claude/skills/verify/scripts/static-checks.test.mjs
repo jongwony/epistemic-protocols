@@ -92,26 +92,29 @@ describe('gate-answer-reference', () => {
     );
   });
 
-  it('rejects dangling TYPES, MODE STATE, and inline type references', () => {
+  it('rejects dangling TYPES, MODE STATE, and inline type references', (t) => {
+    // Any protocol still in the DSL serves as the fixture: three probe arrows are
+    // added to its PHASE TRANSITIONS, so the test outlives each move to Lean.
+    const target = protocolFiles({ projectRoot })
+      .filter((file) => !isLeanProtocol(file))
+      .find((file) => /── PHASE TRANSITIONS ──[\s\S]*?→\s*Stop\s*→/.test(
+        readFileSync(path.join(projectRoot, file), 'utf-8')));
+    if (!target) {
+      t.skip('no protocol with a DSL gate arrow remains');
+      return;
+    }
     const root = copyWorkingTree();
     try {
-      const anamnesisPath = path.join(root, 'anamnesis/skills/recollect/SKILL.md');
-      const anamnesis = readFileSync(anamnesisPath, 'utf-8');
-      assert.ok(anamnesis.includes('→ Stop → U '), 'Anamnesis mutation anchor moved');
-      writeFileSync(anamnesisPath, anamnesis.replaceAll('→ Stop → U ', '→ Stop → Zeta '));
-
-      const katalepsisPath = path.join(root, 'katalepsis/skills/grasp/SKILL.md');
-      const katalepsis = readFileSync(katalepsisPath, 'utf-8');
-      assert.ok(katalepsis.includes('→ Stop → ZeroGapConfirmation '), 'Katalepsis mutation anchor moved');
-      writeFileSync(
-        katalepsisPath,
-        katalepsis.replace('→ Stop → ZeroGapConfirmation ', '→ Stop → Λ.missing_gate_answers ')
-      );
-
-      const hyphegesisPath = path.join(root, 'hyphegesis/skills/conduct/SKILL.md');
-      const hyphegesis = readFileSync(hyphegesisPath, 'utf-8');
-      assert.ok(hyphegesis.includes('→ Stop → DM ∈ {'), 'Hyphegesis inline type anchor moved');
-      writeFileSync(hyphegesisPath, hyphegesis.replace('→ Stop → DM ∈ {', '→ Stop → DM ∈ Zeta {'));
+      const targetPath = path.join(root, target);
+      const source = readFileSync(targetPath, 'utf-8');
+      const header = '── PHASE TRANSITIONS ──\n';
+      assert.ok(source.includes(header), `${target}: PHASE TRANSITIONS header moved`);
+      const probes = [
+        'Probe₁: Q → Stop → Zeta',
+        'Probe₂: Q → Stop → Λ.missing_gate_answers',
+        'Probe₃: Q → Stop → X ∈ Zeta   -- inline',
+      ].join('\n');
+      writeFileSync(targetPath, source.replace(header, `${header}${probes}\n`));
 
       const mutated = run(root);
       const failures = mutated.fail
@@ -270,6 +273,11 @@ describe('lean-definition', () => {
 
       write(proofRelative, beforeEnd('private theorem mutation_extra : True := trivial'));
       expectSome(failures(), `declares \`theorem ${ns}.mutation_extra\``);
+      restore();
+
+      // A judgment is a documented axiom of the block, and its type must be inhabited.
+      write(target, withBlock(`${block}\n/-- **Your judgment**: nothing. -/\naxiom mutationEmpty : Empty`));
+      expectSome(failures(), 'has no `Nonempty` instance');
       restore();
 
       // Two commands on one line escape a line-anchored axiom pattern; the

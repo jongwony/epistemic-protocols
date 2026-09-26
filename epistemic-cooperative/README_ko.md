@@ -1,12 +1,12 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-프로토콜 학습, work-unit triage, 결정 지점 유틸리티.
+프로토콜 학습, 작업 orchestration, 결정 지점 유틸리티.
 
 > [English](./README.md)
 
 ## Epistemic Cooperative란?
 
-인식론적 프로토콜 온보딩, 작업 orchestration, 그리고 결정 지점 유틸리티에 걸친 유틸리티 플러그인이다. 시작하는 자리이면서 — 체험 기반 프로토콜 학습, 이슈에서 형성하는 focused work unit — 동시에 몇몇 스킬은 그 자신의 특정 결정 지점에서 작동한다: 초안된 게이트의 옵션 집합 검사, 리뷰를 수렴까지 끌고 가기.
+인식론적 프로토콜 온보딩, 작업 orchestration, 그리고 결정 지점 유틸리티에 걸친 유틸리티 플러그인이다. 시작하는 자리이면서 — 체험 기반 프로토콜 학습 — 동시에 몇몇 스킬은 그 자신의 특정 결정 지점에서 작동한다: 초안된 게이트의 옵션 집합 검사, 리뷰를 수렴까지 끌고 가기.
 
 ### 스킬
 
@@ -14,7 +14,6 @@
 |------|------|------|
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/probe` | 결핍 인식 fit review — 역증거 조건이 붙은 복수의 결핍 가설을 제시하고 사용자 인식으로 라우팅 | 프로토콜 route |
-| `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, 기판 레코드로 외재화 후 포인터로 전달 |
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 — 프로젝트가 표방한 목표로 아티팩트를 수렴 | 적용된 수정 + 인계 + 수렴 trace |
@@ -40,7 +39,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |------|------|
 | 0. Entry | 경로 선택: 빠른 추천 / 특정 프로토콜 학습 / 전체 둘러보기 |
 | 1. Quick Scan | 최근 세션 메타데이터를 인라인으로 수집 (Glob + Read) |
-| 2a. Pick-1 | Quick path: `/elicit`, `/inquire`, `/frame` 중 1개 추천 선택 |
+| 2a. Pick-1 | Quick path: `/elicit`, `/inquire` 중 1개 추천 선택 |
 | 2b. Evidence | Quick path: 근거 카드 1개 표시 (최대 2줄) |
 | 2. Map | Targeted path: 컴팩트 매핑 테이블로 프로토콜 매칭 |
 | 3. Scenario | Targeted path: 프리셋 시나리오로 개입 지점 제시 |
@@ -51,24 +50,9 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 주요 특징:
 - **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감
 - **한 번에 하나만**: 추천 1개, 근거 카드 1개, 체험 1회 — 카탈로그 불필요
-- **Onboarding Pool**: `/elicit`, `/inquire`, `/frame` — Quick 추천 + Targeted 폴백 통합
+- **Onboarding Pool**: `/elicit`, `/inquire` — Quick 추천 + Targeted 폴백 통합
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
-
-### /triage — Work-Unit Formation
-
-GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 focused work unit을 형성한다. 사용자가 route를 선택하면 `/triage`는 각 routed unit을 기판 레코드로 외재화하고 수신 세션에 그 레코드의 항해 블록을 건넨다. 이슈 범위 없이 `/triage`만 호출하면 현재 repository의 open backlog에서 시작하고, full issue substrate를 읽기 전에 triage load를 판정한다.
-
-```
-RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → EXTERNALIZE (WorkUnitRecord) → POINT
-```
-
-주요 특징:
-- bare `/triage`는 open-backlog metadata intake를 먼저 수행한 뒤 issue load, repo load, mapping load, intent ambiguity로 small / medium / large posture를 판정한다.
-- label만이 아니라 problem pressure 기준으로 similarity grouping
-- 기본은 `IssueGroup -> FocusedWorkUnit` 1:1, northstar fusion 중 실행축이 갈라질 때만 split
-- route choice는 현재 세션에서 사용자가 결정: independent session, re-triage
-- independent session으로 routed된 unit은 레코드를 외재화하고 포인터로 전달; re-triage는 레코드를 외재화하지 않음
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
@@ -113,7 +97,6 @@ epistemic-cooperative/
 └── skills/
     ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
     ├── probe/SKILL.md            # /probe 결핍 인식 fit review
-    ├── triage/SKILL.md           # /triage work-unit formation
     ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── review-loop/SKILL.md      # /review-loop 수렴 페이스 리뷰-resolve 루프
@@ -131,7 +114,6 @@ epistemic-cooperative/
 | 인식론적 프로토콜이 처음일 때 | `/onboard` |
 | 체험을 통한 프로토콜 학습 | `/onboard` |
 | 워크플로우 변경 후 재평가할 때 | `/onboard` |
-| 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
 | 뭔가 어긋났는데 어떤 결핍인지 아직 이름 붙이지 못할 때 | `/probe` |
 | 모든 finding 이 처분될 때까지 변경을 리뷰로 끌고 갈 때 | `/review-loop` |
@@ -144,8 +126,6 @@ epistemic-cooperative/
 ```
 /onboard
 /probe
-/triage
-/triage #41 #52 #60
 /review-loop codex 123
 /goal-research <question>
 ```
