@@ -10,13 +10,9 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 그 어긋남이 코드, 배포 단계, 후속 설명으로 굳어지면 몇 시간의 재작업이 될 수 있습니다.
 이 프로토콜은 중요한 결정 지점마다 구조화된 점검 절차를 두어, 잘못된 방향 위에 후속 작업이 쌓이기 전에 사람과 AI가 함께 방향을 바로잡도록 돕습니다.
 
-## 미션과 구조 (Mission and Machinery)
+## 프로토콜이 도움이 되는 순간
 
-**명시된 미션 (Stated Mission)** — 공개 진입점: 잘못된 방향을 일찍, 특히 계획 단계에서 잡는 것. 가장 명확한 진입 스토리이며 대부분의 사용자가 프로토콜에 이르는 경로입니다.
-
-**실제 구조 (Realized Machinery)** — 실제 커버리지: 구조화된 체크포인트가 계획, 분석, 결정, 실행, 검증, 회상, 이해에 걸쳐 작동합니다. Merismos(목표를 조건 붙은 실행 단위로 분배), Epharmoge(사후 적용성), Anamnesis(세션 회상), Katalepsis(이해 검증) 같은 프로토콜은 계획 단계 너머까지 확장됩니다.
-
-두 층은 다른 청중을 대상으로 합니다: README는 좁은 공개 계약을 운반하고, `SKILL.md`와 `CLAUDE.md`는 전체 구조를 서술합니다. 두 층을 정합하게 유지하는 거버넌스 규칙은 [docs/mission-bridge.md](./docs/mission-bridge.md)를 참조하세요.
+계획 단계에서 잘못된 방향을 발견하고, 후속 작업으로 이어지기 전에 바로잡으세요. 같은 구조화된 점검 절차는 작업을 자율 실행에 넘길 때, 결과가 실제 상황에 맞는지 확인할 때, 이전 논의를 떠올릴 때, 무언가를 이해했는지 확인하고 그 위에 쌓아 올리기 전에도 도움이 됩니다.
 
 ## 빠른 시작
 
@@ -30,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 그다음 지금 서 있는 결정 지점에서 프로토콜을 호출하세요 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 작업에서 무엇을 결정해야 할지 아직 보이지 않을 때 `/bound`.
 
-유틸리티 플러그인 둘은 opt-in이라 위 한 줄은 건너뜁니다. `epistemic-cooperative`는 학습·결핍 인식(`/onboard`, `/probe`)과 컨트리뷰터 도구를, `route`는 세션 훅들 — 매 프롬프트 라우팅 지시문, 세션 시작에 설치된 프로토콜의 결핍 테이블과 그 아래 [premise](./premise) 색인, 그리고 매처가 premise 문서의 순간이라고 볼 수 있는 도구 호출 — 바뀌는 지시 표면, 에이전트에게 넘기는 일 — 시점에 그 문서의 항목을 한 번 더 — 담습니다. 필요한 쪽을 따로 추가하세요:
+유틸리티 플러그인은 opt-in으로, 별도로 설치합니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 결핍 인식(`/probe`), 컨트리뷰터 도구를 제공합니다. 실험 단계인 [`route`](#route)는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 필요한 플러그인을 추가하세요:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
@@ -84,12 +80,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 ## 유틸리티
 
-프로토콜 옆에 플러그인 둘이 있습니다. 둘 다 Claude Code 한 줄 설치에서는 opt-in입니다:
-
-```bash
-claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
-```
+Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claude-code)을 참고하세요.
 
 ### [Epistemic Cooperative](./epistemic-cooperative)
 
@@ -120,22 +111,13 @@ claude plugin install route@epistemic-protocols
 
 컨텍스트 기반 프로토콜 라우팅. 세션 시작 훅이 설치된 프로토콜의 결핍 테이블과 [premise](./premise) 색인을 컨텍스트 머리에, 컨텍스트 에포크마다 한 번 놓고, 매 프롬프트 훅이 프롬프트 옆에 짧은 지시문을 놓습니다. 쌓인 컨텍스트가 설치된 코어 프로토콜 정확히 하나가 해소하는 결핍을 보이면 에이전트가 그 프로토콜을 호출하고, 여럿이 맞으면 넛지하고, 없으면 침묵합니다. 호출된 프로토콜의 첫 게이트가 당신의 판단을 그 자리에 그대로 둡니다.
 
-## 설계
-
-각 프로토콜은 인간-AI 협업이 어긋날 수 있는 특정 결정 지점을 다룹니다. 공개 문서는 계획 단계의 진입 훅을 앞세우고, 컨트리뷰터 문서는 계획/실행/검증/회상/이해까지 포괄하는 더 넓은 구조를 설명합니다. 두 층을 잇는 설명은 [docs/mission-bridge.md](./docs/mission-bridge.md), 아키텍처와 설계 철학의 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
-
 ## 컨트리뷰터를 위해
 
-이 레포에 처음이신가요? [ONBOARDING.md](./ONBOARDING.md)부터 시작하세요. 의도된 사용 방법: 새 Claude Code 세션에 파일 전체를 붙여넣으세요 — 문서에 내장된 지시문 블록이 Claude를 온보딩 버디로 전환합니다. Claude가 환경을 셋업 체크리스트와 대조하고, 현재 상태에 가장 잘 맞는 프로토콜로 라우팅하며, 핵심 문서를 순서대로 안내하고, 컨트리뷰션 워크플로우와 컨벤션을 함께 살펴봅니다.
-
-온보딩 진행 중에 프로토콜을 직접 경험할 수 있도록, 초반에 진입점 라우팅이 제공됩니다:
-
-- **이 프로토콜 자체가 처음, 사전 컨텍스트 없음** → `/onboard` (epistemic-cooperative) — 빠른 추천 + 시나리오/실행/퀴즈 가이드
-- **프로젝트 자체에 대한 이해를 검증하고 싶음** → `/grasp` (katalepsis) — `CLAUDE.md` 또는 특정 `SKILL.md` 대상
-- **Claude Code 워크플로우와 이 프로토콜의 설명을 이미 갖고 있고 둘의 비교가 뒷받침하는 결론을 감사하고 싶음** → `/ground` (analogia) — 본인의 사용 패턴을 대상 설명으로
-- **어떤 프로토콜을 언제 쓰는지 빠른 레퍼런스가 필요** → 위의 프로토콜 표, 또는 `route` 플러그인의 세션 시작 테이블
+[ONBOARDING.md](./ONBOARDING.md)부터 시작하세요. 새 Claude Code 세션에 파일 전체를 붙여넣으면 Claude가 온보딩 버디가 되어 환경 셋업, 핵심 문서, 컨트리뷰션 워크플로우를 안내합니다.
 
 아키텍처는 [CLAUDE.md](./CLAUDE.md), 협업의 바탕이 되는 원칙은 [premise/](./premise/)에서 살펴보세요.
+
+프로젝트를 소개하는 공개 문구를 고칠 때는 [Mission Bridge](./docs/mission-bridge.md)의 작성 기준을 따르세요.
 
 <details>
 <summary>Greek Codex</summary>
