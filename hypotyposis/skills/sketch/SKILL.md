@@ -31,8 +31,11 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
     produce → present → Qfit → Stop
   next utterance u: c' := fuse(c, u), every reading below taken afresh on c' →
     [the person withdraws]                        account → EarlyExit
-    [the person accepts that no form is owed]     account → DissolutionExit
-    [the person names where the run goes next]    account → Routed
+    [the person accepts that no form is owed, its ground and your contrary grounds in view]
+                                                  account → DissolutionExit
+    [the person names where the run goes next, its ground and your contrary grounds in view]
+                                                  account → Routed
+      (either closing taken without them in view: the gate again, with them shown)
     [a realization the run needs is shown unsuppliable] the boundary relay → account → BoundaryExit
     [a recognition and a placement stand on c', taken with what they need in view]
       retain and verify → every placed reference resolves: release the rest → RecognizedForm
@@ -211,23 +214,33 @@ axiom spec : Context P → Option RoundSpec
     checked. -/
 abbrev Location := String
 
+/-- One copy the run wrote: which version, and where — its temp-isolated reference at creation,
+    session text for a Text sketch, or a location the person named. -/
+structure Copy where
+  ref : SketchRef
+  loc : Location
+
+/-- **Your record**, read from the context: every copy the run has written, at creation and at
+    every placement attempt. -/
+axiom written : Context P → List Copy
+
 inductive Disposition
-  | retained (loc : Location)
+  | retained
   | released
   | releaseFailed (reason : String)
-  | retainFailed (loc : Location) (reason : String)
+  | retainFailed (reason : String)
 
-/-- **Your reading** of the account observations: for each version, what became of it at each
-    place it was written — one entry per version and location, the latest standing. `retained`
-    is read only where the observation shows the reference resolving to that version's exact
-    concretum. -/
-axiom dispositions : Context P → List (SketchRef × Disposition)
+/-- **Your reading** of the account observations: what became of each copy — one entry per copy,
+    the latest standing. `retained` is read only where the observation shows the reference
+    resolving to that version's exact concretum. -/
+axiom dispositions : Context P → List (Copy × Disposition)
 
 /-- What every spec a relay presents owes (Concretum Retention): each parent a brief names is a
-    version produced and not released. -/
+    version produced with a copy still unreleased. -/
 def SpecOwes (c : Context P) (s : RoundSpec) : Prop :=
   ∀ b ∈ s.briefs, ∀ p ∈ b.parents,
-    (∃ x ∈ sketches c, x.ref = p) ∧ (p, Disposition.released) ∉ dispositions c
+    (∃ x ∈ sketches c, x.ref = p) ∧
+    ∃ w ∈ written c, w.ref = p ∧ (w, Disposition.released) ∉ dispositions c
 
 /-- A mark: a person's utterance on a version, cited as said. What it points at, whether it
     names a misfit or something to keep, and which axis it reaches are your reading of it,
@@ -338,24 +351,26 @@ def fixture (c : Context P) : Option Fixture :=
   | some r, some p => some ⟨p.location, r.target, r.purposeScope, r.residual, p.kept⟩
   | _, _           => none
 
-/-- **Your judgment**, the adoption condition: the recognition and the placement the person's
-    answers took were shown, on a gate the person answered, with what they take — what producing
-    the recognized version determined, what it was checked against and how that came out, what
-    it moved from a value the person settled, your contrary grounds, and, after a failed
-    retention, every copy already written and where. A value the answer itself states counts
-    where its consequences were in view. Where anything would be taken unseen, the gate is drawn
-    again. -/
+/-- **Your judgment**, the adoption condition: what the person's answer closes on was shown, on a
+    gate the person answered, with what it takes. For a recognition and a placement: what
+    producing the recognized version determined, what it was checked against and how that came
+    out, what it moved from a value the person settled, your contrary grounds, and, after a
+    failed retention, every copy already written and where. For a dissolution or a route: the
+    ground the closing rests on, and your contrary grounds — a doubt about the dissolution, a
+    sibling deficit you read otherwise. A value the answer itself states counts where its
+    consequences were in view. Where anything would be taken unseen, the gate is drawn again
+    with it shown. A withdrawal needs nothing in view: the person may stop at any gate. -/
 axiom Covered : Context P → Prop
 
 /-- Every placed reference verified, and no version kept as a revert point is the recognized
     one: those are the versions the run passed over. -/
 def Verified (c : Context P) (f : Fixture) : Prop :=
   (∀ k ∈ f.kept, k.1 ≠ f.target) ∧
-  (f.target, Disposition.retained f.ref) ∈ dispositions c ∧
-  ∀ k ∈ f.kept, (k.1, Disposition.retained k.2) ∈ dispositions c
+  (⟨f.target, f.ref⟩, Disposition.retained) ∈ dispositions c ∧
+  ∀ k ∈ f.kept, (⟨k.1, k.2⟩, Disposition.retained) ∈ dispositions c
 
-/-- Every sketch has a declared disposition. -/
-def Accounted (c : Context P) : Prop := ∀ s ∈ sketches c, ∃ d, (s.ref, d) ∈ dispositions c
+/-- Every copy the run wrote has a declared disposition. -/
+def Accounted (c : Context P) : Prop := ∀ w ∈ written c, ∃ d, (w, d) ∈ dispositions c
 
 /-- A value on the record, named as the presentation shows it — a settled axis, the recognition,
     the placement, a kept version. -/
@@ -465,7 +480,9 @@ structure Closed (P : Type) where
     settled values (`operative`), the fixture, the recognition, the trace of every mark, the
     residual — axes left open and material the person entrusted to sketches that never came —
     the readings still `provisional`, every copy written with its disposition, the dissent, and
-    how each value came to stand. -/
+    how each value came to stand. It is assembled before any release, and the RecognizedForm
+    entire is the durable record of the run: sketch content beyond what placement retains stays
+    session-local. -/
 structure RecognizedForm (P : Type) where
   context    : Context P
   fixture    : Fixture
@@ -561,8 +578,12 @@ def sketch (relay respond : Context P → Response P) :
     let c' := fuse c u
     match filledValue (closing c') with
     | some .withdraw  => .withdrawn (closed c')
-    | some .dissolve  => .dissolved (closed c')
-    | some (.route t) => .routed t (closed c')
+    | some .dissolve  =>
+      if Covered c' then .dissolved (closed c')
+      else sketch relay respond (c' ++ [(respond c').val]) us
+    | some (.route t) =>
+      if Covered c' then .routed t (closed c')
+      else sketch relay respond (c' ++ [(respond c').val]) us
     | none =>
       if Unsuppliable c' then .boundary (closed (c' ++ [(relay c').val]))
       else
@@ -633,8 +654,9 @@ theorem each_step_continues_or_closes (relay respond : Context P → Response P)
     (h : sketch relay respond c (u :: us) = o) :
     (∃ c', sketch relay respond c' us = o) ∨
     (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) ∨
-    (filledValue (closing (fuse c u)) = some .dissolve ∧ o = .dissolved (closed (fuse c u))) ∨
-    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧
+    (filledValue (closing (fuse c u)) = some .dissolve ∧ Covered (fuse c u) ∧
+      o = .dissolved (closed (fuse c u))) ∨
+    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧ Covered (fuse c u) ∧
       o = .routed t (closed (fuse c u))) ∨
     (Unsuppliable (fuse c u) ∧ o = .boundary (closed (fuse c u ++ [(relay (fuse c u)).val]))) ∨
     (∃ f, fixture (fuse c u) = some f ∧ Covered (fuse c u) ∧ Verified (settle (fuse c u)) f ∧
@@ -673,15 +695,16 @@ theorem recognized_verified (relay respond : Context P → Response P) (c : Cont
     ∃ c₀, fixture c₀ = some r.fixture ∧ Covered c₀ ∧ Verified (settle c₀) r.fixture ∧
       r = recognize (settle c₀) r.fixture
 
-A dissolution, a route, and a withdrawal each rest on the person's closing.
+A dissolution and a route each rest on the person's closing, taken with its ground and your
+contrary grounds in view; a withdrawal rests on the person's closing alone.
 theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .dissolved r) :
-    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ r = closed c₀
+    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ Covered c₀ ∧ r = closed c₀
 
 theorem routed_by_person (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (t : String) (r : Closed P)
     (h : sketch relay respond c us = .routed t r) :
-    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ r = closed c₀
+    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ Covered c₀ ∧ r = closed c₀
 
 theorem withdrawn_by_person (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .withdrawn r) :
@@ -730,7 +753,7 @@ def grounding : Op → Annot × String
   | .readAnswer        => (.sense, "Internal analysis: the latest utterance, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — its marks, the values it settles and their scope, a recognition or its reopening, a placement, a closing — whatever form it takes")
   | .qplace            => (.constitution, "present: mandatory placement gate — the recognized version and the capability it needs, a reference the person judges to outlive the session, beside the versions this run passed over; the person names the location and which of the others are kept and where; no default for either; after a retention failure the failure and every copy already written are shown before the gate, and the same location stays admissible")
   | .account           => (.transform, "artifact write, environment run: only on a recognition and placement taken with what they need in view, retain every placed version and verify each reference resolves to that exact concretum — one retry, then the failure is declared and Qplace presented again with nothing released; once every placed version is verified, release the sketches placement did not keep and verify each — one retry, then ReleaseFailed declared with a handoff; each copy is accounted for where it was written, and a copy at a location the person moved from is released only where their words reach it")
-  | .assemble          => (.sense, "Internal analysis: RecognizedForm read from the context at the verified placement, before any release — the settled values with who proposed each and how it came to stand, the fixture, the recognition, the trace, the residual, the readings still provisional, every copy with its disposition, and the dissent attached to the closure")
+  | .assemble          => (.sense, "Internal analysis: RecognizedForm read from the context at the verified placement, before any release — the settled values with who proposed each and how it came to stand, the fixture, the recognition, the trace, the residual, the readings still provisional, every copy with its disposition, and the dissent attached to the closure; the RecognizedForm entire is the durable record of the run, and sketch content beyond what placement retains stays session-local")
   | .dissolutionRelay  => (.extension, "TextPresent+Proceed: when the person accepts or declares that no further encounter is owed — the sharpened description made the form recognizable without one, or the activation premise collapsed — state the basis, relay the settled values and every mark, attach any dissent, run account, stand down as DissolutionExit — a success, not an abandonment")
   | .routeRelay        => (.extension, "TextPresent+Proceed: when the person names where the run goes next — a sibling deficit, another protocol — relay the record so far with that target and its basis, attach any dissent, run account, exit as Routed; taking it up is the session's")
   | .boundaryRelay     => (.extension, "TextPresent+Proceed: where reachable evidence shows a realization the next sketches or the placement need cannot be supplied in this session — name the obligation and its basis, relay the record so far, run account, exit as BoundaryExit; the next protocol is the session's to choose")
@@ -809,7 +832,7 @@ A version kept as a revert point is one the run passed over, never the recognize
 - **Utterance continuity**: Every gate answer joins the context as it was said, and the readings drawn from it are shown beside it as the AI's. Each answer is read against the context as it now stands; a value the user settled stands on the scope their words reach, and a later version that moves it is shown as a change before the next gate, never silently. At the spec relay, re-present outstanding material the user entrusted to later sketches; a subsequent act of theirs settles whether it is taken up or withdrawn. Whatever remains is declared in the terminal's residual.
 - **Ground interpretations**: Read each mark against the version it names, that version's brief, and how it was realized. What the evidence supports about the form and about the realization is the judgment; carry it with its basis, and where the evidence does not settle which of the two a mark reaches, carry that unresolved into the provisional reading the spec relay presents. Where the focus carries a standard outside both parties' preference, check each sketch against its referent before presenting, and show how it came out.
 - **Draft relayed with its basis**: relay what the next sketches try, the perception they need, and the variant briefs with the basis that chose each, the provisional readings beside them, and the affordance to send any of it back, then produce; the recognition gate is where the user settles a value or sends the draft back.
-- **Closure by the user**: A recognition, a placement, a dissolution, and a route are closed only by the user's utterance, and taken only with what they need in view. Before each gate, show any contrary ground you hold about the version or the placement; where the user closes with that ground standing, attach it to the closure record. Evidence found later that breaks a recognition or a value the user settled is shown before the next gate, and always before any release; the closed value itself is never rewritten by you. Record for each settled value who proposed it and whether the user's words set it or their answer adopted yours.
+- **Closure by the user**: A recognition, a placement, a dissolution, and a route are closed only by the user's utterance, and taken only with what they need in view; a withdrawal needs nothing more than the user's word. Before each gate, show any contrary ground you hold about the version or the placement; where the user closes with that ground standing, attach it to the closure record. Evidence found later that breaks a recognition or a value the user settled is shown before the next gate, and always before any release; the closed value itself is never rewritten by you. Record for each settled value who proposed it and whether the user's words set it or their answer adopted yours.
 - **Placement has no default**: The protocol names what the retained version needs — a reference the user judges to outlive the session — and the user names where, together with which other versions are kept and where. The fixture that results is a recognition witness and carries no implementation commitment.
 - **Round composition**: Use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

@@ -57,8 +57,9 @@ theorem each_step_continues_or_closes (relay respond : Context P → Response P)
     (h : sketch relay respond c (u :: us) = o) :
     (∃ c', sketch relay respond c' us = o) ∨
     (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) ∨
-    (filledValue (closing (fuse c u)) = some .dissolve ∧ o = .dissolved (closed (fuse c u))) ∨
-    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧
+    (filledValue (closing (fuse c u)) = some .dissolve ∧ Covered (fuse c u) ∧
+      o = .dissolved (closed (fuse c u))) ∨
+    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧ Covered (fuse c u) ∧
       o = .routed t (closed (fuse c u))) ∨
     (Unsuppliable (fuse c u) ∧ o = .boundary (closed (fuse c u ++ [(relay (fuse c u)).val]))) ∨
     (∃ f, fixture (fuse c u) = some f ∧ Covered (fuse c u) ∧ Verified (settle (fuse c u)) f ∧
@@ -66,9 +67,16 @@ theorem each_step_continues_or_closes (relay respond : Context P → Response P)
   simp only [sketch] at h
   split at h
   · exact .inr (.inl ⟨by assumption, h.symm⟩)
-  · exact .inr (.inr (.inl ⟨by assumption, h.symm⟩))
-  · rename_i t ht
-    exact .inr (.inr (.inr (.inl ⟨t, ht, h.symm⟩)))
+  · rename_i hk
+    split at h
+    · rename_i hc
+      exact .inr (.inr (.inl ⟨hk, hc, h.symm⟩))
+    · exact .inl ⟨_, h⟩
+  · rename_i t hk
+    split at h
+    · rename_i hc
+      exact .inr (.inr (.inr (.inl ⟨t, hk, hc, h.symm⟩)))
+    · exact .inl ⟨_, h⟩
   · split at h
     · rename_i hu
       exact .inr (.inr (.inr (.inr (.inl ⟨hu, h.symm⟩))))
@@ -93,7 +101,7 @@ theorem recognized_verified (relay respond : Context P → Response P) (c : Cont
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ |
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, _, h'⟩ |
         ⟨_, h'⟩ | ⟨f, hf, hc, hv, h'⟩
     · exact ih c' h'
     · cases h'
@@ -105,16 +113,16 @@ theorem recognized_verified (relay respond : Context P → Response P) (c : Cont
 
 theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .dissolved r) :
-    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ r = closed c₀ := by
+    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ Covered c₀ ∧ r = closed c₀ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hk, h'⟩ | ⟨_, _, h'⟩ |
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hk, hc, h'⟩ | ⟨_, _, _, h'⟩ |
         ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
     · exact ih c' h'
     · cases h'
     · cases h'
-      exact ⟨_, hk, rfl⟩
+      exact ⟨_, hk, hc, rfl⟩
     · cases h'
     · cases h'
     · cases h'
@@ -122,17 +130,17 @@ theorem dissolved_by_person (relay respond : Context P → Response P) (c : Cont
 theorem routed_by_person (relay respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (t : String) (r : Closed P)
     (h : sketch relay respond c us = .routed t r) :
-    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ r = closed c₀ := by
+    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ Covered c₀ ∧ r = closed c₀ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩ | ⟨t', hk, h'⟩ |
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨t', hk, hc, h'⟩ |
         ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
     · exact ih c' h'
     · cases h'
     · cases h'
     · cases h'
-      exact ⟨_, hk, rfl⟩
+      exact ⟨_, hk, hc, rfl⟩
     · cases h'
     · cases h'
 
@@ -142,7 +150,7 @@ theorem withdrawn_by_person (relay respond : Context P → Response P) (c : Cont
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨hk, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ |
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨hk, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, _, h'⟩ |
         ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
     · exact ih c' h'
     · cases h'
@@ -158,7 +166,7 @@ theorem boundary_on_evidence (relay respond : Context P → Response P) (c : Con
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ |
+    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, _, h'⟩ |
         ⟨hu, h'⟩ | ⟨_, _, _, _, h'⟩
     · exact ih c' h'
     · cases h'
