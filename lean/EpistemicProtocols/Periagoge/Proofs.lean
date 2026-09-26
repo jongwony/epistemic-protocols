@@ -18,7 +18,9 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty Focus := ⟨.naming⟩
+instance : Nonempty Candidate := ⟨⟨"", "", "", none⟩⟩
+instance : Nonempty Row := ⟨⟨"", ⟨"", ⟨"", ""⟩⟩, ⟨"", ⟨"", ""⟩⟩, ""⟩⟩
+instance : Nonempty Move := ⟨.confirm⟩
 
 theorem silence (respond declare : Context P → Response P) (c : Context P) :
     induce respond declare c [] = .holding c := by
@@ -28,18 +30,11 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
   let c₁ := c ++ (collect c).map (·.val)
   exact ⟨(collect c).map (·.val) ++ (passRecord c₁).map (·.val), by simp [pass, c₁]⟩
 
-theorem proposal_only_when_showable (c : Context P) (n : Naming) (h : shownNaming c = some n) :
-    Showable c := by
-  unfold shownNaming at h
-  split at h
-  · assumption
-  · cases h
-
 theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond declare c us = .crystallized r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .confirm ∧ shownNaming c₁ = some r.naming ∧
-      Showable c₁ ∧ Covered c₁ ∧ r = crystallize declare c₁ r.naming := by
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .confirm ∧ CandidateLive c₁ ∧ Covered c₁ ∧
+      r = crystallize declare c₁ := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -51,12 +46,9 @@ theorem crystallized_on_confirm (respond declare : Context P → Response P) (c 
       · cases h
       · rename_i hk
         split at h
-        · rename_i n hn
-          split at h
-          · rename_i hc
-            cases h
-            exact ⟨_, hk, hn, proposal_only_when_showable _ _ hn, hc, rfl⟩
-          · exact ih _ h
+        · rename_i hc
+          cases h
+          exact ⟨_, hk, hc.1, hc.2, rfl⟩
         · exact ih _ h
       · exact ih _ h
 
@@ -75,9 +67,7 @@ theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Cont
         exact ⟨_, hk, rfl⟩
       · cases h
       · split at h
-        · split at h
-          · cases h
-          · exact ih _ h
+        · cases h
         · exact ih _ h
       · exact ih _ h
 
@@ -97,9 +87,7 @@ theorem routed_on_route (respond declare : Context P → Response P) (c : Contex
         cases h
         exact ⟨_, hk, rfl⟩
       · split at h
-        · split at h
-          · cases h
-          · exact ih _ h
+        · cases h
         · exact ih _ h
       · exact ih _ h
 
@@ -109,61 +97,22 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-theorem cap_bounds_probes (c : Context P) (h : CapReached c) (hr : ¬ ProbeRequested c)
-    (p : ProbeCase) : focus c ≠ .probe p ∧ focus c ≠ .plainCorrespondence p := by
-  have hc : CapReached c ∧ ¬ ProbeRequested c := ⟨h, hr⟩
-  unfold focus
-  cases selectFocus c with
-  | probe q =>
-    dsimp only
-    split
-    · split <;> simp
-    · rename_i hn
-      exact absurd hc hn
-  | plainCorrespondence q =>
-    dsimp only
-    split
-    · rename_i hp
-      exact absurd hc hp.2
-    · simp
-  | correspondence => simp
-  | naming => simp
-  | exhausted => simp
+theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
+    (r, row c r) ∈ crossView c := by
+  simp only [crossView, List.mem_map]
+  exact ⟨r, h, rfl⟩
 
-theorem probe_rides_only_plain (c : Context P) (p : ProbeCase)
-    (h : focus c = .plainCorrespondence p) : CorrespondencePlain c := by
-  unfold focus at h
-  cases hs : selectFocus c with
-  | probe q =>
-    rw [hs] at h
-    dsimp only at h
-    split at h
-    · split at h <;> cases h
-    · cases h
-  | plainCorrespondence q =>
-    rw [hs] at h
-    dsimp only at h
-    split at h
-    · rename_i hp
-      exact hp.1
-    · cases h
-  | correspondence => rw [hs] at h; cases h
-  | naming => rw [hs] at h; cases h
-  | exhausted => rw [hs] at h; cases h
-
-theorem stale_verdict_uncounted (c : Context P) (p : ProbeCase) (r : Reading)
-    (h : Stale c p r = true) : standingVerdict c p r = none := by
-  simp [standingVerdict, h]
-
-theorem live_leaves_only_by_refutes (c : Context P) (r : Reading) (hr : r ∈ readings c)
-    (hn : r ∉ live c) : refuted c r = true := by
+theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ readings c)
+    (hn : r ∉ live c) : ∃ g, filledValue (setAside c r) = some g := by
   unfold live at hn
   simp only [List.mem_filter, not_and] at hn
   have := hn hr
-  cases h : refuted c r <;> simp_all
+  cases hs : filledValue (setAside c r) with
+  | none => simp_all
+  | some g => exact ⟨g, rfl⟩
 
-theorem verdict_by_person {c : Context P} {p : ProbeCase} {r : Reading} {s : Cite c}
-    (ok : (verdictCoord (P := P) p r).admits s.src) : s.src.val = .person := ok
+theorem set_aside_by_person {c : Context P} {r : Reading} {s : Cite c}
+    (ok : (setAsideCoord (P := P) r).admits s.src) : s.src.val = .person := ok
 
 theorem disposed_by_person {c : Context P} {i : OpenItem} {s : Cite c}
     (ok : (dispositionCoord (P := P) i).admits s.src) : s.src.val = .person := ok
