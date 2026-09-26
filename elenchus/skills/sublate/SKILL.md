@@ -5,309 +5,635 @@ description: "Vet working context by dialectical antithesis before action. Type:
 
 # Elenchus Protocol
 
-Vet working context by dialectical antithesis before action through structured per-claim disposition judgment, resolving suspect context into vetted context. Type: `(ContextSuspect, User, VET, WorkingContext) → VettedContext`.
+Vet working context by dialectical antithesis before action: each suspect claim is met by a concrete challenge, and the user's own answer to it is what the context carries forward, resolving suspect context into vetted context. Type: `(ContextSuspect, User, VET, WorkingContext) → VettedContext`.
 
 ## Definition
 
-**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, cross-source consistency check, and inference-fallacy archetype scan before pre-execution sync. The protocol's lexical verb is `/sublate`. Each audit — a source under one claim it is read as authority for — undergoes the motion of stating that claim, surfacing what would shake it, and then deciding what to make of it in light of that challenge (the Hegelian *Aufhebung* — preserve + negate + lift up — supplies the source vocabulary).
+**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, cross-source consistency check, and inference-fallacy archetype scan before pre-execution sync. The protocol's lexical verb is `/sublate`. Each claim the pending action leans on is stated as it stands (thesis), met by what would shake it (antithesis), and then the person says what they make of it in light of that challenge (synthesis) — the Hegelian *Aufhebung*, preserve + negate + lift up, supplies the source vocabulary. The protocol exists to help that thinking reach its synthesis; the synthesis is the person's.
 
-```
-── FLOW ──
-W → identify(W) → S_cand → ∀s ∈ S_cand: bind_kind(s) → k [split where non-atomic] → certify(k, local_claims) → [status(c) = ambiguous: Qa(a, claims_supported(a)) → Stop → Attribution → attribute(a, ·)] → keep(status(c) = pass) → bind_value_space(audit, W.action) → S_high →
-  S_high = ∅ ∧ nothing yet posited: emit VettedContext (extension) → deactivate   -- trivial convergence, two causes reported apart: no audit-candidate source at all (Λ.formed = ∅, dispositions empty), or candidates every one of which this protocol handed elsewhere or the user left unattributable (dispositions = the records Phase 0 wrote, by the certificate or by the user's attribution, so NOT empty). Both are first-pass shapes; a loop return that empties S_high leaves through the loop, never here, or the antitheses already put to the user would go out with an empty trace
-  Λ.pass = ∅ ∧ something already posited: → integrate(J, Λ.antitheses) → V → LOOP evaluation   -- a loop return this re-pass admitted nothing from: nothing to tag, posit against, or ask, but V is still re-assembled because this pass rewrote J
-  Λ.pass ≠ ∅: tag(provenance, freshness, leverage) → S' → posit(antithesis) → A[] →   -- tagging and positing range over Λ.pass, not the standing S_high, so an audit judged in an earlier cycle is not worked again unless its Revisit returned it
-  Q(per-claim disposition slots) → J → integrate(J, Λ.antitheses) → V →
-  (loop if ∃ a ∈ S_high : J(a.ref).disposition = Judged(_, Revisit(c)) ∧ trigger_met(c))   -- the S_high membership is part of the condition, not a shorthand: a met Revisit is owed a fresh antithesis and a fresh question, and only a member can be given either
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
+-/
 
-── MORPHISM ──
+/-! ── FLOW ──
+Elenchus(W) → start(c) → sublate(c, utterances), where c is the fused session context and W, the
+working context, is c itself:
+  pass(c): judge afresh, against the context as it now stands and from this run's invocation on,
+    which claims the pending action leans on are suspect, whose each one is, and — for each claim
+    still waiting on the person — a concrete antithesis with its basis → record
+  [the person stops]                                           close: stopped
+  [the person goes on to a protocol they name]                 close: routed
+  [nothing open ∧ the person has answered in this run]         close: vetted
+  [otherwise] present the current list and what this turn changed, then every open claim with its
+    antithesis and concrete actions for it — with nothing open, what was searched and what was
+    found, handed on or not — → Stop
+  next utterance u: c' := pass(fuse(c, u)) → the same reading, whatever u says
+  no utterance: the gate holds; nothing is judged and nothing closes
+-/
+
+/-! ── MORPHISM ──
 WorkingContext
-  → identify(high_leverage_sources, S_cand)    -- silent scan for sources warranting audit
-  → bind_kind(source) → [split_binding(binding, source) where atomicity = non-atomic] → certify(kind_binding, local_claims) → bind_value_space(audit, W.action) -- shared meta-backbone: bind each candidate to the CLAIM it is being read as authority for, SPLIT the binding where it bundles more than one claim so certify never sees a compound, certify deficit fit (fail-closed) against the claims inscribed in this SKILL.md, then derive the NARROWING its judgment will be made against — in that strict order, BEFORE any tagging, antithesis, or surfacing. ONLY status(certificate) = pass CONTINUES DOWN THIS CHAIN: route writes a certificate-assigned record straight into the disposition table emit reads; ambiguous is put to the user at Qa, whose attribution admits the candidate, hands it elsewhere, or records it Unattributable — so every step below ranges over the admitted audits alone
-  → tag(provenance, freshness, leverage)        -- attach metadata triple per audit
-  → posit(antithesis per audit)                 -- Pattern A ∪ Pattern B ∪ Pattern C ∪ Pattern D ∪ Emergent(Pattern)
-  → present(antitheses as text, then the reach of a judgment, then the question)  -- per-claim material and a per-batch reach note precede the gate, which carries the question and the instruction list
-  → judge(disposition per audit)                 -- over the admitted audits: an open verdict plus an optional instruction, whose members are only what this protocol can itself discharge. The records Phase 0 wrote — certificate- or attribution-assigned — are already in the table and are reported rather than judged
-  → emit(VettedContext with disposition table)
+  → select(claims)               -- the claims the pending action leans on that warrant a challenge; afresh every pass, the person's words about what to vet included
+  → certify(claim)               -- whose it is: a suspect claim here, another deficit's, or unclear (fail-closed)
+  → posit(antithesis)            -- a concrete challenge to each claim waiting on the person, with its basis
+  → surface(list, changes, open) -- the current list and this turn's changes, then each open claim with its challenge and concrete actions
+  → sublate(person's turn)       -- what the person makes of each claim in light of its antithesis, in their words; or that it is another deficit's; or close
   → VettedContext
-requires: working_context_pre_execution_committed   -- runtime checkpoint (Phase 0)
-deficit:  ContextSuspect                            -- activation precondition (Layer 1); the certificate's own_claim deficit for in-scope audits
-preserves: source_chain                              -- W.sources is read-only; binding, antithesis and disposition annotate, never mutate. A split produces several AUDITS over one source, never several sources
+requires: working_context_pre_execution_committed   -- runtime checkpoint
+deficit:  ContextSuspect                            -- activation precondition (Layer 1)
+preserves: every turn of the context -- the context only grows (pass_extends); an answer annotates a claim and never rewrites its source
 invariant: Dialectical Vetting over Silent Trust
-invariant: certificate-before-surfacing              -- status(certificate) = pass strictly precedes entry into S_high, and therefore precedes tagging, antithesis positing, and the Phase 2 disposition gate (shared meta-backbone order)
+invariant: antithesis before synthesis -- a claim's challenge is shown before the person is asked what they make of it
+invariant: the person answers and closes; the certificate alone only hands on what it places elsewhere, and says so
+-/
 
-── TYPES ──
-W              = WorkingContext { sources: List(Source), action: Prospect }
-Prospect       = { intent: String, leans_on: List(Reference) }   -- the pre-execution action the working context was committed against: what is about to be done, and the source references it rests on. READ by bind_value_space, which turns it into the Stake each judgment is made against. Without that read a user is asked what they make of a claim with no statement of what the pending action would do with it, and a claim's standing gets judged in the abstract — which is the one condition under which the judgment cannot be theirs to make
-Source         = { content: String, origin: Origin, observed_at: Timestamp, downstream: List(Reference) }
-Origin         ∈ {UserStatement, DocumentRead, ToolOutput, AIInference, ExternalAPI, PastSession} ∪ Emergent(Origin)
-identify       = WorkingContext → Set(Source)            -- silent selection per Source Identification Criteria
-S_cand         = Set(Source) from identify(W)            -- audit CANDIDATES: sources the criteria selected, before any of them is bound to a claim, certified, or admitted
-AuditRef       = { source: Source, claim_at_admission: ClaimRef }      -- the audit's STABLE IDENTITY, and the only thing any map is keyed by
-               -- both components are fixed when the audit is FORMED and never rewritten, which is what lets a re-triggered audit be re-bound and re-certified without its key moving. Every map below — S', J, V.trace, and the Λ maps — is keyed by this ref; two audits are the same audit exactly when their refs agree, and two siblings from an atomicity split get distinct refs because they were admitted under distinct claims
-               -- claim_at_admission IS NOT THE LIVE CLAIM. The claim under test is kind_binding.label, which a loop re-binding may replace when the conditions that fired the trigger moved the claim with them. Keeping the admission claim in the ref is what stops the identity from drifting while the challenge still aims at the claim as it now stands; where the two have come apart, the trace shows both
-ClaimAudit     = { ref: AuditRef, kind_binding: KindBinding, certificate: DeficitFitCertificate }
-               -- object_ref: the per-audit anchor the certificate evaluates and the value space binds over (elenchus-local instantiation of the shared backbone's object_ref)
-               -- IDENTITY VERSUS CONTENTS: ref is the identity, and the two fields after it are contents a loop re-binding and re-certification may replace. Keying anything by the whole record would make re-certifying a re-triggered audit silently change its key and orphan its entry, so the split is load-bearing rather than presentational
-               -- THE UNIT OF JUDGMENT IS THE SOURCE UNDER ONE CLAIM, not the source. One source read as authority for two distinct claims is TWO audits, which is what the atomicity split produces and what `Claim-relative provenance` has always required be surfaced rather than carried over silently. A source carrying one claim yields one audit, which is the ordinary case
-               -- THE NARROWING IS NOT A FIELD HERE: bind_value_space takes this record as an argument and writes its result to Λ.narrowing, keyed by ref, so this type carries none of it. That keeps the type inhabitable at every point the pipeline reaches it — including for a candidate the certificate routes or leaves unattributable, which never earns a narrowing at all, and for the record as it stands between certify and the Phase 2 slot. A field would demand a value the contract forbids producing until the certificate passes; the narrowing lives in Λ.narrowing instead, keyed by the audit's ref
-               -- ASSEMBLED ACROSS THE PHASE 0 PIPELINE: identify selects the source, bind_kind binds the claim it is read as authority for, and certify fits that binding against the local claims — in the order `Admission-time certificate` fixes
-               -- The REF is fixed before the record completes, at the point the binding is settled atomic, and that is what Λ.formed holds. So the convergence domain is a set of identities and never a set of records: a candidate can be answered for from the moment its identity exists, which is earlier than the moment it becomes a ClaimAudit this protocol tags, posits against, or surfaces
-S_high         = Map(AuditRef, ClaimAudit)                -- the audit-candidate set, KEYED BY THE STABLE IDENTITY like every other collection over audits, with key = value.ref. A set of records would have to remove BY VALUE, and the value moves: a loop re-binding and re-certification replaces the record, so the member a removal clause is looking for is no longer the member that is there. Read a ∈ S_high as membership in its range and r ∈ S_high as membership in its domain — key = value.ref holds by construction, so the two never disagree. Atomic and certificate-passing BY CONSTRUCTION, since nothing else is admitted to it. Cardinality 0 yields trivial convergence ON THE FIRST PASS — which is a SATISFIED terminal rather than a vacuous one, since every candidate that never reached S_high carries a Phase 0 record in J, certificate- or attribution-assigned. On a LOOP RETURN cardinality 0 means something different and takes a different exit: a re-certification can route the last admitted audit out after the user has already judged it, and that run's terminal is the loop's, whose account ranges over dom(Λ.antitheses). Reading cardinality 0 as one condition would send that run to a terminal emitting an empty trace
-ClaimRef       = { referent: String, claim_kind: String, scope: String, text: String }
-               -- claim_kind = the SEMANTIC CATEGORY of claim the source is tested as authority for (a distinct axis from an evidence-channel kind); values are protocol-local (self-contained, no shared cross-protocol enum). text = claim verbatim, used by Pattern A's cite-claim-verbatim test
-               -- carried as KindBinding.label (below), which is what makes the axis a BOUND FIELD rather than something the antithesis inherits from how it happened to be worded. All four components are load-bearing for that: referent and claim_kind fix what the claim is about and in what category, scope fixes how far it reaches, and text pins the wording the challenge must confront
-ProvenanceTag  = { claim: ClaimRef, evidence: VerificationPath, confidence: Float }
-               -- claim-relative tag: the source's authority is recorded for the claim it authorizes, not for the source in general
-VerificationPath ∈ {DirectObserved, InferredFromN, ExternalCited, ProvisionalAssumption}
-FreshnessTag   = { age: Duration, horizon: Duration }
-               -- currency only: a source can be fresh yet still not track the behavior its claim asserts (it documents intent with nothing enforcing the match). Freshness is necessary but not sufficient for trusting a source; the support-integrity challenge is posited per audit in Pattern A (Source Provenance Audit).
-LeverageTag    = { branches: Set(Reference) }
-S'             = Map(AuditRef, ProvenanceTag × FreshnessTag × LeverageTag)
-               -- keyed by the AUDIT, not the source: ProvenanceTag is claim-relative already (`Claim-relative provenance`), so two audits over one source carry two provenance verdicts. FreshnessTag and LeverageTag are properties of the source and are therefore identical across sibling audits — carried per audit so one read gives the whole triple, not because they differ
+namespace Elenchus
 
--- Shared meta-backbone (KIND dispatch, admission-time). One canonical schema; elenchus-local instantiation ONLY for object_ref (= ClaimAudit), local_value_space (= the per-audit narrowing the judgment is made against, never a set of answers), the label field's type (ClaimRef), the own claim, and the local route claims.
-KindBinding    = { label: ClaimRef, positive_predicate: String, evidence: Set(Evidence), atomicity ∈ {atomic, non-atomic} }
-                 -- binds the candidate to the CLAIM it is being read as authority for, read off the source's content together with its downstream references. positive_predicate states what makes that claim suspect
-                 -- if atomicity = non-atomic (the binding bundles two distinct claims) → split BEFORE certify, and the split is given the SOURCE alongside this binding, since label holds one claim and a further one is readable only there. No compound is admitted to S_high, tagged, posited against, or surfaced
-                 -- atomicity IS THE BACKBONE'S QUESTION AND CARRIES THE BACKBONE'S MEANING: how many distinct claims this binding bundles — the same question the sibling protocols sharing this schema ask of it. THE FLAG AND THE FIELD DISAGREE ABOUT WHAT A BINDING CAN HOLD, AND THAT IS A DECLARED RESIDUAL: this flag can say "more than one" while label holds exactly one, so the assertion has nothing here to point at. It costs no admitted claim — split_binding takes the source and each distinct claim gets its own binding, its own ref and its own place in Λ.formed — and what it leaves is the flag naming a multiplicity the record cannot represent. Changing that means changing what atomicity refers to, which is this backbone's own question and therefore a change across every protocol sharing the schema, so it is named here and not made here. It never asks how far a disposition would reach: one claim standing on evidence that lies in several places is ONE audit, because what becomes of the source is what the disposition answers and not what admission decides
-Evidence       = { source: String, content: String }   -- observable indicator from W supporting the binding and the certificate's deficit-fit basis
-OwnClaim       = { deficit: ContextSuspect, resolution: VettedContext, in_scope_if: String }
-                 -- the claim elenchus makes, stated as the WHOLE local morphism: the deficit it takes AND the resolution it produces. An audit is claimed here when its positive_predicate instantiates ContextSuspect AND the local value space can carry it to VettedContext — the bare deficit label is a name, the morphism is the predicate
-DeficitFitCertificate = { own_claim: OwnClaim, route_claims: List<RouteClaim>, claimed_by: Set(Deficit), evidence: Set(Evidence), attribution_by ∈ {certificate, user} }
-                 -- attribution_by records WHO SETTLED claimed_by: `certificate` where the fit alone settled it, `user` where the fit was ambiguous and the user's Attribution at Qa rewrote claimed_by. Written by attribute and nowhere else; read by DispositionRecord.assigned_by and the closing account
-status(c)        = pass iff c.claimed_by = {ContextSuspect}; route iff c.claimed_by = {d} with d a routed_deficit of one of c.route_claims; ambiguous otherwise
-                 -- read off claimed_by rather than stored beside it, so no field can disagree with the set that determines it
-                 -- fail-closed: status(c) ≠ pass BLOCKS entry into S_high, and therefore blocks tagging, antithesis positing, and the Phase 2 disposition gate. Generated at Phase 0 by fitting KindBinding.positive_predicate against own_claim and every route_claim inscribed below — the certificate reads nothing outside this SKILL.md
-                 -- claimed_by collects every claim the evidence supports; a SET, so "no claim holds" is the value ∅ rather than a hole in the type
-                 -- status(c) = pass: claimed_by = {ContextSuspect} — the own claim holds alone → admitted to S_high
-                 -- status(c) = route: claimed_by = {d} for a single route_claim's routed_deficit d → emit d as the typed handoff, record Handed(d) against the audit, and drop it from admission; it never enters S_high, so it never reaches a disposition slot — but it IS in Λ.formed, so vetted(V) quantifies over it and that record is what discharges it
-                 -- status(c) = ambiguous: |claimed_by| ≠ 1 — several claims hold, or none holds on the evidence at hand → Qa: the candidate is put to the user with the claims its evidence supports, and their Attribution settles it — Own (admitted to S_high on their word), Route(d) (Handed(d), attribution-assigned), or Unattributable (recorded against the audit with what they saw as unresolved in basis, reported, and dropped from admission — never admitted, but discharged in the ledger like every other formed audit). ONE gate and no AI re-assessment, because W.sources is read-only (preserves: source_chain) and the detection state cannot have moved: nothing the certificate could re-read would move the fit, and a step whose answer can move with no new evidence behind it would admit or dismiss a candidate arbitrarily. The user's utterance is the one new ground that can arrive, so ambiguity goes to them and not to a second pass — asked once per candidate, and Unattributable reached only on their word
-                 -- what a pass certifies is LOCAL ADMISSIBILITY: elenchus's own gate governing elenchus's own activation, not the absence of a claim anywhere in the wider protocol set. Where two protocols' scopes both reach a situation, each protocol's own gate governs
-RouteClaim     = (route_if_predicate: String, routed_deficit: Deficit)
-                 -- elenchus-local route claims — what a candidate is handed to when it is not a suspect claim in the working context. routed_deficit is the BINDING field; the command in parentheses is a non-binding hint for the user, not the relation this guard composes on:
-                 --   a missing pre-execution fact — nothing to vet, something to acquire        → ContextInsufficient (hint: /inquire)
-                 --   the claim is not open at all: a convention or ownership question settles it → BoundaryUndefined   (hint: /bound)
-Deficit        = a deficit label — a name for the kind of interaction deficit a claim's resolution belongs to. THE TYPE IS OPEN: what may inhabit it is not bounded by this file, because a user's HandOff names where they judge the question belongs and that judgment needs no local inscription to be well-formed. What IS bounded is the CERTIFICATE's range — every label the certificate can assign is inscribed in THIS SKILL.md (elenchus's own ContextSuspect, or one of the sibling deficits named in the route claims above) and nothing outside this file supplies one, the certificate being a check this protocol performs and so one it must be able to run from this file alone
-               -- the bound named above reaches the certificate and stops there. A user's HandOff at Qs, or their Route(d) attribution at Qa, names where THEY judge the question belongs, and it travels in the typed field whether or not this file mentions that deficit — a judgment is not a check and owes no local inscription, so nothing coerces it toward an inscribed name. What the bound must not be read as is the range of things a user may conclude
-bind_kind        : Source → KindBinding                 -- binds a candidate to the claim it is read as authority for; runs before certify, and its output is what certify fits. TOTAL ON PURPOSE, WITH NO FAILURE VALUE: a candidate whose claim the AI cannot settle still yields a binding, and certify is what catches it — the evidence supports no claim, so claimed_by = ∅, status(c) is ambiguous, and the attribute arm puts it to the user at Qa, whose attribution is what admits it, hands it elsewhere, or records it Unattributable. Putting a failure value here instead would let this step decide admissibility, which is the fail-closed order's whole point to prevent
-split_binding    : (KindBinding, Source) → Set(KindBinding)       -- the producer the split transition runs on. Reads a binding whose atomicity is non-atomic and emits one atomic binding per distinct claim that binding was standing for, each carrying the positive_predicate and evidence that bear on ITS claim.
-                 -- SOURCE IS A SECOND ARGUMENT BECAUSE THE CLAIMS ARE READ FROM IT AND THE BINDING DOES NOT CARRY THEM. label is ONE ClaimRef and ClaimRef's four components are each singular, so a binding standing for two claims holds the first and has nowhere to put the second: atomicity says two are bundled while nothing in the record says what the second one IS. A producer given only the binding would therefore have to invent the second claim's referent, claim_kind, scope and verbatim text, and a claim invented at the split is one no user was ever read off the source for. Handing it the Source is what makes the declared output derivable from the declared input — the same repair, and for the same reason, that bind_value_space below takes Prospect as a second argument Those two are FACTORED and never copied across: certify fits the predicate and bind_value_space reads the evidence, so a child handed the compound's predicate would be certified and then judged against a claim it does not carry. Where the predicate cannot be factored per claim, that is the signal the binding was not two claims after all — one claim standing on evidence lying in several places is ONE audit, which is what atomicity already says. It is declared because the transition cannot borrow bind_kind for this: bind_kind is a function of the SOURCE that returns ONE binding, so re-running it on the one source yields that same one binding again, never the several a split owes — a transition whose output nothing produces is one an executor has to invent its way through. WHAT THAT EXCLUDES IS RE-RUNNING bind_kind, NOT READING THE SOURCE. The two are different: bind_kind's job is to settle the single claim a candidate is read as authority for, and running it twice settles it twice; split_binding's job is to enumerate the distinct claims one non-atomic binding was standing for, which is a different question put to the same substrate. That is why the Source is admissible here as a second argument while bind_kind is not admissible as a borrowed step. Called only where atomicity = non-atomic. THIS IS ALSO WHERE THE SIBLING PROTOCOLS SHARING THIS BACKBONE DIVERGE, AND THE DIVERGENCE IS PRINCIPLED RATHER THAN A DRIFT: they re-run their own bind_kind instead of declaring a producer, which works there because their label is a simple re-derivable value, while a ClaimRef is four components fixed per candidate and bind_kind yields one of them per source. A protocol whose label can be re-derived needs no producer; one whose label cannot, does
-certify          : (KindBinding, LocalClaims) → DeficitFitCertificate   -- fits KindBinding.positive_predicate against the own claim and the route claims; the BINDING is the domain, never the raw source — fitting a source's content instead would decide admissibility on wording the binding exists to replace
-LocalClaims      = (OwnClaim, List<RouteClaim>)         -- both inscribed in this file; the pair the certificate is evaluated against
-claims_supported(a) = { d ∈ {ContextSuspect} ∪ { rc.routed_deficit : rc ∈ route_claims } : the evidence supports d's predicate }   -- what Qa presents: the inscribed claims a's evidence supports, each with what attributing a to it would mean. Equal to claimed_by at the moment Qa fires; named separately because Qa also presents the case none of them holds
-Attribution      = Own | Route(routed_deficit: Deficit) | Unattributable   -- the user's answer at Qa. A CLOSED coproduct because each constructor is a distinct processing path (PHASE TRANSITIONS, attribute): Own admits the audit to S_high like any the fit passed; Route(d) takes the route_away arm; Unattributable records it and drops it from admission. Route's payload is the deficit the user named — one of the claims Qa presented, or one they name themselves, emitted bare where this file inscribes no hint for it (Deficit is open above for exactly this)
-attribute(a, x)  = the step that writes the user's Attribution onto a's certificate: Own → claimed_by := {ContextSuspect}; Route(d) → claimed_by := {d}; Unattributable → claimed_by := ∅ — and attribution_by := user on every arm. It rewrites the certificate rather than bypassing it so that every downstream reader of status(c) — the admission filter, the invariants, the closing account — reads the attributed value through the same function it always read. Runs on the far side of Qa's Stop, over Λ.attribution_target
-Qa               = Attribution gate, at Phase 0 and on a loop re-certification. Fires per candidate whose certificate is ambiguous, one per turn in formation order off Λ.unattributed. Presents the candidate — its source, the bound claim, and the evidence with its channel — and claims_supported(a) with what each would mean: the own claim, admitted here and challenged at Qs in its turn; each supported route claim, handed to that deficit with its command hint; and none of these. Answer type Attribution. It asks whose the candidate is and nothing about what the user makes of the claim — that is Qs's, and only an Own attribution ever reaches Qs
-bind_value_space : (ClaimAudit, Prospect) → ValueSpace  -- the NARROWING this audit's judgment will be made against; generated ONLY after status(certificate) = pass, and held for the cycle in Λ.narrowing. Prospect is a SECOND ARGUMENT because Stake is read from it and ClaimAudit does not carry it — a producer whose declared input cannot yield its declared output leaves the gate free to reconstruct the stake or drop it
-ValueSpace     = { claim: ClaimRef, positive_predicate: String, evidence: Set(Evidence), stake: Stake }   -- local_value_space, elenchus-local instantiation point. The first three are read off kind_binding; stake is read off W.action
-Stake          = { reads: String, if_it_fails: String }   -- what the pending action does with this claim, and what follows if the claim does not hold. The one part of the narrowing that comes from outside the audit, and the part that makes the challenge answerable: a claim's standing is judged for a purpose, and this is the purpose
-                 -- IT NARROWS THE QUESTION AND FIXES NO ANSWER. A step here that handed back bound answers would make a judgment step look determinate — concrete answers standing ready before the user has been asked anything, and the more fluent they read the harder the unsettled question is to see. What a type may do on a judgment's side is narrow what the judgment must address; what it may not do is say how it comes out
-                 -- HELD FOR THE CYCLE in Λ.narrowing, keyed by AuditRef, and what the hold buys is that the material does not shift under a user between being shown it and answering. The hold is a statement with content only because something CARRIES the value: an assertion that a value is held, over a value no field holds, is an assertion nothing can be checked against. It is held beside the audits rather than inside ClaimAudit so a candidate the certificate never passes still has an inhabitable record, which is the reason it was kept off that type in the first place
-Pattern        ∈ {ProvenanceAudit, CounterfactualGap, CrossSourceConsistency, InferenceFallacyAudit} ∪ Emergent(Pattern)
-Antithesis     = { audit: ClaimAudit, pattern: Pattern, antithesis: String, basis: String }
-               -- posited against the bound CLAIM: the thesis is audit.kind_binding.label, read off the audit rather than kept beside it, and the challenge confronts it. Pattern C's candidate pairs are enumerated over audits sharing a referent, which the bound ClaimRef makes a typed comparison rather than a judgment about wording
-A[]            = List(Antithesis)
-Disposition    = Judged(verdict: String, continuation: Option(Instruction))   -- USER-ANSWERED at the Phase 2 gate
-               | Handed(routed_deficit: Deficit)             -- ASSIGNED AT PHASE 0, before any work was done on the candidate: by the certificate where a local route claim held it alone, or by the user's Route(d) attribution at Qa where the fit was ambiguous
-               | Unattributable                              -- ATTRIBUTION-ASSIGNED at Phase 0: the fit was ambiguous and the user found no claim that holds — several standing, or none. The certificate never assigns this on its own
-Instruction    = Withdraw | Revisit(on: ReopenCondition) | HandOff(to: Deficit)
-ReopenCondition = String                                     -- the condition that returns this audit to the loop; trigger_met evaluates it
-               -- THE TWO HALVES OF Judged ARE DIFFERENT KINDS OF THING, and that difference is the whole shape of this type. verdict is what the user makes of the claim once the antithesis has been put to them, and it is FREE TEXT because nothing downstream is entitled to rely on how a judgment came out; a type there would be this protocol writing the answer before anyone was asked. continuation is what they instruct the rest of the run to DO, and its members are closed because the repertoire being enumerated is not the claim's but the MACHINE's
-               -- ADMISSION TEST FOR A MEMBER, and the only one: NAME WHAT DISCHARGES IT, AND SHOW THE DISCHARGE IS THIS PROTOCOL'S TO MAKE. A member is admitted where carrying out what it instructs is a mark on a ledger this protocol already writes, or control of its own loop. It is refused where carrying it out would mean producing or replacing content this protocol is bound to leave alone — W.sources is read-only to it (preserves: source_chain), so an instruction whose execution rewrites a source, or swaps one for an authority from outside the session, has no admissible discharge here however sensible it sounds
-               -- THE TEST DOES NOT ASK FOR A STEP INSIDE THIS FILE, and could not. Some discharges are marks and some are changes made to the world; a protocol that specified the second would be specifying a state change it has no standing to make. What it can do is carry the instruction in the result it emits and name the point where execution is handed off, so whoever executes reads it from a typed field rather than by parsing prose. That IS the discharge, and the mark is made HERE: an instruction reaching past this protocol's own turn is exactly what a typed field is for, and a test demanding an internal actor would refuse those members while putting nothing in their place, the protocol still being unable to make the change itself. What such a member may never do is stand in the emitted contract for something this protocol was bound not to touch
-               -- APPLIED MEMBER BY MEMBER, the test being applied to each rather than argued once for the set. Withdraw: the discharge is the record in J, which travels in VettedContext, together with Λ.history keeping the audit with the verdict as the user gave it — both written here, and what a later step does with that mark is that step's to do. Revisit: control of this protocol's own loop, read by the LOOP scan, trigger_met, unresolved(Λ) and vetted(V). ITS DISCHARGE IS BOUNDED TO THE ACTIVE RUN and the bound is part of what the member means — while the protocol is active its own scan watches the condition, and at deactivation nothing here watches anything. A run ending with an unmet Revisit has recorded an instruction it did not carry out, and the closing account says so rather than letting a recorded condition read as a watched one. Standing a monitor past the run would be a state change outside what this protocol may specify; naming the bound is what it can do instead. HandOff: the deficit is emitted at convergence, with its command hint where THIS FILE INSCRIBES one for that deficit and without a hint where it does not — the hints come from the local route claims and nothing produces one outside them, so a deficit the user names that this file never mentions is emitted and reported bare rather than carrying a hint the account cannot supply. Otherwise exactly as a certificate-assigned Handed is, and `Declared continuation relay`'s seam reads it where the user has declared the next protocol. A candidate that cannot be discharged this way does not belong here, whatever it would be called
-               -- WHAT THE TEST KEEPS OUT is what makes it a test rather than a licence. An instruction to rewrite the claim into a refined form, or to replace the source with an authority outside the session, is refused twice over: read as an instruction each would have this protocol produce what it is bound to leave alone, and read as a mark each is already what the verdict carries. An instruction restating a member already here under a second name is refused too — hold-this-provisional-until-a-measurement-lands is a Revisit whose condition is that measurement where the user wants the claim back, and is the no-instruction case with the verdict saying so where they do not. A second name for one path reads as a real distinction and has nothing of its own behind it
-               -- THE ABSENCE OF AN INSTRUCTION IS NOT A MEMBER. None means the run carries on with the source as it stands, and there is nothing to discharge: it is what holds when no member does. Giving that case a constructor would put a name in the set with nothing of its own to discharge, which is the one thing the test above exists to refuse
-               -- THE HAZARD THIS SHAPE GUARDS. Specifying a JUDGMENT step as though it were a determinate one does not fail at once: it fails by GROWING, one constructor per answer-shape someone notices, each new question raised by the previous answer rather than by the subject — and every constructor added that way reads as a real distinction while having no step that acts on it. The standing test against that is the one applied above, constructor by constructor: name what discharges it, and show the discharge is this protocol's to make. What survives the test is typed; what does not belongs in the verdict
-               -- THE TWO REGISTRATION-TIME CONSTRUCTORS STAY TYPED, and for the opposite reason. Their fit is either relay grounded in a claim inscribed in this file or the user's own attribution at Qa, so downstream MAY rely on it: Handed names the deficit a later step emits, and Unattributable names an outcome the residual report dispatches on. Handed carries the Deficit because a step reads it; Unattributable carries no payload, since no step reads a reason and what the attribution left unresolved is written to the record's basis. Their constructors are what keep them apart from the user's Judged while one ledger carries both kinds
-               -- WHY THEY EXIST: vetted(V) quantifies over Λ.formed, so an audit that leaves has to leave carrying something. Without them, leaving is indistinguishable from never having been there, and the protocol reaches its terminal by narrowing its own domain rather than by resolving it
-               -- Handed IS NOT a user judgment. Handed fires at Phase 0 on a candidate that was never elenchus's, before it is tagged or posited against; a judgment is given at Phase 2 by a user who has been shown the antithesis. The certificate asks "is this mine?", the user answers "what do I make of it, and what should be done with it?". A Route(d) attribution at Qa is not a judgment either: there the user answers the certificate's own question — "whose is this?" — where the evidence left it open, and nothing about the claim's standing. Where the user judges the certificate to have got the first question wrong on a candidate it settled alone, the correction is to re-invoke the protocol rather than to answer here
-Qs             = Per-claim disposition gate
-DispositionRecord = { disposition: Disposition, claim_judged: ClaimRef, basis: Option(String), assigned_by ∈ {certificate, attribution, user} }
-               -- ONE ledger entry per closed audit. The disposition's constructor keeps the user's judgment (Judged) and the registration-time classifications (Handed, Unattributable) distinguishable inside a single ledger, which is what lets the closing account be a PROJECTION of J rather than a separate structure someone has to remember to walk
-               -- assigned_by says who wrote the record: Judged ⟹ user (at Qs); Handed ⟹ certificate where the fit held alone, attribution where the user placed it at Qa; Unattributable ⟹ attribution, always. It is what lets the closing account tell a handoff the certificate made from one the user made, which the constructor alone cannot
-               -- claim_judged IS THE CLAIM THIS RECORD WAS MADE AGAINST — kind_binding.label as it stood when the record was written — and it is TOTAL, since no record is ever made against nothing. It is NOT ref.claim_at_admission: a loop re-binding replaces the live claim while the ref stays put (AuditRef), so the two come apart exactly where a record is written after a re-bind, and the ref then names the claim the user was NOT asked about. `Source chain preservation` types Withdraw so a later step can read whether the source stands FOR THAT CLAIM without parsing a verdict; without this field the typed pair (ref, Withdraw) names the wrong claim on that arm and the right one is recoverable only by joining V.trace's last entry — a reconstruction the typing exists to remove. The certificate arm needed the same thing first and carried it in basis prose; it is a field here because both arms need it and only one of them has a basis
-               -- Judged(verdict, continuation) is USER-ASSIGNED — given at the Phase 2 gate against that audit's bound narrowing, and claim_judged is that narrowing's claim, which is the claim the antithesis was aimed at and the one the user was actually shown. The narrowing supplies what the judgment is made against, never what it says. A user HandOff and a certificate Handed both name a deficit and both are emitted at convergence, each with its command hint where this file inscribes one for that deficit — always so for a certificate Handed, whose deficit is a local route claim, and only where the user named an inscribed one for a HandOff; the constructor is what keeps them from being read as the same finding, one being a judgment made after the antithesis and the other a check made before any work
-               -- Handed is CERTIFICATE-ASSIGNED where a route claim held the candidate alone and ATTRIBUTION-ASSIGNED where the user placed it at Qa; Unattributable is ATTRIBUTION-ASSIGNED only — at Phase 0 or on a loop re-certification. Neither is surfaced at Qs: what Qa surfaces is the attribution question, never the claim's standing
-               -- basis: the cited claim fit for a certificate assignment, the user's attribution for an attribution assignment — each always carries one. ABSENT for a user answer at Qs, and Option is what lets the record say so. It carries the FIT and no longer the claim — claim_judged holds that on both arms, so the two stop sharing one field and the arm with no basis stops being the arm with no claim — no step here asks the user for a ground apart from the verdict, and no step reads one, the verdict being where what they made of the claim is written. A required field would have to be filled from somewhere; with the user asked nothing, the only somewhere left is the AI's own account of why they answered as they did, entered in the ledger beside their words. Optional is the least specific carrier that still lets the certificate arm cite its fit
-J              = Λ.dispositions = Map(AuditRef, DispositionRecord)     -- the SINGLE disposition ledger, keyed by audit identity. dom(J) is what convergence is measured against, so every close writes here whoever assigned it
-               -- J AND Λ.dispositions ARE ONE MAP UNDER TWO NAMES, and the equation above is where that is declared rather than left to be inferred. It has to be declared because the names split across the predicates — V.dispositions is written as J, while unresolved(Λ), which vetted(V) reduces to, and the Discharge invariant read dom(Λ.dispositions) — and a reader taking them for two maps gets a protocol that cannot terminate and a result that drops what it answered for: V := { dispositions = J } would carry one batch's answers, and dom(J) = Λ.formed would never come true. What forces the identity rather than merely suggesting it is that Phase 0 writes J(a.ref) directly, before any gate has run, so J cannot be what a gate returns
-               -- WHAT A PHASE 2 GATE RETURNS IS A BATCH OF ANSWERS, NOT THIS MAP. The answers are WRITTEN INTO this ledger at Phase 3; the ledger is the standing thing and the batch is an input to it. Reading an arrow into J as "J is what came back" is the reading the paragraph above rules out
-               -- EVERY WRITE HERE, AND EVERY REMOVAL FROM HERE, FIRST APPENDS TO Λ.history: the audit as it stood, the index in that ref's antithesis list of the antithesis put to it if one had been, and the record being displaced or written. Both directions, because a record leaves this map on two occasions — a later record replacing it, and the loop taking an audit back for re-judgment — and only the second is not a write. That is what gives Λ.history its producer, and it is stated on the ledger rather than on each transition because a producer named per transition is one a later transition can be added without — a record this map replaces would then vanish with the slot it occupied, which is exactly what the closing account reads history to avoid
-V              = VettedContext { dispositions: J, trace: Map(AuditRef, List(Antithesis)) }   -- trace is Λ.antitheses as integrate found it; its producer is the Phase 1 record step and integrate is what carries it into this type. The value is a LIST IN CYCLE ORDER and not one antithesis, because a met Revisit re-binds the claim and posits again at the SAME ref — a singular field could hold only the latest, and the claim the intermediate antithesis was put to would be admitted, judged, and then absent from the result
-               -- WHAT THIS CARRIES AND WHAT IT DOES NOT. dispositions is the ledger keyed by audit identity, holding each audit's STANDING record; trace holds EVERY antithesis put to it IN CYCLE ORDER, and since Antithesis carries the ClaimAudit, the claim AS IT STOOD WHEN EACH ONE WAS PUT travels there beside ref.claim_at_admission. On the arm where a loop re-certification routes an audit out without re-positing, that is the pre-trigger reading while the record in J is the certificate assignment — the two together are what the closing account reads, and neither alone says what became of the claim. EVERY ANTITHESIS PUT TO A REF TRAVELS, in the order the cycles put them — a loop re-binding APPENDS rather than replaces, so the claim each one was aimed at is in the result even where a later cycle moved that claim. What does NOT travel is a superseded DISPOSITION: dispositions holds each audit's standing record, and what a later answer replaced lives in Λ.history, which is mode state and ends with the run. That side is a split rather than an omission: the standing judgment is what a later step acts on, and each superseded one was superseded by the user's own later answer. The two sides differ because a claim is what the result must answer for and a retracted answer is not. What it does mean, and what the closing account depends on, is that the account is presented WHILE Λ is live and is text rather than a projection of this type — assembled from V alone it would show each audit's STANDING disposition and no superseded one — every antithesis is in trace, but the answers the earlier ones drew are not
-trigger_met(c)        = Bool                                                                            -- evaluator: true when a Revisit condition c is now satisfied at the LOOP scan
-unresolved(Λ)         = {r ∈ Λ.formed | r ∉ dom(Λ.dispositions) ∨ (∃c. Λ.dispositions(r).disposition = Judged(_, Revisit(c)) ∧ trigger_met(c) ∧ r ∈ S_high)}   -- audits still requiring judgment: unrecorded, or carrying a Revisit whose condition has now been met on an audit this protocol can still put a fresh antithesis to. A Revisit whose condition has not been met is resolved (vetted-compatible), not pending — vetted-compatible WITHIN THE RUN, since the audit owes nothing this protocol can act on right now, and at deactivation it is reported as an instruction the run did not carry out rather than as a settled item. THE S_high CONJUNCT NAMES WHAT A MET REVISIT ACTUALLY OWES: re-vetting is positing again and asking again, and only a member of S_high can be posited against. A loop-time split leaves the parent's binding no longer one claim, so the parent drops out of S_high and there is nothing further it can be asked — what its condition set in motion is owed by the children it produced, each unrecorded and each caught by the first disjunct. Without this conjunct the parent's own record would answer 'still pending' on every later scan with no step able to change it, and the terminal would be unreachable
-vetted(V)      = unresolved(Λ) = ∅                            -- V.dispositions = J by construction (Phase 3), so the predicate over V is the predicate over Λ
-               -- THE FIRST DISJUNCT OF unresolved(Λ) CARRIES THE CURRENT-PASS CONDITION BY CONSTRUCTION, not by a separate clause: every ref in Λ.pass — the returning audit on the atomic arm, each emitted binding certify passed after a split — has its record moved out of J on the way, so a ref awaiting re-judgment is missing from dom(J) and unresolved(Λ) holds it until it is answered. That is why no carrier is needed for "judged in this cycle" — the ledger's own domain says it
-               -- QUANTIFIES OVER Λ.formed, not over the subset the certificate admitted: NOTHING EVER LEAVES this set, so the quantifier only ever gets harder to satisfy — a loop-time split adds the audits it produced and keeps the parent, which already carries the judgment the user gave it. Each is discharged by carrying a record, whoever assigned it — a user judgment at the Phase 2 gate, or Handed / Unattributable at Phase 0. A candidate handed elsewhere is therefore RESOLVED here rather than absent from the question, which is what stops this protocol from reaching its terminal by narrowing its own domain. Λ.pass names what a cycle tags and posits against, and S_high the standing admitted set a met Revisit's guard tests membership in; neither is what convergence is measured over
-VettedContext  = V where vetted(V)
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
 
-── PHASE TRANSITIONS ──
-Phase 0: W → identify(W) → S_cand → ∀s ∈ S_cand: bind_kind(s) → k → certify(k, local_claims) → Λ.unattributed := [a : status(c) = ambiguous] in formation order → [Λ.unattributed ≠ []] Qa(head, claims_supported) → Stop → Attribution → attribute(head, ·) → pop → repeat until empty [Tool] → keep(status(c) = pass) → bind_value_space(each, W.action) → S_high   -- silent scan + admission-time KIND dispatch (fail-closed), silent apart from the certificate's route relay and the attribution gate Qa, which fires only where the certificate left a candidate ambiguous and before anything downstream reads its status. The whole backbone pipeline runs WITHIN Phase 0, so everything downstream — tagging, antithesis, the Phase 2 gate — operates on audits that are atomic and certificate-passing by construction. Formation COMPLETES once atomicity is settled, and every audit so formed is added to Λ.formed at that point — admitted or not — which is the domain vetted(V) is measured over. Binding is not yet formation: a binding still bundling two claims is not an audit, so the split below runs before anything enters the domain and no ref that cannot be discharged is ever written into it
-Phase 0 → split (pre-certify): KindBinding.atomicity = non-atomic  -- a candidate bound to a claim that bundles two distinct claims → split_binding(k, s) — the binding together with the source it was read off — emits one atomic binding per distinct claim that binding was standing for, and certify runs on each (same Phase 0 pass, before any pass/route/attribute decision); recursive until atomic, and terminating because each split strictly decreases the number of bundled claims. A compound is split pre-admission, never deferred or admitted as one — a single disposition slot answering for two claims collects one judgment for both and records it against a thesis the user was never shown whole. WHAT IT SPLITS ON is claim multiplicity and nothing else: one claim standing on evidence that lies in several places is ONE audit, because what becomes of the source is what the disposition answers and not what admission decides. Each child is a newly formed audit with its own ref and its own Λ.formed entry; the compound that produced them was never formed as an audit and so never enters the domain
-Phase 0 → route_away (audit-local, relay): status(certify(a)) = route  -- a local route claim holds the candidate → emit that claim's routed_deficit (ContextInsufficient, BoundaryUndefined — with its command hint), report it with the cited claim fit as text, and record J(a.ref) := { disposition = Handed(routed_deficit), claim_judged = kind_binding.label, basis = the cited claim fit }. a never enters S_high, is never tagged or posited against, and never reaches a disposition slot — but it stays in Λ.formed and is DISCHARGED by that record, so convergence still answers for it. The scan continues with the remaining candidates. Detection with Authority is preserved by the report rather than by a gate — the user sees what was handed elsewhere and on what basis, while W.sources stands untouched
-Phase 0 → attribute (audit-local, CONSTITUTION): status(certify(a)) = ambiguous  -- |claimed_by| ≠ 1, several claims holding or none → Λ.attribution_target := a.ref → Qa(a, claims_supported(a)) → Stop → Attribution → attribute(a, ·), on the far side of the Stop, over Λ.attribution_target:
-         Own            → claimed_by := {ContextSuspect}, attribution_by := user; a now reads as pass to every downstream reader and is admitted to S_high, narrowed, tagged, posited against and asked like any audit the fit passed
-         Route(d)       → claimed_by := {d}, attribution_by := user; then the Phase 0 → route_away arm above, with J(a.ref) := { disposition = Handed(d), claim_judged = kind_binding.label, basis = the user's attribution, assigned_by = attribution }, and a command hint only where this file inscribes one for d
-         Unattributable → claimed_by := ∅, attribution_by := user; record J(a.ref) := { disposition = Unattributable, claim_judged = kind_binding.label, basis = the user's attribution — what they saw as unresolved: several claims standing, or none, assigned_by = attribution }, report it as a non-blocking residual; a stays in Λ.formed and is discharged by that record
-         Then pop Λ.unattributed and present the next, until it is empty; the admission leg runs only once it is. NO SECOND LOOK BY THE AI: the detection state is fixed and W.sources is read-only, so nothing the certificate could re-read would move the fit. The user's utterance is the one new ground that can arrive, which is why this arm is a gate and not a re-assessment — asked once per candidate, and Unattributable reached only on their word [Tool]
-Phase 0 close: Λ.pass := the refs THIS PASS certified (∅ where it certified none)   -- WRITTEN HERE, AT THE END OF ADMISSION AND BEFORE ANY EXIT IS EVALUATED, because two of the exits below READ it and one of them fires precisely when it is empty. An assignment carried on a transition is only performed by taking that transition, so writing Λ.pass on the Phase 0 → Phase 1 edge would leave the empty-pass edge testing whatever the PREVIOUS cycle admitted: a re-pass that certified nothing would read a stale non-empty pass, take the Phase 1 edge, and tag refs no longer in S_high. The write belongs to the phase that produces the value, not to one of the branches that consume it
-Phase 0 → converge (trivial, no candidate): S_cand = ∅ → emit empty VettedContext (dispositions = ∅, trace = ∅) as relay, deactivate   -- no source met the Source Identification Criteria; nothing was ever bound, so Λ.formed = ∅ and vetted(V) holds over an empty domain because the domain is genuinely empty
-Phase 0 → converge (trivial, none claimed): S_cand ≠ ∅ ∧ S_high = ∅ ∧ dom(J) = Λ.formed ∧ Λ.antitheses = ∅ → report every Handed deficit with its command hint and every Unattributable residual, emit VettedContext (dispositions = J, trace = ∅) as relay, deactivate   -- candidates WERE formed but every one was handed elsewhere or left unattributable by the user. The dispositions are NOT empty here: each formed audit carries its Phase 0 record, certificate- or attribution-assigned, which is what makes this terminal satisfied rather than vacuous. Reported apart from the no-candidate case above, since telling the user nothing warranted vetting would be false where something did and was handed elsewhere. THE Λ.antitheses = ∅ CONJUNCT IS WHAT MAKES trace = ∅ TRUE RATHER THAN MERELY WRITTEN: this terminal emits an empty trace, and the condition under which an empty trace is the correct one is that nothing was ever posited. It holds on the first pass by construction and is FALSE on any loop return, which is the case the other three conjuncts do not exclude — a loop re-certification can route the last admitted audit out, emptying S_high while every record stands, and this terminal would then discard every antithesis the run put to the user and the answers they gave. That is what a guard stating its own output's truth condition prevents. A loop return that admits nothing leaves through Phase 0 → LOOP below instead
-Phase 0 → Phase 1: Λ.pass ≠ ∅        -- every member carries status(certificate) = pass; on the first pass Λ.pass = dom(S_high), on a loop return only what that re-pass certified. GUARDED ON Λ.pass AND NOT ON S_high: what Phase 1 and Phase 2 do is tag, posit against, and ask, and all three range over this pass's admitted refs. S_high is the STANDING set, so a loop return that admitted nothing can leave it non-empty from earlier cycles, and guarding on it would enter Phase 1 with nothing to tag and open a mandatory Phase 2 gate with nothing to ask
-Phase 0 → Phase 3 (loop return, nothing admitted): Λ.pass = ∅ ∧ Λ.antitheses ≠ ∅ → skip Phases 1 and 2 only, and enter Phase 3   -- this re-pass certified nothing, so there is no audit to tag, posit against, or present, and those two phases would each run empty; Phase 2 in particular would open a mandatory gate with no slot in it. IT GOES THROUGH PHASE 3 AND NOT PAST IT, because Phase 3 is the ONLY step that assembles V, and this pass has just changed what V must report: a re-certification that routed an audit out rewrote its record in J, and a loop-time split may have added children to Λ.formed. vetted(V) reads live J and Λ.formed, so it can hold while V still holds what the PREVIOUS cycle's integrate assembled — a result declaring a Judged(_, Revisit) where the ledger now says Handed, or omitting the children just formed. Skipping Phase 3 would emit a VettedContext different from the state that certified it, which is the one failure a terminal must not have. Phase 3 with an empty Λ.pass records no new disposition and re-assembles V from current J and Λ.antitheses, which is exactly what is owed. Λ.antitheses ≠ ∅ is what distinguishes this from the first pass, where an empty admitted set means the trivial terminals above
-Phase 1: Λ.pass → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: artifact read, artifact search]
-         Step₂ posit(antithesis per a ∈ S') → A[]                        -- per-audit Pattern A ∪ B ∪ C ∪ D ∪ Emergent(Pattern) generation
-         Step₃ record: ∀r ∈ Λ.pass: Λ.tagged(r) := S'(r), Λ.antitheses(r) := Λ.antitheses(r) ⌢ [A[r]]   -- Λ.pass holds REFS, so each write is at a ref; WRITTEN AT THE KEY, NEVER OVER THE MAP, and the antithesis is APPENDED so an earlier cycle's stays: each audit's entry is set as that audit is processed and no entry is removed, so a cycle working one returned audit leaves every earlier entry standing. dom(Λ.antitheses) is the domain the closing trace ranges over, so a whole-map assignment would narrow that domain to the current cycle and a run that posited across several cycles would reach its terminal able to demonstrate only the last; a run that posits without recording at all reaches it with nothing to demonstrate
-Phase 2: (A[], judgment slots) → present(per-claim, Λ.tagged(a.ref) + Λ.narrowing(a.ref) + the antithesis with its cited basis) [pre-gate text] → present(per-batch, the reach of a judgment — one claim, its own slot, nothing beyond it) [pre-gate text] → Qs(per-claim, the open question + the instruction list, each member with its differential implication) → Stop → answers written into J, and Λ.presented := Λ.presented ∪ that batch's refs            [Tool: Constitution interaction]   -- the narrowing and the antithesis are ANALYSIS AND EVIDENCE and go out before the gate; so does the reach note, ONCE FOR THE BATCH rather than per claim, it being the same for every slot and reading nothing off Λ — it is what a scope caveat folded into an instruction line was doing, moved to where it is read before deciding rather than during; Qs carries the question and what may be instructed, and nothing else
-Phase 3: J → integrate(J, Λ.antitheses) → V                          -- per-audit disposition recorded, and V.trace := Λ.antitheses — the map the Phase 1 record step wrote, which is the ONLY source of the antitheses this result type declares and is why the trace's domain is every audit an antithesis was put to. J does not carry one, so a result assembled from the ledger alone would declare a trace it could not fill; the certificate-assigned records written at Phase 0 are already in J, so integration adds the user-answered ones to a ledger that is already partly filled
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
 
-── LOOP ──
-After Phase 3: scan for judgments carrying a Revisit whose condition is met, on an audit that can still be posited against.
-If ∃ r ∈ Λ.formed : J(r).disposition = Judged(_, Revisit(c)) ∧ trigger_met(c) ∧ r ∈ S_high: re-run the Phase 0 pipeline on the audit a bearing r — bind_kind → split_binding(·, a.ref.source) where non-atomic → certify → bind_value_space(·, W.action) — then return to Phase 1 with what that pass produced as fresh ContextSuspect, or, WHERE THAT PASS CERTIFIED NOTHING (Λ.pass = ∅ — the returning audit re-certified out, and any children the split emitted did too), enter Phase 3 without Phases 1 and 2: there is nothing to tag, nothing to posit against, and no slot to open a gate for, but V is re-assembled there from the J this re-pass just rewrote. Returning to this evaluation without Phase 3 would leave V holding the previous cycle's assembly while the guard below reads live J and Λ.formed — the terminal would then emit a result the ledger no longer agrees with. EVERY REF IN Λ.pass — this cycle's admitted set — HAS ITS EXISTING RECORD MOVED OUT OF J — appended to Λ.history first, as every displacement is — so dom(J) = Λ.formed is false for it until it is judged again. WHICH REFS THOSE ARE IS SETTLED BY CERTIFY AND NOT BEFORE: on the atomic arm it is the returning audit itself, and after a split it is each emitted binding the certificate passed — the parent among them only where a binding carried its admitted claim, and a sibling an earlier split already formed on the same terms as any other. Without that, a ref about to be asked again already carries a record and the equation holds before anything has been asked; vetted(V) would then read a pre-trigger answer as this cycle's. A REF OUTSIDE Λ.pass KEEPS ITS RECORD EXACTLY WHERE IT STOOD: a parent no emitted binding carried is never asked again, so there is no pre-trigger answer to guard against, and clearing it would strand a ref that stays in Λ.formed with no step left that could ever discharge it. What returns is the re-bound audit itself where it stayed atomic, or the audits split_binding emitted where it did not. Certify runs on each emitted binding separately and its arms are the Phase 0 arms — a passing child enters S_high and returns to Phase 1, one the certificate routes carries its certificate-assigned record and never reaches a slot, and one it leaves ambiguous is put to Qa exactly as at Phase 0, its attribution deciding among the same three arms. A split is not required to come out uniform and nothing here assumes it does; new antithesis under updated evidence for whichever children passed. The trigger fired because conditions moved, so the claim may have moved with them: re-binding is what keeps the antithesis aimed at the claim as it now stands, and re-certifying is what keeps the fail-closed order holding across the loop rather than only on the first pass. Where the re-certification no longer passes, a is removed from S_high BY ITS REF — the record has just been rewritten, so a by-value removal would be looking for a member that is no longer there — and its prior Judged record is REPLACED by the registration-time one — J(a.ref) := { disposition = Handed(d) or Unattributable, claim_judged = THE CLAIM AS RE-BOUND, basis = the cited fit or the user's attribution, assigned_by = certificate or attribution }; an Own attribution at Qa instead re-admits a and returns it to Phase 1. claim_judged carries that claim because nothing else on the record retains it: the audit's record leaves S_high on this arm, ref.claim_at_admission holds the claim at admission, and Λ.antitheses and Λ.history hold the pre-trigger reading — so without it the closing account could not show the claim the run ended on beside the one the user judged. It is a FIELD and not a phrase inside basis because the user-answered arm needs the same thing and has no basis to put it in. a stays in Λ.formed, so the convergence domain does not shrink and dom(J) = Λ.formed keeps holding; what changes is which record discharges it. A loop-time split forms one audit per binding split_binding emitted, each audit's ref being (source, that binding's claim) like any other. A REF ALREADY IN Λ.formed NAMES THE AUDIT THAT ALREADY HAS IT, never a second one — this file's identity rule is that same source under same claim is the same audit — and that covers the parent's own admitted claim and any sibling an earlier split already formed, without the two needing separate handling. Certify then decides that audit's arm exactly as at Phase 0, old ref or new alike: a pass admits it to S_high and returns it to Phase 1, and the judgment it is then given is written at its ref, replacing whatever record stood there; a route writes the certificate-assigned record at that ref instead and keeps it out of S_high, and an ambiguous outcome goes to Qa, whose Route or Unattributable attribution writes the attribution-assigned record there and whose Own attribution admits it. No child the certificate did not pass is ever admitted — the certificate invariant holds across the loop or it holds only on the first pass. A ref not yet in Λ.formed forms a new audit and joins the domain, pending until judged. NOTHING LEAVES Λ.formed on any branch: what the parent keeps is its place in the domain, and what stands at its ref in J is whatever the latest arm wrote there — the user's judgment where nothing re-certified it, a certificate assignment where the loop routed it out, exactly as on the atomic arm. Its S_high entry goes only where no emitted binding carried its admitted claim — removed BY ITS REF, that binding being no longer one claim and so no longer something this protocol can tag, posit against, or present again. What that leaves standing is a met-condition Revisit on an audit outside S_high, which unresolved(Λ) reads as no longer pending, because what a met Revisit owes is a fresh antithesis and a fresh question and the parent can be given neither. What its condition set in motion is owed by the children instead, each unrecorded and each caught by that predicate's first disjunct. So dom(J) = Λ.formed does not hold at that instant and is not meant to — the children enter unjudged — while the equation stays REACHABLE, since all that stands between it and holding is judgments the children can actually be given. Nothing is lost with the parent because nothing leaves: the user's answer is in J where it was written, the antithesis in Λ.antitheses, the triple in Λ.history. The closing account shows the claim they judged beside the claims that replaced it, each on its own line. The domain REFINES and never narrows — the parent stays and two or more join it, so what is owed strictly increases and the protocol answers for everything it took on.
-If vetted(V) holds — dom(J) = Λ.formed AND no met-condition Revisit on a member of S_high: terminate with VettedContext. Read the FIRST conjunct, not only the second: a loop-time split takes the parent out of S_high and enters unjudged children, so the second conjunct can hold while the children have no records at all. ALL THREE PREDICATES CARRY THE SAME S_high CONJUNCT — this guard, unresolved(Λ) and vetted(V) — by construction, since a guard that re-enters on an audit the others treat as settled would put the loop back on a parent nothing can ask again.
-Continue until: vetted(V).
-Convergence evidence: At vetted(V), present transformation trace — for each r ∈ dom(Λ.antitheses), show every antithesis in that ref's list IN CYCLE ORDER — (the claim that antithesis was put to → that antithesis → the disposition that answered it) — naming the source each claim was read off. A ref the loop returned more than once therefore shows a line per cycle rather than only its last, which is what makes each admitted claim visible in the account rather than only in the run's own memory. THE DISPOSITION IS READ PER ANTITHESIS AND NOT PER REF: a ref the loop returned carries one answer per cycle, so a ref-level lookup would leave every block but the last with no record to fill it. Each block's disposition is read from the Λ.history entries AT THAT ANTITHESIS'S INDEX — every write to J and every removal from it appends the audit together with THE INDEX of the antithesis standing at the time, so an answer and the antithesis it answered are in history as one entry, and the index rather than the antithesis's value is what names which occasion that was. Take the DISTINCT records at that index; for the LAST antithesis in the list the standing record in J(r), where r is still in dom(J), is among them. Where two distinct records stand at one index, that block shows BOTH — the judgment the user gave and the record that later replaced it. An index carrying no record at all is an antithesis nothing has answered, which cannot occur at the terminal, since dom(J) = Λ.formed. Reading J alone would report a loop re-certified audit as though the user had never answered, since the certificate assignment overwrote their answer there. A split parent needs no such recovery — its record stays in J and is read there, beside the children's. The domain is every audit an antithesis was PUT TO, which no step removes from, and NOT S_high, which the loop can take an audit out of after the user has judged it: ranging over S_high would drop that audit's antithesis and the user's own answer from the very account that replaced them. Where one source yielded several audits, each is shown on its own line with its own claim, since that split is what the user was asked to judge separately. Report apart from the trace every audit whose record's disposition is Handed or Unattributable, with the deficit it was handed to or what its attribution left unresolved, WHO ASSIGNED IT — the certificate on its own reading, or the user at Qa — the record's claim_judged where it differs from ref.claim_at_admission — a loop re-binding having moved the claim — and the cited basis — that list is a PROJECTION of J by constructor and assigned_by (Judged against Handed / Unattributable, and within those, certificate against attribution) rather than a second account kept beside it. The two are not disjoint and the account does not present them as such: a candidate the certificate held at Phase 0 appears only in the list, no antithesis ever having been put to it, while one the loop routed out AFTER the user judged it appears in both — in the trace with the antithesis and the judgment it was given, and in the list with the certificate-assigned record that now discharges it. Convergence is demonstrated, not asserted.
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
 
-── CONVERGENCE ──
-vetted(V): see TYPES
-certificate gate: every audit in S_high carried status(certificate) = pass (fail-closed, at admission), AND every ref in Λ.formed carries a record in J AT THAT MOMENT — every one, since nothing leaves Λ.formed and every audit the loop returned for re-judgment has been answered again by the time this holds: a loop-time split adds the children beside the parent, whose record stays where the user's answer was written — a candidate routed, or left unattributable by the user, at Phase 0 never entered S_high, an ambiguous one entered only on the user's Own attribution, and one the loop routes out on a failed re-certification had entered and been posited against before it left — all discharged in the ledger, so a VettedContext is assembled from audits the own claim holds (claimed_by = {ContextSuspect}), each fit-certified and each atomic. The pass certifies LOCAL admissibility — elenchus's own gate over elenchus's own activation — not the absence of a claim anywhere in the wider protocol set
+abbrev Context (P : Type) := List (Turn P)
 
-── TOOL GROUNDING ──
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
+
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
+
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
+
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
+
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-!
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t
+
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
+-/
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- `W`, `WorkingContext`: the context the pending action was committed against. Every source a
+    claim rests on is a turn of it — a statement, a document or tool read, an inference, a record
+    of an earlier session, the assistant's own earlier output — and it is read, never rewritten. -/
+abbrev WorkingContext (P : Type) := Context P
+
+/-- The pending action: what is about to be done, and the turns it leans on. -/
+structure Prospect where
+  intent  : String
+  leansOn : List Nat
+
+/-- **Your reading** of the pending action the working context was committed against. -/
+axiom prospect : Context P → Prospect
+
+/-- A claim as it stands: what it is about, its category, how far it reaches, and its wording
+    verbatim — the text a challenge must confront. -/
+structure ClaimRef where
+  referent  : String
+  claimKind : String
+  scope     : String
+  text      : String
+
+/-- An observable indicator in the context bearing on a claim, with the channel it came through. -/
+structure Indicator where
+  channel : String
+  content : String
+
+/-- A claim under vetting: the turn that carries its source — by index, since the assistant's own
+    earlier output can be a source — the claim that source is read as authority for, what makes
+    it suspect, and the evidence for that. -/
+structure Claim where
+  source    : Nat
+  claim     : ClaimRef
+  suspicion : String
+  evidence  : List Indicator
+
+/-- **Your judgment**, made afresh on every pass: the claims the pending action leans on that
+    warrant a challenge, read from the context as it now stands and from this run's invocation on.
+    A working order that serves it: identify the sources that warrant a look — unusually
+    load-bearing, older than the horizon for their origin, reached through a long provenance chain,
+    in tension with another source about the same referent, or an inference used as a premise — then
+    bind each to the claim it is read as authority for, and split a binding that bundles several
+    distinct claims, one claim each; where the suspicion cannot be factored per claim, it was one
+    claim after all. One claim standing on evidence in several places is one claim. Binding is
+    total: a source whose claim you cannot settle still yields a claim, whose owner the
+    certificate then finds unclear, so nothing selected is dropped silently. The person's words
+    about what to vet are part of the context: a correction of the target moves it on the next
+    pass. Whether a claim is the same one an earlier pass selected is your judgment too — changed
+    wording alone does not make it new, and a claim that continues after a split is still that
+    claim for whatever it owes. The list is the run's: a claim once selected in this run stays in
+    it with whatever answered it, and a correction of the target adds what it points at beside
+    the claims already there. What an earlier run or session selected is not this run's. -/
+axiom claims : Context P → List Claim
+
+/-- A deficit label. A certificate assigns only the ones this contract inscribes; the person may
+    name any. -/
+inductive Deficit
+  /-- this contract's own: a suspect claim in the working context -/
+  | contextSuspect
+  /-- a missing pre-execution fact — nothing to vet, something to acquire (hint: /inquire) -/
+  | contextInsufficient
+  /-- the claim is not open at all: a convention or ownership question settles it (hint: /bound) -/
+  | boundaryUndefined
+  /-- a deficit the person names that no constructor above names; emitted bare -/
+  | emergent (name : String)
+
+/-- The deficits this contract inscribes. -/
+def Inscribed : Deficit → Prop
+  | .emergent _ => False
+  | _           => True
+
+/-- Every inscribed claim a claim's evidence supports, and the cited fit. It certifies this
+    contract's gate over its own activation and nothing about claims anywhere else. -/
+structure Certificate where
+  claimedBy : List Deficit
+  distinct  : claimedBy.Nodup
+  inscribed : ∀ d ∈ claimedBy, Inscribed d
+  fit       : String
+
+inductive Whose
+  | here
+  | elsewhere (d : Deficit)
+  | unclear
+
+/-- Read off `claimedBy`, so nothing stored beside it can disagree: the own claim alone is here; a
+    single other claim is elsewhere; several claims, or none, leave it unclear. -/
+def Certificate.whose (k : Certificate) : Whose :=
+  match k.claimedBy with
+  | [.contextSuspect] => .here
+  | [d]               => .elsewhere d
+  | _                 => .unclear
+
+/-- **Your judgment**: fit the claim against this contract's own claim and its route claims,
+    reading nothing outside this contract. The own claim holds only where the claim is suspect and
+    vetting it here can carry it to a vetted context; a pass certifies admissibility here, not
+    the absence of a claim anywhere else — where two protocols' scopes both reach, each one's own
+    gate governs. Evidence that supports no claim, or several, leaves it unclear, and an unclear
+    claim is put to the person like any other, never dropped. The person's words about whose a
+    claim is are part of the context: one they say is to be vetted here is here. -/
+axiom certify : Context P → Claim → Certificate
+
+/-- What the person's turn settles for one claim. There is no verdict category beside it: what the
+    claim IS stays theirs to say. -/
+inductive Answer
+  /-- what the person makes of the claim in light of its antithesis, in their words — the
+      synthesis — with whatever they said alongside it carried in those words: an instruction to
+      stop relying on the source for it, a condition under which to look again, an order to act -/
+  | synthesis (words : String)
+  /-- another deficit's: handed to it -/
+  | elsewhere (d : Deficit)
+
+/-- **Your judgment**: the cited turn answers claim `a`, as it now stands, this way — read against
+    the context that now stands, the order of its turns included, and only from this run's
+    invocation on. One turn may answer several claims, and may answer some and leave others. An
+    answer reaches the claim it covers: changed wording alone does not void it, while a
+    materially changed claim, or a fresh antithesis, is not covered by an answer given before it.
+    A correction of the target answers the claims it sets aside, in the person's words. Where the
+    person set a condition for looking at the claim again and the context now shows it met, the
+    earlier answer no longer covers it, and the claim is challenged afresh. -/
+axiom AnswerSupported : Claim → Context P → Turn P → Answer → Prop
+
+/-- A claim is answered only by the person's turn, whatever form that turn takes. -/
+def answerCoord (a : Claim) : Coord P Answer :=
+  { admits := (·.val = .person), supports := AnswerSupported a }
+
+/-- **Your reading**: the person's answer to `a` that still covers it; `open_` until one does. -/
+axiom answer : (c : Context P) → (a : Claim) → Occ (answerCoord a) c
+
+def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
+  | .open_ _     => none
+  | .filled a .. => some a
+
+/-- How a claim stands. -/
+inductive Standing
+  /-- waits on the person -/
+  | open_
+  /-- the person's turn answered it -/
+  | answered (a : Answer)
+  /-- the certificate alone handed it to another deficit -/
+  | handed (d : Deficit)
+
+/-- The person's answer first, whatever the certificate read. Without one, a claim the
+    certificate alone places elsewhere is handed on, and every other claim — its own, or one
+    whose owner is unclear — waits on the person. -/
+def standing (c : Context P) (a : Claim) : Standing :=
+  match filledValue (answer c a) with
+  | some w => .answered w
+  | none =>
+    match (certify c a).whose with
+    | .elsewhere d => .handed d
+    | _            => .open_
+
+/-- What the pending action does with a claim, and what follows if the claim does not hold. -/
+structure Stake where
+  reads     : String
+  ifItFails : String
+
+/-- The narrowing an answer is made against: the claim, what makes it suspect, and its evidence
+    off the claim, the stake off the pending action (`prospect`). It narrows the question and fixes
+    no answer. -/
+structure ValueSpace where
+  claim     : ClaimRef
+  suspicion : String
+  evidence  : List Indicator
+  stake     : Stake
+
+/-- **Your reading** of an open claim's narrowing, presented whole. -/
+axiom narrowing : Context P → Claim → ValueSpace
+
+inductive VerificationPath | directObserved | inferredFromN | externalCited | provisionalAssumption
+
+/-- Provenance, freshness, and leverage. Provenance is claim-relative: the source's authority
+    for this claim, not in general. Freshness is currency only: a current source can still fail
+    to track the behavior its claim asserts. -/
+structure Tags where
+  claim      : ClaimRef
+  path       : VerificationPath
+  confidence : String
+  age        : String
+  horizon    : String
+  branches   : List String
+
+/-- **Your reading** of an open claim's tags, from the verification reads (`tagReads`). -/
+axiom tags : Context P → Claim → Tags
+
+inductive Pattern
+  | provenanceAudit
+  | counterfactualGap
+  | crossSourceConsistency
+  | inferenceFallacy
+  | emergent (name : String)
+
+/-- A concrete counter-claim, counter-condition, counter-source, or counter-inference, put to the
+    claim as it stood when it was put, with its cited basis. Where no concrete challenge could be
+    constructed, that result with the attempted pattern and basis. -/
+structure Antithesis where
+  claim      : ClaimRef
+  pattern    : Pattern
+  antithesis : String
+  basis      : String
+
+/-- **Your record**, read from the context: every antithesis put to `a` in this run, in cycle
+    order. A claim that waits on the person and has no antithesis its current state has not
+    outrun gets one before it is presented — a claim whose owner is unclear included, its
+    antithesis provisional and shown beside the other deficits its evidence also supports.
+    Nothing is removed. -/
+axiom antitheses : Context P → Claim → List Antithesis
+
+/-- One concrete action the gate offers for a claim: what it does, and what then happens. -/
+structure Action where
+  does        : String
+  consequence : String
+
+/-- **Your judgment**: the actions to offer for `a`, each concrete to this claim — stop relying on
+    this source for this claim, look again once a named condition holds, keep it as it stands,
+    and for an unclear owner, hand it to the deficit each supported claim names — never a category
+    title; the person may answer in their own words instead. -/
+axiom actions : Context P → Claim → List Action
+
+/-- How the person ends the run. -/
+inductive Closing
+  /-- the run is finished; said while claims are still open, it reads as `stop` -/
+  | done
+  /-- stop here: what is open stays unanswered -/
+  | stop
+  /-- go on to the protocol the person names -/
+  | route (target : String)
+
+/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
+    stands, the order of its turns included: a closing said before a later round was presented was
+    answered by that round. An ordinary reply to a round with nothing open — an acknowledgement, a
+    go-ahead — reads as `done`. -/
+axiom ClosingSupported : Context P → Turn P → Closing → Prop
+
+/-- Only the person closes. -/
+def closeCoord : Coord P Closing :=
+  { admits := (·.val = .person), supports := ClosingSupported }
+
+/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
+axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
+
+/-- **Your reading**: conditions the person set in this run for looking at a claim again that the
+    context does not show met — reported open at the close, and not watched after it. -/
+axiom unmet : Context P → List String
+
+/-- **Your record**: contrary grounds you showed before the person's answers, beyond the
+    antithesis each claim already carries, still held where the person answered over them —
+    attached to the closure; empty when there were none. -/
+axiom dissent : Context P → List String
+
+/-- `VettedContext`: the context at closure, every claim of this run with how it stood, the
+    conditions left unmet, and the dissent attached to the closure. The trace — every antithesis
+    put to each claim, and the answer that met it — is read from `context`; an answer a later one
+    replaced stays there too. -/
+structure VettedContext (P : Type) where
+  context : Context P
+  ledger  : List (Claim × Standing)
+  unmet   : List String
+  dissent : List String
+
+def verdict (c : Context P) : VettedContext P :=
+  ⟨c, (claims c).map (fun a => (a, standing c a)), unmet c, dissent c⟩
+
+inductive Outcome (P : Type)
+  /-- nothing open, and the person closed: by answers of theirs in this run, or by saying the run
+      is done after seeing what was found -/
+  | vetted (v : VettedContext P)
+  /-- the person stopped; what was open stays unanswered -/
+  | stopped (v : VettedContext P)
+  /-- the person went on to a protocol they named -/
+  | routed (target : String) (v : VettedContext P)
+  | holding (c : Context P)
+
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else; every reading above is taken from it.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-! ── PHASE TRANSITIONS ──
+A pass is the silent work: it judges afresh which claims warrant a challenge, whose each one is,
+and how each stands; it makes the verification reads, and posits an antithesis for each claim that
+waits on the person and has none its state has not outrun. The reads enter the context, then the
+pass's record. Either a closure fires, or `respond` presents the round. Each person utterance is
+fused, and the next pass reads it.
+-/
+
+/-- **Your collection**: the verification reads provenance tagging makes for the claims that wait
+    on the person — artifact reads and searches of a source's origin, the claim it authorizes, and
+    its downstream references. -/
+axiom tagReads : Context P → List (Evidence P)
+
+/-- **Your record** of a pass, written once its reads have entered the context: the claims and
+    their certificates, the narrowings, tags, and antitheses posited, how each claim stands, and
+    what changed since the last pass. `claims`, `antitheses`, `narrowing`, and `tags` are read
+    from these turns. A record grounds nothing. -/
+axiom passRecord : Context P → List (Response P)
+
+def pass (c : Context P) : Context P :=
+  let c₁ := c ++ (tagReads c).map (·.val)
+  c₁ ++ (passRecord c₁).map (·.val)
+
+/-- The person has closed: they said the run is done, or some turn of theirs in this run answered
+    a claim. No particular turn anchors this: which of their turns carries the answer is read from
+    the context as it now stands. Where nothing was found, or every claim was handed on by the
+    certificate alone, only the first holds, so what was found is seen before the run ends. -/
+def PersonClosed (c : Context P) : Prop :=
+  filledValue (closing c) = some .done ∨ ∃ a ∈ claims c, ∃ w, standing c a = .answered w
+
+def NothingOpen (c : Context P) : Prop := ∀ a ∈ claims c, standing c a ≠ .open_
+
+def Closable (c : Context P) : Prop :=
+  filledValue (closing c) = some .stop ∨
+  (∃ t, filledValue (closing c) = some (.route t)) ∨
+  (NothingOpen c ∧ PersonClosed c)
+
+def close (c : Context P) : Outcome P :=
+  match filledValue (closing c) with
+  | some .stop      => .stopped (verdict c)
+  | some (.route t) => .routed t (verdict c)
+  | _               => .vetted (verdict c)
+
+open Classical in
+/-- `respond` presents the round. First the current list: every claim of this run, each with its
+    source and how it stands — waiting on the person, answered with what they said, or handed on
+    by the certificate with its fit and the command only as a hint. Then what this turn changed:
+    what the person's turn answered, what is newly found or re-targeted, a claim challenged afresh
+    because a condition the person set is now met. Then every open claim: its source and the
+    claim verbatim, what makes it suspect, the evidence with its channel, what the pending action
+    stakes on it, its tags, the antithesis with its basis, and the certificate's fit — for an
+    unclear owner, that the evidence also supports the other deficits it names — then `actions`,
+    each with its consequence; a few at a time where there are many, around four, so each is read.
+    Wherever a person's earlier turn is read as the answer to a claim,
+    or as what lets the run close, say which turn was read and what was taken from it, quoting
+    their words. With nothing open, what was searched and what was found, and whether the run is
+    done. -/
+def sublate (respond : Context P → Response P) :
+    Context P → List (Utterance P) → Outcome P
+  | c, []      => .holding c
+  | c, u :: us =>
+    let c₁ := pass (fuse c u)
+    if Closable c₁ then close c₁
+    else sublate respond (c₁ ++ [(respond c₁).val]) us
+
+/-- The invocation opens the run: the first pass is always presented, and nothing closes before
+    the person has seen it. -/
+def start (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  let c₁ := pass c
+  sublate respond (c₁ ++ [(respond c₁).val]) us
+
+/-! ── LOOP ──
+Every utterance opens a pass over the fused context: an answer, a correction of the target, a
+question, a closing, read whole. Nothing counts rounds or batches; every pass judges the claims
+against the whole context again, so what is open is whatever the context leaves open. A condition
+the person set that the context now shows met leaves its claim open again, with a fresh
+antithesis. The loop is dialogue: each round ends at a gate, and the person ends the run.
+-/
+
+/-!
+Silence judges nothing and closes nothing.
+theorem silence (respond : Context P → Response P) (c : Context P) :
+    sublate respond c [] = .holding c
+
+While no closure fires, an utterance leads to the next round and closes nothing.
+theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
+    sublate respond c (u :: us) =
+      sublate respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us
+
+The invocation alone closes nothing: without a person's utterance the run holds at its first round.
+theorem start_holds (respond : Context P → Response P) (c : Context P) :
+    start respond c [] = .holding (pass c ++ [(respond (pass c)).val])
+
+A pass only adds to the context.
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t
+-/
+
+/-! ── CONVERGENCE ──
+Every closure is read where it fires and nowhere else. vetted: nothing open, and the person
+closed — by answers of theirs in this run, read from any of their turns, or by saying the run is
+done after seeing the list, which is the only way a run closes where nothing was found or every
+claim was handed on by the certificate alone. stopped: what was open stays unanswered. routed: the
+person named the next protocol. The vetted context claims no more than the claims this run
+selected; an answer carries the person's words and no category the AI assigned to them.
+Convergence evidence: for each claim an antithesis was put to, every antithesis in cycle order —
+the claim it was put to → the antithesis with its basis → the answer that met it, quoted, with a
+later answer that replaced it shown beside it — naming the source; apart from the trace, every
+claim the certificate handed on, with its fit and hint; the conditions left unmet, reported open;
+and the dissent attached to the closure. Demonstrated, not asserted.
+-/
+
+/-!
+Every vetted closure follows a person's utterance, and its context is the pass that read it.
+theorem closes_after_utterance (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (v : VettedContext P) (h : sublate respond c us = .vetted v) :
+    ∃ (c₀ : Context P) (u : Utterance P), v.context = pass (fuse c₀ u)
+
+The person's answer stands over anything the certificate read.
+theorem person_first (c : Context P) (a : Claim) (w : Answer)
+    (h : filledValue (answer c a) = some w) : standing c a = .answered w
+
+A claim whose owner is unclear waits on the person until they answer it.
+theorem unclear_waits (c : Context P) (a : Claim) (hr : filledValue (answer c a) = none)
+    (hu : (certify c a).whose = .unclear) : standing c a = .open_
+
+An answer always rests on a turn the person sent.
+theorem answered_by_person (c : Context P) (a : Claim) (w : Answer)
+    (h : standing c a = .answered w) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person
+
+Only the person closes.
+theorem closing_by_person {c : Context P} {s : Cite c}
+    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person
+
+A vetted run has nothing open, and the person closed it.
+theorem vetted_closed_by_person (c : Context P) (v : VettedContext P) (hc : Closable c)
+    (h : close c = .vetted v) : NothingOpen c ∧ PersonClosed c
+-/
+
+/-! ── TOOL GROUNDING ── -/
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction / inference-character scan, over sources; produces S_cand)
-Phase 0 bind_kind       (sense)        → Internal analysis (bind each candidate to the CLAIM it is being read as authority for — a KindBinding {label: ClaimRef, positive_predicate, evidence, atomicity} read off the source's content together with its downstream references. The label carries referent, claim_kind, scope and the verbatim text, so the axis the antithesis will confront is a bound field rather than an assumption inherited from how the challenge was worded. atomicity carries the backbone's meaning — how many distinct claims this binding bundles — so a candidate read as authority for two claims lands non-atomic and is handed to split_binding together with the source it was read off, which emits one atomic binding per distinct claim before certify — the source travels with it because label holds one ClaimRef and the second claim is only readable off the source. It is never asked how far a disposition would reach)
-Phase 0 certify         (extension)    → Internal analysis (fail-closed DeficitFitCertificate; fit of KindBinding.positive_predicate against the own claim and the route claims inscribed in this SKILL.md, reading nothing outside this file: claimed_by = {ContextSuspect} when the own claim holds alone; status(certificate) = pass | route | ambiguous, read off claimed_by; basis = the cited claim fit, shown at the audit's Phase 2 surfacing. Relay (Extension): the fit is grounded in a citable source, and an unclear fit leaves status(certificate) = ambiguous → Qa; the certificate itself closes nothing under ambiguity. Runs at Phase 0 for every candidate, and again on an audit a met Revisit condition returns to the loop, BEFORE it is admitted to S_high)
-Phase 0 bind_value_space (track)       → Internal state update (derive the NARROWING the audit's judgment will be made against, once status(certificate) = pass, and write it to Λ.narrowing under the audit's ref. Read the claim, the positive predicate and the evidence off kind_binding, and read W.action — the second argument — for the Stake: what the pending action does with this claim and what follows if it does not hold. It is kept off the ClaimAudit record, which is what keeps that record inhabitable for a candidate that never passes. This step derives the QUESTION and never the answer: it fixes no verdict, offers no option, and states no default, so `Narrowing identity`'s intact-presentation requirement lands on the narrowing rather than on an answer set)
-Phase 0 certify_route   (extension)    → TextPresent+Proceed (conditional: status(certificate) = route → emit the matched route claim's routed_deficit — a missing pre-execution fact → ContextInsufficient (hint /inquire), a claim a convention or ownership question already settles → BoundaryUndefined (hint /bound) — with the cited claim fit as its basis, then record the Handed disposition against the audit's ref (claim_judged = the bound claim the fit was taken against, basis = the cited claim fit) and drop the candidate from admission. The deficit is read off the matched local route claim and the command travels only as a hint. A dropped candidate is always reported: the run never removes one from the user's view silently)
-Phase 0 Qa              (constitution) → present (conditional: status(certificate) = ambiguous, at Phase 0 or on a loop re-certification. Fires per candidate, one per turn, in formation order off Λ.unattributed, with Λ.attribution_target holding the ref across the Stop. Presents, as text before the gate, the source and the bound claim, the evidence with its channel, and what the certificate found — the claims that evidence supports, or that none does; the gate itself carries the question "whose is this?" and the Attribution options with their differential implications: the own claim → admitted here and challenged at Qs in its turn; each supported route claim → handed to that deficit, with the command hint this file inscribes for it; none of these → recorded as unattributed, a non-blocking residual. A deficit the user names outside the presented set is a Route(d) answer emitted bare. The turn is yielded, once per candidate, and the admission leg waits until Λ.unattributed is empty. Non-blocking where the answer is Unattributable: on the Phase 0 pass the candidate never entered S_high, so no antithesis is owed for it; on a loop re-certification it had already entered and been posited against, and that antithesis and the user's judgment stay in Λ.antitheses and Λ.history and are still shown. Either way it is in Λ.formed, so convergence answers for it through the record the attribution wrote. Constitution because the certificate has already said what the evidence settles, and what it does not settle is not the AI's to decide — `Ambiguity surfaces`)
-Phase 0 attribute       (track)        → Internal state update (writes the user's Attribution onto the certificate of the audit at Λ.attribution_target — claimed_by rewritten to {ContextSuspect} / {d} / ∅ and attribution_by := user — then pops Λ.unattributed. Runs on the far side of Qa's Stop and nowhere else; where the attribution writes a record, that write is the route_away or Unattributable record named in PHASE TRANSITIONS)
-Phase 0 trivial_converge (extension)   → TextPresent+Proceed (conditional: S_high = ∅ on the FIRST pass, with Λ.antitheses = ∅ — relay the VettedContext and deactivate. A loop return that empties S_high does not fire this: it goes to LOOP evaluation, and its account is the convergence trace over dom(Λ.antitheses). The two causes are reported apart: no source met the criteria, in which case Λ.formed = ∅ and the disposition table is empty; or candidates were formed and every one was handed elsewhere or left unattributable, in which case the table carries their certificate-assigned records and the handed deficits and residual are named)
-Phase 1 ProvenanceTag   (observe)      → artifact read, artifact search (verification of source origin, authorized claim, and downstream references)
-Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D/Emergent antithesis generation per audit, against the claim its binding fixed)
-Phase 1 record          (track)        → Internal state update (Λ.tagged(r) := the metadata triple Step₁ attached to that ref's audit; Λ.antitheses(r) := that list with the antithesis Step₂ posited appended — written AT THE KEY for each ref r ∈ Λ.pass, never over the map, and appended rather than replaced so a met Revisit's earlier antithesis stays. Both are written as each audit is processed, and no step removes from either. This is what makes dom(Λ.antitheses) the set of audits an antithesis was PUT TO — the domain the convergence trace ranges over. Positing without recording would leave that domain empty, so a run that did all its work would reach its terminal with nothing to demonstrate it with)
-Phase 2 Qs              (constitution) → present (mandatory; per-claim: that audit's bound narrowing whole, with the antithesis and its cited basis, goes out as TEXT PRECEDING the gate; then ONCE FOR THE BATCH, still as text before the gate, how far a judgment reaches — one claim, its own slot, nothing beyond it; and the gate itself carries the open question and the instruction list with each member's differential implication. Analysis and evidence sit before a gate rather than inside it, so what the user is asked is a question and not a briefing; no answer is offered and no free response is mapped onto one)
-Phase 3 integrate       (track)        → Internal state update + result assembly (Λ.dispositions, Λ.history — the user-answered records joining the ones Phase 0 already wrote, certificate- or attribution-assigned, each such record taking claim_judged from Λ.narrowing(r).claim, which is the claim that audit's narrowing was bound over and therefore the one the user was shown and answered against — and then V := { dispositions = J, trace = Λ.antitheses }, since the antitheses do not live in integrate's other argument)
-converge                (extension)    → TextPresent+Proceed (per-claim disposition trace over dom(Λ.antitheses) — every audit an antithesis was put to — with each disposition read PER ANTITHESIS from the Λ.history entries at its index, plus the standing J(r) for a ref's last antithesis, and both shown where two distinct records stand at one index; PLUS the handed/unattributable list projected from J by constructor and assigned_by (Judged against Handed / Unattributable; within those, the certificate's handoffs apart from the user's attributions). Only the second is a projection of J alone: reading J for the trace would lose a judgment a loop re-certification overwrote, though a split parent's own record is still there to read; proceed with VettedContext)
-Seam transition to a declared next protocol (extension) → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares, settles the next move — proceed directly to it, citing that settling source; every Constitution gate inside Elenchus and inside the next protocol fires unchanged)
 
-── MODE STATE ──
-Λ = {
-  phase: Phase,
-  W: WorkingContext,
-  S_high: Map(AuditRef, ClaimAudit),
-  pass: Set(AuditRef),
-  presented: Set(AuditRef),
-  unattributed: List(AuditRef),   -- the candidates this pass's certify left ambiguous, in formation order; written by certify at Phase 0 and on a loop re-certification, drained by Qa one candidate per turn. The admission leg waits on it being empty, which is what keeps the fail-closed order holding across a Stop
-  attribution_target: Option(AuditRef),   -- the candidate Qa is asking about, written before its Stop and read by attribute on the far side; None outside a Qa turn. Across a Stop nothing survives but Λ, which is why it is a field
-  formed: Set(AuditRef),
-  narrowing: Map(AuditRef, ValueSpace),
-  tagged: Map(AuditRef, ProvenanceTag × FreshnessTag × LeverageTag),
-  antitheses: Map(AuditRef, List(Antithesis)),
-  dispositions: Map(AuditRef, DispositionRecord),   -- = J (TYPES); the two names denote this one map
-  history: List<(ClaimAudit, Option(Nat), DispositionRecord)>,   -- the third member is the RECORD and not the bare disposition, matching exactly what every write to J appends here: a superseded entry that dropped claim_judged would leave the closing account unable to say which claim the superseded answer was given against — the case a loop re-binding produces and the one the account most needs. The second member is OPTIONAL because a record the loop supersedes need not have had an antithesis: a certificate assignment written at a ref that an emitted binding later lands on is replaced without any antithesis ever having been put to that reading, and a required field would leave that supersession nowhere to go. IT CARRIES THE INDEX into that ref's Λ.antitheses list and not the antithesis itself, because THE INDEX IS WHAT NAMES THE OCCASION — the antithesis's VALUE cannot, and Λ.antitheses is where the value is read from. A met Revisit fires because conditions moved, which does not oblige the wording to move, so two cycles may posit antitheses that are equal as values while drawing different answers; and a removal appends an index a write already appended. A trace pairing by value would then hold two blocks against two answers with nothing to say which went with which, and an interruption before the current cycle's judgment could attach an earlier answer to a block nothing has answered. Λ.antitheses is append-only and never overwritten, so an index is a permanent name for one antithesis. The member stays SINGULAR — one entry records ONE moment, at which exactly one antithesis stood or none did — and widening it to the list would repeat the whole list on every entry and destroy the pairing it exists to supply. This is the one collection over audits NOT keyed by ref, and deliberately so: it is append-only, so it has no removal clause to break, and each entry holds the audit AS IT STOOD when that judgment was given. Keying it would make it dereference to the record as it stands NOW, which is the opposite of what a history is for
-  active: Bool,
-  cause_tag: String
-}
--- pass: WRITTEN AT PHASE 0 CLOSE — after admission settles and BEFORE any Phase 0 exit is evaluated, since two of those exits read it and one fires exactly when it is empty (where Λ.presented is reset to ∅ beside it) — as the refs THIS CYCLE admitted — on the first pass every member of S_high, on a loop return only the refs certify passed in that re-pass — and READ by Phase 1, by the Phase 2 batching, and by Phase 3's completion test. S_high is the STANDING admitted set, which is what a met Revisit's guard tests membership in and what the certificate and atomicity invariants quantify over; Λ.pass is this cycle's work. Without the two held apart, S_high would have to serve as both, and an audit judged in an earlier cycle would be re-tagged, re-posited against and re-asked every time the loop turned — while the record-clearing rule, which ranges over what this pass admitted, would have nothing to name
--- presented: WRITTEN as each Phase 2 batch's gate returns, adding that batch's refs, and RESET to ∅ at Phase 0 close alongside Λ.pass — the two are this cycle's work and this cycle's progress through it, so they are established and retired together, and at the one point that runs on every pass whether or not Phase 1 is entered. READ by Phase 3's completion test (Λ.pass ⊆ Λ.presented) and by the next batch's selection (Λ.pass \ Λ.presented). IT EXISTS BECAUSE PHASE 2 YIELDS THE TURN PER BATCH: across a Stop nothing survives but Λ, so a completion test resting on "the batches" would have no carrier to read on return. Presentation and judgment are DIFFERENT QUESTIONS and this is the first — a batch that was presented and answered writes both here and in J, but the test that decides whether Phase 2 is done asks only whether the slot was put in front of the user, which is what the phase itself controls
--- narrowing: WRITTEN by bind_value_space for each certificate-passing audit at Phase 0 (and again on a loop re-certification), READ at the Phase 2 pre-gate presentation and by `Narrowing identity`'s intact-presentation requirement, which needs an identity to preserve. An audit that never passes gets no entry, so no candidate the certificate held is ever asked for one. NOTHING REMOVES FROM THIS MAP, so an audit a loop re-certification routes out keeps the entry its passing pass wrote; what keeps that stale entry from reaching a presentation is that the map is read at the refs in Λ.pass and a routed-out audit is not among them. The map therefore covers every audit a judgment is asked for, and covering more than that costs nothing because no step reads the excess
--- formed: WRITTEN as each audit COMPLETES formation — the point its binding is settled atomic, at Phase 0 or in the loop — and never at binding, since a binding that bundles two claims is split and the compound never becomes an audit. READ by unresolved(Λ) and vetted(V). It is the convergence DOMAIN and never the working set: an audit the certificate hands elsewhere leaves S_high but stays here, which is what makes the ledger answer for it
--- dispositions: THIS IS J — one map, two names, declared as an equation in TYPES because the predicates split across the names. WRITTEN at Phase 0 by the route and attribute arms (certificate- and attribution-assigned records, before any Qs gate has run — which is what makes J the standing ledger and not a gate's return), at Phase 3 by integrate (the batch's answers written in as user-assigned records), and by the LOOP on a failed re-certification (a certificate assignment replacing what stood). REMOVED FROM at exactly one point: the LOOP clears the record of every ref in Λ.pass before that pass is asked again, appending to Λ.history first as every displacement does. READ by unresolved(Λ), vetted(V), the closing account's certificate projection, and V's own dispositions field
--- tagged: WRITTEN by the Phase 1 record step from Step₁'s tagging, keyed by the audit's ref, READ at the Phase 2 pre-gate presentation (the triple is part of the material the judgment is made against) — it is where S' lives across the cycle, so the triple survives a batch boundary rather than being held only for the pass that attached it
--- antitheses: WRITTEN by the Phase 1 record step from Step₂'s positing, APPENDED to the list at the audit's ref, READ by the convergence trace and the loop's account of a re-certified audit. NEVER REMOVED FROM AND NEVER OVERWRITTEN — a met Revisit adds this cycle's antithesis after the earlier ones rather than replacing them, so the claim each was aimed at stays in the result the trace is carried into. which is the property the trace's domain rests on: an audit the loop takes out of S_high after the user judged it keeps its antitheses here, so the account that replaced their answer still shows the answer they gave
--- Certificate invariant: ∀ a ∈ S_high : status(a.certificate) = pass (fail-closed — routed and unattributable candidates never enter S_high, and an ambiguous one enters only once the user's Own attribution has made it pass, on the first pass and on every loop re-certification)
--- Formed-domain invariant: every audit the pipeline forms is added to Λ.formed when its binding is settled atomic, and NOTHING IS EVER REMOVED. A loop-time split adds the audits it produced and keeps the parent that produced them, so the domain is REFINED, never narrowed: two or more join, none leave, each newcomer owing a judgment of its own. What the invariant protects is that the protocol never answers for less than it took on — which an append-only domain gives outright rather than by argument, and which is why the parent's own claim cannot go missing when a re-binding moves the claim under it. S_high may shrink freely across the loop, and that is where a split parent goes: out of what can be posited against, never out of what must be answered for
--- Discharge invariant: at vetted(V), dom(Λ.dispositions) = Λ.formed — every formed audit carries exactly one record, user-answered, certificate-assigned, or attribution-assigned
--- Atomicity invariant: ∀ a ∈ S_high : a.kind_binding.atomicity = atomic (the split runs pre-certify, so no compound is ever admitted)
+inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
-── COMPOSITION ──
+inductive Op | select | certify | handoff | narrow | tag | posit | gate | readTurn | converge | seam
+
+def grounding : Op → Annot × String
+  | .select   => (.sense, "Internal analysis: the claims the pending action leans on that warrant a challenge, afresh every pass against the context as it now stands and from this run's invocation on; the person's words about what to vet included, and a source whose claim cannot be settled still selected, its owner unclear")
+  | .certify  => (.sense, "Internal analysis: each claim fitted against this contract's own claim and its route claims, reading nothing outside this contract; admissibility here only, and fail-closed, so evidence that supports no claim or several leaves it unclear")
+  | .handoff  => (.extension, "TextPresent+Proceed: a claim the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), a claim a convention or ownership question settles (/bound); nothing is dispatched, and no claim leaves the person's view silently")
+  | .narrow   => (.sense, "Internal analysis: for each open claim, the narrowing its answer is made against — the claim, what makes it suspect, and its evidence, the stake off the pending action; the question, never an answer")
+  | .tag      => (.observe, "artifact read, artifact search: verify each open claim's source origin, the claim it authorizes, and its downstream references; provenance, freshness, and leverage")
+  | .posit    => (.sense, "Internal analysis: one concrete antithesis per open claim its state has not outrun — Pattern A, B, C, D, or emergent — against the claim as it now stands, with its cited basis; provisional where the owner is unclear")
+  | .gate     => (.constitution, "present: the current list and this turn's changes, then every open claim with its narrowing, tags, antithesis and basis, and certificate fit, and concrete actions for it, each with its consequence and never a category title; the person answers in their own words; with nothing open, what was searched and found, and whether the run is done")
+  | .readTurn => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's in this run it bears on, read whole against the fused context as it now stands — an answer to one claim or several, a correction of the target, a question, a closing — whatever form it takes")
+  | .converge => (.extension, "TextPresent+Proceed: the per-antithesis trace with each answer beside the antithesis it met, quoted, and a replaced answer beside it; the claims the certificate handed on with fit and hint; the conditions left unmet, reported open; the dissent attached to the closure")
+  | .seam     => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; this protocol declares no outbound edge, and every Constitution gate inside Elenchus and the next protocol fires unchanged")
+
+/-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Pattern resolution emergent via session context.
+-/
+
+end
+
+end Elenchus
 ```
 
 ## Mode Activation
 
-`/sublate` is user-invoked over an existing working context before an action that depends on it is externalized or committed. Elenchus has no AI-guided activation: a model may answer an explicit invocation, but it does not initiate vetting from its own suspicion. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind. Empty or freshly arrived context can converge through the Definition's trivial path.
+`/sublate` is user-invoked over an existing working context before an action that depends on it is externalized or committed. Elenchus has no AI-guided activation: a model may answer an explicit invocation, but it does not initiate vetting from its own suspicion. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind. The run begins at the invocation: what an earlier run or session selected, answered, or set as a condition belongs to that run, and the context carries it only as material.
 
 ## Source Identification Criteria
 
-The silent scan selects a source when it is unusually load-bearing, older than the horizon appropriate to its origin, supported through a long provenance chain, in tension with another source about the same referent, or itself an inference being used as a premise. Thresholds and origin horizons remain working hypotheses; an emergent criterion may be used when it directly identifies suspect context.
+A source is worth a look when it is unusually load-bearing, older than the horizon appropriate to its origin, supported through a long provenance chain, in tension with another source about the same referent, or itself an inference being used as a premise — the assistant's own earlier output included. Thresholds and origin horizons remain working hypotheses; an emergent criterion may be used when it directly identifies suspect context.
 
 ## Antithesis Rendering
 
-Render the pattern that directly challenges the bound claim:
+Render the pattern that directly challenges the claim:
 
 - **Provenance**: test whether the source's verification path authorizes this claim. Freshness does not settle support-integrity when nothing couples the source to the behavior it asserts.
 - **Counterfactual**: use a condition the user has put in play to show where the current conclusion could fail.
-- **Cross-source**: compare separate sources only after their referent and claim-kind are compatible. Sibling audits split from one source are not a source pair.
+- **Cross-source**: compare separate sources only after their referent and claim-kind are compatible. Claims split from one source are not a source pair.
 - **Inference**: test the reasoning that produced a conclusion. Time-invariance from a present observation, over-generalization, surviving-sample reasoning, base-rate neglect, and correlation-as-cause are recognition seeds rather than a closed catalog; an emergent archetype remains available.
 
 Counterfactual rendering begins with the user's changed condition. Inference rendering reverse-derives the condition that would expose a reasoning flaw. Every antithesis is a concrete counter-claim, counter-condition, counter-source, or counter-inference with a cited basis.
 
 ## Protocol
 
-### User-facing realization
+The formal block defines execution. This section fixes the user-facing rendering.
 
-For each admitted audit, present the material before the Constitution gate in this order:
+### The round
 
-- the source and bound claim, including referent, claim kind, scope, and verbatim claim text;
-- what makes the claim suspect, the evidence with its channel, and what the pending action stakes on it;
-- the provenance, freshness, and leverage reading;
-- the antithesis and its cited basis, plus the certificate basis that admitted the audit.
+Open every round with the current list: each claim under vetting, its source, and how it stands now — waiting on you, what you said about it, or handed to another protocol with why. Follow it with what this turn changed: what your last answer settled, what is newly found, what moved because you corrected the target, and any claim challenged again because a condition you set is now met.
 
-Then state once for the batch that a judgment reaches only the claim in its own slot. Open the gate with the free-text question asking what the user makes of that claim. The optional instructions are presented with their consequences:
+Then present every open claim, a few at a time where there are many. For each, before the question: the source and the claim verbatim, what makes it suspect, the evidence and where it came from, what the pending action stakes on it, the provenance and freshness reading, and the antithesis with its basis. Where the owner is unclear, say which other kinds of problem the evidence also supports; the antithesis is then provisional.
 
-- **Withdraw** stops downstream reliance on this source for this claim and preserves the judgment in history.
-- **Revisit(condition)** returns this audit only if the condition is met while the current run remains active; an unmet condition is reported open at convergence and is not monitored afterward.
-- **HandOff(deficit)** reports the named deficit at convergence; Elenchus performs no downstream resolution for it.
-- No instruction leaves the source in place under the recorded verdict.
-
-A rejected claim binding is recorded in the verdict; a later invocation performs any re-binding. Process at most four audits per Constitution turn, recording the presented refs before yielding so later batches are derived from state.
-
-### Attribution of an ambiguous candidate
-
-When the certificate cannot say whose a candidate is, put it to the user before it is admitted, handed off, or dropped. Before the question, show the source, the bound claim, the evidence, and which of the inscribed claims that evidence supports — or that none does. The gate renders the `Attribution` answer space in plain language, one option per supported claim:
+The question asks what you make of each claim in light of its challenge. The options are concrete actions for that claim, each with what then happens — never category titles:
 
 ```
-This candidate could be more than one kind of problem, and the evidence doesn't settle which. Whose is it?
+"The staging DB mirrors prod schema" — from the runbook (edited 2025-11)
+  suspect   the migration you plan assumes it; the runbook predates two prod migrations
+  challenge prod ran migrations 0412 and 0419 after that edit; nothing shows staging received them
 
-Options:
-1. **A suspect claim — vet it here** — it is admitted and gets its own challenge in turn
-2. **Belongs to [deficit] — hand it off** — recorded as handed to that protocol: [command hint where one exists]
-3. **None of these** — recorded as unattributed; nothing is done with it here
+What do you make of it?
+1. Stop relying on the runbook for this — check the staging schema before migrating
+2. Look again once 0419 is confirmed on staging — the claim is re-challenged then
+3. It holds — say why, and the migration proceeds on it
 ```
 
-Ask about one candidate per turn. An answer here says whose the candidate is and nothing about what the user makes of the claim; only the first option leads to the challenge and the judgment gate above. Do not drop an ambiguous candidate without this question — a candidate the certificate could not place is the user's to place.
+Answer in your own words; one answer may cover several claims, or only some of them — what it leaves stays open for the next round. An answer is recorded in your words, instructions included. Saying the claim is another protocol's matter hands it there — with the command as a hint where this protocol names one, and as you named it otherwise; nothing is dispatched. Saying the target itself is wrong moves what is vetted on the next pass.
 
-### Attribution of an ambiguous candidate
-
-When the certificate cannot say whose a candidate is, put it to the user before it is admitted, handed off, or dropped. Before the question, show the source, the bound claim, the evidence, and which of the inscribed claims that evidence supports — or that none does. The gate renders the `Attribution` answer space in plain language, one option per supported claim:
-
-```
-This candidate could be more than one kind of problem, and the evidence doesn't settle which. Whose is it?
-
-Options:
-1. **A suspect claim — vet it here** — it is admitted and gets its own challenge in turn
-2. **Belongs to [deficit] — hand it off** — recorded as handed to that protocol: [command hint where one exists]
-3. **None of these** — recorded as unattributed; nothing is done with it here
-```
-
-Ask about one candidate per turn. An answer here says whose the candidate is and nothing about what the user makes of the claim; only the first option leads to the challenge and the judgment gate above. Do not drop an ambiguous candidate without this question — a candidate the certificate could not place is the user's to place. Read `references/round-composition.md` before composing when terminology or wording must remain stable, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
+With nothing open, show what was searched and what was found — including every claim handed elsewhere, with why — and ask whether the run is done; an ordinary reply closes it, and you may name something to vet instead. Wherever an earlier answer of yours is read as covering a claim, or as what lets the run close, say which turn was read and what was taken from it, quoting your words — this disclosure stands in place of asking again.
 
 ## Rules
 
 - **User-initiated only**: Activate only on the user's pre-execution vetting invocation over existing working context.
-- **Recognition over Recall**: Present each complete narrowing and antithesis before the gate, then the batch reach note; the gate carries the free-text judgment question and the typed instruction list with differential implications.
-- **Round composition**: Use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before the gate. Use the referenced round-composition guide at the moments named above.
-- **Source chain preservation**: `W.sources` remains read-only. Withdraw reaches the audit's source only as authority for `claim_judged`; sibling claims remain governed by their own audits, and loop re-binding makes `claim_judged`, not `ref.claim_at_admission`, the operative scope.
-- **Dialectical antithesis**: Posit a concrete challenge to the claim rather than a procedural verification question. If no concrete challenge can be constructed, record that result with the attempted pattern and basis so the audit remains visible in the closing account.
-- **Narrowing identity**: Present the `ValueSpace` fields and the instruction list intact. Materialization fills this audit's concrete claim, evidence, and stake into those fields without changing their structure.
-- **Claim-relative provenance**: A `ProvenanceTag` authorizes one bound `ClaimRef`. Same-referent comparison requires compatible claim kinds and separate sources; a source used for several claims yields separately judged audits.
+- **Antithesis before synthesis**: Every open claim is met by a concrete challenge — a counter-claim, counter-condition, counter-source, or counter-inference with its cited basis — shown before the user is asked what they make of it. Where no concrete challenge can be constructed, say so with the attempted pattern and basis, so the claim stays visible in the closing account.
+- **The answer is the user's, in their words**: A claim is answered only by the user's turn, whatever its form, and that answer stands over anything the certificate read. It is recorded as said, with no category assigned to it; instructions, conditions, and orders it carries are read from those words.
+- **Recognition over categories**: Offer actions concrete to the claim in front of the user, each with its consequence. The user's own words settle what a category would have asked them to choose.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, each judgment beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before the question rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own round bears on where a sentence sits relative to the question.
+- **Judge afresh every pass**: Which claims are vetted, whose each one is, and which answer covers which claim are read from the whole context as it now stands. A correction of the target moves what is vetted; a condition the user set that is now met re-opens its claim with a fresh challenge; changed wording alone does not void an answer.
+- **Source chain preservation**: The working context is read and never rewritten. An answer reaches its source only as authority for the claim it answered; other claims from the same source stand on their own answers.
+- **Claim-relative provenance**: A provenance reading authorizes one claim. Same-referent comparison requires compatible claim kinds and separate sources; a source used for several claims yields separately answered claims.
 - **Currency and support-integrity**: A current source still receives a provenance antithesis when no observable coupling ties it to the behavior its claim asserts.
 - **Open inference archetypes**: The named reasoning flaws seed recognition without closing Pattern D to an emergent flaw condition.
-- **Declared continuation relay**: A user-declared chain or a composition edge named by this contract settles the protocol after Elenchus. Cite that source and preserve every Constitution gate inside both protocols.
+- **Unclear owners are shown, never dropped**: A claim the certificate cannot place is presented with a provisional challenge and the other deficits its evidence supports; the user's answer places it. A claim the certificate alone places elsewhere is reported with its fit and the command only as a hint.
+- **The user closes**: Nothing closes on the first pass. Where nothing was found, or every claim was handed elsewhere by the certificate alone, the run ends only when the user replies after seeing what was found. Contrary ground still held when the user answers over it is attached to the closure record.
+- **Declared continuation relay**: A user-declared chain settles the protocol after Elenchus; this contract declares no outbound edge. Cite that source and preserve every Constitution gate inside both protocols.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Admission-time certificate**: For each atomic claim, run `KindBinding → DeficitFitCertificate → ValueSpace` in that order before tagging or antithesis generation, including on loop re-entry. Only `pass` is admitted; a route is recorded by the certificate, and an ambiguous fit is put to the user at `Qa`, whose attribution is recorded — every formed audit ref carries one record or the other.
-- **Ambiguity surfaces**: An ambiguous certificate is put to the user at `Qa` with the claims its evidence supports, one candidate per turn, before the candidate is admitted, handed off, or dropped. The user's attribution — vet it here, hand it to a named deficit, or none of these — is what settles pass, route, or `Unattributable`; the certificate never drops a candidate it could not place, and the AI takes no second look at ground that has not moved.
