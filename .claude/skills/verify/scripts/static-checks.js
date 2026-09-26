@@ -1925,8 +1925,14 @@ function leanTheoremModule(label, source, ns) {
   if (!/^module\s*$/m.test(code.split('\n').find(line => line.trim() !== '') || '')) {
     problems.push(`${label} does not open with \`module\``);
   }
-  for (const m of code.matchAll(/^\s*(?:public\s+|meta\s+)*import\s+(?:all\s+)?([\w.]+)/gm)) {
-    if (m[1] !== `Contract.${ns}`) problems.push(`${label} imports \`${m[1]}\` — a Theorem module imports only Contract.${ns}`);
+  const imports = [...code.matchAll(/^\s*(?:public\s+|meta\s+)*import\s+(?:all\s+)?([\w.]+)/gm)].map(m => m[1]);
+  for (const name of imports) {
+    if (name !== `Contract.${ns}`) problems.push(`${label} imports \`${name}\` — a Theorem module imports only Contract.${ns}`);
+  }
+  if (!imports.includes(`Contract.${ns}`)) problems.push(`${label} does not import \`Contract.${ns}\` — its statements are about that contract`);
+  const namespaces = [...code.matchAll(/^\s*namespace\s+([\w.]+)/gm)].map(m => m[1]);
+  if (namespaces.length !== 1 || namespaces[0] !== ns) {
+    problems.push(`${label} opens ${namespaces.length === 0 ? 'no namespace' : `namespace ${namespaces.join(', ')}`} — a Theorem module states inside \`namespace ${ns}\` alone`);
   }
   for (const m of code.matchAll(LEAN_THEOREM_DECL)) {
     problems.push(`${label} proves \`theorem ${m[1]}\` — a Theorem module states signatures in doc comments; the proofs module proves them`);
@@ -2006,6 +2012,11 @@ function checkLeanDefinition() {
       expectedLean.add(proofRel);
       const proofFull = path.join(projectRoot, proofRel);
       const inBlock = ground ? leanContract.statedTheorems(source.slice(ground.end)).filter(e => e.name) : [];
+      // A statement before GROUND is read by no audit, wherever the protocol states its theorems.
+      const beforeGround = ground ? leanContract.statedTheorems(source.slice(0, ground.start)).filter(e => e.name) : [];
+      for (const e of beforeGround) {
+        problems.push(`Lean Definition block states \`theorem ${e.name}\` before GROUND — no audit reads a statement there`);
+      }
       const theoremRel = leanContract.theoremModulePath(ns);
       const theoremFull = path.join(projectRoot, theoremRel);
       let stated = inBlock;
@@ -2119,6 +2130,7 @@ function checkLeanDefinition() {
     for (const name of stated) if (!proved.has(name)) problems.push(`Stated \`theorem ${name}\` is not a theorem the proofs module declares`);
     for (const name of proved) if (!stated.has(name)) problems.push(`The proofs module declares \`theorem ${name}\`, which ${audit.statedIn || 'the Lean block'} does not state`);
     for (const name of readout.contract) problems.push(`\`theorem ${name}\` is proved in the contract module — a proof is verification, not contract`);
+    for (const name of readout.stating || []) problems.push(`\`theorem ${name}\` is proved in the Theorem module — a Theorem module states, the proofs module proves`);
     const judgments = new Set((readout.judgments || []).map(j => j.name));
     for (const name of readout.axiomDecls) if (!judgments.has(name)) problems.push(`\`axiom ${name}\` is declared in the Lean package`);
     for (const { name, inhabited } of readout.judgments || []) {

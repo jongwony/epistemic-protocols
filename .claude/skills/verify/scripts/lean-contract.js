@@ -119,7 +119,7 @@ function leanStringList(names) {
   return `[${names.map((n) => `\`${n}`).join(', ')}]`;
 }
 
-function auditModule({ importModule, ns, events, proofsModule, contractModules, judgmentModule = null }) {
+function auditModule({ importModule, ns, events, proofsModule, contractModules, judgmentModule = null, theoremModule = null }) {
   const body = [];
   const stated = [];
   for (const event of events) {
@@ -130,7 +130,7 @@ function auditModule({ importModule, ns, events, proofsModule, contractModules, 
     }
   }
   return `import Lean
-import ${importModule}
+import ${importModule}${theoremModule ? `\nimport ${theoremModule}` : ''}
 
 namespace ${ns}
 open Ground
@@ -149,6 +149,7 @@ open Lean Elab Command in
   let mut proved : Array Name := #[]
   let mut provedUser : Array Name := #[]
   let mut contract : Array Name := #[]
+  let mut stating : Array Name := #[]
   let mut axiomDecls : Array Name := #[]
   let mut judgments : Array Json := #[]
   for (n, ci) in env.constants.toList do
@@ -173,6 +174,8 @@ open Lean Elab Command in
           provedUser := provedUser.push ((privateToUserName? n).getD n)
         else if contractModules.contains m then
           contract := contract.push n
+        else if ${theoremModule ? `m == \`${theoremModule}` : 'false'} then
+          stating := stating.push n
     | _ => pure ()
   let mut axioms : Array Json := #[]
   for n in proved ++ ${`#${leanStringList(stated)}`} do
@@ -181,6 +184,7 @@ open Lean Elab Command in
   let out := Json.mkObj [
     ("proved", toJson (provedUser.map (·.toString))),
     ("contract", toJson (contract.map (·.toString))),
+    ("stating", toJson (stating.map (·.toString))),
     ("axiomDecls", toJson (axiomDecls.map (·.toString))),
     ("judgments", Json.arr judgments),
     ("axioms", Json.arr axioms)]
@@ -199,6 +203,9 @@ function planContracts(root, blocks) {
     if (!ns || !ground || block.indexOf(`namespace ${ns}`) > ground.start) continue;
     files.push({ path: path.join(GENERATED_DIR, 'Contract', `${ns}.lean`), text: contractModule(block, ns) });
     const { source, events } = protocolStatements(root, ns, block);
+    // A Theorem module is imported into the audit, so the environment readout
+    // sees any axiom or proof it declares, not only its text.
+    const theoremModule = source ? `EpistemicProtocols.${ns}.Theorems` : null;
     const auditPath = path.join(GENERATED_DIR, 'Audit', `${ns}.lean`);
     files.push({
       path: auditPath,
@@ -209,6 +216,7 @@ function planContracts(root, blocks) {
         proofsModule: `EpistemicProtocols.${ns}.Proofs`,
         contractModules: [`Contract.${ns}`, 'EpistemicProtocols.Ground'],
         judgmentModule: `Contract.${ns}`,
+        theoremModule,
       }),
     });
     audits.push({ relPath, ns, auditPath, statedIn: source, stated: events.filter((e) => e.name).map((e) => `${ns}.${e.name}`) });

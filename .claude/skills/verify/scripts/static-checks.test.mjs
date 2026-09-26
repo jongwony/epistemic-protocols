@@ -263,6 +263,20 @@ describe('lean-definition', () => {
       write(moduleRelative, moduleText.replace(/^(public import [^\n]*)$/m, '$1\nimport Lean'));
       expectSome(failures(), 'a Theorem module imports only');
       restore();
+
+      write(moduleRelative, moduleText.replace(/^public import [^\n]*\n/m, ''));
+      expectSome(failures(), `does not import \`Contract.${moduled.hostNs}\``);
+      restore();
+
+      write(moduleRelative, moduleText.replace(`namespace ${moduled.hostNs}`, 'namespace MutationWrong').replace(`end ${moduled.hostNs}`, 'end MutationWrong'));
+      expectSome(failures(), `states inside \`namespace ${moduled.hostNs}\` alone`);
+      restore();
+
+      // A statement placed before GROUND is read by no audit.
+      const grounded = moduled.text.indexOf('/-! ── GROUND ──');
+      write(moduled.file, `${moduled.text.slice(0, grounded)}/-!\ntheorem mutation_early : True\n-/\n\n${moduled.text.slice(grounded)}`);
+      expectSome(failures(), 'before GROUND');
+      restore();
     });
   });
 
@@ -273,6 +287,12 @@ describe('lean-definition', () => {
       write(moduleRelative, moduleText.replace(/\n-\/\n\nend /, '\n\ntheorem mutation_unproved : True\n-/\n\nend '));
       // A statement no proof carries: the audit cannot re-derive it, as with a block's.
       expectSome(failures(), 'does not follow from the proved theorem');
+      restore();
+
+      // Two commands on one line escape the line-anchored lint; the audit imports the
+      // Theorem module, so the environment still holds the axiom.
+      write(moduleRelative, moduleText.replace(`\nend ${moduled.hostNs}`, `\nexample : True := trivial axiom mutationSneaky : False\n\nend ${moduled.hostNs}`));
+      expectSome(failures(), `${moduled.hostNs}.mutationSneaky\` is declared in the Lean package`);
       restore();
     });
   });

@@ -525,8 +525,8 @@ inductive Op | detect | scan | absorb | collect | judge | record | sheet | readT
 def grounding : Op → Annot × String
   | .detect   => (.sense, "Internal analysis: the deficit over the utterance and the context")
   | .scan     => (.observe, "artifact read, artifact search (conditional: fewer than two cases, or no essence)")
-  | .absorb   => (.extension, "TextPresent+Proceed: a routed colimit-shaped signal as activation ground, shown as the detection's reading")
-  | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts)")
+  | .absorb   => (.extension, "TextPresent+Proceed: a routed colimit-shaped signal as activation ground, its cited essence and locator shown as the detection's reading")
+  | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used")
   | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context")
   | .record   => (.track, "record: the pass's record")
   | .sheet    => (.constitution, "present: the sheet, then one move (mandatory)")
@@ -548,7 +548,7 @@ end Periagoge
 
 `/induce` remains directly invocable; AI-guided activation stays silent and follows `inProcess`. An abstraction already located — one awaiting comparison or validation — belongs to other work.
 
-Bind the seed from an explicit argument first, then the most recent cluster of cases, then a surfaced essence. Where the scan finds nothing, say what was searched and invite a second case, or invite the user to name what feels in process. Prior-session recall may seed examples or neighbouring abstractions but never settles crystallization.
+Bind the seed from an explicit argument first, then the most recent cluster of cases, then a surfaced essence. Where no essence is sensed, show the scan result and invite the user to name what feels in process; where the scan finds no second case, say what was searched and invite one. Prior-session recall may seed examples or neighbouring abstractions but never settles crystallization.
 
 ## Protocol
 
@@ -558,7 +558,7 @@ Every turn shows one sheet, in everyday language. It opens with any case you fou
 
 Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading and mark it as yours. Under it, the working candidate — a name and a rule — from the first sheet on, always on a reading still in play: where the user sets that reading aside, propose a candidate on a live one. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 
-Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — an example it catches and an example it misses, and where the candidate sits on that reading. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the rows use, unfolded in a few lines — what happened, what was seen and what was not, how it surfaced, who brought it — so every case is read on the sheet itself. Unfold a new or changed case again; an unchanged one may be folded as the same as the last sheet; unfold them all on the sheet a confirm would answer. The full list of cases with who brought each, and the readings the user set aside beside the user's own words, appear when they change, when reconsidering needs them, and on the sheet a confirm would answer. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
+Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — an example it catches and an example it misses, and where the candidate sits on that reading. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the rows use, unfolded in a few lines — what happened, what was seen and what was not, how it surfaced, who brought it — so every case is read on the sheet itself. Unfold a new or changed case again; an unchanged one may be folded as the same as the last sheet; unfold them all on the sheet a confirm would answer. The full list of cases with who brought each, and the readings the user set aside beside the user's own words, appear when they change, when reconsidering needs them, and on the sheet a confirm would answer. Mark every value as the user's or yours. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
 Under the sheet, the ledger of what the last turn changed: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown in the ledger. A row's examples stay as the last sheet showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal in the ledger. Then your contrary grounds, each beside the value it bears on.
 
