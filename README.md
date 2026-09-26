@@ -66,7 +66,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or they narrowed to one too early — widen the field before choosing any |
 | [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first |
 | [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight |
-| [Analogia](./analogia) | `/ground` | You're carrying a framework or an analogy over to a case already in front of you, and it isn't clear what that comparison actually supports |
+| [Analogia](./analogia) | `/ground` | You're carrying a framework or an analogy over to a case already in front of you, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports |
 | [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something you can't name yet — pin down what they have in common |
 | [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and can tell when they are done |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but may not fit your actual situation |
