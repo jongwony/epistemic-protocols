@@ -16,69 +16,49 @@ variable {P : Type}
 /-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
-instance : Nonempty ExpansionWitness := ⟨.empty⟩
 instance : Nonempty Entry := ⟨.blank⟩
-instance : Nonempty Verdict := ⟨.stop⟩
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
 theorem silence (generate respond : Context P → Response P) (c : Context P) :
     ideate generate respond c [] = .holding c := by
   simp [ideate]
 
 theorem blank_frame_map_first (relay generate respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (h : entry (c ++ [(relay c).val]) = .blank) :
+    (us : List (Utterance P))
+    (h : entry (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val])
+      = .blank) :
     start relay generate respond c us =
-      ideate generate respond (c ++ [(relay c).val] ++ [(respond (c ++ [(relay c).val])).val]) us := by
+      ideate generate respond
+        (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val] ++
+          [(respond (c ++ (reference c).map (·.val) ++
+            [(relay (c ++ (reference c).map (·.val))).val])).val]) us := by
   simp only [start, h]
 
 theorem no_empty_pass (generate respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hv : verdict (fuse c u) = .cont)
+    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (fuse c u)) = none)
     (ht : (targets (fuse c u)).isEmpty = true) :
     ideate generate respond c (u :: us) =
       ideate generate respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [ideate, hv, ht]
+  simp [ideate, hk, ht]
 
-theorem stop_assembles (generate respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hv : verdict (fuse c u) = .stop) :
-    ideate generate respond c (u :: us) = assemble (fuse c u) := by
-  simp [ideate, hv]
+theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+  cases hc : closing c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-theorem field_by_person (generate respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : DiverseCandidateField P)
-    (h : ideate generate respond c us = .field r) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .stop ∧ r.context = fuse c₀ u := by
-  induction us generalizing c with
-  | nil => simp [ideate] at h
-  | cons u us ih =>
-    simp only [ideate] at h
-    split at h
-    · rename_i hv
-      unfold assemble at h
-      split at h
-      · cases h
-      · cases h
-        exact ⟨c, u, hv, rfl⟩
-    · split at h
-      · exact ih _ h
-      · exact ih _ h
+theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
+    (c[p.request.idx]'p.request.lt).origin = .person :=
+  p.request.ok.trans p.byPerson
 
-theorem early_by_person (generate respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : EarlyExit P)
-    (h : ideate generate respond c us = .early r) :
-    ∃ (c₀ : Context P) (u : Utterance P), verdict (fuse c₀ u) = .stop ∧ r.context = fuse c₀ u := by
-  induction us generalizing c with
-  | nil => simp [ideate] at h
-  | cons u us ih =>
-    simp only [ideate] at h
-    split at h
-    · rename_i hv
-      unfold assemble at h
-      split at h
-      · cases h
-        exact ⟨c, u, hv, rfl⟩
-      · cases h
-    · split at h
-      · exact ih _ h
-      · exact ih _ h
+theorem explored_registered {c : Context P} {f : Frame} (h : f ∈ explored c) : f ∈ frames c :=
+  (List.mem_filter.mp h).1
+
+theorem explored_not_unexplored {c : Context P} {f : Frame} (h : f ∈ explored c) :
+    ¬ Unexplored c f := by
+  intro hu
+  have := (List.mem_filter.mp h).2
+  simp [hu.2] at this
 
 theorem field_has_candidates (r : DiverseCandidateField P) : candidates r.context ≠ [] := by
   intro h
@@ -91,9 +71,5 @@ theorem early_all_unaddressed (r : EarlyExit P) (s : Signal) (hs : s ∈ signals
   refine ⟨hs, ?_⟩
   rintro ⟨x, hx, _⟩
   simp [he] at hx
-
-theorem explored_not_unexplored {c : Context P} {f : Frame} (h : Unexplored c f) :
-    f ∉ opened c :=
-  h.2
 
 end Heuresis
