@@ -5,260 +5,574 @@ description: "Crystallize a shared but unnamed concept from the concrete cases a
 
 # Periagoge Protocol
 
-Crystallize in-process abstraction by aligning concrete cases first and naming last, with the live alternative readings held visible throughout. Type: `(AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction`.
+Crystallize in-process abstraction by reading the goal it serves across the live readings of the cases, through examples, with a working candidate moved until it fits the user's intent. Type: `(AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction`.
 
 ## Definition
 
-**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, puts the two most alignable cases side by side for the user to correspond, extracts the invariant relation that correspondence carries together with the readings it leaves open, probes those open readings apart against further cases and near-misses the user judges, and only then proposes a name and rule for what survived — so the abstraction is located by the correspondences the user built rather than steered from a candidate offered ahead of them (the Greek dialectical vocabulary supplies the source terms).
+**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form: AI states the goal the abstraction serves and a working candidate, crosses every live reading of what the cases share with that goal through examples, and moves goal and candidate with the user until the abstraction matches the user's intent. The user reaches the abstraction by reading goal and readings against each other, with every alternative in view (the Greek dialectical vocabulary supplies the source terms).
 
-```
-── FLOW ──
-Periagoge(A) → Detect(A) →
-  InProcess(Iᵢ, E, L?): Pair(Iᵢ, E) → (i₁, i₂) →
-         Align(i₁, i₂, ctx) → Stop → Aₐ →
-         (AsShown: M committed
-          | Correct(slot, value): re-present Align
-          | Repartner(ref): re-enter Align with ref as partner
-          | Abandon: declare(alignment_trace, open_trace) → AlignmentSuspended) →
-         Extract(M, Iᵢ, H?) → (R, H) →
-         Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W → narrow(H, W) → H' →
-         loop until (settled(H) ∧ probed(Λ)) ∨ budget_spent(Λ) →
-         Name(H, R, L?, Λ) → Qn → Stop → Nₐ →
-         (Confirm: declare(alignment_trace, open_trace) → CrystallizedAbstraction
-          | NotYet(gap) ∧ ¬budget_spent(Λ): re-enter Probe with gap seeded
-          | NotYet(gap) ∧ budget_spent(Λ): declare(alignment_trace, open_trace) → AlignmentSuspended with gap Deferred
-          | Abandon: declare(alignment_trace, open_trace) → AlignmentSuspended)
-         or unalignable(Λ) → declare(alignment_trace, open_trace) → AlignmentSuspended
-  NotInProcess: deactivate
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract. A
+`theorem` line inside a doc comment states a consequence the contract already has; it is proved
+outside this block and asks nothing further of you.
+-/
 
-── MORPHISM ──
+/-! ── FLOW ──
+Periagoge(A) → start(c) → induce(c, utterances), where c is the fused session context:
+  start: scan where fewer than two cases or no essence → [not in process: not activated] → pass → sheet → Stop
+  each utterance: [bears on nothing in the run: the sheet holds] pass → [stop: withdrawn | route: routed |
+    confirm ∧ candidate live ∧ covered: crystallized | otherwise: the sheet again → Stop]
+  no utterance: the sheet holds
+-/
+
+/-! ── MORPHISM ──
 A
-  → detect(instances, essence, locator)   -- verify in-process abstraction exists
-  → pair(instances, essence)              -- select the two cases that align most readily
-  → align(pair, slots)                    -- user constructs the correspondence; AI supplies the slots; the answer keeps it, corrects a slot, repartners, or abandons
-  → extract(correspondence)               -- invariant relation, plus the axes that correspondence leaves live, over the space already built
-  → probe(space, instances)               -- select the case that separates live axes rather than confirming the leading one
-  → narrow(space, answer)                 -- per axis: rule it out, bound it, or leave it undecided; or, for the run, redraw the case, extend the language, or repartner
-  → name(space, relation, label, record)  -- AI proposes name + rule, reading the boundary off the probe record, after the space has narrowed and not before
-  → declare(trace, open_trace)            -- terminal evidence trace + open-item disposition
   → CrystallizedAbstraction
-requires: in_process(A)                    -- runtime checkpoint (Phase 0)
-deficit:  AbstractionInProcess              -- activation precondition (Layer 1/2)
-preserves: instance_set(A)                  -- Iᵢ read-only; an axis leaves H.ruled_out only when the user's own AxisMissing names it again, so AI never re-proposes one
-invariant: Correspondence Before Naming through Maintained Alternatives over Single-Candidate Steering
+requires: in_process(A)                     -- judged at activation
+deficit:  AbstractionInProcess              -- activation precondition
+preserves: instance_set(A)                  -- the cases are read, never rewritten; a case you found is shown as yours
+invariant: Goal Crossed with Readings through Examples, with Alternatives Maintained, over Single-Candidate Steering
+invariant: setting a reading aside, an open item's disposition, and every closing are the person's; your readings settle none of them
+-/
 
-── TYPES ──
-A              = AbstractionSeed (in-process state: instances + essence intuition + optional user concept label)
-Detect         = A → DetectResult
-DetectResult   ∈ {InProcess(Iᵢ, E, L?), NotInProcess}
-                 -- closed: Phase 0's two exits; the payload rides the InProcess branch, so no verdict and payload
-                 -- can disagree, and InProcess is what witnesses requires: in_process(A)
-Iᵢ             = Set(Instance)                             -- instance set observed; |Iᵢ| ≥ 2 is what Pair requires, since a correspondence needs two terms
-Instance       = { content: String, context: String }       -- concrete case observed
-E              = EssenceIntuition                           -- variation-stable core signal from conversation
-L              = Option(TentativeLabel)                     -- user-provided provisional name or concept, if any
-ctx            = DomainContext                              -- user's domain context gathered via artifact read, artifact search, and a conditional external fetch
-Pair           = (Iᵢ, E) → (i₁, i₂)                        -- the readiest alignment, not the most distant; distance is what Probe is for
-Slot           = { role: String, in_first: String, in_second: Option(String) }
-                 -- in_second is None exactly where the second case carries no counterpart, which is what unmatched(M) collects;
-                 -- filling it reads off the cases rather than choosing between readings, which is what H.live and Probe carry
-M              = Correspondence { slots: List(Slot) }
-unmatched(M)   = {s.role : s ∈ M.slots, s.in_second = None}
-                 -- what one case carries and the other does not, read off the slots rather than kept beside them; it is evidence, not failure
-Align          = (i₁, i₂, ctx) → M                          -- constructed at the Phase 1 gate; the user fills or corrects the slots
-Aₐ             = AlignAnswer ∈ {AsShown, Correct(slot, value), Repartner(ref), Abandon}
-                 value        = what the user says the cases carry in that slot -- the filling is replaced, no reading is chosen
-                 -- the Phase 1 answer. AsShown commits M; Correct re-presents with the slot replaced; Repartner and Abandon
-                 -- are the run-level moves W also carries, reachable here so a wrong pairing or a withdrawal need not wait
-                 -- for a probe. ref is as defined under W
-Axis           = { relation: String }                       -- one reading of what the correspondence carries
-H              = HypothesisSpace { live: Set(Axis), ruled_out: Map(Axis, Ground) }
-                 -- live is what the correspondence has not yet decided between; ruled_out records why each was dropped
-                 -- invariant: live ∩ dom(ruled_out) = ∅ — an axis is in exactly one of them, which is what makes settled(H) total
-Ground         = String                                     -- the probe answer that ruled the axis out, in the user's own terms
-R              = InvariantRelation { statement: String, carried_by: List(Slot) }
-                 -- carried_by cites the slots the relation reads off, so the relation stays traceable to the correspondence
-Extract        = (M, Iᵢ, H?) → (R, H')                      -- internal; no gate. On re-entry H is the space already
-                 -- built: ruled_out carries over untouched and axes already supplied stay live, so re-extraction
-                 -- extends the language rather than resetting it. Absent H, H' is derived from the correspondence alone
-Probe          = (H, Iᵢ, ctx, gap?) → p               -- gap? is the NotYet payload on re-entry from Phase 5, seeding the draw; absent on every other entry
-p              = ProbeCase { content: String, separates: Set(Axis) }
-                 -- separates names which live axes this probe tells apart; a probe separating none is not a probe
-V              = AxisVerdict ∈ {Refutes(ground), Bounds(ground), Undecided}
-                 ground       = the user's reason, recorded verbatim as the Ground for whatever it rules out or bounds
-                 -- one axis judged against one probe case. Refutes rules the axis out; Bounds places the case outside
-                 -- what that axis claims, so the axis survives; Undecided settles neither and leaves it live.
-                 -- These three are the axis-local judgments; every other constructor of W is run-level
-Vs             = AxisVerdicts = Map(Axis, V)
-                 -- invariant: dom(Vs) = p.separates — every axis the probe tells apart carries exactly one verdict,
-                 -- which is what makes narrow total over the probe's separating set
-W              = ProbeAnswer ∈ {Judged(Vs), Redraw(correction), AxisMissing(description), Repartner(ref), Abandon}
-                 correction   = what the user says the probe case actually is -- the case is drawn again, no axis is edited
-                 description  = a dimension the live set does not contain -- extends the language rather than editing a candidate
-                 ref          = another instance or a neighbouring abstraction to align against instead
-narrowed_none(Vs)    = ∄ a ∈ dom(Vs) : Vs(a) = Refutes(_)
-                 -- the round ruled no axis out, whether every axis was kept by scoping the case out of it or left
-                 -- undecided. Both are theory-preserving, so the announcement after Phase 4 is owed on either
-ProbeRecord    = { case: ProbeCase, answer: W }
-                 -- one probe with the answer it received; a Redraw round appends none, since no axis was judged
-boundary(Λ, H) = [(r.case, g) : r ∈ Λ.probes, r.answer = Judged(Vs), a ∈ H.live ∩ dom(Vs), Vs(a) = Bounds(g)]
-                 -- every case the user placed outside a surviving axis's claim, read back from the probe record where
-                 -- the case and its ground both survive. No field carries a boundary, so narrow writes none, and the
-                 -- derivation is total whether Phase 5 fired on settled(H) or on budget_spent with several axes live
-narrow         = (H, W) → H'                                -- Judged(Vs): each Refutes axis moves to ruled_out with its ground,
-                                                            -- each Bounds and each Undecided axis stays live;
-                                                            -- AxisMissing adds the axis the user described to live, and where the description names an axis in ruled_out
-                                                            -- that axis moves back to live, and the ground that ruled it out is read from the probe record that carried the Refutes
-                                                            -- and shown at its return; Redraw, Repartner and Abandon leave H unchanged
-settled(H)     = |H.live| = 1
-probed(Λ)      = |Λ.probes| ≥ 1                             -- Phase 5 opens on settled(H) only past this floor: a space that arrives settled from
-                 -- Extract is still probed once, so the rule is named against at least one case the user judged rather than
-                 -- against the correspondence alone
-unalignable(Λ) = H.live = ∅                                 -- every axis ruled out and none supplied; the seed did not carry one
-                 -- settled(H) is false whenever live is empty, so no second conjunct is doing work here
-Name           = (H, R, L?, Λ) → (N, Rule)                  -- Λ is what boundary(Λ, H) is read from; the rule is read off one live axis, which named(Λ) cites
-N              = AbstractionName { name: String, label_basis: Option(L) }
-Rule           = { statement: String }                      -- presented together with boundary(Λ, H), so what the abstraction excludes is shown, not asserted;
-                 -- no field carries it, so none can drift from the probe record it is read from
-Nₐ             = NameAnswer ∈ {Confirm, Rename(name), RuleWrong(correction), NotYet(gap), Abandon}
-                 gap          = what the user says is still missing; seeds the next Probe while the budget holds, and at budget_spent
-                                is recorded as a Deferred open item instead, so no answer at the cap draws another probe
-Qp             = Probe judgment interaction [Tool: Constitution interaction]
-Qn             = Naming interaction with name + rule + boundary [Tool: Constitution interaction]
-max_probes     = the probe cap LOOP fixes per abstraction seed
-budget_spent(Λ) = |Λ.probes| ≥ max_probes
-                 -- a resource bound on user attention, not a sufficiency criterion: reaching it says the run stopped,
-                 -- never that the abstraction formed. Phase 4 still fires, and whatever stayed live goes to the open trace
-crystallized(Λ) = Λ.crystallized ≠ None                     -- written at Confirm and nowhere else
-OpenDisposition ∈ {None, Nonblocking, Deferred}
-                 None        = no live axis, no unmatched slot, and no gap remains; explicitly declared
-                 Nonblocking = an item remains visible but does not block Confirm
-                 Deferred    = user routes an item to later work via free response
-OpenItemDisposition = OpenDisposition \ {None}             -- per-item value space; None is a whole-trace verdict only
-named(Λ)       = {the live axis Rule.statement was read off} when Λ.crystallized = Some(_); ∅ otherwise
-                 -- so at AlignmentSuspended every live axis is open, and at Confirm only the axes the rule did not take are
-OpenItems(Λ)   = (H.live \ named(Λ)) ∪ ⋃{unmatched(M) : M ∈ Λ.correspondences} ∪ {gap : Λ.naming = Some(NotYet(gap)) ∧ budget_spent(Λ)}
-                 -- what a run can still owe at its terminal, from all three carriers; the gap enters with disposition Deferred
-                 -- by construction, since the run it would have seeded is the one the cap stopped; the union runs over every
-                 -- correspondence built, since a slot left unmatched before a repartnering is still unmatched after it.
-                 -- H.live reads as ∅ while Λ.space is None, so a run abandoned at Phase 1 owes nothing but declares that
-OpenTrace      = { items: Map(String, OpenItemDisposition) }
-                 -- invariant: dom(items) = OpenItems(Λ) — every open item carries exactly one disposition, which makes status(O) total
-status(O)      = None if dom(O.items) = ∅; Deferred if ∃ i ∈ dom(O.items) : O.items(i) = Deferred; otherwise Nonblocking
-AlignmentTrace = List<(Slot | ProbeRecord | (N, Rule))>
-                 -- the run in the order it happened: the correspondence the user built, each probe with the verdict
-                 -- every separated axis received, and the naming it terminated on.
-                 -- Derived from Λ.correspondences, Λ.probes, and Λ.naming
-CrystallizedAbstraction = (N, Rule) where confirmed via Nₐ = Confirm ∧ alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
-AlignmentSuspended = (R?, H?) where alignment_trace_declared(AlignmentTrace) ∧ open_disposition_declared(OpenTrace)
-                 -- the non-crystallizing terminal. It carries what the run established so a later run resumes from it
-                 -- rather than restarting; R and H are absent only when Phase 2 was never reached, which is what
-                 -- Abandon at Phase 1 produces
+namespace Periagoge
 
-── A-BINDING ──
-bind(A) = explicit_arg ∪ recent_instance_cluster ∪ surfaced_essence
-Priority: explicit_arg > recent_instance_cluster > surfaced_essence
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
 
-/induce "theme"              → A = AbstractionSeed with theme label
-/induce (alone)              → A = most recent instance cluster in session
-"the pattern across..."      → A = instance cluster under discussion
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
 
-If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw. If |Iᵢ| < 2, scan the accumulated session context and the user's artifacts for cases that could correspond with the one in hand, and present what the scan found as candidates to recognize or replace before Phase 1. Where it finds nothing, say what was searched and invite a second case.
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
 
-── PHASE TRANSITIONS ──
-Phase 0: A → Detect(A) → InProcess(Iᵢ, E, L?) | NotInProcess               -- detection checkpoint (silent)
-Phase 1: (Iᵢ, E) → Pair(Iᵢ, E) → (i₁, i₂) → Align(i₁, i₂, ctx) → Stop → Aₐ ; on AsShown, Λ.correspondences := Λ.correspondences ++ [M]   -- correspondence Constitution interaction [Tool]
-         -- on re-entry from Repartner(ref), ref is the second term and Pair is skipped: the user already chose the partner
-Phase 2: (M, Iᵢ, Λ.space) → Extract(M, Iᵢ, Λ.space) → (R, H') ; Λ.relation := Some(R) ; Λ.space := Some(H')   -- relation + live-axis derivation (track)
-Phase 3: H → Probe(H, Iᵢ, ctx, gap?) → p → Qp(p, H) → Stop → W                   -- probe Constitution interaction [Tool]
-Phase 4: W → narrow(H, W) → H' ; Λ.space := Some(H') ; Λ.probes := Λ.probes ++ [ProbeRecord(p, W)] where W ≠ Redraw(_)   -- space update + probe record (track)
-         -- the append is what budget_spent counts, so a constructor that declares it spends no probe must not reach it
-Phase 5: (H, R, L?, Λ) → Name(H, R, L?, Λ) → (N, Rule) → Qn → Stop → Nₐ ; Λ.naming := Some(Nₐ)   -- naming Constitution interaction [Tool]
+abbrev Context (P : Type) := List (Turn P)
 
-── LOOP ──
-After Phase 1: evaluate the alignment answer.
-If Aₐ = AsShown: M is committed; proceed to Phase 2.
-If Aₐ = Correct(slot, value): replace that slot's filling with value and re-present at Phase 1 within the same round; the correspondence M then carries is the corrected one.
-If Aₐ = Repartner(ref): re-enter Phase 1 with ref as the alignment partner and Pair skipped; the pairing left behind commits nothing.
-If Aₐ = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended with R and H as Λ carries them (absent when Phase 2 was never reached).
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
 
-After Phase 4: evaluate the probe answer.
-If W = Judged(Vs): each Refutes axis is ruled out with its ground, each Bounds and each Undecided axis stays live; return to Phase 3. If narrowed_none(Vs), say that this round ruled no axis out, and which axes were kept by scoping the case out of their claim and which were left undecided, before drawing the next probe.
-If W = Redraw(correction): the probe is drawn again with the correction taken up; H is unchanged, no ProbeRecord is appended, and no probe is spent from the cap since no axis was judged; return to Phase 3.
-If W = AxisMissing(description): the axis the user described enters H.live; where the description names an axis ruled out earlier, that axis returns to live by the user's word with the ground that ruled it out shown beside it; return to Phase 2 (relation re-extracted over the extended language).
-If W = Repartner(ref): return to Phase 1 with ref as the alignment partner and Pair skipped; H and its ruled_out survive the repartnering, and the correspondence already built stays in Λ.correspondences.
-If W = Abandon: Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as AlignmentSuspended.
-Continue Phase 3 until: (settled(H) ∧ probed(Λ)) ∨ budget_spent(Λ) ∨ unalignable(Λ).
-If unalignable(Λ): declare as AlignmentSuspended — every axis was ruled out and none supplied, which is a finding about the seed and is reported as one.
-Otherwise proceed to Phase 5.
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
 
-After Phase 5: evaluate the naming answer.
-If Nₐ = Confirm: Λ.crystallized := Some((N, Rule)), Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response), declare both, terminate as CrystallizedAbstraction.
-If Nₐ = Rename(name): N.name := name, re-present at Phase 5 within the same round.
-If Nₐ = RuleWrong(correction): Rule.statement := correction, re-present at Phase 5 within the same round.
-If Nₐ = NotYet(gap) ∧ ¬budget_spent(Λ): return to Phase 3 with gap seeding the next Probe; the budget is spent by this round like any other.
-If Nₐ = NotYet(gap) ∧ budget_spent(Λ): Λ.alignment_trace := derive(Λ), Λ.open_trace := derive(OpenItems(Λ), free_response) with gap Deferred, declare both, terminate as AlignmentSuspended; the gap is what the next activation resumes from.
-If Nₐ = Abandon: declare as AlignmentSuspended.
-Cap: max_probes = 5 probes per abstraction seed. This bounds user attention; it is not a claim that five probes suffice to form an abstraction, and reaching it never converts a run into a crystallized one. What makes it a bound is that no answer at budget_spent draws another probe: Confirm crystallizes, NotYet suspends with the gap on record, Abandon suspends.
-Convergence evidence: At crystallized(Λ), present the alignment trace — the correspondence the user built slot by slot, then each probe with the verdict every separated axis received, then the name and rule that survived — plus the boundary derived from the Bounds verdicts standing against the axes still live, plus the OpenTrace. Show every axis that was ruled out beside the ground that ruled it out, so the surviving axis is seen to have won rather than asserted to have. OpenTrace status is None when nothing stayed open, Deferred when any item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
 
-── CONVERGENCE ──
-crystallized(Λ): see TYPES (Λ.crystallized ≠ None, written at Confirm)
-settled(H) ∧ probed(Λ): see TYPES (exactly one live axis, at least one probe recorded) — Phase 5's fire condition, not a terminal on its own
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
 
-── TOOL GROUNDING ──
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-!
+theorem fuse_extends {P : Type} (c : Context P) (u : Utterance P) :
+    ∃ t, fuse c u = c ++ t
+
+theorem cited_not_assistant {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .assistant
+
+theorem cited_not_injected {P : Type} {c : Context P} (s : Cite c) :
+    (c[s.idx]'s.lt).origin ≠ .injected
+-/
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- `A`, `AbstractionSeed`: the in-process state, read from the context — the cases, read and never
+    rewritten; the essence intuition, which a routed colimit-shaped signal seeds only as that
+    detection's reading; and any provisional name the person gave, which grounds the candidate's
+    name without fixing it. -/
+abbrev AbstractionSeed (P : Type) := Context P
+
+/-- A concrete case: what it is, and where it sits. -/
+structure Instance where
+  content : String
+  context : String
+  deriving DecidableEq  -- elab: lets the sheet gather each case once
+
+/-- **Your judgment**: an essence is sensed whose name, scope, or position is still unsettled, and
+    at least two concrete cases can be read together. An abstraction already located — one awaiting
+    comparison or validation — is not in process, and a set of cases and essence this session
+    already crystallized or withdrew stays inactive. -/
+axiom inProcess : Context P → Prop
+
+/-- **Your record**: the cases you found that the person's words have not yet taken up. The next
+    sheet opens with them, marked as found by you, so the person sees them before their next turn;
+    they never join the cases silently. -/
+axiom found : Context P → List Instance
+
+/-- **Your judgment**, made afresh on every pass: the goal — what the abstraction is for — as it now
+    stands. Where the person's words state it, it is their words, quoted; otherwise it is your
+    reading, marked as yours. It moves: a turn that narrows or widens it moves it, on the scope its
+    words reach. -/
+axiom goal : Context P → String
+
+/-- One reading of what the cases share. -/
+abbrev Reading := String
+
+/-- `(N, Rule)`: the working candidate — a name and a rule, the reading the rule is read off, and
+    the label it was grounded on. The name is delivered with the goal, the rule, and the examples
+    the rows drew: it locates the abstraction and returns the person to those cases. -/
+structure Candidate where
+  name       : String
+  rule       : String
+  reading    : Reading
+  labelBasis : Option String
+
+/-- **Your proposal**, from the first sheet on: the working candidate, with every move the person
+    made since — a rename, a rule correction, a move to another reading, a merge. -/
+axiom candidate : Context P → Candidate
+
+/-- **Your judgment**, made afresh on every pass: every reading of what the cases share drawn in this
+    activation, the readings the person added included. A reading you would no longer hold stays
+    here: dropping it is your proposal, shown in the ledger and among your contrary grounds, until
+    the person sets it aside. A merge the person makes is a reading; a reading you judge the same
+    across passes keeps its name. A reading the person set aside comes back within the activation
+    only through their own words (`Reopened`), never as your proposal. -/
+axiom readings : Context P → List Reading
+
+/-- **Your judgment**: the cited turn sets reading `r` aside, on this ground — their reason, carried
+    verbatim — whatever form the turn takes. -/
+axiom SetAsideSupported : Reading → Context P → Turn P → String → Prop
+
+/-- A reading is set aside only by the person's turn. -/
+def setAsideCoord (r : Reading) : Coord P String :=
+  { admits := (·.val = .person), supports := SetAsideSupported r }
+
+/-- **Your reading**: the person's setting-aside of `r`; `open_` until one reaches it. -/
+axiom setAside : (c : Context P) → (r : Reading) → Occ (setAsideCoord (P := P) r) c
+
+def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
+  | .open_ _     => none
+  | .filled a .. => some a
+
+/-- **Your judgment**: the person's later words name reading `r` again after setting it aside; it
+    returns with their ground shown beside it. -/
+axiom Reopened : Context P → Reading → Bool
+
+/-- The readings still in play: a reading leaves only by the person's setting-aside, and returns
+    only by their words. -/
+def live (c : Context P) : List Reading :=
+  (readings c).filter (fun r => (filledValue (setAside c r)).isNone || Reopened c r)
+
+/-- Every reading the person set aside, with their ground. -/
+def setAsideReadings (c : Context P) : List (Reading × String) :=
+  (readings c).filterMap (fun r => (filledValue (setAside c r)).map (r, ·))
+
+/-- An example named by a phrase that carries the feature being judged, never by a bare number. -/
+structure Example where
+  phrase : String
+  source : Instance
+
+/-- One row of the cross view: what the reading becomes against the goal — the check it yields —
+    an example it catches and one it misses, and where the working candidate sits on it. -/
+structure Row where
+  againstGoal   : String
+  catches       : Example
+  misses        : Example
+  candidateHere : String
+
+/-- **Your judgment**: the row for reading `r`. Choose examples that separate the goal and the
+    readings rather than ones every reading treats alike, drawn from the person's own domain: pair
+    the cases that align most readily, not the most distant, since distance is what a separating
+    example is for; align what they carry slot by slot from the cases themselves; and draw a case
+    that tells readings apart. A row's examples stay as the last sheet showed them until a move of
+    the person's reaches them — a swap, a move of the goal, the candidate, or the reading they cross,
+    a correction, a case they brought; an example you would change otherwise is your proposal in the
+    ledger, not a swap. -/
+axiom row : Context P → Reading → Row
+
+/-- The cross view: every live reading with its row. -/
+def crossView (c : Context P) : List (Reading × Row) := (live c).map (fun r => (r, row c r))
+
+/-- A case unfolded on the sheet, a few lines: what happened, what was seen and what was not, how
+    it surfaced, and who brought it. -/
+structure CaseUnfolding where
+  happened  : String
+  seen      : String
+  unseen    : String
+  surfaced  : String
+  broughtBy : String
+
+/-- **Your reading** of case `i`, unfolded. -/
+axiom unfoldCase : Context P → Instance → CaseUnfolding
+
+/-- Every case the cross view uses, once each. -/
+def rowCases (c : Context P) : List Instance :=
+  ((crossView c).flatMap (fun x => [x.2.catches.source, x.2.misses.source])).eraseDups
+
+/-- The cases section of the sheet: every case the cross view uses, unfolded, so the person never
+    leaves the sheet to see one. -/
+def casesSection (c : Context P) : List (Instance × CaseUnfolding) :=
+  (rowCases c).map (fun i => (i, unfoldCase c i))
+
+/-- The candidate is read off a reading still in play. -/
+def CandidateLive (c : Context P) : Prop := (candidate c).reading ∈ live c
+
+open Classical in
+/-- The candidate the sheet shows: only while its reading is in play. Where the person set that
+    reading aside, you propose a candidate on a live reading; where none is live, the sheet shows
+    none. -/
+def shownCandidate (c : Context P) : Option Candidate :=
+  if CandidateLive c then some (candidate c) else none
+
+/-- **Your reading**: what the person said is still missing, each point in their words. -/
+axiom missing : Context P → List String
+
+/-- What a run can still owe at its end, tagged by what it is. -/
+inductive OpenItem
+  | reading (r : Reading)
+  | question (q : String)
+
+/-- The live readings the candidate does not take, and what the person said is still missing. -/
+def openItems (c : Context P) (taken : Option Reading) : List OpenItem :=
+  ((live c).filter (fun r => decide (some r ≠ taken))).map .reading ++ (missing c).map .question
+
+inductive OpenDisposition
+  | nonblocking
+  | deferred
+
+/-- **Your judgment**: the cited turn disposes of item `i` this way — not blocking where the closing
+    turn takes the run with the item shown open, deferred where it routes the item to later work
+    by name or unambiguous reference beside deferral words. Ambiguous deferral words defer
+    nothing. -/
+axiom DispositionSupported : OpenItem → Context P → Turn P → OpenDisposition → Prop
+
+/-- An open item is disposed of only by the person's turn. -/
+def dispositionCoord (i : OpenItem) : Coord P OpenDisposition :=
+  { admits := (·.val = .person), supports := DispositionSupported i }
+
+/-- **Your reading**: how item `i` stands; `open_` where no turn of the person's covers it. -/
+axiom disposition : (c : Context P) → (i : OpenItem) → Occ (dispositionCoord (P := P) i) c
+
+/-- A line of the sheet, named as the sheet shows it. -/
+abbrev Entry := String
+
+/-- **Your reading**: the lines the sheet shows as the context now stands. -/
+axiom entries : Context P → List Entry
+
+/-- Who first put a value forward, kept apart from how it came to stand. -/
+inductive Proposer | ai | person
+
+/-- **Your reading**: the position of the turn that first put forward what `e` holds now. -/
+axiom introducedAt : Context P → Entry → Nat
+
+def proposer (c : Context P) (e : Entry) : Proposer :=
+  match c[introducedAt c e]? with
+  | some ⟨.person, _⟩ => .person
+  | _                 => .ai
+
+/-- How a value came to stand: the person's turn set it; it is yours and still proposed; or a
+    confirm adopted yours. -/
+inductive Standing | set | proposed | adopted
+
+/-- **Your reading**: the person's turn set what `e` holds now, on the scope their words reach. -/
+axiom setByPerson : Context P → Entry → Bool
+
+def standing (c : Context P) (e : Entry) : Standing := if setByPerson c e then .set else .proposed
+
+structure Provenance where
+  entry    : Entry
+  proposer : Proposer
+  standing : Standing
+
+def provenance (c : Context P) : List Provenance :=
+  (entries c).map (fun e => ⟨e, proposer c e, standing c e⟩)
+
+/-- A confirm adopts what was still proposed. -/
+def adopt (p : Provenance) : Provenance :=
+  match p.standing with
+  | .proposed => { p with standing := .adopted }
+  | _         => p
+
+/-- What a ledger line records. -/
+inductive LedgerKind
+  /-- the person's own move -/
+  | personEdit
+  /-- a value you re-drew because a move forces it -/
+  | necessary
+  /-- a value you re-drew, a case you found, or a reading you dropped, because you propose it -/
+  | proposal
+
+/-- One change since the last sheet. -/
+structure LedgerLine where
+  change : String
+  cause  : Option Entry
+  kind   : LedgerKind
+
+/-- **Your record**: what the latest turn changed, the person's moves first. -/
+axiom ledger : Context P → List LedgerLine
+
+/-- The one move a sheet asks about; stopping and going elsewhere stay open on every sheet. -/
+inductive Move
+  | narrowGoal
+  | widenGoal
+  /-- move the candidate onto another reading -/
+  | moveCandidate (to : Reading)
+  /-- merge two readings into one -/
+  | merge (a b : Reading)
+  /-- swap an example on a reading's row for one that separates better -/
+  | swapExample (r : Reading)
+  | confirm
+  /-- every reading drawn so far was set aside: name a distinction the readings missed, read
+      another set of cases, or move the goal -/
+  | exhausted
+
+/-- **Your selection** of the move to ask about: the one whose answer would most change how goal and
+    readings cross. Ask for a confirm only where the candidate fits the goal on every example shown;
+    where an example could still separate it, that example comes first. -/
+axiom selectMove : Context P → Move
+
+open Classical in
+/-- The move the sheet asks about. -/
+def focus (c : Context P) : Move := if live c = [] then .exhausted else selectMove c
+
+/-- **Your record**: the contrary grounds you showed before the person's answers — a reading the
+    examples back better than the candidate's, a goal the candidate misses on an example shown, a
+    case you would weigh otherwise — attached to the closing when the person closes over them;
+    empty when there were none. Your reading never refuses a confirm: a confirm over it carries it
+    as dissent. -/
+axiom dissent : Context P → List String
+
+/-- How the person ends the run. -/
+inductive Closing
+  /-- confirm the goal and the candidate as the sheet shows them -/
+  | confirm
+  /-- stop here -/
+  | stop
+  /-- go on to the protocol the person names -/
+  | route (target : String)
+
+/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
+    stands, the order of its turns included: a closing said before a later sheet was presented was
+    answered by that sheet, so a confirm reaches only the sheet it followed. Whatever form the turn
+    takes, a move, a correction, or a rename closes nothing; "not yet" keeps the run open. -/
+axiom ClosingSupported : Context P → Turn P → Closing → Prop
+
+/-- Only the person closes. -/
+def closeCoord : Coord P Closing :=
+  { admits := (·.val = .person), supports := ClosingSupported }
+
+/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
+axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
+
+/-- **Your judgment**, the adoption condition: everything a confirm would take was shown on the sheet
+    the confirm answered — the goal with who set it, the candidate, every live reading's row, every
+    case the rows use unfolded, the readings set aside with their grounds, every case with who
+    brought it — together with your
+    contrary grounds. A confirm adopts the goal as shown. Where anything would be taken unseen, the
+    sheet is drawn again with the whole basis. -/
+axiom Covered : Context P → Prop
+
+/-- **Your judgment**: the latest utterance bears on this run — a move, a correction, a case, a
+    rename, a closing, a question about the sheet. An utterance about other work leaves the run as
+    it stands. -/
+axiom Reaches : Context P → Prop
+
+/-- `CrystallizedAbstraction`: the person's confirm over a covered sheet whose candidate is read off
+    a live reading. -/
+structure CrystallizedAbstraction (P : Type) where
+  context    : Context P
+  goal       : String
+  candidate  : Candidate
+  crossView  : List (Reading × Row)
+  cases      : List (Instance × CaseUnfolding)
+  setAside   : List (Reading × String)
+  openTrace  : List OpenItem
+  dissent    : List String
+  provenance : List Provenance
+
+/-- What a run established when the person stops it or goes elsewhere, so a later run resumes from
+    it; the goal, the candidate, and the readings stand as your reading. -/
+structure Withdrawn (P : Type) where
+  context   : Context P
+  goal      : String
+  candidate : Candidate
+  setAside  : List (Reading × String)
+  openTrace : List OpenItem
+  dissent   : List String
+
+inductive Outcome (P : Type)
+  | notActivated (c : Context P)
+  | crystallized (r : CrystallizedAbstraction P)
+  /-- the person stopped -/
+  | withdrawn    (r : Withdrawn P)
+  /-- the person named another protocol: proceed to it, citing their words -/
+  | routed       (target : String) (r : Withdrawn P)
+  | holding      (c : Context P)
+
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else; every reading above is taken from it. No gate, stage, or
+count is stored: each sheet is judged afresh from the whole context.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-! ── PHASE TRANSITIONS ──
+A step is one arm of a structural recursion over the person's utterances. A pass is the silent
+work: the reads the run needs enter the context, then the pass's record — the run judged afresh.
+`respond` presents the sheet; `declare` is the closing declaration of the trace.
+-/
+
+/-- **Your reads** at activation: where fewer than two cases are in hand or no essence is sensed,
+    the session context and the person's artifacts scanned for cases that could be read
+    together. -/
+axiom scan : Context P → List (Evidence P)
+
+/-- **Your reads** for a pass: the cases' own context by artifact read and search, examples from the
+    person's domain, and an external fetch where that domain lies outside their artifacts. -/
+axiom collect : Context P → List (Evidence P)
+
+/-- **Your record** of a pass, once its reads have entered the context: the run as judged — the goal,
+    the candidate, the readings and their rows, the readings set aside, provenance, the ledger, your
+    contrary grounds, and the move. A record grounds nothing. -/
+axiom passRecord : Context P → List (Response P)
+
+def pass (c : Context P) : Context P :=
+  let c₁ := c ++ (collect c).map (·.val)
+  c₁ ++ (passRecord c₁).map (·.val)
+
+/-- The crystallized abstraction; the context ends in the declaration. -/
+def crystallize (declare : Context P → Response P) (c : Context P) : CrystallizedAbstraction P :=
+  { context := c ++ [(declare c).val], goal := goal c, candidate := candidate c,
+    crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
+    openTrace := openItems c (some (candidate c).reading), dissent := dissent c,
+    provenance := (provenance c).map adopt }
+
+/-- What the run established; no candidate was taken, so every live reading stays open. -/
+def withdraw (declare : Context P → Response P) (c : Context P) : Withdrawn P :=
+  { context := c ++ [(declare c).val], goal := goal c, candidate := candidate c,
+    setAside := setAsideReadings c, openTrace := openItems c none, dissent := dissent c }
+
+open Classical in
+/-- `respond` presents the sheet the Protocol section describes under "The sheet": the
+    candidate as `shownCandidate` gives it, the cross view (`crossView`), the cases as `casesSection`
+    unfolds them, ending at the one move (`focus`). -/
+def induce (respond declare : Context P → Response P) :
+    Context P → List (Utterance P) → Outcome P
+  | c, []      => .holding c
+  | c, u :: us =>
+    let c' := fuse c u
+    if ¬ Reaches c' then induce respond declare c' us
+    else
+      let c₁ := pass c'
+      match filledValue (closing c₁) with
+      | some .stop      => .withdrawn (withdraw declare c₁)
+      | some (.route t) => .routed t (withdraw declare c₁)
+      | some .confirm   =>
+        if CandidateLive c₁ ∧ Covered c₁ then .crystallized (crystallize declare c₁)
+        else induce respond declare (c₁ ++ [(respond c₁).val]) us
+      | none => induce respond declare (c₁ ++ [(respond c₁).val]) us
+
+open Classical in
+def start (respond declare : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  let c₁ := c ++ (scan c).map (·.val)
+  if ¬ inProcess c₁ then .notActivated c₁
+  else
+    let c₂ := pass c₁
+    induce respond declare (c₂ ++ [(respond c₂).val]) us
+
+/-! ── CONVERGENCE ──
+crystallized, withdrawn, routed — the three closings of `Outcome`, each the person's; the trace each
+carries is its structure's fields, and at a withdrawal they stand as your reading.
+-/
+
+/-! ── TOOL GROUNDING ── -/
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Detect     (sense)   → Internal analysis (no external tool)
-Phase 1 Pair+Align (constitution) → present the two cases side by side with every slot filled from the cases themselves and unmatched roles marked as such, and the four ways the answer can go (mandatory); artifact read, artifact search for the cases' own context; external fetch (conditional: the cases' domain lies outside the user's artifacts)
-Phase 2 Extract    (track)   → Internal state update: writes Λ.relation and Λ.space, so Phase 3 has a space to probe and the terminal has a relation to name
-Phase 3 Probe+Qp   (constitution) → present the probe case with every live axis it separates on screen together, each axis's support and the case that breaks it beside that axis's own verdict slot with what each verdict does to that axis, and before the gate what the live set becomes on each way the round can close (mandatory); external fetch (conditional: a probe drawn from outside the user's domain)
-Phase 4            (track)   → Internal state update: writes Λ.space and appends Λ.probes, so the cap can advance and the alignment trace has per-probe material to build from
-Phase 5 Name+Qn    (constitution) → present name, rule, boundary, whatever stayed live, and whether the budget is spent (mandatory)
-converge           (extension)   → TextPresent+Proceed (alignment trace + open disposition; proceed with the crystallized abstraction)
-seam               (extension)   → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol settles the next move — proceed directly to it, citing that settling source. This protocol declares no wired outbound continuation edge: its only cross-protocol link is an inbound misfit absorption (`Upstream misfit absorption`), not a post-crystallization handoff, so the second trigger is vacuously absent. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
-── MODE STATE ──
-Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
-      correspondences: List(M), relation: Option(R), space: Option(H),
-      probes: List(ProbeRecord), naming: Option(Nₐ),
-      crystallized: Option((N, Rule)),
-      alignment_trace: Option(AlignmentTrace),
-      open_trace: Option(OpenTrace),
-      active: Bool, cause_tag: String }
+inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
 
-── COMPOSITION ──
+inductive Op | detect | scan | absorb | collect | judge | record | sheet | readTurn | declare
+             | converge | seam
+
+def grounding : Op → Annot × String
+  | .detect   => (.sense, "Internal analysis: the deficit over the utterance and the context")
+  | .scan     => (.observe, "artifact read, artifact search (conditional: fewer than two cases, or no essence)")
+  | .absorb   => (.extension, "TextPresent+Proceed: a routed colimit-shaped signal as activation ground, its cited essence and locator shown as the detection's reading")
+  | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used")
+  | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context")
+  | .record   => (.track, "record: the pass's record")
+  | .sheet    => (.constitution, "present: the sheet, then one move (mandatory)")
+  | .readTurn => (.sense, "Internal analysis: the new turn read against the fused context as it now stands")
+  | .declare  => (.extension, "TextPresent+Proceed: at a withdrawal or a route, the trace as your reading")
+  | .converge => (.extension, "TextPresent+Proceed: at a crystallization, the trace and the dissent")
+  | .seam     => (.extension, "TextPresent+Proceed: at a chain the person declared, proceed to the named protocol citing that turn")
+
+/-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
+-/
+
+end
+
+end Periagoge
 ```
 
 ## Mode Activation
 
-`/induce` remains directly invocable. AI-guided activation requires a sensed essence whose name, scope, or position is still unsettled, and at least two concrete cases to correspond; detection stays silent. Existing abstractions awaiting comparison or validation route elsewhere, and a crystallized or suspended `(instance set, essence)` pair stays inactive for the session.
+`/induce` remains directly invocable; AI-guided activation stays silent and follows `inProcess`. An abstraction already located — one awaiting comparison or validation — belongs to other work.
 
-If an explicit invocation has no detectable essence signal, surface that scan result and invite the user to name what feels in process or withdraw. Prior-session recall may seed probe cases or neighbouring abstractions but never settles crystallization.
+Bind the seed from an explicit argument first, then the most recent cluster of cases, then a surfaced essence. Where no essence is sensed, show the scan result and invite the user to name what feels in process; where the scan finds no second case, say what was searched and invite one. Prior-session recall may seed examples or neighbouring abstractions but never settles crystallization.
 
 ## Protocol
 
-### User-facing realization
+### The sheet
 
-At Phase 1, put the two cases side by side and render the correspondence with every slot filled from what the cases themselves carry, marking any role the second case has no counterpart for. The user corrects a filling that is wrong rather than supplying one that is missing; which reading the correspondence supports is separated at Phase 3, never by an unfilled slot here. Materialize the `Aₐ` constructors as everyday-language options with anticipatable differential futures: go on with the correspondence as shown, correct one slot, align against a different partner, or stop here with nothing committed. `AsShown` and `Abandon` remain constitutive even when analysis favours the pairing. Ground both cases in the user's actual domain by artifact read/search; when that domain requires external fetch, cite its URL at the point of use.
+Every turn shows one sheet, in everyday language. It opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up, and a confirm that covers it adopts it as yours.
 
-At Phase 3, put every live axis the probe separates on screen at once, each row carrying that axis, what supports it, the case that breaks it, and its own verdict slot — refutes it, bounds it, or settles neither. Say that the rows are answered against each other rather than top to bottom, since what one axis makes of the case turns on how the others take it. Beside each verdict slot, state what that verdict does: refuting drops the axis to the ruled-out record with the user's ground and it is not proposed again; bounding places the case outside the axis and the axis survives; undecided leaves it live. Before the gate, state what the live set becomes on each way the round can close — how many axes are live now, that leaving one live moves the run to naming, and that refuting all of them suspends it — so the post-selection state is anticipatable before the verdicts are given rather than shown after them. Materialize `V` and the run-level `W` constructors as everyday-language options with anticipatable differential futures. A probe that separates nothing is not presented — draw another. A correction to the probe case itself is `Redraw` — the case is drawn again with the correction taken up, which spends no probe from the cap and leaves H unchanged.
+Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading and mark it as yours. Under it, the working candidate — a name and a rule — from the first sheet on, always on a reading still in play: where the user sets that reading aside, propose a candidate on a live one. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 
-At Phase 5, present the name, the rule, the boundary the near-misses drew, and anything still live. Materialize the `Nₐ` constructors the same way. When Phase 5 opened on the spent budget, say so before the gate: the probe budget is spent, and `NotYet` here records the gap and suspends the run rather than drawing another probe. `Confirm` and `Abandon` remain constitutive even when analysis favours one reading.
+Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — an example it catches and an example it misses, and where the candidate sits on that reading. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the rows use, unfolded in a few lines — what happened, what was seen and what was not, how it surfaced, who brought it — so every case is read on the sheet itself. Unfold a new or changed case again; an unchanged one may be folded as the same as the last sheet; unfold them all on the sheet a confirm would answer. The full list of cases with who brought each, and the readings the user set aside beside the user's own words, appear when they change, when reconsidering needs them, and on the sheet a confirm would answer. Mark every value as the user's or yours. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
-Frame the correspondence currently being built or the reading currently being separated, rather than a progress fraction. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or phase order determines placement relative to the gate.
+Under the sheet, the ledger of what the last turn changed: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown in the ledger. A row's examples stay as the last sheet showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal in the ledger. Then your contrary grounds, each beside the value it bears on.
+
+Then one move to ask about: narrow or widen the goal, move the candidate onto another reading or merge two readings, swap an example for one that separates better, or confirm. Say what each way of answering does to the goal and the candidate. Where every reading was set aside, say that every reading drawn so far was set aside on the grounds shown, and ask whether to name a distinction the readings missed, read another set of cases, or move the goal. Stopping, and going on to a protocol the user names, stay open on every sheet.
+
+The user may answer in their own words, and one answer may reach several parts of the sheet. A move reaches what its words reach. An utterance about other work leaves the sheet as it stands; the sheet returns when the user comes back to the run. A reading leaves the cross view only by the user's words setting it aside, and returns when the user names it again, with their earlier ground shown beside it. Only the user closes the run: confirming, stopping, or going on to a protocol they name. A confirm takes the goal and the candidate as the sheet it followed showed them, with the whole basis in view, and only while the candidate's reading is still in play; where something it would take was never shown, draw the sheet again with the whole basis, and a confirm said before that later sheet does not reach it.
+
+At the close, declare the trace before proceeding: the goal and who set it, the candidate, the cross view with its cases unfolded, the readings set aside with their grounds, every case with who brought it, and the open trace. The open items are the live readings the candidate does not take and what the user said is still missing. Each open item takes its disposition from the user's closing turn: not blocking where the turn takes the run with the item shown open, deferred where it names the item for later work beside deferral words. An item no turn covered is shown as undisposed. At a withdrawal, show the goal, the candidate, and the readings as your reading, not as established.
+
+Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or the order of the sheet bears on where a sentence sits.
 
 ## Rules
 
-- **Recognition over Recall**: Present structured options with anticipatable post-selection states and yield for the user's judgment.
-- **Correspondence before naming**: Build the correspondence between concrete cases before proposing any name or rule for what they share. A name offered ahead of the correspondence conditions every later judgment on its own vocabulary, so the ordering is the operation rather than a presentation preference.
-- **Alternatives stay visible**: Show every live reading at each gate, alongside the one the analysis currently favours. A single reading handed over on its own is the condition under which a judgment bends toward it hardest, so the alternatives are what make the user's answer their own.
-- **Ruling out is recorded, not repeated**: When a reading is ruled out, record it with the user's own ground and never propose it again within the activation. What was already shown to lead nowhere is not offered as a choice; a reading the user names again returns to the live set by their word, with the ground that ruled it out shown beside it.
-- **Probes separate rather than confirm**: Choose the next case for how well it tells the live readings apart, not for how well it fits the leading one. A case that every live reading predicts alike costs a round and settles nothing.
-- **The name is a locator, not a compression**: Deliver the name together with the relation, the correspondence it was read off, and the boundary the near-misses drew. The name is what returns the user to those cases; it does not stand in for them.
-- **Label as ground, not verdict**: Read the user's tentative label as the naming ground Phase 5 works from. It grounds the name and its provenance without fixing either, so what the label survives as stays a judgment made in the run.
-- **Personalized grounding**: Draw cases and probes from the user's own domain and keep external provenance visible.
-- **Periagoge boundary**: Form an abstraction around a sensed but unlocated essence. Comparison or validation of an already located abstraction remains outside this operation.
-- **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the gate.
-- **Upstream misfit absorption**: Accept a routed colimit-shaped signal as activation ground and show its cited essence-and-locator basis before Phase 1.
+- **Recognition over Recall**: Present the sheet and one move with anticipatable consequences, and yield for the user's judgment.
+- **Goal and candidate first, tested against each other**: Open every sheet with the goal and a working candidate, and test the candidate against the goal through examples on every row. The goal and the alternatives beside the candidate are what keep the user's judgment their own.
+- **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the move.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

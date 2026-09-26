@@ -1842,6 +1842,10 @@ function checkGateAnswerReference() {
 // whose proofs stay private to it. lean-contract.js generates `Contract.<NS>`
 // from the block (GROUND replaced by the canonical `EpistemicProtocols.Ground`)
 // and an audit file; the verdict is read from elaboration, not from text:
+//   - a protocol may state its theorems in `lean/EpistemicProtocols/<NS>/Theorems.lean`
+//     instead of the block — same doc-comment form, importing only `Contract.<NS>` —
+//     so the runtime surface carries only what the model reads; where that module
+//     exists the block states none, and the stated set is read from the module;
 //   - each stated signature is re-derived from the proved theorem of that name
 //     alone, so a proof carrying a premise the statement lacks fails;
 //   - the declared theorems of the proofs module, read from the elaborated
@@ -1908,6 +1912,30 @@ function leanLint(label, source, { judgments = false } = {}) {
     problems.push(judgments
       ? `${label} declares \`axiom ${m[1]}\` with no doc comment — an axiom here is a model judgment, and its doc comment says what is judged`
       : `${label} declares \`axiom ${m[1]}\` — only a Lean Definition block declares an axiom, and there it is a documented model judgment`);
+  }
+  return problems;
+}
+
+// A Theorem module states and never proves: it opens with `module`, imports only
+// the contract it states theorems about, and declares nothing — every
+// `theorem` it carries sits inside a doc comment.
+function leanTheoremModule(label, source, ns) {
+  const problems = [...leanLint(label, source)];
+  const code = stripLeanComments(source);
+  if (!/^module\s*$/m.test(code.split('\n').find(line => line.trim() !== '') || '')) {
+    problems.push(`${label} does not open with \`module\``);
+  }
+  const imports = [...code.matchAll(/^\s*(?:public\s+|meta\s+)*import\s+(?:all\s+)?([\w.]+)/gm)].map(m => m[1]);
+  for (const name of imports) {
+    if (name !== `Contract.${ns}`) problems.push(`${label} imports \`${name}\` — a Theorem module imports only Contract.${ns}`);
+  }
+  if (!imports.includes(`Contract.${ns}`)) problems.push(`${label} does not import \`Contract.${ns}\` — its statements are about that contract`);
+  const namespaces = [...code.matchAll(/^\s*namespace\s+([\w.]+)/gm)].map(m => m[1]);
+  if (namespaces.length !== 1 || namespaces[0] !== ns) {
+    problems.push(`${label} opens ${namespaces.length === 0 ? 'no namespace' : `namespace ${namespaces.join(', ')}`} — a Theorem module states inside \`namespace ${ns}\` alone`);
+  }
+  for (const m of code.matchAll(LEAN_THEOREM_DECL)) {
+    problems.push(`${label} proves \`theorem ${m[1]}\` — a Theorem module states signatures in doc comments; the proofs module proves them`);
   }
   return problems;
 }
@@ -1983,12 +2011,31 @@ function checkLeanDefinition() {
       proofRel = path.join('lean', 'EpistemicProtocols', ...ns.split('.'), 'Proofs.lean');
       expectedLean.add(proofRel);
       const proofFull = path.join(projectRoot, proofRel);
-      const stated = ground ? leanContract.statedTheorems(source.slice(ground.end)).filter(e => e.name) : [];
+      const inBlock = ground ? leanContract.statedTheorems(source.slice(ground.end)).filter(e => e.name) : [];
+      // A statement before GROUND is read by no audit, wherever the protocol states its theorems.
+      const beforeGround = ground ? leanContract.statedTheorems(source.slice(0, ground.start)).filter(e => e.name) : [];
+      for (const e of beforeGround) {
+        problems.push(`Lean Definition block states \`theorem ${e.name}\` before GROUND — no audit reads a statement there`);
+      }
+      const theoremRel = leanContract.theoremModulePath(ns);
+      const theoremFull = path.join(projectRoot, theoremRel);
+      let stated = inBlock;
+      if (fs.existsSync(theoremFull)) {
+        expectedLean.add(theoremRel);
+        const theoremText = fs.readFileSync(theoremFull, 'utf8');
+        const theoremProblems = leanTheoremModule(theoremRel, theoremText, ns);
+        for (const message of theoremProblems) fail(theoremRel, message);
+        if (theoremProblems.length > 0) problems.push(`${theoremRel} is not a clean Theorem module`);
+        if (inBlock.length > 0) {
+          problems.push(`Lean Definition block states ${inBlock.length} theorem(s) while ${theoremRel} exists — a protocol states its theorems in one place`);
+        }
+        stated = leanContract.statedTheorems(theoremText).filter(e => e.name);
+      }
       if (fs.existsSync(proofFull)) {
         const proof = fs.readFileSync(proofFull, 'utf8');
         problems.push(...leanLint(proofRel, proof), ...leanProofImports(proofRel, proof, ns));
       } else if (stated.length > 0) {
-        problems.push(`Lean Definition block states ${stated.length} theorem(s) but ${proofRel} does not exist`);
+        problems.push(`${stated === inBlock ? 'Lean Definition block' : leanContract.theoremModulePath(ns)} states ${stated.length} theorem(s) but ${proofRel} does not exist`);
       }
     }
     for (const message of problems) fail(relPath, message);
@@ -2012,7 +2059,7 @@ function checkLeanDefinition() {
   // A Lean file the package does not account for proves nothing the runtime
   // surface carries, and is elaborated by nothing here.
   for (const rel of leanFilesUnder(path.join(projectRoot, 'lean'))) {
-    if (!expectedLean.has(rel)) fail(rel, 'Lean file is neither the canonical GROUND nor the proofs module of a protocol Lean block');
+    if (!expectedLean.has(rel)) fail(rel, 'Lean file is neither the canonical GROUND nor the proofs or Theorem module of a protocol Lean block');
   }
 
   if (blocks.length === 0) return;
@@ -2081,8 +2128,9 @@ function checkLeanDefinition() {
     const stated = new Set(audit.stated);
     const proved = new Set(readout.proved);
     for (const name of stated) if (!proved.has(name)) problems.push(`Stated \`theorem ${name}\` is not a theorem the proofs module declares`);
-    for (const name of proved) if (!stated.has(name)) problems.push(`The proofs module declares \`theorem ${name}\`, which the Lean block does not state`);
+    for (const name of proved) if (!stated.has(name)) problems.push(`The proofs module declares \`theorem ${name}\`, which ${audit.statedIn || 'the Lean block'} does not state`);
     for (const name of readout.contract) problems.push(`\`theorem ${name}\` is proved in the contract module — a proof is verification, not contract`);
+    for (const name of readout.stating || []) problems.push(`\`theorem ${name}\` is proved in the Theorem module — a Theorem module states, the proofs module proves`);
     const judgments = new Set((readout.judgments || []).map(j => j.name));
     for (const name of readout.axiomDecls) if (!judgments.has(name)) problems.push(`\`axiom ${name}\` is declared in the Lean package`);
     for (const { name, inhabited } of readout.judgments || []) {
@@ -2101,7 +2149,7 @@ function checkLeanDefinition() {
       file: audit.relPath,
       message: audit.ns === 'Ground'
         ? `Canonical GROUND and its ${stated.size} stated theorem(s) elaborate; every proof uses only ${leanContract.ALLOWED_AXIOMS.join(', ')}`
-        : `Lean Definition block elaborates standalone, and its ${stated.size} stated theorem(s) follow from ${blocks.find(b => b.relPath === audit.relPath).proofRel} using only ${leanContract.ALLOWED_AXIOMS.join(', ')}${judgments.size > 0 ? ` and ${judgments.size} inhabited judgment(s)` : ''}`
+        : `Lean Definition block elaborates standalone, and ${audit.statedIn ? `the ${stated.size} theorem(s) ${audit.statedIn} states` : `its ${stated.size} stated theorem(s)`} follow from ${blocks.find(b => b.relPath === audit.relPath).proofRel} using only ${leanContract.ALLOWED_AXIOMS.join(', ')}${judgments.size > 0 ? ` and ${judgments.size} inhabited judgment(s)` : ''}`
     });
   }
 }
