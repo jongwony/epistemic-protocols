@@ -1,6 +1,6 @@
 {
   "name": "epistemic-protocols",
-  "description": "A domain-free metalanguage of structured types and morphisms for human-AI collaboration. It makes explicit which judgments are open, who may settle each and on what ground, and what is left unresolved: it elicits unknowns into utterance, constrains AI attention without bias, and resolves interaction deficits at their root within bounded loops, before local misalignment hardens into system-wide rework.",
+  "description": "A domain-free metalanguage of structured types and morphisms that moves the cognitive load of human-AI collaboration from recall to recognition: unknowns are elicited into utterance and answered or recognized where they bind, before local misalignment hardens into system-wide rework.",
   "owner": {
     "name": "jongwony"
   },
