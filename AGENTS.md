@@ -6,6 +6,16 @@ This file provides always-loaded guidance for coding agents when working in this
 
 Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it reduces cognitive load by eliciting unknowns into utterance, constraining AI attention without bias, and resolving interaction deficits at their root within bounded loops before local misalignment hardens into system-wide rework.
 
+## Entry Path
+
+For a reader who is understanding or evaluating the project rather than changing it — the sections after this one govern changing it:
+
+- `README.md` orients: what the project is for, when to reach for each protocol, and how to install it.
+- A protocol's `skills/*/SKILL.md` is that protocol's contract, its formal blocks included.
+- `route/` and `premise/` are optional layers a user may install; `premise/README.md` names `route` as what delivers the premise index.
+- `lean/`, `.claude/`, `design/`, and `scripts/` are maintainer machinery for checking, packaging, and revising the contracts; using a protocol does not require reading them.
+- When exploring a directory, read its `AGENTS.md` if present.
+
 ## Settled Directions
 
 Citable registry of conventions whose resolution direction is already constituted. The option-set relay test (defined in `premise/interaction-factorization.md`) cites a clause here to collapse settled-direction option-set entropy — a finding whose direction a clause below already determines is presented as relay, not gated. Maintained by hand: a direction recurringly constituted the same way graduates into a clause here.

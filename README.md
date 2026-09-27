@@ -110,6 +110,16 @@ Skills that act at their own decision points — around the protocols, on the wo
 
 Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
 
+## What the checks cover
+
+Different mechanisms check different things, and it helps to know where each one stops.
+
+- **Lean proofs** — a protocol's contract is also written as a Lean model inside its `SKILL.md`. Lean checks that the properties stated about that model hold, under the assumptions the model declares; the judgments the model leaves open are among those assumptions, not things it proves. A protocol's [`lean/EpistemicProtocols/<Protocol>/Theorems.lean`](./lean/EpistemicProtocols) holds what is stated and proved about its model.
+- **Runtime evidence** — the contributor skill [`/realize`](./.claude/skills/realize/SKILL.md) runs a protocol in a real session and collects evidence that the steps it declares actually happen, through automatic checks plus a review of the transcript.
+- **Static checks** — [`/verify`](./.claude/skills/verify/SKILL.md) checks the files' structure: required sections, consistent names and references, matching versions.
+
+None of these measures what happens downstream of a protocol, such as whether it reduces rework.
+
 ## For Contributors
 
 Start with [ONBOARDING.md](./ONBOARDING.md). Paste the full file into a fresh Claude Code session to use Claude as an onboarding buddy for environment setup, core docs, and the contribution workflow.
