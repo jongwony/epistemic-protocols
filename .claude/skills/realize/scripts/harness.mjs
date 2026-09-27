@@ -112,6 +112,8 @@ if (process.env.REALIZE_TIMEOUT_SECONDS) {
   CFG.codex.timeoutSeconds = num('REALIZE_TIMEOUT_SECONDS', process.env.REALIZE_TIMEOUT_SECONDS);
 }
 if (process.env.REALIZE_CASES) CFG.cases = csv(process.env.REALIZE_CASES);
+// Setup writes every configured arm's settings, so a later run may name any of them.
+const ALL_ARMS = { ...CFG.arms };
 const requestedArms = process.env.REALIZE_ARMS ? new Set(csv(process.env.REALIZE_ARMS)) : null;
 if (process.env.REALIZE_ARMS) {
   CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([k]) => requestedArms.has(k)));
@@ -274,8 +276,9 @@ function setupClaude() {
   // Per-arm settings. These are passed with --settings so that the isolated
   // config dir itself stays empty of policy — an arm's treatment must come from
   // its own flags, never from ambient state a later arm would inherit.
+  rmSync(join(SKILL, 'arms'), { recursive: true, force: true });
   mkdirSync(join(SKILL, 'arms'), { recursive: true });
-  for (const [name, arm] of Object.entries(CFG.arms)) {
+  for (const [name, arm] of Object.entries(ALL_ARMS)) {
     const settings = arm.style ? { outputStyle: CFG.styleName } : {};
     writeFileSync(join(SKILL, 'arms', `${name.replace('+', '-')}.json`),
       JSON.stringify(settings, null, 2) + '\n');

@@ -140,7 +140,8 @@ negative case wants reading as an adversary would read it, because the protocol 
 
 ## The arm matrix
 
-Claude's four arms cross the protocol against the output style that ships beside it.
+Claude's four default arms cross the protocol against the output style that ships beside it; a
+fifth, run only when named, removes the protocol's formal blocks.
 
 | arm | protocol | style | answers |
 |---|---|---|---|
@@ -148,6 +149,7 @@ Claude's four arms cross the protocol against the output style that ships beside
 | `style` | — | ✓ | sham |
 | `protocol` | ✓ | — | self-containment |
 | `protocol+style` | ✓ | ✓ | deployed configuration |
+| `protocol-prose` | ✓, Lean blocks removed | — | formal-block ablation |
 
 **The sham arm was not constructed; it already existed.** A controlled study of rule
 files for coding agents found randomly generated rules improving performance as much

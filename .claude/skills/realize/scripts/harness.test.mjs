@@ -483,8 +483,11 @@ test('a numbered listing of the target counts as reading it', () => {
 function fakeClaude(root, env) {
   const bin = join(root, 'bin', 'claude');
   writeFileSync(bin, `#!/usr/bin/env node
-const { appendFileSync } = require('node:fs');
-appendFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify(process.argv.slice(2)) + '\\n');
+const { appendFileSync, statSync } = require('node:fs');
+const args = process.argv.slice(2);
+appendFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify(args) + '\\n');
+// claude refuses a --settings path that is not a regular file.
+if (!statSync(args[args.indexOf('--settings') + 1], { throwIfNoEntry: false })?.isFile()) process.exit(1);
 console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default' }));
 console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
 `);
@@ -499,8 +502,12 @@ const pluginDirOf = (args) => (args.includes('--plugin-dir') ? args[args.indexOf
 test('the prose-only arm loads the plugin with every lean block removed, and only that', () => {
   const { root, env } = fixture();
   const calls = fakeClaude(root, env);
-  env.REALIZE_ARMS = 'protocol,protocol-prose';
   try {
+    // Setup as CI runs it, with no arms named; the run then names the opt-in arm.
+    delete env.REALIZE_ARMS;
+    const setup = invoke(env, 'setup', 'inquire');
+    assert.equal(setup.status, 0, setup.stderr || setup.stdout);
+    env.REALIZE_ARMS = 'protocol,protocol-prose';
     const run = invoke(env, 'run', 'inquire');
     assert.equal(run.status, 0, run.stderr || run.stdout);
     const dirs = calls().map(pluginDirOf);
@@ -524,6 +531,7 @@ test('the prose-only arm runs only when named, and the Codex runner refuses it',
   const calls = fakeClaude(root, env);
   delete env.REALIZE_ARMS;
   try {
+    assert.equal(invoke(env, 'setup', 'inquire').status, 0);
     const run = invoke(env, 'run', 'inquire');
     assert.equal(run.status, 0, run.stderr || run.stdout);
     assert.doesNotMatch(run.stdout, /protocol-prose/);
