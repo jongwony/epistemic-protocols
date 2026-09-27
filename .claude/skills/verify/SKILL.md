@@ -109,7 +109,7 @@ Select action:
 
 ## Severity Reference
 
-Consult `references/criteria.md` for detailed severity definitions and decision matrix.
+Consult `references/criteria.md` for which channel judges which kind of obligation, the severity definitions, and what review reads for.
 
 ## Review Checklists
 
