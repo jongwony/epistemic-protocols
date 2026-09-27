@@ -63,7 +63,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 |----------|---------|-------------|
 | [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown |
 | [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) holds the clues |
-| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or they narrowed to one too early — widen the field before choosing any |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any |
 | [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first |
 | [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight |
 | [Analogia](./analogia) | `/ground` | You're carrying a framework or an analogy over to a case already in front of you, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports |

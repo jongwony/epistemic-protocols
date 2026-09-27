@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "No candidates yet, or they narrowed to one too early: widen the idea field in width and depth before any is chosen; reads the user's words and what they name."
+description: "The idea field is empty, narrowed too early, or thin in places: widen it in width and depth before any candidate is chosen; reads the user's words and what they name."
 ---
 
 # Heuresis Protocol
