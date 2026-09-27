@@ -163,12 +163,12 @@ test("a malformed transcript line is skipped and counted, not fatal to the parse
   assert.deepEqual(parsed.user_messages.map((m) => m.text), ["Still verified."]);
 });
 
-test("nested extraction is ephemeral, hooks-off, Luna xhigh, and schema-bound", () => {
+test("nested extraction is ephemeral, hooks-off, gpt-6-luna xhigh, and schema-bound", () => {
   const args = buildCodexCommandArgs({ cwd: "/repo", outputPath: "/tmp/out.json", prompt: "prompt" });
   assert.ok(args.includes("--ephemeral"));
   assert.deepEqual(args.slice(args.indexOf("--disable"), args.indexOf("--disable") + 2), ["--disable", "hooks"]);
   assert.ok(args.includes("--ignore-user-config"));
-  assert.deepEqual(args.slice(args.indexOf("--model"), args.indexOf("--model") + 2), ["--model", "gpt-5.6-luna"]);
+  assert.deepEqual(args.slice(args.indexOf("--model"), args.indexOf("--model") + 2), ["--model", "gpt-6-luna"]);
   assert.ok(args.includes('model_reasoning_effort="xhigh"'));
   assert.ok(args.includes("--output-schema"));
 });

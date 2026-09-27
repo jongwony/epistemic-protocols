@@ -4,9 +4,10 @@
  *
  * Hook-side work is deliberately short: persist one immutable job, detach a
  * worker, and return. The worker coalesces Stop/PreCompact/SessionEnd jobs by
- * transcript revision, extracts one normalized record with Luna xhigh, writes
- * an immutable generation, then atomically advances current.json and the
- * per-session catalog entry. Nested Codex runs are ephemeral and hooks-off.
+ * transcript revision, extracts one normalized record with gpt-6-luna at
+ * xhigh, writes an immutable generation, then atomically advances current.json
+ * and the per-session catalog entry. Nested Codex runs are ephemeral and
+ * hooks-off.
  */
 
 import fs from "node:fs";
@@ -25,7 +26,7 @@ const SCRIPT_DIR = path.dirname(SCRIPT_PATH);
 const SCHEMA_PATH = path.join(SCRIPT_DIR, "hypomnesis-codex-schema.json");
 const EVENTS = new Set(["Stop", "PreCompact", "SessionEnd"]);
 const EVENT_RANK = Object.freeze({ Stop: 1, PreCompact: 2, SessionEnd: 3 });
-const MODEL = "gpt-5.6-luna";
+const MODEL = "gpt-6-luna";
 const REASONING_EFFORT = "xhigh";
 const MAX_TEXT_CHARS = 80_000;
 const WORKER_TIMEOUT_MS = 15 * 60 * 1000;
