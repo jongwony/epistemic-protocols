@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "Reverse-trace decision coordinates for axis-undetermined intent. Type: (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint"
+description: "The user knows roughly what they want but not which decisions it turns on: trace those from their own material — codebase, rules, past sessions — and ask until the intent settles."
 ---
 
 # Euporia Protocol

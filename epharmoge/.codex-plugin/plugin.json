@@ -1,7 +1,7 @@
 {
   "name": "epharmoge",
-  "version": "2.3.1",
-  "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
+  "version": "2.3.2",
+  "description": "Check that a correct result fits your actual situation — /contextualize (ἐφαρμογή: an application)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Epharmoge",
-    "shortDescription": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
-    "longDescription": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
+    "shortDescription": "Check that a correct result fits your actual situation — /contextualize (ἐφαρμογή: an application)",
+    "longDescription": "Check that a correct result fits your actual situation — /contextualize (ἐφαρμογή: an application)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

@@ -1,7 +1,7 @@
 {
   "name": "horismos",
-  "description": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)",
-  "version": "5.4.1",
+  "description": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)",
+  "version": "5.4.2",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

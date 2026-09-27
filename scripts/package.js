@@ -54,9 +54,10 @@ const EXCLUDE_DIRS = new Set(['agents', 'commands', 'evals']);
 const STRIP_FIELDS = new Set(['allowed-tools', 'license', 'compatibility', 'metadata']);
 
 // Protocol metadata for release notes (deficit → resolution pairs).
-// Derived from per-plugin SKILL.md description Type signature; capitalize(dir)
-// for name; `/${skill}` for command. No hand-curated table — drift cannot
-// occur because the single filesystem walk above is the only source.
+// Derived from the Type signature in each protocol SKILL.md (body, or
+// description where one carries it); capitalize(dir) for name; `/${skill}`
+// for command. No hand-curated table — drift cannot occur because the single
+// filesystem walk above is the only source.
 const PROTOCOL_METADATA = Object.fromEntries(
   _records.filter(r => r.isProtocol).map(r => [r.dir, {
     name: r.dir[0].toUpperCase() + r.dir.slice(1),

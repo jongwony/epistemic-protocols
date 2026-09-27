@@ -1,7 +1,7 @@
 {
   "name": "elenchus",
-  "version": "1.2.1",
-  "description": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)",
+  "version": "1.2.2",
+  "description": "Challenge the context you are about to act on, before acting — /sublate (ἔλεγχος: cross-examination)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Elenchus",
-    "shortDescription": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)",
-    "longDescription": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)",
+    "shortDescription": "Challenge the context you are about to act on, before acting — /sublate (ἔλεγχος: cross-examination)",
+    "longDescription": "Challenge the context you are about to act on, before acting — /sublate (ἔλεγχος: cross-examination)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

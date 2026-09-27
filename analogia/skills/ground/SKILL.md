@@ -1,6 +1,6 @@
 ---
 name: ground
-description: "Audit what an analogical mapping licenses about an account already in play: warrants each fit claim from cited evidence, not assent. Type: (MappingUncertain, AI, GROUND, R) → MappingAssessment"
+description: "A framework or analogy is applied to an account already in play, or an abstraction tested against its own cases, and what it supports is unclear: back each fit claim with cited evidence, not assent."
 ---
 
 # Analogia Protocol

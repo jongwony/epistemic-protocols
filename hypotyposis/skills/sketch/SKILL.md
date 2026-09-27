@@ -1,6 +1,6 @@
 ---
 name: sketch
-description: "Recognize and revise concrete sketches to discover a form when descriptions cannot settle intent. Type: (FitUnrecognized, Hybrid, SKETCH-RECOGNIZE-CYCLE, FormIntentSeed) → RecognizedForm"
+description: "Something has to be made that the user cannot describe but would recognize on sight: mark what does not fit on concrete sketches, revising until a form is recognized."
 ---
 
 # Hypotyposis Protocol

@@ -1,6 +1,6 @@
 ---
 name: preview
-description: "Divergent-discard instantiation. Fires when direction candidates cannot be recognized from descriptions. Type: (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast"
+description: "The user is about to commit to one of several directions that cannot be judged from their descriptions: build throwaway probes showing where they diverge, and decide on what is seen."
 ---
 
 # Proplasma Protocol

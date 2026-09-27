@@ -1,6 +1,6 @@
 ---
 name: contextualize
-description: "Detect application-context mismatch after execution. Fires when correct output may not fit the actual context. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution"
+description: "After execution, a correct result may not fit the user's actual situation: surface where it does not fit the context it is applied in, and adapt it as the user directs."
 ---
 
 # Epharmoge Protocol

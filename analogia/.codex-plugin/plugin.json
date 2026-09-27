@@ -1,7 +1,7 @@
 {
   "name": "analogia",
-  "version": "4.4.1",
-  "description": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)",
+  "version": "4.4.2",
+  "description": "Check what an analogy or framework actually supports about a case in play — /ground (ἀναλογία: a proportion)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Analogia",
-    "shortDescription": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)",
-    "longDescription": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)",
+    "shortDescription": "Check what an analogy or framework actually supports about a case in play — /ground (ἀναλογία: a proportion)",
+    "longDescription": "Check what an analogy or framework actually supports about a case in play — /ground (ἀναλογία: a proportion)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

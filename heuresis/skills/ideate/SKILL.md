@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "Widen an empty or prematurely converged idea field in width and depth; reads your words and what you name. Type: (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField"
+description: "No candidates yet, or they narrowed to one too early: widen the idea field in width and depth before any is chosen; reads the user's words and what they name."
 ---
 
 # Heuresis Protocol

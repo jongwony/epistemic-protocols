@@ -1,6 +1,6 @@
 ---
 name: apportion
-description: "Apportion an autonomous goal into execution units carrying their own completion conditions. Type: (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan"
+description: "One goal is about to be handed to an autonomous run: cut it into units that each fit one stretch of the run and carry their own conditions for when they are done."
 ---
 
 # Merismos Protocol

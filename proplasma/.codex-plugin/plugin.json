@@ -1,7 +1,7 @@
 {
   "name": "proplasma",
-  "version": "1.4.1",
-  "description": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
+  "version": "1.4.2",
+  "description": "Compare throwaway probes of candidate directions before committing to one — /preview (πρόπλασμα: a preliminary clay model)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Proplasma",
-    "shortDescription": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
-    "longDescription": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
+    "shortDescription": "Compare throwaway probes of candidate directions before committing to one — /preview (πρόπλασμα: a preliminary clay model)",
+    "longDescription": "Compare throwaway probes of candidate directions before committing to one — /preview (πρόπλασμα: a preliminary clay model)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

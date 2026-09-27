@@ -8,7 +8,7 @@
     {
       "name": "katalepsis",
       "source": "./katalepsis",
-      "description": "Verify understanding of a target in play — code, a document, a result — present in context and quotable, through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)"
+      "description": "Check that something in play — code, a document, a result — is actually understood, step by step — /grasp (κατάληψις: a grasping firmly)"
     },
     {
       "name": "aitesis",
@@ -18,7 +18,7 @@
     {
       "name": "analogia",
       "source": "./analogia",
-      "description": "Audit what an analogical mapping licenses — /ground (ἀναλογία: a proportion)"
+      "description": "Check what an analogy or framework actually supports about a case in play — /ground (ἀναλογία: a proportion)"
     },
     {
       "name": "periagoge",
@@ -28,7 +28,7 @@
     {
       "name": "euporia",
       "source": "./euporia",
-      "description": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)"
+      "description": "Find the decisions a rough intent turns on, traced from your own material — /elicit (εὐπορία: way through)"
     },
     {
       "name": "merismos",
@@ -38,17 +38,17 @@
     {
       "name": "epharmoge",
       "source": "./epharmoge",
-      "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)"
+      "description": "Check that a correct result fits your actual situation — /contextualize (ἐφαρμογή: an application)"
     },
     {
       "name": "elenchus",
       "source": "./elenchus",
-      "description": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)"
+      "description": "Challenge the context you are about to act on, before acting — /sublate (ἔλεγχος: cross-examination)"
     },
     {
       "name": "horismos",
       "source": "./horismos",
-      "description": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)"
+      "description": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)"
     },
     {
       "name": "epistemic-cooperative",
@@ -63,12 +63,12 @@
     {
       "name": "hyphegesis",
       "source": "./hyphegesis",
-      "description": "Conduct the method of a session's epistemic work before object-level cognition — /conduct (ὑφήγησις: a leading-the-way)"
+      "description": "Settle how work with several lines of thinking runs before starting it — /conduct (ὑφήγησις: a leading-the-way)"
     },
     {
       "name": "proplasma",
       "source": "./proplasma",
-      "description": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)"
+      "description": "Compare throwaway probes of candidate directions before committing to one — /preview (πρόπλασμα: a preliminary clay model)"
     },
     {
       "name": "hypotyposis",
@@ -78,7 +78,7 @@
     {
       "name": "heuresis",
       "source": "./heuresis",
-      "description": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)"
+      "description": "Widen an empty or prematurely narrowed field of ideas before choosing — /ideate (εὕρεσις: finding/invention)"
     },
     {
       "name": "route",

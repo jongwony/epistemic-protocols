@@ -31,8 +31,9 @@ const _protocolRecords = _records.filter(r => r.isProtocol);
 
 const PROTOCOL_FILES = protocolFiles({ projectRoot });
 
-// Protocol display name → {deficit, resolution}. Derived from per-protocol
-// SKILL.md description Type signature; capitalize(dir) for display name.
+// Protocol display name → {deficit, resolution}. Derived from the Type
+// signature each protocol SKILL.md carries in its body (extractTypeSignature
+// also accepts one in the description); capitalize(dir) for display name.
 //
 // Loud-fail: extractTypeSignature returns null when the Type pattern is
 // absent or malformed. Null values would silently flow into spec-vs-impl
@@ -51,7 +52,7 @@ const CANONICAL_PROTOCOLS = Object.fromEntries(
   if (incomplete.length) {
     throw new Error(
       `[static-checks] CANONICAL_PROTOCOLS missing deficit/resolution for: ${incomplete.join(', ')}. ` +
-      `Likely cause: SKILL.md description Type signature absent or malformed for these protocols.`
+      `Likely cause: SKILL.md Type signature (description or body) absent or malformed for these protocols.`
     );
   }
 }
