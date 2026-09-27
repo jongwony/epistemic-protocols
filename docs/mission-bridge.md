@@ -49,7 +49,9 @@ When mission or vision wording changes:
 
 1. Update the canonical umbrella statement in `CLAUDE.md`
 2. Update this bridge document's public contract and runtime boundary if needed
-3. Update README as an audience-specific derivation
+3. Update README and the marketplace description (`.claude-plugin/marketplace.json`) as audience-specific derivations
 4. Verify that no `SKILL.md` or plugin description now depends on mission/vision documents for correct use
+
+A derivation can move first. When a derivation narrows or withdraws a claim the umbrella makes — a README scope statement, a skill's stated measure, a metadata description — revise the umbrella in the same change, or state there why the claim still stands.
 
 If a change makes README depend on CLAUDE to be understandable, the bridge has failed and the public contract needs revision. If a change makes runtime users depend on mission/vision documents, the boundary has failed.
