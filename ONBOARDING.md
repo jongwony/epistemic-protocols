@@ -6,26 +6,9 @@ Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue �
 
 Contributors here design, refine, and verify the protocols themselves. This guide is for you.
 
-## How the Maintainer Works on This
+## Dogfooding
 
-Based on jongwony's last 30 days (64 sessions):
-
-Work Type Breakdown:
-  Improve Quality   ████████░░░░░░░░░░░░  40%   PR review loops, worktree checkouts, protocol audits
-  Plan Design       ██████░░░░░░░░░░░░░░  32%   Protocol design debates, elicitation, direction analysis
-  Build Feature     ███░░░░░░░░░░░░░░░░░  13%   New skill implementation, handoff-driven builds
-  Debug Fix         ██░░░░░░░░░░░░░░░░░░   9%   Codex invocation fixes, Ink rendering breakage
-  Write Docs        █░░░░░░░░░░░░░░░░░░░   6%   CLAUDE.md progressive disclosure, conventions
-
-Protocols the Maintainer Dogfoods:
-  /epistemic-cooperative:review-loop  ████████████████████  19x   iterative PR review loop (+ codex reviewer)
-  /euporia:elicit                     █████░░░░░░░░░░░░░░░   5x   design-dimension elicitation
-  /formal-review                      ████░░░░░░░░░░░░░░░░   4x   formal-triple review of protocol changes
-  /release                            ████░░░░░░░░░░░░░░░░   4x   CalVer tag + draft release
-  /gh-address-comments                ███░░░░░░░░░░░░░░░░░   3x   PR feedback loop
-  /codex-plus:codex                   ███░░░░░░░░░░░░░░░░░   3x   cross-vendor second opinion
-
-Contributors are expected to dogfood the protocols they edit — the list above is what that looks like in practice, not a mandated workflow.
+Contributors are expected to dogfood the protocols they edit — §Protocols to Use While Contributing below is where to start, not a mandated workflow.
 
 ## Your Setup Checklist
 
