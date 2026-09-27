@@ -164,11 +164,14 @@ const RESULTS = process.env.REALIZE_RESULTS_DIR
   ? resolve(process.env.REALIZE_RESULTS_DIR)
   : join(SKILL, 'results', RUNNER, TARGET);
 const repoKey = createHash('sha256').update(REPO).digest('hex').slice(0, 12);
+// Outside the checkout for both runners. Under `.claude/`, Claude Code treats every file of
+// a case's tree as a sensitive path and refuses Edit and Write there, so a Proceed cell
+// could not change the tree it is scored on.
 const WORK = process.env.REALIZE_WORK_DIR
   ? resolve(process.env.REALIZE_WORK_DIR)
   : (RUNNER === 'codex'
       ? join(tmpdir(), `epistemic-realize-${repoKey}`, TARGET)
-      : join(SKILL, '.work', RUNNER, TARGET));
+      : join(tmpdir(), `epistemic-realize-${repoKey}`, RUNNER, TARGET));
 for (const [name, target] of [['REALIZE_RESULTS_DIR', RESULTS], ['REALIZE_WORK_DIR', WORK]]) {
   for (const forbidden of [homedir(), '/', REPO, SKILL, tmpdir()]) {
     if (resolve(target) === resolve(forbidden)) {
@@ -829,7 +832,8 @@ function parseClaudeTurn(events) {
     if (e.type === 'assistant' && Array.isArray(content)) {
       for (const b of content) {
         if (b.type !== 'tool_use') continue;
-        toolUses.push(b.name);
+        toolUses.push(b.name === 'Bash' && readsThroughShell(String(b.input?.command || ''))
+          ? 'Read' : b.name);
         // The identifier only. Matching against the serialized input would also match a
         // different skill invoked with args that happen to echo the protocol's name --
         // which the injected invocation line puts into the prompt on every protocol arm.
@@ -877,9 +881,8 @@ function parseCodexTurn(events) {
   // the user's task. Require a separate read-like command against the fixture.
   // `nl`, `grep`, `awk`, `less` and `more` print file contents as surely as `cat` does; a
   // Lean /grasp run read the whole target through `nl -ba` alone and was scored unread.
-  const readLike = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
   const toolUses = commands
-    .filter((item) => !item.command?.includes('/plugins/cache/') && readLike.test(item.command || ''))
+    .filter((item) => readsThroughShell(item.command || ''))
     .map(() => 'Read');
   const messages = items.filter((item) => item.type === 'agent_message').map((item) => item.text).filter(Boolean);
   const completed = events.find((e) => e.type === 'turn.completed');
@@ -952,6 +955,10 @@ function treeMutated(workdir, caseName) {
 }
 
 const isRead = (t) => t === 'Read' || t === 'Grep' || t === 'Glob';
+// A shell command that prints files or the tree. Both runners read through the shell, so
+// a read is recognised by what the command does rather than by which tool carried it.
+const READ_LIKE = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
+const readsThroughShell = (command) => !command.includes('/plugins/cache/') && READ_LIKE.test(command);
 
 // Deterministic graders. Each returns true / false / null (not applicable).
 // These read behaviour, not wording: the protocols are required to render in the
