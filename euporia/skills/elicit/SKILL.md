@@ -294,26 +294,38 @@ resolved(c) = the user's latest utterance judges the endpoint resolved; the resi
 `residualAt`.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | detect | scanSurface | substrate | utteranceRead | reverseTrace
              | filterConfidence | resurface | qs | readAnswer | converge | seam
 
 def grounding : Op → Annot × String
   | .detect           => (.sense, "Internal analysis: axis-undetermined intent with an external substrate signal")
-  | .scanSurface      => (.extension, "TextPresent+Proceed: when Phase 0 does not activate, the scan result with a routing recommendation, or an invitation to articulate or withdraw; no constitutive gate")
+  | .scanSurface      => (.interaction .extension, "when Phase 0 does not activate, the scan result with a routing recommendation, or an invitation to articulate or withdraw; no constitutive gate")
   | .substrate        => (.observe, "artifact read, artifact search, environment run: read-only substrate access — codebase, rules, session history, and machine-setup metadata only; the substrate is never mutated")
   | .utteranceRead    => (.sense, "Internal analysis of the seed utterance for in-text semantic ambiguity; citations quote actual fragments")
   | .reverseTrace     => (.sense, "Internal analysis: axis inference and coordinate construction over the fused context")
   | .filterConfidence => (.sense, "Internal analysis: concrete substrate basis surfaces, thin basis is held back; a relay grounded in whether a citable basis exists, never a user gate")
   | .resurface        => (.sense, "Internal analysis: each parked coordinate returns as itself, with the question and basis it was parked with")
-  | .qs               => (.constitution, "present: this cycle's projections with their cited basis and defaults, the returning parked coordinates, the cycle count, and per-coordinate provide-or-defer slots beside Dismiss and Resolved")
+  | .qs               => (.interaction .constitution, "this cycle's projections with their cited basis and defaults, the returning parked coordinates, the cycle count, and per-coordinate provide-or-defer slots beside Dismiss and Resolved")
   | .readAnswer       => (.sense, "Internal analysis: the handling the latest utterance carries and the values it gives")
-  | .converge         => (.extension, "TextPresent+Proceed: intent readback and per-cycle coordinate trace; proceed with ResolvedEndpoint")
-  | .seam             => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed directly to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .converge         => (.interaction .extension, "intent readback and per-cycle coordinate trace; proceed with ResolvedEndpoint")
+  | .seam             => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed directly to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.

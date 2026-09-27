@@ -905,28 +905,40 @@ proposed it, set or adopted — and the turns read as setting values, quoted; (g
 plan carries. Demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | probe | relay | collect | judge | record | sheet | readTurn | emit | package
              | parkCarrier | recordHandoff | converge | seam
 
 def grounding : Op → Annot × String
   | .probe         => (.observe, "record read, artifact read: autonomous intent, goal singleness, and uncompiled-plan detection over the goal, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names — and its grounding instruction run once; condition-bearing is decided against the plan read back from that carrier")
-  | .relay         => (.extension, "TextPresent+Proceed: no autonomous interval; a composite goal, naming each stated outcome and the shared-procedure bond; an unreadable handoff, which never falls through to fresh compilation; a plan already condition-bearing; or nothing read from the goal's scope. No activation")
+  | .relay         => (.interaction .extension, "no autonomous interval; a composite goal, naming each stated outcome and the shared-procedure bond; an unreadable handoff, which never falls through to fresh compilation; a plan already condition-bearing; or nothing read from the goal's scope. No activation")
   | .collect       => (.observe, "record read, artifact read, artifact search: the goal's cited material and seam evidence over its substrate; read-only")
   | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, how each value came to stand, and your contrary grounds; a person's value stands on the scope their words reach")
   | .record        => (.track, "record: the pass's record of the plan as judged, the ledger, and the focus")
-  | .sheet         => (.constitution, "present: the whole plan on one sheet, each value marked the person's or the draft's; the ledger of what the last turn changed, edits first and each re-fill marked necessary or proposal; your contrary grounds; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan")
+  | .sheet         => (.interaction .constitution, "the whole plan on one sheet, each value marked the person's or the draft's; the ledger of what the last turn changed, edits first and each re-fill marked necessary or proposal; your contrary grounds; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan")
   | .readTurn      => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — an edit and its scope, an answer to the focus, a settling of the acceptance question, a taking over a fit, a closing — whatever form it takes")
   | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
   | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the dissent the taking carried and each value's provenance")
   | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
-  | .recordHandoff => (.extension, "TextPresent+Proceed: the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet shows what is missing")
-  | .converge      => (.extension, "TextPresent+Proceed: the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; and the dissent the plan carries")
-  | .seam          => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; a composition edge this file declares — /bound or /conduct into /apportion, /apportion into /conduct — is offered as a hint, never taken on its own; the edge to predicate enforcement needs its own activation; every Constitution gate here and in the next protocol fires unchanged")
+  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet shows what is missing")
+  | .converge      => (.interaction .extension, "the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; and the dissent the plan carries")
+  | .seam          => (.interaction .extension, "at a chain the person declared, naming the next protocol, proceed to it citing that turn; a composition edge this file declares — /bound or /conduct into /apportion, /apportion into /conduct — is offered as a hint, never taken on its own; the edge to predicate enforcement needs its own activation; every Constitution gate here and in the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

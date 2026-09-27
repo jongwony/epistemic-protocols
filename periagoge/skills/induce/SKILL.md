@@ -501,10 +501,22 @@ crystallized, withdrawn, routed — the three closings of `Outcome`, each the pe
 carries is its structure's fields, and at a withdrawal they stand as your reading.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | detect | scan | absorb | collect | judge | record | sheet | readTurn | declare
              | converge | seam
@@ -512,15 +524,15 @@ inductive Op | detect | scan | absorb | collect | judge | record | sheet | readT
 def grounding : Op → Annot × String
   | .detect   => (.sense, "Internal analysis: the deficit over the utterance and the context")
   | .scan     => (.observe, "artifact read, artifact search (conditional: fewer than two cases, or no essence)")
-  | .absorb   => (.extension, "TextPresent+Proceed: a routed colimit-shaped signal as activation ground, its cited essence and locator shown as the detection's reading")
+  | .absorb   => (.interaction .extension, "a routed colimit-shaped signal as activation ground, its cited essence and locator shown as the detection's reading")
   | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used")
   | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context")
   | .record   => (.track, "record: the pass's record")
-  | .sheet    => (.constitution, "present: the sheet, then one move (mandatory)")
+  | .sheet    => (.interaction .constitution, "the sheet, then one move (mandatory)")
   | .readTurn => (.sense, "Internal analysis: the new turn read against the fused context as it now stands")
-  | .declare  => (.extension, "TextPresent+Proceed: at a withdrawal or a route, the trace as your reading")
-  | .converge => (.extension, "TextPresent+Proceed: at a crystallization, the trace and the dissent")
-  | .seam     => (.extension, "TextPresent+Proceed: at a chain the person declared, proceed to the named protocol citing that turn")
+  | .declare  => (.interaction .extension, "at a withdrawal or a route, the trace as your reading")
+  | .converge => (.interaction .extension, "at a crystallization, the trace and the dissent")
+  | .seam     => (.interaction .extension, "at a chain the person declared, proceed to the named protocol citing that turn")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

@@ -384,26 +384,39 @@ reads it, and every landing stands on the whole material. `user_unknown ≠ ∅`
 convergence: what remains is surfaced as the user's, which is the product.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed. No Constitution entry: whether a turn halts is the harness's baseline
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | scan | sufficiencyRelay | push | observeRun | register | land | surface
              | readAnswer | converge | sufficiency | seam
 
+/-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .scan             => (.sense, "Internal analysis: what the context leaves uncertain, at Phase 0 and at Step₀")
-  | .sufficiencyRelay => (.extension, "TextPresent+Proceed: with nothing uncertain, the sufficiency finding with its reasoning; proceed with X unchanged, trivial SufficientContext")
+  | .sufficiencyRelay => (.interaction .extension, "with nothing uncertain, the sufficiency finding with its reasoning; proceed with X unchanged, trivial SufficientContext")
   | .push             => (.observe, "artifact read, artifact search, record read, external fetch (conditional, tagged web:{url}), environment run (conditional: read-only commit-log queries, tagged history:{ref}); what a channel yields enters the context for the item pushed")
   | .observeRun       => (.transform, "artifact write, environment run, artifact read: one observation run shaped by ObservationSpec; a run that resolves nothing returns its null result and the item continues to its next channel, and a declined run is recorded with its escape in skips")
   | .register         => (.sense, "Internal analysis: Step₂, what this pass's collection exposed, registered before landing")
   | .land             => (.sense, "Internal analysis: every live item, every pass — state, reason, and basis read from the material as it now stands")
-  | .surface          => (.extension, "TextPresent+Proceed: every landed item that is not resolved, in priority order, beside its state, reason, basis, and what an answer would change; the turn is not held")
+  | .surface          => (.interaction .extension, "every landed item that is not resolved, in priority order, beside its state, reason, basis, and what an answer would change; the turn is not held")
   | .readAnswer       => (.sense, "Internal analysis: which surfaced item a later utterance answers and how; every answer but Sufficient opens the next pass")
-  | .converge         => (.extension, "TextPresent+Proceed: the convergence evidence trace, one pair per item including the dismissed and the detect-only; proceed with SufficientContext")
-  | .sufficiency      => (.extension, "TextPresent+Proceed: on Sufficient, the dismissed set with the declaration recorded against each, so the trace shows what was accepted unresolved")
-  | .seam             => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed directly to it citing that source")
+  | .converge         => (.interaction .extension, "the convergence evidence trace, one pair per item including the dismissed and the detect-only; proceed with SufficientContext")
+  | .sufficiency      => (.interaction .extension, "on Sufficient, the dismissed set with the declaration recorded against each, so the trace shows what was accepted unresolved")
+  | .seam             => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed directly to it citing that source")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

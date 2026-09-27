@@ -509,9 +509,9 @@ abbrev Mode (P : Type) := Context P
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `relay` is the spec
 relay: it presents `spec`, a `RoundSpec` carrying `SpecOwes`, and yields no turn; where
-`Unsuppliable` holds, the boundary relay takes its place. The sketches are then produced
-(`.produce`; in parallel through `.produceDelegate` when a spec has more than one brief, one
-sketch per executor, each temp-isolated).
+`Unsuppliable` holds, the boundary relay takes its place. The sketches are then produced through
+the operations `producedBy` names for the spec, one sketch per executor where delegated, each
+temp-isolated.
 -/
 
 /-- **Your production** under the relayed spec: each Artifact sketch as observed at creation,
@@ -619,10 +619,22 @@ handoff, never silent. Each other terminal presents its own payload (TOOL GROUND
 Demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | detect | noActivationRelay | bind | draft | specRelay | produce | produceDelegate
              | present | acquire | qfit | interpret | readAnswer | qplace | account | assemble
@@ -630,26 +642,31 @@ inductive Op | detect | noActivationRelay | bind | draft | specRelay | produce |
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: the deficit predicate over the utterance and the context; no external tool")
-  | .noActivationRelay => (.extension, "TextPresent+Proceed: the non-activation basis — the failed predicate with its evidence; a sibling deficit seen in the scan is named as a finding and left to the session; not activated")
+  | .noActivationRelay => (.interaction .extension, "the non-activation basis — the failed predicate with its evidence; a sibling deficit seen in the scan is named as a finding and left to the session; not activated")
   | .bind              => (.sense, "Internal analysis: prior material read from the context — settled where a person's utterance in this context settles it, a candidate otherwise, with where it came from; a record of a commitment made in an earlier session is a candidate")
   | .draft             => (.sense, "Internal analysis: what the next sketches try, the perception the judgment needs, the referent a standard outside both parties' preference is checked against, and the variant briefs, drafted from the whole context — the settled values, the provisional readings, the prior material, every mark, and any spec revision the person named — read together rather than from any one of them")
-  | .specRelay         => (.extension, "TextPresent+Proceed: the draft whole — what the next sketches try, what the judgment needs, the variant briefs, each with the basis that chose it, and each provisional reading with where it came from — laid out so that any of it can be settled, sent back, or replaced at Qfit; fires before anything is produced and settles nothing; on the AI-detected path it cites the evidence of FitUnrecognized as the run's basis; after a spec revision it is re-presented scoped to that revision")
+  | .specRelay         => (.interaction .extension, "the draft whole — what the next sketches try, what the judgment needs, the variant briefs, each with the basis that chose it, and each provisional reading with where it came from — laid out so that any of it can be settled, sent back, or replaced at Qfit; fires before anything is produced and settles nothing; on the AI-detected path it cites the evidence of FitUnrecognized as the run's basis; after a spec revision it is re-presented scoped to that revision")
   | .produce           => (.transform, "artifact write, environment run: temp-isolated sketches, each with its concretum and a versioned reference registered at creation; a brief naming parents revises those retained versions, a brief naming none generates from the material its source names or from prior material; existing project files are never modified; Text concreta are session text only. Each sketch proposes as readings what it was rendered under that no settled value covered, so the person meets those determinations beside the sketch at Qfit")
   | .produceDelegate   => (.dispatch, "delegate (conditional: more than one brief; parallel topology: one sketch per executor, each temp-isolated with its reference registered; subordinate to the active runtime policy)")
-  | .present           => (.extension, "TextPresent+Proceed: each sketch from its concretum — Text as recorded, an Artifact walked through at its reference, reporting what was observed there or that it was not observed and what was tried — then what this realization cannot expose, what each sketch was checked against and how it came out, which content came from the person and which is the AI's proposal, what each sketch's own production determined, the ledger, where the run stands, and any contrary ground held — a defect found after the person judged a version, a reading that no further encounter is owed, a sibling deficit read — each stated with its basis and closing nothing")
+  | .present           => (.interaction .extension, "each sketch from its concretum — Text as recorded, an Artifact walked through at its reference, reporting what was observed there or that it was not observed and what was tried — then what this realization cannot expose, what each sketch was checked against and how it came out, which content came from the person and which is the AI's proposal, what each sketch's own production determined, the ledger, where the run stands, and any contrary ground held — a defect found after the person judged a version, a reading that no further encounter is owed, a sibling deficit read — each stated with its basis and closing nothing")
   | .acquire           => (.observe, "channel read: utterances anchored on a sketch; the marks arrive as the person's utterances. The channel is a capability the host supplies, named here and bound nowhere in this contract: the person can point at what they saw, and the pointing arrives with the utterance")
-  | .qfit              => (.constitution, "present: mandatory recognition gate on a specific version — Mark, Fit on this focus, Finish for a stated purpose — and, riding the same answer, which readings shown beside it the person settles, replaces, or retires; an answer with no marks and no acts presents the gate again; the pre-gate text declares interrogating a sketch, sending back what the next sketches try, contesting the premise, naming where the run goes next, and withdrawing")
+  | .qfit              => (.interaction .constitution, "mandatory recognition gate on a specific version — Mark, Fit on this focus, Finish for a stated purpose — and, riding the same answer, which readings shown beside it the person settles, replaces, or retires; an answer with no marks and no acts presents the gate again; the pre-gate text declares interrogating a sketch, sending back what the next sketches try, contesting the premise, naming where the run goes next, and withdrawing")
   | .interpret         => (.sense, "Internal analysis: marks read against the version they name, that version's brief, and how it was realized → provisional readings, each citing the mark it came from; whether a mark reaches the form or the realization is carried unresolved where the evidence does not settle it; never settled here")
   | .readAnswer        => (.sense, "Internal analysis: the latest utterance, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — its marks, the values it settles and their scope, a recognition or its reopening, a placement, a closing — whatever form it takes")
-  | .qplace            => (.constitution, "present: mandatory placement gate — the recognized version and the capability it needs, a reference the person judges to outlive the session, beside the versions this run passed over; the person names the location and which of the others are kept and where; no default for either; after a retention failure the failure and every copy already written are shown before the gate, and the same location stays admissible")
+  | .qplace            => (.interaction .constitution, "mandatory placement gate — the recognized version and the capability it needs, a reference the person judges to outlive the session, beside the versions this run passed over; the person names the location and which of the others are kept and where; no default for either; after a retention failure the failure and every copy already written are shown before the gate, and the same location stays admissible")
   | .account           => (.transform, "artifact write, environment run: only on a recognition and placement taken with what they need in view, retain every placed version and verify each reference resolves to that exact concretum — one retry, then the failure is declared and Qplace presented again with nothing released; once every placed version is verified, release the sketches placement did not keep and verify each — one retry, then ReleaseFailed declared with a handoff; each copy is accounted for where it was written, and a copy at a location the person moved from is released only where their words reach it")
   | .assemble          => (.sense, "Internal analysis: RecognizedForm read from the context at the verified placement, before any release — the settled values with who proposed each and how it came to stand, the fixture, the recognition, the trace, the residual, the readings still provisional, every copy with its disposition, and the dissent attached to the closure; the RecognizedForm entire is the durable record of the run, and sketch content beyond what placement retains stays session-local")
-  | .dissolutionRelay  => (.extension, "TextPresent+Proceed: when the person accepts or declares that no further encounter is owed — the sharpened description made the form recognizable without one, or the activation premise collapsed — state the basis, relay the settled values and every mark, attach any dissent, run account, stand down as DissolutionExit — a success, not an abandonment")
-  | .routeRelay        => (.extension, "TextPresent+Proceed: when the person names where the run goes next — a sibling deficit, another protocol — relay the record so far with that target and its basis, attach any dissent, run account, exit as Routed; taking it up is the session's")
-  | .boundaryRelay     => (.extension, "TextPresent+Proceed: where reachable evidence shows a realization the next sketches or the placement need cannot be supplied in this session — name the obligation and its basis, relay the record so far, run account, exit as BoundaryExit; the next protocol is the session's to choose")
-  | .withdraw          => (.extension, "TextPresent+Proceed: explicit exit at any gate — the partial trace and residual declared, account enforced; EarlyExit. A hard interrupt yields no turn, so account cannot run: temp isolation's bounded lifecycle is the backstop")
-  | .converge          => (.extension, "TextPresent+Proceed: the transformation trace — marks → readings → revisions → recognition — with the recognized version, its placement, the settled values and their provenance, the provisional readings, the residual, the dissent, and every copy's disposition")
-  | .seam              => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; the RecognizedForm enters it as prior material, its fixture a recognition witness and nothing more; this protocol declares no wired outbound edge, and every Constitution gate inside this protocol and the next fires unchanged")
+  | .dissolutionRelay  => (.interaction .extension, "when the person accepts or declares that no further encounter is owed — the sharpened description made the form recognizable without one, or the activation premise collapsed — state the basis, relay the settled values and every mark, attach any dissent, run account, stand down as DissolutionExit — a success, not an abandonment")
+  | .routeRelay        => (.interaction .extension, "when the person names where the run goes next — a sibling deficit, another protocol — relay the record so far with that target and its basis, attach any dissent, run account, exit as Routed; taking it up is the session's")
+  | .boundaryRelay     => (.interaction .extension, "where reachable evidence shows a realization the next sketches or the placement need cannot be supplied in this session — name the obligation and its basis, relay the record so far, run account, exit as BoundaryExit; the next protocol is the session's to choose")
+  | .withdraw          => (.interaction .extension, "explicit exit at any gate — the partial trace and residual declared, account enforced; EarlyExit. A hard interrupt yields no turn, so account cannot run: temp isolation's bounded lifecycle is the backstop")
+  | .converge          => (.interaction .extension, "the transformation trace — marks → readings → revisions → recognition — with the recognized version, its placement, the settled values and their provenance, the provisional readings, the residual, the dissent, and every copy's disposition")
+  | .seam              => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed to it citing that source; the RecognizedForm enters it as prior material, its fixture a recognition witness and nothing more; this protocol declares no wired outbound edge, and every Constitution gate inside this protocol and the next fires unchanged")
+
+/-- The operations that produce a round's sketches: `.produce`, and `.produceDelegate` only for a
+    spec with more than one brief. -/
+def producedBy (s : RoundSpec) : List Op :=
+  if s.briefs.length > 1 then [.produce, .produceDelegate] else [.produce]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Form resolution emergent via session context.

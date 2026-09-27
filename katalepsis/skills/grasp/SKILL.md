@@ -605,9 +605,23 @@ every task. The trace derives from historical readings: accepting an answer, acc
 and demonstrating an aspect remain different. None substitutes for another.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-inductive Annot | sense | observe | track | constitution | extension
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
+
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
+
 inductive Op | route | read | assess | record | present | material | converge | seam
 
 def grounding : Op → Annot × String
@@ -615,10 +629,10 @@ def grounding : Op → Annot × String
   | .read => (.observe, "consult: read any source the answer cites, now; then read the whole answer once against that context")
   | .assess => (.sense, "Assess the fused context afresh, under Assessment")
   | .record => (.track, "Context records selections, answers and presentations; said projects their history")
-  | .present => (.constitution, "present the Round under present's contract, then Stop")
+  | .present => (.interaction .constitution, "the Round under present's contract")
   | .material => (.sense, "Quote in place the Measure carried by the adjudication, at the narrowest span")
-  | .converge => (.extension, "TextPresent+Proceed: show the completed or withdrawn trace under VerifiedUnderstanding")
-  | .seam => (.extension, "Proceed to a next protocol only on a user-declared chain, citing that declaration; this contract declares no wired outbound edge")
+  | .converge => (.interaction .extension, "show the completed or withdrawn trace under VerifiedUnderstanding")
+  | .seam => (.interaction .extension, "Proceed to a next protocol only on a user-declared chain, citing that declaration; this contract declares no wired outbound edge")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

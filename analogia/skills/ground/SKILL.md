@@ -435,10 +435,22 @@ unassessed and any retained assessment is labelled by its earlier focus and K. C
 demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | detect | zeroGapRelay | focusDerive | focusReadback | focusSelector
              | inferenceSettle | inferenceReadback | mapAssessFit | checkRead | runChecks
@@ -447,23 +459,23 @@ inductive Op | detect | zeroGapRelay | focusDerive | focusReadback | focusSelect
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: licensing uncertainty and whether self-grounding holds")
-  | .zeroGapRelay      => (.extension, "TextPresent+Proceed: when nothing is uncertain, the finding with its reasoning; proceed with R unchanged")
+  | .zeroGapRelay      => (.interaction .extension, "when nothing is uncertain, the finding with its reasoning; proceed with R unchanged")
   | .focusDerive       => (.sense, "Internal analysis: MappingFocus candidates and each axis's standing, before any correspondence is constructed")
-  | .focusReadback     => (.extension, "TextPresent+Proceed: when every axis is settled, relay the focus with the citation that settles each axis")
-  | .focusSelector     => (.constitution, "present: when an axis is unsettled or K was narrowed without basis, the candidate foci with their consequences visible before choice, including the committed-domain replacement exit")
+  | .focusReadback     => (.interaction .extension, "when every axis is settled, relay the focus with the citation that settles each axis")
+  | .focusSelector     => (.interaction .constitution, "when an axis is unsettled or K was narrowed without basis, the candidate foci with their consequences visible before choice, including the committed-domain replacement exit")
   | .inferenceSettle   => (.sense, "Internal analysis: K from R, the settled purpose, and the context")
-  | .inferenceReadback => (.extension, "TextPresent+Proceed: K and its basis beside the settled focus, with what a revision added, removed, or reformulated; no approval required")
+  | .inferenceReadback => (.interaction .extension, "K and its basis beside the settled focus, with what a revision added, removed, or reformulated; no approval required")
   | .mapAssessFit      => (.observe, "artifact read, artifact search, external fetch (conditional): construct correspondences along the focus and assert their fit")
   | .checkRead         => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, defeater, and reach")
   | .runChecks         => (.observe, "artifact read, artifact search, external fetch, environment run: the reachable checks, including exercising an artifact whose behavior the claim turns on; results enter the context as observations")
   | .warrantRead       => (.sense, "Internal analysis: each claim's warrant read off its check")
   | .judge             => (.sense, "Internal analysis: per inference, Licensed with limits, Blocked, or Undetermined with what is missing")
   | .partitionRead     => (.sense, "Internal analysis: under self-grounding, a supported partition or its missing basis; no separate gate")
-  | .surface           => (.extension, "TextPresent+Proceed: the assessment with its trace and what a later turn would change; no verdict answer is required")
-  | .converge          => (.extension, "TextPresent+Proceed: when converged, the convergence evidence trace; proceed with the assessment")
-  | .inconclusive      => (.extension, "TextPresent+Proceed: the same trace with every Undetermined verdict naming what is missing, every unmet check with its reach, and why the run closed")
-  | .superseded        => (.extension, "TextPresent+Proceed: report what was assessed, declare the question superseded, and seed a fresh activation; evidence crosses as context, verdicts do not")
-  | .seam              => (.extension, "TextPresent+Proceed: at a user-declared chain or a declared edge (the partition route partitionRoute names, or remaining checks all user-held to /inquire), proceed citing the settling source")
+  | .surface           => (.interaction .extension, "the assessment with its trace and what a later turn would change; no verdict answer is required")
+  | .converge          => (.interaction .extension, "when converged, the convergence evidence trace; proceed with the assessment")
+  | .inconclusive      => (.interaction .extension, "the same trace with every Undetermined verdict naming what is missing, every unmet check with its reach, and why the run closed")
+  | .superseded        => (.interaction .extension, "report what was assessed, declare the question superseded, and seed a fresh activation; evidence crosses as context, verdicts do not")
+  | .seam              => (.interaction .extension, "at a user-declared chain or a declared edge (the partition route partitionRoute names, or remaining checks all user-held to /inquire), proceed citing the settling source")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
