@@ -11,6 +11,19 @@ Writing that prompt is the hard part. It means recalling every unknown at once a
 What the prompt missed surfaces later, and the later it surfaces the more it costs: a wrong direction corrected at the plan level can cost one conversation turn, while one found after release to a live service costs rework that grows with everything built on it.
 The protocols make the AI a thinking partner at those decision points. It asks, and you answer with what the question brings to mind; it presents candidates, and you recognize which one fits. Many of the items that end up deciding the work are ones you could not have listed at the start.
 
+For example, "Write the email announcing next week's meeting":
+
+| Decision | Without a protocol | With `/inquire` |
+|---|---|---|
+| Who receives it | The AI decides alone | Asked — you recall and answer |
+| What the meeting is for (decide or share) | The AI decides alone | Asked — you recall and answer |
+| Date and place | Asked — you answer | Asked — you recall and answer |
+| Whether to ask for replies | The AI decides alone | Presented — you recognize it |
+| Length | The AI decides alone | Presented — you correct it |
+| Tone | The AI decides alone | The AI decides alone |
+
+This is an illustration, not a run result: which items come up, and how, varies with the model and the person. A decision the AI makes alone is not wrong for that; what differs is whether it passed through you.
+
 ## Where the protocols help
 
 Use the protocols to catch a wrong direction while planning, before it shapes later work. The same structured checkpoints also help when you hand work to an autonomous run, check a result against your actual situation, recall an earlier discussion, or make sure you understand something before building on it.
