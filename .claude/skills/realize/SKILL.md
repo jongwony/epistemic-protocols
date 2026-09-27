@@ -104,7 +104,8 @@ defect in the contract from a limit of the model.
 
 ## Arms
 
-Claude has four arms crossing the protocol against the output style shipped beside it:
+Claude has four arms crossing the protocol against the output style shipped beside it, and one
+that removes the protocol's formal blocks:
 
 | arm | protocol | style | answers |
 |---|---|---|---|
@@ -112,6 +113,12 @@ Claude has four arms crossing the protocol against the output style shipped besi
 | `style` | — | ✓ | sham — is the structure coming from form alone? |
 | `protocol` | ✓ | — | is the `SKILL.md` self-contained, as required? |
 | `protocol+style` | ✓ | ✓ | the deployed configuration |
+| `protocol-prose` | ✓, every ```` ```lean ```` block removed | — | what the formal blocks add over the same `SKILL.md` prose |
+
+`protocol-prose` runs only when named in `REALIZE_ARMS`. It loads a copy of the plugin rebuilt at
+each run with the Lean blocks removed from its `SKILL.md` files, and refuses to run when the copy
+lost none. Read against `protocol`: a transition realized in both arms is realized without the
+formal blocks, and one realized only under `protocol` points to what they add.
 
 The sham arm is not a construction. Published work on rule files for coding agents
 found random rules helping as much as curated ones, which makes "a long structured
@@ -121,9 +128,9 @@ observer markers while fixing none of a protocol's own obligations.
 
 Codex has `bare` and `protocol` arms. Codex has no equivalent of Claude's shipped
 output-style treatment, so requesting `style` or `protocol+style` fails rather than
-simulating a different deployment condition. The Codex protocol treatment is present
-only when `codex plugin list` reports that plugin installed and enabled in the isolated
-protocol home while the bare home reports it absent. Codex JSONL currently exposes no
+simulating a different deployment condition; `protocol-prose` is likewise Claude-only. The
+Codex protocol treatment is present only when `codex plugin list` reports that plugin
+installed and enabled in the isolated protocol home while the bare home reports it absent. Codex JSONL currently exposes no
 separate skill-invocation event, so its `skill` report cell states that limitation
 rather than inferring invocation from the model's prose.
 
