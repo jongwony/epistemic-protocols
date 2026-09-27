@@ -4,7 +4,8 @@ name: Lean
 # then the static checks, where every `fail` blocks. lean-definition runs the one
 # driver in lean-contract.js — generate the contract modules from each SKILL.md
 # Lean block, `lake build --wfail`, then the checked-in audit as `lake lint` —
-# with a toolchain reachable, so its verdict here is never the warn.
+# with a toolchain reachable, so its verdict here is never the warn. The node
+# test suites run after them, one invocation at a time.
 
 on:
   pull_request:
@@ -48,3 +49,14 @@ jobs:
             for (const x of lean) if (r.warn.includes(x)) console.log(`::error file=${x.file}::${x.check}: ${x.message}`);
             process.exit(r.fail.length > 0 || lean.length > 0 ? 1 : 0);
           '
+
+      # Sequential after the static checks, never beside them: liveness tests
+      # mutate SKILL.md files the verifier reads. static-checks.test.mjs runs the
+      # verifier over the tree itself, so it takes its own invocation.
+      - name: Tests
+        if: ${{ !cancelled() }}
+        run: node --test $(git ls-files '*.test.js' '*.test.mjs' | grep -v '^.claude/skills/verify/scripts/static-checks.test.mjs$')
+
+      - name: Static check tests
+        if: ${{ !cancelled() }}
+        run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
