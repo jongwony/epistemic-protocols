@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 /**
- * Known-pass / known-fail proof for lean-definition: it reaches every protocol
- * whose Definition block is Lean 4 — every protocol, now that none keeps the
- * DSL — and each rule it holds is shown rejecting a mutated copy of the tree.
- * artifact-self-containment's path rules are shown firing on a backticked path.
+ * Known-pass / known-fail proof for the static checks, grouped by the layer
+ * file each check lives in. Each rule is shown rejecting a mutated copy of the
+ * tree (or a throwaway fixture), never the live tree.
+ *
+ *   lean-bridge.js         lean-definition reaches every canonical protocol,
+ *                          whose Definition block is Lean 4, and each rule it
+ *                          holds rejects its counterexample
+ *   contract-structure.js  provisional text checks on contract structure
+ *   prose-surface.js       artifact-self-containment's path rules fire on a
+ *                          backticked path
  *
  * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
  */
@@ -61,54 +67,54 @@ function isLeanProtocol(file) {
   return /^## Definition$(?:(?!^```)[\s\S])*?^```lean$/m.test(readFileSync(path.join(projectRoot, file), 'utf-8'));
 }
 
-describe('lean-definition', () => {
-  const leanFiles = protocolFiles({ projectRoot }).filter(isLeanProtocol).sort();
-  const target = leanFiles[0];
-  const elaborated = clean.pass.some((r) => r.check === LEAN && r.file === target);
+const leanFiles = protocolFiles({ projectRoot }).filter(isLeanProtocol).sort();
+const target = leanFiles[0];
+const elaborated = clean.pass.some((r) => r.check === LEAN && r.file === target);
 
-  // One copy of the tree per mutation group; `mutate` rewrites a file relative
-  // to the copy and `failures` reruns the verifier there.
-  function withCopy(body) {
-    const root = copyWorkingTree();
-    const originals = new Map();
-    const file = (relative) => path.join(root, relative);
-    const read = (relative) => readFileSync(file(relative), 'utf-8');
-    const write = (relative, text) => {
-      if (!originals.has(relative)) originals.set(relative, existsSync(file(relative)) ? read(relative) : null);
-      mkdirSync(path.dirname(file(relative)), { recursive: true });
-      writeFileSync(file(relative), text);
-    };
-    const remove = (relative) => {
-      if (!originals.has(relative)) originals.set(relative, read(relative));
-      rmSync(file(relative), { force: true });
-    };
-    const restore = () => {
-      for (const [relative, text] of originals) {
-        if (text === null) rmSync(file(relative), { force: true });
-        else writeFileSync(file(relative), text);
-      }
-      originals.clear();
-    };
-    const failures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
-    try {
-      body({ read, write, remove, restore, failures, verdict: () => run(root) });
-    } finally {
-      rmSync(root, { recursive: true, force: true });
+// One copy of the tree per mutation group; `mutate` rewrites a file relative
+// to the copy and `failures` reruns the verifier there.
+function withCopy(body) {
+  const root = copyWorkingTree();
+  const originals = new Map();
+  const file = (relative) => path.join(root, relative);
+  const read = (relative) => readFileSync(file(relative), 'utf-8');
+  const write = (relative, text) => {
+    if (!originals.has(relative)) originals.set(relative, existsSync(file(relative)) ? read(relative) : null);
+    mkdirSync(path.dirname(file(relative)), { recursive: true });
+    writeFileSync(file(relative), text);
+  };
+  const remove = (relative) => {
+    if (!originals.has(relative)) originals.set(relative, read(relative));
+    rmSync(file(relative), { force: true });
+  };
+  const restore = () => {
+    for (const [relative, text] of originals) {
+      if (text === null) rmSync(file(relative), { force: true });
+      else writeFileSync(file(relative), text);
     }
+    originals.clear();
+  };
+  const failures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
+  try {
+    body({ read, write, remove, restore, failures, verdict: () => run(root) });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
+}
 
-  const skill = readFileSync(path.join(projectRoot, target), 'utf-8');
-  const fence = skill.indexOf('```lean\n') + '```lean\n'.length;
-  const close = skill.indexOf('\n```', fence);
-  const block = skill.slice(fence, close);
-  const withBlock = (body) => skill.slice(0, fence) + body + skill.slice(close);
-  const ns = /^namespace (\w+)/m.exec(block)[1];
-  const theoremsRelative = `lean/EpistemicProtocols/${ns}/Theorems.lean`;
-  const theorems = readFileSync(path.join(projectRoot, theoremsRelative), 'utf-8');
-  const endNs = theorems.lastIndexOf(`\nend ${ns}`);
-  const beforeEnd = (text) => `${theorems.slice(0, endNs)}\n${text}\n${theorems.slice(endNs)}`;
-  const expectSome = (messages, needle) => assert.ok(messages.some((m) => m.includes(needle)), `expected "${needle}" in:\n${messages.join('\n')}`);
+const skill = readFileSync(path.join(projectRoot, target), 'utf-8');
+const fence = skill.indexOf('```lean\n') + '```lean\n'.length;
+const close = skill.indexOf('\n```', fence);
+const block = skill.slice(fence, close);
+const withBlock = (body) => skill.slice(0, fence) + body + skill.slice(close);
+const ns = /^namespace (\w+)/m.exec(block)[1];
+const theoremsRelative = `lean/EpistemicProtocols/${ns}/Theorems.lean`;
+const theorems = readFileSync(path.join(projectRoot, theoremsRelative), 'utf-8');
+const endNs = theorems.lastIndexOf(`\nend ${ns}`);
+const beforeEnd = (text) => `${theorems.slice(0, endNs)}\n${text}\n${theorems.slice(endNs)}`;
+const expectSome = (messages, needle) => assert.ok(messages.some((m) => m.includes(needle)), `expected "${needle}" in:\n${messages.join('\n')}`);
 
+describe('lean bridge: lean-definition', () => {
   it('reaches every protocol whose Definition block is Lean, with no failure', () => {
     assert.ok(leanFiles.length > 0, 'no Lean Definition block found — the check has nothing to reach');
     const verdictFiles = leanVerdicts.map((result) => result.file).filter((file) => file.endsWith('SKILL.md'));
@@ -117,19 +123,13 @@ describe('lean-definition', () => {
   });
 
   it('rejects sorry, forks of GROUND, forbidden escapes, and foreign imports before any build', () => {
-    withCopy(({ write, restore, failures, verdict }) => {
+    withCopy(({ write, restore, failures }) => {
       write(target, withBlock(`${block}\ntheorem mutation_open : 1 = 2 := sorry`));
       expectSome(failures(), '`sorry`');
       restore();
 
       write(target, skill.replace('── GROUND ──', '── GROUND ──\nA forked primitive.'));
       expectSome(failures(), 'GROUND section differs');
-      restore();
-
-      const annotated = /\(\.(observe|sense|extension),/.exec(block);
-      assert.ok(annotated, 'no grounding arm found to mutate');
-      write(target, withBlock(block.replace(annotated[0], '(.inspect,')));
-      expectSome(verdict().fail.filter((r) => r.check === 'tool-grounding').map((r) => r.message), 'Non-standard annotation "(inspect)"');
       restore();
 
       // Codex review of #961: each of these elaborated cleanly or hid a proof gap.
@@ -235,7 +235,21 @@ describe('lean-definition', () => {
   });
 });
 
-describe('artifact-self-containment path rules', () => {
+// Contract structure is Lean's to carry; the checks in contract-structure.js are
+// provisional, and each test here goes with the check it proves.
+describe('contract structure (provisional): tool-grounding', () => {
+  it('rejects an annotation outside the grounding vocabulary', () => {
+    withCopy(({ write, restore, verdict }) => {
+      const annotated = /\(\.(observe|sense|extension),/.exec(block);
+      assert.ok(annotated, 'no grounding arm found to mutate');
+      write(target, withBlock(block.replace(annotated[0], '(.inspect,')));
+      expectSome(verdict().fail.filter((r) => r.check === 'tool-grounding').map((r) => r.message), 'Non-standard annotation "(inspect)"');
+      restore();
+    });
+  });
+});
+
+describe('prose surface: artifact-self-containment path rules', () => {
   const { checkSurfaceLeaks } = require(path.join(projectRoot, '.claude/skills/verify/scripts/artifact-self-containment.js'));
   const leaks = (text) => {
     const bucket = { pass: [], fail: [], warn: [] };

@@ -8,7 +8,7 @@ Run `/verify` before commits. Static checks via:
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
-**The script is the check inventory.** What each check does, which files it walks, and what it treats as fail versus warn are read from `static-checks.js` itself. A prose inventory here would be a hand-maintained copy with nothing re-running it: correct on the day it was written, then quietly asserting an earlier reading of a file that has since moved — and a reader who trusts it stops at a contradiction the script never raised.
+**The scripts are the check inventory.** `static-checks.js` names the layer files it runs, and each layer file's `CHECKS` list is what runs; what each check does, which files it walks, and what it treats as fail versus warn are read from those files themselves. A prose inventory here would be a hand-maintained copy with nothing re-running it: correct on the day it was written, then quietly asserting an earlier reading of a file that has since moved — and a reader who trusts it stops at a contradiction the script never raised.
 
 What this page carries instead is the part the script does not: why a check exists where the reason is not obvious from its code, and what to do when one fires.
 
