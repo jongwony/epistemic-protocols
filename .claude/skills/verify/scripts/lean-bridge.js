@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { escapeRegex } = require('./check-context');
 const leanContract = require('./lean-contract');
 
 // A Definition block is authored in one of two notations: the DSL (a bare
@@ -38,19 +37,6 @@ function extractFormalSection(content, sectionName) {
   const lines = content.split('\n');
   const at = lines.findIndex(line => sectionHeaderName(line.trim()) === sectionName);
   return at === -1 ? '' : collectSection(lines, at + 1);
-}
-
-function extractAllFormalSections(content, sectionSuffix) {
-  const lines = content.split('\n');
-  const sections = [];
-  const namePattern = new RegExp(`^(?:\\w+ )*${escapeRegex(sectionSuffix)}$`);
-
-  for (let i = 0; i < lines.length; i++) {
-    const name = sectionHeaderName(lines[i].trim());
-    if (name === null || !namePattern.test(name)) continue;
-    sections.push(collectSection(lines, i + 1));
-  }
-  return sections;
 }
 
 // True when the Definition block is authored in Lean 4 notation.
@@ -89,13 +75,6 @@ function stripLeanComments(source) {
     out += source[i];
   }
   return out;
-}
-
-// Names a Lean section declares at top level (inductive, structure, def, …).
-const LEAN_DECLARATION = /^(?:noncomputable\s+|private\s+|protected\s+)*(?:inductive|structure|def|abbrev|opaque|class|theorem)\s+([^\s:({[]+)/gm;
-
-function leanDeclarationNames(section) {
-  return [...section.matchAll(LEAN_DECLARATION)].map(m => m[1]);
 }
 
 // ============================================================
@@ -340,10 +319,8 @@ function checkLeanDefinition(ctx) {
 module.exports = {
   CHECKS: [checkLeanDefinition],
   checkLeanDefinition,
-  extractAllFormalSections,
   extractFormalSection,
   extractLeanDefinition,
   isLeanDefinition,
-  leanDeclarationNames,
   stripLeanComments,
 };

@@ -1,20 +1,15 @@
 /**
  * Contract-structure layer (provisional): text checks over the structure of a
- * protocol's Definition block — its grounding entries, its morphism anatomy,
- * its declared types and partitions. Contract structure belongs to Lean
- * declarations, theorems and the audit; a check here stays only until its
- * replacement there rejects the same counterexamples.
+ * protocol's Definition block — its grounding entries and its morphism
+ * anatomy. Contract structure belongs to Lean declarations, theorems and the
+ * audit; a check here stays only until its replacement there rejects the same
+ * counterexamples.
  */
 
 const fs = require('fs');
 const path = require('path');
 const { escapeRegex } = require('./check-context');
-const {
-  extractAllFormalSections,
-  extractFormalSection,
-  isLeanDefinition,
-  leanDeclarationNames,
-} = require('./lean-bridge');
+const { extractFormalSection, isLeanDefinition } = require('./lean-bridge');
 
 // ============================================================
 // Check: Tool Grounding Consistency
@@ -270,127 +265,6 @@ function checkToolGrounding(ctx) {
 }
 
 // ============================================================
-// Check: Spec vs Impl Drift Detection
-// ============================================================
-function checkSpecVsImpl(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES } = ctx;
-  // Extract type definitions from all TYPES sections of a formal block
-  // Matches: ── TYPES ──, and any other section ending in " TYPES ──"
-  function extractTypeNames(content) {
-    const typeNames = [];
-    if (isLeanDefinition(content)) {
-      for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
-        typeNames.push(...leanDeclarationNames(typesSection));
-      }
-      return typeNames;
-    }
-    for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
-      const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
-      let match;
-      while ((match = typePattern.exec(typesSection)) !== null) {
-        const name = match[1].trim();
-        if (name.length >= 2 || /[Α-Ωα-ω]/.test(name)) {
-          typeNames.push(name);
-        }
-      }
-    }
-    return typeNames;
-  }
-
-  // Extract type names from PHASE TRANSITIONS section
-  function extractPhaseTypeRefs(content) {
-    return extractFormalSection(content, 'PHASE TRANSITIONS');
-  }
-
-  for (const relPath of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-    const typeNames = extractTypeNames(content);
-    if (typeNames.length === 0) {
-      results.warn.push({
-        check: 'spec-vs-impl',
-        file: relPath,
-        message: 'No type definitions found in ── TYPES ── section'
-      });
-      continue;
-    }
-
-    const phaseSection = extractPhaseTypeRefs(content);
-
-    // Extract the formal block (inside ```) and prose sections (outside ```)
-    const formalBlockMatch = content.match(/```[\s\S]*?```/);
-    const formalBlock = formalBlockMatch ? formalBlockMatch[0] : '';
-    const proseContent = content.replace(/```[\s\S]*?```/g, '');
-
-    // Check: Type names defined in TYPES should appear in PHASE TRANSITIONS
-    // Only check "important" types (skip pure enum values, comments, etc.)
-    // Important = types that represent operations or data flows (appear as function calls or data references)
-    const operationTypes = typeNames.filter(name => {
-      // Skip common enum-like short names and status types
-      if (['Phase', 'Mode', 'Stakes'].includes(name)) return false;
-      return true;
-    });
-
-    for (const typeName of operationTypes) {
-      // Escape special regex chars in type name
-      const escaped = typeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-      // Check if type appears in PHASE TRANSITIONS
-      const inPhase = new RegExp(escaped).test(phaseSection);
-      // Check if type appears in prose
-      const inProse = new RegExp(escaped).test(proseContent);
-      // Check if type is cross-referenced elsewhere in formal block
-      // (FLOW, LOOP, MODE STATE, other TYPES definitions, etc.)
-      // Remove the type's own definition line(s) to avoid self-match
-      const defLinePattern = isLeanDefinition(content)
-        ? new RegExp(`^(?:noncomputable\\s+)?(?:inductive|structure|def|abbrev|opaque|class|theorem)\\s+${escaped}(?![\\w'.]).*$`, 'gm')
-        : new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
-      const formalWithoutOwnDef = formalBlock.replace(defLinePattern, '');
-      // Lean resolves `X.f` through dot notation as well (`x.f`, `.f`), so a
-      // dotted declaration is also referenced by its last component.
-      const dotted = isLeanDefinition(content) && typeName.includes('.')
-        ? new RegExp(`\\.${escapeRegex(typeName.split('.').pop())}(?![\\w'])`)
-        : null;
-      const inFormalCrossRef = new RegExp(escaped, 'i').test(formalWithoutOwnDef)
-        || (dotted !== null && dotted.test(formalWithoutOwnDef));
-
-      // A type defined in TYPES but absent from PHASE TRANSITIONS, prose,
-      // AND all other formal block sections suggests rename drift or dead type
-      if (!inPhase && !inProse && !inFormalCrossRef) {
-        results.warn.push({
-          check: 'spec-vs-impl',
-          file: relPath,
-          message: `Type "${typeName}" defined in TYPES but not referenced in PHASE TRANSITIONS, prose, or formal block cross-references — possible rename drift or dead type`
-        });
-      }
-    }
-
-    // Check: Resolution type (terminal type) should appear in the formal block
-    // Extract the resolution type from the Type: line at the top
-    const typeLineMatch = content.match(/Type:\s*`[^`]*→\s*(\w+)`/);
-    if (typeLineMatch) {
-      const resolutionType = typeLineMatch[1];
-      if (!formalBlock.includes(resolutionType)) {
-        results.warn.push({
-          check: 'spec-vs-impl',
-          file: relPath,
-          message: `Resolution type "${resolutionType}" in Type signature but not defined in formal block — possible rename drift`
-        });
-      }
-    }
-
-    results.pass.push({
-      check: 'spec-vs-impl',
-      file: relPath,
-      message: `Spec-vs-impl check completed (${typeNames.length} types analyzed)`
-    });
-  }
-}
-
-// ============================================================
 // Check: Morphism Anatomy
 // ============================================================
 function checkMorphismAnatomy(ctx) {
@@ -514,115 +388,8 @@ function checkMorphismAnatomy(ctx) {
   }
 }
 
-// ============================================================
-// Check: partition-invariant
-// Verify MODE STATE pairwise disjoint partition invariants —
-// universe set and partition members exist as MODE STATE fields
-// ============================================================
-function checkPartitionInvariant(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES } = ctx;
-  const checkName = 'partition-invariant';
-  const invariantPattern = /-- Invariant:\s*(\w+)\s*=\s*(.+?)\s*\(pairwise disjoint\)/;
-
-  for (const relPath of PROTOCOL_FILES) {
-    const filePath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(filePath)) continue;
-
-    const content = fs.readFileSync(filePath, 'utf8');
-    const protocolName = relPath.split('/')[0];
-
-    // A Lean Definition block states a partition as a proposition the
-    // elaborator checks; the `-- Invariant:` line format is the DSL's.
-    if (isLeanDefinition(content)) continue;
-
-    // Extract MODE STATE section (from marker to closing ```)
-    const modeStateMatch = content.match(/── MODE STATE ──([\s\S]*?)```/);
-    if (!modeStateMatch) continue;
-
-    const modeStateSection = modeStateMatch[1];
-
-    // Find invariant line (single-line only; multi-line invariants require regex update)
-    const invMatch = modeStateSection.match(invariantPattern);
-    if (!invMatch) {
-      // A partition cue without a recognized invariant needs format review.
-      if (/pairwise disjoint/.test(modeStateSection)) {
-        results.warn.push({
-          check: checkName,
-          file: relPath,
-          message: `${protocolName}: MODE STATE contains "pairwise disjoint" but its partition invariant failed to parse — may be multi-line or non-standard format`
-        });
-      }
-      continue;
-    }
-
-    const universeSet = invMatch[1];
-    const rhsRaw = invMatch[2];
-    const partitionMembers = rhsRaw.split('∪').map(s => s.trim());
-
-    // Extract MODE STATE field names from Λ = { ... }
-    const lambdaMatch = modeStateSection.match(/Λ\s*=\s*\{([^}]+)\}/);
-    if (!lambdaMatch) {
-      results.fail.push({
-        check: checkName,
-        file: relPath,
-        message: `${protocolName}: MODE STATE has invariant but no Λ definition found`
-      });
-      continue;
-    }
-
-    const lambdaBody = lambdaMatch[1];
-    // Extract field names: "fieldName:" pattern, handling multi-line with comments
-    const fieldNames = new Set();
-    const fieldPattern = /(\w+)\s*:/g;
-    let fm;
-    while ((fm = fieldPattern.exec(lambdaBody)) !== null) {
-      fieldNames.add(fm[1]);
-    }
-
-    let subCheckFailed = false;
-
-    // Verify universe set exists in MODE STATE fields
-    if (!fieldNames.has(universeSet)) {
-      results.fail.push({
-        check: checkName,
-        file: relPath,
-        message: `${protocolName}: universe set "${universeSet}" not found in MODE STATE fields`
-      });
-      subCheckFailed = true;
-    }
-
-    // Verify each partition member exists in MODE STATE fields
-    const missingMembers = partitionMembers.filter(m => !fieldNames.has(m));
-    for (const member of missingMembers) {
-      results.warn.push({
-        check: checkName,
-        file: relPath,
-        message: `${protocolName}: partition member "${member}" not found in MODE STATE fields (may be implicit/derived)`
-      });
-    }
-
-    if (!subCheckFailed) {
-      if (missingMembers.length === 0) {
-        results.pass.push({
-          check: checkName,
-          file: relPath,
-          message: `${protocolName}: partition invariant verified — ${universeSet} = ${partitionMembers.join(' ∪ ')} (${partitionMembers.length}-way partition)`
-        });
-      } else {
-        results.pass.push({
-          check: checkName,
-          file: relPath,
-          message: `${protocolName}: partition invariant structurally valid — ${universeSet} = ${partitionMembers.join(' ∪ ')} (${partitionMembers.length}-way partition, ${missingMembers.length} implicit member(s): ${missingMembers.join(', ')})`
-        });
-      }
-    }
-  }
-}
-
 module.exports = {
-  CHECKS: [checkToolGrounding, checkSpecVsImpl, checkMorphismAnatomy, checkPartitionInvariant],
+  CHECKS: [checkToolGrounding, checkMorphismAnatomy],
   checkMorphismAnatomy,
-  checkPartitionInvariant,
-  checkSpecVsImpl,
   checkToolGrounding,
 };

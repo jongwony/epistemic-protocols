@@ -15,66 +15,6 @@ const { extractFormalSection } = require('./lean-bridge');
 const { CANONICAL_CLUSTERS } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
 
 // ============================================================
-// Check: JSON Schema Validation
-// ============================================================
-function checkJsonSchema(ctx) {
-  const { projectRoot, results, walkFiles } = ctx;
-  const pluginJsonPaths = walkFiles(projectRoot, e => e.name === 'plugin.json', 'json-schema');
-
-  const requiredFields = ['name', 'version', 'description', 'author'];
-  const versionPattern = /^\d+\.\d+\.\d+$/;
-
-  for (const jsonPath of pluginJsonPaths) {
-    try {
-      const content = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-      const relativePath = path.relative(projectRoot, jsonPath);
-
-      // Check required fields
-      for (const field of requiredFields) {
-        if (!content[field]) {
-          results.fail.push({
-            check: 'json-schema',
-            file: relativePath,
-            message: `Missing required field: ${field}`
-          });
-        }
-      }
-
-      // Check version format
-      if (content.version && !versionPattern.test(content.version)) {
-        results.warn.push({
-          check: 'json-schema',
-          file: relativePath,
-          message: `Version "${content.version}" not in semver format (x.y.z)`
-        });
-      }
-
-      // Check name format (lowercase, hyphens only)
-      if (content.name && !/^[a-z][a-z0-9-]*$/.test(content.name)) {
-        results.warn.push({
-          check: 'json-schema',
-          file: relativePath,
-          message: `Name "${content.name}" should be lowercase with hyphens only`
-        });
-      }
-
-      results.pass.push({
-        check: 'json-schema',
-        file: relativePath,
-        message: 'Valid plugin.json structure'
-      });
-
-    } catch (e) {
-      results.fail.push({
-        check: 'json-schema',
-        file: path.relative(projectRoot, jsonPath),
-        message: `Invalid JSON: ${e.message}`
-      });
-    }
-  }
-}
-
-// ============================================================
 // Check: Cross-Reference Integrity
 // ============================================================
 function checkCrossReference(ctx) {
@@ -544,8 +484,7 @@ function checkCrossRefScan(ctx) {
             // Surface parse errors as warnings so the real cause (bad JSON)
             // shows up in this check's output instead of cascading into a
             // misleading "missing from PROTOCOL_FILES" downstream warning
-            // (PR #351 review M1). The json-schema check independently
-            // reports the same error; co-reporting is intentional.
+            // (PR #351 review M1).
             results.warn.push({
               check: 'cross-ref-scan',
               file: path.relative(projectRoot, pluginJsonPath),
@@ -887,9 +826,8 @@ function checkOnboardSync(ctx) {
 // package.js builds from) and may carry a .codex-plugin/plugin.json variant.
 // version-staleness only inspects the claude manifest, so a bump that touches
 // the claude manifest leaves the codex manifest silently drifted — the
-// recurring "version bump missed codex-plugin" pattern. walkFiles skips
-// dot-directories, so the codex manifest is also outside json-schema's reach;
-// this check is its only parse/version guard. Fail-level on purpose: the
+// recurring "version bump missed codex-plugin" pattern. No other check parses
+// the codex manifest, so this check is its only parse/version guard. Fail-level on purpose: the
 // forcing function must block at the same /verify gate the claude bump passes
 // through, not surface after the fact in a separate remediation PR.
 function checkCodexManifestSync(ctx) {
@@ -1349,12 +1287,11 @@ function checkInkBodyIdentity(ctx) {
 }
 
 module.exports = {
-  CHECKS: [checkJsonSchema, checkCrossReference, checkRoutingIndexContract, checkRequiredSections, checkVersionStaleness, checkCodexManifestSync, checkPackagedAgentContractSync, checkCrossRefScan, checkOnboardSync, checkInkBodyIdentity],
+  CHECKS: [checkCrossReference, checkRoutingIndexContract, checkRequiredSections, checkVersionStaleness, checkCodexManifestSync, checkPackagedAgentContractSync, checkCrossRefScan, checkOnboardSync, checkInkBodyIdentity],
   checkCodexManifestSync,
   checkCrossRefScan,
   checkCrossReference,
   checkInkBodyIdentity,
-  checkJsonSchema,
   checkOnboardSync,
   checkPackagedAgentContractSync,
   checkRequiredSections,

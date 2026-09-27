@@ -14,7 +14,7 @@ What this page carries instead is the part the script does not: why a check exis
 
 ### Why certain checks exist
 
-- **codex-manifest-sync** — `version-staleness` inspects only the Claude manifest, and the file walk skips dot-directories, so `json-schema` cannot reach the Codex manifest either. Without this check the Codex manifest has no parse or version guard at all, which is how the "version bump missed codex-plugin" drift kept recurring.
+- **codex-manifest-sync** — `version-staleness` reads only the Claude manifest's version, and no other check parses the Codex manifest. Without this check the Codex manifest has no parse or version guard at all, which is how the "version bump missed codex-plugin" drift kept recurring.
 - **framing-readout-enforcement** — when this fires on the guard kernel, the Cognitive work element has lost the sentence stating what the readout is. Restore it as a positive statement rather than a prohibition: the body is injected every turn, which puts it under `premise/instruction-authoring.md` §Prohibition Base Rate and White Bear Avoidance.
 - **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so protocol drift is caught without re-creating the co-change chain that mirroring the protocol table into an instruction file would impose.
 - **ink-body-identity** — a per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier. This check guards that copy against silent drift.
