@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-When AI collaboration goes off-track, you redo everything. These protocols catch misalignment early — often at the plan level, before it hardens into code or other downstream work. Fix the direction before the implementation compounds it.
+When AI collaboration goes off-track, you redo everything. These protocols bring the decisions that set the direction to you early — often at the plan level, before a wrong one hardens into code or other downstream work — and leave each one yours to settle. Fix the direction before the implementation compounds it.
 
 ## Why
 
