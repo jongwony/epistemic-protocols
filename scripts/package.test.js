@@ -1107,6 +1107,32 @@ describe('unified release artifact contract', () => {
     }
   });
 
+  it('rejects a SKILL.md references/ pointer left dangling by removing a skill\'s only reference file', () => {
+    const plugin = { dir: 'elenchus', skill: 'sublate' };
+    const relativeReference = 'skills/sublate/references/round-composition.md';
+    const sourceReferences = fs.readdirSync(
+      path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'references')
+    );
+    assert.deepEqual(sourceReferences, ['round-composition.md'], 'fixture premise: the only reference file');
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'release-dangling-reference-'));
+    try {
+      fs.cpSync(path.join(__dirname, '..', plugin.dir), path.join(root, plugin.dir), { recursive: true });
+      for (const profile of ['release', 'codex-submit']) {
+        assert.doesNotThrow(() => buildSkillArtifact(plugin, { root, profile }), `intact copy, ${profile}`);
+      }
+      fs.rmSync(path.join(root, plugin.dir, relativeReference));
+      for (const profile of ['release', 'codex-submit']) {
+        assert.throws(
+          () => buildSkillArtifact(plugin, { root, profile }),
+          /unresolved local reference: sublate\/SKILL\.md -> references\/round-composition\.md/,
+          profile
+        );
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('retains utility sidecars in the release superset', () => {
     const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
     assert.ok(entriesFor('epistemic-cooperative', 'review-loop')
