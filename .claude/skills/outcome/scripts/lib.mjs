@@ -351,6 +351,202 @@ export function validateNotes(notes, { turns, manualItems }) {
   return errors;
 }
 
+// ------------------------------------------------------------------ answer forms
+
+// What each phase-A user reply line asked of the user. The case fixture maps each oracle answer
+// to a form, splits each table value into fields, and holds the tests for whether the subject's
+// handed-back item carried a proposal and which fields it presented; this code only applies that
+// mapping. The fixture's header defines every label and field status.
+export const ANSWER_LABELS = ['recognized', 'composed', 'rejected', 'reframed', 'deferred', 'unknown', 'pointer',
+  'permission', 'sufficient', 'repeated', 'unclassified'];
+export const FIELD_STATUSES = ['presented', 'released', 'example', 'repeat', 'unverified'];
+
+const normText = (s) => String(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+  .replace(/[*`]/g, '').replace(/\s+/g, ' ').trim();
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const globalRe = (re) => new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+
+export function replyLines(text) {
+  return String(text).split('\n').map((l) => l.trim()).filter(Boolean);
+}
+
+// The oracle answers found in one reply line, in the order they appear. Literal answers are
+// matched longest first and never overlap, so a shorter answer inside a longer one is not
+// counted twice.
+export function matchOracleAnswers(line, answers) {
+  const s = normText(line);
+  const taken = [];
+  const hits = [];
+  const ordered = [...answers].sort((a, b) => (b.text ? normText(b.text).length : 0) - (a.text ? normText(a.text).length : 0));
+  for (const a of ordered) {
+    const re = a.text ? new RegExp(escapeRe(normText(a.text)), 'g') : globalRe(a.pattern);
+    for (const m of s.matchAll(re)) {
+      const span = [m.index, m.index + m[0].length];
+      if (taken.some(([x, y]) => span[0] < y && x < span[1])) continue;
+      taken.push(span);
+      hits.push({ at: m.index, answer: a });
+    }
+  }
+  return hits.sort((x, y) => x.at - y.at).map((h) => h.answer);
+}
+
+// The start of the clause holding position `at`: just past the nearest boundary before it.
+function clauseStart(text, at, boundary) {
+  let start = 0;
+  for (const m of text.matchAll(globalRe(boundary))) {
+    if (m.index + m[0].length <= at) start = m.index + m[0].length;
+    else break;
+  }
+  return start;
+}
+
+// The first value `re` finds in `text` that no negation earlier in its own clause names as
+// absent ("there are no API keys"), or null.
+function presentedIn(text, re, fixture, negationBlind) {
+  for (const m of text.matchAll(globalRe(re))) {
+    if (negationBlind || !fixture.negation) return m[0];
+    const lead = text.slice(clauseStart(text, m.index, fixture.clauseBoundary), m.index);
+    if (!fixture.negation.test(lead)) return m[0];
+  }
+  return null;
+}
+
+// One table answer against the item it answers. `disclosed` holds the fields earlier replies in
+// the cell already released. Returns the field statuses and the rule-derived labels.
+export function classifyTableAnswer(answer, item, disclosed, fixture) {
+  const key = (f) => `${answer.rule}:${f.name}`;
+  if (item === null) {
+    const fields = answer.fields.map((f) => ({ field: key(f), status: disclosed.has(key(f)) ? 'repeat' : 'unverified' }));
+    if (fields.every((f) => f.status === 'repeat')) return { rule: answer.rule, fields, labels: ['repeated'] };
+    return { rule: answer.rule, fields, labels: ['unclassified'], reason: 'no verified item excerpt on record' };
+  }
+  const full = normText(item);
+  const stripped = fixture.exampleClause ? full.replace(globalRe(fixture.exampleClause), ' ') : full;
+  const fields = answer.fields.map((f) => {
+    if (disclosed.has(key(f))) return { field: key(f), status: 'repeat' };
+    const hit = presentedIn(stripped, f.value, fixture, f.negationBlind);
+    if (hit) return { field: key(f), status: 'presented', evidence: hit };
+    if (presentedIn(full, f.value, fixture, f.negationBlind)) return { field: key(f), status: 'example' };
+    return { field: key(f), status: 'released' };
+  });
+  const st = (s) => fields.some((f) => f.status === s);
+  const labels = [];
+  let evidence; let reason;
+  if (!fields.some((f) => f.status !== 'repeat')) labels.push('repeated');
+  else if (st('presented')) {
+    labels.push('recognized');
+    if (st('released')) labels.push('composed');
+  } else if (st('example')) { labels.push('unclassified'); reason = 'the answer\'s value sits only in an example clause'; } else {
+    const proposal = presentedIn(stripped, answer.topic, fixture);
+    if (proposal) { labels.push('rejected'); evidence = proposal; } else if (presentedIn(full, answer.topic, fixture)) {
+      labels.push('unclassified'); reason = 'the only proposal on the topic sits in an example clause';
+    } else labels.push('composed');
+  }
+  return { rule: answer.rule, fields, labels, ...(evidence ? { proposal: evidence } : {}), ...(reason ? { reason } : {}) };
+}
+
+// Every phase-A reply line of a cell, labelled. `replies` are the reply turns in order:
+// { turn, text (what was sent), prevText (the subject turn it answers) }. `items` are the notes'
+// reply_items: { turn, line, text, item, review? } — `item` the verbatim excerpt (a string, or a
+// list of spans) of the handed-back item the line answers, which must occur in prevText; `review`
+// labels a reader adds after the fact, [{ label, why }], kept apart from the rule-derived ones.
+// An entry naming no sent line, or whose text is not that line, is an error: the notes and the
+// records disagree.
+export function classifyReplies({ replies, items = [], fixture }) {
+  const errors = [];
+  const out = [];
+  const byKey = new Map();
+  if (!Array.isArray(items)) errors.push('reply_items must be a list');
+  else {
+    for (const e of items) {
+      const spansOk = e && (e.item === null || typeof e.item === 'string'
+        || (Array.isArray(e.item) && e.item.every((s) => typeof s === 'string')));
+      if (!e || !Number.isInteger(e.turn) || !Number.isInteger(e.line) || typeof e.text !== 'string' || !spansOk) {
+        errors.push(`reply_items entry ${JSON.stringify(e).slice(0, 80)} needs integer turn and line, the line's text, and item (string, list of strings, or null)`);
+        continue;
+      }
+      for (const r of e.review || []) {
+        if (!ANSWER_LABELS.includes(r?.label) || typeof r?.why !== 'string' || !r.why.trim()) {
+          errors.push(`reply_items ${e.turn}:${e.line}: a review label needs one of ${ANSWER_LABELS.join('|')} and a why`);
+        }
+      }
+      if (byKey.has(`${e.turn}:${e.line}`)) errors.push(`reply_items ${e.turn}:${e.line} appears twice`);
+      byKey.set(`${e.turn}:${e.line}`, e);
+    }
+  }
+  const seen = new Set();
+  const disclosed = new Set();
+  for (const r of replies) {
+    const prev = normText(r.prevText || '');
+    replyLines(r.text).forEach((text, i) => {
+      const line = i + 1;
+      const key = `${r.turn}:${line}`;
+      const entry = byKey.get(key);
+      if (entry) {
+        seen.add(key);
+        if (normText(entry.text) !== normText(text)) errors.push(`reply_items ${key}: text does not match the sent line`);
+      }
+      const spans = entry?.item == null ? [] : [].concat(entry.item);
+      const unfound = spans.filter((s) => !prev.includes(normText(s)));
+      const item = spans.length && !unfound.length ? spans.join('\n') : null;
+      const answers = matchOracleAnswers(text, fixture.answers);
+      const results = answers.map((a) => (a.form === 'by-item'
+        ? classifyTableAnswer(a, item, disclosed, fixture)
+        : { rule: a.rule, fields: [], labels: [a.form] }));
+      for (const res of results) for (const f of res.fields) disclosed.add(f.field);
+      const labels = [];
+      const add = (label, source, why) => { if (!labels.some((l) => l.label === label && l.source === source)) labels.push({ label, source, ...(why ? { why } : {}) }); };
+      if (!answers.length) add('unclassified', 'rule', 'no oracle answer found in the line');
+      for (const res of results) for (const l of res.labels) add(l, 'rule', res.reason);
+      for (const rv of entry?.review || []) add(rv.label, 'review', rv.why);
+      out.push({
+        turn: r.turn, line, text, answers: results, labels,
+        ...(unfound.length ? { itemNotFound: `excerpt not found in turn ${r.turn - 1}'s text` } : {}),
+      });
+    });
+  }
+  for (const k of byKey.keys()) if (!seen.has(k)) errors.push(`reply_items ${k}: no such phase-A reply line`);
+  return { lines: out, errors };
+}
+
+// Per cell: how many lines carry each label (a line can carry several; review labels are counted
+// apart as well), the field statuses, the unknown answers, and the recognized share — fields the
+// subject presented before the user disclosed them, over those plus the fields the oracle released
+// plus the unknown answers. Example and repeat fields are outside the share. The share is null when
+// nothing was settled, and while any field is unverified: a line whose item excerpt is missing
+// leaves the notes incomplete, and a share over the rest would read as a finished number.
+export function summarizeForms(lines) {
+  const labels = Object.fromEntries(ANSWER_LABELS.map((l) => [l, 0]));
+  const review = Object.fromEntries(ANSWER_LABELS.map((l) => [l, 0]));
+  const fields = Object.fromEntries(FIELD_STATUSES.map((s) => [s, 0]));
+  let unknown = 0;
+  for (const l of lines) {
+    for (const lab of new Set(l.labels.map((x) => x.label))) labels[lab]++;
+    for (const x of l.labels) if (x.source === 'review') review[x.label]++;
+    for (const a of l.answers) {
+      if (a.rule === 'Default') unknown++;
+      for (const f of a.fields) fields[f.status]++;
+    }
+  }
+  const n = fields.presented + fields.released + unknown;
+  return { lines: lines.length, labels, review, fields, unknown, n, share: n && !fields.unverified ? fields.presented / n : null };
+}
+
+// The reply_items template: one entry per line that carries a table value, item left for the
+// person filling the notes to quote from the turn the line answers.
+export function replyItemsTemplate(replies, fixture) {
+  const out = [];
+  for (const r of replies) {
+    replyLines(r.text).forEach((text, i) => {
+      const answers = matchOracleAnswers(text, fixture.answers);
+      if (answers.some((a) => a.form === 'by-item')) {
+        out.push({ turn: r.turn, line: i + 1, text, rules: answers.map((a) => a.rule), item: null });
+      }
+    });
+  }
+  return out;
+}
+
 // ------------------------------------------------------------------ aggregation
 
 // A resumed Claude session reports its running total in every result event, so a cell's cost
@@ -368,7 +564,7 @@ const sum = (o) => Object.values(o || {}).reduce((s, v) => s + v, 0);
 
 // One row per cell, from the facts outcome.mjs gathered. `turns` are the per-turn metas in
 // order; `scores` the A and final score files; `diff` the A-to-final diffTrees result.
-export function buildRow({ cell, turns, notes, scores, diff, integrity, pathFlags = [] }) {
+export function buildRow({ cell, turns, notes, scores, diff, integrity, pathFlags = [], answerForms = null }) {
   const first = sum(scores.A.auto) + sum(notes.manual.A);
   const final = sum(scores.final.auto) + sum(notes.manual.final);
   const row = {
@@ -386,6 +582,15 @@ export function buildRow({ cell, turns, notes, scores, diff, integrity, pathFlag
     wall: turns.reduce((s, t) => s + (t.wallS || 0), 0), subj_turns: turns.length,
     path_flags: pathFlags.length,
   };
+  // Answer forms of the phase-A reply lines; null throughout when the case defines none.
+  const af = answerForms ? summarizeForms(answerForms.lines) : null;
+  Object.assign(row, {
+    af_lines: af ? af.lines : null, af_labels: af ? af.labels : null, af_review: af ? af.review : null,
+    af_fields: af ? af.fields : null,
+    af_presented: af ? af.fields.presented : null, af_released: af ? af.fields.released : null,
+    af_unknown: af ? af.unknown : null, af_n: af ? af.n : null, af_share: af ? af.share : null,
+    af_detail: answerForms ? answerForms.lines : null,
+  });
   if (cell.runner === 'claude') {
     const { costUsd, basis } = claudeCellCost(turns.map((t) => t.costUsd));
     const last = turns[turns.length - 1]?.usage || {};
@@ -410,7 +615,8 @@ export function buildRow({ cell, turns, notes, scores, diff, integrity, pathFlag
   return row;
 }
 
-export const MEAN_KEYS = ['q', 'q_items', 'a_turns', 'first', 'b_turns', 'b_lines', 'rework', 'final', 'total_cost', 'wall'];
+export const MEAN_KEYS = ['q', 'q_items', 'a_turns', 'first', 'b_turns', 'b_lines', 'rework', 'final', 'total_cost', 'wall',
+  'af_presented', 'af_released', 'af_unknown'];
 
 const groupKey = (r) => `${r.runner}\u0000${r.model}\u0000${r.effort ?? ''}`;
 
@@ -428,6 +634,11 @@ export function groupMeans(rows) {
       const vals = g.rows.map((r) => r[key]).filter((v) => typeof v === 'number');
       mean[key] = vals.length === g.rows.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
     }
+    // The recognized share is a ratio per cell; it is averaged over the cells where something was
+    // settled, and the number of those cells travels with it.
+    const shares = g.rows.map((r) => r.af_share).filter((v) => typeof v === 'number');
+    mean.af_share = shares.length ? shares.reduce((s, v) => s + v, 0) / shares.length : null;
+    mean.af_share_cells = shares.length;
     mean.stopped = g.rows.filter((r) => r.stopped_first_turn).length;
     mean.unimplemented = g.rows.filter((r) => !r.a_implemented).length;
     return { runner: g.runner, model: g.model, effort: g.effort, variant: g.variant, arm: g.arm, n: g.rows.length, mean };
@@ -494,6 +705,20 @@ const costCell = (r) => (r.runner === 'claude'
   ? fmt(r.cost_usd, 4)
   : `${fmt(r.in_tok)}/${fmt(r.cached_in_tok)}/${fmt(r.out_tok)}/${fmt(r.reasoning_tok)}`);
 const pair = (o, d = 1) => `${fmt(o.bare, d)} → ${fmt(o.protocol, d)}`;
+const LABEL_ABBR = { recognized: 'rec', composed: 'comp', rejected: 'rej', reframed: 'refr', deferred: 'def', unknown: 'unk',
+  pointer: 'ptr', permission: 'perm', sufficient: 'suff', repeated: 'rep', unclassified: 'uncl' };
+const labelsCell = (r) => {
+  if (!r.af_labels) return '-';
+  const parts = Object.entries(r.af_labels).filter(([, v]) => v > 0)
+    .map(([k, v]) => `${LABEL_ABBR[k]} ${v}${r.af_review?.[k] ? ` (${r.af_review[k]} rev)` : ''}`);
+  return parts.length ? parts.join(', ') : 'none';
+};
+const fieldsCell = (r) => (r.af_fields ? `${r.af_fields.presented}/${r.af_fields.released}/${r.af_unknown}` : '-');
+const shareCell = (r) => {
+  if (r.af_n === null || r.af_n === undefined) return '-';
+  if (r.af_fields.unverified) return `items missing (${r.af_fields.unverified} fields)`;
+  return r.af_n ? `${r.af_share.toFixed(2)} (n=${r.af_n})` : 'n=0';
+};
 const modelLabel = (x) => `${x.model}${x.effort ? ` (effort ${x.effort})` : ''} · ${x.runner}`;
 
 export function renderReport({ rows, means, verdicts, guards, scope }) {
@@ -529,18 +754,18 @@ export function renderReport({ rows, means, verdicts, guards, scope }) {
     const rs = rows.filter((r) => groupKey(r) === groupKey(m));
     const codex = m.runner === 'codex';
     out.push(`## ${modelLabel(m)}`, '');
-    out.push(`| cell | integrity | stopped at turn 1 | Qs explicit/items | A turns | first | B turns | B files/lines | rework files/lines | final | ${codex ? 'tokens in/cached/out/reasoning' : 'cost $'} | wall s | path flags |`);
-    out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+    out.push(`| cell | integrity | stopped at turn 1 | Qs explicit/items | reply labels | fields presented/released/unknown | recognized share | A turns | first | B turns | B files/lines | rework files/lines | final | ${codex ? 'tokens in/cached/out/reasoning' : 'cost $'} | wall s | path flags |`);
+    out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
     for (const variant of [...new Set(rs.map((r) => r.variant))]) {
       for (const arm of ARMS) {
         const grp = rs.filter((r) => r.variant === variant && r.arm === arm).sort((a, b) => a.rep - b.rep);
         for (const r of grp) {
-          out.push(`| ${r.cell} | ${r.integrity ? 'ok' : 'FAILED'} | ${r.stopped_first_turn ? 'yes' : 'no'} | ${r.q}/${r.q_items} | ${r.a_turns} | ${r.first} | ${r.b_turns} | ${r.b_files}/${r.b_lines} | ${r.rework_files}/${r.rework} | ${r.final} | ${costCell(r)} | ${r.wall} | ${r.path_flags} |`);
+          out.push(`| ${r.cell} | ${r.integrity ? 'ok' : 'FAILED'} | ${r.stopped_first_turn ? 'yes' : 'no'} | ${r.q}/${r.q_items} | ${labelsCell(r)} | ${fieldsCell(r)} | ${shareCell(r)} | ${r.a_turns} | ${r.first} | ${r.b_turns} | ${r.b_files}/${r.b_lines} | ${r.rework_files}/${r.rework} | ${r.final} | ${costCell(r)} | ${r.wall} | ${r.path_flags} |`);
         }
         const g = means.find((x) => groupKey(x) === groupKey(m) && x.variant === variant && x.arm === arm);
         if (g) {
           const c = codex ? `${fmt(g.mean.total_cost, 0)} in` : fmt(g.mean.total_cost, 3);
-          out.push(`| **mean ${variant}-${arm}** (n=${g.n}) | | ${g.mean.stopped}/${g.n} | ${fmt(g.mean.q)}/${fmt(g.mean.q_items)} | ${fmt(g.mean.a_turns)} | ${fmt(g.mean.first)} | ${fmt(g.mean.b_turns)} | -/${fmt(g.mean.b_lines)} | -/${fmt(g.mean.rework)} | ${fmt(g.mean.final)} | ${c} | ${fmt(g.mean.wall, 0)} | |`);
+          out.push(`| **mean ${variant}-${arm}** (n=${g.n}) | | ${g.mean.stopped}/${g.n} | ${fmt(g.mean.q)}/${fmt(g.mean.q_items)} | | ${fmt(g.mean.af_presented)}/${fmt(g.mean.af_released)}/${fmt(g.mean.af_unknown)} | ${g.mean.af_share === null ? `- (0/${g.n} cells)` : `${g.mean.af_share.toFixed(2)} (${g.mean.af_share_cells}/${g.n} cells)`} | ${fmt(g.mean.a_turns)} | ${fmt(g.mean.first)} | ${fmt(g.mean.b_turns)} | -/${fmt(g.mean.b_lines)} | -/${fmt(g.mean.rework)} | ${fmt(g.mean.final)} | ${c} | ${fmt(g.mean.wall, 0)} | |`);
         }
       }
     }

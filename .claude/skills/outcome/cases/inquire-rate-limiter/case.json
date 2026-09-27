@@ -25,6 +25,7 @@
   "checklist": "checklist.md",
   "probes": "probes.py",
   "rules": "rules.mjs",
+  "answerForms": "answer-forms.mjs",
   "scorerRequirements": "scorer-requirements.txt",
   "frozenAgainst": {
     ".claude/skills/realize/evals/scaffold.sh": "14ea8ae964920e59cdd48cec0fbf11848b8f80f423da5cbe3915413b2be97bf0",

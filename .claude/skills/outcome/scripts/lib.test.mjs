@@ -9,11 +9,13 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  auditPaths, buildRow, childEnv, claudeCellCost, composeOpen, composePhaseB, diffCounts, diffTrees,
-  evaluateFalsifiers, groupMeans, loadChecklist, parseClaudeTurn, parseCodexTurn, sha256,
-  stripFrontmatter, validateNotes, validatePlan,
+  auditPaths, buildRow, childEnv, claudeCellCost, classifyReplies, classifyTableAnswer, composeOpen,
+  composePhaseB, diffCounts, diffTrees, evaluateFalsifiers, groupMeans, loadChecklist, matchOracleAnswers,
+  parseClaudeTurn, parseCodexTurn, replyItemsTemplate, sha256, stripFrontmatter, summarizeForms,
+  validateNotes, validatePlan,
 } from './lib.mjs';
 import { AUTO, MANUAL, score } from '../cases/inquire-rate-limiter/rules.mjs';
+import * as forms from '../cases/inquire-rate-limiter/answer-forms.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..', '..', '..', '..');
@@ -267,4 +269,154 @@ test('models are judged separately', () => {
     row({ model: 'b', arm: 'bare', rework: 50 }), row({ model: 'b', arm: 'protocol', rework: 60 }),
   ]), { variant: 'under' });
   assert.deepEqual(Object.fromEntries(v.map((x) => [x.model, x.verdict])), { a: 'not-falsified', b: 'no-reduction' });
+});
+
+// ------------------------------------------------------------------ answer forms
+
+const FX = { answers: forms.ORACLE_ANSWERS, exampleClause: forms.EXAMPLE_CLAUSE, clauseBoundary: forms.CLAUSE_BOUNDARY, negation: forms.NEGATION };
+const Q = (rule) => forms.ORACLE_ANSWERS.find((a) => a.rule === rule);
+const unfence = (t) => t.replace(/`/g, '');
+
+test('answer-form fixture: every fixed answer is the oracle\'s own wording, and every Table Q row has an entry', () => {
+  const oracle = {
+    under: unfence(readFileSync(join(REPO, spec.variants.under.oracle), 'utf8')),
+    full: unfence(readFileSync(join(REPO, spec.variants.full.oracle), 'utf8')),
+  };
+  for (const a of forms.ORACLE_ANSWERS) {
+    for (const o of a.oracle.split(',')) {
+      if (a.text) assert.ok(oracle[o].includes(a.text), `${a.rule}: ${JSON.stringify(a.text)} is not in the ${o} oracle`);
+    }
+    if (a.form === 'by-item') {
+      assert.ok(a.topic instanceof RegExp && a.fields.length, `${a.rule} needs a topic test and fields`);
+      for (const f of a.fields) assert.ok(f.value instanceof RegExp, `${a.rule}:${f.name}`);
+    }
+  }
+  const rows = [...readFileSync(join(REPO, spec.variants.under.oracle), 'utf8').matchAll(/^\| (Q\d+) \|[^|]*\| `([^`]+)` \|/gm)];
+  assert.ok(rows.length >= 10);
+  for (const [, rule, answer] of rows) assert.equal(Q(rule)?.text, answer, `${rule} in the fixture differs from the oracle's Table Q`);
+  assert.ok(Q('P').pattern.test("It's in the repo — look at pyproject.toml."));
+  assert.equal("It's in the repo — look at requirements.txt and app/main.py.".match(Q('P').pattern)[0].endsWith('main.py.'), true);
+});
+
+test('matchOracleAnswers reads every oracle answer on a line, in order, without double counting', () => {
+  const rules = (l) => matchOracleAnswers(l, FX.answers).map((a) => a.rule);
+  assert.deepEqual(rules("2. Who: Per API key, taken from the X-API-Key header. Proxy: I don't know."), ['Q2', 'Default']);
+  assert.deepEqual(rules("That's enough — go ahead."), ['S']);
+  assert.deepEqual(rules('Yes, go ahead.'), ['G']);
+  assert.deepEqual(rules('6. Python: It’s in the repo — look at pyproject.toml.'), ['P']);
+  assert.deepEqual(rules("It's all in my message — go with what I wrote."), ['F']);
+  assert.deepEqual(rules('Sure, whatever you think.'), []);
+});
+
+test('classifyTableAnswer: presented, released, example and repeat fields, and the labels they give', () => {
+  const none = new Set();
+  const q5 = classifyTableAnswer(Q('Q5'), 'Library? The options are `slowapi` or a small built-in middleware.', none, FX);
+  assert.deepEqual(q5.fields.map((f) => f.status), ['presented', 'released']);
+  assert.deepEqual(q5.labels, ['recognized', 'composed']);
+
+  const q4 = classifyTableAnswer(Q('Q4'), 'I would return 429 with Retry-After, counting down until the window resets.', none, FX);
+  assert.deepEqual([q4.fields.map((f) => f.status), q4.labels], [['presented', 'presented', 'presented'], ['recognized']]);
+
+  const q1open = classifyTableAnswer(Q('Q1'), 'How many requests per time window?', none, FX);
+  assert.deepEqual([q1open.fields[0].status, q1open.labels], ['released', ['composed']]);
+  const q1declined = classifyTableAnswer(Q('Q1'), 'A starting point is 60 requests/minute per IP.', none, FX);
+  assert.deepEqual([q1declined.fields[0].status, q1declined.labels, q1declined.proposal], ['released', ['rejected'], '60 requests/minute']);
+  const q1example = classifyTableAnswer(Q('Q1'), 'I need a number (e.g. "100 req/min per IP").', none, FX);
+  assert.deepEqual([q1example.fields[0].status, q1example.labels], ['example', ['unclassified']]);
+  const q1exampleOther = classifyTableAnswer(Q('Q1'), 'The rate (for example 60/min) is your call.', none, FX);
+  assert.deepEqual([q1exampleOther.fields[0].status, q1exampleOther.labels], ['released', ['unclassified']]);
+
+  const q1repeat = classifyTableAnswer(Q('Q1'), 'Limit?', new Set(['Q1:rate']), FX);
+  assert.deepEqual([q1repeat.fields[0].status, q1repeat.labels], ['repeat', ['repeated']]);
+  const noItem = classifyTableAnswer(Q('Q1'), null, none, FX);
+  assert.deepEqual([noItem.fields[0].status, noItem.labels], ['unverified', ['unclassified']]);
+});
+
+test('classifyTableAnswer: a value named as absent is not presented, and a later negation does not reach back', () => {
+  const absent = classifyTableAnswer(Q('Q2'), 'There is no auth, so there are no users or API keys to count against. The only option is the client IP.', new Set(), FX);
+  assert.deepEqual([absent.fields.map((f) => f.status), absent.labels, absent.proposal], [['released', 'released'], ['rejected'], 'client IP']);
+  const offered = classifyTableAnswer(Q('Q2'), 'Key on source IP (or you want to add an API-key scheme first)?', new Set(), FX);
+  assert.deepEqual(offered.fields.map((f) => f.status), ['presented', 'released']);
+  const later = classifyTableAnswer(Q('Q8'), 'With one process, an in-memory limiter works and adds no new infrastructure.', new Set(), FX);
+  assert.deepEqual([later.fields[0].status, later.labels], ['presented', ['recognized']]);
+});
+
+test('classifyReplies: items are verified against the turn they answer, fields disclosed once, review labels kept apart', () => {
+  const prev1 = '1. **Limit?** How many requests per minute?\n2. **Library?** `slowapi` or hand-written middleware.';
+  const prev2 = 'Missing key: reject with 401, or an anonymous bucket?';
+  const replies = [
+    { turn: 2, text: '1. Limit: 100 requests per minute.\n2. Library: Use slowapi; add it to requirements.txt pinned >=0.1.9,<0.2.\n', prevText: prev1 },
+    { turn: 3, text: 'Missing key: If the X-API-Key header is absent, count per client IP.\nLimit again: 100 requests per minute.\nThat\'s enough — go ahead.\n', prevText: prev2 },
+  ];
+  const tpl = replyItemsTemplate(replies, FX);
+  assert.deepEqual(tpl.map((e) => [e.turn, e.line, e.rules]), [[2, 1, ['Q1']], [2, 2, ['Q5']], [3, 1, ['Q3']], [3, 2, ['Q1']]]);
+  const items = [
+    { ...tpl[0], item: '1. **Limit?** How many requests per minute?' },
+    { ...tpl[1], item: '2. **Library?** `slowapi` or hand-written middleware.' },
+    { ...tpl[2], item: 'reject with 401, or an anonymous bucket?', review: [{ label: 'reframed', why: 'IP fallback replaces the reject/anonymous framing' }] },
+    { ...tpl[3], item: 'not in the turn' },
+  ];
+  const { lines, errors } = classifyReplies({ replies, items, fixture: FX });
+  assert.deepEqual(errors, []);
+  const labels = (l) => l.labels.map((x) => `${x.label}/${x.source}`);
+  assert.deepEqual(lines.map(labels), [
+    ['composed/rule'], ['recognized/rule', 'composed/rule'], ['rejected/rule', 'reframed/review'], ['repeated/rule'], ['sufficient/rule'],
+  ]);
+  assert.match(lines[3].itemNotFound, /not found in turn 2/);
+  const sum = summarizeForms(lines);
+  assert.deepEqual([sum.fields.presented, sum.fields.released, sum.fields.repeat, sum.unknown, sum.n], [1, 3, 1, 0, 4]);
+  assert.equal(sum.share, 0.25);
+  assert.equal(sum.review.reframed, 1);
+  assert.equal(sum.labels.sufficient, 1);
+});
+
+test('classifyReplies: notes that disagree with the records are errors, not silent misreadings', () => {
+  const replies = [{ turn: 2, text: 'Limit: 100 requests per minute.', prevText: 'Limit?' }];
+  const errorsFor = (items) => classifyReplies({ replies, fixture: FX, items }).errors.join(' | ');
+  assert.match(errorsFor([{ turn: 2, line: 1, text: 'something else', item: null }]), /2:1: text does not match/);
+  assert.match(errorsFor([{ turn: 5, line: 1, text: 'x', item: null }]), /5:1: no such phase-A reply line/);
+  assert.match(errorsFor([{ turn: 2, line: 1, text: 'Limit: 100 requests per minute.', item: null, review: [{ label: 'tired', why: 'x' }] }]), /review label needs one of/);
+  assert.match(errorsFor([{ turn: 2, line: 1, text: 'Limit: 100 requests per minute.', item: null }, { turn: 2, line: 1, text: 'Limit: 100 requests per minute.', item: null }]), /appears twice/);
+  const unmatched = classifyReplies({ replies: [{ turn: 2, text: 'Do whatever.', prevText: '' }], fixture: FX });
+  assert.deepEqual(unmatched.lines[0].labels.map((x) => x.label), ['unclassified']);
+  assert.equal(summarizeForms(unmatched.lines).share, null);
+});
+
+test('buildRow carries the answer forms, and the per-arm mean share is taken over cells where something was settled', () => {
+  const lines = (presented, released, unknown) => [{
+    labels: [{ label: 'recognized', source: 'rule' }],
+    answers: [
+      { rule: 'Q1', fields: [...Array(presented).fill({ status: 'presented' }), ...Array(released).fill({ status: 'released' })] },
+      ...Array(unknown).fill({ rule: 'Default', fields: [] }),
+    ],
+  }];
+  const mk = (arm, rep, af) => {
+    const r = row({ arm, rep, rework: 10 });
+    const withForms = buildRow({
+      cell: { run: 'r', name: `under-r${rep}-${arm}`, runner: 'claude', model: 'm', effort: null, variant: 'under', arm, rep },
+      turns: [{ wallS: 1, costUsd: 1, treeChanged: false }],
+      notes: { phaseA_turns: [1], phaseB_turns: [2], q_explicit: 0, q_items_total: 0, manual: { A: {}, final: {} } },
+      scores: { A: { auto: {}, implemented: true }, final: { auto: {} } },
+      diff: { files: 0, lines: 0, plus: 0, minus: 0, reworkFiles: 0, rework: 10 },
+      integrity: { ok: true, reasons: [] },
+      answerForms: af === null ? { lines: [], errors: [] } : { lines: af, errors: [] },
+    });
+    return { ...r, ...Object.fromEntries(Object.entries(withForms).filter(([k]) => k.startsWith('af_'))) };
+  };
+  const a = mk('protocol', 1, lines(1, 1, 0));
+  assert.deepEqual([a.af_presented, a.af_released, a.af_unknown, a.af_n, a.af_share], [1, 1, 0, 2, 0.5]);
+  const none = mk('protocol', 2, null);
+  assert.deepEqual([none.af_n, none.af_share], [0, null]);
+  const b = mk('protocol', 3, lines(3, 0, 1));
+  const [g] = groupMeans([a, none, b]);
+  assert.equal(g.mean.af_share_cells, 2);
+  assert.equal(g.mean.af_share, (0.5 + 0.75) / 2);
+  assert.equal(g.mean.af_presented, 4 / 3);
+  assert.equal(row({ arm: 'bare', rework: 1 }).af_share, null);
+});
+
+test('a missing item excerpt withholds the share rather than reporting one over the rest', () => {
+  const replies = [{ turn: 2, text: "Limit: 100 requests per minute.\nBursts: I don't know.", prevText: 'Limit? Bursts?' }];
+  const s = summarizeForms(classifyReplies({ replies, fixture: FX }).lines);
+  assert.deepEqual([s.fields.unverified, s.unknown, s.share], [1, 1, null]);
 });

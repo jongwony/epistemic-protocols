@@ -26,10 +26,10 @@ import { homedir, tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
-  auditPaths, buildRow, cellList, childEnv, composeOpen, composePhaseB, diffTrees,
+  auditPaths, buildRow, cellList, childEnv, classifyReplies, composeOpen, composePhaseB, diffTrees,
   evaluateFalsifiers, groupMeans, guardrails, loadChecklist, parseArgs, parseClaudeTurn,
-  parseCodexTurn, renderReport, sha256, snapshotKeeps, stripFrontmatter, treeDigest,
-  validateNotes, validatePlan,
+  parseCodexTurn, renderReport, replyItemsTemplate, sha256, snapshotKeeps, stripFrontmatter,
+  summarizeForms, treeDigest, validateNotes, validatePlan,
 } from './lib.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -574,24 +574,58 @@ async function cmdNote([run, name]) {
   const c = loadCase(plan.case);
   const cell = loadCell(plan, name);
   const manual = await manualItems(c);
+  const fx = await answerFixture(c);
   const p = join(recDir(run, name), 'notes.json');
   const n = turnCount(run, name);
   if (!existsSync(p)) {
     const aTurns = cell.phaseBTurn ? cell.phaseBTurn - 1 : n;
     const blank = Object.fromEntries(manual.map((k) => [k, null]));
+    const phaseA = Array.from({ length: aTurns }, (_, i) => i + 1);
     writeJson(p, {
-      phaseA_turns: Array.from({ length: aTurns }, (_, i) => i + 1),
+      phaseA_turns: phaseA,
       phaseB_turns: Array.from({ length: Math.max(0, n - aTurns) }, (_, i) => aTurns + i + 1),
       questions_phaseA: [], q_explicit: null, q_items_total: null,
       manual: { A: { ...blank }, final: { ...blank } },
+      ...(fx ? { reply_items: replyItemsTemplate(phaseAReplies(run, name, phaseA), fx) } : {}),
       notes_phaseA: '', notes_phaseB: '',
     });
-    console.log(`wrote a template: ${p}\nfill q_explicit, q_items_total, questions_phaseA and manual.{A,final} by reading the transcript and snapshots`);
+    console.log(`wrote a template: ${p}\nfill q_explicit, q_items_total, questions_phaseA and manual.{A,final} by reading the transcript and snapshots`
+      + (fx ? ', and each reply_items entry\'s item with the verbatim text of the item that line answers' : ''));
     return;
   }
-  const errors = validateNotes(readJson(p), { turns: n, manualItems: manual });
+  const notes = readJson(p);
+  const errors = validateNotes(notes, { turns: n, manualItems: manual });
   if (errors.length) die(`${p}:\n  - ${errors.join('\n  - ')}`);
+  if (fx) {
+    const forms = classifyReplies({ replies: phaseAReplies(run, name, notes.phaseA_turns), items: notes.reply_items || [], fixture: fx });
+    if (forms.errors.length) die(`${p}:\n  - ${forms.errors.join('\n  - ')}`);
+    const summary = summarizeForms(forms.lines);
+    writeJson(join(recDir(run, name), 'answer-forms.json'), { summary, lines: forms.lines });
+    const open = forms.lines.filter((l) => l.labels.some((x) => x.label === 'unclassified') || l.itemNotFound);
+    console.log(`answer forms: fields presented/released/unknown ${summary.fields.presented}/${summary.fields.released}/${summary.unknown}, `
+      + `recognized share ${summary.fields.unverified ? `none while ${summary.fields.unverified} field(s) lack an item excerpt`
+        : summary.share === null ? 'n=0' : `${summary.share.toFixed(2)} (n=${summary.n})`}`);
+    for (const l of open) console.log(`  unclassified turn ${l.turn} line ${l.line}: ${l.itemNotFound || l.labels.find((x) => x.label === 'unclassified').why || 'see answer-forms.json'}`);
+  }
   console.log(`${p}: complete`);
+}
+
+// The case's answer-form fixture, or null when the case defines none.
+async function answerFixture(c) {
+  if (!c.spec.answerForms) return null;
+  const m = await import(pathToFileURL(join(c.dir, c.spec.answerForms)).href);
+  return { answers: m.ORACLE_ANSWERS, exampleClause: m.EXAMPLE_CLAUSE, clauseBoundary: m.CLAUSE_BOUNDARY, negation: m.NEGATION };
+}
+
+// The phase-A turns that carried an oracle reply, each with the subject turn it answers. A --go
+// turn is the runner's rule, not an oracle reply, and is not among them.
+function phaseAReplies(run, name, aTurns) {
+  const rec = recDir(run, name);
+  return aTurns.filter((t) => t > 1 && turnMeta(run, name, t).kind === 'reply').map((t) => ({
+    turn: t,
+    text: readFileSync(join(rec, `turn-${t}.msg`), 'utf8'),
+    prevText: readFileSync(join(rec, `turn-${t - 1}.txt`), 'utf8'),
+  }));
 }
 
 function cmdStatus([run]) {
@@ -647,6 +681,12 @@ async function cellRow(plan, c, name, manual) {
   const scores = { A: readJson(join(rec, 'A.score.json')), final: readJson(join(rec, 'final.score.json')) };
   if (scores.A.afterTurn !== notes.phaseA_turns[notes.phaseA_turns.length - 1]) return { skip: 'the A snapshot was not taken after the last phase-A turn' };
   if (scores.final.afterTurn !== n) return { skip: 'the final snapshot was not taken after the last turn' };
+  const fx = await answerFixture(c);
+  let answerForms = null;
+  if (fx) {
+    answerForms = classifyReplies({ replies: phaseAReplies(plan.run, name, notes.phaseA_turns), items: notes.reply_items || [], fixture: fx });
+    if (answerForms.errors.length) return { skip: `notes.json reply_items: ${answerForms.errors.join('; ')}` };
+  }
   const reasons = turns.flatMap((t) => t.integrity.reasons.map((r) => `turn ${t.turn}: ${r}`));
   const cellDir = cellStateDir(plan.run, name);
   const allowed = [c.pluginDir, join(codexHome(plan.run, cell.arm), 'plugins', 'cache')];
@@ -655,7 +695,7 @@ async function cellRow(plan, c, name, manual) {
   return {
     row: buildRow({
       cell, turns, notes, scores, diff: readJson(join(rec, 'phase-b.diff.json')),
-      integrity: { ok: reasons.length === 0, reasons }, pathFlags,
+      integrity: { ok: reasons.length === 0, reasons }, pathFlags, answerForms,
     }),
   };
 }

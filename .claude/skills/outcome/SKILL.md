@@ -41,7 +41,10 @@ a question about whether a gate fired belongs to `/realize`.
   every spending or scoring command refuses when those files have changed.
 - **Metrics.** First score (checklist passes at snapshot A), final score, rework (lines changed
   between the snapshots outside `tests/`, by a minimal line diff), questions handed back, turns,
-  and total cost in the runner's unit — USD on Claude, input tokens on Codex.
+  and total cost in the runner's unit — USD on Claude, input tokens on Codex. On the user side,
+  the answer form of each phase-A reply line: which oracle rule produced it, and for a table value
+  whether the subject had presented it for the user to recognize or the oracle released it when
+  asked, read by the case's answer-form fixture into a recognized share.
 
 ## Runbook
 

@@ -86,6 +86,14 @@ the transcript and the two snapshots:
 - `manual.A`, `manual.final` — the checklist items the case marks manual (for this case R6, R8,
   R12), 0 or 1 each, confirmed by reading the snapshot with the printed automatic evidence as a
   guide.
+- `reply_items` — present when the case has an answer-form fixture: one entry per phase-A reply
+  line that carries a table value, prefilled with its turn, line, text and the oracle rules found
+  in it. Fill `item` with the verbatim text of the item that line answers, copied from the
+  subject turn just before it — the item as handed back, heading and body, not a summary; a list
+  of spans where the item is split. `note` checks each excerpt against that turn and fails on an
+  entry that names no sent line. Add `review: [{ "label": …, "why": … }]` only for a label the
+  fixture cannot assign (`reframed`, `deferred`); it is reported apart and never enters the share.
+  Validating writes `answer-forms.json` and prints every line left unclassified with its reason.
 - `notes_phaseA`, `notes_phaseB` — what happened, in a few sentences; these are what a later
   reader of the report checks a number against.
 
@@ -168,6 +176,10 @@ A case is a directory under `cases/` with:
   has to run) emits evidence only; `rules.mjs` turns evidence and files into verdicts and exports
   `AUTO` and `MANUAL`, which together must be exactly the checklist's ids.
 - `scorer-requirements.txt` — exact pins for the scorer's environment.
+- `answer-forms.mjs` (optional, named by `answerForms`) — each oracle answer's fixed wording and
+  form, and for each table value its fields and the matchers that decide whether an item
+  presented them (`references/report-format.md` §Answer form). `lib.test.mjs` holds the wording
+  to the oracle files.
 
 Before the first subject run, score a hand-written reference implementation and the bare
 scaffold, and check that each verdict is the one the checklist predicts.
