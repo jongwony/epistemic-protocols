@@ -487,24 +487,36 @@ claim the certificate handed on, with its fit and hint; the conditions left unme
 and the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | select | certify | handoff | narrow | tag | posit | gate | readTurn | converge | seam
 
 def grounding : Op → Annot × String
   | .select   => (.sense, "Internal analysis: the claims the pending action leans on that warrant a challenge, afresh every pass against the context as it now stands and from this run's invocation on; the person's words about what to vet included, and a source whose claim cannot be settled still selected, its owner unclear")
   | .certify  => (.sense, "Internal analysis: each claim fitted against this contract's own claim and its route claims, reading nothing outside this contract; admissibility here only, and fail-closed, so evidence that supports no claim or several leaves it unclear")
-  | .handoff  => (.extension, "TextPresent+Proceed: a claim the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), a claim a convention or ownership question settles (/bound); nothing is dispatched, and no claim leaves the person's view silently")
+  | .handoff  => (.interaction .extension, "a claim the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), a claim a convention or ownership question settles (/bound); nothing is dispatched, and no claim leaves the person's view silently")
   | .narrow   => (.sense, "Internal analysis: for each open claim, the narrowing its answer is made against — the claim, what makes it suspect, and its evidence, the stake off the pending action; the question, never an answer")
   | .tag      => (.observe, "artifact read, artifact search: verify each open claim's source origin, the claim it authorizes, and its downstream references; provenance, freshness, and leverage")
   | .posit    => (.sense, "Internal analysis: one concrete antithesis per open claim its state has not outrun — Pattern A, B, C, D, or emergent — against the claim as it now stands, with its cited basis; provisional where the owner is unclear")
-  | .gate     => (.constitution, "present: the current list and this turn's changes, then every open claim with its narrowing, tags, antithesis and basis, and certificate fit, and concrete actions for it, each with its consequence and never a category title; the person answers in their own words; with nothing open, what was searched and found, and whether the run is done")
+  | .gate     => (.interaction .constitution, "the current list and this turn's changes, then every open claim with its narrowing, tags, antithesis and basis, and certificate fit, and concrete actions for it, each with its consequence and never a category title; the person answers in their own words; with nothing open, what was searched and found, and whether the run is done")
   | .readTurn => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's in this run it bears on, read whole against the fused context as it now stands — an answer to one claim or several, a correction of the target, a question, a closing — whatever form it takes")
-  | .converge => (.extension, "TextPresent+Proceed: the per-antithesis trace with each answer beside the antithesis it met, quoted, and a replaced answer beside it; the claims the certificate handed on with fit and hint; the conditions left unmet, reported open; the dissent attached to the closure")
-  | .seam     => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; this protocol declares no outbound edge, and every Constitution gate inside Elenchus and the next protocol fires unchanged")
+  | .converge => (.interaction .extension, "the per-antithesis trace with each answer beside the antithesis it met, quoted, and a replaced answer beside it; the claims the certificate handed on with fit and hint; the conditions left unmet, reported open; the dissent attached to the closure")
+  | .seam     => (.interaction .extension, "at a chain the person declared, naming the next protocol, proceed to it citing that turn; this protocol declares no outbound edge, and every Constitution gate inside Elenchus and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Pattern resolution emergent via session context.

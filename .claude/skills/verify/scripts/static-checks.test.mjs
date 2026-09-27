@@ -7,8 +7,8 @@
  *   lean-bridge.js         lean-definition reaches every canonical protocol,
  *                          whose Definition block is Lean 4, and each rule it
  *                          holds rejects its counterexample
- *   contract-structure.js  provisional text checks on contract structure
- *   artifact-sync.js       version-staleness measures a change from its base
+ *   artifact-sync.js       version-staleness measures a change from its base,
+ *                          and structure requires the TOOL GROUNDING section
  *   prose-surface.js       artifact-self-containment's path rules fire on a
  *                          backticked path
  *
@@ -138,6 +138,14 @@ describe('lean bridge: lean-definition', () => {
       expectSome(failures(), 'GROUND section differs');
       restore();
 
+      // An annotation added to the block's copy of the vocabulary is a fork of
+      // the canonical text, whatever it would elaborate to.
+      const vocabulary = '| dispatch | interaction (kind : Interaction)';
+      assert.ok(skill.includes(vocabulary), 'precondition: the block carries the TOOL GROUNDING vocabulary');
+      write(target, skill.replace(vocabulary, '| dispatch | inspect | interaction (kind : Interaction)'));
+      expectSome(failures(), 'TOOL GROUNDING section does not open with the text of');
+      restore();
+
       // Codex review of #961: each of these elaborated cleanly or hid a proof gap.
       const escapes = [
         ['set_option warn.sorry false in\ntheorem mutation_cheat : 1 = 2 := by admit', '`set_option`'],
@@ -182,7 +190,7 @@ describe('lean bridge: lean-definition', () => {
     withCopy(({ write, restore, failures }) => {
       for (const orphan of ['lean/Orphan.lean', `lean/EpistemicProtocols/${ns}/Nested/Orphan.lean`]) {
         write(orphan, 'theorem orphan : True := trivial\n');
-        expectSome(failures(), 'neither the canonical GROUND, a Theorems module');
+        expectSome(failures(), 'is neither a canonical shared section');
         restore();
       }
     });
@@ -239,6 +247,26 @@ describe('lean bridge: lean-definition', () => {
       restore();
     });
   });
+
+  // TOOL GROUNDING is judged from the elaborated `grounding`: each mutation
+  // below still elaborates, and the audit rejects it (lake test runs the same
+  // rules over lean/Tests fixtures).
+  it('reads TOOL GROUNDING from elaboration: convergence, realization, and dispatch wiring', { skip: !elaborated && 'no Lean toolchain reachable' }, () => {
+    const arm = (op) => new RegExp(`^(  \\| \\.${op}\\s+=> \\()([^,]+), "`, 'm');
+    const converge = arm('converge').exec(block);
+    const other = [...block.matchAll(/^  \| \.(\w+)\s+=> \(\.(?:sense|observe|transform), "/gm)].find((m) => m[1] !== 'converge');
+    assert.ok(converge && other, 'precondition: the block grounds .converge and an operation that is neither an interaction nor a dispatch');
+    const mutated = block
+      .replace(arm('converge'), '$1.sense, "TextPresent+Proceed: ')
+      .replace(arm(other[1]), '$1.dispatch, "');
+    withCopy(({ write, failures }) => {
+      write(target, withBlock(mutated));
+      const messages = failures();
+      expectSome(messages, `\`${ns}.grounding .converge\` is annotated \`ToolGrounding.Annot.sense\``);
+      expectSome(messages, `the description of \`${ns}.Op.converge\` opens with \`TextPresent\``);
+      expectSome(messages, `\`${ns}.Op.${other[1]}\` is a \`dispatch\` operation no contract declaration other than \`grounding\` names`);
+    });
+  });
 });
 
 describe('fail closed: a missing required input fails under each check that requires it', () => {
@@ -286,6 +314,15 @@ describe('fail closed: a missing required input fails under each check that requ
       const result = verdict();
       expectSome(result.fail.filter((r) => r.check === LEAN).map((r) => r.message), 'exited with status 1 though its readout lists no problem');
       assert.deepEqual(result.pass.filter((r) => r.check === LEAN), [], 'no unit passes on a readout its audit exit contradicts');
+    });
+  });
+});
+
+describe('artifact sync: structure', () => {
+  it('requires the TOOL GROUNDING section of every protocol SKILL.md', () => {
+    withCopy(({ write, verdict }) => {
+      write(target, skill.replace('── TOOL GROUNDING ──', '── TOOLING ──'));
+      assert.ok(verdict().fail.some((r) => r.check === 'structure' && r.file === target && r.message.includes('"── TOOL GROUNDING ──"')), `expected a structure failure for ${target}`);
     });
   });
 });
@@ -343,20 +380,6 @@ describe('artifact sync: version-staleness', () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
-  });
-});
-
-// Contract structure is Lean's to carry; the checks in contract-structure.js are
-// provisional, and each test here goes with the check it proves.
-describe('contract structure (provisional): tool-grounding', () => {
-  it('rejects an annotation outside the grounding vocabulary', () => {
-    withCopy(({ write, restore, verdict }) => {
-      const annotated = /\(\.(observe|sense|extension),/.exec(block);
-      assert.ok(annotated, 'no grounding arm found to mutate');
-      write(target, withBlock(block.replace(annotated[0], '(.inspect,')));
-      expectSome(verdict().fail.filter((r) => r.check === 'tool-grounding').map((r) => r.message), 'Non-standard annotation "(inspect)"');
-      restore();
-    });
   });
 });
 

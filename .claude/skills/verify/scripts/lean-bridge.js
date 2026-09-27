@@ -93,10 +93,14 @@ function stripLeanComments(source) {
 // checked-in audit (`lean/Audit/`, run as `lake lint` through
 // lean-contract.js's one driver) reads declaration ownership, kind, doc
 // strings, guarantees, `Nonempty` witnesses and transitive axioms from the
-// elaborated environment. This check orchestrates it and keeps what is text:
-// extracting the block from Markdown, comparing GROUND against the canonical
-// file, the repository inventory under `lean/`, and a token preflight over
-// the Lean sources that a cheap scan catches before any build.
+// elaborated environment, and judges TOOL GROUNDING there too: `Op`, a
+// `grounding` over the shared annotation type, an interaction-kind `.converge`,
+// descriptions that leave the realization to the kind, and every `dispatch`
+// operation wired into the contract. This check orchestrates it and keeps what
+// is text: extracting the block from Markdown, comparing each block's shared
+// sections — GROUND and the vocabulary opening TOOL GROUNDING — against their
+// canonical files, the repository inventory under `lean/`, and a token
+// preflight over the Lean sources that a cheap scan catches before any build.
 
 
 // Commands and options that can close a goal, add an assumption, or skip the
@@ -126,11 +130,18 @@ function leanLint(label, source) {
 }
 
 // A Theorems module opens with `module` and imports only the contract it
-// proves guarantees about and GROUND.
+// proves guarantees about and the shared sections, GROUND and TOOL GROUNDING.
+const SHARED_IMPORTS = Object.freeze({
+  Ground: ['EpistemicProtocols.Ground'],
+  ToolGrounding: ['EpistemicProtocols.ToolGrounding'],
+});
+
 function leanTheoremsImports(label, source, ns) {
-  const allowed = new Set(ns === 'Ground'
-    ? ['EpistemicProtocols.Ground']
-    : [`Contract.${ns}`, 'EpistemicProtocols.Ground', 'EpistemicProtocols.Ground.Theorems']);
+  const allowed = new Set(SHARED_IMPORTS[ns] || [
+    `Contract.${ns}`,
+    'EpistemicProtocols.Ground', 'EpistemicProtocols.Ground.Theorems',
+    'EpistemicProtocols.ToolGrounding', 'EpistemicProtocols.ToolGrounding.Theorems',
+  ]);
   const problems = [];
   const code = stripLeanComments(source);
   if (!/^module\s*$/m.test(code.split('\n').find(line => line.trim() !== '') || '')) {
@@ -161,13 +172,21 @@ function checkLeanDefinition(ctx) {
   const { projectRoot, results, protocolInputs } = ctx;
   const CHECK = 'lean-definition';
   const fail = (file, message) => results.fail.push({ check: CHECK, file, message });
-  const groundPath = path.join(projectRoot, leanContract.CANONICAL_GROUND);
-  const groundSource = fs.existsSync(groundPath) ? fs.readFileSync(groundPath, 'utf8') : null;
-  const canonicalGround = groundSource === null ? null : leanContract.canonicalGroundText(groundSource);
+  const canonical = (rel, extract) => {
+    const full = path.join(projectRoot, rel);
+    return fs.existsSync(full) ? extract(fs.readFileSync(full, 'utf8')) : null;
+  };
+  const canonicalGround = canonical(leanContract.CANONICAL_GROUND, leanContract.canonicalGroundText);
+  const canonicalTool = canonical(leanContract.CANONICAL_TOOL_GROUNDING, leanContract.canonicalToolGroundingText);
+  // The shared sections: each canonical module and the Theorems module proving its guarantees.
+  const SHARED = [
+    { ns: 'Ground', module: leanContract.CANONICAL_GROUND, theorems: leanContract.GROUND_THEOREMS },
+    { ns: 'ToolGrounding', module: leanContract.CANONICAL_TOOL_GROUNDING, theorems: leanContract.TOOL_GROUNDING_THEOREMS },
+  ];
   const blocks = [];
   const failedFiles = new Set();
   const namespaces = new Map();
-  const expectedLean = new Set([leanContract.CANONICAL_GROUND, leanContract.GROUND_THEOREMS]);
+  const expectedLean = new Set(SHARED.flatMap(({ module, theorems }) => [module, theorems]));
 
   // Enrollment: every canonical protocol hands its Definition block to Lean.
   // A protocol with no SKILL.md, or whose block is not a ```lean fence, fails
@@ -194,6 +213,14 @@ function checkLeanDefinition(ctx) {
     else if (ns && source.indexOf(`namespace ${ns}`) > ground.start) problems.push('Lean Definition block opens its namespace after GROUND');
     else if (canonicalGround === null) problems.push(`${leanContract.CANONICAL_GROUND} is missing or has no \`namespace Ground\` … \`end Ground\` text`);
     else if (ground.text !== canonicalGround) problems.push(`GROUND section differs from ${leanContract.CANONICAL_GROUND} — the session primitive is one text across Lean blocks`);
+    // The vocabulary is compared where the section exists; a block without one
+    // grounds no operation, which the audit reports from the environment.
+    if (canonicalTool === null) problems.push(`${leanContract.CANONICAL_TOOL_GROUNDING} is missing or has no \`namespace ToolGrounding\` … \`end ToolGrounding\` text`);
+    else {
+      const tool = leanContract.toolGroundingSpan(source, canonicalTool);
+      if (tool && !tool.matches) problems.push(`TOOL GROUNDING section does not open with the text of ${leanContract.CANONICAL_TOOL_GROUNDING} — the annotation vocabulary and the realization of each interaction kind are one text across Lean blocks`);
+      else if (tool && ground && tool.start < ground.end) problems.push('Lean Definition block opens TOOL GROUNDING before GROUND');
+    }
     // The block states no theorem, GROUND included: nothing reads a statement there.
     {
       const stated = leanContract.docTheoremNames(source);
@@ -222,17 +249,19 @@ function checkLeanDefinition(ctx) {
     blocks.push({ relPath, block: source, theoremsRel });
   }
 
-  for (const rel of [leanContract.CANONICAL_GROUND, leanContract.GROUND_THEOREMS]) {
-    const full = path.join(projectRoot, rel);
-    if (!fs.existsSync(full)) {
-      fail(rel, 'Canonical GROUND file is missing'); failedFiles.add(rel);
-      continue;
+  for (const { ns, module, theorems } of SHARED) {
+    for (const rel of [module, theorems]) {
+      const full = path.join(projectRoot, rel);
+      if (!fs.existsSync(full)) {
+        fail(rel, `Canonical ${ns} file is missing`); failedFiles.add(rel);
+        continue;
+      }
+      const text = fs.readFileSync(full, 'utf8');
+      const problems = leanLint(rel, text);
+      if (rel === theorems) problems.push(...leanTheoremsImports(rel, text, ns));
+      for (const message of problems) fail(rel, message);
+      if (problems.length > 0) failedFiles.add(rel);
     }
-    const text = fs.readFileSync(full, 'utf8');
-    const problems = leanLint(rel, text);
-    if (rel === leanContract.GROUND_THEOREMS) problems.push(...leanTheoremsImports(rel, text, 'Ground'));
-    for (const message of problems) fail(rel, message);
-    if (problems.length > 0) failedFiles.add(rel);
   }
 
   // A Lean file the package does not account for proves nothing the runtime
@@ -240,7 +269,7 @@ function checkLeanDefinition(ctx) {
   // fixtures are tooling, not contract.
   const tooling = (rel) => leanContract.LEAN_TOOLING_DIRS.some((dir) => rel.startsWith(dir + path.sep));
   for (const rel of leanFilesUnder(path.join(projectRoot, 'lean'))) {
-    if (!expectedLean.has(rel) && !tooling(rel)) fail(rel, 'Lean file is neither the canonical GROUND, a Theorems module of a protocol Lean block, nor the audit tooling under lean/Audit or lean/Tests');
+    if (!expectedLean.has(rel) && !tooling(rel)) fail(rel, 'Lean file is neither a canonical shared section (GROUND, TOOL GROUNDING) or its Theorems module, a Theorems module of a protocol Lean block, nor the audit tooling under lean/Audit or lean/Tests');
   }
 
   if (blocks.length === 0) return;
@@ -277,12 +306,13 @@ function checkLeanDefinition(ctx) {
   // Theorems module built with warnings as errors, then the Lean audit.
   const ready = blocks.filter(b => !failedFiles.has(b.relPath));
   const result = leanContract.check(projectRoot, ready, lake);
-  const units = [{ relPath: leanContract.CANONICAL_GROUND, ns: 'Ground' }, ...result.plan.units];
+  const shared = new Set(SHARED.map(({ ns }) => ns));
+  const units = [...SHARED.map(({ ns, module }) => ({ relPath: module, ns })), ...result.plan.units];
   if (result.build.status !== 0 || result.build.diagnostics.length > 0) {
     const attributed = new Set();
     for (const { relPath, ns } of units) {
-      const own = result.build.diagnostics.filter(line => ns === 'Ground'
-        ? /EpistemicProtocols\/Ground/.test(line)
+      const own = result.build.diagnostics.filter(line => shared.has(ns)
+        ? line.includes(`EpistemicProtocols/${ns}.lean`) || line.includes(`EpistemicProtocols/${ns}/`)
         : line.includes(`Contract/${ns}.lean`) || line.includes(`EpistemicProtocols/${ns}/`));
       if (own.length === 0) continue;
       own.forEach(line => attributed.add(line));
@@ -325,9 +355,9 @@ function checkLeanDefinition(ctx) {
     passes.push({
       check: CHECK,
       file: relPath,
-      message: ns === 'Ground'
-        ? `Canonical GROUND elaborates, and ${leanContract.GROUND_THEOREMS} proves its ${report.guarantees.length} guarantee(s); the Lean audit finds no project axiom`
-        : `Lean Definition block elaborates standalone, and ${block.theoremsRel} proves ${report.guarantees.length} guarantee(s)${report.helpers.length > 0 ? ` with ${report.helpers.length} private helper(s)` : ''}; the Lean audit admits only propext, Classical.choice, Quot.sound and ${report.judgments.length} documented judgment(s), each inhabited by a witness that assumes nothing`,
+      message: shared.has(ns)
+        ? `Canonical ${ns} elaborates, and ${SHARED.find(s => s.ns === ns).theorems} proves its ${report.guarantees.length} guarantee(s); the Lean audit finds no project axiom`
+        : `Lean Definition block elaborates standalone, and ${block.theoremsRel} proves ${report.guarantees.length} guarantee(s)${report.helpers.length > 0 ? ` with ${report.helpers.length} private helper(s)` : ''}; the Lean audit admits only propext, Classical.choice, Quot.sound and ${report.judgments.length} documented judgment(s), each inhabited by a witness that assumes nothing, and grounds every operation in the shared TOOL GROUNDING vocabulary`,
     });
   }
   if (result.lint.status !== 0 && problemCount === 0) {

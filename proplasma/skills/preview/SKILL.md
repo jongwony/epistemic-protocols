@@ -459,8 +459,8 @@ abbrev Mode (P : Type) := Context P
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. Your turns are
 `AITurns`: a fan relays the spec — whole, with its ledger — before anything is generated, then the
-probes are written (`narrate` for a Vignette; `.instantiate` for a Mockup, one per agent through
-`.instantiateDelegate` where delegated); `respond` presents the round and closes it at the gate.
+probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy` names,
+one probe per agent where delegated); `respond` presents the round and closes it at the gate.
 -/
 
 /-- Your turns. `narrate` writes each Vignette probe's narration, re-presented as instantiated and
@@ -553,10 +553,22 @@ under contrast, direction being constituted, discard being verified — never a 
 Demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | detect | noDeficitRelay | routeAwayRelay | unfitRelay | requiresFailRelay
              | deriveAxes | draftPolicy | specRelay | instantiate | instantiateDelegate
@@ -565,28 +577,34 @@ inductive Op | detect | noDeficitRelay | routeAwayRelay | unfitRelay | requiresF
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: the deficit predicate and the 4-step routing, first match wins; a question about what an option means is answered, not previewed; no external tool")
-  | .noDeficitRelay    => (.extension, "TextPresent+Proceed: futures recognizable from text — the finding with its reasoning; a regular gate suffices; not activated")
-  | .routeAwayRelay    => (.extension, "TextPresent+Proceed: routing rows ①–③ — the matched row with its basis and its command as a hint; which protocol takes it is the session's; not activated")
-  | .unfitRelay        => (.extension, "TextPresent+Proceed: a type guard fails and no routing row matches — the failed guard and why; the decision stays at a regular gate; not activated")
-  | .requiresFailRelay => (.extension, "TextPresent+Proceed: no imminent commitment, or fewer than two candidates — the failed requirement; one or zero candidates points to row ③'s targets as hints — /ideate for the thin field, /elicit for its narrower case; not activated")
+  | .noDeficitRelay    => (.interaction .extension, "futures recognizable from text — the finding with its reasoning; a regular gate suffices; not activated")
+  | .routeAwayRelay    => (.interaction .extension, "routing rows ①–③ — the matched row with its basis and its command as a hint; which protocol takes it is the session's; not activated")
+  | .unfitRelay        => (.interaction .extension, "a type guard fails and no routing row matches — the failed guard and why; the decision stays at a regular gate; not activated")
+  | .requiresFailRelay => (.interaction .extension, "no imminent commitment, or fewer than two candidates — the failed requirement; one or zero candidates points to row ③'s targets as hints — /ideate for the thin field, /elicit for its narrower case; not activated")
   | .deriveAxes        => (.sense, "Internal analysis: divergence axis candidates from the candidate directions")
   | .draftPolicy       => (.sense, "Internal analysis: the placeholder policy draft — visible synthesis, non-evidence stamp, skeleton-data split")
-  | .specRelay         => (.extension, "TextPresent+Proceed: the spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where a candidate waits, which and why; on every later fan the whole spec again with its ledger, each changed line marked the person's edit, a necessary consequence, or your proposal; fires before any probe is generated and yields no turn")
+  | .specRelay         => (.interaction .extension, "the spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where a candidate waits, which and why; on every later fan the whole spec again with its ledger, each changed line marked the person's edit, a necessary consequence, or your proposal; fires before any probe is generated and yields no turn")
   | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the target set, each realization registered at creation; existing project files never modified; the Vignette tier writes no file — its narration is your own turn (`narrate`), recorded on the probe and never regenerated")
   | .instantiateDelegate => (.dispatch, "delegate (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with its path registered; subordinate to the active runtime policy)")
   | .contrast          => (.sense, "Internal analysis: per-axis juxtaposition over every probe so far, the exposed unknowns with their routes, the common commitments recomputed over every probe, and your readings — insufficiency with the revision you propose, a sibling deficit, futures already recognizable or a collapsed premise, contrary grounds")
-  | .present           => (.extension, "TextPresent+Proceed: probe-first order — probes one by one, each from its realization, never regenerated → the per-axis contrast map with the common commitments declared → newly exposed unknowns → your readings, each with its basis; table-first re-abstracts and reproduces the deficit")
-  | .qdir              => (.constitution, "present: mandatory direction gate — one concrete Select per probe-exposed direction plus composing from the probes, each option pointing at the future it settles; sending back any spec element, naming a candidate no probe materialized, asking about a probe, stopping, and naming another protocol are declared in the pre-gate text, never as peer options")
+  | .present           => (.interaction .extension, "probe-first order — probes one by one, each from its realization, never regenerated → the per-axis contrast map with the common commitments declared → newly exposed unknowns → your readings, each with its basis; table-first re-abstracts and reproduces the deficit")
+  | .qdir              => (.interaction .constitution, "mandatory direction gate — one concrete Select per probe-exposed direction plus composing from the probes, each option pointing at the future it settles; sending back any spec element, naming a candidate no probe materialized, asking about a probe, stopping, and naming another protocol are declared in the pre-gate text, never as peer options")
   | .readTurn          => (.sense, "Internal analysis: the new turn and every earlier turn of the person's it bears on, read against the fused context as it now stands — a closing and whether it is covered, a request to see something unmaterialized, a question about a probe — whatever form it takes; a turn read as a closing is quoted with the intent taken from it")
   | .harvest           => (.sense, "Internal analysis: the constituted direction, whether a probe materialized it, the deciding contrast rows marked as your reading unless the person named them, the routed unknowns, and any GroundTag, read from the context before discard")
   | .cleanup           => (.transform, "environment run: the destruction step — per-probe artifact destruction, one retry on failure; every exit with probes runs it first")
   | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each Path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
-  | .converge          => (.extension, "TextPresent+Proceed: the transformation trace — the turn read as the closing, quoted, with the intent taken; axes → deciding contrast rows → direction; unknowns with routes; per-probe discard disposition with where each probe lived; the dissent attached")
-  | .dissolutionRelay  => (.extension, "TextPresent+Proceed: when the person accepts or declares that the futures are recognizable without further probes, or that the activation premise collapsed — state the basis, the sharpened axes themselves, and hand to the regular gate the enriched axes with every exposed unknown and its route and, wherever probes exist, the per-probe dispositions plus any candidate still pending as live candidates; attach any dissent; stand down as DissolutionExit — a success, not an abandonment")
-  | .withdraw          => (.extension, "TextPresent+Proceed: the person stops — the partial trace and the residual declared; cleanup_verify enforced; EarlyExit. A hard escape yields no turn, so cleanup cannot run: temp isolation's bounded lifecycle is the backstop")
-  | .routeRelay        => (.extension, "TextPresent+Proceed: the person names another protocol — cleanup_verify enforced; the unknowns with their routes and the contrast as context; proceed to the named protocol citing their words")
-  | .seam              => (.extension, "TextPresent+Proceed: at a user-declared chain naming the next protocol, proceed to it citing that source; a harvested GroundTag proposes /ground with its basis and moves nothing on its own; every Constitution gate inside this protocol and the next fires unchanged")
+  | .converge          => (.interaction .extension, "the transformation trace — the turn read as the closing, quoted, with the intent taken; axes → deciding contrast rows → direction; unknowns with routes; per-probe discard disposition with where each probe lived; the dissent attached")
+  | .dissolutionRelay  => (.interaction .extension, "when the person accepts or declares that the futures are recognizable without further probes, or that the activation premise collapsed — state the basis, the sharpened axes themselves, and hand to the regular gate the enriched axes with every exposed unknown and its route and, wherever probes exist, the per-probe dispositions plus any candidate still pending as live candidates; attach any dissent; stand down as DissolutionExit — a success, not an abandonment")
+  | .withdraw          => (.interaction .extension, "the person stops — the partial trace and the residual declared; cleanup_verify enforced; EarlyExit. A hard escape yields no turn, so cleanup cannot run: temp isolation's bounded lifecycle is the backstop")
+  | .routeRelay        => (.interaction .extension, "the person names another protocol — cleanup_verify enforced; the unknowns with their routes and the contrast as context; proceed to the named protocol citing their words")
+  | .seam              => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed to it citing that source; a harvested GroundTag proposes /ground with its basis and moves nothing on its own; every Constitution gate inside this protocol and the next fires unchanged")
+
+/-- The operations that write a fan's probes, by the spec's tier: a Mockup through `.instantiate`,
+    and `.instantiateDelegate` where delegated; a Vignette writes no file. -/
+def instantiatedBy : RealizationTier → List Op
+  | .vignette => []
+  | .mockup   => [.instantiate, .instantiateDelegate]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Direction resolution emergent via session context.

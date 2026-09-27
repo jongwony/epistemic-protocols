@@ -169,6 +169,7 @@ function checkRequiredSections(ctx) {
     '## Rules',
     '── PHASE TRANSITIONS ──',
     '── MODE STATE ──',
+    '── TOOL GROUNDING ──',
   ];
 
   for (const relPath of protocolInputs('structure')) {
