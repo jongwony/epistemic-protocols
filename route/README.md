@@ -7,7 +7,7 @@ Route the accumulated session context to the core epistemic protocol whose defic
 > **Experimental.** Two distinct things, and they are not the same promise:
 >
 > - **The contract can change without a deprecation path.** The directive's wording, the injected table's shape, the hook set, the config's fields and the name of the variable that arms the advisory channel have all moved between releases and may move again. Pin a version if you are depending on any of them.
-> - **The advisory channel is unvalidated.** Its fixture labels ship unadjudicated — every case in `evals/cases/cases.json` carries `adjudicated: false`, and the harness withholds every rate while that holds. Nothing here ships a key, for that reason. Read `evals/README.md` before drawing anything from its numbers.
+> - **The advisory channel is unvalidated.** A fixture label counts only once someone other than its author has adjudicated it — each case in `evals/cases/cases.json` records that in its `adjudicated` field — and the harness leaves every unadjudicated case out of every rate. Nothing here ships a key, for that reason. Read `evals/README.md` before drawing anything from its numbers.
 >
 > The other hooks — the session-start table, the per-prompt directive, the premise index — touch no network and are the settled part of this plugin. *Experimental* above is about the contract's stability for them, and about both the contract and the evidence for the advisory channel.
 
