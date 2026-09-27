@@ -1,97 +1,86 @@
 ---
 name: outcome
-description: This skill should be used when the user asks to "measure whether a protocol reduces rework", "run the outcome eval", "paired bare vs protocol", "compare first implementation with and without the protocol", "does /inquire reduce rework", or wants evidence about what a protocol does to the downstream work rather than whether its declared transitions happen. Project-local contributor tooling.
+description: This skill should be used when the user asks to "run the outcome eval", "paired bare vs protocol", "which decisions did the protocol surface", "count what the AI asked or presented", "does /inquire surface what the request left out", or wants to see, from transcripts, which decisions reached the user as a question or something to recognize instead of having to be written into the opening prompt. Project-local contributor tooling.
 allowed-tools: Read, Grep, Glob, Bash, Write
 ---
 
 # Outcome Eval
 
-Measure what a protocol does to the work that follows it. The same task runs with and without
-the protocol; each cell's first implementation is scored against a frozen checklist, the full
-specification is then handed over, and the edits that answer it are counted as rework.
+Without a protocol, a person has to recall at length and write a long opening prompt. With one,
+they answer when asked, by recalling, or recognize what is put in front of them — and the items
+that come up this way can be ones nobody would have thought of at the start. This eval shows
+that one thing, from the transcript: the same request runs with and without the protocol, and
+each cell lists the decisions that reached the user through the AI.
 
-## Judgment boundary
+## The one measure
 
-`/realize` judges whether a run follows a protocol's declared transitions and stops at
-`Stop | Proceed`; the quality of the artifact after `Proceed` is outside it by its own
-declaration (`.claude/skills/realize/references/grader-design.md`). This skill judges exactly
-that artifact: how well the first implementation meets the specification, how much of it the
-full specification forces the subject to rewrite, and what the whole session cost. It reuses
-`/realize`'s cases, scaffold, invocation lines and isolation by path and changes none of them;
-a question about whether a gate fired belongs to `/realize`.
+Per cell: the decision items that entered the conversation through the AI and that the user's
+opening request did not contain. Each is recorded with the verbatim span that raised it and how
+it reached the user:
+
+- `asked` — put as a question; the user answered by recalling.
+- `presented` — shown as an option or default; the user recognized, picked or corrected it.
+
+The number is the count of such items, per cell and per arm, shown under the opening request
+whose gaps they fill: each item is something the user would otherwise have had to write into
+that request. It is read from the transcript and the opening request alone — no hidden
+specification, no checklist, no grader of correctness. Identifying an item is a reading of the
+transcript, attributed to whoever wrote the cell's notes, not a mechanical extraction; the spans
+stay with it so anyone can check the reading.
+
+## What this eval measures, and what it does not
+
+It shows how many decisions reached the user as a question or as something to recognize, rather
+than having to be written up front. It does not show whether the answers were right, whether a
+person felt less load, or anything about rework.
+
+A result is an observation of one model on one day, and it changes as models change. It goes into
+the pull request body or the commit message it informs, never onto a state surface — a README, an
+`AGENTS.md`, this file — where nothing re-runs it. A surface may say that this eval exists and
+what it counts; it does not say what it found. Records (`results/`) are gitignored for the same
+reason.
+
+## Boundary with `/realize`
+
+`/realize` judges whether a run follows a protocol's declared transitions. This skill reuses its
+cases — scaffold, prompts, oracles, invocation lines and isolation — by path, and changes none of
+them; a question about whether a gate fired belongs there.
 
 ## Design
 
-- **Pair.** A case pairs an underspecified request with its fully specified sibling on one
-  scaffold. The underspecified variant is where the protocol has something to find and carries
-  the falsifier; the fully specified one is the guardrail — what the protocol costs where there
-  is nothing to find.
-- **Arms.** `bare` and `protocol`. The protocol arm gets the plugin and the `/realize` invocation
-  line, nothing else: no instruction to wait, no extra harness rule. Adding one to that arm alone
-  would measure a stronger intervention than the shipped contract.
-- **Phase A** runs from the task to the first implementation. The user side is played
-  mechanically by the variant's `oracle.md` from `/realize`, plus two rules of this skill: phase A
-  ends at the first turn that writes an implementation, and a turn that neither implements nor
-  hands anything back gets the case's go line once. Snapshot A is taken there.
-- **Phase B** sends the full specification. Its user side follows the fully specified case's
-  oracle — permission gets `Yes, go ahead.`, anything else `It's all in my message — go with what
-  I wrote.` — until a turn hands nothing back. The final snapshot is taken there.
-- **Frozen checklist.** Each case fixture holds a checklist written before the first run from
-  the fully specified request, and records digests of the `/realize` files it was derived from;
-  every spending or scoring command refuses when those files have changed.
-- **Metrics.** First score (checklist passes at snapshot A), final score, rework (lines changed
-  between the snapshots outside `tests/`, by a minimal line diff — a measure of the artifact, not
-  of the effort a person would spend repairing it), questions handed back, turns, and total cost
-  in the runner's unit — USD on Claude, input tokens on Codex. Rework, completion and cost are
-  reported as three findings; cost qualifies a reduction in rework rather than falsifying it. On
-  the user side,
-  the answer form of each phase-A reply line: which oracle rule produced it, and for a table value
-  whether the subject had presented it for the user to recognize or the oracle released it when
-  asked, read by the case's answer-form fixture into a recognized share.
+- **Arms.** `bare` and `protocol`. The protocol arm gets the plugin and `/realize`'s invocation
+  line, nothing else. A rule added to that arm alone would credit the protocol with what the
+  harness added.
+- **Dialogue.** The user side is played mechanically by the variant's `oracle.md`, up to the first
+  turn that writes an implementation; a turn that neither implements nor hands anything back gets
+  the case's go line once. The notes then close the cell.
+- **Frozen case.** `case.json` holds the sha256 of every reused `/realize` file and invocation
+  line; every command that spends refuses when one has changed, since items read against a
+  different request or oracle are a different case.
 
 ## Runbook
 
 ```bash
 S=.claude/skills/outcome/scripts/outcome.mjs
-node $S plan --runner claude --model claude-sonnet-5 --reps 2 --budget 3 --dry-run   # argument check only
-node $S plan --runner claude --model claude-sonnet-5 --reps 2 --budget 3
-node $S plan --runner codex --model gpt-6-luna --effort xhigh --codex-auth login     # or api-key (default)
-node $S setup <run>                            # scorer venv; codex bare/protocol homes
+node $S plan --runner claude --model claude-sonnet-5 --reps 2 --dry-run   # argument check only
+node $S plan --runner claude --model claude-sonnet-5 --reps 2
+node $S plan --runner codex --model gpt-6-luna --effort xhigh --codex-auth login   # or api-key (default)
+node $S setup <run>                            # codex: bare and protocol homes
 node $S turn <run> <cell> --open               # then --reply <file> | --go, as the oracle says
-node $S snap <run> <cell> A
-node $S turn <run> <cell> --phase-b            # then --reply <file> until nothing is handed back
-node $S snap <run> <cell> final
-node $S note <run> <cell>                      # template, then fill the manual judgments
+node $S note <run> <cell>                      # closes the cell; fill the items, then run again
 node $S report <run> [<run> ...] [--out <dir>]
 node $S teardown <run>                         # work trees and homes; records stay
 ```
 
-Read `references/runbook.md` before the first run: the per-turn oracle procedure, how phase
-boundaries and the manual items are judged, authentication for each runner, where isolation
-lives, and why a Codex protocol cell writes code before any answer can arrive. Read
-`references/report-format.md` before quoting any result: the table, the means, the three findings
-per model and when the rework claim fails, and what a result can and cannot claim.
+Read `references/runbook.md` before the first run: the turn procedure, how to write the notes'
+items, authentication and isolation per runner, and why a Codex protocol cell writes code before
+any answer can arrive.
 
-Records go to `.claude/skills/outcome/results/`, work trees and homes under the system temporary
-directory; neither is tracked, since both belong to the run that made them.
+## Prerequisites and tests
 
-## Prerequisites
-
-Node 22+ and the runner's CLI (`claude` or `codex`) on PATH. Python 3.11+ with `venv` and `pip`
-is required because the case's FastAPI app has to run for the functional checks; the same probe
-script reads the app's source with Python's own parser, so no second parser has to agree with
-it. Everything else is Node. `setup` builds the scorer venv from the case's
-`scorer-requirements.txt`, which needs PyPI access once; on Debian or Ubuntu,
-`apt install python3-venv` supplies the venv module.
-
-## Tests
-
-The pure parts — checklist loading, the fixture's frozen digests, the scoring rules, diffing,
-aggregation and the per-model findings — have their own test, which calls no model:
+Node 22+ and the runner's CLI (`claude` or `codex`) on PATH. The pure parts have a test that calls
+no model:
 
 ```bash
 node --test .claude/skills/outcome/scripts/lib.test.mjs
 ```
-
-A new case is a new directory under `cases/`; `references/runbook.md` §Adding a case says what
-it must hold and when its checklist is frozen.

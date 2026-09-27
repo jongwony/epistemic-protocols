@@ -1,5 +1,5 @@
 {
-  "description": "/inquire on the rate-limiter task: the underspecified request against the fully specified one, both on /realize's scaffold.",
+  "description": "/inquire on the rate-limiter task: the underspecified request and its fully specified sibling, both on /realize's scaffold, prompts and oracles.",
   "realizeTarget": "inquire",
   "realizeConfig": ".claude/skills/realize/harness.config.json",
   "scaffold": ".claude/skills/realize/evals/scaffold.sh",
@@ -13,20 +13,7 @@
       "oracle": ".claude/skills/realize/evals/inquire-fully-specified/oracle.md"
     }
   },
-  "phaseB": {
-    "lead": "phase-b.md",
-    "specification": "full",
-    "oracle": "full"
-  },
   "goLine": "Please go ahead and implement it.",
-  "falsifierVariant": "under",
-  "guardrailVariant": "full",
-  "testPrefix": "tests/",
-  "checklist": "checklist.md",
-  "probes": "probes.py",
-  "rules": "rules.mjs",
-  "answerForms": "answer-forms.mjs",
-  "scorerRequirements": "scorer-requirements.txt",
   "frozenAgainst": {
     ".claude/skills/realize/evals/scaffold.sh": "14ea8ae964920e59cdd48cec0fbf11848b8f80f423da5cbe3915413b2be97bf0",
     ".claude/skills/realize/evals/inquire-underspecified/prompt.md": "a4d49544706328350d8febc6444455519a0c22f0943a87daf88830e5553bf87b",

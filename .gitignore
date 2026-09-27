@@ -33,7 +33,7 @@ docs/audit-delta-*.md
 .claude/skills/realize/.work/
 .claude/skills/realize/.codex/
 
-# /outcome records. Each run's transcripts, snapshots, scores and report are an observation of
+# /outcome records. Each run's transcripts, notes and report are an observation of
 # that run, like the /realize results above; its work trees and Codex homes already live under
 # the system temporary directory.
 .claude/skills/outcome/results/

@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // The outcome eval's runner: plan a paired matrix, set up isolation, drive one subject turn at a
-// time, snapshot and score, and aggregate. The user side of each dialogue is played by a person
-// (or an agent) applying the case's oracle; this script sends what they compose and records
-// everything else. Node standard library only; see ../SKILL.md and ../references/runbook.md.
+// time up to the first implementation, check the notes' items, and list them. The user side of
+// each dialogue is played by a person (or an agent) applying the case's oracle; this script sends
+// what they compose and records everything else. Node standard library only; see ../SKILL.md and
+// ../references/runbook.md.
 //
 //   node outcome.mjs plan --runner claude|codex --model M [--effort E] [--case C] [--variants v,..]
 //                         [--reps N] [--arms bare,protocol] [--budget USD] [--timeout S]
 //                         [--codex-auth api-key|login] [--run NAME] [--dry-run]
 //   node outcome.mjs setup <run>
-//   node outcome.mjs turn <run> <cell> --open | --go | --phase-b | --reply <file>
-//   node outcome.mjs snap <run> <cell> A|final
+//   node outcome.mjs turn <run> <cell> --open | --go | --reply <file>
 //   node outcome.mjs note <run> <cell>
 //   node outcome.mjs status <run>
 //   node outcome.mjs reset <run> <cell>
@@ -19,17 +19,15 @@
 
 import { spawnSync } from 'node:child_process';
 import {
-  copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync,
-  readlinkSync, renameSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync,
+  copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync,
+  renameSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync,
 } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import {
-  auditPaths, buildRow, cellList, childEnv, classifyReplies, composeOpen, composePhaseB, diffTrees,
-  evaluateFindings, groupMeans, guardrails, loadChecklist, parseArgs, parseClaudeTurn,
-  parseCodexTurn, renderReport, replyItemsTemplate, sha256, snapshotKeeps, stripFrontmatter,
-  summarizeForms, treeDigest, validateNotes, validatePlan,
+  armCounts, auditPaths, buildRow, cellList, childEnv, composeOpen, parseArgs, parseClaudeTurn,
+  parseCodexTurn, renderReport, sha256, stripFrontmatter, treeDigest, validateNotes, validatePlan,
 } from './lib.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -40,8 +38,6 @@ const TURN_CLAUDE = join(HERE, 'turn-claude.sh');
 const repoKey = sha256(REPO).slice(0, 12);
 const RESULTS = resolve(process.env.OUTCOME_RESULTS_DIR || join(SKILL, 'results'));
 const STATE = resolve(process.env.OUTCOME_STATE_DIR || join(tmpdir(), `epistemic-outcome-${repoKey}`));
-const SCORER_VENV = join(STATE, 'scorer-venv');
-const SCORER_PY = join(SCORER_VENV, 'bin', 'python');
 
 // Teardown and reset delete under these roots; refuse the paths where a typo is unrecoverable.
 for (const [name, dir] of [['OUTCOME_RESULTS_DIR', RESULTS], ['OUTCOME_STATE_DIR', STATE]]) {
@@ -79,19 +75,18 @@ function loadCase(name) {
     allowedTools: realize.allowedTools,
     permissionMode: realize.permissionMode,
     marketplace: readJson(join(REPO, '.claude-plugin', 'marketplace.json')).name,
-    checklist: loadChecklist(readFileSync(join(dir, spec.checklist), 'utf8')),
   };
 }
 
-// The checklist and the phase-B message were derived from /realize's case files as they stood
-// when the checklist was frozen. A later edit there changes the task under a frozen scorer, so
-// every entry point that spends or scores refuses until the fixture is re-derived.
+// Items are read against the opening request, and the user side answers from the oracle, as both
+// stood when the case was frozen. A later edit there makes a different case whose counts do not
+// compare with this one's, so every entry point that spends refuses until a new case is made.
 function frozenMismatches(c) {
   const out = [];
   for (const [rel, digest] of Object.entries(c.spec.frozenAgainst)) {
     const p = join(REPO, rel);
     if (!existsSync(p)) out.push(`${rel} is missing`);
-    else if (sha256(readFileSync(p)) !== digest) out.push(`${rel} changed since the checklist was frozen`);
+    else if (sha256(readFileSync(p)) !== digest) out.push(`${rel} changed since the case was frozen`);
   }
   for (const [runner, digest] of Object.entries(c.spec.frozenInvocation || {})) {
     const line = c.target.invocation?.[runner];
@@ -103,8 +98,8 @@ function frozenMismatches(c) {
 function requireFrozen(c) {
   const bad = frozenMismatches(c);
   if (bad.length) {
-    die(`case ${c.name} no longer matches what its checklist was frozen against:\n  - ${bad.join('\n  - ')}\n`
-      + 're-derive the fixture (a new case directory with its own checklist) instead of scoring a changed task with a frozen checklist');
+    die(`case ${c.name} no longer matches what it was frozen against:\n  - ${bad.join('\n  - ')}\n`
+      + 'make a new case directory for the changed request or oracle instead of re-digesting this one');
   }
 }
 
@@ -152,7 +147,7 @@ function createCell(plan, c, cell) {
     run: plan.run, name: cell.name, runner: plan.runner, model: plan.model, effort: plan.effort,
     case: plan.case, variant: cell.variant, arm: cell.arm, rep: cell.rep,
     work: workDir(plan.run, cell.name), scaffoldDigest: treeDigest(workDir(plan.run, cell.name)),
-    sessionId: null, phaseBTurn: null, createdAt: new Date().toISOString(),
+    sessionId: null, createdAt: new Date().toISOString(),
   });
 }
 
@@ -174,7 +169,7 @@ function cmdPlan(argv) {
     `run        : ${plan.run}`,
     `runner     : ${plan.runner}${plan.runner === 'codex' ? ` (auth ${plan.codexAuth})` : ''}`,
     `model      : ${plan.model}${plan.effort ? ` (effort ${plan.effort})` : ''}`,
-    `case       : ${plan.case} — variants ${plan.variants.join(', ')}; checklist items ${c.checklist.map((i) => i.id).join(' ')}`,
+    `case       : ${plan.case} — variants ${plan.variants.join(', ')}`,
     `arms × reps: ${plan.arms.join(', ')} × ${plan.reps}`,
     `per turn   : ${plan.runner === 'claude' ? `--max-budget-usd ${plan.budgetUsd}, ` : ''}timeout ${plan.timeoutS} s`,
     `records    : ${runDir(plan.run)}`,
@@ -183,8 +178,7 @@ function cmdPlan(argv) {
   ];
   console.log(lines.join('\n'));
   if (flags['dry-run']) {
-    const tools = [plan.runner, 'python3'].map((b) => `${b} ${onPath(b) ? 'found' : 'NOT on PATH'}`);
-    console.log(`prerequisites: ${tools.join(', ')}; scorer venv ${existsSync(SCORER_PY) ? 'present' : 'not built (setup builds it)'}`);
+    console.log(`prerequisites: ${plan.runner} ${onPath(plan.runner) ? 'found' : 'NOT on PATH'}`);
     console.log('dry run: arguments and frozen sources checked; nothing written, no model called');
     return;
   }
@@ -201,6 +195,11 @@ function cmdPlan(argv) {
 const CODEX_KEEP = new Set(['config.toml', 'plugins', '.tmp', 'auth.json']);
 const codexHome = (run, arm) => join(stateDir(run), 'codex-home', arm);
 const ownerFile = (run, arm) => join(stateDir(run), 'codex-home', `${arm}.owner`);
+// A Codex home serves one cell from its first turn until the cell is closed or reset.
+function releaseHome(plan, arm, name) {
+  if (plan.runner === 'codex' && existsSync(ownerFile(plan.run, arm))
+      && readFileSync(ownerFile(plan.run, arm), 'utf8').trim() === name) rmSync(ownerFile(plan.run, arm));
+}
 const LOGIN_SOURCE = join((process.env.CODEX_HOME || join(homedir(), '.codex')).replace(/^~/, homedir()), 'auth.json');
 // The same lock file /realize's harness takes, so the two never hold this login at once.
 const LOGIN_LOCK = join(tmpdir(), `epistemic-realize-codex-login-${sha256(LOGIN_SOURCE).slice(0, 12)}.lock`);
@@ -284,24 +283,12 @@ function codexPluginState(home, c) {
 
 // ------------------------------------------------------------------ setup
 
-function buildScorer(c) {
-  if (existsSync(SCORER_PY)) { console.log(`scorer venv : ${SCORER_VENV} (present)`); return; }
-  if (!onPath('python3')) die('python3 is required to build the scorer venv (the case app must run to be probed)');
-  mkdirSync(STATE, { recursive: true });
-  let r = spawnSync('python3', ['-m', 'venv', SCORER_VENV], { stdio: 'inherit' });
-  if (r.status !== 0) die('python3 -m venv failed (on Debian/Ubuntu install python3-venv)');
-  r = spawnSync(join(SCORER_VENV, 'bin', 'pip'), ['install', '--quiet', '-r', join(c.dir, c.spec.scorerRequirements)], { stdio: 'inherit' });
-  if (r.status !== 0) { rmSync(SCORER_VENV, { recursive: true, force: true }); die('installing the scorer pins failed'); }
-  console.log(`scorer venv : ${SCORER_VENV} (built from ${c.spec.scorerRequirements})`);
-}
-
 function cmdSetup([run]) {
   if (!run) die('usage: setup <run>');
   const plan = loadRun(run);
   const c = loadCase(plan.case);
   requireFrozen(c);
   if (!onPath(plan.runner)) die(`${plan.runner} is not on PATH`);
-  buildScorer(c);
   if (plan.runner !== 'codex') { console.log('claude: each cell gets an empty config directory at its first turn; nothing else to build'); return; }
   const stray = releaseLogins(run);
   if (stray.length) die(strayMessage(stray));
@@ -328,28 +315,16 @@ function cmdSetup([run]) {
 
 // ------------------------------------------------------------------ turn
 
-function composeMessage(plan, c, cell, flags, n) {
-  const kinds = ['open', 'go', 'phase-b', 'reply'].filter((k) => flags[k] !== undefined);
-  if (kinds.length !== 1) die('turn takes exactly one of --open, --go, --phase-b, --reply <file>');
+function composeMessage(c, cell, flags, n, plan) {
+  const kinds = ['open', 'go', 'reply'].filter((k) => flags[k] !== undefined);
+  if (kinds.length !== 1) die('turn takes exactly one of --open, --go, --reply <file>');
   const kind = kinds[0];
-  const hasA = existsSync(join(recDir(plan.run, cell.name), 'A.score.json'));
   if (kind === 'open') {
     if (n !== 0) die(`${cell.name} already has ${n} turn(s); --open is the first turn only`);
     return { kind, text: composeOpen(taskBody(c, cell.variant), cell.arm, c.target.invocation[plan.runner]) };
   }
   if (n === 0) die(`${cell.name} has no turn yet; start it with --open`);
-  if (existsSync(join(recDir(plan.run, cell.name), 'final.score.json'))) die(`${cell.name} is finished (final snapshot taken)`);
-  if (kind === 'phase-b') {
-    if (!hasA) die(`take the phase-A snapshot first: snap ${plan.run} ${cell.name} A`);
-    if (cell.phaseBTurn) die(`${cell.name} already received the phase-B message at turn ${cell.phaseBTurn}`);
-    const lead = readFileSync(join(c.dir, c.spec.phaseB.lead), 'utf8');
-    return { kind, text: composePhaseB(lead, taskBody(c, c.spec.phaseB.specification)) };
-  }
-  if (hasA && !cell.phaseBTurn) die(`the phase-A snapshot is taken; the next turn is --phase-b (or reset the cell)`);
-  if (kind === 'go') {
-    if (cell.phaseBTurn) die('--go belongs to phase A');
-    return { kind, text: c.spec.goLine };
-  }
+  if (kind === 'go') return { kind, text: c.spec.goLine };
   const file = flags.reply;
   if (!file || !existsSync(file)) die(`--reply needs an existing file (got ${JSON.stringify(file)})`);
   const text = readFileSync(file, 'utf8').trim();
@@ -387,9 +362,9 @@ function runCodexTurn(plan, c, cell, message, outPrefix) {
   if (authState(home) === 'file') die(strayMessage([authPath(home)]));
   if (!cell.sessionId) {
     // A fresh cell resets the home's volatile state, which would wipe another cell's session,
-    // so a home serves one cell at a time from its first turn to its final snapshot.
+    // so a home serves one cell at a time from its first turn until the cell is closed.
     const owner = existsSync(ownerFile(plan.run, cell.arm)) ? readFileSync(ownerFile(plan.run, cell.arm), 'utf8').trim() : '';
-    if (owner && owner !== cell.name) die(`the ${cell.arm} codex home is held by ${owner} until its final snapshot`);
+    if (owner && owner !== cell.name) die(`the ${cell.arm} codex home is held by ${owner} until that cell is closed (note) or reset`);
     for (const e of readdirSync(home)) if (!CODEX_KEEP.has(e)) rmSync(join(home, e), { recursive: true, force: true });
     writeFileSync(ownerFile(plan.run, cell.arm), `${cell.name}\n`);
   }
@@ -469,13 +444,14 @@ function runCodexTurn(plan, c, cell, message, outPrefix) {
 function cmdTurn(argv) {
   const { flags, positionals } = parseArgs(argv);
   const [run, name] = positionals;
-  if (!run || !name) die('usage: turn <run> <cell> --open | --go | --phase-b | --reply <file>');
+  if (!run || !name) die('usage: turn <run> <cell> --open | --go | --reply <file>');
   const plan = loadRun(run);
   const c = loadCase(plan.case);
   requireFrozen(c);
   const cell = loadCell(plan, name);
   const n = turnCount(run, name);
-  const msg = composeMessage(plan, c, cell, flags, n);
+  if (existsSync(join(recDir(run, name), 'notes.json'))) die(`${name} is closed: its notes were started after turn ${n}`);
+  const msg = composeMessage(c, cell, flags, n, plan);
   const turn = n + 1;
   const rec = recDir(run, name);
   const outPrefix = join(rec, `turn-${turn}`);
@@ -490,142 +466,50 @@ function cmdTurn(argv) {
   const after = treeDigest(cell.work);
   writeFileSync(`${outPrefix}.txt`, res.parsed.texts.join('\n\n----- [next assistant text] -----\n\n'));
   const meta = {
-    turn, kind: msg.kind, phase: cell.phaseBTurn || msg.kind === 'phase-b' ? 'B' : 'A',
+    turn, kind: msg.kind,
     runner: plan.runner, model: plan.model, effort: plan.effort, arm: cell.arm,
     id: res.id, wallS, completed: res.parsed.completed,
     integrity: { ok: res.reasons.length === 0, reasons: res.reasons },
     treeChanged: before !== after, treeChangedSinceScaffold: after !== cell.scaffoldDigest,
     commands: res.parsed.commands,
-    ...(plan.runner === 'claude'
-      ? { costUsd: res.parsed.costUsd, usage: res.parsed.usage, resultSubtype: res.parsed.resultSubtype, isError: res.parsed.isError, skillInvocations: res.parsed.skillInvocations, toolUses: res.parsed.toolUses }
-      : { usage: res.parsed.usage, failed: res.parsed.failed }),
+    ...(plan.runner === 'claude' ? { skillInvocations: res.parsed.skillInvocations } : { failed: res.parsed.failed }),
     ...res.extra,
   };
   writeJson(`${outPrefix}.meta.json`, meta);
   if (!cell.sessionId && res.id) cell.sessionId = res.id;
-  if (msg.kind === 'phase-b') cell.phaseBTurn = turn;
   writeJson(join(rec, 'cell.json'), cell);
-  console.log(`${name} turn ${turn} (${msg.kind}, phase ${meta.phase}): ${meta.completed ? 'completed' : 'INCOMPLETE'}, `
+  console.log(`${name} turn ${turn} (${msg.kind}): ${meta.completed ? 'completed' : 'INCOMPLETE'}, `
     + `tree ${meta.treeChanged ? 'changed' : 'unchanged'}, integrity ${meta.integrity.ok ? 'ok' : `FAILED (${meta.integrity.reasons.join('; ')})`}, ${wallS} s`);
   console.log(`read: ${relative(process.cwd(), `${outPrefix}.txt`)}`);
   if (res.fatal) die(res.fatal, 4);
   if (!meta.completed) process.exitCode = 2;
 }
 
-// ------------------------------------------------------------------ snapshot and score
-
-function scoreSnapshot(c, snap) {
-  if (!existsSync(SCORER_PY)) die(`no scorer venv at ${SCORER_VENV}; run setup`);
-  const r = spawnSync(SCORER_PY, [join(c.dir, c.spec.probes), snap], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
-  if (r.status !== 0) die(`probes failed: ${r.stderr}`);
-  return JSON.parse(r.stdout);
-}
-
-async function cmdSnap([run, name, label]) {
-  if (!run || !name || !['A', 'final'].includes(label)) die('usage: snap <run> <cell> A|final');
-  const plan = loadRun(run);
-  const c = loadCase(plan.case);
-  requireFrozen(c);
-  const cell = loadCell(plan, name);
-  const n = turnCount(run, name);
-  const rec = recDir(run, name);
-  if (label === 'A') {
-    if (!n) die(`${name} has no turn yet`);
-    if (cell.phaseBTurn) die(`${name} is already in phase B; the phase-A snapshot is fixed`);
-  } else {
-    if (!cell.phaseBTurn) die(`${name} has not received the phase-B message`);
-  }
-  const snap = join(rec, 'snapshots', label);
-  rmSync(snap, { recursive: true, force: true });
-  mkdirSync(snap, { recursive: true });
-  cpSync(cell.work, snap, { recursive: true, filter: (src) => src === cell.work || snapshotKeeps(src.split('/').pop()) });
-  const ref = mkdtempSync(join(tmpdir(), 'outcome-scaffold-'));
-  try {
-    scaffoldInto(c, ref);
-    const evidence = scoreSnapshot(c, snap);
-    const { score } = await import(pathToFileURL(join(c.dir, c.spec.rules)).href);
-    const { auto, manualEvidence } = score({ evidence, snapshotDir: snap, scaffoldDir: ref });
-    const fromScaffold = diffTrees(ref, snap, { testPrefix: c.spec.testPrefix });
-    const out = { label, afterTurn: n, auto, manualEvidence, evidence, implemented: fromScaffold.rework > 0, changedFromScaffold: fromScaffold.changed };
-    writeJson(join(rec, `${label}.score.json`), out);
-    console.log(`${name} ${label} after turn ${n}: auto ${JSON.stringify(auto)} (sum ${Object.values(auto).reduce((s, v) => s + v, 0)})`);
-    console.log(`manual items to confirm by reading the snapshot: ${JSON.stringify(manualEvidence)}`);
-    if (label === 'final') {
-      const d = diffTrees(join(rec, 'snapshots', 'A'), snap, { testPrefix: c.spec.testPrefix });
-      writeJson(join(rec, 'phase-b.diff.json'), d);
-      console.log(`phase B: ${d.files} files, ${d.lines} lines; rework (outside ${c.spec.testPrefix}) ${d.reworkFiles} files, ${d.rework} lines`);
-      if (plan.runner === 'codex' && existsSync(ownerFile(run, cell.arm))
-          && readFileSync(ownerFile(run, cell.arm), 'utf8').trim() === name) rmSync(ownerFile(run, cell.arm));
-    }
-  } finally {
-    rmSync(ref, { recursive: true, force: true });
-  }
-}
-
 // ------------------------------------------------------------------ notes, status, reset
 
-function manualItems(c) {
-  return import(pathToFileURL(join(c.dir, c.spec.rules)).href).then((m) => m.MANUAL);
-}
+const turnTexts = (run, name, n) => Array.from({ length: n }, (_, i) => readFileSync(join(recDir(run, name), `turn-${i + 1}.txt`), 'utf8'));
 
-async function cmdNote([run, name]) {
+// The first call closes the dialogue and writes the template; later calls check it.
+function cmdNote([run, name]) {
   if (!run || !name) die('usage: note <run> <cell>');
   const plan = loadRun(run);
-  const c = loadCase(plan.case);
   const cell = loadCell(plan, name);
-  const manual = await manualItems(c);
-  const fx = await answerFixture(c);
   const p = join(recDir(run, name), 'notes.json');
   const n = turnCount(run, name);
   if (!existsSync(p)) {
-    const aTurns = cell.phaseBTurn ? cell.phaseBTurn - 1 : n;
-    const blank = Object.fromEntries(manual.map((k) => [k, null]));
-    const phaseA = Array.from({ length: aTurns }, (_, i) => i + 1);
-    writeJson(p, {
-      phaseA_turns: phaseA,
-      phaseB_turns: Array.from({ length: Math.max(0, n - aTurns) }, (_, i) => aTurns + i + 1),
-      questions_phaseA: [], q_explicit: null, q_items_total: null,
-      manual: { A: { ...blank }, final: { ...blank } },
-      ...(fx ? { reply_items: replyItemsTemplate(phaseAReplies(run, name, phaseA), fx) } : {}),
-      notes_phaseA: '', notes_phaseB: '',
-    });
-    console.log(`wrote a template: ${p}\nfill q_explicit, q_items_total, questions_phaseA and manual.{A,final} by reading the transcript and snapshots`
-      + (fx ? ', and each reply_items entry\'s item with the verbatim text of the item that line answers' : ''));
+    if (!n) die(`${name} has no turn yet`);
+    writeJson(p, { lastTurn: n, items: null, notes: '' });
+    releaseHome(plan, cell.arm, name);
+    console.log(`${name} is closed after turn ${n}; wrote a template: ${p}\n`
+      + 'fill items with every decision item the AI raised that the opening request did not contain: '
+      + '{ "turn", "via": "asked"|"presented", "item", "span" } (see references/runbook.md §Notes)');
     return;
   }
   const notes = readJson(p);
-  const errors = validateNotes(notes, { turns: n, manualItems: manual });
+  const errors = validateNotes(notes, { turnTexts: turnTexts(run, name, n) });
   if (errors.length) die(`${p}:\n  - ${errors.join('\n  - ')}`);
-  if (fx) {
-    const forms = classifyReplies({ replies: phaseAReplies(run, name, notes.phaseA_turns), items: notes.reply_items || [], fixture: fx });
-    if (forms.errors.length) die(`${p}:\n  - ${forms.errors.join('\n  - ')}`);
-    const summary = summarizeForms(forms.lines);
-    writeJson(join(recDir(run, name), 'answer-forms.json'), { summary, lines: forms.lines });
-    const open = forms.lines.filter((l) => l.labels.some((x) => x.label === 'unclassified') || l.itemNotFound);
-    console.log(`answer forms: fields presented/released/unknown ${summary.fields.presented}/${summary.fields.released}/${summary.unknown}, `
-      + `recognized share ${summary.fields.unverified ? `none while ${summary.fields.unverified} field(s) lack an item excerpt`
-        : summary.share === null ? 'n=0' : `${summary.share.toFixed(2)} (n=${summary.n})`}`);
-    for (const l of open) console.log(`  unclassified turn ${l.turn} line ${l.line}: ${l.itemNotFound || l.labels.find((x) => x.label === 'unclassified').why || 'see answer-forms.json'}`);
-  }
-  console.log(`${p}: complete`);
-}
-
-// The case's answer-form fixture, or null when the case defines none.
-async function answerFixture(c) {
-  if (!c.spec.answerForms) return null;
-  const m = await import(pathToFileURL(join(c.dir, c.spec.answerForms)).href);
-  return { answers: m.ORACLE_ANSWERS, exampleClause: m.EXAMPLE_CLAUSE, clauseBoundary: m.CLAUSE_BOUNDARY, negation: m.NEGATION };
-}
-
-// The phase-A turns that carried an oracle reply, each with the subject turn it answers. A --go
-// turn is the runner's rule, not an oracle reply, and is not among them.
-function phaseAReplies(run, name, aTurns) {
-  const rec = recDir(run, name);
-  return aTurns.filter((t) => t > 1 && turnMeta(run, name, t).kind === 'reply').map((t) => ({
-    turn: t,
-    text: readFileSync(join(rec, `turn-${t}.msg`), 'utf8'),
-    prevText: readFileSync(join(rec, `turn-${t - 1}.txt`), 'utf8'),
-  }));
+  const asked = notes.items.filter((x) => x.via === 'asked').length;
+  console.log(`${p}: complete — ${notes.items.length} item(s), ${asked} asked, ${notes.items.length - asked} presented`);
 }
 
 function cmdStatus([run]) {
@@ -634,18 +518,14 @@ function cmdStatus([run]) {
   for (const { name } of cellList(plan)) {
     const rec = recDir(run, name);
     if (!existsSync(join(rec, 'cell.json'))) { console.log(`${name}: missing`); continue; }
-    const cell = readJson(join(rec, 'cell.json'));
     const n = turnCount(run, name);
     const metas = Array.from({ length: n }, (_, i) => turnMeta(run, name, i + 1));
     const firstChange = metas.findIndex((m) => m.treeChangedSinceScaffold) + 1;
     const bits = [
       `${n} turn(s)`,
       n ? `turn 1 ${metas[0].treeChanged ? 'wrote code' : 'stopped before code'}` : null,
-      firstChange ? `first change at turn ${firstChange}` : (n ? 'no change yet' : null),
-      existsSync(join(rec, 'A.score.json')) ? 'A snapped' : null,
-      cell.phaseBTurn ? `phase B from turn ${cell.phaseBTurn}` : null,
-      existsSync(join(rec, 'final.score.json')) ? 'final snapped' : null,
-      existsSync(join(rec, 'notes.json')) ? 'notes present' : null,
+      firstChange ? `first implementation at turn ${firstChange}` : (n ? 'no implementation yet' : null),
+      existsSync(join(rec, 'notes.json')) ? 'closed, notes present' : null,
       metas.some((m) => !m.integrity.ok) ? 'INTEGRITY FAILED' : null,
     ].filter(Boolean);
     console.log(`${name}: ${bits.join(', ')}`);
@@ -660,71 +540,53 @@ function cmdReset([run, name]) {
   const rec = recDir(run, name);
   const kept = `${rec}.discarded-${new Date().toISOString().replace(/[:.]/g, '-')}`;
   renameSync(rec, kept);
-  if (plan.runner === 'codex' && existsSync(ownerFile(run, cell.arm))
-      && readFileSync(ownerFile(run, cell.arm), 'utf8').trim() === name) rmSync(ownerFile(run, cell.arm));
+  releaseHome(plan, cell.arm, name);
   createCell(plan, c, { name, variant: cell.variant, arm: cell.arm, rep: cell.rep });
   console.log(`${name}: records moved to ${kept}; a fresh scaffold is in place`);
 }
 
 // ------------------------------------------------------------------ report
 
-async function cellRow(plan, c, name, manual) {
+function cellRow(plan, c, name) {
   const rec = recDir(plan.run, name);
-  const missing = ['cell.json', 'A.score.json', 'final.score.json', 'phase-b.diff.json', 'notes.json'].filter((f) => !existsSync(join(rec, f)));
+  const missing = ['cell.json', 'notes.json'].filter((f) => !existsSync(join(rec, f)));
   if (missing.length) return { skip: `missing ${missing.join(', ')}` };
   const cell = readJson(join(rec, 'cell.json'));
   const n = turnCount(plan.run, name);
   const turns = Array.from({ length: n }, (_, i) => turnMeta(plan.run, name, i + 1));
   const notes = readJson(join(rec, 'notes.json'));
-  const errors = validateNotes(notes, { turns: n, manualItems: manual });
+  const errors = validateNotes(notes, { turnTexts: turnTexts(plan.run, name, n) });
   if (errors.length) return { skip: `notes.json: ${errors.join('; ')}` };
-  const scores = { A: readJson(join(rec, 'A.score.json')), final: readJson(join(rec, 'final.score.json')) };
-  if (scores.A.afterTurn !== notes.phaseA_turns[notes.phaseA_turns.length - 1]) return { skip: 'the A snapshot was not taken after the last phase-A turn' };
-  if (scores.final.afterTurn !== n) return { skip: 'the final snapshot was not taken after the last turn' };
-  const fx = await answerFixture(c);
-  let answerForms = null;
-  if (fx) {
-    answerForms = classifyReplies({ replies: phaseAReplies(plan.run, name, notes.phaseA_turns), items: notes.reply_items || [], fixture: fx });
-    if (answerForms.errors.length) return { skip: `notes.json reply_items: ${answerForms.errors.join('; ')}` };
-  }
   const reasons = turns.flatMap((t) => t.integrity.reasons.map((r) => `turn ${t.turn}: ${r}`));
-  const cellDir = cellStateDir(plan.run, name);
   const allowed = [c.pluginDir, join(codexHome(plan.run, cell.arm), 'plugins', 'cache')];
-  const pathFlags = auditPaths(turns.flatMap((t) => t.commands || []), { ownDir: cellDir, roots: [STATE, RESULTS, REPO], allowed });
+  const pathFlags = auditPaths(turns.flatMap((t) => t.commands || []), { ownDir: cellStateDir(plan.run, name), roots: [STATE, RESULTS, REPO], allowed });
   writeJson(join(rec, 'path-audit.json'), pathFlags);
-  return {
-    row: buildRow({
-      cell, turns, notes, scores, diff: readJson(join(rec, 'phase-b.diff.json')),
-      integrity: { ok: reasons.length === 0, reasons }, pathFlags, answerForms,
-    }),
-  };
+  return { row: buildRow({ cell, turns, notes, integrity: { ok: reasons.length === 0, reasons }, pathFlags }) };
 }
 
-async function cmdReport(argv) {
+function cmdReport(argv) {
   const { flags, positionals } = parseArgs(argv);
   if (!positionals.length) die('usage: report <run> [<run> ...] [--out <dir>]');
   if (positionals.length > 1 && !flags.out) die('reporting several runs together needs --out <dir>');
   const out = resolve(flags.out || runDir(positionals[0]));
   const rows = []; const skipped = [];
-  let caseSpec = null;
+  let c = null;
   for (const run of positionals) {
     const plan = loadRun(run);
-    const c = loadCase(plan.case);
-    if (caseSpec && caseSpec.name !== c.name) die('a report covers one case');
-    caseSpec = c;
-    const manual = await manualItems(c);
+    const next = loadCase(plan.case);
+    if (c && c.name !== next.name) die('a report covers one case');
+    c = next;
     for (const { name } of cellList(plan)) {
-      const r = await cellRow(plan, c, name, manual);
+      const r = cellRow(plan, c, name);
       if (r.row) rows.push(r.row); else skipped.push(`${run}/${name}: ${r.skip}`);
     }
   }
-  const means = groupMeans(rows);
-  const findings = evaluateFindings(means, { variant: caseSpec.spec.falsifierVariant });
-  const guards = guardrails(means, { variant: caseSpec.spec.guardrailVariant });
-  const scope = `case ${caseSpec.name}; runs ${positionals.join(', ')}; ${rows.length} cell(s) reported`;
+  const arms = armCounts(rows);
+  const requests = Object.fromEntries(Object.keys(c.spec.variants).map((v) => [v, taskBody(c, v)]));
+  const scope = `case ${c.name}; runs ${positionals.join(', ')}; ${rows.length} cell(s) reported`;
   mkdirSync(out, { recursive: true });
-  writeJson(join(out, 'results.json'), { rows, means, findings, guards, skipped });
-  let md = renderReport({ rows, means, findings, guards, scope });
+  writeJson(join(out, 'results.json'), { rows, arms, skipped });
+  let md = renderReport({ rows, arms, requests, scope });
   if (skipped.length) md += `\n## Not reported\n\n${skipped.map((s) => `- ${s}`).join('\n')}\n`;
   writeFileSync(join(out, 'report.md'), md);
   console.log(md);
@@ -755,7 +617,7 @@ function cmdTeardown([run]) {
 
 const [cmd, ...rest] = process.argv.slice(2);
 const commands = {
-  plan: cmdPlan, setup: cmdSetup, turn: cmdTurn, snap: cmdSnap, note: cmdNote, status: cmdStatus,
+  plan: cmdPlan, setup: cmdSetup, turn: cmdTurn, note: cmdNote, status: cmdStatus,
   reset: cmdReset, report: cmdReport, 'release-login': cmdReleaseLogin, teardown: cmdTeardown,
 };
 if (!commands[cmd]) die(`usage: outcome.mjs <${Object.keys(commands).join('|')}> ...`);

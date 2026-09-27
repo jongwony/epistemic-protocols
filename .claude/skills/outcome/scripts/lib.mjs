@@ -1,6 +1,6 @@
-// Pure parts of the outcome eval: argument checking, message composition, checklist loading,
-// trace parsing, tree diffing, aggregation and the per-model findings. Node standard library
-// only. Everything that spawns a process or owns a directory lives in outcome.mjs.
+// Pure parts of the outcome eval: argument checking, message composition, trace parsing, the
+// notes' items, and the report. Node standard library only. Everything that spawns a process or
+// owns a directory lives in outcome.mjs.
 
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -13,7 +13,7 @@ export const CODEX_AUTH = ['api-key', 'login'];
 
 // ------------------------------------------------------------------ arguments
 
-const BOOLEAN_FLAGS = new Set(['dry-run', 'open', 'go', 'phase-b']);
+const BOOLEAN_FLAGS = new Set(['dry-run', 'open', 'go']);
 
 export function parseArgs(argv) {
   const flags = {};
@@ -56,6 +56,7 @@ export function validatePlan(flags, { cases = [], variantsOf = () => [] } = {}) 
     errors.push('--effort applies only to the codex runner');
   }
 
+  // A spending cap per Claude turn, so a runaway turn stops; it is not a measure.
   let budgetUsd = null;
   if (runner === 'claude') {
     budgetUsd = flags.budget === undefined ? 3 : posNum(flags.budget);
@@ -119,34 +120,7 @@ export function composeOpen(taskBody, arm, invocation) {
   return arm === 'protocol' ? `${taskBody}\n\n${invocation}` : taskBody;
 }
 
-export function composePhaseB(lead, specificationBody) {
-  return `${lead.trim()}\n\n${specificationBody}`;
-}
-
 export const sha256 = (data) => createHash('sha256').update(data).digest('hex');
-
-// ------------------------------------------------------------------ checklist
-
-// A checklist is a markdown table of `| id | requirement | how it is checked |` rows whose check
-// cell opens with `functional:` or `static:`. Anything else in the file is prose.
-export function loadChecklist(text) {
-  const items = [];
-  for (const line of text.split('\n')) {
-    if (!/^\|\s*R\d+\s*\|/.test(line)) continue;
-    const cells = line.split('|');
-    if (cells.length !== 5 || cells[0].trim() || cells[4].trim()) {
-      throw new Error(`checklist row does not have exactly three cells: ${line.slice(0, 60)}`);
-    }
-    const [id, requirement, check] = cells.slice(1, 4).map((c) => c.trim());
-    const kind = /^(functional|static):/.exec(check)?.[1];
-    if (!kind) throw new Error(`checklist ${id}: the check must open with "functional:" or "static:"`);
-    if (!requirement) throw new Error(`checklist ${id}: empty requirement`);
-    if (items.some((it) => it.id === id)) throw new Error(`checklist ${id}: duplicate id`);
-    items.push({ id, requirement, check, kind });
-  }
-  if (!items.length) throw new Error('checklist has no rows');
-  return items;
-}
 
 // ------------------------------------------------------------------ environment
 
@@ -163,75 +137,21 @@ export function childEnv(env) {
 
 // ------------------------------------------------------------------ trees
 
-// What a snapshot keeps: everything but dot-entries, __pycache__ and a venv directory.
-export const snapshotKeeps = (name) => !(name.startsWith('.') || name === '__pycache__' || name === 'venv');
-
-export function listFiles(dir, keep = snapshotKeeps) {
-  const out = new Map();
+// /realize's tree digest: sha256 per file over sorted relative paths, dot-entries and
+// __pycache__ excluded. A digest that differs from the scaffold's means the subject wrote code.
+export function treeDigest(dir) {
+  const out = [];
   const walk = (d, rel) => {
     for (const e of readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-      if (!keep(e.name)) continue;
+      if (e.name.startsWith('.') || e.name === '__pycache__') continue;
       const p = join(d, e.name);
       const r = rel ? `${rel}/${e.name}` : e.name;
       if (e.isDirectory()) walk(p, r);
-      else if (e.isFile()) out.set(r, p);
+      else if (e.isFile()) out.push(`${r}:${sha256(readFileSync(p))}`);
     }
   };
   if (existsSync(dir)) walk(dir, '');
-  return out;
-}
-
-// /realize's tree digest: sha256 per file over sorted relative paths, dot-entries and
-// __pycache__ excluded. Equal digests before and after a turn mean the turn wrote nothing.
-export function treeDigest(dir) {
-  const files = listFiles(dir, (n) => !(n.startsWith('.') || n === '__pycache__'));
-  return [...files].map(([r, p]) => `${r}:${sha256(readFileSync(p))}`).join('\n');
-}
-
-const lines = (text) => {
-  if (text === null) return [];
-  const ls = text.split('\n');
-  if (ls[ls.length - 1] === '') ls.pop();
-  return ls;
-};
-
-function lcsLength(a, b) {
-  let prev = new Uint32Array(b.length + 1);
-  let cur = new Uint32Array(b.length + 1);
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] + 1 : Math.max(prev[j], cur[j - 1]);
-    }
-    [prev, cur] = [cur, prev];
-  }
-  return prev[b.length];
-}
-
-// Lines added and removed by a minimal line diff, as `diff -N` counts them; a missing file
-// counts as empty.
-export function diffCounts(before, after) {
-  const a = lines(before);
-  const b = lines(after);
-  const common = lcsLength(a, b);
-  return { plus: b.length - common, minus: a.length - common };
-}
-
-// Phase-B rework: every file that differs between the two snapshots, and its changed lines;
-// files under testPrefix are counted apart, since rework is measured on the rest.
-export function diffTrees(beforeDir, afterDir, { testPrefix = 'tests/' } = {}) {
-  const a = listFiles(beforeDir);
-  const b = listFiles(afterDir);
-  const out = { files: 0, plus: 0, minus: 0, lines: 0, reworkFiles: 0, rework: 0, changed: [] };
-  for (const rel of [...new Set([...a.keys(), ...b.keys()])].sort()) {
-    const x = a.has(rel) ? readFileSync(a.get(rel)) : null;
-    const y = b.has(rel) ? readFileSync(b.get(rel)) : null;
-    if (x && y && x.equals(y)) continue;
-    const { plus, minus } = diffCounts(x && x.toString('utf8'), y && y.toString('utf8'));
-    out.files++; out.plus += plus; out.minus += minus; out.lines += plus + minus;
-    out.changed.push(rel);
-    if (!rel.startsWith(testPrefix)) { out.reworkFiles++; out.rework += plus + minus; }
-  }
-  return out;
+  return out.join('\n');
 }
 
 // ------------------------------------------------------------------ traces
@@ -247,7 +167,7 @@ function jsonLines(text) {
 
 export function parseClaudeTurn(text, { skillPattern = /inquire|aitesis/ } = {}) {
   let sessionId = null; let init = null; let result = null;
-  const texts = []; const tools = []; const skills = []; const commands = [];
+  const texts = []; const skills = []; const commands = [];
   for (const e of jsonLines(text)) {
     sessionId = e.session_id || sessionId;
     if (e.type === 'system' && e.subtype === 'init') init = e;
@@ -256,40 +176,29 @@ export function parseClaudeTurn(text, { skillPattern = /inquire|aitesis/ } = {})
     for (const c of e.message.content) {
       if (c.type === 'text') texts.push(c.text);
       if (c.type !== 'tool_use') continue;
-      tools.push(c.name);
       if (c.name === 'Skill' && c.input?.skill) skills.push(String(c.input.skill));
       for (const k of ['command', 'file_path', 'path', 'notebook_path']) {
         if (typeof c.input?.[k] === 'string') commands.push(c.input[k]);
       }
     }
   }
-  const usage = {};
-  for (const m of Object.values(result?.modelUsage || {})) {
-    for (const [k, v] of Object.entries(m)) if (typeof v === 'number' && /Tokens$/.test(k)) usage[k] = (usage[k] || 0) + v;
-  }
   return {
     sessionId,
     completed: Boolean(init && result),
     initPlugins: (init?.plugins || []).map((p) => p.name),
     initSkillsMatching: (init?.skills || []).filter((s) => skillPattern.test(s)),
-    model: init?.model ?? null,
     skillInvocations: skills,
-    toolUses: tools,
     commands,
-    resultSubtype: result?.subtype ?? null,
-    isError: result?.is_error ?? null,
-    costUsd: typeof result?.total_cost_usd === 'number' ? result.total_cost_usd : null,
-    usage,
     texts,
   };
 }
 
 export function parseCodexTurn(text) {
-  let threadId = null; let usage = null; let completed = false; let failed = null;
+  let threadId = null; let completed = false; let failed = null;
   const texts = []; const commands = []; const fileChanges = [];
   for (const e of jsonLines(text)) {
     if (e.type === 'thread.started') threadId = e.thread_id;
-    if (e.type === 'turn.completed') { completed = true; usage = e.usage || null; }
+    if (e.type === 'turn.completed') completed = true;
     if (e.type === 'turn.failed' || e.type === 'error') failed = e;
     if (e.type !== 'item.completed' || !e.item) continue;
     const it = e.item;
@@ -297,15 +206,15 @@ export function parseCodexTurn(text) {
     if (it.type === 'command_execution') commands.push(it.command || '');
     if (it.type === 'file_change') fileChanges.push(...(it.changes || []).map((c) => `${c.kind} ${c.path}`));
   }
-  return { threadId, completed: completed && Boolean(threadId), failed, usage, texts, commands, fileChanges };
+  return { threadId, completed: completed && Boolean(threadId), failed, texts, commands, fileChanges };
 }
 
 // ------------------------------------------------------------------ path audit
 
 // Commands that name a path outside the cell's own directory: another cell, the run's records,
 // the repository, or a climb to the parent. Flags are for reading, not an integrity verdict.
-// `roots` are the directories a subject has no business reading: the run state holding other
-// cells, the records, the repository. `allowed` carves out what a treatment legitimately reads.
+// `roots` are the directories a subject has no business reading; `allowed` carves out what a
+// treatment legitimately reads.
 export function auditPaths(commands, { ownDir, roots = [], allowed = [] }) {
   const flags = [];
   for (const cmd of commands) {
@@ -322,476 +231,127 @@ export function auditPaths(commands, { ownDir, roots = [], allowed = [] }) {
   return flags;
 }
 
-// ------------------------------------------------------------------ notes
+// ------------------------------------------------------------------ items
 
-export function validateNotes(notes, { turns, manualItems }) {
-  const errors = [];
-  if (!notes || typeof notes !== 'object') return ['notes.json is not an object'];
-  const seq = (k) => Array.isArray(notes[k]) && notes[k].every((n) => Number.isInteger(n) && n > 0);
-  if (!seq('phaseA_turns') || !notes.phaseA_turns.length) errors.push('phaseA_turns must list the phase-A turn numbers');
-  if (!seq('phaseB_turns') || !notes.phaseB_turns.length) errors.push('phaseB_turns must list the phase-B turn numbers');
-  if (!errors.length) {
-    const all = [...notes.phaseA_turns, ...notes.phaseB_turns];
-    const want = Array.from({ length: turns }, (_, i) => i + 1);
-    if (all.join() !== want.join()) errors.push(`phaseA_turns then phaseB_turns must be exactly turns 1..${turns} in order`);
-  }
-  for (const k of ['q_explicit', 'q_items_total']) {
-    if (!Number.isInteger(notes[k]) || notes[k] < 0) errors.push(`${k} must be a non-negative integer`);
-  }
-  if (Number.isInteger(notes.q_explicit) && Number.isInteger(notes.q_items_total) && notes.q_items_total < notes.q_explicit) {
-    errors.push('q_items_total counts every handed-back item, so it cannot be below q_explicit');
-  }
-  if (!Array.isArray(notes.questions_phaseA)) errors.push('questions_phaseA must be a list (empty when none)');
-  for (const label of ['A', 'final']) {
-    const m = notes.manual?.[label];
-    const keys = m && typeof m === 'object' ? Object.keys(m).sort() : [];
-    if (keys.join() !== [...manualItems].sort().join()) errors.push(`manual.${label} must hold exactly ${manualItems.join(', ')}`);
-    else if (!keys.every((k) => m[k] === 0 || m[k] === 1)) errors.push(`manual.${label} values must be 0 or 1`);
-  }
-  return errors;
-}
-
-// ------------------------------------------------------------------ answer forms
-
-// What each phase-A user reply line asked of the user. The case fixture maps each oracle answer
-// to a form, splits each table value into fields, and holds the tests for whether the subject's
-// handed-back item carried a proposal and which fields it presented; this code only applies that
-// mapping. The fixture's header defines every label and field status.
-export const ANSWER_LABELS = ['recognized', 'composed', 'rejected', 'reframed', 'deferred', 'unknown', 'pointer',
-  'permission', 'sufficient', 'repeated', 'unclassified'];
-export const FIELD_STATUSES = ['presented', 'released', 'example', 'repeat', 'unverified'];
+// How a decision item reached the user: `asked` — put as a question, answered by recalling;
+// `presented` — shown as an option or default, for the user to recognize, pick or correct.
+export const VIA = ['asked', 'presented'];
 
 const normText = (s) => String(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
   .replace(/[*`]/g, '').replace(/\s+/g, ' ').trim();
-const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const globalRe = (re) => new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
 
-export function replyLines(text) {
-  return String(text).split('\n').map((l) => l.trim()).filter(Boolean);
-}
-
-// The oracle answers found in one reply line, in the order they appear. Literal answers are
-// matched longest first and never overlap, so a shorter answer inside a longer one is not
-// counted twice.
-export function matchOracleAnswers(line, answers) {
-  const s = normText(line);
-  const taken = [];
-  const hits = [];
-  const ordered = [...answers].sort((a, b) => (b.text ? normText(b.text).length : 0) - (a.text ? normText(a.text).length : 0));
-  for (const a of ordered) {
-    const re = a.text ? new RegExp(escapeRe(normText(a.text)), 'g') : globalRe(a.pattern);
-    for (const m of s.matchAll(re)) {
-      const span = [m.index, m.index + m[0].length];
-      if (taken.some(([x, y]) => span[0] < y && x < span[1])) continue;
-      taken.push(span);
-      hits.push({ at: m.index, answer: a });
-    }
-  }
-  return hits.sort((x, y) => x.at - y.at).map((h) => h.answer);
-}
-
-// The start of the clause holding position `at`: just past the nearest boundary before it.
-function clauseStart(text, at, boundary) {
-  let start = 0;
-  for (const m of text.matchAll(globalRe(boundary))) {
-    if (m.index + m[0].length <= at) start = m.index + m[0].length;
-    else break;
-  }
-  return start;
-}
-
-// The first value `re` finds in `text` that no negation earlier in its own clause names as
-// absent ("there are no API keys"), or null.
-function presentedIn(text, re, fixture, negationBlind) {
-  for (const m of text.matchAll(globalRe(re))) {
-    if (negationBlind || !fixture.negation) return m[0];
-    const lead = text.slice(clauseStart(text, m.index, fixture.clauseBoundary), m.index);
-    if (!fixture.negation.test(lead)) return m[0];
-  }
-  return null;
-}
-
-// One table answer against the item it answers. `disclosed` holds the fields earlier replies in
-// the cell already released. Returns the field statuses and the rule-derived labels.
-export function classifyTableAnswer(answer, item, disclosed, fixture) {
-  const key = (f) => `${answer.rule}:${f.name}`;
-  if (item === null) {
-    const fields = answer.fields.map((f) => ({ field: key(f), status: disclosed.has(key(f)) ? 'repeat' : 'unverified' }));
-    if (fields.every((f) => f.status === 'repeat')) return { rule: answer.rule, fields, labels: ['repeated'] };
-    return { rule: answer.rule, fields, labels: ['unclassified'], reason: 'no verified item excerpt on record' };
-  }
-  const full = normText(item);
-  const stripped = fixture.exampleClause ? full.replace(globalRe(fixture.exampleClause), ' ') : full;
-  const fields = answer.fields.map((f) => {
-    if (disclosed.has(key(f))) return { field: key(f), status: 'repeat' };
-    const hit = presentedIn(stripped, f.value, fixture, f.negationBlind);
-    if (hit) return { field: key(f), status: 'presented', evidence: hit };
-    if (presentedIn(full, f.value, fixture, f.negationBlind)) return { field: key(f), status: 'example' };
-    return { field: key(f), status: 'released' };
-  });
-  const st = (s) => fields.some((f) => f.status === s);
-  const labels = [];
-  let evidence; let reason;
-  if (!fields.some((f) => f.status !== 'repeat')) labels.push('repeated');
-  else if (st('presented')) {
-    labels.push('recognized');
-    if (st('released')) labels.push('composed');
-  } else if (st('example')) { labels.push('unclassified'); reason = 'the answer\'s value sits only in an example clause'; } else {
-    const proposal = presentedIn(stripped, answer.topic, fixture);
-    if (proposal) { labels.push('rejected'); evidence = proposal; } else if (presentedIn(full, answer.topic, fixture)) {
-      labels.push('unclassified'); reason = 'the only proposal on the topic sits in an example clause';
-    } else labels.push('composed');
-  }
-  return { rule: answer.rule, fields, labels, ...(evidence ? { proposal: evidence } : {}), ...(reason ? { reason } : {}) };
-}
-
-// Every phase-A reply line of a cell, labelled. `replies` are the reply turns in order:
-// { turn, text (what was sent), prevText (the subject turn it answers) }. `items` are the notes'
-// reply_items: { turn, line, text, item, review? } — `item` the verbatim excerpt (a string, or a
-// list of spans) of the handed-back item the line answers, which must occur in prevText; `review`
-// labels a reader adds after the fact, [{ label, why }], kept apart from the rule-derived ones.
-// An entry naming no sent line, or whose text is not that line, is an error: the notes and the
-// records disagree.
-export function classifyReplies({ replies, items = [], fixture }) {
+// A cell's notes: `lastTurn` (the dialogue's last subject turn), and `items`, each
+// { turn, via, item, span } — `item` a short name, `span` the verbatim text (a string, or a list
+// of strings where the item is split) of the subject turn that raised it. `turnTexts[i]` is
+// turn i+1's text. Whether a span is a decision item the opening request did not contain is the
+// reader's attribution; what is checked here is that the reading can be checked: every span
+// occurs in the turn it names.
+export function validateNotes(notes, { turnTexts }) {
+  if (!notes || typeof notes !== 'object') return ['notes.json is not an object'];
   const errors = [];
-  const out = [];
-  const byKey = new Map();
-  if (!Array.isArray(items)) errors.push('reply_items must be a list');
-  else {
-    for (const e of items) {
-      const spansOk = e && (e.item === null || typeof e.item === 'string'
-        || (Array.isArray(e.item) && e.item.every((s) => typeof s === 'string')));
-      if (!e || !Number.isInteger(e.turn) || !Number.isInteger(e.line) || typeof e.text !== 'string' || !spansOk) {
-        errors.push(`reply_items entry ${JSON.stringify(e).slice(0, 80)} needs integer turn and line, the line's text, and item (string, list of strings, or null)`);
-        continue;
-      }
-      for (const r of e.review || []) {
-        if (!ANSWER_LABELS.includes(r?.label) || typeof r?.why !== 'string' || !r.why.trim()) {
-          errors.push(`reply_items ${e.turn}:${e.line}: a review label needs one of ${ANSWER_LABELS.join('|')} and a why`);
-        }
-      }
-      if (byKey.has(`${e.turn}:${e.line}`)) errors.push(`reply_items ${e.turn}:${e.line} appears twice`);
-      byKey.set(`${e.turn}:${e.line}`, e);
+  if (notes.lastTurn !== turnTexts.length) errors.push(`lastTurn must be ${turnTexts.length}, the cell's last turn`);
+  if (!Array.isArray(notes.items)) return [...errors, 'items must be a list (empty when the AI raised none)'];
+  notes.items.forEach((e, i) => {
+    const at = `items[${i}]`;
+    if (!e || typeof e !== 'object') { errors.push(`${at} is not an object`); return; }
+    if (!Number.isInteger(e.turn) || e.turn < 1 || e.turn > turnTexts.length) errors.push(`${at}.turn must be a turn 1..${turnTexts.length}`);
+    if (!VIA.includes(e.via)) errors.push(`${at}.via must be one of ${VIA.join('|')}`);
+    if (typeof e.item !== 'string' || !e.item.trim()) errors.push(`${at}.item must name the item`);
+    const spans = typeof e.span === 'string' ? [e.span] : e.span;
+    if (!Array.isArray(spans) || !spans.length || !spans.every((s) => typeof s === 'string' && normText(s))) {
+      errors.push(`${at}.span must be the verbatim text that raised the item (a string or a list of strings)`);
+    } else if (Number.isInteger(e.turn) && turnTexts[e.turn - 1] !== undefined) {
+      const text = normText(turnTexts[e.turn - 1]);
+      for (const s of spans) if (!text.includes(normText(s))) errors.push(`${at}.span not found in turn ${e.turn}: ${JSON.stringify(s.slice(0, 60))}`);
     }
-  }
-  const seen = new Set();
-  const disclosed = new Set();
-  for (const r of replies) {
-    const prev = normText(r.prevText || '');
-    replyLines(r.text).forEach((text, i) => {
-      const line = i + 1;
-      const key = `${r.turn}:${line}`;
-      const entry = byKey.get(key);
-      if (entry) {
-        seen.add(key);
-        if (normText(entry.text) !== normText(text)) errors.push(`reply_items ${key}: text does not match the sent line`);
-      }
-      const spans = entry?.item == null ? [] : [].concat(entry.item);
-      const unfound = spans.filter((s) => !prev.includes(normText(s)));
-      const item = spans.length && !unfound.length ? spans.join('\n') : null;
-      const answers = matchOracleAnswers(text, fixture.answers);
-      const results = answers.map((a) => (a.form === 'by-item'
-        ? classifyTableAnswer(a, item, disclosed, fixture)
-        : { rule: a.rule, fields: [], labels: [a.form] }));
-      for (const res of results) for (const f of res.fields) disclosed.add(f.field);
-      const labels = [];
-      const add = (label, source, why) => { if (!labels.some((l) => l.label === label && l.source === source)) labels.push({ label, source, ...(why ? { why } : {}) }); };
-      if (!answers.length) add('unclassified', 'rule', 'no oracle answer found in the line');
-      for (const res of results) for (const l of res.labels) add(l, 'rule', res.reason);
-      for (const rv of entry?.review || []) add(rv.label, 'review', rv.why);
-      out.push({
-        turn: r.turn, line, text, answers: results, labels,
-        ...(unfound.length ? { itemNotFound: `excerpt not found in turn ${r.turn - 1}'s text` } : {}),
-      });
-    });
-  }
-  for (const k of byKey.keys()) if (!seen.has(k)) errors.push(`reply_items ${k}: no such phase-A reply line`);
-  return { lines: out, errors };
-}
-
-// Per cell: how many lines carry each label (a line can carry several; review labels are counted
-// apart as well), the field statuses, the unknown answers, and the recognized share — fields the
-// subject presented before the user disclosed them, over those plus the fields the oracle released
-// plus the unknown answers. Example and repeat fields are outside the share. The share is null when
-// nothing was settled, and while any field is unverified: a line whose item excerpt is missing
-// leaves the notes incomplete, and a share over the rest would read as a finished number.
-export function summarizeForms(lines) {
-  const labels = Object.fromEntries(ANSWER_LABELS.map((l) => [l, 0]));
-  const review = Object.fromEntries(ANSWER_LABELS.map((l) => [l, 0]));
-  const fields = Object.fromEntries(FIELD_STATUSES.map((s) => [s, 0]));
-  let unknown = 0;
-  for (const l of lines) {
-    for (const lab of new Set(l.labels.map((x) => x.label))) labels[lab]++;
-    for (const x of l.labels) if (x.source === 'review') review[x.label]++;
-    for (const a of l.answers) {
-      if (a.rule === 'Default') unknown++;
-      for (const f of a.fields) fields[f.status]++;
-    }
-  }
-  const n = fields.presented + fields.released + unknown;
-  return { lines: lines.length, labels, review, fields, unknown, n, share: n && !fields.unverified ? fields.presented / n : null };
-}
-
-// The reply_items template: one entry per line that carries a table value, item left for the
-// person filling the notes to quote from the turn the line answers.
-export function replyItemsTemplate(replies, fixture) {
-  const out = [];
-  for (const r of replies) {
-    replyLines(r.text).forEach((text, i) => {
-      const answers = matchOracleAnswers(text, fixture.answers);
-      if (answers.some((a) => a.form === 'by-item')) {
-        out.push({ turn: r.turn, line: i + 1, text, rules: answers.map((a) => a.rule), item: null });
-      }
-    });
-  }
-  return out;
-}
-
-// ------------------------------------------------------------------ aggregation
-
-// A resumed Claude session reports its running total in every result event, so a cell's cost
-// is its last turn's figure. A total that ever falls means a turn did not resume that session;
-// the per-turn figures are then summed and the basis says so.
-export function claudeCellCost(costs) {
-  if (!costs.length || costs.some((c) => typeof c !== 'number')) return { costUsd: null, basis: 'missing' };
-  const monotonic = costs.every((c, i) => i === 0 || c >= costs[i - 1]);
-  return monotonic
-    ? { costUsd: costs[costs.length - 1], basis: 'cumulative' }
-    : { costUsd: costs.reduce((s, c) => s + c, 0), basis: 'summed' };
-}
-
-const sum = (o) => Object.values(o || {}).reduce((s, v) => s + v, 0);
-
-// One row per cell, from the facts outcome.mjs gathered. `turns` are the per-turn metas in
-// order; `scores` the A and final score files; `diff` the A-to-final diffTrees result.
-export function buildRow({ cell, turns, notes, scores, diff, integrity, pathFlags = [], answerForms = null }) {
-  const first = sum(scores.A.auto) + sum(notes.manual.A);
-  const final = sum(scores.final.auto) + sum(notes.manual.final);
-  const row = {
-    run: cell.run, cell: cell.name, runner: cell.runner, model: cell.model, effort: cell.effort ?? null,
-    variant: cell.variant, arm: cell.arm, rep: cell.rep,
-    integrity: integrity.ok, integrity_reasons: integrity.reasons,
-    stopped_first_turn: turns[0]?.treeChanged === false,
-    a_implemented: scores.A.implemented,
-    q: notes.q_explicit, q_items: notes.q_items_total,
-    a_turns: notes.phaseA_turns.length, b_turns: notes.phaseB_turns.length,
-    first, first_detail: { ...scores.A.auto, ...notes.manual.A },
-    final, final_detail: { ...scores.final.auto, ...notes.manual.final },
-    b_files: diff.files, b_lines: diff.lines, b_plus: diff.plus, b_minus: diff.minus,
-    rework_files: diff.reworkFiles, rework: diff.rework,
-    wall: turns.reduce((s, t) => s + (t.wallS || 0), 0), subj_turns: turns.length,
-    path_flags: pathFlags.length,
-  };
-  // Answer forms of the phase-A reply lines; null throughout when the case defines none.
-  const af = answerForms ? summarizeForms(answerForms.lines) : null;
-  Object.assign(row, {
-    af_lines: af ? af.lines : null, af_labels: af ? af.labels : null, af_review: af ? af.review : null,
-    af_fields: af ? af.fields : null,
-    af_presented: af ? af.fields.presented : null, af_released: af ? af.fields.released : null,
-    af_unknown: af ? af.unknown : null, af_n: af ? af.n : null, af_share: af ? af.share : null,
-    af_detail: answerForms ? answerForms.lines : null,
   });
-  if (cell.runner === 'claude') {
-    const { costUsd, basis } = claudeCellCost(turns.map((t) => t.costUsd));
-    const last = turns[turns.length - 1]?.usage || {};
-    Object.assign(row, {
-      skill_invoked: (turns[0]?.skillInvocations || []).some((s) => /(^|:)inquire$/.test(s)),
-      cost_usd: costUsd, cost_basis: basis, cost_unit: 'usd', total_cost: costUsd,
-      in_tok: last.inputTokens ?? null, out_tok: last.outputTokens ?? null,
-      cache_read: last.cacheReadInputTokens ?? null, cache_create: last.cacheCreationInputTokens ?? null,
-    });
-  } else {
-    // A resumed codex thread reports its running total; the last turn's figure is the cell's.
-    const usages = turns.map((t) => t.usage || {});
-    const u = usages[usages.length - 1] || {};
-    Object.assign(row, {
-      skill_invoked: 'trace-unavailable',
-      cost_unit: 'input_tokens', total_cost: u.input_tokens ?? null,
-      in_tok: u.input_tokens ?? null, cached_in_tok: u.cached_input_tokens ?? null,
-      out_tok: u.output_tokens ?? null, reasoning_tok: u.reasoning_output_tokens ?? null,
-      usage_monotonic: usages.every((x, i) => i === 0 || (x.input_tokens || 0) >= (usages[i - 1].input_tokens || 0)),
-    });
-  }
-  return row;
-}
-
-export const MEAN_KEYS = ['q', 'q_items', 'a_turns', 'first', 'b_turns', 'b_lines', 'rework', 'final', 'total_cost', 'wall',
-  'af_presented', 'af_released', 'af_unknown'];
-
-const groupKey = (r) => `${r.runner}\u0000${r.model}\u0000${r.effort ?? ''}`;
-
-// Means per (model, variant, arm) over rows whose integrity held; failed rows are never averaged.
-export function groupMeans(rows) {
-  const groups = new Map();
-  for (const r of rows.filter((x) => x.integrity)) {
-    const k = `${groupKey(r)}\u0000${r.variant}\u0000${r.arm}`;
-    if (!groups.has(k)) groups.set(k, { runner: r.runner, model: r.model, effort: r.effort, variant: r.variant, arm: r.arm, rows: [] });
-    groups.get(k).rows.push(r);
-  }
-  return [...groups.values()].map((g) => {
-    const mean = {};
-    for (const key of MEAN_KEYS) {
-      const vals = g.rows.map((r) => r[key]).filter((v) => typeof v === 'number');
-      mean[key] = vals.length === g.rows.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
-    }
-    // The recognized share is a ratio per cell; it is averaged over the cells where something was
-    // settled, and the number of those cells travels with it.
-    const shares = g.rows.map((r) => r.af_share).filter((v) => typeof v === 'number');
-    mean.af_share = shares.length ? shares.reduce((s, v) => s + v, 0) / shares.length : null;
-    mean.af_share_cells = shares.length;
-    mean.stopped = g.rows.filter((r) => r.stopped_first_turn).length;
-    mean.unimplemented = g.rows.filter((r) => !r.a_implemented).length;
-    return { runner: g.runner, model: g.model, effort: g.effort, variant: g.variant, arm: g.arm, n: g.rows.length, mean };
-  });
-}
-
-// The per-model findings of references/report-format.md on the variant where the protocol has
-// something to find: rework, completion and cost as three separate findings, and the rework claim,
-// which fails on no reduction or on a reduction that left the work less finished. Cost is not one
-// of its failure conditions: a higher total cost qualifies whether the reduction saved anything,
-// it does not undo the reduction.
-export function evaluateFindings(means, { variant }) {
-  const out = [];
-  const byModel = new Map();
-  for (const m of means.filter((x) => x.variant === variant)) {
-    const k = groupKey(m);
-    if (!byModel.has(k)) byModel.set(k, {});
-    byModel.get(k)[m.arm] = m;
-  }
-  for (const pair of byModel.values()) {
-    const b = pair.bare; const p = pair.protocol;
-    const who = b || p;
-    const base = { runner: who.runner, model: who.model, effort: who.effort, variant };
-    if (!b || !p) { out.push({ ...base, claim: 'incomplete', reason: 'one arm has no cell whose integrity held' }); continue; }
-    const need = ['rework', 'final', 'total_cost'];
-    if (need.some((k) => b.mean[k] === null || p.mean[k] === null)) {
-      out.push({ ...base, claim: 'incomplete', reason: 'a mean the findings read is missing' }); continue;
-    }
-    const facts = {
-      n: { bare: b.n, protocol: p.n },
-      rework: { bare: b.mean.rework, protocol: p.mean.rework },
-      final: { bare: b.mean.final, protocol: p.mean.final },
-      first: { bare: b.mean.first, protocol: p.mean.first },
-      total_cost: { bare: b.mean.total_cost, protocol: p.mean.total_cost },
-      protocol_unimplemented: p.mean.unimplemented,
-    };
-    const findings = {
-      rework: p.mean.rework < b.mean.rework ? 'reduced' : 'no-reduction',
-      completion: p.mean.final < b.mean.final || p.mean.unimplemented > 0 ? 'unfinished-work' : 'finished',
-      cost: p.mean.total_cost > b.mean.total_cost ? 'higher' : 'not-higher',
-    };
-    let claim = 'not-falsified';
-    if (findings.rework === 'no-reduction') claim = 'no-reduction';
-    else if (findings.completion === 'unfinished-work') claim = 'unfinished-work';
-    out.push({ ...base, claim, findings, facts });
-  }
-  return out;
-}
-
-// The fully specified variant: what the protocol arm costs where there is nothing to find.
-export function guardrails(means, { variant }) {
-  const byModel = new Map();
-  for (const m of means.filter((x) => x.variant === variant)) {
-    const k = groupKey(m);
-    if (!byModel.has(k)) byModel.set(k, {});
-    byModel.get(k)[m.arm] = m;
-  }
-  return [...byModel.values()].filter((p) => p.bare && p.protocol).map(({ bare, protocol }) => ({
-    runner: bare.runner, model: bare.model, effort: bare.effort, variant,
-    q: { bare: bare.mean.q, protocol: protocol.mean.q },
-    first: { bare: bare.mean.first, protocol: protocol.mean.first },
-    final: { bare: bare.mean.final, protocol: protocol.mean.final },
-    total_cost: { bare: bare.mean.total_cost, protocol: protocol.mean.total_cost },
-  }));
+  return errors;
 }
 
 // ------------------------------------------------------------------ report
 
-const fmt = (v, d = 1) => (v === null || v === undefined ? '-' : (Number.isInteger(v) ? String(v) : v.toFixed(d)));
-const costCell = (r) => (r.runner === 'claude'
-  ? fmt(r.cost_usd, 4)
-  : `${fmt(r.in_tok)}/${fmt(r.cached_in_tok)}/${fmt(r.out_tok)}/${fmt(r.reasoning_tok)}`);
-const pair = (o, d = 1) => `${fmt(o.bare, d)} → ${fmt(o.protocol, d)}`;
-const LABEL_ABBR = { recognized: 'rec', composed: 'comp', rejected: 'rej', reframed: 'refr', deferred: 'def', unknown: 'unk',
-  pointer: 'ptr', permission: 'perm', sufficient: 'suff', repeated: 'rep', unclassified: 'uncl' };
-const labelsCell = (r) => {
-  if (!r.af_labels) return '-';
-  const parts = Object.entries(r.af_labels).filter(([, v]) => v > 0)
-    .map(([k, v]) => `${LABEL_ABBR[k]} ${v}${r.af_review?.[k] ? ` (${r.af_review[k]} rev)` : ''}`);
-  return parts.length ? parts.join(', ') : 'none';
-};
-const fieldsCell = (r) => (r.af_fields ? `${r.af_fields.presented}/${r.af_fields.released}/${r.af_unknown}` : '-');
-const shareCell = (r) => {
-  if (r.af_n === null || r.af_n === undefined) return '-';
-  if (r.af_fields.unverified) return `items missing (${r.af_fields.unverified} fields)`;
-  return r.af_n ? `${r.af_share.toFixed(2)} (n=${r.af_n})` : 'n=0';
-};
+// One row per cell. `turns` are the per-turn metas in order.
+export function buildRow({ cell, turns, notes, integrity, pathFlags = [] }) {
+  const idx = turns.findIndex((t) => t.treeChangedSinceScaffold);
+  const items = notes.items;
+  return {
+    run: cell.run, cell: cell.name, runner: cell.runner, model: cell.model, effort: cell.effort ?? null,
+    variant: cell.variant, arm: cell.arm, rep: cell.rep,
+    integrity: integrity.ok, integrity_reasons: integrity.reasons,
+    turns: turns.length, implemented_at: idx === -1 ? null : idx + 1,
+    count: items.length,
+    asked: items.filter((x) => x.via === 'asked').length,
+    presented: items.filter((x) => x.via === 'presented').length,
+    items,
+    path_flags: pathFlags.length,
+  };
+}
+
+const groupKey = (r) => `${r.runner}\u0000${r.model}\u0000${r.effort ?? ''}`;
+
+// Per (model, variant, arm), over the cells whose integrity held: each cell's count, and the
+// arm's total. A failed cell is listed under Integrity and counted nowhere.
+export function armCounts(rows) {
+  const groups = new Map();
+  for (const r of rows.filter((x) => x.integrity)) {
+    const k = `${groupKey(r)}\u0000${r.variant}\u0000${r.arm}`;
+    if (!groups.has(k)) groups.set(k, { runner: r.runner, model: r.model, effort: r.effort, variant: r.variant, arm: r.arm, cells: [] });
+    groups.get(k).cells.push(r);
+  }
+  return [...groups.values()].map((g) => {
+    const cells = g.cells.sort((a, b) => a.rep - b.rep);
+    const total = (key) => cells.reduce((s, r) => s + r[key], 0);
+    return {
+      runner: g.runner, model: g.model, effort: g.effort, variant: g.variant, arm: g.arm,
+      n: cells.length, perCell: cells.map((r) => r.count),
+      total: total('count'), asked: total('asked'), presented: total('presented'),
+    };
+  });
+}
+
 const modelLabel = (x) => `${x.model}${x.effort ? ` (effort ${x.effort})` : ''} · ${x.runner}`;
+const quote = (text) => text.split('\n').map((l) => `> ${l}`.trimEnd()).join('\n');
+const spanText = (s) => [].concat(s).map((x) => `"${normText(x)}"`).join(' … ');
 
-export function renderReport({ rows, means, findings, guards, scope }) {
-  const out = [];
-  out.push('# Outcome eval report', '');
-  out.push(`Scope: ${scope}`, '');
-  out.push('Observations from these runs only: one task, a scripted user, n per group as shown,',
-    'no significance test. Read references/report-format.md before quoting any number.', '');
-
-  out.push('## Findings per model', '');
-  out.push('Three separate findings, bare → protocol; the rework claim fails only on the first two. Rework counts',
-    'changed lines in the artifact, not the effort a person would spend repairing it.', '');
-  out.push('| model | n bare/protocol | rework (non-test lines) | rework | final | completion | total cost | cost | rework claim |');
-  out.push('|---|---|---|---|---|---|---|---|---|');
-  for (const v of findings) {
-    if (v.claim === 'incomplete') { out.push(`| ${modelLabel(v)} | - | - | - | - | - | - | - | incomplete: ${v.reason} |`); continue; }
-    const d = v.runner === 'claude' ? 3 : 0;
-    const f = v.findings;
-    out.push(`| ${modelLabel(v)} | ${v.facts.n.bare}/${v.facts.n.protocol} | ${pair(v.facts.rework)} | ${f.rework} | ${pair(v.facts.final)} | ${f.completion} | ${pair(v.facts.total_cost, d)} | ${f.cost} | ${v.claim} |`);
-  }
-  out.push('');
-
-  if (guards.length) {
-    out.push('## Guardrail: fully specified variant', '');
-    out.push('| model | questions | first | final | total cost |');
-    out.push('|---|---|---|---|---|');
-    for (const g of guards) {
-      const d = g.runner === 'claude' ? 3 : 0;
-      out.push(`| ${modelLabel(g)} | ${pair(g.q)} | ${pair(g.first)} | ${pair(g.final)} | ${pair(g.total_cost, d)} |`);
-    }
-    out.push('');
-  }
-
-  const models = [...new Map(rows.map((r) => [groupKey(r), r])).values()];
-  for (const m of models) {
-    const rs = rows.filter((r) => groupKey(r) === groupKey(m));
-    const codex = m.runner === 'codex';
-    out.push(`## ${modelLabel(m)}`, '');
-    out.push(`| cell | integrity | stopped at turn 1 | Qs explicit/items | reply labels | fields presented/released/unknown | recognized share | A turns | first | B turns | B files/lines | rework files/lines | final | ${codex ? 'tokens in/cached/out/reasoning' : 'cost $'} | wall s | path flags |`);
-    out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
-    for (const variant of [...new Set(rs.map((r) => r.variant))]) {
+// `requests` maps each variant to its opening request, shown before its cells: the items listed
+// under it are what that request did not contain, and so what the user would otherwise have had
+// to write into it.
+export function renderReport({ rows, arms, requests, scope }) {
+  const out = ['# Outcome eval report', '', `Scope: ${scope}`, ''];
+  out.push('Per cell: the decision items that entered the conversation through the AI — asked as a',
+    'question, or presented for the user to recognize — that the opening request did not contain.',
+    'Identifying an item is a reading of the transcript; each is listed with the span that raised it.',
+    'These are observations of one model on one day, not a standing claim.', '');
+  for (const variant of [...new Set(rows.map((r) => r.variant))]) {
+    out.push(`## Variant \`${variant}\``, '', 'Opening request:', '', quote(requests[variant] ?? '(not found)'), '');
+    for (const m of [...new Map(rows.filter((r) => r.variant === variant).map((r) => [groupKey(r), r])).values()]) {
+      out.push(`### ${modelLabel(m)}`, '');
+      out.push('| arm | cells | items per cell | items in the arm | asked / presented |', '|---|---|---|---|---|');
+      for (const a of arms.filter((x) => x.variant === variant && groupKey(x) === groupKey(m))) {
+        out.push(`| ${a.arm} | ${a.n} | ${a.perCell.join(', ')} | ${a.total} | ${a.asked} / ${a.presented} |`);
+      }
+      out.push('');
       for (const arm of ARMS) {
-        const grp = rs.filter((r) => r.variant === variant && r.arm === arm).sort((a, b) => a.rep - b.rep);
-        for (const r of grp) {
-          out.push(`| ${r.cell} | ${r.integrity ? 'ok' : 'FAILED'} | ${r.stopped_first_turn ? 'yes' : 'no'} | ${r.q}/${r.q_items} | ${labelsCell(r)} | ${fieldsCell(r)} | ${shareCell(r)} | ${r.a_turns} | ${r.first} | ${r.b_turns} | ${r.b_files}/${r.b_lines} | ${r.rework_files}/${r.rework} | ${r.final} | ${costCell(r)} | ${r.wall} | ${r.path_flags} |`);
-        }
-        const g = means.find((x) => groupKey(x) === groupKey(m) && x.variant === variant && x.arm === arm);
-        if (g) {
-          const c = codex ? `${fmt(g.mean.total_cost, 0)} in` : fmt(g.mean.total_cost, 3);
-          out.push(`| **mean ${variant}-${arm}** (n=${g.n}) | | ${g.mean.stopped}/${g.n} | ${fmt(g.mean.q)}/${fmt(g.mean.q_items)} | | ${fmt(g.mean.af_presented)}/${fmt(g.mean.af_released)}/${fmt(g.mean.af_unknown)} | ${g.mean.af_share === null ? `- (0/${g.n} cells)` : `${g.mean.af_share.toFixed(2)} (${g.mean.af_share_cells}/${g.n} cells)`} | ${fmt(g.mean.a_turns)} | ${fmt(g.mean.first)} | ${fmt(g.mean.b_turns)} | -/${fmt(g.mean.b_lines)} | -/${fmt(g.mean.rework)} | ${fmt(g.mean.final)} | ${c} | ${fmt(g.mean.wall, 0)} | |`);
+        for (const r of rows.filter((x) => x.variant === variant && groupKey(x) === groupKey(m) && x.arm === arm).sort((a, b) => a.rep - b.rep)) {
+          const impl = r.implemented_at ? `first implementation at turn ${r.implemented_at}` : 'no implementation';
+          const flags = [r.integrity ? null : 'INTEGRITY FAILED', r.path_flags ? `${r.path_flags} path flag(s)` : null].filter(Boolean);
+          out.push(`**${r.run}/${r.cell}** — ${r.turns} turn(s), ${impl}, ${r.count} item(s)${flags.length ? `; ${flags.join('; ')}` : ''}`, '');
+          for (const it of r.items) out.push(`- t${it.turn} ${it.via} — ${it.item}: ${spanText(it.span)}`);
+          if (r.items.length) out.push('');
         }
       }
     }
-    out.push('');
   }
-
   const failed = rows.filter((r) => !r.integrity);
   out.push('## Integrity', '');
   if (!failed.length) out.push('Every cell passed its treatment-integrity check.');
   else {
-    out.push('These cells are not evidence about the protocol and are left out of every mean:', '');
+    out.push('These cells are not evidence about the protocol and are counted in no arm:', '');
     for (const r of failed) out.push(`- ${r.run}/${r.cell}: ${r.integrity_reasons.join('; ')}`);
   }
   const flagged = rows.filter((r) => r.path_flags > 0);
   if (flagged.length) {
-    out.push('', `Cells with path-audit flags to read before quoting (see each cell's path-audit.json): ${flagged.map((r) => `${r.run}/${r.cell}`).join(', ')}`);
+    out.push('', `Read each flagged cell's path-audit.json before quoting it: ${flagged.map((r) => `${r.run}/${r.cell}`).join(', ')}`);
   }
   out.push('');
   return out.join('\n');
