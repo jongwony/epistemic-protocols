@@ -117,9 +117,8 @@ Different mechanisms check different things, and it helps to know where each one
 - **Lean proofs** — a protocol's contract is also written as a Lean model inside its `SKILL.md`. Lean checks that the properties stated about that model hold, under the assumptions the model declares; the judgments the model leaves open are among those assumptions, not things it proves. A protocol's [`lean/EpistemicProtocols/<Protocol>/Theorems.lean`](./lean/EpistemicProtocols) holds what is stated and proved about its model.
 - **Runtime evidence** — the contributor skill [`/realize`](./.claude/skills/realize/SKILL.md) runs a protocol in a real session and collects evidence that the steps it declares actually happen, through automatic checks plus a review of the transcript.
 - **Static checks** — [`/verify`](./.claude/skills/verify/SKILL.md) checks the files' structure: required sections, consistent names and references, matching versions.
-- **Outcome evidence** — the contributor skill [`/outcome`](./.claude/skills/outcome/SKILL.md) runs one task with and without a protocol, scores the first implementation against a checklist fixed in advance, then hands over the full specification and counts how much of that implementation had to change. A run's results are reported in the pull request it informs, not here.
 
-The first three stop at the protocol's own contract; outcome evidence looks at the work that follows it, one task at a time.
+None of these measures what happens downstream of a protocol, such as whether it reduces rework.
 
 ## For Contributors
 
