@@ -2,8 +2,9 @@
  * Repository-artifact sync layer: mechanical verdicts on repository artifacts
  * Lean does not see — plugin manifests and their versions, packaging, the
  * README / marketplace / routing-index / onboard surfaces that enumerate the
- * protocols, packaged-agent and Output Style copies that must stay in step
- * with their source, and the SKILL.md section schema (`structure`).
+ * protocols, a protocol's public Type signature against its MORPHISM,
+ * packaged-agent and Output Style copies that must stay in step with their
+ * source, and the SKILL.md section schema (`structure`).
  */
 
 const fs = require('fs');
@@ -159,6 +160,17 @@ function checkRoutingIndexContract(ctx) {
 // ============================================================
 // Check: Required Sections in Protocols
 // ============================================================
+// The MORPHISM clause lines, each at line start: the protocol router reads the
+// `deficit:` line in that shape.
+const MORPHISM_CLAUSES = ['requires', 'deficit', 'preserves', 'invariant'];
+
+// The MORPHISM's source object: its first line that is neither a step of the
+// `→` chain nor a clause.
+function morphismSource(section) {
+  return section.split('\n').map(line => line.trim()).filter(Boolean)
+    .find(line => !line.startsWith('→') && !new RegExp(`^(?:${MORPHISM_CLAUSES.join('|')}):`).test(line)) || null;
+}
+
 function checkRequiredSections(ctx) {
   const { projectRoot, results, protocolInputs } = ctx;
 
@@ -167,6 +179,9 @@ function checkRequiredSections(ctx) {
     '## Mode Activation',
     '## Protocol',
     '## Rules',
+    '── FLOW ──',
+    '── MORPHISM ──',
+    '── TYPES ──',
     '── PHASE TRANSITIONS ──',
     '── MODE STATE ──',
     '── TOOL GROUNDING ──',
@@ -174,22 +189,40 @@ function checkRequiredSections(ctx) {
 
   for (const relPath of protocolInputs('structure')) {
     const content = fs.readFileSync(path.join(projectRoot, relPath), 'utf8');
+    let failed = false;
+    const fail = (message) => {
+      failed = true;
+      results.fail.push({ check: 'structure', file: relPath, message });
+    };
 
     for (const section of requiredSections) {
-      if (!content.includes(section)) {
-        results.fail.push({
-          check: 'structure',
-          file: relPath,
-          message: `Missing required section: "${section}"`
-        });
+      if (!content.includes(section)) fail(`Missing required section: "${section}"`);
+    }
+
+    // The Definition block's doc-text anatomy: FLOW, then MORPHISM, then TYPES;
+    // a MORPHISM that opens on its source object and carries every clause line.
+    const [flow, morphism, types] = ['── FLOW ──', '── MORPHISM ──', '── TYPES ──'].map(marker => content.indexOf(marker));
+    if (flow !== -1 && morphism !== -1 && types !== -1 && !(flow < morphism && morphism < types)) {
+      fail('Definition block sections must run FLOW → MORPHISM → TYPES');
+    }
+    if (morphism !== -1) {
+      const section = extractFormalSection(content, 'MORPHISM');
+      if (!section) fail('MORPHISM section is empty');
+      else {
+        if (!morphismSource(section)) fail('MORPHISM must start from a source object');
+        for (const clause of MORPHISM_CLAUSES) {
+          if (!new RegExp(`^${clause}:`, 'm').test(section)) fail(`MORPHISM missing required clause "${clause}:" at line start`);
+        }
       }
     }
 
-    results.pass.push({
-      check: 'structure',
-      file: relPath,
-      message: 'Required sections present'
-    });
+    if (!failed) {
+      results.pass.push({
+        check: 'structure',
+        file: relPath,
+        message: 'Required sections present, with the Definition block\'s FLOW → MORPHISM → TYPES anatomy'
+      });
+    }
   }
 }
 
@@ -443,11 +476,13 @@ function checkCrossRefScan(ctx) {
   // the scan enforces those sources directly and no longer reads CLAUDE.md content.
   //
   // Each comparison here sets two independently authored artifacts against each
-  // other. A protocol's deficit → resolution pair is read from its own SKILL.md,
-  // so searching that same file for the pair compares it with itself; the
-  // PROTOCOL_FILES and CANONICAL_PROTOCOLS sets are both projections of one
-  // discoverPlugins() walk, so diffing them against that walk does too. Neither
-  // is compared here. That every canonical protocol has a SKILL.md is the
+  // other. A protocol's deficit → resolution pair is read from its own SKILL.md's
+  // Type signature, so searching that same file for the pair's names compares
+  // the signature with itself; sub-check 3 compares it with the MORPHISM, a
+  // separately authored surface, instead. The PROTOCOL_FILES and
+  // CANONICAL_PROTOCOLS sets are both projections of one discoverPlugins()
+  // walk, so diffing them against that walk compares it with itself too.
+  // Neither self-comparison is made here. That every canonical protocol has a SKILL.md is the
   // registry check `structure` and `lean-definition` make through protocolInputs.
 
   // Sub-check 1: Verify README workflow canonical-clusters invariant
@@ -661,11 +696,38 @@ function checkCrossRefScan(ctx) {
     }
   }
 
+  // Sub-check 3: each protocol's public Type signature against its MORPHISM.
+  // The two are authored apart — the signature in the body's opening line, the
+  // MORPHISM in the Definition block — and read apart: the protocol router
+  // takes the deficit from the MORPHISM's `deficit:` line and the resolution
+  // from `Type:`, so a disagreement publishes a pair neither surface states.
+  // The deficit is the activation precondition, never the source object.
+  for (const record of ctx.protocolRecords) {
+    const relPath = path.relative(projectRoot, record.skillMdPath);
+    const section = extractFormalSection(fs.readFileSync(record.skillMdPath, 'utf8'), 'MORPHISM');
+    if (!section) continue; // `structure` fails a missing or empty MORPHISM
+    const { deficit, resolution } = record;
+    const mismatch = (message) => {
+      results.fail.push({ check: 'cross-ref-scan', file: relPath, message });
+      subCheckFailed = true;
+    };
+    if (morphismSource(section) === deficit) {
+      mismatch(`MORPHISM starts from the deficit "${deficit}" — the deficit is the activation precondition on its \`deficit:\` line, and the chain starts from the source object`);
+    }
+    if (!new RegExp(`^deficit:\\s+${escapeRegex(deficit)}\\b`, 'm').test(section)) {
+      mismatch(`MORPHISM \`deficit:\` clause does not name the Type signature's deficit "${deficit}"`);
+    }
+    const chain = section.split('\n').map(line => line.trim()).filter(line => line.startsWith('→'));
+    if (!new RegExp(`^→\\s*${escapeRegex(resolution)}\\b`).test(chain[chain.length - 1] || '')) {
+      mismatch(`MORPHISM chain does not terminate in the Type signature's resolution "${resolution}"`);
+    }
+  }
+
   if (!subCheckFailed) {
     results.pass.push({
       check: 'cross-ref-scan',
       file: 'all protocols',
-      message: 'Cross-reference scan completed — README workflow clusters and publication inventory consistent'
+      message: 'Cross-reference scan completed — README workflow clusters, publication inventory, and each protocol\'s Type signature against its MORPHISM consistent'
     });
   }
 }

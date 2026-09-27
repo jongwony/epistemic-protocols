@@ -12,11 +12,9 @@ A protocol's contract structure — what its Definition block declares and what 
 
 The bridge that hands the block to Lean is text, and lives in `lean-bridge.js`: extracting the block from Markdown, enrolling every canonical protocol's block as a contract module, keeping each section every block shares identical to its canonical module, the preflight that runs before any build, and reading the build's and the audit's verdicts. The bridge fails closed: a canonical protocol with no block, or with a block Lean never sees, is a failure rather than one fewer thing checked, and with no toolchain reachable the verdict is reported as not obtained, never as passed.
 
-`contract-structure.js` holds text checks on contract structure that predate this channel. They are provisional: each retires when its Lean replacement rejects the same counterexamples, and until then a pass from one says only that its text pattern held.
-
 ### Repository artifacts
 
-`artifact-sync.js` gives mechanical verdicts on artifacts Lean does not see: plugin manifests and their versions, packaging and publication inventories, the surfaces that enumerate the protocols, copies that must stay identical to their source, and the section schema of a protocol `SKILL.md`. A verdict follows from the artifacts alone, so a required input that is missing fails rather than being skipped.
+`artifact-sync.js` gives mechanical verdicts on artifacts Lean does not see: plugin manifests and their versions, packaging and publication inventories, the surfaces that enumerate the protocols, copies that must stay identical to their source, the section schema of a protocol `SKILL.md`, and its public `Type:` signature against the MORPHISM its Definition block states. A verdict follows from the artifacts alone, so a required input that is missing fails rather than being skipped.
 
 ### Prose surface
 

@@ -9,7 +9,6 @@
  * The orchestrator: it builds one run context and runs every layer's checks
  * against it. The checks live in their layer files —
  *   lean-bridge.js         the Definition block handed to Lean (lean-definition)
- *   contract-structure.js  provisional text checks on contract structure
  *   artifact-sync.js       repository artifacts Lean does not see
  *   prose-surface.js       lexical obligations on Markdown and packaged prose
  * and each layer file's CHECKS list is what runs.
@@ -18,7 +17,6 @@
 const { createContext } = require('./check-context');
 const LAYERS = [
   require('./lean-bridge'),
-  require('./contract-structure'),
   require('./artifact-sync'),
   require('./prose-surface'),
 ];

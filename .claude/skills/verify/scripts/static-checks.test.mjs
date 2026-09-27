@@ -7,8 +7,10 @@
  *   lean-bridge.js         lean-definition reaches every canonical protocol,
  *                          whose Definition block is Lean 4, and each rule it
  *                          holds rejects its counterexample
- *   artifact-sync.js       version-staleness measures a change from its base,
- *                          and structure requires the TOOL GROUNDING section
+ *   artifact-sync.js       version-staleness measures a change from its base;
+ *                          structure holds the section schema and MORPHISM
+ *                          anatomy; cross-ref-scan holds the Type signature
+ *                          against the MORPHISM
  *   prose-surface.js       artifact-self-containment's path rules fire on a
  *                          backticked path
  *
@@ -318,11 +320,41 @@ describe('fail closed: a missing required input fails under each check that requ
   });
 });
 
-describe('artifact sync: structure', () => {
-  it('requires the TOOL GROUNDING section of every protocol SKILL.md', () => {
+describe('artifact sync: structure and the Type signature against the MORPHISM', () => {
+  const failed = (result, check) => result.fail.filter((r) => r.check === check && r.file === target).map((r) => r.message);
+  const { deficit, resolution } = /Type:\s*`\(([A-Za-z]+),[^)]*\)\s*→\s*([A-Za-z]+)`/.exec(skill).slice(1).reduce((acc, v, i) => ({ ...acc, [i ? 'resolution' : 'deficit']: v }), {});
+
+  it('requires the TOOL GROUNDING section, the FLOW → MORPHISM → TYPES order, and every MORPHISM clause', () => {
+    const flow = skill.indexOf('── FLOW ──');
+    const morphism = skill.indexOf('── MORPHISM ──');
+    assert.ok(flow !== -1 && morphism > flow && /^preserves:/m.test(skill), 'precondition: FLOW precedes MORPHISM, which carries a preserves: line');
     withCopy(({ write, verdict }) => {
-      write(target, skill.replace('── TOOL GROUNDING ──', '── TOOLING ──'));
-      assert.ok(verdict().fail.some((r) => r.check === 'structure' && r.file === target && r.message.includes('"── TOOL GROUNDING ──"')), `expected a structure failure for ${target}`);
+      write(target, skill
+        .replace('── TOOL GROUNDING ──', '── TOOLING ──')
+        .replace('── FLOW ──', '── WOLF ──').replace('── MORPHISM ──', '── FLOW ──').replace('── WOLF ──', '── MORPHISM ──')
+        .replace(/^preserves:/m, 'keeps:'));
+      const messages = failed(verdict(), 'structure');
+      expectSome(messages, 'Missing required section: "── TOOL GROUNDING ──"');
+      expectSome(messages, 'must run FLOW → MORPHISM → TYPES');
+      expectSome(messages, 'MORPHISM missing required clause "preserves:"');
+    });
+  });
+
+  it('fails a MORPHISM whose deficit, source, or terminal disagrees with the Type signature', () => {
+    const section = skill.slice(skill.indexOf('── MORPHISM ──'), skill.indexOf('── TYPES ──'));
+    const terminal = new RegExp(`^(\\s*→\\s*)${resolution}\\b`, 'm');
+    const source = section.split('\n').slice(1).find((line) => line.trim() && !line.trim().startsWith('→'));
+    assert.ok(terminal.test(section) && new RegExp(`^deficit:\\s+${deficit}\\b`, 'm').test(section) && source, 'precondition: the MORPHISM names the signature\'s deficit and resolution');
+    const mutated = section
+      .replace(new RegExp(`^(deficit:\\s+)${deficit}\\b`, 'm'), '$1SomeOtherDeficit')
+      .replace(terminal, '$1SomeOtherResolution')
+      .replace(source, deficit);
+    withCopy(({ write, verdict }) => {
+      write(target, skill.replace(section, mutated));
+      const messages = failed(verdict(), 'cross-ref-scan');
+      expectSome(messages, `does not name the Type signature's deficit "${deficit}"`);
+      expectSome(messages, `does not terminate in the Type signature's resolution "${resolution}"`);
+      expectSome(messages, `MORPHISM starts from the deficit "${deficit}"`);
     });
   });
 });
