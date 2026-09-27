@@ -32,19 +32,20 @@ Use the protocols to catch a wrong direction while planning, before it shapes la
 
 ### Claude Code
 
-Install every protocol:
+Install every protocol, together with the [`route`](#route) plugin:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
+`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. To leave it out, run `claude plugin disable route@epistemic-protocols` after installing.
 
-Utility plugins are opt-in and installed separately. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. The experimental [`route`](#route) plugin helps the agent invoke a suitable protocol from the conversation context and find relevant collaboration principles when needed. Add either plugin:
+You can also invoke a protocol yourself at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
+
+`epistemic-cooperative` is opt-in and installed separately. It adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools:
 
 ```bash
 claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
 ```
 
 With `epistemic-cooperative` installed, `/onboard` gives a quick recommendation from your recent sessions and can continue into guided learning with scenarios, trials, and quizzes.

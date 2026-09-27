@@ -1,6 +1,7 @@
 #!/bin/bash
 # Install every core protocol plugin in the epistemic-protocols marketplace for
-# Claude Code. Utility plugins are opt-in — see SKIP_PLUGINS below.
+# Claude Code, together with route. Other utility plugins are opt-in — see
+# SKIP_PLUGINS below.
 # Idempotent: a re-run adds new plugins and brings installed ones to the
 # marketplace's current version.
 #
@@ -20,11 +21,11 @@ MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/market
 #                           and audit tooling) layered on the protocols, not a
 #                           protocol itself; install it when you want them:
 #                           claude plugin install epistemic-cooperative@epistemic-protocols
-#   route — carries the session hooks (per-prompt routing directive;
-#           protocol deficit table and premise index at session start);
-#           install it deliberately:
-#           claude plugin install route@epistemic-protocols
-SKIP_PLUGINS="epistemic-cooperative route"
+# route is installed: its session-start table and per-prompt directive are what
+# let the agent reach a protocol without the user naming one. Its advisory
+# channel stays off until armed. Leave it out after install with:
+#   claude plugin disable route@epistemic-protocols
+SKIP_PLUGINS="epistemic-cooperative"
 
 command -v claude >/dev/null 2>&1 || { echo "Error: claude CLI not found. Install Claude Code first." >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found." >&2; exit 1; }
