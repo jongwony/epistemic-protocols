@@ -1,0 +1,40 @@
+{
+  "description": "/inquire on the rate-limiter task: the underspecified request against the fully specified one, both on /realize's scaffold.",
+  "realizeTarget": "inquire",
+  "realizeConfig": ".claude/skills/realize/harness.config.json",
+  "scaffold": ".claude/skills/realize/evals/scaffold.sh",
+  "variants": {
+    "under": {
+      "prompt": ".claude/skills/realize/evals/inquire-underspecified/prompt.md",
+      "oracle": ".claude/skills/realize/evals/inquire-underspecified/oracle.md"
+    },
+    "full": {
+      "prompt": ".claude/skills/realize/evals/inquire-fully-specified/prompt.md",
+      "oracle": ".claude/skills/realize/evals/inquire-fully-specified/oracle.md"
+    }
+  },
+  "phaseB": {
+    "lead": "phase-b.md",
+    "specification": "full",
+    "oracle": "full"
+  },
+  "goLine": "Please go ahead and implement it.",
+  "falsifierVariant": "under",
+  "guardrailVariant": "full",
+  "testPrefix": "tests/",
+  "checklist": "checklist.md",
+  "probes": "probes.py",
+  "rules": "rules.mjs",
+  "scorerRequirements": "scorer-requirements.txt",
+  "frozenAgainst": {
+    ".claude/skills/realize/evals/scaffold.sh": "14ea8ae964920e59cdd48cec0fbf11848b8f80f423da5cbe3915413b2be97bf0",
+    ".claude/skills/realize/evals/inquire-underspecified/prompt.md": "a4d49544706328350d8febc6444455519a0c22f0943a87daf88830e5553bf87b",
+    ".claude/skills/realize/evals/inquire-underspecified/oracle.md": "c0479e20889572c060bb0112fc8a25915c07c86bf5a921fec1b7745cb7725e9b",
+    ".claude/skills/realize/evals/inquire-fully-specified/prompt.md": "5849764975905586654b137c203d7ec272b9d4c8184c1a5cf7eeab9eb892d5e6",
+    ".claude/skills/realize/evals/inquire-fully-specified/oracle.md": "b75438cc707992323d67e77b28d7fafc0098ac3ad870cf6b399d631ec90118e0"
+  },
+  "frozenInvocation": {
+    "claude": "99ad8236f3d618d9c898597fcea45a57b3527ff16a5bf9641700e28e6af7d37e",
+    "codex": "3daf6988655ef269ef33f0a28f673d1613171d32bef8163c38b2a6009ebc3199"
+  }
+}
