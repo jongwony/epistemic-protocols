@@ -229,7 +229,7 @@ test('Proceed is scored from its witness without grading artifact quality', () =
     assert.equal(report.status, 0, report.stderr || report.stdout);
     assert.match(
       report.stdout,
-      /\| codex \| gpt-5\.6-luna \| bare \| inquire-fully-specified \| 1 \| 1 \| 1\/1 \|/
+      /\| codex \| gpt-6-luna \| bare \| inquire-fully-specified \| 1 \| 1 \| 1\/1 \|/
     );
   } finally {
     rmSync(root, { recursive: true, force: true });
