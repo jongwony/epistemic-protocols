@@ -27,7 +27,7 @@ import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   auditPaths, buildRow, cellList, childEnv, classifyReplies, composeOpen, composePhaseB, diffTrees,
-  evaluateFalsifiers, groupMeans, guardrails, loadChecklist, parseArgs, parseClaudeTurn,
+  evaluateFindings, groupMeans, guardrails, loadChecklist, parseArgs, parseClaudeTurn,
   parseCodexTurn, renderReport, replyItemsTemplate, sha256, snapshotKeeps, stripFrontmatter,
   summarizeForms, treeDigest, validateNotes, validatePlan,
 } from './lib.mjs';
@@ -719,12 +719,12 @@ async function cmdReport(argv) {
     }
   }
   const means = groupMeans(rows);
-  const verdicts = evaluateFalsifiers(means, { variant: caseSpec.spec.falsifierVariant });
+  const findings = evaluateFindings(means, { variant: caseSpec.spec.falsifierVariant });
   const guards = guardrails(means, { variant: caseSpec.spec.guardrailVariant });
   const scope = `case ${caseSpec.name}; runs ${positionals.join(', ')}; ${rows.length} cell(s) reported`;
   mkdirSync(out, { recursive: true });
-  writeJson(join(out, 'results.json'), { rows, means, verdicts, guards, skipped });
-  let md = renderReport({ rows, means, verdicts, guards, scope });
+  writeJson(join(out, 'results.json'), { rows, means, findings, guards, skipped });
+  let md = renderReport({ rows, means, findings, guards, scope });
   if (skipped.length) md += `\n## Not reported\n\n${skipped.map((s) => `- ${s}`).join('\n')}\n`;
   writeFileSync(join(out, 'report.md'), md);
   console.log(md);

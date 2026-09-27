@@ -40,8 +40,11 @@ a question about whether a gate fired belongs to `/realize`.
   the fully specified request, and records digests of the `/realize` files it was derived from;
   every spending or scoring command refuses when those files have changed.
 - **Metrics.** First score (checklist passes at snapshot A), final score, rework (lines changed
-  between the snapshots outside `tests/`, by a minimal line diff), questions handed back, turns,
-  and total cost in the runner's unit — USD on Claude, input tokens on Codex. On the user side,
+  between the snapshots outside `tests/`, by a minimal line diff — a measure of the artifact, not
+  of the effort a person would spend repairing it), questions handed back, turns, and total cost
+  in the runner's unit — USD on Claude, input tokens on Codex. Rework, completion and cost are
+  reported as three findings; cost qualifies a reduction in rework rather than falsifying it. On
+  the user side,
   the answer form of each phase-A reply line: which oracle rule produced it, and for a table value
   whether the subject had presented it for the user to recognize or the oracle released it when
   asked, read by the case's answer-form fixture into a recognized share.
@@ -66,8 +69,8 @@ node $S teardown <run>                         # work trees and homes; records s
 Read `references/runbook.md` before the first run: the per-turn oracle procedure, how phase
 boundaries and the manual items are judged, authentication for each runner, where isolation
 lives, and why a Codex protocol cell writes code before any answer can arrive. Read
-`references/report-format.md` before quoting any result: the table, the means, the falsifier
-clauses and their order, and what a result can and cannot claim.
+`references/report-format.md` before quoting any result: the table, the means, the three findings
+per model and when the rework claim fails, and what a result can and cannot claim.
 
 Records go to `.claude/skills/outcome/results/`, work trees and homes under the system temporary
 directory; neither is tracked, since both belong to the run that made them.
@@ -84,7 +87,7 @@ it. Everything else is Node. `setup` builds the scorer venv from the case's
 ## Tests
 
 The pure parts — checklist loading, the fixture's frozen digests, the scoring rules, diffing,
-aggregation and the falsifier evaluation — have their own test, which calls no model:
+aggregation and the per-model findings — have their own test, which calls no model:
 
 ```bash
 node --test .claude/skills/outcome/scripts/lib.test.mjs

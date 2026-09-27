@@ -1,5 +1,5 @@
 // Tests for the outcome eval's pure parts: checklist loading, the case fixture's consistency,
-// tree diffing, aggregation and the falsifier evaluation. No model is called and no case app is
+// tree diffing, aggregation and the per-model findings. No model is called and no case app is
 // run. Run: node --test .claude/skills/outcome/scripts/lib.test.mjs
 
 import test from 'node:test';
@@ -10,7 +10,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   auditPaths, buildRow, childEnv, claudeCellCost, classifyReplies, classifyTableAnswer, composeOpen,
-  composePhaseB, diffCounts, diffTrees, evaluateFalsifiers, groupMeans, loadChecklist, matchOracleAnswers,
+  composePhaseB, diffCounts, diffTrees, evaluateFindings, groupMeans, loadChecklist, matchOracleAnswers,
   parseClaudeTurn, parseCodexTurn, replyItemsTemplate, sha256, stripFrontmatter, summarizeForms,
   validateNotes, validatePlan,
 } from './lib.mjs';
@@ -231,44 +231,46 @@ test('groupMeans averages per model, variant and arm, leaving out cells whose in
   assert.deepEqual([means[0].n, means[0].mean.rework, means[0].mean.final], [2, 90, 12]);
 });
 
-const verdictOf = (rows) => evaluateFalsifiers(groupMeans(rows), { variant: 'under' })[0].verdict;
+const judged = (rows) => evaluateFindings(groupMeans(rows), { variant: 'under' })[0];
+const claimOf = (rows) => judged(rows).claim;
 
-test('falsifier clause 1: no reduction in rework', () => {
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 100 }), row({ arm: 'protocol', rework: 100 })]), 'no-reduction');
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 100 }), row({ arm: 'protocol', rework: 150, final: 5 })]), 'no-reduction');
+test('the rework claim fails when rework did not fall', () => {
+  assert.equal(claimOf([row({ arm: 'bare', rework: 100 }), row({ arm: 'protocol', rework: 100 })]), 'no-reduction');
+  assert.equal(claimOf([row({ arm: 'bare', rework: 100 }), row({ arm: 'protocol', rework: 150, final: 5 })]), 'no-reduction');
 });
 
-test('falsifier clause 2: a reduction that comes with a less finished tree', () => {
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 100, final: 12 }), row({ arm: 'protocol', rework: 10, final: 11 })]), 'unfinished-work');
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 100 }), row({ arm: 'protocol', rework: 10, implemented: false })]), 'unfinished-work');
+test('the rework claim fails when the reduction left the work less finished', () => {
+  assert.equal(claimOf([row({ arm: 'bare', rework: 100, final: 12 }), row({ arm: 'protocol', rework: 10, final: 11 })]), 'unfinished-work');
+  assert.equal(claimOf([row({ arm: 'bare', rework: 100 }), row({ arm: 'protocol', rework: 10, implemented: false })]), 'unfinished-work');
 });
 
-test('falsifier clause 3: a finished reduction that cost more in total', () => {
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 100, cost: 0.9 }), row({ arm: 'protocol', rework: 10, cost: 1.05 })]), 'greater-total-cost');
+test('a higher total cost is its own finding and does not falsify the reduction', () => {
+  const costlier = judged([row({ arm: 'bare', rework: 100, cost: 0.9 }), row({ arm: 'protocol', rework: 10, cost: 1.05 })]);
+  assert.deepEqual([costlier.claim, costlier.findings], ['not-falsified', { rework: 'reduced', completion: 'finished', cost: 'higher' }]);
+  const cheaper = judged([row({ arm: 'bare', rework: 100, cost: 1 }), row({ arm: 'protocol', rework: 10, cost: 1 })]);
+  assert.deepEqual([cheaper.claim, cheaper.findings.cost], ['not-falsified', 'not-higher']);
 });
 
-test('no clause holds: a finished reduction at no greater total cost', () => {
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 100, cost: 1 }), row({ arm: 'protocol', rework: 10, cost: 1 })]), 'not-falsified');
-});
-
-test('the clauses are read in order: the first that holds is the verdict', () => {
-  // Rework unchanged, tree less finished and cost higher: clause 1 is the verdict.
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 50, cost: 1 }), row({ arm: 'protocol', rework: 50, final: 3, cost: 9 })]), 'no-reduction');
-  // Reduced, less finished and costlier: clause 2 is the verdict.
-  assert.equal(verdictOf([row({ arm: 'bare', rework: 50, cost: 1 }), row({ arm: 'protocol', rework: 5, final: 3, cost: 9 })]), 'unfinished-work');
+test('the three findings are reported separately even when the claim already failed', () => {
+  // Rework unchanged, tree less finished and cost higher: the claim fails on rework, and the
+  // completion and cost findings still say what they found.
+  const a = judged([row({ arm: 'bare', rework: 50, cost: 1 }), row({ arm: 'protocol', rework: 50, final: 3, cost: 9 })]);
+  assert.deepEqual([a.claim, a.findings], ['no-reduction', { rework: 'no-reduction', completion: 'unfinished-work', cost: 'higher' }]);
+  const b = judged([row({ arm: 'bare', rework: 50, cost: 1 }), row({ arm: 'protocol', rework: 5, final: 3, cost: 9 })]);
+  assert.deepEqual([b.claim, b.findings.rework, b.findings.cost], ['unfinished-work', 'reduced', 'higher']);
 });
 
 test('a model with one arm missing, or only failed cells in an arm, is incomplete rather than judged', () => {
-  const v = evaluateFalsifiers(groupMeans([row({ arm: 'bare', rework: 50 }), row({ arm: 'protocol', rework: 5, ok: false })]), { variant: 'under' });
-  assert.equal(v[0].verdict, 'incomplete');
+  const v = evaluateFindings(groupMeans([row({ arm: 'bare', rework: 50 }), row({ arm: 'protocol', rework: 5, ok: false })]), { variant: 'under' });
+  assert.equal(v[0].claim, 'incomplete');
 });
 
 test('models are judged separately', () => {
-  const v = evaluateFalsifiers(groupMeans([
+  const v = evaluateFindings(groupMeans([
     row({ model: 'a', arm: 'bare', rework: 50 }), row({ model: 'a', arm: 'protocol', rework: 5 }),
     row({ model: 'b', arm: 'bare', rework: 50 }), row({ model: 'b', arm: 'protocol', rework: 60 }),
   ]), { variant: 'under' });
-  assert.deepEqual(Object.fromEntries(v.map((x) => [x.model, x.verdict])), { a: 'not-falsified', b: 'no-reduction' });
+  assert.deepEqual(Object.fromEntries(v.map((x) => [x.model, x.claim])), { a: 'not-falsified', b: 'no-reduction' });
 });
 
 // ------------------------------------------------------------------ answer forms

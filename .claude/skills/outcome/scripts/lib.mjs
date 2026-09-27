@@ -1,5 +1,5 @@
 // Pure parts of the outcome eval: argument checking, message composition, checklist loading,
-// trace parsing, tree diffing, aggregation and the falsifier evaluation. Node standard library
+// trace parsing, tree diffing, aggregation and the per-model findings. Node standard library
 // only. Everything that spawns a process or owns a directory lives in outcome.mjs.
 
 import { createHash } from 'node:crypto';
@@ -645,9 +645,12 @@ export function groupMeans(rows) {
   });
 }
 
-// The falsifier clauses of references/report-format.md, evaluated in order on the variant where
-// the protocol has something to find. The first clause that holds is the verdict.
-export function evaluateFalsifiers(means, { variant }) {
+// The per-model findings of references/report-format.md on the variant where the protocol has
+// something to find: rework, completion and cost as three separate findings, and the rework claim,
+// which fails on no reduction or on a reduction that left the work less finished. Cost is not one
+// of its failure conditions: a higher total cost qualifies whether the reduction saved anything,
+// it does not undo the reduction.
+export function evaluateFindings(means, { variant }) {
   const out = [];
   const byModel = new Map();
   for (const m of means.filter((x) => x.variant === variant)) {
@@ -659,10 +662,10 @@ export function evaluateFalsifiers(means, { variant }) {
     const b = pair.bare; const p = pair.protocol;
     const who = b || p;
     const base = { runner: who.runner, model: who.model, effort: who.effort, variant };
-    if (!b || !p) { out.push({ ...base, verdict: 'incomplete', reason: 'one arm has no cell whose integrity held' }); continue; }
+    if (!b || !p) { out.push({ ...base, claim: 'incomplete', reason: 'one arm has no cell whose integrity held' }); continue; }
     const need = ['rework', 'final', 'total_cost'];
     if (need.some((k) => b.mean[k] === null || p.mean[k] === null)) {
-      out.push({ ...base, verdict: 'incomplete', reason: 'a mean the clauses read is missing' }); continue;
+      out.push({ ...base, claim: 'incomplete', reason: 'a mean the findings read is missing' }); continue;
     }
     const facts = {
       n: { bare: b.n, protocol: p.n },
@@ -672,11 +675,15 @@ export function evaluateFalsifiers(means, { variant }) {
       total_cost: { bare: b.mean.total_cost, protocol: p.mean.total_cost },
       protocol_unimplemented: p.mean.unimplemented,
     };
-    let verdict = 'not-falsified';
-    if (!(p.mean.rework < b.mean.rework)) verdict = 'no-reduction';
-    else if (p.mean.final < b.mean.final || p.mean.unimplemented > 0) verdict = 'unfinished-work';
-    else if (p.mean.total_cost > b.mean.total_cost) verdict = 'greater-total-cost';
-    out.push({ ...base, verdict, facts });
+    const findings = {
+      rework: p.mean.rework < b.mean.rework ? 'reduced' : 'no-reduction',
+      completion: p.mean.final < b.mean.final || p.mean.unimplemented > 0 ? 'unfinished-work' : 'finished',
+      cost: p.mean.total_cost > b.mean.total_cost ? 'higher' : 'not-higher',
+    };
+    let claim = 'not-falsified';
+    if (findings.rework === 'no-reduction') claim = 'no-reduction';
+    else if (findings.completion === 'unfinished-work') claim = 'unfinished-work';
+    out.push({ ...base, claim, findings, facts });
   }
   return out;
 }
@@ -721,20 +728,23 @@ const shareCell = (r) => {
 };
 const modelLabel = (x) => `${x.model}${x.effort ? ` (effort ${x.effort})` : ''} · ${x.runner}`;
 
-export function renderReport({ rows, means, verdicts, guards, scope }) {
+export function renderReport({ rows, means, findings, guards, scope }) {
   const out = [];
   out.push('# Outcome eval report', '');
   out.push(`Scope: ${scope}`, '');
   out.push('Observations from these runs only: one task, a scripted user, n per group as shown,',
     'no significance test. Read references/report-format.md before quoting any number.', '');
 
-  out.push('## Falsifier verdicts', '');
-  out.push('| model | n bare/protocol | rework (non-test lines) | final | total cost | verdict |');
-  out.push('|---|---|---|---|---|---|');
-  for (const v of verdicts) {
-    if (v.verdict === 'incomplete') { out.push(`| ${modelLabel(v)} | - | - | - | - | incomplete: ${v.reason} |`); continue; }
+  out.push('## Findings per model', '');
+  out.push('Three separate findings, bare → protocol; the rework claim fails only on the first two. Rework counts',
+    'changed lines in the artifact, not the effort a person would spend repairing it.', '');
+  out.push('| model | n bare/protocol | rework (non-test lines) | rework | final | completion | total cost | cost | rework claim |');
+  out.push('|---|---|---|---|---|---|---|---|---|');
+  for (const v of findings) {
+    if (v.claim === 'incomplete') { out.push(`| ${modelLabel(v)} | - | - | - | - | - | - | - | incomplete: ${v.reason} |`); continue; }
     const d = v.runner === 'claude' ? 3 : 0;
-    out.push(`| ${modelLabel(v)} | ${v.facts.n.bare}/${v.facts.n.protocol} | ${pair(v.facts.rework)} | ${pair(v.facts.final)} | ${pair(v.facts.total_cost, d)} | ${v.verdict} |`);
+    const f = v.findings;
+    out.push(`| ${modelLabel(v)} | ${v.facts.n.bare}/${v.facts.n.protocol} | ${pair(v.facts.rework)} | ${f.rework} | ${pair(v.facts.final)} | ${f.completion} | ${pair(v.facts.total_cost, d)} | ${f.cost} | ${v.claim} |`);
   }
   out.push('');
 
