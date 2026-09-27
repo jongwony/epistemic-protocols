@@ -22,7 +22,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -409,6 +409,72 @@ describe('artifact sync: version-staleness', () => {
       // A pull request whose base branch was never fetched has nothing to
       // measure from, and says so rather than comparing HEAD with itself.
       expectSome(staleness(root, { ...gitEnv, GITHUB_BASE_REF: 'unfetched' }).fail, 'is not fetched');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails when the base version is not x.y.z or absent, rather than accepting any change', () => {
+    for (const [baseManifest, label] of [
+      [manifest('1.2'), 'non-semver base'],
+      [`${JSON.stringify({ name: 'plug' }, null, 2)}\n`, 'base without a version'],
+    ]) {
+      const root = mkdtempSync(path.join(tmpdir(), 'version-staleness-base-'));
+      const put = (relative, text) => {
+        mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
+        writeFileSync(path.join(root, relative), text);
+      };
+      try {
+        git(root, ['init', '-q', '-b', 'main', '.']);
+        git(root, ['config', 'user.email', 'fixture@example.invalid']);
+        git(root, ['config', 'user.name', 'fixture']);
+        put('plug/.claude-plugin/plugin.json', baseManifest);
+        put('plug/skills/x/SKILL.md', 'base\n');
+        git(root, ['add', '-A']);
+        git(root, ['commit', '-qm', 'base']);
+        git(root, ['update-ref', 'refs/remotes/origin/main', 'HEAD']);
+        git(root, ['checkout', '-q', '-b', 'feature']);
+        put('plug/skills/x/SKILL.md', 'changed\n');
+        put('plug/.claude-plugin/plugin.json', manifest('0.0.1'));
+        git(root, ['commit', '-qam', 'change with a lower-looking version']);
+        expectSome(staleness(root).fail, 'not x.y.z, so no bump can be established');
+      } catch (e) {
+        e.message = `${label}: ${e.message}`;
+        throw e;
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+  });
+});
+
+describe('lean bridge: the standalone lean-contract.js command enrolls every protocol', () => {
+  it('fails generate when a block is left out of the plan, naming the block and why', () => {
+    const target = protocolFiles({ projectRoot })[0];
+    const root = mkdtempSync(path.join(tmpdir(), 'lean-contract-cli-'));
+    try {
+      // A copy of the tree the command reads: the registry, the canonical
+      // shared modules, and every protocol SKILL.md.
+      for (const relative of ['scripts', 'lean/EpistemicProtocols', ...new Set(protocolFiles({ projectRoot }).map((p) => p.split('/')[0]))]) {
+        cpSync(path.join(projectRoot, relative), path.join(root, relative), { recursive: true });
+      }
+      for (const file of ['.claude-plugin']) {
+        if (existsSync(path.join(projectRoot, file))) cpSync(path.join(projectRoot, file), path.join(root, file), { recursive: true });
+      }
+      const cli = path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js');
+      const generate = () => spawnSync(process.execPath, [cli, 'generate', root], { encoding: 'utf-8' });
+      assert.equal(generate().status, 0, 'precondition: the copied tree enrolls every protocol');
+
+      const full = path.join(root, target);
+      writeFileSync(full, readFileSync(full, 'utf-8').replace('inductive Continuation | stop | proceed', 'inductive Continuation | stop | proceed | pause'));
+      const drifted = generate();
+      assert.equal(drifted.status, 1);
+      assert.match(drifted.stderr, new RegExp(`not enrolled: ${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} — TOOL GROUNDING vocabulary differs`));
+
+      rmSync(path.join(root, 'lean/EpistemicProtocols/ToolGrounding.lean'));
+      const missing = generate();
+      assert.equal(missing.status, 1);
+      assert.match(missing.stderr, /ToolGrounding\.lean is missing/);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

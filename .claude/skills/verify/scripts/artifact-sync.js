@@ -447,9 +447,11 @@ function checkVersionStaleness(ctx) {
     const changed = `${contentChanges.length} file(s) changed since ${label}`;
     if (typeof current !== 'string' || !SEMVER.test(current)) {
       stale(pluginJsonRel, `Plugin "${pluginName}" version ${JSON.stringify(current)} is not x.y.z, so no bump can be established (${changed})`);
+    } else if (typeof previous !== 'string' || !SEMVER.test(previous)) {
+      stale(pluginJsonRel, `Plugin "${pluginName}" version at ${label} is ${JSON.stringify(previous)}, not x.y.z, so no bump can be established (${changed})`);
     } else if (current === previous) {
       stale(pluginJsonRel, `Plugin "${pluginName}" has content changes but no version bump in plugin.json (${changed}; still ${current})`);
-    } else if (typeof previous === 'string' && SEMVER.test(previous) && !semverGreater(current, previous)) {
+    } else if (!semverGreater(current, previous)) {
       stale(pluginJsonRel, `Plugin "${pluginName}" version ${current} is not greater than ${previous} at ${label} (${changed})`);
     }
   }

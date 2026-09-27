@@ -119,22 +119,33 @@ function readCanonical(root, rel, extract) {
 
 // The generated contract modules, derived from the blocks. `blocks` is
 // [{ relPath, block }]; `units` names each audited protocol. A block whose
-// shared sections cannot be replaced by the canonical modules is left out;
-// lean-definition reports why.
+// shared sections cannot be replaced by the canonical modules is left out and
+// listed in `skipped` with the reason.
 function planContracts(root, blocks) {
   const files = [];
   const units = [];
+  const skipped = [];
   const toolCanonical = readCanonical(root, CANONICAL_TOOL_GROUNDING, canonicalToolGroundingText);
   for (const { relPath, block } of blocks) {
     const ns = blockNamespace(block);
     const ground = groundSpan(block);
-    if (!ns || !ground || block.indexOf(`namespace ${ns}`) > ground.start) continue;
-    const tool = toolCanonical === null ? undefined : toolGroundingSpan(block, toolCanonical);
-    if (tool === undefined || (tool && (!tool.matches || tool.start < ground.end))) continue;
+    if (!ns || !ground || block.indexOf(`namespace ${ns}`) > ground.start) {
+      skipped.push({ relPath, reason: 'no namespace, or no GROUND section after it' });
+      continue;
+    }
+    if (toolCanonical === null) {
+      skipped.push({ relPath, reason: `${CANONICAL_TOOL_GROUNDING} is missing` });
+      continue;
+    }
+    const tool = toolGroundingSpan(block, toolCanonical);
+    if (tool && (!tool.matches || tool.start < ground.end)) {
+      skipped.push({ relPath, reason: tool.matches ? 'TOOL GROUNDING opens before GROUND' : `TOOL GROUNDING vocabulary differs from ${CANONICAL_TOOL_GROUNDING}` });
+      continue;
+    }
     files.push({ path: path.join(GENERATED_DIR, 'Contract', `${ns}.lean`), text: contractModule(block, ns, tool) });
     units.push({ relPath, ns });
   }
-  return { files, units };
+  return { files, units, skipped };
 }
 
 function writeContracts(root, plan) {
@@ -236,12 +247,23 @@ if (require.main === module) {
   }
   const root = path.resolve(rootArg || '.');
   const { protocolFiles } = require(path.join(root, 'scripts/load-protocols.js'));
-  const blocks = leanBlocksFrom(root, protocolFiles({ projectRoot: root }));
+  const relPaths = protocolFiles({ projectRoot: root });
+  const blocks = leanBlocksFrom(root, relPaths);
+  // Every protocol is enrolled or the command fails: a block left out of the
+  // plan is a block nothing audits.
+  const plan = planContracts(root, blocks);
+  const withBlock = new Set(blocks.map((b) => b.relPath));
+  const unenrolled = [
+    ...relPaths.filter((p) => !withBlock.has(p)).map((relPath) => ({ relPath, reason: 'no Lean Definition block' })),
+    ...plan.skipped,
+  ];
+  for (const { relPath, reason } of unenrolled) console.error(`not enrolled: ${relPath} — ${reason}`);
   if (command === 'generate') {
-    const plan = planContracts(root, blocks);
     writeContracts(root, plan);
     for (const file of plan.files) console.log(file.path);
+    if (unenrolled.length > 0) process.exit(1);
   } else {
+    if (unenrolled.length > 0) process.exit(1);
     const lake = resolveLeanTool('lake', 'LAKE', root);
     if (!lake) {
       console.error('No Lean toolchain reachable ($LAKE, PATH, ~/.elan/bin)');
