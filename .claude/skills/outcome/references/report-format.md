@@ -16,6 +16,33 @@ surface may say that this eval exists and what it measures; it does not say what
 The run's records (`results/<run>/`) are gitignored for the same reason: they belong to whoever
 ran them, not to the checkout.
 
+## What this eval measures, and what it does not
+
+It measures one thing: whether a protocol changes how much of an already-held specification
+reaches the first implementation, and how much work is redone once the whole specification
+arrives. The user side holds that specification in full and hands it over when asked, so what
+travels between the two sides is information transfer.
+
+It does not measure what a person values in the protocols: recognizing what they want in
+something shown to them rather than having to recall and state it, and the fusion of their
+horizon with the AI's. That depends on what each person does not yet know, so it differs from
+person to person, and no single number stands for it — an average over people who knew
+everything and people who knew little describes neither.
+
+## Which numbers leave the run
+
+A number is quoted outside the run only when the case fixes it rather than the conversation
+that produced it:
+
+- the guardrail's over-asking count on the fully specified variant, with the questions quoted;
+- where a case defines a hidden endpoint, the share of its items the subject surfaced for the
+  user to recognize, with the items listed.
+
+First and final scores, rework lines and cost move with every variable in how the accumulated
+context was built — what the subject read first, how it phrased a question, which default it
+reached for. They are reported per cell and read beside the transcript, never lifted into a
+headline.
+
 ## Per-cell table
 
 One row per cell, grouped by model, then variant, then arm:
