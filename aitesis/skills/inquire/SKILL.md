@@ -1,6 +1,6 @@
 ---
 name: inquire
-description: "Collect every piece of context the AI can reach on its own, then hand back what it cannot reach as the user's own unknown. Type: (ContextInsufficient, AI, INQUIRE, Prospect) → SufficientContext"
+description: "A task rests on missing context or unchecked assumptions: collect every piece of context the AI can reach on its own, then hand back what it cannot reach as the user's own unknown."
 ---
 
 # Aitesis Protocol

@@ -1,6 +1,6 @@
 ---
 name: grasp
-description: "Verify understanding of a target in play — code, a document, a result — present in context and quotable. Type: (TargetUngrasped, User, VERIFY, Target) → VerifiedUnderstanding"
+description: "Something in play — code, a document, a result, quotable in context — needs to be actually understood; the user can't follow it yet or nods along unsure: verify understanding step by step."
 ---
 
 # Katalepsis Protocol

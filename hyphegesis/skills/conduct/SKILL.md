@@ -1,6 +1,6 @@
 ---
 name: conduct
-description: "Conduct method before object-level work. Fires when the work needs several moves in non-trivial order. Type: (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × MoveGround) → ConductedMethod"
+description: "The work needs several lines of thinking, and their order, independence, combination, stopping point, or where results go is not obvious: settle the method before starting."
 ---
 
 # Hyphegesis Protocol

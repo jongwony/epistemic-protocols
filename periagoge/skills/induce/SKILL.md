@@ -1,6 +1,6 @@
 ---
 name: induce
-description: "Crystallize a shared but unnamed concept from the concrete cases at hand. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction"
+description: "Several concrete cases at hand seem to share something no one has named yet: pin down what they have in common, checked against the goal the name serves."
 ---
 
 # Periagoge Protocol

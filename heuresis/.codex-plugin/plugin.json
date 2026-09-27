@@ -1,7 +1,7 @@
 {
   "name": "heuresis",
-  "version": "1.3.0",
-  "description": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
+  "version": "1.3.2",
+  "description": "Widen an empty or prematurely narrowed field of ideas before choosing — /ideate (εὕρεσις: finding/invention)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Heuresis",
-    "shortDescription": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
-    "longDescription": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
+    "shortDescription": "Widen an empty or prematurely narrowed field of ideas before choosing — /ideate (εὕρεσις: finding/invention)",
+    "longDescription": "Widen an empty or prematurely narrowed field of ideas before choosing — /ideate (εὕρεσις: finding/invention)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

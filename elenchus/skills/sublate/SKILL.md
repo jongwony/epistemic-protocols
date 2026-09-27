@@ -1,6 +1,6 @@
 ---
 name: sublate
-description: "Vet working context by dialectical antithesis before action. Type: (ContextSuspect, User, VET, WorkingContext) → VettedContext"
+description: "Context about to be acted on may no longer hold — stale, weakly sourced, or contradicted: challenge each claim the action leans on, and the user judges what stands before acting."
 ---
 
 # Elenchus Protocol

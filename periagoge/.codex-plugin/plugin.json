@@ -1,6 +1,6 @@
 {
   "name": "periagoge",
-  "version": "2.7.0",
+  "version": "2.7.2",
   "description": "Align concrete cases first, then name what they share — /induce (περιαγωγή: turning-around)",
   "author": {
     "name": "Jongwon Choi",
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Periagoge",
-    "shortDescription": "Calibrate and crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
-    "longDescription": "Calibrate and crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+    "shortDescription": "Align concrete cases first, then name what they share — /induce (περιαγωγή: turning-around)",
+    "longDescription": "Align concrete cases first, then name what they share — /induce (περιαγωγή: turning-around)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

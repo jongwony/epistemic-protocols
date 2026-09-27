@@ -1,7 +1,7 @@
 {
   "name": "euporia",
-  "description": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
-  "version": "2.3.0",
+  "description": "Find the decisions a rough intent turns on, traced from your own material — /elicit (εὐπορία: way through)",
+  "version": "2.3.2",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

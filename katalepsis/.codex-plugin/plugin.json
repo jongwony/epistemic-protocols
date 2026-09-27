@@ -1,7 +1,7 @@
 {
   "name": "katalepsis",
-  "version": "4.3.0",
-  "description": "Verify understanding of a target in play — code, a document, a result — present in context and quotable, through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
+  "version": "4.3.2",
+  "description": "Check that something in play — code, a document, a result — is actually understood, step by step — /grasp (κατάληψις: a grasping firmly)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Katalepsis",
-    "shortDescription": "Verify understanding of a target in play — code, a document, a result — present in context and quotable, through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
-    "longDescription": "Verify understanding of a target in play — code, a document, a result — present in context and quotable, through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
+    "shortDescription": "Check that something in play — code, a document, a result — is actually understood, step by step — /grasp (κατάληψις: a grasping firmly)",
+    "longDescription": "Check that something in play — code, a document, a result — is actually understood, step by step — /grasp (κατάληψις: a grasping firmly)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

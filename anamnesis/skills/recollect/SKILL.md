@@ -1,6 +1,6 @@
 ---
 name: recollect
-description: "Resolve vague recall into recognized context through AI-guided contextual scan and user-validated recognition — one session, or the line of work, topic, or settled concept spread across several."
+description: "The user vaguely recalls something discussed before but cannot name it — one session, or a line of work, topic, or settled concept across several: find it in past records to recognize."
 ---
 
 # Anamnesis Protocol

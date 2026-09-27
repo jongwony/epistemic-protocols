@@ -1,6 +1,6 @@
 ---
 name: bound
-description: "Define epistemic boundaries from a provisional whole map, opening decisions to the depth needed for delegation. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary"
+description: "The user cannot yet see what a task needs them to decide, or which decisions to keep or entrust: map the whole task first, then open each decision to the depth needed."
 ---
 
 # Horismos Protocol

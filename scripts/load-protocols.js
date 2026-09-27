@@ -67,8 +67,8 @@ function makeJsonReader() {
 
 // Minimal frontmatter parser — name + description only. Full parse lives in
 // scripts/package.js parseFrontmatter (handles folded scalars, quoting). This
-// loader only needs the Type signature embedded in description, which is a
-// single-line scalar across all current SKILL.md files.
+// loader reads the description as a single-line scalar and returns the full
+// file content beside it, so extractTypeSignature can fall back to the body.
 //
 // Returns null sentinel on read failure (permission error, EMFILE, EIO).
 // discoverPlugins skips null records and emits a stderr diagnostic so the
@@ -103,8 +103,9 @@ function parseSkillFrontmatter(skillMdPath) {
 
 // Parse Type: (Deficit, ...) → Resolution from description, or fall back to
 // body prose. Pattern is the SKILL.md-level canonical for the morphism's
-// type signature — present in every protocol's SKILL.md (sometimes in
-// description, sometimes in the body's first paragraph).
+// type signature. Protocol descriptions are written as the situation a
+// protocol is for, so the signature is read from the body's opening
+// paragraph; a description that carries one is still accepted.
 function extractTypeSignature(skillMd) {
   const re = /Type:\s*[`"]?\(([A-Z][A-Za-z]+)\s*,[^)]*\)\s*→\s*([A-Z][A-Za-z]+)/;
   const fromDescription = skillMd.description && skillMd.description.match(re);

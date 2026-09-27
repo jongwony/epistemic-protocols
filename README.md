@@ -63,7 +63,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 |----------|---------|-------------|
 | [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown |
 | [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) holds the clues |
-| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or they narrowed to one too early — widen the field before choosing any |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any |
 | [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first |
 | [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight |
 | [Analogia](./analogia) | `/ground` | You're carrying a framework or an analogy over to a case already in front of you, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports |
@@ -109,6 +109,16 @@ Skills that act at their own decision points — around the protocols, on the wo
 > **Experimental.** The hook set and the injected wording can change between releases, and the optional advisory channel is unvalidated — see [route/README.md](./route/README.md) before depending on either.
 
 Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
+
+## What the checks cover
+
+Different mechanisms check different things, and it helps to know where each one stops.
+
+- **Lean proofs** — a protocol's contract is also written as a Lean model inside its `SKILL.md`. Lean checks that the properties stated about that model hold, under the assumptions the model declares; the judgments the model leaves open are among those assumptions, not things it proves. A protocol's [`lean/EpistemicProtocols/<Protocol>/Theorems.lean`](./lean/EpistemicProtocols) holds what is stated and proved about its model.
+- **Runtime evidence** — the contributor skill [`/realize`](./.claude/skills/realize/SKILL.md) runs a protocol in a real session and collects evidence that the steps it declares actually happen, through automatic checks plus a review of the transcript.
+- **Static checks** — [`/verify`](./.claude/skills/verify/SKILL.md) checks the files' structure: required sections, consistent names and references, matching versions.
+
+None of these measures what happens downstream of a protocol, such as whether it reduces rework.
 
 ## For Contributors
 
