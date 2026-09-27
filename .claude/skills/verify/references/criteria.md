@@ -55,7 +55,6 @@ What review reads for, by severity. Each is a judgment; none is a static predica
 - **Supersession non-conflict**: different protocols supersede different domains.
 - **Activation determinism**: trigger conditions are unambiguous.
 - **Gate realization**: a user-facing gate is realized as structured presentation plus turn yield under the context it fires in, not bypassed as unstructured text.
-- **Escape semantics**: escape behavior matches the protocol's context (fallback, silence, cancel).
 
 **Concern**
 
