@@ -4,9 +4,15 @@
 // Runs a selected agent CLI across (model x arm x case x repetition), captures
 // its JSONL trace, and grades the protocol's DECLARED CONTRACT from behaviour.
 //
-// Why the CLI rather than `claude plugin eval`: that subcommand is gated behind
-// early access. Everything it would have given us is reachable from the CLI —
-// `--plugin-dir` for the treatment, `--output-format stream-json` for the trace,
+// Why the CLI rather than `claude plugin eval`: that subcommand cannot express
+// two things this suite measures. A case there is one user prompt; its
+// `context.history_file` seeds a fixed prior transcript, but nothing answers the
+// subject after it replies, so a gate that asks and waits is never answered —
+// here a `multi_turn` case sends its scripted replies turn by turn. And its
+// without-arm is always "no plugin", so there is no place for the `style` sham
+// arm that separates a protocol's effect from a long structured instruction's.
+// Everything else it would give us is reachable from the CLI — `--plugin-dir`
+// for the treatment, `--output-format stream-json` for the trace,
 // `--max-budget-usd` for the ceiling. What we lose is reporting, which is cheap
 // to rebuild and lives in `report` below.
 //
