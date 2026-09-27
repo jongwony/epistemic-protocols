@@ -145,7 +145,8 @@ const diagnostics = (output) => output.split('\n').filter((line) => /(?:^|\s)(er
 // The driver: generate the contracts, build the package with warnings as
 // errors, and run the audit. Returns what each stage produced; the caller
 // judges it. `audit` is the list of per-unit reports, or null when the audit
-// did not run or printed no readout.
+// did not run or printed no readout; `auditError` says why a printed readout
+// did not parse.
 function check(root, blocks, lake) {
   const plan = planContracts(root, blocks);
   writeContracts(root, plan);
@@ -155,7 +156,13 @@ function check(root, blocks, lake) {
   const lint = run(lake, ['lint', '--', ...plan.units.map((u) => u.ns)], root);
   result.lint = { status: lint.status, output: lint.output };
   const line = /^AUDIT (\[.*\])$/m.exec(lint.output);
-  if (line) result.audit = JSON.parse(line[1]);
+  if (line) {
+    try {
+      result.audit = JSON.parse(line[1]);
+    } catch (e) {
+      result.auditError = e.message;
+    }
+  }
   return result;
 }
 

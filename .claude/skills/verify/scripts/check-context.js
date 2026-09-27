@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const {
+  CANONICAL_PROTOCOL_SET,
   discoverPlugins,
   protocolFiles,
 } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
@@ -80,6 +81,28 @@ function createContext(projectRoot) {
     return collected;
   }
 
+  // The protocol SKILL.md files a check requires, read from the canonical
+  // registry rather than from what discovery happened to find: PROTOCOL_FILES
+  // lists only files that exist, so a check iterating it cannot notice one that
+  // is gone. A canonical protocol with no active plugin carrying a SKILL.md is
+  // a missing required input, and fails under the check that required it.
+  function protocolInputs(check) {
+    const present = [];
+    for (const id of CANONICAL_PROTOCOL_SET) {
+      const files = PROTOCOL_FILES.filter(f => f.split(path.sep)[0] === id);
+      if (files.length === 0) {
+        results.fail.push({
+          check,
+          file: `${id}/`,
+          message: `Canonical protocol "${id}" (scripts/load-protocols.js CANONICAL_PROTOCOL_SET) has no active plugin carrying a skills/*/SKILL.md — a required input is missing`,
+        });
+        continue;
+      }
+      present.push(...files);
+    }
+    return present;
+  }
+
   return {
     projectRoot,
     results,
@@ -87,6 +110,7 @@ function createContext(projectRoot) {
     protocolRecords,
     PROTOCOL_FILES,
     CANONICAL_PROTOCOLS,
+    protocolInputs,
     walkFiles,
   };
 }

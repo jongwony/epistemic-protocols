@@ -85,10 +85,10 @@ function checkRoutingIndexContract(ctx) {
   const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
 
   if (!fs.existsSync(claudeMdPath)) {
-    results.warn.push({
+    results.fail.push({
       check,
       file: 'CLAUDE.md',
-      message: 'CLAUDE.md not found, skipping routing-index contract check'
+      message: 'CLAUDE.md not found — the routing index it must carry has no source to check'
     });
     return;
   }
@@ -160,7 +160,7 @@ function checkRoutingIndexContract(ctx) {
 // Check: Required Sections in Protocols
 // ============================================================
 function checkRequiredSections(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES } = ctx;
+  const { projectRoot, results, protocolInputs } = ctx;
 
   const requiredSections = [
     '## Definition',
@@ -171,18 +171,8 @@ function checkRequiredSections(ctx) {
     '── MODE STATE ──',
   ];
 
-  for (const relPath of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) {
-      results.warn.push({
-        check: 'structure',
-        file: relPath,
-        message: `Protocol file not found: ${relPath}`
-      });
-      continue;
-    }
-
-    const content = fs.readFileSync(fullPath, 'utf8');
+  for (const relPath of protocolInputs('structure')) {
+    const content = fs.readFileSync(path.join(projectRoot, relPath), 'utf8');
 
     for (const section of requiredSections) {
       if (!content.includes(section)) {
@@ -205,51 +195,97 @@ function checkRequiredSections(ctx) {
 // ============================================================
 // Check: Version Staleness Detection
 // ============================================================
+// A plugin whose files changed must carry a higher plugin.json version than it
+// had at the comparison base. The base is where the change will land: the
+// merge-base with the pull request's base branch in CI ($GITHUB_BASE_REF),
+// else with origin/main where that ref exists, else HEAD. A clean checkout in
+// CI therefore still sees the committed change, and a local run — the
+// pre-commit hook included — sees committed-but-unpushed and uncommitted work
+// alike, so a branch that bumped in an earlier commit is not asked to bump
+// again. Fail-level: a changed plugin shipped under an unchanged version
+// reaches users as the version they already hold.
+
+const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/;
+
+function semverGreater(a, b) {
+  const x = SEMVER.exec(a).slice(1).map(Number);
+  const y = SEMVER.exec(b).slice(1).map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (x[i] !== y[i]) return x[i] > y[i];
+  }
+  return false;
+}
+
+// The commit changes are measured from: { base, label } where base is a
+// commit (null when the repository has no commit yet), or { error }.
+function stalenessBase(git) {
+  try {
+    git(['rev-parse', '--verify', '--quiet', 'HEAD^{commit}']);
+  } catch {
+    return { base: null, label: 'the empty repository' };
+  }
+  const prBase = process.env.GITHUB_BASE_REF;
+  const candidates = prBase ? [`origin/${prBase}`] : ['origin/main'];
+  for (const ref of candidates) {
+    let tip;
+    try {
+      tip = git(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]).trim();
+    } catch {
+      // A pull request names its base; a run that cannot see it would fall
+      // back to HEAD and compare the change with itself.
+      if (prBase) return { error: `$GITHUB_BASE_REF names "${prBase}" but ${ref} is not fetched — check out with full history (fetch-depth: 0)` };
+      continue;
+    }
+    try {
+      return { base: git(['merge-base', 'HEAD', tip]).trim(), label: `the merge-base with ${ref}` };
+    } catch (e) {
+      return { error: `${ref} has no merge-base with HEAD — a shallow checkout needs full history (fetch-depth: 0): ${e.message.split('\n')[0]}` };
+    }
+  }
+  return { base: git(['rev-parse', 'HEAD']).trim(), label: 'HEAD' };
+}
+
 function checkVersionStaleness(ctx) {
   const { projectRoot, results } = ctx;
+  const CHECK = 'version-staleness';
+  const git = (args) => execFileSync('git', args, { cwd: projectRoot, encoding: 'utf8', stdio: 'pipe' });
+  const lines = (output) => output.trim() ? output.trim().split('\n') : [];
+
   // Verify git repo
   try {
-    execFileSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd: projectRoot, stdio: 'pipe' });
+    git(['rev-parse', '--is-inside-work-tree']);
   } catch {
     // Not a git repo — check not applicable
-    results.pass.push({ check: 'version-staleness', file: 'working tree', message: 'Not a git repository — skipping' });
+    results.pass.push({ check: CHECK, file: 'working tree', message: 'Not a git repository — skipping' });
     return;
   }
 
-  // Collect all uncommitted changes (staged + unstaged + untracked)
-  // Union of diff HEAD (working tree vs HEAD) and diff --cached (index vs HEAD)
-  // to cover staged-only changes (e.g., git add file then revert working tree)
+  const { base, label, error } = stalenessBase(git);
+  if (error) {
+    results.fail.push({ check: CHECK, file: 'working tree', message: `No comparison base: ${error}` });
+    return;
+  }
+
+  // Every change since the base: committed since it, staged (including a staged
+  // change the working tree has since reverted), unstaged, and untracked.
   let changedFiles;
   try {
-    const diffHeadOutput = execFileSync('git', ['diff', 'HEAD', '--name-only'], { cwd: projectRoot, encoding: 'utf8' }).trim();
-    const diffCachedOutput = execFileSync('git', ['diff', '--cached', '--name-only'], { cwd: projectRoot, encoding: 'utf8' }).trim();
-    const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: projectRoot, encoding: 'utf8' }).trim();
     const fileSet = new Set([
-      ...(diffHeadOutput ? diffHeadOutput.split('\n') : []),
-      ...(diffCachedOutput ? diffCachedOutput.split('\n') : []),
-      ...(untrackedOutput ? untrackedOutput.split('\n') : []),
+      ...(base ? lines(git(['diff', '--name-only', base])) : []),
+      ...lines(git(base ? ['diff', '--cached', '--name-only', base] : ['diff', '--cached', '--name-only'])),
+      ...lines(git(['ls-files', '--others', '--exclude-standard'])),
     ]);
     changedFiles = [...fileSet];
-  } catch {
-    // git diff HEAD fails on initial commit (no HEAD) — fall back to staged + untracked only
-    try {
-      const stagedOutput = execFileSync('git', ['diff', '--cached', '--name-only'], { cwd: projectRoot, encoding: 'utf8' }).trim();
-      const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: projectRoot, encoding: 'utf8' }).trim();
-      changedFiles = [
-        ...(stagedOutput ? stagedOutput.split('\n') : []),
-        ...(untrackedOutput ? untrackedOutput.split('\n') : []),
-      ];
-    } catch {
-      results.warn.push({ check: 'version-staleness', file: 'working tree', message: 'Git commands failed — version staleness check skipped' });
-      return;
-    }
+  } catch (e) {
+    results.fail.push({ check: CHECK, file: 'working tree', message: `Git commands failed — changes since ${label} could not be listed: ${e.message.split('\n')[0]}` });
+    return;
   }
 
   if (changedFiles.length === 0) {
     results.pass.push({
-      check: 'version-staleness',
+      check: CHECK,
       file: 'working tree',
-      message: 'No uncommitted changes'
+      message: `No changes since ${label}`
     });
     return;
   }
@@ -262,13 +298,12 @@ function checkVersionStaleness(ctx) {
   let gitDir;
   try {
     // `--git-dir` may answer relative to the git process's cwd, which is projectRoot
-    const gitDirOutput = execFileSync('git', ['rev-parse', '--git-dir'], { cwd: projectRoot, encoding: 'utf8' }).trim();
-    gitDir = path.resolve(projectRoot, gitDirOutput);
+    gitDir = path.resolve(projectRoot, git(['rev-parse', '--git-dir']).trim());
   } catch (e) {
     // Conflict state is now unknown, which is precisely when diff output cannot be
     // trusted — skip visibly rather than let the guard fall silently open again.
     results.warn.push({
-      check: 'version-staleness',
+      check: CHECK,
       file: 'working tree',
       message: `Git command failed (rev-parse --git-dir) — version staleness check skipped: ${e.message}`
     });
@@ -278,7 +313,7 @@ function checkVersionStaleness(ctx) {
   const activeConflict = conflictHeads.find(h => fs.existsSync(path.join(gitDir, h)));
   if (activeConflict) {
     results.pass.push({
-      check: 'version-staleness',
+      check: CHECK,
       file: 'working tree',
       message: `${activeConflict} detected — skipping version staleness check`
     });
@@ -307,14 +342,17 @@ function checkVersionStaleness(ctx) {
       }
     } catch (e) {
       if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
-        results.warn.push({ check: 'version-staleness', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
+        results.warn.push({ check: CHECK, file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
       }
     }
   }
   findPluginDirs(projectRoot);
 
-  // Track warn count to avoid pass+warn co-emission
-  let stalenessWarns = 0;
+  let staleCount = 0;
+  const stale = (file, message) => {
+    results.fail.push({ check: CHECK, file, message });
+    staleCount++;
+  };
 
   // Non-semantic files that don't warrant a version bump
   const STALENESS_IGNORE = new Set([
@@ -325,6 +363,7 @@ function checkVersionStaleness(ctx) {
   for (const [pluginDir, pluginJsonRel] of pluginDirs) {
     const prefix = pluginDir === '.' ? '' : pluginDir + '/';
     const pluginMetaPrefix = prefix + '.claude-plugin/';
+    const pluginName = pluginDir === '.' ? 'root' : pluginDir;
 
     // Content changes = files in this plugin dir, excluding .claude-plugin/ and non-semantic files
     const contentChanges = changedFiles.filter(f => {
@@ -342,109 +381,75 @@ function checkVersionStaleness(ctx) {
 
     if (contentChanges.length === 0) continue;
 
-    // Check if plugin.json has a version bump
-    let versionBumped = false;
+    let current;
+    try {
+      current = JSON.parse(fs.readFileSync(path.join(projectRoot, pluginJsonRel), 'utf8')).version;
+    } catch (e) {
+      stale(pluginJsonRel, `Plugin "${pluginName}" has content changes but its plugin.json cannot be read: ${e.message}`);
+      continue;
+    }
 
-    // New untracked plugin.json counts as version set
-    if (changedFiles.includes(pluginJsonRel)) {
+    // The version at the base. A plugin.json absent there is a new plugin,
+    // whose initial version is its bump.
+    let previous = null;
+    if (base) {
+      let text = null;
       try {
-        const diffResult = execFileSync('git', ['diff', 'HEAD', '--', pluginJsonRel], { cwd: projectRoot, encoding: 'utf8' });
-        if (/^\+\s*"version":/m.test(diffResult)) {
-          versionBumped = true;
-        }
+        text = git(['show', `${base}:${pluginJsonRel.split(path.sep).join('/')}`]);
       } catch {
-        // If diff fails (e.g., initial commit with no HEAD), check untracked and staged files
+        // absent at the base
+      }
+      if (text !== null) {
         try {
-          const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: projectRoot, encoding: 'utf8' }).trim();
-          if (untrackedOutput.split('\n').includes(pluginJsonRel)) {
-            versionBumped = true; // New plugin — initial version is set
-          }
-          // Also check staged changes (file may be git-added but no HEAD exists yet)
-          if (!versionBumped) {
-            const stagedDiff = execFileSync('git', ['diff', '--cached', '--', pluginJsonRel], { cwd: projectRoot, encoding: 'utf8' });
-            if (/^\+\s*"version":/m.test(stagedDiff)) {
-              versionBumped = true;
-            }
-          }
+          previous = JSON.parse(text).version;
         } catch (e) {
-          // Git commands failed (e.g., index.lock, permissions) — conservative: assume no bump
-          results.warn.push({ check: 'version-staleness', file: pluginJsonRel, message: `Git command failed: ${e.message}` });
-          versionBumped = false;
+          stale(pluginJsonRel, `Plugin "${pluginName}" plugin.json at ${label} cannot be parsed, so no bump can be established: ${e.message}`);
+          continue;
         }
       }
     }
+    if (previous === null) continue;
 
-    if (!versionBumped) {
-      const pluginName = pluginDir === '.' ? 'root' : pluginDir;
-      results.warn.push({
-        check: 'version-staleness',
-        file: pluginJsonRel,
-        message: `Plugin "${pluginName}" has content changes but no version bump in plugin.json (${contentChanges.length} file(s) changed)`
-      });
-      stalenessWarns++;
+    const changed = `${contentChanges.length} file(s) changed since ${label}`;
+    if (typeof current !== 'string' || !SEMVER.test(current)) {
+      stale(pluginJsonRel, `Plugin "${pluginName}" version ${JSON.stringify(current)} is not x.y.z, so no bump can be established (${changed})`);
+    } else if (current === previous) {
+      stale(pluginJsonRel, `Plugin "${pluginName}" has content changes but no version bump in plugin.json (${changed}; still ${current})`);
+    } else if (typeof previous === 'string' && SEMVER.test(previous) && !semverGreater(current, previous)) {
+      stale(pluginJsonRel, `Plugin "${pluginName}" version ${current} is not greater than ${previous} at ${label} (${changed})`);
     }
   }
 
-  if (stalenessWarns === 0) {
+  if (staleCount === 0) {
     results.pass.push({
-      check: 'version-staleness',
+      check: CHECK,
       file: 'all plugins',
-      message: 'Version staleness check completed'
+      message: `Every plugin with content changes since ${label} carries a higher version`
     });
   }
 }
 
 // ============================================================
-// Check: Cross-Reference Scan (Protocol Name & Deficit Consistency)
+// Check: Cross-Reference Scan (README clusters & publication inventory)
 // ============================================================
 function checkCrossRefScan(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES, CANONICAL_PROTOCOLS } = ctx;
+  const { projectRoot, results } = ctx;
   let subCheckFailed = false;
 
   // CLAUDE.md is a routing index, not a content mirror: its deficit → resolution
   // pairs, cluster table, and initiator taxonomy were replaced by pointers to the
   // authoritative sources (per-protocol SKILL.md, the route table, README), so
   // the scan enforces those sources directly and no longer reads CLAUDE.md content.
+  //
+  // Each comparison here sets two independently authored artifacts against each
+  // other. A protocol's deficit → resolution pair is read from its own SKILL.md,
+  // so searching that same file for the pair compares it with itself; the
+  // PROTOCOL_FILES and CANONICAL_PROTOCOLS sets are both projections of one
+  // discoverPlugins() walk, so diffing them against that walk does too. Neither
+  // is compared here. That every canonical protocol has a SKILL.md is the
+  // registry check `structure` and `lean-definition` make through protocolInputs.
 
-  // Sub-check 1: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
-  for (const relPath of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-    // Determine which protocol this SKILL.md belongs to
-    const dirName = relPath.split('/')[0];
-    const protocolEntry = Object.entries(CANONICAL_PROTOCOLS).find(([name]) =>
-      name.toLowerCase() === dirName
-    );
-
-    if (!protocolEntry) continue;
-
-    const [protocolName, { deficit, resolution }] = protocolEntry;
-
-    // Check that the deficit type appears in the SKILL.md
-    if (!content.includes(deficit)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: relPath,
-        message: `Missing deficit type "${deficit}" in ${protocolName} SKILL.md`
-      });
-      subCheckFailed = true;
-    }
-
-    // Check that the resolution type appears in the SKILL.md
-    if (!content.includes(resolution)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: relPath,
-        message: `Missing resolution type "${resolution}" in ${protocolName} SKILL.md`
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 2: Verify README workflow canonical-clusters invariant
+  // Sub-check 1: Verify README workflow canonical-clusters invariant
   for (const relPath of ['README.md', 'README_ko.md']) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
@@ -460,8 +465,8 @@ function checkCrossRefScan(ctx) {
     }
   }
 
-  // Sub-check 3: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
-  // package.js PLUGINS, and marketplace.json plugins against filesystem ground truth
+  // Sub-check 2: Publication completeness — cross-check package.js PLUGINS and
+  // marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
     // Deprecated plugins (plugin.json carries "deprecated": true) are tracked
@@ -483,8 +488,7 @@ function checkCrossRefScan(ctx) {
           } catch (e) {
             // Surface parse errors as warnings so the real cause (bad JSON)
             // shows up in this check's output instead of cascading into a
-            // misleading "missing from PROTOCOL_FILES" downstream warning
-            // (PR #351 review M1).
+            // misleading downstream inventory warning (PR #351 review M1).
             results.warn.push({
               check: 'cross-ref-scan',
               file: path.relative(projectRoot, pluginJsonPath),
@@ -495,12 +499,12 @@ function checkCrossRefScan(ctx) {
       }
     } catch (e) {
       // Stage 2 loud mode (upstream scope): this readdir is the ground-truth
-      // source for cross-ref-scan Sources 1, 2, 3, and 4. If it fails,
+      // source for both publication sources below. If it fails,
       // allPluginDirs is empty, every downstream source sees an empty
       // filesystem view, every bidirectional diff collapses to zero findings,
       // and the entire cross-ref-scan check would silently pass with no
       // detection. This is the exact silent-failure CLASS Stage 2 closes in
-      // Source 3, at an upstream scope that covers all four sources.
+      // the package.js source, at an upstream scope that covers both.
       // Escalate to fail + subCheckFailed per fail-closed policy —
       // review-ensemble cross-model agreement (Codex gpt-5.4 high +
       // silent-failure-hunter) flagged this during PR development.
@@ -512,48 +516,11 @@ function checkCrossRefScan(ctx) {
       subCheckFailed = true;
     }
 
-    // Protocol-only subset (dirs listed in PROTOCOL_FILES)
-    const protocolDirs = new Set(PROTOCOL_FILES.map(f => f.split('/')[0]));
-
-    // Non-protocol plugin dirs (utility plugins not expected in protocol-only arrays)
-    const utilityDirs = new Set([...allPluginDirs].filter(d => !protocolDirs.has(d)));
-
-    // Source 1: PROTOCOL_FILES dirs
-    for (const dir of allPluginDirs) {
-      if (utilityDirs.has(dir)) continue; // utility plugins not expected in PROTOCOL_FILES
-      if (deprecatedPluginDirs.has(dir)) continue; // deprecated plugins exit active enumeration
-      if (!protocolDirs.has(dir)) {
-        results.warn.push({
-          check: 'cross-ref-scan',
-          file: 'static-checks.js',
-          message: `Protocol directory "${dir}" exists on filesystem but missing from PROTOCOL_FILES array`
-        });
-      }
-    }
-
-    // Source 2: CANONICAL_PROTOCOLS keys (title-cased protocol names)
-    const canonicalDirs = new Set(
-      Object.keys(CANONICAL_PROTOCOLS).map(name => name.toLowerCase())
-    );
-    for (const dir of allPluginDirs) {
-      if (utilityDirs.has(dir)) continue;
-      if (deprecatedPluginDirs.has(dir)) continue;
-      if (!canonicalDirs.has(dir)) {
-        results.warn.push({
-          check: 'cross-ref-scan',
-          file: 'static-checks.js',
-          message: `Protocol directory "${dir}" exists on filesystem but missing from CANONICAL_PROTOCOLS`
-        });
-      }
-    }
-
-    // Source 3: package.js PLUGINS at (dir, skill) tuple granularity.
+    // Source 1: package.js PLUGINS at (dir, skill) tuple granularity.
     // Publication-surface invariant: the set of (dir, skill) SKILL.md files on disk
-    // must match PLUGINS exactly. This sub-check deliberately does NOT apply the
-    // utilityDirs skip — utility plugin SKILL.md files must also be published.
-    // Sources 1 and 2 remain protocol-only (utility-skip preserved) — Source 3
-    // (package.js PLUGINS) and Source 4 (marketplace.json) publish across the
-    // full plugin set, protocol and utility alike.
+    // must match PLUGINS exactly. Both publication sources span the full plugin
+    // set, protocol and utility alike — utility plugin SKILL.md files must also
+    // be published.
     //
     // IMPORTANT: path.resolve (not path.join) is load-bearing here. When invoked
     // as `node .claude/skills/verify/scripts/static-checks.js .`, projectRoot is
@@ -581,7 +548,7 @@ function checkCrossRefScan(ctx) {
       results.fail.push({
         check: 'cross-ref-scan',
         file: 'scripts/package.js',
-        message: 'Required file not found — cross-ref-scan Source 3 cannot verify publication surface'
+        message: 'Required file not found — cross-ref-scan cannot verify the package.js publication surface'
       });
       subCheckFailed = true;
     } else {
@@ -632,7 +599,7 @@ function checkCrossRefScan(ctx) {
         // (publication-gap, stale-plugins-entry) compared PLUGINS against a
         // separate filesystem walk — under the helper-derived model both
         // sides share the same walk, making the diff tautological. Drift
-        // detection moves to marketplace.json plugins (Source 4), which
+        // detection moves to marketplace.json plugins (Source 2), which
         // remains hand-curated relative to filesystem.
         for (const p of PLUGINS) {
           if (!p || typeof p.dir !== 'string' || typeof p.skill !== 'string') {
@@ -648,7 +615,7 @@ function checkCrossRefScan(ctx) {
       }
     }
 
-    // Source 4: marketplace.json plugins
+    // Source 2: marketplace.json plugins
     const marketplacePath = path.join(projectRoot, '.claude-plugin', 'marketplace.json');
     if (fs.existsSync(marketplacePath)) {
       try {
@@ -697,7 +664,7 @@ function checkCrossRefScan(ctx) {
     results.pass.push({
       check: 'cross-ref-scan',
       file: 'all protocols',
-      message: 'Cross-reference scan completed — protocol names and deficit pairs consistent'
+      message: 'Cross-reference scan completed — README workflow clusters and publication inventory consistent'
     });
   }
 }
@@ -709,10 +676,10 @@ function checkOnboardSync(ctx) {
   const { projectRoot, results, PROTOCOL_FILES } = ctx;
   const onboardSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/SKILL.md');
   if (!fs.existsSync(onboardSkillPath)) {
-    results.warn.push({
+    results.fail.push({
       check: 'onboard-sync',
       file: 'epistemic-cooperative/skills/onboard/SKILL.md',
-      message: 'Onboard SKILL.md not found, skipping onboard sync check'
+      message: 'Onboard SKILL.md not found — the protocol coverage it must carry has no source to check'
     });
     return;
   }
@@ -781,11 +748,12 @@ function checkOnboardSync(ctx) {
       }
     }
   } else {
-    results.warn.push({
+    results.fail.push({
       check: 'onboard-sync',
       file: 'epistemic-cooperative/skills/onboard/references/scenarios.md',
-      message: 'scenarios.md not found'
+      message: 'scenarios.md not found — every protocol\'s scenario block has no source to check'
     });
+    subCheckFailed = true;
   }
 
   // Sub-check 4: workflow.md — all slash commands present
@@ -803,11 +771,12 @@ function checkOnboardSync(ctx) {
       }
     }
   } else {
-    results.warn.push({
+    results.fail.push({
       check: 'onboard-sync',
       file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
-      message: 'workflow.md not found'
+      message: 'workflow.md not found — every protocol\'s slash command has no source to check'
     });
+    subCheckFailed = true;
   }
 
   if (!subCheckFailed) {

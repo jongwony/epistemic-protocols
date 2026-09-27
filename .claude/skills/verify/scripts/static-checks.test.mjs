@@ -8,8 +8,12 @@
  *                          whose Definition block is Lean 4, and each rule it
  *                          holds rejects its counterexample
  *   contract-structure.js  provisional text checks on contract structure
+ *   artifact-sync.js       version-staleness measures a change from its base
  *   prose-surface.js       artifact-self-containment's path rules fire on a
  *                          backticked path
+ *
+ * A missing required input fails under every check that requires it; that
+ * group mutates the tree once and reads every layer's verdict.
  *
  * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
  */
@@ -29,11 +33,13 @@ const checkerRelative = '.claude/skills/verify/scripts/static-checks.js';
 const require = createRequire(import.meta.url);
 const { protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
 
-function run(root) {
+// Runs the verifier at `checker` (the one inside `root` by default) over `root`.
+function run(root, { checker = path.join(root, checkerRelative), env = process.env } = {}) {
   try {
-    return JSON.parse(execFileSync('node', [path.join(root, checkerRelative), root], {
+    return JSON.parse(execFileSync('node', [checker, root], {
       encoding: 'utf-8',
-      maxBuffer: 1 << 28
+      maxBuffer: 1 << 28,
+      env
     }));
   } catch (error) {
     assert.equal(error.status, 1, `verifier failed without a check verdict: ${error.stderr}`);
@@ -232,6 +238,111 @@ describe('lean bridge: lean-definition', () => {
       expectSome(failures(), 'does not elaborate');
       restore();
     });
+  });
+});
+
+describe('fail closed: a missing required input fails under each check that requires it', () => {
+  it('fails a missing or non-Lean protocol, a missing index or onboard source, and a Rules label outside Rules', () => {
+    const [missing, nonLean, displaced] = leanFiles.filter((file) => file !== target);
+    const missingId = missing.split('/')[0];
+    withCopy(({ read, write, remove, verdict }) => {
+      remove(missing);
+      write(nonLean, read(nonLean).replace('```lean\n', '```\n'));
+      remove('CLAUDE.md');
+      remove('epistemic-cooperative/skills/onboard/references/scenarios.md');
+      remove('epistemic-cooperative/skills/onboard/references/workflow.md');
+
+      // The label moves out of Rules rather than vanishing: a whole-file search
+      // still finds it, and only a search confined to Rules does not.
+      const text = read(displaced);
+      const rules = text.indexOf('\n## Rules\n');
+      const after = text.indexOf('\n## ', rules + 1);
+      const end = after === -1 ? text.length : after;
+      assert.ok(rules !== -1 && text.slice(rules, end).includes('**Round composition**'), `precondition: ${displaced} carries the label in Rules`);
+      write(displaced, `${text.slice(0, rules)}${text.slice(rules, end).replaceAll('**Round composition**', 'Round composition')}${text.slice(end)}\n## Appendix\n\n**Round composition** stated outside Rules.\n`);
+
+      const result = verdict();
+      const failed = (check) => result.fail.filter((r) => r.check === check).map((r) => r.message);
+      const registryGap = `Canonical protocol "${missingId}"`;
+      for (const check of [LEAN, 'structure', 'emit-load-discipline', 'framing-readout-enforcement']) {
+        expectSome(failed(check), registryGap);
+      }
+      assert.ok(result.fail.some((r) => r.check === LEAN && r.file === nonLean && r.message.includes('is not a ```lean fence')), `expected a non-Lean failure for ${nonLean}`);
+      expectSome(failed('routing-index-contract'), 'CLAUDE.md not found');
+      expectSome(failed('onboard-sync'), 'scenarios.md not found');
+      expectSome(failed('onboard-sync'), 'workflow.md not found');
+      assert.ok(result.fail.some((r) => r.check === 'emit-load-discipline' && r.file === displaced && r.message.includes('in ## Rules: Round composition')), `expected the displaced label to fail for ${displaced}`);
+    });
+  });
+
+  // The audit's verdict is its exit status as well as its readout. The
+  // counterexample needs the package to build, so it runs on its own tree.
+  it('fails an audit whose exit status its readout does not account for', { skip: !elaborated && 'no Lean toolchain reachable' }, () => {
+    withCopy(({ read, write, verdict }) => {
+      const main = read('lean/Audit/Main.lean');
+      const verdictLine = 'return if reports.any (fun r => !r.problems.isEmpty) then 1 else 0';
+      assert.ok(main.includes(verdictLine), 'precondition: the audit driver returns its verdict on one line');
+      write('lean/Audit/Main.lean', main.replace(verdictLine, 'return 1'));
+      const result = verdict();
+      expectSome(result.fail.filter((r) => r.check === LEAN).map((r) => r.message), 'exited with status 1 though its readout lists no problem');
+      assert.deepEqual(result.pass.filter((r) => r.check === LEAN), [], 'no unit passes on a readout its audit exit contradicts');
+    });
+  });
+});
+
+describe('artifact sync: version-staleness', () => {
+  // A throwaway repository, verified by the live checker: one plugin, a trunk
+  // that origin/main points at, and a branch whose change is committed — the
+  // clean tree a CI checkout sees.
+  const gitEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_') && key !== 'GITHUB_BASE_REF'));
+  const git = (cwd, args) => execFileSync('git', args, { cwd, encoding: 'utf-8', stdio: 'pipe', env: gitEnv });
+  const staleness = (root, env = gitEnv) => {
+    const result = run(root, { checker: path.join(projectRoot, checkerRelative), env });
+    return {
+      fail: result.fail.filter((r) => r.check === 'version-staleness').map((r) => r.message),
+      pass: result.pass.filter((r) => r.check === 'version-staleness').map((r) => r.message),
+    };
+  };
+  const manifest = (version) => `${JSON.stringify({ name: 'plug', version }, null, 2)}\n`;
+
+  it('measures a committed change from the merge-base with origin/main and requires a higher version', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'version-staleness-'));
+    const put = (relative, text) => {
+      mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
+      writeFileSync(path.join(root, relative), text);
+    };
+    try {
+      git(root, ['init', '-q', '-b', 'main', '.']);
+      git(root, ['config', 'user.email', 'fixture@example.invalid']);
+      git(root, ['config', 'user.name', 'fixture']);
+      put('plug/.claude-plugin/plugin.json', manifest('1.0.0'));
+      put('plug/skills/x/SKILL.md', 'base\n');
+      git(root, ['add', '-A']);
+      git(root, ['commit', '-qm', 'base']);
+      git(root, ['update-ref', 'refs/remotes/origin/main', 'HEAD']);
+      git(root, ['checkout', '-q', '-b', 'feature']);
+      put('plug/skills/x/SKILL.md', 'changed\n');
+      git(root, ['commit', '-qam', 'change without a bump']);
+      assert.equal(git(root, ['status', '--porcelain']), '', 'precondition: a clean tree');
+
+      expectSome(staleness(root).fail, 'no version bump');
+
+      put('plug/.claude-plugin/plugin.json', manifest('0.9.0'));
+      git(root, ['commit', '-qam', 'a lower version']);
+      expectSome(staleness(root).fail, 'is not greater than 1.0.0');
+
+      put('plug/.claude-plugin/plugin.json', manifest('1.0.1'));
+      git(root, ['commit', '-qam', 'a higher version']);
+      const bumped = staleness(root);
+      assert.deepEqual(bumped.fail, []);
+      expectSome(bumped.pass, 'the merge-base with origin/main');
+
+      // A pull request whose base branch was never fetched has nothing to
+      // measure from, and says so rather than comparing HEAD with itself.
+      expectSome(staleness(root, { ...gitEnv, GITHUB_BASE_REF: 'unfetched' }).fail, 'is not fetched');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 

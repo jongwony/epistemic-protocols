@@ -158,7 +158,7 @@ function leanFilesUnder(dir, rel = '') {
 }
 
 function checkLeanDefinition(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES } = ctx;
+  const { projectRoot, results, protocolInputs } = ctx;
   const CHECK = 'lean-definition';
   const fail = (file, message) => results.fail.push({ check: CHECK, file, message });
   const groundPath = path.join(projectRoot, leanContract.CANONICAL_GROUND);
@@ -169,11 +169,16 @@ function checkLeanDefinition(ctx) {
   const namespaces = new Map();
   const expectedLean = new Set([leanContract.CANONICAL_GROUND, leanContract.GROUND_THEOREMS]);
 
-  for (const relPath of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-    const content = fs.readFileSync(fullPath, 'utf8');
-    if (!isLeanDefinition(content)) continue;
+  // Enrollment: every canonical protocol hands its Definition block to Lean.
+  // A protocol with no SKILL.md, or whose block is not a ```lean fence, fails
+  // here rather than dropping out of what gets elaborated and audited.
+  for (const relPath of protocolInputs(CHECK)) {
+    const content = fs.readFileSync(path.join(projectRoot, relPath), 'utf8');
+    if (!isLeanDefinition(content)) {
+      fail(relPath, 'Definition block is not a ```lean fence — every canonical protocol hands its contract to Lean, and a block outside it is neither elaborated nor audited');
+      failedFiles.add(relPath);
+      continue;
+    }
 
     const source = extractLeanDefinition(content);
     if (source === null) {
@@ -220,7 +225,7 @@ function checkLeanDefinition(ctx) {
   for (const rel of [leanContract.CANONICAL_GROUND, leanContract.GROUND_THEOREMS]) {
     const full = path.join(projectRoot, rel);
     if (!fs.existsSync(full)) {
-      if (blocks.length > 0) { fail(rel, 'Canonical GROUND file is missing'); failedFiles.add(rel); }
+      fail(rel, 'Canonical GROUND file is missing'); failedFiles.add(rel);
       continue;
     }
     const text = fs.readFileSync(full, 'utf8');
@@ -288,25 +293,36 @@ function checkLeanDefinition(ctx) {
     }
     return;
   }
+  if (result.auditError) {
+    fail('lakefile.toml', `The Lean audit (\`lake lint\`) printed an unreadable readout: ${result.auditError}`);
+    return;
+  }
   if (!result.audit) {
     fail('lakefile.toml', `The Lean audit (\`lake lint\`) printed no readout: ${leanContract.diagnostics(result.lint.output).slice(0, 3).join(' | ') || result.lint.output.trim().split('\n').slice(-3).join(' | ') || `exit ${result.lint.status}`}`);
     return;
   }
 
+  // The audit's verdict is its exit status as well as its readout: it exits 1
+  // exactly when a report carries a problem, so a status that disagrees with
+  // the readout means the readout is not the whole verdict.
   const reports = new Map(result.audit.map(r => [r.ns, r]));
+  const passes = [];
+  let problemCount = 0;
   for (const { relPath, ns } of units) {
     const report = reports.get(ns);
     if (!report) {
       fail(relPath, `The Lean audit returned no report for ${ns}`);
+      problemCount++;
       continue;
     }
     const problems = [...report.problems];
     if (problems.length > 0) {
       for (const message of problems) fail(relPath, message);
+      problemCount += problems.length;
       continue;
     }
     const block = blocks.find(b => b.relPath === relPath);
-    results.pass.push({
+    passes.push({
       check: CHECK,
       file: relPath,
       message: ns === 'Ground'
@@ -314,6 +330,14 @@ function checkLeanDefinition(ctx) {
         : `Lean Definition block elaborates standalone, and ${block.theoremsRel} proves ${report.guarantees.length} guarantee(s)${report.helpers.length > 0 ? ` with ${report.helpers.length} private helper(s)` : ''}; the Lean audit admits only propext, Classical.choice, Quot.sound and ${report.judgments.length} documented judgment(s), each inhabited by a witness that assumes nothing`,
     });
   }
+  if (result.lint.status !== 0 && problemCount === 0) {
+    fail('lakefile.toml', `The Lean audit (\`lake lint\`) exited with status ${result.lint.status} though its readout lists no problem — no unit passes on a readout its own exit status contradicts`);
+    return;
+  }
+  if (result.lint.status === 0 && problemCount > 0) {
+    fail('lakefile.toml', `The Lean audit (\`lake lint\`) exited with status 0 though its readout lists ${problemCount} problem(s)`);
+  }
+  results.pass.push(...passes);
 }
 
 module.exports = {

@@ -1,10 +1,10 @@
 name: Lean
 
 # Installs the pinned toolchain and runs the Lean audit's fixtures (`lake test`),
-# then the static checks. lean-definition runs the one driver in
-# lean-contract.js — generate the contract modules from each SKILL.md Lean block,
-# `lake build --wfail`, then the checked-in audit as `lake lint` — with a
-# toolchain reachable, so its verdict here is never the warn.
+# then the static checks, where every `fail` blocks. lean-definition runs the one
+# driver in lean-contract.js — generate the contract modules from each SKILL.md
+# Lean block, `lake build --wfail`, then the checked-in audit as `lake lint` —
+# with a toolchain reachable, so its verdict here is never the warn.
 
 on:
   pull_request:
@@ -18,7 +18,11 @@ jobs:
     permissions:
       contents: read
     steps:
+      # Full history: version-staleness measures a pull request's plugin changes
+      # from its merge-base with the base branch, which a shallow clone lacks.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:

@@ -144,35 +144,54 @@ function checkLanguagePurity(ctx) {
 // with the occasion-bound detail moved to each skill's own
 // references/round-composition.md; Form feedback handles how a round's
 // density is set and stays a separate rule. These must live in each core
-// protocol SKILL.md because packaged runtime contracts cannot depend on
-// contributor docs or Output Style alone.
+// protocol SKILL.md's Rules section because packaged runtime contracts cannot
+// depend on contributor docs or Output Style alone, so the labels are searched
+// there and nowhere else in the file.
+
+// The body of the `## Rules` section: from its heading to the next H2, with
+// fenced code skipped so a `## ` line inside a fence neither ends the section
+// nor opens one. Null when the file has no such section.
+function rulesSection(content) {
+  const lines = content.split('\n');
+  let inFence = false;
+  let start = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*```/.test(lines[i])) inFence = !inFence;
+    if (inFence) continue;
+    if (start === -1) {
+      if (/^## Rules[ \t]*$/.test(lines[i])) start = i + 1;
+    } else if (/^## /.test(lines[i])) {
+      return lines.slice(start, i).join('\n');
+    }
+  }
+  return start === -1 ? null : lines.slice(start).join('\n');
+}
+
 function checkEmitLoadDiscipline(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES } = ctx;
+  const { projectRoot, results, protocolInputs } = ctx;
   const REQUIRED_RULES = [
     { label: 'Round composition', pattern: /\*\*Round composition\*\*/ },
     { label: 'Form feedback', pattern: /\*\*Form feedback\*\*/ },
   ];
 
   let checked = 0;
-  for (const relPath of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) {
-      results.warn.push({
+  for (const relPath of protocolInputs('emit-load-discipline')) {
+    checked++;
+    const rules = rulesSection(fs.readFileSync(path.join(projectRoot, relPath), 'utf8'));
+    if (rules === null) {
+      results.fail.push({
         check: 'emit-load-discipline',
         file: relPath,
-        message: `Protocol file not found: ${relPath}`
+        message: 'Missing "## Rules" section — the user-facing emit load rules have no section to live in',
       });
       continue;
     }
-
-    checked++;
-    const content = fs.readFileSync(fullPath, 'utf8');
     for (const rule of REQUIRED_RULES) {
-      if (!rule.pattern.test(content)) {
+      if (!rule.pattern.test(rules)) {
         results.fail.push({
           check: 'emit-load-discipline',
           file: relPath,
-          message: `Missing user-facing emit load rule: ${rule.label}`,
+          message: `Missing user-facing emit load rule in ## Rules: ${rule.label}`,
         });
       }
     }
@@ -247,17 +266,13 @@ function liveProse(span) {
 // is a positive statement rather than a prohibition: references/verification.md,
 // framing-readout-enforcement.
 function checkFramingReadoutEnforcement(ctx) {
-  const { projectRoot, results, PROTOCOL_FILES } = ctx;
+  const { projectRoot, results, protocolInputs } = ctx;
   const BAR_GLYPH = /[▓░]/;
   const CHECK = 'framing-readout-enforcement';
   let checked = 0;
 
-  for (const relPath of PROTOCOL_FILES) {
+  for (const relPath of protocolInputs(CHECK)) {
     const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) {
-      results.warn.push({ check: CHECK, file: relPath, message: `Protocol file not found: ${relPath}` });
-      continue;
-    }
     checked++;
     const content = fs.readFileSync(fullPath, 'utf8');
     content.split('\n').forEach((line, idx) => {
