@@ -575,8 +575,9 @@ function runStaticChecksSubprocess(projectRoot) {
       maxBuffer: 32 * 1024 * 1024,
       // static-checks.js shells out to git itself, so it needs the same
       // scrubbing: an inherited GIT_DIR would aim it at the real repository
-      // no matter which root it was handed.
-      env: envWithoutGitVars(),
+      // no matter which root it was handed. A fixture root has no
+      // origin/<base>, so a CI run's GITHUB_BASE_REF is withheld from it.
+      env: projectRoot ? { ...envWithoutGitVars(), GITHUB_BASE_REF: '' } : envWithoutGitVars(),
     });
     return JSON.parse(stdout);
   } catch (err) {
