@@ -9,8 +9,9 @@ focus: whether each turn that hands the user something ends there, rather than a
 
 Contract obligation, shared by both forms of `/grasp`: every question the protocol puts to the
 user is realized as present-then-Stop. The list form states it as `Constitution → TextPresent+Stop`
-and the active-turn rule that every turn ends in one terminal shape; the Lean form as `present`
-("present the Round … then Stop"), with an unanswered gate holding (`silence`). The tree half of
+and the active-turn rule that every turn ends in one terminal shape; the Lean form as the
+`.present` operation's `.interaction .constitution` annotation, which `Interaction.realization`
+maps to `.stop`, with an unanswered gate holding (`silence`). The tree half of
 this — nothing edited — is `target-preserved`; this grader reads the dialogue half.
 
 ## Met

@@ -2,8 +2,9 @@ import Audit.Check
 
 /-! The lint driver (`lake lint`): imports every audited unit's modules and prints one
     `AUDIT {json}` line with a report per unit. Arguments name the protocol namespaces; with none,
-    every generated `lean/.contract/Contract/<NS>.lean` is one. GROUND is always audited. The exit
-    code is 1 when any report carries a problem. `lake lint` does not build; build first. -/
+    every generated `lean/.contract/Contract/<NS>.lean` is one. GROUND and the TOOL GROUNDING
+    vocabulary are always audited. The exit code is 1 when any report carries a problem.
+    `lake lint` does not build; build first. -/
 
 open Lean Audit
 
@@ -18,7 +19,7 @@ def generatedNamespaces : IO (Array Name) := do
 
 unsafe def main (args : List String) : IO UInt32 := do
   let namespaces ← if args.isEmpty then generatedNamespaces else pure (args.toArray.map String.toName)
-  let targets := #[Target.ground] ++ namespaces.map Target.protocol
+  let targets := #[Target.ground, Target.toolGrounding] ++ namespaces.map Target.protocol
   initSearchPath (← findSysroot)
   enableInitializersExecution
   let mut imports : Array Import := #[]

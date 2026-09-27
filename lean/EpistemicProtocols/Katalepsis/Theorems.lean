@@ -235,4 +235,8 @@ theorem other_intent_no_disclosure (c : Context P) (e : EntryPoint) (basis : Str
   all_goals simp only [gateFor, settle, entryRound]
   all_goals repeat first | split | exact fun h => Gate.noConfusion h
 
+theorem writes_and_dispatches_nothing (op : Op) :
+    (grounding op).1 ≠ .transform ∧ (grounding op).1 ≠ .dispatch := by
+  cases op <;> simp [grounding]
+
 end Katalepsis

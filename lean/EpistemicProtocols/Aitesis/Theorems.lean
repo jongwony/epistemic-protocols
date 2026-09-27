@@ -49,4 +49,8 @@ theorem sufficient_opens_no_pass (respond : Context P → Response P) (c : Conte
     inquire respond c (u :: us) = .declared (fuse c u) := by
   simp [inquire, h]
 
+theorem never_holds_the_turn (op : Op) (k : ToolGrounding.Interaction)
+    (h : (grounding op).1 = .interaction k) : k.realization = .proceed := by
+  cases op <;> simp [grounding] at h <;> subst h <;> rfl
+
 end Aitesis

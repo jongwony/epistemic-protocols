@@ -1,7 +1,7 @@
 {
   "name": "heuresis",
   "description": "Widen an empty or prematurely narrowed field of ideas before choosing — /ideate (εὕρεσις: finding/invention)",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

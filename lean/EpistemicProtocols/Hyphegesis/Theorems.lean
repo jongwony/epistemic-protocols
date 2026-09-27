@@ -198,4 +198,16 @@ theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : 
 theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
     (ok : (feasibilityCoord (P := P) r).admits s.src) : s.src.val = .external := ok
 
+theorem handoff_on_covered_partition (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (op : Op) (h : handedOffBy (conduct respond c us) = some op) :
+    op = .handoff ∧ ∃ c₁ t, conduct respond c us = .conducted c₁ t ∧ Covered c₁ ∧
+      IsPartition (moves c₁) (cut c₁) := by
+  cases ho : conduct respond c us with
+  | conducted c₁ t =>
+    rw [ho] at h
+    simp only [handedOffBy, Option.some.injEq] at h
+    obtain ⟨_, _, _, _, hc, hp, _, _⟩ := conducted_by_person respond c us c₁ t ho
+    exact ⟨h.symm, c₁, t, rfl, hc, hp⟩
+  | _ => rw [ho] at h; simp [handedOffBy] at h
+
 end Hyphegesis

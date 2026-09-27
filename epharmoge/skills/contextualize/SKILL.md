@@ -464,10 +464,22 @@ changed in the result, any that did not repair what they aimed at, and the disse
 closure. Demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | judge | certify | handoff | evidenceWithdraw | evidenceShow | gate | adapt
              | discard | persist | readTurn | converge | seam
@@ -475,16 +487,16 @@ inductive Op | judge | certify | handoff | evidenceWithdraw | evidenceShow | gat
 def grounding : Op → Annot × String
   | .judge            => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass; it re-executes nothing and reads the completed result and the observable context, never the assistant's own words, as what the result must fit")
   | .certify          => (.sense, "Internal analysis: each mismatch's claim fitted against this contract's own claim and its route claims, reading nothing outside this contract; fail-closed, so evidence that supports no claim leaves it unclear")
-  | .handoff          => (.extension, "TextPresent+Proceed: a mismatch the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), undefined convention or dependency ownership (/bound); nothing is dispatched")
-  | .evidenceWithdraw => (.extension, "TextPresent+Proceed: where evidence alone shows a flagged place fits, withdraw the flag and say so with that evidence; a person's turn that disputes it puts it back")
-  | .evidenceShow     => (.extension, "TextPresent+Proceed: where evidence alone shows a mismatch does not fit, show that evidence before the gate; the person still resolves it")
-  | .gate             => (.constitution, "present: the current list and this turn's changes, then one mismatch — an unclear owner first — with concrete actions, each with its consequence and never a category title; with nothing open, whether the run is done")
+  | .handoff          => (.interaction .extension, "a mismatch the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), undefined convention or dependency ownership (/bound); nothing is dispatched")
+  | .evidenceWithdraw => (.interaction .extension, "where evidence alone shows a flagged place fits, withdraw the flag and say so with that evidence; a person's turn that disputes it puts it back")
+  | .evidenceShow     => (.interaction .extension, "where evidence alone shows a mismatch does not fit, show that evidence before the gate; the person still resolves it")
+  | .gate             => (.interaction .constitution, "the current list and this turn's changes, then one mismatch — an unclear owner first — with concrete actions, each with its consequence and never a category title; with nothing open, whether the run is done")
   | .adapt            => (.transform, "artifact write: the person's adaptation applied to the result; the write's result returns into the context and the next pass judges it")
   | .discard          => (.transform, "artifact write: withdraw the result and put the replacement in its place, or remove it when nothing takes its place")
   | .persist          => (.track, "record, record update: the one carrier entry — created when a mismatch is first found, brought into line every pass, one line per mismatch with its standing and what it stood on; its locator is carried out on the verdict")
   | .readTurn         => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — a resolution, a closing, something named as not fitting, a correction, a question — whatever form it takes")
-  | .converge         => (.extension, "TextPresent+Proceed: the per-mismatch trace with who settled each line and what it stood on — for a person's resolution, the turn read, quoted, and the intent taken from it — the adaptations made and any that did not repair what they aimed at, the dissent attached to the closure, and what the verdict does not claim")
-  | .seam             => (.extension, "TextPresent+Proceed: at a chain the person declared, naming the next protocol, proceed to it citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
+  | .converge         => (.interaction .extension, "the per-mismatch trace with who settled each line and what it stood on — for a person's resolution, the turn read, quoted, and the intent taken from it — the adaptations made and any that did not repair what they aimed at, the dissent attached to the closure, and what the verdict does not claim")
+  | .seam             => (.interaction .extension, "at a chain the person declared, naming the next protocol, proceed to it citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.

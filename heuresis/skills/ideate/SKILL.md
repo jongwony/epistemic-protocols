@@ -400,10 +400,22 @@ Demonstrated, not asserted. Nothing is held beyond the context, so nothing needs
 parked set's durable record is the host's after the protocol ends.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | bind | readReference | classify | extractSignals | classifyRelay | deriveFrames
              | qframes | generate | present | qround | readAnswer | shapeFrames | park | converge
@@ -414,17 +426,17 @@ def grounding : Op → Annot × String
   | .readReference  => (.observe, "Tool read, conditional: fires only when a turn of the person's — the bound request or an answer at any gate — names a record outside the session: that record and nothing else; what it returns enters with its external origin")
   | .classify       => (.sense, "Internal analysis: the entry, Blank or Seeded, inferred from the bound request; zero entry questions")
   | .extractSignals => (.sense, "Internal analysis: signals — concerns, weaknesses, requirements — read from the bound request, named material, and what the person says later, each tagged by its source; never scored or ranked")
-  | .classifyRelay  => (.extension, "TextPresent+Proceed: the inferred entry and its basis, quoting the utterance fragment, why the field reads thin, and the signals with their sources; relay, not a gate")
+  | .classifyRelay  => (.interaction .extension, "the inferred entry and its basis, quoting the utterance fragment, why the field reads thin, and the signals with their sources; relay, not a gate")
   | .deriveFrames   => (.sense, "Internal analysis: the generation frames — seed-anchored and novel on Seeded, novel and abstract on Blank; a chained field's frames and branches carry over")
-  | .qframes        => (.constitution, "present: Blank only — the frame map, multi-select, before any concrete candidate, with the Stop path and room for a frame the person names; read references/blank-entry.md before presenting")
+  | .qframes        => (.interaction .constitution, "Blank only — the frame map, multi-select, before any concrete candidate, with the Stop path and room for a frame the person names; read references/blank-entry.md before presenting")
   | .generate       => (.sense, "Internal generation: parallel over the frames the pass opens; a host may realize it through isolated parallel agents, and the meaning does not depend on that; no elimination, ranking, or scoring")
-  | .present        => (.extension, "TextPresent+Proceed: the map of the whole field with this round's additions marked, the unaddressed signals, your contrary grounds, what continuing would cost to review and what stopping keeps; precedes the gate")
-  | .qround         => (.constitution, "present: every round, continue first and stop second at every presentation; continue opens unexplored frames, a new angle, or a branch under what the person asks to deepen; an answer that opens nothing presents the gate again")
+  | .present        => (.interaction .extension, "the map of the whole field with this round's additions marked, the unaddressed signals, your contrary grounds, what continuing would cost to review and what stopping keeps; precedes the gate")
+  | .qround         => (.interaction .constitution, "every round, continue first and stop second at every presentation; continue opens unexplored frames, a new angle, or a branch under what the person asks to deepen; an answer that opens nothing presents the gate again")
   | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's closing if any, the frames it opens, any new angle or branch, any deferral, any exclusion or taken proposal, any record it names, any new signal")
   | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
-  | .park           => (.extension, "TextPresent+Proceed: something the person set aside for later acknowledged as parked, quoting their request; declared at either terminal; its durable record is the host's after the protocol ends")
-  | .converge       => (.extension, "TextPresent+Proceed: DiverseCandidateField — the topic and the map, every registered frame and branch marked explored, unexplored, or out of scope with every candidate under it and its origin, the parked follow-ups, the unaddressed signals, your contrary grounds; EarlyExit — the frames offered, those out of scope, the parked follow-ups, every signal, your contrary grounds")
-  | .seam           => (.extension, "TextPresent+Proceed: after the person's Stop, at either terminal, a user-declared chain naming the next protocol settles the next move; proceed to it citing that source. A route the person names at a gate is the routed outcome itself. This protocol declares no wired outbound edge. The assembled terminal crosses whole, every origin, branch, park, signal, and contrary ground intact, and the seam never selects, ranks, or trims; every Constitution gate inside this protocol and the next fires unchanged")
+  | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared at either terminal; its durable record is the host's after the protocol ends")
+  | .converge       => (.interaction .extension, "DiverseCandidateField — the topic and the map, every registered frame and branch marked explored, unexplored, or out of scope with every candidate under it and its origin, the parked follow-ups, the unaddressed signals, your contrary grounds; EarlyExit — the frames offered, those out of scope, the parked follow-ups, every signal, your contrary grounds")
+  | .seam           => (.interaction .extension, "after the person's Stop, at either terminal, a user-declared chain naming the next protocol settles the next move; proceed to it citing that source. A route the person names at a gate is the routed outcome itself. This protocol declares no wired outbound edge. The assembled terminal crosses whole, every origin, branch, park, signal, and contrary ground intact, and the seam never selects, ranks, or trims; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.

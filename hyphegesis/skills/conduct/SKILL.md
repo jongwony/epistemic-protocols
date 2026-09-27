@@ -881,10 +881,22 @@ off the rows shown. What the closing utterance itself changed is shown first, as
 every other answer's change is. Demonstrated, not asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | groundPointer | inventory | unreadableRelay | brief | guard | relayRoute | moveId
              | readAnswer | draft | map | mapGate | withdrawal | routeExit | settle
@@ -894,27 +906,33 @@ inductive Op | groundPointer | inventory | unreadableRelay | brief | guard | rel
 def grounding : Op → Annot × String
   | .groundPointer      => (.observe, "record read, artifact read: while the context holds a navigation block, follow its dereference instruction at its locator — the record it names, within the session it names — and run its grounding instruction; what the record returns enters the context before the map it informs, and nothing read here is copied onto the method")
   | .inventory          => (.observe, "artifact read, environment run: the session's actually loaded inventory — its agents, skills, MCP servers, and the tools each exposes — observed for the method the map now holds, before the map that shows it; the inventory is the authority, and text injected into the session grounds no verdict")
-  | .unreadableRelay    => (.extension, "TextPresent+Proceed: the pointer did not resolve — unreachable, a locator missing a half, or a premise the method needs unsupported — named with what was tried; the run ends with no method")
+  | .unreadableRelay    => (.interaction .extension, "the pointer did not resolve — unreachable, a locator missing a half, or a premise the method needs unsupported — named with what was tried; the run ends with no method")
   | .brief              => (.sense, "Internal analysis: the work prospect's method brief and span, read from the whole context after every utterance")
   | .guard              => (.sense, "Internal analysis: the relay test — work that needs fewer than two moves or no real fork — and anti-self-application, on the map now standing")
-  | .relayRoute         => (.extension, "TextPresent+Proceed: the relay test's finding with its basis: single-move work names that protocol, a self-evident method is stated through the protocols it runs — each a recommendation the person may take or set aside; the run ends with no method")
+  | .relayRoute         => (.interaction .extension, "the relay test's finding with its basis: single-move work names that protocol, a self-evident method is stated through the protocols it runs — each a recommendation the person may take or set aside; the run ends with no method")
   | .moveId             => (.observe, "artifact read, artifact search: the move ground — the context together with each available protocol's own deficit and resolution — read for the draft's move set")
   | .readAnswer         => (.sense, "Internal analysis: the latest utterance read whole with the context — the verdict, and every edit it makes to the brief, the moves, the cut, or a slot, with the scope each denotes")
   | .draft              => (.sense, "Internal analysis: the whole method drafted from the context — the proposed cut read from the moves' non-uniformity, every slot with its value, ground, and the differential where the plan turns — around every value the person set, naming a decision whose reach an upstream change left unclear")
-  | .map                => (.extension, "TextPresent+Proceed: the whole map on one sheet, which is the full state taking it as is would take — the brief first; the moves as a named, indented outline under their regions, each line an id with its short everyday name in place, `after` naming what it follows, and whether the draft or the person put it there; ASCII links drawn only where a move joins more than one predecessor, placement held from turn to turn; the slot values as a table, region by axis, each cell marked you or draft and a changed cell written old → new; each value the person set marked as theirs, every other value with its ground, every named alternative, the emergent affordance, the composition affordance on reconciliation, and the differential that most changes the plan; each region's observed realizability or that it is unobserved; your contrary grounds; after an answer, the change ledger — the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it, written changed input → affected slot → consequence and marked a necessary consequence or your proposal; a removed move and a replaced value stay in the ledger")
-  | .mapGate            => (.constitution, "present: what the map got wrong, anywhere on it — or sufficient to take the method as shown, withdraw, or another protocol by name; silence holds and takes nothing")
-  | .withdrawal         => (.extension, "TextPresent+Proceed: on the person's withdraw, what stood — the map as last shown — reported with nothing handed off")
-  | .routeExit          => (.extension, "TextPresent+Proceed: on the person's named protocol, proceed to it citing their words; its Constitution gates fire unchanged")
+  | .map                => (.interaction .extension, "the whole map on one sheet, which is the full state taking it as is would take — the brief first; the moves as a named, indented outline under their regions, each line an id with its short everyday name in place, `after` naming what it follows, and whether the draft or the person put it there; ASCII links drawn only where a move joins more than one predecessor, placement held from turn to turn; the slot values as a table, region by axis, each cell marked you or draft and a changed cell written old → new; each value the person set marked as theirs, every other value with its ground, every named alternative, the emergent affordance, the composition affordance on reconciliation, and the differential that most changes the plan; each region's observed realizability or that it is unobserved; your contrary grounds; after an answer, the change ledger — the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it, written changed input → affected slot → consequence and marked a necessary consequence or your proposal; a removed move and a replaced value stay in the ledger")
+  | .mapGate            => (.interaction .constitution, "what the map got wrong, anywhere on it — or sufficient to take the method as shown, withdraw, or another protocol by name; silence holds and takes nothing")
+  | .withdrawal         => (.interaction .extension, "on the person's withdraw, what stood — the map as last shown — reported with nothing handed off")
+  | .routeExit          => (.interaction .extension, "on the person's named protocol, proceed to it citing their words; its Constitution gates fire unchanged")
   | .settle             => (.sense, "Internal analysis: on a covered sufficient, each value the method takes with who proposed it and, apart from that, how it came into force — set by the person, adopted on closure with the draft's ground, or adopted as the default — and the move placements and checkpoints it induces")
   | .compileBriefs      => (.sense, "Internal analysis: for every checkpoint, the decision-typed brief compiled from the topology and move set taken — structure, never a copy of execution content — marked advisory where an observed infeasibility reaches the checkpoint itself")
   | .assembleTrace      => (.sense, "Internal analysis: the trace contract — the moves' and cut's proposer and standing, every slot's proposer and adoption, degradations, coverage caps, termination grounds — assembled from the method taken; never gated")
-  | .surfaceAssignment  => (.extension, "TextPresent+Proceed: every move with its region and its slot under the resolved order")
-  | .surfaceAnnotations => (.extension, "TextPresent+Proceed: every span externalization obligation, the empty set surfaced as empty")
-  | .surfaceTrace       => (.extension, "TextPresent+Proceed: every adoption, degradation, coverage cap, and termination ground with what it was read against; a resolutionRequired ground with its resolver, marked unroutable where the resolver cannot reach the region before its stop is wanted, with that reading's basis")
-  | .surfaceBriefs      => (.extension, "TextPresent+Proceed: each compiled checkpoint brief, an advisory one shown as advisory")
-  | .converge           => (.extension, "TextPresent+Proceed: the conduct trace whole before the dispatch — what the closing utterance itself changed, as a ledger; the full state to be taken, each entry with who proposed it apart from how it came into force; placements, per-slot adoptions, feasibility, span annotations, checkpoint briefs, the trace contract, and the dissent attached to the method")
+  | .surfaceAssignment  => (.interaction .extension, "every move with its region and its slot under the resolved order")
+  | .surfaceAnnotations => (.interaction .extension, "every span externalization obligation, the empty set surfaced as empty")
+  | .surfaceTrace       => (.interaction .extension, "every adoption, degradation, coverage cap, and termination ground with what it was read against; a resolutionRequired ground with its resolver, marked unroutable where the resolver cannot reach the region before its stop is wanted, with that reading's basis")
+  | .surfaceBriefs      => (.interaction .extension, "each compiled checkpoint brief, an advisory one shown as advisory")
+  | .converge           => (.interaction .extension, "the conduct trace whole before the dispatch — what the closing utterance itself changed, as a ledger; the full state to be taken, each entry with who proposed it apart from how it came into force; placements, per-slot adoptions, feasibility, span annotations, checkpoint briefs, the trace contract, and the dissent attached to the method")
   | .handoff            => (.dispatch, "delegate: after the conduct trace, the ConductedMethod handed to the substrate, which executes it — its fields, never the session context its citations resolve in; when the method has run, the substrate returns one consolidated summary of every region's results to the person; mid-run it returns to the person only at a registered checkpoint, or where execution needs what only the person can supply and no checkpoint anticipated it — a secret or credential, a runtime error it cannot resolve, a deployment handed to runtime — naming what it needs; the span annotations delegate the record and navigation-block production a crossing region owes, and an incoming pointer rides the method unchanged while the record it names stays where its locator names")
-  | .seam               => (.extension, "TextPresent+Proceed: at a chain the person declared naming the next protocol, proceed to it citing that source; a composition edge this file declares is offered as a hint, never taken on its own; a region crossing the span wall names no next protocol — its record's producer supplies the navigation block; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam               => (.interaction .extension, "at a chain the person declared naming the next protocol, proceed to it citing that source; a composition edge this file declares is offered as a hint, never taken on its own; a region crossing the span wall names no next protocol — its record's producer supplies the navigation block; every Constitution gate inside this protocol and the next fires unchanged")
+
+/-- The operation an outcome hands off through: a conducted run hands its method to the substrate
+    by `.handoff`, after the conduct trace; every other outcome hands nothing off. -/
+def handedOffBy : Outcome P → Option Op
+  | .conducted _ _ => some .handoff
+  | _              => none
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

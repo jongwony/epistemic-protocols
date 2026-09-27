@@ -4,11 +4,13 @@ import Lean
 
 For one protocol it inspects two modules: the contract `Contract.<NS>`, generated from the SKILL.md
 Lean block, and `EpistemicProtocols.<NS>.Theorems`, where the contract's guarantees are stated and
-proved together. GROUND is audited the same way, as the pair `EpistemicProtocols.Ground` and
-`EpistemicProtocols.Ground.Theorems`, with no judgments. Every verdict here follows from the
-environment: which module owns a declaration, what kind it is, its doc string, and the axioms it
-transitively depends on (`Lean.collectAxioms`). Markdown extraction, the textual GROUND comparison,
-and the repository inventory stay with the Node orchestrator. -/
+proved together. GROUND and the TOOL GROUNDING vocabulary are audited the same way, each as the
+pair of its canonical module and that module's `Theorems`, with no judgments. Every verdict here
+follows from the environment: which module owns a declaration, what kind it is, its doc string, the
+axioms it transitively depends on (`Lean.collectAxioms`), what a declaration's type and value name,
+and what `grounding` reduces to. Markdown extraction, the textual comparison of each block's shared
+sections with their canonical modules, and the repository inventory stay with the Node
+orchestrator. -/
 
 open Lean Meta
 
@@ -24,13 +26,21 @@ structure Target where
   theorems : Name
   /-- GROUND declares no judgments; a protocol contract may. -/
   judgmentsAllowed : Bool := true
+  /-- A protocol contract grounds its operations; a shared section has none. -/
+  groundsOperations : Bool := true
 
 def Target.protocol (ns : Name) : Target :=
   { ns, contract := `Contract ++ ns, theorems := `EpistemicProtocols ++ ns ++ `Theorems }
 
 def Target.ground : Target :=
   { ns := `Ground, contract := `EpistemicProtocols.Ground,
-    theorems := `EpistemicProtocols.Ground.Theorems, judgmentsAllowed := false }
+    theorems := `EpistemicProtocols.Ground.Theorems, judgmentsAllowed := false,
+    groundsOperations := false }
+
+def Target.toolGrounding : Target :=
+  { ns := `ToolGrounding, contract := `EpistemicProtocols.ToolGrounding,
+    theorems := `EpistemicProtocols.ToolGrounding.Theorems, judgmentsAllowed := false,
+    groundsOperations := false }
 
 structure Report where
   ns : String
@@ -74,6 +84,68 @@ def escapes (n : Name) (ci : ConstantInfo) : MetaM (List String) := do
   if isExtern env n then out := out ++ ["carries `extern`"]
   return out
 
+/-- The annotation type every contract's `grounding` uses: the shared TOOL GROUNDING vocabulary. -/
+def sharedAnnot : Name := `ToolGrounding.Annot
+
+/-- A declaration's type or value names `c`. -/
+def names (ci : ConstantInfo) (c : Name) : Bool :=
+  ci.type.getUsedConstants.contains c ||
+    (ci.value? (allowOpaque := true)).any (·.getUsedConstants.contains c)
+
+/-- How a description may not open: the realization an interaction's kind already carries. -/
+def realizationPrefixes : List String := ["TextPresent", "present:"]
+
+/-- TOOL GROUNDING, read from the environment: the contract declares its operations as `Op` and
+    grounds each by `grounding : Op → ToolGrounding.Annot × String`, so no annotation outside the
+    shared vocabulary can be written; `.converge` is an operation, annotated as an interaction,
+    since convergence is presented to the person; no description restates the realization its
+    annotation's kind carries; and each `dispatch` operation is named by a contract declaration
+    other than `grounding`, so the hand-off is wired into the contract rather than only listed.
+    Annotations and descriptions are read by reducing `grounding` at each constructor. -/
+def auditGrounding (u : Target) (contractDecls : Array (Name × ConstantInfo)) :
+    MetaM (Array String) := do
+  let env ← getEnv
+  let op := u.ns ++ `Op
+  let grounding := u.ns ++ `grounding
+  let owned (n : Name) := moduleOf env n == some u.contract
+  let some (.inductInfo opInfo) := (env.find? op).filter (fun _ => owned op)
+    | return #[s!"`{u.contract}` declares no `inductive {op}` — each operation the contract grounds is a constructor of `Op`, annotated in `grounding`"]
+  let some gci := (env.find? grounding).filter (fun _ => owned grounding)
+    | return #[s!"`{u.contract}` declares no `{grounding}` — each operation's annotation and description is an arm of `grounding : Op → Annot × String`"]
+  let mut problems : Array String := #[]
+  let converge := op ++ `converge
+  if !opInfo.ctors.contains converge then
+    problems := problems.push s!"`{op}` has no `converge` constructor — a contract's convergence is an operation, grounded as an interaction with the person"
+  unless env.contains sharedAnnot do
+    return problems.push s!"`{sharedAnnot}` is not in the environment — the shared TOOL GROUNDING vocabulary is `EpistemicProtocols.ToolGrounding`"
+  let expected ← mkArrow (mkConst op) (← mkAppM ``Prod #[mkConst sharedAnnot, mkConst ``String])
+  unless ← isDefEq gci.type expected do
+    return problems.push s!"`{grounding}` has type `{← ppExpr gci.type}` — its annotation type is the shared `{sharedAnnot}`, so an annotation outside that vocabulary cannot be written"
+  let arm (proj : Name) (c : Name) : MetaM Expr := do
+    whnf (← mkAppM proj #[mkApp (mkConst grounding) (mkConst c)])
+  if opInfo.ctors.contains converge then
+    let a ← arm ``Prod.fst converge
+    unless a.isAppOfArity (sharedAnnot ++ `interaction) 1 do
+      problems := problems.push s!"`{grounding} .converge` is annotated `{← ppExpr a}` — convergence is presented to the person, so its annotation is an interaction"
+  for c in opInfo.ctors do
+    match ← arm ``Prod.snd c with
+    | .lit (.strVal d) =>
+      if let some p := realizationPrefixes.find? (fun p => d.startsWith p) then
+        problems := problems.push s!"the description of `{c}` opens with `{p}` — the realization is carried by the interaction's kind (`Interaction.realization`), not restated in the description"
+    | _ =>
+      problems := problems.push s!"the description of `{c}` does not reduce to a string literal — a description is read as written, so what it opens with is decided where it is written"
+    if (← arm ``Prod.fst c).isConstOf (sharedAnnot ++ `dispatch) then
+      let mut wired := false
+      for (n, ci) in contractDecls do
+        if grounding.isPrefixOf n || op.isPrefixOf n || Meta.isInstanceCore env n || !names ci c then
+          continue
+        if ← authored n then
+          wired := true
+          break
+      unless wired do
+        problems := problems.push s!"`{c}` is a `dispatch` operation no contract declaration other than `grounding` names — a hand-off is wired into the transitions or the data that decide it"
+  return problems
+
 def auditTarget (u : Target) : MetaM Report := do
   let env ← getEnv
   let mut r : Report := { ns := u.ns.toString }
@@ -109,6 +181,8 @@ def auditTarget (u : Target) : MetaM Report := do
     for e in ← escapes n ci do
       r := { r with problems := r.problems.push s!"`{n}` in `{u.contract}` {e}" }
   r := { r with judgments := judgments.map toString }
+  if u.groundsOperations then
+    r := { r with problems := r.problems ++ (← auditGrounding u contractDecls) }
 
   -- The Theorems module: public theorems are the guarantees, private ones helpers; it adds no
   -- axiom and no public definition, and every declaration rests only on allowed axioms and the

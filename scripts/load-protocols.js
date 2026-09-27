@@ -160,11 +160,9 @@ function discoverPlugins(options = {}) {
     try {
       pluginJson = readJson(pluginJsonPath);
     } catch (e) {
-      // Surface plugin.json parse errors loudly. Prior silent skip relied
-      // on the json-schema static check, but that runs only inside
-      // static-checks.js — direct loader callers (package.js, scripts)
-      // would see the plugin disappear with no diagnostic (PR #351
-      // review H3).
+      // Surface plugin.json parse errors loudly: a silent skip would let
+      // loader callers (package.js, static-checks.js, scripts) see the
+      // plugin disappear with no diagnostic (PR #351 review H3).
       process.stderr.write(
         `[load-protocols] WARN: cannot parse ${pluginJsonPath}: ${e.message}; plugin skipped\n`
       );

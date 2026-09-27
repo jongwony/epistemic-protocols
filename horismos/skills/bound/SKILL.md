@@ -313,10 +313,22 @@ converge only on `finish`: the boundary is `close` of the context at the accepti
   non-convergent exits keep their finding or partial record.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | probe | readout | round | verdict | finalReadout | converge | withdrawal
              | routeExit | seam
@@ -324,13 +336,13 @@ inductive Op | probe | readout | round | verdict | finalReadout | converge | wit
 def grounding : Op → Annot × String
   | .probe        => (.observe, "record read, artifact read, artifact search: read the current context and reachable records; construct the relevant provisional whole with uncertain goals and dependencies exposed")
   | .readout      => (.observe, "record read, artifact read: derive the whole map and the opened detail beside their current sources at every round; classify content by its actual setting act")
-  | .round        => (.constitution, "present: the whole map, the question with its open choices, every irreversible AI-delegation proposal, and the closing offer; yield for the whole response")
+  | .round        => (.interaction .constitution, "the whole map, the question with its open choices, every irreversible AI-delegation proposal, and the closing offer; yield for the whole response")
   | .verdict      => (.sense, "Internal analysis: read the whole latest utterance with the fused context; an unsettled reading continues")
   | .finalReadout => (.observe, "record read, artifact read: derive the settled map, residual, and setting sources from the context at the accepting utterance")
-  | .converge     => (.extension, "TextPresent+Proceed: present DefinedBoundary with its limits, source-grounded trace, and required next treatment")
-  | .withdrawal   => (.extension, "TextPresent+Proceed: present the partial record with its limits and required next treatment")
-  | .routeExit    => (.extension, "TextPresent+Proceed: relay the deficit and its basis with the command hint where one exists")
-  | .seam         => (.extension, "TextPresent+Proceed: at a user-declared continuation, cite that source and proceed to the named next protocol; every required checkpoint there still fires")
+  | .converge     => (.interaction .extension, "present DefinedBoundary with its limits, source-grounded trace, and required next treatment")
+  | .withdrawal   => (.interaction .extension, "present the partial record with its limits and required next treatment")
+  | .routeExit    => (.interaction .extension, "relay the deficit and its basis with the command hint where one exists")
+  | .seam         => (.interaction .extension, "at a user-declared continuation, cite that source and proceed to the named next protocol; every required checkpoint there still fires")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.

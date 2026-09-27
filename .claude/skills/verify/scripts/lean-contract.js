@@ -8,7 +8,10 @@
  * that judges them is checked in (`lean/Audit/`) and runs as `lake lint`.
  *
  *   Contract.<NS>  = module header + the block, with its GROUND section replaced
- *                    by `open Ground` (the canonical `EpistemicProtocols.Ground`).
+ *                    by `open Ground` (the canonical `EpistemicProtocols.Ground`)
+ *                    and the vocabulary opening its TOOL GROUNDING section by
+ *                    `open ToolGrounding` (the canonical
+ *                    `EpistemicProtocols.ToolGrounding`).
  *
  * One driver runs the whole path, locally, in the static checks, and in CI:
  *   generate → `lake build --wfail` → `lake lint` (prints `AUDIT {json}`).
@@ -25,6 +28,8 @@ const { execFileSync } = require('child_process');
 const GENERATED_DIR = path.join('lean', '.contract');
 const CANONICAL_GROUND = path.join('lean', 'EpistemicProtocols', 'Ground.lean');
 const GROUND_THEOREMS = path.join('lean', 'EpistemicProtocols', 'Ground', 'Theorems.lean');
+const CANONICAL_TOOL_GROUNDING = path.join('lean', 'EpistemicProtocols', 'ToolGrounding.lean');
+const TOOL_GROUNDING_THEOREMS = path.join('lean', 'EpistemicProtocols', 'ToolGrounding', 'Theorems.lean');
 // The checked-in Lean tooling: the audit and its fixtures. Not part of any contract.
 const LEAN_TOOLING_DIRS = Object.freeze([path.join('lean', 'Audit'), path.join('lean', 'Tests')]);
 
@@ -48,10 +53,27 @@ function groundSpan(block) {
   return { start, end, text: block.slice(start, end) };
 }
 
-// The canonical GROUND text: between `namespace Ground` and `end Ground`.
-function canonicalGroundText(source) {
-  const m = /^namespace Ground\n\n([\s\S]*?)^end Ground\s*$/m.exec(source);
+// The text a canonical shared section carries: between `namespace <ns>` and
+// `end <ns>` of its file.
+function canonicalText(source, ns) {
+  const m = new RegExp(`^namespace ${ns}\\n\\n([\\s\\S]*?)^end ${ns}\\s*$`, 'm').exec(source);
   return m ? m[1] : null;
+}
+
+const canonicalGroundText = (source) => canonicalText(source, 'Ground');
+const canonicalToolGroundingText = (source) => canonicalText(source, 'ToolGrounding');
+
+// The vocabulary that opens a block's TOOL GROUNDING section: the canonical
+// text's length from the section's `/-! ── TOOL GROUNDING ──` line. Null when
+// the block has no such section — whether the contract then grounds its
+// operations is the audit's to judge. `matches` says whether the copy is the
+// canonical text.
+function toolGroundingSpan(block, canonical) {
+  const start = block.search(/^\/-! ── TOOL GROUNDING ──/m);
+  if (start === -1) return null;
+  const end = start + canonical.length;
+  const text = block.slice(start, end);
+  return { start, end, text, matches: text === canonical };
 }
 
 // Names of the `theorem` lines inside `/-! … -/` doc comments of `text`: a
@@ -69,34 +91,61 @@ function theoremsModulePath(ns) {
   return path.join('lean', 'EpistemicProtocols', ...ns.split('.'), 'Theorems.lean');
 }
 
-function contractModule(block, ns) {
+// `tool` is the block's TOOL GROUNDING span, already found to match the
+// canonical text, or null when the block has no such section.
+function contractModule(block, ns, tool) {
   const ground = groundSpan(block);
+  const rest = tool
+    ? `${block.slice(ground.end, tool.start)}open ToolGrounding\n\n${block.slice(tool.end)}`
+    : block.slice(ground.end);
   return [
     'module',
     '',
     'public import EpistemicProtocols.Ground',
+    'public import EpistemicProtocols.ToolGrounding',
     '',
     '@[expose] public section',
     '',
     `${block.slice(0, ground.start)}open Ground`,
     '',
-    block.slice(ground.end),
+    rest,
   ].join('\n');
 }
 
+function readCanonical(root, rel, extract) {
+  const full = path.join(root, rel);
+  return fs.existsSync(full) ? extract(fs.readFileSync(full, 'utf8')) : null;
+}
+
 // The generated contract modules, derived from the blocks. `blocks` is
-// [{ relPath, block }]; `units` names each audited protocol.
+// [{ relPath, block }]; `units` names each audited protocol. A block whose
+// shared sections cannot be replaced by the canonical modules is left out and
+// listed in `skipped` with the reason.
 function planContracts(root, blocks) {
   const files = [];
   const units = [];
+  const skipped = [];
+  const toolCanonical = readCanonical(root, CANONICAL_TOOL_GROUNDING, canonicalToolGroundingText);
   for (const { relPath, block } of blocks) {
     const ns = blockNamespace(block);
     const ground = groundSpan(block);
-    if (!ns || !ground || block.indexOf(`namespace ${ns}`) > ground.start) continue;
-    files.push({ path: path.join(GENERATED_DIR, 'Contract', `${ns}.lean`), text: contractModule(block, ns) });
+    if (!ns || !ground || block.indexOf(`namespace ${ns}`) > ground.start) {
+      skipped.push({ relPath, reason: 'no namespace, or no GROUND section after it' });
+      continue;
+    }
+    if (toolCanonical === null) {
+      skipped.push({ relPath, reason: `${CANONICAL_TOOL_GROUNDING} is missing` });
+      continue;
+    }
+    const tool = toolGroundingSpan(block, toolCanonical);
+    if (tool && (!tool.matches || tool.start < ground.end)) {
+      skipped.push({ relPath, reason: tool.matches ? 'TOOL GROUNDING opens before GROUND' : `TOOL GROUNDING vocabulary differs from ${CANONICAL_TOOL_GROUNDING}` });
+      continue;
+    }
+    files.push({ path: path.join(GENERATED_DIR, 'Contract', `${ns}.lean`), text: contractModule(block, ns, tool) });
     units.push({ relPath, ns });
   }
-  return { files, units };
+  return { files, units, skipped };
 }
 
 function writeContracts(root, plan) {
@@ -145,7 +194,8 @@ const diagnostics = (output) => output.split('\n').filter((line) => /(?:^|\s)(er
 // The driver: generate the contracts, build the package with warnings as
 // errors, and run the audit. Returns what each stage produced; the caller
 // judges it. `audit` is the list of per-unit reports, or null when the audit
-// did not run or printed no readout.
+// did not run or printed no readout; `auditError` says why a printed readout
+// did not parse.
 function check(root, blocks, lake) {
   const plan = planContracts(root, blocks);
   writeContracts(root, plan);
@@ -155,17 +205,26 @@ function check(root, blocks, lake) {
   const lint = run(lake, ['lint', '--', ...plan.units.map((u) => u.ns)], root);
   result.lint = { status: lint.status, output: lint.output };
   const line = /^AUDIT (\[.*\])$/m.exec(lint.output);
-  if (line) result.audit = JSON.parse(line[1]);
+  if (line) {
+    try {
+      result.audit = JSON.parse(line[1]);
+    } catch (e) {
+      result.auditError = e.message;
+    }
+  }
   return result;
 }
 
 module.exports = {
   CANONICAL_GROUND,
+  CANONICAL_TOOL_GROUNDING,
   GENERATED_DIR,
   GROUND_THEOREMS,
   LEAN_TOOLING_DIRS,
+  TOOL_GROUNDING_THEOREMS,
   blockNamespace,
   canonicalGroundText,
+  canonicalToolGroundingText,
   check,
   diagnostics,
   docTheoremNames,
@@ -176,6 +235,7 @@ module.exports = {
   resolveLeanTool,
   run,
   theoremsModulePath,
+  toolGroundingSpan,
   writeContracts,
 };
 
@@ -187,12 +247,23 @@ if (require.main === module) {
   }
   const root = path.resolve(rootArg || '.');
   const { protocolFiles } = require(path.join(root, 'scripts/load-protocols.js'));
-  const blocks = leanBlocksFrom(root, protocolFiles({ projectRoot: root }));
+  const relPaths = protocolFiles({ projectRoot: root });
+  const blocks = leanBlocksFrom(root, relPaths);
+  // Every protocol is enrolled or the command fails: a block left out of the
+  // plan is a block nothing audits.
+  const plan = planContracts(root, blocks);
+  const withBlock = new Set(blocks.map((b) => b.relPath));
+  const unenrolled = [
+    ...relPaths.filter((p) => !withBlock.has(p)).map((relPath) => ({ relPath, reason: 'no Lean Definition block' })),
+    ...plan.skipped,
+  ];
+  for (const { relPath, reason } of unenrolled) console.error(`not enrolled: ${relPath} — ${reason}`);
   if (command === 'generate') {
-    const plan = planContracts(root, blocks);
     writeContracts(root, plan);
     for (const file of plan.files) console.log(file.path);
+    if (unenrolled.length > 0) process.exit(1);
   } else {
+    if (unenrolled.length > 0) process.exit(1);
     const lake = resolveLeanTool('lake', 'LAKE', root);
     if (!lake) {
       console.error('No Lean toolchain reachable ($LAKE, PATH, ~/.elan/bin)');

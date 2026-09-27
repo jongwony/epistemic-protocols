@@ -443,29 +443,41 @@ identification → RecalledContext), or the scope searched and what did not open
 asserted.
 -/
 
-/-! ── TOOL GROUNDING ── -/
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
 
-inductive Annot | sense | observe | track | transform | dispatch | constitution | extension
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
 
 inductive Op | detect | relayNotActivated | cue | search | group | ground | qualify | ask | expand
              | present | readTurn | resolve | unresolved | converge
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether the context carries an empty intention; an invocation of the person's own activates without one")
-  | .relayNotActivated => (.extension, "TextPresent+Proceed: with no empty intention and no invocation, the finding with its reasoning; proceed without activation")
+  | .relayNotActivated => (.interaction .extension, "with no empty intention and no invocation, the finding with its reasoning; proceed without activation")
   | .cue               => (.sense, "Internal analysis: the past meant, the whole, and the axes it can be reached along, read from the utterance and the fused context afresh every pass")
   | .search            => (.observe, "artifact read, artifact search: the records the past work left that may bear the cue, along its axes, within the boundary the context has established, and each member of the leading recognizable opened at the span the cue reaches — for an artifact, the change history of that span; where each runtime keeps its conversations is bound by its realization reference; read-only")
   | .group             => (.sense, "Internal analysis: found records joined into the cue's whole by relations the records support, and ordered; a method that computes groups may propose, and the judgment decides")
   | .ground            => (.sense, "Internal analysis: the story composed from the opened records, one supported claim per sentence, each speaker kept as the record names it")
   | .qualify           => (.observe, "artifact read, environment run: the capture outcome for every record the searches examined, one that matched nothing included, associated by runtime, store root, and session identity, per the capture-outcome reference; read-only")
-  | .ask               => (.constitution, "present: with nothing to present and nothing yet added to the cue, what was searched with the capture evidence of the records examined, then one open question asking for more of what the person remembers")
-  | .expand            => (.constitution, "present: what was searched so far, which records did not open, and the capture evidence of the records examined, then the wider search with what it would read and its cost, against stopping here")
-  | .present           => (.constitution, "present: the story, each claim with the record it rests on and that record's handle, the members whose records did not open, the adjacent candidates named, the members' qualifications, and the currency caveat; no option list")
+  | .ask               => (.interaction .constitution, "with nothing to present and nothing yet added to the cue, what was searched with the capture evidence of the records examined, then one open question asking for more of what the person remembers")
+  | .expand            => (.interaction .constitution, "what was searched so far, which records did not open, and the capture evidence of the records examined, then the wider search with what it would read and its cost, against stopping here")
+  | .present           => (.interaction .constitution, "the story, each claim with the record it rests on and that record's handle, the members whose records did not open, the adjacent candidates named, the members' qualifications, and the currency caveat; no option list")
   | .readTurn          => (.sense, "Internal analysis: the latest utterance read against the fused context — an identification, a stop, or more cue: a correction, a place to look, an admission of the wider search")
-  | .resolve           => (.extension, "TextPresent+Proceed: on identification, RecalledContext — the story, the excerpts with locators and handles, the qualifications, the scope searched, the identifying turn quoted, and the currency caveat")
-  | .unresolved        => (.extension, "TextPresent+Proceed: on a stop or an unresolved close, the scope searched per root, the records that did not open, the capture evidence of the records examined, and the causes the evidence supports; no absence claimed")
-  | .converge          => (.extension, "TextPresent+Proceed: the convergence trace from the first cue through each correction to the close")
+  | .resolve           => (.interaction .extension, "on identification, RecalledContext — the story, the excerpts with locators and handles, the qualifications, the scope searched, the identifying turn quoted, and the currency caveat")
+  | .unresolved        => (.interaction .extension, "on a stop or an unresolved close, the scope searched per root, the records that did not open, the capture evidence of the records examined, and the causes the evidence supports; no absence claimed")
+  | .converge          => (.interaction .extension, "the convergence trace from the first cue through each correction to the close")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Recall resolution emergent via session context.
