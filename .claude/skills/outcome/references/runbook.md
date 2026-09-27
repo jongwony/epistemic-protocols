@@ -66,7 +66,8 @@ not contain:
   code (which framework, where config lives) is not a decision the user owed the request, and a
   request for permission to write, run or install is about the harness; neither is an item.
 - An item raised in the turn that also wrote the implementation still counts; its turn number,
-  beside the turn of the first implementation, shows that it reached the user after the code.
+  beside the turn of the first implementation, shows that it reached the user after the code, and
+  the report counts it apart from the items raised before code.
 - `items` stays `[]` when the AI raised none. `notes` holds a sentence or two a later reader can
   check the list against.
 
@@ -107,7 +108,8 @@ write-up that the cell was re-run and why.
 `report <run> …` writes `results.json` and `report.md` (to the run directory, or `--out` for
 several runs) and exits non-zero when a planned cell is not reportable yet, naming why. Per variant
 it quotes the opening request, then per model and arm the items per cell and in the arm (asked /
-presented), then each cell's items with their spans. `teardown <run>` removes the work trees,
+presented, and how many were raised before the first implementation), then each cell's items with
+their spans. `teardown <run>` removes the work trees,
 config directories and Codex homes, after removing any login link; the records stay.
 `release-login <run>` removes only the links, for an interrupted Codex turn.
 
