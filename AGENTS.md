@@ -4,7 +4,7 @@ This file provides always-loaded guidance for coding agents when working in this
 
 ## Northstar
 
-Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it reduces cognitive load by eliciting unknowns into utterance, constraining AI attention without bias, and resolving interaction deficits at their root within bounded loops before local misalignment hardens into system-wide rework.
+Epistemic Protocols is a domain-free metalanguage of structured types and morphisms that moves the cognitive load of human-AI collaboration from recall to recognition. Instead of recalling and writing up front every unknown, decision, and condition a task turns on, the person answers or recognizes each where it binds: unknowns are elicited into utterance, AI attention is constrained without bias, and interaction deficits are resolved at their root within bounded loops, before local misalignment hardens into system-wide rework.
 
 ## Entry Path
 
@@ -74,7 +74,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Node.js 22+ is required; CI pins Node 22.
 - Plugin code uses Node.js standard library only.
 - Static checks: see `## Verification` below for the command.
-- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomnesis-codex-write.test.mjs route/scripts/route-protocols.test.mjs route/scripts/route-session.test.mjs route/scripts/route-premise.test.mjs route/scripts/route-tool.test.mjs route/scripts/route-prompt.test.mjs route/scripts/route-evaluator.test.mjs route/scripts/route-evaluator-eval.test.mjs route/scripts/route-evaluator-smoke.test.mjs .claude/skills/realize/scripts/harness.test.mjs`
+- Tests: `node --test $(git ls-files '*.test.js' '*.test.mjs' | grep -v '^.claude/skills/verify/scripts/static-checks.test.mjs$')`
   - `.claude/skills/verify/scripts/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation for the same reason `/verify` does — see the concurrency note under `## Verification`.
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`

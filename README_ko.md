@@ -2,7 +2,7 @@
 
 > [English](./README.md)
 
-AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토콜은 어긋남을 일찍 잡습니다 — 특히 계획 단계에서, 그리고 그것이 코드나 다른 후속 작업으로 굳어지기 전에. 구현이 커지기 전에 방향부터 바로잡으세요.
+AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토콜은 방향을 정하는 결정을 일찍 드러내고 — 특히 계획 단계에서, 잘못된 방향이 코드나 다른 후속 작업으로 굳어지기 전에 — 각 결정은 직접 확정하도록 남겨 둡니다. 구현이 커지기 전에 방향부터 바로잡으세요.
 
 ## 왜 필요한가
 
@@ -38,7 +38,7 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route`는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 그래서 어떤 프로토콜이 맞는지 몰라도 됩니다. 아직 실험 단계라 문구와 훅 구성이 릴리스마다 바뀔 수 있습니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 결핍 인식(`/probe`), 컨트리뷰터 도구를 제공합니다. 둘 중 하나를 빼고 싶다면 설치 뒤 `claude plugin disable <name>@epistemic-protocols`를 실행하세요.
+`route`는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 그래서 어떤 프로토콜이 맞는지 몰라도 됩니다. 아직 실험 단계라 문구와 훅 구성이 릴리스마다 바뀔 수 있습니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 결핍 인식(`/probe`), 컨트리뷰터 도구를 제공합니다. 둘 중 하나를 빼고 싶다면 설치 뒤 `claude plugin disable <name>@epistemic-protocols`를 실행하세요. `route`가 없어도 모든 프로토콜은 설치된 채로 각자의 명령으로 호출할 수 있습니다.
 
 지금 서 있는 결정 지점에서 프로토콜을 직접 호출할 수도 있습니다 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 작업에서 무엇을 결정해야 할지 아직 보이지 않을 때 `/bound`.
 
@@ -59,6 +59,8 @@ codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
 Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니다: 각 프로토콜은 독립 플러그인이고, `epistemic-cooperative`가 유틸리티 스킬을 담습니다. marketplace는 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있고, 각 플러그인은 Claude manifest 옆에 Codex manifest를 `<plugin>/.codex-plugin/plugin.json`으로 둡니다.
+
+프로토콜의 체크포인트는 결정과 각 답이 바꾸는 것을 제시할 뿐 실행을 스스로 멈추지는 않습니다. 그래서 `codex exec` 같은 비대화형 실행에서는 결정이 작업이 시작된 뒤에 도착할 수 있습니다.
 
 ### 기타 에이전트 도구
 

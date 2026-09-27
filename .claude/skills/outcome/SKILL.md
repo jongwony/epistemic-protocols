@@ -31,10 +31,15 @@ stay with it so anyone can check the reading.
 ## What this eval measures, and what it does not
 
 It shows how many decisions reached the user as a question or as something to recognize, rather
-than having to be written up front. It does not show whether the answers were right, whether a
-person felt less load, or anything about rework.
+than having to be written up front, and how many of them reached the user before any code
+existed — the only ones an answer could shape before the implementation. It does not show whether
+an answer then changed the code, whether the answers were right, whether a person felt less load,
+or anything about rework.
 
-A result is an observation of one model on one day, and it changes as models change. It goes into
+A result is an observation of one model on one day, and it changes as models change. A write-up
+quotes every reportable cell of the runs it draws on, including cells where the arms did not
+differ and cells where the bare arm raised more; picking cells turns an observation into a
+showcase. It goes into
 the pull request body or the commit message it informs, never onto a state surface — a README, an
 `AGENTS.md`, this file — where nothing re-runs it. A surface may say that this eval exists and
 what it counts; it does not say what it found. Records (`results/`) are gitignored for the same

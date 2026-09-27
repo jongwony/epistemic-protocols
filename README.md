@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-When AI collaboration goes off-track, you redo everything. These protocols catch misalignment early — often at the plan level, before it hardens into code or other downstream work. Fix the direction before the implementation compounds it.
+When AI collaboration goes off-track, you redo everything. These protocols bring the decisions that set the direction to you early — often at the plan level, before a wrong one hardens into code or other downstream work — and leave each one yours to settle. Fix the direction before the implementation compounds it.
 
 ## Why
 
@@ -38,7 +38,7 @@ Install every protocol, together with the [`route`](#route) and [`epistemic-coop
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. To leave either one out, run `claude plugin disable <name>@epistemic-protocols` after installing.
+`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. To leave either one out, run `claude plugin disable <name>@epistemic-protocols` after installing; without `route`, every protocol stays installed and callable by its own command.
 
 You can also invoke a protocol yourself at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
 
@@ -59,6 +59,8 @@ codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
 The Codex marketplace keeps the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. The marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json); each plugin keeps its Codex manifest beside its Claude manifest at `<plugin>/.codex-plugin/plugin.json`.
+
+A protocol's checkpoint presents its decisions and what each answer changes; it does not by itself suspend execution, so on a non-interactive run such as `codex exec` the decisions can arrive after the work has started.
 
 ### Other agent tools
 

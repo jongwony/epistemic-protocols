@@ -575,8 +575,9 @@ function runStaticChecksSubprocess(projectRoot) {
       maxBuffer: 32 * 1024 * 1024,
       // static-checks.js shells out to git itself, so it needs the same
       // scrubbing: an inherited GIT_DIR would aim it at the real repository
-      // no matter which root it was handed.
-      env: envWithoutGitVars(),
+      // no matter which root it was handed. A fixture root has no
+      // origin/<base>, so a CI run's GITHUB_BASE_REF is withheld from it.
+      env: projectRoot ? { ...envWithoutGitVars(), GITHUB_BASE_REF: '' } : envWithoutGitVars(),
     });
     return JSON.parse(stdout);
   } catch (err) {
@@ -1104,6 +1105,32 @@ describe('unified release artifact contract', () => {
       const submission = buildCodexSubmitArtifact(plugin);
       assert.deepEqual(release.zipBuffer, submission.zipBuffer, `${plugin.dir}/${plugin.skill}`);
       assert.deepEqual(release.artifact, submission.artifact, `${plugin.dir}/${plugin.skill}`);
+    }
+  });
+
+  it('rejects a SKILL.md references/ pointer left dangling by removing a skill\'s only reference file', () => {
+    const plugin = { dir: 'elenchus', skill: 'sublate' };
+    const relativeReference = 'skills/sublate/references/round-composition.md';
+    const sourceReferences = fs.readdirSync(
+      path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'references')
+    );
+    assert.deepEqual(sourceReferences, ['round-composition.md'], 'fixture premise: the only reference file');
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'release-dangling-reference-'));
+    try {
+      fs.cpSync(path.join(__dirname, '..', plugin.dir), path.join(root, plugin.dir), { recursive: true });
+      for (const profile of ['release', 'codex-submit']) {
+        assert.doesNotThrow(() => buildSkillArtifact(plugin, { root, profile }), `intact copy, ${profile}`);
+      }
+      fs.rmSync(path.join(root, plugin.dir, relativeReference));
+      for (const profile of ['release', 'codex-submit']) {
+        assert.throws(
+          () => buildSkillArtifact(plugin, { root, profile }),
+          /unresolved local reference: sublate\/SKILL\.md -> references\/round-composition\.md/,
+          profile
+        );
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
     }
   });
 

@@ -155,6 +155,8 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
 ]);
 const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis', 'epistemic-cooperative']);
 const CODEX_SUPPORT_DIRS = Object.freeze(['references', 'scripts', 'assets']);
+// Inline-code prefixes that are closure obligations in every profile, whatever the ZIP holds.
+const ARCHIVE_INLINE_PREFIXES = Object.freeze([...CODEX_SUPPORT_DIRS, 'agents']);
 const CODEX_FORBIDDEN_SEGMENTS = new Set(['.claude', '.codex', 'sessions', 'transcripts']);
 
 function compareCodexPaths(a, b) {
@@ -447,7 +449,7 @@ function escapeRegExp(value) {
 function extractArchiveLocalReferences(
   content,
   archivePath,
-  { inlinePrefixes = [...CODEX_SUPPORT_DIRS, 'agents'], inlineRootFiles = [] } = {}
+  { inlinePrefixes = ARCHIVE_INLINE_PREFIXES, inlineRootFiles = [] } = {}
 ) {
   const references = [];
   const markdownPattern = /!?\[[^\]]*\]\(([^)]+)\)/g;
@@ -766,10 +768,13 @@ function buildSkillArtifact(
       .filter(name => name !== 'SKILL.md')
     : [];
   const releaseInlinePrefixes = profile === 'release'
-    ? [...new Set(zipEntries.map(entry => {
-      const relative = entry.name.slice(`${plugin.skill}/`.length);
-      return relative.includes('/') ? relative.split('/')[0] : null;
-    }).filter(Boolean))].sort(compareCodexPaths)
+    ? [...new Set([
+      ...ARCHIVE_INLINE_PREFIXES,
+      ...zipEntries.map(entry => {
+        const relative = entry.name.slice(`${plugin.skill}/`.length);
+        return relative.includes('/') ? relative.split('/')[0] : null;
+      }).filter(Boolean),
+    ])].sort(compareCodexPaths)
     : undefined;
   assertCodexArtifactContract(zipEntries, plugin, {
     inlinePrefixes: releaseInlinePrefixes,

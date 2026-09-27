@@ -479,3 +479,67 @@ test('a numbered listing of the target counts as reading it', () => {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+function fakeClaude(root, env) {
+  const bin = join(root, 'bin', 'claude');
+  writeFileSync(bin, `#!/usr/bin/env node
+const { appendFileSync, statSync } = require('node:fs');
+const args = process.argv.slice(2);
+appendFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify(args) + '\\n');
+// claude refuses a --settings path that is not a regular file.
+if (!statSync(args[args.indexOf('--settings') + 1], { throwIfNoEntry: false })?.isFile()) process.exit(1);
+console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default' }));
+console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
+`);
+  chmodSync(bin, 0o755);
+  env.REALIZE_RUNNER = 'claude';
+  env.HOME = root;
+  env.FAKE_CLAUDE_LOG = join(root, 'claude.log');
+  return () => readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n').map(JSON.parse);
+}
+const pluginDirOf = (args) => (args.includes('--plugin-dir') ? args[args.indexOf('--plugin-dir') + 1] : null);
+
+test('the prose-only arm loads the plugin with every lean block removed, and only that', () => {
+  const { root, env } = fixture();
+  const calls = fakeClaude(root, env);
+  try {
+    // Setup as CI runs it, with no arms named; the run then names the opt-in arm.
+    delete env.REALIZE_ARMS;
+    const setup = invoke(env, 'setup', 'inquire');
+    assert.equal(setup.status, 0, setup.stderr || setup.stdout);
+    env.REALIZE_ARMS = 'protocol,protocol-prose';
+    const run = invoke(env, 'run', 'inquire');
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    const dirs = calls().map(pluginDirOf);
+    const shipped = join(HERE, '..', '..', '..', '..', 'aitesis');
+    const prose = dirs.find((d) => d && !d.endsWith('aitesis'));
+    assert.ok(dirs.some((d) => d && d.endsWith('aitesis')), 'the protocol arm loads the shipped plugin');
+    assert.ok(prose, 'the prose-only arm loads a copy');
+    const original = readFileSync(join(shipped, 'skills', 'inquire', 'SKILL.md'), 'utf8');
+    const stripped = readFileSync(join(prose, 'skills', 'inquire', 'SKILL.md'), 'utf8');
+    assert.match(original, /^```lean$/m);
+    assert.doesNotMatch(stripped, /```lean|namespace /);
+    assert.ok(stripped.includes('## Rules'), 'the prose contract stays');
+    assert.ok(stripped.length < original.length);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the prose-only arm runs only when named, and the Codex runner refuses it', () => {
+  const { root, env } = fixture();
+  const calls = fakeClaude(root, env);
+  delete env.REALIZE_ARMS;
+  try {
+    assert.equal(invoke(env, 'setup', 'inquire').status, 0);
+    const run = invoke(env, 'run', 'inquire');
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.doesNotMatch(run.stdout, /protocol-prose/);
+    assert.ok(calls().every((args) => !String(pluginDirOf(args)).includes('prose-plugin')));
+    const codex = invoke({ ...env, REALIZE_RUNNER: 'codex', REALIZE_ARMS: 'protocol-prose' }, 'run', 'inquire');
+    assert.equal(codex.status, 1);
+    assert.match(codex.stderr, /unsupported arms: protocol-prose/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

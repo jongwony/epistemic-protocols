@@ -27,7 +27,7 @@ on:
         required: false
         type: string
       arms:
-        description: 'Comma-separated arms: bare,style,protocol,protocol+style (blank = all)'
+        description: 'Comma-separated arms: bare,style,protocol,protocol+style,protocol-prose (blank = all but protocol-prose)'
         required: false
         type: string
       cases:

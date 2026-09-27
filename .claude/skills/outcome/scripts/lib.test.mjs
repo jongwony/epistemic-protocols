@@ -154,6 +154,13 @@ test('buildRow counts the items by how they reached the user and finds the first
   assert.equal(row({ arm: 'bare', changedAt: 3 }).implemented_at, null);
 });
 
+test('buildRow counts as before code only the items raised in a turn earlier than the first implementation', () => {
+  const late = { turn: 2, via: 'presented', item: 'storage', span: 'storage?' };
+  assert.equal(row({ arm: 'protocol', items: [item('asked', 'limit'), late], changedAt: 2 }).before_code, 1);
+  assert.equal(row({ arm: 'protocol', items: [item('presented', 'limit'), late], changedAt: 1 }).before_code, 0);
+  assert.equal(row({ arm: 'protocol', items: [item('asked', 'limit'), late], changedAt: 3 }).before_code, 2);
+});
+
 test('armCounts lists each cell\'s count and the arm\'s total, leaving out cells whose integrity failed', () => {
   const arms = armCounts([
     row({ arm: 'protocol', rep: 2, items: [item('asked', 'a')] }),
@@ -162,7 +169,7 @@ test('armCounts lists each cell\'s count and the arm\'s total, leaving out cells
     row({ arm: 'bare', rep: 1 }),
   ]);
   const p = arms.find((a) => a.arm === 'protocol');
-  assert.deepEqual([p.n, p.perCell, p.total, p.asked, p.presented], [2, [2, 1], 3, 2, 1]);
+  assert.deepEqual([p.n, p.perCell, p.total, p.asked, p.presented, p.beforeCode], [2, [2, 1], 3, 2, 1, 0]);
   assert.deepEqual(arms.find((a) => a.arm === 'bare').perCell, [0]);
 });
 
@@ -170,7 +177,7 @@ test('renderReport quotes the opening request and lists every item with its span
   const rows = [row({ arm: 'protocol', items: [item('asked', 'limit')] }), row({ arm: 'bare', ok: false })];
   const md = renderReport({ rows, arms: armCounts(rows), requests: { under: 'Add rate limiting.' }, scope: 's' });
   assert.match(md, /> Add rate limiting\./);
-  assert.match(md, /\| protocol \| 1 \| 1 \| 1 \| 1 \/ 0 \|/);
+  assert.match(md, /\| protocol \| 1 \| 1 \| 1 \| 1 \/ 0 \| 0 \|/);
   assert.match(md, /- t1 asked — limit: "limit\?"/);
   assert.match(md, /r\/under-r1-bare: x/);
 });

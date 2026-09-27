@@ -270,10 +270,13 @@ export function validateNotes(notes, { turnTexts }) {
 
 // ------------------------------------------------------------------ report
 
-// One row per cell. `turns` are the per-turn metas in order.
+// One row per cell. `turns` are the per-turn metas in order. `before_code` counts the items
+// raised in a turn earlier than the first implementation (every item, where there is none): only
+// those could be answered before code existed.
 export function buildRow({ cell, turns, notes, integrity, pathFlags = [] }) {
   const idx = turns.findIndex((t) => t.treeChangedSinceScaffold);
   const items = notes.items;
+  const beforeCode = idx === -1 ? items.length : items.filter((x) => x.turn < idx + 1).length;
   return {
     run: cell.run, cell: cell.name, runner: cell.runner, model: cell.model, effort: cell.effort ?? null,
     variant: cell.variant, arm: cell.arm, rep: cell.rep,
@@ -282,6 +285,7 @@ export function buildRow({ cell, turns, notes, integrity, pathFlags = [] }) {
     count: items.length,
     asked: items.filter((x) => x.via === 'asked').length,
     presented: items.filter((x) => x.via === 'presented').length,
+    before_code: beforeCode,
     items,
     path_flags: pathFlags.length,
   };
@@ -305,6 +309,7 @@ export function armCounts(rows) {
       runner: g.runner, model: g.model, effort: g.effort, variant: g.variant, arm: g.arm,
       n: cells.length, perCell: cells.map((r) => r.count),
       total: total('count'), asked: total('asked'), presented: total('presented'),
+      beforeCode: total('before_code'),
     };
   });
 }
@@ -321,21 +326,23 @@ export function renderReport({ rows, arms, requests, scope }) {
   out.push('Per cell: the decision items that entered the conversation through the AI — asked as a',
     'question, or presented for the user to recognize — that the opening request did not contain.',
     'Identifying an item is a reading of the transcript; each is listed with the span that raised it.',
+    '"Before code" counts the items raised in a turn earlier than the first implementation: only those',
+    'could be answered before code existed. Whether an answer then changed the code is not counted.',
     'These are observations of one model on one day, not a standing claim.', '');
   for (const variant of [...new Set(rows.map((r) => r.variant))]) {
     out.push(`## Variant \`${variant}\``, '', 'Opening request:', '', quote(requests[variant] ?? '(not found)'), '');
     for (const m of [...new Map(rows.filter((r) => r.variant === variant).map((r) => [groupKey(r), r])).values()]) {
       out.push(`### ${modelLabel(m)}`, '');
-      out.push('| arm | cells | items per cell | items in the arm | asked / presented |', '|---|---|---|---|---|');
+      out.push('| arm | cells | items per cell | items in the arm | asked / presented | before code |', '|---|---|---|---|---|---|');
       for (const a of arms.filter((x) => x.variant === variant && groupKey(x) === groupKey(m))) {
-        out.push(`| ${a.arm} | ${a.n} | ${a.perCell.join(', ')} | ${a.total} | ${a.asked} / ${a.presented} |`);
+        out.push(`| ${a.arm} | ${a.n} | ${a.perCell.join(', ')} | ${a.total} | ${a.asked} / ${a.presented} | ${a.beforeCode} |`);
       }
       out.push('');
       for (const arm of ARMS) {
         for (const r of rows.filter((x) => x.variant === variant && groupKey(x) === groupKey(m) && x.arm === arm).sort((a, b) => a.rep - b.rep)) {
           const impl = r.implemented_at ? `first implementation at turn ${r.implemented_at}` : 'no implementation';
           const flags = [r.integrity ? null : 'INTEGRITY FAILED', r.path_flags ? `${r.path_flags} path flag(s)` : null].filter(Boolean);
-          out.push(`**${r.run}/${r.cell}** — ${r.turns} turn(s), ${impl}, ${r.count} item(s)${flags.length ? `; ${flags.join('; ')}` : ''}`, '');
+          out.push(`**${r.run}/${r.cell}** — ${r.turns} turn(s), ${impl}, ${r.count} item(s), ${r.before_code} before code${flags.length ? `; ${flags.join('; ')}` : ''}`, '');
           for (const it of r.items) out.push(`- t${it.turn} ${it.via} — ${it.item}: ${spanText(it.span)}`);
           if (r.items.length) out.push('');
         }

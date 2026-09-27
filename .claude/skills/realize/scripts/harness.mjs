@@ -112,17 +112,23 @@ if (process.env.REALIZE_TIMEOUT_SECONDS) {
   CFG.codex.timeoutSeconds = num('REALIZE_TIMEOUT_SECONDS', process.env.REALIZE_TIMEOUT_SECONDS);
 }
 if (process.env.REALIZE_CASES) CFG.cases = csv(process.env.REALIZE_CASES);
+// Setup writes every configured arm's settings, so a later run may name any of them.
+const ALL_ARMS = { ...CFG.arms };
 const requestedArms = process.env.REALIZE_ARMS ? new Set(csv(process.env.REALIZE_ARMS)) : null;
 if (process.env.REALIZE_ARMS) {
   CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([k]) => requestedArms.has(k)));
+} else {
+  // An `optIn` arm runs only when REALIZE_ARMS names it.
+  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([, arm]) => !arm.optIn));
 }
 if (RUNNER === 'codex') {
-  const styleArms = Object.entries(CFG.arms).filter(([, arm]) => arm.style).map(([name]) => name);
+  const unsupported = (arm) => arm.style || arm.formal === false;
+  const styleArms = Object.entries(CFG.arms).filter(([, arm]) => unsupported(arm)).map(([name]) => name);
   if (requestedArms && styleArms.length) {
-    console.error(`codex runner has no output-style treatment; unsupported arms: ${styleArms.join(', ')}`);
+    console.error(`codex runner has no output-style or prose-only treatment; unsupported arms: ${styleArms.join(', ')}`);
     process.exit(1);
   }
-  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([, arm]) => !arm.style));
+  CFG.arms = Object.fromEntries(Object.entries(CFG.arms).filter(([, arm]) => !unsupported(arm)));
 }
 for (const [key, list] of [['models', CFG.models], ['cases', CFG.cases]]) {
   if (!list.length) { console.error(`no ${key} selected`); process.exit(1); }
@@ -270,8 +276,9 @@ function setupClaude() {
   // Per-arm settings. These are passed with --settings so that the isolated
   // config dir itself stays empty of policy — an arm's treatment must come from
   // its own flags, never from ambient state a later arm would inherit.
+  rmSync(join(SKILL, 'arms'), { recursive: true, force: true });
   mkdirSync(join(SKILL, 'arms'), { recursive: true });
-  for (const [name, arm] of Object.entries(CFG.arms)) {
+  for (const [name, arm] of Object.entries(ALL_ARMS)) {
     const settings = arm.style ? { outputStyle: CFG.styleName } : {};
     writeFileSync(join(SKILL, 'arms', `${name.replace('+', '-')}.json`),
       JSON.stringify(settings, null, 2) + '\n');
@@ -286,6 +293,33 @@ function setupClaude() {
   console.log('Then export that token before `run`. The variable name is');
   console.log('CLAUDE_CODE_OAUTH_TOKEN -- CLAUDE_OAUTH_TOKEN is silently ignored and the');
   console.log('run then fails with "Not logged in", which reads like a setup-token problem.');
+}
+
+// The `formal: false` treatment: the plugin as shipped, with every ```lean block removed from its
+// SKILL.md files, rebuilt at each run. A copy from which no block was removed would run the
+// `protocol` treatment under another name, so building it fails instead.
+function stripFormalBlocks(text) {
+  return text.replace(/^```lean\n[\s\S]*?^```[ \t]*(\n|$)/gm, '');
+}
+
+let proseDir = null;
+function prosePluginDir() {
+  if (proseDir) return proseDir;
+  const dir = join(CONFIG_DIR, 'prose-plugin');
+  rmSync(dir, { recursive: true, force: true });
+  cpSync(expand(CFG.pluginDir), dir, { recursive: true });
+  let removed = 0;
+  const skills = join(dir, 'skills');
+  for (const name of existsSync(skills) ? readdirSync(skills) : []) {
+    const f = join(skills, name, 'SKILL.md');
+    if (!existsSync(f)) continue;
+    const text = readFileSync(f, 'utf8');
+    const stripped = stripFormalBlocks(text);
+    if (stripped !== text) { removed++; writeFileSync(f, stripped); }
+  }
+  if (!removed) throw new Error(`no \`\`\`lean block found under ${skills}; the prose-only arm would equal the protocol arm`);
+  proseDir = dir;
+  return dir;
 }
 
 function codexHome(arm) {
@@ -620,7 +654,7 @@ function runOne({ model, armName, arm, caseName, rep }) {
       '--allowed-tools', CFG.allowedTools.join(','),
       '--settings', join(SKILL, 'arms', `${armName.replace('+', '-')}.json`),
     ];
-    if (arm.protocol) args.push('--plugin-dir', expand(CFG.pluginDir));
+    if (arm.protocol) args.push('--plugin-dir', arm.formal === false ? prosePluginDir() : expand(CFG.pluginDir));
     if (sessionId) args.push('--resume', sessionId);
     args.push(message);
     return args;

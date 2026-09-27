@@ -30,6 +30,12 @@
     "protocol+style": {
       "protocol": true,
       "style": true
+    },
+    "protocol-prose": {
+      "protocol": true,
+      "style": false,
+      "formal": false,
+      "optIn": true
     }
   },
   "runs": 1,
