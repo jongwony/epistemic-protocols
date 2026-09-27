@@ -33,7 +33,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] **Node.js 22+** — CI pins Node 22; `zlib.crc32` is used in packaging
 - [ ] **gh CLI** authenticated — required for PR, CI, and release workflows
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
-- [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` — it is opt-in for the default installer: `claude plugin install epistemic-cooperative@epistemic-protocols`
+- [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` — the default installer includes it; otherwise `claude plugin install epistemic-cooperative@epistemic-protocols`
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
 - [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
 

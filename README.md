@@ -6,9 +6,23 @@ When AI collaboration goes off-track, you redo everything. These protocols catch
 
 ## Why
 
-Correcting a wrong direction at the plan level can cost one conversation turn.
-Once it hardens into code, rollout steps, or downstream explanations, it can cost hours of rework.
-These protocols add structured checkpoints to help you and the AI catch and correct a wrong direction before more work depends on it.
+As models improve, a well-written prompt goes a long way: if it already states everything that matters, working with or without a protocol can lead to nearly the same result.
+Writing that prompt is the hard part. It means recalling every unknown at once and anticipating the cases the work will meet at runtime, alone, before the first reply.
+What the prompt missed surfaces later, and the later it surfaces the more it costs: a wrong direction corrected at the plan level can cost one conversation turn, while one found after release to a live service costs rework that grows with everything built on it.
+The protocols make the AI a thinking partner at those decision points. It asks, and you answer with what the question brings to mind; it presents candidates, and you recognize which one fits. Many of the items that end up deciding the work are ones you could not have listed at the start.
+
+For example, "Write the email announcing next week's meeting":
+
+| Decision | Without a protocol | With `/inquire` |
+|---|---|---|
+| Who receives it | The AI decides alone | Asked — you recall and answer |
+| What the meeting is for (decide or share) | The AI decides alone | Asked — you recall and answer |
+| Date and place | Asked — you answer | Asked — you recall and answer |
+| Whether to ask for replies | The AI decides alone | Presented — you recognize it |
+| Length | The AI decides alone | Presented — you correct it |
+| Tone | The AI decides alone | The AI decides alone |
+
+This is an illustration, not a run result: which items come up, and how, varies with the model and the person. A decision the AI makes alone is not wrong for that; what differs is whether it passed through you.
 
 ## Where the protocols help
 
@@ -18,22 +32,17 @@ Use the protocols to catch a wrong direction while planning, before it shapes la
 
 ### Claude Code
 
-Install every protocol:
+Install every protocol, together with the [`route`](#route) and [`epistemic-cooperative`](#epistemic-cooperative) plugins:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-Then invoke a protocol at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
+`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. To leave either one out, run `claude plugin disable <name>@epistemic-protocols` after installing.
 
-Utility plugins are opt-in and installed separately. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. The experimental [`route`](#route) plugin helps the agent invoke a suitable protocol from the conversation context and find relevant collaboration principles when needed. Add either plugin:
+You can also invoke a protocol yourself at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
 
-```bash
-claude plugin install epistemic-cooperative@epistemic-protocols
-claude plugin install route@epistemic-protocols
-```
-
-With `epistemic-cooperative` installed, `/onboard` gives a quick recommendation from your recent sessions and can continue into guided learning with scenarios, trials, and quizzes.
+`/onboard` gives a quick recommendation from your recent sessions and can continue into guided learning with scenarios, trials, and quizzes.
 
 ### Codex
 
@@ -118,7 +127,7 @@ Different mechanisms check different things, and it helps to know where each one
 - **Runtime evidence** — the contributor skill [`/realize`](./.claude/skills/realize/SKILL.md) runs a protocol in a real session and collects evidence that the steps it declares actually happen, through automatic checks plus a review of the transcript.
 - **Static checks** — [`/verify`](./.claude/skills/verify/SKILL.md) checks the files' structure: required sections, consistent names and references, matching versions.
 
-None of these measures what happens downstream of a protocol, such as whether it reduces rework.
+None of these measures what happens downstream of a protocol, such as whether it reduces rework, and that is deliberate: how much a protocol helps depends on what each person does not yet know, and on the model, which keeps improving. What a run can show is which decisions entered the conversation because the AI asked or presented them rather than because they were written up front. The contributor skill [`/outcome`](./.claude/skills/outcome/SKILL.md) runs the same request with and without a protocol and lists those decisions with the passages they came from.
 
 ## For Contributors
 
