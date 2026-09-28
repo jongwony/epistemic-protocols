@@ -30,47 +30,37 @@ theorem nothing_to_elicit_surfaces_nothing (report respond : Context P → Respo
 
 theorem withdraw_closes_unresolved (respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P))
-    (h : filledValue (closing (fuse c u)) = some .withdraw) :
+    (h : isFilled (withdrawal (fuse c u)) = true) :
     elicit respond c (u :: us) = .withdrawn (closed (fuse c u)) := by
-  simp [elicit, h]
-
-theorem route_closes_unresolved (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (t : String)
-    (h : filledValue (closing (fuse c u)) = some (.route t)) :
-    elicit respond c (u :: us) = .routed t (closed (fuse c u)) := by
   simp [elicit, h]
 
 theorem covered_resolution_needs_no_further_utterance (respond : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P))
-    (hk : filledValue (closing (fuse c u)) = none) (hr : isFilled (resolution (fuse c u)) = true)
+    (hw : isFilled (withdrawal (fuse c u)) = false) (hr : isFilled (resolution (fuse c u)) = true)
     (hc : Covered (fuse c u)) :
     elicit respond c (u :: us) = .resolved (endpoint (fuse c u)) := by
-  simp [elicit, hk, hr, hc]
+  simp [elicit, hw, hr, hc]
 
 theorem uncovered_surfaces_again (respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P))
-    (hk : filledValue (closing (fuse c u)) = none) (hc : ¬ Covered (fuse c u)) :
+    (hw : isFilled (withdrawal (fuse c u)) = false) (hc : ¬ Covered (fuse c u)) :
     elicit respond c (u :: us) =
       elicit respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [elicit, hk, hc]
+  simp [elicit, hw, hc]
 
 theorem each_step_continues_or_closes (respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : elicit respond c (u :: us) = o) :
     (∃ c', elicit respond c' us = o) ∨
-    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) ∨
-    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧
-      o = .routed t (closed (fuse c u))) ∨
+    (isFilled (withdrawal (fuse c u)) = true ∧ o = .withdrawn (closed (fuse c u))) ∨
     (isFilled (resolution (fuse c u)) = true ∧ Covered (fuse c u) ∧
       o = .resolved (endpoint (fuse c u))) := by
   simp only [elicit] at h
   split at h
   · exact .inr (.inl ⟨by assumption, h.symm⟩)
-  · rename_i t hk
-    exact .inr (.inr (.inl ⟨t, hk, h.symm⟩))
   · split at h
     · rename_i hrc
-      exact .inr (.inr (.inr ⟨hrc.1, hrc.2, h.symm⟩))
+      exact .inr (.inr ⟨hrc.1, hrc.2, h.symm⟩)
     · exact .inl ⟨_, h⟩
 
 theorem resolved_requires_covered (respond : Context P → Response P) (c : Context P)
@@ -81,9 +71,8 @@ theorem resolved_requires_covered (respond : Context P → Response P) (c : Cont
   | nil => simp [elicit] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨hr, hc, h'⟩
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hr, hc, h'⟩
     · exact ih c' h'
-    · cases h'
     · cases h'
     · cases h'
       exact ⟨_, hr, hc, rfl⟩
@@ -96,40 +85,23 @@ theorem endpoint_ends_in_utterance (respond : Context P → Response P) (c : Con
   | nil => simp [elicit] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, h'⟩
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩
     · exact ih c' h'
-    · cases h'
     · cases h'
     · cases h'
       exact ⟨c, u, rfl⟩
 
 theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P) (h : elicit respond c us = .withdrawn r) :
-    ∃ c₀, filledValue (closing c₀) = some .withdraw ∧ r = closed c₀ := by
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
   induction us generalizing c with
   | nil => simp [elicit] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond c u us _ h with
-        ⟨c', h'⟩ | ⟨hk, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, h'⟩
+        ⟨c', h'⟩ | ⟨hw, h'⟩ | ⟨_, _, h'⟩
     · exact ih c' h'
     · cases h'
-      exact ⟨_, hk, rfl⟩
-    · cases h'
-    · cases h'
-
-theorem routed_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (r : Closed P)
-    (h : elicit respond c us = .routed t r) :
-    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ r = closed c₀ := by
-  induction us generalizing c with
-  | nil => simp [elicit] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes respond c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨t', hk, h'⟩ | ⟨_, _, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hk, rfl⟩
+      exact ⟨_, hw, rfl⟩
     · cases h'
 
 theorem proposed_never_set (c : Context P) (e : Entry) (h : proposer c e = .draft) :
@@ -148,7 +120,7 @@ theorem open_in_residual (c : Context P) (x : Entry) (hx : x ∈ coordinates c)
 theorem resolved_by_person {c : Context P} {s : Cite c}
     (ok : (resolutionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-theorem closed_by_person {c : Context P} {s : Cite c}
-    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person := ok
+theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
+    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 end Euporia

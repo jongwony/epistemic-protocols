@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "The user knows roughly what they want but not which decisions it turns on: trace those from their own material — codebase, rules, past sessions — and ask until the intent settles."
+description: "The user knows roughly what they want but not which decisions it turns on: trace them from their own material (code, rules, past sessions) and the domain's usual decisions; ask until it settles."
 ---
 
 # Euporia Protocol
@@ -29,7 +29,6 @@ Euporia(I) → start(c) → elicit(c, utterances), where c is the fused session 
     contrary grounds → Stop
   next utterance u: c' := fuse(c, u), every reading below taken afresh on c' →
     [the person withdraws]                                   → Withdrawn
-    [the person names where the run goes next]               → Routed
     [the utterance settles the intent, and nothing it would take is unseen (Covered)]
                                                              → ResolvedEndpoint
     [otherwise — values, deferrals, questions, a new frame, or something you would add unseen,
@@ -242,24 +241,20 @@ axiom Covered : Context P → Prop
     empty when there were none. -/
 axiom dissent : Context P → List String
 
-/-- How the person ends the run without resolving it. -/
-inductive Closing
-  /-- stop here; nothing open is delegated -/
-  | withdraw
-  /-- go on to what the person names -/
-  | route (target : String)
+/-- **Your judgment**: the cited turn withdraws — the person stops here without resolving the
+    intent, with nothing open delegated — read against the context as it now stands. Moving to
+    other work in the middle of the run is not a withdrawal: the gate holds and the context carries
+    on; "stop here and go there" is a withdrawal together with the person's declared next move.
+    Your own reading that the run should end closes nothing: it is stated with its basis before
+    the gate, and the person's answer closes. -/
+axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
 
-/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
-    stands. Your own reading that the run should end, or go elsewhere, closes nothing: it is
-    stated with its basis before the gate, and the person's answer closes. -/
-axiom ClosingSupported : Context P → Turn P → Closing → Prop
+/-- Only the person withdraws. -/
+def withdrawalCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := WithdrawalSupported }
 
-/-- Only the person closes. -/
-def closeCoord : Coord P Closing :=
-  { admits := (·.val = .person), supports := ClosingSupported }
-
-/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
-axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
+/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
+axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
 
 /-- The record every exit carries: the context, the values with who proposed each and how it came
     to stand, what is still open, and the dissent attached to the closure. -/
@@ -284,8 +279,6 @@ inductive Outcome (P : Type)
   | resolved  (r : ResolvedEndpoint P)
   /-- the partial record; what is open stays open -/
   | withdrawn (r : Closed P)
-  /-- the person named where the run goes next; that is the session's to take up -/
-  | routed    (target : String) (r : Closed P)
   | holding   (c : Context P)
 
 /-! ── A-BINDING ──
@@ -313,12 +306,9 @@ def elicit (respond : Context P → Response P) : Context P → List (Utterance 
   | c, []      => .holding c
   | c, u :: us =>
     let c' := fuse c u
-    match filledValue (closing c') with
-    | some .withdraw  => .withdrawn (closed c')
-    | some (.route t) => .routed t (closed c')
-    | none =>
-      if isFilled (resolution c') = true ∧ Covered c' then .resolved (endpoint c')
-      else elicit respond (c' ++ [(respond c').val]) us
+    if isFilled (withdrawal c') = true then .withdrawn (closed c')
+    else if isFilled (resolution c') = true ∧ Covered c' then .resolved (endpoint c')
+    else elicit respond (c' ++ [(respond c').val]) us
 
 open Classical in
 def start (report respond : Context P → Response P) (c : Context P) (us : List (Utterance P)) :
@@ -331,7 +321,9 @@ Every answer is read against the whole context as it now stands: nothing counts 
 earlier answer is held apart from what later ones say. A value the person gave stands on the scope
 their words reach, and changes only by their words; evidence that breaks it is shown, and shown
 before a dependent step that cannot be undone, never substituted. No fixed cap: each surface is
-dialogue, and the person can withdraw or route at any gate. After the resolution, where the
+dialogue, and the person can withdraw at any gate. Where the person turns to other work in the
+middle of the run, the gate holds and the context carries on; to stop here and go there is a
+withdrawal together with the person's declared next move. After the resolution, where the
 person's request declared what follows, it proceeds without another turn.
 -/
 
@@ -362,18 +354,17 @@ def Interaction.realization : Interaction → Continuation
   | .extension    => .proceed
 
 inductive Op | detect | nothingRelay | read | trace | surface | readAnswer | converge | withdraw
-             | routeRelay | seam
+             | seam
 
 def grounding : Op → Annot × String
   | .detect       => (.sense, "Internal analysis: whether the intent turns on a decision the person has not named, read from the utterance, their material, and the domain's decision structure")
-  | .nothingRelay => (.interaction .extension, "when every coordinate the intent turns on is already settled — what settles each, by the person's words or by evidence; a routing mention is a proposal; nothing is surfaced, and what follows is the session's")
+  | .nothingRelay => (.interaction .extension, "when every coordinate the intent turns on is already settled — what settles each, by the person's words or by evidence; a mention of other work is a proposal; nothing is surfaced, and what follows is the session's")
   | .read         => (.observe, "artifact read, artifact search, record read: read-only reads of the person's material where the intent turns on it — their code, their rules, earlier sessions and decisions")
   | .trace        => (.sense, "Internal analysis: the coordinates the intent turns on, over the whole fused context and the domain's decision structure, each with where it comes from and what leaving it open changes")
-  | .surface      => (.interaction .constitution, "the read-back of the intent with each value marked by who proposed it and how it stands; each open coordinate with its source — the person's material cited, their words quoted, or the domain's structure marked as yours — what leaving it open changes, and any default as your proposal; a deferred coordinate returning as itself; your contrary grounds; where closing would take something you added, that gap alone. The answer may give values, defer, say the intent is resolved as read back, withdraw, or name a route, in any form")
-  | .readAnswer   => (.sense, "Internal analysis: the latest utterance, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — the values it gives, a resolution, a closing — whatever form it takes")
+  | .surface      => (.interaction .constitution, "the read-back of the intent with each value marked by who proposed it and how it stands; each open coordinate with its source — the person's material cited, their words quoted, or the domain's structure marked as yours — what leaving it open changes, and any default as your proposal; a deferred coordinate returning as itself; your contrary grounds; where closing would take something you added, that gap alone. The answer may give values, defer, say the intent is resolved as read back, or withdraw, in any form")
+  | .readAnswer   => (.sense, "Internal analysis: the latest utterance, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — the values it gives, a resolution, a withdrawal — whatever form it takes")
   | .converge     => (.interaction .extension, "the read-back of the resolved intent and the trace — each coordinate, where it came from, its value, who proposed it and how it came to stand — with the residual and the dissent attached to the closure; proceed with ResolvedEndpoint")
   | .withdraw     => (.interaction .extension, "explicit exit at any gate: the partial record declared — the values so far with their provenance, and what is still open; nothing open is delegated")
-  | .routeRelay   => (.interaction .extension, "when the person names where the run goes next: relay the record so far with that target; taking it up is the session's")
   | .seam         => (.interaction .extension, "at a chain the person's request declared — the task the seed asked for, or a next protocol named — proceed to it citing that source once the intent is resolved; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──

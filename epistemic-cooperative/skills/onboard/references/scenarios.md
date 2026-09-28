@@ -102,9 +102,9 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - Answer: C
 
 **Quiz Q (design)**: Your intent is articulated but the axis it commits to depends on coordinates implicit in your externalized cognition (codebase, rules, past sessions). How would you surface those coordinates without forcing a single axis upfront?
-- Hint: Reverse-trace from intent through substrate; let the axis emerge per cycle.
+- Hint: Trace from the intent to the decisions it turns on — in your own material, your words, and the domain's usual decisions; let the axis emerge per round.
 
-**Philosophy**: εὐπορία (way through, resourcefulness) — the resolving passage that emerges from aporia (no way through). Plato's later dialectic threads aporia and euporia as paired moments of inquiry. Core principle: **Reverse Induction over Axis-Fixed Extraction**. Directional dual to `/induce` — where `/induce` ascends from instances to abstraction (bottom-up colimit), `/elicit` descends from intent through substrate to coordinates (top-down reverse induction). Workflow position: Planning cluster — alongside `/inquire`, but for axis-emergent intents that no axis-specific protocol covers. Game feel: "I know I want X, but the axis is fuzzy" → substrate trace surfaces dimension projections → cycle-emergent answers → endpoint resolves.
+**Philosophy**: εὐπορία (way through, resourcefulness) — the resolving passage that emerges from aporia (no way through). Plato's later dialectic threads aporia and euporia as paired moments of inquiry. Core principle: **Reverse Induction over Axis-Fixed Extraction**. Directional dual to `/induce` — where `/induce` ascends from instances to abstraction (bottom-up colimit), `/elicit` descends from intent to the coordinates it turns on (top-down reverse induction). Workflow position: Planning cluster — alongside `/inquire`, but for axis-emergent intents that no axis-specific protocol covers. Game feel: "I know I want X, but the axis is fuzzy" → coordinates surface from your material, your words, and the domain's usual decisions → your answers are taken whole → the intent resolves when you recognize it as yours.
 
 ## Proplasma `/preview`
 
