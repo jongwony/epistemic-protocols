@@ -37,6 +37,8 @@ Write the research prompt to `/tmp/goal_research_${SUFFIX}.txt`. The prompt **mu
 ```
 /goal Research and externally verify the target below.
 
+This session is the research session the goal-research skill has already delegated to — goal-research is already running here, so do not invoke it again in this session.
+
 Research target:
 {research_question}
 
