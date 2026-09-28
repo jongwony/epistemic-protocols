@@ -135,8 +135,11 @@ theorem routed_by_person (respond : Context P → Response P) (c : Context P)
 theorem proposed_never_set (c : Context P) (e : Entry) (h : proposer c e = .draft) :
     standing c e ≠ .set := by
   unfold standing
-  rw [h]
-  cases withinGrant c e <;> simp
+  cases withinGrant c e <;> simp [h]
+
+theorem granted_stands_as_granted (c : Context P) (e : Entry) (h : withinGrant c e = true) :
+    standing c e = .granted := by
+  simp [standing, h]
 
 theorem open_in_residual (c : Context P) (x : Entry) (hx : x ∈ coordinates c)
     (ho : isFilled (operative c x) = false) : x ∈ residual c := by

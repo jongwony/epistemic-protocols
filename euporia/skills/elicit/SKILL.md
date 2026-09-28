@@ -43,7 +43,7 @@ IntentSeed
   → trace(coordinates)   -- over the fused context: the person's material, their words, and the domain's decision structure
   → surface              -- the read-back with each value's proposer and standing; each open coordinate with its source and what leaving it open changes; contrary grounds
   → fuse(answer)         -- the answer joins the context whole; it adds determinations
-  → cover                -- every value you proposed was shown as yours before the answer that takes it
+  → cover                -- every value you proposed was shown as yours before the answer that takes it; a choice within a grant needs the grant to reach it
   → resolve(intent)      -- the person's utterance settles the intent
   → ResolvedEndpoint
 requires: aporia(I)                           -- runtime checkpoint (Phase 0); sole activation precondition
@@ -155,7 +155,9 @@ def valueCoord (x : Entry) : Coord P Entry :=
   { admits := fun _ => True, supports := ValueSupported x }
 
 /-- **Your reading**: how coordinate `x` stands in `c` — filled by the latest turn that settles
-    it; open where nothing settles it, carrying as candidate a value proposed but not yet taken. -/
+    it; open where nothing settles it, carrying as candidate a value proposed but not yet taken.
+    A value the person's turn set is not replaced by later evidence: evidence against it is shown,
+    and the value stands until the person's words change it. -/
 axiom operative : (c : Context P) → (x : Entry) → Occ (valueCoord (P := P) x) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
@@ -195,11 +197,13 @@ inductive Standing | set | adopted | granted
     grant's words reach. -/
 axiom withinGrant : Context P → Entry → Bool
 
-/-- A value you proposed never stands as set by the person. -/
+/-- A choice within a grant stands as granted whoever first named it; otherwise a value the person
+    put forward stands as set, and a value you proposed stands as adopted — never as set. -/
 def standing (c : Context P) (e : Entry) : Standing :=
-  match proposer c e with
-  | .person => .set
-  | .draft  => if withinGrant c e then .granted else .adopted
+  if withinGrant c e then .granted
+  else match proposer c e with
+    | .person => .set
+    | .draft  => .adopted
 
 structure Provenance where
   entry    : Entry
@@ -228,8 +232,9 @@ axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
     a decision, the person's words carried over in other words — was shown as yours, with what
     decides it and your contrary grounds, before the person's answer that takes it; and nothing is
     added after that answer. A value the person's own answer states counts as it was said. A
-    choice within a grant needs the grant to reach it. Where anything would be taken unseen, the
-    next surface shows that gap alone. -/
+    choice you make within a grant the person gave needs no prior showing: it needs the grant's
+    words to reach it, and it stands as yours. Where anything would be taken unseen, the next
+    surface shows that gap alone. -/
 axiom Covered : Context P → Prop
 
 /-- **Your record**: the contrary grounds you presented before the answer that closes — a value
@@ -418,6 +423,6 @@ Utterance evidence quotes the user's actual fragment; it does not attribute an u
 - **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
 - **Coverage before closure**: Present a single dominant coordinate value as your proposal with its basis; it enters the resolved intent only through the user's answer taken with it shown as yours. Keep the answer slot constitutive when different user value weightings sustain multiple values. A resolution with everything in view needs no further turn; where the user's request declared what follows, proceed to it.
 - **Provenance**: Record for each value who proposed it and whether the user's words set it, their answer adopted yours, or a grant they gave covers your choice. A rejected alternative or a reason stands as the user's only where their words state it; the user's words carried over in other words are your proposal. Where the user closes with a contrary ground of yours standing, attach it to the closure record.
-- **Parked-coordinate identity**: A deferred coordinate returns each round as the same question with the same basis, marked as returning; it stops being open only through a value the user gives it, and at the close it is residual.
+- **Parked-coordinate identity**: A deferred coordinate returns each round as the same question with the same basis, marked as returning. It stops being open when the user gives it a value, retires or merges it, or entrusts it to you within a grant; otherwise at the close it is residual.
 - **Trace over the whole context**: Each trace reads the fused context — the seed, every answer, and every read of the user's material — and the decision structure of the domain, not a summary of the values given, so a coordinate the user named in their own words is traced like any other.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
