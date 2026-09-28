@@ -543,3 +543,53 @@ test('the prose-only arm runs only when named, and the Codex runner refuses it',
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('the Claude runner counts a read made through the shell as a read', () => {
+  const { root, env } = fixture();
+  const bin = join(root, 'bin', 'claude');
+  writeFileSync(bin, `#!/usr/bin/env node
+console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default' }));
+console.log(JSON.stringify({ type: 'assistant', message: { content: [
+  { type: 'tool_use', name: 'Bash', input: { command: 'ls -la && cat app/main.py' } }] } }));
+console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
+`);
+  chmodSync(bin, 0o755);
+  env.REALIZE_RUNNER = 'claude';
+  env.HOME = root;
+  try {
+    assert.equal(invoke(env, 'run', 'inquire').status, 0);
+    const report = invoke(env, 'report', 'inquire', '--markdown');
+    assert.match(report.stdout, /collection_observed 1\/1/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the Claude runner mounts each case outside any .claude directory', () => {
+  const { root, env } = fixture();
+  const bin = join(root, 'bin', 'claude');
+  writeFileSync(bin, `#!/usr/bin/env node
+require('node:fs').appendFileSync(process.env.FAKE_CLAUDE_LOG, process.cwd() + '\\n');
+console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default' }));
+console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
+`);
+  chmodSync(bin, 0o755);
+  env.REALIZE_RUNNER = 'claude';
+  env.HOME = root;
+  env.FAKE_CLAUDE_LOG = join(root, 'claude.log');
+  // The default location, kept inside this fixture: tmpdir() follows TMPDIR.
+  delete env.REALIZE_WORK_DIR;
+  env.TMPDIR = join(root, 'tmp');
+  mkdirSync(env.TMPDIR);
+  try {
+    assert.equal(invoke(env, 'run', 'inquire').status, 0);
+    const cwds = readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n');
+    assert.ok(cwds.length > 0);
+    for (const cwd of cwds) {
+      assert.ok(cwd.startsWith(env.TMPDIR), cwd);
+      assert.doesNotMatch(cwd, /\/\.claude\//);
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
