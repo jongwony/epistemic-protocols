@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
-Output substrate evidence and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the per-coordinate answer slot; the dimension surface is pre-gate context.
+Output the evidence behind each coordinate, the read-back with each value's proposer, and your contrary grounds as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the answer slots; the coordinate surface is pre-gate context.

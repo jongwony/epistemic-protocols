@@ -4,14 +4,14 @@ Resolve via Extended-Mind reverse induction — `/elicit`.
 
 ## Overview
 
-Euporia opens a way through abstract aporia by reverse-tracing decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment) and surfacing them as cycle-emergent dimension projections. The user's answers explicate which coordinates were already implicit in their externalized cognition; resolution emerges through cycle iteration rather than axis-fixed extraction. Every answer joins the conversation whole — including a dimension you name beyond the listed options — and the next cycle re-traces from all of it; a value you gave changes only when your own words change it. The cycle ends when you say the intent is resolved as read back, or when you dismiss it with the rest delegated.
+Euporia opens a way through abstract aporia — you hold a direction but cannot yet name the decisions it turns on. It traces those decision coordinates from your own material (codebase, rules, past sessions), from your words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. Every answer joins the conversation whole — including a coordinate you name beyond the listed ones, or an axis you reject — and the next round traces from all of it; a value you gave changes only when your own words change it. The read-back of the intent marks each value with who proposed it: your words, or the AI's proposal with its basis. The answer that settles the intent resolves it when nothing it would take is unseen — no separate confirmation turn; where closing would take something the AI added, that gap alone is asked first. You can also withdraw, or name where the run goes next; what is still open is carried as residual, never closed by default.
 
 The protocol stands in directional dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent through substrate to coordinates (top-down direction). The two compose as orthogonal directions of the same dialectic substrate. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
 
 ## Type
 
 ```
-(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate)
+(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed)
   → ResolvedEndpoint
 ```
 
@@ -21,7 +21,7 @@ Greek εὐπορία — literally "good passage" (εὖ "well" + πόρος "w
 
 ## When to invoke
 
-Activate when the user's intent is articulated but its decision coordinates are implicit in the externalized substrate — the utterance does not commit to a single axis-specific protocol, yet the substrate carries traces of the values needed to resolve it. The gate is the conjunction of axis-undetermined intent and substrate-implicit coordinates.
+Activate when the user's intent is articulated but turns on decisions they have not named — read from the utterance, their material, or the decision structure of the domain the intent sits in. When every coordinate is already settled by their words or by reachable evidence, the protocol reports what settles each and ends without surfacing.
 
 When the intent is axis-determined (a single axis-specific protocol covers the resolution), defer to that protocol. When the user holds an instance set converging toward an unnamed essence with no locator, defer to Periagoge.
 
