@@ -37,13 +37,14 @@ Write the research prompt to `/tmp/goal_research_${SUFFIX}.txt`. The prompt **mu
 ```
 /goal Research and externally verify the target below.
 
+This session is the research session the goal-research skill has already delegated to — goal-research is already running here, so do not invoke it again in this session.
+
 Research target:
 {research_question}
 
 Workflow:
 1. The `/goal` prefix above scopes this Codex session as a research endpoint.
 2. Inside that scope, invoke `$inquire` (the Aitesis skill) to drive Tavily-based external verification searches.
-   Run `$inquire` in this session. Do not invoke the goal-research skill, and do not spawn `codex exec` or any other subprocess session.
 3. Cite each external source used.
 
 Report:
