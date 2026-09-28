@@ -176,7 +176,10 @@ newly matching site does not falsify an earlier sweep.
   than asking whether to apply them all.
 
 Relay a disposition already settled by the user's prior direction, the PR's purpose,
-or citable precedent, recording side effects. Reopen only a genuinely live competing
+a governing rule harvested under Phase 0 rule 4, or citable precedent, recording side
+effects. A proposed repair that a harvested rule excludes is not a live option: report
+it with that rule as its rejection basis before classifying, so any gate forms only
+over the admissible trajectories that remain. Reopen only a genuinely live competing
 judgment. Packaging an identical mechanical fix does not reopen disposition; repairing
 a pre-existing-side defect needs a citable scope license (purpose, mandated sweep,
 or settled precedent), otherwise ask about expansion.
