@@ -18,36 +18,111 @@ variable {P : Type}
 /-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
-instance {c : Context P} {i : Item} : Nonempty (Landing c i) := ⟨.userUnknown .couldNot ""⟩
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-theorem state_unique {c : Context P} {i : Item} {s s' : State}
-    (h : inState c s i) (h' : inState c s' i) : s = s' := h.2.symm.trans h'.2
+theorem settled_not_ai (c : Context P) :
+    ∀ r ∈ record c, (c[r.src.idx]'r.src.lt).origin ≠ .assistant :=
+  fun r _ => cited_not_assistant r.src
 
-theorem no_reentry (c : Context P) (i : Item) (hreg : Registered c i) (hself : SameItem c i i)
-    (hd : (dismissal c i).isSome = true) : ¬ working c i := by
-  rintro (⟨_, hn⟩ | ⟨_, hl⟩)
-  · exact hn ⟨i, hreg, hself⟩
-  · rw [hl] at hd; cases hd
+theorem silence_holds (respond session : Context P → Response P) (c : Context P) :
+    inquire respond session c [] = .holding c := by
+  simp [inquire]
 
-theorem resolved_not_ai {c : Context P} {i : Item} {f w : String} {s : Cite c}
-    {sup : LandSupported i c (c[s.idx]'s.lt) f} (_ : landing c i = .resolved f s sup w) :
-    (c[s.idx]'s.lt).origin ≠ .assistant := by
-  exact cited_not_assistant s
-
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
-  ⟨(push c).map (·.val) ++ (passRecord (c ++ (push c).map (·.val))).map (·.val), by
-    simp [pass]⟩
-
-theorem ends_sufficient {c c' : Context P} (h : CollectionEnds c c') :
-    ∃ c₀, c' = pass c₀ ∧ (¬ PassChanged c₀ (pass c₀) ∨ ¬ WorthAnotherPass (pass c₀)) := by
-  induction h with
-  | stop c h => exact ⟨c, rfl, h⟩
-  | more _ _ _ _ _ ih => exact ih
-
-theorem sufficient_opens_no_pass (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : answer (fuse c u) = some .sufficient) :
-    inquire respond c (u :: us) = .declared (fuse c u) := by
+theorem other_work_collects_nothing (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    inquire respond session c (u :: us) =
+      inquire respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [inquire, h]
+
+theorem dismissal_only_by_person {c : Context P} {x : Entry} {s : Cite c}
+    (ok : (dismissalCoord (P := P) x).admits s.src) : s.src.val = .person := ok
+
+theorem enough_only_by_person {c : Context P} {s : Cite c}
+    (ok : (enoughCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
+    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem dismissed_by_person (c : Context P) : ∀ d ∈ dismissed c, d.src.src.val = .person :=
+  fun d _ => d.byPerson
+
+theorem closure_keeps_residual (c : Context P) : (closed c).residual = residual c := rfl
+
+private theorem after_completed {c : Context P} {next : Context P → Outcome P}
+    {r : SufficientContext P} (h : afterCollection c next = .completed r) :
+    ((residual c).isEmpty = true ∧ r = ⟨closed c⟩) ∨
+    (isFilled (enough c) = true ∧ r = ⟨closed c⟩) ∨ next c = .completed r := by
+  unfold afterCollection at h
+  split at h
+  · cases h
+    exact .inl ⟨by assumption, rfl⟩
+  · split at h
+    · cases h
+      exact .inr (.inl ⟨by assumption, rfl⟩)
+    · exact .inr (.inr h)
+
+private theorem after_withdrawn {c : Context P} {next : Context P → Outcome P} {r : Closed P}
+    (h : afterCollection c next = .withdrawn r) : next c = .withdrawn r := by
+  unfold afterCollection at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · exact h
+
+theorem inquire_completes_only_when_nothing_open_or_accepted
+    (respond session : Context P → Response P) (c : Context P) (us : List (Utterance P))
+    (r : SufficientContext P) (h : inquire respond session c us = .completed r) :
+    (residual r.closure.context).isEmpty = true ∨ isFilled (enough r.closure.context) = true := by
+  induction us generalizing c with
+  | nil => simp [inquire] at h
+  | cons u us ih =>
+    simp only [inquire] at h
+    split at h
+    · exact ih _ h
+    · split at h
+      · cases h
+      · split at h
+        · cases h
+          exact .inr (by assumption)
+        · rcases after_completed h with ⟨he, hr⟩ | ⟨hf, hr⟩ | h'
+          · subst hr
+            exact .inl he
+          · subst hr
+            exact .inr hf
+          · exact ih _ h'
+
+theorem completes_only_when_nothing_open_or_accepted
+    (respond session : Context P → Response P) (c : Context P) (us : List (Utterance P))
+    (r : SufficientContext P) (h : start respond session c us = .completed r) :
+    (residual r.closure.context).isEmpty = true ∨ isFilled (enough r.closure.context) = true := by
+  rcases after_completed h with ⟨he, hr⟩ | ⟨hf, hr⟩ | h'
+  · subst hr
+    exact .inl he
+  · subst hr
+    exact .inr hf
+  · exact inquire_completes_only_when_nothing_open_or_accepted respond session _ us r h'
+
+theorem inquire_withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P) (h : inquire respond session c us = .withdrawn r) :
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
+  induction us generalizing c with
+  | nil => simp [inquire] at h
+  | cons u us ih =>
+    simp only [inquire] at h
+    split at h
+    · exact ih _ h
+    · split at h
+      · cases h
+        exact ⟨_, by assumption, rfl⟩
+      · split at h
+        · cases h
+        · exact ih _ (after_withdrawn h)
+
+theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P) (h : start respond session c us = .withdrawn r) :
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ :=
+  inquire_withdrawn_by_person respond session _ us r (after_withdrawn h)
 
 theorem never_holds_the_turn (op : Op) (k : ToolGrounding.Interaction)
     (h : (grounding op).1 = .interaction k) : k.realization = .proceed := by

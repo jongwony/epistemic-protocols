@@ -9,7 +9,7 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach, where AI infers what the prospect leaves uncertain, pushes each uncertainty through every channel it can read or run on its own until no channel is left, writes down for each one what that reached — a fact that settles it, a finding whose ground it declares short, a detection that answers no uncertainty raised, or nothing — and hands what only the user can settle, or nobody yet knows, back to the user as their own unknown. The beneficiary is the user's epistemic state; the AI's collection is the instrument. Whether a turn halts on that handoff belongs to the harness; this contract inscribes what is presented and what an answer, when one comes, changes.
+**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. What only the person can settle, and what no source reached settles, is handed back as the person's own unknown, shown so they can recognize it. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when nothing is left open, or when the person's words — or a grant whose words reach it — accept what is; silence holds it. Completion establishes context sufficient for the work ahead, not the factual correctness of its parts.
 
 ```lean
 /-!
@@ -21,41 +21,39 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 -/
 
 /-! ── FLOW ──
-Aitesis(X) → Scan(X) → Uᵢ →
-  [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed          (trivial SufficientContext)
-  Pass(c): W := (Scan(c) \ uncertainties) ∪ live → ∀u ∈ W: push(u) until ¬advanceable(u)
-    → W ∪= what collection exposed → ∀u ∈ W: land(u) → (Uᵣ, Uₚ, Uᵤ, Uₙ)
-  [the pass changed something ∧ another pass is still worth it] Pass(c') → …
-  [it changed nothing ∨ a further pass is not worth it] Surface(Uₚ ∪ Uᵤ ∪ Uₙ, Uᵣ) → proceed
-    → converge
-  [every later utterance] c' := fuse(c, u) → Pass(c') → …
-    (any utterance may carry an unknown; answering a surfaced item is one case — an answer is
-     one more channel, and the next pass re-reads everything)
-  [the answer is Sufficient] c' := fuse(c, u) → converge
-    (the one answer that opens no pass: the inquiry is declared enough, and what remains is
-     dismissed with the declaration)
-live: every uncertainty not dismissed — the pass is the unit, and every pass pushes and lands
-the whole of it again. push(u): one untried channel the AI can reach on its own, cheapest
-first; a tried channel is not re-selected. land(u): the state the item reached, the reason it
-reached no further, and the basis, read from the material; written at every pass, the same
-where nothing moved. Uᵣ resolved · Uₚ provisional (a finding with its shortfall declared) ·
-Uᵤ the user's unknown · Uₙ detect-only.
+Aitesis(X) → start(c) → inquire(c, utterances), where c is the fused session context:
+  collect(c): every source you can read or run on your own, to the limit of your reach, for every
+    live uncertainty and every one collection exposes; what it returns joins the context
+  after every collection:
+    [nothing is open]                                 → SufficientContext, by evidence
+    [the person's words, or a grant whose words reach
+     it, already accept what is open]                 → SufficientContext, the residual kept
+    [otherwise] relay(c): what is open, handed back as the person's own unknown; the turn is
+      not held
+  next utterance u: c' := fuse(c, u), read whole against the prospect and c' →
+    [the utterance does not bear on this run]  the session answers it; no collection of this run
+    [the person withdraws]                     → Withdrawn
+    [the person says it is enough to go on]    → SufficientContext, the residual kept
+    [otherwise]                                → collect(c') → after every collection …
+  no utterance: the run holds — work that rests on no open uncertainty proceeds, work that rests
+    on one waits
+  after completion: the next move the person declared — the prospect's own work —, an adopted
+    policy, or a grant; after a withdrawal, only a next move the person declared with it
 -/
 
 /-! ── MORPHISM ──
 Prospect
-  → scan(prospect, context)                    -- infer what the prospect leaves uncertain; open dimensions, no fixed taxonomy
-  → collect(uncertainties, channels)           -- push each uncertainty through every channel the AI can reach on its own, and register what that collection exposes before landing
-  → land(uncertainty, state, reason, basis)    -- write what collection reached and why it reached no further — every item, every pass
-  → enrich(prospect, landed)                   -- the landed records join the context the next pass reads; a pass that changed something is followed by another while a further pass is still worth reaching for
-  → surface(landed, as_relay)                  -- hand what remains to the user as their own unknown; proceed
-  → fuse(answer)                               -- an answer, when it comes, is one more channel: the next pass re-reads everything on it
+  → scan(prospect, context)      -- the live inventory: what the prospect rests on that the context leaves uncertain; open dimensions, no fixed taxonomy (focus)
+  → collect(uncertainties)       -- every source the AI can read or run on its own, to the limit of its reach; what it returns joins the context before anything is recorded
+  → read(uncertainty)            -- how each stands: settled with a citation, ground short with its candidate, or unreached; the sources tried and those not reached, by name
+  → relay(open)                  -- hand what is open back as the person's own unknown, each with its reach and each settled value with its provenance; proceed
+  → fuse(answer)                 -- an answer, when it comes, joins the context whole and everything is read again
   → SufficientContext
-requires: uncertain(sufficiency(X))            -- runtime checkpoint (Phase 0)
-deficit:  ContextInsufficient                  -- activation precondition (Layer 1/2)
-preserves: task_identity(X)                    -- task intent invariant; the context only grows
+requires: insufficient(X)        -- declared by invoking /inquire, never judged; judged only on the AI-guided path, where not starting leaves no outcome
+deficit:  ContextInsufficient    -- activation precondition (Layer 1/2)
+preserves: task_identity(X)      -- the prospect is never rewritten; the context only grows
 invariant: Evidence over Inference over Detection
-invariant: Judgment is the model's, the product is a field   -- which state an item reached is judged from the material; that it reached it is written on the item
+invariant: Focus never records   -- the inventory, the relay, and whether an utterance bears on the run are re-read every turn; only a cited source or the person's turn moves a value into the record
 -/
 
 namespace Aitesis
@@ -122,266 +120,273 @@ noncomputable section
 variable {P : Type}
 
 /-- `X`: the prospect for action — planning, task execution, analysis, investigation, or any
-    purposeful action requiring context. Its task intent is never changed here. -/
+    purposeful action requiring context. It is a turn of the context and is never rewritten. -/
 abbrev Prospect (P : Type) := Context P
 
-inductive Priority | critical | significant | marginal
+/-- The deficit: the work ahead rests on ground not yet checked — a reading presupposed, a missing
+    value filled in, a search stopped early. Invoking `/inquire` is the person's declaration of it,
+    and you do not judge it away. **Your judgment** on the AI-guided path only, as the entry
+    judgment: finding none means not starting, which leaves no outcome of this protocol. -/
+axiom insufficient : Context P → Prop
 
-structure Item where
-  domain      : String
-  description : String
-  priority    : Priority
+/-- An uncertainty, a value, or a finding, named as the presentation shows it. -/
+abbrev Entry := String
 
-/-- **Your judgment**: `i` and `j` are the same uncertainty, read from the material — for a
-    dismissed item, from the person's dismissal utterance. -/
-axiom SameItem : Context P → Item → Item → Prop
+/-- **Your judgment**, the inventory: every uncertainty the prospect rests on that this run has
+    raised — a missing fact, a contradiction between the utterance and what was collected, a
+    judgment the person holds that the work turns on, a relevance gap; no fixed taxonomy — read
+    over the whole fused context, what collection returned included. An uncertainty collection
+    exposes joins in the collection that exposed it; one the person dismissed stays here, and
+    `live` sets it apart. Whether a reworded uncertainty is the same one is your judgment.
+    Guidance for the reading, not steps it must take: decisions already made about the prospect
+    are part of what it rests on; show first what an answer would change most. -/
+axiom uncertainties : Context P → List Entry
 
-/-- `Scan`: **your judgment** of what the context leaves uncertain — a missing fact, a
-    contradiction between the utterance and what was collected, a relevance gap; no fixed
-    taxonomy. It also registers, as an item of its own, a finding the material carries that
-    answers nothing raised: that item lands `detectOnly`, and the question the material was
-    collected for keeps its own record beside it. Run after collection, it reads what the pass
-    itself collected, so a discovery is registered in the pass that made it, before landing. -/
-axiom Scanned : Context P → Item → Prop
+/-- **Your collection** from `c`, to the limit of your own reach: every live uncertainty, and every
+    one collection exposes, pushed through every source you can read or run without changing
+    state, until none is left; where to look is yours to judge, and no list of sources bounds it.
+    What you say you read, you read whole. A source that needs a state change, someone's
+    permission, or another's authority is not reached on your own: name it, with the judgment or
+    capability it needs, in the uncertainty's `reach`, and hand it off. Each return is an evidence
+    turn; a run that observed nothing returns its null result. Direction:
+    `references/judgments.md` §Collection. -/
+axiom collect : Context P → List (Evidence P)
 
-/-- **Your record**, read from the context: every item raised so far. Cumulative: an item
-    once raised is never replaced. -/
-axiom Registered : Context P → Item → Prop
+/-- Who first put a held value forward: you, or the person. -/
+inductive Proposer | draft | person
 
-structure Dismissal (c : Context P) where
-  src : Cite c
+/-- What the turn that made a held value stand did: gave it in its own words, took a value put
+    forward before, or gave a grant that reaches your choice. -/
+inductive Standing | set | adopted | granted
+
+/-- What settles an uncertainty: a fact, whose source is the citation; or a value the person
+    holds, with who first put it forward and how it came to stand. -/
+inductive Settled
+  | fact (value : Entry)
+  | held (value : Entry) (proposer : Proposer) (standing : Standing)
+
+/-- **Your judgment**, the record rule: the cited turn settles uncertainty `x` as `s`, read against
+    the context as it now stands. Evidence — what a source returned, or what the person reports
+    they observed — settles a fact. A judgment the person holds — a value, a preference, a scope,
+    an order no prior decision or grant already fixes — is settled only by the person's turn: in
+    their own words (`set`), by taking a value put forward before (`adopted`) — where you put it
+    forward, only if it was visible as yours, with what decides it and your contrary grounds,
+    before that turn — or by a grant whose words reach your choice (`granted`). Evidence informs a
+    held judgment and never settles it. A question, a request to look, a deferral, or a bare
+    mention settles nothing. A held value changes only by the person's later words: evidence
+    against it is shown before any step that depends on it and cannot be undone, and the value
+    stands. A fact is read again against the evidence as it now stands; a correction keeps the
+    earlier citation and says why. -/
+axiom Settles : Entry → Context P → Turn P → Settled → Prop
+
+def settleCoord (x : Entry) : Coord P Settled :=
+  { admits := fun _ => True, supports := Settles x }
+
+/-- **Your reading**: how uncertainty `x` stands in `c` — filled by the latest turn that settles
+    it; open with a candidate citation where a cited evidence or person turn points toward a value
+    but its ground is short; open with none where nothing was reached. Your own inference is never
+    a citation: it stays in your turns and in the presentation, marked as yours. -/
+axiom operative : (c : Context P) → (x : Entry) → Occ (settleCoord (P := P) x) c
+
+/-- **Your record** of what collection reached for `x`, read from the context as it now stands:
+    the sources tried and those not reached, by name — so the person can point at one you missed
+    —, with what each unreached one needs; what was found and where its ground falls short; a
+    contradiction no source settles, quoted; and what an answer would change. What the person said
+    they know or do not know is carried as said; while their words say nothing of it, whether they
+    know is not established. -/
+axiom reach : Context P → Entry → String
+
+/-- **Your record**: findings collection turned up that answer no uncertainty raised, each with its
+    source. They sit outside the inventory; they are shown, not handed back. -/
+axiom detections : Context P → List String
+
+def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
+  | .open_ _   => false
+  | .filled .. => true
+
+/-- **Your judgment**: the cited turn dismisses uncertainty `x` — the person sets it aside, in
+    whatever words, with whatever reason they give and none demanded — read against the context
+    as it now stands. Whether an earlier dismissal still reaches `x` once new evidence bears on it
+    is read on the current context: a dismissed uncertainty may be raised again on new evidence. -/
+axiom DismissalSupported : Entry → Context P → Turn P → Unit → Prop
+
+/-- Only the person dismisses. -/
+def dismissalCoord (x : Entry) : Coord P Unit :=
+  { admits := (·.val = .person), supports := DismissalSupported x }
+
+/-- **Your reading**: the person's dismissal of `x`; `open_` until one reaches it. -/
+axiom dismissal : (c : Context P) → (x : Entry) → Occ (dismissalCoord (P := P) x) c
+
+/-- The uncertainties still in play: raised, and not dismissed. -/
+def live (c : Context P) : List Entry :=
+  (uncertainties c).filter (fun x => !isFilled (dismissal c x))
+
+/-- One recorded value: the uncertainty, what settled it, and the turn it stands on, with that
+    turn's support. -/
+structure Recorded (c : Context P) where
+  item      : Entry
+  settled   : Settled
+  src       : Cite c
+  supported : Settles item c (c[src.idx]'src.lt) settled
+
+def recordOf {c : Context P} (x : Entry) : Occ (settleCoord (P := P) x) c → List (Recorded c)
+  | .open_ _                  => []
+  | .filled s src _ supported => [⟨x, s, src, supported⟩]
+
+/-- The record: every filled occurrence over the live inventory. An open one adds nothing. -/
+def record (c : Context P) : List (Recorded c) :=
+  (live c).flatMap (fun x => recordOf x (operative c x))
+
+/-- An uncertainty still open, with what collection reached for it. -/
+structure Open where
+  item  : Entry
+  reach : String
+
+/-- What is still open: every live uncertainty whose occurrence is open, each with its reach —
+    ground short, unreached, or the person's to settle. None closes by default. -/
+def residual (c : Context P) : List Open :=
+  ((live c).filter (fun x => !isFilled (operative c x))).map (fun x => ⟨x, reach c x⟩)
+
+/-- One dismissal: the uncertainty, the person's turn that dismissed it, and how the uncertainty
+    stood and what collection had reached for it as of that turn. -/
+structure Dismissed (c : Context P) where
+  item     : Entry
+  src      : Cite c
   byPerson : src.src.val = .person
+  stood    : Occ (settleCoord (P := P) item) (c.take (src.idx + 1))
+  reached  : String
 
-/-- **Your reading** of the person's dismissal for `i` — a dismissal of that item, or a
-    declaration of sufficiency reaching it, whatever form the turn takes — with its citation;
-    `none` while there is none. -/
-axiom dismissal : (c : Context P) → Item → Option (Dismissal c)
+def dismissedOf {c : Context P} (x : Entry) : Occ (dismissalCoord (P := P) x) c → List (Dismissed c)
+  | .open_ _                 => []
+  | .filled _ src allowed _  =>
+    [⟨x, src, allowed, operative (c.take (src.idx + 1)) x, reach (c.take (src.idx + 1)) x⟩]
 
-def live (c : Context P) (i : Item) : Prop := Registered c i ∧ dismissal c i = none
+/-- Every dismissal over the inventory, with how each dismissed uncertainty stood at the time. -/
+def dismissed (c : Context P) : List (Dismissed c) :=
+  (uncertainties c).flatMap (fun x => dismissedOf x (dismissal c x))
 
-/-- Step₀'s working set. -/
-def working (c : Context P) (i : Item) : Prop :=
-  (Scanned c i ∧ ¬ ∃ j, Registered c j ∧ SameItem c i j) ∨ live c i
+/-- **Your judgment**: the cited turn says the context is enough to go on over what is still open
+    — the person's own words, or a grant whose words reach accepting this residual — read against
+    the context as it now stands and from what its words actually say: it may instead withdraw, or
+    dismiss named uncertainties. It answers nothing and dismisses nothing: what is open stays open,
+    as residual. A grant authorizes a choice; its presence does not make the choice, and it answers
+    no checkpoint that requires the person's own response. Your own reading that enough was
+    collected completes nothing. -/
+axiom EnoughSupported : Context P → Turn P → Unit → Prop
 
-/-- The kinds of route the AI can read or run on its own for an item; which kinds an item
-    admits is read from the item, never from a table. -/
-inductive ChannelKind
-  | artifactRead | artifactSearch | recordRead
-  /-- conditional: canonical external sources — RFCs, vendor API docs, standards; tagged
-      `web:{url}` and cross-checked against the codebase version, so a page that may be stale
-      lands the item provisional rather than resolved -/
-  | externalFetch
-  /-- conditional: read-only commit-log queries — content pickaxe, message search, temporal
-      range; tagged `history:{ref}` -/
-  | historyQuery
-  /-- an observation run shaped by `ObservationSpec`; one channel like any other -/
-  | observationRun
-  /-- a location or answer the user has given -/
-  | userGiven
-  | emergent (name : String)
+/-- Only the person — or a grant they gave — accepts what is open. -/
+def enoughCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := EnoughSupported }
 
-/-- A channel as it was read: a source that has changed since — the user says so, an answer
-    points back to it, or the material shows a newer version — is a new channel. -/
-structure Channel where
-  kind   : ChannelKind
-  source : String
-  asRead : String
+/-- **Your reading**: the person's acceptance of what is open; `open_` until one reaches it. -/
+axiom enough : (c : Context P) → Occ (enoughCoord (P := P)) c
 
-/-- **Your record**, read from the context: the channels already read for `i`, the user
-    counting as one when an utterance answered `i`, and a channel declined under an
-    `EscapeCondition` counting as read. It only grows. -/
-axiom tried : Context P → Item → List Channel
+/-- **Your judgment**: the cited turn withdraws — the person stops here without going on to the
+    work ahead, and nothing open is delegated — read against the context as it now stands. A
+    withdrawal from an earlier run does not close a new one. Your own reading that the run should
+    end closes nothing. -/
+axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
 
-/-- **Your judgment**: the item admits this channel. A channel whose expected yield no longer
-    justifies pushing it on the AI's own is not one it admits; it admits none when its answer
-    lives only with the user or it is not the AI's to collect. Record which way this fell in
-    the item's basis. Direction: `references/judgments.md` §Stopping. -/
-axiom Admits : Context P → Item → Channel → Prop
+/-- Only the person withdraws. -/
+def withdrawalCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := WithdrawalSupported }
 
-/-- False ends collection for the item and hands it to the user. -/
-def advanceable (c : Context P) (i : Item) : Prop := ∃ ch, Admits c i ch ∧ ch ∉ tried c i
+/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
+axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
 
-inductive State | resolved | provisional | userUnknown | detectOnly
+/-- **Your judgment**: the latest utterance, read whole against the prospect and the fused context,
+    bears on this run — an answer, a correction, a source to read, a dismissal, "enough", a
+    withdrawal, or anything that exposes a new uncertainty, changes the evidence, or revises who
+    may settle what, even where it looks like other work. An utterance that bears on none of it
+    leaves the run as it stands: the session answers it, that answer stays in the context, and no
+    collection of this run opens. -/
+axiom Reaches : Context P → Prop
 
-/-- Why an item reached no further. -/
-inductive Reason
-  /-- not the AI's to collect: another domain, another authority -/
-  | notMine
-  /-- every channel tried, ground still short -/
-  | couldNot
-  /-- the answer lives with the user -/
-  | onlyYou
-  | emergent (name : String)
+/-- **Your record**: the contrary grounds you presented before the turn that closes — a value you
+    doubt, a premise that may not hold, a source that disagrees — attached to the closure; empty
+    when there were none. -/
+axiom dissent : Context P → List String
 
-/-- **Your judgment**: the cited turn settles `i` with this finding. A person's report of what
-    they observed and their statement both reach it as turns; which one bears is read. -/
-axiom LandSupported : Item → Context P → Turn P → String → Prop
+/-- The record every exit carries: the context, what settled each uncertainty and on which turn,
+    what is still open with its reach, what the person dismissed, the detections, and the dissent
+    attached to the closure. -/
+structure Closed (P : Type) where
+  context    : Context P
+  record     : List (Recorded context)
+  residual   : List Open
+  dismissed  : List (Dismissed context)
+  detections : List String
+  dissent    : List String
 
-def itemCoord (i : Item) : Coord P String :=
-  { admits := fun _ => True, supports := LandSupported i }
+def closed (c : Context P) : Closed P :=
+  { context := c, record := record c, residual := residual c, dismissed := dismissed c,
+    detections := detections c, dissent := dissent c }
 
-/-- What `land(u)` writes on an item. -/
-inductive Landing (c : Context P) (i : Item)
-  /-- evidence settles the item: what sufficed is a citation, required, and why -/
-  | resolved (finding : String) (src : Cite c)
-      (supported : LandSupported i c (c[src.idx]'src.lt) finding) (why : String)
-  /-- a finding with a candidate citation whose ground is short — a finding, never an absence -/
-  | provisional (finding : String) (candidate : Cite c) (reason : Reason) (shortfall : String)
-  /-- no finding the AI can stand on: what was tried, or the contradiction quoted -/
-  | userUnknown (reason : Reason) (basis : String)
-  /-- a finding that answers no uncertainty raised: what was seen -/
-  | detectOnly (reason : Reason) (seen : String)
+/-- `SufficientContext`: the context the work ahead reads, with the record of what settled each
+    uncertainty, and what is still open — by evidence, nothing; by the person's acceptance, the
+    residual as it stood. -/
+structure SufficientContext (P : Type) where
+  closure : Closed P
 
-def Landing.state {c : Context P} {i : Item} : Landing c i → State
-  | .resolved ..    => .resolved
-  | .provisional .. => .provisional
-  | .userUnknown .. => .userUnknown
-  | .detectOnly ..  => .detectOnly
-
-def Landing.toOcc {c : Context P} {i : Item} : Landing c i → Occ (itemCoord i) c
-  | .resolved f s sup _    => .filled f s trivial sup
-  | .provisional _ s _ _   => .open_ (some s)
-  | .userUnknown ..        => .open_ none
-  | .detectOnly ..         => .open_ none
-
-/-- `land(u)`: **your judgment** from the whole material as it now stands. A web page that may
-    be stale lands provisional rather than resolved; an observation run that resolved nothing
-    is never the sole ground of a landing. A contradiction no channel settles lands
-    `userUnknown` with the contradiction quoted — `onlyYou` where it is one of intent,
-    `couldNot` where it is one of fact. The item's coordinate is `(landing c i).toOcc`. -/
-axiom landing : (c : Context P) → (i : Item) → Landing c i
-
-/-- `A`, read from a later utterance that addresses a surfaced item. Every answer but
-    `sufficient` opens the next pass, which re-reads every live item on the fused context.
-    Premise: one utterance carries one disposition per item; silence is none of them. -/
-inductive Answer
-  /-- one more channel for the item: the next pass pushes and lands it on the content -/
-  | provide (i : Item) (content : String)
-  /-- as `provide`; a point back at a source already read says the source changed -/
-  | point (i : Item) (location : String)
-  /-- the user does not know either; what they do know attaches the same way -/
-  | unknown (i : Item) (said : String)
-  /-- the item leaves `live` -/
-  | dismiss (i : Item)
-  /-- the whole inquiry is declared enough: every provisional and user-unknown item is dismissed
-      with the declaration recorded; detect-only items stand -/
-  | sufficient
-
-/-- **Your reading** of the latest utterance; `none` when it answers no surfaced item. Every
-    later utterance opens a pass, `none` included — answering a surfaced item is one case;
-    only `sufficient` opens none. -/
-axiom answer : Context P → Option Answer
-
-/-- `ObservationSpec`: an observation run is one channel; it yields evidence or nothing, never a
-    disposition. -/
-structure ObservationSpec where
-  setup   : List String
-  execute : List String
-  observe : String
-  cleanup : List String
-
-/-- Pre-run judgments only: each names a reason an observation must not run. Duration is not a
-    member: a run that hits its budget yields its null result as evidence. -/
-inductive EscapeCondition | environmentMutation | riskElevated
-
-/-- **Your record**, read from the context: observation channels declined before running,
-    each with its escape and rationale — the audit trail. -/
-axiom skips : Context P → List (Item × EscapeCondition × String)
-
-/-- `SufficientContext`: the context once collection has ended, with every live item landed in
-    the pass that ended it, or the trivial one Phase 0 proceeds with. -/
 inductive Outcome (P : Type)
-  | notActivated (c : Context P)
-  | converged    (c : Context P)
-  | declared     (c : Context P)
+  | completed (r : SufficientContext P)
+  /-- the partial record; what is open stays open -/
+  | withdrawn (r : Closed P)
+  | holding   (c : Context P)
 
 /-! ── MODE STATE ──
 Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
-abbrev Mode (P : Type) := Context P
-
-def inState (c : Context P) (s : State) (i : Item) : Prop := live c i ∧ (landing c i).state = s
-
 /-! ── PHASE TRANSITIONS ──
-Phase 0 scans the context; with nothing uncertain it presents the sufficiency finding with its
-reasoning and proceeds, not activated. Otherwise each pass runs: Step₀ registers `working`;
-Step₁ pushes each item while `advanceable`, its evidence entering the context as evidence
-turns [Tool]; Step₂ scans what the pass collected; Step₃ lands every live item; Step₄'s records
-join the context. Collection ends by `CollectionEnds`, the relay is presented, and the turn
-proceeds.
+A step is one arm of a structural recursion over the person's utterances. `collected c` is the
+context once what collection from `c` returned has joined it. `respond` is the relay, as TOOL
+GROUNDING's `surface` entry names it; `session` is the session's own answer to an utterance about
+other work, which stays in the context without opening collection.
 -/
 
-/-- **Your collection** for one pass from `c`: what the channels returned, each an evidence
-    turn — a run that observed nothing returns its null result. -/
-axiom push : Context P → List (Evidence P)
+def collected (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
-/-- **Your record** of a pass, written once its collection has entered the context: the items
-    registered, the channels tried and those declined under an `EscapeCondition`, and every
-    landing. `Registered`, `tried`, `landing`, and `skips` are read from these turns, so a
-    declined channel is recorded even when collection returned nothing. A record grounds
-    nothing. -/
-axiom passRecord : Context P → List (Response P)
-
-def pass (c : Context P) : Context P :=
-  let c₁ := c ++ (push c).map (·.val)
-  c₁ ++ (passRecord c₁).map (·.val)
-
-/-- **Your judgment**, made once for the pass: another pass is still worth reaching for on the
-    AI's own. No pass cap bounds it; this judgment and the growing `tried` sets do. Direction:
-    `references/judgments.md` §Stopping. -/
-axiom WorthAnotherPass : Context P → Prop
-
-/-- **Your judgment**: from `c` to `c'` the pass opened an item, tried a channel, or changed a
-    landing. -/
-axiom PassChanged : Context P → Context P → Prop
-
-inductive CollectionEnds : Context P → Context P → Prop
-  | stop (c : Context P)
-      (h : ¬ PassChanged c (pass c) ∨ ¬ WorthAnotherPass (pass c)) :
-      CollectionEnds c (pass c)
-  | more (c c' : Context P) (h1 : PassChanged c (pass c)) (h2 : WorthAnotherPass (pass c))
-      (rest : CollectionEnds (pass c) c') :
-      CollectionEnds c c'
-
-/-- **Your collection** from `c` to where it ends: `CollectionEnds c (collected c)`. -/
-axiom collected : Context P → Context P
-
-/-- `respond` is the relay presented after collection: every landed item that is not resolved,
-    in priority order, beside its state, reason, basis, and what an answer would change. -/
-def inquire (respond : Context P → Response P) : Context P → List (Utterance P) → Outcome P
-  | c, []      => .converged c
-  | c, u :: us =>
-    let c' := fuse c u
-    match answer c' with
-    | some .sufficient => .declared c'
-    | _ =>
-      let c'' := collected c'
-      inquire respond (c'' ++ [(respond c'').val]) us
+/-- After a collection: complete where nothing is open, or where the person's words — or a grant
+    whose words reach it — already accept what is open; otherwise the relay, and the run goes on to
+    the next utterance. -/
+def afterCollection (c : Context P) (next : Context P → Outcome P) : Outcome P :=
+  if (residual c).isEmpty then .completed ⟨closed c⟩
+  else if isFilled (enough c) = true then .completed ⟨closed c⟩
+  else next c
 
 open Classical in
-noncomputable def start (respond : Context P → Response P) (c : Context P)
+def inquire (respond session : Context P → Response P) :
+    Context P → List (Utterance P) → Outcome P
+  | c, []      => .holding c
+  | c, u :: us =>
+    let c' := fuse c u
+    if ¬ Reaches c' then inquire respond session (c' ++ [(session c').val]) us
+    else if isFilled (withdrawal c') = true then .withdrawn (closed c')
+    else if isFilled (enough c') = true then .completed ⟨closed c'⟩
+    else afterCollection (collected c')
+      (fun c'' => inquire respond session (c'' ++ [(respond c'').val]) us)
+
+/-- The run opens on a collection. -/
+def start (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
-  if ∃ i, Scanned c i then
-    let c' := collected c
-    inquire respond (c' ++ [(respond c').val]) us
-  else .notActivated c
+  afterCollection (collected c) (fun c' => inquire respond session (c' ++ [(respond c').val]) us)
 
 /-! ── LOOP ──
-Nothing here holds the turn: silence leaves the surfaced items as the user's unknown.
-Convergence evidence, after the pass that ended collection: for every item — raised by the
-first scan or opened by a later pass — one pair (ContextInsufficient(u) → landing(u)): a
-resolved item with what sufficed; a provisional item with its finding and where the ground
-falls short; a user-unknown item with its reason and what was tried; a detect-only item as
-detected, answering no uncertainty raised; a dismissed item with the reason or declaration
-recorded. No item is declared out of scope without its own line. Convergence is demonstrated,
-not asserted.
+Every utterance is read whole against the context as it now stands: nothing counts passes, and no
+earlier reading is held apart from what later turns say. Silence takes nothing: the run holds, an
+open uncertainty stays open, and only work that rests on none of them proceeds. No fixed cap: each
+relay is dialogue.
 -/
 
 /-! ── CONVERGENCE ──
-sufficient(c) = `CollectionEnds`: the AI's own reach is exhausted as the stopping judgment
-reads it, and every landing stands on the whole material. `user_unknown ≠ ∅` does not block
-convergence: what remains is surfaced as the user's, which is the product.
+completed: nothing is open, by evidence, or the person's words — or a grant whose words reach it —
+accept what is open. A finding alone does not establish completion. Convergence evidence, at
+completion: for every uncertainty raised, one pair (ContextInsufficient(u) → how it stands) — a
+settled one with its citation and, for a held value, who proposed it and how it stood; an open one
+with its reach, marked as shown to the person with their recognition not yet established unless a
+later turn of theirs showed it; a dismissed one with the person's words and how it stood then —
+beside the detections and the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -401,22 +406,18 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | scan | sufficiencyRelay | push | observeRun | register | land | surface
-             | readAnswer | converge | sufficiency | seam
+inductive Op | scan | collect | read | surface | readAnswer | converge | withdraw | seam
 
 /-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
-  | .scan             => (.sense, "Internal analysis: what the context leaves uncertain, at Phase 0 and at Step₀")
-  | .sufficiencyRelay => (.interaction .extension, "with nothing uncertain, the sufficiency finding with its reasoning; proceed with X unchanged, trivial SufficientContext")
-  | .push             => (.observe, "artifact read, artifact search, record read, external fetch (conditional, tagged web:{url}), environment run (conditional: read-only commit-log queries, tagged history:{ref}); what a channel yields enters the context for the item pushed")
-  | .observeRun       => (.transform, "artifact write, environment run, artifact read: one observation run shaped by ObservationSpec; a run that resolves nothing returns its null result and the item continues to its next channel, and a declined run is recorded with its escape in skips")
-  | .register         => (.sense, "Internal analysis: Step₂, what this pass's collection exposed, registered before landing")
-  | .land             => (.sense, "Internal analysis: every live item, every pass — state, reason, and basis read from the material as it now stands")
-  | .surface          => (.interaction .extension, "every landed item that is not resolved, in priority order, beside its state, reason, basis, and what an answer would change; the turn is not held")
-  | .readAnswer       => (.sense, "Internal analysis: which surfaced item a later utterance answers and how; every answer but Sufficient opens the next pass")
-  | .converge         => (.interaction .extension, "the convergence evidence trace, one pair per item including the dismissed and the detect-only; proceed with SufficientContext")
-  | .sufficiency      => (.interaction .extension, "on Sufficient, the dismissed set with the declaration recorded against each, so the trace shows what was accepted unresolved")
-  | .seam             => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed directly to it citing that source")
+  | .scan       => (.sense, "Internal analysis: the inventory — what the prospect rests on that the fused context leaves uncertain, what collection returned included; no fixed taxonomy")
+  | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing state, to the limit of your reach; what each returns enters the context as an evidence turn; a source that needs a state change, a permission, or another's authority is named with what it needs and handed off, never run as collection")
+  | .read       => (.sense, "Internal analysis: how each uncertainty stands — settled with its citation, ground short with its candidate, or unreached — and its reach, read on the context as it now stands")
+  | .surface    => (.interaction .extension, "every open uncertainty handed back as the person's own unknown, each with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; what an answer would change; each settled one with its provenance — the evidence and where it was read, the person's words, or your proposal marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
+  | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, dismisses, says enough, withdraws, or exposes a new uncertainty")
+  | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with SufficientContext")
+  | .withdraw   => (.interaction .extension, "at the person's word: what you took as withdrawn, and the partial record — what settled and on which turn, what is open with its reach, what was dismissed; nothing open is delegated, and the person's next words correct it")
+  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared — the prospect's own work —, an adopted policy, or a grant, citing that source; after a withdrawal, only to a next move the person declared with it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -429,25 +430,17 @@ end Aitesis
 
 ## Mode Activation
 
-`/inquire` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
+`/inquire` remains directly invocable: the invocation declares the deficit the Definition's `insufficient` names, and collection starts at once. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind. Skip AI-guided activation when the user explicitly asks to proceed without context verification or when no prospect exists to verify.
 
-### Prior-decision scan
+### Prior decisions
 
-When a prospect touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, begin Phase 1 with a bounded scan over persistent memory and project-local prior-decision history even without an explicit reference. Prior-session recall indices may seed Phase 0; they are one channel among the others, and current evidence governs what an item lands as.
-
-### Activation exceptions
-
-Skip AI-guided activation when the user explicitly requests proceeding without context verification or when no prospect exists to verify. An item the user dismissed stays skipped for the current session; whether a newly raised item is that one is read from the user's dismissal itself.
-
-### Accumulation signal
-
-When the recorded skipped observations across at least three sessions cluster around one `EscapeCondition` with a consistent rationale, revisit what counts as a channel the AI may run on its own.
+When a prospect touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, the decisions already made about it are part of what it rests on: look for them with everything else, and let current evidence govern how each uncertainty stands.
 
 ## Protocol
 
 ### User-facing realization
 
-At Phase 2, render each landed item in everyday language: what was found, the state it reached, why it reached no further, and the basis — beside what an answer would change. Order by priority. Say plainly which items are the user's to settle and which the AI found without full warrant; name a detect-only finding as one, on its own line. State what the protocol takes if an answer comes — a fact, a place to look, "I don't know either", a dismissal, "that is enough" — without holding the turn for it. Keep every landing open to free-response correction.
+Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Say plainly which uncertainties are the user's to settle and which the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a place to look, "I don't know either", a dismissal, "that is enough", a withdrawal — without holding the turn for it. Keep every item open to free-response correction.
 
 Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 
@@ -455,17 +448,17 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Marginal priority items only | Brief relay: each item with its state and basis in one line |
-| Medium | Significant priority items, collection partially resolved | Structured relay framing each item beside its evidence and what an answer would change |
-| Heavy | Critical priority, several unresolved items | Detailed evidence + channels tried + findings with their shortfalls + the user's unknowns named as such |
+| Light | A few open uncertainties, little riding on them | Brief relay: each with its reach in one line |
+| Medium | Several open uncertainties, or collection that settled some and fell short on others | Structured relay framing each beside its evidence and what an answer would change |
+| Heavy | Much of the work ahead rests on what is open | Detailed evidence, the sources tried and not reached, findings with their shortfalls, and the user's unknowns named as such |
 
 ## Rules
 
-- **Recognition over Recall**: Present each landed item with its state, reason, and basis, so the reader recognizes what remains rather than reconstructing it.
+- **Recognition over Recall**: Present each open uncertainty with its reach and each settled one with its provenance, so the reader recognizes what the work rests on rather than reconstructing it.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
-- **Option-set relay test**: Surfacing is a relay: it presents and proceeds. An item lands where the material puts it; the user's answer, when it comes, is one more channel, not a gate this protocol holds.
-- **Judgment is the model's, the product is a field**: Which state an item reached and why are judged from the material, and the judgment is written into the item's landing — its state, reason, and basis. A resolved landing carries the citation of what sufficed; the AI's own records and landings are material the next pass reads, never the ground an item stands on. A sentence is not a substitute for an empty field.
-- **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and the item moves to its next channel. What that evidence means for another item is read at that item's next landing, not decided when it lands. Only the user's answer disposes of an item, and a declaration of sufficiency reaches every unresolved item, observed or not.
-- **Finding and completion stay apart**: That an item carries a provisional finding says nothing about whether collection is complete. Completion is a pass that changed nothing, or after which a further pass is not worth reaching for — no channel left worth trying for any live item, no landing that moved, no scan worth another pass — judged on channels, landings and the stopping judgment, never on how a finding reads.
-- **Boundary named, not crossed**: For every item that is not Resolved, say what was tried, what was found, and where it falls short; leave disposition to the user. What lies past the AI's reach is another deficit, read from the trace by whatever routes the turn after.
+- **Option-set relay test**: Handing back is a relay: it presents and proceeds. The user's answer, when it comes, is read whole; it is not a gate this protocol holds, and silence settles, dismisses, accepts, and withdraws nothing.
+- **Focus and record**: As the Definition's MORPHISM invariant, `Settles`, and `record` state.
+- **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and collection moves on. Only the user's words dismiss an uncertainty, accept what is open, or withdraw.
+- **Completion**: Completion is nothing left open, by evidence, or the user's words — or a grant whose words reach it — accepting what is open. A finding alone does not establish completion, and the AI's own reading that enough was collected completes nothing.
+- **Boundary named, not crossed**: For every open uncertainty, say what was tried, what was not reached and what it needs, what was found, and where it falls short; leave its disposition to the user.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
