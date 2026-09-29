@@ -158,7 +158,7 @@ following. Under that reading, any positive result here could come from a long
 structured instruction being present at all. Ruling that out needs a control with the
 same form and none of the obligations — which is exactly what the output style is: it
 prescribes gate shape, observer markers and convergence lines, and prescribes nothing
-about this protocol's five answer constructors or the state, reason and basis it writes on each item.
+about this protocol's record — how each uncertainty stands, what was tried and not reached, and who settled what.
 
 **The `protocol` arm tests a stated invariant.** The runtime contract requires each
 `SKILL.md` to be self-contained. If the declared type is realized only when the output

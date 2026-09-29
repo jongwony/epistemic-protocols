@@ -55,20 +55,31 @@ private theorem after_completed {c : Context P} {next : Context P → Outcome P}
   unfold afterCollection at h
   split at h
   · cases h
-    exact .inl ⟨by assumption, rfl⟩
   · split at h
     · cases h
-      exact .inr (.inl ⟨by assumption, rfl⟩)
-    · exact .inr (.inr h)
+      exact .inl ⟨by assumption, rfl⟩
+    · split at h
+      · cases h
+        exact .inr (.inl ⟨by assumption, rfl⟩)
+      · exact .inr (.inr h)
 
 private theorem after_withdrawn {c : Context P} {next : Context P → Outcome P} {r : Closed P}
-    (h : afterCollection c next = .withdrawn r) : next c = .withdrawn r := by
+    (h : afterCollection c next = .withdrawn r) :
+    (isFilled (withdrawal c) = true ∧ r = closed c) ∨ next c = .withdrawn r := by
   unfold afterCollection at h
   split at h
   · cases h
+    exact .inl ⟨by assumption, rfl⟩
   · split at h
     · cases h
-    · exact h
+    · split at h
+      · cases h
+      · exact .inr h
+
+theorem withdrawal_after_collection_closes (respond session : Context P → Response P)
+    (c : Context P) (us : List (Utterance P)) (h : isFilled (withdrawal (collected c)) = true) :
+    start respond session c us = .withdrawn (closed (collected c)) := by
+  simp [start, afterCollection, h]
 
 theorem inquire_completes_only_when_nothing_open_or_accepted
     (respond session : Context P → Response P) (c : Context P) (us : List (Utterance P))
@@ -117,12 +128,16 @@ theorem inquire_withdrawn_by_person (respond session : Context P → Response P)
         exact ⟨_, by assumption, rfl⟩
       · split at h
         · cases h
-        · exact ih _ (after_withdrawn h)
+        · rcases after_withdrawn h with ⟨hw, hr⟩ | h'
+          · exact ⟨_, hw, hr⟩
+          · exact ih _ h'
 
 theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P) (h : start respond session c us = .withdrawn r) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ :=
-  inquire_withdrawn_by_person respond session _ us r (after_withdrawn h)
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
+  rcases after_withdrawn h with ⟨hw, hr⟩ | h'
+  · exact ⟨_, hw, hr⟩
+  · exact inquire_withdrawn_by_person respond session _ us r h'
 
 theorem never_holds_the_turn (op : Op) (k : ToolGrounding.Interaction)
     (h : (grounding op).1 = .interaction k) : k.realization = .proceed := by

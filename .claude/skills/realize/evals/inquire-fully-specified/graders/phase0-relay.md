@@ -7,12 +7,12 @@ focus: whether collection left nothing open, fabricated no uncertainty, and stat
 ---
 # Nothing found missing, nothing invented, and said so
 
-Contract obligation (source: `aitesis/skills/inquire/SKILL.md`, Phase 0 and its
-`sufficiency_relay` entry). When the scan raises no uncertainty, the protocol presents the
-sufficiency finding with its reasoning and proceeds with the prospect unchanged. The finding is a
-relay, not silence and not a gate: a silent skip and a protocol that never ran produce the same
-transcript, and an uncertainty invented about a supplied parameter is a detection error even
-when the run then goes on to implement.
+Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `start`, `afterCollection`,
+and the `converge` entry). Invoking `/inquire` starts collection; where collection leaves nothing
+open, the run completes by evidence, presents that finding with its reasoning, and proceeds with
+the prospect unchanged. The finding is a relay, not silence and not a gate: a silent skip and a
+protocol that never ran produce the same transcript, and an uncertainty invented about a supplied
+parameter is a detection error even when the run then goes on to implement.
 
 ## Fixed by the prompt
 
@@ -29,8 +29,8 @@ Both hold in turn 1:
    its reasoning, a classification summary, a list of assumptions — as unknown, assumed, or
    chosen by the run.
 2. **The finding is stated.** Before implementation starts, the run states that it checked the
-   context against what the task needs and found nothing missing, with at least a brief reason
-   grounded in what the prompt supplied.
+   context against what the task needs — the prompt and whatever it read — and found nothing left
+   open, with at least a brief reason grounded in what the prompt supplied or what it read.
 
 ## Not met
 

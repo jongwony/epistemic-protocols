@@ -31,7 +31,7 @@ Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Ai
 
 ```
 Collection   → Push each uncertainty through every source the AI can reach on its own; name what it tried and what it could not reach
-Relay        → Hand back what is open — findings with their shortfalls, the user's unknowns, detections — and proceed
+Relay        → Hand back what is open — findings with their shortfalls, the user's unknowns — show detections beside it, and proceed
 Answer       → Read whole: settle, point to a source, dismiss, say "enough", or withdraw; collection resumes where it opens something
 Completion   → Nothing left open, or the user's "enough" — the residual kept as it stands
 ```

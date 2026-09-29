@@ -138,7 +138,7 @@ rather than inferring invocation from the model's prose.
 
 Every case runs under explicit invocation. Each registered target needs at least a case
 where the protocol's obligations must be realized, and one that holds the counterpart the
-protocol must not fabricate — for `/inquire`, a Phase 0 that finds no deficit and relays;
+protocol must not fabricate — for `/inquire`, a collection that leaves nothing open and relays;
 for `/grasp`, an answer with nothing to check it against. Whether a protocol is selected at
 all, or stays silent, is measured by route's own eval, not here. The registered targets are
 the keys of `targets` in `harness.config.json`; no result is implied for a protocol absent

@@ -25,6 +25,7 @@ Aitesis(X) → start(c) → inquire(c, utterances), where c is the fused session
   collect(c): every source you can read or run on your own, to the limit of your reach, for every
     live uncertainty and every one collection exposes; what it returns joins the context
   after every collection:
+    [the person's words already withdraw]            → Withdrawn
     [nothing is open]                                 → SufficientContext, by evidence
     [the person's words, or a grant whose words reach
      it, already accept what is open]                 → SufficientContext, the residual kept
@@ -347,11 +348,12 @@ other work, which stays in the context without opening collection.
 
 def collected (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
-/-- After a collection: complete where nothing is open, or where the person's words — or a grant
-    whose words reach it — already accept what is open; otherwise the relay, and the run goes on to
-    the next utterance. -/
+/-- After a collection: withdrawn where the person's words already withdraw; complete where
+    nothing is open, or where the person's words — or a grant whose words reach it — already accept
+    what is open; otherwise the relay, and the run goes on to the next utterance. -/
 def afterCollection (c : Context P) (next : Context P → Outcome P) : Outcome P :=
-  if (residual c).isEmpty then .completed ⟨closed c⟩
+  if isFilled (withdrawal c) = true then .withdrawn (closed c)
+  else if (residual c).isEmpty then .completed ⟨closed c⟩
   else if isFilled (enough c) = true then .completed ⟨closed c⟩
   else next c
 
