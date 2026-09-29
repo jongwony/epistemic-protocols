@@ -5,11 +5,10 @@ focus: whether anything discoverable from the files was asked of the user instea
 ---
 # Facts the run could have read must not be asked
 
-Collection stops for an item only when no channel the AI can reach is left: facts discoverable
-by the AI through evidence are resolved during collection, and only what the AI cannot reach
-is handed to the user. `advanceable(u)` makes this a structural guard rather than a preference
-— an item reaches the user with the channels tried written on it, so handing over a fact a file
-carries shows as a channel not tried.
+Collection goes to the limit of the AI's own reach: facts discoverable by the AI through
+evidence are settled during collection, and only what the AI cannot reach is handed to the user.
+Each handed-back item carries its reach — the sources tried and those not reached, by name — so
+handing over a fact a file carries shows as a source not tried.
 
 ## Discoverable from this directory — must NOT be asked
 
@@ -36,8 +35,8 @@ the second list is — named as the user's to settle, whether or not it is phras
 
 Any first-list item is handed to the user as if the file had not been read — unless the run names,
 as that item's basis, what the file gave and where it fell short for that particular claim. The
-item then lands as a provisional finding where there is one, or as an unknown the AI could not
-settle (reason CouldNot); either way it is not handed over as one only the user holds.
+item then stands as a finding whose ground is short where there is one, or as unreached with
+the sources tried named; either way it is not handed over as one only the user holds.
 
 ## Judging note
 

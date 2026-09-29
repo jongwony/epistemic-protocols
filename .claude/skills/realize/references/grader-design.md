@@ -42,14 +42,14 @@ transition it was built to observe.
 |---|---|---|---|
 | — | the arm's treatment actually applied | `treatment_integrity` | behaviour |
 | — | the protocol loaded and fired | `skill_fired` | behaviour |
-| PHASE TRANSITIONS | collection happened in the turn | `collection_observed` | behaviour |
-| PHASE TRANSITIONS | collection precedes surfacing | `collection-precedes-inquiry` | manual transcript review |
-| TYPES `advanceable` | cheap evidence resolved, not handed over | `cheap-evidence-not-asked` | manual; judge specified |
-| TYPES `basis` / Phase 2 | each surfaced item's basis is locatable, faithfully attributed, and carries its state's content | `basis-faithful` | manual; judge specified |
-| TYPES `State`, `Reason` / Rules | each unresolved item shows state and reason; nothing the user owns is settled for them | `ownership-kept` | manual; judge specified |
-| TYPES | answer set is the declared five-way coproduct | `option-coproduct` | manual; judge specified |
-| Phase 0 | no deficit detected, none fabricated, the sufficiency finding stated as relay | `phase0-relay` | manual; judge specified |
-| Phase 0 | zero-uncertainty path reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
+| PHASE TRANSITIONS `collect` | collection happened in the turn | `collection_observed` | behaviour |
+| PHASE TRANSITIONS `start` | collection precedes the relay | `collection-precedes-inquiry` | manual transcript review |
+| TYPES `collect` | cheap evidence collected, not handed over | `cheap-evidence-not-asked` | manual; judge specified |
+| TYPES `reach`, `Settles` / `surface` | each handed-back item's reach and each settled item's provenance is locatable, faithfully attributed, and carries what its standing requires | `basis-faithful` | manual; judge specified |
+| TYPES `reach`, `Settles` / Rules | each open item shows how it stands and what was tried and not reached; nothing the user holds is settled for them, and no work resting on it proceeds on a run-chosen value | `ownership-kept` | manual; judge specified |
+| TYPES `dismissal`, `enough`, `withdrawal` / Rules | what an answer can do is stated, and nothing is taken from silence or the run's own reading | `answer-openings` | manual; judge specified |
+| PHASE TRANSITIONS `afterCollection` | nothing left open, none fabricated, the evidence completion stated with its reason | `phase0-relay` | manual; judge specified |
+| PHASE TRANSITIONS `afterCollection` | the evidence completion reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
 
 `/grasp` maps its own obligations. Those that depend on an answer are reached only through
 scripted user turns, and the pair of cases is scored on obligations its list form and its

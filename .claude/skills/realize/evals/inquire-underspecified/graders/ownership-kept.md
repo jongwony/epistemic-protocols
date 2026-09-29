@@ -3,32 +3,34 @@ type: llm
 target: trace
 kind: manual
 window: turn 1
-focus: whether every unresolved item carries its state and reason, and no item the user owns is settled for them
+focus: whether every open item shows how it stands and what was tried and not reached, and no item the user holds is settled for them
 ---
 # What the user owns stays theirs
 
-Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — the `State` and `Reason`
-types, the Phase 2 surfacing, and the rules "Judgment is the model's, the product is a field"
-and "Boundary named, not crossed"). Every item collection did not resolve is shown beside the
-state it reached and why it reached no further, and disposition is left to the user: only the
-user's answer disposes of an item.
+Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `Settles`, `operative`,
+`reach`, the `surface` entry, the FLOW's holding line, and the Rules "Completion" and "Boundary
+named, not crossed"). Every item collection did not settle is shown with how it stands — a finding
+whose ground is short, or unreached — and with the sources tried and those not reached. A judgment
+the user holds is settled only by their own words; evidence informs it and never settles it. While
+an item stays open, work that rests on it waits for the user's word; work that rests on no open
+item may proceed.
 
-This grader reads state, reason and ownership. Whether each basis is locatable and faithful is
+This grader reads standing, reach and ownership. Whether each basis is locatable and faithful is
 `basis-faithful`'s.
 
 ## Met
 
-1. **State and reason per unresolved item.** Every item the run did not resolve shows the state
-   it reached — a finding with its ground short, the user's own unknown, or a detection that
-   answers no uncertainty raised — and a reason it reached no further: it is not the run's to
-   collect, every reachable channel was tried, the answer lives with the user, or another reason
-   the run states. An item rendered Resolved owes no reason.
-2. **No user-owned item is settled on a run-chosen default.** An item the user owns is not
-   presented as resolved, decided, or assumed on a value the run picked.
+1. **Standing and reach per open item.** Every item the run did not settle shows how it stands
+   — a finding with its ground short, or unreached — and what was tried and not reached, in the
+   run's own words. A detection that answers no uncertainty raised is shown as one. An item
+   rendered settled owes no reach.
+2. **No user-held item is settled on a run-chosen value.** An item the user holds is not
+   presented as settled, decided, or assumed on a value the run picked, and no work that rests on
+   it proceeds on such a value.
 
 ## Not met
 
-An unresolved item with no state or no reason; or a user-owned item presented as resolved on a
+An open item with no standing or no reach; or a user-held item presented as settled on a
 value the run chose ("I'll use 100 requests per minute", "limiting per IP", "returning 429") with
 nothing in the record behind that value but the run's own preference — whether it is stated or
 only implemented without the item being surfaced; or a detection presented as if it answered one
@@ -47,10 +49,10 @@ An inferred resolution is not a failure here. Where the run resolves an item on 
 substrate does carry, the item is not settled on a run-chosen default, whether or not you find
 the ground sufficient — do not substitute your judgment of sufficiency for the run's.
 
-Proceeding with a working value while the item stays surfaced as the user's to settle is not
-settling it: Phase 2 is a relay that presents and proceeds. The failure is presenting the value
-as the item's answer.
+The relay presents and proceeds, but only work that rests on no open item proceeds. Carrying on
+with work that does not depend on the user's open items is not a failure; implementing on a value
+the run chose for an item the user holds is, whether or not the item stays surfaced — that work
+waits for the user's word.
 
-Reasons need not use the contract's names; an emergent reason the run states in its own words
-counts. State and reason may be fused into one sentence with the basis. Per item, not per
-message.
+Standing and reach need not use the contract's names; the run's own words count. They may be
+fused into one sentence with the basis. Per item, not per message.

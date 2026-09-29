@@ -209,7 +209,7 @@ test('a complete requested cell reports transition and manual scopes separately'
     assert.equal(report.status, 0, report.stderr || report.stdout);
     assert.match(report.stdout, /\| manual \|/);
     assert.match(report.stdout, /pass_k.*deterministic transition predicates only/);
-    assert.match(report.stdout, /option-coproduct/);
+    assert.match(report.stdout, /answer-openings/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

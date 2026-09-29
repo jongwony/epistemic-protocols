@@ -1029,7 +1029,7 @@ const CASE_PREDICATES = {
 const CASE_MANUAL_REVIEWS = {
   'inquire-underspecified': [
     'collection-precedes-inquiry', 'cheap-evidence-not-asked',
-    'basis-faithful', 'ownership-kept', 'option-coproduct',
+    'basis-faithful', 'ownership-kept', 'answer-openings',
   ],
   'inquire-fully-specified': [
     'phase0-relay', 'proceed-observed',

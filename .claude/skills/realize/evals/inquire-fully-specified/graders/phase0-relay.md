@@ -3,9 +3,9 @@ type: llm
 target: trace
 kind: manual
 window: turn 1
-focus: whether Phase 0 found no uncertainty, fabricated none, and stated that finding as a relay
+focus: whether collection left nothing open, fabricated no uncertainty, and stated that finding as a relay
 ---
-# Phase 0 finds nothing missing, invents nothing, and says so
+# Nothing found missing, nothing invented, and said so
 
 Contract obligation (source: `aitesis/skills/inquire/SKILL.md`, Phase 0 and its
 `sufficiency_relay` entry). When the scan raises no uncertainty, the protocol presents the
