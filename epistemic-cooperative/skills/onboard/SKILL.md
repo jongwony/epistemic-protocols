@@ -50,7 +50,7 @@ Compact mapping for inline use.
 | Protocol | Cluster | When to Use | Key Patterns |
 |----------|---------|-------------|-------------|
 | Aitesis `/inquire` | Planning | A task rests on missing context or unchecked assumptions — collect what the AI can reach on its own, hand back what it cannot as the user's own unknown | Hand-off or execution about to start on context nobody gathered; implicit requirements, environment dependencies, prior decisions (for prior-session recall → use `/recollect`) |
-| Euporia `/elicit` | Planning | Intent articulated but axis-undetermined; decision coordinates implicit in codebase / rules / past sessions | Multi-axis intent without single axis-specific protocol fit; substrate-implicit coordinates surface through cycle-emergent dimensions |
+| Euporia `/elicit` | Planning | Intent articulated but the decisions it turns on not yet named | Multi-axis intent without single axis-specific protocol fit; coordinates surface from the user's material, words, and the domain's usual decisions |
 | Heuresis `/ideate` | Planning | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
 | Proplasma `/preview` | Planning | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on AI-drafted axes relayed with their basis | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
 | Hypotyposis `/sketch` | Planning | A form has to be made, intent cannot yet be settled from descriptions, and the user would recognize it on sight — sketch under a settled focus, take marks on a specific version, revise the retained version, finish on the recognized one | "I'd know it when I see it", a plan stalled at its first draft, a description rewritten repeatedly instead of made |
@@ -147,7 +147,7 @@ If no person turns were collected — a fresh install, or a host that keeps no s
 
 | Protocol | Signal patterns | Priority |
 |----------|----------------|----------|
-| `/elicit` | Vague first prompts ("improve", "optimize", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates. An ideation ask ("ideas for", "brainstorm") routes to `/ideate` (Heuresis), which is user-initiated and therefore outside this proactive pool | Highest (also fallback) |
+| `/elicit` | Vague first prompts ("improve", "optimize", "make it better", "help me plan"); intent articulated but the decisions it turns on not yet named. An ideation ask ("ideas for", "brainstorm") routes to `/ideate` (Heuresis), which is user-initiated and therefore outside this proactive pool | Highest (also fallback) |
 | `/inquire` | Hand-off or finalization language ("go ahead", "just do it", "ready", "ship", "merge") — the AI is about to execute on the context it has; tasks with implicit requirements or environment dependencies in summary. It checks what the imminent execution rests on (assumptions, missing facts, environment dependencies); it does not audit the decision for unconsidered trade-offs, alternatives, or omitted steps | Medium |
 
 **Decision logic**:
@@ -389,7 +389,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Difficulty progression**: Start with high-contrast pairs (e.g., `/elicit` vs `/apportion`), progress to subtle distinctions (e.g., `/elicit` vs `/inquire`, `/inquire` vs `/contextualize`).
 
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
-- `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis collects the facts the AI can reach and hands back what only the user holds (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
+- `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis collects the facts the AI can reach and hands back what only the user holds (information layer), Euporia surfaces the decisions the user's intent turns on (coordinate-explication layer)
 - `/inquire` ↔ `/apportion`: both run right before the AI acts, but `/inquire` collects the context the action rests on as far as the AI can reach and names the rest as the user's unknown, `/apportion` cuts an autonomous goal into coarse units and closes each one — on a compiled completion predicate, on an acceptance you recorded when none compiles, or on a reservation where a judgment rather than a check settles it — before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)

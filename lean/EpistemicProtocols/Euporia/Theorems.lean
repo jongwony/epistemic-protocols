@@ -28,25 +28,30 @@ theorem nothing_to_elicit_surfaces_nothing (report respond : Context P → Respo
     start report respond c us = .nothingToElicit (c ++ [(report c).val]) := by
   simp [start, h]
 
-theorem withdraw_closes_unresolved (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P))
-    (h : isFilled (withdrawal (fuse c u)) = true) :
-    elicit respond c (u :: us) = .withdrawn (closed (fuse c u)) := by
+theorem unrelated_adds_no_gate (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    elicit respond c (u :: us) = elicit respond (fuse c u) us := by
   simp [elicit, h]
 
+theorem withdraw_closes_unresolved (respond : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (h : isFilled (withdrawal (fuse c u)) = true) :
+    elicit respond c (u :: us) = .withdrawn (closed (fuse c u)) := by
+  simp [elicit, hr, h]
+
 theorem covered_resolution_needs_no_further_utterance (respond : Context P → Response P)
-    (c : Context P) (u : Utterance P) (us : List (Utterance P))
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false) (hr : isFilled (resolution (fuse c u)) = true)
     (hc : Covered (fuse c u)) :
     elicit respond c (u :: us) = .resolved (endpoint (fuse c u)) := by
-  simp [elicit, hw, hr, hc]
+  simp [elicit, hre, hw, hr, hc]
 
 theorem uncovered_surfaces_again (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P))
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false) (hc : ¬ Covered (fuse c u)) :
     elicit respond c (u :: us) =
       elicit respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [elicit, hw, hc]
+  simp [elicit, hre, hw, hc]
 
 theorem each_step_continues_or_closes (respond : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
@@ -57,11 +62,13 @@ theorem each_step_continues_or_closes (respond : Context P → Response P) (c : 
       o = .resolved (endpoint (fuse c u))) := by
   simp only [elicit] at h
   split at h
-  · exact .inr (.inl ⟨by assumption, h.symm⟩)
+  · exact .inl ⟨_, h⟩
   · split at h
-    · rename_i hrc
-      exact .inr (.inr ⟨hrc.1, hrc.2, h.symm⟩)
-    · exact .inl ⟨_, h⟩
+    · exact .inr (.inl ⟨by assumption, h.symm⟩)
+    · split at h
+      · rename_i hrc
+        exact .inr (.inr ⟨hrc.1, hrc.2, h.symm⟩)
+      · exact .inl ⟨_, h⟩
 
 theorem resolved_requires_covered (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : ResolvedEndpoint P)
@@ -80,7 +87,7 @@ theorem resolved_requires_covered (respond : Context P → Response P) (c : Cont
 theorem endpoint_ends_in_utterance (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : ResolvedEndpoint P)
     (h : elicit respond c us = .resolved r) :
-    ∃ (c₀ : Context P) (u : Utterance P), r.record.context = fuse c₀ u := by
+    ∃ (c₀ : Context P) (u : Utterance P), r.closure.context = fuse c₀ u := by
   induction us generalizing c with
   | nil => simp [elicit] at h
   | cons u us ih =>
@@ -104,18 +111,40 @@ theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
       exact ⟨_, hw, rfl⟩
     · cases h'
 
-theorem proposed_never_set (c : Context P) (e : Entry) (h : proposer c e = .draft) :
-    standing c e ≠ .set := by
-  unfold standing
-  cases withinGrant c e <;> simp [h]
+private theorem mem_recordOf {c : Context P} {x : Entry} {o : Occ (standingCoord (P := P) x) c}
+    {r : Recorded c} (h : r ∈ recordOf x o) : r.coord = x ∧ isFilled o = true := by
+  cases o with
+  | open_ _ => simp [recordOf] at h
+  | filled d s allowed supported =>
+    simp only [recordOf, List.mem_singleton] at h
+    subst h
+    exact ⟨rfl, rfl⟩
 
-theorem granted_stands_as_granted (c : Context P) (e : Entry) (h : withinGrant c e = true) :
-    standing c e = .granted := by
-  simp [standing, h]
+theorem recorded_by_person (c : Context P) (r : Recorded c) (_ : r ∈ record c) :
+    r.src.src.val = .person ∧ StandingSupported r.coord c (c[r.src.idx]'r.src.lt) r.det :=
+  ⟨r.byPerson, r.supported⟩
+
+theorem recorded_is_filled (c : Context P) (r : Recorded c) (h : r ∈ record c) :
+    r.coord ∈ coordinates c ∧ isFilled (operative c r.coord) = true := by
+  simp only [record, List.mem_flatMap] at h
+  obtain ⟨x, hx, hr⟩ := h
+  obtain ⟨hc, hf⟩ := mem_recordOf hr
+  subst hc
+  exact ⟨hx, hf⟩
+
+theorem open_not_recorded (c : Context P) (x : Entry) (ho : isFilled (operative c x) = false)
+    (r : Recorded c) (h : r ∈ record c) : r.coord ≠ x := by
+  intro hx
+  have := (recorded_is_filled c r h).2
+  rw [hx, ho] at this
+  cases this
 
 theorem open_in_residual (c : Context P) (x : Entry) (hx : x ∈ coordinates c)
     (ho : isFilled (operative c x) = false) : x ∈ residual c := by
   simp [residual, hx, ho]
+
+theorem stands_only_by_person {c : Context P} {x : Entry} {s : Cite c}
+    (ok : (standingCoord (P := P) x).admits s.src) : s.src.val = .person := ok
 
 theorem resolved_by_person {c : Context P} {s : Cite c}
     (ok : (resolutionCoord (P := P)).admits s.src) : s.src.val = .person := ok

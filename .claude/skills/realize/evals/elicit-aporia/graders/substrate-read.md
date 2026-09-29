@@ -1,7 +1,7 @@
 ---
 type: code
 target: trace
-kind: deterministic
+kind: diagnostic
 window: turn 1
 predicate: >
   turn 1 contains at least one content read of a preference-bearing substrate path, and turn 1
@@ -12,17 +12,17 @@ preference_bearing_paths:
   - docs/adr/*.md
   - git history (git log / git show / git blame over this repo)
 ---
-# The substrate is read before the user is asked
+# Reach diagnostic: what of the user's material turn 1 read
 
-Contract obligation (source: `euporia/skills/elicit/SKILL.md`, the substrate-access step and its
-tool grounding). Coordinates are reverse-traced from the user's externalized substrate —
-codebase, rules, history — *before* the first surfacing hands the turn over. The surfacing ends
-the turn, so in a run that follows the contract every read that grounds the first cycle falls
-inside turn 1.
+Not scored. Reading the user's material is guidance on the `coordinates` judgment in
+`euporia/skills/elicit/SKILL.md` — read it where the intent turns on it — rather than a step the
+contract requires, and coordinates may also come from the user's words or the domain's decision
+structure. The graders score the record; this one records how far turn 1 reached, so runs and
+SKILL.md revisions can be compared on reach.
 
-## Predicate
+## Predicate (recorded, not scored)
 
-Pass when both hold:
+Record whether both hold:
 
 1. **A preference-bearing read occurred in turn 1.** At least one tool call in turn 1 reads the
    contents of a path listed above. Counted forms:
@@ -38,7 +38,7 @@ Pass when both hold:
    user. In a single-prompt first turn this holds by construction; it is stated so that a runner
    that splits turns differently does not read a later read as grounding an earlier question.
 
-## Diagnostic, not scored
+## Channel set
 
 Record which channels turn 1 touched — codebase (`digest/`, `feed/`, `tests/`, `ops/`), rules
 (`CONVENTIONS.md`, `docs/adr/`), history (`git …`), notes (`NOTES.md`) — as a per-run channel
@@ -49,11 +49,11 @@ set. It lets runs and SKILL.md revisions be compared on reach without making bre
 Reading `digest/*.py` alone yields what the code does, which is the axis-fixed extraction the
 protocol sets itself against. The coordinates this case hides — local send time, length cut,
 security carve-out, unsubscribe, plain text, empty days — sit in the records of what the user
-already decided or complained about. A run that read only code and then asked has skipped the
-channel the protocol exists to use.
+already decided or complained about. A run that read only code and then asked reached less of what
+the user already said; that shows here as reach, not as a failure.
 
 ## Known limits
 
 A `Grep` over the whole repository (no path) that happens to match inside `NOTES.md` is not
-counted; the predicate prefers a false negative to crediting an incidental match. Report such
-runs in the diagnostic so a reviewer can override.
+counted; the predicate prefers a false negative to crediting an incidental match. Note such runs
+so a reviewer can override.
