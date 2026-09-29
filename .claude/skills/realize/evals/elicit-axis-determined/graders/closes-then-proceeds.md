@@ -38,6 +38,10 @@ outside the design — a permission, a missing tool such as `pytest` — is not 
 
 ## Not applicable
 
-Turn 1 asked only for permission, so the oracle's reply was not a resolution (see `oracle.md`).
-Record N/A with the reason. A turn 1 that carries both the first surface and a permission question
-is graded: the oracle's reply answers the surface.
+- Turn 1 asked only for permission, so the oracle's reply was not a resolution (see `oracle.md`).
+- Turn 2 took the resolution but ended on a permission or missing-tool question (for example
+  `pytest` not installed) without writing: the case allows no further reply (`max_user_replies: 1`),
+  so the tree witness cannot be reached. Record N/A with the question quoted; it is not a failure.
+
+A turn 1 that carries both the first surface and a permission question is graded: the oracle's reply
+resolves it and grants the permission.

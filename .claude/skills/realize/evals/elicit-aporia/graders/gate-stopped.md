@@ -30,9 +30,8 @@ proceeds, and whether it then implements is not under judgment.
 
 An unchanged tree is necessary for `Stop` but not sufficient: a turn that ended with neither a
 surface nor a write (a plan, a summary) also leaves the tree alone. Every turn in the window
-bears on the run and does not close it, so each must end with a gate the user can answer — read
-this predicate together with `activation-silent` for turn 1 and `person-closes` for the rest; a
-pass here with a fail there is a stop without a gate.
+bears on the run and does not close it, so each must end with a gate the user can answer — that is
+`turn-ends-at-gate`'s; a pass here with a fail there is a stop without a gate.
 
 ## Not met
 

@@ -1,6 +1,6 @@
 ---
 name: elicit-axis-determined
-tags: [euporia, trigger-negative, type-realization]
+tags: [euporia, fully-specified, immediate-resolution, multi-turn]
 plugins: ["euporia"]
 runs: 3
 max_turns: 24

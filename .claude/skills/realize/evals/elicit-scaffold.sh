@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Scaffold for both /elicit cases: a small stdlib-only "daily digest" email service plus the
-# owner's externalized substrate — decision records, team conventions, scratch notes, and a git
-# history — from which decision coordinates can be reverse-traced.
+# owner's own material — decision records, team conventions, scratch notes, and a git history —
+# in which the decisions the owner's intent turns on can be found.
 #
-# Both cases mount the SAME directory, deliberately. The trigger-positive case is graded on
-# whether coordinates are reverse-traced from this substrate (and cite it) before the user is
-# asked; the trigger-negative case is graded on whether the same substrate's latent
-# dissatisfaction gets turned into open dimensions of a request whose axes are already fixed.
-# Different substrates would let a run pass one of them by luck.
+# Both cases mount the SAME directory, deliberately. The open-intent case (elicit-aporia) is graded
+# on the record the user's "resolved" closes — honest attribution, valid adoption, residual and
+# dissent kept; the fully-specified case (elicit-axis-determined) is graded on whether the same
+# material's latent dissatisfaction gets turned into open coordinates of a request that already
+# settles them. Different substrates would let a run pass one of them by luck.
 #
-# What the substrate encodes (the hidden endpoint the positive-case oracle answers from):
+# What the material encodes (the hidden endpoint the open-intent oracle answers from):
 #   send time      ADR-0003 + unused User.tz + NOTES 2026-08-15          -> 07:00 user-local
 #   length         NOTES 2026-08-02, 2026-08-09                          -> top 3 + "N more"
 #   ordering       feed/ranking.py exists, digest sorts chronologically  -> in-app feed order
@@ -20,7 +20,7 @@
 #   frequency      NOTES 2026-08-28 ("not sure")                         -> user defers, then daily
 #   distractor     run.py queries per user (N+1)                         -> not the user's concern
 # None of these files is an auto-loaded agent instruction file (no CLAUDE.md, AGENTS.md or
-# .claude/), so the Rules channel has to be read through a tool like every other channel.
+# .claude/), so the rules have to be read through a tool like every other file.
 #
 # Requires: bash, git. Deterministic: fixed author, fixed dates, no signing, so commit ids are
 # stable across machines. The working tree is left clean on `main`.

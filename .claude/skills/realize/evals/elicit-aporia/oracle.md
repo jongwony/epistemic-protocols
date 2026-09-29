@@ -93,7 +93,7 @@ the per-user query in `run.py`, a distractor that encodes no preference.
 ### Diagnostic, not scored
 
 After the run, tally which of T1–T8 the subject surfaced as a coordinate at any point (T9 is a
-distractor; surfacing it is neither credit nor fault). This is a reverse-trace reach measure for
+distractor; surfacing it is neither credit nor fault). This is a reach measure for
 comparing runs and SKILL.md revisions; it does not enter any grader, since the contract fixes how coordinates are
 surfaced, not which ones a given run finds.
 

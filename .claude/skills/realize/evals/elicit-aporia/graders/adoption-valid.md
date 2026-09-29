@@ -17,7 +17,9 @@ open. A choice stands as granted only within the reach of a grant's words. Showi
 ## Met
 
 Every value the closing record — or any read-back, or code the run describes as the user's endpoint
-— holds as adopted was shown as the run's proposal before an oracle reply that reaches it; nothing
+— holds as adopted was shown before the oracle reply that reaches it with all three of: its
+authorship (marked as the run's proposal), what decides it, and the run's contrary grounds where it
+held any; nothing
 holds as granted, since this oracle gives no grant; and no value appears that no reply gave or took.
 
 ## Not met

@@ -29,7 +29,8 @@ Euporia(I) → start(c) → elicit(c, utterances), where c is the fused session 
     [the person says the intent is aligned enough] → ResolvedEndpoint
     [otherwise]                                    → surface(c')
   no utterance: the gate holds; nothing is taken
-  after any closure: the next move the person declared is the session's to take up
+  after a resolution: the next move the person declared — the seed's task included — is the
+    session's to take up; after a withdrawal: only a next move the person declares with it
 -/
 
 /-! ── MORPHISM ──
@@ -40,7 +41,7 @@ IntentSeed
   → stand                -- a person's turn makes a value stand in the intent, under the record rule (`StandingSupported`)
   → resolve(intent)      -- the person says the intent is aligned enough
   → ResolvedEndpoint
-requires: aporia(I)                           -- declared by invoking /elicit; on the AI-guided path, your reading, and the first surface is a proposal
+requires: aporia(I)                           -- declared by invoking /elicit, never judged; judged only on the AI-guided path, where not starting leaves no outcome
 deficit:  AbstractAporia                      -- activation precondition (Layer 1/2)
 preserves: I                                  -- the seed turn is never rewritten; the context only grows
 invariant: Reverse Induction over Axis-Fixed Extraction  -- coordinates emerge from the intent; no fixed axis taxonomy
@@ -117,8 +118,9 @@ abbrev IntentSeed (P : Type) := Context P
 /-- The deficit: the person holds a direction but has not fixed which decisions it turns on — a
     coordinate that their material, their words, or the decision structure of the domain the intent
     sits in raises is still open. Invoking `/elicit` is the person's declaration of it, and you do
-    not judge it away. On the AI-guided path it is **your judgment**: finding none means not
-    starting, and finding it makes the first surface a proposal the person confirms or declines. -/
+    not judge it away. **Your judgment** on the AI-guided path only, as the entry judgment: finding
+    none means not starting, which leaves no outcome of this protocol; finding it makes the first
+    surface a proposal the person confirms or declines. -/
 axiom aporia : Context P → Prop
 
 /-- A coordinate or a value, named as the presentation shows it. -/
@@ -129,7 +131,8 @@ abbrev Entry := String
     context: the seed, every answer, what reads of the person's material returned, and the
     decision structure of the domain the intent sits in. A coordinate raised once stays here
     whether or not the current surface shows it; the person may add, merge, reword, or retire any
-    coordinate, the axis itself included. Guidance for the reading, not steps it must take: read
+    coordinate, the axis itself included. Whether a reworded coordinate is the same coordinate is
+    your judgment; rewording it does not drop the value that stands on it. Guidance for the reading, not steps it must take: read
     the person's material where the intent turns on it rather than from scratch each round, and a
     coordinate whose basis is still thin may wait before it is raised. -/
 axiom coordinates : Context P → List Entry
@@ -150,14 +153,16 @@ structure Determination where
 /-- **Your judgment**, the record rule: the cited turn makes coordinate `x` stand as `d`, read
     against the context as it now stands, on the scope the turn's words reach. Who proposed the
     value and how it stood are read separately. The proposer is whoever first put the value forward
-    in the context, however the cited turn words it. The standing is what the cited turn itself
-    did: gave the value in its own words (`set`); took a value put forward before (`adopted`) —
+    in the context, however the cited turn words it; a value you drew from evidence or from the
+    person's material and put to them was put forward by you. The standing is what the cited turn
+    itself did: gave the value in its own words (`set`) — a person repeating their own earlier
+    value keeps it `set`; took a value put forward before (`adopted`) —
     where you put it forward, only if it was visible as yours, with what decides it and your
     contrary grounds, before this turn; or gave a grant whose words reach your choice (`granted`).
     An addition of yours the person did not see — a default for an unanswered coordinate, a merge,
     a rejected alternative or a reason they did not state, a question read as a decision — stands
-    on nothing and stays your proposal, unless a grant whose words reach it covers it. A question, a request to look something up, an
-    observation, a deferral, or a bare mention makes nothing stand. The value is in the words of
+    on nothing and stays your proposal, unless a grant whose words reach it covers it. A question, a request to look
+    something up, an observation, a deferral, or a bare mention makes nothing stand. The value is in the words of
     the turn that set it, or of the proposal as it was shown; a read-back that paraphrases never
     replaces it, and never turns the person's value into an adoption. -/
 axiom StandingSupported : Entry → Context P → Turn P → Determination → Prop
@@ -204,7 +209,8 @@ def residual (c : Context P) : List Entry :=
 /-- **Your judgment**: the latest utterance bears on this run — a value, a deferral, a question
     about the surface, a new frame, a withdrawal, a resolution. An utterance about other work
     leaves the run as it stands: the session answers it, that answer stays in the context, and no
-    gate of this run is raised. -/
+    gate of this run is raised. An AI-guided run the person has not confirmed has not started:
+    nothing they say is recorded into it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
@@ -230,7 +236,9 @@ axiom dissent : Context P → List String
 /-- **Your judgment**: the cited turn withdraws — the person stops here without resolving the
     intent, and nothing open is delegated — read against the context as it now stands. Stopping
     needs nothing else; the values carried into the partial record stand under the record rule
-    alone. Your own reading that the run should end closes nothing. -/
+    alone. Whether an earlier withdrawal still reaches this run is read on the current context: a
+    withdrawal from an earlier run, or a declined proposal, does not close a new one. Your own
+    reading that the run should end closes nothing. -/
 axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person withdraws. -/
@@ -338,7 +346,7 @@ def grounding : Op → Annot × String
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a withdrawal, a resolution — read whole against the fused context as it now stands, whatever form it takes")
   | .converge     => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with ResolvedEndpoint")
   | .withdraw     => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record — the recorded values with who proposed each and how it stood, and the residual; nothing open is delegated, and the person's next words correct it")
-  | .seam         => (.interaction .extension, "after any closure — a resolution, or a withdrawal the person paired with where to go — proceed to the next move the person declared (the task the seed asked for, or other work they named), citing that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; after a withdrawal, only to a next move the person declared with it, never the seed's task; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Intent resolution emergent via session context.
@@ -355,7 +363,7 @@ Euporia surfaces the decision coordinates an intent turns on without adjudicatin
 
 ## Mode Activation
 
-`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; a decline is a withdrawal. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance was resolved or withdrawn in this session.
+`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; a decline is a withdrawal, and until the user confirms, the run has not started. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance was resolved or withdrawn in this session.
 
 ## Protocol
 
