@@ -233,10 +233,11 @@ describe('lean bridge: lean-definition', () => {
       restore();
 
       // A private theorem is a helper, not a guarantee, and is admitted.
+      const helpersBefore = (theorems.match(/^private theorem /gm) || []).length;
       write(theoremsRelative, beforeEnd('private theorem mutation_helper : True := trivial'));
       const helped = verdict();
       assert.deepEqual(helped.fail.filter((r) => r.check === LEAN), []);
-      expectSome(helped.pass.filter((r) => r.check === LEAN && r.file === target).map((r) => r.message), '1 private helper(s)');
+      expectSome(helped.pass.filter((r) => r.check === LEAN && r.file === target).map((r) => r.message), `${helpersBefore + 1} private helper(s)`);
       restore();
 
       // With every theorem private, the contract guarantees nothing.
