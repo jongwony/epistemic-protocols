@@ -1,6 +1,6 @@
 ---
 name: elicit-aporia
-tags: [euporia, trigger-positive, type-realization, multi-turn]
+tags: [euporia, open-intent, record, multi-turn]
 plugins: ["euporia"]
 runs: 3
 max_turns: 24

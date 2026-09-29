@@ -9,7 +9,7 @@ predicate: some Skill tool_use in turn 1 whose input.skill is "elicit" or ends w
 ---
 # Activation indicator, not a score component
 
-It matters more here than in the trigger-positive case. Without it, a run that never loaded the
-protocol and simply implemented the change passes every other grader in this case: the correct
-behaviour and the protocol's absence are outwardly identical when the correct behaviour is "open
-no gate". This line is what separates them. Match the invoked skill's identity, not the tool.
+It matters more here than in the open-intent case. A run that never loaded the protocol and asked
+one clarifying question before implementing can look much like a first surface followed by the
+user's resolution; this line is what separates them. Match the invoked skill's identity, not the
+tool.

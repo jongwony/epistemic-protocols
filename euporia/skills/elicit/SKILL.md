@@ -1,15 +1,15 @@
 ---
 name: elicit
-description: "The user knows roughly what they want but not which decisions it turns on: trace those from their own material — codebase, rules, past sessions — and ask until the intent settles."
+description: "The user knows roughly what they want but not which decisions it turns on: trace them from their own material (code, rules, past sessions) and the domain's usual decisions; ask until it settles."
 ---
 
 # Euporia Protocol
 
-Resolve abstract aporia through Extended-Mind reverse induction. Type: `(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint`.
+Resolve abstract aporia by surfacing the decisions an intent turns on until the person recognizes the intent as theirs. Type: `(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed) → ResolvedEndpoint`.
 
 ## Definition
 
-**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia, where AI reverse-traces decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment), surfaces them as cycle-emergent dimension projections, and shapes the converging intent through user answers until the endpoint resolves.
+**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. What is surfaced is focus: re-read every turn, it decides nothing. Only the person's words move a value from focus into the record, and each recorded value carries who proposed it and how it came to stand; what is still open is carried as residual. The run closes when the person says the intent is aligned enough — every coordinate need not be filled — or when they withdraw. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
 
 ```lean
 /-!
@@ -21,36 +21,31 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 -/
 
 /-! ── FLOW ──
-Euporia(I) → Detect(I, S) → aporia with an external substrate signal? →
-  true:  elicit(c, utterances), where c is the fused session context:
-    cycle(c): Substrate access → ReverseTrace(c) → D[] → filter_confidence → (D_surfaced, deferred)
-      → resurface(parked) → Qs(D_surfaced, parked, cycle_n) → Stop
-    next utterance u: c' := fuse(c, u) → answer(c') →
-      Resolved: ResolvedEndpoint(c')             (the user's resolution covers the values relayed)
-      Dismiss: ResolvedEndpoint(c') with unresolved axes delegated in its residual
-      Provide or Defer: cycle(c')                 (the re-trace reads the whole fused context)
-    no utterance: the gate holds
-  false: surface the scan result; route to an axis-specific protocol (axis-determined) or invite
-    the user to articulate or withdraw (no external substrate signal)
+Euporia(I) → start(c) → elicit(c, utterances), where c is the fused session context:
+  surface(c): the read-back of the intent as understood, with its sources → Stop
+  next utterance u: c' := fuse(c, u), every reading below taken afresh on c' →
+    [the utterance does not bear on this run]      the session answers it; no gate of this run
+    [the person withdraws]                         → Withdrawn
+    [the person says the intent is aligned enough] → ResolvedEndpoint
+    [otherwise]                                    → surface(c')
+  no utterance: the gate holds; nothing is taken
+  after a resolution: the next move the person declared — the seed's task included — is the
+    session's to take up; after a withdrawal: only a next move the person declares with it
 -/
 
 /-! ── MORPHISM ──
 IntentSeed
-  → detect(aporia, axis_undetermined)        -- verify abstract aporia exists
-  → access(externalized_substrate)            -- read external substrate channels (codebase / rules / sessions / environment)
-  → observe(utterance_ambiguity)              -- analyze the utterance for in-text semantic ambiguity (internal)
-  → reverse_trace(coordinates)                -- over the fused context: the user's externalized decision coordinates
-  → filter_confidence(D[]) → D_surfaced       -- concrete substrate basis surfaces; thin basis is held back
-  → resurface(parked_coordinates)             -- deferred coordinates come back as themselves
-  → surface(D_surfaced, parked, cycle_emergent)
-  → fuse(answer)                              -- the answer joins the context; it adds determinations
-  → resolve(intent)                           -- convergence when the user judges it resolved
+  → inventory            -- the live coordinates, read over the fused context (focus)
+  → surface              -- the read-back and the open coordinates, with sources and contrary grounds (focus)
+  → fuse(answer)         -- the answer joins the context whole
+  → stand                -- a person's turn makes a value stand in the intent, under the record rule (`StandingSupported`)
+  → resolve(intent)      -- the person says the intent is aligned enough
   → ResolvedEndpoint
-requires: aporia(I)                           -- runtime checkpoint (Phase 0); sole activation precondition
+requires: aporia(I)                           -- declared by invoking /elicit, never judged; judged only on the AI-guided path, where not starting leaves no outcome
 deficit:  AbstractAporia                      -- activation precondition (Layer 1/2)
-preserves: utterance(I)                       -- the seed utterance is read-only; the context only grows
-invariant: Reverse Induction over Axis-Fixed Extraction
-invariant: Coordinate Monotonicity            -- an accepted coordinate is revised only by a person's utterance
+preserves: I                                  -- the seed turn is never rewritten; the context only grows
+invariant: Reverse Induction over Axis-Fixed Extraction  -- coordinates emerge from the intent; no fixed axis taxonomy
+invariant: Focus never records                -- focus is re-read every turn and carries no authority; only the person's words move a value into the record
 -/
 
 namespace Euporia
@@ -116,182 +111,212 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `I`: the user's intent seed. The seed utterance is a turn of the context and is never
-    rewritten; `axis` is set when the seed already names one. -/
-structure IntentSeed where
-  utterance : String
-  axis      : Option String
+/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in. The
+    seed is a turn of the context and is never rewritten. Source-neutral; read from the context. -/
+abbrev IntentSeed (P : Type) := Context P
 
-/-- The channels a coordinate's basis is read from. Codebase, Rules, Session, and Environment
-    are the externalized substrate `S` — a read-only view of the user's externalized cognition;
-    Environment is machine-setup metadata only (uname, pwd, tool versions, public git config
-    fields). Utterance is the seed utterance itself: its citation quotes the actual fragment and
-    attributes no unstated mental model. -/
-inductive SubstrateChannel | codebase | rules | session | environment | utterance
+/-- The deficit: the person holds a direction but has not fixed which decisions it turns on — a
+    coordinate that their material, their words, or the decision structure of the domain the intent
+    sits in raises is still open. Invoking `/elicit` is the person's declaration of it, and you do
+    not judge it away. **Your judgment** on the AI-guided path only, as the entry judgment: finding
+    none means not starting, which leaves no outcome of this protocol; finding it makes the first
+    surface a proposal the person confirms or declines. -/
+axiom aporia : Context P → Prop
 
-structure SubstrateBasis where
-  source  : SubstrateChannel
-  content : String
+/-- A coordinate or a value, named as the presentation shows it. -/
+abbrev Entry := String
 
-abbrev Value := String
+/-- **Your judgment**, the live inventory: every coordinate the intent turns on that this run has
+    raised and the person's words have not since retired or merged — read over the whole fused
+    context: the seed, every answer, what reads of the person's material returned, and the
+    decision structure of the domain the intent sits in. A coordinate raised once stays here
+    whether or not the current surface shows it; the person may add, merge, reword, or retire any
+    coordinate, the axis itself included. Whether a reworded coordinate is the same coordinate is
+    your judgment; rewording it does not drop the value that stands on it. Guidance for the reading, not steps it must take: read
+    the person's material where the intent turns on it rather than from scratch each round, and a
+    coordinate whose basis is still thin may wait before it is raised. -/
+axiom coordinates : Context P → List Entry
 
-structure Coordinate where
-  name     : String
-  default  : Option Value
-  question : String
-  basis    : SubstrateBasis
+/-- Who first put a value forward: you, or the person. -/
+inductive Proposer | draft | person
 
-/-- Cycle-emergent; no fixed taxonomy. -/
-structure DimensionProjection where
-  axisInferred : String
-  coordinates  : List Coordinate
+/-- What the turn that made a value stand did: gave it in its own words, took a value put forward
+    before, or gave a grant that reaches your choice. -/
+inductive Standing | set | adopted | granted
 
-/-- **Your judgment**: the decision coordinates the user's externalized substrate implies for
-    the intent, read from the whole fused context — the seed, every answer since, and what
-    the substrate reads returned. -/
-axiom reverseTrace : Context P → List DimensionProjection
+/-- What stands on a coordinate: the value, who first put it forward, and how it came to stand. -/
+structure Determination where
+  value    : Entry
+  proposer : Proposer
+  standing : Standing
 
-/-- **Your judgment**: the projection's substrate basis is concrete enough to surface. -/
-axiom concreteBasis : DimensionProjection → Bool
+/-- **Your judgment**, the record rule: the cited turn makes coordinate `x` stand as `d`, read
+    against the context as it now stands, on the scope the turn's words reach. Who proposed the
+    value and how it stood are read separately. The proposer is whoever first put the value forward
+    in the context, however the cited turn words it; a value you drew from evidence or from the
+    person's material and put to them was put forward by you. The standing is what the cited turn
+    itself did: gave the value in its own words (`set`) — a person repeating their own earlier
+    value keeps it `set`; took a value put forward before (`adopted`) —
+    where you put it forward, only if it was visible as yours, with what decides it and your
+    contrary grounds, before this turn; or gave a grant whose words reach your choice (`granted`).
+    An addition of yours the person did not see — a default for an unanswered coordinate, a merge,
+    a rejected alternative or a reason they did not state, a question read as a decision — stands
+    on nothing and stays your proposal, unless a grant whose words reach it covers it. A question, a request to look
+    something up, an observation, a deferral, or a bare mention makes nothing stand. The value is in the words of
+    the turn that set it, or of the proposal as it was shown; a read-back that paraphrases never
+    replaces it, and never turns the person's value into an adoption. -/
+axiom StandingSupported : Entry → Context P → Turn P → Determination → Prop
 
-/-- `filter_confidence`; what is held back is tried again on a later re-trace. -/
-def surfaced (c : Context P) : List DimensionProjection := (reverseTrace c).filter concreteBasis
-def deferred (c : Context P) : List DimensionProjection :=
-  (reverseTrace c).filter (fun d => !concreteBasis d)
+/-- Only a person's turn makes a value stand in the intent. Evidence fixes facts and informs the
+    person; it fills no coordinate here. -/
+def standingCoord (x : Entry) : Coord P Determination :=
+  { admits := (·.val = .person), supports := StandingSupported x }
 
-/-- `A`, the reading of the user's latest utterance. Coordinate values and deferrals are read
-    from every utterance in the context (`provided`, `parked`). -/
-inductive Answer
-  /-- values for surfaced or parked coordinates -/
-  | provide (values : List (Coordinate × Value))
-  /-- coordinates parked for a later cycle: ambiguous, partial, or not yet answerable -/
-  | defer (coords : List Coordinate)
-  /-- stop here, delegating the unresolved axes; on an AI-detected first surface, a decline -/
-  | dismiss
-  /-- the user judges the endpoint resolved; this utterance is the closing citation -/
-  | resolved
+/-- **Your reading**: how coordinate `x` stands in `c` — filled by the person's latest turn that
+    makes it stand; open where none does, carrying as candidate only a turn of the person's or
+    evidence that points toward a value not yet taken. A value a person's turn made stand changes
+    only by their later words: evidence against it is shown — before any step that depends on it
+    and cannot be undone — and the value stands. -/
+axiom operative : (c : Context P) → (x : Entry) → Occ (standingCoord (P := P) x) c
 
-/-- **Your judgment** on the latest utterance read with the context. -/
-axiom answer : Context P → Answer
+def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
+  | .open_ _   => false
+  | .filled .. => true
 
-/-- **Your judgment**: the value this person's utterance gives coordinate `x`, read with the
-    context before it; `none` when it gives none. -/
-axiom provided : Context P → Turn P → Coordinate → Option Value
+/-- One recorded value: the coordinate, what stands on it, and the person's turn it stands on,
+    with that turn's support. -/
+structure Recorded (c : Context P) where
+  coord     : Entry
+  det       : Determination
+  src       : Cite c
+  byPerson  : src.src.val = .person
+  supported : StandingSupported coord c (c[src.idx]'src.lt) det
 
-/-- The accepted value of `x`: the latest value a person's utterance gave it. -/
-def acceptedAux (x : Coordinate) : Context P → Context P → Option Value → Option Value
-  | _,   [],      acc => acc
-  | pre, t :: ts, acc =>
-    acceptedAux x (pre ++ [t]) ts
-      (if t.origin = .person then
-        match provided pre t x with
-        | some v => some v
-        | none   => acc
-      else acc)
+def recordOf {c : Context P} (x : Entry) : Occ (standingCoord (P := P) x) c → List (Recorded c)
+  | .open_ _                      => []
+  | .filled d s allowed supported => [⟨x, d, s, allowed, supported⟩]
 
-def accepted (c : Context P) (x : Coordinate) : Option Value := acceptedAux x [] c none
+/-- The record: every filled occurrence over the live inventory. An open one adds nothing; a
+    proposal of yours the person has not taken lives only in the context and its presentation. -/
+def record (c : Context P) : List (Recorded c) :=
+  (coordinates c).flatMap (fun x => recordOf x (operative c x))
 
-/-- **Your judgment**: the coordinates the user deferred and has not since given a value
-    (`Leftover`), each returning as itself — the same question with the same basis. -/
-axiom parked : Context P → List Coordinate
+/-- What is still open: every coordinate of the live inventory whose occurrence is open, whether
+    it was deferred, left unanswered, or never reached. None closes by default. -/
+def residual (c : Context P) : List Entry :=
+  (coordinates c).filter (fun x => !isFilled (operative c x))
 
-def Leftover (c : Context P) : Prop := ∀ x ∈ parked c, accepted c x = none
+/-- **Your judgment**: the latest utterance bears on this run — a value, a deferral, a question
+    about the surface, a new frame, a withdrawal, a resolution. An utterance about other work
+    leaves the run as it stands: the session answers it, that answer stays in the context, and no
+    gate of this run is raised. An AI-guided run the person has not confirmed has not started:
+    nothing they say is recorded into it. -/
+axiom Reaches : Context P → Prop
 
-/-- **Your judgment**: the axes still unresolved when the user dismisses. -/
-axiom unresolvedAxes : Context P → List String
+/-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
+    read against the context as it now stands. It closes the run: coordinates need not all be
+    filled, and what is open is residual. Filled coordinates, or your own reading, close nothing.
+    Whether an earlier resolution still reaches what is now at issue is read on the current
+    context: a later question may reopen the alignment, ask only about a fact, or concern other
+    work. -/
+axiom ResolutionSupported : Context P → Turn P → Unit → Prop
 
-/-- **Your count**, read from the record: which cycle this is. -/
-axiom cycleOf : Context P → Nat
+/-- Only the person settles the intent. -/
+def resolutionCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := ResolutionSupported }
 
-inductive Initiator | userInvoked | aiDetected
+/-- **Your reading**: the person's resolution; `open_` until one reaches it. -/
+axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
 
-/-- **Your reading** of how this activation began. On an AI-detected activation the first
-    surface is an implicit confirm-or-decline. -/
-axiom initiatorOf : Context P → Initiator
+/-- **Your record**: the contrary grounds you presented before the answer that closes — a value
+    you doubt, a premise that may not hold, a sibling deficit you read — attached to the closure;
+    empty when there were none. -/
+axiom dissent : Context P → List String
 
-/-- None is reduced to a bare axis label. -/
-inductive ResidualItem
-  /-- an unresolved axis delegated downstream -/
-  | axis (label : String)
-  /-- a projection the confidence filter still held back -/
-  | projection (d : DimensionProjection)
-  /-- a coordinate the user deferred -/
-  | coordinate (x : Coordinate)
+/-- **Your judgment**: the cited turn withdraws — the person stops here without resolving the
+    intent, and nothing open is delegated — read against the context as it now stands. Stopping
+    needs nothing else; the values carried into the partial record stand under the record rule
+    alone. Whether an earlier withdrawal still reaches this run is read on the current context: a
+    withdrawal from an earlier run, or a declined proposal, does not close a new one. Your own
+    reading that the run should end closes nothing. -/
+axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
 
-/-- **Your judgment**: the intent as resolved — every coordinate with its accepted value, and
-    every value relayed as the single dominant one, which the resolving utterance covers. -/
-axiom resolvedIntent : Context P → List (Coordinate × Value)
+/-- Only the person withdraws. -/
+def withdrawalCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := WithdrawalSupported }
 
-structure ResolvedEndpoint (P : Type) where
+/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
+axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
+
+/-- The record every exit carries: the context, the recorded values with who proposed each and
+    how it came to stand, what is still open, and the dissent attached to the closure. -/
+structure Closed (P : Type) where
   context  : Context P
-  intent   : List (Coordinate × Value)
-  residual : List ResidualItem
+  record   : List (Recorded context)
+  residual : List Entry
+  dissent  : List String
 
-def residualAt (c : Context P) (dismissed : Bool) : List ResidualItem :=
-  (deferred c).map .projection ++ (parked c).map .coordinate ++
-    (if dismissed then (unresolvedAxes c).map .axis else [])
+def closed (c : Context P) : Closed P :=
+  { context := c, record := record c, residual := residual c, dissent := dissent c }
 
-def endpoint (c : Context P) (dismissed : Bool) : ResolvedEndpoint P :=
-  { context := c, intent := resolvedIntent c, residual := residualAt c dismissed }
+/-- `ResolvedEndpoint`: the intent the person recognized, as the record of the resolving turn. -/
+structure ResolvedEndpoint (P : Type) where
+  closure : Closed P
+
+def endpoint (c : Context P) : ResolvedEndpoint P := { closure := closed c }
 
 inductive Outcome (P : Type)
-  | resolved (r : ResolvedEndpoint P)
-  | holding  (c : Context P)
-
-/-- **Your judgment** at Phase 0: the intent's axis is undetermined. -/
-axiom Aporia : Context P → Prop
-/-- **Your judgment** at Phase 0: the signal comes from the external substrate — the utterance
-    alone cannot activate. -/
-axiom ExternalSignal : Context P → Prop
-
-def activates (c : Context P) : Prop := Aporia c ∧ ExternalSignal c
+  | resolved  (r : ResolvedEndpoint P)
+  /-- the partial record; what is open stays open -/
+  | withdrawn (r : Closed P)
+  | holding   (c : Context P)
 
 /-! ── A-BINDING ──
 bind(I) = explicit_arg ∪ recent_intent_seed ∪ surfaced_aporia
 Priority: explicit_arg > recent_intent_seed > surfaced_aporia
-  /elicit "intent"   → I = IntentSeed with that utterance
+  /elicit "intent"   → I = the utterance, with the context it lands in
   /elicit (alone)    → I = the most recent intent seed in the session
-  "I want to..."     → I = the utterance under discussion
-When `activates` fails, Phase 0 surfaces the scan result instead of opening a cycle: a fully
-axis-determined intent routes to the matching axis-specific protocol; with no external
-substrate signal it invites the user to articulate further or withdraw.
+  "I want to..."     → I = the utterance under discussion (AI-detected path: the first surface
+                       confirms or declines the run; a decline is a withdrawal)
 -/
 
 /-! ── MODE STATE ──
 Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
-abbrev Mode (P : Type) := Context P
-
 /-! ── PHASE TRANSITIONS ──
-Each cycle is one step of a structural recursion over the user's utterances. The run starts
-from the context in which Phase 0 found `activates` and the first cycle surfaced. After each
-utterance that continues, `respond` is the next cycle's surface: `surfaced` and `parked`
-beside the cycle count (`cycleOf`) and a one-sentence readback of the intent, in every cycle
-including the first. Where `initiatorOf` reads an AI-detected activation, the first surface is an implicit
-confirm-or-decline, and a decline reads as `dismiss`.
+A step is one arm of a structural recursion over the person's utterances. `respond` is the next
+surface, as TOOL GROUNDING's `surface` entry names it; `session` is the session's own answer to an
+utterance about other work, which stays in the context without being a gate of this run.
 -/
 
-def elicit (respond : Context P → Response P) : Context P → List (Utterance P) → Outcome P
+open Classical in
+def elicit (respond session : Context P → Response P) :
+    Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     let c' := fuse c u
-    match answer c' with
-    | .resolved => .resolved (endpoint c' false)
-    | .dismiss  => .resolved (endpoint c' true)
-    | _         => elicit respond (c' ++ [(respond c').val]) us
+    if ¬ Reaches c' then elicit respond session (c' ++ [(session c').val]) us
+    else if isFilled (withdrawal c') = true then .withdrawn (closed c')
+    else if isFilled (resolution c') = true then .resolved (endpoint c')
+    else elicit respond session (c' ++ [(respond c').val]) us
+
+/-- The run opens on its first surface. -/
+def start (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  elicit respond session (c ++ [(respond c).val]) us
 
 /-! ── LOOP ──
-No fixed cycle cap. Convergence presentation, relayed at termination: (a) a plain one-sentence
-readback of the resolved intent, in the user's language; (b) the per-cycle trace (surfaced →
-answer → intent). The readback also appears in Phase 2 in every cycle, the first
-included, as the recognizable target a resolving answer points at; the trace is termination-only. Convergence
-is demonstrated, not asserted.
+Every answer is read against the whole context as it now stands: nothing counts rounds, and no
+earlier answer is held apart from what later ones say. No fixed cap: each surface is dialogue.
 -/
 
 /-! ── CONVERGENCE ──
-resolved(c) = the user's latest utterance judges the endpoint resolved; the residual is
-`residualAt`.
+converged: a ResolvedEndpoint the person's utterance closed. Withdrawal keeps its partial record.
+Convergence evidence: at the resolution, present the read-back of the intent in the person's
+language and the trace — each coordinate → where it came from → what stands on it, in the words of
+the turn that set it → who proposed it and how it stood — beside the residual and the dissent
+attached to the closure. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -311,24 +336,20 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | scanSurface | substrate | utteranceRead | reverseTrace
-             | filterConfidence | resurface | qs | readAnswer | converge | seam
+inductive Op | detect | read | trace | surface | readAnswer | converge | withdraw | seam
 
 def grounding : Op → Annot × String
-  | .detect           => (.sense, "Internal analysis: axis-undetermined intent with an external substrate signal")
-  | .scanSurface      => (.interaction .extension, "when Phase 0 does not activate, the scan result with a routing recommendation, or an invitation to articulate or withdraw; no constitutive gate")
-  | .substrate        => (.observe, "artifact read, artifact search, environment run: read-only substrate access — codebase, rules, session history, and machine-setup metadata only; the substrate is never mutated")
-  | .utteranceRead    => (.sense, "Internal analysis of the seed utterance for in-text semantic ambiguity; citations quote actual fragments")
-  | .reverseTrace     => (.sense, "Internal analysis: axis inference and coordinate construction over the fused context")
-  | .filterConfidence => (.sense, "Internal analysis: concrete substrate basis surfaces, thin basis is held back; a relay grounded in whether a citable basis exists, never a user gate")
-  | .resurface        => (.sense, "Internal analysis: each parked coordinate returns as itself, with the question and basis it was parked with")
-  | .qs               => (.interaction .constitution, "this cycle's projections with their cited basis and defaults, the returning parked coordinates, the cycle count, and per-coordinate provide-or-defer slots beside Dismiss and Resolved")
-  | .readAnswer       => (.sense, "Internal analysis: the handling the latest utterance carries and the values it gives")
-  | .converge         => (.interaction .extension, "intent readback and per-cycle coordinate trace; proceed with ResolvedEndpoint")
-  | .seam             => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed directly to it citing that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .detect       => (.sense, "Internal analysis, on the AI-guided path only: whether the person has fixed which decisions the intent turns on, read from the utterance, their material, and the domain's decision structure; an invocation of /elicit declares the deficit and is not judged")
+  | .read         => (.observe, "artifact read, artifact search, record read: read-only reads of the person's own material where the intent turns on it")
+  | .trace        => (.sense, "Internal analysis: the live inventory over the whole fused context and the domain's decision structure, each coordinate with where it comes from and what leaving it open changes")
+  | .surface      => (.interaction .constitution, "a plain one-sentence read-back of the intent as understood, every round the first included, with its sources and each recorded value marked by who proposed it and how it stood; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the answer slots. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, say the intent is aligned enough, or withdraw, in any form; an answer beyond the slots joins the context whole")
+  | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a withdrawal, a resolution — read whole against the fused context as it now stands, whatever form it takes")
+  | .converge     => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with ResolvedEndpoint")
+  | .withdraw     => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record — the recorded values with who proposed each and how it stood, and the residual; nothing open is delegated, and the person's next words correct it")
+  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; after a withdrawal, only to a next move the person declared with it, never the seed's task; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Substrate channel resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). Intent resolution emergent via session context.
 -/
 
 end
@@ -338,39 +359,29 @@ end Euporia
 
 ## Scope Boundary
 
-Euporia surfaces grounded decision coordinates without adjudicating which sibling protocol owns them. A coordinate that exposes a missing fact, undefined boundary, or unrecognizable direction remains a coordinate with its substrate basis; the user decides what to reach for next.
-
-## Coordinate Monotonicity Invariant
-
-An accepted coordinate is revised only by a person's utterance. An answer joins the context and adds determinations; a later re-trace, a substrate read, or an AI turn is not ground for revising a value the user gave. When the re-trace finds a contradiction with an accepted value, surface it as such and leave the value standing until the user's own words change it.
+Euporia surfaces the decision coordinates an intent turns on without adjudicating which sibling protocol owns them. A coordinate that exposes a missing fact, an undefined boundary, or an unrecognizable direction remains a coordinate with its basis; a fact claim you add from the domain's practice is shown as your unverified judgment. The user decides what to reach for next.
 
 ## Mode Activation
 
-`/elicit` remains directly invocable. AI-guided activation requires an axis-undetermined intent backed by an external substrate signal from Codebase, Rules, Session, or Environment. Utterance evidence may ground a projection after activation, but cannot activate Euporia by itself.
-
-On the AI-guided path, the immutable Phase 1 scan may precede confirmation; the first Phase 2 response confirms or declines the run. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance and substrate slice was resolved or dismissed in this session.
+`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; a decline is a withdrawal, and until the user confirms, the run has not started. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance was resolved or withdrawn in this session.
 
 ## Protocol
 
-### Phase 2 surfacing format
+### Phase 2 surface
 
-At Phase 2, render the cycle counter and, in every cycle including the first, a plain one-sentence readback of the current intent — the target a "resolved as read back" answer points at. For each surfaced projection, show its inferred axis, coordinate questions, cited substrate basis, and any substrate-derived default. Mark each parked coordinate as returning in the same wording and with the same basis. Let the listed coordinates establish what is currently in play without a derived count or resolved/total tally, then present per-coordinate provide-or-defer slots, a way to say the intent is resolved as read back, and Dismiss-with-residual, and yield the turn. An answer beyond the slots — a value for an unlisted coordinate, a dimension the surface excluded, a changed framing — joins the context whole, and the next re-trace reads it.
-
-Utterance evidence quotes the user's actual fragment; it does not attribute an unstated mental model. Only projections with concrete substrate basis reach the surface. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
+Present what TOOL GROUNDING's `surface` entry names and yield the turn. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
 
 ### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | One grounded dimension | Brief surface and per-coordinate slots |
-| Medium | Several dimensions or partial evidence | Full surface at coordinate granularity |
-| Heavy | Multi-axis, weak-basis, multi-cycle prospect | Full surface with per-coordinate evidence and explicit residuals |
+| Light | One open coordinate | Brief surface and per-coordinate slots |
+| Medium | Several coordinates or partial evidence | Full surface at coordinate granularity |
+| Heavy | Many coordinates, weak basis, several rounds in prospect | Full surface with per-coordinate evidence and explicit residuals |
 
 ## Rules
 
-- **Recognition over Recall**: Present structured dimension projections with anticipatable post-answer states.
+- **Recognition over Recall**: Present the coordinates an intent turns on with their anticipatable post-answer states, so the user recognizes what they would otherwise have to recall.
 - **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
-- **Option-set relay test**: Present a single dominant coordinate value as Extension; it becomes part of the resolved intent only through the user's resolving answer, which covers it. Keep the answer slot constitutive when different user value weightings sustain multiple values.
-- **Parked-coordinate identity**: A deferred coordinate returns each cycle as the same question with the same basis, marked as returning; it stops being parked only through a value the user gives it or termination residual folding.
-- **Re-trace over the whole context**: Each re-trace reads the fused context — the seed, every answer, and every substrate read — not a summary of the values provided, so a dimension the user named in their own words is traced like any other.
+- **Focus and record**: As the Definition's MORPHISM invariant and `record` state.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

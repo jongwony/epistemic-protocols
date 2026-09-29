@@ -1,17 +1,17 @@
 # Euporia (εὐπορία)
 
-Resolve via Extended-Mind reverse induction — `/elicit`.
+Surface the decisions a rough intent turns on until you say it is aligned — `/elicit`.
 
 ## Overview
 
-Euporia opens a way through abstract aporia by reverse-tracing decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment) and surfacing them as cycle-emergent dimension projections. The user's answers explicate which coordinates were already implicit in their externalized cognition; resolution emerges through cycle iteration rather than axis-fixed extraction. Every answer joins the conversation whole — including a dimension you name beyond the listed options — and the next cycle re-traces from all of it; a value you gave changes only when your own words change it. The cycle ends when you say the intent is resolved as read back, or when you dismiss it with the rest delegated.
+Euporia opens a way through abstract aporia — you hold a direction but cannot yet name the decisions it turns on. It traces those decision coordinates from your own material (codebase, rules, past sessions), from your words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. Every answer joins the conversation whole — including a coordinate you name beyond the listed ones, or an axis you reject — and the next round traces from all of it. The AI is bound to leave a value you gave standing until your own words change it — an obligation on its reading; what the Lean contract proves is that turns without a word of yours are never the source of a recorded value. The read-back of the intent marks each value with who proposed it: your words, or the AI's proposal with its basis. The run closes when you say the intent is aligned enough — every coordinate need not be filled — or when you withdraw; what is still open is carried as residual, never closed by default. A proposal of the AI's enters the record as adopted only where it was shown as the AI's before your answer took it. Turning to other work mid-run leaves the question open rather than closing it.
 
-The protocol stands in directional dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent through substrate to coordinates (top-down direction). The two compose as orthogonal directions of the same dialectic substrate. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
+The protocol stands in directional dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent to the coordinates it turns on (top-down direction). The two compose as orthogonal directions of the same dialectic. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
 
 ## Type
 
 ```
-(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate)
+(AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed)
   → ResolvedEndpoint
 ```
 
@@ -21,9 +21,9 @@ Greek εὐπορία — literally "good passage" (εὖ "well" + πόρος "w
 
 ## When to invoke
 
-Activate when the user's intent is articulated but its decision coordinates are implicit in the externalized substrate — the utterance does not commit to a single axis-specific protocol, yet the substrate carries traces of the values needed to resolve it. The gate is the conjunction of axis-undetermined intent and substrate-implicit coordinates.
+Invoke it when your intent is articulated but turns on decisions you have not named — they may show in your words, your material, or the decision structure of the domain the intent sits in. Invoking `/elicit` is your declaration of that: the first surface shows the intent as the AI understands it, with its sources, and you may say at once that it is aligned enough. When the AI raises it on its own, the first surface is a proposal you confirm or decline.
 
-When the intent is axis-determined (a single axis-specific protocol covers the resolution), defer to that protocol. When the user holds an instance set converging toward an unnamed essence with no locator, defer to Periagoge.
+An intent whose axis is already fixed may be better served by an axis-specific protocol, and an instance set converging toward an unnamed essence with no locator by Periagoge. Which to run is yours to choose; once a run is active, it closes only by your own words.
 
 ## Components
 

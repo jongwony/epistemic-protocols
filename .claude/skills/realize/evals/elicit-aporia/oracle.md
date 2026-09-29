@@ -43,8 +43,8 @@ applies:
 
 A yes/no question about a suggested value is answered with the table's value (which implies the
 yes or the no). A question spanning two rows gets both rows' answers on its line. Never use the
-words "dismiss", "skip", "stop", or "your call": dismissal is not exercised by this oracle (it
-ends the loop and would bypass convergence), and "your call" is not one of the answer kinds.
+words "withdraw", "skip", "stop", or "your call": withdrawal is not exercised by this oracle (it
+ends the run without a resolution), and "your call" would be a grant this case does not test.
 
 ### Table T — the hidden intended endpoint
 
@@ -93,15 +93,16 @@ the per-user query in `run.py`, a distractor that encodes no preference.
 ### Diagnostic, not scored
 
 After the run, tally which of T1–T8 the subject surfaced as a coordinate at any point (T9 is a
-distractor; surfacing it is neither credit nor fault). This is a reverse-trace reach measure for
+distractor; surfacing it is neither credit nor fault). This is a reach measure for
 comparing runs and SKILL.md revisions; it does not enter any grader, since the contract fixes how coordinates are
 surfaced, not which ones a given run finds.
 
 ## Worked turn shape (illustrative, not a script)
 
-- Turn 1 — subject reads the directory, surfaces cycle 1. Reply 1: one line per coordinate from
-  Table T; the frequency coordinate (or the last one) gets the deferral line; no "resolved".
-- Turn 2 — subject surfaces cycle 2 with a readback and the deferred coordinate returning. Reply
-  2: one line per coordinate (the returning one now answered from the table) + the resolved line.
-- Turn 3 — subject presents convergence (readback, per-cycle trace, residual) and may go on to
+- Turn 1 — subject reads the directory and shows its first round. Reply 1: one line per coordinate
+  from Table T; the frequency coordinate (or the last one) gets the deferral line; no "resolved".
+- Turn 2 — subject shows the next round with a readback and the deferred coordinate returning.
+  Reply 2: one line per coordinate (the returning one now answered from the table) + the resolved
+  line, which closes the run.
+- Turn 3 — subject presents the closing record (readback, trace, residual) and may go on to
   implement. Run ends.

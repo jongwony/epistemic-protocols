@@ -17,57 +17,146 @@ variable {P : Type}
 /-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
-instance : Nonempty Answer := ⟨.dismiss⟩
-instance : Nonempty Initiator := ⟨.userInvoked⟩
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-theorem acceptedAux_skip (x : Coordinate) (pre ts : Context P) (acc : Option Value)
-    (h : ∀ t ∈ ts, t.origin ≠ .person) :
-    acceptedAux x pre ts acc = acc := by
-  induction ts generalizing pre acc with
-  | nil => rfl
-  | cons t ts ih =>
-    have hn : ¬ (t.origin = .person) := h t (by simp)
-    simp only [acceptedAux, hn, ↓reduceIte]
-    exact ih _ _ (fun t' ht' => h t' (by simp [ht']))
+theorem silence (respond session : Context P → Response P) (c : Context P) :
+    elicit respond session c [] = .holding c := by
+  simp [elicit]
 
-theorem acceptedAux_append (x : Coordinate) (pre c e : Context P) (acc : Option Value) :
-    acceptedAux x pre (c ++ e) acc = acceptedAux x (pre ++ c) e (acceptedAux x pre c acc) := by
-  induction c generalizing pre acc with
-  | nil => simp [acceptedAux]
-  | cons t ts ih =>
-    simp only [List.cons_append, acceptedAux]
-    rw [ih]
-    simp
+theorem start_surfaces_first (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) :
+    start respond session c us = elicit respond session (c ++ [(respond c).val]) us := rfl
 
-theorem accepted_revised_only_by_utterance (c e : Context P) (x : Coordinate)
-    (h : ∀ t ∈ e, t.origin ≠ .person) : accepted (c ++ e) x = accepted c x := by
-  simp only [accepted]
-  rw [acceptedAux_append]
-  exact acceptedAux_skip x _ e _ h
-
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    elicit respond c [] = .holding c := rfl
-
-theorem resolved_here (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : answer (fuse c u) = .resolved) :
-    elicit respond c (u :: us) = .resolved (endpoint (fuse c u) false) := by
+theorem unrelated_adds_no_gate (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    elicit respond session c (u :: us) =
+      elicit respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [elicit, h]
 
-theorem parked_in_residual (c : Context P) (d : Bool) (x : Coordinate) (hx : x ∈ parked c) :
-    ResidualItem.coordinate x ∈ residualAt c d := by
-  simp only [residualAt, List.mem_append, List.mem_map]
-  exact .inl (.inr ⟨x, hx, rfl⟩)
+theorem withdraw_closes_unresolved (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (h : isFilled (withdrawal (fuse c u)) = true) :
+    elicit respond session c (u :: us) = .withdrawn (closed (fuse c u)) := by
+  simp [elicit, hr, h]
 
-theorem endpoint_ends_in_utterance (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : ResolvedEndpoint P) (h : elicit respond c us = .resolved r) :
-    ∃ (c₀ : Context P) (u : Utterance P), r.context = fuse c₀ u := by
+theorem resolution_closes (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (hw : isFilled (withdrawal (fuse c u)) = false) (hr : isFilled (resolution (fuse c u)) = true) :
+    elicit respond session c (u :: us) = .resolved (endpoint (fuse c u)) := by
+  simp [elicit, hre, hw, hr]
+
+theorem unresolved_surfaces_again (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (hw : isFilled (withdrawal (fuse c u)) = false)
+    (hr : isFilled (resolution (fuse c u)) = false) :
+    elicit respond session c (u :: us) =
+      elicit respond session (fuse c u ++ [(respond (fuse c u)).val]) us := by
+  simp [elicit, hre, hw, hr]
+
+theorem each_step_continues_or_closes (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
+    (h : elicit respond session c (u :: us) = o) :
+    (∃ c', elicit respond session c' us = o) ∨
+    (isFilled (withdrawal (fuse c u)) = true ∧ o = .withdrawn (closed (fuse c u))) ∨
+    (isFilled (resolution (fuse c u)) = true ∧ o = .resolved (endpoint (fuse c u))) := by
+  simp only [elicit] at h
+  split at h
+  · exact .inl ⟨_, h⟩
+  · split at h
+    · exact .inr (.inl ⟨by assumption, h.symm⟩)
+    · split at h
+      · exact .inr (.inr ⟨by assumption, h.symm⟩)
+      · exact .inl ⟨_, h⟩
+
+theorem resolved_by_person_resolution (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : ResolvedEndpoint P)
+    (h : elicit respond session c us = .resolved r) :
+    ∃ c₀, isFilled (resolution c₀) = true ∧ r = endpoint c₀ := by
   induction us generalizing c with
   | nil => simp [elicit] at h
   | cons u us ih =>
-    simp only [elicit] at h
-    split at h
-    · cases h; exact ⟨c, u, rfl⟩
-    · cases h; exact ⟨c, u, rfl⟩
-    · exact ih _ h
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hr, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+      exact ⟨_, hr, rfl⟩
+
+theorem endpoint_ends_in_utterance (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : ResolvedEndpoint P)
+    (h : elicit respond session c us = .resolved r) :
+    ∃ (c₀ : Context P) (u : Utterance P), r.closure.context = fuse c₀ u := by
+  induction us generalizing c with
+  | nil => simp [elicit] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+      exact ⟨c, u, rfl⟩
+
+theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P) (h : elicit respond session c us = .withdrawn r) :
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
+  induction us generalizing c with
+  | nil => simp [elicit] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨hw, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+      exact ⟨_, hw, rfl⟩
+    · cases h'
+
+private theorem mem_recordOf {c : Context P} {x : Entry} {o : Occ (standingCoord (P := P) x) c}
+    {r : Recorded c} (h : r ∈ recordOf x o) : r.coord = x ∧ isFilled o = true := by
+  cases o with
+  | open_ _ => simp [recordOf] at h
+  | filled d s allowed supported =>
+    simp only [recordOf, List.mem_singleton] at h
+    subst h
+    exact ⟨rfl, rfl⟩
+
+theorem recorded_by_person (c : Context P) :
+    ∀ r ∈ record c, r.src.src.val = .person ∧
+      StandingSupported r.coord c (c[r.src.idx]'r.src.lt) r.det :=
+  fun r _ => ⟨r.byPerson, r.supported⟩
+
+theorem suffix_without_person_is_no_source (c e : Context P) (he : ∀ t ∈ e, t.origin ≠ .person) :
+    ∀ r ∈ record (c ++ e), r.src.idx < c.length := by
+  intro r _
+  refine Nat.lt_of_not_le fun hle => ?_
+  have hok := r.src.ok
+  rw [r.byPerson, List.getElem_append_right hle] at hok
+  exact he _ (List.getElem_mem _) hok
+
+theorem recorded_is_filled (c : Context P) (r : Recorded c) (h : r ∈ record c) :
+    r.coord ∈ coordinates c ∧ isFilled (operative c r.coord) = true := by
+  simp only [record, List.mem_flatMap] at h
+  obtain ⟨x, hx, hr⟩ := h
+  obtain ⟨hc, hf⟩ := mem_recordOf hr
+  subst hc
+  exact ⟨hx, hf⟩
+
+theorem open_not_recorded (c : Context P) (x : Entry) (ho : isFilled (operative c x) = false)
+    (r : Recorded c) (h : r ∈ record c) : r.coord ≠ x := by
+  intro hx
+  have := (recorded_is_filled c r h).2
+  rw [hx, ho] at this
+  cases this
+
+theorem open_in_residual (c : Context P) (x : Entry) (hx : x ∈ coordinates c)
+    (ho : isFilled (operative c x) = false) : x ∈ residual c := by
+  simp [residual, hx, ho]
+
+theorem stands_only_by_person {c : Context P} {x : Entry} {s : Cite c}
+    (ok : (standingCoord (P := P) x).admits s.src) : s.src.val = .person := ok
+
+theorem resolved_by_person {c : Context P} {s : Cite c}
+    (ok : (resolutionCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
+    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 end Euporia

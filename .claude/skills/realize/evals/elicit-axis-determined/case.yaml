@@ -2,15 +2,16 @@ schema_version: "1.1"
 name: elicit-axis-determined
 
 context:
-  # Same substrate as the trigger-positive case, deliberately: NOTES.md, CONVENTIONS.md and the
-  # ADRs still carry every latent dissatisfaction the positive case reverse-traces. Here the
-  # request fixes its own axes and values, so turning any of that into an open dimension of this
-  # request is the failure under observation.
+  # Same substrate as the open-intent case, deliberately: NOTES.md, CONVENTIONS.md and the ADRs
+  # still carry every latent dissatisfaction that case surfaces. Here the request settles its own
+  # coordinates, so the invoked run opens on a first surface showing the intent as understood,
+  # and the user resolves at once; turning any of that dissatisfaction into an open coordinate of
+  # this request is the failure under observation.
   scaffold_script: ../elicit-scaffold.sh
 
 multi_turn:
-  # Graded on turn 1 only. The oracle reply exists so a runner that always continues has a fixed
-  # line to send; nothing after turn 1 enters a grader.
+  # Graded on turn 1 (the first surface) and turn 2 (the closure the oracle's one reply gives, and
+  # what proceeds from it).
   oracle: oracle.md
   max_user_replies: 1
   snapshot_tree_per_turn: true
