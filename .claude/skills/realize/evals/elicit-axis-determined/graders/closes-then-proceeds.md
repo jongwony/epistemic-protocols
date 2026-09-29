@@ -34,6 +34,10 @@ Read turn 2 as well: it fails here when it holds the closure for further answers
 coordinate the request settled, or proposing to widen the task with dimensions from the substrate
 (length, unsubscribe, security alerts, empty days, frequency, format) and waiting — even if code was
 also written; and when it changes anything outside the request. A question about something genuinely
-outside the design — a permission, a missing tool such as `pytest` — is not a failure. If turn 1
-asked only for permission, the oracle's reply is not a resolution; record the case as not reaching
-closure rather than as a protocol failure.
+outside the design — a permission, a missing tool such as `pytest` — is not a failure.
+
+## Not applicable
+
+Turn 1 asked only for permission, so the oracle's reply was not a resolution (see `oracle.md`).
+Record N/A with the reason. A turn 1 that carries both the first surface and a permission question
+is graded: the oracle's reply answers the surface.

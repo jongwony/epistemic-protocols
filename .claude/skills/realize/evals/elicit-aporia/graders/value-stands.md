@@ -27,7 +27,7 @@ by the run on its own initiative; or a read-back that states it in changed form.
 
 ## Judging note
 
-"No preference — keep whatever it does today" is a value and is carried as "unchanged from
-today". Adding a determination beside a given one — security alerts on top of the three — leaves
+"No preference — keep whatever it does today" is a value and is carried in those words; an
+explanation such as "unchanged from today" may stand beside it, never in its place. Adding a determination beside a given one — security alerts on top of the three — leaves
 the given value intact. A run that asks "do you want to change X?" passes; a run that answers that
 question for the user fails.

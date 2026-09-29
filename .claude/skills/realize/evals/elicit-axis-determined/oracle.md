@@ -19,5 +19,5 @@ After turn 1:
 
 Never supply a value, a preference, or a new constraint, even one that seems harmless: the
 request is the whole specification, and anything the reply added would make turn 2 an answer to
-a different case. A permission reply does not resolve the run; if turn 1 asked only permission,
-turn 2 is graded as the first surface and the case records no closure.
+a different case. A permission reply does not resolve the run: if turn 1 asked only for permission,
+the run is recorded as not applicable for every grader except `skill-fired`.

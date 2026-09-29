@@ -44,8 +44,9 @@ The oracle never sent "resolved". Record N/A with the reason.
 
 ## Judging note
 
-"No preference — keep whatever it does today" is recorded in those words (or quoted), set by the
-user, unless the run had put forward "leave it as it is" as a default, in which case it is adopted.
-A value from Table T that matches a default the run showed earlier was first put forward by the
-run and is adopted, whether the reply points at it or writes it out. Rendering is free as long as
-each value's facts are recoverable.
+"No preference — keep whatever it does today" is recorded in those words (or quoted). Where a value
+matches a default the run showed earlier, the proposer is the run — it put the value forward first
+— and the standing is judged from what the reply did: taking the run's default (by pointing at it,
+or by accepting it in its own words) is adopted; giving the value as its own answer is set. Value
+equality alone decides neither; grade that the marks the run gave are a reading the reply
+supports. Rendering is free as long as each value's facts are recoverable.

@@ -37,7 +37,7 @@ IntentSeed
   → inventory            -- the live coordinates, read over the fused context (focus)
   → surface              -- the read-back and the open coordinates, with sources and contrary grounds (focus)
   → fuse(answer)         -- the answer joins the context whole
-  → stand                -- a person's turn makes a value stand in the intent (record); a proposal of yours stands only where it was visible as yours before that turn
+  → stand                -- a person's turn makes a value stand in the intent, under the record rule (`StandingSupported`)
   → resolve(intent)      -- the person says the intent is aligned enough
   → ResolvedEndpoint
 requires: aporia(I)                           -- declared by invoking /elicit; on the AI-guided path, your reading, and the first surface is a proposal
@@ -156,7 +156,7 @@ structure Determination where
     contrary grounds, before this turn; or gave a grant whose words reach your choice (`granted`).
     An addition of yours the person did not see — a default for an unanswered coordinate, a merge,
     a rejected alternative or a reason they did not state, a question read as a decision — stands
-    on nothing and stays your proposal. A question, a request to look something up, an
+    on nothing and stays your proposal, unless a grant whose words reach it covers it. A question, a request to look something up, an
     observation, a deferral, or a bare mention makes nothing stand. The value is in the words of
     the turn that set it, or of the proposal as it was shown; a read-back that paraphrases never
     replaces it, and never turns the person's value into an adoption. -/

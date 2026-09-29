@@ -41,6 +41,10 @@ unsubscribe are also undetermined"); a turn that implements without a first surf
 judges there is nothing to elicit and proceeds on its own; a first surface that withholds the
 read-back behind questions.
 
+## Not applicable
+
+Turn 1 asked only for permission (see `oracle.md`). Record N/A with the reason.
+
 ## Judging note
 
 Mentioning a substrate signal as information ("NOTES.md also mentions length; not part of this
