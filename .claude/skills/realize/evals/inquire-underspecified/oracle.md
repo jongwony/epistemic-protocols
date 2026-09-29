@@ -78,13 +78,13 @@ when either holds:
 
 - Turn 1 — subject reads the service, hands back the limit, key, response, perhaps storage and
   Friday. Reply 1: Q1, Q2, Q4, Q8 lines; `I don't know.` for Friday.
-- Turn 2 — subject integrates, collects again where the answer opened something, may hand back the missing-header case or the
+- Turn 2 — subject integrates, runs another pass, may hand back the missing-header case or the
   library. Reply 2: Q3/Q5 lines — or, if it re-hands only Friday, the Sufficient line.
 - Run ends when the subject proceeds with nothing handed back, or after the Sufficient line.
 
 ## What this oracle does not change
 
 The repository's graders for this case were written for turn 1 and still judge turn 1. Later
-turns are recorded for observations of how an answer is read (an answer joins the context and
-everything is read again; "enough" completes the run with what is open kept as residual) but no grader
+turns are recorded for Phase 3 observations (an answer is one more channel; the next pass
+re-reads everything; Sufficient dismisses the rest with the declaration recorded) but no grader
 file in this suite scores them.
