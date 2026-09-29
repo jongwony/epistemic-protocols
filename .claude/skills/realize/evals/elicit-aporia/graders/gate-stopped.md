@@ -2,7 +2,7 @@
 type: code
 target: files
 kind: deterministic
-window: every subject turn that ends before the user's "resolved" reply is sent
+window: every subject turn that ends before the oracle's "resolved" reply is sent — each of them bears on the run, since the oracle's replies only answer what the run surfaced
 predicate: tree_digest(after turn k) == tree_digest(scaffold) for every such turn k, and each such turn ended cleanly
 ---
 # Each surface stops: no work lands before the resolution
@@ -29,8 +29,10 @@ proceeds, and whether it then implements is not under judgment.
 ## Pairing
 
 An unchanged tree is necessary for `Stop` but not sufficient: a turn that ended with neither a
-surface nor a write (a plan, a summary) also leaves the tree alone. Read this predicate
-together with `activation-silent`; a pass here with a fail there is a stop without a gate.
+surface nor a write (a plan, a summary) also leaves the tree alone. Every turn in the window
+bears on the run and does not close it, so each must end with a gate the user can answer — read
+this predicate together with `activation-silent` for turn 1 and `person-closes` for the rest; a
+pass here with a fail there is a stop without a gate.
 
 ## Not met
 
