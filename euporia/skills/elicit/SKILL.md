@@ -151,13 +151,15 @@ structure Determination where
   standing : Standing
 
 /-- **Your judgment**: the cited turn makes coordinate `x` stand as `d`, read against the context as
-    it now stands, on the scope the turn's words reach. What the turn itself does decides the
-    standing: its own words give the value (`set`, proposed by the person); it takes a proposal of
-    yours it could see was yours (`adopted`, proposed by you); or it gives a grant whose words reach
-    your choice (`granted`, proposed by you). A question, a request to look something up, an
-    observation, a deferral, or a bare mention makes nothing stand; a default you showed stands
-    only where the turn's words reach it. The person's words carried over in other words were
-    proposed by you. -/
+    it now stands, on the scope the turn's words reach. The proposer is whoever first put the value
+    forward in the context — the person, or you — however the cited turn words it. What the turn
+    itself does decides the standing: it gives a value nobody had put forward (`set`, proposed by
+    the person); it takes a value you put forward and it could see was yours, by reference or by
+    writing it out (`adopted`, proposed by you); or it gives a grant whose words reach your choice
+    (`granted`, proposed by you). A question, a request to look something up, an observation, a
+    deferral, or a bare mention makes nothing stand; a default you showed stands only where the
+    turn's words reach it. The person's words carried over in other words were put forward by
+    you. -/
 axiom StandingSupported : Entry → Context P → Turn P → Determination → Prop
 
 /-- Only a person's turn makes a value stand in the intent. Evidence fixes facts and informs the
@@ -279,9 +281,7 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 -/
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else; every reading above is taken from it. Focus — the
-inventory, the surface, whether an utterance bears on this run — is re-read every turn; the record
-is what `record` projects from it.
+Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
 /-! ── PHASE TRANSITIONS ──
@@ -346,7 +346,7 @@ def grounding : Op → Annot × String
   | .trace        => (.sense, "Internal analysis: the live inventory over the whole fused context and the domain's decision structure, each coordinate with where it comes from and what leaving it open changes")
   | .surface      => (.interaction .constitution, "a plain one-sentence read-back of the intent, every round the first included, each recorded value marked by who proposed it and how it stands; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the answer slots; where closing would take something you added, that gap alone. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, say the intent is resolved as read back, or withdraw, in any form; an answer beyond the slots joins the context whole")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a withdrawal, a resolution — read whole against the fused context as it now stands, whatever form it takes")
-  | .converge     => (.interaction .extension, "the read-back of the resolved intent and the trace — each coordinate, where it came from, what stands on it, who proposed it and how it came to stand — with the residual and the dissent attached to the closure; proceed with ResolvedEndpoint")
+  | .converge     => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with ResolvedEndpoint")
   | .withdraw     => (.interaction .extension, "explicit exit at any gate: the partial record declared — the recorded values with who proposed each and how it came to stand, and the residual; nothing open is delegated")
   | .seam         => (.interaction .extension, "after any closure — a resolution, or a withdrawal the person paired with where to go — proceed to the next move the person declared (the task the seed asked for, or other work they named), citing that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
@@ -385,5 +385,5 @@ Present what TOOL GROUNDING's `surface` entry names and yield the turn. Read `re
 
 - **Recognition over Recall**: Present the coordinates an intent turns on with their anticipatable post-answer states, so the user recognizes what they would otherwise have to recall.
 - **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
-- **Focus and record**: Focus — the inventory, the surface, whether an utterance bears on this run — is re-read every turn and decides nothing. A value enters the record only as the Definition's `standingCoord`, `operative`, and `Covered` state; what stays open is `residual`.
+- **Focus and record**: As the Definition's MORPHISM invariant and `record` state.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

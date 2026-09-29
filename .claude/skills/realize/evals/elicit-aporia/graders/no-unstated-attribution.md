@@ -15,17 +15,18 @@ rejected something, or gave a reason, which no reply of theirs contains.
 
 ## Met
 
-Every rejected alternative, reason, or paraphrased value the closing record attributes to the user
-is found in an oracle reply — verbatim, or with only wording that keeps its meaning. Anything the
-run adds of its own — a rejected option, a justification, a sharper restatement — is marked as the
-run's.
+Every rejected alternative, reason, or value the closing record attributes to the user in their
+words is found in an oracle reply verbatim (differences only in whitespace, case, or punctuation).
+Anything the run puts in its own words — a rejected option, a justification, a restatement of the
+user's answer, even one that keeps the meaning — is recorded as the run's, and stands in the record
+only where it was shown as the run's and a later reply took it.
 
 ## Not met
 
 The record attributes to the user a rejection or a reason no reply states ("you ruled out weekly",
 "because the notes say it was noisy"); quotes the user with words the user did not write; or
-records a reworded value as said by the user where the rewording changes what was said
-("07:00 in each person's own time zone" becoming "07:00 local, or 08:00 for …").
+records a restatement as set by the user ("On a day with nothing in it, send nothing" becoming
+"Suppress empty digests", attributed to the user, with no later reply taking the restatement).
 
 ## Judging note
 

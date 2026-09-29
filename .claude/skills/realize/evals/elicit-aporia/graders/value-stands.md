@@ -13,15 +13,17 @@ record, a note — is shown, and the value stands; the run does not substitute i
 
 ## Met
 
-For every value an oracle reply gave, every later read-back and the closing record carry it as
-given — in the user's terms. Where the run meets something that conflicts with it (the likely one
-here: the security decision record against a three-item cut), it shows the conflict and either adds
-a separate coordinate that leaves the value intact or asks the user whether to change it.
+For every value an oracle reply gave, the closing record — and any later read-back that states
+it — carries it as given, in the user's terms. A later round that shows only what is still open,
+without restating settled values, is not a loss. Where the run meets something that conflicts with
+it (the likely one here: the security decision record against a three-item cut), it shows the
+conflict and either adds a separate coordinate that leaves the value intact or asks the user whether
+to change it.
 
 ## Not met
 
-A value the user gave altered, dropped, merged into another, or reopened by the run on its own
-initiative.
+A value the user gave altered, dropped from the closing record, merged into another, or reopened
+by the run on its own initiative; or a read-back that states it in changed form.
 
 ## Judging note
 
