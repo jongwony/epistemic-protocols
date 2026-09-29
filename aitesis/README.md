@@ -6,7 +6,7 @@ Collect what the AI can reach on its own, hand back the rest as the user's unkno
 
 ## What is Aitesis?
 
-A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **collects context to the limit of what the AI can reach on its own, writes down for each uncertainty what that reached and why it reached no further, and hands what only the user can settle — or nobody yet knows — back to the user as their own unknown**.
+A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **collects context to the limit of what the AI can reach on its own, writes down for each uncertainty what that reached and why it reached no further, and hands what only the user can settle — or what no source it reached settles — back to the user as their own unknown**.
 
 ### The Core Problem
 
@@ -14,7 +14,7 @@ AI systems often proceed despite insufficient context (`ContextInsufficient`) �
 
 ### The Solution
 
-**Evidence over Inference over Detection**: AI infers what the prospect leaves uncertain rather than detecting via a fixed taxonomy (Inference > Detection), then pushes each uncertainty through every channel it can read or run on its own — the codebase, records, external sources, history, an observation run — and gathers evidence rather than substituting inference (Evidence > Inference). Collection stops for an item only when no channel the AI can reach is left. Each item then lands in one of four states, with the reason and the basis written on it: **resolved** by evidence; **provisional** — a finding whose ground the AI declares short; the **user's unknown** — only the user can settle it, or nobody yet knows; **detect-only** — a finding that answers no uncertainty raised. What remains is handed back as the user's own unknown and the protocol proceeds; an answer, when it comes, is one more channel and reopens collection. The beneficiary is the user's epistemic state; the AI's collection is the instrument.
+**Evidence over Inference over Detection**: AI infers what the prospect leaves uncertain rather than detecting via a fixed taxonomy (Inference > Detection), then pushes each uncertainty through every source it can read or run on its own without changing anything, and gathers evidence rather than substituting inference (Evidence > Inference). Where to look is the AI's judgment, and collection goes to the limit of its reach. Each uncertainty then stands one of three ways: **settled** — a cited source or the user's own words fix it; **ground short** — a finding whose shortfall the AI declares; **unreached** — nothing it could reach settles it. For each open one the AI names the sources it tried and those it could not reach, with what they need, so the user can point at one it missed; a finding that answers no uncertainty raised is shown on its own line. What remains is handed back as the user's own unknown and the protocol proceeds without holding the turn. The run completes when nothing is left open, or when the user says it is enough to go on; the user can also dismiss an uncertainty or withdraw, and silence decides none of these. Only the user's own words settle a value that is theirs to hold. The beneficiary is the user's epistemic state; the AI's collection is the instrument.
 
 ### Difference from Other Protocols
 
@@ -30,21 +30,21 @@ Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Ai
 ## Protocol Flow
 
 ```
-Phase 0: Checkpoint         → Scan context sufficiency (silent)
-Phase 1: Collection          → Push each uncertainty through every channel the AI can reach; write its state, reason, basis
-Phase 2: Surfacing           → Hand back what remains — findings with their shortfalls, the user's unknowns, detections — and proceed
-Phase 3: Integration         → An answer, when it comes, reopens collection as one more channel
+Collection   → Push each uncertainty through every source the AI can reach on its own; name what it tried and what it could not reach
+Relay        → Hand back what is open — findings with their shortfalls, the user's unknowns, detections — and proceed
+Answer       → Read whole: settle, point to a source, dismiss, say "enough", or withdraw; collection resumes where it opens something
+Completion   → Nothing left open, or the user's "enough" — the residual kept as it stands
 ```
 
 ## Uncertainty Identification
 
-Uncertainties are identified dynamically per task — no fixed taxonomy:
+Uncertainties are identified dynamically per task — no fixed taxonomy. What an answer would change most is shown first. For example:
 
-| Priority | Criterion | Example |
-|----------|-----------|---------|
-| **Critical** | Execution cannot proceed | "Which database schema version should I target?" |
-| **Significant** | Suboptimal outcome likely | "Both REST and GraphQL endpoints exist — which API layer does this service consume?" |
-| **Marginal** | Reasonable default exists | "Prefer tabs or spaces for this file?" |
+| What the work rests on | Example |
+|------------------------|---------|
+| A fact the AI can look up | "Which database schema version does this service run against?" — read from the migrations |
+| A fact only the user holds | "Is the staging cluster still shared with the other team?" |
+| A judgment that is the user's | "Both REST and GraphQL endpoints exist — which should this service consume?" |
 
 ## Protocol Precedence
 
@@ -63,7 +63,7 @@ Aitesis runs early: exhaust what the AI can collect before analogical-inference 
 - When entering a novel domain not previously discussed in session
 
 **Skip**:
-- When the context is fully specified
+- When the context is fully specified (AI-guided activation only; invoking `/inquire` always collects)
 - When delegation scope is unclear
 
 ## Install
