@@ -1,15 +1,15 @@
 ---
 name: ground
-description: "A framework or analogy is applied to an account already in play, or an abstraction tested against its own cases, and what it supports is unclear: back each fit claim with cited evidence, not assent."
+description: "A framework, analogy, or earlier design is carried to a case, or an abstraction tested against its own cases, and what it supports is unclear: back each conclusion with cited evidence, not assent."
 ---
 
 # Analogia Protocol
 
-Audit what a mapping licenses: construct the correspondences between an abstract structure and the target account in play, warrant each fit claim from evidence the protocol can cite, and report which of the intended inferences the mapping supports, which it blocks, and which stay undetermined. Type: `(MappingUncertain, AI, GROUND, R) → MappingAssessment`.
+Audit what a mapping licenses: on the question the person's own words set, collect to the limit of your reach over what the mapping rests on, construct the correspondences between the source structure and the target, warrant each fit claim from evidence the protocol can cite, and report for each conclusion at stake whether it holds, is blocked, or stays undetermined. Type: `(MappingUncertain, AI, GROUND, R) → MappingAssessment`.
 
 ## Definition
 
-**Analogia** (ἀναλογία): A dialogical act of auditing analogical inference, where AI detects that what a mapping licenses is uncertain, settles the comparison focus and the inferences at stake, constructs the correspondences, warrants each fit claim against evidence it can reach and states what would defeat it, and reports the resulting verdicts with their limits. The user's utterance supplies grounds and records what they adopt; it never promotes a claim to warranted, because assent is not evidence about the world.
+**Analogia** (ἀναλογία): A dialogical act of auditing analogical inference. A mapping — a framework, an analogy, an earlier design, an abstraction — is being relied on, and what it licenses about the target is unclear: the feeling that it fits does not tell which conclusions it supports. The person's own words set the question: what the comparison is for, the conclusions at stake, and which source and which target where that choice is open; the AI never supplies it. The AI then collects to the limit of its own reach over what the mapping rests on — the source's relations and their counterparts in the target, reading any account it can reach itself — names the places it reached and those it could not, constructs the correspondences, warrants each fit claim against evidence with what would defeat it, and reports for each conclusion the source relation that carries it, what was checked and found, what difference would break it, and whether it holds and how far, is blocked, or stays undetermined with what is missing and who can reach it. What remains open is shown as the person's own unknown. The person's utterance supplies grounds and records what they adopt; it never promotes a claim to warranted, because assent is not evidence about the world. An assessment establishes no correctness beyond the evidence it cites, and a blocked conclusion is not thereby false.
 
 ```lean
 /-!
@@ -21,40 +21,41 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 -/
 
 /-! ── FLOW ──
-Analogia(R) → ground(c, utterances), where c is the fused session context:
-  pass(c): Detect →
-    ¬uncertain: ZeroGapRelay(finding) → proceed with R unchanged
-    uncertain: focus settlement per axis →
-      every axis settled: FocusReadback | an axis unsettled, or K narrowed without basis:
-        FocusSelector → Stop
-      → K := settle_inferences → InferenceReadback → construct and assess fit (a counted
-        reconstruction) → checks → run the reachable ones (observations enter c) → warrant →
-        judge → [self-grounding: partition reading] → Surface → proceed
-      → converged(K): MappingAssessment | an earlier dependency still pending with no evidence
-        progress, or the reconstruction cap reached: Inconclusive | otherwise Inconclusive
-  later utterance u: c' := fuse(c, u) →
-    it replaces a committed domain: DomainSuperseded
-    otherwise: pass(c')   (the purpose, K, mapping, or evidence it changes is read there)
+Analogia(R) → start(c) → ground(c, utterances), where c is the fused session context:
+  pass(c):
+    [the question does not stand on a person's turn]  present it — the purpose, the conclusions
+        at stake, and the source–target pair where R and the context leave that choice open —
+        and wait; nothing is collected
+    [otherwise]  collect(c): to the limit of your reach over what the mapping rests on — the
+        source's relations and their target counterparts, and the checks on the claims bearing
+        on K; every place looked joins the context, a null result included →
+      [the collected context leaves a choice only the person settles]  present the question, wait
+      [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
+        with what is missing and who can reach it; present it and proceed — no verdict is asked
+  next utterance u: c' := fuse(c, u), read whole against R and c' →
+    [the question is waiting and u ends the audit]  withdrawn — the question and u kept; the
+                                                    deficit stays unresolved
+    [u bears on the audit]  pass(c')   (a changed purpose, conclusion, pair, or ground is read there)
+    [otherwise]  the session answers it; no pass opens; the last outcome stands
+  no utterance: the last outcome stands — silence settles nothing
+  mid-pass stop: the harness's interrupt — a delegation point, not an outcome
 -/
 
 /-! ── MORPHISM ──
 R
-  → detect(R, context)                     -- what the mapping licenses is uncertain, with a target account in play
-  → settle_focus(R, context) → φ           -- per axis; the purpose only from the user's words
-  → settle_inferences(R, φ, context) → K   -- read back before construction
-  → construct(mapping, Sₐ → Sₜ, φ, context)
-  → assess_fit(mapping, Sₐ, Sₜ, context)   -- each cell placement is a claim
-  → check(fit_claims, K, context)          -- per bearing claim, what within its scope would change it
-  → run_checks(checks, context)            -- reachable evidence moves; results enter the context
-  → warrant(fit_claims, checks)            -- read off evidence, never assent
-  → judge(K, mapping, warrant)             -- Licensed with limits, Blocked, or Undetermined with what is missing
-  → surface(assessment)                    -- present and proceed
+  → question(R, context) → Q      -- purpose, conclusions at stake (K), and an open pair; only from the person's turn
+  → collect(Q, context)            -- to the limit of reach over what the mapping rests on; reached and unreached named
+  → construct(mapping, context)    -- correspondences and their fit claims; each placement is a claim
+  → check(claims bearing on K)     -- per bearing claim, what target-side fact within its scope would change it, and who can reach it
+  → warrant(claims, checks)        -- read off evidence, never assent
+  → judge(K)                       -- Licensed with limits, Blocked, or Undetermined with what is missing
+  → surface(assessment)            -- present and proceed; what is open is the person's own unknown
   → MappingAssessment
-requires: uncertain(licenses(mapping(Sₐ, Sₜ)))  -- runtime checkpoint (Phase 0)
-deficit:  MappingUncertain                       -- activation precondition
-preserves: content_identity(R)                   -- output content invariant; the assessment is carried in R'
+requires: uncertain(licenses(mapping))  -- declared by invoking /ground, never judged; judged only on the AI-guided path
+deficit:  MappingUncertain              -- activation precondition
+preserves: content_identity(R)          -- output content invariant; the assessment is carried beside R
 invariant: Warrant tracks cited evidence, never assent
-invariant: Judgment is the model's, the product is a field
+invariant: The question stands only on the person's turn
 -/
 
 namespace Analogia
@@ -120,9 +121,10 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `R`: text carrying an abstract structure and a target account already in play —
-    AI output, user analysis, or an external reference. The morphism processes it uniformly;
-    it is bound by R-BINDING and read from the context, as the positions of its turns. -/
+/-- `R`: text carrying a source structure — a framework, an analogy, an earlier design, an
+    abstraction — and the target it is applied to: AI output, user analysis, or an external
+    reference. The morphism processes it uniformly; it is bound by R-BINDING and read from the
+    context, as the positions of its turns. -/
 abbrev Text (c : Context P) := List (Fin c.length)
 
 structure Component where
@@ -134,43 +136,49 @@ structure Correspondence where
   concrete : Component
   relation : String
 
-/-- The four axes of the comparison focus that conditions construction. -/
-inductive Axis | sourceScope | targetScope | relation | purpose
+/-- One conclusion the mapping is being asked to license about the target: a prediction, a
+    permission, a limit, an expected behavior. -/
+structure Inference where
+  claim : String
 
-/-- **Your judgment**: the cited turn establishes value `v` for axis `a` in `c`. For `purpose`
-    only the user's own words do. For another axis the value is established when it is
-    `determined` — fixed by the user's words or a citable standing rule — or `forced` — the
-    decomposition admits exactly one value, and the citation is a source turn of `R` showing
-    that uniqueness, never the decomposition's own output. -/
-axiom AxisSupported : Axis → Context P → Turn P → String → Prop
+/-- The question an audit answers: what the comparison is for, the conclusions at stake (`K`), and
+    the source and target — carried only where `R` and the context leave a materially different
+    choice of either open, `none` where they fix it. -/
+structure Question where
+  purpose     : String
+  conclusions : List Inference
+  pair        : Option (String × String)
 
-def axisCoord : Axis → Coord P String
-  | .purpose => { admits := (·.val = .person), supports := AxisSupported .purpose }
-  | a        => { admits := fun _ => True,        supports := AxisSupported a }
+/-- **Your judgment**: the cited turn establishes question `q` in `c`, in the whole scope that turn
+    asks — a turn asking about A and B supports no question narrowed to A — with conclusions to
+    audit. Where the purpose is to carry a structure over — a port, a migration, a sibling's shape
+    — the conclusion is that the structure is preserved in the target; the relations under it are
+    what collection finds, never a list fixed here. Articulating what a stated purpose entails is
+    reading it; choosing among materially different purposes, conclusions, or source–target pairs
+    is not, and a pair `R` or a fact fixes is read, not asked. -/
+axiom QuestionSupported : Context P → Turn P → Question → Prop
+
+/-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
+    theirs would cover a question you chose. -/
+def questionCoord : Coord P Question :=
+  { admits := (·.val = .person), supports := QuestionSupported }
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _ => false
   | .filled .. => true
 
-/-- **Your judgment**: how axis `a` of the comparison focus stands in `c`. -/
-axiom focusAxis : (c : Context P) → (a : Axis) → Occ (axisCoord a) c
+/-- **Your judgment**: how the question stands in `c`, read again against the context as it now
+    stands. -/
+axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
-/-- One axis the protocol would otherwise pick among viable alternatives fires the focus
-    gate. -/
-def focusSettled (c : Context P) : Prop := ∀ a, isFilled (focusAxis c a) = true
+/-- `K`: the conclusions of the question that stands; empty while it is open. -/
+def inferences (c : Context P) : List Inference :=
+  match question c with
+  | .filled q .. => q.conclusions
+  | .open_ _     => []
 
-/-- One thing the mapping is being asked to license about the target: a prediction, a
-    permission, a limit, an expected behavior. -/
-structure Inference where
-  claim : String
-
-/-- **Your judgment**: `K`, what this activation audits, derived from the request and the
-    settled purpose before construction; non-empty once activated. -/
-axiom inferences : Context P → List Inference
-
-/-- **Your judgment**: the latest settlement narrows `K` with no basis in the request or the
-    settled purpose. -/
-axiom UnsupportedNarrowing : Context P → Prop
+/-- The question stands on a person's turn, with conclusions to audit. -/
+def QuestionStands (c : Context P) : Prop := isFilled (question c) = true ∧ inferences c ≠ []
 
 inductive FitLabel
   /-- the target structure preserves the source relation -/
@@ -186,19 +194,23 @@ inductive FitClaim
   | fit     (c : Correspondence) (l : FitLabel)
   | missing (x : Component)
 
-/-- **Your judgment**: the correspondences constructed along the settled focus. -/
+/-- **Your judgment**: the correspondences constructed over what collection found. -/
 axiom mapping : Context P → List Correspondence
 
-/-- **Your judgment**: the fit claims over the current mapping — each correspondence in
-    exactly one cell, and every source component with no evidenced correspondent missing. -/
+/-- **Your judgment**: the fit claims over the current mapping — each correspondence in exactly
+    one cell, and every source component with no evidenced correspondent missing. -/
 axiom fitClaims : Context P → List FitClaim
 
-/-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed.
-    Direction: `references/judgments.md` §BearsOn. -/
+/-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed. A source
+    feature the target lacks bears on `k` only where `k` needs it: a deliberate absence is not a
+    gap. Direction: `references/judgments.md` §BearsOn. -/
 axiom BearsOn : Context P → FitClaim → Inference → Prop
 
-/-- Who can carry a check out. `userHeld` is context only the user holds; it is met by what
-    the user reports observing, and otherwise it is `/inquire`'s deficit. -/
+/-- A fit claim a conclusion of the standing question turns on. -/
+def Relevant (c : Context P) (x : FitClaim) : Prop := ∃ k ∈ inferences c, BearsOn c x k
+
+/-- Who can carry a check out. `userHeld` is context only the user holds; it is met by what the
+    user reports observing, and otherwise it is shown as their own unknown. -/
 inductive Reach
   | aiReachable (action : String)
   | userHeld (question : String)
@@ -206,37 +218,41 @@ inductive Reach
 inductive Bearing | supports | defeats
 
 /-- **Your judgment**: the cited turn establishes, within `scope`, that it supports or defeats
-    `x`. A citation's stated bearing is read against its source and scope. A person's turn
-    bears only where it reports what they observed — a result they ran, a source they read;
-    their assent, agreement, or bare assertion establishes nothing here, whatever its form. -/
+    `x`. A citation's stated bearing is read against its source and scope. Where the evidence
+    would fit a materially different explanation as well, read it against that explanation too:
+    evidence as expected under either reading supports neither. A person's turn bears only where
+    it reports what they observed — a result they ran, a source they read; their assent,
+    agreement, or bare assertion establishes nothing here, whatever its form. -/
 axiom CheckSupported : FitClaim → String → Context P → Turn P → Bearing → Prop
 
 def checkCoord (x : FitClaim) (scope : String) : Coord P Bearing :=
   { admits := fun _ => True, supports := CheckSupported x scope }
 
-structure Check (c : Context P) where
-  claim        : FitClaim
+/-- The check on fit claim `x`. -/
+structure Check (c : Context P) (x : FitClaim) where
   scope        : String
-  /-- evidence that, within `scope`, would require the claim to change -/
+  /-- a target-side fact or observable result that, within `scope`, would require the claim to
+      change -/
   wouldChangeIt : String
   /-- `none`: reachable by neither party now; say what is missing -/
   reach        : Option Reach
-  state        : Occ (checkCoord claim scope) c
+  state        : Occ (checkCoord x scope) c
   /-- further cited grounds beside the one that fills the state -/
   more         : List (Cite c)
 
-/-- **Your judgment**: the checks for the current fit claims bearing on `K`, each with its
-    state read off the grounds the context now holds. Direction: `references/judgments.md`
-    §checks. -/
-axiom checks : (c : Context P) → List (Check c)
+/-- **Your judgment**: the one check on a fit claim bearing on `K`, its state read off the grounds
+    the context now holds; a claim that bears on nothing asked has none. Direction:
+    `references/judgments.md` §checks. -/
+axiom check : (c : Context P) → (x : FitClaim) → Relevant c x → Check c x
 
-def ChecksExact (c : Context P) : Prop :=
-  (∀ x ∈ fitClaims c, (∃ k ∈ inferences c, BearsOn c x k) → ∃ ch ∈ checks c, ch.claim = x) ∧
-  (∀ ch ∈ checks c, ch.claim ∈ fitClaims c)
+open Classical in
+/-- Every check of a pass: exactly one per fit claim bearing on `K`, none for any other. -/
+def checks (c : Context P) : List (Σ x : FitClaim, Check c x) :=
+  (fitClaims c).filterMap fun x => if h : Relevant c x then some ⟨x, check c x h⟩ else none
 
 inductive Warrant | open_ (missing : String) | supported | defeated
 
-def Check.warrant {c : Context P} (ch : Check c) : Warrant :=
+def Check.warrant {c : Context P} {x : FitClaim} (ch : Check c x) : Warrant :=
   match ch.state with
   | .open_ _                  => .open_ ch.wouldChangeIt
   | .filled .supports _ _ _   => .supported
@@ -248,35 +264,34 @@ def Grounds (c : Context P) :=
   {g : List (Cite c) // g ≠ []}
 
 inductive Verdict (c : Context P)
-  /-- grounds support the whole requested inference at its requested scope, with a met check
-      for every fit claim bearing on it; `limits` is that supported reach -/
+  /-- grounds support the whole conclusion at its asked scope, with a met check for every fit
+      claim bearing on it; `limits` is that supported reach -/
   | licensed     (g : Grounds c) (limits : String)
-  /-- a decisive ground against the inference -/
+  /-- a decisive ground against this route to the conclusion; it does not make the conclusion
+      false -/
   | blocked      (g : Grounds c)
+  /-- what is missing and who can reach it; never a check this session can reach and has not
+      run -/
   | undetermined (missing : String)
 
-
-/-- **Your judgment** per inference, reading the grounds' bearing on `k` rather than a
-    label-to-verdict polarity. -/
+/-- **Your judgment** per conclusion, reading the grounds' bearing on `k` rather than a
+    label-to-verdict polarity. Direction: `references/judgments.md` §judge. -/
 axiom judge : (c : Context P) → Inference → Verdict c
-
-def Verdict.decisive {c : Context P} : Verdict c → Bool
-  | .undetermined _ => false
-  | _               => true
-
-def converged (c : Context P) : Prop := ∀ k ∈ inferences c, (judge c k).decisive = true
 
 inductive Pref | adopted | withdrawn
 
-/-- **Your judgment**: the cited turn of the person's adopts or withdraws `x`. -/
-axiom PrefSupported : Correspondence → Context P → Turn P → Pref → Prop
+/-- **Your judgment**: the cited turn of the person's adopts or withdraws conclusion `k` — takes it
+    into, or leaves it out of, what they carry over. An instruction to do the next task adopts
+    nothing; where their turns conflict, it stays open. -/
+axiom PrefSupported : Inference → Context P → Turn P → Pref → Prop
 
-/-- What the reader takes up. -/
-def prefCoord (x : Correspondence) : Coord P Pref :=
-  { admits := (·.val = .person), supports := PrefSupported x }
+/-- What the reader takes up. It never moves a warrant or a verdict; a conclusion adopted over a
+    Blocked or Undetermined verdict stands as accepted and evidentially disputed. -/
+def prefCoord (k : Inference) : Coord P Pref :=
+  { admits := (·.val = .person), supports := PrefSupported k }
 
-/-- **Your judgment**: how the user's adoption of `x` stands in `c`. -/
-axiom preference : (c : Context P) → (x : Correspondence) → Occ (prefCoord x) c
+/-- **Your judgment**: how the person's adoption of `k` stands in `c`. -/
+axiom preference : (c : Context P) → (k : Inference) → Occ (prefCoord k) c
 
 /-- **Your judgment**: the source abstraction is located. -/
 axiom Located : Context P → Prop
@@ -285,10 +300,8 @@ axiom InstancesAreTarget : Context P → Prop
 
 def selfGrounding (c : Context P) : Prop := Located c ∧ InstancesAreTarget c
 
-inductive PartitionVerdict | split | trim | hold
-
-/-- A supported partition of the target's members, read only under self-grounding and only
-    where the grounds establish the full allocation and each rival grouping. -/
+/-- A supported allocation of the target's members, read only under self-grounding and only where
+    the grounds establish the full allocation and each rival grouping. -/
 structure PartitionReading (c : Context P) where
   misfits  : List String
   rivals   : List (List String)
@@ -296,62 +309,63 @@ structure PartitionReading (c : Context P) where
   core     : List String
   grounds  : Grounds c
 
-def PartitionReading.verdict {c : Context P} (r : PartitionReading c) : PartitionVerdict :=
-  if r.misfits = [] then .hold
-  else if (if r.core = [] then 0 else 1) + r.rivals.length ≥ 2 then .split
-  else .trim
+/-- **Your judgment**, only under self-grounding: the partition reading, or `none` where its basis
+    is unresolved — the assessment then names what is missing and recommends no partition. Split,
+    trim and hold are how you may summarize a reading, not a verdict this contract computes.
+    Direction: `references/judgments.md` §partition. -/
+axiom partition : (c : Context P) → selfGrounding c → Option (PartitionReading c)
 
-/-- Where a partition verdict routes. `trim` names `/induce` Narrow as written; whether that
-    move still exists there is an open question of this contract. -/
-def PartitionVerdict.route : PartitionVerdict → Option String
-  | .split => some "/conduct decompose-recovery recipe"
-  | .trim  => some "/induce Narrow"
-  | .hold  => none
+/-- **Your collection** from `c`, to the limit of your own reach, over what the mapping rests on:
+    the source's relations and their counterparts in the target, the checks on the fit claims
+    bearing on `K`, and every one collection exposes; where to look is yours to judge, and no list
+    of sources bounds it. A source or target account you can reach, you read yourself. Each place
+    you look returns an evidence turn, a null result included, so the places reached and those not
+    stay in the context by name. What the context already holds from a source is not fetched again
+    unless an utterance or evidence says it changed. Read and run without changing existing state;
+    what you create only to look you remove afterwards. An observation that needs to change
+    existing state, someone's permission, or another's authority is named with what it needs and
+    left open. Where a claim turns on what an artifact does, exercise it over the case that
+    separates the readings. What is still open once collection ends is shown as the person's own
+    unknown. Direction: `references/judgments.md` §collection. -/
+axiom observe : Context P → List (Evidence P)
 
-/-- **Your judgment**: the partition reading, or `none` with its missing basis reported. -/
-axiom partition : (c : Context P) → Option (PartitionReading c)
+def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
 
-def PartitionScoped (c : Context P) : Prop := (partition c).isSome → selfGrounding c
+/-- **Your judgment**: the latest utterance, read whole against `R` and the fused context, bears on
+    this audit — a purpose, a conclusion, a source or target, a fact, a source to read, a
+    counterexample, a result from running something, an adoption. One that bears on none of it
+    leaves the audit as it stands: the session answers it, that answer stays in the context, and no
+    pass opens. -/
+axiom BearsOnRun : Context P → Prop
 
-def partitionRoute {c : Context P} (r : PartitionReading c) : Option String := r.verdict.route
+/-- **Your judgment**: the latest utterance, read whole, is the person ending this audit while its
+    question waits for them. -/
+axiom Ends : Context P → Prop
 
-/-- **Your judgment**: the latest utterance replaces a committed domain — a different question,
-    not an advance of this one. The domain pair is committed once a mapping has been constructed
-    against it; before that, a reframe may replace either domain and settlement starts again. -/
-axiom Supersedes : Context P → Prop
+/-- Where the audit stands. -/
+inductive Outcome (P : Type)
+  /-- the question is presented and waits for the person's turn; nothing was collected for it. A
+      run status, not a closure. -/
+  | holding    (c : Context P)
+  /-- `MappingAssessment` over the collected context `c`, on which the question stands: every
+      conclusion's verdict with its grounds and limits, every check with its warrant, scope,
+      defeater and reach, the places reached and those not, and what is open as the person's own
+      unknown; under self-grounding, the partition reading or what its basis is missing. Not an
+      endorsement of the mapping. -/
+  | assessment (c : Context P) (stands : QuestionStands c) (relay : Response P)
+  /-- the person ended the audit while its question waited; the question and their turn are kept,
+      and the deficit stays unresolved -/
+  | withdrawn  (c : Context P) (ending : Utterance P)
 
-/-- **Your judgment**: an earlier dependency still needs revision and no evidence move this
-    activation can make remains to bring it up to date. -/
-axiom PendingRevision : Context P → Prop
+def Outcome.isHolding : Outcome P → Bool
+  | .holding _ => true
+  | _          => false
 
-/-- **Your judgment**: what mapping licenses is uncertain here, with a target account in play. -/
-axiom Uncertain : Context P → Prop
-
-/-- **Your count**, read from the record: construction or fit passes run in this activation. -/
-axiom reconstructions : Context P → Nat
-
-/-- **Your judgment**: the pending request needs another construction or fit pass. -/
-axiom NeedsReconstruction : Context P → Prop
-
-def maxReconstructions : Nat := 3
-
-inductive InconclusiveReason | cap | openEvidence | emergent (why : String)
-
-/-- Where an activation stands after a pass. Every close but `zeroGap` and `focusGate` carries
-    `R'`: the verdicts over `K` with their grounds and limits, every fit claim's warrant, and
-    every unmet check with its scope and reach or the absence of one — under self-grounding,
-    also the partition reading and its routing. -/
-inductive Report (c : Context P)
-  /-- nothing uncertain: the finding with its reasoning; `R` proceeds unchanged -/
-  | zeroGap
-  /-- the focus gate is presented and held -/
-  | focusGate
-  /-- `MappingAssessment`: every intended inference Licensed or Blocked with its grounds;
-      not an endorsement of the mapping -/
-  | assessment
-  | inconclusive (why : InconclusiveReason)
-  /-- the question changed; evidence crosses as context, verdicts do not -/
-  | superseded
+/-- The context once the outcome's text is presented. -/
+def Outcome.context : Outcome P → Context P
+  | .holding c        => c
+  | .assessment c _ r => c ++ [r.val]
+  | .withdrawn c _    => c
 
 /-! ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
@@ -361,78 +375,87 @@ Priority: explicit_arg > current_output > most_recent_output
   "ground this..."  → R = the text currently under discussion
   "does this abstraction hold across its cases?" → R = a candidate abstraction and the
     instances it claims to subsume → self-grounding
-With no relevant text, ask for a grounding target before the first pass.
+With no relevant text, the source and target are open, and the first pass presents the question.
 -/
 
 /-! ── MODE STATE ──
 Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
-abbrev Mode (P : Type) := Context P
-
-def PassHolds (c : Context P) : Prop := ChecksExact c ∧ PartitionScoped c
-
 /-! ── PHASE TRANSITIONS ──
-A pass surfaces from a context in which `PassHolds`; the focus gate alone holds the turn.
+A step is one arm of a structural recursion over the person's utterances, carrying the context as
+it stands and the last outcome. `respond` is your surface for a pass; `session` is the session's
+own answer to an utterance that does not bear on the audit, which stays in the context without
+opening a pass.
 -/
 
-/-- The focus gate holds: something is uncertain, and an axis is unsettled or `K` was narrowed
-    without basis. Nothing is constructed, checked, or collected while it holds. -/
-def FocusHeld (c : Context P) : Prop := Uncertain c ∧ (¬ focusSettled c ∨ UnsupportedNarrowing c)
+open Classical in
+/-- One pass. While the question does not stand, it is presented and nothing is collected. Once it
+    stands, collection runs; where the collected context leaves the question open again — a choice
+    only the person settles surfaced — it is presented; otherwise the assessment is. -/
+def pass (respond : Context P → Response P) (c : Context P) : Outcome P :=
+  if ¬ QuestionStands c then .holding (c ++ [(respond c).val])
+  else
+    let c₂ := collect c
+    if h : QuestionStands c₂ then .assessment c₂ h (respond c₂)
+    else .holding (c₂ ++ [(respond c₂).val])
 
 open Classical in
-noncomputable def report (c : Context P) : Report c :=
-  if ¬ Uncertain c then .zeroGap
-  else if ¬ focusSettled c ∨ UnsupportedNarrowing c then .focusGate
-  else if reconstructions c ≥ maxReconstructions ∧ NeedsReconstruction c then .inconclusive .cap
-  else if PendingRevision c then .inconclusive .openEvidence
-  else if converged c then .assessment
-  else .inconclusive .openEvidence
+/-- One utterance, read whole: a withdrawn audit stays withdrawn; while the question waits, a turn
+    ending the audit withdraws it; a turn bearing on the audit opens a pass; any other turn is the
+    session's, and the last outcome stands. -/
+def step (respond session : Context P → Response P) (c : Context P) (o : Outcome P)
+    (u : Utterance P) : Context P × Outcome P :=
+  match o with
+  | .withdrawn c₀ e => (c₀, .withdrawn c₀ e)
+  | _ =>
+    let c' := fuse c u
+    if o.isHolding = true ∧ Ends c' then (c', .withdrawn c' u)
+    else if BearsOnRun c' then ((pass respond c').context, pass respond c')
+    else (c' ++ [(session c').val], o)
 
-/-- **Your evidence moves** for a pass: what the reachable checks returned — artifact reads,
-    searches, fetches, and runs — each an evidence turn. -/
-axiom observe : Context P → List (Evidence P)
+def ground (respond session : Context P → Response P) :
+    Context P → Outcome P → List (Utterance P) → Outcome P
+  | _, o, []      => o
+  | c, o, u :: us =>
+    let r := step respond session c o u
+    ground respond session r.1 r.2 us
 
-def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
-
-open Classical in
-/-- `respond` is your surface for the pass. -/
-noncomputable def ground (respond : Context P → Response P) :
-    (c : Context P) → List (Utterance P) → (c' : Context P) × Report c'
-  | c, []      => ⟨c, report c⟩
-  | c, u :: us =>
-    let c₁ := fuse c u
-    if Supersedes c₁ then ⟨c₁, .superseded⟩
-    else
-      let c₂ := if FocusHeld c₁ then c₁ else collect c₁
-      ground respond (c₂ ++ [(respond c₂).val]) us
+/-- The audit opens on a pass. -/
+def start (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  let o := pass respond c
+  ground respond session o.context o us
 
 /-! ── LOOP ──
-A change to the intended inferences alone leaves the mapping as it was. Within a pass,
-re-entering an earlier step needs evidence progress: a ground in the context that the affected
-step has not yet read, or a still-untried reachable evidence move expected to change its
-assessment. Every construction or fit-assessment pass spends one of `maxReconstructions`,
-including a fit-only reassessment that keeps the mapping, and none is refunded; a K-only or
-checks-only reassessment, focus settlement, and read-back spend none. An empty mapping is
-assessed like any other. Preference changes no warrant or verdict.
+Every utterance is read whole against the context as it now stands: nothing counts passes or
+reconstructions, and no earlier reading is held apart from what later turns say. A changed
+purpose, conclusion, source or target, or a new ground is simply the context the next pass reads;
+evidence already gathered stays in the context, and every verdict is judged again over the
+question that now stands. Silence takes nothing: the last outcome stands, and a waiting question
+stays open. Adoption changes no warrant or verdict. Stopping in the middle of a pass is the
+harness's interrupt.
 -/
 
 /-! ── CONVERGENCE ──
-converged(K): every intended inference carries a Licensed or a Blocked verdict with its grounds.
-Convergence evidence: for each k in K, one pair (MappingUncertain(k) → verdict(k)) showing the
-correspondences it rode on, the warrant each carried (`Check.warrant`), and, for Licensed, the
-limits. For each
-checked fit claim, its label, warrant, and scope beside the grounds, the stated defeater, the
-reach or its absence, and whether the check was unmet, survived, or failed. An unmet check is
-reported as unmet, never as a pass; a claim whose warrant is open is named open rather than
-weakly supported. Preference is reported apart from warrant and never as a reason. State the
-committed domain pair, the comparison focus, and K with its basis, carrying any read-back
-change to K and distinguishing questions removed from scope from questions answered. Under
-self-grounding, append the supported partition reading with its grounds and routing, or why
-its basis remains unresolved. An Inconclusive close keeps the same trace with every
-Undetermined verdict naming what is missing; at the cap, the requested revision is named as
-unassessed and any retained assessment is labelled by its earlier focus and K. Convergence is
-demonstrated, not asserted.
+assessed: a pass in which the question stood on the person's turn, collection reached what it
+could, and every conclusion in K carries a verdict — Licensed with its limits, Blocked, or
+Undetermined naming what is missing and who can reach it. Undetermined does not block the
+assessment and is not settled by it; a check this session can reach and has not run is run, not
+reported Undetermined. Convergence evidence: the question with the person's turn it stands on —
+the purpose, K, and the source and target where that choice was open; for each k in K, one pair
+(MappingUncertain(k) → verdict(k)) showing the source relation that carries it, the
+correspondences it rode on, the likenesses, the differences in both directions, and the unknowns;
+for each checked fit claim, its label, warrant (`Check.warrant`), and scope beside the grounds,
+the stated defeater, the reach or its absence, and whether the check was unmet, survived, or
+failed; correspondences outside the checked scope named as outside it; the places collection
+reached and those it did not, by name; what is still open, as the person's own unknown. An unmet
+check is reported as unmet, never as a pass; a claim whose warrant is open is named open rather
+than weakly supported. Adoption is reported apart from warrant and never as a reason; a
+conclusion adopted over a Blocked or Undetermined verdict is shown as accepted and evidentially
+disputed. Carry any change to the question, distinguishing conclusions removed from scope from
+conclusions answered. Under self-grounding, append the partition reading with its grounds, or
+what its basis is missing. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -452,30 +475,23 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | zeroGapRelay | focusDerive | focusReadback | focusSelector
-             | inferenceSettle | inferenceReadback | mapAssessFit | checkRead | runChecks
-             | warrantRead | judge | partitionRead | surface | converge | inconclusive
-             | superseded | seam
+inductive Op | questionRead | questionGate | questionReadback | collect | construct | checkRead
+             | warrantRead | judge | partitionRead | surface | converge | readAnswer | withdraw
 
 def grounding : Op → Annot × String
-  | .detect            => (.sense, "Internal analysis: licensing uncertainty and whether self-grounding holds")
-  | .zeroGapRelay      => (.interaction .extension, "when nothing is uncertain, the finding with its reasoning; proceed with R unchanged")
-  | .focusDerive       => (.sense, "Internal analysis: MappingFocus candidates and each axis's standing, before any correspondence is constructed")
-  | .focusReadback     => (.interaction .extension, "when every axis is settled, relay the focus with the citation that settles each axis")
-  | .focusSelector     => (.interaction .constitution, "when an axis is unsettled or K was narrowed without basis, the candidate foci with their consequences visible before choice, including the committed-domain replacement exit")
-  | .inferenceSettle   => (.sense, "Internal analysis: K from R, the settled purpose, and the context")
-  | .inferenceReadback => (.interaction .extension, "K and its basis beside the settled focus, with what a revision added, removed, or reformulated; no approval required")
-  | .mapAssessFit      => (.observe, "artifact read, artifact search, external fetch (conditional): construct correspondences along the focus and assert their fit")
-  | .checkRead         => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, defeater, and reach")
-  | .runChecks         => (.observe, "artifact read, artifact search, external fetch, environment run: the reachable checks, including exercising an artifact whose behavior the claim turns on; results enter the context as observations")
-  | .warrantRead       => (.sense, "Internal analysis: each claim's warrant read off its check")
-  | .judge             => (.sense, "Internal analysis: per inference, Licensed with limits, Blocked, or Undetermined with what is missing")
-  | .partitionRead     => (.sense, "Internal analysis: under self-grounding, a supported partition or its missing basis; no separate gate")
-  | .surface           => (.interaction .extension, "the assessment with its trace and what a later turn would change; no verdict answer is required")
-  | .converge          => (.interaction .extension, "when converged, the convergence evidence trace; proceed with the assessment")
-  | .inconclusive      => (.interaction .extension, "the same trace with every Undetermined verdict naming what is missing, every unmet check with its reach, and why the run closed")
-  | .superseded        => (.interaction .extension, "report what was assessed, declare the question superseded, and seed a fresh activation; evidence crosses as context, verdicts do not")
-  | .seam              => (.interaction .extension, "at a user-declared chain or a declared edge (the partition route partitionRoute names, or remaining checks all user-held to /inquire), proceed citing the settling source")
+  | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
+  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn, or collection surfaced a choice only the person settles: what is open, with what each reading would audit visible before choice; nothing is collected while it waits")
+  | .questionReadback => (.interaction .extension, "when the question stands, relay it with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
+  | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: to the limit of your own reach over what the mapping rests on — the source's relations and their target counterparts, and the reachable checks, exercising an artifact whose behavior a claim turns on — without changing existing state, removing afterwards what you created only to look; every place looked enters the context as an evidence turn, a null result included; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and left open")
+  | .construct        => (.sense, "Internal analysis: the correspondences over what collection found and their fit claims")
+  | .checkRead        => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, target-side defeater, and reach")
+  | .warrantRead      => (.sense, "Internal analysis: each claim's warrant read off its check")
+  | .judge            => (.sense, "Internal analysis: per conclusion, Licensed with limits, Blocked, or Undetermined with what is missing and who can reach it")
+  | .partitionRead    => (.sense, "Internal analysis: under self-grounding, the member allocation and its grounds, or its missing basis; no separate gate")
+  | .surface          => (.interaction .extension, "the assessment with its trace, the places reached and not, what is open as the person's own unknown, and what a later turn would change; no verdict answer is required")
+  | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
+  | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit, and, while the question waits, whether it ends the audit")
+  | .withdraw         => (.interaction .extension, "when the person ends the audit while its question waits: say that the question was left open and nothing was assessed; the deficit stays unresolved")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -488,19 +504,19 @@ end Analogia
 
 ## Mode Activation
 
-`/ground` remains directly invocable. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
+`/ground` remains directly invocable, and invoking it declares the deficit; it is not judged away. During AI-guided activation, loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind.
 
 ### Activation heuristics and exceptions
 
-Activate where a target account is already in play and what the mapping licenses about it is open: an abstract framework being applied to a concrete case, a possible structural mismatch, or a located abstraction tested against its own members. Prior-session recall indices may seed domain decomposition; they do not settle a constitutive judgment.
+Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or a located abstraction tested against its own members. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
 
-The reader's first encounter with either domain is a different deficit. Where the target account is not yet in play — where what is wanted is to come to hold an account rather than to audit one — that is explanation, and it hands off to a capability that explains the unfamiliar domain; this protocol stops there rather than teaching the domain it was invoked to audit. Absence of evidence that an account is in play establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
+A source or target account this session can reach — code, documents, a repository, a published source — is read as evidence inside the audit, whether or not the reader already holds it; the audit never waits for the reader to bring an account first, and never asks them to judge a correspondence. Where what the reader wants is only to come to hold an account, with no mapping being relied on, that is explanation rather than this audit, and the AI-guided path does not activate. Absence of evidence that a mapping is being relied on establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
 
-Skip AI-guided activation when what the mapping licenses is already settled in context, the output is purely concrete, or no abstract framework is being applied. Route an unlocated, merely sensed essence over accumulated instances to `/induce`; retain a located abstraction tested against its own members as self-grounding. Framework selection and factual context insufficiency remain their own primary deficits.
+Skip AI-guided activation when what the mapping licenses is already settled in context, the output is purely concrete, or no mapping is being applied. An essence merely sensed across accumulated instances, with no located abstraction yet, is a different deficit; a located abstraction tested against its own members is self-grounding. Framework selection and factual context insufficiency remain their own primary deficits.
 
 ### Evidence loading
 
-Read code, configuration, documentation, and other available artifacts when the target domain is recorded there. When the relevant source or target structure exists primarily in external APIs, standards, scholarship, or industry material, fetch that evidence and keep its source address visible in the trace.
+Collect to the limit of your own reach over what the mapping rests on: read code, configuration, documentation, and other available artifacts where either structure is recorded there, and where the source or target structure lives primarily in external APIs, standards, scholarship, or industry material, fetch it and keep its source address visible in the trace. Name the places reached and those that could not be.
 
 Where a claim turns on what an artifact does rather than on what it says about itself, exercise it over the case that separates the readings and cite the result.
 
@@ -508,37 +524,36 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 ### User-facing realization
 
-Before assessing, read back the intended conclusions beside the comparison focus and cite the request or settled purpose they come from. When that question changes, show what was added, removed or reformulated and why; a removed unanswered question is outside the revised scope, not resolved. At the focus gate, show each option's consequence before asking: a reframe within the committed pair revises that comparison, while replacing a committed domain ends this audit and starts a new question.
+Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target where that choice was open — citing the person's turn it stands on. Where their words leave any of it open, present the question and wait: show what is open and what each reading would audit, and collect nothing until their turn answers. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
-Present the whole assessment in everyday language: the comparison focus; what the mapping is being asked to license; every correspondence with its fit claim, one concrete scenario, and what actually warrants that claim; and for each intended inference, whether it holds, is blocked, or is undetermined, with how far it reaches.
+Present the whole assessment in everyday language: the question; for each conclusion, the source relation that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target deliberately does without counts against a conclusion only where that conclusion needs it.
 
-Beside each claim that matters, state the scope its grounds were checked within, what would change it, and who can reach that evidence or why neither party currently can. Carry out the ones this session can reach before presenting, and put the ones only the user holds as the questions they are. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
+Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
-For self-grounding, render a partition only with the grounds supporting its full member allocation and grouping. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
+For self-grounding, name the level of abstraction at which fit is claimed and allocate every member, rendering a partition only with the grounds supporting that allocation and grouping and with a contrast that makes the fit diagnostic. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
 
-Then state what a later turn would change, and proceed without asking for a verdict. When a revision of the intended conclusions narrows them with no basis in the request or the settled purpose, do not re-read the same context: put the comparison focus to the user at the focus gate. Read all its determinate acts together; a changed purpose or intended conclusion reopens settlement and readback, retaining the mapping when only the intended conclusions changed, while evidence reopens the earliest affected assessment step. Evidence moves the assessment: a fact, a source, a counterexample, a result from running something. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption and withdrawal are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did. If the turn says one of the two domains is the wrong one, say plainly that this ends the current question rather than adjusting it, and start the new one from what was just said, carrying the evidence but none of the verdicts.
+Then state what a later turn would change, and proceed without asking for a verdict. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or leaving it out of, what they carry over; an instruction to do the next task adopts nothing. Adoption and withdrawal are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn ending the audit withdraws it: say plainly that the question was left open and nothing was assessed.
 
-Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing a focus gate requires placing evidence before its question and option-specific consequences inside the options.
+Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing the question requires placing evidence before its question and option-specific consequences inside the options.
 
 ### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | One inference, one obvious correspondence | Compact rendering of the same required assessment trace |
-| Medium | Several inferences or partial correspondences | Required assessment trace grouped by inference and bearing claim |
-| Heavy | Complex transfer or structural mismatch | Required assessment trace with expanded domain decomposition and instantiations |
+| Light | One conclusion, one obvious correspondence | Compact rendering of the same required assessment trace |
+| Medium | Several conclusions or partial correspondences | Required assessment trace grouped by conclusion and bearing claim |
+| Heavy | Complex transfer or structural mismatch | Required assessment trace with expanded collection and instantiations |
 
 ## Rules
 
-- **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **Convergence is over inferences, not correspondences**: Derive and read back what the mapping is being asked to license from the request and settled purpose before constructing or reassessing it, and read completion over those inferences. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it.
-- **Every bearing claim carries its own defeater**: For each fit claim an intended inference turns on, state what evidence, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
-- **Audit, not instruction**: This protocol takes a target account already in play. Where the reader does not yet hold one, the deficit is explanation and routes there; do not teach the domain under audit.
-- **Recognition over Recall**: Present structured alternatives with anticipatable futures only for a genuine domain decision. Keep the turn-reading constructors internal, so the reader acts in their own language rather than selecting a meta-label.
-- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question about the assessment is exploration; answer it without asking the reader to classify their own turn.
-- **Option-set relay test**: Relay a focus axis only where the user's words, a citable standing rule, or a source turn of the text under audit showing that one value is admissible settles it; the decomposition's own output settles nothing. The AI never supplies the comparison purpose: this audit closes on evidence, so no later utterance of the user's would cover a purpose the AI chose. A purpose the user's own words settle is read back like any settled axis; otherwise it is asked at the focus gate. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
+- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI never supplies the purpose, narrows the conclusions below what the cited turn asks, or picks between materially different sources or targets: this audit closes on evidence, so no later utterance of the user's would cover a question the AI chose. A question the user's words settle is read back; otherwise it is asked, and nothing is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over, audit whether the whole structure is preserved, with its relations found by collection.
+- **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
+- **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
+- **Recognition over Recall**: Present structured alternatives with anticipatable futures only for the question, where the person's words leave a genuine choice open. Read their turns whole, so the reader acts in their own language rather than selecting a meta-label.
+- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question about the assessment is answered from the current grounds or reopens the affected part; the reader is never asked to classify their own turn.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
 - **Bounded reach**: State the limits supported by the cited grounds and their checked scopes in the same breath as every Licensed verdict. A mapping presented without its breaking point produces confident wrong inference, which is the failure this protocol exists to catch.
-- **Self-grounding visibility**: Treat a case as self-grounding only where the source abstraction is located and its member instances are the target. Surface the full member partition and the grounds supporting it before routing split to the `/conduct` decompose-recovery recipe or trim to `/induce`. An unresolved basis carries no partition recommendation. Analogia supplies the partition evidence while the downstream checkpoint constitutes cell membership.
+- **Self-grounding visibility**: Treat a case as self-grounding only where the source abstraction is located and its member instances are the target. Surface the full member allocation and the grounds supporting it; an unresolved basis carries no partition recommendation. Analogia supplies the partition evidence; what becomes of the cells is the reader's.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Zero-gap surfacing**: Present a zero-gap finding with its reasoning before deactivation.

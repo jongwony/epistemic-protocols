@@ -19,46 +19,76 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 instance {c : Context P} : Nonempty (Verdict c) := ⟨.undetermined ""⟩
+instance {c : Context P} {x : FitClaim} : Nonempty (Check c x) :=
+  ⟨{ scope := "", wouldChangeIt := "", reach := none, state := .open_ none, more := [] }⟩
 
 theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c := by
   simp [collect, h]
 
-theorem narrowing_holds_at_gate (c : Context P) (hu : Uncertain c)
-    (hn : UnsupportedNarrowing c) : report c = .focusGate := by
-  simp [report, hu, hn]
-
+/-- While the question does not stand, the pass presents it and collects nothing. -/
 theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Supersedes (fuse c u))
-    (hf : FocusHeld (fuse c u)) :
-    ground respond c (u :: us) = ground respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [ground, hs, hf]
+    (h : ¬ QuestionStands c) : pass respond c = .holding (c ++ [(respond c).val]) := by
+  simp [pass, h]
 
-theorem assessment_converged (c : Context P) (h : report c = .assessment) :
-    focusSettled c ∧ converged c := by
-  unfold report at h
-  split at h
-  · cases h
-  · split at h
-    · cases h
-    · rename_i h2
-      split at h
-      · cases h
-      · split at h
-        · cases h
-        · split at h
-          · rename_i h5
-            refine ⟨?_, h5⟩
-            apply Classical.byContradiction
-            intro hn
-            exact h2 (.inl hn)
-          · cases h
+/-- The question is filled only from a person's turn. -/
+theorem question_by_person {c : Context P} {s : Cite c}
+    (ok : (questionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-theorem purpose_by_person {c : Context P} {s : Cite c}
-    (ok : (axisCoord (P := P) .purpose).admits s.src) : s.src.val = .person := ok
+/-- An assessment is made only over the collected context, on a question that stood before
+    collection and still stands after it. -/
+theorem assessment_after_collection (respond : Context P → Response P) (c b : Context P)
+    (hs : QuestionStands b) (r : Response P) (h : pass respond c = .assessment b hs r) :
+    b = collect c ∧ QuestionStands c := by
+  unfold pass at h
+  by_cases hc : QuestionStands c
+  · by_cases hc₂ : QuestionStands (collect c)
+    · simp [hc, hc₂] at h
+      exact ⟨h.1.symm, hc⟩
+    · simp [hc, hc₂] at h
+  · simp [hc] at h
 
-theorem superseded_first (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : Supersedes (fuse c u)) :
-    ground respond c (u :: us) = ⟨fuse c u, .superseded⟩ := by
-  simp [ground, h]
+/-- A pass whose question stands before and after collection yields the assessment. -/
+theorem not_held_completes (respond : Context P → Response P) (c : Context P)
+    (h₁ : QuestionStands c) (h₂ : QuestionStands (collect c)) :
+    pass respond c = .assessment (collect c) h₂ (respond (collect c)) := by
+  simp [pass, h₁, h₂]
+
+/-- Silence settles nothing: with no utterance, the last outcome stands. -/
+theorem silence_keeps_last (respond session : Context P → Response P) (c : Context P)
+    (o : Outcome P) : ground respond session c o [] = o := rfl
+
+private theorem pass_ne_withdrawn (respond : Context P → Response P) (c a : Context P)
+    (e : Utterance P) : pass respond c ≠ .withdrawn a e := by
+  unfold pass
+  by_cases hc : QuestionStands c
+  · by_cases hc₂ : QuestionStands (collect c) <;> simp [hc, hc₂]
+  · simp [hc]
+
+/-- A withdrawal comes only from an audit whose question was waiting, or one already withdrawn. -/
+theorem withdrawn_only_while_holding (respond session : Context P → Response P)
+    (c c' c₀ : Context P) (o : Outcome P) (u e : Utterance P)
+    (h : step respond session c o u = (c', .withdrawn c₀ e)) :
+    o.isHolding = true ∨ ∃ a b, o = .withdrawn a b := by
+  cases o with
+  | holding _ => exact .inl rfl
+  | withdrawn a b => exact .inr ⟨a, b, rfl⟩
+  | assessment b hs r =>
+    exfalso
+    simp only [step, Outcome.isHolding] at h
+    by_cases hb : BearsOnRun (fuse c u)
+    · simp [hb] at h
+      exact pass_ne_withdrawn respond _ _ _ h.2
+    · simp [hb] at h
+
+/-- A turn that does not bear on the audit, and does not end a waiting one, opens no pass: the
+    session answers it and the last outcome stands. -/
+theorem unrelated_opens_no_pass (respond session : Context P → Response P) (c : Context P)
+    (o : Outcome P) (u : Utterance P) (hw : ∀ a b, o ≠ .withdrawn a b)
+    (he : ¬ (o.isHolding = true ∧ Ends (fuse c u))) (hb : ¬ BearsOnRun (fuse c u)) :
+    step respond session c o u = (fuse c u ++ [(session (fuse c u)).val], o) := by
+  cases o with
+  | withdrawn a b => exact absurd rfl (hw a b)
+  | holding _ => simp [step, he, hb]
+  | assessment _ _ _ => simp [step, he, hb]
 
 end Analogia
