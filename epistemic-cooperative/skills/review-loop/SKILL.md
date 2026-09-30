@@ -113,8 +113,7 @@ reach nor a source direction by inference.
 
 Use the selected host route and source adapter with the captured pointer and current
 intent bundle. Several designated sources review that same pointer in parallel, each
-in its own context; the round's findings are their union, one defect — identified as
-Recurrence identifies it — keeping every source that raised it. Read the returned review and diagnostics in full. Record actual call
+in its own context; the round's findings are their union, each keeping its source. Read the returned review and diagnostics in full. Record actual call
 settings and any reported failure cause as provenance, not coverage.
 
 Use each source's first read-only review call to confirm its command and contract
@@ -315,9 +314,8 @@ The user may exit at any point; an external interruption supplies no convergence
 ## Trace and Exit
 
 Present each round's trace and continue without a gate, except where its `Roots:` names
-none: there, before that round's repairs, ask whether to exit — exiting or silence ends
-the loop as non-convergence with the round's findings as residual; continuing proceeds
-to Phase 4:
+none: that trace, presented before the round's repairs, ends the turn, and the loop
+resumes on the user's instruction:
 
 ```
 Round k — host / source / route — reviewed base → head or working-tree state — verdict

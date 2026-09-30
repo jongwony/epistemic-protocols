@@ -45,7 +45,7 @@ One protocol per run. The object is the core protocol itself — its `SKILL.md` 
    - PR body carries the record and `Part of ROO-67`; no merge.
    Check the fork's report against the branch and CI before relaying it.
 10. **Dogfood** — run the new `SKILL.md` by hand in this session on a live target. Each mismatch → a gate → choi's answer → a decide → a fork fix → re-judge. Close the run with the intents taken, quoting choi's words. This dogfood is the run's runtime evidence.
-11. **Review** — this session drives `/review-loop` over the PR: landing `head`, codex and code-review (`xhigh`) as parallel sources, the decide texts with choi's words as design intent.
+11. **Review** — this session drives `/review-loop` over the PR: landing `head`, codex and code-review at `xhigh` as parallel sources, the decide texts with choi's words as design intent.
 12. **Merge and close** — merge only on choi's instruction. The close runs whatever status the chart shows: `/unfold close` on the protocol chart — structure delta, closing note with commit and PR locators, follow-ups with one pointer back.
 13. **Skill retrospective** — after the close, read this run for where the flow sent it around and where choi brought something in at a gate. Present each candidate with its ground (a source, a decide, the premise, or this run's trace), the surface it reads as belonging to — this skill, the protocol chart, ROO-67, or a premise proposal on ROO-77 — and what it would make unnecessary here. Branches:
     - choi takes a candidate → it lands where choi placed it; a change to this skill is its own commit under ROO-67;
