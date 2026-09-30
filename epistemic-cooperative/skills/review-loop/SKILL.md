@@ -201,9 +201,10 @@ one direction, not a repair either reading settles.
 
 Read every repair as an ablation before classifying it. A finding grounds a repair
 through the consequence it verified, not through what it finds unstated; the repair
-is the least text that resolves that consequence — an existing carrier before a new one,
-a removal before an addition. Where trajectories diverge materially, that reading is
-the recommendation at the Judgment gate, not the disposition.
+is the least text that resolves that consequence and loses no other obligation — an
+existing carrier before a new one, a removal before an addition. Where trajectories
+diverge materially, that reading is the recommendation at the Judgment gate, not the
+disposition.
 
 **Recurrence:** identify the same defect by clause/invariant, not phrasing or line.
 An initial uninformed return is absorbed by settled policy. Instance-specific
@@ -309,20 +310,21 @@ residual; they do not themselves force another round and are never reported as c
 
 At any exit before these conditions hold, report non-convergence with the latest
 reviewed artifact, later edits, unfinished repairs, residuals, and retained judgments.
+A round that has not converged and whose cause reading after its repairs names no
+shared cause ends the turn there, its trace carrying that report; the loop resumes on
+the user's instruction.
 The user may exit at any point; an external interruption supplies no convergence evidence.
 
 ## Trace and Exit
 
-Present each round's trace and continue without a gate, except where its `Roots:` names
-none: that trace, presented before the round's repairs, ends the turn, and the loop
-resumes on the user's instruction:
+Present each round's trace and continue without a gate:
 
 ```
 Round k — host / source / route — reviewed base → head or working-tree state — verdict
 Exercised: source-reported reach and gaps (omit for a standing no-channel source)
 Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
-Roots: Phase 3 cause reading — each root with the findings it explains, or none
+Roots: Phase 3 shared-cause reading — each shared cause with the findings it explains, or none
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
 Apply: writer route (fork | brief | inline) → commits or new head, or tree state (omit if no pass ran)

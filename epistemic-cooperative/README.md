@@ -123,7 +123,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 ```
 
 `/review-loop` reuses matching reviewer capability evidence and confirms the command
-and scope during the first read-only review. For PRs, an omitted `head`/`stacked`
+and scope during each source's first read-only review. For PRs, an omitted `head`/`stacked`
 repair destination is settled before the first edit; it does not delay the review.
 
 ## Author
