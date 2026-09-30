@@ -987,13 +987,13 @@ const GRADERS = {
     return parsed.skillInvocations.some(
       (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`));
   },
-  // Phase 0 declares relay-and-proceed; mutation witnesses that this implementation
-  // prospect crossed Proceed. Correctness and completeness of the change are out of scope.
+  // In this fixture collection leaves nothing open, so completion proceeds; mutation
+  // witnesses that this implementation prospect crossed Proceed. Correctness and completeness of the change are out of scope.
   // Runs write through Bash as readily as through Write, so a predicate keyed on
   // tool identity misses the writes it exists to catch — and misses them in every
   // arm alike, which makes it look stable while measuring nothing.
-  // The trigger-positive case carries no tree witness: /inquire's Phase 2 is a relay
-  // that presents and proceeds, so whether the tree changed afterwards is the
+  // The trigger-positive case carries no tree witness: /inquire's relay presents and
+  // proceeds, so whether the tree changed afterwards is the
   // harness's to decide, not the contract's. Its handoff is a manual grader.
   proceed_observed: ({ mutated }) => mutated === true,
   // A read occurred somewhere in the turn. This does not establish its order relative
@@ -1029,10 +1029,10 @@ const CASE_PREDICATES = {
 const CASE_MANUAL_REVIEWS = {
   'inquire-underspecified': [
     'collection-precedes-inquiry', 'cheap-evidence-not-asked',
-    'basis-faithful', 'ownership-kept', 'option-coproduct',
+    'basis-faithful', 'ownership-kept', 'answer-openings',
   ],
   'inquire-fully-specified': [
-    'phase0-relay', 'proceed-observed',
+    'nothing-open-relay', 'proceed-observed',
   ],
   'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
   'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],

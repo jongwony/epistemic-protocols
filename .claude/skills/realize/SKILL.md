@@ -138,7 +138,7 @@ rather than inferring invocation from the model's prose.
 
 Every case runs under explicit invocation. Each registered target needs at least a case
 where the protocol's obligations must be realized, and one that holds the counterpart the
-protocol must not fabricate — for `/inquire`, a Phase 0 that finds no deficit and relays;
+protocol must not fabricate — for `/inquire`, a collection that leaves nothing open and relays;
 for `/grasp`, an answer with nothing to check it against. Whether a protocol is selected at
 all, or stays silent, is measured by route's own eval, not here. The registered targets are
 the keys of `targets` in `harness.config.json`; no result is implied for a protocol absent
@@ -183,8 +183,8 @@ so they are not mistaken for findings.
 `pass_k` is one only when every repetition passed its deterministic transition
 predicates. The `manual` column counts scenario-specific transcript judgments excluded from that
 composite; the report names them. For `inquire`, collection-before-surfacing order,
-unasked cheap evidence, faithful basis, kept ownership, constructor coverage, the Phase 0
-relay, and the absence of a design gate remain manual observations grounded by the grader
+unasked cheap evidence, faithful basis, kept ownership, stated answer openings, the relay of a
+collection that left nothing open, and the absence of a design gate remain manual observations grounded by the grader
 files. For `grasp`, the automatic set is what both cases share — the target read in the
 first turn, the tree unchanged after every turn, every turn reported — and the quoted
 correction, the withheld verdict with its named need, the stop at each gate, and closure on

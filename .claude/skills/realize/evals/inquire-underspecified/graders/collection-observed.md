@@ -6,7 +6,7 @@ target: trace
 ---
 # Context collection must occur
 
-Phase 1 reads the available substrate before the formal branch is selected. A run that surfaces
+Collection reads the available substrate before anything is handed back. A run that surfaces
 uncertainties without inspecting the directory has skipped that transition.
 
 This predicate establishes occurrence only. One read satisfies it; it does not establish whether

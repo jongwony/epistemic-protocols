@@ -5,8 +5,8 @@ focus: whether the working tree differs from the scaffold the run started with, 
 ---
 # The branch must reach Proceed
 
-Phase 0's zero-uncertainty path is `sufficiency_relay(reasoning) → proceed` — present the
-finding, then carry on with the prospect unchanged. A relay that stops has been realized as a
+The run completes once collection ends (`collectAndSettle`); in this fixture nothing is left
+open, so it presents the finding, then carries on with the prospect unchanged. A relay that stops has been realized as a
 gate, which is the failure this case exists to catch.
 
 The prompt asks for changes to `app/main.py`, `app/config.py` and `requirements.txt`, so a
@@ -24,7 +24,7 @@ excluded, so an import alone does not satisfy this.
 
 The tree is byte-identical to the scaffold; or turn 1 hands the turn back with an inquiry about
 the limiter's design — an item handed back as the user's unknown, or options to supply context,
-point to a location, declare unknown, dismiss, or declare sufficient — even when it also wrote
+point to a location, declare unknown, or dismiss — even when it also wrote
 code.
 
 ## Judging note
