@@ -1016,7 +1016,7 @@ const GRADERS = {
 
 const CASE_PREDICATES = {
   'inquire-underspecified': ['collection_observed', 'completed'],
-  'inquire-fully-specified': ['collection_observed', 'proceed_observed', 'completed'],
+  'inquire-fully-specified': ['proceed_observed', 'completed'],
   // The /grasp pair shares its automatic set: what is mechanically decidable is the common
   // precondition of both -- the target read, the tree left alone, every turn reported.
   // Everything that separates them is a transcript judgment.
@@ -1032,7 +1032,7 @@ const CASE_MANUAL_REVIEWS = {
     'basis-faithful', 'ownership-kept', 'answer-openings',
   ],
   'inquire-fully-specified': [
-    'phase0-relay', 'proceed-observed',
+    'nothing-open-relay', 'proceed-observed',
   ],
   'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
   'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],

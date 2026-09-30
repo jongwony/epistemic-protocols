@@ -22,7 +22,7 @@ For every item the run surfaces — in the relay wherever it sits in the trace:
 
 1. **A locator is present.** The basis points at something a reader can find: a file (with a
    line, clause or quoted span where useful), a commit, a verbatim quote of the user's words, or
-   a channel or tool call the trace records the run trying.
+   a source or tool call the trace records the run trying.
 2. **The attribution is faithful.** What the run says a source says is what that source says,
    and the run's own inference is distinguishable from the source's content. A source's
    conditional or scoped statement rendered as the user's expectation, or as an unconditional
