@@ -18,7 +18,7 @@ goal and governing conventions, in its declared authority order.
 ```
 /review-loop [source?] [scope?] [landing?]
 
-source  : codex | code-review
+source  : codex | code-review — one, or several reviewing in parallel
 scope   : PR number | implicit current-branch PR / working tree
 landing : head | stacked       (PR scope only)
 ```
@@ -67,7 +67,8 @@ reach nor a source direction by inference.
 
 ### Phase 0 — Set the invocation and its ground
 
-1. Use the source designated in this invocation. Otherwise present the invokable
+1. Use the source or sources designated in this invocation, with any effort level
+   designated for each. Otherwise present the invokable
    sources with their actual coverage, cost, and reporting limits, without a default;
    ask which to use and wait for the answer. Silence stops. One available source relays its designation; zero stops with the missing capability.
    If an explicitly designated source is unavailable, surface why and ask whether to
@@ -108,10 +109,12 @@ reach nor a source direction by inference.
    an optional offer to record what outlives it. Execution permissions and call
    supervision belong to the host; the loop provides no timeout guarantee itself.
 
-### Phase 1 — Obtain one review
+### Phase 1 — Obtain the round's reviews
 
 Use the selected host route and source adapter with the captured pointer and current
-intent bundle. Read the returned review and diagnostics in full. Record actual call
+intent bundle. Several designated sources review that same pointer in parallel, each
+in its own context; the round's findings are their union, each keeping its source, and
+every rule below applies to each source as a source of its own. Read the returned review and diagnostics in full. Record actual call
 settings and any reported failure cause as provenance, not coverage.
 
 Use the first read-only review call to confirm the selected command and its contract
@@ -189,6 +192,16 @@ settled direction to identify what governs. That settles direction, not repair s
 or execution permission. Where direction remains unsettled or its authority is
 contested, show both surfaces, their disagreement, and their authority relation or
 its absence; ask an open-ended direction question and retain the user's words.
+
+Where two sources point in opposite directions on the same clause or invariant — one
+reading it as too loose, the other as too tight — the clause they share has closed a
+judgment the governing surfaces leave open. That is a Judgment gate showing both
+readings, not a repair either source's direction settles.
+
+Before classifying a repair that adds — a clause, a type, a field, a check — name the
+existing carrier that already holds the distinction and the governing ground that
+requires the addition. A repair no ground requires is dropped with that basis; where a
+subtraction serves the same finding, it is the repair.
 
 **Recurrence:** identify the same defect by clause/invariant, not phrasing or line.
 An initial uninformed return is absorbed by settled policy. Instance-specific
@@ -281,7 +294,7 @@ This call is the next round's review: send its findings and direction straight t
 Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
 perform the goal reading. Converge only on the current reviewed artifact when every
 surfaced finding is dispositioned, no recurrence awaits diagnosis, no edit has landed
-since the review, and either:
+since the review, and, for every designated source, either:
 
 - the source returned `approve`; or
 - a full re-review returned zero new non-refuted findings.
@@ -304,6 +317,7 @@ Round k — host / source / route — reviewed base → head or working-tree sta
 Exercised: source-reported reach and gaps (omit for a standing no-channel source)
 Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
+Roots: loop's cause reading — an earlier root reappearing (named), a new root, or none
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
 Apply: writer route (fork | brief | inline) → commits or new head, or tree state (omit if no pass ran)

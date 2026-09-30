@@ -42,7 +42,7 @@ One protocol per run. The object is the core protocol itself — its `SKILL.md` 
    - commit B: the re-derivation;
    - plugin version: one minor step over main's (ROO-67 decide db1de854);
    - verify: `lean-contract.js check` (generate, `lake build --wfail`, `lake lint`) and `lake test`, static checks, the `AGENTS.md` §Development test bundle, and `static-checks.test.mjs` in its own `node --test` run;
-   - review rounds — codex and `/code-review xhigh` in parallel, each round asked for roots first (an earlier root reappearing, or a new one) and mechanical items apart, a round's own fixes inside the next round's scope — until a round finds no root and its remaining fixes only strike false assertions; PR body carries the record and `Part of ROO-67`; no merge.
+   - review: `/review-loop` over the PR with codex and code-review (`xhigh`) as parallel sources, the decide ids as design intent; PR body carries the record and `Part of ROO-67`; no merge.
    Check the fork's report against the branch and CI before relaying it.
 10. **Dogfood** — run the new `SKILL.md` by hand in this session on a live target. Each mismatch → a gate → choi's answer → a decide → a fork fix → re-judge. Close the run with the intents taken, quoting choi's words. This dogfood is the run's runtime evidence.
 11. **Merge and close** — merge only on choi's instruction. The close runs whatever status the chart shows: `/unfold close` on the protocol chart — structure delta, closing note with commit and PR locators, follow-ups with one pointer back.
