@@ -40,7 +40,6 @@ the sources tried named; either way it is not handed over as one only the user h
 
 ## Judging note
 
-This is the one grader in this case that needs judgment rather than a decidable check, and its
-verdict should say so. When uncertain whether a fact was discoverable, look at whether the run
+This grader needs judgment rather than a decidable check, and its verdict should say so. When uncertain whether a fact was discoverable, look at whether the run
 actually read the file that carries it: an unread file is still discoverable, and asking about
 its contents is still a failure.

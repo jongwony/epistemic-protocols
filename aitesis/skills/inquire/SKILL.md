@@ -117,7 +117,8 @@ noncomputable section
 variable {P : Type}
 
 /-- `X`: the prospect for action — planning, task execution, analysis, investigation, or any
-    purposeful action requiring context. It is a turn of the context and is never rewritten. -/
+    purposeful action requiring context — read as the context it lands in; the turn that states
+    it is never rewritten. -/
 abbrev Prospect (P : Type) := Context P
 
 /-- The deficit: the work ahead rests on ground not yet checked — a reading presupposed, a missing
