@@ -18,7 +18,7 @@ goal and governing conventions, in its declared authority order.
 ```
 /review-loop [source?] [scope?] [landing?]
 
-source  : codex | code-review
+source  : codex | code-review — one, or several reviewing in parallel
 scope   : PR number | implicit current-branch PR / working tree
 landing : head | stacked       (PR scope only)
 ```
@@ -67,7 +67,8 @@ reach nor a source direction by inference.
 
 ### Phase 0 — Set the invocation and its ground
 
-1. Use the source designated in this invocation. Otherwise present the invokable
+1. Use the source or sources designated in this invocation, with any effort level
+   designated for each. Otherwise present the invokable
    sources with their actual coverage, cost, and reporting limits, without a default;
    ask which to use and wait for the answer. Silence stops. One available source relays its designation; zero stops with the missing capability.
    If an explicitly designated source is unavailable, surface why and ask whether to
@@ -108,22 +109,25 @@ reach nor a source direction by inference.
    an optional offer to record what outlives it. Execution permissions and call
    supervision belong to the host; the loop provides no timeout guarantee itself.
 
-### Phase 1 — Obtain one review
+### Phase 1 — Obtain the round's reviews
 
 Use the selected host route and source adapter with the captured pointer and current
-intent bundle. Read the returned review and diagnostics in full. Record actual call
+intent bundle. Several designated sources review that same pointer in parallel, each
+in its own context; the round's findings are their union, each keeping its source. Read the returned review and diagnostics in full. Record actual call
 settings and any reported failure cause as provenance, not coverage.
 
-Use the first read-only review call to confirm the selected command and its contract
+Use each source's first read-only review call to confirm its command and contract
 through startup, any skill expansion, and returned output. Reuse matching implementation
-evidence as the adapter specifies. Before accepting a verdict, establish that the
-selected source actually reviewed the captured surface and completed successfully.
+evidence as the adapter specifies. Before accepting a verdict, establish that its
+source actually reviewed the captured surface and completed successfully.
 When execution contradicts the expected contract, diagnose that mismatch; unresolved
 source or scope mismatches contribute no verdict and follow the incomplete-call rule.
 
 A call ending without a usable review contributes no verdict and satisfies neither
-convergence arm. Show what returned and ask whether to continue without that round,
-switch source, or stop. Continuing still owes a completed review before convergence.
+convergence arm. Show what returned and ask whether to continue this round without
+that source's review, switch source, or stop. A failure that persists makes the source
+unavailable under Phase 0 rule 1, where its designation is settled. Continuing still
+owes that source a completed review before convergence.
 An extraction failure calls for inspecting raw output; it does not prove source
 failure. A capable source omitting reach leaves the missing report visible as residual.
 
@@ -166,6 +170,11 @@ matching site missed by a sweep calls for completing the enumeration; an instanc
 outside that predicate calls for reconsidering the abstraction. A later-created or
 newly matching site does not falsify an earlier sweep.
 
+Where that reading, on a full re-review every designated source completed, names no
+shared cause, every root on the trace maps to its resolution, and no recurrence awaits
+diagnosis, the loop ends there as it stands: the round's findings go to the user
+unrepaired with their dispositions, and no repair is chosen or applied.
+
 - **Mechanical / Extension:** a verified bug with a self-evident localized fix, or
   another deterministic edit whose plausible shapes do not materially diverge.
   Apply and report without a disposition gate.
@@ -189,6 +198,18 @@ settled direction to identify what governs. That settles direction, not repair s
 or execution permission. Where direction remains unsettled or its authority is
 contested, show both surfaces, their disagreement, and their authority relation or
 its absence; ask an open-ended direction question and retain the user's words.
+
+Where findings pull one clause or invariant in opposite directions and nothing
+governing decides between them, the clause holds a judgment the governing surfaces
+leave open: a Judgment gate showing both readings and any repair already landed in
+one direction, not a repair either reading settles.
+
+Read every repair as an ablation before classifying it. A finding grounds a repair
+through the consequence it verified; a finding that shows only something unstated
+grounds none and is dropped on that basis. The repair is the least text that resolves
+that consequence and loses no other obligation — an existing carrier before a new one,
+a removal before an addition — and that reading is a recommendation, not the
+disposition.
 
 **Recurrence:** identify the same defect by clause/invariant, not phrasing or line.
 An initial uninformed return is absorbed by settled policy. Instance-specific
@@ -265,10 +286,10 @@ so far, so the driving session records rather than re-derives it.
 
 ### Phase 5 — Re-review and stop on evidence
 
-When the processed round has not earned convergence below, refresh changed files
-and design intent and obtain a **full** re-review, including after dispositions that
-landed no edit. Any edit invalidates the preceding verdict and always owes this
-review of the original surface plus all repairs. For PR scope, use the re-review
+When the processed round has not earned convergence below, refresh changed files and
+design intent and obtain a **full** re-review from each designated source, including
+after dispositions that landed no edit. Any edit invalidates the preceding verdict and
+always owes this review of the original surface plus all repairs. For PR scope, use the re-review
 pointer supplied by [PR scope](references/pr-scope.md).
 For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
@@ -277,14 +298,15 @@ message is a fix-status claim under Phase 0 rule 5: point the re-review at the l
 through the pre-repair range only, and state that the repair commits are judged from
 their content in the diff as part of the whole range.
 
-This call is the next round's review: send its findings and direction straight to
-Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
+These reviews are the next round's: Phase 1's rules for parallel sources and failed
+calls apply to them, and their findings and direction go straight to Phase 2. Process findings even alongside approval, and
 perform the goal reading. Converge only on the current reviewed artifact when every
 surfaced finding is dispositioned, no recurrence awaits diagnosis, no edit has landed
 since the review, and either:
 
-- the source returned `approve`; or
-- a full re-review returned zero new non-refuted findings.
+- for every designated source, the source returned `approve` or a full re-review
+  returned zero new non-refuted findings; or
+- the loop ended at Phase 3's root-resolved end.
 
 A new finding remains new in its discovery review even when deferred or handed over;
 its later return is not new and preserves the disposition. Unreached axes, missing
@@ -304,11 +326,14 @@ Round k — host / source / route — reviewed base → head or working-tree sta
 Exercised: source-reported reach and gaps (omit for a standing no-channel source)
 Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
+Roots: Phase 3 shared-cause reading — each shared cause with the findings it explains, or none
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
 Apply: writer route (fork | brief | inline) → commits or new head, or tree state (omit if no pass ran)
 Landing: repair destination (PR only)
 ```
+
+A round with several sources carries its Round, Exercised and Call lines once per source.
 
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised

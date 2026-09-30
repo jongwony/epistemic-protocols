@@ -18,7 +18,7 @@ not the model name or the presence of a plugin directory alone.
   session. Resume the same fork with `SendMessage` to its agent name to continue with
   its context intact; a new `Agent` call starts a writer without the pass's ground.
 
-After designation, load only the selected adapter:
+After designation, load only the adapter of each selected source:
 [Claude review output](source-adapter-code-review.md) or
 [Codex CLI](source-adapter-codex.md).
 

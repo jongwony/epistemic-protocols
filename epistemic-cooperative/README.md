@@ -71,7 +71,7 @@ Key features:
 
 `codex` and `code-review` select the reviewer in either Claude Code or Codex.
 The [runtime contract](skills/review-loop/SKILL.md) routes to the active host
-reference, then loads only the selected source adapter. Claude reviews require a
+reference, then loads only the adapter of each selected source. Claude reviews require a
 skill that can review the captured local scope; Codex reviews require its CLI.
 
 ## Architecture
@@ -123,7 +123,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 ```
 
 `/review-loop` reuses matching reviewer capability evidence and confirms the command
-and scope during the first read-only review. For PRs, an omitted `head`/`stacked`
+and scope during each source's first read-only review. For PRs, an omitted `head`/`stacked`
 repair destination is settled before the first edit; it does not delay the review.
 
 ## Author

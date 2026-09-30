@@ -71,7 +71,7 @@ ClaimIntake → ScopedClaimFrame → BoundedTestSpace → EmpiricalEvidence → 
 
 Claude Code와 Codex 모두에서 `codex`, `code-review`로 리뷰 소스를 선택합니다.
 [런타임 계약](skills/review-loop/SKILL.md)이 현재 호스트 참조로 연결하고,
-선택한 소스 어댑터만 읽습니다. Claude 리뷰에는 지정된 로컬 범위를 검토할 수
+선택한 소스마다 그 어댑터만 읽습니다. Claude 리뷰에는 지정된 로컬 범위를 검토할 수
 있는 스킬이, Codex 리뷰에는 CLI가 필요합니다.
 
 ## 아키텍처
@@ -114,8 +114,8 @@ epistemic-cooperative/
 /goal-research <question>
 ```
 
-`/review-loop`는 환경이 일치하는 리뷰어 기능 확인 기록을 재사용하고, 첫 읽기 전용
-리뷰에서 명령과 범위를 확인합니다. PR의 `head`/`stacked` 수정 반영 위치를 생략하면
+`/review-loop`는 환경이 일치하는 리뷰어 기능 확인 기록을 재사용하고, 소스마다 첫 읽기
+전용 리뷰에서 명령과 범위를 확인합니다. PR의 `head`/`stacked` 수정 반영 위치를 생략하면
 첫 수정 전에 확정하며, 그 선택 때문에 리뷰를 늦추지 않습니다.
 
 ## 저자

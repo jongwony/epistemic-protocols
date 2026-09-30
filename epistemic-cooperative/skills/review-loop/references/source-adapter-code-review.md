@@ -12,6 +12,10 @@ Claude `/code-review` implementation to the Source Interface in `SKILL.md`.
   review invocation and determine the contract from its skill expansion and output.
   Mark unknown limits until observed; refresh the affected record fields when runtime
   evidence differs. A contract that cannot be established remains an explicit gap.
+- Pass a designated effort level in the form the implementation parses, and read the
+  level actually used from its expansion or output onto the trace. A call that ran at
+  another level than designated, such as a remembered fallback, is a source mismatch
+  under Phase 1.
 - Establish that each review examined the requested local surface before normalizing
   it. A raw PR number alone addresses remote PR state and can omit local or stacked
   repairs.
