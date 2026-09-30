@@ -145,11 +145,12 @@ axiom uncertainties : Context P → List Entry
 
 /-- **Your collection** from `c`, to the limit of your own reach: every live uncertainty, and every
     one collection exposes, pushed through every source you can read or run without changing
-    state, until none is left; where to look is yours to judge, and no list of sources bounds it.
-    What you say you read, you read whole. A source that needs a state change, someone's
-    permission, or another's authority is not reached on your own: name it, with the judgment or
-    capability it needs, in the uncertainty's `reach`, and hand it off. Each return is an evidence
-    turn; a run that observed nothing returns its null result. Direction:
+    existing state, until none is left; where to look is yours to judge, and no list of sources
+    bounds it. What you create only to look — a scratch copy, a temp file — you remove afterwards.
+    What you say you read, you read whole. An observation that needs to change existing state,
+    someone's permission, or another's authority is not reached on your own: name it, with the
+    judgment or capability it needs, in the uncertainty's `reach`, and hand it off. Each return is
+    an evidence turn; a run that observed nothing returns its null result. Direction:
     `references/judgments.md` §Collection. -/
 axiom collect : Context P → List (Evidence P)
 
@@ -413,7 +414,7 @@ inductive Op | scan | collect | read | surface | readAnswer | converge | withdra
 /-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .scan       => (.sense, "Internal analysis: the inventory — what the prospect rests on that the fused context leaves uncertain, what collection returned included; no fixed taxonomy")
-  | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing state, to the limit of your reach; what each returns enters the context as an evidence turn; a source that needs a state change, a permission, or another's authority is named with what it needs and handed off, never run as collection")
+  | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing existing state, to the limit of your reach, removing afterwards what you created only to look; what each returns enters the context as an evidence turn; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and handed off, never run as collection")
   | .read       => (.sense, "Internal analysis: how each uncertainty stands — settled with its citation, ground short with its candidate, or unreached — and its reach, read on the context as it now stands")
   | .surface    => (.interaction .extension, "every open uncertainty handed back as the person's own unknown, each with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; what an answer would change; each settled one with its provenance — the evidence and where it was read, the person's words, or your proposal marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, dismisses, says enough, withdraws, or exposes a new uncertainty")
