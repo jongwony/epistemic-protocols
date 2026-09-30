@@ -365,13 +365,17 @@ open Classical in
     where it came from), how much it matters, and how it stands — waiting on the person; the
     person's resolution with their turn quoted, the intent taken from it, and whether they said
     it, took a proposed action, or entrusted the choice; a relayed resolution with the evidence
-    that fixed it; a withdrawn flag with that evidence. For each open one, `actions`, each with its
+    that fixed it; a withdrawn flag with that evidence; a settled resolution the context does not
+    yet show carried out (`Undone`), as waiting, carried out when the next utterance that bears on
+    the run arrives. For each open one, `actions`, each with its
     consequence; mismatches that bear on each other grouped, with their combined consequence. Then
     `reach`. Then what changed since the last sheet: each line added, removed, or changed names
     what moved — a write, a new observation, a person's turn, or a reading of yours corrected on
     unchanged ground, said to be a correction; a line that left says why — repaired, gone with a
     removed result, withdrawn by evidence; an adaptation that did not repair what it aimed at says
-    so. Then one gate over every open mismatch. Re-present the whole sheet where it changed or the
+    so. Then one gate over every open mismatch; where nothing is open and only settled resolutions
+    wait, the line that they are carried out when the next utterance that bears on the run arrives
+    takes the gate's place, and nothing is asked. Re-present the whole sheet where it changed or the
     person asked for it; a question about the sheet is answered with the gate said to stand. On
     completion, the closing sheet CONVERGENCE names; on a stop, what landed and what stays open. -/
 def settle (respond : Context P → Response P) (c : Context P) : Outcome P :=
@@ -400,8 +404,9 @@ Transformative revalidation (NON-MONOTONE): a write produces a new X, and the ne
 reads it, so a write can breed mismatches that did not exist before, and can leave the one it
 aimed at in place. Nothing counts down; every pass judges the whole X against the whole context,
 and every change on the sheet names what moved. Each round that leaves something open ends at a
-gate; a resolution fixed by evidence only after a pass's writes waits for the next pass, which
-the next utterance that bears on the run opens. The person stops the run; completion needs no
+gate; a resolution settled only after a pass's writes waits for the next pass, which the next
+utterance that bears on the run opens, and the sheet shows it as waiting, with no question asked
+for it. The person stops the run; completion needs no
 turn of theirs.
 -/
 
@@ -446,7 +451,7 @@ def grounding : Op → Annot × String
   | .judge            => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result must fit; how each mismatch stands; what fits and what was not reached")
   | .evidenceWithdraw => (.interaction .extension, "where evidence alone shows a flagged place fits, withdraw the flag and say so with that evidence; a person's turn that disputes it puts it back")
   | .evidenceRelay    => (.interaction .extension, "where evidence alone fixes a mismatch's whole resolution, record it as yours with that evidence and carry it out; a person's turn that disputes it leaves it open")
-  | .gate             => (.interaction .constitution, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
+  | .gate             => (.interaction .constitution, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and never a category title, what fits, what was not reached, and what changed since the last sheet, a settled resolution not yet carried out shown as waiting — then one question over every open mismatch, or, where only such a resolution waits, the line that it is carried out when the next utterance that bears on the run arrives, with nothing asked")
   | .adapt            => (.transform, "artifact write: an adaptation a settled resolution asks, applied to the result; what it returns enters the context and the next observation reads it")
   | .discard          => (.transform, "artifact write: withdraw the result and put the replacement in its place, or remove it when nothing takes its place")
   | .readTurn         => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it stops the run, whether it bears on it, and what it does there: resolves, corrects, disputes, grants, names something that does not fit, points at a place to look, asks about the sheet")
@@ -484,6 +489,8 @@ The formal blocks define execution. This section fixes the user-facing rendering
 
 Open with an overview — how many places do not fit, how many wait on the user, what was checked and fits. Then every place the result does not fit, each with what does not fit, where it is (in the result, or where the result lands), the part of the context it does not fit (quoted with where it came from), how much it matters, and how it stands — waiting on the user, what they decided and how (their words, an action they took, a choice they entrusted), settled by evidence with that evidence, or withdrawn because evidence showed it fits. Group places that bear on each other and say what the group means together. Then say what was checked and fits, and each place that could not be reached with what reaching it needs. From the second sheet on, say what changed: each line added, removed, or changed names what moved — a write, something newly observed, the user's answer, or a correction of your own reading — and a line that left says why.
 
+A resolution that stands settled — by the user, under their grant, or by evidence — but is not yet carried out is shown as waiting, with the line that it is carried out when their next message that bears on the run arrives; where it is all that is left, that line takes the question's place, and nothing is asked — no "shall I apply it?".
+
 Then ask once, over every open place. The options are concrete actions for each, each with what then happens — never category titles. For a nightly report whose schedule was written this session:
 
 ```
@@ -514,7 +521,7 @@ When a pass leaves nothing open and nothing settled undone, the run completes wi
 
 - **Non-circularity**: What the result must fit is the context the person and the environment supplied — never the assistant's own words, which a mismatch cannot cite.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own moves bear on where a sentence sits relative to a gate.
-- **One sheet**: Every place found goes on one sheet with one question over the open ones; a place is not held back for a later round. Where one answer changes what a later choice means, or the user asks for it, take them one at a time with the whole sheet still in view.
+- **One sheet**: Every place found goes on one sheet with one question over the open ones; a place is not held back for a later round. Where one answer changes what a later choice means, or the user asks for it, take them one at a time with the whole sheet still in view. A settled resolution not yet carried out is on the sheet as waiting, carried out when the next utterance that bears on the run arrives; it takes no confirmation turn, and where nothing else is open its line stands in place of the question.
 - **Recognition over categories**: Offer actions concrete to the place in front of the person, each with its consequence. The person's own words settle what a category would have asked them to choose.
 - **Reach named**: Follow the result to every place it lands and every intent it was meant to carry, without changing existing state; read whole what you say you read; name each place not reached with what reaching it needs.
 - **Verdict scope**: Present the per-mismatch trace before the verdict. Fit is claimed only for the mismatches found within the reach, and an adapted result claims fit, not correctness; a removal claims nothing for its replacement.
