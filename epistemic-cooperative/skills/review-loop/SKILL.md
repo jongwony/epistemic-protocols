@@ -200,8 +200,8 @@ leave open: a Judgment gate showing both readings and any repair already landed 
 one direction, not a repair either reading settles.
 
 Read every repair as an ablation before classifying it. A finding grounds a repair
-through the consequence it verified, not through what it finds unstated; the repair
-is the least text that resolves that consequence and loses no other obligation — an
+through the consequence it verified, not through what it finds unstated, which is
+dropped on that basis; the repair is the least text that resolves that consequence and loses no other obligation — an
 existing carrier before a new one, a removal before an addition. Where trajectories
 diverge materially, that reading is the recommendation at the Judgment gate, not the
 disposition.
@@ -281,10 +281,11 @@ so far, so the driving session records rather than re-derives it.
 
 ### Phase 5 — Re-review and stop on evidence
 
-When the processed round has not earned convergence below, refresh changed files
-and design intent and obtain a **full** re-review from each designated source,
-including after dispositions that
-landed no edit. Any edit invalidates the preceding verdict and always owes this
+When the processed round has not earned convergence below and its Phase 3 reading
+names a shared cause, refresh changed files and design intent and obtain a **full**
+re-review from each designated source, including after dispositions that landed no
+edit. Where it names none, the round's trace is a non-convergence exit as below, and
+the user's instruction resumes the loop. Any edit invalidates the preceding verdict and always owes this
 review of the original surface plus all repairs. For PR scope, use the re-review
 pointer supplied by [PR scope](references/pr-scope.md).
 For working-tree scope, compare against the captured base and include current
@@ -310,9 +311,6 @@ residual; they do not themselves force another round and are never reported as c
 
 At any exit before these conditions hold, report non-convergence with the latest
 reviewed artifact, later edits, unfinished repairs, residuals, and retained judgments.
-A round that has not converged and whose cause reading after its repairs names no
-shared cause ends the turn there, its trace carrying that report; the loop resumes on
-the user's instruction.
 The user may exit at any point; an external interruption supplies no convergence evidence.
 
 ## Trace and Exit
@@ -331,7 +329,7 @@ Apply: writer route (fork | brief | inline) → commits or new head, or tree sta
 Landing: repair destination (PR only)
 ```
 
-A round with several sources carries the first three lines once per source.
+A round with several sources carries its Round, Exercised and Call lines once per source.
 
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
