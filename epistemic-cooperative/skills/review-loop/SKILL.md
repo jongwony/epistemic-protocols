@@ -200,10 +200,10 @@ leave open: a Judgment gate showing both readings and any repair already landed 
 one direction, not a repair either reading settles.
 
 Read every repair as an ablation before classifying it. A finding grounds a repair
-through the consequence it verified, not through what it finds unstated, which is
-dropped on that basis; the repair is the least text that resolves that consequence and loses no other obligation — an
-existing carrier before a new one, a removal before an addition. Where trajectories
-diverge materially, that reading is the recommendation at the Judgment gate, not the
+through the consequence it verified; a finding that shows only something unstated
+grounds none and is dropped on that basis. The repair is the least text that resolves
+that consequence and loses no other obligation — an existing carrier before a new one,
+a removal before an addition — and that reading is a recommendation, not the
 disposition.
 
 **Recurrence:** identify the same defect by clause/invariant, not phrasing or line.
@@ -281,12 +281,10 @@ so far, so the driving session records rather than re-derives it.
 
 ### Phase 5 — Re-review and stop on evidence
 
-When the processed round has not earned convergence below and its Phase 3 reading
-names a shared cause, refresh changed files and design intent and obtain a **full**
-re-review from each designated source, including after dispositions that landed no
-edit. Where it names none, the round's trace is a non-convergence exit as below, and
-the user's instruction resumes the loop. Any edit invalidates the preceding verdict and always owes this
-review of the original surface plus all repairs. For PR scope, use the re-review
+When the processed round has not earned convergence below, refresh changed files and
+design intent and obtain a **full** re-review from each designated source, including
+after dispositions that landed no edit. Any edit invalidates the preceding verdict and
+always owes this review of the original surface plus all repairs. For PR scope, use the re-review
 pointer supplied by [PR scope](references/pr-scope.md).
 For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
@@ -299,10 +297,13 @@ These reviews are the next round's: Phase 1's rules for parallel sources and fai
 calls apply to them, and their findings and direction go straight to Phase 2. Process findings even alongside approval, and
 perform the goal reading. Converge only on the current reviewed artifact when every
 surfaced finding is dispositioned, no recurrence awaits diagnosis, no edit has landed
-since the review, and, for every designated source, either:
+since the review, and either:
 
-- the source returned `approve`; or
-- a full re-review returned zero new non-refuted findings.
+- for every designated source, the source returned `approve` or a full re-review
+  returned zero new non-refuted findings; or
+- the latest full re-review's Phase 3 reading names no shared cause and every root on
+  the trace maps to its resolution: the loop ends as it stands, and that review's
+  remaining findings are carried to the user unrepaired, with their dispositions.
 
 A new finding remains new in its discovery review even when deferred or handed over;
 its later return is not new and preserves the disposition. Unreached axes, missing
