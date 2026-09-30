@@ -170,6 +170,11 @@ matching site missed by a sweep calls for completing the enumeration; an instanc
 outside that predicate calls for reconsidering the abstraction. A later-created or
 newly matching site does not falsify an earlier sweep.
 
+Where that reading, on a full re-review every designated source completed, names no
+shared cause, every root on the trace maps to its resolution, and no recurrence awaits
+diagnosis, the loop ends there as it stands: the round's findings go to the user
+unrepaired with their dispositions, and no repair is chosen or applied.
+
 - **Mechanical / Extension:** a verified bug with a self-evident localized fix, or
   another deterministic edit whose plausible shapes do not materially diverge.
   Apply and report without a disposition gate.
@@ -301,9 +306,7 @@ since the review, and either:
 
 - for every designated source, the source returned `approve` or a full re-review
   returned zero new non-refuted findings; or
-- the latest full re-review's Phase 3 reading names no shared cause and every root on
-  the trace maps to its resolution: the loop ends as it stands, and that review's
-  remaining findings are carried to the user unrepaired, with their dispositions.
+- the loop ended at Phase 3's root-resolved end.
 
 A new finding remains new in its discovery review even when deferred or handed over;
 its later return is not new and preserves the disposition. Unreached axes, missing
