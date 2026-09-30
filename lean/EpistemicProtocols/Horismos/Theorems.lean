@@ -17,38 +17,155 @@ variable {P : Type}
 /-! Every judgment the block declares as an `axiom` has an inhabited type; these witnesses carry no
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
-instance {c : Context P} : Nonempty (BoundaryEssence c) := ⟨⟨[], [], "", [], []⟩⟩
-instance : Nonempty Verdict := ⟨.cont⟩
-variable (respond : Context P → Response P)
+instance {c : Context P} : Nonempty (BoundaryEssence c) := ⟨⟨[], ""⟩⟩
+instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-theorem silence (c : Context P) : bound respond c [] = .holding c := rfl
+variable (respond session : Context P → Response P)
 
-theorem continue_folds (c : Context P) (xs ys : List (Utterance P))
-    (h : AllCont respond c xs) :
-    bound respond c (xs ++ ys) = bound respond (foldRounds respond c xs) ys := by
-  induction xs generalizing c with
-  | nil => rfl
-  | cons u us ih =>
-    simp only [AllCont] at h
-    simp only [List.cons_append, bound, h.1, foldRounds]
-    exact ih _ h.2
+/-- Silence settles nothing: with no further utterance the run stands as it was — a holding gate
+    keeps holding, a boundary that stands keeps standing. -/
+theorem silence (c : Context P) (o : Outcome P) : bound respond session c o [] = o := by
+  simp [bound]
 
-theorem stop_here (c : Context P) (u : Utterance P) (us : List (Utterance P))
-    (h : verdict (fuse c u) = .finish) :
-    bound respond c (u :: us) = .defined (close (fuse c u)) := by
+theorem start_rounds_first (c : Context P) (us : List (Utterance P)) :
+    start respond session c us =
+      bound respond session (c ++ [(respond c).val]) (status (c ++ [(respond c).val])) us := rfl
+
+/-- An utterance that does not bear on the boundary adds no round and leaves the run as it stood. -/
+theorem unrelated_keeps_the_run (c : Context P) (o : Outcome P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    bound respond session c o (u :: us) =
+      bound respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
   simp [bound, h]
 
-theorem defined_ends_in_utterance (c : Context P) (us : List (Utterance P))
-    (b : DefinedBoundary P) (h : bound respond c us = .defined b) :
-    ∃ (c₀ : Context P) (u : Utterance P), b.context = fuse c₀ u := by
-  induction us generalizing c with
-  | nil => simp [bound] at h
+/-- A withdrawal ends the run with the partial record and sets no boundary. -/
+theorem withdrawal_ends (c : Context P) (o : Outcome P) (u : Utterance P)
+    (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (h : isFilled (withdrawal (fuse c u)) = true) :
+    bound respond session c o (u :: us) = .withdrawn (partialOf (fuse c u)) := by
+  simp [bound, hr, h]
+
+/-- Any other utterance that bears on the boundary is answered by the next round, and the run
+    stands as that round leaves it — also after the boundary stood, so a later correction reopens
+    it. -/
+theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
+    (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (hw : isFilled (withdrawal (fuse c u)) = false) :
+    bound respond session c o (u :: us) =
+      bound respond session (fuse c u ++ [(respond (fuse c u)).val])
+        (status (fuse c u ++ [(respond (fuse c u)).val])) us := by
+  simp [bound, hr, hw]
+
+/-- The boundary stands on one of two grounds: the person's acceptance, or no decision awaiting
+    their disposition. -/
+theorem defined_grounds (c : Context P) (b : DefinedBoundary P) (h : status c = .defined b) :
+    (isFilled (acceptance c) = true ∨ awaits c = false) ∧ b = close c := by
+  unfold status at h
+  split at h
+  · rename_i hc
+    cases h
+    simp only [Bool.or_eq_true, Bool.not_eq_true'] at hc
+    exact ⟨hc, rfl⟩
+  · cases h
+
+/-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
+theorem acceptance_sets_despite_residual (c : Context P) (h : isFilled (acceptance c) = true) :
+    status c = .defined (close c) := by
+  simp [status, h]
+
+/-- Where something awaits the person and they have not accepted, the gate holds. -/
+theorem awaiting_holds (c : Context P) (ha : isFilled (acceptance c) = false)
+    (hw : awaits c = true) : status c = .holding c := by
+  simp [status, ha, hw]
+
+theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
+    (us : List (Utterance P)) (h : bound respond session c o (u :: us) = r) :
+    (∃ c' o', bound respond session c' o' us = r) ∨
+    (isFilled (withdrawal (fuse c u)) = true ∧ r = .withdrawn (partialOf (fuse c u))) := by
+  simp only [bound] at h
+  split at h
+  · exact .inl ⟨_, _, h⟩
+  · split at h
+    · exact .inr ⟨by assumption, h.symm⟩
+    · exact .inl ⟨_, _, h⟩
+
+/-- A withdrawn run was withdrawn by the person's turn. -/
+theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utterance P))
+    (p : PartialRecord P) (h : bound respond session c o us = .withdrawn p)
+    (ho : ∀ q, o ≠ .withdrawn q) :
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ p = partialOf c₀ := by
+  induction us generalizing c o with
+  | nil => simp [bound] at h; exact absurd h (ho p)
   | cons u us ih =>
     simp only [bound] at h
     split at h
-    · exact ih _ h
-    · cases h; exact ⟨c, u, rfl⟩
-    · cases h
-    · cases h
+    · exact ih _ o h ho
+    · split at h
+      · cases h; exact ⟨_, by assumption, rfl⟩
+      · refine ih _ _ h ?_
+        intro q hq
+        unfold status at hq
+        split at hq <;> cases hq
+
+/-- Every boundary a run sets, from a start that has not withdrawn, stands on the acceptance or on
+    nothing awaiting the person, in the context where it was read. -/
+theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
+    (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
+    (ho : ∀ b', o = .defined b' → ∃ c₀, (isFilled (acceptance c₀) = true ∨ awaits c₀ = false) ∧
+      b' = close c₀) :
+    ∃ c₀, (isFilled (acceptance c₀) = true ∨ awaits c₀ = false) ∧ b = close c₀ := by
+  induction us generalizing c o with
+  | nil => simp [bound] at h; exact ho b h
+  | cons u us ih =>
+    simp only [bound] at h
+    split at h
+    · exact ih _ o h ho
+    · split at h
+      · cases h
+      · refine ih _ _ h ?_
+        intro b' hb'
+        exact ⟨_, defined_grounds _ b' hb'⟩
+
+/-- Every disposition on the record cites a person's turn: a relayed earlier decision, a fact, or
+    a proposal of yours makes none. -/
+theorem recorded_by_person (c : Context P) (r : Recorded c) : r.src.src.val = .person :=
+  r.byPerson
+
+/-- A disposition is never granted: only the person disposes. -/
+theorem disposition_not_granted (d : Disposition) : d.standing ≠ .granted := d.notGranted
+
+/-- Held content that stands — the person's own value, one they took, or your choice inside their
+    grant — stands on a person's turn. -/
+theorem held_content_cites_person {d : Domain} {c : Context P} (s : Settled) (src : Cite c)
+    (allowed : (contentOf (P := P) d).admits src.src)
+    (supported : (contentOf (P := P) d).supports c (c[src.idx]'src.lt) s)
+    (hh : s.isHeld = true) (hs : stands (Occ.filled s src allowed supported) = true) :
+    src.src.val = .person := by
+  simp [stands, hh] at hs
+  exact hs
+
+private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : BoundaryEntry c)
+    (hm : e ∈ m) (hs : stands e.content = false) : (e.domain, e.question) ∈ residualOf m := by
+  simp only [residualOf, List.mem_map, List.mem_filter]
+  exact ⟨e, ⟨hm, by simp [hs]⟩, rfl⟩
+
+/-- Every decision on the map whose content does not stand is in the residual of the boundary. -/
+theorem open_decisions_in_residual (c : Context P) (e : BoundaryEntry c)
+    (hm : e ∈ (readout c).map) (hs : stands e.content = false) :
+    (e.domain, e.question) ∈ (close c).residual :=
+  mem_residualOf _ e hm hs
+
+/-- A decision awaiting the person is in the residual. -/
+theorem awaiting_in_residual (c : Context P) (e : BoundaryEntry c) (hm : e ∈ (readout c).map)
+    (ha : awaitsEntry e = true) : (e.domain, e.question) ∈ (close c).residual := by
+  apply open_decisions_in_residual c e hm
+  simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true'] at ha
+  exact ha.2
+
+/-- The boundary carries the map, the record, the residual, and the dissent read from the context
+    it closes. -/
+theorem close_carries (c : Context P) :
+    (close c).context = c ∧ (close c).dissent = dissent c ∧
+      (close c).residual = residualOf (readout c).map := ⟨rfl, rfl, rfl⟩
 
 end Horismos
