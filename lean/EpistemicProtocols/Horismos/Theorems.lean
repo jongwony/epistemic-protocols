@@ -126,8 +126,8 @@ theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P
         intro b' hb'
         exact ⟨_, defined_grounds _ b' hb'⟩
 
-/-- Every disposition on the record cites a person's turn: a relayed earlier decision, a fact, or
-    a proposal of yours makes none. -/
+/-- Every disposition on the record cites a person's turn: a relayed earlier decision — one fixing
+    a decision's content or who settles it —, a fact, or a proposal of yours makes none. -/
 theorem recorded_by_person (c : Context P) (r : Recorded c) : r.src.src.val = .person :=
   r.byPerson
 
@@ -161,6 +161,19 @@ theorem awaiting_in_residual (c : Context P) (e : BoundaryEntry c) (hm : e ∈ (
   apply open_decisions_in_residual c e hm
   simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true'] at ha
   exact ha.2
+
+/-- A decision whose disposition an earlier decision fixes does not await the person: it is shown
+    with that citation and not asked again. -/
+theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c) (s : Cite c)
+    (h : e.priorDisposition = some s) : awaitsEntry e = false := by
+  simp [awaitsEntry, h]
+
+/-- An earlier decision fixing who settles a decision makes no disposition of this run: the record
+    reads only the person's disposition. -/
+theorem prior_disposition_records_nothing {c : Context P} (e : BoundaryEntry c)
+    (x : Option (Cite c)) : recordOf { e with priorDisposition := x } = recordOf e := by
+  obtain ⟨d, q, r, ev, dep, app, pr, disp, pd, ct⟩ := e
+  cases disp <;> simp [recordOf]
 
 /-- The boundary carries the map, the record, the residual, and the dissent read from the context
     it closes. -/
