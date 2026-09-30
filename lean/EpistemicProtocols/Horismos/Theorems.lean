@@ -27,9 +27,10 @@ variable (respond session : Context P → Response P)
 theorem silence (c : Context P) (o : Outcome P) : bound respond session c o [] = o := by
   simp [bound]
 
+/-- The run opens on its first round, standing as the context it is presented from leaves it. -/
 theorem start_rounds_first (c : Context P) (us : List (Utterance P)) :
-    start respond session c us =
-      bound respond session (c ++ [(respond c).val]) (status (c ++ [(respond c).val])) us := rfl
+    start respond session c us = bound respond session (c ++ [(respond c).val]) (status c) us :=
+  rfl
 
 /-- An utterance that does not bear on the boundary adds no round and leaves the run as it stood. -/
 theorem unrelated_keeps_the_run (c : Context P) (o : Outcome P) (u : Utterance P)
@@ -38,22 +39,21 @@ theorem unrelated_keeps_the_run (c : Context P) (o : Outcome P) (u : Utterance P
       bound respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
   simp [bound, h]
 
-/-- A withdrawal ends the run with the partial record and sets no boundary. -/
+/-- A withdrawal ends the run with the snapshot at the person's word and sets no boundary. -/
 theorem withdrawal_ends (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (h : isFilled (withdrawal (fuse c u)) = true) :
-    bound respond session c o (u :: us) = .withdrawn (partialOf (fuse c u)) := by
+    bound respond session c o (u :: us) = .withdrawn (snapshotOf (fuse c u)) := by
   simp [bound, hr, h]
 
-/-- Any other utterance that bears on the boundary is answered by the next round, and the run
-    stands as that round leaves it — also after the boundary stood, so a later correction reopens
-    it. -/
+/-- Any other utterance that bears on the boundary is read where it is said — the run stands as
+    that utterance leaves it — and then answered by your turn; also after the boundary stood, so a
+    later correction reopens it. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false) :
     bound respond session c o (u :: us) =
-      bound respond session (fuse c u ++ [(respond (fuse c u)).val])
-        (status (fuse c u ++ [(respond (fuse c u)).val])) us := by
+      bound respond session (fuse c u ++ [(respond (fuse c u)).val]) (status (fuse c u)) us := by
   simp [bound, hr, hw]
 
 /-- The boundary stands on one of two grounds: the person's acceptance, or no decision awaiting
@@ -68,6 +68,13 @@ theorem defined_grounds (c : Context P) (b : DefinedBoundary P) (h : status c = 
     exact ⟨hc, rfl⟩
   · cases h
 
+/-- Where a person's utterance sets the boundary, the boundary is read at that utterance: the
+    context it closes ends in the person's turn, before any turn of yours. -/
+theorem defined_at_utterance (c : Context P) (u : Utterance P) (b : DefinedBoundary P)
+    (h : status (fuse c u) = .defined b) : b.snapshot.context.getLast? = some u.val := by
+  obtain ⟨_, rfl⟩ := defined_grounds (fuse c u) b h
+  simp [close, snapshotOf, fuse]
+
 /-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
 theorem acceptance_sets_despite_residual (c : Context P) (h : isFilled (acceptance c) = true) :
     status c = .defined (close c) := by
@@ -81,7 +88,7 @@ theorem awaiting_holds (c : Context P) (ha : isFilled (acceptance c) = false)
 theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (h : bound respond session c o (u :: us) = r) :
     (∃ c' o', bound respond session c' o' us = r) ∨
-    (isFilled (withdrawal (fuse c u)) = true ∧ r = .withdrawn (partialOf (fuse c u))) := by
+    (isFilled (withdrawal (fuse c u)) = true ∧ r = .withdrawn (snapshotOf (fuse c u))) := by
   simp only [bound] at h
   split at h
   · exact .inl ⟨_, _, h⟩
@@ -91,9 +98,9 @@ theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : 
 
 /-- A withdrawn run was withdrawn by the person's turn. -/
 theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utterance P))
-    (p : PartialRecord P) (h : bound respond session c o us = .withdrawn p)
+    (p : Snapshot P) (h : bound respond session c o us = .withdrawn p)
     (ho : ∀ q, o ≠ .withdrawn q) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ p = partialOf c₀ := by
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ p = snapshotOf c₀ := by
   induction us generalizing c o with
   | nil => simp [bound] at h; exact absurd h (ho p)
   | cons u us ih =>
@@ -152,33 +159,36 @@ private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : Boundary
 /-- Every decision on the map whose content does not stand is in the residual of the boundary. -/
 theorem open_decisions_in_residual (c : Context P) (e : BoundaryEntry c)
     (hm : e ∈ (readout c).map) (hs : stands e.content = false) :
-    (e.domain, e.question) ∈ (close c).residual :=
+    (e.domain, e.question) ∈ (close c).snapshot.residual :=
   mem_residualOf _ e hm hs
 
 /-- A decision awaiting the person is in the residual. -/
 theorem awaiting_in_residual (c : Context P) (e : BoundaryEntry c) (hm : e ∈ (readout c).map)
-    (ha : awaitsEntry e = true) : (e.domain, e.question) ∈ (close c).residual := by
+    (ha : awaitsEntry e = true) : (e.domain, e.question) ∈ (close c).snapshot.residual := by
   apply open_decisions_in_residual c e hm
   simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true'] at ha
   exact ha.2
 
 /-- A decision whose disposition an earlier decision fixes does not await the person: it is shown
     with that citation and not asked again. -/
-theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c) (s : Cite c)
-    (h : e.priorDisposition = some s) : awaitsEntry e = false := by
+theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c)
+    (h : isFilled e.priorDisposition = true) : awaitsEntry e = false := by
   simp [awaitsEntry, h]
 
 /-- An earlier decision fixing who settles a decision makes no disposition of this run: the record
     reads only the person's disposition. -/
 theorem prior_disposition_records_nothing {c : Context P} (e : BoundaryEntry c)
-    (x : Option (Cite c)) : recordOf { e with priorDisposition := x } = recordOf e := by
-  obtain ⟨d, q, r, ev, dep, app, pr, disp, pd, ct⟩ := e
-  cases disp <;> simp [recordOf]
+    (x : Occ (priorDispositionOf (P := P) e.domain) c) :
+    recordOf { e with priorDisposition := x } = recordOf e := by
+  cases e with
+  | mk d q r ev dep app pr disp pd ct => cases disp <;> rfl
 
-/-- The boundary carries the map, the record, the residual, and the dissent read from the context
-    it closes. -/
-theorem close_carries (c : Context P) :
-    (close c).context = c ∧ (close c).dissent = dissent c ∧
-      (close c).residual = residualOf (readout c).map := ⟨rfl, rfl, rfl⟩
+/-- The snapshot carries the map, the record, the residual, what the map did not look at, and the
+    dissent read from the context it is taken in; the boundary and a withdrawal carry the same. -/
+theorem snapshot_carries (c : Context P) :
+    (snapshotOf c).context = c ∧ (snapshotOf c).dissent = dissent c ∧
+      (snapshotOf c).residual = residualOf (readout c).map ∧
+      (snapshotOf c).limits = (readout c).limits ∧ (close c).snapshot = snapshotOf c :=
+  ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 end Horismos

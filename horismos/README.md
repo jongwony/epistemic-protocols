@@ -13,14 +13,14 @@ flowchart LR
     C -->|Open or correct an axis| D[Concrete content and consequences]
     D --> E[Update affected decisions]
     E --> B
-    C -->|Sufficient| F[Defined boundary and explicit remainder]
+    C -->|Sufficient| F[Defined boundary and explicit residual]
 ```
 
 The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. Every round keeps a way to accept the boundary as it stands, in whatever words: accepting sets it from what the conversation now holds, and any other answer continues or withdraws. Where no decision on the map is waiting for the user, the boundary stands as shown, and the user's next words reopen it where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, before the user took it.
 
 For example, a project map might show that the audience is already chosen, the data handling approach needs comparison, and the rollout date is still open. The user can inspect data handling, rule out external transmission, entrust the comparison work, and retain the final choice. The map then updates the affected options and keeps the rollout date unresolved. Finishing means this boundary is sufficient for the next move; it does not silently resolve every open project question.
 
-The result is `BoundaryUndefined → DefinedBoundary`: a current map, its boundary question, explicit residue, and pointers to the records that settled it. A receiving agent must read those sources. Proposal work leaves selection with its holder; entrusted discretion permits choice within the actual grant. Required checkpoints in another protocol still apply.
+The result is `BoundaryUndefined → DefinedBoundary`: the current map with each decision's disposition — who put it forward and how it stood — the questions still open, what the map did not look at, the AI's recorded objections, and pointers to the records that settled it. A receiving agent must read those sources. Proposal work leaves selection with its holder; entrusted discretion permits choice within the actual grant. Required checkpoints in another protocol still apply.
 
 ## Install and use
 
