@@ -24,7 +24,7 @@ excluded, so an import alone does not satisfy this.
 
 The tree is byte-identical to the scaffold; or turn 1 hands the turn back with an inquiry about
 the limiter's design — an item handed back as the user's unknown, or options to supply context,
-point to a location, declare unknown, dismiss, or say it is enough — even when it also wrote
+point to a location, declare unknown, dismiss, or withdraw — even when it also wrote
 code.
 
 ## Judging note

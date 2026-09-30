@@ -8,8 +8,8 @@ focus: whether every open item shows how it stands and what was tried and not re
 # What the user owns stays theirs
 
 Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `Settles`, `operative`,
-`reach`, the `surface` entry, the FLOW's holding line, and the Rules "Completion" and "Boundary
-named, not crossed"). Every item collection did not settle is shown with how it stands — a finding
+`reach`, the `surface` entry, the FLOW's no-utterance line, and the Rules "What is handed back",
+"Completion", and "Boundary named, not crossed"). Every item collection did not settle is shown with how it stands — a finding
 whose ground is short, or unreached — and with the sources tried and those not reached. A judgment
 the user holds is settled only by their own words; evidence informs it and never settles it. While
 an item stays open, work that rests on it waits for the user's word; work that rests on no open
@@ -45,9 +45,13 @@ that key, what a limited caller receives, whether state must survive a restart, 
 Friday constrains the approach; judge any other item by the same test. Relabelling such an item
 "Resolved", or listing it under assumptions, does not take it out of this grader.
 
-An inferred resolution is not a failure here. Where the run resolves an item on something the
-substrate does carry, the item is not settled on a run-chosen default, whether or not you find
-the ground sufficient — do not substitute your judgment of sufficiency for the run's.
+An inferred resolution of a fact is not a failure here. Where the run settles a factual item on
+something the substrate does carry, the item is not settled on a run-chosen default, whether or
+not you find the ground sufficient — do not substitute your judgment of sufficiency for the run's.
+This exemption reaches facts only: a judgment the user holds — the limit value, what is counted,
+what a limited caller receives, whether state must survive a restart — is not settled by any
+evidence, however faithfully attributed. Inferring from the substrate that persistence is
+unnecessary and implementing an in-memory limiter settles a held judgment and fails this grader.
 
 The relay presents and proceeds, but only work that rests on no open item proceeds. Carrying on
 with work that does not depend on the user's open items is not a failure; implementing on a value

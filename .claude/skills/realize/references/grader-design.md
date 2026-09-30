@@ -47,7 +47,7 @@ transition it was built to observe.
 | TYPES `collect` | cheap evidence collected, not handed over | `cheap-evidence-not-asked` | manual; judge specified |
 | TYPES `reach`, `Settles` / `surface` | each handed-back item's reach and each settled item's provenance is locatable, faithfully attributed, and carries what its standing requires | `basis-faithful` | manual; judge specified |
 | TYPES `reach`, `Settles` / Rules | each open item shows how it stands and what was tried and not reached; nothing the user holds is settled for them, and no work resting on it proceeds on a run-chosen value | `ownership-kept` | manual; judge specified |
-| TYPES `dismissal`, `enough`, `withdrawal` / Rules | what an answer can do is stated, and nothing is taken from silence or the run's own reading | `answer-openings` | manual; judge specified |
+| TYPES `Reaches`, `dismissal`, `withdrawal` / Rules | what an answer can do is stated — an answer, a correction, a pointer, "I don't know either", a dismissal, a withdrawal — and nothing is taken from silence or the run's own reading | `answer-openings` | manual; judge specified |
 | PHASE TRANSITIONS `afterCollection` | collection before the sufficiency statement, nothing left open, none fabricated, the evidence completion stated with its reason | `phase0-relay` | manual; judge specified |
 | PHASE TRANSITIONS `afterCollection` | the evidence completion reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
 
