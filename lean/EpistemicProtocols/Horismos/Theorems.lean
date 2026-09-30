@@ -27,9 +27,11 @@ variable (respond session : Context P → Response P)
 theorem silence (c : Context P) (o : Outcome P) : bound respond session c o [] = o := by
   simp [bound]
 
-/-- The run opens on its first round, standing as the context it is presented from leaves it. -/
+/-- The run opens on its first round, standing as the invoking context, with what observation
+    returned, leaves it. -/
 theorem start_rounds_first (c : Context P) (us : List (Utterance P)) :
-    start respond session c us = bound respond session (c ++ [(respond c).val]) (status c) us :=
+    start respond session c us =
+      bound respond session (observed c ++ [(respond (observed c)).val]) (status (observed c)) us :=
   rfl
 
 /-- An utterance that does not bear on the boundary adds no round and leaves the run as it stood. -/
@@ -46,21 +48,23 @@ theorem withdrawal_ends (c : Context P) (o : Outcome P) (u : Utterance P)
     bound respond session c o (u :: us) = .withdrawn (snapshotOf (fuse c u)) := by
   simp [bound, hr, h]
 
-/-- Any other utterance that bears on the boundary is read where it is said — the run stands as
-    that utterance leaves it — and then answered by your turn; also after the boundary stood, so a
-    later correction reopens it. -/
+/-- Any other utterance that bears on the boundary is read where it is said, with what observation
+    returned — the run stands as that leaves it — and then answered by your turn; also after the
+    boundary stood, so a later correction reopens it. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false) :
     bound respond session c o (u :: us) =
-      bound respond session (fuse c u ++ [(respond (fuse c u)).val]) (status (fuse c u)) us := by
+      bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
+        (status (observed (fuse c u))) us := by
   simp [bound, hr, hw]
 
-/-- The boundary stands on one of two grounds: the person's acceptance, or no decision awaiting
-    their disposition. -/
+/-- The boundary stands on one of two grounds: the person's acceptance, or no item awaiting their
+    disposition. -/
 theorem defined_grounds (c : Context P) (b : DefinedBoundary P) (h : status c = .defined b) :
-    (isFilled (acceptance c) = true ∨ awaits c = false) ∧ b = close c := by
+    (isFilled (acceptance c) = true ∨ awaits (readout c) = false) ∧ b = close c := by
   unfold status at h
+  dsimp only at h
   split at h
   · rename_i hc
     cases h
@@ -68,21 +72,42 @@ theorem defined_grounds (c : Context P) (b : DefinedBoundary P) (h : status c = 
     exact ⟨hc, rfl⟩
   · cases h
 
+/-- What observation joins to a context is evidence: no turn of yours, and no person's turn. -/
+theorem observed_adds_evidence (c : Context P) :
+    ∃ ev : List (Turn P), observed c = c ++ ev ∧
+      ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer := by
+  refine ⟨(observe c).map (·.val), rfl, ?_⟩
+  intro e he
+  simp only [List.mem_map] at he
+  obtain ⟨x, _, rfl⟩ := he
+  exact x.property
+
+/-- Wherever the boundary stands, it is read before your turn: the context it closes is the one
+    read — at the person's utterance, or at the start the invoking context — with only what
+    observation returned after it. -/
+theorem defined_before_your_turn (c : Context P) (b : DefinedBoundary P)
+    (h : status (observed c) = .defined b) :
+    ∃ ev : List (Turn P), b.snapshot.context = c ++ ev ∧
+      ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer := by
+  obtain ⟨_, rfl⟩ := defined_grounds (observed c) b h
+  exact observed_adds_evidence c
+
 /-- Where a person's utterance sets the boundary, the boundary is read at that utterance: the
-    context it closes ends in the person's turn, before any turn of yours. -/
+    context it closes is the person's turn followed only by what observation returned. -/
 theorem defined_at_utterance (c : Context P) (u : Utterance P) (b : DefinedBoundary P)
-    (h : status (fuse c u) = .defined b) : b.snapshot.context.getLast? = some u.val := by
-  obtain ⟨_, rfl⟩ := defined_grounds (fuse c u) b h
-  simp [close, snapshotOf, fuse]
+    (h : status (observed (fuse c u)) = .defined b) :
+    ∃ ev : List (Turn P), b.snapshot.context = c ++ [u.val] ++ ev ∧
+      ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
+  defined_before_your_turn (fuse c u) b h
 
 /-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
 theorem acceptance_sets_despite_residual (c : Context P) (h : isFilled (acceptance c) = true) :
     status c = .defined (close c) := by
-  simp [status, h]
+  simp [status, close, snapshotOf, h]
 
 /-- Where something awaits the person and they have not accepted, the gate holds. -/
 theorem awaiting_holds (c : Context P) (ha : isFilled (acceptance c) = false)
-    (hw : awaits c = true) : status c = .holding c := by
+    (hw : awaits (readout c) = true) : status c = .holding c := by
   simp [status, ha, hw]
 
 theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
@@ -112,15 +137,16 @@ theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utteranc
       · refine ih _ _ h ?_
         intro q hq
         unfold status at hq
+        dsimp only at hq
         split at hq <;> cases hq
 
 /-- Every boundary a run sets, from a start that has not withdrawn, stands on the acceptance or on
     nothing awaiting the person, in the context where it was read. -/
 theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
     (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
-    (ho : ∀ b', o = .defined b' → ∃ c₀, (isFilled (acceptance c₀) = true ∨ awaits c₀ = false) ∧
-      b' = close c₀) :
-    ∃ c₀, (isFilled (acceptance c₀) = true ∨ awaits c₀ = false) ∧ b = close c₀ := by
+    (ho : ∀ b', o = .defined b' → ∃ c₀, (isFilled (acceptance c₀) = true ∨
+      awaits (readout c₀) = false) ∧ b' = close c₀) :
+    ∃ c₀, (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b = close c₀ := by
   induction us generalizing c o with
   | nil => simp [bound] at h; exact ho b h
   | cons u us ih =>
@@ -156,24 +182,29 @@ private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : Boundary
   simp only [residualOf, List.mem_map, List.mem_filter]
   exact ⟨e, ⟨hm, by simp [hs]⟩, rfl⟩
 
-/-- Every decision on the map whose content does not stand is in the residual of the boundary. -/
+/-- Every item on the map whose content does not stand is in the residual of the boundary. -/
 theorem open_decisions_in_residual (c : Context P) (e : BoundaryEntry c)
     (hm : e ∈ (readout c).map) (hs : stands e.content = false) :
     (e.domain, e.question) ∈ (close c).snapshot.residual :=
   mem_residualOf _ e hm hs
 
-/-- A decision awaiting the person is in the residual. -/
+/-- An item awaiting the person is in the residual. -/
 theorem awaiting_in_residual (c : Context P) (e : BoundaryEntry c) (hm : e ∈ (readout c).map)
     (ha : awaitsEntry e = true) : (e.domain, e.question) ∈ (close c).snapshot.residual := by
   apply open_decisions_in_residual c e hm
   simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true'] at ha
   exact ha.2
 
-/-- A decision whose disposition an earlier decision fixes does not await the person: it is shown
+/-- An item whose disposition an earlier decision fixes does not await the person: it is shown
     with that citation and not asked again. -/
 theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c)
     (h : isFilled e.priorDisposition = true) : awaitsEntry e = false := by
   simp [awaitsEntry, h]
+
+/-- A person's turn in this context never stands as an earlier decision fixing who settles an
+    item: that turn fills the disposition. -/
+theorem prior_disposition_not_the_persons (d : Domain) (g : Grounding)
+    (h : (priorDispositionOf (P := P) d).admits g) : g.val ≠ .person := h
 
 /-- An earlier decision fixing who settles a decision makes no disposition of this run: the record
     reads only the person's disposition. -/

@@ -18,14 +18,14 @@ The core recognition act is **decomposing the equivalence claim into verifiable 
 ```
 InferenceUncertainClaim
   -> ScopedClaimFrame       (core: decompose target↔surrogate equivalence into verifiable facets)
-  -> /bound outcome        (an applicable DefinedBoundary proceeds; other exits retain their finding/partial record under Phase 2)
+  -> /bound outcome        (an applicable DefinedBoundary proceeds; other exits keep what they left — a withdrawal's snapshot, or a gate still holding — under Phase 2)
   -> BoundedTestSpace       (applicable result projected into settled test scope, coverage complement, and pending boundary obligations)
   -> EmpiricalEvidence      (/inquire: observe inside the bounded space, evidence over inference)
   -> ScopedResolution | CoverageShortfall   (carry the scope record, including pending boundary obligations; scoped outcome — holds, fails, or inconclusive — within the claim's defined conditions; or, on under-coverage, a CoverageShortfall: slice-scoped resolution or no resolution, with the remainder re-bounded or carried)
   -> Residual               (uncovered complement -> follow-up protocol)
 ```
 
-An empirical terminal pairs a **scoped result** (`ScopedResolution` or `CoverageShortfall`) with a **carried residual**: the supported outcome or explicit shortfall, paired with the coverage complement. The scoped result retains its scope record, including still-pending boundary obligations with their sources and next treatment; these obligations remain distinct from coverage. A non-convergent `/bound` exit follows Phase 2 and supplies no successful validation result.
+An empirical terminal pairs a **scoped result** (`ScopedResolution` or `CoverageShortfall`) with a **carried residual**: the supported outcome or explicit shortfall, paired with the coverage complement. The scoped result retains its scope record, including still-pending boundary obligations with their sources and next treatment; these obligations remain distinct from coverage. A `/bound` run that ends without an applicable `DefinedBoundary` follows Phase 2 and supplies no successful validation result.
 
 ## Types
 
@@ -48,13 +48,13 @@ Reduced-Space Test orchestrates existing protocols; most per-step work is delega
 ```
 (conditional front) /elicit | /induce                              Phase 0
    -> decompose equivalence claim into facets [owned: ScopedClaimFrame]  Phase 1
-   -> /bound      [applicable DefinedBoundary, or actual non-convergent exit]  Phase 2
+   -> /bound      [applicable DefinedBoundary, or another actual exit]  Phase 2
    -> project scope, coverage complement, and pending obligations     Phase 2, only with the applicable result
    -> /inquire    [ContextInsufficient -> SufficientContext, Observe]  Phase 3
    -> residual carry-forward (/inquire | /elicit)                      Phase 4
 ```
 
-- On an actually emitted, applicable `DefinedBoundary`, project the validation scope and its coverage complement from the current boundary entries, their setting record, and the `ScopedClaimFrame`. A boundary remainder can be pending work inside the scope; an established exclusion can belong to the coverage complement with no unsettled judgment. Preserve this distinction when composing the result.
+- On an actually emitted, applicable `DefinedBoundary`, project the validation scope and its coverage complement from the current boundary entries, their setting record, and the `ScopedClaimFrame`. An item in the boundary's residual can be pending work inside the scope; an established exclusion can belong to the coverage complement with no unsettled judgment. Preserve this distinction when composing the result.
 - At the `/inquire` handoff, pass the settled scope, conditions, and source-grounded pending obligations that bear on the observation. Its scope-covers-claim discipline governs what the evidence can support.
 
 ## Phase 0: Intake + Name the Pattern (conditional)
@@ -89,7 +89,7 @@ Compose `/bound` (Horismos: `BoundaryUndefined -> DefinedBoundary`) to define th
 
 - When an applicable `DefinedBoundary` has been emitted, read its map and setting record to resolve the actual included conditions and exclusions against the `ScopedClaimFrame`. Project the included conditions into the test scope and the uncovered facets into this utility's `Residual`; cite the source of each cut.
 - When `/bound` ends without an applicable `DefinedBoundary`, preserve what it left — a withdrawal's snapshot, or the map of a gate still holding — with its sources, limits, and open decisions. Respect the actual exit and the user's instruction: a withdrawal ends the withdrawn composition, a continuation the user names follows its stated reach, and an unanswered boundary judgment holds dependent validation. Neither an empty successful boundary nor an automatic restart is supplied by the exit. Resume projection only when an actual applicable result is available.
-- When the emitted boundary carries unresolved material, retain it with its required next treatment in `BoundedTestSpace`. Distinguish a pending in-scope selection or prerequisite from an uncovered facet; copying the entire boundary residual as the coverage complement loses that distinction.
+- When the emitted boundary carries unresolved material, retain it in `BoundedTestSpace` with the next treatment this utility derives from each open item's disposition and dependencies on the boundary map. Distinguish a pending in-scope selection or prerequisite from an uncovered facet; copying the entire boundary residual as the coverage complement loses that distinction.
 - Before empirical work depends on an unsettled scope value or prerequisite, resolve it through its source-defined disposition or return to the affected `/bound` judgment in Phase 2. Continue independent authorized observation only within already-settled conditions. Carry still-pending obligations in the final scoped result's scope record, with sources and required next treatment.
 
 ## Phase 3: Capture Empirical Evidence (compose /inquire)
@@ -118,7 +118,7 @@ At empirical convergence, present the pairing: the scoped resolution with its sc
 3. **Scoped claim only** (evidence discipline): Resolution sentences assert an updated failure probability within the defined conditions — lower on confirmation, higher on disconfirmation, open on inconclusive. Absolute claims in either direction exceed what a stand-in space supports and are reframed to the scoped form. A disconfirming or inconclusive result is a first-class resolution, never suppressed to force a confirmation.
 4. **Residual carries forward** (completeness): Derive the uncovered complement from the settled test scope and facet frame, and route it to a follow-up protocol. Preserve pending boundary obligations in the scoped result's record through final presentation and downstream use, distinct from the coverage complement; dependent observation waits until its scope and prerequisites are settled.
 5. **Scope covers claim** (coverage): The bounded test space must cover the claim it licenses. Evidence from a slice narrower than its claim is under-covering: it yields no scoped resolution for the full claim and exits as a `CoverageShortfall` — re-scope to the covered slice (resolution over the slice + remainder as residual) or re-bound — never an implicit retry.
-6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). Project only an actually emitted, applicable `DefinedBoundary`; otherwise preserve the non-convergent record and follow the actual exit and user instruction. It introduces no new interaction deficit and does not constitute a new protocol.
+6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). Project only an actually emitted, applicable `DefinedBoundary`; otherwise preserve what the actual exit left and follow that exit and the user's instruction. It introduces no new interaction deficit and does not constitute a new protocol.
 
 ## Boundary Note
 
@@ -139,7 +139,7 @@ At empirical convergence, present the pairing: the scoped resolution with its sc
 
 - [ ] Phase 0 the `InferenceUncertainClaim` is stated; a `/elicit` or `/induce` front is used only when the intent is aporetic or the pattern is unnamed
 - [ ] Phase 1 critical facets, surrogate↔target difference inventory, influence-path hypotheses, and a gap-measurement approach are surfaced as the `ScopedClaimFrame`, and the frame is surfaced for user recognition (with an Emergent missing-facet probe) before Phase 2 draws the boundary over it
-- [ ] Phase 2 projects an actually emitted, applicable `DefinedBoundary` into test scope and coverage `Residual` against `ScopedClaimFrame`, retaining pending obligations in the scope record; absent that result, the actual exit and its finding/partial record govern continuation
+- [ ] Phase 2 projects an actually emitted, applicable `DefinedBoundary` into test scope and coverage `Residual` against `ScopedClaimFrame`, retaining pending obligations in the scope record; absent that result, the actual exit and what it left — a withdrawal's snapshot or a gate still holding — govern continuation
 - [ ] Phase 3 `/inquire` captures `EmpiricalEvidence` inside the bounded space under a scope-covers-claim discipline
 - [ ] Phase 4 the resolution is scoped to the tested conditions (no absolute claim; a disconfirming/inconclusive outcome recorded as a first-class resolution, not retried into a confirmation) and the `Residual` is routed to a follow-up protocol
 - [ ] Empirical convergence pairs the scoped result and its scope record (including pending obligations, sources, and next treatment) with the coverage residual and its routing; a `CoverageShortfall` retains that record even without a slice resolution, and follow-up consumption reads it before relying on the result
