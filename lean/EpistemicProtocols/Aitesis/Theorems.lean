@@ -34,154 +34,72 @@ theorem held_only_by_person (c : Context P) :
 theorem dismissal_only_by_person {c : Context P} {x : Entry} {s : Cite c}
     (ok : (dismissalCoord (P := P) x).admits s.src) : s.src.val = .person := ok
 
-theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
-    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
-
 theorem dismissed_by_person (c : Context P) : ∀ d ∈ dismissed c, d.src.src.val = .person :=
   fun d _ => d.byPerson
 
 theorem silence_keeps_last_completion (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) : inquire respond session c o [] = o := by
+    (r : SufficientContext P) : inquire respond session c r [] = r := by
   simp [inquire]
 
 theorem other_work_collects_nothing (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
-    inquire respond session c o (u :: us) =
-      inquire respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
+    (r : SufficientContext P) (u : Utterance P) (us : List (Utterance P))
+    (h : ¬ Reaches (fuse c u)) :
+    inquire respond session c r (u :: us) =
+      inquire respond session (fuse c u ++ [(session (fuse c u)).val]) r us := by
   simp [inquire, h]
 
-theorem withdrawal_closes_before_collection (respond session : Context P → Response P)
-    (c : Context P) (o : Outcome P) (u : Utterance P) (us : List (Utterance P))
-    (hr : Reaches (fuse c u)) (hw : isFilled (withdrawal (fuse c u)) = true) :
-    inquire respond session c o (u :: us) = .withdrawn (closed (fuse c u)) := by
-  simp [inquire, hr, hw]
-
-theorem completes_unless_withdrawn (respond : Context P → Response P) (c : Context P)
-    (h : isFilled (withdrawal (collected c)) = false) :
-    collectAndSettle respond c =
-      .completed ⟨closed (collected c ++ [(respond (collected c)).val])⟩ := by
-  simp [collectAndSettle, h]
-
-theorem withdrawal_after_collection_closes (respond : Context P → Response P) (c : Context P)
-    (h : isFilled (withdrawal (collected c)) = true) :
-    collectAndSettle respond c = .withdrawn (closed (collected c)) := by
-  simp [collectAndSettle, h]
-
 theorem reaching_collects_again (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (fuse c u)) = false) (r : SufficientContext P)
-    (h : collectAndSettle respond (fuse c u) = .completed r) :
-    inquire respond session c o (u :: us) =
-      inquire respond session r.closure.context (.completed r) us := by
-  simp [inquire, hr, hw, h]
+    (r : SufficientContext P) (u : Utterance P) (us : List (Utterance P))
+    (h : Reaches (fuse c u)) :
+    inquire respond session c r (u :: us) =
+      inquire respond session (collectAndSettle respond (fuse c u)).closure.context
+        (collectAndSettle respond (fuse c u)) us := by
+  simp [inquire, h]
+
+theorem completes_after_collection (respond : Context P → Response P) (c : Context P) :
+    (collectAndSettle respond c).closure.context =
+      collected c ++ [(respond (collected c)).val] := rfl
 
 /-- Collection only adds to the context, over this contract's own operations. -/
 theorem collected_extends (c : Context P) : ∃ t, collected c = c ++ t := ⟨_, rfl⟩
 
-/-- A collection and what follows it only add to the context, over this contract's own
+/-- A collection and its completion only add to the context, over this contract's own
     operations. -/
 theorem settle_extends (respond : Context P → Response P) (c : Context P) :
-    (∀ r, collectAndSettle respond c = .completed r → ∃ t, r.closure.context = c ++ t) ∧
-    (∀ r, collectAndSettle respond c = .withdrawn r → ∃ t, r.context = c ++ t) := by
-  by_cases hw : isFilled (withdrawal (collected c)) = true
-  · rw [withdrawal_after_collection_closes respond c hw]
-    refine ⟨(fun r h => by cases h), fun r h => ?_⟩
-    cases h
-    exact ⟨_, rfl⟩
-  · have hw' : isFilled (withdrawal (collected c)) = false := by simpa using hw
-    rw [completes_unless_withdrawn respond c hw']
-    refine ⟨fun r h => ?_, (fun r h => by cases h)⟩
-    cases h
-    exact ⟨(collect c).map (·.val) ++ [(respond (collected c)).val], by simp [closed, collected]⟩
+    ∃ t, (collectAndSettle respond c).closure.context = c ++ t :=
+  ⟨(collect c).map (·.val) ++ [(respond (collected c)).val], by simp [collectAndSettle, closed, collected]⟩
 
-/-- Over this contract's own operations, a run either leaves the last outcome standing or ends on
-    a context that extends the one it started from. -/
+/-- Over this contract's own operations, a run either leaves the last completion standing or ends
+    on a completion whose context extends the one it started from. -/
 theorem inquire_extends (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (us : List (Utterance P)) :
-    inquire respond session c o us = o ∨
-    (∃ r, inquire respond session c o us = .completed r ∧ ∃ t, r.closure.context = c ++ t) ∨
-    (∃ r, inquire respond session c o us = .withdrawn r ∧ ∃ t, r.context = c ++ t) := by
-  induction us generalizing c o with
+    (r : SufficientContext P) (us : List (Utterance P)) :
+    inquire respond session c r us = r ∨
+    ∃ t, (inquire respond session c r us).closure.context = c ++ t := by
+  induction us generalizing c r with
   | nil => exact .inl (by simp [inquire])
   | cons u us ih =>
     by_cases hr : Reaches (fuse c u)
-    · by_cases hw : isFilled (withdrawal (fuse c u)) = true
-      · exact .inr (.inr ⟨closed (fuse c u), by simp [inquire, hr, hw], [u.val], rfl⟩)
-      · have hw' : isFilled (withdrawal (fuse c u)) = false := by simpa using hw
-        cases hs : collectAndSettle respond (fuse c u) with
-        | withdrawn r =>
-          obtain ⟨t, ht⟩ := (settle_extends respond (fuse c u)).2 r hs
-          refine .inr (.inr ⟨r, by simp [inquire, hr, hw', hs], [u.val] ++ t, ?_⟩)
-          simp [ht, fuse]
-        | completed r =>
-          obtain ⟨t, ht⟩ := (settle_extends respond (fuse c u)).1 r hs
-          have hstep : inquire respond session c o (u :: us) =
-              inquire respond session r.closure.context (.completed r) us := by
-            simp [inquire, hr, hw', hs]
-          rw [hstep]
-          rcases ih r.closure.context (.completed r) with h | ⟨r', h, t', ht'⟩ | ⟨r', h, t', ht'⟩
-          · exact .inr (.inl ⟨r, h, [u.val] ++ t, by simp [ht, fuse]⟩)
-          · exact .inr (.inl ⟨r', h, [u.val] ++ t ++ t', by simp [ht', ht, fuse]⟩)
-          · exact .inr (.inr ⟨r', h, [u.val] ++ t ++ t', by simp [ht', ht, fuse]⟩)
-    · have hstep : inquire respond session c o (u :: us) =
-          inquire respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
-        simp [inquire, hr]
-      rw [hstep]
-      rcases ih (fuse c u ++ [(session (fuse c u)).val]) o with h | ⟨r', h, t', ht'⟩ | ⟨r', h, t', ht'⟩
+    · rw [reaching_collects_again respond session c r u us hr]
+      obtain ⟨t, ht⟩ := settle_extends respond (fuse c u)
+      rcases ih (collectAndSettle respond (fuse c u)).closure.context
+          (collectAndSettle respond (fuse c u)) with h | ⟨t', ht'⟩
+      · exact .inr ⟨[u.val] ++ t, by rw [h, ht]; simp [fuse]⟩
+      · exact .inr ⟨[u.val] ++ t ++ t', by rw [ht', ht]; simp [fuse]⟩
+    · rw [other_work_collects_nothing respond session c r u us hr]
+      rcases ih (fuse c u ++ [(session (fuse c u)).val]) r with h | ⟨t', ht'⟩
       · exact .inl h
-      · exact .inr (.inl ⟨r', h, [u.val, (session (fuse c u)).val] ++ t', by simp [ht', fuse]⟩)
-      · exact .inr (.inr ⟨r', h, [u.val, (session (fuse c u)).val] ++ t', by simp [ht', fuse]⟩)
+      · exact .inr ⟨[u.val, (session (fuse c u)).val] ++ t', by rw [ht']; simp [fuse]⟩
 
-private theorem settle_withdrawn {respond : Context P → Response P} {c : Context P} {r : Closed P}
-    (h : collectAndSettle respond c = .withdrawn r) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
-  by_cases hw : isFilled (withdrawal (collected c)) = true
-  · rw [withdrawal_after_collection_closes respond c hw] at h
-    cases h
-    exact ⟨_, hw, rfl⟩
-  · have hw' : isFilled (withdrawal (collected c)) = false := by simpa using hw
-    rw [completes_unless_withdrawn respond c hw'] at h
-    cases h
-
-theorem inquire_withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (us : List (Utterance P)) (r : Closed P)
-    (h : inquire respond session c o us = .withdrawn r) :
-    o = .withdrawn r ∨ ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
-  induction us generalizing c o with
-  | nil => exact .inl (by simpa [inquire] using h)
-  | cons u us ih =>
-    by_cases hr : Reaches (fuse c u)
-    · by_cases hw : isFilled (withdrawal (fuse c u)) = true
-      · simp [inquire, hr, hw] at h
-        exact .inr ⟨_, hw, h.symm⟩
-      · have hw' : isFilled (withdrawal (fuse c u)) = false := by simpa using hw
-        cases hs : collectAndSettle respond (fuse c u) with
-        | withdrawn r₀ =>
-          simp [inquire, hr, hw', hs] at h
-          subst h
-          exact .inr (settle_withdrawn hs)
-        | completed r₀ =>
-          simp [inquire, hr, hw', hs] at h
-          rcases ih _ _ h with h' | h'
-          · cases h'
-          · exact .inr h'
-    · simp [inquire, hr] at h
-      exact ih _ _ h
-
-theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : start respond session c us = .withdrawn r) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
-  unfold start at h
-  cases hs : collectAndSettle respond c with
-  | withdrawn r₀ =>
-    rw [hs] at h
-    cases h
-    exact settle_withdrawn hs
-  | completed r₀ =>
-    rw [hs] at h
-    rcases inquire_withdrawn_by_person respond session _ _ us r h with h' | h'
-    · cases h'
-    · exact h'
+/-- A run's completion extends the context it was invoked on, over this contract's own
+    operations. -/
+theorem start_extends (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) :
+    ∃ t, (start respond session c us).closure.context = c ++ t := by
+  obtain ⟨t, ht⟩ := settle_extends respond c
+  rcases inquire_extends respond session (collectAndSettle respond c).closure.context
+      (collectAndSettle respond c) us with h | ⟨t', ht'⟩
+  · exact ⟨t, by simp only [start]; rw [h, ht]⟩
+  · exact ⟨t ++ t', by simp only [start]; rw [ht', ht]; simp⟩
 
 theorem never_holds_the_turn (op : Op) (k : ToolGrounding.Interaction)
     (h : (grounding op).1 = .interaction k) : k.realization = .proceed := by
