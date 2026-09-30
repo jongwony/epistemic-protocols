@@ -80,11 +80,12 @@
       }
     ],
     "expected": [
+      "contextualize",
       "inquire",
       "sublate"
     ],
     "adjudicated": false,
-    "note": "Verbatim shape of a real turn from the session this was built in. Both fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. /contextualize does not fit on its object - it types over Result, the output of an execution just completed, not an artifact written in an earlier session."
+    "note": "Verbatim shape of a real turn from the session this was built in. inquire and sublate fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. /contextualize is added as an AI proposal, not an adjudicated label: its contract (ROO-107) checks any result against the context it lands in, an artifact written in an earlier session included, so the reason this case once excluded it - that it typed over the output of an execution just completed - no longer holds. Whether a correct advisory carries it here is for the adjudicator."
   },
   {
     "id": "singleton-ideate-unframed",

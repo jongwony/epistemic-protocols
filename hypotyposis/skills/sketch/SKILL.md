@@ -683,7 +683,7 @@ The transformation the moment needs decides between neighbors; a sibling deficit
 
 - `/preview` — recognize and settle a direction among named alternatives; its probes are discarded. Here the resolution sought is a form, and the recognized version is kept; a direction settled by `/preview` can enter as prior material.
 - `/elicit` — resolve intent by reverse-tracing decision coordinates from externalized cognition. Here encountering and revising sketches constitutes the remaining form intent; readable prior material may already exist.
-- `/contextualize` — adjudicate a result's fit against application context held fixed within the run, with adaptation directed by the user. Here encountering sketches develops the form intent itself.
+- `/contextualize` — check a finished result against everywhere it lands and the intents it was meant to carry, with the fixes the user settles carried out. Here encountering sketches develops the form intent itself.
 - `/ideate` — a thin field of ideas widened, nothing selected. Here a form is recognized.
 
 ## Mode Activation
