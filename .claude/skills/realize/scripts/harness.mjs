@@ -987,7 +987,7 @@ const GRADERS = {
     return parsed.skillInvocations.some(
       (s) => s === cfg.protocolSkill || s.endsWith(`:${cfg.protocolSkill}`));
   },
-  // A collection that leaves nothing open completes by evidence and proceeds; mutation
+  // In this fixture collection leaves nothing open, so completion proceeds; mutation
   // witnesses that this implementation prospect crossed Proceed. Correctness and completeness of the change are out of scope.
   // Runs write through Bash as readily as through Write, so a predicate keyed on
   // tool identity misses the writes it exists to catch — and misses them in every

@@ -5,8 +5,8 @@ focus: whether the working tree differs from the scaffold the run started with, 
 ---
 # The branch must reach Proceed
 
-With nothing left open after collection, the run completes by evidence (`afterCollection`) —
-present the finding, then carry on with the prospect unchanged. A relay that stops has been realized as a
+The run completes once collection ends (`collectAndSettle`); in this fixture nothing is left
+open, so it presents the finding, then carries on with the prospect unchanged. A relay that stops has been realized as a
 gate, which is the failure this case exists to catch.
 
 The prompt asks for changes to `app/main.py`, `app/config.py` and `requirements.txt`, so a

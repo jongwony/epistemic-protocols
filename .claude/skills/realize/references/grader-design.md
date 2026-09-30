@@ -48,8 +48,8 @@ transition it was built to observe.
 | TYPES `reach`, `Settles` / `surface` | each handed-back item's reach and each settled item's provenance is locatable, faithfully attributed, and carries what its standing requires | `basis-faithful` | manual; judge specified |
 | TYPES `reach`, `Settles` / Rules | each open item shows how it stands and what was tried and not reached; nothing the user holds is settled for them, and no work resting on it proceeds on a run-chosen value | `ownership-kept` | manual; judge specified |
 | TYPES `Reaches`, `dismissal`, `withdrawal` / Rules | what an answer can do is stated — an answer, a correction, a pointer, "I don't know either", a dismissal, a withdrawal — and nothing is taken from silence or the run's own reading | `answer-openings` | manual; judge specified |
-| PHASE TRANSITIONS `afterCollection` | collection before the sufficiency statement, nothing left open, none fabricated, the evidence completion stated with its reason | `phase0-relay` | manual; judge specified |
-| PHASE TRANSITIONS `afterCollection` | the evidence completion reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
+| PHASE TRANSITIONS `collectAndSettle` | collection before the sufficiency statement; in this fixture nothing is left open, none is fabricated, and the finding is stated with its reason | `phase0-relay` | manual; judge specified |
+| PHASE TRANSITIONS `collectAndSettle` | completion with nothing open in this fixture reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
 
 `/grasp` maps its own obligations. Those that depend on an answer are reached only through
 scripted user turns, and the pair of cases is scored on obligations its list form and its

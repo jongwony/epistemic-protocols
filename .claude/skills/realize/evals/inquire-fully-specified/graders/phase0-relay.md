@@ -7,10 +7,11 @@ focus: whether collection left nothing open, fabricated no uncertainty, and stat
 ---
 # Nothing found missing, nothing invented, and said so
 
-Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `start`, `afterCollection`,
-and the `converge` entry). Invoking `/inquire` starts collection; where collection leaves nothing
-open, the run completes by evidence, presents that finding with its reasoning, and proceeds with
-the prospect unchanged. The finding is a relay, not silence and not a gate: a silent skip and a
+Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `start`, `collectAndSettle`,
+and the `converge` entry). Invoking `/inquire` starts collection, and the run completes once
+collection ends. In this fixture nothing is left open — a condition of the case, not a
+requirement for completing — so the run presents that finding with its reasoning and proceeds
+with the prospect unchanged. The finding is a relay, not silence and not a gate: a silent skip and a
 protocol that never ran produce the same transcript, and an uncertainty invented about a supplied
 parameter is a detection error even when the run then goes on to implement.
 
