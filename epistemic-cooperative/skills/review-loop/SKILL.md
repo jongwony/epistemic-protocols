@@ -113,7 +113,8 @@ reach nor a source direction by inference.
 
 Use the selected host route and source adapter with the captured pointer and current
 intent bundle. Several designated sources review that same pointer in parallel, each
-in its own context; the round's findings are their union, each keeping its source. Read the returned review and diagnostics in full. Record actual call
+in its own context; the round's findings are their union, one defect — identified as
+Recurrence identifies it — keeping every source that raised it. Read the returned review and diagnostics in full. Record actual call
 settings and any reported failure cause as provenance, not coverage.
 
 Use each source's first read-only review call to confirm its command and contract
@@ -125,8 +126,9 @@ source or scope mismatches contribute no verdict and follow the incomplete-call 
 
 A call ending without a usable review contributes no verdict and satisfies neither
 convergence arm. Show what returned and ask whether to continue this round without
-that source's review, switch source, or stop. Continuing still owes that source a
-completed review before convergence.
+that source's review, switch source, or stop. A failure that persists makes the source
+unavailable under Phase 0 rule 1, where its designation is settled. Continuing still
+owes that source a completed review before convergence.
 An extraction failure calls for inspecting raw output; it does not prove source
 failure. A capable source omitting reach leaves the missing report visible as residual.
 
@@ -200,7 +202,7 @@ one direction, not a repair either reading settles.
 
 Read every repair as an ablation before classifying it. A finding grounds a repair
 through the consequence it verified, not through what it finds unstated; the repair
-is the least text that serves that consequence — an existing carrier before a new one,
+is the least text that resolves that consequence — an existing carrier before a new one,
 a removal before an addition. Where trajectories diverge materially, that reading is
 the recommendation at the Judgment gate, not the disposition.
 
@@ -280,7 +282,8 @@ so far, so the driving session records rather than re-derives it.
 ### Phase 5 — Re-review and stop on evidence
 
 When the processed round has not earned convergence below, refresh changed files
-and design intent and obtain a **full** re-review, including after dispositions that
+and design intent and obtain a **full** re-review from each designated source,
+including after dispositions that
 landed no edit. Any edit invalidates the preceding verdict and always owes this
 review of the original surface plus all repairs. For PR scope, use the re-review
 pointer supplied by [PR scope](references/pr-scope.md).
@@ -291,8 +294,8 @@ message is a fix-status claim under Phase 0 rule 5: point the re-review at the l
 through the pre-repair range only, and state that the repair commits are judged from
 their content in the diff as part of the whole range.
 
-This call is the next round's review: send its findings and direction straight to
-Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
+These reviews are the next round's: Phase 1's rules for parallel sources and failed
+calls apply to them, and their findings and direction go straight to Phase 2. Process findings even alongside approval, and
 perform the goal reading. Converge only on the current reviewed artifact when every
 surfaced finding is dispositioned, no recurrence awaits diagnosis, no edit has landed
 since the review, and, for every designated source, either:
@@ -307,27 +310,28 @@ residual; they do not themselves force another round and are never reported as c
 
 At any exit before these conditions hold, report non-convergence with the latest
 reviewed artifact, later edits, unfinished repairs, residuals, and retained judgments.
-The user may exit at any point, and a round whose cause reading finds no root says so
-and asks whether to exit there; an external interruption supplies no convergence evidence.
+The user may exit at any point; an external interruption supplies no convergence evidence.
 
 ## Trace and Exit
 
-Present each round's trace and continue without a gate:
+Present each round's trace and continue without a gate, except where its `Roots:` names
+none: there, before that round's repairs, ask whether to exit — exiting or silence ends
+the loop as non-convergence with the round's findings as residual; continuing proceeds
+to Phase 4:
 
 ```
 Round k — host / source / route — reviewed base → head or working-tree state — verdict
 Exercised: source-reported reach and gaps (omit for a standing no-channel source)
 Call: observed settings or diagnostics, when present
 Goal: loop's goal reading and its findings, including none (omit if no declared goal)
-Roots: Phase 3 cause reading — each root with the findings it explains, new or an earlier round's (named), or none
+Roots: Phase 3 cause reading — each root with the findings it explains, or none
 Relay: autonomously dispositioned findings → applied | dropped: basis | carried: reason
 Gated: findings requiring user judgment → applied | dropped: basis | carried: reason
 Apply: writer route (fork | brief | inline) → commits or new head, or tree state (omit if no pass ran)
 Landing: repair destination (PR only)
 ```
 
-A round with several sources carries the first three lines once per source. Earlier
-rounds' `Roots:` lines are the register a later round's reading names its roots against.
+A round with several sources carries the first three lines once per source.
 
 Each verified finding carries base provenance; an applied fix also carries its
 predicate and sweep side effects. Carry the loop's check artifact, evidence, unexercised
