@@ -71,7 +71,7 @@ Key features:
 
 `codex` and `code-review` select the reviewer in either Claude Code or Codex.
 The [runtime contract](skills/review-loop/SKILL.md) routes to the active host
-reference, then loads only the selected source adapter. Claude reviews require a
+reference, then loads only the adapter of each selected source. Claude reviews require a
 skill that can review the captured local scope; Codex reviews require its CLI.
 
 ## Architecture

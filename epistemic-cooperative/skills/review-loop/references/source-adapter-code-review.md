@@ -13,9 +13,9 @@ Claude `/code-review` implementation to the Source Interface in `SKILL.md`.
   Mark unknown limits until observed; refresh the affected record fields when runtime
   evidence differs. A contract that cannot be established remains an explicit gap.
 - Pass a designated effort level in the form the implementation parses, and read the
-  level actually used from its output onto the trace. An implementation that falls
-  back to a remembered level when the designation does not parse ran at that level:
-  record it as the call's setting, not the designated one.
+  level actually used from its expansion or output onto the trace. A call that ran at
+  another level than designated, such as a remembered fallback, is a contract mismatch
+  under Phase 1.
 - Establish that each review examined the requested local surface before normalizing
   it. A raw PR number alone addresses remote PR state and can omit local or stacked
   repairs.

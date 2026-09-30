@@ -71,7 +71,7 @@ ClaimIntake → ScopedClaimFrame → BoundedTestSpace → EmpiricalEvidence → 
 
 Claude Code와 Codex 모두에서 `codex`, `code-review`로 리뷰 소스를 선택합니다.
 [런타임 계약](skills/review-loop/SKILL.md)이 현재 호스트 참조로 연결하고,
-선택한 소스 어댑터만 읽습니다. Claude 리뷰에는 지정된 로컬 범위를 검토할 수
+선택한 소스마다 그 어댑터만 읽습니다. Claude 리뷰에는 지정된 로컬 범위를 검토할 수
 있는 스킬이, Codex 리뷰에는 CLI가 필요합니다.
 
 ## 아키텍처
