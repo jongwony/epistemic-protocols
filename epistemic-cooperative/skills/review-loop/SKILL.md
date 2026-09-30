@@ -116,17 +116,17 @@ intent bundle. Several designated sources review that same pointer in parallel, 
 in its own context; the round's findings are their union, each keeping its source. Read the returned review and diagnostics in full. Record actual call
 settings and any reported failure cause as provenance, not coverage.
 
-Use the first read-only review call to confirm the selected command and its contract
+Use each source's first read-only review call to confirm its command and contract
 through startup, any skill expansion, and returned output. Reuse matching implementation
-evidence as the adapter specifies. Before accepting a verdict, establish that the
-selected source actually reviewed the captured surface and completed successfully.
+evidence as the adapter specifies. Before accepting a verdict, establish that its
+source actually reviewed the captured surface and completed successfully.
 When execution contradicts the expected contract, diagnose that mismatch; unresolved
 source or scope mismatches contribute no verdict and follow the incomplete-call rule.
 
 A call ending without a usable review contributes no verdict and satisfies neither
-convergence arm. Show what returned and ask whether to continue without that source's
-review, switch source, or stop. Continuing without it removes that source from the
-designated sources for convergence and still owes a completed review before convergence.
+convergence arm. Show what returned and ask whether to continue this round without
+that source's review, switch source, or stop. Continuing still owes that source a
+completed review before convergence.
 An extraction failure calls for inspecting raw output; it does not prove source
 failure. A capable source omitting reach leaves the missing report visible as residual.
 
@@ -193,22 +193,16 @@ or execution permission. Where direction remains unsettled or its authority is
 contested, show both surfaces, their disagreement, and their authority relation or
 its absence; ask an open-ended direction question and retain the user's words.
 
-Where findings point in opposite directions on the same clause or invariant — one
-reading it as too loose, the other as too tight, from two sources or from one source
-across rounds — and no requirement, harvested rule, or settled direction decides
-between the readings, the clause has closed a judgment the governing surfaces leave
-open. That is a Judgment gate showing both readings, not a repair either direction
-settles. Where the governing requirement fixes the combined repair, both findings are
-ordinary defects against it.
+Where findings pull one clause or invariant in opposite directions and nothing
+governing decides between them, the clause holds a judgment the governing surfaces
+leave open: a Judgment gate showing both readings and any repair already landed in
+one direction, not a repair either reading settles.
 
-Read every repair as an ablation before classifying it. A repair that adds — a clause,
-a type, a field, a check — names the obligation it serves, from the verified finding
-or a governing surface, and the existing carrier that fails to hold it; where an
-existing carrier can hold it, repairing that carrier is the repair. A subtraction that
-serves the same obligation and loses none — no verified behavior, no constituted
-decision — is the repair; one that would remove a constituted decision or a
-design-bearing clause is a trajectory beside the addition, classified like any other.
-A repair dropped here leaves its finding dropped with that basis on the trace.
+Read every repair as an ablation before classifying it. A finding grounds a repair
+through the consequence it verified, not through what it finds unstated; the repair
+is the least text that serves that consequence — an existing carrier before a new one,
+a removal before an addition. Where trajectories diverge materially, that reading is
+the recommendation at the Judgment gate, not the disposition.
 
 **Recurrence:** identify the same defect by clause/invariant, not phrasing or line.
 An initial uninformed return is absorbed by settled policy. Instance-specific
@@ -287,9 +281,8 @@ so far, so the driving session records rather than re-derives it.
 
 When the processed round has not earned convergence below, refresh changed files
 and design intent and obtain a **full** re-review, including after dispositions that
-landed no edit. Any edit invalidates the preceding verdict and owes this review of
-the original surface plus all repairs, except the closing strikes of the root arm
-below. For PR scope, use the re-review
+landed no edit. Any edit invalidates the preceding verdict and always owes this
+review of the original surface plus all repairs. For PR scope, use the re-review
 pointer supplied by [PR scope](references/pr-scope.md).
 For working-tree scope, compare against the captured base and include current
 untracked files even if the loop has since committed. Keep review base fixed.
@@ -300,15 +293,12 @@ their content in the diff as part of the whole range.
 
 This call is the next round's review: send its findings and direction straight to
 Phase 2, not a second Phase 1 call. Process findings even alongside approval, and
-perform the goal reading. Converge when every surfaced finding is dispositioned, no
-recurrence awaits diagnosis, and either:
+perform the goal reading. Converge only on the current reviewed artifact when every
+surfaced finding is dispositioned, no recurrence awaits diagnosis, no edit has landed
+since the review, and, for every designated source, either:
 
-- no edit has landed since the review of the current artifact, and for every
-  designated source, the source returned `approve` or a full re-review returned zero
-  new non-refuted findings; or
-- the round's cause reading over every source's verified findings finds no root, and
-  its remaining repairs only strike assertions the round verified false: those strikes
-  land and the loop ends without a further review.
+- the source returned `approve`; or
+- a full re-review returned zero new non-refuted findings.
 
 A new finding remains new in its discovery review even when deferred or handed over;
 its later return is not new and preserves the disposition. Unreached axes, missing
@@ -317,7 +307,8 @@ residual; they do not themselves force another round and are never reported as c
 
 At any exit before these conditions hold, report non-convergence with the latest
 reviewed artifact, later edits, unfinished repairs, residuals, and retained judgments.
-The user may exit at any point; an external interruption supplies no convergence evidence.
+The user may exit at any point, and a round whose cause reading finds no root says so
+and asks whether to exit there; an external interruption supplies no convergence evidence.
 
 ## Trace and Exit
 
