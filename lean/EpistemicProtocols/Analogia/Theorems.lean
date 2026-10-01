@@ -34,12 +34,6 @@ theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Con
 theorem question_by_person {c : Context P} {s : Cite c}
     (ok : (questionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-/-- A drafted question stands only on the person's turn that takes it; the draft alone does not. -/
-theorem draft_stands_only_on_person {c : Context P} {q : Question} {s : Cite c}
-    {ok : (questionCoord (P := P)).admits s.src}
-    {sp : (questionCoord (P := P)).supports c (c[s.idx]'s.lt) q}
-    (_h : question c = .filled q s ok sp) (_hd : q.proposer = .draft) : s.src.val = .person := ok
-
 /-- An assessment is made only over the collected context, on a question that stood before
     collection and still stands after it. -/
 theorem assessment_after_collection (respond : Context P → Response P) (c b : Context P)

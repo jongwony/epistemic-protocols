@@ -27,7 +27,8 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
         context — the purpose, the conclusions at stake, and the source–target pair where R and
         the context leave that choice open — with its grounds, one draft per materially divergent
         candidate, for the person to take, correct, or replace; wait; nothing more is collected,
-        and what was collected stays
+        and what was collected stays; work that rests on the mapping meanwhile rests on nothing
+        audited
     [otherwise]  collect(c): to the limit of your reach over what the mapping rests on — the
         source's relations and their target counterparts, and the checks on the claims bearing
         on K; every place looked joins the context, a null result included →
@@ -35,17 +36,19 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
         question, wait
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it; present it and proceed — no verdict is asked
-  after the assessment: the next move the person declared, an adopted policy, or a grant; work
-    that rests on anything not licensed within limits — a Blocked or Undetermined conclusion, or a
-    Licensed one beyond its stated limits — waits for the person's words
+  while the audit stands: the next move the person declared, an adopted policy, or a grant; work
+    that rests on anything not licensed within limits — a Blocked or Undetermined conclusion, a
+    Licensed one beyond its stated limits, or, while the question still waits, the mapping
+    itself, unaudited — waits for the person's words, with what it rests on shown; a turn that
+    also asks for other work has that part served too, under this same rule
   next utterance u: c' := fuse(c, u), read whole against R and c' →
     [the question is waiting and u ends the audit]  withdrawn — the waiting question left
         unassessed and the deficit unresolved, said in its report; an earlier assessment stays in
         the context as it was presented, over its own question
     [the audit is withdrawn]  the session answers u; it stays in the context; no pass opens
     [u bears on the audit]  pass(c')   (a changed purpose, conclusion, pair, or ground is read there)
-    [otherwise — an adoption alone, a question the current grounds answer entirely, other work]  the
-        session answers it; no pass opens; the last outcome stands
+    [otherwise — adopting or setting aside a conclusion, a question the current grounds answer
+        entirely, other work]  the session answers it; no pass opens; the last outcome stands
   no utterance: the last outcome stands — silence settles nothing
   mid-pass stop: the harness's interrupt — a delegation point, not an outcome
 -/
@@ -182,7 +185,9 @@ structure Question where
     not asked. The question stands only on the person's turn that sets it in their own words
     (`set`) or takes a draft you put forward, as it was or corrected (`adopted`); a draft counts
     only where it was visible as yours, with its grounds, before that turn. A draft alone is a
-    proposal, and an instruction to do the next task takes none. -/
+    proposal, and an instruction to do the next task takes none. A turn that takes several drafts
+    takes the one question they make together — their purposes and conclusions joined — read back
+    as one. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -346,14 +351,14 @@ axiom partition : (c : Context P) → selfGrounding c → Option (PartitionReadi
     bearing on `K`, and every one collection exposes; where to look is yours to judge, and no list
     of sources bounds it. A source or target account you can reach, you read yourself, and what
     you say you read, you read whole. Each place you look returns an evidence turn, a null result
-    included, so the places reached and those not stay in the context by name. Where collected
+    included, so the places looked stay in the context by name. Where collected
     material conflicts, name what conflicts with what and show it, not only as a check's grounds.
     What the context already holds from a source is not fetched again unless an utterance,
     evidence, or your own work since says it changed. Read and run without changing existing state;
     what you create only to look you remove afterwards. An observation that needs to change
     existing state, someone's permission, or another's authority is not made and leaves no evidence
-    turn: name it, with what it needs, in what you present, and leave it open. Where a claim turns on what an artifact does, exercise it over the case that
-    separates the readings. What is still open once collection ends is shown as the person's own
+    turn: name it, with what it needs, in what you present, and leave it open. Where a claim turns
+    on what an artifact does, exercise it over the case that separates the readings. What is still open once collection ends is shown as the person's own
     unknown. Direction: `references/judgments.md` §collection. -/
 axiom observe : Context P → List (Evidence P)
 
@@ -362,9 +367,10 @@ def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
 /-- **Your judgment**: the latest utterance, read whole against `R` and the fused context, bears on
     this audit — a purpose, a conclusion, a source or target, a fact, a source to read, a
     counterexample, a result from running something. One that bears on none of it leaves the audit
-    as it stands: the session answers it, that answer stays in the context, and no pass opens. An
-    adoption alone opens no pass: it moves no warrant or verdict, `preference` reads it from the
-    context, and the session acknowledges it. A turn that brings a ground — a fact, a source, a
+    as it stands: the session answers it, that answer stays in the context, and no pass opens.
+    Adopting or setting aside a conclusion alone opens no pass: it moves no warrant or verdict,
+    `preference` reads it from the context, and the session acknowledges it. Taking a drafted
+    question, or setting the question in the person's own words, makes it stand and opens one. A turn that brings a ground — a fact, a source, a
     counterexample, a result — bears on the audit whatever its grammatical form, a question
     included; only a question the current grounds answer entirely opens no pass. -/
 axiom BearsOnRun : Context P → Prop
@@ -375,7 +381,7 @@ axiom Ends : Context P → Prop
 
 /-- What an assessment carries, read off the contract's own readings over the collected context:
     each conclusion of `K` with its verdict, every check, and, under self-grounding, the partition
-    reading. Adoption stays where `preference` reads it. -/
+    reading. Adopting or setting aside a conclusion stays where `preference` reads it. -/
 structure Assessed (c : Context P) where
   verdicts  : List (Inference × Verdict c)
   checks    : List (Σ x : FitClaim, Check c x)
@@ -435,7 +441,8 @@ With no relevant text, the source and target are open, and the first pass presen
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances, carrying the context as
 it stands and the last outcome. `respond` is your relay for what a step presents — a pass's
-question or assessment, a withdrawal's report; `session` is the session's
+question or assessment, a withdrawal's report, and any other work the same turn asks for, held by
+the seam; `session` is the session's
 own answer to an utterance that does not bear on the audit, which stays in the context without
 opening a pass.
 -/
@@ -455,7 +462,8 @@ open Classical in
 /-- One utterance, read whole, each answered once: while the question waits, a turn ending the
     audit withdraws it, with its report; a turn bearing on the audit opens a pass; any other turn —
     and every turn once the audit is withdrawn — is the session's, kept in the context, and the
-    last outcome stands. -/
+    last outcome stands. A turn that bears on the audit, or ends it, and also asks for other work
+    has that part served in the same reply; work resting on the audit is held by the seam. -/
 def step (respond session : Context P → Response P) (c : Context P) (o : Outcome P)
     (u : Utterance P) : Context P × Outcome P :=
   let c' := fuse c u
@@ -541,7 +549,7 @@ inductive Op | questionRead | questionGate | questionReadback | collect | constr
 
 def grounding : Op → Annot × String
   | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
-  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice only the person settles, or when a later turn reopens it: a question drafted from the context — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words; nothing more is collected while it waits, and evidence already collected stays")
+  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice only the person settles, or when a later turn reopens it: a question drafted from the context — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words — a turn taking several drafts takes the one question they make together, read back as one; nothing more is collected while it waits, and evidence already collected stays; work resting on the mapping meanwhile rests on nothing audited")
   | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
   | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: collection as `observe` states")
   | .construct        => (.sense, "Internal analysis: the correspondences over what collection found and their fit claims")
@@ -553,7 +561,7 @@ def grounding : Op → Annot × String
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit, and, while the question waits, whether it ends the audit")
   | .withdraw         => (.interaction .extension, "when the person ends the audit while its question waits: say that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stays in the context as it was presented, over its own question")
-  | .seam             => (.interaction .extension, "after the assessment, proceed to the next move the person declared, an adopted policy, or a grant, citing that source; work that rests on anything not licensed within limits — a Blocked or Undetermined conclusion, or a Licensed one beyond its stated limits — waits for the person's words, with that conclusion's grounds shown; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
+  | .seam             => (.interaction .extension, "while the audit stands, proceed to the next move the person declared, an adopted policy, or a grant, citing that source; work that rests on anything not licensed within limits — a Blocked or Undetermined conclusion, a Licensed one beyond its stated limits, or, while the question still waits, the mapping itself, unaudited — waits for the person's words, with that conclusion's grounds or what is still unaudited shown, and so does such work a turn asks for beside its answer; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -586,7 +594,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 ### User-facing realization
 
-Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, do not ask an open question: put forward a question drafted from the context — one per materially divergent candidate, each with its grounds and what it would audit — and wait for them to take, correct, or replace it; collect nothing more until their turn does, and what was already collected stays. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
+Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, do not ask an open question: put forward a question drafted from the context — one per materially divergent candidate, each with its grounds and what it would audit — and wait for them to take, correct, or replace it; collect nothing more until their turn does, and what was already collected stays. An instruction to do the next task takes no draft. While the question waits, work that rests on the mapping rests on nothing audited: say so, with what is unaudited, and wait for their words. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
 Present the whole assessment in everyday language: the question; for each conclusion, the source relation that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say.
 

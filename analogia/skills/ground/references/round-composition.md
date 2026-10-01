@@ -10,6 +10,6 @@ User-facing emit (the question and the assessment as presented, convergence trac
 
 Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 
-## When this protocol's own phases bear on where a sentence sits relative to a gate
+## When this protocol's own moves bear on where a sentence sits relative to a gate
 
 Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation.
