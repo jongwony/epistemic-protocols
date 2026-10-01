@@ -33,14 +33,12 @@ theorem other_work_passes_nothing (respond session : Context P → Response P) (
       contextualize respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
   simp [contextualize, h]
 
-/-- An utterance that bears on the run gets the session's answer to what it asks outside the run
-    first, then opens a pass, completed or not. -/
+/-- An utterance that bears on the run opens a pass, completed or not. -/
 theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
     (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : Reaches (fuse c u)) :
     contextualize respond session c o (u :: us) =
-      contextualize respond session
-        (settle respond (pass (fuse c u ++ [(session (fuse c u)).val]))).context
-        (settle respond (pass (fuse c u ++ [(session (fuse c u)).val]))) us := by
+      contextualize respond session (settle respond (pass (fuse c u))).context
+        (settle respond (pass (fuse c u))) us := by
   simp [contextualize, h]
 
 /-- Completion needs nothing open. -/
@@ -116,21 +114,40 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
 theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
     (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person := ok
 
-private theorem relayRounds_extends : ∀ (n : Nat) (c : Context P), ∃ t, relayRounds n c = c ++ t
-  | 0, c => ⟨[], by simp [relayRounds]⟩
-  | n + 1, c => by
-    by_cases hs : Settling c
-    · obtain ⟨t, ht⟩ := relayRounds_extends n (relayRound c)
-      refine ⟨(perform c ++ (observe (c ++ perform c)).map (·.val)) ++ t, ?_⟩
-      simp only [relayRounds, hs, ite_true, ht]
-      simp [relayRound]
-    · exact ⟨[], by simp [relayRounds, hs]⟩
-
 /-- A pass only adds to the context. -/
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
-  obtain ⟨t, ht⟩ := relayRounds_extends (rounds (c ++ (observe c).map (·.val)))
-    (c ++ (observe c).map (·.val))
-  exact ⟨(observe c).map (·.val) ++ t, by simp [pass, ht]⟩
+  let c₁ := c ++ (observe c).map (·.val)
+  let c₂ := c₁ ++ (perform c₁).map (·.val)
+  exact ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val) ++ (observe c₂).map (·.val),
+    by simp [pass, c₁, c₂]⟩
+
+private theorem observed_not_person (c : Context P) :
+    ∀ e ∈ (observe c).map (·.val), e.origin ≠ .person := by
+  intro e he
+  obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
+  rcases x.property with h | h <;> rw [h] <;> decide
+
+private theorem written_not_person (c : Context P) :
+    ∀ e ∈ (perform c).map (·.val), e.origin ≠ .person := by
+  intro e he
+  obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
+  rcases x.property with h | h <;> rw [h] <;> decide
+
+/-- No turn a pass adds is the person's: observation returns what the environment or a peer
+    reported, and a write returns your own turn or what an artifact write returned, so the relay
+    never stands in for the person's coordinate. -/
+theorem pass_adds_no_person_turn (c : Context P) :
+    ∃ t, pass c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
+  let c₁ := c ++ (observe c).map (·.val)
+  let c₂ := c₁ ++ (perform c₁).map (·.val)
+  refine ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val) ++ (observe c₂).map (·.val),
+    by simp [pass, c₁, c₂], ?_⟩
+  intro e he
+  simp only [List.mem_append] at he
+  rcases he with (he | he) | he
+  · exact observed_not_person c e he
+  · exact written_not_person c₁ e he
+  · exact observed_not_person c₂ e he
 
 theorem against_not_assistant {c : Context P} (m : Mismatch c) :
     (c[m.against.idx]'m.against.lt).origin ≠ .assistant :=

@@ -189,7 +189,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: After a long conversation where you established many specific constraints, Claude answers a new question correctly-in-general but ignores the accumulated context. How would you systematically check for context fit?
 - Hint: The output is not wrong on its own — it's mismatched against the context you both built up this session.
 
-**Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct output that doesn't fit the accumulated conversation context is not useful output. The user's awareness that context has been built up in this session is the trigger. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, this ignores everything we just discussed" → accumulated-context mismatch surfaces → adapt, leave as is with a reason, stop using it, or hand it on.
+**Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct output that doesn't fit the accumulated conversation context is not useful output. The user's awareness that context has been built up in this session is the trigger. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, this ignores everything we just discussed" → accumulated-context mismatch surfaces → adapt, leave as is with a reason, stop using it, or leave it to whoever owns it.
 
 ## Elenchus `/sublate`
 
