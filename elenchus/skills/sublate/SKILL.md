@@ -569,6 +569,8 @@ What do you make of it?
 3. It holds — say why, and the migration proceeds on it
 ```
 
+Where one question covers several claims, open each claim's actions with one line stating that claim in words — not a label it was given during the run — and number the actions once across the whole question: one answer may cover several claims, and each number in it has to reach exactly one action.
+
 Answer in your own words; one answer may cover several claims, or only some of them — what it leaves stays open for the next round. An answer is recorded in your words, instructions included. Saying the claim is another protocol's matter hands it there — with the command as a hint where this protocol names one, and as you named it otherwise; nothing is dispatched. Saying the target itself is wrong moves what is vetted on the next pass.
 
 With nothing open, show what was searched and what was found — including every claim handed elsewhere, with why — and ask whether the run is done; an ordinary reply closes it, and you may name something to vet instead. Wherever an earlier answer of yours is read as covering a claim, or as what lets the run close, say which turn was read and what was taken from it, quoting your words — this disclosure stands in place of asking again.
