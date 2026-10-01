@@ -358,8 +358,10 @@ axiom partition : (c : Context P) → selfGrounding c → Option (PartitionReadi
     what you create only to look you remove afterwards. An observation that needs to change
     existing state, someone's permission, or another's authority is not made and leaves no evidence
     turn: name it, with what it needs, in what you present, and leave it open. Where a claim turns
-    on what an artifact does, exercise it over the case that separates the readings. What is still open once collection ends is shown as the person's own
-    unknown. Direction: `references/judgments.md` §collection. -/
+    on what an artifact does, exercise it over the case that separates the readings. Collection
+    includes trying the construction it needs: a reachable check that constructing the
+    correspondences over what was collected exposes is run within collection as well. What is
+    still open once collection ends is shown as the person's own unknown. Direction: `references/judgments.md` §collection. -/
 axiom observe : Context P → List (Evidence P)
 
 def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)

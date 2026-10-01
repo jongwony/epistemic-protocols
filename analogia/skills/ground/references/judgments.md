@@ -12,7 +12,7 @@ Bearing keeps the check set finite without letting the protocol choose its own e
 
 ## checks
 
-The questions an audit raises guide which checks are derived; they add no check that names no current fit claim, and a claim that bears on nothing asked gets none. A defeater outside the claim's scope tests nothing. Read reach again whenever the context supplies a new route to the evidence. A check survives only where no applicable decisive defeater stands. An open check state is unmet — the honest default — and is never read as a pass; a check that has not been performed stays unmet, while evidence already in the context can still fill it.
+The questions an audit raises guide which checks are derived; they add no check that names no current fit claim, and a claim that bears on nothing asked gets none. A defeater outside the claim's scope tests nothing. Read reach again whenever the context supplies a new route to the evidence. A check survives only where no applicable decisive defeater stands. An open check state is unmet — the honest default — and is never read as a pass; a check that has not been performed stays unmet, while evidence already in the context can still fill it. A reachable check is run within collection, including one that only constructing the correspondences exposed.
 
 ## judge
 
