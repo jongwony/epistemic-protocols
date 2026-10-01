@@ -80,14 +80,10 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 
 ## Termination
 
-Protocol exit follows a graduated taxonomy based on whether breaking off leaves state behind:
-
-| Tier | Mechanism | Cleanup | Scope |
-|------|-----------|---------|-------|
-| `user_withdraw` | The person's turn at the waiting gate, read whole | Side effects undone (team shutdown, partial contract); open state recorded unresolved | Protocols whose breaking off leaves state behind |
-| Normal convergence | Completion predicate | Full | Per-protocol |
-
-Principle: state left behind by breaking off requires an explicit withdrawal constructor. That state is side-effect state (team shutdown, a partial contract) or an open state the run holds for the person (a question waiting on their turn, a deficit left unresolved). The person's turn at the waiting gate yields a turn to act in — to undo the side effects and record the open state unresolved — whatever form that turn takes, so the exit need not be an enumerated option. A protocol whose breaking off leaves nothing behind, such as one that completes after every pass, needs no exit tier at all. Whether breaking off leaves state is judged when the protocol is derived, with its grounds shown to the person, rather than read off a fixed list.
+- At derivation, require a withdrawal result where ending at the person's word needs an independently grounded account of the work's standing that existing outcomes cannot carry. Show the obligation and what would be lost without that result.
+- On withdrawal, record the person's ending and what remains established or unresolved. Present exits under `premise/gate-design.md` §Differential Future Requirement.
+- While a gate awaits the person, silence or turning to unrelated work leaves it holding.
+- At an execution handoff, name the required capability and stop there.
 
 Circular protocol interactions are healthy dialogue rather than a hang, and the gate is what makes them so: a cycle re-entering a Constitution gate yields the turn each time, so it advances only when the user answers and cannot spin on its own.
 

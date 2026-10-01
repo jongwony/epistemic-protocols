@@ -75,45 +75,11 @@ theorem not_held_completes (respond : Context P → Response P) (c : Context P)
 theorem silence_keeps_last (respond session : Context P → Response P) (c : Context P)
     (o : Outcome P) : ground respond session c o [] = o := rfl
 
-private theorem pass_ne_withdrawn (respond : Context P → Response P) (c a : Context P)
-    (e : Utterance P) (r : Response P) : pass respond c ≠ .withdrawn a e r := by
-  unfold pass
-  by_cases hc : QuestionStands c
-  · by_cases hc₂ : QuestionStands (collect c) <;> simp [hc, hc₂]
-  · simp [hc]
-
-/-- A withdrawal comes only from an audit whose question was waiting, or one already withdrawn. -/
-theorem withdrawn_only_while_holding (respond session : Context P → Response P)
-    (c c' c₀ : Context P) (o : Outcome P) (u e : Utterance P) (r : Response P)
-    (h : step respond session c o u = (c', .withdrawn c₀ e r)) :
-    o.isHolding = true ∨ ∃ a b q, o = .withdrawn a b q := by
-  cases o with
-  | holding _ _ => exact .inl rfl
-  | withdrawn a b q => exact .inr ⟨a, b, q, rfl⟩
-  | assessment b hs rec q =>
-    exfalso
-    simp only [step, Outcome.isHolding] at h
-    by_cases hb : BearsOnRun (fuse c u)
-    · simp [hb] at h
-      exact pass_ne_withdrawn respond _ _ _ _ h.2
-    · simp [hb] at h
-
-/-- A turn that does not bear on the audit, and does not end a waiting one, opens no pass: the
-    session answers it, both stay in the context, and the last outcome stands. -/
+/-- A turn that does not bear on the audit opens no pass: the session answers it, both stay in
+    the context, and the last outcome stands — a waiting question stays open. -/
 theorem unrelated_opens_no_pass (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P)
-    (he : ¬ (o.isHolding = true ∧ Ends (fuse c u))) (hb : ¬ BearsOnRun (fuse c u)) :
+    (o : Outcome P) (u : Utterance P) (hb : ¬ BearsOnRun (fuse c u)) :
     step respond session c o u = (fuse c u ++ [(session (fuse c u)).val], o) := by
-  cases o with
-  | withdrawn _ _ _ => rfl
-  | holding _ _ => simp [step, he, hb]
-  | assessment _ _ _ _ => simp [step, he, hb]
-
-/-- After a withdrawal, a later turn is kept in the context with the session's answer; the audit
-    stays withdrawn. -/
-theorem after_withdrawal_kept (respond session : Context P → Response P) (c a : Context P)
-    (e u : Utterance P) (r : Response P) :
-    step respond session c (.withdrawn a e r) u =
-      (fuse c u ++ [(session (fuse c u)).val], .withdrawn a e r) := rfl
+  simp [step, hb]
 
 end Analogia

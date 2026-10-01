@@ -33,13 +33,10 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
         with what is missing and who can reach it; present it and proceed — no verdict is asked
   next requested move: as TOOL GROUNDING `seam` states
   next utterance u: c' := fuse(c, u), read whole against R and c' →
-    [the question is waiting and u ends the audit]  withdrawn — the waiting question left
-        unassessed and the deficit unresolved, said in its report; an earlier assessment stays in
-        the context as it was presented, over its own question
-    [the audit is withdrawn]  the session answers u; it stays in the context; no pass opens
     [u bears on the audit]  pass(c')   (a changed purpose, conclusion, pair, or ground is read there)
     [otherwise — adopting or setting aside a conclusion, a question the current grounds answer
-        entirely, other work]  the session answers it; no pass opens; the last outcome stands
+        entirely, other work, turning away from a waiting question]  the session answers it; no
+        pass opens; the last outcome stands — a waiting question stays open
   no utterance: the last outcome stands — silence settles nothing
   mid-pass stop: the harness's interrupt — a delegation point, not an outcome
 -/
@@ -375,10 +372,6 @@ def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
     session's. -/
 axiom BearsOnRun : Context P → Prop
 
-/-- **Your judgment**: the latest utterance, read whole, is the person ending this audit while its
-    question waits for them. -/
-axiom Ends : Context P → Prop
-
 /-- What an assessment carries, read off the contract's own readings over the collected context:
     each conclusion of `K` with its verdict, every check, and, under self-grounding, the partition
     reading. Adopting or setting aside a conclusion stays where `preference` reads it. -/
@@ -408,20 +401,11 @@ inductive Outcome (P : Type)
       endorsement of the mapping. -/
   | assessment (c : Context P) (stands : QuestionStands c) (record : Assessed c)
       (relay : Response P)
-  /-- the person ended the audit while its question waited: the waiting question was left
-      unassessed and the deficit stays unresolved; an earlier assessment, if any, stays in the
-      context as it was presented, over its own question -/
-  | withdrawn  (c : Context P) (ending : Utterance P) (relay : Response P)
-
-def Outcome.isHolding : Outcome P → Bool
-  | .holding .. => true
-  | _           => false
 
 /-- The context once the outcome's relay is presented. -/
 def Outcome.context : Outcome P → Context P
   | .holding c r        => c ++ [r.val]
   | .assessment c _ _ r => c ++ [r.val]
-  | .withdrawn c _ r    => c ++ [r.val]
 
 /-! ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
@@ -441,9 +425,8 @@ no candidate.
 
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances, carrying the context as
-it stands and the last outcome. `respond` is your relay for what a step presents — a pass's
-question or assessment, a withdrawal's report; `session` is the session's
-own answer to an utterance that does not bear on the audit, which stays in the context without
+it stands and the last outcome. `respond` is your relay for what a pass presents — the question
+or the assessment; `session` is the session's own answer to an utterance that does not bear on the audit, which stays in the context without
 opening a pass.
 -/
 
@@ -459,23 +442,16 @@ def pass (respond : Context P → Response P) (c : Context P) : Outcome P :=
     else .holding c₂ (respond c₂)
 
 open Classical in
-/-- One utterance, read whole, each answered once: while the question waits, a turn ending the
-    audit withdraws it, with its report; a turn bearing on the audit opens a pass; any other turn —
-    and every turn once the audit is withdrawn — is the session's, kept in the context, and the
-    last outcome stands. -/
+/-- One utterance, read whole, each answered once: a turn bearing on the audit opens a pass; any
+    other turn — one turning away from a waiting question included — is the session's, kept in
+    the context, and the last outcome stands. -/
 def step (respond session : Context P → Response P) (c : Context P) (o : Outcome P)
     (u : Utterance P) : Context P × Outcome P :=
   let c' := fuse c u
-  match o with
-  | .withdrawn .. => (c' ++ [(session c').val], o)
-  | _ =>
-    if o.isHolding = true ∧ Ends c' then
-      let o' : Outcome P := .withdrawn c' u (respond c')
-      (o'.context, o')
-    else if BearsOnRun c' then
-      let o' := pass respond c'
-      (o'.context, o')
-    else (c' ++ [(session c').val], o)
+  if BearsOnRun c' then
+    let o' := pass respond c'
+    (o'.context, o')
+  else (c' ++ [(session c').val], o)
 
 def ground (respond session : Context P → Response P) :
     Context P → Outcome P → List (Utterance P) → Outcome P
@@ -543,7 +519,7 @@ def Interaction.realization : Interaction → Continuation
   | .extension    => .proceed
 
 inductive Op | questionRead | questionGate | questionReadback | collect | construct | checkRead
-             | warrantRead | judge | partitionRead | surface | converge | readAnswer | withdraw
+             | warrantRead | judge | partitionRead | surface | converge | readAnswer
              | seam
 
 def grounding : Op → Annot × String
@@ -558,8 +534,7 @@ def grounding : Op → Annot × String
   | .partitionRead    => (.sense, "Internal analysis: under self-grounding, the member allocation and its grounds, or its missing basis; no separate gate")
   | .surface          => (.interaction .extension, "the assessment with its trace, the places reached and not, what is open as the person's own unknown, and what a later turn would change; no verdict answer is required")
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
-  | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit, and, while the question waits, whether it ends the audit")
-  | .withdraw         => (.interaction .extension, "when the person ends the audit while its question waits: say that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stays in the context as it was presented, over its own question")
+  | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit")
   | .seam             => (.interaction .extension, "the next move the person requests, an adopted policy, or a grant, citing that source: where the requested work rests on anything not licensed within limits — a Blocked or Undetermined conclusion, a Licensed one beyond its stated limits, or, while the question waits, the mapping itself, unaudited — show what it rests on and hold that work; the hold binds the work, not a turn, and only the person's later words directing that work, after its grounds or unaudited basis were shown, release it — 'go ahead' can suffice in context; a release neither adopts the conclusion nor changes its warrant, and an unrelated reply or silence directs nothing; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
@@ -601,7 +576,7 @@ Beside each claim that matters, state the scope its grounds were checked within,
 
 For self-grounding, name the level of abstraction at which fit is claimed and allocate every member, rendering a partition only with the grounds supporting that allocation and grouping and with a contrast that makes the fit diagnostic. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
 
-Then state what a later turn would change, and proceed without asking for a verdict; next work the person requests follows TOOL GROUNDING `seam`. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about this audit the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn ending the audit withdraws it: say plainly that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stays in the context as it was presented, over its own question. After that, a turn is simply answered; a new audit starts as a new activation.
+Then state what a later turn would change, and proceed without asking for a verdict; next work the person requests follows TOOL GROUNDING `seam`. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about this audit the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn that turns to other work is simply answered; the question stays open.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing the question requires placing evidence before its question and option-specific consequences inside the options.
 
