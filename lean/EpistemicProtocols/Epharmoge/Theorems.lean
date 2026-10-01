@@ -49,21 +49,37 @@ theorem completed_nothing_open (respond : Context P → Response P) (c : Context
   · exact hc
   · simp [hc] at h
 
-/-- On completion no found mismatch rests on a resolution that asks for a write: a write that
-    repaired its mismatch took it out of what is found, so what remains is kept or another's. -/
-theorem completed_no_write_pending (respond : Context P → Response P) (c : Context P)
-    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) :
-    ∀ m ∈ mismatches c, ∀ (r : Resolution) (h' : How),
-      (standing c m = .resolved r h' ∨ standing c m = .relayed r) →
-      (∃ x, r = .keep x) ∨ (∃ o, r = .elsewhere o) := by
-  intro m hm r h' hs
-  have hn := completed_nothing_open respond c v h m hm
-  rcases hs with hs | hs <;> rw [hs] at hn <;> cases r <;> simp_all [Closes]
+/-- A settled standing never rests on a resolution that asks for a write: such a mismatch stays
+    open until its write repairs it and takes it out of what is found. -/
+theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
+    (hs : standing c m = .resolved r h' ∨ standing c m = .relayed r) : r.asksWrite = false := by
+  unfold standing at hs
+  cases hr : resolution c m with
+  | filled a src ok sup =>
+    obtain ⟨r₀, h₀⟩ := a
+    simp only [hr, filledValue] at hs
+    by_cases hw : r₀.asksWrite <;> simp [hw] at hs
+    obtain ⟨rfl, -⟩ := hs
+    simpa using hw
+  | open_ _ =>
+    simp only [hr, filledValue] at hs
+    cases he : byEvidence c m with
+    | filled a src ok sup =>
+      cases a with
+      | withdraw => simp [he] at hs
+      | resolves r₀ =>
+        simp only [he] at hs
+        by_cases hw : r₀.asksWrite <;> simp [hw] at hs
+        subst hs
+        simpa using hw
+    | open_ _ => simp [he] at hs
 
-/-- The person's resolution comes first, whatever evidence read. -/
+/-- The person's resolution comes first, whatever evidence read: one that asks no write stands
+    resolved. -/
 theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
-    (h : filledValue (resolution c m) = some (r, h')) : standing c m = .resolved r h' := by
-  simp [standing, h]
+    (h : filledValue (resolution c m) = some (r, h')) (hw : r.asksWrite = false) :
+    standing c m = .resolved r h' := by
+  simp [standing, h, hw]
 
 /-- A resolution on the person's record cites a turn the person sent. -/
 theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
@@ -75,7 +91,7 @@ theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (h'
     exact ⟨src, ok, src.ok.trans ok⟩
   | open_ _ =>
     simp only [hr, filledValue] at h
-    split at h <;> cases h
+    split at h <;> (try split at h) <;> cases h
 
 /-- A relayed resolution cites evidence the person did not send. -/
 theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
@@ -85,7 +101,7 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
   cases hr : resolution c m with
   | filled a src ok _ =>
     simp only [hr, filledValue] at h
-    cases a; cases h
+    split at h <;> cases h
   | open_ _ =>
     simp only [hr, filledValue] at h
     cases he : byEvidence c m with
@@ -98,12 +114,20 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
 theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
     (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person := ok
 
+private theorem relayRounds_extends : ∀ (n : Nat) (c : Context P), ∃ t, relayRounds n c = c ++ t
+  | 0, c => ⟨[], by simp [relayRounds]⟩
+  | n + 1, c => by
+    obtain ⟨t, ht⟩ := relayRounds_extends n (relayRound c)
+    refine ⟨((perform c).map (·.val) ++
+      (observe (c ++ (perform c).map (·.val))).map (·.val)) ++ t, ?_⟩
+    rw [relayRounds, ht]
+    simp [relayRound]
+
 /-- A pass only adds to the context. -/
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
-  let c₁ := c ++ (observe c).map (·.val)
-  let c₂ := c₁ ++ (perform c₁).map (·.val)
-  exact ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val) ++ (observe c₂).map (·.val),
-    by simp [pass, c₁, c₂]⟩
+  obtain ⟨t, ht⟩ := relayRounds_extends (rounds (c ++ (observe c).map (·.val)))
+    (c ++ (observe c).map (·.val))
+  exact ⟨(observe c).map (·.val) ++ t, by simp [pass, ht]⟩
 
 theorem against_not_assistant {c : Context P} (m : Mismatch c) :
     (c[m.against.idx]'m.against.lt).origin ≠ .assistant :=
