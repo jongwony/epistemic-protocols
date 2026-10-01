@@ -59,7 +59,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: A friend tells you their morning routine — 5am wake, cold shower, 10k run, no coffee. They swear by it. You're tempted to copy it, but you don't yet know whether your sleep schedule, fitness baseline, and commute map cleanly onto theirs or break the pattern.
 
-**Intervention**: With both accounts in the conversation — the friend's routine and your own conditions — `/ground` settles, from your words, what adopting the routine is expected to achieve, constructs the correspondences, and checks the evidence for each claim those expectations depend on. It reports what the analogy supports within its limits, what it blocks, and what remains unknown.
+**Intervention**: `/ground` settles, from your words, what adopting the routine is expected to achieve, reads what it can reach of the friend's routine and your own conditions, constructs the correspondences, and checks the evidence for each claim those expectations depend on. It reports what the analogy supports within its limits, what it blocks, and what remains unknown.
 
 **Trial prompt**: "Let's practice: first describe your friend's routine and your own conditions — wake time, fitness baseline, commute — in two or three lines each. Then ask: which benefits of copying the routine does the comparison support, and what evidence or limits would change that?"
 
@@ -67,7 +67,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - A) Periagoge `/induce` — B) Katalepsis `/grasp` — C) Analogia `/ground` — D) Aitesis `/inquire`
 - Answer: C
 
-**Quiz Q (design)**: Someone says "just treat your side project like a startup." With both accounts in play, how would you audit the conclusions that comparison supports about your setup?
+**Quiz Q (design)**: Someone says "just treat your side project like a startup." How would you audit the conclusions that comparison supports about your setup?
 - Hint: Separate the intended conclusions, evidence for their bearing correspondences, and the limits of each conclusion.
 
 **Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Warrant tracks evidence, never assent**. Workflow position: Analysis cluster — audit what an analogy being relied on licenses, reading any account it can reach as evidence. Game feel: "What can this comparison support?" → settle intended conclusions → check their structural grounds → report verdicts with limits and missing evidence.

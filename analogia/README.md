@@ -49,11 +49,11 @@ Assess    → Construct the correspondences, state what would defeat each bearin
 Surface   → Present the whole assessment and proceed (relay — no verdict is requested);
             work that rests on a blocked or undetermined conclusion waits for your word
 Later     → A turn that bears on the audit is read whole and the audit runs again on it;
-            anything else — an adoption, a question the current grounds answer — is
-            simply answered
+            anything else — an adoption, a question the current grounds answer entirely —
+            is simply answered
 ```
 
-The question is the only decision gate. It is never filled in for you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, the gate asks. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection. A pass on a question that stands ends in an assessment; a conclusion that stays undetermined is part of it, not a failure to finish. The question can wait before collection, after collection turns up a choice only you can make, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. While it waits, you can end the audit: it says the waiting question was left unassessed and the deficit unresolved, and an earlier assessment, if any, stands as it was over its own question.
+The question is the only decision gate. It is never filled in for you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, the gate asks. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection, unless your turn asks something narrower. A pass on a question that stands ends in an assessment unless collection turns up a choice only you can make; a conclusion that stays undetermined is part of it, not a failure to finish. The question can wait before collection, after collection turns up a choice only you can make, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. While it waits, you can end the audit: it says the waiting question was left unassessed and the deficit unresolved, and an earlier assessment, if any, stays in the conversation as it was presented, over its own question.
 
 ## What a later turn does
 
@@ -62,8 +62,8 @@ The question is the only decision gate. It is never filled in for you: where you
 | **Cite a ground** | Its relevance and scope are checked, and the audit runs again with it before conclusions are judged |
 | **Adopt / set aside a conclusion** | Recorded as yours, reported apart from the evidence, moves no warrant and opens no new pass; asking for the next task adopts nothing |
 | **Revise the purpose, conclusions, source or target** | Reads back the revised question and audits again; evidence already gathered carries over, verdicts are judged again |
-| **Ask a question** | Answered from current grounds; a ground it brings is audited in the next pass |
-| **Something unrelated** | Answered; the last assessment stands |
+| **Ask a question** | Answered from current grounds when they answer it entirely; a question that brings a fact, a source, a counterexample, or a result opens a new pass on it |
+| **Something unrelated** | Answered; the last outcome stands |
 
 ## When to Use
 

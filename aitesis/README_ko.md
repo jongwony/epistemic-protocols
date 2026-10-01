@@ -52,7 +52,7 @@ Answer       → 통째로 읽음: 정함, 고침, 출처를 가리킴, "나도 
 Aitesis → Analogia → Katalepsis
 ```
 
-Aitesis는 일찍 실행됩니다: 유비 추론 감사(Analogia) 전에 AI가 모을 수 있는 것을 다 모읍니다.
+Aitesis는 일찍 실행됩니다: 앞일에 필요한 것 가운데 AI가 모을 수 있는 것을 다 모읍니다. 순서상 뒤의 Analogia는 자기 감사가 기대는 것을 스스로 모읍니다.
 
 ## 사용 시기
 
