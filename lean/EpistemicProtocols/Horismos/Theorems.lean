@@ -35,12 +35,26 @@ theorem withdrawn_stays (c : Context P) (w : Withdrawal P) (us : List (Utterance
 /-- The run opens by reading the invoking context with what observation returned: where nothing
     awaits the person and no turn of theirs is owed, the boundary stands at once and the first turn
     shows it (`converge`); otherwise the gate holds with the first round in its context. No
-    boundary stood before the run. -/
+    boundary stood before the run, and no acceptance is read before a map is shown. -/
 theorem start_reads_first (c : Context P) (us : List (Utterance P)) :
     start respond session c us =
       bound respond session (observed c ++ [(respond (observed c)).val])
-        (status (observed c) (observed c ++ [(respond (observed c)).val]) none) us :=
+        (statusAtStart (observed c) (observed c ++ [(respond (observed c)).val])) us :=
   rfl
+
+/-- At the start the boundary never stands on an acceptance: only where nothing awaits the person
+    and no turn of theirs is owed. -/
+theorem start_stands_only_on_nothing_awaiting (c shown : Context P) (b : DefinedBoundary P)
+    (h : statusAtStart c shown = .defined b) :
+    owed c = false ∧ awaits (readout c) = false ∧ b = closeAt c shown (readout c) := by
+  unfold statusAtStart at h
+  dsimp only at h
+  split at h
+  · rename_i hc
+    cases h
+    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hc
+    exact ⟨hc.1, hc.2, rfl⟩
+  · cases h
 
 /-- An utterance that does not bear on the boundary adds no round and leaves how the run stands as
     it stood; a gate that holds holds the context as it now stands. -/
@@ -191,7 +205,7 @@ theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P)
 theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (ho : ∀ w, o ≠ .withdrawn w)
     (h : bound respond session c o (u :: us) = r) :
-    (∃ c' o', bound respond session c' o' us = r) ∨
+    (∃ c' o', (∀ w, o' ≠ .withdrawn w) ∧ bound respond session c' o' us = r) ∨
     ((isFilled (withdrawal (fuse c u)) = true ∨
         isFilled (withdrawal (observed (fuse c u))) = true) ∧
       r = .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩) := by
@@ -200,12 +214,16 @@ theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : 
   | _ =>
     simp only [bound] at h
     split at h
-    · exact .inl ⟨_, _, h⟩
+    · exact .inl ⟨_, _, by intro w; simp [Outcome.carry], h⟩
     · split at h
       · rename_i hc
         simp only [Bool.or_eq_true] at hc
         exact .inr ⟨hc, h.symm⟩
-      · exact .inl ⟨_, _, h⟩
+      · refine .inl ⟨_, _, ?_, h⟩
+        intro w
+        unfold status
+        dsimp only
+        split <;> simp
 
 /-- Every boundary a run sets stands where no turn of the person's was owed, on their acceptance or
     on nothing awaiting them, closed at the context where it was read — provided the outcome the run
