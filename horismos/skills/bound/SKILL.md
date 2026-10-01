@@ -48,7 +48,7 @@ stands:
 /-! ── MORPHISM ──
 TaskScope
   → observe_and_read_whole_map
-  → present_round ↺ fuse_utterance → observe   -- while something awaits or a turn is owed
+  → present_round ↺ fuse_utterance → observe   -- while something awaits unaccepted, or a turn is owed
   → stand_where_accepted_or_nothing_awaits     -- shown by `converge`; reachable from the first reading
   → DefinedBoundary
 requires: boundary_undefined(T)
@@ -477,17 +477,20 @@ the boundary, which stays in the context; the run's status is carried to it unch
 holds holding the context as it now stands.
 -/
 
-def snapshotFrom (c : Context P) (r : BoundaryEssence c) : Snapshot P :=
+def snapshotFrom (c : Context P) (r : BoundaryEssence c) (limits : String) (dis : List String) :
+    Snapshot P :=
   { context := c, map := r.map, record := r.map.flatMap recordOf, residual := residualOf r.map,
-    limits := r.limits, dissent := dissent c }
+    limits := limits, dissent := dis }
 
-def snapshotOf (c : Context P) : Snapshot P := snapshotFrom c (readout c)
+def snapshotOf (c : Context P) : Snapshot P :=
+  let r := readout c
+  snapshotFrom c r r.limits (dissent c)
 
 /-- The boundary where it stands: the map, record, and residual as read at `c`, where its citations
     point, and what the turn that shows it at `shown` adds — what it names as not reached, and the
     dissent attached to the boundary that it shows. -/
 def closeAt (c shown : Context P) (r : BoundaryEssence c) : DefinedBoundary P :=
-  ⟨{ snapshotFrom c r with limits := (readout shown).limits, dissent := dissent shown }⟩
+  ⟨snapshotFrom c r (readout shown).limits (dissent shown)⟩
 
 /-- How the run stands in `c` — the context at the person's utterance, or at the start the context
     the first round is presented from: the boundary stands where no turn of the person's is owed
@@ -576,7 +579,7 @@ def grounding : Op → Annot × String
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
   | .round        => (.interaction .constitution, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used; yield for the whole response")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance, a withdrawal — read whole against the fused context, whatever form it takes; a reading not yet settled — by this reply or a later one — makes the person's turn owed and holds a round that serves it, committing nothing; a request to see something is served by the turn that shows it")
-  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, the dissent, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground the person has not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where nothing awaited the person, say so")
+  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, the dissent, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground the person has not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
   | .withdrawal   => (.interaction .extension, "at the person's word: what you took as withdrawn, the snapshot there with its limits and its residual, declared empty where nothing is open, and the boundary that last stood, if any; nothing open is entrusted, and a correction reopens the boundary through a new run that reads this record")
   | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared — a chain they named, an adopted policy, or an explicit grant of that next move; a boundary standing again unchanged does not run that move again; after a withdrawal, only to a next move the person declared with it; cite that source; every checkpoint whose own contract requires the person's response still fires, and every later act that cannot be undone needs an authorization reaching it — an entrustment shown by kind, target, and limit is one, and is not asked for again")
 

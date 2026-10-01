@@ -32,10 +32,11 @@ theorem withdrawn_stays (c : Context P) (w : Withdrawal P) (us : List (Utterance
     bound respond session c (.withdrawn w) us = .withdrawn w := by
   cases us <;> simp [bound]
 
-/-- The run opens on its first round, standing as the invoking context, with what observation
-    returned, leaves it; a gate that holds there holds with that round in its context, and no
-    boundary has stood yet. -/
-theorem start_rounds_first (c : Context P) (us : List (Utterance P)) :
+/-- The run opens by reading the invoking context with what observation returned: where nothing
+    awaits the person and no turn of theirs is owed, the boundary stands at once and the first turn
+    shows it (`converge`); otherwise the gate holds with the first round in its context. No
+    boundary stood before the run. -/
+theorem start_reads_first (c : Context P) (us : List (Utterance P)) :
     start respond session c us =
       bound respond session (observed c ++ [(respond (observed c)).val])
         (status (observed c) (observed c ++ [(respond (observed c)).val]) none) us :=
@@ -153,6 +154,26 @@ theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context 
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
   defined_before_your_turn (fuse c u) shown stood b h
 
+/-- A boundary that a bearing utterance sets is read at that utterance: the context it closes is
+    the person's turn followed only by what observation returned. -/
+theorem defined_ends_in_utterance (c : Context P) (o : Outcome P) (u : Utterance P)
+    (ho : ∀ w, o ≠ .withdrawn w) (hr : Reaches (fuse c u))
+    (hw : isFilled (withdrawal (fuse c u)) = false)
+    (hw' : isFilled (withdrawal (observed (fuse c u))) = false)
+    (b : DefinedBoundary P) (h : bound respond session c o [u] = .defined b) :
+    ∃ ev : List (Turn P), b.snapshot.context = c ++ [u.val] ++ ev ∧
+      ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer := by
+  rw [bearing_utterance_rounds respond session c o u [] ho hr hw hw', silence] at h
+  exact defined_at_utterance c u _ _ b h
+
+/-- Only a person's turn accepts the boundary. -/
+theorem accepted_only_by_person (g : Grounding) (h : (acceptanceCoord (P := P)).admits g) :
+    g.val = .person := h
+
+/-- Only a person's turn withdraws. -/
+theorem withdrawn_only_by_person (g : Grounding) (h : (withdrawalCoord (P := P)).admits g) :
+    g.val = .person := h
+
 /-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
 theorem acceptance_sets_despite_residual (c shown : Context P) (stood : Option (DefinedBoundary P))
     (ho : owed c = false) (h : isFilled (acceptance c) = true) :
@@ -186,9 +207,11 @@ theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : 
         exact .inr ⟨hc, h.symm⟩
       · exact .inl ⟨_, _, h⟩
 
-/-- Every boundary a run sets, from a start that has not withdrawn, stands where no turn of the
-    person's was owed, on their acceptance or on nothing awaiting them, in the context where it was
-    read. -/
+/-- Every boundary a run sets stands where no turn of the person's was owed, on their acceptance or
+    on nothing awaiting them, closed at the context where it was read — provided the outcome the run
+    starts from (`ho`), where it is a boundary that stands, stood on those same grounds. This pins
+    the grounds, not which context: that a step's boundary is read at the person's utterance is
+    `defined_ends_in_utterance`. -/
 theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
     (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
     (ho : ∀ b', o = .defined b' → ∃ c₀ s₀, owed c₀ = false ∧

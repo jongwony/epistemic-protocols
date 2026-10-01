@@ -9,19 +9,17 @@ A request to delegate can precede both a fixed goal and knowledge of the decisio
 ```mermaid
 flowchart LR
     A[Open task and delegation intent] --> B[Provisional whole map]
-    B --> C{Anything waiting for the user?}
-    C -->|Yes: open or correct an axis| D[Concrete content and consequences]
+    B -->|Nothing waits for the user, no turn owed| G[Boundary stands as shown]
+    B -->|Something waits, or a turn is owed| C{User's reply}
+    C -->|Opens or corrects an axis| D[Concrete content and consequences]
     D --> E[Update affected decisions]
     E --> B
-    C -->|User accepts it as it stands, no turn still owed| F[Boundary stands, open questions in residual]
-    C -->|No, and no turn of the user's still owed| G[Boundary stands as shown]
-    C -->|User's turn still owed, e.g. unclear reply or AI objection| H[Round that serves it]
+    C -->|Accepts it as it stands, no turn owed| F[Boundary stands, what still waits in residual]
+    C -->|Unclear, or an AI objection not yet closed over| H[Round that serves it]
     H --> B
-    C -->|User withdraws| W[Withdrawal record, keeping the boundary that last stood]
-    F -->|Later words bear on it| B
-    G -->|Later words bear on it| B
-    F -->|User withdraws| W
-    G -->|User withdraws| W
+    C -->|Withdraws| W[Withdrawal record, keeping the boundary that last stood]
+    F -->|Later words| C
+    G -->|Later words| C
 ```
 
 The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. The boundary stands in one of two ways: the user accepts it as it stands, in whatever words, and it is set from what the conversation now holds; or no item on the map is waiting for the user, and it stands as shown, with what the map did not look at. Either way it stands only where no turn of the user's is still owed: an unclear answer or an AI objection they have not closed over, for instance, gets a round that serves it first; asking to see something just shows it, and a boundary that stands keeps standing. Any other answer continues or withdraws. The user's next words reopen a boundary that stands where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, if it had any, before the user took it.
@@ -45,9 +43,10 @@ claude plugin install horismos@epistemic-protocols
 
 - [SKILL.md](skills/bound/SKILL.md) defines provisional discovery, progressive examination, source-bound settlement, and closing on the user's acceptance or on a map with nothing left for the user to dispose — as a Lean 4 block that elaborates.
 - [Round composition](skills/bound/references/round-composition.md) supplies occasion-specific presentation rules.
-- [Repository verification](../AGENTS.md#verification) gives the contributor workflow. For this plugin's static and packaging checks, run these from the repository root, sequentially:
+- [Repository verification](../AGENTS.md#verification) gives the contributor workflow. For this plugin's Lean contract, static, and packaging checks, run these from the repository root, sequentially:
 
 ```bash
+node .claude/skills/verify/scripts/lean-contract.js check .
 node .claude/skills/verify/scripts/static-checks.js .
 node --test .claude/skills/verify/scripts/static-checks.test.mjs
 node --test scripts/package.test.js
