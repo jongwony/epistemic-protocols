@@ -1,7 +1,7 @@
 {
   "name": "epharmoge",
-  "description": "Check that a correct result fits your actual situation — /contextualize (ἐφαρμογή: an application)",
-  "version": "2.4.0",
+  "description": "Check that a result fits everywhere it lands — misfits and omissions on one sheet — /contextualize (ἐφαρμογή: an application)",
+  "version": "2.5.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

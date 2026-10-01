@@ -19,34 +19,71 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty Certificate := ⟨⟨[], List.nodup_nil, by simp, ""⟩⟩
 
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    contextualize respond c [] = .holding c := by
+/-- Silence settles nothing: with no utterance, the last outcome stands. -/
+theorem silence (respond session : Context P → Response P) (c : Context P) (o : Outcome P) :
+    contextualize respond session c o [] = o := by
   simp [contextualize]
 
-theorem unclosed_holds_gate (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Closable (pass (fuse c u))) :
-    contextualize respond c (u :: us) =
-      contextualize respond (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
+/-- An utterance that does not bear on this run joins the context with the session's answer to
+    it; no pass runs, and the last outcome stands. -/
+theorem other_work_passes_nothing (respond session : Context P → Response P) (c : Context P)
+    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    contextualize respond session c o (u :: us) =
+      contextualize respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
   simp [contextualize, h]
 
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
-  let c₁ := c ++ (perform c).map (·.val)
-  let c₂ := c₁ ++ (passRecord c₁).map (·.val)
-  exact ⟨(perform c).map (·.val) ++ (passRecord c₁).map (·.val) ++ (persist c₂).map (·.val),
-    by simp [pass, c₁, c₂]⟩
+/-- An utterance that bears on the run opens a pass, completed or not. -/
+theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
+    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : Reaches (fuse c u)) :
+    contextualize respond session c o (u :: us) =
+      contextualize respond session (settle respond (pass (fuse c u))).context
+        (settle respond (pass (fuse c u))) us := by
+  simp [contextualize, h]
 
-theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution)
-    (h : filledValue (resolution c m) = some r) : standing c m = .resolved r := by
-  simp [standing, h]
+/-- Completion needs nothing open. -/
+theorem completed_nothing_open (respond : Context P → Response P) (c : Context P)
+    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) : NothingOpen c := by
+  unfold settle at h
+  by_cases hc : NothingOpen c
+  · exact hc
+  · simp [hc] at h
 
-theorem unclear_waits (c : Context P) (m : Mismatch c) (hr : filledValue (resolution c m) = none)
-    (hu : (certify c m).whose = .unclear) : standing c m = .open_ := by
-  simp [standing, hr, hu]
+/-- A settled standing never rests on a resolution that asks for a write: such a mismatch stays
+    open until its write repairs it and takes it out of what is found. -/
+theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
+    (hs : standing c m = .resolved r how ∨ standing c m = .relayed r) : r.asksWrite = false := by
+  unfold standing at hs
+  cases hr : resolution c m with
+  | filled a src ok sup =>
+    obtain ⟨r₀, h₀⟩ := a
+    simp only [hr, filledValue] at hs
+    by_cases hw : r₀.asksWrite <;> simp [hw] at hs
+    obtain ⟨rfl, -⟩ := hs
+    simpa using hw
+  | open_ _ =>
+    simp only [hr, filledValue] at hs
+    cases he : byEvidence c m with
+    | filled a src ok sup =>
+      cases a with
+      | withdraw => simp [he] at hs
+      | resolves r₀ =>
+        simp only [he] at hs
+        by_cases hw : r₀.asksWrite <;> simp [hw] at hs
+        subst hs
+        simpa using hw
+    | open_ _ => simp [he] at hs
 
-theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution)
-    (h : standing c m = .resolved r) :
+/-- The person's resolution comes first, whatever evidence read: one that asks no write stands
+    resolved. -/
+theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
+    (h : filledValue (resolution c m) = some (r, how)) (hw : r.asksWrite = false) :
+    standing c m = .resolved r how := by
+  simp [standing, h, hw]
+
+/-- A resolution on the person's record cites a turn the person sent. -/
+theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
+    (h : standing c m = .resolved r how) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
   unfold standing at h
   cases hr : resolution c m with
@@ -54,28 +91,59 @@ theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution)
     exact ⟨src, ok, src.ok.trans ok⟩
   | open_ _ =>
     simp only [hr, filledValue] at h
-    split at h
-    · cases h
-    · split at h <;> cases h
+    split at h <;> (try split at h) <;> cases h
 
+/-- A relayed resolution cites evidence the person did not send. -/
+theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
+    (h : standing c m = .relayed r) :
+    ∃ s : Cite c, s.src.val ≠ .person ∧ (c[s.idx]'s.lt).origin ≠ .person := by
+  unfold standing at h
+  cases hr : resolution c m with
+  | filled a src ok _ =>
+    simp only [hr, filledValue] at h
+    split at h <;> cases h
+  | open_ _ =>
+    simp only [hr, filledValue] at h
+    cases he : byEvidence c m with
+    | filled a src ok _ =>
+      exact ⟨src, ok, by rw [src.ok]; exact ok⟩
+    | open_ _ =>
+      simp [he] at h
+
+/-- Evidence never stands on the person's say-so. -/
 theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
     (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person := ok
 
-theorem closing_by_person {c : Context P} {s : Cite c}
-    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person := ok
+private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.origin ≠ .person)
+    (xs : List {e : Turn P // Q e}) : ∀ e ∈ xs.map (·.val), e.origin ≠ .person := by
+  intro e he
+  obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
+  exact h x.val x.property
 
-theorem done_closed_by_person (c : Context P) (v : ApplicabilityVerdict P) (hc : Closable c)
-    (h : close c = .done v) : NothingOpen c ∧ PersonClosed c := by
-  unfold close at h
-  cases hw : withdrawal c with
-  | some r => simp [hw] at h
-  | none =>
-    simp only [hw] at h
-    rcases hc with hw' | hs | ⟨t, ht⟩ | hdone
-    · simp [hw] at hw'
-    · simp [hs] at h
-    · simp [ht] at h
-    · exact hdone
+/-- No turn a pass adds is the person's: observation returns what the environment or a peer
+    reported, and a write returns your own turn or what an artifact write returned, so the relay
+    never stands in for the person's coordinate. -/
+theorem pass_adds_no_person_turn (c : Context P) :
+    ∃ t, pass c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
+  let c₁ := c ++ (observe c).map (·.val)
+  let c₂ := c₁ ++ (perform c₁).map (·.val)
+  have hev : ∀ e : Turn P, (e.origin = .external ∨ e.origin = .peer) → e.origin ≠ .person := by
+    intro e h; rcases h with h | h <;> rw [h] <;> decide
+  have hwr : ∀ e : Turn P, (e.origin = .assistant ∨ e.origin = .external) → e.origin ≠ .person := by
+    intro e h; rcases h with h | h <;> rw [h] <;> decide
+  refine ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val) ++ (observe c₂).map (·.val),
+    by simp [pass, c₁, c₂], ?_⟩
+  intro e he
+  simp only [List.mem_append] at he
+  rcases he with (he | he) | he
+  · exact returned_not_person hev (observe c) e he
+  · exact returned_not_person hwr (perform c₁) e he
+  · exact returned_not_person hev (observe c₂) e he
+
+/-- A pass only adds to the context. -/
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
+  let ⟨t, ht, _⟩ := pass_adds_no_person_turn c
+  ⟨t, ht⟩
 
 theorem against_not_assistant {c : Context P} (m : Mismatch c) :
     (c[m.against.idx]'m.against.lt).origin ≠ .assistant :=
