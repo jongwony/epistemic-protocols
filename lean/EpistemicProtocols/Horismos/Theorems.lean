@@ -98,12 +98,11 @@ theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance 
   simp [bound, hr, hw]
 
 /-- The boundary stands on one of two grounds — the person's acceptance, or no item awaiting their
-    disposition — never while the reading of the latest reply is unsettled, and it records which:
-    it stood on the acceptance exactly where the acceptance reaches it. -/
+    disposition — never while the reading of the latest reply is unsettled. -/
 theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P))
     (b : DefinedBoundary P) (h : status c shown stood = .defined b) :
     unsettled c = false ∧ (isFilled (acceptance c) = true ∨ awaits (readout c) = false) ∧
-      b = close c (if isFilled (acceptance c) then .acceptance else .nothingAwaiting) := by
+      b = close c := by
   unfold status at h
   dsimp only at h
   split at h
@@ -112,13 +111,6 @@ theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P
     simp only [Bool.and_eq_true, Bool.or_eq_true, Bool.not_eq_true'] at hc
     exact ⟨hc.1, hc.2, rfl⟩
   · cases h
-
-/-- A boundary stood on the acceptance exactly where the person's acceptance reaches it. -/
-theorem stood_on_acceptance (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (b : DefinedBoundary P) (h : status c shown stood = .defined b) :
-    b.stoodOn = .acceptance ↔ isFilled (acceptance c) = true := by
-  obtain ⟨_, _, rfl⟩ := defined_grounds c shown stood b h
-  cases isFilled (acceptance c) <;> simp [close]
 
 /-- Where the reading of the latest reply is unsettled, the gate holds, with the round that shows
     the candidate readings in its context and the boundary that last stood. -/
@@ -166,11 +158,10 @@ theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context 
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
   defined_before_your_turn (fuse c u) shown stood b h
 
-/-- An acceptance sets the boundary whatever is still open; the open part is its residual, and the
-    boundary records that it stood on the acceptance. -/
+/-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
 theorem acceptance_sets_despite_residual (c shown : Context P) (stood : Option (DefinedBoundary P))
     (hu : unsettled c = false) (h : isFilled (acceptance c) = true) :
-    status c shown stood = .defined (close c .acceptance) := by
+    status c shown stood = .defined (close c) := by
   simp [status, close, snapshotOf, h, hu]
 
 /-- Where something awaits the person and they have not accepted, the gate holds. -/
@@ -226,10 +217,10 @@ theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utteranc
     read. -/
 theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
     (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
-    (ho : ∀ b', o = .defined b' → ∃ c₀ g, unsettled c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b' = close c₀ g) :
-    ∃ c₀ g, unsettled c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b = close c₀ g := by
+    (ho : ∀ b', o = .defined b' → ∃ c₀, unsettled c₀ = false ∧
+      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b' = close c₀) :
+    ∃ c₀, unsettled c₀ = false ∧
+      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b = close c₀ := by
   induction us generalizing c o with
   | nil => simp [bound] at h; exact ho b h
   | cons u us ih =>
@@ -243,15 +234,12 @@ theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P
       · refine ih _ _ h ?_
         intro b' hb'
         obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ _ b' hb'
-        exact ⟨_, _, h1, h2, h3⟩
+        exact ⟨_, h1, h2, h3⟩
 
 /-- Every disposition on the record cites a person's turn: a relayed earlier decision — one fixing
     a decision's content or who settles it —, a fact, or a proposal of yours makes none. -/
 theorem recorded_by_person (c : Context P) (r : Recorded c) : r.src.src.val = .person :=
   r.byPerson
-
-/-- A disposition is never granted: only the person disposes. -/
-theorem disposition_not_granted (d : Disposition) : d.standing ≠ .granted := d.notGranted
 
 /-- Where the person disposed a decision in this run, that disposition governs it — their current
     words — whatever an earlier decision fixed. -/
@@ -266,15 +254,15 @@ theorem current_disposition_governs {c : Context P} (e : BoundaryEntry c) (d : D
 theorem granted_choice_stands_iff {c : Context P} (e : BoundaryEntry c) (v : String)
     (src : Cite c) (allowed : (contentOf (P := P) e.domain).admits src.src)
     (supported : (contentOf (P := P) e.domain).supports c (c[src.idx]'src.lt)
-      (.held v .draft .granted))
-    (hc : e.content = .filled (.held v .draft .granted) src allowed supported) :
+      (.granted v))
+    (hc : e.content = .filled (.granted v) src allowed supported) :
     stands e = true ↔
       ∃ a g, governing e = some (a, g) ∧ a.form = .aiAutonomous ∧ src.idx = g.idx := by
   cases hg : governing e with
-  | none => simp [stands, hc, Settled.isGrantedChoice, hg]
+  | none => simp [stands, hc, hg]
   | some p =>
     obtain ⟨a, g⟩ := p
-    simp only [stands, hc, Settled.isGrantedChoice, ite_true, hg, Bool.and_eq_true, decide_eq_true_eq]
+    simp only [stands, hc, hg, Bool.and_eq_true, decide_eq_true_eq]
     constructor
     · intro h; exact ⟨a, g, rfl, h⟩
     · rintro ⟨a', g', he, h⟩
@@ -282,26 +270,14 @@ theorem granted_choice_stands_iff {c : Context P} (e : BoundaryEntry c) (v : Str
       exact h
 
 /-- Held content that stands — the person's own value, or one they took — stands on a person's
-    turn; your choice inside a grant stands only under a governing entrustment, citing its turn. -/
-theorem held_content_cites_person {c : Context P} (e : BoundaryEntry c) (s : Settled)
+    turn; your choice inside a grant is its own form (`granted_choice_stands_iff`). -/
+theorem held_content_cites_person {c : Context P} (e : BoundaryEntry c) (v : String)
+    (p : Proposer) (st : Standing)
     (src : Cite c) (allowed : (contentOf (P := P) e.domain).admits src.src)
-    (supported : (contentOf (P := P) e.domain).supports c (c[src.idx]'src.lt) s)
-    (hc : e.content = .filled s src allowed supported) (hh : s.isHeld = true)
-    (hs : stands e = true) :
-    src.src.val = .person ∨ (s.isGrantedChoice = true ∧
-      ∃ a g, governing e = some (a, g) ∧ a.form = .aiAutonomous ∧ src.idx = g.idx) := by
-  cases hgc : s.isGrantedChoice with
-  | false =>
-    simp [stands, hc, hgc, hh] at hs
-    exact .inl hs
-  | true =>
-    refine .inr ⟨rfl, ?_⟩
-    cases hg : governing e with
-    | none => simp [stands, hc, hgc, hg] at hs
-    | some p =>
-      obtain ⟨a, g⟩ := p
-      simp [stands, hc, hgc, hg] at hs
-      exact ⟨a, g, rfl, hs.1, hs.2⟩
+    (supported : (contentOf (P := P) e.domain).supports c (c[src.idx]'src.lt) (.held v p st))
+    (hc : e.content = .filled (.held v p st) src allowed supported)
+    (hs : stands e = true) : src.src.val = .person := by
+  simpa [stands, hc] using hs
 
 /-- Your choice inside a grant that an earlier decision fixing who settles the item states stands,
     citing that decision's record, where no disposition of this run governs the item and the
@@ -309,15 +285,15 @@ theorem held_content_cites_person {c : Context P} (e : BoundaryEntry c) (s : Set
 theorem granted_choice_under_prior_stands {c : Context P} (e : BoundaryEntry c) (v : String)
     (src : Cite c) (allowed : (contentOf (P := P) e.domain).admits src.src)
     (supported : (contentOf (P := P) e.domain).supports c (c[src.idx]'src.lt)
-      (.held v .draft .granted))
-    (hc : e.content = .filled (.held v .draft .granted) src allowed supported)
+      (.granted v))
+    (hc : e.content = .filled (.granted v) src allowed supported)
     (x : Option (Cite c)) (hd : e.disposition = .open_ x)
     (a : Arrangement) (ha : a.form = .aiAutonomous) (prior : Cite c)
     (al : (priorDispositionOf (P := P) e.domain).admits prior.src)
     (su : (priorDispositionOf (P := P) e.domain).supports c (c[prior.idx]'prior.lt) a)
     (hp : e.priorDisposition = .filled a prior al su) (hi : src.idx = prior.idx) :
     stands e = true := by
-  simp [stands, hc, hd, hp, governing, Settled.isGrantedChoice, ha, hi]
+  simp [stands, hc, hd, hp, governing, ha, hi]
 
 /-- Where the person's disposition in this run keeps a decision for themselves or for their
     selection, your choice inside an earlier decision's grant does not stand: their current words
@@ -325,13 +301,13 @@ theorem granted_choice_under_prior_stands {c : Context P} (e : BoundaryEntry c) 
 theorem override_blocks_prior_grant {c : Context P} (e : BoundaryEntry c) (v : String)
     (src : Cite c) (allowed : (contentOf (P := P) e.domain).admits src.src)
     (supported : (contentOf (P := P) e.domain).supports c (c[src.idx]'src.lt)
-      (.held v .draft .granted))
-    (hc : e.content = .filled (.held v .draft .granted) src allowed supported)
+      (.granted v))
+    (hc : e.content = .filled (.granted v) src allowed supported)
     (d : Disposition) (hf : d.arrangement.form ≠ .aiAutonomous) (s : Cite c)
     (al : (dispositionOf (P := P) e.domain).admits s.src)
     (su : (dispositionOf (P := P) e.domain).supports c (c[s.idx]'s.lt) d)
     (hd : e.disposition = .filled d s al su) : stands e = false := by
-  simp [stands, hc, hd, governing, Settled.isGrantedChoice, hf]
+  simp [stands, hc, hd, governing, hf]
 
 private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : BoundaryEntry c)
     (hm : e ∈ m) (hs : stands e = false) : (e.domain, e.question) ∈ residualOf m := by
@@ -371,13 +347,13 @@ theorem prior_disposition_records_nothing {c : Context P} (e : BoundaryEntry c)
   | mk d q r ev dep app pr disp pd ct => cases disp <;> rfl
 
 /-- The snapshot carries the map, the record, the residual, what the map did not look at, and the
-    dissent read from the context it is taken in; a boundary carries it with what it stood on, and
-    a withdrawal carries it at the person's word. -/
-theorem snapshot_carries (c : Context P) (on : StoodOn) :
+    dissent read from the context it is taken in; a boundary carries it, and a withdrawal carries
+    it at the person's word. -/
+theorem snapshot_carries (c : Context P) :
     (snapshotOf c).context = c ∧ (snapshotOf c).dissent = dissent c ∧
       (snapshotOf c).residual = residualOf (readout c).map ∧
       (snapshotOf c).limits = (readout c).limits ∧
-      (close c on).snapshot = snapshotOf c ∧ (close c on).stoodOn = on :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
+      (close c).snapshot = snapshotOf c :=
+  ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 end Horismos

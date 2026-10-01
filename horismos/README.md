@@ -10,18 +10,21 @@ A request to delegate can precede both a fixed goal and knowledge of the decisio
 flowchart LR
     A[Open task and delegation intent] --> B[Provisional whole map]
     B --> C{Anything waiting for the user?}
-    C -->|Open or correct an axis| D[Concrete content and consequences]
+    C -->|Yes: open or correct an axis| D[Concrete content and consequences]
     D --> E[Update affected decisions]
     E --> B
-    C -->|User accepts it as it stands| F[Defined boundary and explicit residual]
-    C -->|Nothing waiting| F
+    C -->|Yes: user accepts it as it stands| F[Boundary stands, open questions in residual]
+    C -->|No| G[Boundary stands as shown]
+    C -->|Unclear reply| H[Round showing the possible readings]
+    H --> B
+    C -->|User withdraws| W[Withdrawal record]
 ```
 
-The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. The boundary stands in one of two ways: the user accepts it as it stands, in whatever words, and it is set from what the conversation now holds; or no item on the map is waiting for the user — every one disposed by their words, fixed by an earlier recorded decision, or settled by what was observed — and it stands as shown, with what the map did not look at. Any other answer continues or withdraws, and an answer whose meaning is still unclear gets a round that shows the possible readings. The user's next words reopen a boundary that stands where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, before the user took it.
+The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. The boundary stands in one of two ways: the user accepts it as it stands, in whatever words, and it is set from what the conversation now holds; or no item on the map is waiting for the user — every one disposed by their words, fixed by an earlier recorded decision of theirs, or settled by what was observed — and it stands as shown, with what the map did not look at. Any other answer continues or withdraws, and an answer whose meaning is still unclear gets a round that shows the possible readings. The user's next words reopen a boundary that stands where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, before the user took it.
 
 For example, a project map might show that the audience is already chosen, the data handling approach needs comparison, and the rollout date is still open. The user can inspect data handling, rule out external transmission, entrust the comparison work, and retain the final choice. The map then updates the affected options and keeps the rollout date unresolved. A boundary that stands — whether the user accepted it or nothing was waiting for them — is sufficient for the next move; it does not silently resolve every open project question.
 
-The result is `BoundaryUndefined → DefinedBoundary`: the current map with each decision's disposition — who put it forward and how it stood — the questions still open, what the map did not look at, the AI's recorded objections, what it stood on — the user's acceptance, or nothing waiting for them — and pointers to the records that settled it. A withdrawal leaves what the user's words now make, beside the boundary that last stood in the run, if one did. A receiving agent must read those sources. Proposal work leaves selection with its holder; entrusted discretion permits choice within the actual grant. Required checkpoints in another protocol still apply.
+The result is `BoundaryUndefined → DefinedBoundary`: the current map with each decision's disposition — who put it forward and how it stood — the questions still open, what the map did not look at, the AI's recorded objections, and pointers to the records that settled it. A withdrawal leaves what the user's words now make, beside the boundary that last stood in the run, if one did. A receiving agent must read those sources. Proposal work leaves selection with its holder; entrusted discretion permits choice within the actual grant. Required checkpoints in another protocol still apply.
 
 ## Install and use
 
