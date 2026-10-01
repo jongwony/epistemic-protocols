@@ -62,28 +62,25 @@ private theorem carry_withdrawn (o : Outcome P) (c : Context P) (w : Withdrawal 
     (h : o.carry c = .withdrawn w) : o = .withdrawn w := by
   cases o <;> simp_all [Outcome.carry]
 
-/-- A settled withdrawal ends the run at the person's word, with nothing further observed: its
+/-- A withdrawal at the person's word ends the run there, with nothing further observed: its
     record keeps the snapshot at that word and, apart from it, the boundary that last stood; it sets
     no boundary from there. -/
 theorem withdrawal_ends (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hu : unsettled (fuse c u) = false)
     (h : isFilled (withdrawal (fuse c u)) = true) :
     bound respond session c o (u :: us) =
       .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩ := by
-  simp [bound, hr, hu, h]
+  simp [bound, hr, h]
 
-/-- A reply whose reading is unsettled at the person's word never ends the run: it is read like
-    any reply that bears on the boundary, with what observation returned, and answered by your
-    turn; where its reading is still unsettled there, the gate holds (`unsettled_holds`). -/
-theorem unsettled_never_withdraws (c : Context P) (o : Outcome P) (u : Utterance P)
+/-- A withdrawal whose reading only observation settles still withdraws, and its record is still
+    the snapshot at the person's word. -/
+theorem withdrawal_after_observation (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hu : unsettled (fuse c u) = true) :
+    (h₀ : isFilled (withdrawal (fuse c u)) = false)
+    (h : isFilled (withdrawal (observed (fuse c u))) = true) :
     bound respond session c o (u :: us) =
-      bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
-        (status (observed (fuse c u))
-          (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
-  simp [bound, hr, hu]
+      .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩ := by
+  simp [bound, hr, h₀, h]
 
 /-- Any other utterance that bears on the boundary is read where it is said, with what observation
     returned — the run stands as that leaves it — and then answered by your turn, and a gate that
@@ -91,21 +88,20 @@ theorem unsettled_never_withdraws (c : Context P) (o : Outcome P) (u : Utterance
     boundary stood, so a later correction reopens it. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hw : (!unsettled (fuse c u) && isFilled (withdrawal (fuse c u))) = false) :
+    (hw : isFilled (withdrawal (fuse c u)) = false)
+    (hw' : isFilled (withdrawal (observed (fuse c u))) = false) :
     bound respond session c o (u :: us) =
       bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
         (status (observed (fuse c u))
           (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
-  simp [bound, hr, hw]
+  simp [bound, hr, hw, hw']
 
-/-- The boundary stands on one of two grounds — the person's acceptance, or, without it, no item
-    awaiting their disposition, nothing they asked to see left unshown, and no contrary ground of
-    yours they have not closed over — never while the reading of the latest reply is unsettled. -/
+/-- The boundary stands only where no turn of the person's is owed, and then on one of two grounds:
+    the person's acceptance, or, without it, no item awaiting their disposition. -/
 theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P))
     (b : DefinedBoundary P) (h : status c shown stood = .defined b) :
-    unsettled c = false ∧
-      (isFilled (acceptance c) = true ∨
-        (awaits (readout c) = false ∧ opening c = false ∧ (dissent c).isEmpty = true)) ∧
+    owed c = false ∧
+      (isFilled (acceptance c) = true ∨ awaits (readout c) = false) ∧
       b = close c := by
   unfold status at h
   dsimp only at h
@@ -113,13 +109,13 @@ theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true, Bool.or_eq_true, Bool.not_eq_true'] at hc
-    exact ⟨hc.1, hc.2.imp_right (fun h => ⟨h.1.1, h.1.2, h.2⟩), rfl⟩
+    exact ⟨hc.1, hc.2, rfl⟩
   · cases h
 
-/-- Where the reading of the latest reply is unsettled, the gate holds, with the round that shows
-    the candidate readings in its context and the boundary that last stood. -/
-theorem unsettled_holds (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (h : unsettled c = true) : status c shown stood = .holding shown stood := by
+/-- Where a turn of the person's is still owed, the gate holds, with the round that serves it in
+    its context and the boundary that last stood. -/
+theorem owed_holds (c shown : Context P) (stood : Option (DefinedBoundary P))
+    (h : owed c = true) : status c shown stood = .holding shown stood := by
   simp [status, h]
 
 /-- A gate that holds keeps the boundary that last stood: a reopen erases nothing a later
@@ -164,9 +160,9 @@ theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context 
 
 /-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
 theorem acceptance_sets_despite_residual (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (hu : unsettled c = false) (h : isFilled (acceptance c) = true) :
+    (ho : owed c = false) (h : isFilled (acceptance c) = true) :
     status c shown stood = .defined (close c) := by
-  simp [status, close, snapshotOf, h, hu]
+  simp [status, close, h, ho]
 
 /-- Where something awaits the person and they have not accepted, the gate holds. -/
 theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P))
@@ -174,33 +170,22 @@ theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P)
     status c shown stood = .holding shown stood := by
   simp [status, ha, hw]
 
-/-- Where you hold contrary grounds and the person has not accepted, the boundary does not stand on
-    nothing awaiting: the gate holds for the person to close over them. -/
-theorem dissent_holds_without_acceptance (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (ha : isFilled (acceptance c) = false) (hd : (dissent c).isEmpty = false) :
-    status c shown stood = .holding shown stood := by
-  simp [status, ha, hd]
-
-/-- Where the latest reply asks to see something not yet shown and the person has not accepted, the
-    gate holds for the round that shows it. -/
-theorem opening_holds_without_acceptance (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (ha : isFilled (acceptance c) = false) (ho : opening c = true) :
-    status c shown stood = .holding shown stood := by
-  simp [status, ha, ho]
-
 theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (h : bound respond session c o (u :: us) = r) :
     (∃ c' o', bound respond session c' o' us = r) ∨
-    (unsettled (fuse c u) = false ∧ isFilled (withdrawal (fuse c u)) = true ∧
+    ((isFilled (withdrawal (fuse c u)) = true ∨
+        isFilled (withdrawal (observed (fuse c u))) = true) ∧
       r = .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩) := by
   simp only [bound] at h
   split at h
   · exact .inl ⟨_, _, h⟩
   · split at h
     · rename_i hc
-      simp only [Bool.and_eq_true, Bool.not_eq_true'] at hc
-      exact .inr ⟨hc.1, hc.2, h.symm⟩
-    · exact .inl ⟨_, _, h⟩
+      exact .inr ⟨.inl hc, h.symm⟩
+    · split at h
+      · rename_i hc
+        exact .inr ⟨.inr hc, h.symm⟩
+      · exact .inl ⟨_, _, h⟩
 
 private theorem status_not_withdrawn (c shown : Context P) (stood : Option (DefinedBoundary P))
     (q : Withdrawal P) : status c shown stood ≠ .withdrawn q := by
@@ -208,12 +193,13 @@ private theorem status_not_withdrawn (c shown : Context P) (stood : Option (Defi
   dsimp only
   split <;> intro h <;> cases h
 
-/-- A withdrawn run was withdrawn by the person's settled turn, and its record is the snapshot at
-    that very context. -/
+/-- A withdrawn run was withdrawn by the person's turn — at their word, or once observation settled
+    its reading — and its record is the snapshot at that word. -/
 theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utterance P))
     (w : Withdrawal P) (h : bound respond session c o us = .withdrawn w)
     (ho : ∀ q, o ≠ .withdrawn q) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ unsettled c₀ = false ∧ w.atWord = snapshotOf c₀ := by
+    ∃ c₀, (isFilled (withdrawal c₀) = true ∨ isFilled (withdrawal (observed c₀)) = true) ∧
+      w.atWord = snapshotOf c₀ := by
   induction us generalizing c o with
   | nil => simp [bound] at h; exact absurd h (ho w)
   | cons u us ih =>
@@ -224,24 +210,23 @@ theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utteranc
       exact ho q (carry_withdrawn _ _ _ hq)
     · split at h
       · rename_i hc
-        simp only [Bool.and_eq_true, Bool.not_eq_true'] at hc
         cases h
-        exact ⟨_, hc.2, hc.1, rfl⟩
-      · exact ih _ _ h (fun q => status_not_withdrawn _ _ _ q)
+        exact ⟨_, .inl hc, rfl⟩
+      · split at h
+        · rename_i hc
+          cases h
+          exact ⟨_, .inr hc, rfl⟩
+        · exact ih _ _ h (fun q => status_not_withdrawn _ _ _ q)
 
-/-- Every boundary a run sets, from a start that has not withdrawn, stands on the acceptance or on
-    nothing awaiting the person, with no reply's reading unsettled, in the context where it was
+/-- Every boundary a run sets, from a start that has not withdrawn, stands where no turn of the
+    person's was owed, on their acceptance or on nothing awaiting them, in the context where it was
     read. -/
 theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
     (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
-    (ho : ∀ b', o = .defined b' → ∃ c₀, unsettled c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨
-        (awaits (readout c₀) = false ∧ opening c₀ = false ∧ (dissent c₀).isEmpty = true)) ∧
-      b' = close c₀) :
-    ∃ c₀, unsettled c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨
-        (awaits (readout c₀) = false ∧ opening c₀ = false ∧ (dissent c₀).isEmpty = true)) ∧
-      b = close c₀ := by
+    (ho : ∀ b', o = .defined b' → ∃ c₀, owed c₀ = false ∧
+      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b' = close c₀) :
+    ∃ c₀, owed c₀ = false ∧
+      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b = close c₀ := by
   induction us generalizing c o with
   | nil => simp [bound] at h; exact ho b h
   | cons u us ih =>
@@ -252,10 +237,12 @@ theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P
       exact ho b' (carry_defined _ _ _ hb')
     · split at h
       · cases h
-      · refine ih _ _ h ?_
-        intro b' hb'
-        obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ _ b' hb'
-        exact ⟨_, h1, h2, h3⟩
+      · split at h
+        · cases h
+        · refine ih _ _ h ?_
+          intro b' hb'
+          obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ _ b' hb'
+          exact ⟨_, h1, h2, h3⟩
 
 /-- Every disposition on the record cites a person's turn: a relayed earlier decision — one fixing
     a decision's content or who settles it —, a fact, or a proposal of yours makes none. -/
@@ -340,8 +327,7 @@ private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : Boundary
     governs it yet. -/
 theorem open_decisions_in_residual (c : Context P) (e : BoundaryEntry c)
     (hm : e ∈ (readout c).map) (hs : stands e = false) :
-    (⟨e.domain, e.question, e.relevance, (governing e).map (·.1)⟩ : OpenItem) ∈
-      (snapshotOf c).residual :=
+    openItemOf e ∈ (snapshotOf c).residual :=
   mem_residualOf _ e hm hs
 
 /-- An item awaiting the person is in the residual, marked as governed by no arrangement yet. -/
