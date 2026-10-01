@@ -26,7 +26,7 @@ Some forms cannot be specified before they are seen (`FitUnrecognized`): the pla
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | **Hypotyposis** | **Hybrid** | **`FitUnrecognized → RecognizedForm`** |
 
-**What decides between the neighbors** is the transformation the moment needs: named alternatives whose futures you cannot judge from words → `/preview` (contrast, commit to a direction, discard the probes); intent whose coordinates already live in your codebase, rules, or past sessions → `/elicit` (read them); a correct result that may not fit a context already settled → `/contextualize` (repair the result); an empty field of ideas → `/ideate` (widen it); **a form to make, intent underdetermined, and you would know it on sight → `/sketch`** (make, mark, revise, recognize — and keep the version you recognized).
+**What decides between the neighbors** is the transformation the moment needs: named alternatives whose futures you cannot judge from words → `/preview` (contrast, commit to a direction, discard the probes); intent whose coordinates already live in your codebase, rules, or past sessions → `/elicit` (read them); a finished result checked against everywhere it lands and the intents it was meant to carry → `/contextualize` (carry out the fixes you settle); an empty field of ideas → `/ideate` (widen it); **a form to make, intent underdetermined, and you would know it on sight → `/sketch`** (make, mark, revise, recognize — and keep the version you recognized).
 
 ## Three Breach Conditions
 

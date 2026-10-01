@@ -35,7 +35,7 @@ A result can be correct and still not apply, because correctness alone doesn't g
 | Deficit | `ContextInsufficient` | `ApplicationDecontextualized` |
 | Resolution | `SufficientContext` | `ContextualizedExecution` |
 
-Same axis (context fitness), opposite timing, different object — before a result exists, on what the AI lacks; after, on whether the result fits. Aitesis asks "what can I reach on my own, and what is yours to settle?" — Epharmoge asks "does my execution actually fit the context?" They are complementary, not redundant.
+Same axis (context fitness), opposite timing, different object — before a result exists, on what the AI lacks; after, on whether the result fits. Aitesis asks "what can I reach on my own, and what is yours to settle?" — Epharmoge asks "does this result — mine or anyone's — actually fit where it lands?" They are complementary, not redundant.
 
 ## Protocol Flow
 

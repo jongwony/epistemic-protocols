@@ -9,7 +9,7 @@ Check a result against every place it lands and every intent it was meant to car
 
 ## Definition
 
-**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit: fix it this way, leave it for this reason, stop using it, or it is not this result's to fix — given in their own words, by taking a proposed action, or by entrusting the choice; only that coordinate waits on them. Orthogonal to it, the AI relays: it follows the result to every place it lands — what reads it, its copies and neighbours, the people who read it, the environment it runs in — and to every intent in the accumulated context it was meant to carry, observing without changing existing state; it carries out every settled resolution inside what this run may write, and evidence that fixes a resolution alone settles it as the AI's, shown with that evidence; it reads again until nothing newly settled is left. Every place the result does not fit, an intent it was meant to carry and does not included, goes on one sheet with its concrete consequence in the person's own situation, beside what was checked and fits and what was not reached, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of the person; a later utterance that bears on the run opens it again. Completion establishes fit for what was found within what was reached — not the correctness of the result, and nothing about places the check could not reach.
+**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit: fix it this way, leave it for this reason, stop using it, or it is not this result's to fix — given in their own words, by taking a proposed action, or by entrusting the choice; only that coordinate waits on them. Orthogonal to it, the AI relays: it follows the result to every place it lands — what reads it, its copies and neighbours, the people who read it, the environment it runs in — and to every intent in the accumulated context it was meant to carry, observing without changing existing state; it carries out every settled resolution inside what this run may write, and evidence that fixes a resolution alone settles it as the AI's, shown with that evidence; then it reads again. Every place the result does not fit, an intent it was meant to carry and does not included, goes on one sheet with its concrete consequence in the person's own situation, beside what was checked and fits and what was not reached, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of the person; a later utterance that bears on the run opens it again. Completion establishes fit for what was found within what was reached — not the correctness of the result, and nothing about places the check could not reach.
 
 ```lean
 /-!
@@ -24,9 +24,7 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 Epharmoge(X) → start(c) → contextualize(c, utterances), where c is the fused session context and
 X, the result under review, is whatever the invocation names — this session's output or an
 artifact from elsewhere:
-  pass(c): the relay — observe every place X lands and every intent it answers to, carry out every
-    settled resolution inside what this run may write, and observe again, until nothing newly
-    settled is left
+  pass(c): the relay (PHASE TRANSITIONS) — observe, carry out what is settled, observe again
   [nothing open]   completed — the closing sheet
   [otherwise]      present the sheet, then one gate over every open mismatch → Stop
   next utterance u: c' := fuse(c, u), read whole →
@@ -47,7 +45,7 @@ artifact from elsewhere:
   → ContextualizedExecution
 requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invocation declares the deficit and enters without it
 deficit:  ApplicationDecontextualized
-preserves: every turn of the context -- the context only grows (pass_extends); a write changes the result alone
+preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Applicability over Correctness
 invariant: the person holds each resolution; evidence settles only what it fixes alone and what nothing the person said contests
 invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the next observation reads, so a run can have more open after a resolution than before it
@@ -135,8 +133,7 @@ axiom target : Context P → Option Result
     utterance, or evidence says it moved; what you create only to look — a scratch copy, a temp
     file — you remove afterwards. A place that needs a change to existing state, someone's
     permission, or another's authority is not reached on your own: it goes into `reach` with what
-    it needs. Each return is an evidence turn. Within a pass, observing and `perform` go on in
-    turn until nothing newly settled is left to carry out. -/
+    it needs. Each return is an evidence turn. -/
 axiom observe : Context P → List (Evidence P)
 
 /-- One place X does not fit: what does not fit, in plain words; where in X, or where it lands;
@@ -159,9 +156,11 @@ axiom mismatches : (c : Context P) → List (Mismatch c)
 
 /-- What settles one mismatch, read the same way wherever it stands — by the person's turn or by
     evidence. There is no verdict beside it: whether the mismatch "really" stands is not asked,
-    and nothing here asserts it either way. A resolution that asks for a write resolves the
-    mismatch only until that write lands; a mismatch still found after its write landed is
-    unrepaired and open again, and a write that failed or was not carried out resolves nothing. -/
+    and nothing here asserts it either way. A resolution that asks for a write — `adapt`,
+    `discard` — does not close its mismatch: before the write lands it is still to be carried
+    out, and a mismatch still found after its write landed is unrepaired. A write that repairs it
+    removes it from what is found, and the sheet says it was repaired. `keep` and `elsewhere` close
+    it as they stand. -/
 inductive Resolution
   /-- change X this way -/
   | adapt (direction : String)
@@ -274,7 +273,9 @@ axiom reach : Context P → String
     fit, points at a place to look, asks about the sheet, or changes X or the evidence — even
     where it looks like other work. An utterance that bears on none of it leaves the run as it
     stands: the session answers it, that answer stays in the context, no pass runs, and the last
-    outcome stands. -/
+    outcome stands. An utterance asking for a step that rests on X while something is open bears
+    on the run: the open places are shown before that step, and a step that cannot be undone
+    waits on them. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: contrary grounds you showed before the person's resolutions — evidence that
@@ -308,8 +309,9 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A pass is the relay, silent and orthogonal to the person's coordinate: observe the reach, carry
-out every settled resolution inside what this run may write, and observe again, each return
-entering the context, until nothing newly settled is left. What was found, how each mismatch
+out every settled resolution inside what this run may write, and observe again — in turn, each
+return entering the context, until nothing newly settled is left; `pass` writes one round of it,
+and every further round extends the context the same way. What was found, how each mismatch
 stands, what fits, and what was not reached are then read from the context. `respond` presents
 the sheet — the closing sheet on completion —, and `session` answers an utterance that does not
 bear on this run.
@@ -318,10 +320,13 @@ bear on this run.
 /-- **Your action** for a pass: the writes carrying out every adaptation or discard a resolution
     settles — the person's, one under their grant, one evidence relays — that the context does
     not yet show carried out, the person's whole answer read and its combined consequence weighed
-    first; returning what the writes returned. A write that needs a change outside what this run
-    may write, someone's permission, or another's authority is not carried out: it goes into
-    `reach` with what it needs, and its mismatch stays open for the person. A discard with nothing
-    in its place removes X; a replacement this run wrote is X from then on. -/
+    first; returning what the writes returned. What this run may write is X and the places it
+    lands that the work in front of the person covers; anything else needs a permission or its
+    owner. A write outside that, or one whose effect cannot be undone — a removal or overwrite
+    with no way back, a deploy, a send outside — is not carried out, even where evidence fixes
+    its direction: it goes into `reach` with what it needs, and its mismatch waits on the person.
+    A discard with nothing in its place removes X; a replacement this run wrote is X from then
+    on. -/
 axiom perform : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P :=
@@ -329,7 +334,18 @@ def pass (c : Context P) : Context P :=
   let c₂ := c₁ ++ (perform c₁).map (·.val)
   c₂ ++ (observe c₂).map (·.val)
 
-def NothingOpen (c : Context P) : Prop := ∀ m ∈ mismatches c, standing c m ≠ .open_
+/-- A standing that closes its mismatch: kept or another's, by the person or by evidence, or a
+    flag evidence withdrew. A resolution that asks for a write closes nothing; its write, once it
+    repairs the mismatch, takes the mismatch out of what is found. -/
+def Closes : Standing → Prop
+  | .resolved (.keep _) _      => True
+  | .resolved (.elsewhere _) _ => True
+  | .relayed (.keep _)         => True
+  | .relayed (.elsewhere _)    => True
+  | .withdrawn                 => True
+  | _                          => False
+
+def NothingOpen (c : Context P) : Prop := ∀ m ∈ mismatches c, Closes (standing c m)
 
 def verdict (c : Context P) (t : Context P) : ApplicabilityVerdict P :=
   ⟨t, target c, reach c, dissent c⟩
@@ -341,15 +357,19 @@ open Classical in
     only with a demonstrable behavioral consequence, structural extent alone minor — and how it
     stands: waiting on the person; the person's resolution with their turn quoted, the intent
     taken from it, and whether they said it, took a proposed action, or entrusted the choice; a
-    relayed resolution with the evidence that fixed it; a withdrawn flag with that evidence. For
-    each open one, `actions`, each with its consequence and your contrary grounds where you have
-    them; mismatches that bear on each other grouped, with their combined consequence. Then
-    `reach`. Then what changed since the last sheet: each line added, removed, or changed names
+    relayed resolution with the evidence that fixed it; a withdrawn flag with that evidence; a
+    resolution whose write was not carried out, with what it needs. For each open one, `actions`,
+    each with its consequence and your contrary grounds where you have them — for one whose write
+    was held back, what would unblock it: grant the permission, do it yourself, hand it to its
+    owner, or leave it; mismatches that bear on each other grouped, with their combined
+    consequence. Then `reach`: what fits and what was not reached. Then what changed since the last sheet: each line added, removed, or changed names
     what moved — a write, a new observation, a person's turn, or a reading of yours corrected on
     unchanged ground, said to be a correction; a line that left says why — repaired, gone with a
-    removed result, withdrawn by evidence. Then one gate over every open mismatch. Re-present the
-    whole sheet where it changed or the person asked for it; a question about the sheet is
-    answered with the gate said to stand. On completion, the closing sheet CONVERGENCE names. -/
+    removed result, withdrawn by evidence. Then the one question over every open mismatch, asked
+    as a question. Re-present the whole sheet where it changed or the person asked for it; a
+    question about the sheet is answered with the gate said to stand. On completion, the closing
+    sheet CONVERGENCE names. Where the run may be cut off before it completes, keep the current
+    sheet in a durable record the person can find. -/
 def settle (respond : Context P → Response P) (c : Context P) : Outcome P :=
   let t := c ++ [(respond c).val]
   if NothingOpen c then .completed (verdict c t) else .holding t
@@ -374,14 +394,15 @@ def start (respond session : Context P → Response P) (c : Context P)
 Transformative revalidation (NON-MONOTONE): a write produces a new X, and the next observation
 reads it, so a write can breed mismatches that did not exist before, and can leave the one it
 aimed at in place. Nothing counts down; every pass judges the whole X against the whole context,
-and every change on the sheet names what moved. The relay goes on inside a pass until nothing
-newly settled is left; each round that leaves something open ends at one gate, and only the
-person's turn answers it. Completion needs no turn of theirs.
+and every change on the sheet names what moved. The relay runs inside a pass; each round that
+leaves something open ends at one gate, and only the person's turn answers it. Completion needs no turn of theirs.
 -/
 
 /-! ── CONVERGENCE ──
-Every closure is read where it fires and nowhere else. completed: a pass left nothing open —
-whether or not the person decided anything in this run; the closing sheet carries the ground.
+Every closure is read where it fires and nowhere else. completed: a pass left nothing open — every
+mismatch still found kept, another's, or withdrawn, a place resolved by a write gone once the
+write repaired it — whether or not the person decided anything in this run; the closing sheet
+carries the ground.
 Fit is claimed only for the mismatches found within the reach, and fit is not correctness, which
 was presupposed at entry and is not re-checked here; a replacement this run wrote is judged by
 the next observation like the result it replaced, and a removal with nothing in its place leaves
@@ -419,7 +440,7 @@ def grounding : Op → Annot × String
   | .observe          => (.observe, "artifact read, artifact search, record read, environment run: every place the result lands and every intent it answers to, read without changing existing state, what the context holds read again where something says it moved; what is made only to look is removed afterwards; each return enters the context as an evidence turn; a place that needs a change to existing state, a permission, or another's authority is named with what it needs and left unreached")
   | .judge            => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result must fit; how each mismatch stands; what fits and what was not reached")
   | .evidenceWithdraw => (.interaction .extension, "where evidence alone shows a flagged place fits, withdraw the flag and say so with that evidence; a person's turn that disputes it puts it back")
-  | .evidenceRelay    => (.interaction .extension, "where evidence alone fixes a mismatch's whole resolution, record it as yours with that evidence and carry it out inside what this run may write; a person's turn that disputes it leaves it open")
+  | .evidenceRelay    => (.interaction .extension, "where evidence alone fixes a mismatch's whole resolution, say so with that evidence and record it as yours; the write it asks is an adapt or a discard; a person's turn that disputes it leaves it open")
   | .gate             => (.interaction .constitution, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and your contrary grounds where you have them, never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
   | .adapt            => (.transform, "artifact write: an adaptation a settled resolution asks, applied to the result inside what this run may write; what it returns enters the context and the next observation reads it")
   | .discard          => (.transform, "artifact write: withdraw the result and put the replacement in its place, or remove it when nothing takes its place")
@@ -456,12 +477,12 @@ The formal blocks define execution. This section fixes the user-facing rendering
 
 ### The sheet
 
-Open with an overview — how many places do not fit, how many wait on the user, what was checked and fits. Then every place the result does not fit, the ones that matter most first, each with what does not fit, where it is (in the result, or where the result lands), the part of the context it does not fit (quoted with where it came from), how much it matters, and how it stands — waiting on the user, what they decided and how (their words, an action they took, a choice they entrusted), settled by evidence with that evidence, or withdrawn because evidence showed it fits. Group places that bear on each other and say what the group means together. Then say what was checked and fits, and each place that could not be reached — or each fix that could not be made — with what it needs. From the second sheet on, say what changed: each line added, removed, or changed names what moved — a write, something newly observed, the user's answer, or a correction of your own reading — and a line that left says why.
+Open with an overview — how many places do not fit and how many wait on the user. Then every place the result does not fit, the ones that matter most first, each with what does not fit, where it is (in the result, or where the result lands), the part of the context it does not fit (quoted with where it came from), how much it matters, and how it stands — waiting on the user, what they decided and how (their words, an action they took, a choice they entrusted), settled by evidence with that evidence, or withdrawn because evidence showed it fits. For each open place, concrete actions, each with what then happens and your contrary grounds where you have them — never category titles; for a fix that was held back for a permission or its owner, say what it needs, and the actions are what would unblock it: grant the permission, do it yourself, hand it to its owner, or leave it. Group places that bear on each other and say what the group means together. Then say what was checked and fits, and each place that could not be reached with what reaching it needs. From the second sheet on, say what changed: each line added, removed, or changed names what moved — a write, something newly observed, the user's answer, or a correction of your own reading — and a line that left says why. Then ask once, over every open place, as a question. Where the run may be cut off before it completes, keep the current sheet in a durable record the user can find.
 
-Then ask once, over every open place. The options are concrete actions for each, each with what then happens and your contrary grounds where you have them — never category titles. For a nightly report whose schedule was written this session:
+For a nightly report whose schedule was written this session:
 
 ```
-Two places do not fit; both wait on you. The script, its log path and the mail relay fit.
+Two places do not fit; both wait on you.
 
 1. The report goes out at 18:00 Seoul time — after the team has left. Matters: nobody reads it the day it is sent.
    result   `0 9 * * *` (server in UTC)
@@ -469,13 +490,16 @@ Two places do not fit; both wait on you. The script, its log path and the mail r
    a. Send it at 09:00 Seoul time — `0 0 * * *`; this overlaps the 00:00–00:30 UTC backup window, so it is checked again
    b. Leave the 18:00 arrival — the report goes out unchanged
 
-2. The report is mailed to ops@, but you asked for it in #daily-report. Matters less: ops@ forwards to the same people.
+2. The report is mailed to ops@, but you asked for it in #daily-report. Matters: the forward from ops@ drops the attachment, so the team gets the report without its numbers.
    result   `MAILTO=ops@…`
    context  "put it in #daily-report" (your message)
    a. Post to #daily-report through the webhook the repo already uses
-   b. Keep mail — say why, and it is recorded; against it: the forward drops the attachment
+   b. Keep mail — say why, and it is recorded; against it: the team keeps getting it without the numbers
 
+Fits: the script, its log path, the mail relay.
 Not reached: whether the webhook token is valid in production — reaching it needs a live send.
+
+Which way for each? Your own words are fine — for example "1a, 2a".
 ```
 
 The user may answer in their own words, and one answer may settle several places or a class of them by a criterion; whatever else their message says, a resolution in it is carried out. Leaving a place as it is records the reason they gave and makes no claim that it does or does not stand. Where a place reads as another owner's, the options name the concrete split, for example "install mail in this image as part of this work" beside "leave it to whoever owns the image". Where the user entrusts a choice, make it inside what they entrusted and say it was yours. Where evidence alone fixes a resolution, carry it out and show it with that evidence; it takes no turn of theirs.
@@ -491,11 +515,11 @@ When a pass leaves nothing open, the run completes without asking whether it is 
 - **One sheet**: Every place found goes on one sheet with one question over the open ones; a place is not held back for a later round. Where one answer changes what a later choice means, or the user asks for it, take them one at a time with the whole sheet still in view.
 - **Recognition over categories**: Offer actions concrete to the place in front of the person, each with its consequence and your contrary grounds where you have them. The person's own words settle what a category would have asked them to choose.
 - **Reach named**: Follow the result to every place it lands and every intent it was meant to carry, without changing existing state; read whole what you say you read; name each place not reached, and each fix not made, with what it needs.
-- **Relay runs as Extension**: Carry out every settled resolution — the person's, one under their grant, one evidence fixes alone — inside what this run may write, and read again, until nothing newly settled is left; only a place the person holds waits for their turn. A fix that needs a change outside what this run may write, someone's permission, or another's authority is not made: it is named, and the place stays open for the person.
+- **Relay runs as Extension**: The pass relays every settled resolution — the person's, one under their grant, one evidence fixes alone — inside what this run may write: the result and the places it lands that the work in front of the person covers; only a place the person holds waits for their turn. A fix outside that, one that needs someone's permission or another's authority, or one whose effect cannot be undone is not made, even where evidence fixes its direction: it is named with what it needs, and the place waits on the person.
 - **Verdict scope**: Present the per-mismatch trace before the verdict. Fit is claimed only for the mismatches found within the reach, and an adapted result claims fit, not correctness. A replacement the run wrote is judged on the next observation like the result it replaced; a removal with nothing in its place leaves no result.
 - **The person resolves**: A resolution stands on the person's record only by their turn — their words, an action they took that was shown as yours with its consequence and your contrary grounds before they took it, or a choice they entrusted, recorded as yours. Evidence alone settles only what it fixes entirely and what nothing the person said contests: it withdraws your own flag or relays a resolution, shown with that evidence, and a person's turn that disputes it leaves it open. Which of the person's turns resolves a place is read from the context as it now stands and is not tied to their latest turn; wherever such a reading is made, say which turn was read and what intent was taken from it, quoting their words, in place of asking again.
-- **Completion needs no closing turn**: A pass that leaves nothing open completes the run, whether or not the person decided anything in it; the closing sheet carries the ground. A later utterance that bears on the run opens it again.
+- **Completion needs no closing turn**: A pass that leaves nothing open completes the run, whether or not the person decided anything in it; the closing sheet carries the ground. A place resolved by a write is not closed until that write repairs it. A later utterance that bears on the run opens it again; one asking for a step that rests on the result while something is open gets the open places first, and a step that cannot be undone waits on them.
 - **How much it matters**: Say how much each place matters by its demonstrable behavioral consequence — a downstream decision, a runtime divergence, a changed gate trajectory. Structural extent (line count, file count, scope size) alone makes a place minor. This guards against presenting structural change as if it changed how the result applies.
-- **Judge afresh after every write**: A write changes the result, so the next observation reads the whole result against everywhere it lands again; the run can have more open after a resolution than before it. A place a write aimed at and that is still found is unrepaired and open again; a write that failed resolves nothing. Every change on the sheet names what moved.
+- **Judge afresh after every write**: A write changes the result, so the next observation reads the whole result against everywhere it lands again; the run can have more open after a resolution than before it. A place a write aimed at and that is still found is unrepaired; a write that failed resolves nothing. Every change on the sheet names what moved.
 - **After the close**: The AI never rewrites or vetoes a resolution the person settled. New evidence against it is shown, and is owed before any dependent step that cannot be undone. A next step the person declared runs only after completion.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.

@@ -49,6 +49,17 @@ theorem completed_nothing_open (respond : Context P → Response P) (c : Context
   · exact hc
   · simp [hc] at h
 
+/-- On completion no found mismatch rests on a resolution that asks for a write: a write that
+    repaired its mismatch took it out of what is found, so what remains is kept or another's. -/
+theorem completed_no_write_pending (respond : Context P → Response P) (c : Context P)
+    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) :
+    ∀ m ∈ mismatches c, ∀ (r : Resolution) (h' : How),
+      (standing c m = .resolved r h' ∨ standing c m = .relayed r) →
+      (∃ x, r = .keep x) ∨ (∃ o, r = .elsewhere o) := by
+  intro m hm r h' hs
+  have hn := completed_nothing_open respond c v h m hm
+  rcases hs with hs | hs <;> rw [hs] at hn <;> cases r <;> simp_all [Closes]
+
 /-- The person's resolution comes first, whatever evidence read. -/
 theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
     (h : filledValue (resolution c m) = some (r, h')) : standing c m = .resolved r h' := by
