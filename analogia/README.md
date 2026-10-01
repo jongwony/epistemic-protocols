@@ -40,8 +40,9 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 
 ```
 Question  → Read from your words: the purpose, the conclusions at stake, and the source and
-            target where that is still open. If your words leave it open, it is asked, and
-            nothing more is collected while it waits.
+            target where that is still open. If your words leave it open, a question drafted
+            from the context is put forward for you to take, correct, or replace, and nothing
+            more is collected while it waits.
 Collect   → To the limit of reach over what the mapping rests on; every place looked is named,
             reached or not
 Assess    → Construct the correspondences, state what would defeat each bearing claim, run the
@@ -54,7 +55,7 @@ Later     → A turn that bears on the audit is read whole and the audit runs ag
             is simply answered
 ```
 
-The question is the only decision gate. It is never filled in for you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, the gate asks. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection, unless your turn asks something narrower. A pass on a question that stands ends in an assessment unless collection turns up a choice only you can make; a conclusion that stays undetermined is part of it, not a failure to finish. The question can wait before collection, after collection turns up a choice only you can make, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. While it waits, you can end the audit: it says the waiting question was left unassessed and the deficit unresolved, and an earlier assessment, if any, stays in the conversation as it was presented, over its own question. A new audit after that starts as a new `/ground`.
+The question is the only decision gate, and it is designed with you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, Analogia puts forward a question drafted from the context — one per divergent candidate, with its grounds — for you to take, correct, or replace. It stands only once your turn does; asking for the next task takes no draft. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection, unless your turn asks something narrower. A pass on a question that stands ends in an assessment unless collection turns up a choice only you can make; a conclusion that stays undetermined is part of it, not a failure to finish. The question can wait before collection, after collection turns up a choice only you can make, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. While it waits, you can end the audit: it says the waiting question was left unassessed and the deficit unresolved, and an earlier assessment, if any, stays in the conversation as it was presented, over its own question. A new audit after that starts as a new `/ground`.
 
 ## What a later turn does
 

@@ -23,13 +23,16 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 /-! ── FLOW ──
 Analogia(R) → start(c) → ground(c, utterances), where c is the fused session context:
   pass(c):
-    [the question does not stand on a person's turn]  present it — the purpose, the conclusions
-        at stake, and the source–target pair where R and the context leave that choice open —
-        and wait; nothing more is collected, and what was collected stays
+    [the question does not stand on a person's turn]  put forward a question drafted from the
+        context — the purpose, the conclusions at stake, and the source–target pair where R and
+        the context leave that choice open — with its grounds, one draft per materially divergent
+        candidate, for the person to take, correct, or replace; wait; nothing more is collected,
+        and what was collected stays
     [otherwise]  collect(c): to the limit of your reach over what the mapping rests on — the
         source's relations and their target counterparts, and the checks on the claims bearing
         on K; every place looked joins the context, a null result included →
-      [the collected context leaves a choice only the person settles]  present the question, wait
+      [the collected context leaves a choice only the person settles]  put forward a drafted
+        question, wait
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it; present it and proceed — no verdict is asked
   after the assessment: the next move the person declared, an adopted policy, or a grant; work
@@ -49,7 +52,7 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
 
 /-! ── MORPHISM ──
 R
-  → question(R, context) → Q      -- purpose, conclusions at stake (K), and an open pair; only from the person's turn
+  → question(R, context) → Q      -- purpose, conclusions at stake (K), and an open pair; drafted with the person, standing only on their turn
   → collect(Q, context)            -- to the limit of reach over what the mapping rests on, constructing the claims it needs and running their reachable checks; results join the context; reached and unreached named
   → construct(mapping, context)    -- correspondences and their fit claims; each placement is a claim
   → check(claims bearing on K)     -- per bearing claim, what target-side fact within its scope would change it, and who can reach it; the reachable ones run within collection
@@ -149,13 +152,24 @@ structure Correspondence where
 structure Inference where
   claim : String
 
+/-- Who first put the question forward: you, as a draft read from the context and shown with its
+    grounds, or the person. -/
+inductive Proposer | draft | person
+
+/-- What the person's turn that made the question stand did: set it in its own words, or took a
+    draft put forward before, as it was or corrected. -/
+inductive Standing | set | adopted
+
 /-- The question an audit answers: what the comparison is for, the conclusions at stake (`K`), and
     the source and target — carried only where `R` and the context leave a materially different
-    choice of either open, `none` where they fix it. -/
+    choice of either open, `none` where they fix it — with who first put it forward and how it
+    came to stand. -/
 structure Question where
   purpose     : String
   conclusions : List Inference
   pair        : Option (String × String)
+  proposer    : Proposer
+  standing    : Standing
 
 /-- **Your judgment**: the cited turn establishes question `q` in `c`, in the whole scope that turn
     asks — a turn asking about A and B supports no question narrowed to A — with conclusions to
@@ -165,7 +179,10 @@ structure Question where
     question the turn asks — whether the retries will match, say — is that turn's whole scope.
     Articulating what a stated purpose entails is reading it; choosing among materially different
     purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes is read,
-    not asked. -/
+    not asked. The question stands only on the person's turn that sets it in their own words
+    (`set`) or takes a draft you put forward, as it was or corrected (`adopted`); a draft counts
+    only where it was visible as yours, with its grounds, before that turn. A draft alone is a
+    proposal, and an instruction to do the next task takes none. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -373,7 +390,7 @@ def assessed (c : Context P) : Assessed c :=
 /-- Where the audit stands. Each carries the context it was reached on and the relay that
     presents it. -/
 inductive Outcome (P : Type)
-  /-- the question is presented and waits for the person's turn — before collection, after
+  /-- a drafted question is put forward and waits for the person's turn — before collection, after
       collection surfaced a choice only the person settles, or when a later turn reopens it after
       an assessment; nothing more is collected while it waits, and evidence already collected
       stays. A run status, not a closure. -/
@@ -481,7 +498,8 @@ assessed: a pass in which the question stood on the person's turn, collection re
 could, and every conclusion in K carries a verdict — Licensed with its limits, Blocked, or
 Undetermined naming what is missing and who can reach it. Undetermined does not block the
 assessment and is not settled by it; a check this session can reach and has not run is run, not
-reported Undetermined. Convergence evidence: the question with the person's turn it stands on —
+reported Undetermined. Convergence evidence: the question with the person's turn it stands on,
+who first put it forward, and whether that turn set it or took a draft —
 the purpose, K, and the source and target audited, with the turn or fact that fixed them or the
 person's answer where the choice was open; for each k in K, one pair
 (MappingUncertain(k) → verdict(k)) showing the source relation that carries it, the
@@ -523,7 +541,7 @@ inductive Op | questionRead | questionGate | questionReadback | collect | constr
 
 def grounding : Op → Annot × String
   | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
-  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice only the person settles, or when a later turn reopens it: what is open, with what each reading would audit visible before choice; nothing more is collected while it waits, and evidence already collected stays")
+  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice only the person settles, or when a later turn reopens it: a question drafted from the context — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words; nothing more is collected while it waits, and evidence already collected stays")
   | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
   | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: collection as `observe` states")
   | .construct        => (.sense, "Internal analysis: the correspondences over what collection found and their fit claims")
@@ -568,7 +586,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 ### User-facing realization
 
-Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on, and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, present the question and wait: show what is open and what each reading would audit, and collect nothing more until their turn answers; what was already collected stays. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
+Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, do not ask an open question: put forward a question drafted from the context — one per materially divergent candidate, each with its grounds and what it would audit — and wait for them to take, correct, or replace it; collect nothing more until their turn does, and what was already collected stays. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
 Present the whole assessment in everyday language: the question; for each conclusion, the source relation that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say.
 
@@ -591,11 +609,11 @@ Read `references/round-composition.md` before composing when terminology must re
 ## Rules
 
 - **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI never supplies the purpose, narrows the conclusions below what the cited turn asks, or picks between materially different sources or targets: this audit closes on evidence, so no later utterance of the user's would cover a question the AI chose. A question the user's words settle is read back; otherwise it is asked, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose, narrow the conclusions below what the cited turn asks, or pick between materially different sources or targets without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise a drafted question is put forward for them to take, correct, or replace, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
 - **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
-- **Recognition over Recall**: Present structured alternatives with anticipatable futures only for the question, where the person's words leave a genuine choice open. Read their turns whole, so the reader acts in their own language rather than selecting a meta-label.
+- **Recognition over Recall**: Where the person's words leave the question open, put forward drafted questions with what each would audit, so they recognize the question rather than recall it. Read their turns whole, so the reader acts in their own language rather than selecting a meta-label.
 - **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question the current grounds answer entirely is answered; any other — one they do not settle, or one that brings a ground — opens the next pass; the reader is never asked to classify their own turn.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
 - **Bounded reach**: State the limits supported by the cited grounds and their checked scopes in the same breath as every Licensed verdict. A mapping presented without its breaking point produces confident wrong inference, which is the failure this protocol exists to catch.
