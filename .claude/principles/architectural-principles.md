@@ -80,14 +80,10 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 
 ## Termination
 
-Protocol exit follows a graduated taxonomy based on whether the run has reached an irreversible act:
-
-| Tier | Mechanism | Cleanup | Scope |
-|------|-----------|---------|-------|
-| `user_withdraw` | The person's turn at the waiting gate, read whole | The result of the irreversible act dealt with (team shutdown, an applied change, a partial contract) | Protocols whose run reaches an act that changes existing state |
-| Normal convergence | Completion predicate | Full | Per-protocol |
-
-Principle: withdrawal sits on the same axis as reading and writing. Where the run has reached an irreversible act — a write that changes existing state, such as an applied change, a team, or a partial contract — breaking off leaves that act's result behind, and an explicit withdrawal constructor is required; the person's turn at the waiting gate yields a turn to deal with it, whatever form that turn takes, so the exit need not be an enumerated option. A run that only reads, removing whatever it created only to look, leaves nothing behind and needs no exit tier at all. A gate waiting on the person is not such state: it stands, turning to other work closes nothing, and stopping in the middle of a run is the harness's. Whether a protocol's run reaches such an act is judged when the protocol is derived, with its grounds shown to the person, rather than read off a fixed list.
+- At derivation, require a withdrawal result where ending at the person's word needs an independently grounded account of the work's standing that existing outcomes cannot carry. Show the obligation and what would be lost without that result.
+- On withdrawal, record the person's ending and what remains established or unresolved. Present exits under `premise/gate-design.md` §Differential Future Requirement.
+- While a gate awaits the person, silence or turning to unrelated work leaves it holding.
+- At an execution handoff, name the required capability and stop there.
 
 Circular protocol interactions are healthy dialogue rather than a hang, and the gate is what makes them so: a cycle re-entering a Constitution gate yields the turn each time, so it advances only when the user answers and cannot spin on its own.
 
