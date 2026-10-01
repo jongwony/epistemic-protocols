@@ -1,15 +1,15 @@
 ---
 name: contextualize
-description: "After execution, a correct result may not fit the user's actual situation: surface where it does not fit the context it is applied in, and adapt it as the user directs."
+description: "A result may not fit where it lands: check every place it reaches and every intent it was meant to carry, show every misfit and omission on one sheet, and carry out the fixes the user settles."
 ---
 
 # Epharmoge Protocol
 
-Detect application-context mismatch after execution through AI-guided applicability verification, where correct results that may not fit the actual context are surfaced for user judgment. Type: `(ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution`.
+Check a result against every place it lands and every intent it was meant to carry, show every place it does not fit on one sheet, and carry out the fixes the person settles. Type: `(ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution`.
 
 ## Definition
 
-**Epharmoge** (ἐφαρμογή): A dialogical act of verifying that results fit the actual application context — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness through structured mismatch surfacing and user-directed adaptation.
+**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit — fix it this way, leave it for this reason, stop using it, or it is not this result's to fix — and only that coordinate waits on them. Orthogonal to it, the AI relays: it follows the result to everywhere it lands and every intent it was meant to carry, and carries out what is settled within what this run may write. Every place the result does not fit, an omission included, goes on one sheet with its consequence in the person's own situation, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of them. Completion establishes fit for what was found within what was reached — not the correctness of the result.
 
 ```lean
 /-!
@@ -21,37 +21,33 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 -/
 
 /-! ── FLOW ──
-Epharmoge(R, X) → start(c) → contextualize(c, utterances), where c is the fused session context and
-X, the application context, is c itself:
-  pass(c): carry out what a person's resolution asked and the context does not yet show done — an
-    adaptation, a withdrawal — and take in what the write returned; then judge afresh where the
-    result as it now stands does not fit the context as it now stands, whose each mismatch is,
-    and how each one stands → write the carrier
-  [a withdrawal the person asked for has landed]              close: discarded
-  [the person stops]                                          close: stopped
-  [the person goes on to a protocol they name]                close: routed
-  [nothing open ∧ the person has closed]                      close: done
-  [otherwise] present the current list and what this turn changed, then one gate: the next open
-    mismatch — one whose owner is unclear first — with concrete actions for it; with nothing
-    open, the list and whether this is done → Stop
-  next utterance u: c' := pass(fuse(c, u)) → the same reading, whatever u says
-  no utterance: the gate holds; nothing is judged and nothing closes
+Epharmoge(X) → start(c) → contextualize(c, utterances), where c is the fused session context and
+X, the result under review, is whatever the invocation names — this session's output or an
+artifact from elsewhere:
+  pass(c): observe; perform — the relay; observe again
+  [nothing open]   completed — the closing sheet
+  [otherwise]      the sheet, then one gate over every open mismatch → Stop
+  next utterance u: c' := fuse(c, u), read whole →
+    [u does not bear on this run]   the session answers it; the run stands as it was
+    [otherwise]                     pass(c') → the same reading
+  no utterance: the last outcome stands; a later utterance that bears on the run opens it again
 -/
 
 /-! ── MORPHISM ──
-(R, X)
-  → perform(requested)          -- carry out the adaptation or withdrawal a person asked for; what the write returned enters the context
-  → judge(result, context)      -- where the result as it now stands does not fit the accumulated context; afresh on every pass
-  → certify(mismatch)           -- whose it is: a fit problem here, another deficit's, or unclear (fail-closed)
-  → surface(list, changes, one) -- the current list and this turn's changes, then concrete actions for one mismatch
-  → resolve(person's turn)      -- adapt it, leave it as it is with their reason, stop using the result, hand it on; or close
+(X, context)
+  → observe(reach)             -- every place X lands and every intent it answers to, without changing existing state; what could not be reached, named
+  → judge(result, context)     -- where X as it now stands does not fit the context as it now stands; afresh on every pass
+  → perform(settled)           -- the relay: every settled resolution within what this run may write, and what its own writes newly settle
+  → surface(sheet, changes)    -- every mismatch at once, with concrete actions, what fits, what was not reached, and what changed
+  → resolve(person's turn)     -- adapt, keep with their reason, stop using, not this result's — their words, a proposal they took, a grant of theirs
   → ContextualizedExecution
-requires: mismatch_detected(R, X)   -- the auto-activation condition only (Layer 2); a user-invoked run enters without it
+requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invocation declares the deficit and enters without it
 deficit:  ApplicationDecontextualized
-preserves: every turn of the context -- the context only grows (pass_extends); adapt and discard change the result alone
+preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Applicability over Correctness
-invariant: the person resolves and closes; evidence only withdraws the AI's own flag or shows what it found
-invariant: transformative revalidation (NON-MONOTONE) -- an adaptation changes what the next pass judges, so a run can have more open after a resolution than before it
+invariant: the person holds each resolution; evidence settles one only where it chooses nothing that is the person's (SettledSupported)
+invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the next observation reads, so a run can have more open after a resolution than before it; every pass judges the whole X against the whole context
+invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a resolution onto the record
 -/
 
 namespace Epharmoge
@@ -117,125 +113,118 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `R`, the result under review: any completed work product — an AI output, an analysis
-    conclusion, a decision outcome. The morphism treats every kind alike. -/
+/-- `X`, the result under review: any work product — this session's output, an analysis, a
+    decision, a document, or an artifact another session or person produced. The morphism treats
+    every kind alike. -/
 abbrev Result := String
 
-/-- **Your reading**: the result as the context now shows it, every adaptation whose write has
-    landed applied — each write returns its result into the context. Correctness is presupposed
-    at entry and never re-checked here. -/
-axiom target : Context P → Result
+/-- **Your reading**: X as the person is now left with it, every write that has landed applied —
+    each write returns its result into the context; after a discard, the replacement or `none`,
+    whether or not the discarded artifact still exists elsewhere. Correctness is presupposed at
+    entry and never re-checked here. -/
+axiom target : Context P → Option Result
 
-/-- `significant` requires a demonstrable behavioral consequence — a downstream decision, a
-    runtime divergence, a changed gate trajectory; structural extent alone is `minor`. -/
-inductive Severity | critical | significant | minor
+/-- **Your observation** of the reach, to the limit of what you can read or run without changing
+    existing state: every place X lands — what reads or consumes it, its copies and neighbours,
+    the people who will read it, the environment it runs in — and every intent in the context it
+    was meant to carry. Where to look is yours to judge, and no list of places bounds it. What you
+    say you read, you read whole; what the context already holds is read again where a write, an
+    utterance, or evidence says it moved; what you create only to look — a scratch copy, a temp
+    file — you remove afterwards. A place that needs a change to existing state, someone's
+    permission, or another's authority is not reached on your own: it goes into `reach` with what
+    it needs. Each return is an evidence turn. -/
+axiom observe : Context P → List (Evidence P)
 
-/-- One place the result does not fit: what does not fit, in plain words; where in the result;
+/-- One place X does not fit: what does not fit, in plain words; where in X, or where it lands;
     the turn of the context it does not fit, which is never the assistant's own (`Cite`), so the
-    comparison stays non-circular; and how much it matters. -/
+    comparison stays non-circular. -/
 structure Mismatch (c : Context P) where
   what     : String
   inResult : String
   against  : Cite c
-  severity : Severity
 
-/-- **Your judgment**, made afresh on every pass: where the result as it now stands does not fit
-    the context as it now stands — the context is the application context, the person's own
-    account of their situation and every earlier answer included. One mismatch per claim is the
+/-- **Your judgment**, made afresh on every pass: where X as it now stands does not fit the context
+    as it now stands. The context is the application context — the person's account of their
+    situation and the intents they stated along the way, every earlier answer, the conventions
+    and environment X meets, and what observation returned from every place X lands. An intent X
+    was meant to carry and does not is a mismatch, an omission. One mismatch per claim is the
     direction; a claim standing on evidence in several places is one mismatch, since how far a
     repair reaches is the resolution's question. Something the person names as not fitting is
-    judged here like anything else. A mismatch an adaptation aimed at and that is still here
-    after the write landed is one that adaptation did not repair. -/
+    judged here like anything else. A place of an X that nothing relies on any more — the person
+    discarded it — is not a mismatch. -/
 axiom mismatches : (c : Context P) → List (Mismatch c)
 
-/-- A deficit label. A certificate assigns only the ones this contract inscribes; the person may
-    name any. -/
-inductive Deficit
-  /-- this contract's own: a correct result that does not fit its application context -/
-  | applicationDecontextualized
-  /-- a missing pre-execution fact, with no observable value to adapt to (hint: /inquire) -/
-  | contextInsufficient
-  /-- undefined convention or dependency ownership for the decision (hint: /bound) -/
-  | boundaryUndefined
-  /-- a deficit the person names that no constructor above names; emitted bare -/
-  | emergent (name : String)
-
-/-- The deficits this contract inscribes. -/
-def Inscribed : Deficit → Prop
-  | .emergent _ => False
-  | _           => True
-
-/-- Every inscribed claim a mismatch's evidence supports, and the cited fit. It certifies this
-    contract's gate over its own activation and nothing about claims anywhere else. -/
-structure Certificate where
-  claimedBy : List Deficit
-  distinct  : claimedBy.Nodup
-  inscribed : ∀ d ∈ claimedBy, Inscribed d
-  fit       : String
-
-inductive Whose
-  | here
-  | elsewhere (d : Deficit)
-  | unclear
-
-/-- Read off `claimedBy`, so nothing stored beside it can disagree: the own claim alone is here; a
-    single other claim is elsewhere; several claims, or none, leave it unclear. -/
-def Certificate.whose (k : Certificate) : Whose :=
-  match k.claimedBy with
-  | [.applicationDecontextualized] => .here
-  | [d]                            => .elsewhere d
-  | _                              => .unclear
-
-/-- **Your judgment**: fit the mismatch's claim against this contract's own claim and its route
-    claims, reading nothing outside this contract. Evidence that supports no claim leaves it
-    unclear, and an unclear mismatch is put to the person before anything else happens to it. -/
-axiom certify : (c : Context P) → Mismatch c → Certificate
-
-/-- What a person's turn settles for one mismatch. There is no verdict beside it: whether the
-    mismatch "really" stands is not asked, and nothing here asserts it either way. -/
+/-- What settles one mismatch, read the same way wherever it stands — by the person's turn or by
+    evidence. There is no verdict beside it: whether the mismatch "really" stands is not asked,
+    and nothing here asserts it either way. `adapt` and `discard` ask for a write and leave their
+    mismatch open while it is still found: before the write lands, or after a write that did not
+    repair it. A write that repairs it takes it out of what is found, and the sheet says so.
+    `keep` and `elsewhere` close it as they stand. -/
 inductive Resolution
-  /-- change the result this way; resolves the mismatch until the write lands, after which the
-      next pass judges the new result -/
+  /-- change X this way -/
   | adapt (direction : String)
-  /-- leave the result as it is here, with the reason the person gave where they gave one -/
+  /-- leave X as it is here, with the reason given where one was given -/
   | keep (reason : Option String)
-  /-- stop using the result; `none` when nothing takes its place -/
+  /-- stop relying on X; the replacement, or `none`, is what the person is now left with. Within
+      what this run may write, the write removes X or puts the replacement in its place; outside
+      it, the write is your turn recording that X is no longer relied on, and it counts as carried
+      out -/
   | discard (replacement : Option Result)
-  /-- another deficit's: handed to it -/
-  | elsewhere (d : Deficit)
+  /-- not this result's to fix: whose it is — a system, a team, a scope — as named; nothing is
+      dispatched -/
+  | elsewhere (owner : String)
 
-/-- **Your judgment**: the cited turn resolves `m`, as it now stands, this way. Read against the
-    context that now stands, the order of its turns included. An adaptation that has landed no
-    longer resolves a mismatch still found afterwards; a write that failed resolves nothing. -/
-axiom ResolutionSupported : {c : Context P} → Mismatch c → Context P → Turn P → Resolution → Prop
+/-- How a resolution the person's turn carries came to stand: in their own words; by taking an
+    action you proposed; or by your choice inside a grant of theirs. -/
+inductive How | set | adopted | granted
 
-/-- A mismatch is resolved only by the person's turn, whatever form that turn takes. -/
-def resolutionCoord {c : Context P} (m : Mismatch c) : Coord P Resolution :=
+/-- **Your judgment**: the cited turn of the person resolves `m`, as it now stands, this way — read
+    against the context that now stands, the order of its turns included, and not tied to their
+    latest turn; the `Resolution` reads as its constructor says. `set`: their own words.
+    `adopted`: they took an action you proposed, and only where that action was visible as yours,
+    with its consequence and your contrary grounds where there were any, before that turn.
+    `granted`: the cited turn entrusts the choice to you, and only inside what it covers; the
+    resolution is then your choice under it, recorded as yours. A question, a request to look, a
+    deferral, or a bare mention settles nothing. Their answer is read whole: one turn may resolve
+    several mismatches, or settle a class of them by a criterion; where it asks for dispositions
+    of one result that conflict — a discard beside an adaptation of the same result — it resolves
+    neither: only a turn of theirs after the combined consequence has been shown resolves them,
+    and the earlier conflicting turn never takes effect on its own. -/
+axiom ResolutionSupported : {c : Context P} → Mismatch c → Context P → Turn P → Resolution × How → Prop
+
+/-- A mismatch is resolved on the person's record only by the person's turn, whatever form that
+    turn takes. -/
+def resolutionCoord {c : Context P} (m : Mismatch c) : Coord P (Resolution × How) :=
   { admits := (·.val = .person), supports := ResolutionSupported m }
 
 /-- **Your reading**: the person's resolution of `m`; `open_` until one reaches it. -/
 axiom resolution : (c : Context P) → (m : Mismatch c) → Occ (resolutionCoord m) c
 
-/-- What evidence alone settled about a mismatch. -/
-inductive Shown
-  /-- it fits after all: the AI withdraws its own flag -/
-  | fits
-  /-- it does not fit: shown before the gate, and the person still resolves it -/
-  | fails
+/-- What evidence alone settles about a mismatch. -/
+inductive Settled
+  /-- it fits after all: you withdraw your own flag, reported with that evidence -/
+  | withdraw
+  /-- the evidence settles the resolution: relayed, recorded as yours with that ground -/
+  | resolves (r : Resolution)
 
-/-- **Your judgment**: the cited evidence, read against the result and the context as they now
-    stand, admits this reading of `m` alone. Where it admits more than one, it settles nothing.
-    A person's turn that disputes it leaves it unsettled: evidence settles only what nothing the
-    person said contests. -/
-axiom ShownSupported : {c : Context P} → Mismatch c → Context P → Turn P → Shown → Prop
+/-- **Your judgment**: the cited evidence, read against X and the whole context as they now
+    stand, admits this reading of `m` alone and fixes all of it; the `Resolution` reads as its
+    constructor says. Evidence settles a resolution only where it selects no judgment that is the
+    person's. Whether to leave a misfit as it is, to stop using X, or whose it is, is the person's:
+    evidence settles those only where something the person already constituted — a decision
+    they recorded — settles it. The direction of a change that makes X fit is something
+    evidence can fix. Which grounds do this is your reading each time. Where the evidence admits
+    more than one reading, it settles nothing; where several sources fix it together, the sheet
+    shows them together. A person's turn that disputes it leaves it unsettled. -/
+axiom SettledSupported : {c : Context P} → Mismatch c → Context P → Turn P → Settled → Prop
 
-/-- Evidence stands on what was observed or reported, never on the person's say-so, which is a
+/-- Evidence stands on what was observed or recorded, never on the person's say-so, which is a
     resolution. -/
-def evidenceCoord {c : Context P} (m : Mismatch c) : Coord P Shown :=
-  { admits := (·.val ≠ .person), supports := ShownSupported m }
+def evidenceCoord {c : Context P} (m : Mismatch c) : Coord P Settled :=
+  { admits := (·.val ≠ .person), supports := SettledSupported m }
 
-/-- **Your reading**: what evidence alone settled for `m`, with the evidence cited; `open_`
-    where it settled nothing. -/
+/-- **Your reading**: what evidence alone settled for `m`, with the evidence cited; `open_` where
+    it settled nothing. -/
 axiom byEvidence : (c : Context P) → (m : Mismatch c) → Occ (evidenceCoord m) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
@@ -244,224 +233,174 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 
 /-- How a mismatch stands. -/
 inductive Standing
-  /-- waits on the person -/
+  /-- waits on the person — nothing settled it, or what settled it asks for a write that has not
+      repaired it; the sheet tells the two apart -/
   | open_
-  /-- the person's turn resolved it -/
-  | resolved (r : Resolution)
-  /-- the certificate alone handed it to another deficit -/
-  | handed (d : Deficit)
-  /-- evidence showed it fits; the AI withdrew its own flag -/
+  /-- the person's turn resolved it, and how that resolution came to stand -/
+  | resolved (r : Resolution) (how : How)
+  /-- evidence alone fixed its resolution: yours, with that evidence -/
+  | relayed (r : Resolution)
+  /-- evidence showed it fits; you withdrew your own flag -/
   | withdrawn
 
-/-- The person's resolution first, whatever evidence or the certificate read. Without one, a
-    mismatch whose owner is unclear waits on the person before anything else happens to it —
-    evidence does not withdraw it; otherwise evidence that it fits withdraws it, the
-    certificate's handoff hands it on, and what is left waits. -/
+/-- `adapt` and `discard` ask for a write; `keep` and `elsewhere` do not. -/
+def Resolution.asksWrite : Resolution → Bool
+  | .adapt _   => true
+  | .discard _ => true
+  | _          => false
+
+/-- The person's resolution first, whatever evidence read; otherwise what evidence alone settled;
+    otherwise it waits on the person. A mismatch still found whose resolution asks for a write
+    stays open. -/
 def standing (c : Context P) (m : Mismatch c) : Standing :=
   match filledValue (resolution c m) with
-  | some r => .resolved r
+  | some (r, h) => if r.asksWrite then .open_ else .resolved r h
   | none =>
-    match (certify c m).whose with
-    | .unclear => .open_
-    | w =>
-      match filledValue (byEvidence c m), w with
-      | some .fits, _         => .withdrawn
-      | _, .elsewhere d       => .handed d
-      | _, _                  => .open_
+    match filledValue (byEvidence c m) with
+    | some .withdraw     => .withdrawn
+    | some (.resolves r) => if r.asksWrite then .open_ else .relayed r
+    | none               => .open_
 
-/-- One concrete action the gate offers for a mismatch: what it does, as the resolution it would
-    record, and what then happens. -/
-structure Action where
-  resolution  : Resolution
-  consequence : String
+/-- **Your record** of the reach, read from the context as it now stands: where the judgment looked
+    and what it found fits; each place it could not reach, and each write it did not carry out,
+    with what it needs — a change outside what this run may write, a permission, another's
+    authority — named so the person can point at one you missed. -/
+axiom reach : Context P → String
 
-/-- **Your judgment**: the actions to offer for `m`, each concrete to this mismatch — the change
-    that would make it fit where one is evident, leaving it as it is and what then happens, not
-    using the result and what would take its place, and for an unclear owner the deficit each
-    supported claim would hand it to. Never a category title; the person may answer in their own
-    words instead. -/
-axiom actions : (c : Context P) → Mismatch c → List Action
-
-/-- **Your selection** of the open mismatch the gate presents next: one whose owner is unclear
-    first, then by severity, critical first. -/
-axiom selectNext : (c : Context P) → Option (Mismatch c)
-
-/-- How the person ends the run. -/
-inductive Closing
-  /-- the run is finished; said while mismatches are still open, it reads as `stop` -/
-  | done
-  /-- stop here: the result stays as it is, and what is open stays unresolved -/
-  | stop
-  /-- go on to the protocol the person names -/
-  | route (target : String)
-
-/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
-    stands, the order of its turns included: a closing said before a later round was presented was
-    answered by that round. -/
-axiom ClosingSupported : Context P → Turn P → Closing → Prop
-
-/-- Only the person closes. -/
-def closeCoord : Coord P Closing :=
-  { admits := (·.val = .person), supports := ClosingSupported }
-
-/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
-axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
-
-/-- **Your reading**: a withdrawal a person's resolution asked for, carried out — the write that
-    removed or replaced the result returned — with the replacement now in the result's place,
-    `none` when nothing took it; the outer `none` while no withdrawal has landed. Read from the
-    write, not from what is still found, since the replaced result may leave nothing to find. -/
-axiom withdrawal : Context P → Option (Option Result)
-
-/-- **Your reading**: an adaptation a person's turn in this run asked for has been written and has
-    landed — whether or not the mismatch it aimed at is still found afterwards. Read against the
-    context as it now stands, from any of the person's turns, not only the latest. -/
-axiom AdaptationLanded : Context P → Prop
-
-/-- **Your record**, read from the context: the locator the carrier-creating write returned — the
-    one durable record every mismatch and its standing is written into; `none` where nothing was
-    ever written. -/
-axiom carrier : Context P → Option String
+/-- **Your judgment**: the latest utterance, read whole against the context as it now stands,
+    bears on this run — it resolves, corrects, disputes, grants, names something that does not
+    fit, points at a place to look, asks about the sheet, or changes X or the evidence — even
+    where it looks like other work. An utterance that bears on none of it leaves the run as it
+    stands: the session answers it, that answer stays in the context, no pass runs, and the last
+    outcome stands. -/
+axiom Reaches : Context P → Prop
 
 /-- **Your record**: contrary grounds you showed before the person's resolutions — evidence that
-    a mismatch does not fit, beside a resolution that left it as it is, among them — attached to
-    the closure; empty when there were none. -/
+    a mismatch does not fit beside a resolution that left it as it is, a doubt about a grant's
+    reach, among them — attached to the closure; empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- `ContextualizedExecution`: the context at closure, what the person is left with (`none` when a
-    withdrawal left nothing), the carrier's locator, and the dissent attached to the closure. -/
+    removal left nothing), the reach, and the dissent attached to the closure. -/
 structure ApplicabilityVerdict (P : Type) where
   context : Context P
   target  : Option Result
-  carrier : Option String
+  reach   : String
   dissent : List String
 
 inductive Outcome (P : Type)
-  /-- nothing open and the person closed: by resolutions of theirs that have taken effect, or by
-      saying the run is done -/
-  | done (v : ApplicabilityVerdict P)
-  /-- the person withdrew the result and the withdrawal landed; the replacement is carried with no
-      claim of fit -/
-  | discarded (v : ApplicabilityVerdict P)
-  /-- the person stopped; the result stays as it is and what was open stays unresolved -/
-  | stopped (v : ApplicabilityVerdict P)
-  /-- the person went on to a protocol they named -/
-  | routed (target : String) (v : ApplicabilityVerdict P)
+  /-- a pass left nothing open -/
+  | completed (v : ApplicabilityVerdict P)
+  /-- the gate stands over the open mismatches; only the person's turn answers it -/
   | holding (c : Context P)
+
+def Outcome.context : Outcome P → Context P
+  | .completed v => v.context
+  | .holding c   => c
 
 /-! ── MODE STATE ──
 Λ is the fused context and nothing else; every reading above is taken from it.
 -/
 
-abbrev Mode (P : Type) := Context P
-
 /-! ── PHASE TRANSITIONS ──
-A pass is the silent work. It first carries out what a person's resolution asked and the context
-does not yet show done, and the write's result returns into the context. It then judges afresh:
-the mismatches, whose each one is, what evidence alone settles, and how each stands. The pass's
-record follows, then the carrier write. Either a closure fires, or `respond` presents the current
-list and one gate. Each person utterance is fused, and the next pass reads it; after an adaptation
-that pass judges the new result.
+A pass is silent and orthogonal to the person's coordinate: observe the reach, `perform` the
+relay, observe again; every return enters the context, and how each mismatch stands is then read
+from it. `respond` presents the sheet — the closing sheet on completion. `session` answers an
+utterance that does not bear on this run.
 -/
 
-/-- **Your action** for a pass, before anything is judged: where a person's resolution asks for an
-    adaptation or a withdrawal the context does not yet show carried out, the artifact write that
-    carries it out, returning what the write returned. -/
-axiom perform : Context P → List (Evidence P)
+/-- A turn a write returns: your own, stating a revised result or recording a discard, or what an
+    artifact write returned. Never the person's, never a peer's. -/
+def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .external}
 
-/-- **Your record** of a pass, written once its writes have entered the context: what the pass
-    judged — the mismatches, their certificates, what evidence settled, their standing — and what
-    changed since the last pass. A record grounds nothing. -/
-axiom passRecord : Context P → List (Response P)
-
-/-- **Your action**: the carrier write — created the first time a mismatch is found, brought into
-    line on every later pass — returning its locator. -/
-axiom persist : Context P → List (Evidence P)
+/-- **Your action**, the relay: carry out every adaptation and every discard a resolution settles —
+    the person's, one under their grant, one evidence relays — that the context does not yet show
+    carried out, the person's whole answer read and its combined consequence weighed first, and
+    what your own writes newly settle, until nothing newly settled is left; where a write brings
+    back a place an earlier write in this run repaired, stop there and leave both for the person.
+    A write follows where X lives: an artifact is written where it lies; a result that lives in
+    the conversation — an answer, an analysis — is adapted by your stating the revised result in
+    your own turn. What this run may write is what the work in front of the person covers and
+    they hold authority over: their own resolution turn authorizes a write to anything they hold,
+    an artifact another session of theirs produced included; another person's artifact, or a
+    scope they do not hold, needs that person or a permission. A write outside that, or one whose
+    effect cannot be undone — a removal or overwrite with no way back, a deploy, a send outside —
+    is not carried out, even where evidence fixes its direction: it goes into `reach` with what it
+    needs, and its mismatch waits on the person; once their turn authorizes it, it is carried out.
+    A discard there is the exception: its write is your turn recording that X is no longer relied
+    on. Returns what the writes returned. -/
+axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
-  let c₁ := c ++ (perform c).map (·.val)
-  let c₂ := c₁ ++ (passRecord c₁).map (·.val)
-  c₂ ++ (persist c₂).map (·.val)
-
-/-- The person has closed: they said the run is done, or some turn of theirs in this run resolved
-    something that has taken effect — a mismatch still found that stands resolved by their turn, or
-    an adaptation they asked for whose write has landed. No particular turn anchors this: which of
-    their turns carries the resolution is read from the context as it now stands, and the round or
-    the closing trace says which turn was read and what intent was taken from it. Where nothing was
-    found, or every mismatch was handed on or withdrawn without the person, only the first holds,
-    so the list is seen before the run ends. -/
-def PersonClosed (c : Context P) : Prop :=
-  filledValue (closing c) = some .done ∨
-  (∃ m ∈ mismatches c, ∃ r, standing c m = .resolved r) ∨
-  AdaptationLanded c
+  let c₁ := c ++ (observe c).map (·.val)
+  let c₂ := c₁ ++ (perform c₁).map (·.val)
+  c₂ ++ (observe c₂).map (·.val)
 
 def NothingOpen (c : Context P) : Prop := ∀ m ∈ mismatches c, standing c m ≠ .open_
 
-def Closable (c : Context P) : Prop :=
-  (withdrawal c).isSome ∨
-  filledValue (closing c) = some .stop ∨
-  (∃ t, filledValue (closing c) = some (.route t)) ∨
-  (NothingOpen c ∧ PersonClosed c)
+def verdict (c : Context P) (t : Context P) : ApplicabilityVerdict P :=
+  ⟨t, target c, reach c, dissent c⟩
 
 open Classical in
-def close (c : Context P) : Outcome P :=
-  match withdrawal c with
-  | some r => .discarded ⟨c, r, carrier c, dissent c⟩
-  | none =>
-    match filledValue (closing c) with
-    | some .stop      => .stopped ⟨c, some (target c), carrier c, dissent c⟩
-    | some (.route t) => .routed t ⟨c, some (target c), carrier c, dissent c⟩
-    | _               => .done ⟨c, some (target c), carrier c, dissent c⟩
+/-- `respond` presents the round, read on the context the pass left, in this order. An overview:
+    how many places do not fit, how many wait on the person's choice, and how many are settled
+    and still to be carried out. Every mismatch found, the ones
+    that matter most first: what does not fit, where, the part of the context it does not fit
+    (quoted with where it came from), how much it matters — significant only with a demonstrable
+    behavioral consequence (a downstream decision, a runtime divergence, a changed gate
+    trajectory), structural extent alone minor — and how it stands: waiting on the person; the
+    person's resolution with their turn quoted, the intent taken from it, and whether they said
+    it, took a proposed action, or entrusted the choice; a relayed resolution with the evidence
+    that fixed it; a withdrawn flag with that evidence; one whose write landed without repairing
+    it, said to be unrepaired; one whose write was held, with what it needs. For each open one,
+    concrete actions, each with its consequence and your contrary grounds where you have them,
+    never a category title — the person may answer in their own words — and for one held, the
+    resolutions that unblock it: the change carried out once they authorize it, the change they
+    make themselves, handing it to its owner (nothing is sent), or leaving it. Mismatches that bear
+    on each other grouped, with their combined consequence. Then `reach`: what fits and what was
+    not reached. Then what changed since the last sheet: each line added, removed, or changed
+    names what moved — a write, a new observation, a person's turn, or a reading of yours
+    corrected on unchanged ground, said to be a correction; a line that left says why. Then one
+    question over every open mismatch; take them one at a time only where one answer changes what
+    a later choice means or the person asks for it. What the utterance asked outside this run is
+    answered here; a step that rests on X and cannot be undone waits while something is open,
+    and the open places are shown before it. Re-present the whole sheet where it changed or the
+    person asked for it; a question about the sheet is answered with the gate said to stand. On
+    completion, the closing sheet is CONVERGENCE's convergence evidence. Where the run may be cut off before it
+    completes, keep the current sheet in a durable record the person can find. -/
+def settle (respond : Context P → Response P) (c : Context P) : Outcome P :=
+  let t := c ++ [(respond c).val]
+  if NothingOpen c then .completed (verdict c t) else .holding t
 
 open Classical in
-/-- `respond` presents the round. First the current list: every mismatch found, each with what does
-    not fit, where, and how it stands, in plain words. Then what this turn changed: what the
-    person's turn resolved, what an adaptation changed in the result, what is newly found, what an
-    adaptation aimed at and did not repair, a flag evidence withdrew with that evidence, and a
-    handoff with its fit and the command only as a hint. Then one gate. For `selectNext`: what does
-    not fit, where in the result, the turn of the context it does not fit, how much it matters, and
-    evidence that it does not fit where evidence showed that; then `actions`, each with its
-    consequence. Wherever a person's earlier turn is read as the resolution of a mismatch, or as
-    what lets the run close, say which turn was read and the intent taken from it, quoting their
-    words. With nothing open, the list, how far the judgment reached, and whether the run is
-    done. -/
-def contextualize (respond : Context P → Response P) :
-    Context P → List (Utterance P) → Outcome P
-  | c, []      => .holding c
-  | c, u :: us =>
-    let c₁ := pass (fuse c u)
-    if Closable c₁ then close c₁
-    else contextualize respond (c₁ ++ [(respond c₁).val]) us
+def contextualize (respond session : Context P → Response P) :
+    Context P → Outcome P → List (Utterance P) → Outcome P
+  | _, o, []      => o
+  | c, o, u :: us =>
+    let c' := fuse c u
+    if ¬ Reaches c' then contextualize respond session (c' ++ [(session c').val]) o us
+    else
+      let o' := settle respond (pass c')
+      contextualize respond session o'.context o' us
 
-open Classical in
-def start (respond : Context P → Response P) (c : Context P)
+def start (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
-  let c₁ := pass c
-  if Closable c₁ then close c₁
-  else contextualize respond (c₁ ++ [(respond c₁).val]) us
-
-/-! ── LOOP ──
-Transformative revalidation (NON-MONOTONE): an adaptation produces a new result, and the next pass
-judges it, so an adaptation can breed mismatches that did not exist before, and can leave the one
-it aimed at in place. Nothing counts down; every pass judges the whole result against the whole
-context. The loop is dialogue: each round ends at a gate, and the person ends the run.
--/
+  let o := settle respond (pass c)
+  contextualize respond session o.context o us
 
 /-! ── CONVERGENCE ──
-Every closure is read where it fires and nowhere else. done: nothing open, and the person closed —
-by resolutions of theirs that have taken effect — an adaptation whose write landed included —
-read from any of their turns, or by saying the run is done after seeing the list, which is the only
-way a run closes where nothing was found or nothing was the person's to resolve. discarded: the withdrawal the
-person asked for landed; the replacement is carried with no claim of fit. stopped: the result stays as it is and every open mismatch is recorded unresolved.
-routed: the person named the next protocol. Fit is claimed only for the mismatches found, and fit
-is not correctness, which was presupposed at entry and is not re-checked here. A mismatch left as
-it is carries the person's reason and no claim that it does or does not stand.
-Convergence evidence: one line per mismatch found — what did not fit, where, and how it stood at
-the close: the person's resolution with the turn it came from, quoted, and the intent taken from
-it, the certificate's handoff with its
-fit, or evidence's withdrawal with that evidence — beside the adaptations made with what each
-changed in the result, any that did not repair what they aimed at, and the dissent attached to the
-closure. Demonstrated, not asserted.
+Every closure is read where it fires and nowhere else. completed: `NothingOpen`, whether or not
+the person decided anything in this run; the closing sheet carries the ground. Fit is claimed
+only for the mismatches found within the reach, and fit is not correctness, which was presupposed
+at entry and is not re-checked here; a replacement this run wrote is judged by the next
+observation like the result it replaced. A mismatch left as it is carries the reason given and no
+claim that it does or does not stand. Convergence evidence: one line per mismatch found — what did
+not fit, where, and how it stood at the close: the person's resolution with the turn it came from,
+quoted, the intent taken from it, and how it came to stand; a grant with what it covered; a
+relayed resolution or a withdrawn flag with its evidence — beside the writes made with what each
+changed in X, any that did not repair what they aimed at, the lines that left and why, what was
+checked and fits, what was not reached with what it needs, the dissent attached to the closure,
+and what the verdict does not claim. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -481,22 +420,20 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | judge | certify | handoff | evidenceWithdraw | evidenceShow | gate | adapt
-             | discard | persist | readTurn | converge | seam
+inductive Op | observe | judge | evidence | gate | adapt | discard | readTurn | record | converge
+             | seam
 
 def grounding : Op → Annot × String
-  | .judge            => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass; it re-executes nothing and reads the completed result and the observable context, never the assistant's own words, as what the result must fit")
-  | .certify          => (.sense, "Internal analysis: each mismatch's claim fitted against this contract's own claim and its route claims, reading nothing outside this contract; fail-closed, so evidence that supports no claim leaves it unclear")
-  | .handoff          => (.interaction .extension, "a mismatch the certificate alone hands to another deficit, named with its fit and the command only as a hint — a missing pre-execution fact (/inquire), undefined convention or dependency ownership (/bound); nothing is dispatched")
-  | .evidenceWithdraw => (.interaction .extension, "where evidence alone shows a flagged place fits, withdraw the flag and say so with that evidence; a person's turn that disputes it puts it back")
-  | .evidenceShow     => (.interaction .extension, "where evidence alone shows a mismatch does not fit, show that evidence before the gate; the person still resolves it")
-  | .gate             => (.interaction .constitution, "the current list and this turn's changes, then one mismatch — an unclear owner first — with concrete actions, each with its consequence and never a category title; with nothing open, whether the run is done")
-  | .adapt            => (.transform, "artifact write: the person's adaptation applied to the result; the write's result returns into the context and the next pass judges it")
-  | .discard          => (.transform, "artifact write: withdraw the result and put the replacement in its place, or remove it when nothing takes its place")
-  | .persist          => (.track, "record, record update: the one carrier entry — created when a mismatch is first found, brought into line every pass, one line per mismatch with its standing and what it stood on; its locator is carried out on the verdict")
-  | .readTurn         => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — a resolution, a closing, something named as not fitting, a correction, a question — whatever form it takes")
-  | .converge         => (.interaction .extension, "the per-mismatch trace with who settled each line and what it stood on — for a person's resolution, the turn read, quoted, and the intent taken from it — the adaptations made and any that did not repair what they aimed at, the dissent attached to the closure, and what the verdict does not claim")
-  | .seam             => (.interaction .extension, "at a chain the person declared, naming the next protocol, proceed to it citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
+  | .observe   => (.observe, "artifact read, artifact search, record read, and a run that changes no existing state — no send, nothing left behind: every place the result lands and every intent it answers to; each return enters the context as an evidence turn; a place that needs a change to existing state, a permission, or another's authority is named with what it needs and left unreached")
+  | .judge     => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result must fit; how each mismatch stands; what fits and what was not reached")
+  | .evidence  => (.interaction .extension, "where evidence alone settles a mismatch as SettledSupported says, withdraw your own flag or record the relayed resolution as yours, with that evidence; a person's turn that disputes it leaves it open")
+  | .gate      => (.interaction .constitution, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and your contrary grounds where you have them, never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
+  | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled resolution asks, within what this run may write; what it returns enters the context and the next observation reads it")
+  | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")
+  | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, corrects, disputes, grants, names something that does not fit, points at a place to look, asks about the sheet")
+  | .record    => (.track, "record: the current sheet kept in a durable record the person can find, where the run may be cut off before it completes")
+  | .converge  => (.interaction .extension, "the closing sheet: the convergence evidence CONVERGENCE names")
+  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.
@@ -511,51 +448,49 @@ end
 end Epharmoge
 ```
 
-## Core Principle
-
-**Applicability over Correctness**: Surface evidence that a correct result does not fit its application context; contextual fitness is the question this protocol settles.
-
 ## Mode Activation
 
 ### Activation
 
-Layer 1 activates whenever the user invokes `/contextualize`, including when nothing may turn out not to fit. Layer 2 may activate only after Aitesis operational evidence has established the recurring pattern “context gathered but application mismatched,” and only when the post-execution result satisfies the formal auto-activation guard. Prior-session recall indices may inform the judgment when available; they never settle the user's resolution.
+Layer 1 activates whenever the user invokes `/contextualize`, on any result they name — this session's output or an artifact from elsewhere — including when nothing may turn out not to fit; the invocation declares the deficit, and the AI does not judge it away. Layer 2, the AI-opened path, activates only when the AI has detected a mismatch between a result and the context it lands in, and the AI says that it opened the run. Prior-session recall indices may inform the judgment when available; they never settle the user's resolution.
 
 ## Protocol
 
-The formal blocks define execution. This section fixes the user-facing rendering.
-
-### The round
-
-Open every round with the current list: each place the result does not fit, where it is, and how it stands now — waiting on you, what you decided, handed to another protocol, or withdrawn because evidence showed it fits. Follow it with what this turn changed: what your last answer settled, what an adaptation changed in the result, what is newly found, what an adaptation aimed at and did not repair, and any flag withdrawn with the evidence that withdrew it. Keep one carrier entry for the result, one line per mismatch with its standing and what it stood on.
-
-Then ask about one mismatch. Before the question, show what does not fit, where in the result, the part of the context it does not fit (quoted with where it came from), how much it matters, and evidence that it does not fit where evidence showed that. Ask first about a mismatch whose owner is unclear.
-
-The options are concrete actions for this mismatch, each with what then happens — never category titles. For a schedule that lands after working hours:
+The formal blocks define execution. This section fixes the user-facing rendering: the sheet `respond` names, in everyday words. For a nightly report whose schedule was written this session:
 
 ```
-The report goes out at 18:00 Seoul time — after the team has left.
-  result   `0 9 * * *` (server in UTC)
-  context  "the team works in Seoul" (your message)
+Two places do not fit; both wait on you.
 
-What should happen?
-1. Send it at 09:00 Seoul time — `0 0 * * *`; this overlaps the 00:00–00:30 UTC backup window, so it is checked again
-2. Leave the 18:00 arrival as it is — the report goes out unchanged
-3. Stop using this cron — say what should replace it
+1. The report goes out at 18:00 Seoul time — after the team has left. Matters: nobody reads it the day it is sent.
+   result   `0 9 * * *` (server in UTC)
+   context  "the team works in Seoul" (your message)
+   a. Send it at 09:00 Seoul time — `0 0 * * *`; this overlaps the 00:00–00:30 UTC backup window, so it is checked again
+   b. Leave the 18:00 arrival — the report goes out unchanged
+
+2. The report is mailed to ops@, but you asked for it in #daily-report. Matters: the forward from ops@ drops the attachment, so the team gets the report without its numbers.
+   result   `MAILTO=ops@…`
+   context  "put it in #daily-report" (your message)
+   a. Post to #daily-report through the webhook the repo already uses
+   b. Keep mail — say why, and it is recorded; against it: the team keeps getting it without the numbers
+
+Fits: the script, its log path, the mail relay.
+Not reached: whether the webhook token is valid in production — reaching it needs a live send.
+
+Which way for each? Your own words are fine — for example "1a, 2a".
 ```
 
-The person may answer in their own words, and one answer may settle more than one mismatch. Leaving a mismatch as it is records the reason they gave and makes no claim that the mismatch does or does not stand. Where the owner is unclear, the options name the concrete split, for example "install mail in this image as part of this work" beside "hand it to whoever owns the image (/bound)".
-
-With nothing open, show the list, how far the judgment reached, and ask whether the run is done; the person may also name something that does not fit. After an adaptation, say that the changed result was judged again and that no correctness claim is made for it; where it left nothing open, the run closes and the closing trace shows what the adaptation changed. Wherever you read one of the person's earlier turns as resolving a mismatch or as what lets the run close, say which turn and what you took from it, quoting their words — for example: "Your 'leave the 18:00 arrival, the team reads it in the morning' — taken as: keep the schedule as it is." This disclosure stands in place of asking again. After a withdrawal, say that the replacement is carried with no claim of fit.
+Where a place reads as another owner's, the options name the concrete split, for example "install mail in this image as part of this work" beside "leave it to whoever owns the image". Wherever you read one of the user's earlier turns as resolving a place, say which turn and what you took from it, quoting their words — for example: "Your 'leave the 18:00 arrival, the team reads it in the morning' — taken as: keep the schedule as it is." This disclosure stands in place of asking again.
 
 ## Rules
 
-- **Non-circularity**: What the result must fit is the context the person and the environment supplied — never the assistant's own words, which a mismatch cannot cite.
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-- **Recognition over categories**: Offer actions concrete to the mismatch in front of the person, each with its consequence. The person's own words settle what a category would have asked them to choose.
-- **Verdict scope**: Present the per-mismatch trace before the verdict. Fit is claimed only for the mismatches found, and an adapted result claims fit, not correctness; a withdrawal claims neither for its replacement.
-- **The person resolves and closes**: A mismatch is resolved only by the person's turn, whatever its form, and the person's resolution stands over anything evidence or the certificate read. Evidence alone may withdraw the AI's own flag, reported with that evidence, or show that a mismatch does not fit before the gate; a person's turn that disputes a withdrawal puts it back. Which of the person's turns resolves a mismatch, or lets the run close, is read from the context as it now stands and is not tied to their latest turn; wherever such a reading is made, the round or the closing trace says which turn was read and what intent was taken from it, quoting their words, in place of asking again. Where nothing was found, or nothing was the person's to resolve, the run ends only when the person says it is done after seeing the list.
-- **Significant requires demonstrable behavioral impact**: Severity = Significant requires that the mismatch produces a demonstrable behavioral consequence — downstream-decision impact, runtime divergence, gate-trajectory change. Structural-change extent (line count, file count, scope size) alone is insufficient grounds — categorize as Minor when behavioral impact is undemonstrated. This guards against false-positive gating arising from conflation of structural-change extent with applicability impact
-- **Unclear owners surface first**: A mismatch the certificate cannot place is put to the person before anything else happens to it, with the claims its evidence supports; the certificate never places a mismatch it could not place, and evidence does not withdraw it first.
-- **Judge afresh after every write**: An adaptation changes the result, so the next pass judges the whole result against the whole context again; the run can have more open after a resolution than before it. A mismatch an adaptation aimed at and that is still found is said to be unrepaired; a write that did not land resolves nothing. A turn whose adaptation landed and left nothing open closes the run; the changed result and any adaptation that did not repair what it aimed at appear in the closing trace.
+- **Non-circularity**: As `Mismatch.against` states — what the result must fit is never the assistant's own words.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own moves bear on where a sentence sits relative to a gate.
+- **One sheet**: As `respond` states — every place on one sheet, one question over the open ones.
+- **Recognition over categories**: As `respond` and the `gate` grounding state — concrete actions with their consequences and contrary grounds, never category titles.
+- **Reach named**: As `observe` and `reach` state.
+- **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write; only what the person holds waits for their turn.
+- **The person resolves**: As `ResolutionSupported`, `SettledSupported`, and `respond` state — including the quoted disclosure of a turn read as a resolution.
+- **Completion needs no closing turn**: As `NothingOpen`, `Outcome`, and CONVERGENCE state.
+- **How much it matters**: As `respond` states — by demonstrable behavioral consequence, never structural extent alone.
+- **After the close**: The AI never rewrites or vetoes a resolution the person settled. New evidence against it is shown, and is owed before any dependent step that cannot be undone. A next step the person declared runs only after completion.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
