@@ -13,7 +13,7 @@ flowchart LR
     C -->|Yes: open or correct an axis| D[Concrete content and consequences]
     D --> E[Update affected decisions]
     E --> B
-    C -->|User accepts it as it stands| F[Boundary stands, open questions in residual]
+    C -->|User accepts it as it stands, no turn still owed| F[Boundary stands, open questions in residual]
     C -->|No, and no turn of the user's still owed| G[Boundary stands as shown]
     C -->|User's turn owed: unclear reply, request to look, AI objection| H[Round that serves it]
     H --> B
@@ -22,7 +22,7 @@ flowchart LR
     G -->|Later words bear on it| B
 ```
 
-The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. The boundary stands in one of two ways: the user accepts it as it stands, in whatever words, and it is set from what the conversation now holds; or no item on the map is waiting for the user — every one disposed by their words, fixed by an earlier recorded decision of theirs, or settled by what was observed — it stands as shown, with what the map did not look at. Either way it stands only where no turn of the user's is still owed: an unclear answer, a request to see something, or an AI objection they have not closed over gets a round that serves it first. Any other answer continues or withdraws. The user's next words reopen a boundary that stands where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, if it had any, before the user took it.
+The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. The boundary stands in one of two ways: the user accepts it as it stands, in whatever words, and it is set from what the conversation now holds; or no item on the map is waiting for the user, and it stands as shown, with what the map did not look at. Either way it stands only where no turn of the user's is still owed: an unclear answer, a request to see something, or an AI objection they have not closed over gets a round that serves it first. Any other answer continues or withdraws. The user's next words reopen a boundary that stands where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, if it had any, before the user took it.
 
 For example, a project map might show that the audience is already chosen, the data handling approach needs comparison, and the rollout date is still open. The user can inspect data handling, rule out external transmission, entrust the comparison work, and retain the final choice. The map then updates the affected options and keeps the rollout date unresolved. A boundary that stands — whether the user accepted it or nothing was waiting for them — is sufficient for the next move; it does not silently resolve every open project question.
 

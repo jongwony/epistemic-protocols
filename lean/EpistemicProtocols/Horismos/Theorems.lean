@@ -25,7 +25,12 @@ variable (respond session : Context P → Response P)
 /-- Silence settles nothing: with no further utterance the run stands as it was — a holding gate
     keeps holding, a boundary that stands keeps standing. -/
 theorem silence (c : Context P) (o : Outcome P) : bound respond session c o [] = o := by
-  simp [bound]
+  cases o <;> simp [bound]
+
+/-- A run that has withdrawn stays withdrawn: later words do not revive it. -/
+theorem withdrawn_stays (c : Context P) (w : Withdrawal P) (us : List (Utterance P)) :
+    bound respond session c (.withdrawn w) us = .withdrawn w := by
+  cases us <;> simp [bound]
 
 /-- The run opens on its first round, standing as the invoking context, with what observation
     returned, leaves it; a gate that holds there holds with that round in its context, and no
@@ -39,11 +44,13 @@ theorem start_rounds_first (c : Context P) (us : List (Utterance P)) :
 /-- An utterance that does not bear on the boundary adds no round and leaves how the run stands as
     it stood; a gate that holds holds the context as it now stands. -/
 theorem unrelated_keeps_the_run (c : Context P) (o : Outcome P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    (us : List (Utterance P)) (ho : ∀ w, o ≠ .withdrawn w) (h : ¬ Reaches (fuse c u)) :
     bound respond session c o (u :: us) =
       bound respond session (fuse c u ++ [(session (fuse c u)).val])
         (o.carry (fuse c u ++ [(session (fuse c u)).val])) us := by
-  simp [bound, h]
+  cases o with
+  | withdrawn w => exact absurd rfl (ho w)
+  | _ => simp [bound, h]
 
 /-- Carrying the run to a longer context keeps what it is: a boundary that stands stays the same
     boundary, a withdrawal stays the same record, and a gate that holds keeps the boundary that
@@ -54,55 +61,43 @@ theorem carry_keeps_status (o : Outcome P) (c : Context P) :
       (∀ w, o = .withdrawn w → o.carry c = .withdrawn w) := by
   cases o <;> simp [Outcome.carry, Outcome.stood]
 
-private theorem carry_defined (o : Outcome P) (c : Context P) (b : DefinedBoundary P)
-    (h : o.carry c = .defined b) : o = .defined b := by
-  cases o <;> simp_all [Outcome.carry]
-
-private theorem carry_withdrawn (o : Outcome P) (c : Context P) (w : Withdrawal P)
-    (h : o.carry c = .withdrawn w) : o = .withdrawn w := by
-  cases o <;> simp_all [Outcome.carry]
-
-/-- A withdrawal at the person's word ends the run there, with nothing further observed: its
-    record keeps the snapshot at that word and, apart from it, the boundary that last stood; it sets
-    no boundary from there. -/
-theorem withdrawal_ends (c : Context P) (o : Outcome P) (u : Utterance P)
-    (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (h : isFilled (withdrawal (fuse c u)) = true) :
+/-- A withdrawal — at the person's word, or once observation settles its reading — ends the run
+    there: its record keeps the snapshot at that word and, apart from it, the boundary that last
+    stood; it sets no boundary from there. -/
+theorem withdrawal_at_word (c : Context P) (o : Outcome P) (u : Utterance P)
+    (us : List (Utterance P)) (ho : ∀ w, o ≠ .withdrawn w) (hr : Reaches (fuse c u))
+    (h : isFilled (withdrawal (fuse c u)) = true ∨
+      isFilled (withdrawal (observed (fuse c u))) = true) :
     bound respond session c o (u :: us) =
       .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩ := by
-  simp [bound, hr, h]
-
-/-- A withdrawal whose reading only observation settles still withdraws, and its record is still
-    the snapshot at the person's word. -/
-theorem withdrawal_after_observation (c : Context P) (o : Outcome P) (u : Utterance P)
-    (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (h₀ : isFilled (withdrawal (fuse c u)) = false)
-    (h : isFilled (withdrawal (observed (fuse c u))) = true) :
-    bound respond session c o (u :: us) =
-      .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩ := by
-  simp [bound, hr, h₀, h]
+  cases o with
+  | withdrawn w => exact absurd rfl (ho w)
+  | _ => rcases h with h | h <;> simp [bound, hr, h]
 
 /-- Any other utterance that bears on the boundary is read where it is said, with what observation
     returned — the run stands as that leaves it — and then answered by your turn, and a gate that
     holds holds with that turn in its context and the boundary that last stood; also after the
     boundary stood, so a later correction reopens it. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
-    (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (us : List (Utterance P)) (ho : ∀ w, o ≠ .withdrawn w) (hr : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false)
     (hw' : isFilled (withdrawal (observed (fuse c u))) = false) :
     bound respond session c o (u :: us) =
       bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
         (status (observed (fuse c u))
           (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
-  simp [bound, hr, hw, hw']
+  cases o with
+  | withdrawn w => exact absurd rfl (ho w)
+  | _ => simp [bound, hr, hw, hw']
 
 /-- The boundary stands only where no turn of the person's is owed, and then on one of two grounds:
-    the person's acceptance, or, without it, no item awaiting their disposition. -/
+    the person's acceptance, or, without it, no item awaiting their disposition; it is read at
+    `c`, with its limits and dissent read with the turn that shows it. -/
 theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P))
     (b : DefinedBoundary P) (h : status c shown stood = .defined b) :
     owed c = false ∧
       (isFilled (acceptance c) = true ∨ awaits (readout c) = false) ∧
-      b = close c := by
+      b = closeAt c shown (readout c) := by
   unfold status at h
   dsimp only at h
   split at h
@@ -161,8 +156,8 @@ theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context 
 /-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
 theorem acceptance_sets_despite_residual (c shown : Context P) (stood : Option (DefinedBoundary P))
     (ho : owed c = false) (h : isFilled (acceptance c) = true) :
-    status c shown stood = .defined (close c) := by
-  simp [status, close, h, ho]
+    status c shown stood = .defined (closeAt c shown (readout c)) := by
+  simp [status, h, ho]
 
 /-- Where something awaits the person and they have not accepted, the gate holds. -/
 theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P))
@@ -170,79 +165,57 @@ theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P)
     status c shown stood = .holding shown stood := by
   simp [status, ha, hw]
 
+/-- Each utterance either continues the run — a later step carries it — or withdraws it, at the
+    person's word or once observation settles its reading, with the record at that word. -/
 theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
-    (us : List (Utterance P)) (h : bound respond session c o (u :: us) = r) :
+    (us : List (Utterance P)) (ho : ∀ w, o ≠ .withdrawn w)
+    (h : bound respond session c o (u :: us) = r) :
     (∃ c' o', bound respond session c' o' us = r) ∨
     ((isFilled (withdrawal (fuse c u)) = true ∨
         isFilled (withdrawal (observed (fuse c u))) = true) ∧
       r = .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩) := by
-  simp only [bound] at h
-  split at h
-  · exact .inl ⟨_, _, h⟩
-  · split at h
-    · rename_i hc
-      exact .inr ⟨.inl hc, h.symm⟩
-    · split at h
-      · rename_i hc
-        exact .inr ⟨.inr hc, h.symm⟩
-      · exact .inl ⟨_, _, h⟩
-
-private theorem status_not_withdrawn (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (q : Withdrawal P) : status c shown stood ≠ .withdrawn q := by
-  unfold status
-  dsimp only
-  split <;> intro h <;> cases h
-
-/-- A withdrawn run was withdrawn by the person's turn — at their word, or once observation settled
-    its reading — and its record is the snapshot at that word. -/
-theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utterance P))
-    (w : Withdrawal P) (h : bound respond session c o us = .withdrawn w)
-    (ho : ∀ q, o ≠ .withdrawn q) :
-    ∃ c₀, (isFilled (withdrawal c₀) = true ∨ isFilled (withdrawal (observed c₀)) = true) ∧
-      w.atWord = snapshotOf c₀ := by
-  induction us generalizing c o with
-  | nil => simp [bound] at h; exact absurd h (ho w)
-  | cons u us ih =>
+  cases o with
+  | withdrawn w => exact absurd rfl (ho w)
+  | _ =>
     simp only [bound] at h
     split at h
-    · refine ih _ _ h ?_
-      intro q hq
-      exact ho q (carry_withdrawn _ _ _ hq)
+    · exact .inl ⟨_, _, h⟩
     · split at h
       · rename_i hc
-        cases h
-        exact ⟨_, .inl hc, rfl⟩
-      · split at h
-        · rename_i hc
-          cases h
-          exact ⟨_, .inr hc, rfl⟩
-        · exact ih _ _ h (fun q => status_not_withdrawn _ _ _ q)
+        simp only [Bool.or_eq_true] at hc
+        exact .inr ⟨hc, h.symm⟩
+      · exact .inl ⟨_, _, h⟩
 
 /-- Every boundary a run sets, from a start that has not withdrawn, stands where no turn of the
     person's was owed, on their acceptance or on nothing awaiting them, in the context where it was
     read. -/
 theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
     (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
-    (ho : ∀ b', o = .defined b' → ∃ c₀, owed c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b' = close c₀) :
-    ∃ c₀, owed c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b = close c₀ := by
+    (ho : ∀ b', o = .defined b' → ∃ c₀ s₀, owed c₀ = false ∧
+      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧
+      b' = closeAt c₀ s₀ (readout c₀)) :
+    ∃ c₀ s₀, owed c₀ = false ∧
+      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧
+      b = closeAt c₀ s₀ (readout c₀) := by
   induction us generalizing c o with
-  | nil => simp [bound] at h; exact ho b h
+  | nil => cases o <;> simp [bound] at h; exact ho b (by rw [h])
   | cons u us ih =>
-    simp only [bound] at h
-    split at h
-    · refine ih _ _ h ?_
-      intro b' hb'
-      exact ho b' (carry_defined _ _ _ hb')
-    · split at h
-      · cases h
+    cases o with
+    | withdrawn w => simp [bound] at h
+    | _ =>
+      simp only [bound] at h
+      split at h
+      · refine ih _ _ h ?_
+        intro b' hb'
+        refine ho b' ?_
+        simp only [Outcome.carry] at hb'
+        first | exact hb' | cases hb'
       · split at h
         · cases h
         · refine ih _ _ h ?_
           intro b' hb'
           obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ _ b' hb'
-          exact ⟨_, h1, h2, h3⟩
+          exact ⟨_, _, h1, h2, h3⟩
 
 /-- Every disposition on the record cites a person's turn: a relayed earlier decision — one fixing
     a decision's content or who settles it —, a fact, or a proposal of yours makes none. -/
@@ -360,13 +333,17 @@ theorem prior_disposition_records_nothing {c : Context P} (e : BoundaryEntry c)
   | mk d q r ev dep app pr disp pd ct => cases disp <;> rfl
 
 /-- The snapshot carries the map, the record, the residual, what the map did not look at, and the
-    dissent read from the context it is taken in; a boundary carries it, and a withdrawal carries
-    it at the person's word. -/
-theorem snapshot_carries (c : Context P) :
+    dissent read from the context it is taken in; a withdrawal carries it at the person's word,
+    and a boundary where it stands carries the map read there with the limits and dissent of the
+    turn that shows it. -/
+theorem snapshot_carries (c c' : Context P) :
     (snapshotOf c).context = c ∧ (snapshotOf c).dissent = dissent c ∧
       (snapshotOf c).residual = residualOf (readout c).map ∧
       (snapshotOf c).limits = (readout c).limits ∧
-      (close c).snapshot = snapshotOf c :=
-  ⟨rfl, rfl, rfl, rfl, rfl⟩
+      (close c).snapshot = snapshotOf c ∧
+      ((closeAt c c' (readout c)).snapshot.limits = (readout c').limits ∧
+        (closeAt c c' (readout c)).snapshot.dissent = dissent c' ∧
+        (closeAt c c' (readout c)).snapshot.map = (readout c).map) :=
+  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 end Horismos
