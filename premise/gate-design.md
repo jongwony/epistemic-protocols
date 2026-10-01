@@ -38,7 +38,7 @@ Verification-purpose gates are outside this requirement when their answer forms 
 
 ## Content Placement Boundary (Axiom)
 
-Put analysis and evidence before the question. The gate carries the question and the implications needed to distinguish its answers. Keep a sentence in the gate when removing it would erase an answer's differential implication; put it before the gate when it supplies analytical context. This applies to verification gates as well as decision gates.
+Put analysis and evidence before the question. The gate carries the question and the implications needed to distinguish its answers. Keep a sentence in the gate when removing it would erase an answer's differential implication; put it before the gate when it supplies analytical context. This applies to verification gates as well as decision gates. Where one gate asks about several items, each with answers of its own, the line saying what each item is belongs in the gate, since removing it erases which answers belong to which item; and each reference the person may answer with — a number, a letter — names exactly one answer across the whole gate.
 
 ## Convergence Evidence (Derived)
 
