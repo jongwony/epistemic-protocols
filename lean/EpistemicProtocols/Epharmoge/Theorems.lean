@@ -33,12 +33,14 @@ theorem other_work_passes_nothing (respond session : Context P → Response P) (
       contextualize respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
   simp [contextualize, h]
 
-/-- An utterance that bears on the run opens a pass, completed or not. -/
+/-- An utterance that bears on the run gets the session's answer to what it asks outside the run
+    first, then opens a pass, completed or not. -/
 theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
     (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : Reaches (fuse c u)) :
     contextualize respond session c o (u :: us) =
-      contextualize respond session (settle respond (pass (fuse c u))).context
-        (settle respond (pass (fuse c u))) us := by
+      contextualize respond session
+        (settle respond (pass (fuse c u ++ [(session (fuse c u)).val]))).context
+        (settle respond (pass (fuse c u ++ [(session (fuse c u)).val]))) us := by
   simp [contextualize, h]
 
 /-- Completion needs nothing open. -/
@@ -51,8 +53,8 @@ theorem completed_nothing_open (respond : Context P → Response P) (c : Context
 
 /-- A settled standing never rests on a resolution that asks for a write: such a mismatch stays
     open until its write repairs it and takes it out of what is found. -/
-theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
-    (hs : standing c m = .resolved r h' ∨ standing c m = .relayed r) : r.asksWrite = false := by
+theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
+    (hs : standing c m = .resolved r how ∨ standing c m = .relayed r) : r.asksWrite = false := by
   unfold standing at hs
   cases hr : resolution c m with
   | filled a src ok sup =>
@@ -76,14 +78,14 @@ theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) 
 
 /-- The person's resolution comes first, whatever evidence read: one that asks no write stands
     resolved. -/
-theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
-    (h : filledValue (resolution c m) = some (r, h')) (hw : r.asksWrite = false) :
-    standing c m = .resolved r h' := by
+theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
+    (h : filledValue (resolution c m) = some (r, how)) (hw : r.asksWrite = false) :
+    standing c m = .resolved r how := by
   simp [standing, h, hw]
 
 /-- A resolution on the person's record cites a turn the person sent. -/
-theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
-    (h : standing c m = .resolved r h') :
+theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
+    (h : standing c m = .resolved r how) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
   unfold standing at h
   cases hr : resolution c m with
@@ -117,11 +119,12 @@ theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
 private theorem relayRounds_extends : ∀ (n : Nat) (c : Context P), ∃ t, relayRounds n c = c ++ t
   | 0, c => ⟨[], by simp [relayRounds]⟩
   | n + 1, c => by
-    obtain ⟨t, ht⟩ := relayRounds_extends n (relayRound c)
-    refine ⟨((perform c).map (·.val) ++
-      (observe (c ++ (perform c).map (·.val))).map (·.val)) ++ t, ?_⟩
-    rw [relayRounds, ht]
-    simp [relayRound]
+    by_cases hs : Settling c
+    · obtain ⟨t, ht⟩ := relayRounds_extends n (relayRound c)
+      refine ⟨(perform c ++ (observe (c ++ perform c)).map (·.val)) ++ t, ?_⟩
+      simp only [relayRounds, hs, ite_true, ht]
+      simp [relayRound]
+    · exact ⟨[], by simp [relayRounds, hs]⟩
 
 /-- A pass only adds to the context. -/
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
