@@ -62,26 +62,28 @@ private theorem carry_withdrawn (o : Outcome P) (c : Context P) (w : Withdrawal 
     (h : o.carry c = .withdrawn w) : o = .withdrawn w := by
   cases o <;> simp_all [Outcome.carry]
 
-/-- A settled withdrawal, read with what observation returned like any reply that bears on the
-    boundary, ends the run: its record keeps the snapshot at the person's word and, apart from it,
-    the boundary that last stood; it sets no boundary from there. -/
+/-- A settled withdrawal ends the run at the person's word, with nothing further observed: its
+    record keeps the snapshot at that word and, apart from it, the boundary that last stood; it sets
+    no boundary from there. -/
 theorem withdrawal_ends (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hu : unsettled (observed (fuse c u)) = false)
-    (h : isFilled (withdrawal (observed (fuse c u))) = true) :
+    (hu : unsettled (fuse c u) = false)
+    (h : isFilled (withdrawal (fuse c u)) = true) :
     bound respond session c o (u :: us) =
-      .withdrawn ⟨snapshotOf (observed (fuse c u)), o.stood⟩ := by
+      .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩ := by
   simp [bound, hr, hu, h]
 
-/-- A reply whose reading is unsettled never ends the run: it is read like any reply that bears on
-    the boundary, and the gate holds for a round showing its readings. -/
+/-- A reply whose reading is unsettled at the person's word never ends the run: it is read like
+    any reply that bears on the boundary, with what observation returned, and answered by your
+    turn; where its reading is still unsettled there, the gate holds (`unsettled_holds`). -/
 theorem unsettled_never_withdraws (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hu : unsettled (observed (fuse c u)) = true) :
+    (hu : unsettled (fuse c u) = true) :
     bound respond session c o (u :: us) =
       bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
-        (.holding (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
-  simp [bound, hr, hu, status]
+        (status (observed (fuse c u))
+          (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
+  simp [bound, hr, hu]
 
 /-- Any other utterance that bears on the boundary is read where it is said, with what observation
     returned — the run stands as that leaves it — and then answered by your turn, and a gate that
@@ -89,19 +91,21 @@ theorem unsettled_never_withdraws (c : Context P) (o : Outcome P) (u : Utterance
     boundary stood, so a later correction reopens it. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hw : (!unsettled (observed (fuse c u)) &&
-      isFilled (withdrawal (observed (fuse c u)))) = false) :
+    (hw : (!unsettled (fuse c u) && isFilled (withdrawal (fuse c u))) = false) :
     bound respond session c o (u :: us) =
       bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
         (status (observed (fuse c u))
           (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
   simp [bound, hr, hw]
 
-/-- The boundary stands on one of two grounds — the person's acceptance, or no item awaiting their
-    disposition — never while the reading of the latest reply is unsettled. -/
+/-- The boundary stands on one of two grounds — the person's acceptance, or, without it, no item
+    awaiting their disposition, nothing they asked to see left unshown, and no contrary ground of
+    yours they have not closed over — never while the reading of the latest reply is unsettled. -/
 theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P))
     (b : DefinedBoundary P) (h : status c shown stood = .defined b) :
-    unsettled c = false ∧ (isFilled (acceptance c) = true ∨ awaits (readout c) = false) ∧
+    unsettled c = false ∧
+      (isFilled (acceptance c) = true ∨
+        (awaits (readout c) = false ∧ opening c = false ∧ (dissent c).isEmpty = true)) ∧
       b = close c := by
   unfold status at h
   dsimp only at h
@@ -109,7 +113,7 @@ theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true, Bool.or_eq_true, Bool.not_eq_true'] at hc
-    exact ⟨hc.1, hc.2, rfl⟩
+    exact ⟨hc.1, hc.2.imp_right (fun h => ⟨h.1.1, h.1.2, h.2⟩), rfl⟩
   · cases h
 
 /-- Where the reading of the latest reply is unsettled, the gate holds, with the round that shows
@@ -170,12 +174,25 @@ theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P)
     status c shown stood = .holding shown stood := by
   simp [status, ha, hw]
 
+/-- Where you hold contrary grounds and the person has not accepted, the boundary does not stand on
+    nothing awaiting: the gate holds for the person to close over them. -/
+theorem dissent_holds_without_acceptance (c shown : Context P) (stood : Option (DefinedBoundary P))
+    (ha : isFilled (acceptance c) = false) (hd : (dissent c).isEmpty = false) :
+    status c shown stood = .holding shown stood := by
+  simp [status, ha, hd]
+
+/-- Where the latest reply asks to see something not yet shown and the person has not accepted, the
+    gate holds for the round that shows it. -/
+theorem opening_holds_without_acceptance (c shown : Context P) (stood : Option (DefinedBoundary P))
+    (ha : isFilled (acceptance c) = false) (ho : opening c = true) :
+    status c shown stood = .holding shown stood := by
+  simp [status, ha, ho]
+
 theorem each_step_continues_or_withdraws (c : Context P) (o r : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (h : bound respond session c o (u :: us) = r) :
     (∃ c' o', bound respond session c' o' us = r) ∨
-    (unsettled (observed (fuse c u)) = false ∧
-      isFilled (withdrawal (observed (fuse c u))) = true ∧
-      r = .withdrawn ⟨snapshotOf (observed (fuse c u)), o.stood⟩) := by
+    (unsettled (fuse c u) = false ∧ isFilled (withdrawal (fuse c u)) = true ∧
+      r = .withdrawn ⟨snapshotOf (fuse c u), o.stood⟩) := by
   simp only [bound] at h
   split at h
   · exact .inl ⟨_, _, h⟩
@@ -218,9 +235,13 @@ theorem withdrawn_by_person (c : Context P) (o : Outcome P) (us : List (Utteranc
 theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P)
     (us : List (Utterance P)) (b : DefinedBoundary P) (h : bound respond session c o us = .defined b)
     (ho : ∀ b', o = .defined b' → ∃ c₀, unsettled c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b' = close c₀) :
+      (isFilled (acceptance c₀) = true ∨
+        (awaits (readout c₀) = false ∧ opening c₀ = false ∧ (dissent c₀).isEmpty = true)) ∧
+      b' = close c₀) :
     ∃ c₀, unsettled c₀ = false ∧
-      (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧ b = close c₀ := by
+      (isFilled (acceptance c₀) = true ∨
+        (awaits (readout c₀) = false ∧ opening c₀ = false ∧ (dissent c₀).isEmpty = true)) ∧
+      b = close c₀ := by
   induction us generalizing c o with
   | nil => simp [bound] at h; exact ho b h
   | cons u us ih =>
@@ -310,28 +331,34 @@ theorem override_blocks_prior_grant {c : Context P} (e : BoundaryEntry c) (v : S
   simp [stands, hc, hd, governing, hf]
 
 private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : BoundaryEntry c)
-    (hm : e ∈ m) (hs : stands e = false) : (e.domain, e.question) ∈ residualOf m := by
+    (hm : e ∈ m) (hs : stands e = false) : openItemOf e ∈ residualOf m := by
   simp only [residualOf, List.mem_map, List.mem_filter]
   exact ⟨e, ⟨hm, by simp [hs]⟩, rfl⟩
 
-/-- Every item on the map whose content does not stand is in the residual of the snapshot. -/
+/-- Every item on the map whose content does not stand is in the residual of the snapshot, with
+    its question, why it bears, and the arrangement governing it — none where no disposition
+    governs it yet. -/
 theorem open_decisions_in_residual (c : Context P) (e : BoundaryEntry c)
     (hm : e ∈ (readout c).map) (hs : stands e = false) :
-    (e.domain, e.question) ∈ (snapshotOf c).residual :=
+    (⟨e.domain, e.question, e.relevance, (governing e).map (·.1)⟩ : OpenItem) ∈
+      (snapshotOf c).residual :=
   mem_residualOf _ e hm hs
 
-/-- An item awaiting the person is in the residual. -/
+/-- An item awaiting the person is in the residual, marked as governed by no arrangement yet. -/
 theorem awaiting_in_residual (c : Context P) (e : BoundaryEntry c) (hm : e ∈ (readout c).map)
-    (ha : awaitsEntry e = true) : (e.domain, e.question) ∈ (snapshotOf c).residual := by
-  apply open_decisions_in_residual c e hm
-  simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true'] at ha
-  exact ha.2
+    (ha : awaitsEntry e = true) :
+    openItemOf e ∈ (snapshotOf c).residual ∧ (openItemOf e).governing = none := by
+  simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true', Option.isNone_iff_eq_none] at ha
+  exact ⟨open_decisions_in_residual c e hm ha.2, by simp [openItemOf, ha.1]⟩
 
 /-- An item whose disposition an earlier decision fixes does not await the person: it is shown
     with that citation and not asked again. -/
 theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c)
     (h : isFilled e.priorDisposition = true) : awaitsEntry e = false := by
-  simp [awaitsEntry, h]
+  cases hp : e.priorDisposition with
+  | open_ _ => simp [hp, isFilled] at h
+  | filled a s al su =>
+    cases hd : e.disposition <;> simp [awaitsEntry, governing, hd, hp]
 
 /-- A person's turn in this context never stands as an earlier decision fixing who settles an
     item: that turn fills the disposition. -/

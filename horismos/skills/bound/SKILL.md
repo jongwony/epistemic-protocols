@@ -13,7 +13,7 @@ Define epistemic boundaries through a recognizable whole map and progressive exa
 - Before asking the user what to settle or entrust, construct the relevant whole provisional map of decisions, obligations, assumptions, and dependencies. A settled goal and a user-supplied inventory are not prerequisites. Bound this whole to the current context and show what remains unknown.
 - Let the user open any axis, see the concrete content and consequences needed to judge it, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
 - Keep the boundary question distinct from its settlement disposition and from the content of the decision. For ownership, the disposition assigns the named decision directly; an allocation question is a separate domain only when the source makes allocation itself the subject.
-- The boundary stands in one of two ways: the user accepts it as it stands — at that depth, from the context as it then stands — or no item on the map awaits the user's disposition, and it stands as shown — in either case only where no reply's reading is left unsettled; an unsettled reply holds a round that shows the candidate readings. Every round keeps the way to accept recognizable. Any other response that bears on the boundary continues it — standing it where it leaves nothing awaiting — or withdraws; words that do not bear on it leave it as it stood. Once it stands, the user's later words reopen it where they bear on it.
+- The boundary stands in one of two ways: the user accepts it as it stands — at that depth, from the context as it then stands — or no item on the map awaits the user's disposition, nothing they asked to see is left unshown, and the AI holds no contrary grounds they have not closed over, and it stands as shown — in either case only where no reply's reading is left unsettled; an unsettled reply holds a round that shows the candidate readings. Every round keeps the way to accept recognizable. Any other response that bears on the boundary continues it — standing it where it leaves nothing awaiting — or withdraws; words that do not bear on it leave it as it stood. Once it stands, the user's later words reopen it where they bear on it.
 
 ```lean
 /-!
@@ -28,18 +28,20 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 Horismos(T) → bound(c, o, utterances), where c is the fused session context and o is how the run
 stands:
   first round(c): c₀ := observed(c) [Tool] → readout(c₀) → present the whole map →
-    nothing awaits the person's disposition and the request's reading is settled: the boundary
-      stands, shown with its map and sources
-    something awaits it, or that reading is unsettled: Stop — the gate holds
+    nothing awaits the person's disposition, the request's reading is settled, nothing it asked to
+      see is left unshown, and you hold no contrary grounds: the boundary stands, shown with its
+      map and sources (an acceptance in the invoking context accepts nothing before a map was shown)
+    otherwise: Stop — the gate holds
   next utterance u: c' := fuse(c, u) →
     it does not bear on the boundary: the session answers it; the run stands as it was, a
       holding gate holding the context as it now stands
-    otherwise c'' := observed(c') [Tool] →
-      a withdrawal, its reading settled: the snapshot at c'' and the boundary that last stood,
-        if any; it sets no boundary from there; this run ends
-      otherwise: read at c'', before your turn, the gate holds where the reading of the reply is
-        unsettled or something awaits the person without their acceptance; else the boundary
-        stands → the next round, or the boundary shown
+    a withdrawal, its reading settled: at the person's word, with nothing further observed — the
+      snapshot at c' and the boundary that last stood, if any; it sets no boundary from there;
+      this run ends
+    otherwise c'' := observed(c') [Tool] → read at c'', before your turn: the boundary stands where
+      the reading of the reply is settled and the person's acceptance reaches it, or, without it,
+      where nothing awaits them, nothing they asked to see is left unshown, and you hold no
+      contrary grounds; else the gate holds → the next round, or the boundary shown
   no further utterance: the run as it stands — a holding gate keeps holding, a boundary that
     stands keeps standing; nothing is selected and nothing settles
 -/
@@ -167,7 +169,8 @@ structure Disposition where
     instruction, or the taking of an arrangement shown before. The proposer is whoever first put
     the arrangement forward; the standing is what the cited turn itself did: gave it in its own
     words (`set`), or took one put forward before (`adopted`) — where you put it forward, only if
-    it was visible as yours, with what decides it and your contrary grounds, before this turn. An
+    it was visible as yours, with what decides it and your contrary grounds, where you hold any,
+    before this turn. An
     acceptance of the boundary as it stands takes exactly the arrangements it covers under that
     condition; one it does not cover stays your proposal, and its decision stays open. An
     entrustment reaches what was shown of it: a later act that cannot be undone is entrusted only
@@ -272,7 +275,9 @@ abbrev BoundaryMap (c : Context P) := List (BoundaryEntry c)
 /-- A readable account of the whole map. -/
 structure BoundaryEssence (c : Context P) where
   map    : BoundaryMap c
-  /-- what the map did not look at, and why -/
+  /-- what the map did not look at, and why — the sources observation did not reach, as the context
+      records them: a failure a source returned, or your earlier round naming them; a source left
+      unreached at the step where the boundary stands is named in the turn that shows it -/
   limits : String
 
 /-- **Your judgment**, read afresh at every round: the relevant whole provisional structure from
@@ -291,9 +296,9 @@ axiom readout : (c : Context P) → BoundaryEssence c
     consequence rests on, a record an opened axis needs, a file the person asked you to read.
     Observe what a consequence the map shows rests on before showing it. Collect as far as the
     reachable sources go within what the map turns on; what you say you read, read whole. Where
-    what returns conflicts, name what conflicts with what. A source not reached goes into what the
-    map did not look at, by name; what still remains open is the person's own unknown, carried in
-    the residual. Observation changes no existing state; what needs a change of state, a
+    what returns conflicts, name what conflicts with what. A source not reached is named, by name,
+    in your turn that shows the map, and so enters what the map did not look at; what still
+    remains open is the person's own unknown, carried in the residual. Observation changes no existing state; what needs a change of state, a
     permission, or another's authority is named and handed over, not observed. -/
 axiom observe : Context P → List (Evidence P)
 
@@ -307,7 +312,7 @@ def observed (c : Context P) : Context P := c ++ (observe c).map (·.val)
     is shown with that citation and not asked again; one whose content an earlier decision or an
     observation fixes is settled as a fact. -/
 def awaitsEntry {c : Context P} (e : BoundaryEntry c) : Bool :=
-  !isFilled e.disposition && !isFilled e.priorDisposition && !stands e
+  (governing e).isNone && !stands e
 
 def awaits {c : Context P} (r : BoundaryEssence c) : Bool :=
   r.map.any awaitsEntry
@@ -328,7 +333,8 @@ def acceptanceCoord : Coord P Unit :=
 axiom acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
 
 /-- **Your judgment**: the cited turn withdraws — the person stops this run without setting the
-    boundary — read against the context as it now stands. What the person already disposed stands
+    boundary — read against the context as it now stands. It is read at the person's word; nothing
+    more is observed after it. What the person already disposed stands
     as their words; no proposal of yours is taken by it. A withdrawal from an earlier run does not
     end this one, and a reply whose reading is unsettled withdraws nothing. A withdrawal after the
     boundary stood stops the run from there: what already relied on the boundary stays as done, and
@@ -355,12 +361,17 @@ axiom Reaches : Context P → Prop
     shows the candidate readings with their consequences, and nothing is committed from it. -/
 axiom unsettled : Context P → Bool
 
+/-- **Your reading**: the latest reply that bears on the boundary asks to see or open part of the
+    map not yet shown to the person — an axis, a consequence, a record. The gate holds for the round
+    that shows it, and seeing it adopts nothing. -/
+axiom opening : Context P → Bool
+
 /-- **Your record**: the contrary grounds you presented before the person's turn that set the
-    boundary, or present in the round that shows a boundary nothing awaited — a disposition you
-    doubt, a premise that may not hold — attached to the boundary;
-    empty when there were none. The person's dispositions stand over them: you never rewrite or
-    veto one, and new evidence against one is shown before any step that depends on it and cannot
-    be undone. -/
+    boundary — a disposition you doubt, a premise that may not hold — attached to the boundary;
+    empty when there were none. Where you hold any and the person has not accepted, the boundary
+    does not stand on nothing awaiting: the gate holds for the person to close over them. The
+    person's dispositions stand over them: you never rewrite or veto one, and new evidence against
+    one is shown before any step that depends on it and cannot be undone. -/
 axiom dissent : Context P → List String
 
 /-- One disposition on the record: the decision, the disposition, and the person's turn it stands
@@ -377,12 +388,23 @@ def recordOf {c : Context P} (e : BoundaryEntry c) : List (Recorded c) :=
   | .open_ _                      => []
   | .filled v s allowed supported => [⟨e.domain, v, s, allowed, supported⟩]
 
-/-- What is still open: every item on the map whose content does not stand, disposed or not, by
-    its question. Nothing closes by default. -/
-abbrev Residual := List (Domain × String)
+/-- One item still open: the item, its question, why it bears on the boundary, and the arrangement
+    governing it — `none` where no disposition governs it yet. -/
+structure OpenItem where
+  domain    : Domain
+  question  : String
+  relevance : String
+  governing : Option Arrangement
+
+def openItemOf {c : Context P} (e : BoundaryEntry c) : OpenItem :=
+  ⟨e.domain, e.question, e.relevance, (governing e).map (·.1)⟩
+
+/-- What is still open: every item on the map whose content does not stand, disposed or not, with
+    why it bears and who settles it. Nothing closes by default. -/
+abbrev Residual := List OpenItem
 
 def residualOf {c : Context P} (m : BoundaryMap c) : Residual :=
-  (m.filter (fun e => !stands e)).map (fun e => (e.domain, e.question))
+  (m.filter (fun e => !stands e)).map openItemOf
 
 /-- What the run holds where it is read: the map with each decision's disposition and content, the
     record, what is still open, what the map did not look at, and the dissent; `context` is what
@@ -434,9 +456,12 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances, carrying the context as
-it stands and how the run stands. How the run stands is read at the person's utterance, with what
-observation returned joined to it as evidence turns [Tool], before your turn answers it. A reply
-whose reading is unsettled holds a round and never withdraws. `respond` is then that turn: a
+it stands and how the run stands. A settled withdrawal is read at the person's word, before any
+observation, and ends the run there. Otherwise how the run stands is read at the person's
+utterance, with what observation returned joined to it as evidence turns [Tool], before your turn
+answers it; whether the reply's reading is unsettled is read at the word for the withdrawal and
+again after observation for the standing. A reply whose reading is unsettled holds a round and
+never withdraws. `respond` is then that turn: a
 round (`round`, a Constitution that stops for the person) where the gate holds — and the gate that
 holds holds with that round in its context — or the boundary shown as it stands (`converge`, an
 Extension) where it stands; where the utterance also asks for other work, the same turn serves
@@ -457,11 +482,13 @@ def close (c : Context P) : DefinedBoundary P := ⟨snapshotOf c⟩
 /-- How the run stands in `c` — the context at the person's utterance, or at the start the context
     the first round is presented from: the gate holds, in `shown` — `c` with the round that presents
     it — and with `stood`, the boundary that last stood in the run, where the reading of the latest
-    reply is unsettled, or where something awaits the person and their acceptance does not reach
-    it; otherwise the boundary stands. -/
+    reply is unsettled; otherwise the boundary stands where the person's acceptance reaches it, or,
+    without it, where nothing awaits the person, the latest reply asked to see nothing not yet
+    shown, and you hold no contrary grounds they have not closed over. -/
 def status (c shown : Context P) (stood : Option (DefinedBoundary P)) : Outcome P :=
   let r := readout c
-  if !unsettled c && (isFilled (acceptance c) || !awaits r) then
+  if !unsettled c &&
+      (isFilled (acceptance c) || (!awaits r && !opening c && (dissent c).isEmpty)) then
     .defined ⟨snapshotFrom c r⟩
   else .holding shown stood
 
@@ -474,12 +501,11 @@ def bound (respond session : Context P → Response P) :
     if ¬ Reaches c' then
       let cs := c' ++ [(session c').val]
       bound respond session cs (o.carry cs) us
+    else if !unsettled c' && isFilled (withdrawal c') then .withdrawn ⟨snapshotOf c', o.stood⟩
     else
       let c'' := observed c'
-      if !unsettled c'' && isFilled (withdrawal c'') then .withdrawn ⟨snapshotOf c'', o.stood⟩
-      else
-        let shown := c'' ++ [(respond c'').val]
-        bound respond session shown (status c'' shown o.stood) us
+      let shown := c'' ++ [(respond c'').val]
+      bound respond session shown (status c'' shown o.stood) us
 
 /-- The run opens on its first round, read from the invoking context with what observation
     returned. On AI-guided activation the run starts only where something awaits the person;
@@ -501,10 +527,11 @@ hands off.
 -/
 
 /-! ── CONVERGENCE ──
-converge on `defined`: the boundary is `close` of the context where the person's acceptance
-reaches it or nothing awaits their disposition, with no reply's reading left unsettled.
+converge on `defined`: the boundary is `close` of the context where, with no reply's reading
+left unsettled, the person's acceptance reaches it, or, without it, nothing awaits their
+disposition, nothing they asked to see is left unshown, and you hold no contrary grounds.
   snapshot: read the current map and its cited sources; derive the residual from every item
-    whose content does not stand.
+    whose content does not stand, each with why it bears and the arrangement governing it.
   trace: map each item on the map to its disposition — who put it forward and how it stood — and,
     where its content is still open, to the residual, with facts, relayed earlier decisions, and
     earlier decisions fixing who settles an item shown as cited facts, and the source and effect
@@ -536,13 +563,13 @@ def Interaction.realization : Interaction → Continuation
 inductive Op | observe | readout | round | readAnswer | converge | withdrawal | seam
 
 def grounding : Op → Annot × String
-  | .observe      => (.observe, "record read, artifact read, artifact search: at the start and at every reply that bears on the boundary, read what the map needs from the reachable sources — a fact a consequence rests on, a record an opened axis needs, a file the person asked you to read — without changing existing state, collecting as far as reach allows and reading whole what you say you read; what each returns enters the context as an evidence turn; name what conflicts with what, and name what was not reached in the map's limits; an observation that needs a change of state, a permission, or another's authority is named with what it needs and handed over, never run as observation")
+  | .observe      => (.observe, "record read, artifact read, artifact search: at the start and at every reply that bears on the boundary except a settled withdrawal, read what the map needs from the reachable sources — a fact a consequence rests on, a record an opened axis needs, a file the person asked you to read — without changing existing state, collecting as far as reach allows and reading whole what you say you read; what each returns enters the context as an evidence turn; name what conflicts with what, and name what was not reached in your turn that shows the map, so it enters the map's limits; an observation that needs a change of state, a permission, or another's authority is named with what it needs and handed over, never run as observation")
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
-  | .round        => (.interaction .constitution, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at, the choices still open beside the round's question, your contrary grounds before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used; yield for the whole response")
-  | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance, a withdrawal — read whole against the fused context, whatever form it takes; an unsettled reading holds a round that shows the candidate readings and commits nothing")
-  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual, the dissent, and its limits — with the way to reopen it; where nothing awaited the person, say so")
+  | .round        => (.interaction .constitution, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used; yield for the whole response")
+  | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance, a withdrawal — read whole against the fused context, whatever form it takes; an unsettled reading holds a round that shows the candidate readings and commits nothing; a request to see something not yet shown holds the round that shows it")
+  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual with why each open item bears and who settles it, the dissent, and its limits — every source observation did not reach, by name — with the way to reopen it; where nothing awaited the person, say so")
   | .withdrawal   => (.interaction .extension, "at the person's word: what you took as withdrawn, the snapshot there with its limits, and the boundary that last stood, if any; nothing open is entrusted, and a correction reopens the boundary through a new run that reads this record")
-  | .seam         => (.interaction .extension, "after the boundary stands, proceed to the next move the person declared — a chain they named, an adopted policy, or an explicit grant of that next move — and after a withdrawal, only to a next move the person declared with it; cite that source; every checkpoint whose own contract requires the person's response still fires, and every later act that cannot be undone needs its own authorization")
+  | .seam         => (.interaction .extension, "after the boundary stands, proceed to the next move the person declared — a chain they named, an adopted policy, or an explicit grant of that next move — and after a withdrawal, only to a next move the person declared with it; cite that source; every checkpoint whose own contract requires the person's response still fires, and every later act that cannot be undone needs an authorization reaching it — an entrustment shown by kind, target, and limit is one, and is not asked for again")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.
@@ -574,18 +601,18 @@ end Horismos
 - `/bound` remains directly invocable.
 - When a decision boundary or the structure needed to judge it is undefined, invoke the protocol with the available task context. Keep goal, success criteria, and scope open where the user has left them open.
 - During AI-guided activation, apply current safety boundaries, capability limits, and explicit instructions. Skip activation when source-defined direction already settles the requested boundary, when nothing on the map would await the user, when the user expressly requests proceeding without this interaction, or when the same unresolved finding was dismissed and its ground has not changed.
-- On explicit invocation where nothing on the map awaits the user's disposition — every item disposed by their words, fixed by a cited earlier decision of theirs, or settled as a fact observation returned, or the map is empty — and the request's reading is settled, the first round shows that map with its sources, what it did not look at, and a path to reopen missed structure, and the boundary stands as shown.
+- On explicit invocation where nothing on the map awaits the user's disposition — every item disposed by their words, fixed by a cited earlier decision of theirs, or settled as a fact observation returned, or the map is empty — the request's reading is settled, nothing it asked to see is left unshown, and you hold no contrary grounds, the first round shows that map with its sources, what it did not look at, and a path to reopen missed structure, and the boundary stands as shown.
 
 ## Protocol
 
 - At the first round, show the relevant whole draft before asking the user to choose its applicable parts or examination depth. Give every included item its decision-relevant reason, what getting it wrong would cost, and its conditional connections. State the scope of discovery and what is unknown; do not require the user to invent an obligation inventory. What the user already said enters the map as theirs; what you add is marked as your proposal.
 - When the goal is open, distinguish the work that can investigate it, the judgment that would select it, and obligations conditional on that selection. Propose a way to handle those questions without supplying an unchosen goal.
-- In every round, make existing user decisions, choices made inside a grant, unaccepted proposals, facts relayed from earlier decisions, and unresolved items recognizable through their source and setting status. Put the choices still open beside the round's question, show every proposal that would entrust an irreversible later act to AI with its reach, place your contrary grounds before the question, and keep the way to accept the boundary as it stands recognizable, in the user's language.
-- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis. Keep the whole overview in view and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
+- In every round, make existing user decisions, choices made inside a grant, unaccepted proposals, facts relayed from earlier decisions, and unresolved items recognizable through their source and setting status. Put the choices still open beside the round's question, show every proposal that would entrust an irreversible later act to AI with its reach, place your contrary grounds, where you hold any, before the question, and keep the way to accept the boundary as it stands recognizable, in the user's language.
+- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis; the gate holds for that round even where nothing awaits. Keep the whole overview in view and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
 - At an opened settlement question, materialize UserSupplies, AIPropose, and AIAutonomous in the user's idiom: the user supplies the decision, AI proposes for the user's selection, or AI chooses within stated limits. A displayed default is one of these proposals and binds only through its actual acceptance.
 - When the user corrects an assumption, the scope, or the question the boundary answers, the next round reads the corrected context: revise affected content and obligations, show their changed implications, and preserve independent commitments. Keep excluded or conditional parts legible in the map where they matter to later reliance; the residual lists what is still open.
-- When the user accepts the boundary as it stands, stop at that depth. The acceptance takes the proposals it covers only where each was shown as yours with its deciding evidence and your contrary grounds; what it does not cover stays open in the residual. Present the constituted whole and its remaining questions without asking for a second approval of the same arrangement.
-- When no item on the map awaits the user's disposition — each disposed by their words, fixed by a cited earlier decision of theirs (shown with that citation and not asked again), or settled as a fact observation returned, or the map is empty — and the reply's reading is settled, show the map as it stands with what it did not look at, and say that the boundary stands; the user's next words reopen it where they bear on it.
+- When the user accepts the boundary as it stands, stop at that depth. The acceptance takes the proposals it covers only where each was shown as yours with its deciding evidence and your contrary grounds, where you hold any; what it does not cover stays open in the residual. Present the constituted whole and its remaining questions without asking for a second approval of the same arrangement.
+- When no item on the map awaits the user's disposition — each disposed by their words, fixed by a cited earlier decision of theirs (shown with that citation and not asked again), or settled as a fact observation returned, or the map is empty — the reply's reading is settled, the reply asked to see nothing not yet shown, and you hold no contrary grounds the user has not closed over, show the map as it stands with what it did not look at, and say that the boundary stands; the user's next words reopen it where they bear on it.
 - When a response is not yet readable as continuing, accepting, or withdrawing, the gate holds even where nothing awaits: the next round shows the candidate readings with their consequences, and nothing is committed from the unsettled reading.
 - When the user turns to other work, answer it; the boundary stays as it stood — a gate that holds keeps holding and a boundary that stands keeps standing — and nothing is closed on the user's behalf.
 - Before handing off or using a resulting boundary, read the COMPOSITION contract with its cited sources. Preserve the holder of every retained judgment, the reach of each grant, and any condition that must be revisited.
@@ -595,16 +622,16 @@ end Horismos
 
 - **Recognition over Recall**: Present structured options with anticipatable post-selection states.
 - **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the gate.
-- **Observation before showing**: At the start and at every reply that bears on the boundary, observe what the map needs from the reachable sources before showing it, without changing existing state; name and hand over what needs a change of state, a permission, or another's authority. Collect as far as reach allows, read whole what you say you read, name what conflicts with what and what was not reached, and leave what remains as the person's own unknown in the residual.
+- **Observation before showing**: At the start and at every reply that bears on the boundary — except a settled withdrawal, read at the user's word — observe what the map needs from the reachable sources before showing it, without changing existing state; name and hand over what needs a change of state, a permission, or another's authority. Collect as far as reach allows, read whole what you say you read, name what conflicts with what, name what was not reached in the turn that shows the map, and leave what remains as the person's own unknown in the residual.
 - **Whole before selection**: Construct and present the relevant provisional whole before asking what to settle, inspect, or entrust; the user's existing goal and map can remain incomplete.
-- **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole. Bind requested examination to the next round; a request to see content adopts none of it.
+- **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole. Bind requested examination to the next round — the gate holds for it — and a request to see content adopts none of it.
 - **Dynamic rendering**: Keep boundary questions and examination dimensions runtime-grounded, with recognizable seeds and a path to extend or replace the framing.
-- **Source-bound settlement**: A disposition is made only by a user's utterance that supports it; a proposal, an AI turn, inspection, and silence dispose nothing. Record who put each disposition forward and how it stood, apart from each other. An AI proposal is adopted only where it was shown as yours, with what decides it and your contrary grounds, before the user's turn; apply acceptance only within its actual referent and limits.
+- **Source-bound settlement**: A disposition is made only by a user's utterance that supports it; a proposal, an AI turn, inspection, and silence dispose nothing. Record who put each disposition forward and how it stood, apart from each other. An AI proposal is adopted only where it was shown as yours, with what decides it and your contrary grounds, where you hold any, before the user's turn; apply acceptance only within its actual referent and limits.
 - **Entrustment reach**: An entrustment reaches what was shown of it. A later act that cannot be undone is entrusted only where its consequence was shown by kind, target, and limit; an earlier authorization of the same kind, target, and limit is not asked for again.
 - **Dependency revision**: Reconcile changed ground and transitive dependents before the next round or the reading where the boundary stands, retaining supported decisions and recording unresolved consequences.
 - **Prior-map provenance**: Read an earlier boundary through the turns it cites. Its citation still points at the same source; whether that source still supports the settlement is judged against the context that now stands, and an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is a cited fact, not a disposition of this run — whether it fixes a decision's content or who settles it.
 - **After closure**: Never rewrite or veto a user's disposition. Attach your contrary grounds to the boundary where the user set it over them, raise a disposition again only on new evidence, and show that evidence before any dependent step that cannot be undone.
 - **Settlement across delegation**: Carry and read the source-defined question, judgment holder, limits, dependencies, and residual at downstream use; work reassignment and a summary supply no additional grant.
-- **Closing**: Keep the way to accept the boundary as it stands recognizable in every round, with every irreversible AI-delegation proposal in view. The boundary stands where the user accepts it or no item awaits their disposition, and no reply's reading is left unsettled; silence and other work leave the run as it stood, and scan exhaustion or a visit count supplies no acceptance.
+- **Closing**: Keep the way to accept the boundary as it stands recognizable in every round, with every irreversible AI-delegation proposal in view. The boundary stands where, with no reply's reading left unsettled, the user accepts it, or no item awaits their disposition, nothing they asked to see is left unshown, and you hold no contrary grounds they have not closed over; silence and other work leave the run as it stood, and scan exhaustion or a visit count supplies no acceptance.
 - **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, continue and present those readings and their consequences. Commit nothing from an unresolved reading. Never ask the user to classify their own words into the disposition forms.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
