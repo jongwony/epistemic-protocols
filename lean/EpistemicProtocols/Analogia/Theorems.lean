@@ -34,8 +34,9 @@ theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Con
 theorem question_by_person {c : Context P} {s : Cite c}
     (ok : (questionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-/-- An assessment is made only over the collected context, on a question that stood before
-    collection and still stands after it. -/
+/-- An assessment is made only over the collected context: the pass's question stood before
+    collection, and the question that stands over the collected context is the one `hs`
+    witnesses. -/
 theorem assessment_after_collection (respond : Context P → Response P) (c b : Context P)
     (hs : QuestionStands b) (rec : Assessed b) (r : Response P)
     (h : pass respond c = .assessment b hs rec r) :
