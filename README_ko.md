@@ -77,7 +77,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Heuresis](./heuresis) | `/ideate` | 후보가 아직 없거나 너무 일찍 좁혀졌을 때 — 고르기 전에 후보를 먼저 넓게 펼칠 때 |
 | [Proplasma](./proplasma) | `/preview` | 여러 방향 중 하나로 정하기 직전인데 설명만으로는 판단이 안 서고 직접 봐야 알 것 같을 때 |
 | [Hypotyposis](./hypotyposis) | `/sketch` | 무언가를 만들어야 하는데 어떤 모습이어야 하는지 말로는 못 하지만 보면 알아볼 수 있을 때 |
-| [Analogia](./analogia) | `/ground` | 어떤 틀이나 유비를 이미 눈앞에 있는 사례에 가져다 쓰거나 추상을 그 사례들에 비춰 보는데, 그 비교가 실제로 무엇을 어디까지 뒷받침하는지 분명하지 않을 때 |
+| [Analogia](./analogia) | `/ground` | 어떤 틀 · 유비 · 앞선 설계를 어떤 사례에 가져다 쓰거나 추상을 그 사례들에 비춰 보는데, 그 비교가 실제로 무엇을 어디까지 뒷받침하는지 분명하지 않을 때 |
 | [Periagoge](./periagoge) | `/induce` | 여러 구체적 사례가 무언가를 공유하는 것 같은데 아직 이름 붙이지 못했을 때 — 그 공통점을 붙잡을 때 |
 | [Merismos](./merismos) | `/apportion` | 목표 하나를 자율 실행에 넘기기 직전 — 한 번의 실행 구간에 들어가는 단위로 자르고, 단위마다 언제 끝났는지 판단할 수 있게 할 때 |
 | [Epharmoge](./epharmoge) | `/contextualize` | 결과 — 이 세션의 것이든 다른 곳의 것이든 — 가 정확해도 내 실제 상황에 안 맞거나, 요청한 것을 빠뜨렸을 수 있을 때 |

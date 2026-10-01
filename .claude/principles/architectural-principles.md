@@ -80,14 +80,14 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 
 ## Termination
 
-Protocol exit follows a graduated taxonomy based on side-effect presence:
+Protocol exit follows a graduated taxonomy based on whether breaking off leaves state behind:
 
 | Tier | Mechanism | Cleanup | Scope |
 |------|-----------|---------|-------|
-| `user_withdraw` | Explicit gate option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
+| `user_withdraw` | The person's turn at the waiting gate, read whole | Side effects undone (team shutdown, partial contract); open state recorded unresolved | Protocols whose breaking off leaves state behind |
 | Normal convergence | Completion predicate | Full | Per-protocol |
 
-Principle: side effects require explicit answer types. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on — a gate answer yields a turn to act in, and that turn is what makes the cleanup performable at all. A protocol holding no side-effect state needs no exit tier at all.
+Principle: state left behind by breaking off requires an explicit withdrawal constructor. That state is side-effect state (team shutdown, a partial contract) or an open state the run holds for the person (a question waiting on their turn, a deficit left unresolved). The person's turn at the waiting gate yields a turn to act in — to undo the side effects and record the open state unresolved — whatever form that turn takes, so the exit need not be an enumerated option. A protocol whose breaking off leaves nothing behind, such as one that completes after every pass, needs no exit tier at all. Whether breaking off leaves state is judged when the protocol is derived, with its grounds shown to the person, rather than read off a fixed list.
 
 Circular protocol interactions are healthy dialogue rather than a hang, and the gate is what makes them so: a cycle re-entering a Constitution gate yields the turn each time, so it advances only when the user answers and cannot spin on its own.
 
