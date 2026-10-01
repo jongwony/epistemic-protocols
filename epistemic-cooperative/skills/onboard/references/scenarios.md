@@ -59,7 +59,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: A friend tells you their morning routine — 5am wake, cold shower, 10k run, no coffee. They swear by it. You're tempted to copy it, but you don't yet know whether your sleep schedule, fitness baseline, and commute map cleanly onto theirs or break the pattern.
 
-**Intervention**: With both accounts in the conversation — the friend's routine and your own conditions — `/ground` settles, from your words, what adopting the routine is expected to achieve, constructs the correspondences, and checks the evidence for each claim those expectations depend on. It reports what the analogy supports within its limits, what it blocks, and what remains unknown.
+**Intervention**: `/ground` settles, from your words, what adopting the routine is expected to achieve, reads what it can reach of the friend's routine and your own conditions, constructs the correspondences, and checks the evidence for each claim those expectations depend on. It reports what the analogy supports within its limits, what it blocks, and what remains unknown.
 
 **Trial prompt**: "Let's practice: first describe your friend's routine and your own conditions — wake time, fitness baseline, commute — in two or three lines each. Then ask: which benefits of copying the routine does the comparison support, and what evidence or limits would change that?"
 
@@ -67,10 +67,10 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - A) Periagoge `/induce` — B) Katalepsis `/grasp` — C) Analogia `/ground` — D) Aitesis `/inquire`
 - Answer: C
 
-**Quiz Q (design)**: Someone says "just treat your side project like a startup." With both accounts in play, how would you audit the conclusions that comparison supports about your setup?
+**Quiz Q (design)**: Someone says "just treat your side project like a startup." How would you audit the conclusions that comparison supports about your setup?
 - Hint: Separate the intended conclusions, evidence for their bearing correspondences, and the limits of each conclusion.
 
-**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Warrant tracks evidence, never assent**. Workflow position: Analysis cluster — audit what an analogy licenses about an account already in play. Game feel: "What can this comparison support?" → settle intended conclusions → check their structural grounds → report verdicts with limits and missing evidence.
+**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Warrant tracks evidence, never assent**. Workflow position: Analysis cluster — audit what an analogy being relied on licenses, reading any account it can reach as evidence. Game feel: "What can this comparison support?" → settle intended conclusions → check their structural grounds → report verdicts with limits and missing evidence.
 
 ## Periagoge `/induce`
 
@@ -178,7 +178,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You've been in a long Claude conversation about "low-sodium, low-carb eating" — dietary constraints you've repeatedly named. An hour in, you ask "what should I have for lunch?" and Claude cheerfully suggests ramen. A lunch suggestion in general, but mismatched against the accumulated context you'd built up in this very conversation.
 
-**Intervention**: `/contextualize` detects application-context mismatch after the response — checks whether Claude's output actually fits the context you've been accumulating in this session (prior constraints, stated preferences, established framing) and lists every place it does not fit, each beside the part of the context it misses. It then asks about one mismatch at a time — an unclear-owner one first — offering concrete actions with what each leads to: adapt the result (and have the change judged again), leave it as it is with your reason recorded, stop using it and say what replaces it, or hand it to whoever owns that part.
+**Intervention**: `/contextualize` checks whether Claude's output fits the context you've been accumulating in this session (prior constraints, stated preferences, established framing) and everywhere the answer lands, then shows every place it does not fit on one sheet — each beside the part of the context it misses, with concrete actions and what each leads to: adapt the result, leave it as it is with your reason recorded, stop using it and say what replaces it, or leave it to whoever owns that part. You answer the whole sheet in one turn; the fixes are made, the answer is checked again, and the run completes when nothing is left open.
 
 **Trial prompt**: "Let's practice: first name two or three constraints you live with — say low-sodium, no dairy, fifteen minutes to cook — then ask for a lunch idea. When the answer comes back, invoke /contextualize and I'll show how it checks that answer against the constraints you set"
 
@@ -189,7 +189,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: After a long conversation where you established many specific constraints, Claude answers a new question correctly-in-general but ignores the accumulated context. How would you systematically check for context fit?
 - Hint: The output is not wrong on its own — it's mismatched against the context you both built up this session.
 
-**Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct output that doesn't fit the accumulated conversation context is not useful output. The user's awareness that context has been built up in this session is the trigger. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, this ignores everything we just discussed" → accumulated-context mismatch surfaces → adapt, leave as is with a reason, stop using it, or hand it on.
+**Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct output that doesn't fit the accumulated conversation context is not useful output. The user's awareness that context has been built up in this session is the trigger. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, this ignores everything we just discussed" → accumulated-context mismatch surfaces → adapt, leave as is with a reason, stop using it, or leave it to whoever owns it.
 
 ## Elenchus `/sublate`
 

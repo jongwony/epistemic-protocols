@@ -25,7 +25,7 @@ Netting a gain against a loss hides the loss, so the harness scores in pairs —
     { "role": "user", "text": "…what the session accumulated before that prompt…" },
     { "role": "assistant", "text": "…and the reply to it…" }
   ],
-  "expected": ["inquire", "sublate"],
+  "expected": ["contextualize", "inquire", "sublate"],
   "adjudicated": false,
   "note": "why this is the right answer, in the adjudicator's words"
 }

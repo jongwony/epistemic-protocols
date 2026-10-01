@@ -80,11 +80,12 @@
       }
     ],
     "expected": [
+      "contextualize",
       "inquire",
       "sublate"
     ],
     "adjudicated": false,
-    "note": "Verbatim shape of a real turn from the session this was built in. Both fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. /contextualize does not fit on its object - it types over Result, the output of an execution just completed, not an artifact written in an earlier session."
+    "note": "Verbatim shape of a real turn from the session this was built in. inquire and sublate fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. contextualize fits too: the hook is a result already written, and the new state is the context it has to fit."
   },
   {
     "id": "singleton-ideate-unframed",

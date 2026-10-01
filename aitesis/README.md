@@ -52,7 +52,7 @@ Uncertainties are identified dynamically per task — no fixed taxonomy. What an
 Aitesis → Analogia → Katalepsis
 ```
 
-Aitesis runs early: exhaust what the AI can collect before analogical-inference auditing (Analogia).
+Aitesis runs early: it exhausts what the AI can collect for the work ahead. Analogia, later in the order, collects what its own audit rests on.
 
 ## When to Use
 
