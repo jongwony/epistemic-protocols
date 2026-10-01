@@ -41,26 +41,27 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 ```
 Question  → Read from your words: the purpose, the conclusions at stake, and the source and
             target where that is still open. If your words leave it open, it is asked, and
-            nothing is collected while it waits.
+            nothing more is collected while it waits.
 Collect   → To the limit of reach over what the mapping rests on; every place looked is named,
             reached or not
 Assess    → Construct the correspondences, state what would defeat each bearing claim, run the
             checks reachable here, read warrant off the grounds, judge each conclusion
 Surface   → Present the whole assessment and proceed (relay — no verdict is requested)
 Later     → A turn that bears on the audit is read whole and the audit runs again on it;
-            anything else is simply answered
+            anything else — an adoption, a question the current grounds answer — is
+            simply answered
 ```
 
-The question is the only decision gate. It is never filled in for you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, the gate asks. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection. Every pass ends in an assessment; a conclusion that stays undetermined is part of it, not a failure to finish. While the question waits, you can end the audit, and it closes saying nothing was assessed.
+The question is the only decision gate. It is never filled in for you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, the gate asks. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection. A pass on a question that stands ends in an assessment; a conclusion that stays undetermined is part of it, not a failure to finish. The question can wait before collection, after collection turns up a choice only you can make, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. While it waits, you can end the audit: it says the waiting question was left unassessed and the deficit unresolved, and an earlier assessment, if any, stands as it was over its own question.
 
 ## What a later turn does
 
 | Turn | Effect |
 |------|--------|
 | **Cite a ground** | Its relevance and scope are checked, and the audit runs again with it before conclusions are judged |
-| **Adopt / withdraw a conclusion** | Recorded as yours, reported apart from the evidence, moves no warrant; asking for the next task adopts nothing |
+| **Adopt / set aside a conclusion** | Recorded as yours, reported apart from the evidence, moves no warrant and opens no new pass; asking for the next task adopts nothing |
 | **Revise the purpose, conclusions, source or target** | Reads back the revised question and audits again; evidence already gathered carries over, verdicts are judged again |
-| **Ask a question** | Answered from current grounds, or the audit runs again on what it opens |
+| **Ask a question** | Answered from current grounds; a ground it brings is audited in the next pass |
 | **Something unrelated** | Answered; the last assessment stands |
 
 ## When to Use
@@ -72,9 +73,8 @@ The question is the only decision gate. It is never filled in for you: where you
 - You want to know which conclusions the analogy supports, blocks, or leaves unresolved
 
 **Skip**:
-- AI output is already domain-specific with concrete examples
 - What the mapping licenses is already settled in context
-- No abstract framework is being applied (output is purely concrete)
+- No mapping is being relied on
 - You only want an account of one of the two domains, with no mapping being relied on. That is explanation, not audit. Where an account is needed *for* an audit, Analogia reads it itself as evidence rather than asking you to bring it.
 
 ## Install

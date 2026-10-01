@@ -42,7 +42,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
-- [ ] `/analogia:ground` — audit what an abstract-concrete mapping licenses about an account already in play
+- [ ] `/analogia:ground` — audit what a mapping being relied on licenses about a case, reading reachable accounts as evidence
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, on a recorded acceptance where none compiles, or on a recorded reservation where a judgment rather than a check settles it
 

@@ -70,7 +70,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: Someone says "just treat your side project like a startup." With both accounts in play, how would you audit the conclusions that comparison supports about your setup?
 - Hint: Separate the intended conclusions, evidence for their bearing correspondences, and the limits of each conclusion.
 
-**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Warrant tracks evidence, never assent**. Workflow position: Analysis cluster — audit what an analogy licenses about an account already in play. Game feel: "What can this comparison support?" → settle intended conclusions → check their structural grounds → report verdicts with limits and missing evidence.
+**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Warrant tracks evidence, never assent**. Workflow position: Analysis cluster — audit what an analogy being relied on licenses, reading any account it can reach as evidence. Game feel: "What can this comparison support?" → settle intended conclusions → check their structural grounds → report verdicts with limits and missing evidence.
 
 ## Periagoge `/induce`
 
