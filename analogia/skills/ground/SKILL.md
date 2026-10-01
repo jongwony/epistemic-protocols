@@ -318,9 +318,11 @@ axiom partition : (c : Context P) → selfGrounding c → Option (PartitionReadi
 /-- **Your collection** from `c`, to the limit of your own reach, over what the mapping rests on:
     the source's relations and their counterparts in the target, the checks on the fit claims
     bearing on `K`, and every one collection exposes; where to look is yours to judge, and no list
-    of sources bounds it. A source or target account you can reach, you read yourself. Each place
-    you look returns an evidence turn, a null result included, so the places reached and those not
-    stay in the context by name. What the context already holds from a source is not fetched again
+    of sources bounds it. A source or target account you can reach, you read yourself, and what
+    you say you read, you read whole. Each place you look returns an evidence turn, a null result
+    included, so the places reached and those not stay in the context by name. Where collected
+    material conflicts, name what conflicts with what and show it, not only as a check's grounds.
+    What the context already holds from a source is not fetched again
     unless an utterance or evidence says it changed. Read and run without changing existing state;
     what you create only to look you remove afterwards. An observation that needs to change
     existing state, someone's permission, or another's authority is named with what it needs and
@@ -449,7 +451,8 @@ correspondences it rode on, the likenesses, the differences in both directions, 
 for each checked fit claim, its label, warrant (`Check.warrant`), and scope beside the grounds,
 the stated defeater, the reach or its absence, and whether the check was unmet, survived, or
 failed; correspondences outside the checked scope named as outside it; the places collection
-reached and those it did not, by name; what is still open, as the person's own unknown. An unmet
+reached and those it did not, by name; where collected material conflicts, what conflicts with
+what; what is still open, as the person's own unknown. An unmet
 check is reported as unmet, never as a pass; a claim whose warrant is open is named open rather
 than weakly supported. Adoption is reported apart from warrant and never as a reason; a
 conclusion adopted over a Blocked or Undetermined verdict is shown as accepted and evidentially
@@ -482,7 +485,7 @@ def grounding : Op → Annot × String
   | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
   | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn, or collection surfaced a choice only the person settles: what is open, with what each reading would audit visible before choice; nothing is collected while it waits")
   | .questionReadback => (.interaction .extension, "when the question stands, relay it with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
-  | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: to the limit of your own reach over what the mapping rests on — the source's relations and their target counterparts, and the reachable checks, exercising an artifact whose behavior a claim turns on — without changing existing state, removing afterwards what you created only to look; every place looked enters the context as an evidence turn, a null result included; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and left open")
+  | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: to the limit of your own reach over what the mapping rests on — the source's relations and their target counterparts, and the reachable checks, exercising an artifact whose behavior a claim turns on — without changing existing state, removing afterwards what you created only to look; what you say you read, read whole; every place looked enters the context as an evidence turn, a null result included; where collected material conflicts, what conflicts with what is named and shown; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and left open")
   | .construct        => (.sense, "Internal analysis: the correspondences over what collection found and their fit claims")
   | .checkRead        => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, target-side defeater, and reach")
   | .warrantRead      => (.sense, "Internal analysis: each claim's warrant read off its check")
@@ -528,7 +531,7 @@ Before assessing, read back the question — what the comparison is for, the con
 
 Present the whole assessment in everyday language: the question; for each conclusion, the source relation that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target deliberately does without counts against a conclusion only where that conclusion needs it.
 
-Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
+Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not; where collected material conflicts, name what conflicts with what. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
 For self-grounding, name the level of abstraction at which fit is claimed and allocate every member, rendering a partition only with the grounds supporting that allocation and grouping and with a contrast that makes the fit diagnostic. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
 
