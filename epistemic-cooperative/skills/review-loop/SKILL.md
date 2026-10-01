@@ -261,7 +261,12 @@ so far, so the driving session records rather than re-derives it.
    or drop. Rejection blocks an edit not yet written.
 3. Repeated fix-induced follow-ups across consecutive rounds move judgment, not
    writing: the next apply pass returns its enumerated predicate and sites to Phase 3
-   before writing. Return to autonomous apply after a review without such follow-ups.
+   before writing, and Phase 3 reads whether those repairs have become a chain in which
+   each answers a problem the previous addition created rather than the original
+   finding's subject. Such a chain suggests the first addition computed what the
+   contract leaves to judgment; removing that surrogate with the machinery grown around
+   it, against adding the next case, is the plan-level root-or-local judgment. Return to
+   autonomous apply after a review without such follow-ups.
 4. Read every written and swept site against its disposition and exercise the repaired
    invariant through the transitions and orderings identified by the scan. Repair a known
    discrepancy within the settled disposition and re-check the affected bundle before
