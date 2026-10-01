@@ -25,71 +25,34 @@ theorem silence (respond session : Context P → Response P) (c : Context P) (o 
     contextualize respond session c o [] = o := by
   simp [contextualize]
 
-/-- A stop is read before anything else is done with the utterance: the run is withdrawn on the
-    context the stopping utterance joined, and no pass runs after it. -/
-theorem stop_before_pass (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : Stopped (fuse c u)) :
-    contextualize respond session c o (u :: us) =
-      .withdrawn (verdict (fuse c u) (fuse c u ++ [(respond (fuse c u)).val])) := by
-  simp [contextualize, h]
-
 /-- An utterance that does not bear on this run adds only the session's answer to the context,
     and the last outcome stands. -/
 theorem other_work_passes_nothing (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Stopped (fuse c u))
-    (h : ¬ Reaches (fuse c u)) :
+    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     contextualize respond session c o (u :: us) =
       contextualize respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
-  simp [contextualize, hs, h]
+  simp [contextualize, h]
 
 /-- An utterance that bears on the run opens a pass, completed or not. -/
 theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (hs : ¬ Stopped (fuse c u))
-    (h : Reaches (fuse c u)) :
+    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : Reaches (fuse c u)) :
     contextualize respond session c o (u :: us) =
       contextualize respond session (settle respond (pass (fuse c u))).context
         (settle respond (pass (fuse c u))) us := by
-  simp [contextualize, hs, h]
+  simp [contextualize, h]
 
-/-- Completion needs nothing open and no settled write left undone. -/
-theorem completed_complete (respond : Context P → Response P) (c : Context P)
-    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) :
-    NothingOpen c ∧ NothingPending c := by
+/-- Completion needs nothing open. -/
+theorem completed_nothing_open (respond : Context P → Response P) (c : Context P)
+    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) : NothingOpen c := by
   unfold settle at h
-  by_cases hc : Complete c
+  by_cases hc : NothingOpen c
   · exact hc
   · simp [hc] at h
 
-/-- Settling never withdraws: only the person's stop does. -/
-theorem settle_not_withdrawn (respond : Context P → Response P) (c : Context P)
-    (v : ApplicabilityVerdict P) : settle respond c ≠ .withdrawn v := by
-  unfold settle
-  by_cases hc : Complete c <;> simp [hc]
-
-/-- A run that was not withdrawn ends withdrawn only where some utterance stopped it. -/
-theorem withdrawn_only_by_stop (respond session : Context P → Response P) :
-    ∀ (us : List (Utterance P)) (c : Context P) (o : Outcome P) (v : ApplicabilityVerdict P),
-      (∀ w, o ≠ .withdrawn w) → contextualize respond session c o us = .withdrawn v →
-      ∃ c' : Context P, Stopped c' := by
-  intro us
-  induction us with
-  | nil =>
-    intro c o v ho h
-    simp [contextualize] at h
-    exact absurd h (ho v)
-  | cons u us ih =>
-    intro c o v ho h
-    by_cases hs : Stopped (fuse c u)
-    · exact ⟨fuse c u, hs⟩
-    · by_cases hr : Reaches (fuse c u)
-      · rw [reaching_passes_again respond session c o u us hs hr] at h
-        exact ih _ _ v (fun w => settle_not_withdrawn respond _ w) h
-      · rw [other_work_passes_nothing respond session c o u us hs hr] at h
-        exact ih _ o v ho h
-
-/-- Only the person stops the run. -/
-theorem stop_by_person {c : Context P} {s : Cite c}
-    (ok : (stopCoord (P := P)).admits s.src) : s.src.val = .person := ok
+/-- The person's resolution comes first, whatever evidence read. -/
+theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
+    (h : filledValue (resolution c m) = some (r, h')) : standing c m = .resolved r h' := by
+  simp [standing, h]
 
 /-- A resolution on the person's record cites a turn the person sent. -/
 theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (h' : How)
