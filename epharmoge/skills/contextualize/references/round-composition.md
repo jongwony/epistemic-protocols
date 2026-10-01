@@ -8,7 +8,7 @@ User-facing emit (the sheet, the closing sheet, gate options, and any text shown
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; put background and distant context before the gate or into the convergence trace — every place found still goes on the one sheet.
 
 ## When this protocol's own moves bear on where a sentence sits relative to a gate
 

@@ -118,9 +118,10 @@ variable {P : Type}
     every kind alike. -/
 abbrev Result := String
 
-/-- **Your reading**: X as the context now shows it, every write that has landed applied — each
-    write returns its result into the context; `none` once a removal has landed with nothing in
-    its place. Correctness is presupposed at entry and never re-checked here. -/
+/-- **Your reading**: X as the person is now left with it, every write that has landed applied —
+    each write returns its result into the context; after a discard, the replacement or `none`,
+    whether or not the discarded artifact still exists elsewhere. Correctness is presupposed at
+    entry and never re-checked here. -/
 axiom target : Context P → Option Result
 
 /-- **Your observation** of the reach, to the limit of what you can read or run without changing
@@ -164,9 +165,10 @@ inductive Resolution
   | adapt (direction : String)
   /-- leave X as it is here, with the reason given where one was given -/
   | keep (reason : Option String)
-  /-- stop relying on X; `none` when nothing takes its place. Within what this run may write, the
-      write removes X or puts the replacement in its place; outside it, the write is your turn
-      recording that X is no longer relied on -/
+  /-- stop relying on X; the replacement, or `none`, is what the person is now left with. Within
+      what this run may write, the write removes X or puts the replacement in its place; outside
+      it, the write is your turn recording that X is no longer relied on, and it counts as carried
+      out -/
   | discard (replacement : Option Result)
   /-- not this result's to fix: whose it is — a system, a team, a scope — as named; nothing is
       dispatched -/
@@ -186,7 +188,8 @@ inductive How | set | adopted | granted
     deferral, or a bare mention settles nothing. Their answer is read whole: one turn may resolve
     several mismatches, or settle a class of them by a criterion; where it asks for dispositions
     of one result that conflict — a discard beside an adaptation of the same result — it resolves
-    neither until the combined consequence has been shown. -/
+    neither: only a turn of theirs after the combined consequence has been shown resolves them,
+    and the earlier conflicting turn never takes effect on its own. -/
 axiom ResolutionSupported : {c : Context P} → Mismatch c → Context P → Turn P → Resolution × How → Prop
 
 /-- A mismatch is resolved on the person's record only by the person's turn, whatever form that
@@ -231,7 +234,7 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 /-- How a mismatch stands. -/
 inductive Standing
   /-- waits on the person — nothing settled it, or what settled it asks for a write that has not
-      repaired it -/
+      repaired it; the sheet tells the two apart -/
   | open_
   /-- the person's turn resolved it, and how that resolution came to stand -/
   | resolved (r : Resolution) (how : How)
@@ -317,13 +320,15 @@ def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .ext
     back a place an earlier write in this run repaired, stop there and leave both for the person.
     A write follows where X lives: an artifact is written where it lies; a result that lives in
     the conversation — an answer, an analysis — is adapted by your stating the revised result in
-    your own turn. What this run may write is what the work in front of the person covers — X
-    itself only where it falls inside that; another session's or person's artifact, and anything
-    else, needs a permission or its owner. A write outside that, or one whose effect cannot be
-    undone — a removal or overwrite with no way back, a deploy, a send outside — is not carried
-    out, even where evidence fixes its direction: it goes into `reach` with what it needs, and its
-    mismatch waits on the person; once their turn authorizes it, it is carried out. Returns what
-    the writes returned. -/
+    your own turn. What this run may write is what the work in front of the person covers and
+    they hold authority over: their own resolution turn authorizes a write to anything they hold,
+    an artifact another session of theirs produced included; another person's artifact, or a
+    scope they do not hold, needs that person or a permission. A write outside that, or one whose
+    effect cannot be undone — a removal or overwrite with no way back, a deploy, a send outside —
+    is not carried out, even where evidence fixes its direction: it goes into `reach` with what it
+    needs, and its mismatch waits on the person; once their turn authorizes it, it is carried out.
+    A discard there is the exception: its write is your turn recording that X is no longer relied
+    on. Returns what the writes returned. -/
 axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
@@ -338,7 +343,8 @@ def verdict (c : Context P) (t : Context P) : ApplicabilityVerdict P :=
 
 open Classical in
 /-- `respond` presents the round, read on the context the pass left, in this order. An overview:
-    how many places do not fit and how many wait on the person. Every mismatch found, the ones
+    how many places do not fit, how many wait on the person's choice, and how many are settled
+    and still to be carried out. Every mismatch found, the ones
     that matter most first: what does not fit, where, the part of the context it does not fit
     (quoted with where it came from), how much it matters — significant only with a demonstrable
     behavioral consequence (a downstream decision, a runtime divergence, a changed gate
@@ -360,7 +366,7 @@ open Classical in
     answered here; a step that rests on X and cannot be undone waits while something is open,
     and the open places are shown before it. Re-present the whole sheet where it changed or the
     person asked for it; a question about the sheet is answered with the gate said to stand. On
-    completion, the closing sheet CONVERGENCE names. Where the run may be cut off before it
+    completion, the closing sheet is CONVERGENCE's convergence evidence. Where the run may be cut off before it
     completes, keep the current sheet in a durable record the person can find. -/
 def settle (respond : Context P → Response P) (c : Context P) : Outcome P :=
   let t := c ++ [(respond c).val]
@@ -426,7 +432,7 @@ def grounding : Op → Annot × String
   | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")
   | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, corrects, disputes, grants, names something that does not fit, points at a place to look, asks about the sheet")
   | .record    => (.track, "record: the current sheet kept in a durable record the person can find, where the run may be cut off before it completes")
-  | .converge  => (.interaction .extension, "the closing sheet: one line per mismatch with who settled it on what — the person's turn read, quoted, the intent taken from it and how it came to stand, a grant with what it covered, evidence with what it fixed — the writes made and what each changed, any that did not repair what it aimed at, the lines that left and why, what fits, what was not reached, the dissent attached to the closure, and what the verdict does not claim")
+  | .converge  => (.interaction .extension, "the closing sheet: the convergence evidence CONVERGENCE names")
   | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──

@@ -25,8 +25,8 @@ theorem silence (respond session : Context P → Response P) (c : Context P) (o 
     contextualize respond session c o [] = o := by
   simp [contextualize]
 
-/-- An utterance that does not bear on this run adds only the session's answer to the context,
-    and the last outcome stands. -/
+/-- An utterance that does not bear on this run joins the context with the session's answer to
+    it; no pass runs, and the last outcome stands. -/
 theorem other_work_passes_nothing (respond session : Context P → Response P) (c : Context P)
     (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     contextualize respond session c o (u :: us) =
@@ -114,24 +114,11 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
 theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
     (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person := ok
 
-/-- A pass only adds to the context. -/
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
-  let c₁ := c ++ (observe c).map (·.val)
-  let c₂ := c₁ ++ (perform c₁).map (·.val)
-  exact ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val) ++ (observe c₂).map (·.val),
-    by simp [pass, c₁, c₂]⟩
-
-private theorem observed_not_person (c : Context P) :
-    ∀ e ∈ (observe c).map (·.val), e.origin ≠ .person := by
+private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.origin ≠ .person)
+    (xs : List {e : Turn P // Q e}) : ∀ e ∈ xs.map (·.val), e.origin ≠ .person := by
   intro e he
   obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
-  rcases x.property with h | h <;> rw [h] <;> decide
-
-private theorem written_not_person (c : Context P) :
-    ∀ e ∈ (perform c).map (·.val), e.origin ≠ .person := by
-  intro e he
-  obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
-  rcases x.property with h | h <;> rw [h] <;> decide
+  exact h x.val x.property
 
 /-- No turn a pass adds is the person's: observation returns what the environment or a peer
     reported, and a write returns your own turn or what an artifact write returned, so the relay
@@ -140,14 +127,23 @@ theorem pass_adds_no_person_turn (c : Context P) :
     ∃ t, pass c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
   let c₁ := c ++ (observe c).map (·.val)
   let c₂ := c₁ ++ (perform c₁).map (·.val)
+  have hev : ∀ e : Turn P, (e.origin = .external ∨ e.origin = .peer) → e.origin ≠ .person := by
+    intro e h; rcases h with h | h <;> rw [h] <;> decide
+  have hwr : ∀ e : Turn P, (e.origin = .assistant ∨ e.origin = .external) → e.origin ≠ .person := by
+    intro e h; rcases h with h | h <;> rw [h] <;> decide
   refine ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val) ++ (observe c₂).map (·.val),
     by simp [pass, c₁, c₂], ?_⟩
   intro e he
   simp only [List.mem_append] at he
   rcases he with (he | he) | he
-  · exact observed_not_person c e he
-  · exact written_not_person c₁ e he
-  · exact observed_not_person c₂ e he
+  · exact returned_not_person hev (observe c) e he
+  · exact returned_not_person hwr (perform c₁) e he
+  · exact returned_not_person hev (observe c₂) e he
+
+/-- A pass only adds to the context. -/
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
+  let ⟨t, ht, _⟩ := pass_adds_no_person_turn c
+  ⟨t, ht⟩
 
 theorem against_not_assistant {c : Context P} (m : Mismatch c) :
     (c[m.against.idx]'m.against.lt).origin ≠ .assistant :=
