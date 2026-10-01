@@ -32,6 +32,8 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
       [the collected context leaves a choice only the person settles]  present the question, wait
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it; present it and proceed — no verdict is asked
+  after the assessment: the next move the person declared, an adopted policy, or a grant; work
+    that rests on a Blocked or Undetermined conclusion waits for the person's words
   next utterance u: c' := fuse(c, u), read whole against R and c' →
     [the question is waiting and u ends the audit]  withdrawn — the waiting question left
         unassessed and the deficit unresolved, said in its report; an earlier assessment stands
@@ -508,6 +510,7 @@ def Interaction.realization : Interaction → Continuation
 
 inductive Op | questionRead | questionGate | questionReadback | collect | construct | checkRead
              | warrantRead | judge | partitionRead | surface | converge | readAnswer | withdraw
+             | seam
 
 def grounding : Op → Annot × String
   | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
@@ -523,6 +526,7 @@ def grounding : Op → Annot × String
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit, and, while the question waits, whether it ends the audit")
   | .withdraw         => (.interaction .extension, "when the person ends the audit while its question waits: say that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stands as it was over its own question")
+  | .seam             => (.interaction .extension, "after the assessment, proceed to the next move the person declared, an adopted policy, or a grant, citing that source; work that rests on a Blocked or Undetermined conclusion waits for the person's words, with that conclusion's grounds shown; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -563,7 +567,7 @@ Beside each claim that matters, state the scope its grounds were checked within,
 
 For self-grounding, name the level of abstraction at which fit is claimed and allocate every member, rendering a partition only with the grounds supporting that allocation and grouping and with a contrast that makes the fit diagnostic. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
 
-Then state what a later turn would change, and proceed without asking for a verdict. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about the assessment is answered from the current grounds; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn ending the audit withdraws it: say plainly that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stands as it was over its own question. After that, a turn is simply answered.
+Then state what a later turn would change, and proceed without asking for a verdict; work that rests on a blocked or undetermined conclusion waits for the reader's words, with that conclusion's grounds shown. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about the assessment is answered from the current grounds; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn ending the audit withdraws it: say plainly that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stands as it was over its own question. After that, a turn is simply answered.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing the question requires placing evidence before its question and option-specific consequences inside the options.
 

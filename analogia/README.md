@@ -46,7 +46,8 @@ Collect   → To the limit of reach over what the mapping rests on; every place 
             reached or not
 Assess    → Construct the correspondences, state what would defeat each bearing claim, run the
             checks reachable here, read warrant off the grounds, judge each conclusion
-Surface   → Present the whole assessment and proceed (relay — no verdict is requested)
+Surface   → Present the whole assessment and proceed (relay — no verdict is requested);
+            work that rests on a blocked or undetermined conclusion waits for your word
 Later     → A turn that bears on the audit is read whole and the audit runs again on it;
             anything else — an adoption, a question the current grounds answer — is
             simply answered
