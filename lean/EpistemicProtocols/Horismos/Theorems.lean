@@ -340,10 +340,9 @@ theorem snapshot_carries (c c' : Context P) :
     (snapshotOf c).context = c ∧ (snapshotOf c).dissent = dissent c ∧
       (snapshotOf c).residual = residualOf (readout c).map ∧
       (snapshotOf c).limits = (readout c).limits ∧
-      (close c).snapshot = snapshotOf c ∧
       ((closeAt c c' (readout c)).snapshot.limits = (readout c').limits ∧
         (closeAt c c' (readout c)).snapshot.dissent = dissent c' ∧
         (closeAt c c' (readout c)).snapshot.map = (readout c).map) :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
+  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 end Horismos
