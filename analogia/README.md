@@ -47,7 +47,8 @@ Collect   → To the limit of reach over what the mapping rests on; every place 
 Assess    → Construct the correspondences, state what would defeat each bearing claim, run the
             checks reachable here, read warrant off the grounds, judge each conclusion
 Surface   → Present the whole assessment and proceed (relay — no verdict is requested);
-            work that rests on a blocked or undetermined conclusion waits for your word
+            work that rests on anything not licensed within limits — a blocked or
+            undetermined conclusion, or a licensed one beyond its limits — waits for your word
 Later     → A turn that bears on the audit is read whole and the audit runs again on it;
             anything else — an adoption, a question the current grounds answer entirely —
             is simply answered
@@ -62,7 +63,7 @@ The question is the only decision gate. It is never filled in for you: where you
 | **Cite a ground** | Its relevance and scope are checked, and the audit runs again with it before conclusions are judged |
 | **Adopt / set aside a conclusion** | Recorded as yours, reported apart from the evidence, moves no warrant and opens no new pass; asking for the next task adopts nothing |
 | **Revise the purpose, conclusions, source or target** | Reads back the revised question and audits again; evidence already gathered carries over, verdicts are judged again |
-| **Ask a question** | Answered from current grounds when they answer it entirely; a question that brings a fact, a source, a counterexample, or a result opens a new pass on it |
+| **Ask a question** | Answered from current grounds when they answer it entirely; any other question — one they do not settle, or one that brings a fact, a source, a counterexample, or a result — opens a new pass |
 | **Something unrelated** | Answered; the last outcome stands |
 
 ## When to Use

@@ -8,7 +8,7 @@ Direction for judgments the `/ground` contract leaves to the model. Each section
 
 ## BearsOn
 
-Bearing keeps the check set finite without letting the protocol choose its own exam: a fit claim bears on a conclusion when changing the claim would change that conclusion's verdict, whether or not the claim is convenient to check. A source feature the target lacks bears on a conclusion only where the conclusion needs that feature; under the preservation conclusion every collected source relation is needed, and a missing counterpart is reported as missing. Whether an absence was meant is the reader's to say — their turn can narrow the conclusion — never yours to infer. Differences run both ways — what the target carries that the source does not can bear too.
+Bearing keeps the check set finite without letting the protocol choose its own exam: a fit claim bears on a conclusion when changing the claim would change that conclusion's verdict, whether or not the claim is convenient to check. Differences run both ways — what the target carries that the source does not can bear too.
 
 ## checks
 

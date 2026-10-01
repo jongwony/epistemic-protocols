@@ -33,7 +33,8 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it; present it and proceed — no verdict is asked
   after the assessment: the next move the person declared, an adopted policy, or a grant; work
-    that rests on a Blocked or Undetermined conclusion waits for the person's words
+    that rests on anything not licensed within limits — a Blocked or Undetermined conclusion, or a
+    Licensed one beyond its stated limits — waits for the person's words
   next utterance u: c' := fuse(c, u), read whole against R and c' →
     [the question is waiting and u ends the audit]  withdrawn — the waiting question left
         unassessed and the deficit unresolved, said in its report; an earlier assessment stays in
@@ -49,9 +50,9 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
 /-! ── MORPHISM ──
 R
   → question(R, context) → Q      -- purpose, conclusions at stake (K), and an open pair; only from the person's turn
-  → collect(Q, context)            -- to the limit of reach over what the mapping rests on; reached and unreached named
+  → collect(Q, context)            -- to the limit of reach over what the mapping rests on, constructing the claims it needs and running their reachable checks; results join the context; reached and unreached named
   → construct(mapping, context)    -- correspondences and their fit claims; each placement is a claim
-  → check(claims bearing on K)     -- per bearing claim, what target-side fact within its scope would change it, and who can reach it
+  → check(claims bearing on K)     -- per bearing claim, what target-side fact within its scope would change it, and who can reach it; the reachable ones run within collection
   → warrant(claims, checks)        -- read off evidence, never assent
   → judge(K)                       -- Licensed with limits, Blocked, or Undetermined with what is missing
   → surface(assessment)            -- present and proceed; what is open is the person's own unknown
@@ -333,8 +334,8 @@ axiom partition : (c : Context P) → selfGrounding c → Option (PartitionReadi
     What the context already holds from a source is not fetched again unless an utterance,
     evidence, or your own work since says it changed. Read and run without changing existing state;
     what you create only to look you remove afterwards. An observation that needs to change
-    existing state, someone's permission, or another's authority is named with what it needs and
-    left open. Where a claim turns on what an artifact does, exercise it over the case that
+    existing state, someone's permission, or another's authority is not made and leaves no evidence
+    turn: name it, with what it needs, in what you present, and leave it open. Where a claim turns on what an artifact does, exercise it over the case that
     separates the readings. What is still open once collection ends is shown as the person's own
     unknown. Direction: `references/judgments.md` §collection. -/
 axiom observe : Context P → List (Evidence P)
@@ -534,7 +535,7 @@ def grounding : Op → Annot × String
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit, and, while the question waits, whether it ends the audit")
   | .withdraw         => (.interaction .extension, "when the person ends the audit while its question waits: say that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stays in the context as it was presented, over its own question")
-  | .seam             => (.interaction .extension, "after the assessment, proceed to the next move the person declared, an adopted policy, or a grant, citing that source; work that rests on a Blocked or Undetermined conclusion waits for the person's words, with that conclusion's grounds shown; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
+  | .seam             => (.interaction .extension, "after the assessment, proceed to the next move the person declared, an adopted policy, or a grant, citing that source; work that rests on anything not licensed within limits — a Blocked or Undetermined conclusion, or a Licensed one beyond its stated limits — waits for the person's words, with that conclusion's grounds shown; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -555,7 +556,7 @@ Activate where a mapping is being relied on and what it licenses about a case is
 
 A source or target account this session can reach — code, documents, a repository, a published source — is read as evidence inside the audit, whether or not the reader already holds it; the audit never waits for the reader to bring an account first, and never asks them to judge a correspondence. Where what the reader wants is only to come to hold an account, with no mapping being relied on, that is explanation rather than this audit, and the AI-guided path does not activate. Absence of evidence that a mapping is being relied on establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
 
-Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no located abstraction yet, is a different deficit; a located abstraction tested against its own members is self-grounding. Framework selection and factual context insufficiency remain their own primary deficits.
+Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no located abstraction yet, is a different deficit; a located abstraction tested against its own members is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
 
 ### Evidence loading
 
@@ -575,7 +576,7 @@ Beside each claim that matters, state the scope its grounds were checked within,
 
 For self-grounding, name the level of abstraction at which fit is claimed and allocate every member, rendering a partition only with the grounds supporting that allocation and grouping and with a contrast that makes the fit diagnostic. A split names every rival cell, the fitting core, and all unclustered outliers; a trim distinguishes scattered removal from one-cell reorientation; a hold reports supported fit of all members. Where that basis is unresolved, name what is missing and make no partition recommendation.
 
-Then state what a later turn would change, and proceed without asking for a verdict; work that rests on a blocked or undetermined conclusion waits for the reader's words, with that conclusion's grounds shown. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn ending the audit withdraws it: say plainly that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stays in the context as it was presented, over its own question. After that, a turn is simply answered.
+Then state what a later turn would change, and proceed without asking for a verdict; work that rests on anything not licensed within limits — a blocked or undetermined conclusion, or a licensed one beyond its stated limits — waits for the reader's words, with that conclusion's grounds shown. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn ending the audit withdraws it: say plainly that the waiting question was left unassessed and the deficit unresolved; an earlier assessment, if any, stays in the context as it was presented, over its own question. After that, a turn is simply answered.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing the question requires placing evidence before its question and option-specific consequences inside the options.
 
@@ -595,7 +596,7 @@ Read `references/round-composition.md` before composing when terminology must re
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
 - **Recognition over Recall**: Present structured alternatives with anticipatable futures only for the question, where the person's words leave a genuine choice open. Read their turns whole, so the reader acts in their own language rather than selecting a meta-label.
-- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question the current grounds answer entirely is answered; one that brings a ground opens the next pass; the reader is never asked to classify their own turn.
+- **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. A question the current grounds answer entirely is answered; any other — one they do not settle, or one that brings a ground — opens the next pass; the reader is never asked to classify their own turn.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
 - **Bounded reach**: State the limits supported by the cited grounds and their checked scopes in the same breath as every Licensed verdict. A mapping presented without its breaking point produces confident wrong inference, which is the failure this protocol exists to catch.
 - **Self-grounding visibility**: Treat a case as self-grounding only where the source abstraction is located and its member instances are the target. Surface the full member allocation and the grounds supporting it; an unresolved basis carries no partition recommendation. Analogia supplies the partition evidence; what becomes of the cells is the reader's.
