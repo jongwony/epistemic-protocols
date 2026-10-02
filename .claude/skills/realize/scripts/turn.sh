@@ -7,13 +7,15 @@
 #
 # <cell_dir>/work must already hold the case scaffold. Without a session id this is turn 1:
 # the scaffold's digest is written as turn-0.digest before anything runs. Each turn writes
-# turn-<n>.jsonl (stream-json), turn-<n>.txt (final assistant text), turn-<n>.err and
-# turn-<n>.digest, and prints the session id to pass back for the next turn. `-` in place
-# of a plugin dir is the arm without the protocol.
+# turn-<n>.jsonl (stream-json), turn-<n>.txt (every assistant text block of the turn, in
+# order, each opened by a `<!-- text block k -->` marker), turn-<n>.err and turn-<n>.digest,
+# and prints the session id to pass back for the next turn. `-` in place of a plugin dir is
+# the arm without the protocol.
 #
 # Isolation is per cell, as in setup.sh: an empty CLAUDE_CONFIG_DIR at <cell_dir>/cfg, and
 # the variables through which an enclosing Claude Code session would reach the child
-# (its session identity, its extra CLAUDE.md directories) removed from its environment.
+# (its session identity, its extra CLAUDE.md directories, its skill sync into the child's
+# config directory) removed from its environment.
 set -euo pipefail
 
 SKILL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -67,6 +69,7 @@ args=(-p --verbose --output-format stream-json --model "$model"
 
 ( cd "$cell/work" && env -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_REMOTE_SESSION_ID \
     -u CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD -u CLAUDE_ADDITIONAL_DIRECTORIES \
+    -u CLAUDE_CODE_SYNC_SKILLS \
     CLAUDE_CONFIG_DIR="$cell/cfg" \
     timeout "${TIMEOUT:-600}" claude "${args[@]}" -- "$message" \
     > "$cell/turn-$n.jsonl" 2> "$cell/turn-$n.err" ) || echo "exit=$?" >> "$cell/turn-$n.err"
@@ -85,7 +88,7 @@ for (const line of readFileSync(src, 'utf8').split('\n')) {
   }
   if (e.type === 'result') result = e;
 }
-let body = texts.length ? texts[texts.length - 1] : '';
+let body = texts.map((t, i) => `<!-- text block ${i + 1} -->\n${t}`).join('\n\n');
 if (result) body += `\n\n<!-- is_error=${result.is_error ?? ''} turns=${result.num_turns ?? ''} cost=${result.total_cost_usd ?? ''} -->\n`;
 writeFileSync(dst, body);
 process.stdout.write(`${sid || ''}\n`);
