@@ -18,196 +18,200 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty MethodBrief := ⟨⟨"", "", ""⟩⟩
-instance {s : Slot} : Nonempty (DraftSlot s) := ⟨⟨defaultValue s, none, [], fun _ => rfl⟩⟩
-instance : Nonempty Reading := ⟨⟨.cont, []⟩⟩
-instance : Nonempty Reach := ⟨.reaches⟩
-instance : Nonempty CheckpointBrief := ⟨.emergent ⟨"", [], [], ⟨""⟩⟩⟩
 
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    conduct respond c [] = .holding c := by
+theorem silence (respond session : Context P → Response P) (c : Context P) :
+    conduct respond session c [] = .holding c := by
   simp [conduct]
 
-theorem conducted_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
-    (h : conduct respond c us = .conducted c₁ t) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      (read (fuse c₀ u) u).verdict = .sufficient ∧ Covered c₁ ∧ IsPartition (moves c₁) (cut c₁) ∧
-      relayAt c₁ = none ∧ t = respond c₁ := by
-  induction us generalizing c with
-  | nil => simp [conduct] at h
-  | cons u us ih =>
-    simp only [conduct] at h
-    split at h
-    · cases h
-    · cases h
-    · rename_i v hw hr
-      split at h
-      · cases h
-      · rename_i hrel
-        split at h
-        · rename_i hc
-          cases h
-          exact ⟨c, u, rfl, hc.1, hc.2.1, hc.2.2, hrel, rfl⟩
-        · exact ih _ h
+theorem start_opens_on_map (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (h : isFilled (relay (observe c)) = false) :
+    start respond session c us =
+      conduct respond session (observe c ++ [(respond (observe c)).val]) us := by
+  simp [start, h]
 
-theorem withdrawn_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (h : conduct respond c us = .withdrawn c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      (read (fuse c₀ u) u).verdict = .withdraw := by
-  induction us generalizing c with
-  | nil => simp [conduct] at h
-  | cons u us ih =>
-    simp only [conduct] at h
-    split at h
-    · rename_i hv
-      cases h
-      exact ⟨c, u, rfl, hv⟩
-    · cases h
-    · split at h
-      · cases h
-      · split at h
-        · cases h
-        · exact ih _ h
-
-theorem routed_by_person (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (c₁ : Context P)
-    (h : conduct respond c us = .routed t c₁) :
-    ∃ (c₀ : Context P) (u : Utterance P), c₁ = observe (fuse c₀ u) ∧
-      (read (fuse c₀ u) u).verdict = .route t := by
-  induction us generalizing c with
-  | nil => simp [conduct] at h
-  | cons u us ih =>
-    simp only [conduct] at h
-    split at h
-    · cases h
-    · rename_i t' hv
-      cases h
-      exact ⟨c, u, rfl, hv⟩
-    · split at h
-      · cases h
-      · split at h
-        · cases h
-        · exact ih _ h
-
-theorem withdraw_precedes_relay (respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : (read (fuse c u) u).verdict = .withdraw) :
-    conduct respond c (u :: us) = .withdrawn (observe (fuse c u)) := by
+theorem unrelated_holds_gate (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (observe (fuse c u))) :
+    conduct respond session c (u :: us) =
+      conduct respond session
+        (observe (fuse c u) ++ [(session (observe (fuse c u))).val]) us := by
   simp [conduct, h]
 
-theorem uncovered_redraws (respond : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (hs : (read (fuse c u) u).verdict = .sufficient)
-    (hr : relayAt (observe (fuse c u)) = none) (hn : ¬ Covered (observe (fuse c u))) :
-    conduct respond c (u :: us) =
-      conduct respond (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
-  simp [conduct, hs, hr, hn]
+theorem uncovered_redraws (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (observe (fuse c u)))
+    (hw : isFilled (withdrawal (observe (fuse c u))) = false)
+    (hc : ¬ Covered (observe (fuse c u)))
+    (hr : isFilled (relay (observe (fuse c u))) = false) :
+    conduct respond session c (u :: us) =
+      conduct respond session
+        (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
+  simp [conduct, hre, hw, hc, hr]
 
-theorem person_value_taken (c : Context P) (s : Slot) (v : SlotVal s) (i : Nat)
-    (h : slotState c s = .set v i) : (method c).topology s = v := by
-  simp [method, take, h]
+theorem each_step_continues_or_closes (respond session : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
+    (h : conduct respond session c (u :: us) = o) :
+    (∃ c', conduct respond session c' us = o) ∨
+    (isFilled (withdrawal (observe (fuse c u))) = true ∧
+      o = .withdrawn (closed (observe (fuse c u)))) ∨
+    (isFilled (resolution (observe (fuse c u))) = true ∧ Covered (observe (fuse c u)) ∧
+      o = .conducted (observe (fuse c u)) (respond (observe (fuse c u)))) ∨
+    (isFilled (relay (observe (fuse c u))) = true ∧
+      o = .relayed (observe (fuse c u)) (respond (observe (fuse c u)))) := by
+  simp only [conduct] at h
+  split at h
+  · exact .inl ⟨_, h⟩
+  · split at h
+    · exact .inr (.inl ⟨by assumption, h.symm⟩)
+    · split at h
+      · rename_i hc
+        exact .inr (.inr (.inl ⟨hc.1, hc.2, h.symm⟩))
+      · split at h
+        · exact .inr (.inr (.inr ⟨by assumption, h.symm⟩))
+        · exact .inl ⟨_, h⟩
 
-theorem person_value_recorded (c : Context P) (s : Slot) (h : (slotState c s).isSet = true) :
-    adoption c s = .set := by
-  simp [adoption, h]
+theorem conducted_by_person_covered (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
+    (h : conduct respond session c us = .conducted c₁ t) :
+    isFilled (resolution c₁) = true ∧ Covered c₁ ∧ t = respond c₁ := by
+  induction us generalizing c with
+  | nil => simp [conduct] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hr, hc, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+      exact ⟨hr, hc, rfl⟩
+    · cases h'
 
-theorem earlier_turns_never_reread (c t : Context P) : ∃ more, said (c ++ t) = said c ++ more := by
-  have key : ∀ l : List Nat, (∀ i ∈ l, i < c.length) →
-      l.filterMap (fun i => ((c ++ t)[i]?.bind asUtterance).map
-        (fun u => (i, read ((c ++ t).take (i + 1)) u))) =
-      l.filterMap (fun i => (c[i]?.bind asUtterance).map (fun u => (i, read (c.take (i + 1)) u))) := by
-    intro l hl
-    induction l with
-    | nil => rfl
-    | cons i l ih =>
-      have hi := hl i (by simp)
-      simp only [List.filterMap_cons, List.getElem?_append_left hi,
-        List.take_append_of_le_length (show i + 1 ≤ c.length by omega),
-        ih (fun j hj => hl j (List.mem_cons_of_mem i hj))]
-  simp only [said, List.length_append, List.range_add, List.filterMap_append]
-  exact ⟨_, congrArg (· ++ _) (key _ (fun i hi => List.mem_range.mp hi))⟩
+theorem relayed_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
+    (h : conduct respond session c us = .relayed c₁ t) :
+    isFilled (relay c₁) = true ∧ t = respond c₁ := by
+  induction us generalizing c with
+  | nil => simp [conduct] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨hr, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+    · cases h'
+      exact ⟨hr, rfl⟩
 
-theorem responses_say_nothing (c : Context P) (r : Response P) : said (c ++ [r.val]) = said c := by
-  have hr : asUtterance r.val = none := by
-    obtain ⟨⟨o, x⟩, ho⟩ := r
-    simp only at ho; subst ho; rfl
-  have key : ∀ l : List Nat, (∀ i ∈ l, i < c.length) →
-      l.filterMap (fun i => ((c ++ [r.val])[i]?.bind asUtterance).map
-        (fun u => (i, read ((c ++ [r.val]).take (i + 1)) u))) =
-      l.filterMap (fun i => (c[i]?.bind asUtterance).map (fun u => (i, read (c.take (i + 1)) u))) := by
-    intro l hl
-    induction l with
-    | nil => rfl
-    | cons i l ih =>
-      have hi := hl i (by simp)
-      simp only [List.filterMap_cons, List.getElem?_append_left hi,
-        List.take_append_of_le_length (show i + 1 ≤ c.length by omega),
-        ih (fun j hj => hl j (List.mem_cons_of_mem i hj))]
-  simp only [said, List.length_append, List.length_singleton, List.range_succ,
-    List.filterMap_append]
-  rw [key _ (fun i hi => List.mem_range.mp hi)]
-  simp [hr]
+theorem start_closes_only_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) :
+    (∀ c₁ t, start respond session c us = .conducted c₁ t →
+      isFilled (resolution c₁) = true ∧ Covered c₁) ∧
+    (∀ c₁ t, start respond session c us = .relayed c₁ t → isFilled (relay c₁) = true) := by
+  constructor
+  · intro c₁ t h
+    simp only [start] at h
+    split at h
+    · cases h
+    · have := conducted_by_person_covered respond session _ us c₁ t h
+      exact ⟨this.1, this.2.1⟩
+  · intro c₁ t h
+    simp only [start] at h
+    split at h
+    · rename_i hr
+      cases h
+      exact hr
+    · exact (relayed_by_person respond session _ us c₁ t h).1
 
-theorem said_by_person (c : Context P) (i : Nat) (x : Reading) (h : (i, x) ∈ said c) :
-    ∃ u : Utterance P, c[i]? = some u.val := by
-  simp only [said, List.mem_filterMap, Option.map_eq_some_iff, Option.bind_eq_some_iff] at h
-  obtain ⟨j, -, u, ⟨e, he, hu⟩, hji⟩ := h
-  cases hji
-  obtain ⟨o, x'⟩ := e
-  cases o <;> simp [asUtterance] at hu
-  exact ⟨⟨⟨.person, x'⟩, rfl⟩, he⟩
+theorem observe_extends (c : Context P) : c <+: observe c := by
+  simp only [observe]
+  exact (List.prefix_append _ _).trans (List.prefix_append _ _)
 
-theorem proposer_by_origin (c : Context P) (e : Entry) (t : Turn P)
-    (h : c[introducedAt c e]? = some t) (ho : t.origin = .person) : proposer c e = .person := by
-  obtain ⟨o, x⟩ := t
-  simp only at ho; subst ho
-  simp [proposer, h]
+theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P)
+    (h : conduct respond session c us = .withdrawn r) :
+    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
+  induction us generalizing c with
+  | nil => simp [conduct] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨hw, h'⟩ | ⟨_, _, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+      exact ⟨_, hw, rfl⟩
+    · cases h'
+    · cases h'
 
-theorem every_move_placed (c : Context P) (h : IsPartition (moves c) (cut c)) :
-    ∀ p ∈ (method c).assignment, p.region.isSome = true := by
-  intro p hp
-  simp only [method, assignment, List.mem_map] at hp
-  obtain ⟨m, hm, rfl⟩ := hp
-  obtain ⟨r, hr, hmr⟩ := h.1 m hm
-  simp only [regionOf, List.find?_isSome]
-  exact ⟨r, hr, List.elem_iff.mpr hmr⟩
+theorem withdrawal_and_holding_hand_off_nothing (r : Closed P) (c : Context P) :
+    handedOffBy (.withdrawn r) = none ∧ handedOffBy (.holding c : Outcome P) = none :=
+  ⟨rfl, rfl⟩
 
-theorem ungrounded_is_default (c : Context P) (s : Slot) (hs : (slotState c s).isSet = false)
-    (hg : (draft c s).ground = none) : take c s = defaultValue s := by
-  unfold take
-  split
-  · simp_all [SlotState.isSet]
-  · exact (draft c s).fallback hg
+theorem closure_hands_off (c : Context P) (t : Response P) :
+    handedOffBy (.conducted c t) = some .handoff ∧ handedOffBy (.relayed c t) = some .handoff :=
+  ⟨rfl, rfl⟩
 
-theorem emergent_stop_never_silent (e : Emergent)
-    (h : ObligationClass.needsStopGround ∈ e.classes) :
-    (groundOf (.emergent e)).isSome = true := by
-  simp [groundOf, Option.isSome_map, e.owed h]
+theorem handoff_carries_obligations (c : Context P) :
+    (emitted c).record = record c ∧ (emitted c).residual = residual c ∧
+      (emitted c).deferred = deferred c ∧ (emitted c).required = required c ∧
+      (emitted c).lifetime = lifetime c ∧ (emitted c).placement = placement c ∧
+      (emitted c).pointer = pointer c ∧ (emitted c).dissent = dissent c :=
+  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
-theorem pointer_carried (c : Context P) : (method c).pointer = pointer c := rfl
+theorem withdrawal_keeps_partial_record (c : Context P) :
+    (closed c).record = record c ∧ (closed c).residual = residual c ∧
+      (closed c).deferred = deferred c ∧ (closed c).dissent = dissent c :=
+  ⟨rfl, rfl, rfl, rfl⟩
 
-theorem brief_carried (c : Context P) : (method c).brief = brief c := rfl
+private theorem mem_recordOf {c : Context P} {x : Coordinate}
+    {o : Occ (heldCoord (P := P) x) c} {r : Recorded c} (h : r ∈ recordOf x o) :
+    r.coord = x ∧ isFilled o = true := by
+  cases o with
+  | open_ _ => simp [recordOf] at h
+  | filled d s allowed supported =>
+    simp only [recordOf, List.mem_singleton] at h
+    subst h
+    exact ⟨rfl, rfl⟩
 
-theorem synthesis_checkpoint_registered (c : Context P) (rs : List Region) (r : Region)
-    (hr : r ∈ rs) (h : owesSynthesis c r = true) :
-    ∃ k ∈ checkpoints c rs, k.region = r ∧ k.decision = .synthesisOutputShape := by
-  refine ⟨⟨r, .synthesisOutputShape, compileBrief c r .synthesisOutputShape,
-    CheckpointUnrealizable c r .synthesisOutputShape⟩, ?_, rfl, rfl⟩
-  simp only [checkpoints, orderCheckpoints, List.mem_mergeSort, List.mem_flatMap, List.mem_map]
-  exact ⟨r, hr, .synthesisOutputShape, by simp [deferred, h], rfl⟩
+theorem recorded_by_person (c : Context P) :
+    ∀ r ∈ record c, r.src.src.val = .person ∧
+      StandingSupported r.coord c (c[r.src.idx]'r.src.lt) r.det :=
+  fun r _ => ⟨r.byPerson, r.supported⟩
 
-theorem feasibility_by_observation {c : Context P} {r : Region} {s : Cite c}
-    (ok : (feasibilityCoord (P := P) r).admits s.src) : s.src.val = .external := ok
+theorem suffix_without_person_is_no_source (c e : Context P) (he : ∀ t ∈ e, t.origin ≠ .person) :
+    ∀ r ∈ record (c ++ e), r.src.idx < c.length := by
+  intro r _
+  refine Nat.lt_of_not_le fun hle => ?_
+  have hok := r.src.ok
+  rw [r.byPerson, List.getElem_append_right hle] at hok
+  exact he _ (List.getElem_mem _) hok
 
-theorem handoff_on_covered_partition (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (op : Op) (h : handedOffBy (conduct respond c us) = some op) :
-    op = .handoff ∧ ∃ c₁ t, conduct respond c us = .conducted c₁ t ∧ Covered c₁ ∧
-      IsPartition (moves c₁) (cut c₁) := by
-  cases ho : conduct respond c us with
-  | conducted c₁ t =>
-    rw [ho] at h
-    simp only [handedOffBy, Option.some.injEq] at h
-    obtain ⟨_, _, _, _, hc, hp, _, _⟩ := conducted_by_person respond c us c₁ t ho
-    exact ⟨h.symm, c₁, t, rfl, hc, hp⟩
-  | _ => rw [ho] at h; simp [handedOffBy] at h
+theorem recorded_is_filled (c : Context P) (r : Recorded c) (h : r ∈ record c) :
+    r.coord ∈ coordinates c ∧ isFilled (operative c r.coord) = true := by
+  simp only [record, List.mem_flatMap] at h
+  obtain ⟨x, hx, hr⟩ := h
+  obtain ⟨hc, hf⟩ := mem_recordOf hr
+  subst hc
+  exact ⟨hx, hf⟩
+
+theorem open_not_recorded (c : Context P) (x : Coordinate) (ho : isFilled (operative c x) = false)
+    (r : Recorded c) (h : r ∈ record c) : r.coord ≠ x := by
+  intro hx
+  have := (recorded_is_filled c r h).2
+  rw [hx, ho] at this
+  cases this
+
+theorem open_in_residual (c : Context P) (x : Coordinate) (hx : x ∈ coordinates c)
+    (ho : isFilled (operative c x) = false) : x ∈ residual c := by
+  simp [residual, hx, ho]
+
+theorem held_only_by_person {c : Context P} {x : Coordinate} {s : Cite c}
+    (ok : (heldCoord (P := P) x).admits s.src) : s.src.val = .person := ok
+
+theorem taken_only_by_person {c : Context P} {s : Cite c}
+    (ok : (resolutionCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem relayed_only_by_person {c : Context P} {s : Cite c}
+    (ok : (relayCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
+    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem feasibility_by_observation {c : Context P} {k : String} {s : Cite c}
+    (ok : (feasibilityCoord (P := P) k).admits s.src) : s.src.val = .external := ok
 
 end Hyphegesis
