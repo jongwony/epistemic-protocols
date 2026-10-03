@@ -104,8 +104,10 @@ defect in the contract from a limit of the model.
 
 ## Arms
 
-Claude has four arms crossing the protocol against the output style shipped beside it, and one
-that removes the protocol's formal blocks:
+Claude has four arms crossing the protocol against the Epistemic Ink output style, and one
+that removes the protocol's formal blocks. The style ships in the cc-plugin marketplace's
+`ink-figure` plugin; `styleSource` in `harness.config.json` names the file the style arms read,
+so those arms need that marketplace installed:
 
 | arm | protocol | style | answers |
 |---|---|---|---|

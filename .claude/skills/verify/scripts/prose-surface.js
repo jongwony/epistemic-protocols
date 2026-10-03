@@ -137,7 +137,7 @@ function checkLanguagePurity(ctx) {
 // ============================================================
 // Check: Emit Load Discipline
 // ============================================================
-// Enforces compiled-copy coverage for the user-facing disciplines that shape
+// Enforces the presence of the user-facing disciplines that shape
 // runtime protocol output. Round composition folds placement (context before
 // the gate, not inside it), vocabulary (plain rendering held across the
 // session), and per-round adjacency/context-switch cost into one inline rule,
@@ -145,7 +145,7 @@ function checkLanguagePurity(ctx) {
 // references/round-composition.md; Form feedback handles how a round's
 // density is set and stays a separate rule. These must live in each core
 // protocol SKILL.md's Rules section because packaged runtime contracts cannot
-// depend on contributor docs or Output Style alone, so the labels are searched
+// depend on contributor docs or an output style, so the labels are searched
 // there and nowhere else in the file.
 
 // The body of the `## Rules` section: from its heading to the next H2, with
@@ -197,74 +197,25 @@ function checkEmitLoadDiscipline(ctx) {
     }
   }
 
-  const stylePath = path.join(projectRoot, 'epistemic-cooperative/styles/epistemic-ink.md');
-  if (!fs.existsSync(stylePath)) {
-    results.fail.push({
-      check: 'emit-load-discipline',
-      file: 'epistemic-cooperative/styles/epistemic-ink.md',
-      message: 'Missing Output Style source for runtime emit load discipline',
-    });
-    return;
-  }
-
-  const styleContent = fs.readFileSync(stylePath, 'utf8');
-  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Content placement', 'Form feedback']) {
-    if (!styleContent.includes(`**${label}**`)) {
-      results.fail.push({
-        check: 'emit-load-discipline',
-        file: 'epistemic-cooperative/styles/epistemic-ink.md',
-        message: `Missing Output Style section: ${label}`,
-      });
-    }
-  }
-
   if (!results.fail.some(f => f.check === 'emit-load-discipline')) {
     results.pass.push({
       check: 'emit-load-discipline',
       file: 'all core protocol SKILL.md files',
-      message: `Emit load discipline compiled-copy coverage verified for ${checked} protocols`,
+      message: `Emit load discipline rule coverage verified for ${checked} protocols`,
     });
   }
-}
-
-// Ink-derived Output Styles subject to the same framing-readout / gate-anchor
-// enforcement as the canonical epistemic-ink.md. A sibling style that
-// reproduces the Epistemic Ink body verbatim (see checkInkBodyIdentity) is a
-// copy, not a reference, so its copy of the load-bearing invariants must be
-// checked independently or a drifted copy escapes enforcement silently.
-const INK_DERIVED_STYLE_FILES = [
-  'epistemic-cooperative/styles/epistemic-ink.md',
-  'epistemic-cooperative/styles/proactive-epistemic-ink.md',
-];
-
-function boundedEntryBody(content, labelMatch, bound, nextPattern) {
-  const bodyStart = labelMatch.index + labelMatch[0].length;
-  const bounded = content.slice(bodyStart, bodyStart + bound);
-  const next = nextPattern.exec(bounded);
-  return next ? bounded.slice(0, next.index) : bounded;
-}
-
-// Drift leaves the kernel's bytes in place while the reader receives no
-// instruction, and the shape it takes is a kernel commented out. Removing
-// closed comment regions before the presence test catches that shape, and
-// that is the whole of what this filter claims. Classifying Markdown further
-// is a parser, which this is not; a kernel placed inertly on purpose is
-// review's to catch.
-function liveProse(span) {
-  return span.replace(/<!--[\s\S]*?-->/g, '');
 }
 
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
-// Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
-// framing readout of the work in play) to an enforcement channel:
-// The glyph denylist is scoped by decision, not by what a file category could
-// establish about a glyph's meaning: utility skills may
-// legitimately render bars and are out of it, and the scope otherwise mirrors
-// checkEmitLoadDiscipline. Why a guard exists here at all, and why its kernel
-// is a positive statement rather than a prohibition: references/verification.md,
-// framing-readout-enforcement.
+// Couples the invariant that user-facing protocol surfacing is a framing
+// readout of the work in play, not a progress meter, to an enforcement
+// channel over the core protocol SKILL.md files. The glyph denylist is scoped
+// by decision, not by what a file category could establish about a glyph's
+// meaning: utility skills may legitimately render bars and are out of it, and
+// the scope otherwise mirrors checkEmitLoadDiscipline. Why a guard exists here
+// at all: references/verification.md, framing-readout-enforcement.
 function checkFramingReadoutEnforcement(ctx) {
   const { projectRoot, results, protocolInputs } = ctx;
   const BAR_GLYPH = /[▓░]/;
@@ -286,63 +237,11 @@ function checkFramingReadoutEnforcement(ctx) {
     });
   }
 
-  // Guard kernel: the sentence fragment in which the Cognitive work element
-  // states what it is. Anchored within that element's own bounded body — the
-  // kernel must appear inside the element's own label-to-next-boundary span,
-  // rather than anywhere in the file. It is the positive statement of the
-  // invariant, which is what the element is asked to keep when it is
-  // rewritten: an element that stopped being a framing readout would have to
-  // drop this sentence to say so.
-  const GUARD = 'a framing readout — the kind of work currently in play, a statusline';
-  const COGNITIVE_WORK_LABEL_PATTERN = /^\*\*Cognitive work\*\*/m;
-  const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
-  const ELEMENT_BOUND = 6000;
-
-  for (const stylePath of INK_DERIVED_STYLE_FILES) {
-    const styleFull = path.join(projectRoot, stylePath);
-    if (!fs.existsSync(styleFull)) {
-      results.fail.push({ check: CHECK, file: stylePath, message: 'Missing Output Style source for framing-readout enforcement' });
-      continue;
-    }
-    const styleContent = fs.readFileSync(styleFull, 'utf8');
-    styleContent.split('\n').forEach((line, idx) => {
-      if (BAR_GLYPH.test(line)) {
-        results.fail.push({
-          check: CHECK,
-          file: stylePath,
-          message: `Progress-bar glyph (▓/░) at line ${idx + 1} — the realization layer must not re-introduce a progress bar`,
-        });
-      }
-    });
-
-    // Comments come out of the whole document before the element is located:
-    // one can open before the kernel and close past the element boundary, and
-    // a span sliced first would carry the opener without its closer.
-    const styleProse = liveProse(styleContent);
-    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleProse);
-    if (!labelMatch) {
-      results.fail.push({
-        check: CHECK,
-        file: stylePath,
-        message: 'Missing Ink element label: "**Cognitive work**"',
-      });
-      continue;
-    }
-    const elementBody = boundedEntryBody(styleProse, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
-    if (!elementBody.includes(GUARD)) {
-      results.fail.push({
-        check: CHECK,
-        file: stylePath,
-        message: `Missing guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
-      });
-    }
-  }
-
   if (!results.fail.some(f => f.check === CHECK)) {
     results.pass.push({
       check: CHECK,
-      file: 'all core protocol SKILL.md files + Output Style(s)',
-      message: `Framing-readout enforcement verified for ${checked} protocols + ${INK_DERIVED_STYLE_FILES.length} Ink-derived styles (no progress-bar glyph; guard kernel anchored within the Cognitive work element)`,
+      file: 'all core protocol SKILL.md files',
+      message: `Framing-readout enforcement verified for ${checked} protocols (no progress-bar glyph)`,
     });
   }
 }

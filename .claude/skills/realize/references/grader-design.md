@@ -140,8 +140,8 @@ negative case wants reading as an adversary would read it, because the protocol 
 
 ## The arm matrix
 
-Claude's four default arms cross the protocol against the output style that ships beside it; a
-fifth, run only when named, removes the protocol's formal blocks.
+Claude's four default arms cross the protocol against the Epistemic Ink output style (read from
+`styleSource`); a fifth, run only when named, removes the protocol's formal blocks.
 
 | arm | protocol | style | answers |
 |---|---|---|---|
