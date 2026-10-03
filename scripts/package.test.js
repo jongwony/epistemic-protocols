@@ -401,7 +401,11 @@ describe('goal-research runtime contract', () => {
       /no successful Tavily call/i,
       'Phase 3 must say what to do when the count is zero',
     );
-    assert.match(skill, /recalled-from-training/i, 'zero-search output must be marked as recalled');
+    // The check reads only the Tavily route, so a zero count says nothing came through
+    // that route — not that every claim was recalled, since a page fetched another way is
+    // outside the record.
+    assert.match(skill, /nothing in the trace was retrieved through the designated route/i);
+    assert.ok(!/recalled-from-training/i.test(skill), 'a zero count does not establish that claims were recalled');
     // The marking is a statement in the Source Check covering the trace, never an edit of
     // the trace, which is forwarded verbatim.
     assert.ok(!/mark every claim in it/i.test(skill), 'the zero-call branch must not rewrite the trace');
@@ -413,9 +417,17 @@ describe('goal-research runtime contract', () => {
     assert.match(skill, /runner\s*:\s*claude \| codex/, 'the caller signature must name both runners');
     assert.match(skill, /claude when none is designated/i, 'the default runner must be stated');
     assert.match(skill, /request's words as well as its arguments/i, 'designations are read from words, not only arguments');
-    // The research question is carried verbatim, so a designation is never cut out of it.
-    assert.match(skill, /Nothing inside the research question is removed/i);
-    assert.match(skill, /could be either[^\n]*ask once/i, 'ambiguous wording is asked about, not guessed');
+    // The research question is carried verbatim, so a designation is never cut out of it,
+    // and a leading word that could open the question is asked about, not guessed.
+    assert.match(skill, /only when it stands as a separate leading argument and what follows reads as the whole question/i);
+    assert.match(skill, /could instead open the question[^\n]*Claude Shannon[^\n]*ask once/i, 'ambiguous leading words are asked about');
+    assert.match(skill, /Nothing is removed from inside the question/i);
+    const phase1 = skill.slice(skill.indexOf('## Phase 1'), skill.indexOf('## Phase 2'));
+    assert.match(phase1, /read as the Caller Signature says/, 'Phase 1 defers to the one designation rule');
+    // Separate command calls share no shell state, and the claude runner's precondition is
+    // checked before launch.
+    assert.match(skill, /substitute the generated value literally for `\$\{SUFFIX\}` in every later block/);
+    assert.match(skill, /Before launch, confirm that Tavily search and Tavily extract are available to the subagent/);
     assert.match(skill, /### Runner: claude/, 'the claude route must be specified');
     assert.match(skill, /### Runner: codex/, 'the codex route must be specified');
   });
@@ -462,6 +474,13 @@ describe('goal-research runtime contract', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
     const phase4 = skill.slice(skill.indexOf('## Phase 4'), skill.indexOf('## Rules'));
     assert.match(phase4, /--- Yours to Settle ---/, 'the output must carry the user\'s items in their own block');
+    // The check result comes first, so a zero-call or unreadable statement is read before
+    // anything that rests on the trace.
+    const order = ['--- Source Check ---', '--- Yours to Settle ---', '--- Trace ---'].map((h) => phase4.indexOf(h));
+    assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), 'Source Check, then Yours to Settle, then Trace');
+    assert.match(phase4, /Present the check results first/);
+    assert.match(phase4, /the report cites no URL; no claim carries a checkable citation/);
+    assert.match(phase4, /successful Tavily calls returned a response this check cannot read; URLs they returned cannot be confirmed/);
     assert.match(phase4, /neither the runner nor the main session answers or settles them/i);
   });
 
@@ -494,11 +513,13 @@ describe('goal-research runtime contract', () => {
   const tmpFile = (kind, suffix, ext) => `/tmp/goal_research_${kind}_${suffix}.${ext}`;
   const parseChecks = (out) => {
     const count = Number(out.match(/^successful Tavily calls: (\d+)$/m)?.[1]);
+    const unreadable = Number(out.match(/with a response this check cannot read: (\d+)$/m)?.[1]);
+    const cited = Number(out.match(/^cited URLs: (\d+)$/m)?.[1]);
     const [, after] = out.split('--- cited, not opened in this run ---');
     const [notOpened, extracted] = (after ?? '').split('--- extracted ---');
     const urlsOf = (t) => (t ?? '').split('\n').map((l) => l.trim()).filter((l) => /^https?:/.test(l));
     // Order is the shell's collation; the sets are what the checks assert.
-    return { count, notOpened: urlsOf(notOpened).sort(), extracted: urlsOf(extracted).sort() };
+    return { count, unreadable, cited, notOpened: urlsOf(notOpened).sort(), extracted: urlsOf(extracted).sort() };
   };
 
   // Runs the SKILL's own codex blocks — narrative extraction, record reduction, checks,
@@ -562,6 +583,8 @@ describe('goal-research runtime contract', () => {
       message('item_7', [
         `Claim A ([paper](${paper}/#abstract)), verified.`,
         `Again _HTTPS://ACLANTHOLOGY.ORG/2024.tacl-1.9_ and '${paper}'.`,
+        // cited only in upper case, with no lower-case twin anywhere in the report
+        'Claim H: HTTPS://UPPER.EXAMPLE/Only',
         'Claim B: https://example.org/snippet-only?a=1&b=2.',
         'Claim C: https://fabricated.example/paper',
         'Claim D, verified: https://failed.example/x',
@@ -572,12 +595,14 @@ describe('goal-research runtime contract', () => {
     ];
     const r = runCodexChecks(events);
     assert.equal(r.count, 3, 'three Tavily calls completed without error; the failed extract does not count');
+    assert.equal(r.unreadable, 0);
     assert.deepEqual(r.notOpened, [
       'https://curl.example/z',
       'https://fabricated.example/paper',
       'https://failed.example/x',
       'https://failedcall.example/y',
       'https://linked.example/inside',
+      'https://upper.example/Only',
     ], 'arguments, failed_results, failed calls, page-internal links and non-Tavily fetches are not evidence; '
       + 'case, fragment, trailing slash and punctuation do not cause a miss');
     assert.deepEqual(r.extracted, [paper], 'only an extract result entry counts as extracted, never failed_results');
@@ -648,6 +673,118 @@ describe('goal-research runtime contract', () => {
       fs.rmSync(dir, { recursive: true, force: true });
       for (const f of files) fs.rmSync(f, { force: true });
     }
+  });
+
+  // The official Tavily MCP server prints its response as formatted text, one `URL: ` line
+  // per result; a remote server can return JSON instead. Both forms reach both reducers.
+  const officialText = [
+    'Request ID: r1',
+    'Detailed Results:',
+    '',
+    'Title: Paper',
+    'ID: s1',
+    'URL: https://text.example/paper',
+    'Content: snippet naming https://content.example/in-snippet',
+    'Raw Content: body line',
+    'URL: https://inner.example/x',
+    'more body',
+    '',
+    'Images:',
+    '',
+    '[1] URL: https://img.example/1.png',
+  ].join('\n');
+  const officialExtract = ['Detailed Results:', '', 'Title: Paper', 'URL: https://text.example/paper', 'Raw Content: page'].join('\n');
+  const unreadableText = 'Something went sideways but the call succeeded; it mentions https://odd.example/u';
+  const textReport = [
+    'A: https://text.example/paper',
+    'B: https://content.example/in-snippet',
+    'C: https://inner.example/x',
+    'D: https://img.example/1.png',
+    'E: https://odd.example/u',
+  ].join('\n');
+  const assertTextFormat = (r) => {
+    assert.equal(r.count, 3);
+    assert.equal(r.unreadable, 1, 'a successful call whose response is neither JSON nor result lines is counted, not passed over');
+    assert.deepEqual(r.notOpened, [
+      'https://content.example/in-snippet',
+      'https://img.example/1.png',
+      'https://odd.example/u',
+    ], 'only `URL: ` result lines are sources — not snippet text, image lines, or an unreadable response');
+    // The documented limit: a page-body line beginning `URL: ` reads as a result line.
+    assert.ok(!r.notOpened.includes('https://inner.example/x'));
+    assert.deepEqual(r.extracted, ['https://text.example/paper']);
+  };
+
+  it('reads source records from the Tavily MCP server\'s formatted text (codex)', { skip: !hasJq && 'jq not installed' }, () => {
+    const text = (t) => ({ content: [{ type: 'text', text: t }] });
+    assertTextFormat(runCodexChecks([
+      tavily('item_1', 'tavily_search', { query: 'q' }, text(officialText)),
+      tavily('item_2', 'tavily_extract', { urls: ['https://text.example/paper'] }, text(officialExtract)),
+      tavily('item_3', 'tavily_search', { query: 'q2' }, text(unreadableText)),
+      message('item_4', textReport),
+    ]));
+  });
+
+  it('reads source records from the Tavily MCP server\'s formatted text (Claude Code)', { skip: !hasJq && 'jq not installed' }, () => {
+    const REPO_ROOT = path.join(__dirname, '..');
+    const ref = fs.readFileSync(path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-claude-code.md'), 'utf8');
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    const use = (id, name) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', id, name, input: {} }] } });
+    const res = (id, t) => ({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: false,
+      content: [{ type: 'text', text: t }] }] } });
+    const transcript = [
+      use('t1', 'mcp__tavily__tavily_search'), res('t1', officialText),
+      use('t2', 'mcp__tavily__tavily_extract'), res('t2', officialExtract),
+      use('t3', 'mcp__tavily__tavily_search'), res('t3', unreadableText),
+    ];
+    const suffix = crypto.randomBytes(4).toString('hex');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-claude-text-'));
+    const files = [tmpFile('calls', suffix, 'jsonl'), tmpFile('report', suffix, 'txt')];
+    try {
+      const T = path.join(dir, 'agent-x.jsonl');
+      fs.writeFileSync(T, transcript.map((e) => JSON.stringify(e)).join('\n') + '\n');
+      fs.writeFileSync(tmpFile('report', suffix, 'txt'), textReport);
+      const script = [pick(ref, 'tool_use', 'goal_research_calls_'), pick(skill, 'comm -23')].join('\n');
+      assertTextFormat(parseChecks(execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix, T }, encoding: 'utf8' })));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+      for (const f of files) fs.rmSync(f, { force: true });
+    }
+  });
+
+  it('reads every URL by one predicate: URI characters, balanced parentheses, prose punctuation off', { skip: !hasJq && 'jq not installed' }, () => {
+    const r = runCodexChecks([
+      tavily('item_1', 'tavily_search', { query: 'q' }, asText({ results: [
+        { url: 'https://x.org/paper(A)' },
+        { url: 'https://en.wikipedia.org/wiki/Foo_(album)' },
+        { url: 'https://x.org/a' },
+        { url: 'https://arxiv.org/abs/2307.03172' },
+      ] })),
+      message('item_2', [
+        'HTTPS://FABRICATED.EXAMPLE/paper',
+        'See https://x.org/paper(B).',
+        'Wiki: https://en.wikipedia.org/wiki/Foo_(album)',
+        'Link [t](https://x.org/a) and a cell |https://x.org/a| here',
+        // a Korean particle running straight on from the URL, escaped to keep this file ASCII
+        'https://arxiv.org/abs/2307.03172\uC5D0 \uB530\uB974\uBA74',
+        '[https://x.org/a](https://x.org/a)',
+        '(see https://x.org/a), **https://x.org/a**',
+      ].join('\n')),
+    ]);
+    assert.equal(r.cited, 5, "distinct normalized URLs");
+    assert.deepEqual(r.notOpened, ['https://fabricated.example/paper', 'https://x.org/paper(B)'],
+      'an upper-case scheme is still a URL; a different parenthesized path is a different URL; '
+      + 'balanced parentheses, markdown, table pipes and a Korean particle cause no false flag');
+  });
+
+  it('says the report cites no URL rather than passing clean', { skip: !hasJq && 'jq not installed' }, () => {
+    const r = runCodexChecks([
+      tavily('item_1', 'tavily_search', { query: 'q' }, asText({ results: [{ url: 'https://x.org/a' }] })),
+      message('item_2', 'An answer that cites nothing.'),
+    ]);
+    assert.equal(r.count, 1);
+    assert.equal(r.cited, 0);
+    assert.deepEqual(r.notOpened, []);
   });
 });
 

@@ -15,7 +15,10 @@ applies.
 In that transcript, assistant entries carry `message.content[]` items
 `{type: "tool_use", id, name, input}`, and user entries carry `message.content[]` items
 `{type: "tool_result", tool_use_id, is_error, content}`. A Tavily MCP result's `content` is a
-list of `{type: "text", text}` items whose text is the Tavily response as JSON, or a string.
+string or a list of `{type: "text", text}` items. The text is the Tavily response either as JSON
+or in the formatted text the Tavily MCP server prints; Phase 3 step 2 says how source records are
+read from each, and the reduction below applies it unchanged. Its limit applies here too: a line
+inside a returned page's text that begins `URL: ` is read as a result line.
 
 ## Reduction
 
@@ -29,8 +32,12 @@ jq -cs '
   | .[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result")
   | ($names[.tool_use_id] // "") as $tool
   | select(($tool | test("tavily"; "i")) and ($tool | test("search|extract"; "i")) and .is_error != true)
+  | [.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end] as $texts
+  | ([$texts[] | try fromjson catch empty] | map(objects)) as $json
   | {tool: $tool,
-     records: [.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end | try fromjson catch empty | objects]}
+     records: (if ($json | length) > 0 then $json
+               else [{results: [$texts[] | split("\n")[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
+                    | map(select(.results | length > 0)) end)}
 ' "$T" > /tmp/goal_research_calls_${SUFFIX}.jsonl
 ```
 

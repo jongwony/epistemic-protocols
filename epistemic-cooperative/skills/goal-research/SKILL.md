@@ -32,7 +32,7 @@ goal-research
 runner : claude | codex        (claude when none is designated)
 ```
 
-Read the runner designation from the request's words as well as its arguments: a leading `claude` or `codex` argument, or the request's wording outside the research question. Nothing inside the research question is removed or read as a designation. Where wording could be either — a runner named in what may be part of the question — ask once which it is. With no designation, the runner is `claude`.
+Read the runner designation from the request's words as well as its arguments. A leading `claude` or `codex` designates the runner only when it stands as a separate leading argument and what follows reads as the whole question; wording outside the research question designates as well. Where the leading word could instead open the question — `Claude Shannon's 1948 paper…`, `codex CLI sandbox defaults` — ask once which it is. Nothing is removed from inside the question. With no designation, the runner is `claude`.
 
 | Runner | Route | Precondition |
 |---|---|---|
@@ -43,14 +43,14 @@ Record the runner actually used. A precondition found missing before launch is s
 
 ## Phase 1: Argument Capture
 
-1. If `/goal-research` is invoked with an argument, the research question is that argument after any leading runner argument, carried verbatim — nothing is removed from inside it.
+1. If `/goal-research` is invoked with an argument, the research question is that argument after a leading runner designation, read as the Caller Signature says, carried verbatim — nothing is removed from inside it.
 2. If invoked without a research question, ask the user once for it, then proceed.
 
 The research question is passed unchanged into the research brief — paraphrasing is prohibited.
 
 ## Phase 2: Launch (Background)
 
-Generate a unique suffix for this run's temp files: `SUFFIX=$(openssl rand -hex 4)`
+Generate a unique suffix for this run's temp files: `SUFFIX=$(openssl rand -hex 4)`. Shell state does not persist between separate command calls, so substitute the generated value literally for `${SUFFIX}` in every later block.
 
 ### Research brief
 
@@ -81,7 +81,7 @@ Report {inquire}'s record as it stands at completion, refined as follows:
 
 ### Runner: claude
 
-Start a background subagent with its own context and the brief as its whole task. It receives the brief, not this conversation's history. Wait for the host's completion notification — do not poll.
+Before launch, confirm that Tavily search and Tavily extract are available to the subagent; where either is missing, surface the missing capability and stop. Start a background subagent with its own context and the brief as its whole task. It receives the brief, not this conversation's history. Wait for the host's completion notification — do not poll.
 
 ### Runner: codex
 
@@ -153,18 +153,29 @@ The runner's final report **is** the research trace/answer — **forward it verb
 
 ### 2. The tool record
 
-The checks read the run's own record of its tool calls, never the run's description of them. From that record they keep only the **successful Tavily calls**: a Tavily search or extract call that completed without error — a call that only started, failed, or carries an error does not count. From each one they read its **source records**: the `results[]` entries of the Tavily response, each naming its `url`. What a call asked for (its arguments, a URL inside a query) is never evidence, and neither is a link inside a returned page or an extract's `failed_results`.
+The checks read the run's own record of its tool calls, never the run's description of them. From that record they keep only the **successful Tavily calls**: a Tavily search or extract call that completed without error — a call that only started, failed, or carries an error does not count. From each one they read its **source records**, the URLs the Tavily response returned as results. What a call asked for (its arguments, a URL inside a query) is never evidence, and neither is an extract's failed URL.
 
-The record is reduced to one line per successful Tavily call, `{"tool": <tool name>, "records": [<parsed Tavily response>, …]}`, in `/tmp/goal_research_calls_${SUFFIX}.jsonl`:
+A Tavily response reaches the record in one of two forms, and the source records are read from whichever is present:
 
-- **codex**: the filtered events. Each Tavily call is an `mcp_tool_call` item with its `server`, `tool`, `status`, `error`, and `result`; the Tavily response is the result's `structured_content`, or the JSON text inside its `content[].text`.
+- **JSON**: a response object, as structured content or as JSON text — its `results[].url`.
+- **Formatted text** (the form the Tavily MCP server prints): one line `URL: <url>` per result, at the start of a line. Image lines (`[n] URL: …`) and the `Content:` and `Raw Content:` text are not source records. A line inside a returned page's text that itself begins `URL: ` cannot be told apart from a result line, so it is read as one; the limit runs toward missing a flag, never toward a false one.
+
+A successful call whose response yields neither form is counted as unreadable: URLs it returned cannot be confirmed either way.
+
+The record is reduced to one line per successful Tavily call, `{"tool": <tool name>, "records": [{"results": [{"url": …}, …]}, …]}` — `records` empty where the response could not be read — in `/tmp/goal_research_calls_${SUFFIX}.jsonl`:
+
+- **codex**: the filtered events. Each Tavily call is an `mcp_tool_call` item with its `server`, `tool`, `status`, `error`, and `result`; the response is the result's `structured_content` or the text inside its `content[].text`.
 
   ```bash
   jq -c 'select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
            and ((.item.server // "") + " " + (.item.tool // "") | test("tavily"; "i"))
            and (.item.tool // "" | test("search|extract"; "i")))
+         | [.item.result.content[]? | select(.type=="text") | .text] as $texts
+         | ([.item.result.structured_content?, ($texts[] | try fromjson catch empty)] | map(objects)) as $json
          | {tool: .item.tool,
-            records: [.item.result | (.structured_content?, (.content[]? | select(.type=="text") | .text | try fromjson catch empty)) | objects]}' \
+            records: (if ($json | length) > 0 then $json
+                      else [{results: [$texts[] | split("\n")[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
+                           | map(select(.results | length > 0)) end)}' \
     /tmp/goal_research_json_${SUFFIX}.jsonl > /tmp/goal_research_calls_${SUFFIX}.jsonl
   ```
 
@@ -174,26 +185,43 @@ The record these checks read is the Tavily route the brief directs. A page the r
 
 ### 3. Checks
 
-One script reads the calls file and the report, and prints the successful Tavily call count, the cited URLs no successful Tavily result returned, and the extracted URLs. Cited, returned, and extracted URLs pass through the same normalization: fragment, trailing punctuation, and trailing slash dropped; scheme and host lowercased.
+One script reads the calls file and the report, and prints the successful Tavily call count, how many of those returned a response it cannot read, how many URLs the report cites, the cited URLs no successful Tavily result returned, and the extracted URLs.
+
+Every URL — cited, returned, or extracted — is read by one predicate. Extraction takes the URI characters of RFC 3986 (ASCII letters and digits, `-._~:/?#@!$&'()*+,;=%`), the scheme matched in any case; `[` and `]` are left out, as RFC 3986 admits them only around an IP-literal host and in prose they bracket a link. Then the fragment is dropped; trailing prose punctuation `.,;:!?*_'` is removed, and a trailing `)` only while it is unbalanced within the URL, so parentheses that belong to it stay; a trailing slash is dropped; scheme and host are lowercased.
 
 ```bash
 C=/tmp/goal_research_calls_${SUFFIX}.jsonl
 R=/tmp/goal_research_report_${SUFFIX}.txt
 urls() {
-  grep -oE 'https?://[^]["(){}<>`[:space:]\\]+' | awk '{
-    sub(/#.*/, ""); sub(/[.,;:!?*_'\'']+$/, ""); sub(/\/$/, "")
-    i = index($0, "://"); rest = substr($0, i + 3); j = index(rest, "/"); if (j == 0) j = length(rest) + 1
-    print tolower(substr($0, 1, i + 2 + j - 1)) substr(rest, j)
-  }' | sort -u
+  LC_ALL=C grep -oiE "https?://[A-Za-z0-9._~:/?#@!\$&'()*+,;=%-]+" | LC_ALL=C awk '{
+    u = $0; sub(/#.*/, "", u)
+    do {
+      p = u
+      sub(/[.,;:!?*_'\'']+$/, "", u)
+      if (substr(u, length(u)) == ")") {
+        t = u; o = gsub(/\(/, "", t); t = u; c = gsub(/\)/, "", t)
+        if (c > o) u = substr(u, 1, length(u) - 1)
+      }
+    } while (u != p)
+    sub(/\/$/, "", u)
+    i = index(u, "://"); rest = substr(u, i + 3); j = match(rest, /[\/?]/); if (j == 0) j = length(rest) + 1
+    print tolower(substr(u, 1, i + 2 + j - 1)) substr(rest, j)
+  }' | LC_ALL=C sort -u
 }
 echo "successful Tavily calls: $(jq -s 'length' "$C")"
+echo "  of which with a response this check cannot read: $(jq -s '[.[] | select(.records == [])] | length' "$C")"
+echo "cited URLs: $(urls < "$R" | wc -l | tr -d ' ')"
 echo '--- cited, not opened in this run ---'
-comm -23 <(urls < "$R") <(jq -r '.records[].results[]?.url? | strings' "$C" | urls)
+LC_ALL=C comm -23 <(urls < "$R") <(jq -r '.records[].results[]?.url? | strings' "$C" | urls)
 echo '--- extracted ---'
 jq -r 'select(.tool | test("extract"; "i")) | .records[].results[]?.url? | strings' "$C" | urls
 ```
 
-**Zero-call.** If the successful Tavily call count is `0`, the run has **no successful Tavily call**: nothing it says was retrieved through the designated route. Do not present its output as verified research. The Source Check says so first, as a statement covering the whole trace below it — every claim there is recalled-from-training, the runner's own inference, open, none of it filled by a citation — and the trace itself stays unedited. For codex, surface the warn file as well — an MCP that failed to start leaves its trace there, not in the narrative.
+**Zero-call.** If the successful Tavily call count is `0`, the run has **no successful Tavily call**: nothing in the trace was retrieved through the designated route, and its claims stand as the runner's own, open, unchecked. Do not present its output as verified research. The Source Check says so first, as a statement covering the whole trace below it, and the trace itself stays unedited. For codex, surface the warn file as well — an MCP that failed to start leaves its trace there, not in the narrative.
+
+**Unreadable responses.** Where that count is above zero, the Source Check states beside the flags: "N successful Tavily calls returned a response this check cannot read; URLs they returned cannot be confirmed".
+
+**No citation.** Where the report cites no URL, the Source Check says "the report cites no URL; no claim carries a checkable citation", in place of a clean pass.
 
 **Cited-source check.** Each URL under `cited, not opened in this run` is flagged, per URL, as `not opened in this run`: no successful Tavily result of this run returned it, so what rests on it is the runner's own inference and open, whatever label it carries. Then read the report's `verified` claims: one whose sources all lie outside `extracted` is flagged `verified, but not extracted` — at most a snippet supported it.
 
@@ -218,7 +246,7 @@ rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl
 
 ## Phase 4: Output
 
-Present the items the run returned as the user's to settle, then the check results, then the runner's narrative verbatim as the trace. Those items are lifted from the narrative into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the Phase 3 narrative as the trace body — do not dump the raw event stream or tool record:
+Present the check results first, then the items the run returned as the user's to settle, then the runner's narrative verbatim as the trace — so a statement that the check found no successful Tavily call, or could not read or run it, is the first thing the user reads. The items to settle are lifted from the narrative into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the Phase 3 narrative as the trace body — do not dump the raw event stream or tool record:
 
 ```
 ## Goal Research Result
@@ -226,14 +254,16 @@ Present the items the run returned as the user's to settle, then the check resul
 Target: {research_question}
 Runner: {claude | codex}
 
---- Yours to Settle ---
-{each item the run returned as the user's, with what it needs; or "none returned"}
-
 --- Source Check ---
-{"no successful Tavily call — every claim in the trace below is recalled-from-training, the runner's own inference, open";
+{"no successful Tavily call — nothing in the trace below was retrieved through the designated route; its claims stand as the runner's own, open, unchecked";
+ or "not run: the runner's tool record is not readable from this session — sources and strength labels are the runner's own, unchecked";
+ or "the report cites no URL; no claim carries a checkable citation";
  or cited URLs no successful Tavily result of this run returned, each listed as `not opened in this run`, and verified claims none of whose sources an extract returned, each listed as `verified, but not extracted`;
  or "every cited URL was returned by a successful Tavily result of this run";
- or "not run: the runner's tool record is not readable from this session — sources and strength labels are the runner's own, unchecked"}
+ with, wherever it applies, "N successful Tavily calls returned a response this check cannot read; URLs they returned cannot be confirmed"}
+
+--- Yours to Settle ---
+{each item the run returned as the user's, with what it needs; or "none returned"}
 
 --- Trace ---
 {runner_narrative}
