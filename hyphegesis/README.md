@@ -50,7 +50,7 @@ These are the questions the map answers from the work in front of it — guidanc
 | Lines of work | Which lines of thinking the work needs, and what each does |
 | Order | Whether they run in sequence, side by side, or as dependencies allow |
 | Independence | Whether lines see each other's results before those results combine |
-| Combination | How separately produced results are combined (the user's to decide where they diverge) |
+| Combination | How separately produced results are combined (the user's to decide) |
 | Stopping | When each line, and the whole method, stops (the user's to decide) |
 | Destination | Where each result goes beyond the end summary every result returns in — a next unit of work, for one (the user's to decide) |
 

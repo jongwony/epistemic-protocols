@@ -19,6 +19,8 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
+instance : Nonempty NavigationBlock := ⟨⟨"", ⟨"", ""⟩, "", none, ""⟩⟩
+
 theorem silence (respond session : Context P → Response P) (c : Context P) :
     conduct respond session c [] = .holding c := by
   simp [conduct]
@@ -46,19 +48,25 @@ theorem uncovered_redraws (respond session : Context P → Response P) (c : Cont
         (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
   simp [conduct, hre, hw, hc, hr]
 
+theorem observe_extends (c : Context P) : c <+: observe c := by
+  simp only [observe]
+  exact (List.prefix_append _ _).trans (List.prefix_append _ _)
+
 theorem each_step_continues_or_closes (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : conduct respond session c (u :: us) = o) :
-    (∃ c', conduct respond session c' us = o) ∨
+    (∃ c', c <+: c' ∧ conduct respond session c' us = o) ∨
     (isFilled (withdrawal (observe (fuse c u))) = true ∧
       o = .withdrawn (closed (observe (fuse c u)))) ∨
     (isFilled (resolution (observe (fuse c u))) = true ∧ Covered (observe (fuse c u)) ∧
       o = .conducted (observe (fuse c u)) (respond (observe (fuse c u)))) ∨
     (isFilled (relay (observe (fuse c u))) = true ∧
       o = .relayed (observe (fuse c u)) (respond (observe (fuse c u)))) := by
+  have grows : ∀ t : List (Turn P), c <+: observe (fuse c u) ++ t := fun t =>
+    ((List.prefix_append c [u.val]).trans (observe_extends _)).trans (List.prefix_append _ _)
   simp only [conduct] at h
   split at h
-  · exact .inl ⟨_, h⟩
+  · exact .inl ⟨_, grows _, h⟩
   · split at h
     · exact .inr (.inl ⟨by assumption, h.symm⟩)
     · split at h
@@ -66,7 +74,7 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
         exact .inr (.inr (.inl ⟨hc.1, hc.2, h.symm⟩))
       · split at h
         · exact .inr (.inr (.inr ⟨by assumption, h.symm⟩))
-        · exact .inl ⟨_, h⟩
+        · exact .inl ⟨_, grows _, h⟩
 
 theorem conducted_by_person_covered (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
@@ -76,7 +84,7 @@ theorem conducted_by_person_covered (respond session : Context P → Response P)
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hr, hc, h'⟩ | ⟨_, h'⟩
+        ⟨c', -, h'⟩ | ⟨_, h'⟩ | ⟨hr, hc, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
     · cases h'
@@ -91,16 +99,12 @@ theorem relayed_by_person (respond session : Context P → Response P) (c : Cont
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨hr, h'⟩
+        ⟨c', -, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨hr, h'⟩
     · exact ih c' h'
     · cases h'
     · cases h'
     · cases h'
       exact ⟨hr, rfl⟩
-
-theorem observe_extends (c : Context P) : c <+: observe c := by
-  simp only [observe]
-  exact (List.prefix_append _ _).trans (List.prefix_append _ _)
 
 theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P)
@@ -110,7 +114,7 @@ theorem withdrawn_by_person (respond session : Context P → Response P) (c : Co
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨hw, h'⟩ | ⟨_, _, h'⟩ | ⟨_, h'⟩
+        ⟨c', -, h'⟩ | ⟨hw, h'⟩ | ⟨_, _, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨_, hw, rfl⟩
@@ -153,11 +157,13 @@ theorem closure_hands_off (c : Context P) (t : Response P) :
   ⟨rfl, rfl⟩
 
 theorem handoff_carries_obligations (c : Context P) :
-    (emitted c).record = record c ∧ (emitted c).residual = residual c ∧
-      (emitted c).deferred = deferred c ∧ (emitted c).required = required c ∧
+    (emitted c).plan = draft c ∧ (emitted c).record = record c ∧
+      (emitted c).residual = residual c ∧ (emitted c).deferred = deferred c ∧
+      (emitted c).required = required c ∧ (emitted c).feasibility = feasibility c ∧
       (emitted c).lifetime = lifetime c ∧ (emitted c).placement = placement c ∧
-      (emitted c).pointer = pointer c ∧ (emitted c).dissent = dissent c :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
+      (emitted c).pointer = pointer c ∧ (emitted c).source = source c ∧
+      (emitted c).dissent = dissent c :=
+  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 theorem withdrawal_keeps_partial_record (c : Context P) :
     (closed c).record = record c ∧ (closed c).residual = residual c ∧
