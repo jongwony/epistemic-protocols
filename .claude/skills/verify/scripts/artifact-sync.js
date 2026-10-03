@@ -1246,86 +1246,11 @@ function checkPackagedAgentContractSync(ctx) {
   }
 }
 
-// ============================================================
-// Check: Ink Body Byte-Identity (copied-sibling drift guard)
-// ============================================================
-// proactive-epistemic-ink.md reproduces the canonical Epistemic Ink body
-// verbatim rather than referencing it — a per-turn injected Output Style
-// cannot dereference a sibling file at runtime, so the only safe carrier is
-// a literal copy. This check pins that reproduction: the region of
-// proactive-epistemic-ink.md from its own "# Epistemic Protocol Formatting"
-// heading up to (not including) its "# Per-Turn Reminder" heading must be
-// byte-identical (module trailing-newline padding at the cut point) to
-// epistemic-ink.md's "# Epistemic Protocol Formatting" heading through EOF.
-// Any future sibling Ink-derived style should extend SIBLING_STYLES below.
-function checkInkBodyIdentity(ctx) {
-  const { projectRoot, results } = ctx;
-  const CHECK = 'ink-body-identity';
-  const CANONICAL = 'epistemic-cooperative/styles/epistemic-ink.md';
-  const HEADING = '# Epistemic Protocol Formatting';
-  const HEADING_LINE_PATTERN = new RegExp('^' + escapeRegex(HEADING) + '$', 'm');
-  const SIBLING_STYLES = [
-    { file: 'epistemic-cooperative/styles/proactive-epistemic-ink.md', endHeading: '# Per-Turn Reminder' },
-  ];
-
-  const canonicalFull = path.join(projectRoot, CANONICAL);
-  if (!fs.existsSync(canonicalFull)) {
-    results.fail.push({ check: CHECK, file: CANONICAL, message: `Canonical Output Style source not found: ${CANONICAL}` });
-    return;
-  }
-  const canonicalContent = fs.readFileSync(canonicalFull, 'utf8');
-  const canonicalMatch = HEADING_LINE_PATTERN.exec(canonicalContent);
-  if (!canonicalMatch) {
-    results.fail.push({ check: CHECK, file: CANONICAL, message: `Missing canonical body heading: "${HEADING}"` });
-    return;
-  }
-  const canonicalBody = canonicalContent.slice(canonicalMatch.index).replace(/\n+$/, '');
-
-  for (const { file: siblingPath, endHeading } of SIBLING_STYLES) {
-    const siblingFull = path.join(projectRoot, siblingPath);
-    if (!fs.existsSync(siblingFull)) {
-      results.fail.push({ check: CHECK, file: siblingPath, message: `Sibling Output Style source not found: ${siblingPath}` });
-      continue;
-    }
-    const siblingContent = fs.readFileSync(siblingFull, 'utf8');
-    const siblingMatch = HEADING_LINE_PATTERN.exec(siblingContent);
-    if (!siblingMatch) {
-      results.fail.push({ check: CHECK, file: siblingPath, message: `Missing reproduced body heading: "${HEADING}"` });
-      continue;
-    }
-    const siblingIdx = siblingMatch.index;
-    const endHeadingPattern = new RegExp('^' + escapeRegex(endHeading) + '$', 'm');
-    const endMatch = endHeadingPattern.exec(siblingContent.slice(siblingIdx));
-    if (!endMatch) {
-      results.fail.push({ check: CHECK, file: siblingPath, message: `Missing closing heading: "${endHeading}"` });
-      continue;
-    }
-    const siblingEndIdx = siblingIdx + endMatch.index;
-    const siblingBody = siblingContent.slice(siblingIdx, siblingEndIdx).replace(/\n+$/, '');
-
-    if (siblingBody !== canonicalBody) {
-      results.fail.push({
-        check: CHECK,
-        file: siblingPath,
-        message: `Reproduced Epistemic Ink body diverges from ${CANONICAL} — the copy must stay byte-identical to the canonical source between "${HEADING}" and EOF (only the surrounding overlay sections may differ)`,
-      });
-      continue;
-    }
-
-    results.pass.push({
-      check: CHECK,
-      file: siblingPath,
-      message: `Reproduced Epistemic Ink body verified byte-identical to ${CANONICAL}`,
-    });
-  }
-}
-
 module.exports = {
-  CHECKS: [checkCrossReference, checkRoutingIndexContract, checkRequiredSections, checkVersionStaleness, checkCodexManifestSync, checkPackagedAgentContractSync, checkCrossRefScan, checkOnboardSync, checkInkBodyIdentity],
+  CHECKS: [checkCrossReference, checkRoutingIndexContract, checkRequiredSections, checkVersionStaleness, checkCodexManifestSync, checkPackagedAgentContractSync, checkCrossRefScan, checkOnboardSync],
   checkCodexManifestSync,
   checkCrossRefScan,
   checkCrossReference,
-  checkInkBodyIdentity,
   checkOnboardSync,
   checkPackagedAgentContractSync,
   checkRequiredSections,

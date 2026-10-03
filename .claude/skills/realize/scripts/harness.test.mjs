@@ -495,6 +495,11 @@ console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.
   env.REALIZE_RUNNER = 'claude';
   env.HOME = root;
   env.FAKE_CLAUDE_LOG = join(root, 'claude.log');
+  // The style arms read styleSource, which ships outside this repo under HOME.
+  const { styleSource } = JSON.parse(readFileSync(join(HERE, '..', 'harness.config.json'), 'utf8'));
+  const style = styleSource.replace(/^~/, root);
+  mkdirSync(dirname(style), { recursive: true });
+  writeFileSync(style, '---\nname: Epistemic Ink\n---\n');
   return () => readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n').map(JSON.parse);
 }
 const pluginDirOf = (args) => (args.includes('--plugin-dir') ? args[args.indexOf('--plugin-dir') + 1] : null);

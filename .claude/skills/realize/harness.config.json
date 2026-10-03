@@ -1,7 +1,7 @@
 {
   "runner": "claude",
   "configDir": "~/.claude-eval",
-  "styleSource": "epistemic-cooperative/styles/epistemic-ink.md",
+  "styleSource": "~/.claude/plugins/marketplaces/cc-plugin/ink-figure/styles/epistemic-ink.md",
   "styleName": "Epistemic Ink",
   "models": [
     "claude-sonnet-5"

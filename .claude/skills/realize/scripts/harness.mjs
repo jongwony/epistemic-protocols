@@ -274,7 +274,11 @@ function resetVolatile() {
 
 function setupClaude() {
   mkdirSync(join(CONFIG_DIR, 'output-styles'), { recursive: true });
-  cpSync(expand(CFG.styleSource), join(CONFIG_DIR, 'output-styles', 'epistemic-ink.md'));
+  // The style ships outside this repo (styleSource), so a machine without it can
+  // still set up and run the arms that do not load it.
+  const styleSource = expand(CFG.styleSource);
+  const styleStaged = existsSync(styleSource);
+  if (styleStaged) cpSync(styleSource, join(CONFIG_DIR, 'output-styles', 'epistemic-ink.md'));
 
   // Per-arm settings. These are passed with --settings so that the isolated
   // config dir itself stays empty of policy — an arm's treatment must come from
@@ -287,7 +291,9 @@ function setupClaude() {
       JSON.stringify(settings, null, 2) + '\n');
   }
   console.log(`config dir : ${CONFIG_DIR}`);
-  console.log(`style      : ${join(CONFIG_DIR, 'output-styles', 'epistemic-ink.md')}`);
+  console.log(styleStaged
+    ? `style      : ${join(CONFIG_DIR, 'output-styles', 'epistemic-ink.md')}`
+    : `style      : not found at ${styleSource} — the style arms cannot run until it is installed`);
   console.log(`arm settings: ${join(SKILL, 'arms')}`);
   console.log('');
   console.log('Next, authenticate that config dir once (interactive, one time):');
