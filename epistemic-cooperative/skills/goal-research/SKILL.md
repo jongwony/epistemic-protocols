@@ -18,10 +18,11 @@ goal-research
 │   ├── zero-call: did any external search happen
 │   ├── cited ⊆ retrieved: every cited URL appears in the run's tool results
 │   └── verified ⊆ extracted: each `verified` claim has a source the run opened
-└── Presentation (check results beside the verbatim trace) + Codex temp-file cleanup
+└── Presentation: open items handed to the user as theirs to settle, check results, verbatim trace
+    (+ Codex temp-file cleanup)
 ```
 
-**Why this composition**: running the research in its own context isolates it from the main conversation while still surfacing the full trace back. A research run can complete, answer fluently, and cite sources it never opened — the model falls back to recalled knowledge, and nothing in the narrative distinguishes that from a searched answer. So the run's report is checked against the run's own tool record, and the run's own account of what it searched or opened is treated as part of the report under check, never as the check.
+**Why this composition**: `/inquire` carries the epistemic contract — its reading of each uncertainty, its record of what collection reached, and what stays open for the person to settle. goal-research refines that contract for the research domain and for a background run; it adds no second reading beside it. Running the research in its own context isolates it from the main conversation while still surfacing the full trace back. A research run can complete, answer fluently, and cite sources it never opened — the model falls back to recalled knowledge, and nothing in the narrative distinguishes that from a searched answer. So the run's report is checked against the run's own tool record, and the run's own account of what it searched or opened is treated as part of the report under check, never as the check.
 
 ## Caller Signature
 
@@ -60,19 +61,20 @@ Research target:
 {research_question}
 
 Workflow:
-1. Invoke {inquire} (the Aitesis skill) to drive external verification through Tavily search and Tavily extract.
-2. Open the page of each primary source a claim rests on with Tavily extract. A search-result snippet alone supports a claim at most as "mostly".
-3. Cite each external source by its URL.
+1. Run {inquire} (the Aitesis skill) on the research target, collecting external evidence through Tavily search and Tavily extract. Its reading of each uncertainty, its reach record, and what it leaves open are the report's substance; the lines below refine them for research and add no second reading.
+2. Open the page of each primary source a filled claim rests on with Tavily extract; a search-result snippet alone fills a claim only as "mostly".
+3. No person answers in this session. An uncertainty {inquire} reads as the person's to settle — a value, preference, or scope only they hold, or an unknown that is their own — is neither answered nor settled here: it returns open, with its reach and what would settle it. Fill no held value yourself; a candidate you see is shown as yours, beside what decides it.
+4. Cite each external source by its URL.
 
-Report:
-- Each factual claim with its source URL(s) and a verification strength:
-  - verified: its primary source's page was opened in this session and states the claim
-  - mostly: the core claim was checked in this session; surrounding detail is synthesized, or the source was seen only as a search-result snippet
-  - reconstructed: a detail such as a volume, issue, page range, date, or number comes from recall and needs a spot-check
-- The weakest link: the claim or detail the conclusions lean on that has the weakest strength, named explicitly.
-- Every absence or novelty claim ("no study has…", "untested", "novel", "first to…") with the search scope that grounds it: the queries run, the sources reached, and the sources not reached. The claim reaches only as far as that scope.
+Report {inquire}'s record as it stands at completion, refined as follows:
+- An uncertainty filled by an external citation carries its source URL(s) and how far the citation reaches:
+  - verified: the source's page was opened with Tavily extract in this session and states the claim
+  - mostly: the source was seen only as a search-result snippet, or its page checked the core claim while surrounding detail is synthesized
+- A detail from recall (a volume, issue, page range, date, or number that no source in this session gave) is not a citation. Mark it reconstructed, as your own inference, and leave its item open, needing a spot-check.
+- The weakest link: the claim or detail the conclusions lean on that stands weakest, named explicitly.
+- An absence or novelty claim ("no study has…", "untested", "novel", "first to…") reaches only as far as {inquire}'s reach record for it; carry that record beside the claim.
 - For each empirical effect cited: its replication status and any retraction, where checkable in this session, otherwise "not checked". An effect that failed replication is reported as a design warning, not a quantitative law.
-- Residual uncertainty where sources contradict or coverage is incomplete.
+- Open: every item still open — the person's to settle, reconstructed, or short of ground — each with its reach, the person's marked as theirs.
 ```
 
 ### Runner: claude
@@ -168,7 +170,7 @@ For claude, count the Tavily search and extract calls in the record.
 
 If that count is `0`, the run performed **no external searches**. Do not
 present its output as verified research. Say so in the first line of the
-report, mark every claim in it as recalled-from-training, and, for codex, surface the
+report, mark every claim in it as recalled-from-training — the runner's own inference, open, none of it filled by a citation — and, for codex, surface the
 warn file — an MCP that failed to start leaves its trace there, not in the
 narrative.
 
@@ -180,7 +182,7 @@ Three URL sets, each under the same pattern and normalization (fragment and trai
 - **retrieved**: the URLs anywhere in the run's completed tool calls — arguments and results, including JSON text nested inside a result
 - **extracted**: the URLs passed to completed, error-free extract calls
 
-Each cited URL outside **retrieved** is flagged, per URL, as `not opened in this run` — the run cited it without any of its own tool calls returning it. Then read the report's `verified` claims: one whose sources all lie outside **extracted** is flagged `verified, but not extracted` — at most a snippet supported it.
+Each cited URL outside **retrieved** is flagged, per URL, as `not opened in this run` — the run cited it without any of its own tool calls returning it, so what rests on it is the runner's own inference and open, whatever label it carries. Then read the report's `verified` claims: one whose sources all lie outside **extracted** is flagged `verified, but not extracted` — at most a snippet supported it.
 
 For codex:
 
@@ -217,13 +219,16 @@ rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl
 
 ## Phase 4: Output
 
-Present the check results, then the runner's narrative verbatim as the trace. Use the Phase 3 narrative as the trace body — do not dump the raw event stream or tool record:
+Present the items the run returned as the user's to settle, then the check results, then the runner's narrative verbatim as the trace. Those items are lifted from the narrative into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the Phase 3 narrative as the trace body — do not dump the raw event stream or tool record:
 
 ```
 ## Goal Research Result
 
 Target: {research_question}
 Runner: {claude | codex}
+
+--- Yours to Settle ---
+{each item the run returned as the user's, with what it needs; or "none returned"}
 
 --- Source Check ---
 {zero-call result; cited URLs not opened in this run, each listed; verified claims not extracted, each listed;
@@ -234,7 +239,7 @@ Runner: {claude | codex}
 {runner_narrative}
 ```
 
-Acceptance criterion: a real research run was launched on the designated runner, its trace was returned to the main session with the source-check result or the statement that the check could not run, and, for codex, the temp files were cleaned up.
+Acceptance criterion: a real research run was launched on the designated runner, its trace was returned to the main session with the source-check result or the statement that the check could not run, the items it returned as the user's were presented as theirs to settle, and, for codex, the temp files were cleaned up.
 
 ## Rules
 
@@ -243,4 +248,4 @@ Acceptance criterion: a real research run was launched on the designated runner,
 - Failure modes (Codex missing, a missing subagent or Tavily capability, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back to the other runner.
 - Check results are read from the run's own tool record and presented beside the narrative; the narrative itself is forwarded unedited.
 - For codex, always clean up the temp files after reading the output.
-- The skill is a delegation channel only — interpretation, follow-up questions, and downstream protocol routing belong to the main session after the trace returns.
+- The skill is a delegation channel only — interpretation, follow-up questions, and downstream protocol routing belong to the main session after the trace returns. What the run returns as the user's to settle reaches the user as theirs, as Phase 4 presents it.

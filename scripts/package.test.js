@@ -410,21 +410,47 @@ describe('goal-research runtime contract', () => {
     assert.match(skill, /### Runner: codex/, 'the codex route must be specified');
   });
 
-  it('asks the runner for per-claim strength, scoped absence claims, and replication status', () => {
+  // The report form lives in the brief both runners receive. Asserting inside that block
+  // keeps a copy elsewhere in the prose from satisfying the test while the runner never
+  // sees it.
+  const readBrief = () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
-    // The report form lives in the brief both runners receive. Asserting inside that block
-    // keeps a copy elsewhere in the prose from satisfying the test while the runner never
-    // sees it.
     const brief = (skill.match(/```\n([\s\S]*?)```/g) ?? []).find((b) => b.includes('Research target:'));
     assert.ok(brief, 'the research brief must be present');
-    for (const label of ['verified', 'mostly', 'reconstructed']) {
+    return brief;
+  };
+
+  it('refines /inquire\'s reading for research instead of running a second one', () => {
+    const brief = readBrief();
+    // /inquire carries the contract: its reading of each uncertainty, its reach record, and
+    // what stays open. The strength scale subdivides "filled by an external citation"; it is
+    // not a parallel scale, so a detail from recall is the runner's own inference and open.
+    assert.match(brief, /add no second reading/i, 'the brief must state the refinement relation');
+    for (const label of ['verified', 'mostly']) {
       assert.match(brief, new RegExp(`- ${label}:`), `the brief must define the ${label} strength`);
     }
+    assert.match(brief, /filled by an external citation/i, 'verified and mostly subdivide a citation-filled uncertainty');
     assert.match(brief, /snippet/i, 'a search-result snippet must cap a claim below verified');
+    assert.match(brief, /not a citation[\s\S]*reconstructed, as your own inference[\s\S]*open/i,
+      'a detail from recall is the runner\'s own inference and leaves its item open');
     assert.match(brief, /weakest link/i, 'the weakest link must be named');
-    assert.match(brief, /absence or novelty claim[\s\S]*queries run[\s\S]*not reached/i, 'absence claims carry their search scope');
+    assert.match(brief, /absence or novelty claim[\s\S]*reach record/i,
+      'absence claims are scoped by /inquire\'s own reach record, not a second one');
     assert.match(brief, /replication status[\s\S]*retraction/i, 'empirical effects carry replication and retraction status');
     assert.match(brief, /design warning, not a quantitative law/i);
+  });
+
+  it('returns what only the person can settle as open, and presents it to the user as theirs', () => {
+    const brief = readBrief();
+    // A background run has no person. Without this the runner fills a held value itself and
+    // the report presents the runner's choice as settled.
+    assert.match(brief, /No person answers in this session/i);
+    assert.match(brief, /neither answered nor settled here/i, 'the person\'s items return open');
+    assert.match(brief, /Fill no held value yourself/i);
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    const phase4 = skill.slice(skill.indexOf('## Phase 4'), skill.indexOf('## Rules'));
+    assert.match(phase4, /--- Yours to Settle ---/, 'the output must carry the user\'s items in their own block');
+    assert.match(phase4, /neither the runner nor the main session answers or settles them/i);
   });
 
   it('states that an unreadable tool record leaves the source check unrun, not passed', () => {
