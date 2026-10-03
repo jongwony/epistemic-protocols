@@ -20,7 +20,7 @@
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
 | `/realign` | 3-horizon 융합으로 프로젝트 가이드 direction line 도출 | 프로젝트 가이드에 기록된 fused direction line |
-| `/goal-research` | 백그라운드 실행에 위임한 리서치 — 기본은 Claude 서브에이전트, 지정하면 Codex CLI 세션 — Aitesis 와 Tavily 로 검증 | Aitesis 의 기록에 주장마다 검증 강도를 더한 리서치 trace, 당신만 정할 수 있는 것은 열린 채로 당신에게 돌아옴, 그리고 그 기록을 읽을 수 있는 곳에서 인용 출처를 실행 자신의 도구 결과와 대조한 검사 |
+| `/goal-research` | 백그라운드 실행에 위임한 리서치 — 기본은 Claude 서브에이전트, 지정하면 Codex CLI 세션 — Aitesis 와 Tavily 로 검증 | Aitesis 의 기록에 주장마다 검증 강도를 더한 리서치 trace, 당신만 정할 수 있는 것은 열린 채로 당신에게 돌아옴, 그리고 그 기록을 읽을 수 있는 곳에서 인용 출처를 실행 자신의 성공한 Tavily 호출이 돌려준 것과 대조한 검사 |
 
 ## 스킬
 
