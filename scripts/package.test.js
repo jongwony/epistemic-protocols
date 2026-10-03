@@ -427,7 +427,7 @@ describe('goal-research runtime contract', () => {
     // Separate command calls share no shell state, and the claude runner's precondition is
     // checked before launch.
     assert.match(skill, /substitute the generated value literally for `\$\{SUFFIX\}` in every later block/);
-    assert.match(skill, /Before launch, confirm that Tavily search and Tavily extract are available to the subagent/);
+    assert.match(skill, /Before launch, confirm that Tavily search and Tavily extract are available to that run/);
     assert.match(skill, /### Runner: claude/, 'the claude route must be specified');
     assert.match(skill, /### Runner: codex/, 'the codex route must be specified');
   });
@@ -785,6 +785,84 @@ describe('goal-research runtime contract', () => {
     assert.equal(r.count, 1);
     assert.equal(r.cited, 0);
     assert.deepEqual(r.notOpened, []);
+  });
+
+  it('starts the claude runner per host, default claude on every host, each host reference packaged', () => {
+    const REPO_ROOT = path.join(__dirname, '..');
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    const runner = skill.slice(skill.indexOf('### Runner: claude'), skill.indexOf('### Runner: codex'));
+    assert.match(runner, /`claude` stays the default on every host/);
+    assert.match(runner, /\| Claude Code \| A background subagent \| \[Claude Code\]\(references\/host-claude-code\.md\) \|/);
+    assert.match(runner, /\| Codex \| A background `claude -p` process \| \[Codex\]\(references\/host-codex\.md\) \|/);
+    for (const ref of ['host-claude-code.md', 'host-codex.md']) {
+      assert.ok(fs.existsSync(path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', ref)), ref);
+    }
+    const view = buildRuntimeContractViews().find((v) => v.skill === 'goal-research');
+    assert.ok(view, 'goal-research must have a runtime contract view');
+    for (const ref of ['goal-research/references/host-claude-code.md', 'goal-research/references/host-codex.md']) {
+      assert.ok(view.packagedEntries.includes(ref), `${ref} must be packaged`);
+    }
+  });
+
+  it('reduces a claude -p stream-json record under the same predicate (Codex host)', { skip: !hasJq && 'jq not installed' }, () => {
+    const REPO_ROOT = path.join(__dirname, '..');
+    const ref = fs.readFileSync(path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-codex.md'), 'utf8');
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // Event shapes as `claude -p --output-format stream-json --verbose` emits them.
+    const paper = 'https://aclanthology.org/2024.tacl-1.9';
+    const use = (id, name) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', id, name, input: {} }] } });
+    const res = (id, content, isError = null) => ({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: isError, content }] } });
+    const text = (t) => [{ type: 'text', text: t }];
+    const events = [
+      { type: 'system', subtype: 'init', tools: ['mcp__tavily__tavily_search', 'mcp__tavily__tavily_extract', 'Skill'] },
+      use('t1', 'mcp__tavily__tavily_search'),
+      res('t1', text(['Detailed Results:', '', 'Title: P', `URL: ${paper}`, 'Content: c'].join('\n'))),
+      use('t2', 'mcp__tavily__tavily_extract'),
+      res('t2', text(JSON.stringify({ results: [{ url: paper, raw_content: 'page' }], failed_results: [{ url: 'https://failed.example/x', error: 'e' }] }))),
+      use('t3', 'mcp__tavily__tavily_search'),
+      res('t3', 'Permission to use mcp__tavily__tavily_search has been denied.', true),
+      use('t4', 'Read'),
+      res('t4', 'file mentions https://read.example/r'),
+      { type: 'assistant', message: { content: [{ type: 'text', text: 'progress' }] } },
+      { type: 'result', subtype: 'success', is_error: false,
+        result: [`A: ${paper}`, 'B: https://failed.example/x', 'C: https://read.example/r'].join('\n') },
+    ];
+    const suffix = crypto.randomBytes(4).toString('hex');
+    const kinds = [['events', 'jsonl'], ['json', 'jsonl'], ['report', 'txt'], ['calls', 'jsonl']];
+    fs.writeFileSync(tmpFile('events', suffix, 'jsonl'), events.map((e) => JSON.stringify(e)).join('\n') + '\n');
+    try {
+      const script = [
+        pick(ref, 'goal_research_report_', '"result"'),
+        pick(ref, 'tool_use', 'goal_research_calls_'),
+        pick(skill, 'comm -23'),
+      ].join('\n');
+      const r = parseChecks(execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix }, encoding: 'utf8' }));
+      assert.equal(fs.readFileSync(tmpFile('report', suffix, 'txt'), 'utf8').trim().split('\n')[0], `A: ${paper}`,
+        'the narrative is the terminal success result');
+      assert.equal(r.count, 2, 'a denied Tavily call and a non-Tavily call do not count');
+      assert.equal(r.unreadable, 0);
+      assert.deepEqual(r.notOpened, ['https://failed.example/x', 'https://read.example/r']);
+      assert.deepEqual(r.extracted, [paper]);
+    } finally {
+      for (const [kind, ext] of kinds) fs.rmSync(tmpFile(kind, suffix, ext), { force: true });
+    }
+  });
+
+  it('reads the report form as this session\'s reading, beside the record that governs the labels', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // The main session reads the report against the brief; meaning stays a reader's
+    // judgment, so each item is marked as a reading, not a mechanical check, and the
+    // runner is held to no line format.
+    const phase3 = skill.slice(skill.indexOf('## Phase 3'), skill.indexOf('## Phase 4'));
+    assert.match(phase3, /\*\*Report form\.\*\* Read the report against the brief's form and the tool record/);
+    for (const gap of [/claim with no citation/, /absence or novelty claim with no reach/, /no replication or retraction status/, /not marked reconstructed/]) {
+      assert.match(phase3, gap);
+    }
+    assert.match(phase3, /this session's reading of the report, not a mechanical check/);
+    assert.match(phase3, /no line format is required of the runner/);
+    assert.match(phase3, /where the record disagrees the record governs/);
+    const phase4 = skill.slice(skill.indexOf('## Phase 4'), skill.indexOf('## Rules'));
+    assert.match(phase4, /as this session's reading of the report rather than a mechanical check/);
   });
 });
 

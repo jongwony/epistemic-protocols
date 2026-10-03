@@ -12,7 +12,7 @@ Invoke directly with `/goal-research [runner] <research question>` when the user
 goal-research
 ├── Runner designation + research question (argument or one-time prompt)
 ├── Research run (background, its own context)
-│   ├── claude (default): subagent — `/inquire` drives Tavily search + extract
+│   ├── claude (default): a Claude run (subagent, or `claude -p` on a Codex host) — `/inquire` drives Tavily search + extract
 │   └── codex: Codex CLI — builtin `goal` scopes the endpoint, `$inquire` drives Tavily
 ├── Checks against the run's own tool record
 │   ├── zero-call: did any Tavily call succeed
@@ -36,7 +36,7 @@ Read the runner designation from the request's words as well as its arguments. A
 
 | Runner | Route | Precondition |
 |---|---|---|
-| `claude` | A background subagent with its own context, running `/inquire` with Tavily search and extract | The host can start a background subagent whose tools include Tavily search and Tavily extract, and the `/inquire` skill |
+| `claude` | A background Claude run with its own context, running `/inquire` with Tavily search and extract | The host can start such a run whose tools include Tavily search and Tavily extract, and the `/inquire` skill |
 | `codex` | A background `codex exec` session, `/goal`-scoped, running `$inquire` with Tavily | `codex` on PATH; Tavily is reached through Codex's own MCP configuration, and its absence surfaces at the zero-call check |
 
 Record the runner actually used. A precondition found missing before launch is surfaced with the missing capability, and the skill stops there.
@@ -81,7 +81,14 @@ Report {inquire}'s record as it stands at completion, refined as follows:
 
 ### Runner: claude
 
-Before launch, confirm that Tavily search and Tavily extract are available to the subagent; where either is missing, surface the missing capability and stop. Start a background subagent with its own context and the brief as its whole task. It receives the brief, not this conversation's history. Wait for the host's completion notification — do not poll.
+The host is the environment driving this skill, not another user choice; `claude` stays the default on every host. Read only that host's reference, here, before determining availability:
+
+| Host | `claude` runner | Reference |
+|---|---|---|
+| Claude Code | A background subagent | [Claude Code](references/host-claude-code.md) |
+| Codex | A background `claude -p` process | [Codex](references/host-codex.md) |
+
+Other hosts may supply the same capability: a background Claude run with its own context whose tool calls are recorded where this session can read them. Before launch, confirm that Tavily search and Tavily extract are available to that run; where either is missing, surface the missing capability and stop. The run receives the brief as its whole task, not this conversation's history. Wait for the host's completion notification — do not poll.
 
 ### Runner: codex
 
@@ -135,7 +142,7 @@ Wait for the background task completion notification — do not poll or sleep.
 
 The runner's final report **is** the research trace/answer — **forward it verbatim to the presentation step; do NOT regex-parse it**. The checks below sit beside it and never rewrite it. Write it to `/tmp/goal_research_report_${SUFFIX}.txt`, which the checks read.
 
-- **claude**: the subagent's final message. If it is empty or the subagent failed, surface what returned instead of proceeding blank.
+- **claude**: the run's final message, read as the host's reference says. If it is empty or the run failed, surface what returned instead of proceeding blank.
 - **codex**: filter the events file once to its JSON lines, then extract the **final** codex `agent_message` from that — high-reasoning codex streams progress messages first, so the extraction takes the last `agent_message`. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
 
   ```bash
@@ -179,7 +186,7 @@ The record is reduced to one line per successful Tavily call, `{"tool": <tool na
     /tmp/goal_research_json_${SUFFIX}.jsonl > /tmp/goal_research_calls_${SUFFIX}.jsonl
   ```
 
-- **claude**: the subagent's own tool-call record, where the host makes it readable from this session. On Claude Code it is; read [Claude Code record](references/host-claude-code.md) here for where it is and the reduction that writes the same calls file. Where no readable record exists, the checks in step 3 have not run: the Source Check says so, and every source and strength label stands as the runner reported it, unchecked. A subagent's statement of what it searched or opened does not substitute for the record.
+- **claude**: the run's own tool-call record, where the host makes it readable from this session. On Claude Code and on Codex it is; the host's reference ([Claude Code](references/host-claude-code.md), [Codex](references/host-codex.md)) says where it is and gives the reduction that writes the same calls file — read it here. Where no readable record exists, the checks in step 3 have not run: the Source Check says so, and every source and strength label stands as the runner reported it, unchecked. The run's statement of what it searched or opened does not substitute for the record.
 
 The record these checks read is the Tavily route the brief directs. A page the run fetched another way — a host's built-in web search, a shell `curl` — is outside it, so a flag below means "no successful Tavily result of this run returned it", not that no tool ever touched the URL.
 
@@ -227,6 +234,8 @@ jq -r 'select(.tool | test("extract"; "i")) | .records[].results[]?.url? | strin
 
 An exact-match miss can come from a URL variant (a redirect, a tracking parameter) rather than a citation from memory; the flag names the URL so the user can tell which.
 
+**Report form.** Read the report against the brief's form and the tool record, and list in the Source Check what you find missing: a factual claim with no citation; an absence or novelty claim with no reach record behind it; an empirical effect with no replication or retraction status; a detail that reads as recalled — a volume, page, date, or number no returned source gave — not marked reconstructed. Each item is marked as this session's reading of the report, not a mechanical check; no line format is required of the runner. The runner's `verified` and `mostly` labels stand as written, and where the record disagrees the record governs, as `verified, but not extracted` already shows.
+
 ### 4. Codex warnings
 
 Some codex warnings ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the trace:
@@ -237,11 +246,12 @@ grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/goal_research_warn_${SUF
 
 ### 5. Cleanup
 
-After the narrative is forwarded, any failure surfaced, and the checks have run, remove this run's temp files (for claude, only the report and calls files exist):
+After the narrative is forwarded, any failure surfaced, and the checks have run, remove this run's temp files (each route creates only some of them):
 
 ```bash
 rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl /tmp/goal_research_warn_${SUFFIX}.txt \
-  /tmp/goal_research_json_${SUFFIX}.jsonl /tmp/goal_research_report_${SUFFIX}.txt /tmp/goal_research_calls_${SUFFIX}.jsonl
+  /tmp/goal_research_json_${SUFFIX}.jsonl /tmp/goal_research_report_${SUFFIX}.txt /tmp/goal_research_calls_${SUFFIX}.jsonl \
+  /tmp/goal_research_status_${SUFFIX}.txt
 ```
 
 ## Phase 4: Output
@@ -260,7 +270,8 @@ Runner: {claude | codex}
  or "the report cites no URL; no claim carries a checkable citation";
  or cited URLs no successful Tavily result of this run returned, each listed as `not opened in this run`, and verified claims none of whose sources an extract returned, each listed as `verified, but not extracted`;
  or "every cited URL was returned by a successful Tavily result of this run";
- with, wherever it applies, "N successful Tavily calls returned a response this check cannot read; URLs they returned cannot be confirmed"}
+ with, wherever it applies, "N successful Tavily calls returned a response this check cannot read; URLs they returned cannot be confirmed";
+ then, as this session's reading of the report rather than a mechanical check, what the report form is missing — a claim with no citation, an absence or novelty claim with no reach, an empirical effect with no replication or retraction status, a recalled detail not marked reconstructed — or "this session's reading found nothing missing"}
 
 --- Yours to Settle ---
 {each item the run returned as the user's, with what it needs; or "none returned"}
@@ -275,7 +286,7 @@ Acceptance criterion: a real research run was launched on the designated runner,
 
 - Research question is embedded verbatim — no paraphrasing before passing it to the runner.
 - The runner is the designated one, `claude` when none is designated; the research runs in the background, so the main session is free until the completion notification arrives.
-- Failure modes (Codex missing, a missing subagent or Tavily capability, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back to the other runner.
+- Failure modes (Codex or the `claude` CLI missing, a missing Claude run or Tavily capability, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back to the other runner.
 - Check results are read from the run's own tool record and presented beside the narrative; the narrative itself is forwarded unedited.
 - Always clean up this run's temp files after the checks have run.
 - The skill is a delegation channel only — interpretation, follow-up questions, and downstream protocol routing belong to the main session after the trace returns. What the run returns as the user's to settle reaches the user as theirs, as Phase 4 presents it.
