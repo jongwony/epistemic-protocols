@@ -19,8 +19,6 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-instance : Nonempty NavigationBlock := ⟨⟨"", ⟨"", ""⟩, "", none, ""⟩⟩
-
 theorem silence (respond session : Context P → Response P) (c : Context P) :
     conduct respond session c [] = .holding c := by
   simp [conduct]
@@ -51,6 +49,12 @@ theorem uncovered_redraws (respond session : Context P → Response P) (c : Cont
 theorem observe_extends (c : Context P) : c <+: observe c := by
   simp only [observe]
   exact (List.prefix_append _ _).trans (List.prefix_append _ _)
+
+theorem reentry_reads_accumulated (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (h : isFilled (relay (observe c)) = false) :
+    ∃ c₁, c <+: c₁ ∧ start respond session c us = conduct respond session c₁ us :=
+  ⟨_, (observe_extends c).trans (List.prefix_append _ _),
+    start_opens_on_map respond session c us h⟩
 
 theorem each_step_continues_or_closes (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
