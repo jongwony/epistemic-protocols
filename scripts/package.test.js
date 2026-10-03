@@ -11,6 +11,7 @@ const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const zlib = require('zlib');
 const { CANONICAL_PRECEDENCE, CANONICAL_PROTOCOL_SET } = require('./load-protocols');
@@ -398,6 +399,113 @@ describe('goal-research runtime contract', () => {
       'Phase 3 must say what to do when the count is zero',
     );
     assert.match(skill, /recalled-from-training/i, 'zero-search output must be marked as recalled');
+  });
+
+  it('designates the runner from the request, claude when none is designated', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    assert.match(skill, /runner\s*:\s*claude \| codex/, 'the caller signature must name both runners');
+    assert.match(skill, /claude when none is designated/i, 'the default runner must be stated');
+    assert.match(skill, /request's words as well as its arguments/i, 'designations are read from words, not only arguments');
+    assert.match(skill, /### Runner: claude/, 'the claude route must be specified');
+    assert.match(skill, /### Runner: codex/, 'the codex route must be specified');
+  });
+
+  it('asks the runner for per-claim strength, scoped absence claims, and replication status', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // The report form lives in the brief both runners receive. Asserting inside that block
+    // keeps a copy elsewhere in the prose from satisfying the test while the runner never
+    // sees it.
+    const brief = (skill.match(/```\n([\s\S]*?)```/g) ?? []).find((b) => b.includes('Research target:'));
+    assert.ok(brief, 'the research brief must be present');
+    for (const label of ['verified', 'mostly', 'reconstructed']) {
+      assert.match(brief, new RegExp(`- ${label}:`), `the brief must define the ${label} strength`);
+    }
+    assert.match(brief, /snippet/i, 'a search-result snippet must cap a claim below verified');
+    assert.match(brief, /weakest link/i, 'the weakest link must be named');
+    assert.match(brief, /absence or novelty claim[\s\S]*queries run[\s\S]*not reached/i, 'absence claims carry their search scope');
+    assert.match(brief, /replication status[\s\S]*retraction/i, 'empirical effects carry replication and retraction status');
+    assert.match(brief, /design warning, not a quantitative law/i);
+  });
+
+  it('states that an unreadable tool record leaves the source check unrun, not passed', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // A subagent's own account of what it opened is part of the report under check. If
+    // the skill let that account stand in for the record, a fabricated citation would be
+    // presented as checked.
+    assert.match(skill, /not readable[\s\S]*have not run/i, 'Phase 3 must say the checks did not run');
+    assert.match(skill, /does not substitute for the record/i);
+    assert.match(skill, /not run: the runner's tool record is not readable/i, 'the output must carry the unrun state');
+  });
+
+  const hasJq = (() => {
+    try {
+      execFileSync('jq', ['--version'], { stdio: 'ignore' });
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+
+  it('flags a cited URL that no tool call of the run returned', { skip: !hasJq && 'jq not installed' }, () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    const block = (skill.match(/```bash\n([\s\S]*?)```/g) ?? []).find((b) => b.includes('comm -23'));
+    assert.ok(block, 'the cited-source check command must be present');
+    const evLine = 'EV=/tmp/goal_research_events_${SUFFIX}.jsonl';
+    assert.ok(block.includes(evLine), 'the check must read the codex events file');
+    const script = block.replace(/^```bash\n/, '').replace(/```$/, '').replace(evLine, 'EV="$FIXTURE"');
+
+    // Event shapes as codex-cli emits them for Tavily MCP calls: the result's text is
+    // itself JSON, so its URLs arrive escaped one level down.
+    const nested = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] });
+    const events = [
+      'Codex autostart is disabled.',
+      { type: 'thread.started', thread_id: 't' },
+      {
+        type: 'item.completed',
+        item: {
+          id: 'item_1', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_search',
+          arguments: { query: 'lost in the middle' },
+          result: nested({ results: [{ url: 'https://aclanthology.org/2024.tacl-1.9', content: 'snippet' },
+            { url: 'https://example.org/snippet-only?a=1&b=2', content: 'snippet' }] }),
+          error: null, status: 'completed',
+        },
+      },
+      {
+        type: 'item.completed',
+        item: {
+          id: 'item_2', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_extract',
+          arguments: { urls: ['https://aclanthology.org/2024.tacl-1.9'] },
+          result: nested({ results: [{ url: 'https://aclanthology.org/2024.tacl-1.9', raw_content: 'page' }] }),
+          error: null, status: 'completed',
+        },
+      },
+      { type: 'item.completed', item: { id: 'item_3', type: 'agent_message', text: 'progress https://example.org/early-draft' } },
+      {
+        type: 'item.completed',
+        item: {
+          id: 'item_4', type: 'agent_message',
+          text: 'Claim A ([paper](https://aclanthology.org/2024.tacl-1.9/#abstract)). '
+            + 'Claim B: https://example.org/snippet-only?a=1&b=2. '
+            + 'Claim C from memory: https://example.org/never-retrieved.',
+        },
+      },
+    ];
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-check-'));
+    try {
+      const fixture = path.join(dir, 'events.jsonl');
+      fs.writeFileSync(fixture, events.map((e) => (typeof e === 'string' ? e : JSON.stringify(e))).join('\n') + '\n');
+      const out = execFileSync('bash', ['-c', script], { env: { ...process.env, FIXTURE: fixture }, encoding: 'utf8' });
+      const [notOpened, extracted] = out.split('--- extracted ---');
+      const lines = (s) => s.split('\n').map((l) => l.trim()).filter((l) => /^https?:/.test(l));
+      assert.deepEqual(
+        lines(notOpened),
+        ['https://example.org/never-retrieved'],
+        'only the URL no tool call returned is flagged; trailing slash, fragment, query and an earlier progress message do not count',
+      );
+      assert.deepEqual(lines(extracted), ['https://aclanthology.org/2024.tacl-1.9']);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 

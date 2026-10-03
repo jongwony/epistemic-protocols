@@ -112,8 +112,8 @@ Skills that act at their own decision points — around the protocols, on the wo
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
 | **Steering the project** | |
 | `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
-| **Delegating to Codex** | |
-| `/goal-research` | A factual research question you want scoped and externally verified in a background Codex session, with the full trace returned |
+| **Delegating research** | |
+| `/goal-research` | A factual research question you want externally verified in a background run — a Claude subagent by default, or Codex — with per-claim verification strength, and its citations checked against what the run actually retrieved wherever its tool record is readable |
 
 ### [Route](./route)
 

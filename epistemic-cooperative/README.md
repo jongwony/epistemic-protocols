@@ -20,7 +20,7 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
 | `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
 | `/realign` | Project guide direction line via three-horizon fusion | Fused direction line written to the project guide |
-| `/goal-research` | Research delegated to a background Codex CLI session (`goal` scoping + Aitesis verification) | Research trace surfaced back |
+| `/goal-research` | Research delegated to a background run — a Claude subagent by default, or a Codex CLI session — verifying through Aitesis and Tavily | Research trace with per-claim verification strength, and its citations checked against the run's own tool results where that record is readable |
 
 ## Skills
 
@@ -88,7 +88,7 @@ epistemic-cooperative/
     ├── white-bear/SKILL.md       # /white-bear competing-target prose audit
     ├── zero-shot/SKILL.md        # /zero-shot anchoring-example prose audit
     ├── realign/SKILL.md          # /realign project guide direction-line fusion
-    └── goal-research/SKILL.md    # /goal-research Codex-delegated research
+    └── goal-research/SKILL.md    # /goal-research delegated research with a cited-source check
 ```
 
 ## When to Use
@@ -104,7 +104,7 @@ epistemic-cooperative/
 | Checking a drafted option set before it reaches the user | `/gate-check` |
 | Auditing prose for prohibition framing or anchoring examples | `/white-bear`, `/zero-shot` |
 | Re-deriving the project guide's direction line | `/realign` |
-| Delegating a research question to Codex | `/goal-research` |
+| Delegating a research question to a background Claude or Codex run | `/goal-research` |
 
 ## Install
 
@@ -120,6 +120,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /probe
 /review-loop codex 123
 /goal-research <question>
+/goal-research codex <question>
 ```
 
 `/review-loop` reuses matching reviewer capability evidence and confirms the command
