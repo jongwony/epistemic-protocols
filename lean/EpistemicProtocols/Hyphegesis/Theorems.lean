@@ -23,11 +23,6 @@ theorem silence (respond session : Context P → Response P) (c : Context P) :
     conduct respond session c [] = .holding c := by
   simp [conduct]
 
-theorem start_relays_only_on_person (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (h : isFilled (relay (observe c)) = true) :
-    start respond session c us = .relayed (observe c) (respond (observe c)) := by
-  simp [start, h]
-
 theorem start_opens_on_map (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (h : isFilled (relay (observe c)) = false) :
     start respond session c us =
@@ -102,6 +97,30 @@ theorem relayed_by_person (respond session : Context P → Response P) (c : Cont
     · cases h'
     · cases h'
       exact ⟨hr, rfl⟩
+
+theorem start_closes_only_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) :
+    (∀ c₁ t, start respond session c us = .conducted c₁ t →
+      isFilled (resolution c₁) = true ∧ Covered c₁) ∧
+    (∀ c₁ t, start respond session c us = .relayed c₁ t → isFilled (relay c₁) = true) := by
+  constructor
+  · intro c₁ t h
+    simp only [start] at h
+    split at h
+    · cases h
+    · have := conducted_by_person_covered respond session _ us c₁ t h
+      exact ⟨this.1, this.2.1⟩
+  · intro c₁ t h
+    simp only [start] at h
+    split at h
+    · rename_i hr
+      cases h
+      exact hr
+    · exact (relayed_by_person respond session _ us c₁ t h).1
+
+theorem observe_extends (c : Context P) : c <+: observe c := by
+  simp only [observe]
+  exact (List.prefix_append _ _).trans (List.prefix_append _ _)
 
 theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P)
