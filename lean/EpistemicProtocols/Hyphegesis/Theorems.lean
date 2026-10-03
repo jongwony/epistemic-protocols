@@ -98,26 +98,6 @@ theorem relayed_by_person (respond session : Context P → Response P) (c : Cont
     · cases h'
       exact ⟨hr, rfl⟩
 
-theorem start_closes_only_by_person (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) :
-    (∀ c₁ t, start respond session c us = .conducted c₁ t →
-      isFilled (resolution c₁) = true ∧ Covered c₁) ∧
-    (∀ c₁ t, start respond session c us = .relayed c₁ t → isFilled (relay c₁) = true) := by
-  constructor
-  · intro c₁ t h
-    simp only [start] at h
-    split at h
-    · cases h
-    · have := conducted_by_person_covered respond session _ us c₁ t h
-      exact ⟨this.1, this.2.1⟩
-  · intro c₁ t h
-    simp only [start] at h
-    split at h
-    · rename_i hr
-      cases h
-      exact hr
-    · exact (relayed_by_person respond session _ us c₁ t h).1
-
 theorem observe_extends (c : Context P) : c <+: observe c := by
   simp only [observe]
   exact (List.prefix_append _ _).trans (List.prefix_append _ _)
@@ -136,6 +116,33 @@ theorem withdrawn_by_person (respond session : Context P → Response P) (c : Co
       exact ⟨_, hw, rfl⟩
     · cases h'
     · cases h'
+
+theorem start_closes_only_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) :
+    (∀ c₁ t, start respond session c us = .conducted c₁ t →
+      isFilled (resolution c₁) = true ∧ Covered c₁) ∧
+    (∀ c₁ t, start respond session c us = .relayed c₁ t → isFilled (relay c₁) = true) ∧
+    (∀ r, start respond session c us = .withdrawn r →
+      ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro c₁ t h
+    simp only [start] at h
+    split at h
+    · cases h
+    · have := conducted_by_person_covered respond session _ us c₁ t h
+      exact ⟨this.1, this.2.1⟩
+  · intro c₁ t h
+    simp only [start] at h
+    split at h
+    · rename_i hr
+      cases h
+      exact hr
+    · exact (relayed_by_person respond session _ us c₁ t h).1
+  · intro r h
+    simp only [start] at h
+    split at h
+    · cases h
+    · exact withdrawn_by_person respond session _ us r h
 
 theorem withdrawal_and_holding_hand_off_nothing (r : Closed P) (c : Context P) :
     handedOffBy (.withdrawn r) = none ∧ handedOffBy (.holding c : Outcome P) = none :=

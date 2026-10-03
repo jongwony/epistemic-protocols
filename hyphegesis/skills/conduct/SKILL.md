@@ -32,10 +32,9 @@ Hyphegesis(WP) → start(c) → conduct(c, utterances), where c is the fused ses
     [the person's words already settle the method]     → the conduct trace → handoff → ConductedMethod
     [otherwise]                                        → the map again, drawn from c', with a ledger
   no utterance: the gate holds; nothing is taken
-  after handoff: the run has ended. The substrate executes the method and returns one consolidated
-    summary when it has run; mid-run it returns to the person only where a deferred decision needs
-    them or execution needs what only the person can supply, and silence there holds. A later
-    utterance that bears on the method re-enters with the accumulated context.
+  after handoff: the run has ended. The substrate executes the method and returns to the person as
+    `ConductedMethod` names; a later utterance that bears on the method re-enters with the
+    accumulated context.
 -/
 
 /-! ── MORPHISM ──
@@ -180,9 +179,9 @@ axiom draft : Context P → Method
     shown on the map as the draft's inference; the person points only the broad direction, and a
     direction they gave bounds it. A tool description is material for this proposal and for which
     observations to attempt; it grounds no verdict, grants nothing, and shows no act reachable.
-    Where the person will not be present, the map asks at the start for the authority the method's
-    checkpoints would need, and separates what must be decided before they leave from what can
-    wait for their return. -/
+    Where the person will not be present, the map asks at the start for the authority the deferred
+    decisions that return to them would need, and separates what must be decided before they leave
+    from what can wait for their return. -/
 axiom placement : Context P → String
 
 /-- **Your reading**: what the method needs from its substrate to run as drawn — an act, a tool, a
@@ -215,16 +214,17 @@ inductive Held
   /-- the authority the person entrusts and its limits, given as a broad direction -/
   | grant
 
-/-- One coordinate the person holds: its kind, and the line or lines it binds — or the whole
-    method — in the map's words. -/
+/-- One coordinate the person holds: its kind, and its reach — what it settles and the line or
+    lines it binds, or the whole method, in the map's words. Two decisions of one kind on the same
+    lines are two coordinates. -/
 structure Coordinate where
   kind  : Held
   reach : String
 
 /-- **Your judgment**, the live inventory of the person's coordinates: every coordinate the method
     turns on that this run has raised and the person's words have not since retired, read over the
-    whole fused context — the map, every answer, and what the person said outside the map: a
-    grant, a direction for the substrate, whether they will be present. -/
+    whole fused context — the map, every answer, and what the person said outside the map, a grant
+    among it. -/
 axiom coordinates : Context P → List Coordinate
 
 /-- Who first put a value forward: you, or the person. -/
@@ -234,8 +234,8 @@ inductive Proposer | draft | person
     before, or gave a grant that reaches your choice. -/
 inductive Standing | set | adopted | granted
 
-/-- What stands on a coordinate: the value, in the words of the turn that made it stand, who first
-    put it forward, and how it came to stand. -/
+/-- What stands on a coordinate: the value, in the words of the turn that set it or of the
+    proposal as it was shown, who first put it forward, and how it came to stand. -/
 structure Determination where
   value    : String
   proposer : Proposer
@@ -298,8 +298,9 @@ structure Deferred where
 
 /-- **Your reading**: what the method leaves open, each read along two questions that may both
     hold: does its deciding evidence arrive only later, and can only the person supply or settle
-    it? One whose evidence arrives later and is entrusted to the substrate is decided there; one
-    only the person can supply or settle returns to them (`toPerson`) before the work it binds —
+    it? One whose evidence arrives later is decided by the substrate only where the grant entrusts
+    it; otherwise, and wherever only the person can supply or settle it, it returns to them
+    (`toPerson`) before the work it binds —
     a secret or credential to set, a runtime error the substrate cannot resolve, a deployment
     handed to runtime, a fusion whose shape only the person can choose. -/
 axiom deferred : Context P → List Deferred
@@ -315,17 +316,17 @@ axiom lifetime : Context P → String
     closure; empty when there were none. -/
 axiom dissent : Context P → List String
 
-/-- **Your judgment**, the adoption condition: everything the method would take was shown on a map
-    the person answered — each value with who proposed it and whether the person set it, its
-    ground, whether each thing it needs was observed — unconfirmed where nothing did — and your
-    contrary grounds. Where anything would be taken unseen, the map is drawn again. -/
+/-- **Your judgment**, the adoption condition: everything the method would take was shown on the
+    map the taking turn answered — each value with who proposed it and whether the person set it,
+    its ground, whether each thing it needs was observed — unconfirmed where nothing did — and your
+    contrary grounds. A value the taking turn itself sets is the person's own and is not taken
+    unseen. Where anything would be taken unseen, the map is drawn again. -/
 axiom Covered : Context P → Prop
 
 /-- **Your judgment**: the cited turn takes the method as the map showed it, read against the
-    context as it now stands; whatever the same turn settles is read with it. Whether an earlier
-    taking still reaches the map now at issue is read on the current context: a later answer may
-    change what it took, ask only about a fact, or concern other work. Your own reading that the
-    method is ready closes nothing. -/
+    context as it now stands; whatever the same turn settles is read with it. A turn before the
+    latest map, or from an earlier run, takes nothing on it. Your own reading that the method is
+    ready closes nothing. -/
 axiom ResolutionSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person takes the method. -/
@@ -337,11 +338,11 @@ axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
 
 /-- **Your judgment**: the person's own words, read against the context as it now stands, already
     settle every judgment the method needs now — what deferred decisions remain is said explicitly
-    — so no value of yours would be taken unseen. Whether earlier words still settle it is read
-    on the current context, as for a taking. Where an observation found something the method
-    needs missing, the person sees that on a map first; what nothing observed rides the handoff
-    as unconfirmed. Your reading that the work needs no conducting is not this: it is a contrary
-    ground on the map, and the person decides. -/
+    — so no value of yours would be taken unseen. A turn before the latest map, or from an earlier
+    run, settles nothing on it; on a run you opened, nothing said before its first map settles it.
+    Where an observation found something the method needs missing, the person sees that on a map
+    first; what nothing observed rides the handoff as unconfirmed. Your reading that the work needs
+    no conducting is not this: it is a contrary ground on the map, and the person decides. -/
 axiom RelaySupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person's words settle a method without a map. -/
@@ -386,14 +387,19 @@ def closed (c : Context P) : Closed P :=
 /-- `ConductedMethod`: the method handed off and what it carries. The substrate executes it and,
     when it has run, returns one consolidated summary of every line's results to the person; mid-run
     it returns to the person only at a deferred decision marked for them, or where execution needs
-    what only the person can supply and nothing anticipated it — authority for an act whose place
-    inside the grant is unclear, or that the lifetime no longer covers, among it — naming what it
-    needs, before the act. Silence at
-    such a return holds; nothing is selected for the person. Independent lines are handed off so
-    they do not see each other's results before those results combine. `required` names what the
-    substrate must provide, a way back to the person among it; naming it is not evidence that it
-    is there, which `feasibility` reads. `c` is the session context its citations resolve in, and
-    is not part of what the handoff dispatches. -/
+    what only the person can supply and nothing anticipated it — a coordinate left open, whose
+    draft value in the plan is not acted on, and authority for an act whose place inside the grant
+    is unclear or that the lifetime no longer covers, among it — naming what it needs, before the
+    work it binds. Silence at such a return holds; nothing is selected for the person. Independent
+    lines are handed off so they do not see each other's results before those results combine. A
+    result whose destination is a later session is written to a record whose producer supplies
+    the navigation block from that record's own identity, source session, and purpose; its
+    grounding instruction directs the recipient to run `/inquire` or equivalent grounding over the
+    record and its cited sources, recover the retained and entrusted judgments from the governing
+    utterances, and keep an unsupported decision open while independent work may continue.
+    `required` names what the substrate must provide, a way back to the person among it; naming it
+    is not evidence that it is there, which `feasibility` reads. `c` is the session context its
+    citations resolve in, and is not part of what the handoff dispatches. -/
 structure ConductedMethod (P : Type) (c : Context P) where
   plan        : Method
   placement   : String
@@ -452,7 +458,8 @@ A step is one arm of a structural recursion over the person's utterances. Each u
 fused, then observed (`.groundPointer`, `.inventory`): what the pointer's record returns and the
 loaded inventory enter the context before the presentation they inform. `respond` is the next map
 (`.map`, then `.mapGate`), or, when the run closes on a taking or a relay, the conduct trace
-presented before `emitted` is handed off (`.converge`, then `.handoff`); `session` is the session's
+presented before `emitted` is handed off (`.relay` where it relays, `.converge`, then
+`.handoff`); a withdrawal is reported by `.withdraw` and hands nothing off; `session` is the session's
 own answer to an utterance about other work, which stays in the context without being a gate of
 this run.
 -/
@@ -489,7 +496,8 @@ conducted(WP): the method handed off on the person's covered taking, or relayed 
 after the conduct trace reached them. Convergence evidence, before the dispatch: what the closing
 turn itself changed, as a ledger; the method as it will be handed off; the substrate placement,
 marked as your inference; each coordinate the person holds → what stands on it, in the words of
-the turn that set it → who proposed it and how it stood, beside the coordinates still open; the
+the turn that set it or of the proposal as it was shown → who proposed it and how it stood,
+beside the coordinates still open; the
 deferred decisions, each marked whether it returns to the person; what the method needs, each
 observed or unconfirmed; the lifetime; and the dissent attached to the closure. Withdrawal keeps
 its partial record and hands nothing off. Demonstrated, not asserted.
@@ -521,13 +529,13 @@ def grounding : Op → Annot × String
   | .readAnswer    => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the coordinates it makes stand, a grant or a direction given outside the map, a taking, a relay, a withdrawal — read whole against the fused context as it now stands, whatever form it takes")
   | .draft         => (.sense, "Internal analysis: the whole method drafted from the context, as precisely as reaching the goal is worth — the lines of work and how they order, see each other, combine, stop, and where their results go — around every value the person set, with the deferred decisions, what the method needs, and its lifetime")
   | .place         => (.sense, "Internal analysis: who runs each line, where, and whether the person will be present, inferred from the tools the running harness describes and the accumulated context, bounded by any direction the person gave")
-  | .map           => (.interaction .extension, "the whole map on one sheet, which is the full state taking it as is would take: the lines of work as a graph the host can render, each line a node with its id and short everyday name in place, order and joins as its edges — an indented outline naming what each line follows only where no graph renders — placement held from turn to turn; the substrate placement marked as your inference; each coordinate the person holds, marked theirs or the draft's, a draft value with its ground and the alternative that most changes the plan; what the method needs, each observed or unconfirmed; the deferred decisions and whether each returns to the person; where the person will not be present, the authority the checkpoints need and what must be decided before they leave; your contrary grounds; after an answer, the change ledger — the person's edits first, then each value re-filled because of them, pointing to the edit that caused it and marked a necessary consequence or your proposal, a value the person took before and a change now alters flagged")
+  | .map           => (.interaction .extension, "the whole map on one sheet, which is the full state taking it as is would take: the lines of work as a graph the host can render, each line a node with its id and short everyday name in place, order and joins as its edges — an indented outline naming what each line follows only where no graph renders — placement held from turn to turn; the substrate placement marked as your inference; each coordinate the person holds, marked theirs or the draft's, a draft value with its ground and the alternative that most changes the plan; what the method needs, each observed or unconfirmed; the deferred decisions and whether each returns to the person; where the person will not be present, the authority the deferred decisions that return to them need and what must be decided before they leave; your contrary grounds; after an answer, the change ledger — the person's edits first, then each value re-filled because of them, pointing to the edit that caused it and marked a necessary consequence or your proposal, a value the person took before and a change now alters flagged")
   | .mapGate       => (.interaction .constitution, "what the map got wrong, anywhere on it — or take the method as shown, or withdraw; silence holds and takes nothing")
   | .withdraw      => (.interaction .extension, "at the person's word: what you took as withdrawn, and the partial record — the values that stand with who proposed each and how it stood, what is open, the deferred decisions, and your contrary grounds; nothing is handed off, and the person's next words correct it")
   | .relay         => (.interaction .extension, "where the person's words already settle the method: the method as their words fix it, citing those words, with what stays deferred; then the conduct trace")
   | .converge      => (.interaction .extension, "the convergence evidence CONVERGENCE names, before the dispatch")
   | .handoff       => (.dispatch, "delegate: after the conduct trace, the ConductedMethod handed to the substrate, which executes it — its fields, never the session context its citations resolve in; the substrate returns to the person as `ConductedMethod` names; an incoming pointer rides the method unchanged while the record it names stays where its locator names; then this run ends")
-  | .seam          => (.interaction .extension, "at a chain the person declared naming the next protocol or the next unit of work, proceed to it citing that source; a composition edge this file declares is offered as a hint, never taken on its own; a result that crosses into a later session is written to a record, and that record's producer supplies its navigation block; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam          => (.interaction .extension, "at a chain the person declared naming the next protocol or the next unit of work, proceed to it citing that source; a composition edge this file declares is offered as a hint, never taken on its own; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operation an outcome hands off through: a conducted or relayed run hands `emitted` to the
     substrate by `.handoff`, after the conduct trace; a withdrawal or a holding hands nothing off. -/
@@ -555,7 +563,7 @@ When `/ground` reads an abstraction against its own instances and summarizes tha
 
 ### User-facing realization
 
-Present what TOOL GROUNDING's `.map` entry names, at activation and again after every answer, then `.mapGate`, and yield the turn. The map's first line says what the work is for and what it hands off. Prior-session recall indices may seed the lines but never settle them. Keep labels short, since display width is not character count and a column padded by counting characters breaks.
+Present the map as TOOL GROUNDING's `.map` entry names it, then `.mapGate`, and yield the turn. The map's first line says what the work is for and what it hands off. Prior-session recall indices may seed the lines but never settle them. Keep labels short, since display width is not character count and a column padded by counting characters breaks.
 
 ## Rules
 
@@ -568,10 +576,9 @@ Present what TOOL GROUNDING's `.map` entry names, at activation and again after 
 - **Map as a graph**: Draw the lines of work as a graph the host can render — lines as nodes with short names in place, order and joins as edges — keeping each line where it stood; fall back to an indented outline only where no graph renders.
 - **Map change shown**: After every answer, show what it changed as a ledger under the current map — the person's edits first, then each re-drafted value pointing to the edit that caused it, marked necessary consequence or proposal — and flag a previously taken value the change alters.
 - **Adoption covered**: Take the method only on the person's taking over a map that showed everything taken with who proposed it and whether the person set it, its ground, whether each thing it needs was observed — unconfirmed where nothing did — and your contrary grounds. An open coordinate stays open; it is never adopted by default.
-- **Return at the end**: The handoff carries one consolidated summary when the method has run. The run returns to the person mid-way only at a deferred decision marked for them or where execution needs what only the person can supply — authority for an act whose place inside the grant is unclear, or that the lifetime no longer covers, among it; silence there holds.
-- **Handoff carries its obligations**: Hand off the method with the person's coordinates, the deferred decisions, the lifetime of its grants and readings, and the capabilities it needs — a way back to the person among them — then stop. Past the lifetime, what rested on it returns as open. Hand independent lines off so they do not see each other's results before those results combine.
+- **Handoff carries its obligations**: Hand off the method with the person's coordinates, the deferred decisions, the lifetime of its grants and readings, and the capabilities it needs — a way back to the person among them — then stop. Past the lifetime, what rested on it returns as open. The substrate returns one consolidated summary when the method has run, and returns mid-way only at a deferred decision marked for the person or where execution needs what only the person can supply and nothing anticipated it — a coordinate left open, whose draft value is not acted on, and authority for an act whose place inside the grant is unclear or that the lifetime no longer covers, among it — before the work it binds; silence there holds. Hand independent lines off so they do not see each other's results before those results combine. A result whose destination is a later session is written to a record whose producer supplies the navigation block from that record's own identity, source session, and purpose; its grounding instruction directs the recipient to run `/inquire` or equivalent grounding over the record and its cited sources, recover the retained and entrusted judgments from the governing utterances, and keep an unsupported decision open while independent work may continue.
 - **Re-entry**: After handoff, a later utterance that bears on the method opens a new run over the accumulated context. An answer at a return the substrate made goes to that return; a question about status reopens nothing; a change of direction reopens the method.
-- **Declared continuation**: Proceed to a next protocol or unit of work the person declared, citing that source; a composition edge this file declares is offered as a hint, never taken on its own. All internal Constitution gates still fire. A result that crosses into a later session is written to a record whose producer supplies the navigation block from that record's own identity, source session, and purpose; its grounding instruction directs the recipient to run `/inquire` or equivalent grounding over the record and its cited sources, recover the retained and entrusted judgments from the governing utterances, and keep an unsupported decision open while independent work may continue.
+- **Declared continuation**: Proceed to a next protocol or unit of work the person declared, citing that source; a composition edge this file declares is offered as a hint, never taken on its own. All internal Constitution gates still fire.
 - **`/apportion` seam**: Treat an incoming plan as a checked navigation pointer, not an import: dereference it, run the grounding instruction it carries against the current work, and carry the block unchanged.
 - **Convergence evidence**: Before dispatch, demonstrate what CONVERGENCE names; derive any tally from the rows actually shown.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and any overlapping constraint that remains.
