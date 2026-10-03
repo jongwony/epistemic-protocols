@@ -67,8 +67,10 @@ jq -cs '
   | ([$texts[] | try fromjson catch empty] | map(objects)) as $json
   | {tool: $tool,
      records: (if ($json | length) > 0 then $json
-               else [{results: [$texts[] | split("\n")[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
-                    | map(select(.results | length > 0)) end)}
+               else [$texts[] | split("\n")[]] as $lines
+                    | if ($lines | any(. == "Detailed Results:" or startswith("URL: ")))
+                      then [{results: [$lines[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
+                      else [] end end)}
 ' /tmp/goal_research_json_${SUFFIX}.jsonl > /tmp/goal_research_calls_${SUFFIX}.jsonl
 ```
 

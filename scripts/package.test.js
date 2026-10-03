@@ -362,10 +362,14 @@ describe('goal-research runtime contract', () => {
     );
   });
 
-  it('documents the Codex session envelope', () => {
+  it('documents the Codex session envelope, host-neutral in SKILL.md and bound per host in its reference', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
-    const bashMs = Number(skill.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
-    assert.ok(Number.isFinite(bashMs), 'Bash session timeout must be documented');
+    assert.match(skill, /the host's background execution facility, with a 75-minute envelope/);
+    // A host tool name in the host-neutral body binds the contract to one host.
+    assert.ok(!/Bash\(run_in_background/.test(skill), 'the Claude Code binding lives in its host reference');
+    const ref = fs.readFileSync(path.join(__dirname, '..', 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-claude-code.md'), 'utf8');
+    const bashMs = Number(ref.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
+    assert.equal(bashMs, 75 * 60 * 1000, 'the Claude Code binding carries the same 75-minute envelope');
   });
 
   it('filters non-JSON stdout lines before jq, and never claims the events file is pure JSONL', () => {
@@ -695,6 +699,8 @@ describe('goal-research runtime contract', () => {
   ].join('\n');
   const officialExtract = ['Detailed Results:', '', 'Title: Paper', 'URL: https://text.example/paper', 'Raw Content: page'].join('\n');
   const unreadableText = 'Something went sideways but the call succeeded; it mentions https://odd.example/u';
+  // The official formatter's header with no result line: zero results, readable.
+  const emptyOfficial = ['Request ID: r2', 'Detailed Results:'].join('\n');
   const textReport = [
     'A: https://text.example/paper',
     'B: https://content.example/in-snippet',
@@ -703,8 +709,9 @@ describe('goal-research runtime contract', () => {
     'E: https://odd.example/u',
   ].join('\n');
   const assertTextFormat = (r) => {
-    assert.equal(r.count, 3);
-    assert.equal(r.unreadable, 1, 'a successful call whose response is neither JSON nor result lines is counted, not passed over');
+    assert.equal(r.count, 4);
+    assert.equal(r.unreadable, 1, 'a response that is neither JSON nor the official format is counted; '
+      + 'an empty official result is readable with zero sources');
     assert.deepEqual(r.notOpened, [
       'https://content.example/in-snippet',
       'https://img.example/1.png',
@@ -721,6 +728,7 @@ describe('goal-research runtime contract', () => {
       tavily('item_1', 'tavily_search', { query: 'q' }, text(officialText)),
       tavily('item_2', 'tavily_extract', { urls: ['https://text.example/paper'] }, text(officialExtract)),
       tavily('item_3', 'tavily_search', { query: 'q2' }, text(unreadableText)),
+      tavily('item_5', 'tavily_search', { query: 'q3' }, text(emptyOfficial)),
       message('item_4', textReport),
     ]));
   });
@@ -736,6 +744,7 @@ describe('goal-research runtime contract', () => {
       use('t1', 'mcp__tavily__tavily_search'), res('t1', officialText),
       use('t2', 'mcp__tavily__tavily_extract'), res('t2', officialExtract),
       use('t3', 'mcp__tavily__tavily_search'), res('t3', unreadableText),
+      use('t5', 'mcp__tavily__tavily_search'), res('t5', emptyOfficial),
     ];
     const suffix = crypto.randomBytes(4).toString('hex');
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-claude-text-'));
@@ -823,6 +832,8 @@ describe('goal-research runtime contract', () => {
       res('t3', 'Permission to use mcp__tavily__tavily_search has been denied.', true),
       use('t4', 'Read'),
       res('t4', 'file mentions https://read.example/r'),
+      use('t5', 'mcp__tavily__tavily_search'),
+      res('t5', text(['Request ID: r3', 'Detailed Results:'].join('\n'))),
       { type: 'assistant', message: { content: [{ type: 'text', text: 'progress' }] } },
       { type: 'result', subtype: 'success', is_error: false,
         result: [`A: ${paper}`, 'B: https://failed.example/x', 'C: https://read.example/r'].join('\n') },
@@ -839,8 +850,8 @@ describe('goal-research runtime contract', () => {
       const r = parseChecks(execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix }, encoding: 'utf8' }));
       assert.equal(fs.readFileSync(tmpFile('report', suffix, 'txt'), 'utf8').trim().split('\n')[0], `A: ${paper}`,
         'the narrative is the terminal success result');
-      assert.equal(r.count, 2, 'a denied Tavily call and a non-Tavily call do not count');
-      assert.equal(r.unreadable, 0);
+      assert.equal(r.count, 3, 'a denied Tavily call and a non-Tavily call do not count');
+      assert.equal(r.unreadable, 0, 'an empty official result is readable');
       assert.deepEqual(r.notOpened, ['https://failed.example/x', 'https://read.example/r']);
       assert.deepEqual(r.extracted, [paper]);
     } finally {

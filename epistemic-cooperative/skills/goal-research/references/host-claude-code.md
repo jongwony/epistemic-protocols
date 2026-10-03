@@ -1,7 +1,14 @@
 # Claude Code Record
 
-Load at Phase 3 step 2 when the runner is `claude` and the host is Claude Code. It names where
-the subagent's own tool-call record is and reduces it to the calls file the checks read.
+Load when the host driving this skill is Claude Code: at Phase 2 for the `codex` runner's launch,
+and at Phase 3 step 2 for the `claude` runner's record — where the subagent's own tool-call record
+is, and its reduction to the calls file the checks read.
+
+## Codex runner launch
+
+Run the `codex exec` command through the Bash tool in the background,
+`Bash(run_in_background: true, timeout: 4500000)` — 4,500,000 ms is the 75-minute envelope — and
+wait for its completion notification.
 
 ## Where the record is
 
@@ -36,8 +43,10 @@ jq -cs '
   | ([$texts[] | try fromjson catch empty] | map(objects)) as $json
   | {tool: $tool,
      records: (if ($json | length) > 0 then $json
-               else [{results: [$texts[] | split("\n")[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
-                    | map(select(.results | length > 0)) end)}
+               else [$texts[] | split("\n")[]] as $lines
+                    | if ($lines | any(. == "Detailed Results:" or startswith("URL: ")))
+                      then [{results: [$lines[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
+                      else [] end end)}
 ' "$T" > /tmp/goal_research_calls_${SUFFIX}.jsonl
 ```
 

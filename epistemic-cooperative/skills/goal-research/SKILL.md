@@ -104,7 +104,7 @@ The `/goal` prefix above scopes this Codex session as a research endpoint.
 {research brief, with {inquire} = $inquire}
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + splitting the
+Launch through the host's background execution facility, with a 75-minute envelope (on Claude Code, the binding is in [Claude Code](references/host-claude-code.md)). `--color never` + splitting the
 streams (stdout to the events file, `2>` to a separate warn file) keeps stderr
 warnings out of the events file. Stdout is **not** guaranteed to be pure JSONL —
 codex may still print a plain notice line there (e.g. `Codex autostart is
@@ -119,8 +119,7 @@ codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-6-astra
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-loop`'s codex source does not apply here.
 
-The background Bash timeout (4,500,000 ms / 75 min) is the delegated Codex
-session envelope.
+That 75-minute background timeout is the delegated Codex session envelope.
 
 **Do NOT add a dotted `--config mcp_servers.<name>.<key>=<value>` override here.**
 A dotted override under `mcp_servers` REPLACES that server's whole table instead
@@ -165,9 +164,9 @@ The checks read the run's own record of its tool calls, never the run's descript
 A Tavily response reaches the record in one of two forms, and the source records are read from whichever is present:
 
 - **JSON**: a response object, as structured content or as JSON text — its `results[].url`.
-- **Formatted text** (the form the Tavily MCP server prints): one line `URL: <url>` per result, at the start of a line. Image lines (`[n] URL: …`) and the `Content:` and `Raw Content:` text are not source records. A line inside a returned page's text that itself begins `URL: ` cannot be told apart from a result line, so it is read as one; the limit runs toward missing a flag, never toward a false one.
+- **Formatted text** (the form the Tavily MCP server prints): a `Detailed Results:` header, then one line `URL: <url>` per result, at the start of a line; a response carrying the header and no result line returned zero results and is readable. Image lines (`[n] URL: …`) and the `Content:` and `Raw Content:` text are not source records. A line inside a returned page's text that itself begins `URL: ` cannot be told apart from a result line, so it is read as one; the limit runs toward missing a flag, never toward a false one.
 
-A successful call whose response yields neither form is counted as unreadable: URLs it returned cannot be confirmed either way.
+A successful call whose response is neither JSON nor recognizably that formatted text — no header and no result line — is counted as unreadable: URLs it returned cannot be confirmed either way.
 
 The record is reduced to one line per successful Tavily call, `{"tool": <tool name>, "records": [{"results": [{"url": …}, …]}, …]}` — `records` empty where the response could not be read — in `/tmp/goal_research_calls_${SUFFIX}.jsonl`:
 
@@ -181,8 +180,10 @@ The record is reduced to one line per successful Tavily call, `{"tool": <tool na
          | ([.item.result.structured_content?, ($texts[] | try fromjson catch empty)] | map(objects)) as $json
          | {tool: .item.tool,
             records: (if ($json | length) > 0 then $json
-                      else [{results: [$texts[] | split("\n")[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
-                           | map(select(.results | length > 0)) end)}' \
+                      else [$texts[] | split("\n")[]] as $lines
+                           | if ($lines | any(. == "Detailed Results:" or startswith("URL: ")))
+                             then [{results: [$lines[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
+                             else [] end end)}' \
     /tmp/goal_research_json_${SUFFIX}.jsonl > /tmp/goal_research_calls_${SUFFIX}.jsonl
   ```
 
