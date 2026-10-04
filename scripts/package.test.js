@@ -350,6 +350,34 @@ describe('goal-research runtime contract', () => {
     return blocks;
   };
 
+  // The codex invocation reference's own command blocks: deterministic predicates over the
+  // shipped commands. A dotted or inline `mcp_servers` override replaces the server's table and
+  // codex stops at config load; jq stops at the first plain notice line codex prints on stdout;
+  // an ephemeral session leaves nothing for the goal turn and continuations to resume.
+  const invocation = () => fs.readFileSync(path.join(path.dirname(skillPath), 'references', 'codex-exec.md'), 'utf8');
+
+  it('codex invocation: no mcp_servers override, events filtered before jq, the session kept', () => {
+    const blocks = fenced(invocation(), 'bash');
+    const codex = blocks.filter((b) => /\bcodex exec\b/.test(b));
+    assert.ok(codex.length >= 2, 'the launch and the resume commands must be present');
+    const override = /(?:^|[\s'"`])(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.[^\s.=]+(?:\.[^\s=]+)?)?\s*=/m;
+    for (const b of codex) {
+      assert.ok(!override.test(b), `no mcp_servers override on the command line:\n${b}`);
+      assert.ok(!/--ephemeral\b/.test(b), `the session must persist for resume:\n${b}`);
+    }
+    const readers = blocks.filter((b) => /\bjq\b/.test(b) && /events\.jsonl/.test(b));
+    assert.ok(readers.length > 0, 'a block reading the events must be present');
+    for (const b of readers) {
+      const lines = b.replace(/\\\n\s*/g, ' ').split('\n').filter((l) => /\bjq\b/.test(l));
+      for (const l of lines) {
+        const stages = l.split('|').map((x) => x.trim());
+        stages.forEach((stage, k) => {
+          if (/^jq\b/.test(stage)) assert.ok(k > 0 && stages.slice(0, k).some((x) => /^grep\b.*'\^\{'/.test(x)), `jq must read grep '^{' output:\n${l}`);
+        });
+      }
+    }
+  });
+
   // Structural checks only: what each piece of prose means goes to review, not to a
   // phrase match.
 
