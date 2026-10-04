@@ -456,8 +456,12 @@ describe('goal-research runtime contract', () => {
       for (const [name, content] of Object.entries(files)) fs.writeFileSync(path.join(D, name), content);
       const outs = steps.map(({ pass = 0, blocks }) =>
         execFileSync('bash', ['-c', blocks.join('\n')], { env: { ...process.env, SUFFIX: suffix, PASS: String(pass) }, encoding: 'utf8' }));
-      const report = fs.existsSync(path.join(D, 'report.txt')) ? fs.readFileSync(path.join(D, 'report.txt'), 'utf8') : null;
-      return { outs, out: outs.join(''), report };
+      // The latest pass's own report, and the trace assembled from every pass.
+      const passReports = fs.readdirSync(D).map((f) => f.match(/^p(\d+)\.report\.txt$/)).filter(Boolean)
+        .map((m) => [Number(m[1]), fs.readFileSync(path.join(D, m[0]), 'utf8')]).sort((x, y) => x[0] - y[0]);
+      const report = passReports.length ? passReports[passReports.length - 1][1] : null;
+      const trace = fs.existsSync(path.join(D, 'trace.txt')) ? fs.readFileSync(path.join(D, 'trace.txt'), 'utf8') : null;
+      return { outs, out: outs.join(''), report, trace };
     } finally {
       fs.rmSync(D, { recursive: true, force: true });
     }
@@ -482,6 +486,7 @@ describe('goal-research runtime contract', () => {
   const codexReducer = () => pick(skillText(), 'mcp_tool_call', 'calls.jsonl');
   const claudeReducer = () => pick(skillText(), 'tool_use', 'calls.jsonl');
   const listing = () => pick(skillText(), 'not mechanically readable');
+  const assemble = () => pick(skillText(), 'trace.txt');
 
   // Codex event shapes as codex-cli 0.160.0 emits them for Tavily MCP calls.
   const json = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] });
@@ -504,9 +509,9 @@ describe('goal-research runtime contract', () => {
       files[`p${k}.status`] = `${status}\n`;
     });
     const steps = passes.map((_, k) => ({ pass: k, blocks: [codexOutcome()] }));
-    steps.push({ blocks: [passRecord(), codexReducer(), listing()] });
+    steps.push({ blocks: [assemble(), passRecord(), codexReducer(), listing()] });
     const r = runSteps(files, steps);
-    return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report };
+    return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report, trace: r.trace };
   };
 
   it('codex: counts only completed, error-free calls named exactly as Tavily search or extract', needsJq, () => {
@@ -573,11 +578,23 @@ describe('goal-research runtime contract', () => {
     assert.equal(r.report.trim(), 'second report');
   });
 
+  it('the trace keeps every returned pass\'s report in order; a later restatement never replaces the full report', needsJq, () => {
+    const full = 'Full report: claim A (https://a.example/1), open item B with its reach.';
+    const condensed = 'Goal acknowledged. The condition holds for the report I already returned.';
+    const r = runCodex([
+      { events: [call('c1', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] })), message('m1', full), done] },
+      { events: [message('m2', condensed), done] },
+    ]);
+    assert.deepEqual(r.passes, ['pass 0: returned', 'pass 1: returned']);
+    assert.equal(r.trace, `## Pass 0\n\n${full}\n\n## Pass 1\n\n${condensed}\n\n`);
+  });
+
   it('codex (a): a continuation that ends in turn.failed or a nonzero exit fails, never reusing the earlier report', needsJq, () => {
     const launch = { events: [call('c1', 'tavily_search', json({ results: [{ url: 'https://first.example/1' }] })), message('m1', 'first report'), done] };
     const turnFailed = runCodex([launch, { events: [message('m2', 'partial'), { type: 'turn.failed', error: { message: 'stream disconnected' } }] }]);
     assert.deepEqual(turnFailed.passes, ['pass 0: returned', 'pass 1: failed']);
     assert.equal(turnFailed.report, '', 'the earlier pass\'s report is not taken as the new one');
+    assert.equal(turnFailed.trace, '## Pass 0\n\nfirst report\n\n', 'the trace carries only the passes that returned');
     const nonzero = runCodex([launch, { events: [message('m2', 'looks fine'), done], status: 1 }]);
     assert.deepEqual(nonzero.passes, ['pass 0: returned', 'pass 1: failed']);
     assert.equal(nonzero.report, '');
@@ -684,9 +701,9 @@ describe('goal-research runtime contract', () => {
       files[`p${k}.status`] = `${status}\n`;
     });
     const steps = passes.map((_, k) => ({ pass: k, blocks: [pick(ref, '"result"', 'report.txt')] }));
-    steps.push({ blocks: [passRecord(), claudeReducer(), listing()] });
+    steps.push({ blocks: [assemble(), passRecord(), claudeReducer(), listing()] });
     const r = runSteps(files, steps);
-    return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report };
+    return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report, trace: r.trace };
   };
 
   it('Codex host: the shared reduction reads every claude -p pass, and each pass\'s terminal result is its report', needsJq, () => {

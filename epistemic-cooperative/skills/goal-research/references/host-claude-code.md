@@ -69,9 +69,9 @@ if [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -rse '
         | [.[].message.content[]?] as $blocks
         | if ($blocks | any(.type == "tool_use")) then empty
           else [$blocks[] | select(.type == "text") | .text] | if length == 0 then empty else join("\n") end end
-      end' "$D/record.jsonl" > "$D/report.txt" && [ -s "$D/report.txt" ]
+      end' "$D/record.jsonl" > "$D/p${PASS}.report.txt" && [ -s "$D/p${PASS}.report.txt" ]
 then echo "pass ${PASS}: returned"
-else : > "$D/report.txt"; echo "pass ${PASS}: failed"
+else : > "$D/p${PASS}.report.txt"; echo "pass ${PASS}: failed"
 fi
 ```
 

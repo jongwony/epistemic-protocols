@@ -83,10 +83,10 @@ D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
 grep '^{' "$P.events.jsonl" > "$P.json.jsonl"
 if [ "$(cat "$P.status" 2>/dev/null)" = 0 ] \
   && jq -rse '[.[] | select(.type == "result")] | last | select(.subtype == "success" and .is_error == false) | .result' \
-       "$P.json.jsonl" > "$D/report.txt" \
-  && [ -s "$D/report.txt" ]
+       "$P.json.jsonl" > "$P.report.txt" \
+  && [ -s "$P.report.txt" ]
 then echo "pass ${PASS}: returned"
-else : > "$D/report.txt"; echo "pass ${PASS}: failed"
+else : > "$P.report.txt"; echo "pass ${PASS}: failed"
 fi
 ```
 

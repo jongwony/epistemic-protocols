@@ -141,7 +141,7 @@ Wait for the background task completion notification — do not poll or sleep. S
 
 ### 1. The pass outcome
 
-A pass **returned** when its own exit status is zero, its own terminal event is a success, and its own final message carries the report; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report **is** the research trace/answer: it is written to `/tmp/goal_research_${SUFFIX}/report.txt` and **forwarded verbatim to the presentation step; do NOT regex-parse it** — nothing below rewrites it.
+A pass **returned** when its own exit status is zero, its own terminal event is a success, and its own final message carries the report; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report is written to its own `/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`; the reports together **are** the research trace/answer, **forwarded verbatim to the presentation step; do NOT regex-parse them** — nothing below rewrites them.
 
 - **claude**: as the host's reference says.
 - **codex**: the pass's `turn.completed` with no `turn.failed`, and its last `agent_message` — high-reasoning codex streams progress messages first, so the extraction takes the last one.
@@ -152,10 +152,10 @@ A pass **returned** when its own exit status is zero, its own terminal event is 
   if [ "$(cat "$P.status" 2>/dev/null)" = 0 ] \
     && jq -se 'any(.[]; .type == "turn.completed") and all(.[]; .type != "turn.failed")' "$P.json.jsonl" > /dev/null \
     && jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' \
-         "$P.json.jsonl" > "$D/report.txt" \
-    && [ -s "$D/report.txt" ]
+         "$P.json.jsonl" > "$P.report.txt" \
+    && [ -s "$P.report.txt" ]
   then echo "pass ${PASS}: returned"
-  else : > "$D/report.txt"; echo "pass ${PASS}: failed"
+  else : > "$P.report.txt"; echo "pass ${PASS}: failed"
   fi
   ```
 
@@ -165,6 +165,16 @@ A pass **returned** when its own exit status is zero, its own terminal event is 
   failed.
 
   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
+
+Once a pass's outcome is read, assemble the trace from every returned pass's report, in pass order, each headed by its pass number — pass `0`'s full report first. A later pass's report — a goal turn's restatement, or a continuation that answers only the gaps — is added after the earlier ones, never in their place:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}
+: > "$D/trace.txt"
+for k in $(ls "$D" | sed -n 's/^p\([0-9][0-9]*\)\.report\.txt$/\1/p' | sort -n); do
+  [ -s "$D/p$k.report.txt" ] && printf '## Pass %s\n\n%s\n\n' "$k" "$(cat "$D/p$k.report.txt")" >> "$D/trace.txt"
+done
+```
 
 ### 2. The tool record
 
@@ -244,9 +254,9 @@ fi
 
 ### 3. Reading the report
 
-Read the report against the `returned` and `extracted` lists — and, for each call not mechanically readable, against that call's raw record — and judge each citation: **returned by this run**, **extracted by this run**, or **not found in this run's Tavily record**. A citation whose claim is labelled `verified` and whose source this run did not extract is read the same way and said so. Whatever rests on a citation not found in the record is the runner's own inference and open, whatever label it carries.
+Read the trace, every returned pass's report, against the `returned` and `extracted` lists — and, for each call not mechanically readable, against that call's raw record — and judge each citation: **returned by this run**, **extracted by this run**, or **not found in this run's Tavily record**. A citation whose claim is labelled `verified` and whose source this run did not extract is read the same way and said so. Whatever rests on a citation not found in the record is the runner's own inference and open, whatever label it carries.
 
-Read the report against the brief's form as well, and note what it is missing: a factual claim with no citation; an absence or novelty claim with no reach record behind it; an empirical effect with no replication or retraction status; a detail that reads as recalled — a volume, page, date, or number no returned source gave — not marked reconstructed. No line format is required of the runner.
+Read it against the brief's form as well, and note what it is missing: a factual claim with no citation; an absence or novelty claim with no reach record behind it; an empirical effect with no replication or retraction status; a detail that reads as recalled — a volume, page, date, or number no returned source gave — not marked reconstructed. No line format is required of the runner.
 
 Every judgment in this step is this session's reading, marked as such where it is shown, not a mechanical result.
 
@@ -299,7 +309,7 @@ A session a CLI keeps in its own store is left there; the runner's section and t
 
 ## Phase 4: Output
 
-Present the source check first, then the items the run returned as the user's to settle, then the last returned pass's report verbatim as the trace — so a statement that the run had no successful Tavily call, that a pass or the reduction failed, or that its record could not be read, is the first thing the user reads. The items to settle are lifted from the report into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the Phase 3 report as the trace body — do not dump the raw event stream or tool record:
+Present the source check first, then the items the run returned as the user's to settle, then the trace — every returned pass's report verbatim, in pass order, each headed by its pass number — so a statement that the run had no successful Tavily call, that a pass or the reduction failed, or that its record could not be read, is the first thing the user reads. The items to settle are lifted from the trace into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the assembled trace as the trace body — do not dump the raw event stream or tool record:
 
 ```
 ## Goal Research Result
@@ -321,7 +331,7 @@ Passes: {n}, gaps after each: {g0, g1, …} — stopped: {goal met | no progress
 {each item the run returned as the user's, with what it needs; or "none returned"}
 
 --- Trace ---
-{last returned pass's report, or "no pass returned a report"}
+{every returned pass's report in pass order, each headed "Pass k", pass 0's full report first; or "no pass returned a report"}
 ```
 
 Acceptance criterion: a real research run was launched on the designated runner; each pass's outcome was read from that pass; each returned pass was judged against the goal condition and continued only while its gaps fell; the result was presented with the source check, the items the run returned as the user's presented as theirs to settle, and this skill's temp directory removed.
