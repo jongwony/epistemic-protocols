@@ -72,7 +72,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 ## Phase 2: Fixed-Lens Review (isolated analysis → adversarial cross-verification)
 
-This skill names the parallel perspectives and describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. This skill fixes all five conduct axes — order, independence, reconciliation, termination, routing — so the method is not underdetermined and `/conduct`'s own activation precondition is unmet: declining it here IS that warrant relaying, not a shortcut past it. Review **only the changed files**.
+This skill names the parallel perspectives and describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. This skill fixes the method — the lines of work, their order, independence, combination, stopping point, and where results go — so the method is not underdetermined and `/conduct`'s AI-guided activation precondition is unmet: not activating it here IS that precondition read, not a shortcut past it. Review **only the changed files**.
 
 **Lens panel.** This skill **pins** the panel to the fixed formal triple every run, so the same three axes are covered on every diff. The fixed lenses are:
 
