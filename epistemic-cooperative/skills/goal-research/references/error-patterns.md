@@ -11,9 +11,9 @@ a run or reading its output.
   keys the config file already sets.
 - **Symptom:** codex exits 1 at config load with `Error loading config.toml: invalid transport in
   mcp_servers.<name>`, before any research; the events come back empty.
-- **Fix:** no dotted override. Per-call MCP settings belong in `~/.codex/config.toml`. An inline
-  whole-table `--config` form loads, but puts the server URL — and any credential in it — into
-  the process arguments, so it is not a fix either.
+- **Fix:** no dotted override. Per-call MCP settings belong in `~/.codex/config.toml`. Do not pass
+  the server table inline either: it puts the server URL and its credentials in the process
+  arguments.
 
 ## Codex: stdout is not pure JSONL
 
@@ -43,8 +43,8 @@ a run or reading its output.
 - **Failure:** generating the session id through a pipeline whose last stage succeeds when the
   generator is missing — `uuidgen | tr … > file` without `uuidgen` installed.
 - **Symptom:** the id file is empty, so `--session-id` and `--resume` get no id.
-- **Fix:** read `/proc/sys/kernel/random/uuid` where it exists, lowercase it, and write the file
-  only when the id is non-empty.
+- **Fix:** read `/proc/sys/kernel/random/uuid` where it exists, else run `uuidgen`; lowercase the
+  id, and write the file only when it is non-empty.
 
 ## `claude -p`: a goal turn that ends empty
 
@@ -62,7 +62,7 @@ a run or reading its output.
   host's default limit (e.g. 30 minutes) stops it before the research finishes.
 - **Symptom:** the pass ends early, with a truncated event stream or transcript and a missing or
   partial report.
-- **Fix:** launch each pass with a time bound sized to the research — 75 minutes has been enough.
+- **Fix:** launch each pass with a time bound sized to the research — 75 minutes for a deep question.
 
 ## Codex: `--ephemeral` leaves nothing to resume
 

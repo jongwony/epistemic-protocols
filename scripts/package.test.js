@@ -358,14 +358,13 @@ describe('goal-research runtime contract', () => {
   it('carries no dotted mcp_servers config override, and keeps the pattern that says why', () => {
     assert.match(patterns(), /^## Codex: a dotted `mcp_servers` override$/m, 'the error pattern must stay');
     assert.match(patterns(), /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
-    // Every fence (any language or none) and every inline code span on both surfaces.
-    const code = [skill(), patterns()].flatMap((doc) => [
-      ...[...doc.matchAll(/^[ \t]*```[^\n]*\n([\s\S]*?)^[ \t]*```/gm)].map((m) => m[1]),
-      ...[...doc.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]),
-    ]);
-    assert.ok(code.length > 0, 'the scan must read something');
-    const used = code.filter((c) => /--config\s+mcp_servers\.[^\s=]+\.[^\s=]+=/.test(c) && !c.includes('<'));
-    assert.deepEqual(used, [], 'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
+    // Anywhere on both surfaces, in each form codex accepts; only the reference's own
+    // `<name>.<key>` placeholder is exempt.
+    const override = /(?:--config[\s=]+|-c\s+)['"]?mcp_servers\.([^\s.=]+)\.([^\s=]+)=/g;
+    const found = [skill(), patterns()].flatMap((doc) => [...doc.matchAll(override)]);
+    assert.ok(found.some((m) => m[1] === '<name>' && m[2] === '<key>'), 'the scan must find the placeholder it exempts');
+    const used = found.filter((m) => !(m[1] === '<name>' && m[2] === '<key>')).map((m) => m[0]);
+    assert.deepEqual(used, [], 'a dotted mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
   });
 
   it('filters codex stdout to JSON lines, and never claims it is pure JSONL', () => {
