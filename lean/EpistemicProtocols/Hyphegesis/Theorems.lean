@@ -191,6 +191,10 @@ theorem recorded_by_person (c : Context P) :
       StandingSupported r.coord c (c[r.src.idx]'r.src.lt) r.det :=
   fun r _ => ⟨r.byPerson, r.supported⟩
 
+theorem grant_never_self_granted (c : Context P) :
+    ∀ r ∈ record c, r.det.standing = .granted → r.coord.kind ≠ .grant :=
+  fun r _ => r.notSelfGrant
+
 theorem suffix_without_person_is_no_source (c e : Context P) (he : ∀ t ∈ e, t.origin ≠ .person) :
     ∀ r ∈ record (c ++ e), r.src.idx < c.length := by
   intro r _
