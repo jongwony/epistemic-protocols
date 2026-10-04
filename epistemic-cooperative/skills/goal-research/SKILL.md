@@ -1,6 +1,6 @@
 ---
 name: goal-research
-description: Delegate factual research to a background /goal-scoped Claude or Codex run using Aitesis and Tavily; read its citations against its Tavily record, continuing till met. User-invoked via /goal-research.
+description: Delegate factual research to a background Claude or Codex run using Aitesis and Tavily; read its citations against its Tavily record, continuing it while gaps shrink. User-invoked via /goal-research.
 ---
 
 # Goal Research
@@ -11,15 +11,15 @@ Invoke directly with `/goal-research [runner] <research question>` when the user
 ```
 goal-research
 ├── Runner designation + research question (argument or one-time prompt)
-├── Research run (background, its own context), brief opening with `/goal <condition>`
+├── Research run (background, its own context), in passes, toward one goal condition (`/goal` where the route takes it)
 │   ├── claude (default): a Claude run (subagent, or `claude -p` on a Codex host) — `/inquire` drives Tavily search + extract
 │   └── codex: Codex CLI — builtin `goal`, `$inquire` drives Tavily
-├── Each time the run returns
-│   ├── mechanical: reduce its tool record — successful Tavily calls, the URLs their JSON results list, the calls not mechanically readable
+├── After each pass
+│   ├── mechanical: that pass's own outcome; then the whole run's tool record — successful Tavily calls, the URLs their JSON results list, the calls not mechanically readable
 │   ├── reading: this session reads the report against those lists and the raw record, each judgment marked as its reading
-│   └── goal: met → present; unmet → continue the same run with the gaps; no progress → present
+│   └── goal: met → present; gaps fewer than before → continue the same run with them; otherwise, or on any failure → present
 └── Presentation: source check, open items handed to the user as theirs to settle, verbatim trace
-    (+ temp-file cleanup)
+    (+ temp-directory cleanup)
 ```
 
 **Why this composition**: `/inquire` carries the epistemic contract — its reading of each uncertainty, its record of what collection reached, and what stays open for the person to settle. goal-research refines that contract for the research domain and for a background run; it adds no second reading beside it. Running the research in its own context isolates it from the main conversation while still surfacing the full trace back. A research run can complete, answer fluently, and cite sources it never opened, and nothing in the narrative distinguishes that from a searched answer. Whether a URL in report prose names the same source as a URL in a tool result is not mechanically decidable, so the work splits: the machine reads only the run's tool record, and only what is unambiguous there; this session reads the report against it and judges, marking each judgment as its reading. The run's own account of what it opened is part of the report under that reading, never the record.
@@ -50,14 +50,18 @@ The research question is passed unchanged into the research brief — paraphrasi
 
 ## Phase 2: Launch (Background)
 
-Generate a unique suffix for this run's temp files: `SUFFIX=$(openssl rand -hex 4)`. Shell state does not persist between separate command calls, so substitute the generated value literally for `${SUFFIX}` in every later block, and do the same for any other value generated here.
+Generate a unique suffix for this run, `SUFFIX=$(openssl rand -hex 4)`, and create its temp directory, `mkdir -p /tmp/goal_research_${SUFFIX}`. Every file this skill writes lives there. The run proceeds in **passes**: the launch is pass `0`, and each continuation in Phase 3 is the next pass. Shell state does not persist between separate command calls, so substitute `${SUFFIX}`, the current `${PASS}`, and every other value generated here literally into each later block.
 
 ### Research brief
 
-Every runner receives this brief, with `{inquire}` set to `/inquire` for `claude` and `$inquire` for `codex`. Its first line is the **goal condition**, the one this session judges the run against in Phase 3:
+**Goal condition**, the same sentence on every route, and the one this session judges each pass against in Phase 3:
+
+> Every uncertainty this session's research target turns on is either filled by a citation to a source this session's Tavily calls returned, or returned open with its reach — the person's marked as theirs.
+
+Every runner receives this brief, written to `/tmp/goal_research_${SUFFIX}/brief.txt`, with `{inquire}` set to `/inquire` for `claude` and `$inquire` for `codex`, and `{goal}` set to `/goal ` followed by the goal condition for `codex` and to `Goal: ` followed by it for `claude` — on a Claude route the goal command, where it is used at all, is set apart from the brief, as the host's reference says:
 
 ```
-/goal Every uncertainty the research target below turns on is either filled by a citation to a source this session's Tavily calls returned, or returned open with its reach — the person's marked as theirs.
+{goal}
 
 This session is the research session the goal-research skill has already delegated to — goal-research is already running here, so do not invoke it again in this session.
 
@@ -83,7 +87,7 @@ Report {inquire}'s record as it stands at completion, refined as follows:
 
 ### Runner: claude
 
-The host is the environment driving this skill, not another user choice; `claude` stays the default on every host. Read only that host's reference, here, before determining availability; it carries the launch, where the run's record is, how its final message is read, and how the same run is continued:
+The host is the environment driving this skill, not another user choice; `claude` stays the default on every host. Read only that host's reference, here, before determining availability; it carries the launch, each pass's outcome, where the run's record is, and how the same run is continued:
 
 | Host | `claude` runner | Reference |
 |---|---|---|
@@ -96,22 +100,24 @@ Other hosts may supply the same capability: a background Claude run with its own
 
 Check `which codex 2>/dev/null`. If Codex CLI is not found, expose the missing-binary error and stop. Failure modes are surfaced as raw errors, not handled internally.
 
-Write the brief, with `{inquire}` = `$inquire`, to `/tmp/goal_research_${SUFFIX}.txt`. Its `/goal` first line engages Codex's builtin goal command explicitly (the `Goal:` label form also works, but the slash form makes the convention unambiguous and aligns with how `$inquire` is invoked).
+The brief's `/goal` first line engages Codex's builtin goal command explicitly (the `Goal:` label form also works, but the slash form makes the convention unambiguous and aligns with how `$inquire` is invoked).
 
-Launch through the host's background execution facility, with a 75-minute envelope (on Claude Code, the binding is in [Claude Code](references/host-claude-code.md)). `--color never` + splitting the
-streams (stdout to the events file, `2>` to a separate warn file) keeps stderr
+Launch pass `0` through the host's background execution facility, with a 75-minute envelope (on Claude Code, the binding is in [Claude Code](references/host-claude-code.md)). `--color never` + splitting the
+streams (stdout to the pass's events file, `2>` to its warn file) keeps stderr
 warnings out of the events file. Stdout is **not** guaranteed to be pure JSONL —
 codex may still print a plain notice line there (e.g. `Codex autostart is
 disabled.`), so every extraction below filters to lines starting with `{` before
-parsing. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
+parsing. The status file keeps the pass's exit code after the launching shell ends. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
 
 ```bash
 codex exec --json --color never --skip-git-repo-check -m gpt-6-astra \
   --config model_reasoning_effort="{effort}" \
-  < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl 2>/tmp/goal_research_warn_${SUFFIX}.txt
+  < /tmp/goal_research_${SUFFIX}/brief.txt \
+  > /tmp/goal_research_${SUFFIX}/p${PASS}.events.jsonl 2> /tmp/goal_research_${SUFFIX}/p${PASS}.warn.txt
+printf '%s\n' "$?" > /tmp/goal_research_${SUFFIX}/p${PASS}.status
 ```
 
-The launch persists its session so Phase 3 can continue the same one: `--ephemeral` would leave nothing to resume. The cost is that the session's files stay in Codex's own session store after the run.
+The launch persists its session so Phase 3 can continue the same one; `--ephemeral` would leave nothing to resume. The session therefore stays in Codex's own session store (under `~/.codex/sessions/`, named by its thread id) after this skill finishes; removing it is the user's call, not this skill's.
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-loop`'s codex source does not apply here.
 
@@ -131,25 +137,32 @@ option either.
 
 ## Phase 3: Collection, Reading, and Continuation
 
-Wait for the background task completion notification — do not poll or sleep. Steps 1–4 run each time the run returns, over the whole run so far.
+Wait for the background task completion notification — do not poll or sleep. Steps 1–4 run after every pass. Each pass's outcome is read from that pass alone first; only a pass that returned is read further, over the whole run so far.
 
-### 1. The narrative
+### 1. The pass outcome
 
-The runner's final report **is** the research trace/answer — **forward it verbatim to the presentation step; do NOT regex-parse it**. It is extracted mechanically and written to `/tmp/goal_research_report_${SUFFIX}.txt`; nothing below rewrites it.
+A pass **returned** when its own exit status is zero, its own terminal event is a success, and its own final message carries the report; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report **is** the research trace/answer: it is written to `/tmp/goal_research_${SUFFIX}/report.txt` and **forwarded verbatim to the presentation step; do NOT regex-parse it** — nothing below rewrites it.
 
-- **claude**: extracted from the run's record as the host's reference says. If it comes back empty or the run failed, surface what returned instead of proceeding blank.
-- **codex**: filter the events file once to its JSON lines, then extract the **final** codex `agent_message` from that — high-reasoning codex streams progress messages first, so the extraction takes the last `agent_message`. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
+- **claude**: as the host's reference says.
+- **codex**: the pass's `turn.completed` with no `turn.failed`, and its last `agent_message` — high-reasoning codex streams progress messages first, so the extraction takes the last one.
 
   ```bash
-  grep '^{' /tmp/goal_research_events_${SUFFIX}.jsonl > /tmp/goal_research_json_${SUFFIX}.jsonl
-  jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' \
-    /tmp/goal_research_json_${SUFFIX}.jsonl > /tmp/goal_research_report_${SUFFIX}.txt
+  D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
+  grep '^{' "$P.events.jsonl" > "$P.json.jsonl"
+  if [ "$(cat "$P.status" 2>/dev/null)" = 0 ] \
+    && jq -se 'any(.[]; .type == "turn.completed") and all(.[]; .type != "turn.failed")' "$P.json.jsonl" > /dev/null \
+    && jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' \
+         "$P.json.jsonl" > "$D/report.txt" \
+    && [ -s "$D/report.txt" ]
+  then echo "pass ${PASS}: returned"
+  else : > "$D/report.txt"; echo "pass ${PASS}: failed"
+  fi
   ```
 
   The `grep '^{'` is load-bearing, not defensive tidiness: codex prints plain
   notice lines to stdout alongside the JSONL, and `jq -rs` aborts on the first
-  one and returns nothing. Without the filter a **successful** run reads as the
-  empty extraction the previous sentence tells you to treat as a crash.
+  one and returns nothing. Without the filter a **successful** pass reads as
+  failed.
 
   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
 
@@ -161,25 +174,37 @@ The machine reads the run's own record of its tool calls, never the run's descri
 - **What it returned** is read only from a JSON response carrying a `results` array: each entry's `url`, listed verbatim. An extract call's listed URLs are what it extracted; its failed URLs are not in `results`. What a call asked for — its arguments, a URL inside a query — is never read.
 - **Not mechanically readable**: a successful call whose response is not JSON with a `results` array — formatted text, an error body, a truncated or stubbed result. It lists nothing; it is counted and named by call id, and this session reads its raw record in step 3.
 
-The record reduces to one line per successful Tavily call, `{"id", "tool", "readable", "urls"}`, in `/tmp/goal_research_calls_${SUFFIX}.jsonl`. There are two record shapes, each with one reduction:
+The whole run's record is written to `/tmp/goal_research_${SUFFIX}/record.jsonl`, with the exit status of writing it in `record.status` beside it. Where the passes were written to per-pass event files — the `codex` runner, and `claude -p` — the record is their filtered events together:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}
+cat "$D"/p*.json.jsonl > "$D/record.jsonl"
+printf '%s\n' "$?" > "$D/record.status"
+```
+
+Where the host keeps the record itself, its reference gives the block that writes these two files. The record reduces to one line per successful Tavily call, `{"id", "tool", "readable", "urls"}`, in `calls.jsonl`, with the reduction's exit status in `reduce.status`; a record that is missing, failed to write, or holds a line that does not parse fails the reduction. There are two record shapes, each with one reduction:
 
 - **Codex events** (the `codex` runner): each Tavily call is an `mcp_tool_call` item with its `tool`, `status`, `error`, and `result`; the response is the result's `structured_content` or the JSON text inside its `content[].text`.
 
   ```bash
-  jq -c 'select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
+  D=/tmp/goal_research_${SUFFIX}
+  [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -c '
+    select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
            and (.item.tool // "" | test("^tavily(_|-)(search|extract)$")))
-         | (.item.result // {}) as $r
-         | ([$r.structured_content?, ($r.content[]? | select(.type=="text") | .text | try fromjson catch empty)]
-            | map(select(type == "object" and (.results | type) == "array"))) as $json
-         | {id: .item.id, tool: .item.tool, readable: ($json | length > 0),
-            urls: ([$json[] | .results[] | .url? | strings] | unique)}' \
-    /tmp/goal_research_json_${SUFFIX}.jsonl > /tmp/goal_research_calls_${SUFFIX}.jsonl
+    | (.item.result // {}) as $r
+    | ([$r.structured_content?, ($r.content[]? | select(.type=="text") | .text | try fromjson catch empty)]
+       | map(select(type == "object" and (.results | type) == "array"))) as $json
+    | {id: .item.id, tool: .item.tool, readable: ($json | length > 0),
+       urls: ([$json[] | .results[] | .url? | strings] | unique)}' \
+    "$D/record.jsonl" > "$D/calls.jsonl"
+  printf '%s\n' "$?" > "$D/reduce.status"
   ```
 
-- **Claude message record** (the `claude` runner, on any host whose reference binds `REC` to the run's record): assistant entries carry `{type: "tool_use", id, name}` items and user entries carry `{type: "tool_result", tool_use_id, is_error, content}` items; a call is the pair joined by id, and a `tool_use` with no result did not complete.
+- **Claude message record** (the `claude` runner, on any host): assistant entries carry `{type: "tool_use", id, name}` items and user entries carry `{type: "tool_result", tool_use_id, is_error, content}` items; a call is the pair joined by id, and a `tool_use` with no result did not complete.
 
   ```bash
-  jq -cs '
+  D=/tmp/goal_research_${SUFFIX}
+  [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -cs '
     ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | {key: .id, value: .name}] | from_entries) as $names
     | .[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result" and .is_error != true)
     | ($names[.tool_use_id] // "" | split("__") | last) as $tool
@@ -188,27 +213,34 @@ The record reduces to one line per successful Tavily call, `{"id", "tool", "read
        | map(select(type == "object" and (.results | type) == "array"))) as $json
     | {id: .tool_use_id, tool: $tool, readable: ($json | length > 0),
        urls: ([$json[] | .results[] | .url? | strings] | unique)}
-  ' "$REC" > /tmp/goal_research_calls_${SUFFIX}.jsonl
+  ' "$D/record.jsonl" > "$D/calls.jsonl"
+  printf '%s\n' "$?" > "$D/reduce.status"
   ```
 
 Where the host offers no readable record of a `claude` run, nothing below is mechanical: the Source Check says the record was not readable, and every source and strength label stands as the runner reported it, unchecked.
 
 The record is the Tavily route the brief directs. A page the run fetched another way — a host's built-in web search, a shell `curl` — is outside it, so "not found in this run's Tavily record" never means that no tool touched the URL.
 
-Then list what the record holds:
+Then list what the record holds — only once the reduction has succeeded:
 
 ```bash
-C=/tmp/goal_research_calls_${SUFFIX}.jsonl
-echo "successful Tavily calls: $(jq -s 'length' "$C")"
-echo "not mechanically readable: $(jq -s '[.[] | select(.readable | not)] | length' "$C")"
-jq -r 'select(.readable | not) | "  call " + .id + " (" + .tool + ")"' "$C"
-echo '--- returned ---'
-jq -r '.urls[]' "$C" | LC_ALL=C sort -u
-echo '--- extracted ---'
-jq -r 'select(.tool | test("extract")) | .urls[]' "$C" | LC_ALL=C sort -u
+D=/tmp/goal_research_${SUFFIX}; C=$D/calls.jsonl
+if [ "$(cat "$D/reduce.status" 2>/dev/null)" != 0 ]; then
+  echo 'reduction failed: the checks have not run'
+else
+  echo "successful Tavily calls: $(jq -s 'length' "$C")"
+  echo "not mechanically readable: $(jq -s '[.[] | select(.readable | not)] | length' "$C")"
+  jq -r 'select(.readable | not) | "  call " + .id + " (" + .tool + ")"' "$C"
+  echo '--- returned ---'
+  jq -r '.urls[]' "$C" | LC_ALL=C sort -u
+  echo '--- extracted ---'
+  jq -r 'select(.tool | test("extract")) | .urls[]' "$C" | LC_ALL=C sort -u
+fi
 ```
 
-**Zero-call.** If the successful Tavily call count is `0`, the run has **no successful Tavily call**: nothing in the trace was retrieved through the designated route, and its claims stand as the runner's own, open, unchecked. The Source Check says so first, as a statement covering the whole trace below it, and the trace itself stays unedited. For codex, surface the warn file as well — an MCP that failed to start leaves its trace there, not in the narrative.
+**Reduction failed.** No count is reported; the Source Check says the reduction failed and the checks have not run, and the loop ends.
+
+**Zero-call.** If the successful Tavily call count is `0`, the run has **no successful Tavily call**: nothing in the trace was retrieved through the designated route, and its claims stand as the runner's own, open, unchecked. The Source Check says so first, as a statement covering the whole trace below it, and the trace itself stays unedited; the loop ends. For codex, surface the warn files as well — an MCP that failed to start leaves its trace there, not in the narrative.
 
 ### 3. Reading the report
 
@@ -220,79 +252,85 @@ Every judgment in this step is this session's reading, marked as such where it i
 
 ### 4. The goal
 
-Judge the run against the goal condition, using the lists and the reading. Its gaps are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user.
+Judge the pass against the goal condition, using the lists and the reading. Its **gaps** are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user. Record the pass's gap count.
+
+Only research gaps drive a continuation. A failed pass, a reduction failure, or a run with no successful Tavily call has already ended the loop in steps 1–2, and is surfaced rather than continued.
 
 - **No gap**: the condition is met; go to Phase 4.
-- **Gaps**: continue the **same** run — not a new one — through the runner's continuation (codex below; claude in the host's reference), sending this message, written to `/tmp/goal_research_continue_${SUFFIX}.txt`:
+- **Gaps, fewer than after the previous pass** (or pass `0` with any gap): continue the **same** run — not a new one — as the next pass, through the runner's continuation (codex below; claude in the host's reference), sending this message, written to `/tmp/goal_research_${SUFFIX}/continue.txt`:
 
   ```
-  The /goal condition is not met yet. Continue toward it in this same session, then return the whole report again, updated.
+  The goal condition is not met yet. Continue toward it in this same session, then return the whole report again, updated.
   Gaps found in your report and this session's Tavily record:
   - {each gap}
   ```
 
-  Then run steps 1–4 again over the whole run so far.
-- **No progress**: a continuation that closed no gap stops the loop; go to Phase 4 with the gaps that remain.
+- **Gaps, not fewer than after the previous pass**: no progress; the loop ends, and Phase 4 shows the gaps that remain.
 
-A run that failed, rather than returning short of the condition, is surfaced as a raw error and not continued.
+Because a continuation is sent only while the gap count strictly falls, the loop ends.
 
-**Codex continuation.** The thread id is in the events file's `thread.started` event. Continue it through the host's background execution facility, appending to the same events and warn files so the record stays whole:
+**Codex continuation.** The thread id is in the launch's `thread.started` event. Continue it as pass `${PASS}` through the host's background execution facility, with the same envelope:
 
 ```bash
 codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
   --config model_reasoning_effort="{effort}" \
-  < /tmp/goal_research_continue_${SUFFIX}.txt >> /tmp/goal_research_events_${SUFFIX}.jsonl 2>>/tmp/goal_research_warn_${SUFFIX}.txt
+  < /tmp/goal_research_${SUFFIX}/continue.txt \
+  > /tmp/goal_research_${SUFFIX}/p${PASS}.events.jsonl 2> /tmp/goal_research_${SUFFIX}/p${PASS}.warn.txt
+printf '%s\n' "$?" > /tmp/goal_research_${SUFFIX}/p${PASS}.status
 ```
 
 ### 5. Codex warnings
 
-Some codex warnings ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the trace:
+Some codex warnings ride the **stderr banner**, not `agent_message` — each pass sent stderr to its own warn file. Grep those to catch what the narrative does not carry, and surface any hits alongside the trace:
 
 ```bash
-grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/goal_research_warn_${SUFFIX}.txt || true
+cat /tmp/goal_research_${SUFFIX}/p*.warn.txt | grep -iE 'invalid_grant|deprecat|--full-auto|warn' || true
 ```
 
 ### 6. Cleanup
 
-After the loop has stopped and the result is presented, remove this run's temp files (each route creates only some of them):
+After the loop has ended and the result is presented, remove this skill's temp directory, and nothing else:
 
 ```bash
-rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl /tmp/goal_research_warn_${SUFFIX}.txt \
-  /tmp/goal_research_json_${SUFFIX}.jsonl /tmp/goal_research_report_${SUFFIX}.txt /tmp/goal_research_calls_${SUFFIX}.jsonl \
-  /tmp/goal_research_status_${SUFFIX}.txt /tmp/goal_research_continue_${SUFFIX}.txt
+rm -rf /tmp/goal_research_${SUFFIX}
 ```
+
+A session a CLI keeps in its own store is left there; the runner's section and the host's reference say where.
 
 ## Phase 4: Output
 
-Present the source check first, then the items the run returned as the user's to settle, then the runner's last narrative verbatim as the trace — so a statement that the run had no successful Tavily call, or that its record could not be read, is the first thing the user reads. The items to settle are lifted from the narrative into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the Phase 3 narrative as the trace body — do not dump the raw event stream or tool record:
+Present the source check first, then the items the run returned as the user's to settle, then the last returned pass's report verbatim as the trace — so a statement that the run had no successful Tavily call, that a pass or the reduction failed, or that its record could not be read, is the first thing the user reads. The items to settle are lifted from the report into their own block, each with what it needs, and presented to the user as theirs to settle; neither the runner nor the main session answers or settles them, and work that rests on one waits for the user's words. Use the Phase 3 report as the trace body — do not dump the raw event stream or tool record:
 
 ```
 ## Goal Research Result
 
 Target: {research_question}
 Runner: {claude | codex}
-Continuations: {n} — stopped: {goal met | no progress | a continuation failed, surfaced below}
+Goal: {engaged | not engaged | not confirmed on this route}
+Passes: {n}, gaps after each: {g0, g1, …} — stopped: {goal met | no progress | a pass failed | reduction failed | no successful Tavily call}
 
 --- Source Check ---
 {"no successful Tavily call — nothing in the trace below was retrieved through the designated route; its claims stand as the runner's own, open, unchecked";
+ or "pass {k} failed" with its raw error;
+ or "the reduction of the run's record failed; the checks have not run";
  or "the run's tool record is not readable from this session — sources and strength labels are the runner's own, unchecked";
  or the record: {n} successful Tavily calls, {m} not mechanically readable;
- then, as this session's reading: each citation not found in this run's Tavily record, each `verified` label on a source this run did not extract, what the report form is missing, and, where the loop stopped without progress, the gaps that remain — or "this session's reading found every citation in the record and nothing missing"}
+ then, as this session's reading: each citation not found in this run's Tavily record, each `verified` label on a source this run did not extract, what the report form is missing, and, where the loop ended without meeting the goal, the gaps that remain — or "this session's reading found every citation in the record and nothing missing"}
 
 --- Yours to Settle ---
 {each item the run returned as the user's, with what it needs; or "none returned"}
 
 --- Trace ---
-{runner_narrative}
+{last returned pass's report, or "no pass returned a report"}
 ```
 
-Acceptance criterion: a real research run was launched on the designated runner and judged against the goal condition each time it returned, continued while gaps closed, and its last trace was returned to the main session with the source check, the items it returned as the user's presented as theirs to settle, and the temp files cleaned up.
+Acceptance criterion: a real research run was launched on the designated runner; each pass's outcome was read from that pass; each returned pass was judged against the goal condition and continued only while its gaps fell; the result was presented with the source check, the items the run returned as the user's presented as theirs to settle, and this skill's temp directory removed.
 
 ## Rules
 
 - Research question is embedded verbatim — no paraphrasing before passing it to the runner.
 - The runner is the designated one, `claude` when none is designated; the research runs in the background, so the main session is free until the completion notification arrives.
-- Failure modes (Codex or the `claude` CLI missing, a missing Claude run or Tavily capability, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back to the other runner; continuation answers only a run that returned short of the goal.
-- The machine reads the run's tool record and only what is unambiguous there; citations are read against it by this session, each judgment marked as its reading; the narrative itself is forwarded unedited.
-- Always clean up this run's temp files after the result is presented.
+- Failure modes (Codex or the `claude` CLI missing, a missing Claude run or Tavily capability, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back to the other runner; continuation answers only research gaps in a pass that returned.
+- The machine reads the run's tool record and only what is unambiguous there; citations are read against it by this session, each judgment marked as its reading; the report itself is forwarded unedited.
+- Remove only this skill's temp directory; a session kept in a CLI's own store is the user's to remove.
 - The skill is a delegation channel only — interpretation, follow-up questions, and downstream protocol routing belong to the main session after the trace returns. What the run returns as the user's to settle reaches the user as theirs, as Phase 4 presents it.

@@ -20,7 +20,7 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
 | `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
 | `/realign` | Project guide direction line via three-horizon fusion | Fused direction line written to the project guide |
-| `/goal-research` | Research delegated to a background run — a Claude run by default (a subagent, or `claude -p` on a Codex host), or a Codex CLI session — verifying through Aitesis and Tavily | Research trace refining Aitesis's record with per-claim verification strength, what only you can settle returned to you as open, and its citations read against the run's own Tavily record; the same run is continued under `/goal` until its condition is met |
+| `/goal-research` | Research delegated to a background run — a Claude run by default (a subagent, or `claude -p` on a Codex host), or a Codex CLI session — verifying through Aitesis and Tavily | Research trace refining Aitesis's record with per-claim verification strength, what only you can settle returned to you as open, and its citations read against the run's own Tavily record; the same run is continued toward one goal condition while its gaps shrink |
 
 ## Skills
 
