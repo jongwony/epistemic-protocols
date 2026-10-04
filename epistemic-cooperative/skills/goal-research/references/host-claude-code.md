@@ -1,14 +1,29 @@
-# Claude Code Record
+# Claude Code Host
 
-Load when the host driving this skill is Claude Code: at Phase 2 for the `codex` runner's launch,
-and at Phase 3 step 2 for the `claude` runner's record — where the subagent's own tool-call record
-is, and its reduction to the calls file the checks read.
+Load when the host driving this skill is Claude Code: at Phase 2 for either runner's launch, and
+at Phase 3 for the `claude` runner's record, narrative, and continuation.
 
 ## Codex runner launch
 
-Run the `codex exec` command through the Bash tool in the background,
-`Bash(run_in_background: true, timeout: 4500000)` — 4,500,000 ms is the 75-minute envelope — and
-wait for its completion notification.
+Run the `codex exec` command — and each `codex exec resume` continuation — through the Bash tool
+in the background, `Bash(run_in_background: true, timeout: 4500000)` — 4,500,000 ms is the
+75-minute envelope — and wait for its completion notification.
+
+## Claude runner launch
+
+Start a background subagent through the Agent tool, with the brief as its whole prompt and no
+fork of this conversation, and keep the agent's name or id: the continuation addresses it.
+
+Before launch, confirm that Tavily's search and extract tools are among this session's own
+tools. What a background subagent may call follows the host's subagent configuration, and a
+background subagent cannot answer a permission prompt; neither was verified for Tavily here, so
+availability is settled by the record rather than assumed: a Tavily call that was denied or
+unavailable appears in the record as an errored result or not at all, and the run then reads as
+failed calls or as the zero-call outcome. Nothing fails open.
+
+Whether the brief's `/goal` line engages Claude Code's own goal command inside a background
+subagent has not been confirmed. The Phase 3 loop judges the goal condition in this session
+either way.
 
 ## Where the record is
 
@@ -16,39 +31,28 @@ A background subagent's output file, as the host reports it on launch or complet
 the subagent's transcript: a JSONL file under `~/.claude/projects/<project>/`, in a
 `subagents/agent-<id>.jsonl` path (one observed form nests it under the parent session's
 directory). Resolve the reported path, following a symlink, rather than constructing it. Where the
-host reported no path and none resolves, the record is not readable and Phase 3's not-run branch
-applies.
+host reported no path and none resolves, the record is not readable and Phase 3's not-readable
+outcome applies.
 
-In that transcript, assistant entries carry `message.content[]` items
-`{type: "tool_use", id, name, input}`, and user entries carry `message.content[]` items
-`{type: "tool_result", tool_use_id, is_error, content}`. A Tavily MCP result's `content` is a
-string or a list of `{type: "text", text}` items. The text is the Tavily response either as JSON
-or in the formatted text the Tavily MCP server prints; Phase 3 step 2 says how source records are
-read from each, and the reduction below applies it unchanged. Its limit applies here too: a line
-inside a returned page's text that begins `URL: ` is read as a result line.
+Bind `REC` to the resolved transcript path and run Phase 3 step 2's Claude message record
+reduction unchanged. A tool result the transcript stored truncated, or replaced with a pointer to
+a file, fails to parse as JSON and is counted as not mechanically readable; read it in step 3.
 
-## Reduction
+## Narrative
 
-Pair each `tool_result` with its `tool_use` by id. A successful Tavily call is a pair whose tool
-name names Tavily and search or extract, and whose result has `is_error` other than `true`; a
-`tool_use` with no result did not complete. Set `T` to the resolved transcript path:
+The subagent's final message is its last assistant message with text, joined across the entries
+the transcript splits it into:
 
 ```bash
-jq -cs '
-  ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | {key: .id, value: .name}] | from_entries) as $names
-  | .[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result")
-  | ($names[.tool_use_id] // "") as $tool
-  | select(($tool | test("tavily"; "i")) and ($tool | test("search|extract"; "i")) and .is_error != true)
-  | [.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end] as $texts
-  | ([$texts[] | try fromjson catch empty] | map(objects)) as $json
-  | {tool: $tool,
-     records: (if ($json | length) > 0 then $json
-               else [$texts[] | split("\n")[]] as $lines
-                    | if ($lines | any(. == "Detailed Results:" or startswith("URL: ")))
-                      then [{results: [$lines[] | select(startswith("URL: ")) | {url: (.[5:] | sub("\\s+$"; ""))}]}]
-                      else [] end end)}
-' "$T" > /tmp/goal_research_calls_${SUFFIX}.jsonl
+jq -rs '[.[] | select(.type=="assistant")] as $a
+  | ([$a[] | select([.message.content[]? | select(.type=="text")] | length > 0)] | last | .message.id) as $id
+  | [$a[] | select(.message.id == $id) | .message.content[]? | select(.type=="text") | .text] | join("\n")' \
+  "$REC" > /tmp/goal_research_report_${SUFFIX}.txt
 ```
 
-Write the subagent's final message to `/tmp/goal_research_report_${SUFFIX}.txt`, then run
-Phase 3 step 3's checks unchanged.
+## Continuation
+
+Continue the same subagent — send the continuation message to it by the name or id kept at
+launch — rather than spawning a new one, so its context and its transcript carry on. Before
+reducing again, confirm which transcript the continuation wrote to; where it is a different file
+from the launch's, reduce both together.

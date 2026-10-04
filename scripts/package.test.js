@@ -331,7 +331,9 @@ describe('runtime contract view', () => {
 
 describe('goal-research runtime contract', () => {
   const REPO_ROOT = path.join(__dirname, '..');
-  const skillPath = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'SKILL.md');
+  const skillDir = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research');
+  const skillPath = path.join(skillDir, 'SKILL.md');
+  const refPath = (name) => path.join(skillDir, 'references', name);
 
   // This block previously REQUIRED `--config mcp_servers.tavily.tool_timeout_sec=3600`.
   // That override cannot work: a dotted override under `mcp_servers` replaces the
@@ -362,16 +364,6 @@ describe('goal-research runtime contract', () => {
     );
   });
 
-  it('documents the Codex session envelope, host-neutral in SKILL.md and bound per host in its reference', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    assert.match(skill, /the host's background execution facility, with a 75-minute envelope/);
-    // A host tool name in the host-neutral body binds the contract to one host.
-    assert.ok(!/Bash\(run_in_background/.test(skill), 'the Claude Code binding lives in its host reference');
-    const ref = fs.readFileSync(path.join(__dirname, '..', 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-claude-code.md'), 'utf8');
-    const bashMs = Number(ref.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
-    assert.equal(bashMs, 75 * 60 * 1000, 'the Claude Code binding carries the same 75-minute envelope');
-  });
-
   it('filters non-JSON stdout lines before jq, and never claims the events file is pure JSONL', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
     // codex prints plain notice lines to stdout alongside the JSONL; `jq -rs` aborts on
@@ -391,112 +383,46 @@ describe('goal-research runtime contract', () => {
     );
   });
 
-  it('requires a zero-search check before any result is presented as research', () => {
+  // Structural checks only: what each piece of prose means goes to review, not to a
+  // phrase match. These hold the pieces a mechanical predicate can decide.
+
+  it('keeps host tool bindings in the host references, with the codex envelope bound on Claude Code', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
-    // A codex run can complete and answer fluently from recalled knowledge when the
-    // MCP is unavailable; nothing in the narrative distinguishes that from a searched
-    // answer, so the count is the only signal.
-    // Only a completed, error-free Tavily call counts: a call that started and failed
-    // retrieved nothing. The executable fixtures below exercise the count itself.
-    assert.match(skill, /\.item\.status=="completed" and \.item\.error==null/, 'the count must keep only completed, error-free calls');
-    assert.match(skill, /test\("tavily"; "i"\)/, 'the count must keep only Tavily calls');
-    assert.match(
-      skill,
-      /no successful Tavily call/i,
-      'Phase 3 must say what to do when the count is zero',
-    );
-    // The check reads only the Tavily route, so a zero count says nothing came through
-    // that route — not that every claim was recalled, since a page fetched another way is
-    // outside the record.
-    assert.match(skill, /nothing in the trace was retrieved through the designated route/i);
-    assert.ok(!/recalled-from-training/i.test(skill), 'a zero count does not establish that claims were recalled');
-    // The marking is a statement in the Source Check covering the trace, never an edit of
-    // the trace, which is forwarded verbatim.
-    assert.ok(!/mark every claim in it/i.test(skill), 'the zero-call branch must not rewrite the trace');
-    assert.match(skill, /statement covering the whole trace below it/i);
+    assert.ok(!/Bash\(run_in_background/.test(skill), 'a host tool binding stays out of the host-neutral body');
+    const ref = fs.readFileSync(refPath('host-claude-code.md'), 'utf8');
+    const bashMs = Number(ref.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
+    assert.equal(bashMs, 75 * 60 * 1000);
   });
 
-  it('designates the runner from the request, claude when none is designated', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    assert.match(skill, /runner\s*:\s*claude \| codex/, 'the caller signature must name both runners');
-    assert.match(skill, /claude when none is designated/i, 'the default runner must be stated');
-    assert.match(skill, /request's words as well as its arguments/i, 'designations are read from words, not only arguments');
-    // The research question is carried verbatim, so a designation is never cut out of it,
-    // and a leading word that could open the question is asked about, not guessed.
-    assert.match(skill, /only when it stands as a separate leading argument and what follows reads as the whole question/i);
-    assert.match(skill, /could instead open the question[^\n]*Claude Shannon[^\n]*ask once/i, 'ambiguous leading words are asked about');
-    assert.match(skill, /Nothing is removed from inside the question/i);
-    const phase1 = skill.slice(skill.indexOf('## Phase 1'), skill.indexOf('## Phase 2'));
-    assert.match(phase1, /read as the Caller Signature says/, 'Phase 1 defers to the one designation rule');
-    // Separate command calls share no shell state, and the claude runner's precondition is
-    // checked before launch.
-    assert.match(skill, /substitute the generated value literally for `\$\{SUFFIX\}` in every later block/);
-    assert.match(skill, /Before launch, confirm that Tavily search and Tavily extract are available to that run/);
-    assert.match(skill, /### Runner: claude/, 'the claude route must be specified');
-    assert.match(skill, /### Runner: codex/, 'the codex route must be specified');
-  });
-
-  // The report form lives in the brief both runners receive. Asserting inside that block
-  // keeps a copy elsewhere in the prose from satisfying the test while the runner never
-  // sees it.
-  const readBrief = () => {
+  it('opens the brief every runner receives with /goal and carries the research-target slot', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
     // Line-anchored fences: an unanchored match can start at a closing fence and pair it
     // with the next block's opening one.
     const brief = [...skill.matchAll(/^```[^\n]*\n([\s\S]*?)^```/gm)].map((m) => m[1]).find((b) => b.includes('Research target:'));
     assert.ok(brief, 'the research brief must be present');
-    return brief;
-  };
-
-  it('refines /inquire\'s reading for research instead of running a second one', () => {
-    const brief = readBrief();
-    // /inquire carries the contract: its reading of each uncertainty, its reach record, and
-    // what stays open. The strength scale subdivides "filled by an external citation"; it is
-    // not a parallel scale, so a detail from recall is the runner's own inference and open.
-    assert.match(brief, /add no second reading/i, 'the brief must state the refinement relation');
-    for (const label of ['verified', 'mostly']) {
-      assert.match(brief, new RegExp(`- ${label}:`), `the brief must define the ${label} strength`);
-    }
-    assert.match(brief, /filled by an external citation/i, 'verified and mostly subdivide a citation-filled uncertainty');
-    assert.match(brief, /snippet/i, 'a search-result snippet must cap a claim below verified');
-    assert.match(brief, /not a citation[\s\S]*reconstructed, as your own inference[\s\S]*open/i,
-      'a detail from recall is the runner\'s own inference and leaves its item open');
-    assert.match(brief, /weakest link/i, 'the weakest link must be named');
-    assert.match(brief, /absence or novelty claim[\s\S]*reach record/i,
-      'absence claims are scoped by /inquire\'s own reach record, not a second one');
-    assert.match(brief, /replication status[\s\S]*retraction/i, 'empirical effects carry replication and retraction status');
-    assert.match(brief, /design warning, not a quantitative law/i);
+    assert.ok(brief.startsWith('/goal '), 'the brief begins with its goal condition');
+    assert.ok(brief.includes('{research_question}'), 'the research question is slotted in verbatim');
+    assert.ok(brief.includes('{inquire}'), 'the runner-specific /inquire invocation is slotted');
   });
 
-  it('returns what only the person can settle as open, and presents it to the user as theirs', () => {
-    const brief = readBrief();
-    // A background run has no person. Without this the runner fills a held value itself and
-    // the report presents the runner's choice as settled.
-    assert.match(brief, /No person answers in this session/i);
-    assert.match(brief, /neither answered nor settled here/i, 'the person\'s items return open');
-    assert.match(brief, /Fill no held value yourself/i);
+  it('presents the source check, then the items to settle, then the trace', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
     const phase4 = skill.slice(skill.indexOf('## Phase 4'), skill.indexOf('## Rules'));
-    assert.match(phase4, /--- Yours to Settle ---/, 'the output must carry the user\'s items in their own block');
-    // The check result comes first, so a zero-call or unreadable statement is read before
-    // anything that rests on the trace.
     const order = ['--- Source Check ---', '--- Yours to Settle ---', '--- Trace ---'].map((h) => phase4.indexOf(h));
     assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), 'Source Check, then Yours to Settle, then Trace');
-    assert.match(phase4, /Present the check results first/);
-    assert.match(phase4, /the report cites no URL; no claim carries a checkable citation/);
-    assert.match(phase4, /successful Tavily calls returned a response this check cannot read; URLs they returned cannot be confirmed/);
-    assert.match(phase4, /neither the runner nor the main session answers or settles them/i);
   });
 
-  it('states that an unreadable tool record leaves the source check unrun, not passed', () => {
+  it('links each host reference from the body and packages it', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
-    // A subagent's own account of what it opened is part of the report under check. If
-    // the skill let that account stand in for the record, a fabricated citation would be
-    // presented as checked.
-    assert.match(skill, /no readable record exists, the checks[^\n]*have not run/i, 'Phase 3 must say the checks did not run');
-    assert.match(skill, /does not substitute for the record/i);
-    assert.match(skill, /not run: the runner's tool record is not readable/i, 'the output must carry the unrun state');
+    const view = buildRuntimeContractViews().find((v) => v.skill === 'goal-research');
+    assert.ok(view, 'goal-research must have a runtime contract view');
+    for (const name of ['host-claude-code.md', 'host-codex.md']) {
+      assert.ok(skill.includes(`(references/${name})`), `SKILL.md links ${name}`);
+      assert.ok(view.packagedEntries.includes(`goal-research/references/${name}`), `${name} is packaged`);
+    }
   });
+
+  // ---- mechanical behaviour: the reducers run as written, on fixtures ----
 
   const hasJq = (() => {
     try {
@@ -506,6 +432,7 @@ describe('goal-research runtime contract', () => {
       return false;
     }
   })();
+  const needsJq = { skip: !hasJq && 'jq not installed' };
 
   // Bash blocks of a surface, fence lines anchored (indented blocks included).
   const bashBlocks = (doc) => [...doc.matchAll(/^[ \t]*```bash\n([\s\S]*?)^[ \t]*```/gm)].map((m) => m[1]);
@@ -515,367 +442,169 @@ describe('goal-research runtime contract', () => {
     return block;
   };
   const tmpFile = (kind, suffix, ext) => `/tmp/goal_research_${kind}_${suffix}.${ext}`;
-  const parseChecks = (out) => {
+  const KINDS = [['events', 'jsonl'], ['json', 'jsonl'], ['report', 'txt'], ['calls', 'jsonl']];
+  const parseList = (out) => {
     const count = Number(out.match(/^successful Tavily calls: (\d+)$/m)?.[1]);
-    const unreadable = Number(out.match(/with a response this check cannot read: (\d+)$/m)?.[1]);
-    const cited = Number(out.match(/^cited URLs: (\d+)$/m)?.[1]);
-    const [, after] = out.split('--- cited, not opened in this run ---');
-    const [notOpened, extracted] = (after ?? '').split('--- extracted ---');
-    const urlsOf = (t) => (t ?? '').split('\n').map((l) => l.trim()).filter((l) => /^https?:/.test(l));
-    // Order is the shell's collation; the sets are what the checks assert.
-    return { count, unreadable, cited, notOpened: urlsOf(notOpened).sort(), extracted: urlsOf(extracted).sort() };
+    const unreadable = Number(out.match(/^not mechanically readable: (\d+)$/m)?.[1]);
+    const unreadableIds = [...out.matchAll(/^ {2}call (\S+) \(/gm)].map((m) => m[1]).sort();
+    const [, after] = out.split('--- returned ---');
+    const [returned, extracted] = (after ?? '').split('--- extracted ---');
+    const lines = (t) => (t ?? '').split('\n').filter((l) => l.length > 0).sort();
+    return { count, unreadable, unreadableIds, returned: lines(returned), extracted: lines(extracted) };
   };
-
-  // Runs the SKILL's own codex blocks — narrative extraction, record reduction, checks,
-  // cleanup — over a codex event stream, so the test exercises the text a runner follows.
-  const runCodexChecks = (events) => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    const script = [
-      pick(skill, 'goal_research_report_', 'agent_message'),
-      pick(skill, 'goal_research_calls_', 'mcp_tool_call'),
-      pick(skill, 'comm -23'),
-      pick(skill, 'rm -f'),
-    ].join('\n');
+  // Runs the given blocks in one shell with SUFFIX (and any extra env) set, writing the
+  // events fixture first; returns the listing and the extracted narrative.
+  const run = (blocks, events, env = {}) => {
     const suffix = crypto.randomBytes(4).toString('hex');
-    const kinds = [['events', 'jsonl'], ['json', 'jsonl'], ['report', 'txt'], ['calls', 'jsonl']];
     fs.writeFileSync(tmpFile('events', suffix, 'jsonl'),
       events.map((e) => (typeof e === 'string' ? e : JSON.stringify(e))).join('\n') + '\n');
     try {
-      const out = execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix }, encoding: 'utf8' });
-      for (const [kind, ext] of kinds) {
-        assert.ok(!fs.existsSync(tmpFile(kind, suffix, ext)), `cleanup must remove the ${kind} file`);
-      }
-      return parseChecks(out);
+      const extra = typeof env === 'function' ? env(suffix) : env;
+      const out = execFileSync('bash', ['-c', blocks.join('\n')], { env: { ...process.env, SUFFIX: suffix, ...extra }, encoding: 'utf8' });
+      const report = fs.existsSync(tmpFile('report', suffix, 'txt')) ? fs.readFileSync(tmpFile('report', suffix, 'txt'), 'utf8') : '';
+      return { ...parseList(out), report };
     } finally {
-      for (const [kind, ext] of kinds) fs.rmSync(tmpFile(kind, suffix, ext), { force: true });
+      for (const [kind, ext] of KINDS) fs.rmSync(tmpFile(kind, suffix, ext), { force: true });
     }
   };
+  const skillText = () => fs.readFileSync(skillPath, 'utf8');
+  const listBlock = () => pick(skillText(), 'not mechanically readable');
+  const codexBlocks = () => [pick(skillText(), 'goal_research_report_', 'agent_message'), pick(skillText(), 'mcp_tool_call', 'goal_research_calls_'), listBlock()];
+  const claudeReducer = () => pick(skillText(), 'tool_use', 'goal_research_calls_');
 
-  // Event shapes as codex-cli 0.160.0 emits them for Tavily MCP calls: the Tavily response
-  // arrives as structured_content and/or as JSON text inside content[].text.
-  const asText = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] });
-  const asStructured = (obj) => ({ content: [{ type: 'text', text: 'formatted, not JSON' }], structured_content: obj });
-  const tavily = (id, tool, args, result, extra = {}) => ({
+  // Codex event shapes as codex-cli 0.160.0 emits them for Tavily MCP calls.
+  const json = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] });
+  const structured = (obj) => ({ content: [{ type: 'text', text: 'formatted, not JSON' }], structured_content: obj });
+  const text = (t) => ({ content: [{ type: 'text', text: t }] });
+  const call = (id, tool, result, extra = {}) => ({
     type: 'item.completed',
-    item: { id, type: 'mcp_tool_call', server: 'tavily', tool, arguments: args, result, error: null, status: 'completed', ...extra },
+    item: { id, type: 'mcp_tool_call', server: 'tavily', tool, arguments: { query: 'see https://from-args.example/q' }, result, error: null, status: 'completed', ...extra },
   });
-  const message = (id, text) => ({ type: 'item.completed', item: { id, type: 'agent_message', text } });
+  const message = (id, t) => ({ type: 'item.completed', item: { id, type: 'agent_message', text: t } });
+  const officialText = ['Request ID: r1', 'Detailed Results:', '', 'Title: T', 'URL: https://text.example/p', 'Content: c'].join('\n');
 
-  it('counts a URL as opened only when a successful Tavily result returned it', { skip: !hasJq && 'jq not installed' }, () => {
-    const paper = 'https://aclanthology.org/2024.tacl-1.9';
-    const events = [
+  it('codex: counts only completed, error-free calls named exactly as Tavily search or extract', needsJq, () => {
+    const r = run(codexBlocks(), [
       'Codex autostart is disabled.',
-      { type: 'thread.started', thread_id: 't' },
-      // (a) a query naming a fabricated URL that returns nothing
-      tavily('item_1', 'tavily_search', { query: 'see https://fabricated.example/paper' },
-        asText({ query: 'see https://fabricated.example/paper', results: [] })),
-      tavily('item_2', 'tavily_search', { query: 'lost in the middle' },
-        asStructured({ results: [{ url: paper, content: 'snippet' }, { url: 'https://example.org/snippet-only?a=1&b=2', content: 'snippet' }] })),
-      // (b) an extract whose outer call succeeded but whose URL failed
-      tavily('item_3', 'tavily_extract', { urls: [paper, 'https://failed.example/x'] },
-        asText({ results: [{ url: paper, raw_content: 'page linking https://linked.example/inside' }],
-          failed_results: [{ url: 'https://failed.example/x', error: 'Failed to retrieve content' }] })),
-      // (c) an extract call that failed outright
-      { type: 'item.started', item: { id: 'item_4', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_extract',
-        arguments: { urls: ['https://failedcall.example/y'] }, result: null, error: null, status: 'in_progress' } },
-      { type: 'item.completed', item: { id: 'item_4', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_extract',
-        arguments: { urls: ['https://failedcall.example/y'] }, result: null, error: { message: 'timeout' }, status: 'failed' } },
-      // a page fetched outside the Tavily route
-      { type: 'item.completed', item: { id: 'item_5', type: 'command_execution', command: 'curl https://curl.example/z',
-        aggregated_output: 'https://curl.example/z', exit_code: 0, status: 'completed' } },
-      message('item_6', 'progress https://example.org/early-draft'),
-      message('item_7', [
-        `Claim A ([paper](${paper}/#abstract)), verified.`,
-        `Again _HTTPS://ACLANTHOLOGY.ORG/2024.tacl-1.9_ and '${paper}'.`,
-        // cited only in upper case, with no lower-case twin anywhere in the report
-        'Claim H: HTTPS://UPPER.EXAMPLE/Only',
-        'Claim B: https://example.org/snippet-only?a=1&b=2.',
-        'Claim C: https://fabricated.example/paper',
-        'Claim D, verified: https://failed.example/x',
-        'Claim E: https://failedcall.example/y',
-        'Claim F: https://linked.example/inside',
-        'Claim G: https://curl.example/z',
-      ].join('\n')),
-    ];
-    const r = runCodexChecks(events);
-    assert.equal(r.count, 3, 'three Tavily calls completed without error; the failed extract does not count');
-    assert.equal(r.unreadable, 0);
-    assert.deepEqual(r.notOpened, [
-      'https://curl.example/z',
-      'https://fabricated.example/paper',
-      'https://failed.example/x',
-      'https://failedcall.example/y',
-      'https://linked.example/inside',
-      'https://upper.example/Only',
-    ], 'arguments, failed_results, failed calls, page-internal links and non-Tavily fetches are not evidence; '
-      + 'case, fragment, trailing slash and punctuation do not cause a miss');
-    assert.deepEqual(r.extracted, [paper], 'only an extract result entry counts as extracted, never failed_results');
-  });
-
-  it('takes the zero-call path when the only Tavily call started and failed', { skip: !hasJq && 'jq not installed' }, () => {
-    const r = runCodexChecks([
-      { type: 'item.started', item: { id: 'item_1', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_search',
-        arguments: { query: 'q' }, result: null, error: null, status: 'in_progress' } },
-      { type: 'item.completed', item: { id: 'item_1', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_search',
-        arguments: { query: 'q' }, result: null, error: { message: 'unauthorized' }, status: 'failed' } },
-      // a successful call to some other MCP server is not a Tavily call
-      { type: 'item.completed', item: { id: 'item_2', type: 'mcp_tool_call', server: 'github', tool: 'search_code',
-        arguments: {}, result: asText({ results: [{ url: 'https://github.com/x' }] }), error: null, status: 'completed' } },
-      message('item_3', 'From memory: https://example.org/recalled'),
+      call('c1', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] })),
+      call('c2', 'tavily-extract', json({ results: [{ url: 'https://a.example/1' }], failed_results: [{ url: 'https://failed.example/x', error: 'e' }] })),
+      call('c3', 'tavily_research', json({ results: [{ url: 'https://research.example/r' }] })),
+      call('c4', 'tavily_crawl', json({ results: [{ url: 'https://crawl.example/c' }] })),
+      call('c5', 'tavily_map', json({ results: [{ url: 'https://map.example/m' }] })),
+      { type: 'item.started', item: { id: 'c6', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_extract', result: null, error: null, status: 'in_progress' } },
+      call('c6', 'tavily_extract', null, { error: { message: 'timeout' }, status: 'failed' }),
+      call('c7', 'search_code', json({ results: [{ url: 'https://github.example/g' }] }), { server: 'github' }),
+      message('m1', 'progress'),
+      message('m2', 'final report'),
     ]);
-    assert.equal(r.count, 0, 'zero successful Tavily calls');
-    assert.deepEqual(r.notOpened, ['https://example.org/recalled']);
+    assert.equal(r.count, 2, 'research, crawl, map, a failed call and another server\'s search are not counted');
+    assert.equal(r.unreadable, 0);
+    assert.deepEqual(r.returned, ['https://a.example/1'], 'arguments and failed_results are never read');
+    assert.deepEqual(r.extracted, ['https://a.example/1']);
+    assert.equal(r.report.trim(), 'final report', 'the narrative is the last agent_message');
   });
 
-  it('reduces a Claude Code subagent transcript to the same calls under the same predicate', { skip: !hasJq && 'jq not installed' }, () => {
-    const REPO_ROOT = path.join(__dirname, '..');
-    const refPath = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-claude-code.md');
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    assert.ok(skill.includes('(references/host-claude-code.md)'), 'the claude branch must point at the host reference');
-    const ref = fs.readFileSync(refPath, 'utf8');
-    const paper = 'https://aclanthology.org/2024.tacl-1.9';
-    const use = (id, name, input) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', id, name, input }] } });
-    const result = (id, obj, isError = null) => ({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id,
-      is_error: isError, content: typeof obj === 'string' ? obj : [{ type: 'text', text: JSON.stringify(obj) }] }] } });
-    const transcript = [
-      use('t1', 'mcp__tavily__tavily_search', { query: 'https://fabricated.example/paper' }),
-      result('t1', { results: [] }),
-      use('t2', 'mcp__tavily__tavily_search', { query: 'lost in the middle' }),
-      result('t2', { results: [{ url: 'https://example.org/snippet-only' }] }),
-      use('t3', 'mcp__tavily__tavily_extract', { urls: [paper, 'https://failed.example/x'] }),
-      result('t3', { results: [{ url: paper, raw_content: 'page' }], failed_results: [{ url: 'https://failed.example/x', error: 'e' }] }),
-      use('t4', 'mcp__tavily__tavily_extract', { urls: ['https://failedcall.example/y'] }),
-      result('t4', 'Error: request failed', true),
-      use('t5', 'mcp__tavily__tavily_extract', { urls: ['https://nevercompleted.example/w'] }),
-      use('t6', 'WebFetch', { url: 'https://webfetch.example/v' }),
-      result('t6', 'https://webfetch.example/v'),
-    ];
-    const suffix = crypto.randomBytes(4).toString('hex');
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-claude-'));
-    const files = [tmpFile('calls', suffix, 'jsonl'), tmpFile('report', suffix, 'txt')];
-    try {
-      const T = path.join(dir, 'agent-x.jsonl');
-      fs.writeFileSync(T, transcript.map((e) => JSON.stringify(e)).join('\n') + '\n');
-      fs.writeFileSync(tmpFile('report', suffix, 'txt'), [
-        `Claim A: ${paper}`, 'Claim B: https://example.org/snippet-only', 'Claim C: https://fabricated.example/paper',
-        'Claim D: https://failed.example/x', 'Claim E: https://failedcall.example/y',
-        'Claim F: https://nevercompleted.example/w', 'Claim G: https://webfetch.example/v',
-      ].join('\n'));
-      const script = [pick(ref, 'tool_use', 'goal_research_calls_'), pick(skill, 'comm -23')].join('\n');
-      const out = execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix, T }, encoding: 'utf8' });
-      const r = parseChecks(out);
-      assert.equal(r.count, 3);
-      assert.deepEqual(r.notOpened, [
-        'https://fabricated.example/paper',
-        'https://failed.example/x',
-        'https://failedcall.example/y',
-        'https://nevercompleted.example/w',
-        'https://webfetch.example/v',
-      ]);
-      assert.deepEqual(r.extracted, [paper]);
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-      for (const f of files) fs.rmSync(f, { force: true });
-    }
-  });
-
-  // The official Tavily MCP server prints its response as formatted text, one `URL: ` line
-  // per result; a remote server can return JSON instead. Both forms reach both reducers.
-  const officialText = [
-    'Request ID: r1',
-    'Detailed Results:',
-    '',
-    'Title: Paper',
-    'ID: s1',
-    'URL: https://text.example/paper',
-    'Content: snippet naming https://content.example/in-snippet',
-    'Raw Content: body line',
-    'URL: https://inner.example/x',
-    'more body',
-    '',
-    'Images:',
-    '',
-    '[1] URL: https://img.example/1.png',
-  ].join('\n');
-  const officialExtract = ['Detailed Results:', '', 'Title: Paper', 'URL: https://text.example/paper', 'Raw Content: page'].join('\n');
-  const unreadableText = 'Something went sideways but the call succeeded; it mentions https://odd.example/u';
-  // The official formatter's header with no result line: zero results, readable.
-  const emptyOfficial = ['Request ID: r2', 'Detailed Results:'].join('\n');
-  const textReport = [
-    'A: https://text.example/paper',
-    'B: https://content.example/in-snippet',
-    'C: https://inner.example/x',
-    'D: https://img.example/1.png',
-    'E: https://odd.example/u',
-  ].join('\n');
-  const assertTextFormat = (r) => {
+  it('codex: lists JSON result URLs verbatim and fails closed on anything else', needsJq, () => {
+    const verbatim = ['HTTPS://Upper.Example/Path', 'https://x.org/paper(A)', 'https://ko.example/\uB17C\uBB38/\uC81C1\uC7A5'];
+    const r = run(codexBlocks(), [
+      call('c1', 'tavily_search', structured({ results: verbatim.map((url) => ({ url })) })),
+      call('c2', 'tavily_search', text(officialText)),
+      call('c3', 'tavily_extract', json({ error: 'Unauthorized: missing or invalid API key' })),
+      call('c4', 'tavily_search', text('{"results": [{"url": "https://cut.example/')),
+      message('m1', 'report'),
+    ]);
     assert.equal(r.count, 4);
-    assert.equal(r.unreadable, 1, 'a response that is neither JSON nor the official format is counted; '
-      + 'an empty official result is readable with zero sources');
-    assert.deepEqual(r.notOpened, [
-      'https://content.example/in-snippet',
-      'https://img.example/1.png',
-      'https://odd.example/u',
-    ], 'only `URL: ` result lines are sources — not snippet text, image lines, or an unreadable response');
-    // The documented limit: a page-body line beginning `URL: ` reads as a result line.
-    assert.ok(!r.notOpened.includes('https://inner.example/x'));
-    assert.deepEqual(r.extracted, ['https://text.example/paper']);
+    assert.equal(r.unreadable, 3, 'formatted text, a JSON error body, and truncated JSON are not mechanically readable');
+    assert.deepEqual(r.unreadableIds, ['c2', 'c3', 'c4']);
+    assert.deepEqual(r.returned, [...verbatim].sort(), 'no normalization: case, parentheses and non-ASCII paths kept as returned');
+    assert.deepEqual(r.extracted, []);
+  });
+
+  it('codex: a started-then-failed call alone gives the zero-call count', needsJq, () => {
+    const r = run(codexBlocks(), [
+      { type: 'item.started', item: { id: 'c1', type: 'mcp_tool_call', server: 'tavily', tool: 'tavily_search', result: null, error: null, status: 'in_progress' } },
+      call('c1', 'tavily_search', null, { error: { message: 'unauthorized' }, status: 'failed' }),
+      message('m1', 'From memory.'),
+    ]);
+    assert.equal(r.count, 0);
+    assert.deepEqual(r.returned, []);
+  });
+
+  it('codex: a continuation appended to the same events file is read with the launch, and its report is the latest', needsJq, () => {
+    const r = run(codexBlocks(), [
+      { type: 'thread.started', thread_id: 't1' },
+      call('c1', 'tavily_search', json({ results: [{ url: 'https://first.example/1' }] })),
+      message('m1', 'first report'),
+      { type: 'thread.started', thread_id: 't1' },
+      call('c2', 'tavily_extract', json({ results: [{ url: 'https://second.example/2' }] })),
+      message('m2', 'second report'),
+    ]);
+    assert.equal(r.count, 2);
+    assert.deepEqual(r.returned, ['https://first.example/1', 'https://second.example/2']);
+    assert.deepEqual(r.extracted, ['https://second.example/2']);
+    assert.equal(r.report.trim(), 'second report');
+  });
+
+  // Claude message record: one reduction for the Claude Code subagent transcript and for
+  // `claude -p` stream-json, each host reference binding REC to its input.
+  const use = (id, name) => ({ type: 'assistant', message: { id: `msg_${id}`, content: [{ type: 'tool_use', id, name, input: {} }] } });
+  const res = (id, content, isError = null) => ({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: isError, content }] } });
+  const textItems = (t) => [{ type: 'text', text: t }];
+  const claudeRecord = [
+    use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] }))),
+    use('t2', 'mcp__plugin_x_tavily__tavily-extract'), res('t2', JSON.stringify({ results: [{ url: 'https://a.example/1' }], failed_results: [{ url: 'https://failed.example/x', error: 'e' }] })),
+    use('t3', 'mcp__tavily__tavily_research'), res('t3', textItems(JSON.stringify({ results: [{ url: 'https://research.example/r' }] }))),
+    use('t4', 'mcp__tavily__tavily_search'), res('t4', 'Error: request failed', true),
+    use('t5', 'mcp__tavily__tavily_extract'),
+    use('t6', 'mcp__tavily__tavily_search'), res('t6', textItems(officialText)),
+    use('t7', 'mcp__tavily__tavily_search'), res('t7', textItems('[Output truncated: tool result saved to /tmp/x.txt]')),
+    use('t8', 'WebFetch'), res('t8', 'https://webfetch.example/v'),
+  ];
+  const assertClaudeRecord = (r) => {
+    assert.equal(r.count, 4, 'research, an errored call, a call with no result and WebFetch are not counted');
+    assert.equal(r.unreadable, 2, 'formatted text and a truncated stub are not mechanically readable');
+    assert.deepEqual(r.unreadableIds, ['t6', 't7']);
+    assert.deepEqual(r.returned, ['https://a.example/1']);
+    assert.deepEqual(r.extracted, ['https://a.example/1']);
   };
 
-  it('reads source records from the Tavily MCP server\'s formatted text (codex)', { skip: !hasJq && 'jq not installed' }, () => {
-    const text = (t) => ({ content: [{ type: 'text', text: t }] });
-    assertTextFormat(runCodexChecks([
-      tavily('item_1', 'tavily_search', { query: 'q' }, text(officialText)),
-      tavily('item_2', 'tavily_extract', { urls: ['https://text.example/paper'] }, text(officialExtract)),
-      tavily('item_3', 'tavily_search', { query: 'q2' }, text(unreadableText)),
-      tavily('item_5', 'tavily_search', { query: 'q3' }, text(emptyOfficial)),
-      message('item_4', textReport),
-    ]));
-  });
-
-  it('reads source records from the Tavily MCP server\'s formatted text (Claude Code)', { skip: !hasJq && 'jq not installed' }, () => {
-    const REPO_ROOT = path.join(__dirname, '..');
-    const ref = fs.readFileSync(path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-claude-code.md'), 'utf8');
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    const use = (id, name) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', id, name, input: {} }] } });
-    const res = (id, t) => ({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: false,
-      content: [{ type: 'text', text: t }] }] } });
-    const transcript = [
-      use('t1', 'mcp__tavily__tavily_search'), res('t1', officialText),
-      use('t2', 'mcp__tavily__tavily_extract'), res('t2', officialExtract),
-      use('t3', 'mcp__tavily__tavily_search'), res('t3', unreadableText),
-      use('t5', 'mcp__tavily__tavily_search'), res('t5', emptyOfficial),
-    ];
-    const suffix = crypto.randomBytes(4).toString('hex');
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-claude-text-'));
-    const files = [tmpFile('calls', suffix, 'jsonl'), tmpFile('report', suffix, 'txt')];
+  it('Claude Code: the shared reduction reads a subagent transcript, and the narrative is its last assistant text', needsJq, () => {
+    const ref = fs.readFileSync(refPath('host-claude-code.md'), 'utf8');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-cc-'));
     try {
-      const T = path.join(dir, 'agent-x.jsonl');
-      fs.writeFileSync(T, transcript.map((e) => JSON.stringify(e)).join('\n') + '\n');
-      fs.writeFileSync(tmpFile('report', suffix, 'txt'), textReport);
-      const script = [pick(ref, 'tool_use', 'goal_research_calls_'), pick(skill, 'comm -23')].join('\n');
-      assertTextFormat(parseChecks(execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix, T }, encoding: 'utf8' })));
+      const REC = path.join(dir, 'agent-x.jsonl');
+      const final = [
+        { type: 'assistant', message: { id: 'msg_final', content: [{ type: 'text', text: 'final part one' }] } },
+        { type: 'assistant', message: { id: 'msg_final', content: [{ type: 'text', text: 'final part two' }] } },
+      ];
+      fs.writeFileSync(REC, [{ type: 'assistant', message: { id: 'msg_0', content: [{ type: 'text', text: 'early' }] } },
+        ...claudeRecord, ...final].map((e) => JSON.stringify(e)).join('\n') + '\n');
+      const r = run([claudeReducer(), pick(ref, 'goal_research_report_', '"assistant"'), listBlock()], [], { REC });
+      assertClaudeRecord(r);
+      assert.equal(r.report.trim(), 'final part one\nfinal part two');
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
-      for (const f of files) fs.rmSync(f, { force: true });
     }
   });
 
-  it('reads every URL by one predicate: URI characters, balanced parentheses, prose punctuation off', { skip: !hasJq && 'jq not installed' }, () => {
-    const r = runCodexChecks([
-      tavily('item_1', 'tavily_search', { query: 'q' }, asText({ results: [
-        { url: 'https://x.org/paper(A)' },
-        { url: 'https://en.wikipedia.org/wiki/Foo_(album)' },
-        { url: 'https://x.org/a' },
-        { url: 'https://arxiv.org/abs/2307.03172' },
-      ] })),
-      message('item_2', [
-        'HTTPS://FABRICATED.EXAMPLE/paper',
-        'See https://x.org/paper(B).',
-        'Wiki: https://en.wikipedia.org/wiki/Foo_(album)',
-        'Link [t](https://x.org/a) and a cell |https://x.org/a| here',
-        // a Korean particle running straight on from the URL, escaped to keep this file ASCII
-        'https://arxiv.org/abs/2307.03172\uC5D0 \uB530\uB974\uBA74',
-        '[https://x.org/a](https://x.org/a)',
-        '(see https://x.org/a), **https://x.org/a**',
-      ].join('\n')),
-    ]);
-    assert.equal(r.cited, 5, "distinct normalized URLs");
-    assert.deepEqual(r.notOpened, ['https://fabricated.example/paper', 'https://x.org/paper(B)'],
-      'an upper-case scheme is still a URL; a different parenthesized path is a different URL; '
-      + 'balanced parentheses, markdown, table pipes and a Korean particle cause no false flag');
-  });
-
-  it('says the report cites no URL rather than passing clean', { skip: !hasJq && 'jq not installed' }, () => {
-    const r = runCodexChecks([
-      tavily('item_1', 'tavily_search', { query: 'q' }, asText({ results: [{ url: 'https://x.org/a' }] })),
-      message('item_2', 'An answer that cites nothing.'),
-    ]);
-    assert.equal(r.count, 1);
-    assert.equal(r.cited, 0);
-    assert.deepEqual(r.notOpened, []);
-  });
-
-  it('starts the claude runner per host, default claude on every host, each host reference packaged', () => {
-    const REPO_ROOT = path.join(__dirname, '..');
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    const runner = skill.slice(skill.indexOf('### Runner: claude'), skill.indexOf('### Runner: codex'));
-    assert.match(runner, /`claude` stays the default on every host/);
-    assert.match(runner, /\| Claude Code \| A background subagent \| \[Claude Code\]\(references\/host-claude-code\.md\) \|/);
-    assert.match(runner, /\| Codex \| A background `claude -p` process \| \[Codex\]\(references\/host-codex\.md\) \|/);
-    for (const ref of ['host-claude-code.md', 'host-codex.md']) {
-      assert.ok(fs.existsSync(path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', ref)), ref);
-    }
-    const view = buildRuntimeContractViews().find((v) => v.skill === 'goal-research');
-    assert.ok(view, 'goal-research must have a runtime contract view');
-    for (const ref of ['goal-research/references/host-claude-code.md', 'goal-research/references/host-codex.md']) {
-      assert.ok(view.packagedEntries.includes(ref), `${ref} must be packaged`);
-    }
-  });
-
-  it('reduces a claude -p stream-json record under the same predicate (Codex host)', { skip: !hasJq && 'jq not installed' }, () => {
-    const REPO_ROOT = path.join(__dirname, '..');
-    const ref = fs.readFileSync(path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'references', 'host-codex.md'), 'utf8');
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    // Event shapes as `claude -p --output-format stream-json --verbose` emits them.
-    const paper = 'https://aclanthology.org/2024.tacl-1.9';
-    const use = (id, name) => ({ type: 'assistant', message: { content: [{ type: 'tool_use', id, name, input: {} }] } });
-    const res = (id, content, isError = null) => ({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: isError, content }] } });
-    const text = (t) => [{ type: 'text', text: t }];
-    const events = [
+  it('Codex host: the shared reduction reads claude -p stream-json, and the narrative is the terminal result', needsJq, () => {
+    const ref = fs.readFileSync(refPath('host-codex.md'), 'utf8');
+    const r = run([pick(ref, 'goal_research_report_', '"result"'), claudeReducer(), listBlock()], [
       { type: 'system', subtype: 'init', tools: ['mcp__tavily__tavily_search', 'mcp__tavily__tavily_extract', 'Skill'] },
-      use('t1', 'mcp__tavily__tavily_search'),
-      res('t1', text(['Detailed Results:', '', 'Title: P', `URL: ${paper}`, 'Content: c'].join('\n'))),
-      use('t2', 'mcp__tavily__tavily_extract'),
-      res('t2', text(JSON.stringify({ results: [{ url: paper, raw_content: 'page' }], failed_results: [{ url: 'https://failed.example/x', error: 'e' }] }))),
-      use('t3', 'mcp__tavily__tavily_search'),
-      res('t3', 'Permission to use mcp__tavily__tavily_search has been denied.', true),
-      use('t4', 'Read'),
-      res('t4', 'file mentions https://read.example/r'),
-      use('t5', 'mcp__tavily__tavily_search'),
-      res('t5', text(['Request ID: r3', 'Detailed Results:'].join('\n'))),
-      { type: 'assistant', message: { content: [{ type: 'text', text: 'progress' }] } },
-      { type: 'result', subtype: 'success', is_error: false,
-        result: [`A: ${paper}`, 'B: https://failed.example/x', 'C: https://read.example/r'].join('\n') },
-    ];
-    const suffix = crypto.randomBytes(4).toString('hex');
-    const kinds = [['events', 'jsonl'], ['json', 'jsonl'], ['report', 'txt'], ['calls', 'jsonl']];
-    fs.writeFileSync(tmpFile('events', suffix, 'jsonl'), events.map((e) => JSON.stringify(e)).join('\n') + '\n');
-    try {
-      const script = [
-        pick(ref, 'goal_research_report_', '"result"'),
-        pick(ref, 'tool_use', 'goal_research_calls_'),
-        pick(skill, 'comm -23'),
-      ].join('\n');
-      const r = parseChecks(execFileSync('bash', ['-c', script], { env: { ...process.env, SUFFIX: suffix }, encoding: 'utf8' }));
-      assert.equal(fs.readFileSync(tmpFile('report', suffix, 'txt'), 'utf8').trim().split('\n')[0], `A: ${paper}`,
-        'the narrative is the terminal success result');
-      assert.equal(r.count, 3, 'a denied Tavily call and a non-Tavily call do not count');
-      assert.equal(r.unreadable, 0, 'an empty official result is readable');
-      assert.deepEqual(r.notOpened, ['https://failed.example/x', 'https://read.example/r']);
-      assert.deepEqual(r.extracted, [paper]);
-    } finally {
-      for (const [kind, ext] of kinds) fs.rmSync(tmpFile(kind, suffix, ext), { force: true });
-    }
-  });
-
-  it('reads the report form as this session\'s reading, beside the record that governs the labels', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    // The main session reads the report against the brief; meaning stays a reader's
-    // judgment, so each item is marked as a reading, not a mechanical check, and the
-    // runner is held to no line format.
-    const phase3 = skill.slice(skill.indexOf('## Phase 3'), skill.indexOf('## Phase 4'));
-    assert.match(phase3, /\*\*Report form\.\*\* Read the report against the brief's form and the tool record/);
-    for (const gap of [/claim with no citation/, /absence or novelty claim with no reach/, /no replication or retraction status/, /not marked reconstructed/]) {
-      assert.match(phase3, gap);
-    }
-    assert.match(phase3, /this session's reading of the report, not a mechanical check/);
-    assert.match(phase3, /no line format is required of the runner/);
-    assert.match(phase3, /where the record disagrees the record governs/);
-    const phase4 = skill.slice(skill.indexOf('## Phase 4'), skill.indexOf('## Rules'));
-    assert.match(phase4, /as this session's reading of the report rather than a mechanical check/);
+      ...claudeRecord,
+      { type: 'result', subtype: 'success', is_error: false, result: 'first result' },
+      ...[use('t9', 'mcp__tavily__tavily_search'), res('t9', textItems(JSON.stringify({ results: [] })))],
+      { type: 'result', subtype: 'success', is_error: false, result: 'resumed result' },
+    ], (suffix) => ({ REC: tmpFile('json', suffix, 'jsonl') }));
+    // REC is bound, as the reference binds it, to the filtered events file.
+    assert.equal(r.count, 5, 'the resumed call is read with the launch');
+    assert.equal(r.unreadable, 2);
+    assert.deepEqual(r.returned, ['https://a.example/1']);
+    assert.deepEqual(r.extracted, ['https://a.example/1']);
+    assert.equal(r.report.trim(), 'resumed result', 'after a resume, the latest terminal result');
   });
 });
+
 
 // ============================================================
 // codex stdout extraction contract (review-loop)
