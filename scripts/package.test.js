@@ -359,9 +359,10 @@ describe('goal-research runtime contract', () => {
     const [doc, ref] = [skill(), patterns()];
     assert.match(ref, /^## Codex: a dotted `mcp_servers` override$/m, 'the error pattern must stay');
     assert.match(ref, /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
-    // Anywhere on both surfaces, in each form codex accepts — a dotted key, or the server's
-    // whole table inline; only the reference's own `<name>.<key>` placeholder is exempt.
-    const override = /(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers\.([^\s.=]+)(?:\.([^\s=]+))?\s*=/g;
+    // Anywhere on both surfaces, in each form codex accepts — a dotted key, a server's table
+    // inline, or the whole `mcp_servers` table inline; only the reference's own `<name>.<key>`
+    // placeholder is exempt.
+    const override = /(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.([^\s.=]+)(?:\.([^\s=]+))?)?\s*=/g;
     const found = [doc, ref].flatMap((d) => [...d.matchAll(override)]);
     const placeholder = (m) => m[1] === '<name>' && m[2] === '<key>';
     assert.ok(found.some(placeholder), 'the scan must find the placeholder it exempts');
