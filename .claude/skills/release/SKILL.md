@@ -97,7 +97,7 @@ Draft narrative using this template (Korean, matching repo's PR body convention)
 
 The narrative splits into two blockquoted sections, matching the repo's prior-release convention:
 
-- **Background** — pure experiential/contextual narrative (the lived origin). The label is intentionally English `**Background**`: a grandfathered exception to the Korean-narrative convention, carried forward from earlier releases (`v2026.05.18`, `v2026.05.15`) for visual continuity. The change-section label `**무엇이 새로운가요?**` stays Korean.
+- **Background** — pure experiential/contextual narrative (the lived origin). The label is English `**Background**`, an exception to the Korean-narrative convention kept for visual continuity across releases. The change-section label `**무엇이 새로운가요?**` stays Korean.
 - **무엇이 새로운가요?** — leads with the theme sentence (`이번 릴리스의 핵심은 **{theme}** — ...`), then the change bullets.
 
 Both sections, and the close before the script body, are bounded by in-blockquote dividers (`> ---`). Each `> ---` must be preceded by a blank `>` line: in CommonMark a `---` placed flush against paragraph text parses as a setext H2 underline, which would render the preceding line as a heading instead of a divider — the blank `>` line keeps it a thematic break.

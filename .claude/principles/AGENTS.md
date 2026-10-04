@@ -6,7 +6,7 @@ This directory realizes the root `AGENTS.md` `## Progressive Disclosure` policy 
 
 ## Distinction from `.claude/rules/`
 
-- **`.claude/rules/`** — Auto-loaded by the harness at session start, so it is invoked per-turn.
+- **`.claude/rules/`** — Delivered by the harness without a fetch: an unscoped rule at session start, so it is invoked per-turn; a `paths`-scoped rule when a matching file is opened, so it is invoked at that moment.
 - **`.claude/principles/`** — Two load paths. The entry document (`AGENTS.md`, aliased `CLAUDE.md`) loads by directory convention when work touches this directory, so it is invoked once per directory visit. Each principle document lazy-loads via Read/Grep only when named, so it is invoked per-session or per-authoring.
 
 This section is the canonical statement of the load mechanism in this repository; other files point here rather than restating it. Naming this index `AGENTS.md` with the `CLAUDE.md` alias — the only file in this directory that carries that name — is what makes the directory-convention pickup happen, which is why it stays short and current.

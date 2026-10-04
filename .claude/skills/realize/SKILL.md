@@ -146,9 +146,11 @@ all, or stays silent, is measured by route's own eval, not here. The registered 
 the keys of `targets` in `harness.config.json`; no result is implied for a protocol absent
 there.
 
-Both cases mount the same scaffold, deliberately: one observes whether a
-file-discoverable fact was asked, the other whether a supplied parameter was re-asked,
-and differing substrates would let a run pass one by luck.
+A target's paired cases mount the same scaffold, deliberately: for `/inquire`, one
+observes whether a file-discoverable fact was asked, the other whether a supplied
+parameter was re-asked, and differing substrates would let a run pass one by luck. A
+case names its scaffold in `case.yaml` (`scaffold_script`); one that names none mounts
+`evals/scaffold.sh`.
 
 Write the prompt as the task alone. The line that invokes the protocol lives in
 `harness.config.json` and reaches only the arms that have it — a prompt naming the
@@ -217,4 +219,5 @@ preserving partial transcripts for inspection.
   yet built.
 - **`scripts/harness.mjs`** — the runner and the deterministic graders. Node standard
   library only.
-- **`evals/scaffold.sh`** — the fixture both cases mount.
+- **`evals/scaffold.sh`**, **`evals/scaffold-grasp.sh`**, **`evals/elicit-scaffold.sh`** —
+  the fixtures; each case selects its own through `scaffold_script` in `case.yaml`.
