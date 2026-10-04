@@ -30,14 +30,13 @@ theorem start_opens_on_map (respond session : Context P → Response P) (c : Con
   simp [start, h]
 
 theorem unrelated_holds_gate (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (observe (fuse c u))) :
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     conduct respond session c (u :: us) =
-      conduct respond session
-        (observe (fuse c u) ++ [(session (observe (fuse c u))).val]) us := by
+      conduct respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [conduct, h]
 
 theorem uncovered_redraws (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (observe (fuse c u)))
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (observe (fuse c u))) = false)
     (hc : ¬ Covered (observe (fuse c u))) :
     conduct respond session c (u :: us) =
@@ -57,11 +56,13 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
       o = .withdrawn (closed (observe (fuse c u)))) ∨
     (isFilled (resolution (observe (fuse c u))) = true ∧ Covered (observe (fuse c u)) ∧
       o = .conducted (observe (fuse c u)) (respond (observe (fuse c u)))) := by
+  have fused : ∀ t : List (Turn P), c <+: fuse c u ++ t := fun t =>
+    (List.prefix_append c [u.val]).trans (List.prefix_append _ _)
   have grows : ∀ t : List (Turn P), c <+: observe (fuse c u) ++ t := fun t =>
     ((List.prefix_append c [u.val]).trans (observe_extends _)).trans (List.prefix_append _ _)
   simp only [conduct] at h
   split at h
-  · exact .inl ⟨_, grows _, h⟩
+  · exact .inl ⟨_, fused _, h⟩
   · split at h
     · exact .inr (.inl ⟨by assumption, h.symm⟩)
     · split at h
@@ -145,6 +146,19 @@ theorem withdrawal_and_holding_hand_off_nothing (r : Closed P) (c : Context P) :
 theorem closure_hands_off (c : Context P) (t : Response P) :
     handedOffBy (.conducted c t) = some .handoff ∧ handedOffBy (.relayed c t) = some .handoff :=
   ⟨rfl, rfl⟩
+
+theorem handoff_only_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (h : handedOffBy (start respond session c us) = some .handoff) :
+    (∃ c₁ : Context P, isFilled (resolution c₁) = true ∧ Covered c₁) ∨
+      isFilled (relay (observe c)) = true := by
+  have ⟨hc, hr, _⟩ := start_closes_only_by_person respond session c us
+  cases ho : start respond session c us with
+  | conducted c₁ t => exact .inl ⟨c₁, hc c₁ t ho⟩
+  | relayed c₁ t =>
+    have ⟨e, f⟩ := hr c₁ t ho
+    exact .inr (e ▸ f)
+  | withdrawn r => rw [ho] at h; simp [handedOffBy] at h
+  | holding c₁ => rw [ho] at h; simp [handedOffBy] at h
 
 theorem handoff_carries_obligations (c : Context P) :
     (emitted c).plan = draft c ∧ (emitted c).record = record c ∧

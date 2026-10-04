@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When where a sentence sits relative to the gate is in question
 
-Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. The map — what TOOL GROUNDING's `.map` entry names, its change ledger included — is the pre-gate text, and the gate carries only the question of what is wrong or whether to take the method. A part of the map opened for a fuller look is expanded inside the map, with its trade-off prose, before that same gate.
+Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. The map — what TOOL GROUNDING's `.map` entry names, its change ledger included — is the pre-gate text, and the gate carries only the question of what is wrong or whether to take the method.
