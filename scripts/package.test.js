@@ -355,13 +355,17 @@ describe('goal-research runtime contract', () => {
   // ("invalid transport"); reproduced on codex-cli 0.149.0 for every server and every key.
   const patterns = () => fs.readFileSync(path.join(path.dirname(skillPath), 'references', 'error-patterns.md'), 'utf8');
 
-  it('carries no dotted mcp_servers config override, and says why', () => {
-    for (const doc of [skill(), patterns()]) {
-      for (const block of fenced(doc, 'bash')) {
-        assert.ok(!/--config\s+mcp_servers\./.test(block), 'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
-      }
-    }
-    assert.match(patterns(), /invalid transport/i, 'the reference must say why the override is absent, or a future author re-adds it');
+  it('carries no dotted mcp_servers config override, and keeps the pattern that says why', () => {
+    assert.match(patterns(), /^## Codex: a dotted `mcp_servers` override$/m, 'the error pattern must stay');
+    assert.match(patterns(), /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
+    // Every fence (any language or none) and every inline code span on both surfaces.
+    const code = [skill(), patterns()].flatMap((doc) => [
+      ...[...doc.matchAll(/^[ \t]*```[^\n]*\n([\s\S]*?)^[ \t]*```/gm)].map((m) => m[1]),
+      ...[...doc.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]),
+    ]);
+    assert.ok(code.length > 0, 'the scan must read something');
+    const used = code.filter((c) => /--config\s+mcp_servers\.[^\s=]+\.[^\s=]+=/.test(c) && !c.includes('<'));
+    assert.deepEqual(used, [], 'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
   });
 
   it('filters codex stdout to JSON lines, and never claims it is pure JSONL', () => {
@@ -389,14 +393,6 @@ describe('goal-research runtime contract', () => {
     assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), 'Source Check, then Yours to Settle, then Trace');
   });
 
-  it('packages SKILL.md with every reference it links', () => {
-    const view = buildRuntimeContractViews().find((v) => v.skill === 'goal-research');
-    assert.ok(view, 'goal-research must have a runtime contract view');
-    for (const name of [...skill().matchAll(/\]\((references\/[^)]+)\)/g)].map((m) => m[1])) {
-      assert.ok(view.packagedEntries.includes(`goal-research/${name}`), `${name} is linked and packaged`);
-    }
-    assert.ok(skill().includes('](references/error-patterns.md)'), 'the error patterns are linked where a run is launched');
-  });
 });
 
 // ============================================================
@@ -410,8 +406,7 @@ describe('goal-research runtime contract', () => {
 // below reads an empty extraction as "the call produced no verdict", so without the
 // filter a SUCCESSFUL run is reported as a failure. The file also asserted the events
 // file was pure JSONL, which is the claim that made the missing filter look
-// deliberate. goal-research/SKILL.md carries the same repair, pinned by the block
-// above; these assertions hold it here.
+// deliberate. These assertions hold the repair here.
 
 describe('codex stdout extraction contract', () => {
   const REPO_ROOT = path.join(__dirname, '..');

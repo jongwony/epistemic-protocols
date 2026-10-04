@@ -29,12 +29,13 @@ a run or reading its output.
 
 - **Failure:** the runner's CLI has no Tavily server configured, or its Tavily server failed to
   start. A continuation cannot repair this: the run has no Tavily tool to call.
-- **Symptom:** no Tavily call in the record. A `claude -p` run's first
-  `{type: "system", subtype: "init"}` event lists no tool ending in `tavily_search` or
-  `tavily_extract`; the run looks for one, may try a built-in web search or fetch that is denied
-  without a prompt in the background, and reports from recall. On codex, the pass's stderr shows
-  the MCP server failing to start, its transport, or its auth.
-- **Fix:** treat it as a harness failure — report it, with the evidence above, and send no
+- **Symptom:** positive evidence only — the runner's stderr or warn output shows the MCP server
+  failing to start, its transport, or its auth; or the run itself reports, after trying, that it
+  has no Tavily tool. A tool missing from a `claude -p` run's first `{type: "system", subtype:
+  "init"}` event does not establish it: a server can still be connecting, and a tool's name can
+  use `tavily-search` as well as `tavily_search`. Without such evidence, no successful Tavily call
+  in the run is a failure the run can repair.
+- **Fix:** treat it as a harness failure — report it, with that evidence, and send no
   continuation.
 
 ## `claude -p`: an empty session id
@@ -51,6 +52,21 @@ a run or reading its output.
   readable as requiring more than the brief asks, or one the run has no tool to meet.
 - **Symptom:** the goal turn runs many turns, its `{type: "active_goal"}` events carry rising
   `iterations` and a `last_reason`, and the turn's final `result` is empty.
-- **Fix:** the pass failed (empty report), and the current report stays the last whole one. Read
-  `last_reason` for what the evaluator held unmet; where Tavily is missing, the pattern above
-  applies.
+- **Fix:** the current report stays the last whole one; only where the run has none yet is that a
+  failure (no whole report). Read `last_reason` for what the evaluator held unmet; where Tavily is
+  shown unavailable, the pattern above applies.
+
+## A background command stopped at the host's default time limit
+
+- **Failure:** running a pass as a background command without a time bound of its own, so the
+  host's default limit (e.g. 30 minutes) stops it before the research finishes.
+- **Symptom:** the pass ends early, with a truncated event stream or transcript and a missing or
+  partial report.
+- **Fix:** launch each pass with a time bound sized to the research — 75 minutes has been enough.
+
+## Codex: `--ephemeral` leaves nothing to resume
+
+- **Failure:** launching with `codex exec --ephemeral`, which persists no session.
+- **Symptom:** the `/goal` turn and every continuation fail to resume the run.
+- **Fix:** launch without `--ephemeral`, take the thread id from the launch's `thread.started`
+  event, and resume with `codex exec resume <id>` from the same working directory.
