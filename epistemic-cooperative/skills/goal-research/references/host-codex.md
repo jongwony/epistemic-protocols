@@ -9,7 +9,10 @@ with input on stdin. It is not a resume or fork of the driving conversation. `${
 ## Running a pass
 
 Run each pass of either runner — a `codex exec` pass, or a `claude -p` pass — as one command call
-through the host's background execution facility where it has one, and wait for it to end.
+through the host's background execution facility where it has one, and wait for it to end. A pass
+needs the network and writes outside the workspace — the CLI's session store — so run its shell
+call with the host's escalated, unsandboxed permission where the default sandbox blocks either;
+where the host refuses it, report the launch failure.
 
 ## `claude` runner
 
@@ -19,13 +22,12 @@ skills, so neither is passed.
 
 ### Session
 
-Before pass `0`, write the session id, and the Tavily server's name as the CLI's MCP configuration
-names it — `tavily` unless it is configured under another name:
+Before pass `0`, write the session id, in lowercase, only once one has been generated:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}
-cat /proc/sys/kernel/random/uuid > "$D/session.txt" 2>/dev/null || uuidgen > "$D/session.txt"
-printf '%s\n' "{tavily server}" > "$D/tavily_server.txt"
+id=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || uuidgen) && id=$(printf '%s' "$id" | tr '[:upper:]' '[:lower:]') \
+  && [ -n "$id" ] && printf '%s\n' "$id" > "$D/session.txt"
 ```
 
 Pass `0` sets the id and every later pass resumes it. The
@@ -48,15 +50,14 @@ scaffold:
 run() {
   if [ "${PASS}" = 0 ]; then S=--session-id; else S=--resume; fi
   claude -p "$S" "$(cat "$D/session.txt")" --output-format stream-json --verbose \
-    --allowedTools "mcp__$(cat "$D/tavily_server.txt")" Skill
+    --allowedTools 'mcp__tavily' Skill
 }
 ```
 
-`mcp__<server>` admits every tool of that server, and the reduction counts that server's Tavily
-search and extract tools as Tavily's. `Skill` admits the tool that loads
+`mcp__tavily` admits every tool of the MCP server named `tavily`; where the Tavily server is
+configured under another name, put that name in its place. `Skill` admits the tool that loads
 `/inquire`. A background run cannot answer a permission prompt, so a Tavily call it is still
-denied comes back as an errored result: it is not counted, and step 4 names it to the run in the
-next continuation. Where pass `0` exits with no events at all, it started no session to resume:
+denied comes back as an errored result: it is not counted, and step 4 handles the failure. Where pass `0` exits with no events at all, it started no session to resume:
 report its exit code and warn file raw, and stop.
 
 `--output-format stream-json --verbose` is what makes the run's tool calls readable: each event is

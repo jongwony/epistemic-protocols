@@ -99,7 +99,7 @@ Workflow:
 
 Report {inquire}'s record as it stands at completion, refined as follows:
 - An uncertainty filled by an external citation carries its source URL(s) and how far the citation reaches:
-  - verified: the source's page was opened with Tavily extract in this session and states the claim
+  - verified: the claim's primary source — its page opened with Tavily extract in this session — states it; an opened secondary page supports the claim at most as mostly
   - mostly: the source was seen only as a search-result snippet, or its page checked the core claim while surrounding detail is synthesized
 - A detail from recall (a volume, issue, page range, date, or number that no source in this session gave) is not a citation. Mark it reconstructed, as your own inference, and leave its item open, needing a spot-check.
 - The weakest link: the claim or detail the conclusions lean on that stands weakest, named explicitly.
@@ -177,13 +177,22 @@ Wait for each pass to end as the host's reference says; do not poll, or sleep in
 
 ### 1. What the pass delivered
 
-Read what the CLI or host delivered for the pass: its exit code (`p${PASS}.status` on the CLI routes) or the host's completion status, and its report — codex's last `agent_message` in its events file (high-reasoning codex streams progress messages first, so the last one), `claude -p`'s terminal `result` event, the Claude Code subagent's delivered result. This is this session's reading of what was delivered. The pass **failed** where its status is not a success, its terminal event is an error (codex `turn.failed`, a `result` with `is_error`), or its report is empty or aborted. A report is **whole** where it restates the research report as a whole; a goal turn's acknowledgement, or a report that only refers back to an earlier one, is not. Each pass's report is the research trace, **carried verbatim to the presentation step; do NOT regex-parse it** — nothing below rewrites it.
+Read what the CLI or host delivered for the pass: its exit code (`p${PASS}.status` on the CLI routes) or the host's completion status, and its report — codex's last `agent_message` in its events file (high-reasoning codex streams progress messages first, so the last one), `claude -p`'s terminal `result` event, the Claude Code subagent's delivered result. This is this session's reading of what was delivered. The pass **failed** where its status is not a success, its terminal event is an error (codex `turn.failed`, a `result` with `is_error`), or its report is empty or aborted. A report is **whole** where it restates the research report as a whole; a goal turn's acknowledgement, or a report that only refers back to an earlier one, is not. A codex pass's report is taken by this command into its report file — the `grep '^{'` is load-bearing, since `jq -rs` aborts on the first plain notice line and a successful pass would read as empty:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
+grep '^{' "$P.events.jsonl" \
+  | jq -rs '[.[] | select(.type == "item.completed" and .item.type == "agent_message") | .item.text] | last // empty' \
+  > "$P.report.txt"
+```
+
+Each pass's report is the research trace, **carried verbatim to the presentation step; do NOT regex-parse it** — nothing below rewrites it.
 
 ### 2. The tool record
 
 The machine reads the run's own record of its tool calls, never the run's description of them, and only what is unambiguous there; where it cannot read something, it says so rather than guessing.
 
-- **A successful Tavily call** completed without error — a call whose MCP result is flagged as an error is not one: codex reports it as `status: "failed"` even where a result is present, a Claude record as `is_error` — and is a Tavily server's search or extract tool: the server's name contains `tavily`, or is the Tavily server name the launch recorded in `tavily_server.txt`, and the tool is named exactly `tavily_search`, `tavily-search`, `tavily_extract`, or `tavily-extract`. A codex record names the server in `server`; a Claude record names it inside the tool name, `mcp__<server>__<tool>`, where the server segment may carry a plugin or connector prefix (`plugin_<plugin>_<server>`, `claude_ai_<Name>`). Other Tavily tools (research, crawl, map), a tool of that name on a server that is not Tavily's, and every other tool are not counted.
+- **A successful Tavily call** completed without error — a call whose MCP result is flagged as an error is not one: codex reports it as `status: "failed"` even where a result is present, a Claude record as `is_error` — and is Tavily's search or extract tool on whatever server provides it: the tool is named exactly `tavily_search`, `tavily-search`, `tavily_extract`, or `tavily-extract` — a codex record's `tool`, or a Claude record's tool name after its last `__`. Other Tavily tools (research, crawl, map) and every other tool are not counted.
 - **What it returned** is read only from a JSON response carrying a `results` array: each entry's `url`, listed verbatim. An extract call's listed URLs are what it extracted; its failed URLs are not in `results`. What a call asked for — its arguments, a URL inside a query — is never read.
 - **Not mechanically readable**: a successful call whose response is not JSON with a `results` array — formatted text, an error body, a truncated or stubbed result. It lists nothing; it is counted and named by call id, and this session reads its raw record in step 3.
 
@@ -206,9 +215,7 @@ Where the host keeps the record itself, its reference gives the block that write
 ```bash
 D=/tmp/goal_research_${SUFFIX}
 cat > "$D/tavily.jq" <<'JQ'
-def is_tavily($server; $tool; $named):
-  ($server | test("tavily"; "i") or ($named != "" and . == $named))
-  and ($tool | test("^tavily(_|-)(search|extract)$"));
+def is_tavily: test("^tavily(_|-)(search|extract)$");
 def tavily_result:
   ([.structured, (.texts[]? | try fromjson catch empty)]
    | map(select(type == "object" and (.results | type) == "array"))) as $json
@@ -218,13 +225,13 @@ JQ
 
 There are two record shapes, each with one reduction:
 
-- **Codex events** (the `codex` runner): each Tavily call is an `mcp_tool_call` item with its `server`, `tool`, `status`, `error`, and `result`; the response is the result's `structured_content` or the JSON text inside its `content[].text`.
+- **Codex events** (the `codex` runner): each Tavily call is an `mcp_tool_call` item with its `tool`, `status`, `error`, and `result`; the response is the result's `structured_content` or the JSON text inside its `content[].text`.
 
   ```bash
   D=/tmp/goal_research_${SUFFIX}
-  [ -f "$D/record.jsonl" ] && jq -L "$D" --arg named "$(cat "$D/tavily_server.txt" 2>/dev/null)" -cs 'include "tavily";
+  [ -f "$D/record.jsonl" ] && jq -L "$D" -cs 'include "tavily";
     [ .[] | select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
-             and is_tavily(.item.server // ""; .item.tool // ""; $named))
+             and (.item.tool // "" | is_tavily))
       | {id: "\(.pass):\(.item.id)", tool: .item.tool, structured: .item.result.structured_content?,
          texts: [.item.result.content[]? | select(.type=="text") | .text]}
       | tavily_result ]
@@ -236,16 +243,15 @@ There are two record shapes, each with one reduction:
 
   ```bash
   D=/tmp/goal_research_${SUFFIX}
-  [ -f "$D/record.jsonl" ] && jq -L "$D" --arg named "$(cat "$D/tavily_server.txt" 2>/dev/null)" -cs 'include "tavily";
+  [ -f "$D/record.jsonl" ] && jq -L "$D" -cs 'include "tavily";
     ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | {key: .id, value: .name}] | from_entries) as $names
     | [ .[] | select(.type=="user") | . as $entry
         | (if ([.message.content[]? | select(.type=="tool_result")] | length) == 1
            then [$entry.tool_use_result, $entry.toolUseResult] | map(objects | .structuredContent) | map(select(. != null)) | first
            else null end) as $sc
         | .message.content[]? | select(.type=="tool_result" and .is_error != true)
-        | (($names[.tool_use_id // ""] // "") | split("__")) as $parts
-        | ($parts | last // "") as $tool
-        | select(($parts | length) >= 3 and $parts[0] == "mcp" and is_tavily($parts[1:-1] | join("__"); $tool; $named))
+        | (($names[.tool_use_id // ""] // "") | split("__") | last // "") as $tool
+        | select($tool | is_tavily)
         | {id: .tool_use_id, tool: $tool, structured: $sc,
            texts: [.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end]}
         | tavily_result ]
@@ -275,7 +281,7 @@ else
 fi
 ```
 
-No successful Tavily call is a failure the run can repair (step 4): nothing in the report was retrieved through the designated route, and its claims stand as the runner's own, open, unchecked. A record not readable, or a failed reduction, is not the run's to repair: this session reports it, and the loop ends. A pass or transcript listed as not mechanically readable is read raw in step 3. For codex, read the warn files as well — an MCP that failed to start leaves its trace there, not in the narrative.
+No successful Tavily call is a failure the run can repair (step 4): nothing in the report was retrieved through the designated route, and its claims stand as the runner's own, open, unchecked. The latest pass listed as not read is that pass's failure too; the next pass can leave a readable record. A **harness failure** is not the run's to repair: no readable record at all, a failed reduction, no transcript path, or — on codex — a Tavily MCP that failed to start, which step 5's grep of the warn files shows; check it before sending "no successful Tavily call" back. This session reports a harness failure, and the loop ends. A transcript listed as not read is read raw in step 3.
 
 ### 3. Reading the report
 
@@ -289,12 +295,15 @@ Every judgment in this step is this session's reading, marked as such where it i
 
 ### 4. The goal
 
-Judge the run against the goal condition, using the lists and the reading. Its **gaps** are the research gaps in the current report — the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user. Its **failures** are what the run can repair: a failed pass (step 1, pass `0` included), no whole report (step 3), no successful Tavily call (step 2).
+Judge the run against the goal condition, using the lists and the reading. Its **gaps** are the research gaps in the current report — the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user. Its **failures** are what the run can repair: a failed pass (step 1, pass `0` included), no whole report (step 3), no successful Tavily call, or the latest pass not read (step 2).
 
-Count the gaps — the count is this session's reading — and decide, in this order:
+Read failures in the latest pass only, and decide:
 
-- **stop** — a failure the last continuation named is still there: the loop ends, and Phase 4 reports it raw — its status, its terminal or error events, its warn file.
-- **recover** — a failure of a kind not yet sent back in this run: continue the same run as below, naming it, whatever the gap count; this pass records no count.
+- **stop** — the latest pass has a failure whose kind a continuation in this run has already named: the loop ends, and Phase 4 reports it raw — its status, its terminal or error events, its warn file.
+- **recover** — the latest pass has any other failure: continue the same run as below, naming it; this pass records no gap count.
+
+Otherwise, count the gaps — the count is this session's reading:
+
 - **met** — no gap: go to Phase 4.
 - **continue** — the first count recorded, or fewer gaps than the last count recorded: continue the **same** run — not a new one — as the next pass, through the runner's continuation (codex in its runner section; claude in the host's reference), sending this message, written to `/tmp/goal_research_${SUFFIX}/continue.txt`:
 
@@ -308,14 +317,14 @@ Count the gaps — the count is this session's reading — and decide, in this o
 
 - **stop: gaps did not shrink** — otherwise: the loop ends, and Phase 4 shows the gaps that remain.
 
-Each kind of failure is sent back once, and otherwise a continuation is sent only while the gap count strictly falls, so the loop ends. The measure is the count, not which gaps: a pass that closes one gap and exposes another stops here, and whatever remains returns open to the user.
+Each kind of failure is sent back once in a run, and otherwise a continuation is sent only while the gap count strictly falls, so the loop ends. The measure is the count, not which gaps: a pass that closes one gap and exposes another stops here, and whatever remains returns open to the user.
 
 ### 5. Codex warnings
 
 Some codex warnings ride the **stderr banner**, not `agent_message` — each pass sent stderr to its own warn file. Grep those to catch what the narrative does not carry, and surface any hits alongside the trace:
 
 ```bash
-cat /tmp/goal_research_${SUFFIX}/p*.warn.txt | grep -iE 'invalid_grant|deprecat|--full-auto|warn' || true
+cat /tmp/goal_research_${SUFFIX}/p*.warn.txt | grep -iE 'invalid_grant|deprecat|--full-auto|warn|mcp.*(start|transport|auth|connect)' || true
 ```
 
 ### 6. Cleanup
@@ -338,7 +347,7 @@ Present the source check first, then the items the run returned as the user's to
 Target: {research_question}
 Runner: {claude | codex}
 Goal: {engaged, only where the route's record shows it positively — `claude -p`; otherwise "not confirmed on this route", never "not engaged" from an absence}
-Passes: {n}, gap counts from the first evaluated pass: {each} — stopped: {goal met | gaps did not shrink | a failure was not repaired | the record could not be read | the launch did not start}
+Passes: {n}, gap counts from the first evaluated pass: {each} — stopped: {goal met | gaps did not shrink | a failure was not repaired | a harness failure | the launch did not start}
 
 --- Source Check ---
 {"read on pass {k}'s report, the current one; earlier passes are history in the trace";
@@ -361,7 +370,7 @@ Acceptance criterion: a real research run was launched on the designated runner;
 
 - Research question is embedded verbatim — no paraphrasing before passing it to the runner.
 - The runner is the designated one, `claude` when none is designated; the research runs in the background wherever the host offers it, so the main session is free until each pass ends.
-- A run is not required to succeed in one pass. A failure the run can repair — an error or empty result, no whole report, no successful Tavily call — is named to the same run once and reported raw where that continuation does not repair it; one only this session's side can have — a record it cannot read — is reported, not sent to the run. The skill does not mask a failure, start a new run, or fall back to the other runner.
+- A run is not required to succeed in one pass. A failure the run can repair — an error or empty result, no whole report, no successful Tavily call — is named to the same run once and reported raw where that continuation does not repair it; a harness failure — a record this session cannot read, a Tavily server that failed to start — is reported, not sent to the run. The skill does not mask a failure, start a new run, or fall back to the other runner.
 - The machine reads the run's tool record and only what is unambiguous there; citations are read against it by this session, each judgment marked as its reading; the report itself is forwarded unedited.
 - Remove only this skill's temp directory; a session kept in a CLI's own store is the user's to remove.
 - The skill is a delegation channel only — interpretation, follow-up questions, and downstream protocol routing belong to the main session after the trace returns. What the run returns as the user's to settle reaches the user as theirs, as Phase 4 presents it.

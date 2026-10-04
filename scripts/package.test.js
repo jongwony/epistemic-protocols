@@ -335,35 +335,6 @@ describe('goal-research runtime contract', () => {
   const skillPath = path.join(skillDir, 'SKILL.md');
   const refPath = (name) => path.join(skillDir, 'references', name);
 
-  // This block previously REQUIRED `--config mcp_servers.tavily.tool_timeout_sec=3600`.
-  // That override cannot work: a dotted override under `mcp_servers` replaces the
-  // server's whole table instead of merging, dropping the transport field, and codex
-  // then refuses to load config at all ("invalid transport"). Reproduced on
-  // codex-cli 0.149.0 for every server and every key, including keys the config file
-  // already sets. The assertions below pin the repair so the line cannot come back.
-
-  it('carries no dotted mcp_servers config override, which would break codex config load', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    // Scope to the launch command itself. The prose deliberately SHOWS the broken form
-    // while telling you not to use it, so a whole-file match would flag the warning that
-    // exists to prevent the thing being warned about.
-    const launchBlocks = (skill.match(/```bash\n([\s\S]*?)```/g) ?? []).filter((b) =>
-      b.includes('codex exec'),
-    );
-    assert.ok(launchBlocks.length > 0, 'the codex exec launch command must be present');
-    for (const block of launchBlocks) {
-      assert.ok(
-        !/--config\s+mcp_servers\./.test(block),
-        'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load',
-      );
-    }
-    assert.match(
-      skill,
-      /invalid transport/i,
-      'the skill must say why the override is absent, or a future author re-adds it',
-    );
-  });
-
   // Fenced blocks of a surface in one language ('' for a bare fence), indented blocks
   // included. Fences are paired in order, so a closing fence never opens the next block.
   const fenced = (doc, lang) => {
@@ -381,6 +352,33 @@ describe('goal-research runtime contract', () => {
   };
   const bashBlocks = (doc) => fenced(doc, 'bash');
 
+  // This block previously REQUIRED `--config mcp_servers.tavily.tool_timeout_sec=3600`.
+  // That override cannot work: a dotted override under `mcp_servers` replaces the
+  // server's whole table instead of merging, dropping the transport field, and codex
+  // then refuses to load config at all ("invalid transport"). Reproduced on
+  // codex-cli 0.149.0 for every server and every key, including keys the config file
+  // already sets. The assertions below pin the repair so the line cannot come back.
+
+  it('carries no dotted mcp_servers config override, which would break codex config load', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    // Scope to the launch command itself. The prose deliberately SHOWS the broken form
+    // while telling you not to use it, so a whole-file match would flag the warning that
+    // exists to prevent the thing being warned about.
+    const launchBlocks = bashBlocks(skill).filter((b) => b.includes('codex exec'));
+    assert.ok(launchBlocks.length > 0, 'the codex exec launch command must be present');
+    for (const block of launchBlocks) {
+      assert.ok(
+        !/--config\s+mcp_servers\./.test(block),
+        'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load',
+      );
+    }
+    assert.match(
+      skill,
+      /invalid transport/i,
+      'the skill must say why the override is absent, or a future author re-adds it',
+    );
+  });
+
   it('feeds jq only the JSON lines of a pass\'s events, and never claims the events file is pure JSONL', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
     // codex prints plain notice lines to stdout alongside the JSONL; jq aborts on the first
@@ -388,6 +386,9 @@ describe('goal-research runtime contract', () => {
     const readers = bashBlocks(skill).filter((b) => b.includes('events.jsonl') && b.includes('jq'));
     assert.ok(readers.length > 0, 'a block reading the events with jq must be present');
     for (const block of readers) assert.match(block, /grep '\^\{'/, `jq must be fed only JSON lines:\n${block}`);
+    const slurps = readers.filter((b) => b.includes('jq -rs'));
+    assert.ok(slurps.length > 0, 'the codex report command must be present');
+    for (const block of slurps) assert.match(block, /grep '\^\{'[^|]*\|\s*jq -rs/, `jq -rs must read grep's output:\n${block}`);
     assert.ok(!/events file is pure JSONL/i.test(skill), 'stdout is not pure JSONL — the skill must not assert that it is');
   });
 
@@ -720,19 +721,20 @@ describe('goal-research runtime contract', () => {
     assert.equal(cc.count, 0);
   });
 
-  it('a tool named like Tavily\'s on a server that is not Tavily\'s is not counted', needsJq, () => {
+  it('a Tavily tool counts on whatever server provides it; other Tavily tools do not', needsJq, () => {
     const codex = runCodex([[
-      call('c1', 'tavily_search', json({ results: [{ url: 'https://other.example/o' }] }), { server: 'other' }),
-      call('c2', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] })),
+      call('c1', 'tavily_search', json({ results: [{ url: 'https://renamed.example/r' }] }), { server: 'search' }),
+      call('c2', 'tavily_research', json({ results: [{ url: 'https://research.example/x' }] }), { server: 'search' }),
       message('m1', 'r'), done]]);
-    assert.equal(codex.count, 1);
-    assert.deepEqual(codex.returned, ['https://a.example/1']);
+    assert.deepEqual(codex.returned, ['https://renamed.example/r'], 'a renamed server counts; research does not');
     const cc = runClaudeCode([[prompt('brief'),
-      use('t1', 'mcp__other__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://other.example/o' }] }))),
-      use('t2', 'mcp__claude_ai_Tavily__tavily_search'), res('t2', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] }))),
+      use('t1', 'mcp__claude_ai_Tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://connector.example/c' }] }))),
+      use('t2', 'mcp__search__tavily_search'), res('t2', textItems(JSON.stringify({ results: [{ url: 'https://renamed.example/r' }] }))),
+      use('t3', 'mcp__plugin_x_web__tavily-extract'), res('t3', textItems(JSON.stringify({ results: [{ url: 'https://plugin.example/p' }] }))),
+      use('t4', 'mcp__search__tavily_crawl'), res('t4', textItems(JSON.stringify({ results: [{ url: 'https://crawl.example/x' }] }))),
       say('msg_f', 'r')]]);
-    assert.equal(cc.count, 1, 'a connector-provided Tavily server counts; another server does not');
-    assert.deepEqual(cc.returned, ['https://a.example/1']);
+    assert.equal(cc.count, 3, 'connector, renamed and plugin servers count; crawl does not');
+    assert.deepEqual(cc.extracted, ['https://plugin.example/p']);
   });
 
   it('Claude record: structured output beside a tool result is read before its formatted text', needsJq, () => {
@@ -765,7 +767,7 @@ describe('goal-research runtime contract', () => {
   };
   const passFiles = {
     'brief.txt': 'Research goal condition: the condition\nResearch target:\nq\n', 'goal.txt': '/goal the condition\n', 'continue.txt': 'gaps\n',
-    'thread.txt': 'th-123\n', 'session.txt': 'se-456\n', 'tavily_server.txt': 'search\n',
+    'thread.txt': 'th-123\n', 'session.txt': 'se-456\n',
   };
   const scaffold = () => pick(skillText(), 'run < "$IN"');
   const codexRun = () => pick(skillText(), 'run()', 'codex exec resume');
@@ -783,7 +785,7 @@ describe('goal-research runtime contract', () => {
 
   it('claude -p: the brief starts the session, the /goal turn resumes it alone, then continuations', () => {
     const seen = runPassBlock(claudePRun(), 'claude', [os.tmpdir(), os.tmpdir(), os.tmpdir()]).map((p) => p.events);
-    assert.match(seen[0], /^ARGS -p --session-id se-456 .*--allowedTools mcp__search Skill\n/, 'pass 0 starts the session with the id and the server written once');
+    assert.match(seen[0], /^ARGS -p --session-id se-456 /, 'pass 0 starts the session with the id written once');
     assert.match(seen[0], /Research target:/, 'pass 0 sends the brief');
     assert.match(seen[1], /^ARGS -p --resume se-456 /, 'the goal turn resumes the same session');
     assert.match(seen[1], /\n\/goal \S/, 'pass 1 sends /goal');
@@ -841,18 +843,27 @@ describe('goal-research runtime contract', () => {
     assert.deepEqual(r.returned, ['https://one.example/1', 'https://two.example/2'], 'each call keeps its own results');
   });
 
-  it('a Tavily server the launch recorded under another name counts; an unrelated server does not', needsJq, () => {
-    const runNamed = (files, reducer) => parseList(runSteps({ 'tavily_server.txt': 'search\n', ...files }, [{ blocks: [passRecord(), tavilyLib(), reducer, listing()] }]).out);
-    const codex = runNamed({ 'p0.events.jsonl': toJsonl([
-      call('c1', 'tavily_search', json({ results: [{ url: 'https://named.example/n' }] }), { server: 'search' }),
-      call('c2', 'tavily_search', json({ results: [{ url: 'https://other.example/o' }] }), { server: 'other' }), done]) }, codexReducer());
-    assert.deepEqual(codex.returned, ['https://named.example/n']);
-    const claude = runNamed({ 'p0.events.jsonl': toJsonl([
-      use('t1', 'mcp__search__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://named.example/n' }] }))),
-      use('t2', 'mcp__other__tavily_search'), res('t2', textItems(JSON.stringify({ results: [{ url: 'https://other.example/o' }] })))]) }, claudeReducer());
-    assert.deepEqual(claude.returned, ['https://named.example/n']);
-    const unnamed = runCodex([[call('c1', 'tavily_search', json({ results: [{ url: 'https://named.example/n' }] }), { server: 'search' }), done]]);
-    assert.equal(unnamed.count, 0, 'without the recorded name the server is not Tavily\'s');
+  it('codex: each pass\'s report is its last agent_message, read past plain notice lines', needsJq, () => {
+    const take = pick(skillText(), 'agent_message', 'report.txt');
+    const r = runSteps({ 'p1.events.jsonl': toJsonl(['Codex autostart is disabled.', message('m1', 'progress'), message('m2', 'whole report\nline 2'), done]) },
+      [{ pass: 1, blocks: [take] }], ['p1.report.txt']);
+    assert.equal(r.collected['p1.report.txt'], 'whole report\nline 2\n');
+  });
+
+  it('claude -p: the session id is written lowercase, and never truncated when none is generated', () => {
+    const write = pick(refText('host-codex.md'), 'session.txt', 'uuidgen');
+    const bin = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-bin-'));
+    try {
+      fs.writeFileSync(path.join(bin, 'cat'), '#!/bin/sh\ncase "$1" in /proc/*) exit 1 ;; esac\nexec /bin/cat "$@"\n', { mode: 0o755 });
+      fs.writeFileSync(path.join(bin, 'uuidgen'), '#!/bin/sh\necho 0A1B2C3D-AAAA-BBBB-CCCC-DDDDEEEEFFFF\n', { mode: 0o755 });
+      const upper = runSteps({}, [{ blocks: [write], env: { PATH: bin } }], ['session.txt']);
+      assert.equal(upper.collected['session.txt'], '0a1b2c3d-aaaa-bbbb-cccc-ddddeeeeffff\n');
+      fs.writeFileSync(path.join(bin, 'uuidgen'), '#!/bin/sh\nexit 1\n', { mode: 0o755 });
+      const none = runSteps({ 'session.txt': 'kept\n' }, [{ blocks: [write, 'true'], env: { PATH: bin } }], ['session.txt']);
+      assert.equal(none.collected['session.txt'], 'kept\n', 'a failed generation leaves the file as it was');
+    } finally {
+      fs.rmSync(bin, { recursive: true, force: true });
+    }
   });
 
   it('every resumed pass runs from the working directory pass 0 recorded (claude -p and codex)', () => {
