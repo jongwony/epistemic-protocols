@@ -1,7 +1,7 @@
 # Claude Code Host
 
 Load when the host driving this skill is Claude Code: at Phase 2 for either runner's launch, and
-at Phase 3 for the `claude` runner's pass outcome, record, and continuation. `${SUFFIX}`,
+at Phase 3 for the `claude` runner's pass outcome, tool record, and continuation. `${SUFFIX}`,
 `${PASS}`, and every other generated value are substituted literally into each block.
 
 ## Codex runner launch
@@ -34,7 +34,8 @@ the subagent's transcript: a JSONL file under `~/.claude/projects/<project>/`, i
 directory). Resolve each reported path, following a symlink, rather than constructing it, and
 append it to `/tmp/goal_research_${SUFFIX}/transcripts.txt`, one path per line — the launch's
 first, then each continuation's — as each pass completes. Where the host reported no path and
-none resolves, the record is not readable and the next section's not-readable outcome applies.
+none resolves, the record is not readable and Phase 3's not-readable outcome applies: the checks
+have not run, while the pass outcome below still holds.
 
 The run's record is every transcript listed there, each once, in order — one file in the common
 case, several where a continuation wrote a different one:
@@ -54,48 +55,25 @@ not mechanically readable; read it in step 3.
 
 ## Pass outcome
 
-Write the record (above) first; the pass is read from it, together with the host's own signal.
-When the host's completion notification for the pass arrives, write its status alone — `0` where
-it reports the subagent finished successfully, `1` otherwise — to
-`/tmp/goal_research_${SUFFIX}/p${PASS}.status`; the notification's text is not the report.
-
-A pass starts at the last user entry that is a real prompt — the brief, or the continuation
-message — and not tool results or an entry the host injected (`isMeta`: a skill body, a reminder,
-a notification). The pass returned only when its status is `0` and its last assistant message
-carries non-empty text, no tool call, and no mark of an API error or an aborted stream
-(`isApiErrorMessage`, `isAbortedMidStream`); that text, joined across the entries the transcript
-splits the message into, is the report. Anything else failed:
+A pass's report is the subagent's result as the host delivers it to this session — its final
+message, or the message it hands back — and the pass returned when the host reports the subagent
+completed and that result is non-empty. When the host's completion notification for the pass
+arrives, write its status alone — `0` where it reports the subagent completed, `1` otherwise — to
+`/tmp/goal_research_${SUFFIX}/p${PASS}.status`, and the delivered result, unchanged, to
+`/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`. Then read the pass:
 
 ```bash
-D=/tmp/goal_research_${SUFFIX}
-if [ "$(cat "$D/p${PASS}.status" 2>/dev/null)" = 0 ] && [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -rs '
-    . as $all
-    | ([range(0; length) | select($all[.].type == "user" and ($all[.].isMeta | not)
-        and ([$all[.].message.content | if type == "array" then .[] else {type: "text"} end | select(.type == "tool_result")] | length == 0))]
-       | last // -1) as $start
-    | [$all[($start + 1):][] | select(.type == "assistant")] as $a
-    | ($a | last) as $l
-    | if $l == null then empty
-      else (if $l.message.id == null then [$l] else [$a[] | select(.message.id == $l.message.id)] end) as $entries
-        | [$entries[].message.content[]?] as $blocks
-        | if ($entries | any(.isApiErrorMessage == true or .isAbortedMidStream == true))
-             or ($blocks | any(.type == "tool_use")) then empty
-          else [$blocks[] | select(.type == "text") | .text] | join("\n") end
-      end' "$D/record.jsonl" > "$D/p${PASS}.report.txt" && grep -q '[^[:space:]]' "$D/p${PASS}.report.txt"
+D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
+if [ "$(cat "$P.status" 2>/dev/null)" = 0 ] && grep -q '[^[:space:]]' "$P.report.txt" 2>/dev/null
 then echo "pass ${PASS}: returned"
-else : > "$D/p${PASS}.report.txt"; echo "pass ${PASS}: failed"
+else : > "$P.report.txt"; echo "pass ${PASS}: failed"
 fi
 ```
 
-Where the record is not readable, the report comes from the host's completion result instead:
-the subagent's returned final message, as delivered, written unchanged to
-`/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`. The pass returned when its status is `0` and
-that message is non-empty; the Source Check says the report was taken from the host's completion
-message, the record was not readable, and the checks have not run. Where the record is readable,
-it stays the source and the delivered message is not copied.
+The transcript is read only for the tool record above, never for the pass outcome.
 
 ## Continuation
 
 Continue the same subagent — send the continuation message to it by the name or id kept at
-launch — rather than spawning a new one, so its context carries on. Its record is rebuilt from
-every transcript the run has written, as above, before the next pass is read.
+launch — rather than spawning a new one, so its context carries on. Its tool record is rebuilt
+from every transcript the run has written, as above, after each pass.

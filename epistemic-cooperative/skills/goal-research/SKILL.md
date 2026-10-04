@@ -58,10 +58,16 @@ Generate a unique suffix for this run, `SUFFIX=$(openssl rand -hex 4)`, and crea
 
 > Every uncertainty this session's research target turns on is either filled by a citation to a source this session's Tavily calls returned, or returned open with its reach — the person's marked as theirs.
 
-Every runner receives this brief, written to `/tmp/goal_research_${SUFFIX}/brief.txt`, with `{inquire}` set to `/inquire` for `claude` and `$inquire` for `codex`, and `{goal condition}` set to the sentence above. The goal command, where a route uses it, is sent apart from the brief and after it — a CLI's goal command reads everything after `/goal` as its objective, within a length limit the whole brief can exceed — as the runner's section or the host's reference says:
+Every runner receives this brief, written to `/tmp/goal_research_${SUFFIX}/brief.txt`, with `{inquire}` set to `/inquire` for `claude` and `$inquire` for `codex`, and `{goal condition}` set to the sentence above. The brief states the condition under a label no goal command reads as its own. The goal command, where a route uses it, is sent apart from the brief and after it — a CLI's goal command reads everything after `/goal` as its objective, within a length limit the whole brief can exceed — as the runner's section or the host's reference says. Its turn is written once, here, beside the brief:
+
+```bash
+printf '/goal %s\n' "{goal condition}" > /tmp/goal_research_${SUFFIX}/goal.txt
+```
+
+The brief:
 
 ```
-Goal: {goal condition}
+Research goal condition: {goal condition}
 
 This session is the research session the goal-research skill has already delegated to — goal-research is already running here, so do not invoke it again in this session.
 
@@ -100,7 +106,7 @@ Other hosts may supply the same capability: a background Claude run with its own
 
 Check `which codex 2>/dev/null`. If Codex CLI is not found, expose the missing-binary error and stop. Failure modes are surfaced as raw errors, not handled internally.
 
-Launch pass `0` through the host's background execution facility, with a 75-minute envelope (on Claude Code, the binding is in [Claude Code](references/host-claude-code.md)). `--color never` + splitting the
+Every pass runs the block below through the host's background execution facility, with a 75-minute envelope (on Claude Code, the binding is in [Claude Code](references/host-claude-code.md)). Pass `0` launches the session with the brief and records its working directory; pass `1` is the goal turn — `/goal` followed by the goal condition, alone — sent as soon as pass `0` has returned, so the goal engages with the research target already in the session's context; each pass after it sends the continuation message from Phase 3. Every later pass resumes the same session by the thread id in pass `0`'s `thread.started` event, from the working directory pass `0` recorded. `--color never` + splitting the
 streams (stdout to the pass's events file, `2>` to its warn file) keeps stderr
 warnings out of the events file. Stdout is **not** guaranteed to be pure JSONL —
 codex may still print a plain notice line there (e.g. `Codex autostart is
@@ -108,24 +114,24 @@ disabled.`), so every extraction below filters to lines starting with `{` before
 parsing. The status file keeps the pass's exit code after the launching shell ends. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
 
 ```bash
-codex exec --json --color never --skip-git-repo-check -m gpt-6-astra \
-  --config model_reasoning_effort="{effort}" \
-  < /tmp/goal_research_${SUFFIX}/brief.txt \
-  > /tmp/goal_research_${SUFFIX}/p${PASS}.events.jsonl 2> /tmp/goal_research_${SUFFIX}/p${PASS}.warn.txt
-printf '%s\n' "$?" > /tmp/goal_research_${SUFFIX}/p${PASS}.status
-```
-
-Every later pass resumes the same session: pass `1` is the goal turn — `/goal` followed by the goal condition, alone — sent as soon as pass `0` has returned, so the goal engages with the research target already in the session's context; each pass after it sends the continuation message from Phase 3. The thread id is in pass `0`'s `thread.started` event. Each pass goes through the host's background execution facility with the same envelope. `codex exec resume` takes no `--color` option; its stdout is filtered by `grep '^{'` like the launch's. Codex's JSON events carry no event saying whether the goal engaged, so Phase 4 shows the goal as not confirmed on this route:
-
-```bash
 D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
-[ -f "$D/goal.txt" ] || printf '/goal %s\n' "{goal condition}" > "$D/goal.txt"
-IN=$D/goal.txt; [ "${PASS}" = 1 ] || IN=$D/continue.txt
-codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
-  --config model_reasoning_effort="{effort}" \
-  < "$IN" > "$P.events.jsonl" 2> "$P.warn.txt"
+[ "${PASS}" = 0 ] && pwd > "$D/cwd.txt"
+cd "$(cat "$D/cwd.txt")" || exit 1
+case "${PASS}" in
+  0) codex exec --json --color never --skip-git-repo-check -m gpt-6-astra \
+       --config model_reasoning_effort="{effort}" \
+       < "$D/brief.txt" > "$P.events.jsonl" 2> "$P.warn.txt" ;;
+  1) codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
+       --config model_reasoning_effort="{effort}" \
+       < "$D/goal.txt" > "$P.events.jsonl" 2> "$P.warn.txt" ;;
+  *) codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
+       --config model_reasoning_effort="{effort}" \
+       < "$D/continue.txt" > "$P.events.jsonl" 2> "$P.warn.txt" ;;
+esac
 printf '%s\n' "$?" > "$P.status"
 ```
+
+`codex exec resume` takes no `--color` option; its stdout is filtered by `grep '^{'` like the launch's. Codex's JSON events carry no event saying whether the goal engaged, so Phase 4 shows the goal as not confirmed on this route.
 
 The launch persists its session so later passes can continue the same one; `--ephemeral` would leave nothing to resume. The session therefore stays in Codex's own session store (under `~/.codex/sessions/`, named by its thread id) after this skill finishes; removing it is the user's call, not this skill's.
 
@@ -151,7 +157,7 @@ Wait for the background task completion notification — do not poll or sleep. S
 
 ### 1. The pass outcome
 
-A pass **returned** only on positive evidence of success: its own exit status or host completion signal reports success, its own terminal event is a success, and its own final message carries a non-empty report that is not an error or aborted message; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report is written to its own `/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`; the reports together **are** the research trace/answer, **forwarded verbatim to the presentation step; do NOT regex-parse them** — nothing below rewrites them.
+A pass **returned** only on positive evidence of success: its own exit status or host completion signal reports success, its own terminal event — where the route's record has one — is a success, and its own report is non-empty and not an error or aborted message; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report is written to its own `/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`; the reports together **are** the research trace/answer, **forwarded verbatim to the presentation step; do NOT regex-parse them** — nothing below rewrites them.
 
 - **claude**: as the host's reference says.
 - **codex**: the pass's `turn.completed` with no `turn.failed`, and its last `agent_message` — high-reasoning codex streams progress messages first, so the extraction takes the last one.
@@ -254,7 +260,7 @@ There are two record shapes, each with one reduction:
   printf '%s\n' "$?" > "$D/reduce.status"
   ```
 
-Where the host offers no readable record of a `claude` run, nothing below is mechanical: each pass's report is taken from the host's completion message as the host's reference says, the Source Check says the report was taken from the host's completion message, the record was not readable, and the checks have not run, and every source and strength label stands as the runner reported it, unchecked.
+Where the host offers no readable record of a `claude` run, nothing below is mechanical: the Source Check says the record was not readable and the checks have not run, and every source and strength label stands as the runner reported it, unchecked.
 
 The record is the Tavily route the brief directs. A page the run fetched another way — a host's built-in web search, a shell `curl` — is outside it, so "not found in this run's Tavily record" never means that no tool touched the URL.
 
@@ -281,7 +287,15 @@ fi
 
 ### 3. Reading the report
 
-Read the trace, every returned pass's report, against the `returned` and `extracted` lists — and, for each call not mechanically readable, against that call's raw record — and judge each citation: **returned by this run**, **extracted by this run**, or **not found in this run's Tavily record**. A citation whose claim is labelled `verified` and whose source this run did not extract is read the same way and said so. Whatever rests on a citation not found in the record is the runner's own inference and open, whatever label it carries.
+Each continuation asks the run to return its whole report, updated, so the current report is the latest returned pass's report that restates the whole; a pass whose report only refers back to an earlier one — a goal turn's acknowledgement — leaves the current report as it was. Which pass that is, is this session's reading; mark it, and read the report it names:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}
+printf '%s\n' "{pass of the current report}" > "$D/current.txt"
+cat "$D/p$(cat "$D/current.txt").report.txt"
+```
+
+Read the run's **current report** against the `returned` and `extracted` lists — and, for each call not mechanically readable, against that call's raw record — and judge each citation: **returned by this run**, **extracted by this run**, or **not found in this run's Tavily record**. A citation whose claim is labelled `verified` and whose source this run did not extract is read the same way and said so. Whatever rests on a citation not found in the record is the runner's own inference and open, whatever label it carries.
 
 Read it against the brief's form as well, and note what it is missing: a factual claim with no citation; an absence or novelty claim with no reach record behind it; an empirical effect with no replication or retraction status; a detail that reads as recalled — a volume, page, date, or number no returned source gave — not marked reconstructed. No line format is required of the runner.
 
@@ -289,20 +303,26 @@ Every judgment in this step is this session's reading, marked as such where it i
 
 ### 4. The goal
 
-Judge the pass against the goal condition, using the lists and the reading. Its **gaps** are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user.
+Judge the run's current report against the goal condition, using the lists and the reading. Its **gaps** are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user.
 
 Only research gaps drive a continuation. A failed pass, a reduction failure, or a run with no successful Tavily call has already ended the loop in steps 1–2, and is surfaced rather than continued.
 
 Record the pass's gap count — the number is this session's reading; the decision on it is mechanical. The first count recorded is the first evaluated pass, whichever pass number the route starts evaluating at: it continues on any gap, and every later pass continues only on fewer gaps than the pass before it:
 
 ```bash
-D=/tmp/goal_research_${SUFFIX}
-printf '%s %s\n' "${PASS}" "{gap count}" >> "$D/gaps.txt"
-awk 'NR > 1 { prev = n } { n = $2 }
-     END { if (n == 0) print "stop: goal met"
-           else if (NR == 1 || n < prev) print "continue"
-           else print "stop: gaps did not shrink" }' "$D/gaps.txt"
+D=/tmp/goal_research_${SUFFIX}; n="{gap count}"
+case "$n" in
+  ''|*[!0-9]*) echo "step failed: the gap count is not a non-negative integer" ;;
+  *) { [ -f "$D/gaps.txt" ] && awk -v k="${PASS}" '$1 != k' "$D/gaps.txt"
+       printf '%s %s\n' "${PASS}" "$n"; } | sort -n -k1,1 > "$D/gaps.new" && mv "$D/gaps.new" "$D/gaps.txt"
+     awk 'NR > 1 { prev = n } { n = $2 }
+          END { if (n == 0) print "stop: goal met"
+                else if (NR == 1 || n < prev) print "continue"
+                else print "stop: gaps did not shrink" }' "$D/gaps.txt" ;;
+esac
 ```
+
+The file holds one line per pass; recording a pass again replaces its line. A count that is not a non-negative integer stops the step rather than being compared.
 
 - **stop: goal met**: the condition is met; go to Phase 4.
 - **continue**: continue the **same** run — not a new one — as the next pass, through the runner's continuation (codex in its runner section; claude in the host's reference), sending this message, written to `/tmp/goal_research_${SUFFIX}/continue.txt`:
@@ -351,7 +371,7 @@ Passes: {n}, gaps from the first evaluated pass: {as recorded in gaps.txt} — s
 {"no successful Tavily call — nothing in the trace below was retrieved through the designated route; its claims stand as the runner's own, open, unchecked";
  or "pass {k} failed" with its raw error;
  or "the reduction of the run's record failed; the checks have not run";
- or "the report was taken from the host's completion message; the run's tool record is not readable from this session, so the checks have not run — sources and strength labels are the runner's own, unchecked";
+ or "the run's tool record is not readable from this session, so the checks have not run — sources and strength labels are the runner's own, unchecked";
  or the record: {n} successful Tavily calls, {m} not mechanically readable;
  then, as this session's reading: each citation not found in this run's Tavily record, each `verified` label on a source this run did not extract, what the report form is missing, and, where the loop ended without meeting the goal, the gaps that remain — or "this session's reading found every citation in the record and nothing missing"}
 

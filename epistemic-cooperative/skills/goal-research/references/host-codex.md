@@ -33,14 +33,16 @@ user's call, not this skill's.
 Pass `0` sends the brief and starts the session with `--session-id`. Pass `1` is the goal turn:
 `/goal` followed by the goal condition, alone, resumed into the same session as soon as pass `0`
 has returned, so the goal engages with the research target already in the session's context.
-Each later pass sends the continuation message. Every pass goes through the host's background
-execution facility. `<tavily>` stands for the server name `claude mcp list` showed:
+Each later pass sends the continuation message. Every pass has the same 75-minute envelope: run
+it through the host's background execution facility where the host has one, and otherwise as a
+foreground call bounded by the host's own command timeout set to 75 minutes (the Codex shell
+tool's `timeout_ms`, 4500000). The Rules' delegated-session timeout then applies on this route.
+`<tavily>` stands for the server name `claude mcp list` showed:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
 [ "${PASS}" = 0 ] && pwd > "$D/cwd.txt"
 cd "$(cat "$D/cwd.txt")" || exit 1
-[ -f "$D/goal.txt" ] || printf '/goal %s\n' "{goal condition}" > "$D/goal.txt"
 case "${PASS}" in
   0) IN=$D/brief.txt;    SESSION=--session-id ;;
   1) IN=$D/goal.txt;     SESSION=--resume ;;
