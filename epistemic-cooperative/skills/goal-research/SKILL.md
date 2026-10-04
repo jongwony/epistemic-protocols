@@ -1,6 +1,6 @@
 ---
 name: goal-research
-description: Delegate academic-literature research to a background Claude or Codex run using Aitesis and Tavily; check its citations against its Tavily record while gaps shrink. User-invoked via /goal-research.
+description: Delegate academic-literature research to a background Claude or Codex run using Aitesis and Tavily; check its citations against its Tavily record until the goal holds. User-invoked via /goal-research.
 ---
 
 # Goal Research
@@ -59,7 +59,7 @@ Report {inquire}'s whole record as it stands at completion — and again, whole 
 - Open: every item still open — the person's to settle, reconstructed, or short of ground — each with its reach, the person's marked as theirs.
 ```
 
-Run the brief in the background, in its own context rather than as a fork of this conversation: a Claude run by default — a subagent where the host offers one, else the `claude` CLI — or a `codex exec` session when codex is designated. Where the runner has a goal command, the goal turn — `/goal {goal condition}` alone — is the first continuation after a whole report with gaps (Phase 3) — a goal command reads everything after `/goal` as its objective, within a length limit the brief can exceed. Every continuation goes to the same session. A runner that cannot be launched is reported with what is missing, and the skill stops there.
+Run the brief in the background, in its own context rather than as a fork of this conversation: a Claude run by default — a subagent where the host offers one, else the `claude` CLI — or a `codex exec` session when codex is designated. Where the runner has a goal command, the first continuation is the goal turn, sent once: `/goal {goal condition}`, with what remains named in the same or the next message as the runner allows (Phase 3) — a goal command reads everything after `/goal` as its objective, within a length limit the brief can exceed. Every continuation goes to the same session. A runner that cannot be launched is reported with what is missing, and the skill stops there.
 
 Before launching a run or reading its output, read [Error patterns](references/error-patterns.md): failures already seen when driving a run, each with its symptom and fix.
 
@@ -70,7 +70,7 @@ After each pass — the launch, the goal turn, each continuation — has ended:
 1. **The pass.** Read what the runner delivered: its exit or completion status and its final report. The pass **failed** where the status is not a success, its last turn ended in an error, or it was aborted. A report is **whole** where it restates the research report as a whole; the **current report** is the latest whole one. A pass whose report is not whole — a goal turn's acknowledgement — leaves the current report as it was. Each report is carried verbatim to Phase 4 — nothing rewrites it.
 2. **The record.** Read the run's own tool record — its transcript or event stream. A **successful Tavily call** completed without an error flag and is Tavily's search or extract tool on whatever server provides it: its name, or its last `__` segment, is exactly `tavily_search`, `tavily-search`, `tavily_extract`, or `tavily-extract`; research, crawl, and map calls and every other tool are not counted. A structured response — JSON carrying a `results` array — lists what the call returned: each entry's `url`, verbatim; what a call asked for is never read. Any other response — formatted text, as some Tavily servers return — is read by this session itself in step 3. A page the run fetched another way — a built-in web search, a shell `curl` — is outside this record.
 3. **The reading.** Read the current report against the URLs the record returned and extracted, and against each call's response that is not structured — a source found there counts as returned or extracted by this session's reading: each citation is **returned by this run**, **extracted by this run**, or **not found in this run's Tavily record**, and a `verified` label on a source this run did not extract is said so. Note what the report's form misses: a claim with no citation, an absence or novelty claim with no reach record, an empirical effect with no replication or retraction status, a recalled detail not marked reconstructed. Every judgment here is this session's reading, marked as such.
-4. **Continue or stop.** The **gaps** are the citations not found, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach; an item that is the person's to settle is never a gap. After every pass, read the current report, and failure evidence from the latest pass only. A failure is declared only on positive evidence that the research capability failed: a failed pass, one whose record is truncated or malformed, no successful Tavily call in the run so far, or Tavily shown unavailable to the run (the error patterns say what shows it). The goal is met when the current report has no gaps. Otherwise continue the same run, one continuation per pass: a failure the latest pass shows is named first, each kind once; where the runner has a goal command and the goal is not yet set, the goal turn is the first continuation after a whole report with gaps (Phase 2); every other continuation names the current report's gaps and asks for the whole report. Stop when a kind of failure already named shows again in the latest pass, reporting it raw; when a whole report's gap count is not smaller than the previous whole report's, the launch's whole report setting the first; when two passes in a row return no whole report; or on a **harness failure** — the launch cannot start, or the run's record cannot be reached — named with its cause. What remains returns open to the user.
+4. **Continue or stop.** The **gaps** are the citations not found, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach; an item that is the person's to settle is never a gap. A **failure** is shown only by positive evidence: a failed pass, one whose record is truncated or malformed included; no successful Tavily call in the run; or Tavily shown unavailable to the run (the error patterns say what shows it). The goal is met when the current report has no gaps and no failure stands; a report with no gaps beside a failure is not done. Otherwise continue the same run while it is moving toward the goal condition — this session's judgment. Every continuation, the goal turn included, names everything still missing: failures first, then the current gaps. A problem already named once that is still there after the next pass is not named again: stop, and report it with what remains. A **harness failure** — the launch cannot start, or the run's record cannot be reached — is reported directly, with its cause. What remains returns open to the user.
 
 A continuation goes to the same run, not a new one, with this message:
 
@@ -80,7 +80,7 @@ What to address:
 - {each failure and gap, one line each}
 ```
 
-A failure is named plainly with what to do — "no Tavily call succeeded — use Tavily search and extract for the sources", "your last turn ended in an error — continue and return your whole report". The loop ends: the gap count of whole reports must keep falling, two replies in a row that are not whole stop it, and each kind of failure is named once.
+A failure is named plainly with what to do — "no Tavily call succeeded — use Tavily search and extract for the sources", "your last turn ended in an error — continue and return your whole report". The loop ends because each problem is named at most once.
 
 When the loop has ended and the result is presented, remove what this skill wrote; a session a CLI keeps in its own store is the user's to remove.
 
@@ -93,7 +93,7 @@ Present the source check first, then the items the run returned as the user's to
 
 Target: {research_question}
 Runner: {claude | codex}
-Passes: {n}, gap counts: {each} — stopped: {goal met | gaps did not shrink | no whole report twice in a row | a failure recurred | harness failure: {cause}}
+Passes: {n} — stopped: {goal met | a named problem persisted | harness failure: {cause}}
 
 --- Source Check ---
 {which pass's report is current; then any failure, raw — "no successful Tavily call: nothing in the report was retrieved through the designated route; its claims stand as the runner's own, open, unchecked", a failed pass, a harness failure;

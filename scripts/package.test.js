@@ -356,22 +356,25 @@ describe('goal-research runtime contract', () => {
   const patterns = () => fs.readFileSync(path.join(path.dirname(skillPath), 'references', 'error-patterns.md'), 'utf8');
 
   it('carries no dotted mcp_servers config override, and keeps the pattern that says why', () => {
-    assert.match(patterns(), /^## Codex: a dotted `mcp_servers` override$/m, 'the error pattern must stay');
-    assert.match(patterns(), /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
-    // Anywhere on both surfaces, in each form codex accepts; only the reference's own
-    // `<name>.<key>` placeholder is exempt.
-    const override = /(?:--config[\s=]+|-c[\s=]*)['"]?mcp_servers\.([^\s.=]+)\.([^\s=]+)=/g;
-    const found = [skill(), patterns()].flatMap((doc) => [...doc.matchAll(override)]);
-    assert.ok(found.some((m) => m[1] === '<name>' && m[2] === '<key>'), 'the scan must find the placeholder it exempts');
-    const used = found.filter((m) => !(m[1] === '<name>' && m[2] === '<key>')).map((m) => m[0]);
+    const [doc, ref] = [skill(), patterns()];
+    assert.match(ref, /^## Codex: a dotted `mcp_servers` override$/m, 'the error pattern must stay');
+    assert.match(ref, /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
+    // Anywhere on both surfaces, in each form codex accepts — a dotted key, or the server's
+    // whole table inline; only the reference's own `<name>.<key>` placeholder is exempt.
+    const override = /(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers\.([^\s.=]+)(?:\.([^\s=]+))?\s*=/g;
+    const found = [doc, ref].flatMap((d) => [...d.matchAll(override)]);
+    const placeholder = (m) => m[1] === '<name>' && m[2] === '<key>';
+    assert.ok(found.some(placeholder), 'the scan must find the placeholder it exempts');
+    const used = found.filter((m) => !placeholder(m)).map((m) => m[0]);
     assert.deepEqual(used, [], 'a dotted mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
   });
 
   it('filters codex stdout to JSON lines, and never claims it is pure JSONL', () => {
     // codex prints plain notice lines to stdout alongside the JSONL; jq aborts on the first
     // one, so an unfiltered read of a successful pass comes back empty.
-    assert.match(patterns(), /grep '\^\{'/, 'the filter must stay named');
-    for (const doc of [skill(), patterns()]) assert.ok(!/(events file|stdout) is pure JSONL/i.test(doc), 'stdout is not pure JSONL — no surface may assert that it is');
+    const ref = patterns();
+    assert.match(ref, /grep '\^\{'/, 'the filter must stay named');
+    for (const doc of [skill(), ref]) assert.ok(!/(events file|stdout) is pure JSONL/i.test(doc), 'stdout is not pure JSONL — no surface may assert that it is');
   });
 
   // Structural checks only: what each piece of prose means goes to review, not to a
@@ -393,7 +396,8 @@ describe('goal-research runtime contract', () => {
   });
 
   it('presents the source check, then the items to settle, then the trace', () => {
-    const phase4 = skill().slice(skill().indexOf('## Phase 4'), skill().indexOf('## Rules'));
+    const doc = skill();
+    const phase4 = doc.slice(doc.indexOf('## Phase 4'), doc.indexOf('## Rules'));
     const order = ['--- Source Check ---', '--- Yours to Settle ---', '--- Trace ---'].map((h) => phase4.indexOf(h));
     assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), 'Source Check, then Yours to Settle, then Trace');
   });

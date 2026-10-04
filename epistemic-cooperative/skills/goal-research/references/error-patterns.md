@@ -52,8 +52,8 @@ a run or reading its output.
   readable as requiring more than the brief asks, or one the run has no tool to meet.
 - **Symptom:** the goal turn runs many turns, its `{type: "active_goal"}` events carry rising
   `iterations` and a `last_reason`, and the turn's final `result` is empty.
-- **Fix:** the current report stays the last whole one, and the next continuation asks for the whole
-  report; two replies in a row that are not whole end the loop. Read `last_reason` for what the evaluator held unmet; where Tavily is
+- **Fix:** the current report stays the last whole one, and the next continuation names the missing
+  report; where it is still missing after that pass, stop and report it. Read `last_reason` for what the evaluator held unmet; where Tavily is
   shown unavailable, the pattern above applies.
 
 ## A background command stopped at the host's default time limit
