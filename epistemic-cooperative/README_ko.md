@@ -20,7 +20,7 @@
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
 | `/realign` | 3-horizon 융합으로 프로젝트 가이드 direction line 도출 | 프로젝트 가이드에 기록된 fused direction line |
-| `/goal-research` | 백그라운드 Codex CLI 세션에 위임한 리서치 (`goal` 범위 설정 + Aitesis 검증) | 되돌려 받은 리서치 trace |
+| `/goal-research` | 백그라운드 실행에 위임한 학술 문헌 리서치 — 기본은 Claude, 지정하면 Codex CLI 세션 — Aitesis 와 Tavily 로 검증 | Aitesis 의 기록에 주장마다 1차 출처 기준의 검증 강도와 재현 상태를 더한 리서치 trace, 당신만 정할 수 있는 것은 열린 채로 당신에게 돌아옴, 그리고 실행 자신의 Tavily 기록에 대어 확인한 인용 출처; 목표를 향해 나아가는 동안 같은 실행을 이어 감 |
 
 ## 스킬
 
@@ -88,7 +88,7 @@ epistemic-cooperative/
     ├── white-bear/SKILL.md       # /white-bear 경쟁-대상 언급 프로즈 감사
     ├── zero-shot/SKILL.md        # /zero-shot 앵커링 예시 프로즈 감사
     ├── realign/SKILL.md          # /realign 프로젝트 가이드 direction line 융합
-    └── goal-research/SKILL.md    # /goal-research Codex 위임 리서치
+    └── goal-research/SKILL.md    # /goal-research 인용 출처 검사가 붙은 위임 학술 리서치
 ```
 
 ## 사용 시기
@@ -104,7 +104,7 @@ epistemic-cooperative/
 | 초안된 옵션 집합이 사용자에게 닿기 전에 검사할 때 | `/gate-check` |
 | 프로즈의 금지 프레이밍·앵커링 예시를 감사할 때 | `/white-bear`, `/zero-shot` |
 | 프로젝트 가이드 direction line 을 다시 도출할 때 | `/realign` |
-| 리서치 질문을 Codex 에 위임할 때 | `/goal-research` |
+| 학술 문헌 리서치 질문을 백그라운드 Claude 또는 Codex 실행에 위임할 때 | `/goal-research` |
 ## 사용법
 
 ```
@@ -112,6 +112,7 @@ epistemic-cooperative/
 /probe
 /review-loop codex 123
 /goal-research <question>
+/goal-research codex <question>
 ```
 
 `/review-loop`는 환경이 일치하는 리뷰어 기능 확인 기록을 재사용하고, 소스마다 첫 읽기

@@ -331,74 +331,81 @@ describe('runtime contract view', () => {
 describe('goal-research runtime contract', () => {
   const REPO_ROOT = path.join(__dirname, '..');
   const skillPath = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'SKILL.md');
+  const skill = () => fs.readFileSync(skillPath, 'utf8');
 
-  // This block previously REQUIRED `--config mcp_servers.tavily.tool_timeout_sec=3600`.
-  // That override cannot work: a dotted override under `mcp_servers` replaces the
-  // server's whole table instead of merging, dropping the transport field, and codex
-  // then refuses to load config at all ("invalid transport"). Reproduced on
-  // codex-cli 0.149.0 for every server and every key, including keys the config file
-  // already sets. The assertions below pin the repair so the line cannot come back.
-
-  it('carries no dotted mcp_servers config override, which would break codex config load', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    // Scope to the launch command itself. The prose deliberately SHOWS the broken form
-    // while telling you not to use it, so a whole-file match would flag the warning that
-    // exists to prevent the thing being warned about.
-    const launchBlocks = (skill.match(/```bash\n([\s\S]*?)```/g) ?? []).filter((b) =>
-      b.includes('codex exec'),
-    );
-    assert.ok(launchBlocks.length > 0, 'the codex exec launch command must be present');
-    for (const block of launchBlocks) {
-      assert.ok(
-        !/--config\s+mcp_servers\./.test(block),
-        'a dotted --config mcp_servers.<name>.<key>= override makes codex exit 1 at config load',
-      );
+  // Fenced blocks of a surface in one language ('' for a bare fence), indented blocks
+  // included. A block closes only on a bare fence at least as long as the one that opened it.
+  const fenced = (doc, lang) => {
+    const blocks = [];
+    let open = null;
+    for (const line of doc.split('\n')) {
+      const fence = line.match(/^[ \t]*(`{3,})(\S*)(?:\s.*)?$/);
+      if (open === null) {
+        if (fence) open = { ticks: fence[1].length, lang: fence[2], lines: [] };
+      } else if (fence && fence[1].length >= open.ticks && /^[ \t]*`+\s*$/.test(line)) {
+        if (open.lang === lang) blocks.push(open.lines.map((l) => `${l}\n`).join(''));
+        open = null;
+      } else open.lines.push(line);
     }
-    assert.match(
-      skill,
-      /invalid transport/i,
-      'the skill must say why the override is absent, or a future author re-adds it',
-    );
-  });
+    return blocks;
+  };
 
-  it('documents the Codex session envelope', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    const bashMs = Number(skill.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
-    assert.ok(Number.isFinite(bashMs), 'Bash session timeout must be documented');
-  });
+  // The codex invocation reference's own command blocks: deterministic predicates over the
+  // shipped commands. A dotted or inline `mcp_servers` override replaces the server's table and
+  // codex stops at config load; jq stops at the first plain notice line codex prints on stdout;
+  // an ephemeral session leaves nothing for the goal turn and continuations to resume.
+  const invocation = () => fs.readFileSync(path.join(path.dirname(skillPath), 'references', 'codex-exec.md'), 'utf8');
 
-  it('filters non-JSON stdout lines before jq, and never claims the events file is pure JSONL', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    // codex prints plain notice lines to stdout alongside the JSONL; `jq -rs` aborts on
-    // the first one and returns empty, which the skill reads as "codex failed before
-    // answering" — turning a successful run into a reported crash.
-    const jqLines = skill.match(/^.*jq -rs.*$/gm) ?? [];
-    assert.ok(jqLines.length > 0, 'the extraction command must be present');
-    for (const line of jqLines) {
-      assert.ok(
-        /grep '\^\{'/.test(line) || /grep '\^\{'/.test(skill.slice(0, skill.indexOf(line))),
-        `jq must be fed only JSON lines: ${line.trim()}`,
-      );
+  it('codex invocation: no mcp_servers override, events filtered before jq, the session kept', () => {
+    const blocks = fenced(invocation(), 'bash');
+    const codex = blocks.filter((b) => /\bcodex exec\b/.test(b));
+    assert.ok(codex.length >= 2, 'the launch and the resume commands must be present');
+    const override = /(?:^|[\s'"`])(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.[^\s.=]+(?:\.[^\s=]+)?)?\s*=/m;
+    for (const b of codex) {
+      assert.ok(!override.test(b), `no mcp_servers override on the command line:\n${b}`);
+      assert.ok(!/--ephemeral\b/.test(b), `the session must persist for resume:\n${b}`);
     }
-    assert.ok(
-      !/events file is pure JSONL/i.test(skill),
-      'stdout is not pure JSONL — the skill must not assert that it is',
-    );
+    const readers = blocks.filter((b) => /\bjq\b/.test(b) && /events\.jsonl/.test(b));
+    assert.ok(readers.length > 0, 'a block reading the events must be present');
+    for (const b of readers) {
+      const lines = b.replace(/\\\n\s*/g, ' ').split('\n').filter((l) => /\bjq\b/.test(l));
+      for (const l of lines) {
+        const stages = l.split('|').map((x) => x.trim());
+        stages.forEach((stage, k) => {
+          if (/^jq\b/.test(stage)) assert.ok(k > 0 && stages.slice(0, k).some((x) => /^grep\b.*'\^\{'/.test(x)), `jq must read grep '^{' output:\n${l}`);
+        });
+      }
+    }
   });
 
-  it('requires a zero-search check before any result is presented as research', () => {
-    const skill = fs.readFileSync(skillPath, 'utf8');
-    // A codex run can complete and answer fluently from recalled knowledge when the
-    // MCP is unavailable; nothing in the narrative distinguishes that from a searched
-    // answer, so the count is the only signal.
-    assert.match(skill, /tool_call\|mcp/, 'Phase 3 must count MCP tool calls');
-    assert.match(
-      skill,
-      /no external searches/i,
-      'Phase 3 must say what to do when the count is zero',
-    );
-    assert.match(skill, /recalled-from-training/i, 'zero-search output must be marked as recalled');
+  // Structural checks only: what each piece of prose means goes to review, not to a
+  // phrase match.
+
+  it('reads fences whose info string carries attributes', () => {
+    const doc = ['```bash title=x', 'echo one', '```', '', '```', 'plain', '```', ''].join('\n');
+    assert.deepEqual(fenced(doc, 'bash'), ['echo one\n']);
+    assert.deepEqual(fenced(doc, ''), ['plain\n']);
+    const nested = ['````md', '```bash', 'inner', '```', '````', ''].join('\n');
+    assert.deepEqual(fenced(nested, 'md'), ['```bash\ninner\n```\n'], 'a shorter fence inside does not close the block');
+    assert.deepEqual(fenced(nested, 'bash'), []);
   });
+
+  it('opens the brief with its labelled goal condition and carries the research-target slot', () => {
+    const brief = fenced(skill(), '').find((b) => b.includes('Research target:'));
+    assert.ok(brief, 'the research brief must be present');
+    assert.ok(brief.startsWith('Research goal condition: {goal condition}\n'), 'the brief states the goal condition under a label no goal command reads');
+    assert.ok(!brief.includes('/goal'), 'the goal command is sent apart from the brief');
+    assert.ok(brief.includes('{research_question}'), 'the research question is slotted in verbatim');
+    assert.ok(brief.includes('{inquire}'), 'the runner-specific /inquire invocation is slotted');
+  });
+
+  it('presents the source check, then the items to settle, then the trace', () => {
+    const doc = skill();
+    const phase4 = doc.slice(doc.indexOf('## Phase 4'), doc.indexOf('## Rules'));
+    const order = ['--- Source Check ---', '--- Yours to Settle ---', '--- Trace ---'].map((h) => phase4.indexOf(h));
+    assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), 'Source Check, then Yours to Settle, then Trace');
+  });
+
 });
 
 // ============================================================
@@ -412,8 +419,7 @@ describe('goal-research runtime contract', () => {
 // below reads an empty extraction as "the call produced no verdict", so without the
 // filter a SUCCESSFUL run is reported as a failure. The file also asserted the events
 // file was pure JSONL, which is the claim that made the missing filter look
-// deliberate. goal-research/SKILL.md carries the same repair, pinned by the block
-// above; these assertions hold it here.
+// deliberate. These assertions hold the repair here.
 
 describe('codex stdout extraction contract', () => {
   const REPO_ROOT = path.join(__dirname, '..');
