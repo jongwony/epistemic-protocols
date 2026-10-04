@@ -339,7 +339,7 @@ describe('goal-research runtime contract', () => {
     const blocks = [];
     let open = null;
     for (const line of doc.split('\n')) {
-      const fence = line.match(/^[ \t]*```(\S*)\s*$/);
+      const fence = line.match(/^[ \t]*```(\S*)(?:\s.*)?$/);
       if (fence && open === null) open = { lang: fence[1], lines: [] };
       else if (fence) {
         if (open.lang === lang) blocks.push(open.lines.map((l) => `${l}\n`).join(''));
@@ -376,6 +376,12 @@ describe('goal-research runtime contract', () => {
 
   // Structural checks only: what each piece of prose means goes to review, not to a
   // phrase match.
+
+  it('reads fences whose info string carries attributes', () => {
+    const doc = ['```bash title=x', 'echo one', '```', '', '```', 'plain', '```', ''].join('\n');
+    assert.deepEqual(fenced(doc, 'bash'), ['echo one\n']);
+    assert.deepEqual(fenced(doc, ''), ['plain\n']);
+  });
 
   it('opens the brief with its labelled goal condition and carries the research-target slot', () => {
     const brief = fenced(skill(), '').find((b) => b.includes('Research target:'));
