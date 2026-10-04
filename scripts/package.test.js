@@ -334,17 +334,18 @@ describe('goal-research runtime contract', () => {
   const skill = () => fs.readFileSync(skillPath, 'utf8');
 
   // Fenced blocks of a surface in one language ('' for a bare fence), indented blocks
-  // included. Fences are paired in order, so a closing fence never opens the next block.
+  // included. A block closes only on a bare fence at least as long as the one that opened it.
   const fenced = (doc, lang) => {
     const blocks = [];
     let open = null;
     for (const line of doc.split('\n')) {
-      const fence = line.match(/^[ \t]*```(\S*)(?:\s.*)?$/);
-      if (fence && open === null) open = { lang: fence[1], lines: [] };
-      else if (fence) {
+      const fence = line.match(/^[ \t]*(`{3,})(\S*)(?:\s.*)?$/);
+      if (open === null) {
+        if (fence) open = { ticks: fence[1].length, lang: fence[2], lines: [] };
+      } else if (fence && fence[1].length >= open.ticks && /^[ \t]*`+\s*$/.test(line)) {
         if (open.lang === lang) blocks.push(open.lines.map((l) => `${l}\n`).join(''));
         open = null;
-      } else if (open !== null) open.lines.push(line);
+      } else open.lines.push(line);
     }
     return blocks;
   };
@@ -361,12 +362,12 @@ describe('goal-research runtime contract', () => {
     assert.match(ref, /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
     // Anywhere on both surfaces, in each form codex accepts — a dotted key, a server's table
     // inline, or the whole `mcp_servers` table inline; only the reference's own `<name>.<key>`
-    // placeholder is exempt.
-    const override = /(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.([^\s.=]+)(?:\.([^\s=]+))?)?\s*=/g;
-    const found = [doc, ref].flatMap((d) => [...d.matchAll(override)]);
+    // placeholder is exempt, and only in the reference.
+    const override = /(?:^|[\s'"`])(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.([^\s.=]+)(?:\.([^\s=]+))?)?\s*=/gm;
     const placeholder = (m) => m[1] === '<name>' && m[2] === '<key>';
-    assert.ok(found.some(placeholder), 'the scan must find the placeholder it exempts');
-    const used = found.filter((m) => !placeholder(m)).map((m) => m[0]);
+    const inRef = [...ref.matchAll(override)];
+    assert.ok(inRef.some(placeholder), 'the scan must find the placeholder it exempts');
+    const used = [...doc.matchAll(override), ...inRef.filter((m) => !placeholder(m))].map((m) => m[0]);
     assert.deepEqual(used, [], 'a dotted mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
   });
 
@@ -385,6 +386,9 @@ describe('goal-research runtime contract', () => {
     const doc = ['```bash title=x', 'echo one', '```', '', '```', 'plain', '```', ''].join('\n');
     assert.deepEqual(fenced(doc, 'bash'), ['echo one\n']);
     assert.deepEqual(fenced(doc, ''), ['plain\n']);
+    const nested = ['````md', '```bash', 'inner', '```', '````', ''].join('\n');
+    assert.deepEqual(fenced(nested, 'md'), ['```bash\ninner\n```\n'], 'a shorter fence inside does not close the block');
+    assert.deepEqual(fenced(nested, 'bash'), []);
   });
 
   it('opens the brief with its labelled goal condition and carries the research-target slot', () => {
