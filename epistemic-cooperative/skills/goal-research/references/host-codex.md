@@ -19,13 +19,16 @@ skills, so neither is passed.
 
 ### Session
 
-Generate a session id once, before pass `0`:
+Before pass `0`, write the session id, and the Tavily server's name as the CLI's MCP configuration
+names it — `tavily` unless it is configured under another name:
 
 ```bash
-cat /proc/sys/kernel/random/uuid > "/tmp/goal_research_${SUFFIX}/session.txt"
+D=/tmp/goal_research_${SUFFIX}
+cat /proc/sys/kernel/random/uuid > "$D/session.txt" 2>/dev/null || uuidgen > "$D/session.txt"
+printf '%s\n' "{tavily server}" > "$D/tavily_server.txt"
 ```
 
-(`uuidgen` where `/proc` has no such file.) Pass `0` sets it and every later pass resumes it. The
+Pass `0` sets the id and every later pass resumes it. The
 id is set rather than read back: a `claude -p` started from inside another Claude session can
 report the parent's id, which a resume must never reach. The CLI stores sessions per working
 directory (under `~/.claude/projects/<working-directory>/`, named by the session id), so a resume
@@ -45,12 +48,12 @@ scaffold:
 run() {
   if [ "${PASS}" = 0 ]; then S=--session-id; else S=--resume; fi
   claude -p "$S" "$(cat "$D/session.txt")" --output-format stream-json --verbose \
-    --allowedTools 'mcp__tavily' Skill
+    --allowedTools "mcp__$(cat "$D/tavily_server.txt")" Skill
 }
 ```
 
-`mcp__tavily` admits every tool of the MCP server named `tavily`; where the Tavily server is
-configured under another name, put that name in its place. `Skill` admits the tool that loads
+`mcp__<server>` admits every tool of that server, and the reduction counts that server's Tavily
+search and extract tools as Tavily's. `Skill` admits the tool that loads
 `/inquire`. A background run cannot answer a permission prompt, so a Tavily call it is still
 denied comes back as an errored result: it is not counted, and step 4 names it to the run in the
 next continuation. Where pass `0` exits with no events at all, it started no session to resume:

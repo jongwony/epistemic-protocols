@@ -16,7 +16,9 @@ the 75-minute bound — and wait for its completion notification.
 Start a background subagent through the Agent tool, with the brief as its whole prompt and no
 fork of this conversation, and keep the agent's name or id: the continuation addresses it. Wait
 for its completion notification; the result it delivers is the pass's report, and the
-notification's status is the pass's status, read as Phase 3 step 1 says.
+notification's status is the pass's status, read as Phase 3 step 1 says. The host enforces no
+bound on a background subagent; one that hangs is stopped by the user or the host's own
+task-stop.
 
 What a background subagent may call follows the host's subagent configuration, and a background
 subagent cannot answer a permission prompt. A Tavily call that was denied or unavailable appears
@@ -35,18 +37,22 @@ the subagent's transcript: a JSONL file under `~/.claude/projects/<project>/`, i
 Resolve each reported path, following a symlink, rather than constructing it, and append it to
 `/tmp/goal_research_${SUFFIX}/transcripts.txt`, one path per line — the launch's first, then each
 continuation's — as each pass ends. Where the host reported no path and none resolves, the record
-is not readable, which step 4 names to the run like any other failure; the report the host
-delivered is still the pass's report.
+is not readable, which this session reports (step 2); the report the host delivered is still the
+pass's report.
 
 The run's record is every transcript listed there, each once, in order — one file in the common
-case, several where a continuation wrote a different one:
+case, several where a continuation wrote a different one. Each is read whole as JSON lines, so
+transcripts never run together; one that cannot be read is named in `unread.txt` and adds
+nothing:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}
-ok=1; : > "$D/record.jsonl"
-awk '!seen[$0]++' "$D/transcripts.txt" > "$D/transcripts.once.txt" || ok=0
-while IFS= read -r t; do cat "$t" >> "$D/record.jsonl" || ok=0; done < "$D/transcripts.once.txt"
-[ "$ok" = 1 ] && [ -s "$D/record.jsonl" ] || rm -f "$D/record.jsonl"
+: > "$D/record.jsonl"; : > "$D/unread.txt"
+grep -v '^[[:space:]]*$' "$D/transcripts.txt" | awk '!seen[$0]++' > "$D/transcripts.once.txt"
+while IFS= read -r t; do
+  jq -c . "$t" > "$D/part.jsonl" && cat "$D/part.jsonl" >> "$D/record.jsonl" || echo "transcript $t" >> "$D/unread.txt"
+done < "$D/transcripts.once.txt"
+[ -s "$D/record.jsonl" ] || rm -f "$D/record.jsonl"
 ```
 
 Then run Phase 3 step 2's Claude message record reduction unchanged. A tool result the transcript

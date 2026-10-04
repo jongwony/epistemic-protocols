@@ -364,8 +364,22 @@ describe('goal-research runtime contract', () => {
     );
   });
 
-  // Bash blocks of a surface, fence lines anchored (indented blocks included).
-  const bashBlocks = (doc) => [...doc.matchAll(/^[ \t]*```bash\n([\s\S]*?)^[ \t]*```/gm)].map((m) => m[1]);
+  // Fenced blocks of a surface in one language ('' for a bare fence), indented blocks
+  // included. Fences are paired in order, so a closing fence never opens the next block.
+  const fenced = (doc, lang) => {
+    const blocks = [];
+    let open = null;
+    for (const line of doc.split('\n')) {
+      const fence = line.match(/^[ \t]*```(\S*)\s*$/);
+      if (fence && open === null) open = { lang: fence[1], lines: [] };
+      else if (fence) {
+        if (open.lang === lang) blocks.push(open.lines.map((l) => `${l}\n`).join(''));
+        open = null;
+      } else if (open !== null) open.lines.push(line);
+    }
+    return blocks;
+  };
+  const bashBlocks = (doc) => fenced(doc, 'bash');
 
   it('feeds jq only the JSON lines of a pass\'s events, and never claims the events file is pure JSONL', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
@@ -390,9 +404,7 @@ describe('goal-research runtime contract', () => {
 
   it('opens the brief every runner receives with its labelled goal condition and carries the research-target slot', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
-    // Line-anchored fences: an unanchored match can start at a closing fence and pair it
-    // with the next block's opening one.
-    const brief = [...skill.matchAll(/^```[^\n]*\n([\s\S]*?)^```/gm)].map((m) => m[1]).find((b) => b.includes('Research target:'));
+    const brief = fenced(skill, '').find((b) => b.includes('Research target:'));
     assert.ok(brief, 'the research brief must be present');
     assert.ok(brief.startsWith('Research goal condition: {goal condition}\n'), 'the brief states the goal condition under a label no goal command reads');
     assert.ok(!brief.includes('/goal'), 'the goal command is sent apart from the brief');
@@ -469,6 +481,7 @@ describe('goal-research runtime contract', () => {
       count: count === undefined ? undefined : Number(count),
       unreadable: unreadable === undefined ? undefined : Number(unreadable),
       unreadableIds: [...out.matchAll(/^ {2}call (\S+) \(/gm)].map((m) => m[1]).sort(),
+      notRead: [...out.matchAll(/^ {2}not read: (.+)$/gm)].map((m) => m[1]).sort(),
       returned: lines(returned).sort(),
       extracted: lines(extracted).sort(),
     };
@@ -614,7 +627,7 @@ describe('goal-research runtime contract', () => {
         fs.writeFileSync(p, toJsonl(entries));
         return p;
       });
-      const list = [paths[0], ...paths, ...extra];
+      const list = [...paths.slice(0, 1), ...paths, ...extra];
       const r = runSteps({ 'transcripts.txt': list.join('\n') + '\n' },
         [{ blocks: [pick(ref, 'record.jsonl', 'transcripts.txt'), tavilyLib(), claudeReducer(), listing()] }]);
       return parseList(r.out);
@@ -635,11 +648,31 @@ describe('goal-research runtime contract', () => {
     assert.deepEqual(r.extracted, ['https://a.example/1']);
   });
 
-  it('Claude Code: a listed transcript that cannot be read leaves no record, even beside one that can', needsJq, () => {
+  it('Claude Code: a transcript that cannot be read is named, and the readable ones stay in the record', needsJq, () => {
     const r = runClaudeCode([[prompt('brief'), use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] }))), say('msg_f', 'report')]],
       { extra: ['/nonexistent/agent-x.jsonl'] });
-    assert.ok(r.recordUnreadable);
-    assert.equal(r.count, undefined);
+    assert.equal(r.count, 1);
+    assert.deepEqual(r.notRead, ['transcript /nonexistent/agent-x.jsonl']);
+    const none = runClaudeCode([], { extra: ['/nonexistent/agent-x.jsonl'] });
+    assert.ok(none.recordUnreadable, 'with nothing readable there is no record');
+  });
+
+  it('Claude Code: blank lines in the list are skipped, and each transcript is read whole on its own', needsJq, () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-cc-'));
+    try {
+      const a = path.join(dir, 'a.jsonl');
+      const b = path.join(dir, 'b.jsonl');
+      fs.writeFileSync(a, toJsonl([use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] })))]).trimEnd());
+      fs.writeFileSync(b, toJsonl([use('t2', 'mcp__tavily__tavily_extract'), res('t2', textItems(JSON.stringify({ results: [{ url: 'https://b.example/2' }] })))]));
+      const cut = path.join(dir, 'cut.jsonl');
+      fs.writeFileSync(cut, '{"type":"user","mess');
+      const r = parseList(runSteps({ 'transcripts.txt': `\n${a}\n  \n${b}\n\n${cut}\n` },
+        [{ blocks: [pick(refText('host-claude-code.md'), 'record.jsonl', 'transcripts.txt'), tavilyLib(), claudeReducer(), listing()] }]).out);
+      assert.equal(r.count, 2, 'each transcript is read whole on its own');
+      assert.deepEqual(r.notRead, [`transcript ${cut}`], 'a transcript cut off mid-line is named, not mixed into the record');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   const runClaudeP = (passes) => runPasses(passes, claudeReducer());
@@ -732,7 +765,7 @@ describe('goal-research runtime contract', () => {
   };
   const passFiles = {
     'brief.txt': 'Research goal condition: the condition\nResearch target:\nq\n', 'goal.txt': '/goal the condition\n', 'continue.txt': 'gaps\n',
-    'thread.txt': 'th-123\n', 'session.txt': 'se-456\n',
+    'thread.txt': 'th-123\n', 'session.txt': 'se-456\n', 'tavily_server.txt': 'search\n',
   };
   const scaffold = () => pick(skillText(), 'run < "$IN"');
   const codexRun = () => pick(skillText(), 'run()', 'codex exec resume');
@@ -750,7 +783,7 @@ describe('goal-research runtime contract', () => {
 
   it('claude -p: the brief starts the session, the /goal turn resumes it alone, then continuations', () => {
     const seen = runPassBlock(claudePRun(), 'claude', [os.tmpdir(), os.tmpdir(), os.tmpdir()]).map((p) => p.events);
-    assert.match(seen[0], /^ARGS -p --session-id se-456 /, 'pass 0 starts the session with the id written once');
+    assert.match(seen[0], /^ARGS -p --session-id se-456 .*--allowedTools mcp__search Skill\n/, 'pass 0 starts the session with the id and the server written once');
     assert.match(seen[0], /Research target:/, 'pass 0 sends the brief');
     assert.match(seen[1], /^ARGS -p --resume se-456 /, 'the goal turn resumes the same session');
     assert.match(seen[1], /\n\/goal \S/, 'pass 1 sends /goal');
@@ -771,6 +804,55 @@ describe('goal-research runtime contract', () => {
     assert.match(seen[2], /^ARGS exec resume th-123 - /);
     assert.match(seen[2], /\ngaps\n/);
     assert.deepEqual(passes.map((p) => p.status), ['0\n', '0\n', '0\n'], 'each pass keeps the CLI exit code');
+  });
+
+  it('a pass whose working directory is gone still writes a failing status', () => {
+    const r = runSteps({ ...passFiles, 'cwd.txt': '/nonexistent/goal-research-cwd\n' },
+      [{ pass: 1, blocks: [codexRun(), '(', scaffold(), ')', 'true'] }], ['p1.status']);
+    assert.equal(r.collected['p1.status'], '1\n');
+  });
+
+  it('codex record: one unreadable pass is named, and the other passes stay in the record', needsJq, () => {
+    const r = parseList(runSteps({
+      'p0.events.jsonl': toJsonl([call('c1', 'tavily_search', json({ results: [{ url: 'https://first.example/1' }] })), done]),
+      'p1.events.jsonl': toJsonl([call('c1', 'tavily_search', json({ results: [{ url: 'https://second.example/2' }] }))]) + '{"type":"item.completed","item":{"id":"c2"\n',
+    }, [{ blocks: ['mkdir "/tmp/goal_research_${SUFFIX}/p2.events.jsonl"', passRecord(), tavilyLib(), codexReducer(), listing()] }]).out);
+    assert.equal(r.count, 1, 'pass 0\'s call stays');
+    assert.deepEqual(r.returned, ['https://first.example/1']);
+    assert.deepEqual(r.notRead, ['pass 1', 'pass 2'], 'a truncated pass and a pass file that cannot be read are each named');
+  });
+
+  it('codex: a thread.started event without a thread id did not start a session', needsJq, () => {
+    const take = pick(skillText(), 'thread.started', 'thread.txt');
+    const r = runSteps({ 'p0.events.jsonl': toJsonl([{ type: 'thread.started' }, done]) }, [{ blocks: [take] }], ['thread.txt']);
+    assert.equal(r.out.trim(), 'launch did not start a session');
+    assert.equal(r.collected['thread.txt'], '', 'never the string null');
+  });
+
+  it('Claude record: structured output is tied to a call only where the entry carries one result', needsJq, () => {
+    const r = runClaudeP([[
+      { type: 'assistant', message: { id: 'm1', content: [{ type: 'tool_use', id: 't1', name: 'mcp__tavily__tavily_search', input: {} }, { type: 'tool_use', id: 't2', name: 'mcp__tavily__tavily_search', input: {} }] } },
+      { type: 'user', tool_use_result: { structuredContent: { results: [{ url: 'https://whose.example/s' }] } },
+        message: { content: [
+          { type: 'tool_result', tool_use_id: 't1', is_error: null, content: textItems(JSON.stringify({ results: [{ url: 'https://one.example/1' }] })) },
+          { type: 'tool_result', tool_use_id: 't2', is_error: null, content: textItems(JSON.stringify({ results: [{ url: 'https://two.example/2' }] })) }] } },
+      { type: 'result', subtype: 'success', is_error: false, result: 'report' }]]);
+    assert.equal(r.count, 2);
+    assert.deepEqual(r.returned, ['https://one.example/1', 'https://two.example/2'], 'each call keeps its own results');
+  });
+
+  it('a Tavily server the launch recorded under another name counts; an unrelated server does not', needsJq, () => {
+    const runNamed = (files, reducer) => parseList(runSteps({ 'tavily_server.txt': 'search\n', ...files }, [{ blocks: [passRecord(), tavilyLib(), reducer, listing()] }]).out);
+    const codex = runNamed({ 'p0.events.jsonl': toJsonl([
+      call('c1', 'tavily_search', json({ results: [{ url: 'https://named.example/n' }] }), { server: 'search' }),
+      call('c2', 'tavily_search', json({ results: [{ url: 'https://other.example/o' }] }), { server: 'other' }), done]) }, codexReducer());
+    assert.deepEqual(codex.returned, ['https://named.example/n']);
+    const claude = runNamed({ 'p0.events.jsonl': toJsonl([
+      use('t1', 'mcp__search__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://named.example/n' }] }))),
+      use('t2', 'mcp__other__tavily_search'), res('t2', textItems(JSON.stringify({ results: [{ url: 'https://other.example/o' }] })))]) }, claudeReducer());
+    assert.deepEqual(claude.returned, ['https://named.example/n']);
+    const unnamed = runCodex([[call('c1', 'tavily_search', json({ results: [{ url: 'https://named.example/n' }] }), { server: 'search' }), done]]);
+    assert.equal(unnamed.count, 0, 'without the recorded name the server is not Tavily\'s');
   });
 
   it('every resumed pass runs from the working directory pass 0 recorded (claude -p and codex)', () => {
