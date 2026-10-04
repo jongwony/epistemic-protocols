@@ -31,17 +31,21 @@ loop judges it in this session. Phase 4 shows the goal as not confirmed on this 
 A background subagent's output file, as the host reports it on launch or completion, resolves to
 the subagent's transcript: a JSONL file under `~/.claude/projects/<project>/`, in a
 `subagents/agent-<id>.jsonl` path (one observed form nests it under the parent session's
-directory). Resolve each reported path, following a symlink, rather than constructing it. Where
-the host reported no path and none resolves, the record is not readable and Phase 3's
-not-readable outcome applies.
+directory). Resolve each reported path, following a symlink, rather than constructing it, and
+append it to `/tmp/goal_research_${SUFFIX}/transcripts.txt`, one path per line — the launch's
+first, then each continuation's — as each pass completes. Where the host reported no path and
+none resolves, the record is not readable and the next section's not-readable outcome applies.
 
-The run's record is every transcript this run wrote — the launch's, then each continuation's
-where it wrote a different one — each listed once, in order:
+The run's record is every transcript listed there, each once, in order — one file in the common
+case, several where a continuation wrote a different one:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}
-cat "{launch transcript}" {"each further transcript", in order} > "$D/record.jsonl"
-printf '%s\n' "$?" > "$D/record.status"
+st=0; : > "$D/record.jsonl"
+awk '!seen[$0]++' "$D/transcripts.txt" > "$D/transcripts.once.txt" || st=1
+while IFS= read -r t; do cat "$t" >> "$D/record.jsonl" || st=1; done < "$D/transcripts.once.txt"
+[ -s "$D/record.jsonl" ] || st=1
+printf '%s\n' "$st" > "$D/record.status"
 ```
 
 Then run Phase 3 step 2's Claude message record reduction unchanged. A tool result the transcript
@@ -82,6 +86,13 @@ then echo "pass ${PASS}: returned"
 else : > "$D/p${PASS}.report.txt"; echo "pass ${PASS}: failed"
 fi
 ```
+
+Where the record is not readable, the report comes from the host's completion result instead:
+the subagent's returned final message, as delivered, written unchanged to
+`/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`. The pass returned when its status is `0` and
+that message is non-empty; the Source Check says the report was taken from the host's completion
+message, the record was not readable, and the checks have not run. Where the record is readable,
+it stays the source and the delivered message is not copied.
 
 ## Continuation
 

@@ -400,7 +400,8 @@ describe('goal-research runtime contract', () => {
     // with the next block's opening one.
     const brief = [...skill.matchAll(/^```[^\n]*\n([\s\S]*?)^```/gm)].map((m) => m[1]).find((b) => b.includes('Research target:'));
     assert.ok(brief, 'the research brief must be present');
-    assert.ok(brief.startsWith('{goal}\n'), 'the brief begins with the route\'s goal line');
+    assert.ok(brief.startsWith('Goal: {goal condition}\n'), 'the brief states the goal condition as text on every route');
+    assert.ok(!brief.includes('/goal'), 'the goal command is sent apart from the brief');
     assert.ok(brief.includes('{research_question}'), 'the research question is slotted in verbatim');
     assert.ok(brief.includes('{inquire}'), 'the runner-specific /inquire invocation is slotted');
   });
@@ -487,6 +488,7 @@ describe('goal-research runtime contract', () => {
   const claudeReducer = () => pick(skillText(), 'tool_use', 'calls.jsonl');
   const listing = () => pick(skillText(), 'not mechanically readable');
   const assemble = () => pick(skillText(), 'trace.txt');
+  const tavilyLib = () => pick(skillText(), 'def tavily_result');
 
   // Codex event shapes as codex-cli 0.160.0 emits them for Tavily MCP calls.
   const json = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] });
@@ -510,7 +512,7 @@ describe('goal-research runtime contract', () => {
       files[`p${k}.status`] = `${status}\n`;
     });
     const steps = passes.map((_, k) => ({ pass: k, blocks: [outcome] }));
-    steps.push({ blocks: [assemble(), passRecord(), reducer, listing()] });
+    steps.push({ blocks: [assemble(), passRecord(), tavilyLib(), reducer, listing()] });
     const r = runSteps(files, steps);
     return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report, trace: r.trace };
   };
@@ -551,7 +553,7 @@ describe('goal-research runtime contract', () => {
     ] }]);
     assert.equal(r.count, 4);
     assert.equal(r.unreadable, 3, 'formatted text, a JSON error body, and truncated JSON are not mechanically readable');
-    assert.deepEqual(r.unreadableIds, ['c2', 'c3', 'c4']);
+    assert.deepEqual(r.unreadableIds, ['0:c2', '0:c3', '0:c4'], 'a codex call is named by its pass and item id');
     assert.deepEqual(r.returned, [...verbatim].sort(), 'no normalization: case, parentheses and non-ASCII paths kept as returned');
     assert.deepEqual(r.extracted, []);
   });
@@ -606,22 +608,22 @@ describe('goal-research runtime contract', () => {
 
   it('(d): a reduction that cannot read its record says so, and reports no count', needsJq, () => {
     // record missing (no pass files), and a truncated last line
-    const missing = runSteps({}, [{ blocks: [codexReducer(), listing()] }]);
+    const missing = runSteps({}, [{ blocks: [passRecord(), tavilyLib(), codexReducer(), listing()] }]);
     const m = parseList(missing.out);
     assert.ok(m.failed, 'a missing record is a failed reduction');
     assert.equal(m.count, undefined, 'no count is printed');
     const truncated = runSteps({
       'p0.json.jsonl': toJsonl([call('c1', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] }))]) + '{"type":"item.completed","item":{"id":"c2"',
-    }, [{ blocks: [passRecord(), codexReducer(), listing()] }]);
+    }, [{ blocks: [passRecord(), tavilyLib(), codexReducer(), listing()] }]);
     const t = parseList(truncated.out);
     assert.ok(t.failed, 'a line that does not parse fails the reduction');
     assert.equal(t.count, undefined);
     const claudeTruncated = runSteps({
       'record.jsonl': '{"type":"assistant","message":{"content":[]}}\n{"type":"user","mess',
       'record.status': '0\n',
-    }, [{ blocks: [claudeReducer(), listing()] }]);
+    }, [{ blocks: [tavilyLib(), claudeReducer(), listing()] }]);
     assert.ok(parseList(claudeTruncated.out).failed);
-    const recordFailed = runSteps({ 'record.jsonl': '', 'record.status': '1\n' }, [{ blocks: [claudeReducer(), listing()] }]);
+    const recordFailed = runSteps({ 'record.jsonl': '', 'record.status': '1\n' }, [{ blocks: [tavilyLib(), claudeReducer(), listing()] }]);
     assert.ok(parseList(recordFailed.out).failed, 'a record that failed to write is never reduced to zero calls');
   });
 
@@ -654,13 +656,14 @@ describe('goal-research runtime contract', () => {
         fs.writeFileSync(p, toJsonl(entries));
         return p;
       });
-      const build = pick(ref, 'record.status', 'cat ').replace(/cat "\{launch transcript\}" \{[^}]*\}/, `cat ${paths.map((p) => `"${p}"`).join(' ')}`);
-      assert.ok(build.includes(paths[0]), 'the record block binds the transcripts literally');
-      const r = runSteps({ 'p0.status': `${hostStatus}\n` }, [
-        { blocks: [build, pick(ref, 'pass ${PASS}: returned')] },
-        { blocks: [claudeReducer(), listing()] },
+      // The record block runs as written: it reads the paths listed in transcripts.txt.
+      const build = pick(ref, 'record.status', 'transcripts.txt');
+      const r = runSteps({ 'p0.status': `${hostStatus}\n`, 'transcripts.txt': [...paths, paths[0]].join('\n') + '\n' }, [
+        { blocks: [build, 'cat "/tmp/goal_research_${SUFFIX}/record.status"'] },
+        { blocks: [pick(ref, 'pass ${PASS}: returned')] },
+        { blocks: [tavilyLib(), claudeReducer(), listing()] },
       ]);
-      return { ...parseList(r.outs[1]), pass: r.outs[0].trim(), report: r.report };
+      return { ...parseList(r.outs[2]), recordStatus: r.outs[0].trim(), pass: r.outs[1].trim(), report: r.report };
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -810,7 +813,7 @@ describe('goal-research runtime contract', () => {
     };
     assert.deepEqual(run([[0, 3]]), ['continue'], 'codex and Claude Code evaluate from pass 0');
     assert.deepEqual(run([[1, 3]]), ['continue'], 'claude -p evaluates from pass 1, the goal turn');
-    assert.deepEqual(run([[1, 3], [2, 2], [3, 2]]), ['continue', 'continue', 'stop: no progress']);
+    assert.deepEqual(run([[1, 3], [2, 2], [3, 2]]), ['continue', 'continue', 'stop: gaps did not shrink']);
     assert.deepEqual(run([[0, 2], [1, 0]]), ['continue', 'stop: goal met']);
     assert.deepEqual(run([[0, 0]]), ['stop: goal met']);
   });
@@ -840,6 +843,77 @@ describe('goal-research runtime contract', () => {
       }
     } finally {
       for (const d of [bin, here, elsewhere]) fs.rmSync(d, { recursive: true, force: true });
+    }
+  });
+
+  // ---- round 6: call identity, orphan results, MCP error flags, record binding, codex goal turn ----
+
+  it('codex: item ids restart in every pass, so a call is identified by its pass and item id', needsJq, () => {
+    const r = runCodex([
+      { events: [call('item_1', 'tavily_search', json({ results: [{ url: 'https://first.example/1' }] })), message('item_2', 'full report'), done] },
+      { events: [call('item_1', 'tavily_extract', json({ results: [{ url: 'https://second.example/2' }] })), message('item_2', 'goal turn'), done] },
+    ]);
+    assert.equal(r.count, 2, 'the same item id in two passes is two calls');
+    assert.deepEqual(r.extracted, ['https://second.example/2'], 'the later pass\'s extract is listed');
+  });
+
+  it('Claude record: a tool_result with no matching tool_use is skipped, not a reduction failure', needsJq, () => {
+    const r = runClaudeCode([[prompt('brief'),
+      res('orphan', textItems(JSON.stringify({ results: [{ url: 'https://orphan.example/o' }] }))),
+      use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] }))),
+      say('msg_f', 'report')]]);
+    assert.equal(r.failed, false, 'the reduction succeeds');
+    assert.equal(r.count, 1);
+    assert.deepEqual(r.returned, ['https://a.example/1']);
+  });
+
+  it('a Tavily call whose MCP result is flagged as an error is not a successful call', needsJq, () => {
+    // codex 0.160.0 maps an MCP result with isError to status "failed", keeping the result.
+    const codex = runCodex([{ events: [
+      call('c1', 'tavily_search', json({ results: [{ url: 'https://flagged.example/f' }] }), { status: 'failed' }),
+      message('m1', 'report'), done] }]);
+    assert.equal(codex.count, 0);
+    const cc = runClaudeCode([[prompt('brief'),
+      use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://flagged.example/f' }] })), true),
+      say('msg_f', 'report')]]);
+    assert.equal(cc.count, 0);
+  });
+
+  it('Claude Code: the record block runs as written on the common single transcript', needsJq, () => {
+    const r = runClaudeCode([[prompt('brief'), say('msg_f', 'report')]]);
+    assert.equal(r.recordStatus, '0');
+    assert.equal(r.pass, 'pass 0: returned');
+  });
+
+  it('codex: the brief launches the session, the /goal turn follows it alone by resume, then continuations', () => {
+    const bin = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-bin-'));
+    try {
+      fs.writeFileSync(path.join(bin, 'codex'), '#!/bin/sh\necho "ARGS $*"\ncat\n', { mode: 0o755 });
+      const launch = pick(skillText(), 'codex exec --json', 'brief.txt');
+      const later = pick(skillText(), 'codex exec resume', 'goal.txt');
+      const suffix = crypto.randomBytes(4).toString('hex');
+      const D = `/tmp/goal_research_${suffix}`;
+      fs.mkdirSync(D, { recursive: true });
+      try {
+        fs.writeFileSync(path.join(D, 'brief.txt'), 'Goal: the condition\nResearch target:\nq\n');
+        fs.writeFileSync(path.join(D, 'continue.txt'), 'gaps\n');
+        const seen = [[0, launch], [1, later], [2, later]].map(([k, block]) => {
+          execFileSync('bash', ['-c', block], { env: { ...process.env, SUFFIX: suffix, PASS: String(k), PATH: `${bin}:${process.env.PATH}` } });
+          return fs.readFileSync(path.join(D, `p${k}.events.jsonl`), 'utf8');
+        });
+        assert.match(seen[0], /^ARGS exec --json /, 'pass 0 launches');
+        assert.match(seen[0], /Research target:/);
+        assert.ok(!seen[0].includes('/goal'), 'the brief carries no /goal');
+        assert.match(seen[1], /^ARGS exec resume /, 'the goal turn resumes the same session');
+        assert.match(seen[1], /\n\/goal \S/);
+        assert.ok(!seen[1].includes('Research target:'), 'the goal turn carries the condition alone');
+        assert.match(seen[2], /^ARGS exec resume /);
+        assert.match(seen[2], /\ngaps\n/);
+      } finally {
+        fs.rmSync(D, { recursive: true, force: true });
+      }
+    } finally {
+      fs.rmSync(bin, { recursive: true, force: true });
     }
   });
 });

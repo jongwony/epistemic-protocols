@@ -11,7 +11,9 @@ other generated value are substituted literally into each block.
 Resolve `claude` on PATH and its version, and check the installed flags with `claude --help`.
 The run reaches Tavily through the CLI's own MCP configuration: `claude mcp list` must show a
 Tavily server as connected, and its name is what the launch allows below. Where `claude` or a
-connected Tavily server is missing, surface the missing capability and stop. Keep `/inquire`
+connected Tavily server is missing, surface the missing capability and stop. The run also needs
+the `/inquire` skill: `claude plugin list` must show the `aitesis` plugin installed and enabled
+for this CLI; where it does not, surface the missing capability and stop. Keep `/inquire`
 discoverable: `--bare` skips automatic skill discovery and `--disable-slash-commands` removes
 skills, so neither is passed.
 
