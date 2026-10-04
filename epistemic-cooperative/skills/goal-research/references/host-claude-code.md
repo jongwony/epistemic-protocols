@@ -1,7 +1,8 @@
 # Claude Code Host
 
-Load when the host driving this skill is Claude Code: at Phase 2 for either runner's launch, and
-at Phase 3 for the `claude` runner's pass outcome, tool record, and continuation. `${SUFFIX}`,
+Load at Phase 2 whenever the host driving this skill is Claude Code, whichever runner is
+designated: it carries the background binding for either runner, and, for the `claude` runner,
+the launch, pass outcome, tool record, and continuation. `${SUFFIX}`,
 `${PASS}`, and every other generated value are substituted literally into each block.
 
 ## Codex runner launch
@@ -13,10 +14,17 @@ the 75-minute envelope — and wait for its completion notification.
 ## Claude runner launch
 
 Start a background subagent through the Agent tool, with the brief as its whole prompt and no
-fork of this conversation, and keep the agent's name or id: the continuation addresses it.
+fork of this conversation, and keep the agent's name or id: the continuation addresses it. The host
+sets no timeout on a background subagent, so the 75-minute envelope is kept here. With each pass,
+start a timer whose completion notification marks the envelope — `sleep 4500` through
+`Bash(run_in_background: true, timeout: 4500000)`. Where the timer's notification arrives first,
+stop the subagent with the host's task-stop capability, write `1` as the pass's status, and read
+the pass as failed; where the subagent's arrives first, stop the timer.
 
-Before launch, confirm that Tavily's search and extract tools are among this session's own
-tools. What a background subagent may call follows the host's subagent configuration, and a
+Before launch, confirm that the run can reach `/inquire`: `claude plugin list` must show the
+`aitesis` plugin installed and enabled for this session; where it does not, surface the missing
+capability and stop. Confirm too that Tavily's search and extract tools are among this session's
+own tools. What a background subagent may call follows the host's subagent configuration, and a
 background subagent cannot answer a permission prompt; neither was verified for Tavily here, so
 availability is settled by the record rather than assumed: a Tavily call that was denied or
 unavailable appears in the record as an errored result or not at all, and the run then reads as
@@ -55,22 +63,31 @@ not mechanically readable; read it in step 3.
 
 ## Pass outcome
 
-A pass's report is the subagent's result as the host delivers it to this session — its final
-message, or the message it hands back — and the pass returned when the host reports the subagent
-completed and that result is non-empty. When the host's completion notification for the pass
-arrives, write its status alone — `0` where it reports the subagent completed, `1` otherwise — to
-`/tmp/goal_research_${SUFFIX}/p${PASS}.status`, and the delivered result, unchanged, to
-`/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`. Then read the pass:
+The pass's success is the host's: when its completion notification arrives, write its status
+alone — `0` where it reports the subagent completed, `1` otherwise — to
+`/tmp/goal_research_${SUFFIX}/p${PASS}.status`. Its report is taken by a command, immediately,
+from the terminal entry of the transcript that pass wrote — the path the Record section below
+appended last to `transcripts.txt`, so append it first: the message the subagent handed back
+through `SubagentHandback` where the run ended that way, otherwise the text of its final assistant
+message. Nothing is retyped:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
+jq -rs '[.[] | select(.type == "assistant")] as $a | ($a | last) as $l
+  | (if $l.message.id? == null then [$l] else [$a[] | select(.message.id == $l.message.id)] end)
+  | [.[].message.content[]?] as $c
+  | ([$c[] | select(.type == "tool_use" and .name == "SubagentHandback") | .input.message | strings] | last)
+    // ([$c[] | select(.type == "text") | .text] | join("\n"))' \
+  "$(tail -n 1 "$D/transcripts.txt")" > "$P.report.txt"
 if [ "$(cat "$P.status" 2>/dev/null)" = 0 ] && grep -q '[^[:space:]]' "$P.report.txt" 2>/dev/null
 then echo "pass ${PASS}: returned"
 else : > "$P.report.txt"; echo "pass ${PASS}: failed"
 fi
 ```
 
-The transcript is read only for the tool record above, never for the pass outcome.
+Where the transcript is not readable, write the subagent's result as the host delivered it to
+`p${PASS}.report.txt` instead, and read the pass with the same `if` block; the Source Check marks
+the report as taken from the host's completion message, and the record's checks do not run.
 
 ## Continuation
 

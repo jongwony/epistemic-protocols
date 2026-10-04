@@ -37,7 +37,7 @@ Read the runner designation from the request's words as well as its arguments. A
 | Runner | Route | Precondition |
 |---|---|---|
 | `claude` | A background Claude run with its own context, running `/inquire` with Tavily search and extract | The host can start such a run whose tools include Tavily search and Tavily extract, and the `/inquire` skill |
-| `codex` | A background `codex exec` session running `$inquire` with Tavily | `codex` on PATH; Tavily is reached through Codex's own MCP configuration, and its absence surfaces at the zero-call outcome |
+| `codex` | A background `codex exec` session running `$inquire` with Tavily | `codex` on PATH; a Tavily server enabled in Codex's own MCP configuration; the `aitesis` plugin installed and enabled for `$inquire` |
 
 Record the runner actually used. A precondition found missing before launch is surfaced with the missing capability, and the skill stops there.
 
@@ -50,7 +50,24 @@ The research question is passed unchanged into the research brief — paraphrasi
 
 ## Phase 2: Launch (Background)
 
-Generate a unique suffix for this run, `SUFFIX=$(openssl rand -hex 4)`, and create its temp directory, `mkdir -p /tmp/goal_research_${SUFFIX}`. Every file this skill writes lives there. The run proceeds in **passes**: the launch is pass `0`, and each later turn of the same run — a goal turn where the route sends one (codex, `claude -p`), then each continuation in Phase 3 — is the next pass. Shell state does not persist between separate command calls, so substitute `${SUFFIX}`, the current `${PASS}`, and every other value generated here literally into each later block.
+Create this run's temp directory, exclusive to it and private, and take its suffix: `D=$(mktemp -d /tmp/goal_research_XXXXXXXX)`, `SUFFIX=${D#/tmp/goal_research_}`. Every file this skill writes lives there. The run proceeds in **passes**: the launch is pass `0`, and each later turn of the same run — a goal turn where the route sends one (codex, `claude -p`), then each continuation in Phase 3 — is the next pass. Shell state does not persist between separate command calls, so substitute `${SUFFIX}`, the current `${PASS}`, and every other value generated here literally into each later block.
+
+Read the driving host's reference now, whichever runner is designated — [Claude Code](references/host-claude-code.md) or [Codex](references/host-codex.md); another host supplies the same bindings itself. It carries what depends on the host: how a pass is run in the background with its 75-minute envelope and how its completion arrives, and, for the `claude` runner, the launch, each pass's outcome, where the run's record is, and how the same run is continued.
+
+Both CLI routes — the `codex` runner, and `claude -p` on a Codex host — run every pass through one scaffold: it records pass `0`'s working directory and runs every later pass from it, routes the pass's input (the brief at pass `0`, the goal turn at pass `1`, the continuation message after), and keeps the pass's exit status. The route supplies `run`, the command for the current pass, defined in the same command call just before the scaffold:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
+[ "${PASS}" = 0 ] && pwd > "$D/cwd.txt"
+cd "$(cat "$D/cwd.txt")" || exit 1
+case "${PASS}" in
+  0) IN=$D/brief.txt ;;
+  1) IN=$D/goal.txt ;;
+  *) IN=$D/continue.txt ;;
+esac
+run < "$IN" > "$P.events.jsonl" 2> "$P.warn.txt"
+printf '%s\n' "$?" > "$P.status"
+```
 
 ### Research brief
 
@@ -93,20 +110,20 @@ Report {inquire}'s record as it stands at completion, refined as follows:
 
 ### Runner: claude
 
-The host is the environment driving this skill, not another user choice; `claude` stays the default on every host. Read only that host's reference, here, before determining availability; it carries the launch, each pass's outcome, where the run's record is, and how the same run is continued:
+The host is the environment driving this skill, not another user choice; `claude` stays the default on every host. The host's reference, read at the start of this phase, carries this runner's preconditions, launch, each pass's outcome, where the run's record is, and how the same run is continued:
 
 | Host | `claude` runner | Reference |
 |---|---|---|
 | Claude Code | A background subagent | [Claude Code](references/host-claude-code.md) |
 | Codex | A background `claude -p` process | [Codex](references/host-codex.md) |
 
-Other hosts may supply the same capability: a background Claude run with its own context, whose tool calls are recorded where this session can read them, and which this session can continue. Before launch, confirm that Tavily search and Tavily extract are available to that run; where either is missing, surface the missing capability and stop. The run receives the brief as its whole task, not this conversation's history. Wait for the host's completion notification — do not poll.
+Other hosts may supply the same capability: a background Claude run with its own context, whose tool calls are recorded where this session can read them, and which this session can continue. Before launch, confirm that Tavily search and Tavily extract, and the `/inquire` skill, are available to that run; where any is missing, surface the missing capability and stop. The run receives the brief as its whole task, not this conversation's history. Wait for the host's completion notification — do not poll.
 
 ### Runner: codex
 
-Check `which codex 2>/dev/null`. If Codex CLI is not found, expose the missing-binary error and stop. Failure modes are surfaced as raw errors, not handled internally.
+Check `which codex 2>/dev/null`. If Codex CLI is not found, expose the missing-binary error and stop. Failure modes are surfaced as raw errors, not handled internally. The run reaches Tavily through Codex's own MCP configuration: `codex mcp list` must show a Tavily server enabled. It needs the `$inquire` skill: `codex plugin list` must show the `aitesis` plugin installed and enabled. Where either is missing, surface the missing capability and stop.
 
-Every pass runs the block below through the host's background execution facility, with a 75-minute envelope (on Claude Code, the binding is in [Claude Code](references/host-claude-code.md)). Pass `0` launches the session with the brief and records its working directory; pass `1` is the goal turn — `/goal` followed by the goal condition, alone — sent as soon as pass `0` has returned, so the goal engages with the research target already in the session's context; each pass after it sends the continuation message from Phase 3. Every later pass resumes the same session by the thread id in pass `0`'s `thread.started` event, from the working directory pass `0` recorded. `--color never` + splitting the
+Every pass runs the route's `run` with the scaffold above, through the host's background execution facility with a 75-minute envelope, as the host's reference binds it. Pass `0` launches the session with the brief and records its working directory; pass `1` is the goal turn — `/goal` followed by the goal condition, alone — sent as soon as pass `0` has returned, so the goal engages with the research target already in the session's context; each pass after it sends the continuation message from Phase 3. Every later pass resumes the same session by the thread id in pass `0`'s `thread.started` event, from the working directory pass `0` recorded. `--color never` + splitting the
 streams (stdout to the pass's events file, `2>` to its warn file) keeps stderr
 warnings out of the events file. Stdout is **not** guaranteed to be pure JSONL —
 codex may still print a plain notice line there (e.g. `Codex autostart is
@@ -114,21 +131,15 @@ disabled.`), so every extraction below filters to lines starting with `{` before
 parsing. The status file keeps the pass's exit code after the launching shell ends. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
 
 ```bash
-D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
-[ "${PASS}" = 0 ] && pwd > "$D/cwd.txt"
-cd "$(cat "$D/cwd.txt")" || exit 1
-case "${PASS}" in
-  0) codex exec --json --color never --skip-git-repo-check -m gpt-6-astra \
-       --config model_reasoning_effort="{effort}" \
-       < "$D/brief.txt" > "$P.events.jsonl" 2> "$P.warn.txt" ;;
-  1) codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
-       --config model_reasoning_effort="{effort}" \
-       < "$D/goal.txt" > "$P.events.jsonl" 2> "$P.warn.txt" ;;
-  *) codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
-       --config model_reasoning_effort="{effort}" \
-       < "$D/continue.txt" > "$P.events.jsonl" 2> "$P.warn.txt" ;;
-esac
-printf '%s\n' "$?" > "$P.status"
+run() {
+  if [ "${PASS}" = 0 ]; then
+    codex exec --json --color never --skip-git-repo-check -m gpt-6-astra \
+      --config model_reasoning_effort="{effort}"
+  else
+    codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
+      --config model_reasoning_effort="{effort}"
+  fi
+}
 ```
 
 `codex exec resume` takes no `--color` option; its stdout is filtered by `grep '^{'` like the launch's. Codex's JSON events carry no event saying whether the goal engaged, so Phase 4 shows the goal as not confirmed on this route.
@@ -137,7 +148,7 @@ The launch persists its session so later passes can continue the same one; `--ep
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-loop`'s codex source does not apply here.
 
-That 75-minute background timeout is the delegated Codex session envelope, for the launch and for each continuation.
+That 75-minute envelope is the delegated Codex session envelope, for the launch and for each continuation.
 
 **Do NOT add a dotted `--config mcp_servers.<name>.<key>=<value>` override here.**
 A dotted override under `mcp_servers` REPLACES that server's whole table instead
@@ -153,7 +164,7 @@ option either.
 
 ## Phase 3: Collection, Reading, and Continuation
 
-Wait for the background task completion notification — do not poll or sleep. Step 1 runs after every pass on every route, pass `0` included. Steps 2–4 start at the route's **first evaluated pass**: pass `1` where the route sends a goal turn after the launch (codex, `claude -p`), pass `0` on Claude Code; no gap count is recorded for a pass before it. Each pass's outcome is read from that pass alone first; only a pass that returned is read further, over the whole run so far.
+Wait for each pass to complete as the host's reference binds it — its background completion notification, or the return of its bounded foreground call; do not poll, or sleep in the foreground. Steps 1 and 2 run after every pass on every route, pass `0` included, so an infrastructure stop in step 2 ends the run before a goal turn is sent. Steps 3–4 start at the route's **first evaluated pass**: pass `1` where the route sends a goal turn after the launch (codex, `claude -p`), pass `0` on Claude Code; no gap count is recorded for a pass before it. Each pass's outcome is read from that pass alone first; only a pass that returned is read further, over the whole run so far.
 
 ### 1. The pass outcome
 
@@ -198,7 +209,7 @@ done
 
 The machine reads the run's own record of its tool calls, never the run's description of them, and only what is unambiguous there; where it cannot read something, it says so rather than guessing.
 
-- **A successful Tavily call** completed without error — a call whose MCP result is flagged as an error is not one: codex reports it as `status: "failed"` even where a result is present, a Claude record as `is_error` — and is named exactly as Tavily's search or extract tool — `tavily_search`, `tavily-search`, `tavily_extract`, or `tavily-extract`, after any server prefix the host adds. Other Tavily tools (research, crawl, map) and every other tool are not counted.
+- **A successful Tavily call** completed without error — a call whose MCP result is flagged as an error is not one: codex reports it as `status: "failed"` even where a result is present, a Claude record as `is_error` — and is a Tavily server's search or extract tool: the server's name names Tavily, and the tool is named exactly `tavily_search`, `tavily-search`, `tavily_extract`, or `tavily-extract`. A codex record names the server in `server`; a Claude record names it inside the tool name, `mcp__<server>__<tool>`, where the server segment may carry a plugin or connector prefix (`plugin_<plugin>_<server>`, `claude_ai_<Name>`). Other Tavily tools (research, crawl, map), a tool of that name on a server that is not Tavily's, and every other tool are not counted.
 - **What it returned** is read only from a JSON response carrying a `results` array: each entry's `url`, listed verbatim. An extract call's listed URLs are what it extracted; its failed URLs are not in `results`. What a call asked for — its arguments, a URL inside a query — is never read.
 - **Not mechanically readable**: a successful call whose response is not JSON with a `results` array — formatted text, an error body, a truncated or stubbed result. It lists nothing; it is counted and named by call id, and this session reads its raw record in step 3.
 
@@ -219,6 +230,8 @@ Where the host keeps the record itself, its reference gives the block that write
 ```bash
 D=/tmp/goal_research_${SUFFIX}
 cat > "$D/tavily.jq" <<'JQ'
+def is_tavily($server; $tool):
+  ($server | test("tavily"; "i")) and ($tool | test("^tavily(_|-)(search|extract)$"));
 def tavily_result:
   ([.structured, (.texts[]? | try fromjson catch empty)]
    | map(select(type == "object" and (.results | type) == "array"))) as $json
@@ -234,7 +247,7 @@ There are two record shapes, each with one reduction:
   D=/tmp/goal_research_${SUFFIX}
   [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -L "$D" -cs 'include "tavily";
     [ .[] | select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
-             and (.item.tool // "" | test("^tavily(_|-)(search|extract)$")))
+             and is_tavily(.item.server // ""; .item.tool // ""))
       | {id: "\(.pass):\(.item.id)", tool: .item.tool, structured: .item.result.structured_content?,
          texts: [.item.result.content[]? | select(.type=="text") | .text]}
       | tavily_result ]
@@ -243,16 +256,19 @@ There are two record shapes, each with one reduction:
   printf '%s\n' "$?" > "$D/reduce.status"
   ```
 
-- **Claude message record** (the `claude` runner, on any host): assistant entries carry `{type: "tool_use", id, name}` items and user entries carry `{type: "tool_result", tool_use_id, is_error, content}` items; a call is the pair joined by id; a `tool_use` with no result did not complete, and a `tool_result` with no `tool_use` names no tool and is skipped.
+- **Claude message record** (the `claude` runner, on any host): assistant entries carry `{type: "tool_use", id, name}` items and user entries carry `{type: "tool_result", tool_use_id, is_error, content}` items, with the tool's structured output beside them where the host keeps it (`tool_use_result.structuredContent` in `claude -p` output, `toolUseResult.structuredContent` in a Claude Code transcript), read before the text content; a call is the pair joined by id; a `tool_use` with no result did not complete, and a `tool_result` with no `tool_use` names no tool and is skipped.
 
   ```bash
   D=/tmp/goal_research_${SUFFIX}
   [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -L "$D" -cs 'include "tavily";
     ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | {key: .id, value: .name}] | from_entries) as $names
-    | [ .[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result" and .is_error != true)
-        | (($names[.tool_use_id // ""] // "") | split("__") | last // "") as $tool
-        | select($tool | test("^tavily(_|-)(search|extract)$"))
-        | {id: .tool_use_id, tool: $tool, structured: null,
+    | [ .[] | select(.type=="user") | . as $entry
+        | ([$entry.tool_use_result, $entry.toolUseResult] | map(objects | .structuredContent) | map(select(. != null)) | first) as $sc
+        | .message.content[]? | select(.type=="tool_result" and .is_error != true)
+        | (($names[.tool_use_id // ""] // "") | split("__")) as $parts
+        | ($parts | last // "") as $tool
+        | select(($parts | length) >= 3 and $parts[0] == "mcp" and is_tavily($parts[1:-1] | join("__"); $tool))
+        | {id: .tool_use_id, tool: $tool, structured: $sc,
            texts: [.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end]}
         | tavily_result ]
     | unique_by(.id) | .[]
@@ -260,7 +276,7 @@ There are two record shapes, each with one reduction:
   printf '%s\n' "$?" > "$D/reduce.status"
   ```
 
-Where the host offers no readable record of a `claude` run, nothing below is mechanical: the Source Check says the record was not readable and the checks have not run, and every source and strength label stands as the runner reported it, unchecked.
+Where the host offers no readable record of a `claude` run, nothing below is mechanical and every source and strength label stands as the runner reported it, unchecked; the gate below ends the run there.
 
 The record is the Tavily route the brief directs. A page the run fetched another way — a host's built-in web search, a shell `curl` — is outside it, so "not found in this run's Tavily record" never means that no tool touched the URL.
 
@@ -280,6 +296,19 @@ else
   jq -r 'select(.tool | test("extract")) | .urls[]' "$C" | LC_ALL=C sort -u
 fi
 ```
+
+Then decide whether the run can go on, after every pass:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}
+if [ "$(cat "$D/record.status" 2>/dev/null)" != 0 ]; then echo 'stop: record not readable — checks not run'
+elif [ "$(cat "$D/reduce.status" 2>/dev/null)" != 0 ]; then echo 'stop: reduction failed'
+elif [ "$(jq -s 'length' "$D/calls.jsonl")" = 0 ]; then echo 'stop: no successful Tavily call'
+else echo 'proceed'
+fi
+```
+
+**Record not readable.** No lists, no gap count, no continuation: the Source Check says the record was not readable and the checks have not run, and the loop ends.
 
 **Reduction failed.** No count is reported; the Source Check says the reduction failed and the checks have not run, and the loop ends.
 
@@ -305,7 +334,7 @@ Every judgment in this step is this session's reading, marked as such where it i
 
 Judge the run's current report against the goal condition, using the lists and the reading. Its **gaps** are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user.
 
-Only research gaps drive a continuation. A failed pass, a reduction failure, or a run with no successful Tavily call has already ended the loop in steps 1–2, and is surfaced rather than continued.
+Only research gaps drive a continuation. A failed pass, an unreadable record, a reduction failure, or a run with no successful Tavily call has already ended the loop in steps 1–2, and is surfaced rather than continued.
 
 Record the pass's gap count — the number is this session's reading; the decision on it is mechanical. The first count recorded is the first evaluated pass, whichever pass number the route starts evaluating at: it continues on any gap, and every later pass continues only on fewer gaps than the pass before it:
 
@@ -364,12 +393,13 @@ Present the source check first, then the items the run returned as the user's to
 
 Target: {research_question}
 Runner: {claude | codex}
-Goal: {engaged | not engaged, where the route's record shows it — `claude -p`; otherwise "not confirmed on this route" — codex, whose events do not record it, and Claude Code}
-Passes: {n}, gaps from the first evaluated pass: {as recorded in gaps.txt} — stopped: {goal met | gaps did not shrink | a pass failed | reduction failed | no successful Tavily call}
+Goal: {engaged, only where the route's record shows it positively — `claude -p`; otherwise "not confirmed on this route", never "not engaged" from an absence}
+Passes: {n}, gaps from the first evaluated pass: {as recorded in gaps.txt} — stopped: {goal met | gaps did not shrink | a pass failed | record not readable — checks not run | reduction failed | no successful Tavily call | Tavily not reachable from the run}
 
 --- Source Check ---
 {"no successful Tavily call — nothing in the trace below was retrieved through the designated route; its claims stand as the runner's own, open, unchecked";
  or "pass {k} failed" with its raw error;
+ or "Tavily was not reachable from the run — its tool list named no Tavily search or extract tool, or every Tavily call was denied";
  or "the reduction of the run's record failed; the checks have not run";
  or "the run's tool record is not readable from this session, so the checks have not run — sources and strength labels are the runner's own, unchecked";
  or the record: {n} successful Tavily calls, {m} not mechanically readable;
@@ -387,7 +417,7 @@ Acceptance criterion: a real research run was launched on the designated runner;
 ## Rules
 
 - Research question is embedded verbatim — no paraphrasing before passing it to the runner.
-- The runner is the designated one, `claude` when none is designated; the research runs in the background, so the main session is free until the completion notification arrives.
+- The runner is the designated one, `claude` when none is designated; the research runs in the background wherever the host offers it, so the main session is free until each pass completes.
 - Failure modes (Codex or the `claude` CLI missing, a missing Claude run or Tavily capability, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back to the other runner; continuation answers only research gaps in a pass that returned.
 - The machine reads the run's tool record and only what is unambiguous there; citations are read against it by this session, each judgment marked as its reading; the report itself is forwarded unedited.
 - Remove only this skill's temp directory; a session kept in a CLI's own store is the user's to remove.

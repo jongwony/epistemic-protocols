@@ -386,12 +386,15 @@ describe('goal-research runtime contract', () => {
   // Structural checks only: what each piece of prose means goes to review, not to a
   // phrase match. These hold the pieces a mechanical predicate can decide.
 
-  it('keeps host tool bindings in the host references, with the codex envelope bound on Claude Code', () => {
+  it('keeps host tool bindings in the host references, with the 75-minute envelope bound on each host', () => {
     const skill = fs.readFileSync(skillPath, 'utf8');
-    assert.ok(!/Bash\(run_in_background/.test(skill), 'a host tool binding stays out of the host-neutral body');
+    assert.ok(!/Bash\(run_in_background|timeout_ms/.test(skill), 'a host tool binding stays out of the host-neutral body');
     const ref = fs.readFileSync(refPath('host-claude-code.md'), 'utf8');
     const bashMs = Number(ref.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
-    assert.equal(bashMs, 75 * 60 * 1000);
+    assert.equal(bashMs, 75 * 60 * 1000, 'Claude Code binds the CLI pass envelope');
+    const codexHost = fs.readFileSync(refPath('host-codex.md'), 'utf8');
+    const shellMs = Number(codexHost.match(/`timeout_ms`, (\d+)\)/)?.[1]);
+    assert.equal(shellMs, 75 * 60 * 1000, 'the Codex host binds the envelope for either runner\'s pass');
   });
 
   it('opens the brief every runner receives with its labelled goal condition and carries the research-target slot', () => {
@@ -650,8 +653,9 @@ describe('goal-research runtime contract', () => {
   ];
 
   // Claude Code: the reference writes record.jsonl from the run's transcripts for the tool
-  // record; the pass outcome is the host's delivered result and status, never the transcript.
-  const runClaudeCode = (transcripts, { status = 0, delivered = 'report' } = {}) => {
+  // record; the pass's success is the host's status, and its report is taken by a command from
+  // the terminal entry of the transcript the pass wrote.
+  const runClaudeCode = (transcripts, { status = 0 } = {}) => {
     const ref = refText('host-claude-code.md');
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-cc-'));
     try {
@@ -663,8 +667,8 @@ describe('goal-research runtime contract', () => {
       // The record block runs as written: it reads the paths listed in transcripts.txt.
       const build = pick(ref, 'record.status', 'transcripts.txt');
       const r = runSteps({
-        'p0.status': `${status}\n`, 'p0.report.txt': delivered,
-        'transcripts.txt': [...paths, paths[0]].join('\n') + '\n',
+        'p0.status': `${status}\n`,
+        'transcripts.txt': [paths[0], ...paths].join('\n') + '\n',
       }, [
         { blocks: [build, 'cat "/tmp/goal_research_${SUFFIX}/record.status"'] },
         { blocks: [pick(ref, 'pass ${PASS}: returned')] },
@@ -676,13 +680,13 @@ describe('goal-research runtime contract', () => {
     }
   };
 
-  it('Claude Code: the tool record is every transcript of the run; the pass report is the host\'s delivered result', needsJq, () => {
+  it('Claude Code: the tool record is every transcript of the run; the report is the pass transcript\'s terminal entry', needsJq, () => {
     const r = runClaudeCode([
       [prompt('brief'), say('msg_0', 'early'), ...claudeCalls.slice(0, 6), say('msg_f0', 'first report')],
-      [prompt('continue'), ...claudeCalls.slice(6)],
-    ], { delivered: 'the delivered report' });
+      [prompt('continue'), ...claudeCalls.slice(6), say('msg_f1', 'second report')],
+    ]);
     assert.equal(r.pass, 'pass 0: returned');
-    assert.equal(r.report, 'the delivered report', 'the report is what the host delivered, unchanged');
+    assert.equal(r.report, 'second report\n', 'taken by a command from the latest transcript\'s final assistant text');
     assert.equal(r.count, 4, 'research, an errored call, a call with no result and WebFetch are not counted');
     assert.equal(r.unreadable, 2, 'formatted text and a truncated stub are not mechanically readable');
     assert.deepEqual(r.unreadableIds, ['t6', 't7']);
@@ -721,8 +725,8 @@ describe('goal-research runtime contract', () => {
     const check = pick(refText('host-codex.md'), 'active_goal');
     const engaged = runSteps({ 'p1.events.jsonl': toJsonl([{ type: 'active_goal', value: { condition: 'c' } }, { type: 'active_goal', value: null }]) }, [{ blocks: [check] }]);
     assert.equal(engaged.out.trim(), 'goal engaged', 'a goal set and later met still engaged');
-    const refused = runSteps({ 'p1.events.jsonl': toJsonl([{ type: 'active_goal', value: null }, { type: 'result', subtype: 'success', is_error: false, result: 'Goals are unavailable here.' }]) }, [{ blocks: [check] }]);
-    assert.equal(refused.out.trim(), 'goal not engaged');
+    const absent = runSteps({ 'p1.events.jsonl': toJsonl([{ type: 'active_goal', value: null }, { type: 'result', subtype: 'success', is_error: false, result: 'ok' }]) }, [{ blocks: [check] }]);
+    assert.equal(absent.out.trim(), 'goal not confirmed on this route', 'absence never reads as "not engaged"');
   });
 
   // A stand-in CLI on PATH echoes its arguments, working directory and stdin, so a pass
@@ -733,10 +737,13 @@ describe('goal-research runtime contract', () => {
     return bin;
   };
   const passFiles = { 'brief.txt': 'Research goal condition: the condition\nResearch target:\nq\n', 'goal.txt': '/goal the condition\n', 'continue.txt': 'gaps\n' };
-  const runPassBlock = (block, cli, cwds) => {
+  const scaffold = () => pick(skillText(), 'run < "$IN"');
+  const codexRun = () => pick(skillText(), 'run()', 'codex exec resume');
+  const claudePRun = () => pick(refText('host-codex.md'), 'run()', 'claude -p');
+  const runPassBlock = (runDef, cli, cwds) => {
     const bin = standIn(cli);
     try {
-      const r = runSteps(passFiles, cwds.map((cwd, k) => ({ pass: k, blocks: [block], env: { PATH: bin }, cwd })),
+      const r = runSteps(passFiles, cwds.map((cwd, k) => ({ pass: k, blocks: [runDef, scaffold()], env: { PATH: bin }, cwd })),
         cwds.map((_, k) => `p${k}.events.jsonl`));
       return cwds.map((_, k) => r.collected[`p${k}.events.jsonl`]);
     } finally {
@@ -745,7 +752,7 @@ describe('goal-research runtime contract', () => {
   };
 
   it('Codex host: the brief starts the session, the /goal turn follows it alone, then continuations', () => {
-    const seen = runPassBlock(pick(refText('host-codex.md'), 'claude -p', 'SESSION'), 'claude', [os.tmpdir(), os.tmpdir(), os.tmpdir()]);
+    const seen = runPassBlock(claudePRun(), 'claude', [os.tmpdir(), os.tmpdir(), os.tmpdir()]);
     assert.match(seen[0], /^ARGS -p --session-id /, 'pass 0 starts the session');
     assert.match(seen[0], /Research target:/, 'pass 0 sends the brief');
     assert.match(seen[1], /^ARGS -p --resume /, 'the goal turn resumes the same session');
@@ -757,22 +764,21 @@ describe('goal-research runtime contract', () => {
 
   // ---- round 5: positive success evidence on every route, and the loop's first pass ----
 
-  it('Claude Code: a pass returns on the host\'s completed status and a non-empty delivered result', needsJq, () => {
+  it('Claude Code: a pass returns on the host\'s completed status and a non-empty terminal entry', needsJq, () => {
     const transcript = [[prompt('brief'), say('msg_f', 'text in the transcript')]];
     assert.equal(runClaudeCode(transcript).pass, 'pass 0: returned');
     assert.equal(runClaudeCode(transcript, { status: 1 }).pass, 'pass 0: failed', 'a host failure fails the pass');
-    assert.equal(runClaudeCode(transcript, { delivered: '  \n' }).pass, 'pass 0: failed', 'an empty delivered result is no report');
+    assert.equal(runClaudeCode([[prompt('brief'), say('msg_f', '  ')]]).pass, 'pass 0: failed', 'an empty terminal entry is no report');
   });
 
   it('Claude Code: a run that ends by handing its report back is returned, and its tool record reduces', needsJq, () => {
-    // An Auto-mode subagent ends with a terminal tool_use carrying the report; the host
-    // delivers that message, and the transcript is read only for the Tavily calls.
+    // An Auto-mode subagent ends with a terminal tool_use carrying the report.
     const handback = { type: 'assistant', message: { id: 'msg_h', content: [{ type: 'tool_use', id: 'h1', name: 'SubagentHandback', input: { message: 'full report' } }] } };
     const r = runClaudeCode([[prompt('brief'),
       use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] }))),
-      handback]], { delivered: 'full report' });
+      handback]]);
     assert.equal(r.pass, 'pass 0: returned');
-    assert.equal(r.report, 'full report');
+    assert.equal(r.report, 'full report\n', 'the handed-back message, taken from the transcript by a command');
     assert.equal(r.count, 1);
     assert.deepEqual(r.returned, ['https://a.example/1']);
   });
@@ -806,8 +812,8 @@ describe('goal-research runtime contract', () => {
       const steps = counts.map(([pass, n]) => ({ pass, blocks: [decide.replace('{gap count}', String(n))] }));
       return runSteps({}, steps).outs.map((o) => o.trim());
     };
-    assert.deepEqual(run([[0, 3]]), ['continue'], 'codex and Claude Code evaluate from pass 0');
-    assert.deepEqual(run([[1, 3]]), ['continue'], 'claude -p evaluates from pass 1, the goal turn');
+    assert.deepEqual(run([[0, 3]]), ['continue'], 'Claude Code evaluates from pass 0');
+    assert.deepEqual(run([[1, 3]]), ['continue'], 'codex and claude -p evaluate from pass 1, the goal turn');
     assert.deepEqual(run([[1, 3], [2, 2], [3, 2]]), ['continue', 'continue', 'stop: gaps did not shrink']);
     assert.deepEqual(run([[0, 2], [1, 0]]), ['continue', 'stop: goal met']);
     assert.deepEqual(run([[0, 0]]), ['stop: goal met']);
@@ -819,8 +825,8 @@ describe('goal-research runtime contract', () => {
     try {
       const real = fs.realpathSync(here);
       for (const [block, cli] of [
-        [pick(refText('host-codex.md'), 'claude -p', 'SESSION'), 'claude'],
-        [pick(skillText(), 'codex exec --json', 'codex exec resume'), 'codex'],
+        [claudePRun(), 'claude'],
+        [codexRun(), 'codex'],
       ]) {
         const seen = runPassBlock(block, cli, [here, elsewhere, elsewhere]);
         for (const k of [0, 1, 2]) {
@@ -872,7 +878,7 @@ describe('goal-research runtime contract', () => {
   });
 
   it('codex: the brief launches the session, the /goal turn follows it alone by resume, then continuations', () => {
-    const seen = runPassBlock(pick(skillText(), 'codex exec --json', 'codex exec resume'), 'codex', [os.tmpdir(), os.tmpdir(), os.tmpdir()]);
+    const seen = runPassBlock(codexRun(), 'codex', [os.tmpdir(), os.tmpdir(), os.tmpdir()]);
     assert.match(seen[0], /^ARGS exec --json /, 'pass 0 launches');
     assert.match(seen[0], /Research target:/);
     assert.ok(!seen[0].includes('/goal'), 'the brief carries no /goal');
@@ -903,6 +909,59 @@ describe('goal-research runtime contract', () => {
     assert.equal(bad.collected['gaps.txt'], null, 'nothing is recorded');
   });
 
+
+  // ---- round 8: the infrastructure gate, Tavily identity by server, structured output ----
+
+  const gate = () => pick(skillText(), "stop: record not readable");
+
+  it('the gate stops on an infrastructure outcome after any pass, pass 0 included', needsJq, () => {
+    const zero = runSteps({ 'p0.events.jsonl': toJsonl([message('m1', 'From memory.'), done]), 'p0.status': '0\n' },
+      [{ blocks: [codexOutcome()] }, { blocks: [passRecord(), tavilyLib(), codexReducer(), gate()] }]);
+    assert.equal(zero.outs[1].trim(), 'stop: no successful Tavily call', 'a codex launch with no Tavily call stops before the goal turn');
+    const unreadable = runSteps({ 'record.status': '1\n' }, [{ blocks: [tavilyLib(), claudeReducer(), gate()] }]);
+    assert.equal(unreadable.out.trim(), 'stop: record not readable — checks not run');
+    const reduction = runSteps({ 'record.status': '0\n', 'record.jsonl': '{"type":"user","mess' }, [{ blocks: [tavilyLib(), claudeReducer(), gate()] }]);
+    assert.equal(reduction.out.trim(), 'stop: reduction failed');
+    const ok = runCodex([{ events: [call('c1', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] })), message('m1', 'r'), done] }]);
+    assert.equal(ok.count, 1);
+  });
+
+  it('a tool named like Tavily\'s on a server that is not Tavily\'s is not counted', needsJq, () => {
+    const codex = runCodex([{ events: [
+      call('c1', 'tavily_search', json({ results: [{ url: 'https://other.example/o' }] }), { server: 'other' }),
+      call('c2', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] })),
+      message('m1', 'r'), done] }]);
+    assert.equal(codex.count, 1);
+    assert.deepEqual(codex.returned, ['https://a.example/1']);
+    const cc = runClaudeCode([[prompt('brief'),
+      use('t1', 'mcp__other__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://other.example/o' }] }))),
+      use('t2', 'mcp__claude_ai_Tavily__tavily_search'), res('t2', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] }))),
+      say('msg_f', 'r')]]);
+    assert.equal(cc.count, 1, 'a connector-provided Tavily server counts; another server does not');
+    assert.deepEqual(cc.returned, ['https://a.example/1']);
+  });
+
+  it('Claude record: structured output beside a tool result is read before its formatted text', needsJq, () => {
+    const r = runClaudeP([{ events: [
+      use('t1', 'mcp__tavily__tavily_search'),
+      { type: 'user', tool_use_result: { structuredContent: { results: [{ url: 'https://structured.example/s' }] } },
+        message: { content: [{ type: 'tool_result', tool_use_id: 't1', is_error: null, content: textItems(officialText) }] } },
+      { type: 'result', subtype: 'success', is_error: false, result: 'report' }] }]);
+    assert.equal(r.count, 1);
+    assert.equal(r.unreadable, 0, 'formatted text with structured results is readable');
+    assert.deepEqual(r.returned, ['https://structured.example/s']);
+  });
+
+  it('Codex host: Tavily unreachable from the claude -p run is an infrastructure stop after pass 0', needsJq, () => {
+    const check = pick(refText('host-codex.md'), 'Tavily not reachable from the run');
+    const runCheck = (events) => runSteps({ 'p0.json.jsonl': toJsonl(events) }, [{ blocks: [tavilyLib(), check] }]).outs[0].trim();
+    const init = (tools) => ({ type: 'system', subtype: 'init', tools });
+    assert.equal(runCheck([init(['Read', 'Skill'])]), 'stop: Tavily not reachable from the run', 'no Tavily tool listed');
+    assert.equal(runCheck([init(['mcp__tavily__tavily_search']), use('t1', 'mcp__tavily__tavily_search'),
+      res('t1', 'Permission to use mcp__tavily__tavily_search has been denied.', true)]), 'stop: Tavily not reachable from the run', 'every call denied');
+    assert.equal(runCheck([init(['mcp__tavily__tavily_search']), use('t1', 'mcp__tavily__tavily_search'),
+      res('t1', textItems(JSON.stringify({ results: [] })))]), 'proceed');
+  });
 });
 
 // ============================================================
