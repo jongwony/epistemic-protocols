@@ -360,7 +360,7 @@ describe('goal-research runtime contract', () => {
     assert.match(patterns(), /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
     // Anywhere on both surfaces, in each form codex accepts; only the reference's own
     // `<name>.<key>` placeholder is exempt.
-    const override = /(?:--config[\s=]+|-c\s+)['"]?mcp_servers\.([^\s.=]+)\.([^\s=]+)=/g;
+    const override = /(?:--config[\s=]+|-c[\s=]*)['"]?mcp_servers\.([^\s.=]+)\.([^\s=]+)=/g;
     const found = [skill(), patterns()].flatMap((doc) => [...doc.matchAll(override)]);
     assert.ok(found.some((m) => m[1] === '<name>' && m[2] === '<key>'), 'the scan must find the placeholder it exempts');
     const used = found.filter((m) => !(m[1] === '<name>' && m[2] === '<key>')).map((m) => m[0]);

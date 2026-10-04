@@ -28,15 +28,15 @@ a run or reading its output.
 ## Tavily not available to the run
 
 - **Failure:** the runner's CLI has no Tavily server configured, or its Tavily server failed to
-  start. A continuation cannot repair this: the run has no Tavily tool to call.
+  start or lost its connection.
 - **Symptom:** positive evidence only — the runner's stderr or warn output shows the MCP server
   failing to start, its transport, or its auth; or the run itself reports, after trying, that it
   has no Tavily tool. A tool missing from a `claude -p` run's first `{type: "system", subtype:
   "init"}` event does not establish it: a server can still be connecting, and a tool's name can
   use `tavily-search` as well as `tavily_search`. Without such evidence, no successful Tavily call
   in the run is a failure the run can repair.
-- **Fix:** treat it as a harness failure — report it, with that evidence, and send no
-  continuation.
+- **Fix:** a failure of the run: send it back once, naming that evidence — resuming the session
+  can restart its MCP connection; where it recurs, report it with that evidence.
 
 ## `claude -p`: an empty session id
 
