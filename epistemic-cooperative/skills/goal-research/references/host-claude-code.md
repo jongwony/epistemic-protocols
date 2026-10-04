@@ -50,26 +50,34 @@ not mechanically readable; read it in step 3.
 
 ## Pass outcome
 
-Write the record (above) first; the pass is read from it. A pass starts at the last user entry that is a prompt rather than tool results — the brief, or the
-continuation message. The pass returned when its last assistant message carries text and no tool
-call; that text, joined across the entries the transcript splits the message into, is the report.
-A pass whose last assistant message is a tool call, or that has no assistant message, failed:
+Write the record (above) first; the pass is read from it, together with the host's own signal.
+When the host's completion notification for the pass arrives, write its status alone — `0` where
+it reports the subagent finished successfully, `1` otherwise — to
+`/tmp/goal_research_${SUFFIX}/p${PASS}.status`; the notification's text is not the report.
+
+A pass starts at the last user entry that is a real prompt — the brief, or the continuation
+message — and not tool results or an entry the host injected (`isMeta`: a skill body, a reminder,
+a notification). The pass returned only when its status is `0` and its last assistant message
+carries non-empty text, no tool call, and no mark of an API error or an aborted stream
+(`isApiErrorMessage`, `isAbortedMidStream`); that text, joined across the entries the transcript
+splits the message into, is the report. Anything else failed:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}
-if [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -rse '
+if [ "$(cat "$D/p${PASS}.status" 2>/dev/null)" = 0 ] && [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -rs '
     . as $all
-    | ([range(0; length) | select($all[.].type == "user"
+    | ([range(0; length) | select($all[.].type == "user" and ($all[.].isMeta | not)
         and ([$all[.].message.content | if type == "array" then .[] else {type: "text"} end | select(.type == "tool_result")] | length == 0))]
        | last // -1) as $start
     | [$all[($start + 1):][] | select(.type == "assistant")] as $a
     | ($a | last) as $l
     | if $l == null then empty
-      else (if $l.message.id == null then [$l] else [$a[] | select(.message.id == $l.message.id)] end)
-        | [.[].message.content[]?] as $blocks
-        | if ($blocks | any(.type == "tool_use")) then empty
-          else [$blocks[] | select(.type == "text") | .text] | if length == 0 then empty else join("\n") end end
-      end' "$D/record.jsonl" > "$D/p${PASS}.report.txt" && [ -s "$D/p${PASS}.report.txt" ]
+      else (if $l.message.id == null then [$l] else [$a[] | select(.message.id == $l.message.id)] end) as $entries
+        | [$entries[].message.content[]?] as $blocks
+        | if ($entries | any(.isApiErrorMessage == true or .isAbortedMidStream == true))
+             or ($blocks | any(.type == "tool_use")) then empty
+          else [$blocks[] | select(.type == "text") | .text] | join("\n") end
+      end' "$D/record.jsonl" > "$D/p${PASS}.report.txt" && grep -q '[^[:space:]]' "$D/p${PASS}.report.txt"
 then echo "pass ${PASS}: returned"
 else : > "$D/p${PASS}.report.txt"; echo "pass ${PASS}: failed"
 fi

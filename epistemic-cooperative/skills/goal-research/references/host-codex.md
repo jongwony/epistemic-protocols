@@ -20,9 +20,11 @@ skills, so neither is passed.
 Generate a session id once — `cat /proc/sys/kernel/random/uuid`, or `uuidgen` — and set it on
 pass `0`; every later pass resumes it. The id is set rather than read back: a `claude -p`
 started from inside another Claude session was observed reporting the parent's id, which a resume
-must never reach. The session stays in the CLI's own session store (under
-`~/.claude/projects/<working-directory>/`, named by the session id) after this skill finishes;
-removing it is the user's call, not this skill's.
+must never reach. The CLI stores sessions per working directory (under
+`~/.claude/projects/<working-directory>/`, named by the session id), so a resume run from another
+directory does not find the session: pass `0` records its working directory, and every later pass
+runs from it. The session stays in that store after this skill finishes; removing it is the
+user's call, not this skill's.
 
 ## Passes
 
@@ -34,6 +36,8 @@ execution facility. `<tavily>` stands for the server name `claude mcp list` show
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
+[ "${PASS}" = 0 ] && pwd > "$D/cwd.txt"
+cd "$(cat "$D/cwd.txt")" || exit 1
 [ -f "$D/goal.txt" ] || printf '/goal %s\n' "{goal condition}" > "$D/goal.txt"
 case "${PASS}" in
   0) IN=$D/brief.txt;    SESSION=--session-id ;;
@@ -59,8 +63,9 @@ grep '^{' "/tmp/goal_research_${SUFFIX}/p1.events.jsonl" \
 
 "goal not engaged" — a refusal, or no goal event — goes to Phase 4 as such; the goal turn is
 still a pass, read like any other below, and the Phase 3 loop judges the goal condition in this
-session either way. Phase 3 steps 2–4 run from pass `1` on: pass `0` is read for its outcome only,
-and a failed pass `0` ends the loop before the goal turn is sent.
+session either way. Phase 3 steps 2–4 run from pass `1` on, so pass `1` is this route's first
+evaluated pass: pass `0` is read for its outcome only, and a failed pass `0` ends the loop before
+the goal turn is sent.
 
 `--output-format stream-json --verbose` is what makes the run's tool calls readable: each event is
 one JSON line in the Claude message record shape Phase 3 step 2 reduces, and each turn ends with a
@@ -73,7 +78,7 @@ keeps the pass's exit code after the launching shell ends.
 ## Pass outcome
 
 The pass returned when its own exit status is zero and its own terminal `result` event is a
-success that is not an error; that event's `result` is the report. Anything else — a nonzero
+success that is not an error, with a non-empty `result`; that `result` is the report. Anything else — a nonzero
 status, an error result such as a turn limit, no terminal event — is a failed pass: surface its
 status, that event, and its warn file. An authentication failure can arrive on stdout as well, so
 read the events, not only stderr.
@@ -84,7 +89,7 @@ grep '^{' "$P.events.jsonl" > "$P.json.jsonl"
 if [ "$(cat "$P.status" 2>/dev/null)" = 0 ] \
   && jq -rse '[.[] | select(.type == "result")] | last | select(.subtype == "success" and .is_error == false) | .result' \
        "$P.json.jsonl" > "$P.report.txt" \
-  && [ -s "$P.report.txt" ]
+  && grep -q '[^[:space:]]' "$P.report.txt"
 then echo "pass ${PASS}: returned"
 else : > "$P.report.txt"; echo "pass ${PASS}: failed"
 fi

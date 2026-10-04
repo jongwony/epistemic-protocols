@@ -141,7 +141,7 @@ Wait for the background task completion notification — do not poll or sleep. S
 
 ### 1. The pass outcome
 
-A pass **returned** when its own exit status is zero, its own terminal event is a success, and its own final message carries the report; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report is written to its own `/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`; the reports together **are** the research trace/answer, **forwarded verbatim to the presentation step; do NOT regex-parse them** — nothing below rewrites them.
+A pass **returned** only on positive evidence of success: its own exit status or host completion signal reports success, its own terminal event is a success, and its own final message carries a non-empty report that is not an error or aborted message; otherwise it **failed**. A failed pass is surfaced as a raw error — its status, its terminal or error events, its warn file — and ends the loop; an earlier pass's report is never taken in its place. A returned pass's report is written to its own `/tmp/goal_research_${SUFFIX}/p${PASS}.report.txt`; the reports together **are** the research trace/answer, **forwarded verbatim to the presentation step; do NOT regex-parse them** — nothing below rewrites them.
 
 - **claude**: as the host's reference says.
 - **codex**: the pass's `turn.completed` with no `turn.failed`, and its last `agent_message` — high-reasoning codex streams progress messages first, so the extraction takes the last one.
@@ -153,7 +153,7 @@ A pass **returned** when its own exit status is zero, its own terminal event is 
     && jq -se 'any(.[]; .type == "turn.completed") and all(.[]; .type != "turn.failed")' "$P.json.jsonl" > /dev/null \
     && jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' \
          "$P.json.jsonl" > "$P.report.txt" \
-    && [ -s "$P.report.txt" ]
+    && grep -q '[^[:space:]]' "$P.report.txt"
   then echo "pass ${PASS}: returned"
   else : > "$P.report.txt"; echo "pass ${PASS}: failed"
   fi
@@ -172,7 +172,9 @@ Once a pass's outcome is read, assemble the trace from every returned pass's rep
 D=/tmp/goal_research_${SUFFIX}
 : > "$D/trace.txt"
 for k in $(ls "$D" | sed -n 's/^p\([0-9][0-9]*\)\.report\.txt$/\1/p' | sort -n); do
-  [ -s "$D/p$k.report.txt" ] && printf '## Pass %s\n\n%s\n\n' "$k" "$(cat "$D/p$k.report.txt")" >> "$D/trace.txt"
+  if grep -q '[^[:space:]]' "$D/p$k.report.txt"; then
+    printf '## Pass %s\n\n%s\n\n' "$k" "$(cat "$D/p$k.report.txt")" >> "$D/trace.txt"
+  fi
 done
 ```
 
@@ -192,20 +194,21 @@ cat "$D"/p*.json.jsonl > "$D/record.jsonl"
 printf '%s\n' "$?" > "$D/record.status"
 ```
 
-Where the host keeps the record itself, its reference gives the block that writes these two files. The record reduces to one line per successful Tavily call, `{"id", "tool", "readable", "urls"}`, in `calls.jsonl`, with the reduction's exit status in `reduce.status`; a record that is missing, failed to write, or holds a line that does not parse fails the reduction. There are two record shapes, each with one reduction:
+Where the host keeps the record itself, its reference gives the block that writes these two files. The record reduces to one line per successful Tavily call, kept once by its call id however often the record repeats it, `{"id", "tool", "readable", "urls"}`, in `calls.jsonl`, with the reduction's exit status in `reduce.status`; a record that is missing, failed to write, or holds a line that does not parse fails the reduction. There are two record shapes, each with one reduction:
 
 - **Codex events** (the `codex` runner): each Tavily call is an `mcp_tool_call` item with its `tool`, `status`, `error`, and `result`; the response is the result's `structured_content` or the JSON text inside its `content[].text`.
 
   ```bash
   D=/tmp/goal_research_${SUFFIX}
-  [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -c '
-    select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
-           and (.item.tool // "" | test("^tavily(_|-)(search|extract)$")))
-    | (.item.result // {}) as $r
-    | ([$r.structured_content?, ($r.content[]? | select(.type=="text") | .text | try fromjson catch empty)]
-       | map(select(type == "object" and (.results | type) == "array"))) as $json
-    | {id: .item.id, tool: .item.tool, readable: ($json | length > 0),
-       urls: ([$json[] | .results[] | .url? | strings] | unique)}' \
+  [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -cs '
+    [ .[] | select(.type=="item.completed" and .item.type=="mcp_tool_call" and .item.status=="completed" and .item.error==null
+             and (.item.tool // "" | test("^tavily(_|-)(search|extract)$")))
+      | (.item.result // {}) as $r
+      | ([$r.structured_content?, ($r.content[]? | select(.type=="text") | .text | try fromjson catch empty)]
+         | map(select(type == "object" and (.results | type) == "array"))) as $json
+      | {id: .item.id, tool: .item.tool, readable: ($json | length > 0),
+         urls: ([$json[] | .results[] | .url? | strings] | unique)} ]
+    | unique_by(.id) | .[]' \
     "$D/record.jsonl" > "$D/calls.jsonl"
   printf '%s\n' "$?" > "$D/reduce.status"
   ```
@@ -216,13 +219,14 @@ Where the host keeps the record itself, its reference gives the block that write
   D=/tmp/goal_research_${SUFFIX}
   [ "$(cat "$D/record.status" 2>/dev/null)" = 0 ] && jq -cs '
     ([.[] | select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | {key: .id, value: .name}] | from_entries) as $names
-    | .[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result" and .is_error != true)
-    | ($names[.tool_use_id] // "" | split("__") | last) as $tool
-    | select($tool | test("^tavily(_|-)(search|extract)$"))
-    | ([.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end | try fromjson catch empty]
-       | map(select(type == "object" and (.results | type) == "array"))) as $json
-    | {id: .tool_use_id, tool: $tool, readable: ($json | length > 0),
-       urls: ([$json[] | .results[] | .url? | strings] | unique)}
+    | [ .[] | select(.type=="user") | .message.content[]? | select(.type=="tool_result" and .is_error != true)
+        | ($names[.tool_use_id] // "" | split("__") | last) as $tool
+        | select($tool | test("^tavily(_|-)(search|extract)$"))
+        | ([.content | if type=="string" then . else (.[]? | select(.type=="text") | .text) end | try fromjson catch empty]
+           | map(select(type == "object" and (.results | type) == "array"))) as $json
+        | {id: .tool_use_id, tool: $tool, readable: ($json | length > 0),
+           urls: ([$json[] | .results[] | .url? | strings] | unique)} ]
+    | unique_by(.id) | .[]
   ' "$D/record.jsonl" > "$D/calls.jsonl"
   printf '%s\n' "$?" > "$D/reduce.status"
   ```
@@ -262,12 +266,23 @@ Every judgment in this step is this session's reading, marked as such where it i
 
 ### 4. The goal
 
-Judge the pass against the goal condition, using the lists and the reading. Its **gaps** are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user. Record the pass's gap count.
+Judge the pass against the goal condition, using the lists and the reading. Its **gaps** are the citations not found in this run's Tavily record, the `verified` labels on sources not extracted, and the uncertainties neither filled by a citation nor returned open with their reach. An item that is the person's to settle is never a gap; it goes to the user.
 
 Only research gaps drive a continuation. A failed pass, a reduction failure, or a run with no successful Tavily call has already ended the loop in steps 1–2, and is surfaced rather than continued.
 
-- **No gap**: the condition is met; go to Phase 4.
-- **Gaps, fewer than after the previous pass** (or pass `0` with any gap): continue the **same** run — not a new one — as the next pass, through the runner's continuation (codex below; claude in the host's reference), sending this message, written to `/tmp/goal_research_${SUFFIX}/continue.txt`:
+Record the pass's gap count — the number is this session's reading; the decision on it is mechanical. The first count recorded is the first evaluated pass, whichever pass number the route starts evaluating at: it continues on any gap, and every later pass continues only on fewer gaps than the pass before it:
+
+```bash
+D=/tmp/goal_research_${SUFFIX}
+printf '%s %s\n' "${PASS}" "{gap count}" >> "$D/gaps.txt"
+awk 'NR > 1 { prev = n } { n = $2 }
+     END { if (n == 0) print "stop: goal met"
+           else if (NR == 1 || n < prev) print "continue"
+           else print "stop: no progress" }' "$D/gaps.txt"
+```
+
+- **stop: goal met**: the condition is met; go to Phase 4.
+- **continue**: continue the **same** run — not a new one — as the next pass, through the runner's continuation (codex below; claude in the host's reference), sending this message, written to `/tmp/goal_research_${SUFFIX}/continue.txt`:
 
   ```
   The goal condition is not met yet. Continue toward it in this same session, then return the whole report again, updated.
@@ -275,11 +290,11 @@ Only research gaps drive a continuation. A failed pass, a reduction failure, or 
   - {each gap}
   ```
 
-- **Gaps, not fewer than after the previous pass**: no progress; the loop ends, and Phase 4 shows the gaps that remain.
+- **stop: no progress**: the loop ends, and Phase 4 shows the gaps that remain.
 
 Because a continuation is sent only while the gap count strictly falls, the loop ends.
 
-**Codex continuation.** The thread id is in the launch's `thread.started` event. Continue it as pass `${PASS}` through the host's background execution facility, with the same envelope:
+**Codex continuation.** The thread id is in the launch's `thread.started` event. Continue it as pass `${PASS}` through the host's background execution facility, with the same envelope. `codex exec resume` takes no `--color` option; its stdout is filtered by `grep '^{'` like the launch's:
 
 ```bash
 codex exec resume "{thread_id}" - --json --skip-git-repo-check -m gpt-6-astra \
@@ -316,8 +331,8 @@ Present the source check first, then the items the run returned as the user's to
 
 Target: {research_question}
 Runner: {claude | codex}
-Goal: {engaged | not engaged | not confirmed on this route}
-Passes: {n}, gaps after each: {g0, g1, …} — stopped: {goal met | no progress | a pass failed | reduction failed | no successful Tavily call}
+Goal: {engaged | not engaged, where the route's record shows it — `claude -p`; otherwise "not confirmed on this route" — codex, Claude Code}
+Passes: {n}, gaps from the first evaluated pass: {as recorded in gaps.txt} — stopped: {goal met | no progress | a pass failed | reduction failed | no successful Tavily call}
 
 --- Source Check ---
 {"no successful Tavily call — nothing in the trace below was retrieved through the designated route; its claims stand as the runner's own, open, unchecked";

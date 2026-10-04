@@ -500,19 +500,21 @@ describe('goal-research runtime contract', () => {
   const done = { type: 'turn.completed', usage: {} };
   const officialText = ['Request ID: r1', 'Detailed Results:', '', 'Title: T', 'URL: https://text.example/p', 'Content: c'].join('\n');
 
-  // A codex run of one or more passes: outcome of each pass in order, then record,
-  // reduction and listing over the whole run.
-  const runCodex = (passes) => {
+  // A run of one or more per-pass event files: each pass's outcome block in order, then
+  // trace assembly, record, reduction and listing over the whole run. Shared by the codex
+  // runner and `claude -p`, which differ only in their outcome block and reducer.
+  const runPasses = (passes, outcome, reducer) => {
     const files = {};
     passes.forEach(({ events, status = 0 }, k) => {
       files[`p${k}.events.jsonl`] = toJsonl(events);
       files[`p${k}.status`] = `${status}\n`;
     });
-    const steps = passes.map((_, k) => ({ pass: k, blocks: [codexOutcome()] }));
-    steps.push({ blocks: [assemble(), passRecord(), codexReducer(), listing()] });
+    const steps = passes.map((_, k) => ({ pass: k, blocks: [outcome] }));
+    steps.push({ blocks: [assemble(), passRecord(), reducer, listing()] });
     const r = runSteps(files, steps);
     return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report, trace: r.trace };
   };
+  const runCodex = (passes) => runPasses(passes, codexOutcome(), codexReducer());
 
   it('codex: counts only completed, error-free calls named exactly as Tavily search or extract', needsJq, () => {
     const r = runCodex([{ events: [
@@ -643,7 +645,7 @@ describe('goal-research runtime contract', () => {
 
   // Claude Code: the reference writes record.jsonl from the run's transcripts; its outcome
   // block reads the pass from that record.
-  const runClaudeCode = (transcripts) => {
+  const runClaudeCode = (transcripts, hostStatus = 0) => {
     const ref = refText('host-claude-code.md');
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-cc-'));
     try {
@@ -654,7 +656,7 @@ describe('goal-research runtime contract', () => {
       });
       const build = pick(ref, 'record.status', 'cat ').replace(/cat "\{launch transcript\}" \{[^}]*\}/, `cat ${paths.map((p) => `"${p}"`).join(' ')}`);
       assert.ok(build.includes(paths[0]), 'the record block binds the transcripts literally');
-      const r = runSteps({}, [
+      const r = runSteps({ 'p0.status': `${hostStatus}\n` }, [
         { blocks: [build, pick(ref, 'pass ${PASS}: returned')] },
         { blocks: [claudeReducer(), listing()] },
       ]);
@@ -693,18 +695,7 @@ describe('goal-research runtime contract', () => {
   });
 
   // Codex host: claude -p passes, each a turn of the same session in its own files.
-  const runClaudeP = (passes) => {
-    const ref = refText('host-codex.md');
-    const files = {};
-    passes.forEach(({ events, status = 0 }, k) => {
-      files[`p${k}.events.jsonl`] = toJsonl(events);
-      files[`p${k}.status`] = `${status}\n`;
-    });
-    const steps = passes.map((_, k) => ({ pass: k, blocks: [pick(ref, '"result"', 'report.txt')] }));
-    steps.push({ blocks: [assemble(), passRecord(), claudeReducer(), listing()] });
-    const r = runSteps(files, steps);
-    return { ...parseList(r.outs[r.outs.length - 1]), passes: r.outs.slice(0, -1).map((o) => o.trim()), report: r.report, trace: r.trace };
-  };
+  const runClaudeP = (passes) => runPasses(passes, pick(refText('host-codex.md'), '"result"', 'report.txt'), claudeReducer());
 
   it('Codex host: the shared reduction reads every claude -p pass, and each pass\'s terminal result is its report', needsJq, () => {
     const r = runClaudeP([
@@ -768,6 +759,87 @@ describe('goal-research runtime contract', () => {
       }
     } finally {
       fs.rmSync(bin, { recursive: true, force: true });
+    }
+  });
+
+  // ---- round 5: positive success evidence on every route, and the loop's first pass ----
+
+  it('Claude Code: a pass returns only on the host\'s success signal and a clean final reply', needsJq, () => {
+    const brief = prompt('brief');
+    const good = say('msg_ok', 'full report');
+    assert.equal(runClaudeCode([[brief, good]]).pass, 'pass 0: returned');
+    const apiError = { type: 'assistant', isApiErrorMessage: true, message: { id: 'msg_e', content: [{ type: 'text', text: 'API Error: 529 overloaded' }] } };
+    assert.equal(runClaudeCode([[brief, apiError]]).pass, 'pass 0: failed', 'an API error message is not a report');
+    const aborted = { type: 'assistant', isAbortedMidStream: true, message: { id: 'msg_a', content: [{ type: 'text', text: 'Half a rep' }] } };
+    assert.equal(runClaudeCode([[brief, aborted]]).pass, 'pass 0: failed', 'an aborted stream is not a report');
+    const injected = { type: 'user', isMeta: true, message: { content: 'Stop hook feedback: a reminder' } };
+    const afterMeta = runClaudeCode([[brief, good, injected]]);
+    assert.equal(afterMeta.pass, 'pass 0: returned', 'an injected entry after the final reply does not open a new pass');
+    assert.equal(afterMeta.report.trim(), 'full report');
+    assert.equal(runClaudeCode([[brief, good]], 1).pass, 'pass 0: failed', 'a host failure signal fails the pass whatever the text');
+  });
+
+  it('codex and claude -p: an empty final report is a failed pass', needsJq, () => {
+    const codexEmpty = runCodex([{ events: [call('c1', 'tavily_search', json({ results: [] })), message('m1', ''), done] }]);
+    assert.deepEqual(codexEmpty.passes, ['pass 0: failed']);
+    const claudeEmpty = runClaudeP([{ events: [{ type: 'result', subtype: 'success', is_error: false, result: '' }] }]);
+    assert.deepEqual(claudeEmpty.passes, ['pass 0: failed']);
+    const blank = runClaudeP([{ events: [{ type: 'result', subtype: 'success', is_error: false, result: '  \n' }] }]);
+    assert.deepEqual(blank.passes, ['pass 0: failed'], 'whitespace is not a report');
+  });
+
+  it('both reductions keep each call once, however often the record repeats it', needsJq, () => {
+    const once = call('c1', 'tavily_search', json({ results: [{ url: 'https://a.example/1' }] }));
+    const codex = runCodex([{ events: [once, once, message('m1', 'report'), done] }]);
+    assert.equal(codex.count, 1);
+    const repeated = [use('t1', 'mcp__tavily__tavily_search'), res('t1', textItems(JSON.stringify({ results: [{ url: 'https://a.example/1' }] })))];
+    const cc = runClaudeCode([[prompt('brief'), ...repeated], [...repeated, prompt('continue'), say('msg_f', 'report')]]);
+    assert.equal(cc.count, 1, 'a call carried in two transcripts counts once');
+  });
+
+  it('trace assembly ends with status 0 when the last pass failed', needsJq, () => {
+    const r = runSteps({ 'p0.report.txt': 'full report\n', 'p1.report.txt': '' }, [{ blocks: [assemble()] }]);
+    assert.equal(r.trace, '## Pass 0\n\nfull report\n\n');
+  });
+
+  it('the first evaluated pass continues on any gap, whichever pass number the route starts at', () => {
+    const decide = pick(skillText(), 'gaps.txt');
+    const run = (counts) => {
+      const steps = counts.map(([pass, n]) => ({ pass, blocks: [decide.replace('{gap count}', String(n))] }));
+      return runSteps({}, steps).outs.map((o) => o.trim());
+    };
+    assert.deepEqual(run([[0, 3]]), ['continue'], 'codex and Claude Code evaluate from pass 0');
+    assert.deepEqual(run([[1, 3]]), ['continue'], 'claude -p evaluates from pass 1, the goal turn');
+    assert.deepEqual(run([[1, 3], [2, 2], [3, 2]]), ['continue', 'continue', 'stop: no progress']);
+    assert.deepEqual(run([[0, 2], [1, 0]]), ['continue', 'stop: goal met']);
+    assert.deepEqual(run([[0, 0]]), ['stop: goal met']);
+  });
+
+  it('Codex host: every claude -p pass runs from the working directory pass 0 recorded', () => {
+    const bin = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-bin-'));
+    const here = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-cwd0-'));
+    const elsewhere = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-cwd1-'));
+    try {
+      fs.writeFileSync(path.join(bin, 'claude'), '#!/bin/sh\necho "CWD $(pwd)"\ncat > /dev/null\n', { mode: 0o755 });
+      const passes = pick(refText('host-codex.md'), 'claude -p', 'SESSION');
+      const suffix = crypto.randomBytes(4).toString('hex');
+      const D = `/tmp/goal_research_${suffix}`;
+      fs.mkdirSync(D, { recursive: true });
+      try {
+        fs.writeFileSync(path.join(D, 'brief.txt'), 'brief\n');
+        fs.writeFileSync(path.join(D, 'continue.txt'), 'gaps\n');
+        const env = (k) => ({ ...process.env, SUFFIX: suffix, PASS: String(k), PATH: `${bin}:${process.env.PATH}` });
+        execFileSync('bash', ['-c', passes], { cwd: here, env: env(0) });
+        execFileSync('bash', ['-c', passes], { cwd: elsewhere, env: env(1) });
+        const real = (p) => fs.realpathSync(p);
+        assert.equal(fs.readFileSync(path.join(D, 'p0.events.jsonl'), 'utf8').trim(), `CWD ${real(here)}`);
+        assert.equal(fs.readFileSync(path.join(D, 'p1.events.jsonl'), 'utf8').trim(), `CWD ${real(here)}`,
+          'a later pass resumes from the directory the session is stored under');
+      } finally {
+        fs.rmSync(D, { recursive: true, force: true });
+      }
+    } finally {
+      for (const d of [bin, here, elsewhere]) fs.rmSync(d, { recursive: true, force: true });
     }
   });
 });
