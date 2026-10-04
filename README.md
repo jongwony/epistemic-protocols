@@ -105,15 +105,11 @@ Skills that act at their own decision points — around the protocols, on the wo
 | **Shaping the work** | |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
 | `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
-| **Reviewing a change** | |
-| `/review-loop` | Drive a change through review until every finding is verified against the codebase and disposed of, re-reviewing each round |
 | **Auditing instruction prose** | |
 | `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
 | **Steering the project** | |
 | `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
-| **Delegating research** | |
-| `/goal-research` | An academic-literature research question you want externally verified in a background run — Claude by default, or Codex — with per-claim verification strength against primary sources, replication status for empirical effects, what only you can settle returned to you open, and its citations checked against the run's own Tavily record, the same run continued while it moves toward the goal |
 
 ### [Route](./route)
 
