@@ -113,7 +113,7 @@ Skills that act at their own decision points — around the protocols, on the wo
 | **Steering the project** | |
 | `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
 | **Delegating research** | |
-| `/goal-research` | A factual research question you want externally verified in a background run — a Claude run by default (a subagent, or `claude -p` on a Codex host), or Codex — with per-claim verification strength, what only you can settle returned to you open, and its citations read against the run's own Tavily record, the same run continued toward one goal condition while its gaps shrink |
+| `/goal-research` | An academic-literature research question you want externally verified in a background run — Claude by default, or Codex — with per-claim verification strength against primary sources, replication status for empirical effects, what only you can settle returned to you open, and its citations checked against the run's own Tavily record, the same run continued while its gaps shrink |
 
 ### [Route](./route)
 
