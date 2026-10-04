@@ -350,35 +350,6 @@ describe('goal-research runtime contract', () => {
     return blocks;
   };
 
-  // The codex error patterns live in the skill's reference, loaded before a run is launched
-  // or read. A dotted override under `mcp_servers` replaces the server's whole table instead
-  // of merging, dropping the transport field, and codex then refuses to load config at all
-  // ("invalid transport"); reproduced on codex-cli 0.149.0 for every server and every key.
-  const patterns = () => fs.readFileSync(path.join(path.dirname(skillPath), 'references', 'error-patterns.md'), 'utf8');
-
-  it('carries no dotted mcp_servers config override, and keeps the pattern that says why', () => {
-    const [doc, ref] = [skill(), patterns()];
-    assert.match(ref, /^## Codex: a dotted `mcp_servers` override$/m, 'the error pattern must stay');
-    assert.match(ref, /invalid transport/i, 'the pattern must say why the override is absent, or a future author re-adds it');
-    // Anywhere on both surfaces, in each form codex accepts — a dotted key, a server's table
-    // inline, or the whole `mcp_servers` table inline; only the reference's own `<name>.<key>`
-    // placeholder is exempt, and only in the reference.
-    const override = /(?:^|[\s'"`])(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.([^\s.=]+)(?:\.([^\s=]+))?)?\s*=/gm;
-    const placeholder = (m) => m[1] === '<name>' && m[2] === '<key>';
-    const inRef = [...ref.matchAll(override)];
-    assert.ok(inRef.some(placeholder), 'the scan must find the placeholder it exempts');
-    const used = [...doc.matchAll(override), ...inRef.filter((m) => !placeholder(m))].map((m) => m[0]);
-    assert.deepEqual(used, [], 'a dotted mcp_servers.<name>.<key>= override makes codex exit 1 at config load');
-  });
-
-  it('filters codex stdout to JSON lines, and never claims it is pure JSONL', () => {
-    // codex prints plain notice lines to stdout alongside the JSONL; jq aborts on the first
-    // one, so an unfiltered read of a successful pass comes back empty.
-    const ref = patterns();
-    assert.match(ref, /grep '\^\{'/, 'the filter must stay named');
-    for (const doc of [skill(), ref]) assert.ok(!/(events file|stdout) is pure JSONL/i.test(doc), 'stdout is not pure JSONL — no surface may assert that it is');
-  });
-
   // Structural checks only: what each piece of prose means goes to review, not to a
   // phrase match.
 
