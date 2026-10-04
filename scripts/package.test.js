@@ -183,10 +183,10 @@ describe('parseFrontmatter', () => {
   });
 
   it('parses block list (composition skill skills: field)', () => {
-    const content = '---\nname: review-loop\nskills:\n  - aitesis:inquire\n  - epharmoge:contextualize\n---\nBody';
+    const content = '---\nname: composer\nskills:\n  - aitesis:inquire\n  - epharmoge:contextualize\n---\nBody';
     const { fields } = parseFrontmatter(content);
     assert.deepEqual(fields.get('skills'), ['aitesis:inquire', 'epharmoge:contextualize']);
-    assert.equal(fields.get('name'), 'review-loop');
+    assert.equal(fields.get('name'), 'composer');
   });
 
   it('parses block list followed by another field', () => {
@@ -322,162 +322,6 @@ describe('runtime contract view', () => {
     const result = runArtifactSelfContainmentCheck();
     assert.deepEqual(result.fail, []);
   });
-});
-
-// ============================================================
-// goal-research runtime contract
-// ============================================================
-
-describe('goal-research runtime contract', () => {
-  const REPO_ROOT = path.join(__dirname, '..');
-  const skillPath = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'SKILL.md');
-  const skill = () => fs.readFileSync(skillPath, 'utf8');
-
-  // Fenced blocks of a surface in one language ('' for a bare fence), indented blocks
-  // included. A block closes only on a bare fence at least as long as the one that opened it.
-  const fenced = (doc, lang) => {
-    const blocks = [];
-    let open = null;
-    for (const line of doc.split('\n')) {
-      const fence = line.match(/^[ \t]*(`{3,})(\S*)(?:\s.*)?$/);
-      if (open === null) {
-        if (fence) open = { ticks: fence[1].length, lang: fence[2], lines: [] };
-      } else if (fence && fence[1].length >= open.ticks && /^[ \t]*`+\s*$/.test(line)) {
-        if (open.lang === lang) blocks.push(open.lines.map((l) => `${l}\n`).join(''));
-        open = null;
-      } else open.lines.push(line);
-    }
-    return blocks;
-  };
-
-  // The codex invocation reference's own command blocks: deterministic predicates over the
-  // shipped commands. A dotted or inline `mcp_servers` override replaces the server's table and
-  // codex stops at config load; jq stops at the first plain notice line codex prints on stdout;
-  // an ephemeral session leaves nothing for the goal turn and continuations to resume.
-  const invocation = () => fs.readFileSync(path.join(path.dirname(skillPath), 'references', 'codex-exec.md'), 'utf8');
-
-  it('codex invocation: no mcp_servers override, events filtered before jq, the session kept', () => {
-    const blocks = fenced(invocation(), 'bash');
-    const codex = blocks.filter((b) => /\bcodex exec\b/.test(b));
-    assert.ok(codex.length >= 2, 'the launch and the resume commands must be present');
-    const override = /(?:^|[\s'"`])(?:--config|-c)(?:\s*=\s*|\s+|)['"]?mcp_servers(?:\.[^\s.=]+(?:\.[^\s=]+)?)?\s*=/m;
-    for (const b of codex) {
-      assert.ok(!override.test(b), `no mcp_servers override on the command line:\n${b}`);
-      assert.ok(!/--ephemeral\b/.test(b), `the session must persist for resume:\n${b}`);
-    }
-    const readers = blocks.filter((b) => /\bjq\b/.test(b) && /events\.jsonl/.test(b));
-    assert.ok(readers.length > 0, 'a block reading the events must be present');
-    for (const b of readers) {
-      const lines = b.replace(/\\\n\s*/g, ' ').split('\n').filter((l) => /\bjq\b/.test(l));
-      for (const l of lines) {
-        const stages = l.split('|').map((x) => x.trim());
-        stages.forEach((stage, k) => {
-          if (/^jq\b/.test(stage)) assert.ok(k > 0 && stages.slice(0, k).some((x) => /^grep\b.*'\^\{'/.test(x)), `jq must read grep '^{' output:\n${l}`);
-        });
-      }
-    }
-  });
-
-  // Structural checks only: what each piece of prose means goes to review, not to a
-  // phrase match.
-
-  it('reads fences whose info string carries attributes', () => {
-    const doc = ['```bash title=x', 'echo one', '```', '', '```', 'plain', '```', ''].join('\n');
-    assert.deepEqual(fenced(doc, 'bash'), ['echo one\n']);
-    assert.deepEqual(fenced(doc, ''), ['plain\n']);
-    const nested = ['````md', '```bash', 'inner', '```', '````', ''].join('\n');
-    assert.deepEqual(fenced(nested, 'md'), ['```bash\ninner\n```\n'], 'a shorter fence inside does not close the block');
-    assert.deepEqual(fenced(nested, 'bash'), []);
-  });
-
-  it('opens the brief with its labelled goal condition and carries the research-target slot', () => {
-    const brief = fenced(skill(), '').find((b) => b.includes('Research target:'));
-    assert.ok(brief, 'the research brief must be present');
-    assert.ok(brief.startsWith('Research goal condition: {goal condition}\n'), 'the brief states the goal condition under a label no goal command reads');
-    assert.ok(!brief.includes('/goal'), 'the goal command is sent apart from the brief');
-    assert.ok(brief.includes('{research_question}'), 'the research question is slotted in verbatim');
-    assert.ok(brief.includes('{inquire}'), 'the runner-specific /inquire invocation is slotted');
-  });
-
-  it('presents the source check, then the items to settle, then the trace', () => {
-    const doc = skill();
-    const phase4 = doc.slice(doc.indexOf('## Phase 4'), doc.indexOf('## Rules'));
-    const order = ['--- Source Check ---', '--- Yours to Settle ---', '--- Trace ---'].map((h) => phase4.indexOf(h));
-    assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), 'Source Check, then Yours to Settle, then Trace');
-  });
-
-});
-
-// ============================================================
-// codex stdout extraction contract (review-loop)
-// ============================================================
-
-// codex prints plain notice lines to stdout alongside its `--json` event stream —
-// `Codex autostart is disabled.` survives `2>/dev/null` on codex-cli 0.149.0 — so
-// stdout is NOT pure JSONL. `jq -rs` aborts on the first such line with
-// `parse error: Invalid numeric literal`, exits 5, and prints nothing. The surface
-// below reads an empty extraction as "the call produced no verdict", so without the
-// filter a SUCCESSFUL run is reported as a failure. The file also asserted the events
-// file was pure JSONL, which is the claim that made the missing filter look
-// deliberate. These assertions hold the repair here.
-
-describe('codex stdout extraction contract', () => {
-  const REPO_ROOT = path.join(__dirname, '..');
-  const surfaces = [
-    [
-      'review-loop codex source adapter',
-      path.join(
-        REPO_ROOT,
-        'epistemic-cooperative',
-        'skills',
-        'review-loop',
-        'references',
-        'source-adapter-codex.md',
-      ),
-    ],
-  ];
-
-  for (const [label, docPath] of surfaces) {
-    it(`${label}: feeds jq only the JSON lines`, () => {
-      const doc = fs.readFileSync(docPath, 'utf8');
-      // Scope to the fenced command blocks. The prose deliberately NAMES `jq -rs` while
-      // explaining why the filter is there, so a whole-file line match would flag the
-      // warning that exists to keep the filter in place.
-      const jqBlocks = (doc.match(/```bash\n([\s\S]*?)```/g) ?? []).filter((b) =>
-        b.includes('jq -rs'),
-      );
-      assert.ok(jqBlocks.length > 0, 'the extraction command must be present');
-      for (const block of jqBlocks) {
-        assert.ok(
-          /grep '\^\{'/.test(block),
-          `jq must be fed only JSON lines, or one plain notice line empties the extraction:\n${block}`,
-        );
-      }
-    });
-
-    it(`${label}: states that stdout is not pure JSONL, and never claims it is`, () => {
-      const doc = fs.readFileSync(docPath, 'utf8');
-      const mentions = [...doc.matchAll(/pure JSONL/g)];
-      assert.ok(
-        mentions.length > 0,
-        'the correction must stay on the surface — deleting it lets the claim back in unnoticed',
-      );
-      for (const m of mentions) {
-        const preceding = doc.slice(Math.max(0, m.index - 60), m.index);
-        assert.ok(
-          /\bnot\b/.test(preceding),
-          `every mention of pure JSONL must be a denial, not an assertion: ...${preceding.trim()} ${m[0]}`,
-        );
-      }
-    });
-
-    it(`${label}: records why the filter is there`, () => {
-      const doc = fs.readFileSync(docPath, 'utf8');
-      // Without its reason recorded beside it, a future author reads `grep '^{'` as
-      // defensive noise on a stream and drops it, restoring the defect silently.
-      assert.match(doc, /load-bearing/i, 'the filter must carry its reason');
-    });
-  }
 });
 
 // ============================================================
@@ -1076,8 +920,8 @@ describe('unified release artifact contract', () => {
 
   it('retains utility sidecars in the release superset', () => {
     const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
-    assert.ok(entriesFor('epistemic-cooperative', 'review-loop')
-      .includes('review-loop/references/pr-scope.md'));
+    assert.ok(entriesFor('epistemic-cooperative', 'onboard')
+      .includes('onboard/references/scenarios.md'));
   });
 
   it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
@@ -1271,7 +1115,6 @@ describe('package.js CLI', () => {
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'gate-check.zip',
-        'goal-research.zip',
         'grasp.zip',
         'ground.zip',
         'ideate.zip',
@@ -1283,7 +1126,6 @@ describe('package.js CLI', () => {
         'realign.zip',
         'recollect.zip',
         'reduced-space-test.zip',
-        'review-loop.zip',
         'route.zip',
         'sketch.zip',
         'sublate.zip',

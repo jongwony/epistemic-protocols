@@ -6,7 +6,7 @@ Protocol learning, work orchestration, and decision-point utilities for Claude C
 
 ## What is Epistemic Cooperative?
 
-A utility plugin spanning epistemic protocol onboarding, work orchestration, and decision-point utilities. It is where you start — hands-on protocol learning — and also where several skills act at specific decision points of their own, checking a drafted gate's option set and driving a review to convergence.
+A utility plugin spanning epistemic protocol onboarding, work orchestration, and decision-point utilities. It is where you start — hands-on protocol learning — and also where several skills act at specific decision points of their own, checking a drafted gate's option set.
 
 ### Skills
 
@@ -15,12 +15,10 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/probe` | Deficit recognition fit review — multiple deficit hypotheses with reverse-evidence conditions, routed by user recognition | Protocol route |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
-| `/review-loop` | Source-agnostic code/PR review-resolve loop — converges the artifact on the project's stated goal | Applied fixes + handovers + convergence trace |
 | `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, a rebuilt option set, or — where the check could not close — the repair space, the contested reading, or both sets with neither presented as the answer |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
 | `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
 | `/realign` | Project guide direction line via three-horizon fusion | Fused direction line written to the project guide |
-| `/goal-research` | Academic-literature research delegated to a background run — Claude by default, or a Codex CLI session — verifying through Aitesis and Tavily | Research trace refining Aitesis's record with per-claim verification strength against primary sources and replication status, what only you can settle returned to you as open, and its citations checked against the run's own Tavily record; the same run is continued while it moves toward the goal |
 
 ## Skills
 
@@ -67,13 +65,6 @@ Key features:
 - scoped claim only — reduced failure probability within the tested conditions, never absolute equivalence
 - residual complement is a first-class output routed to a follow-up protocol
 
-## Review loop hosts
-
-`codex` and `code-review` select the reviewer in either Claude Code or Codex.
-The [runtime contract](skills/review-loop/SKILL.md) routes to the active host
-reference, then loads only the adapter of each selected source. Claude reviews require a
-skill that can review the captured local scope; Codex reviews require its CLI.
-
 ## Architecture
 
 ```
@@ -83,12 +74,10 @@ epistemic-cooperative/
     ├── onboard/SKILL.md          # /onboard quest-based protocol learning
     ├── probe/SKILL.md            # /probe deficit recognition fit review
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
-    ├── review-loop/SKILL.md      # /review-loop convergence-paced review-resolve loop
     ├── gate-check/SKILL.md       # /gate-check advisor-checked decision gates
     ├── white-bear/SKILL.md       # /white-bear competing-target prose audit
     ├── zero-shot/SKILL.md        # /zero-shot anchoring-example prose audit
-    ├── realign/SKILL.md          # /realign project guide direction-line fusion
-    └── goal-research/SKILL.md    # /goal-research delegated academic research with a cited-source check
+    └── realign/SKILL.md          # /realign project guide direction-line fusion
 ```
 
 ## When to Use
@@ -100,11 +89,9 @@ epistemic-cooperative/
 | Re-evaluating protocol fit after workflow changes | `/onboard` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 | Something feels off but the deficit is not yet named | `/probe` |
-| Driving a change through review until every finding is disposed of | `/review-loop` |
 | Checking a drafted option set before it reaches the user | `/gate-check` |
 | Auditing prose for prohibition framing or anchoring examples | `/white-bear`, `/zero-shot` |
 | Re-deriving the project guide's direction line | `/realign` |
-| Delegating an academic-literature research question to a background Claude or Codex run | `/goal-research` |
 
 ## Install
 
@@ -118,14 +105,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 ```
 /onboard
 /probe
-/review-loop codex 123
-/goal-research <question>
-/goal-research codex <question>
 ```
-
-`/review-loop` reuses matching reviewer capability evidence and confirms the command
-and scope during each source's first read-only review. For PRs, an omitted `head`/`stacked`
-repair destination is settled before the first edit; it does not delay the review.
 
 ## Author
 
