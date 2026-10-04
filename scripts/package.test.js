@@ -715,12 +715,43 @@ describe('goal-research runtime contract', () => {
   });
 
   it('Codex host: the goal turn reports whether /goal engaged from its own events', needsJq, () => {
-    const block = pick(refText('host-codex.md'), 'active_goal');
-    const check = block.slice(block.indexOf("grep '^{'"));
-    const engaged = runSteps({ 'goal.events.jsonl': toJsonl([{ type: 'active_goal', value: null }, { type: 'active_goal', value: { condition: 'c' } }]) }, [{ blocks: [`D=/tmp/goal_research_\${SUFFIX}\n${check}`] }]);
-    assert.equal(engaged.out.trim(), 'goal engaged');
-    const refused = runSteps({ 'goal.events.jsonl': toJsonl([{ type: 'active_goal', value: null }, { type: 'result', subtype: 'success', is_error: false, result: 'Goals are unavailable here.' }]) }, [{ blocks: [`D=/tmp/goal_research_\${SUFFIX}\n${check}`] }]);
+    const check = pick(refText('host-codex.md'), 'active_goal');
+    const engaged = runSteps({ 'p1.events.jsonl': toJsonl([{ type: 'active_goal', value: { condition: 'c' } }, { type: 'active_goal', value: null }]) }, [{ blocks: [check] }]);
+    assert.equal(engaged.out.trim(), 'goal engaged', 'a goal set and later met still engaged');
+    const refused = runSteps({ 'p1.events.jsonl': toJsonl([{ type: 'active_goal', value: null }, { type: 'result', subtype: 'success', is_error: false, result: 'Goals are unavailable here.' }]) }, [{ blocks: [check] }]);
     assert.equal(refused.out.trim(), 'goal not engaged');
+  });
+
+  it('Codex host: the brief starts the session, the /goal turn follows it alone, then continuations', () => {
+    // A stand-in `claude` echoes its arguments and stdin, so the pass block's routing is
+    // what is observed: the goal must engage with the research target already in context.
+    const bin = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-research-bin-'));
+    try {
+      fs.writeFileSync(path.join(bin, 'claude'), '#!/bin/sh\necho "ARGS $*"\ncat\n', { mode: 0o755 });
+      const passes = pick(refText('host-codex.md'), 'claude -p', 'SESSION');
+      const suffix = crypto.randomBytes(4).toString('hex');
+      const D = `/tmp/goal_research_${suffix}`;
+      fs.mkdirSync(D, { recursive: true });
+      try {
+        fs.writeFileSync(path.join(D, 'brief.txt'), 'Goal: the condition\nResearch target:\nq\n');
+        fs.writeFileSync(path.join(D, 'continue.txt'), 'gaps\n');
+        const seen = [0, 1, 2].map((k) => {
+          execFileSync('bash', ['-c', passes], { env: { ...process.env, SUFFIX: suffix, PASS: String(k), PATH: `${bin}:${process.env.PATH}` } });
+          return fs.readFileSync(path.join(D, `p${k}.events.jsonl`), 'utf8');
+        });
+        assert.match(seen[0], /^ARGS -p --session-id /, 'pass 0 starts the session');
+        assert.match(seen[0], /Research target:/, 'pass 0 sends the brief');
+        assert.match(seen[1], /^ARGS -p --resume /, 'the goal turn resumes the same session');
+        assert.match(seen[1], /\n\/goal \S/, 'pass 1 sends /goal');
+        assert.ok(!seen[1].includes('Research target:'), 'the goal turn carries the condition alone');
+        assert.match(seen[2], /^ARGS -p --resume /);
+        assert.match(seen[2], /\ngaps\n/, 'later passes send the continuation');
+      } finally {
+        fs.rmSync(D, { recursive: true, force: true });
+      }
+    } finally {
+      fs.rmSync(bin, { recursive: true, force: true });
+    }
   });
 });
 

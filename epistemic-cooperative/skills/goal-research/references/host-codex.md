@@ -17,47 +17,50 @@ skills, so neither is passed.
 
 ## Session
 
-Generate a session id once — `cat /proc/sys/kernel/random/uuid`, or `uuidgen` — and set it on the
-first turn; every later turn resumes it. The id is set rather than read back: a `claude -p`
+Generate a session id once — `cat /proc/sys/kernel/random/uuid`, or `uuidgen` — and set it on
+pass `0`; every later pass resumes it. The id is set rather than read back: a `claude -p`
 started from inside another Claude session was observed reporting the parent's id, which a resume
 must never reach. The session stays in the CLI's own session store (under
 `~/.claude/projects/<working-directory>/`, named by the session id) after this skill finishes;
 removing it is the user's call, not this skill's.
 
-## Goal turn
-
-The goal is set in a turn of its own, before the brief, because the CLI's goal command reads
-everything after `/goal` as the condition, within a limit the whole brief can exceed. The command
-engages only where the CLI allows it — among its conditions, a trusted workspace and hooks
-allowed — so the turn's own record is read for whether it did:
-
-```bash
-D=/tmp/goal_research_${SUFFIX}
-printf '/goal %s\n' "{goal condition}" \
-  | claude -p --session-id "{session_id}" --output-format stream-json --verbose \
-      > "$D/goal.events.jsonl" 2> "$D/goal.warn.txt"
-printf '%s\n' "$?" > "$D/goal.status"
-grep '^{' "$D/goal.events.jsonl" | jq -se 'any(.[]; .type == "active_goal" and .value != null)' > /dev/null \
-  && echo 'goal engaged' || echo 'goal not engaged'
-```
-
-"goal not engaged" — a refusal, an error, or no goal event — goes to Phase 4 as such, and the run
-proceeds to the brief; the Phase 3 loop judges the goal condition in this session either way.
-
 ## Passes
 
-Pass `0` sends the brief, and each continuation sends the continuation message, as a turn of the
-same session, through the host's background execution facility. `<tavily>` stands for the server
-name `claude mcp list` showed:
+Pass `0` sends the brief and starts the session with `--session-id`. Pass `1` is the goal turn:
+`/goal` followed by the goal condition, alone, resumed into the same session as soon as pass `0`
+has returned, so the goal engages with the research target already in the session's context.
+Each later pass sends the continuation message. Every pass goes through the host's background
+execution facility. `<tavily>` stands for the server name `claude mcp list` showed:
 
 ```bash
 D=/tmp/goal_research_${SUFFIX}; P=$D/p${PASS}
-IN=$D/brief.txt; [ "${PASS}" = 0 ] || IN=$D/continue.txt
-claude -p --resume "{session_id}" --output-format stream-json --verbose \
+[ -f "$D/goal.txt" ] || printf '/goal %s\n' "{goal condition}" > "$D/goal.txt"
+case "${PASS}" in
+  0) IN=$D/brief.txt;    SESSION=--session-id ;;
+  1) IN=$D/goal.txt;     SESSION=--resume ;;
+  *) IN=$D/continue.txt; SESSION=--resume ;;
+esac
+claude -p "$SESSION" "{session_id}" --output-format stream-json --verbose \
   --allowedTools 'mcp__<tavily>' Skill \
   < "$IN" > "$P.events.jsonl" 2> "$P.warn.txt"
 printf '%s\n' "$?" > "$P.status"
 ```
+
+The goal turn is sent alone because the CLI's goal command reads everything after `/goal` as the
+condition, within a limit the whole brief can exceed. It engages only where the CLI allows it —
+among its conditions, a trusted workspace and hooks allowed — so its own record is read for
+whether it did:
+
+```bash
+grep '^{' "/tmp/goal_research_${SUFFIX}/p1.events.jsonl" \
+  | jq -se 'any(.[]; .type == "active_goal" and .value != null)' > /dev/null \
+  && echo 'goal engaged' || echo 'goal not engaged'
+```
+
+"goal not engaged" — a refusal, or no goal event — goes to Phase 4 as such; the goal turn is
+still a pass, read like any other below, and the Phase 3 loop judges the goal condition in this
+session either way. Phase 3 steps 2–4 run from pass `1` on: pass `0` is read for its outcome only,
+and a failed pass `0` ends the loop before the goal turn is sent.
 
 `--output-format stream-json --verbose` is what makes the run's tool calls readable: each event is
 one JSON line in the Claude message record shape Phase 3 step 2 reduces, and each turn ends with a

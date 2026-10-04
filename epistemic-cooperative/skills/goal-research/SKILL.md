@@ -50,7 +50,7 @@ The research question is passed unchanged into the research brief — paraphrasi
 
 ## Phase 2: Launch (Background)
 
-Generate a unique suffix for this run, `SUFFIX=$(openssl rand -hex 4)`, and create its temp directory, `mkdir -p /tmp/goal_research_${SUFFIX}`. Every file this skill writes lives there. The run proceeds in **passes**: the launch is pass `0`, and each continuation in Phase 3 is the next pass. Shell state does not persist between separate command calls, so substitute `${SUFFIX}`, the current `${PASS}`, and every other value generated here literally into each later block.
+Generate a unique suffix for this run, `SUFFIX=$(openssl rand -hex 4)`, and create its temp directory, `mkdir -p /tmp/goal_research_${SUFFIX}`. Every file this skill writes lives there. The run proceeds in **passes**: the launch is pass `0`, and each later turn of the same run — a goal turn where the host's reference sends one, then each continuation in Phase 3 — is the next pass. Shell state does not persist between separate command calls, so substitute `${SUFFIX}`, the current `${PASS}`, and every other value generated here literally into each later block.
 
 ### Research brief
 
@@ -58,7 +58,7 @@ Generate a unique suffix for this run, `SUFFIX=$(openssl rand -hex 4)`, and crea
 
 > Every uncertainty this session's research target turns on is either filled by a citation to a source this session's Tavily calls returned, or returned open with its reach — the person's marked as theirs.
 
-Every runner receives this brief, written to `/tmp/goal_research_${SUFFIX}/brief.txt`, with `{inquire}` set to `/inquire` for `claude` and `$inquire` for `codex`, and `{goal}` set to `/goal ` followed by the goal condition for `codex` and to `Goal: ` followed by it for `claude` — on a Claude route the goal command, where it is used at all, is set apart from the brief, as the host's reference says:
+Every runner receives this brief, written to `/tmp/goal_research_${SUFFIX}/brief.txt`, with `{inquire}` set to `/inquire` for `claude` and `$inquire` for `codex`, and `{goal}` set to `/goal ` followed by the goal condition for `codex` and to `Goal: ` followed by it for `claude` — on a Claude route the goal command, where it is used at all, is sent apart from the brief and after it, as the host's reference says:
 
 ```
 {goal}
@@ -137,7 +137,7 @@ option either.
 
 ## Phase 3: Collection, Reading, and Continuation
 
-Wait for the background task completion notification — do not poll or sleep. Steps 1–4 run after every pass. Each pass's outcome is read from that pass alone first; only a pass that returned is read further, over the whole run so far.
+Wait for the background task completion notification — do not poll or sleep. Steps 1–4 run after every pass, from the pass the host's reference names where it sends a goal turn after the launch. Each pass's outcome is read from that pass alone first; only a pass that returned is read further, over the whole run so far.
 
 ### 1. The pass outcome
 
