@@ -14,7 +14,7 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 
 ### The Solution
 
-**Conduction over Substrate**: Hyphegesis drafts the whole method as one map — the lines of work and how they relate, who runs each and where, inferred from the tools the running environment describes — and draws it only as precisely as reaching the goal is worth: where trying is cheap and can be undone, a coarse map run once and checked may be the method. The user keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust, given as a broad direction. After every answer the map is drawn again with a ledger of what changed. The method is taken on the user's word once what it takes was shown with its evidence and the AI's contrary grounds — or relayed at the start where the user's own words already settle it — and handed off with what it carries; then the run ends. A decision whose evidence arrives later is deferred — decided by whoever runs the method where the authority given entrusts it, otherwise brought back to the user — and so is a need only the user can supply (a secret to set, a deployment handed to runtime). Whoever runs the method comes back to the user mid-way only for such a returning decision, a decision the user left open, an act outside or at the edge of the authority given or past its lifetime, or a finding beyond the direction the user gave; otherwise it returns once, with one consolidated summary when the method has run. Hyphegesis does not execute the work, and whether a capability is there is read from what the environment returns, never from a description.
+**Conduction over Substrate**: Hyphegesis drafts the whole method as one map — the lines of work and how they relate, who runs each and where, inferred from the tools the running environment describes — and draws it only as precisely as reaching the goal is worth: where trying is cheap and can be undone, a coarse map run once and checked may be the method. The user keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust and its limits, given as a broad direction. After every answer the map is drawn again with a ledger of what changed. The method is taken on the user's word once what it takes was shown with its evidence and the AI's contrary grounds — or relayed at the start where the user's own words already settle it — and handed off with what it carries; then the run ends. A decision whose evidence arrives later is deferred — decided by whoever runs the method where the authority given entrusts it, otherwise brought back to the user — and so is a need only the user can supply (a secret to set, a deployment handed to runtime). Whoever runs the method comes back to the user mid-way only for such a returning decision, a decision the user left open, an act outside or at the edge of the authority given or past its lifetime, a finding beyond the direction the user gave, or something only the user can supply that nothing anticipated (a credential, an error it cannot resolve); otherwise it returns once, with one consolidated summary when the method has run. Hyphegesis does not execute the work, and whether a capability is there is read from what the environment returns, never from a description.
 
 ### Difference from Other Protocols
 
@@ -43,7 +43,7 @@ Hyphegesis lays out one map of the whole method before asking anything: what the
 
 ## What a method settles
 
-These are the questions the map answers from the work in front of it — guidance for drawing it, not slots to fill:
+These are the questions the map answers from the work in front of it — guidance for drawing it. The rows marked the user's stand only by the user's words:
 
 | Question | What it decides |
 |----------|-----------------|
@@ -53,5 +53,7 @@ These are the questions the map answers from the work in front of it — guidanc
 | Combination | How separately produced results are combined (the user's to decide) |
 | Stopping | When each line, and the whole method, stops (the user's to decide) |
 | Destination | Where each result goes beyond the end summary every result returns in — a next unit of work, for one (the user's to decide) |
+| Constraints | What is in force on the work — a direction for who runs it, whether the user will be present, a horizon among them (the user's to decide) |
+| Authority | What the user entrusts and its limits, given as a broad direction (the user's to decide) |
 
 A result that must cross into a later session (after `/compact`, `/clear`, or in a new session) is written to a record by whoever runs the method, and the later session is pointed at that record. `/conduct` stays single-session in its own reasoning; only the result crosses.
