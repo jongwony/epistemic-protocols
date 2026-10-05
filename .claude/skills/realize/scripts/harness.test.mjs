@@ -63,7 +63,8 @@ if (kind === 'exec') {
     unlinkSync(auth);
     writeFileSync(auth, body);
   }
-  if (process.env.FAKE_CODEX_MODE === 'file-change') {
+  if (process.env.FAKE_CODEX_MODE === 'file-change'
+      || (process.env.FAKE_CODEX_MODE === 'file-change-on-resume' && resume)) {
     // A write the trace names, undone before the turn ends: the tree is the scaffold's again.
     console.log(JSON.stringify({
       type: 'item.completed',
@@ -438,11 +439,19 @@ test('a gate answered by its closing reply passes only when it stopped and then 
       row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| dispatch_observed 1/1, completed 1/1 \\| - \\|'),
     ]],
     // Every turn writes and puts the file back: the relay started its work though its tree ends
-    // as the scaffold's, while the tree-only witnesses see no change anywhere.
+    // as the scaffold's, and the taking's turn 1 wrote, so its gate did not stop, though its tree
+    // is unchanged after every turn.
     ['file-change', [
       row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| target_preserved 1/1, completed 1/1 \\| - \\|'),
       row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 2/2 \\|'),
       row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| dispatch_observed 1/1, completed 1/1 \\| - \\|'),
+    ]],
+    // Only the resumed turn writes, and puts the file back: the taking stopped at turn 1 and
+    // proceeded at turn 2, though no turn leaves a changed tree.
+    ['file-change-on-resume', [
+      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| target_preserved 1/1, completed 1/1 \\| - \\|'),
+      row('conduct-taking-with-change', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_then_proceed 1/1, completed 1/1 \\| 2/2 \\|'),
+      row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
     ]],
   ]) {
     const { root, env } = fixture();
