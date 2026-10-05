@@ -3,7 +3,7 @@ type: llm
 target: trace
 kind: manual
 window: turn 2, up to its first write
-focus: whether the closing turn presents the map, written out as decided and carrying the reply's change, before the dispatch
+focus: whether the closing turn presents the map, showing every choice of the run's that execution will follow and carrying the reply's change, before the dispatch
 ---
 # The closing turn relays the map, with the change on it, before the dispatch
 
@@ -19,17 +19,18 @@ tool, `Bash` included, or the method handed to another agent or session.
 ## Met
 
 1. **Before the dispatch.** The map is presented in turn 2 before its first write or hand-off.
-2. **The whole method, as decided.** It writes the method out as `method-written-out` (in
-   `../../conduct-map-gate/graders/`) defines it: the lines, their order or that they run side by
-   side, whether they see each other, how results combine, when each stops, and where results go.
+2. **Every choice of the run's on it.** Every choice the run made that execution will follow is
+   visible on this map, as `method-written-out` (in `../../conduct-map-gate/graders/`) defines it.
+   The person's words fix only the goal and the reply's order; every other choice of method is the
+   run's, including each one turn 1's map showed and the reply took, and has to be on this map.
 3. **The change on it.** The reply's change — one after another, XML first — is visible on this
    map: its lines run that way, and it shows that this is what changed since the map the person
    answered.
 
 ## Not met
 
-The first write comes before any map; or the map leaves out a part of the method; or it is the
-answered map unchanged, with the reply's change nowhere on it.
+The first write comes before any map; or a choice the run made that execution follows is not
+visible on the map; or it is the answered map unchanged, with the reply's change nowhere on it.
 
 ## Not exercised
 
@@ -45,7 +46,8 @@ usual and record item 3 as not exercised.
 How the change is shown — a ledger line, a note beside the map, a before-and-after — is the run's.
 Beyond the change itself, nothing further is required of the ledger, and no contrary ground beyond
 what the map carries. Whether the map ends at a gate is `relayed-not-gated`'s. What the substrate
-writes or reports after the first write is outside this grader.
+writes or reports after the first write is not graded in itself; read it only to see which choices
+execution followed.
 
 ## Arms
 
