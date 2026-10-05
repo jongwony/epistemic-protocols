@@ -8,7 +8,7 @@ User-facing emit (the map, the change ledger under it, the taking brief, and any
 
 ## When some of what is in view belongs to a later round or the taking brief rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, the taking brief, or later cycles.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text or later cycles.
 
 ## When where a sentence sits relative to the gate is in question
 
