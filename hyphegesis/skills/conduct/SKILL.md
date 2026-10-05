@@ -346,20 +346,18 @@ def resolutionCoord : Coord P Unit :=
 /-- **Your reading**: the person's taking of the method; `open_` until one reaches it. -/
 axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
 
-/-- **Your judgment**, read only where the run opens, before any map: the person's own words,
-    read against the context as it now stands, already settle every person-held judgment the
-    method needs — what deferred decisions remain is said explicitly, and where they give a grant,
-    its horizon — so no value of yours on a coordinate the person holds would be taken unseen. It
-    stands only where, if the person will not be present, the way back to them is not
-    unconfirmed; your contrary grounds do not hold it back — they ride the taking brief. The
-    placement, the lifetime past what the person fixed, and what the method needs are your
-    inference, not among these: the relay presentation and the taking brief show them, each need
-    observed or unconfirmed. Words from an earlier run settle nothing here, and a run
-    you opened does not relay: nothing said before its first map settles it. Where an observation
-    found something missing — something the method needs, or the record an incoming pointer
-    names — the person sees that on a map first. Once a map has been shown, words that settle the
-    method are a taking. Your reading that the work needs no conducting settles nothing here: it
-    is a contrary ground like any other. -/
+/-- **Your judgment**, read only where the run opens, before any map: the person's own words, read
+    against the context as it now stands, already settle every person-held judgment the method needs
+    — what deferred decisions remain is said explicitly, and where they give a grant, its horizon —
+    so no value of yours on a coordinate the person holds would be taken unseen. It stands only
+    where, if the person will not be present, the way back to them is not unconfirmed; your contrary
+    grounds do not hold it back — they ride the taking brief. The placement, the lifetime past what
+    the person fixed, and what the method needs are your inference, not among these: the relay
+    presentation and the taking brief show them, each need observed or unconfirmed. Words from an
+    earlier run settle nothing here, and a run you opened does not relay: nothing said before its
+    first map settles it. Once a map has been shown, words that settle the method are a taking. Your
+    reading that the work needs no conducting settles nothing here: it is a contrary ground like any
+    other. -/
 axiom RelaySupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person's words settle a method without a map. -/
