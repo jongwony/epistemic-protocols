@@ -55,7 +55,7 @@ if (kind === 'exec') {
   if (process.env.FAKE_CODEX_MODE === 'incomplete') process.exit(9);
   if (process.env.FAKE_CODEX_MODE === 'mutate'
       || (process.env.FAKE_CODEX_MODE === 'mutate-on-resume' && resume)) {
-    appendFileSync(process.cwd() + '/app/main.py', '\\nthis is not valid Python\\n');
+    appendFileSync(process.cwd() + '/' + (process.env.FAKE_CODEX_MUTATE_FILE || 'app/main.py'), '\\nthis is not valid Python\\n');
   }
   if (process.env.FAKE_CODEX_MODE === 'replace-auth' && authLink) {
     // What a writer that renames over its target would leave: a regular file in the link's place.
@@ -409,6 +409,44 @@ test('a turn that changes the tree ends the script and fails preservation', () =
       /\| 0 \| 0\/1 \| 1 \| n\/a \| target_read_first 1\/1, target_preserved 0\/1, completed 1\/1 \| 2\/5 \|/);
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a gate answered by its closing reply passes only when it stopped and then proceeded', () => {
+  const cases = 'conduct-map-gate,conduct-taking-with-change,conduct-relay';
+  const row = (name, cells) => new RegExp(`\\| bare \\| ${name} \\| 1 \\| ${cells}`);
+  for (const [mode, expected] of [
+    // Turn 1 leaves the tree alone and only the resumed turn writes: the map stops, the taking
+    // proceeds, and a single-turn relay that wrote nothing has not proceeded.
+    ['mutate-on-resume', [
+      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| target_preserved 1/1, completed 1/1 \\| - \\|'),
+      row('conduct-taking-with-change', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_then_proceed 1/1, completed 1/1 \\| 2/2 \\|'),
+      row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| proceed_observed 0/1, completed 1/1 \\| - \\|'),
+    ]],
+    // Turn 1 writes: the map did not stop, the script ends before the taking, and the relay
+    // proceeded.
+    ['mutate', [
+      row('conduct-map-gate', '0 \\| 0/1 \\| 1 \\| n/a \\| target_preserved 0/1, completed 1/1 \\| - \\|'),
+      row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 1/2 \\|'),
+      row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| proceed_observed 1/1, completed 1/1 \\| - \\|'),
+    ]],
+  ]) {
+    const { root, env } = fixture();
+    env.CODEX_API_KEY = 'codex-secret';
+    env.FAKE_CODEX_MODE = mode;
+    env.FAKE_CODEX_MUTATE_FILE = 'exporters/csv_export.py';
+    env.REALIZE_CASES = cases;
+    try {
+      assert.equal(invoke(env, 'setup', 'conduct').status, 0);
+      const run = invoke(env, 'run', 'conduct');
+      assert.equal(run.status, 0, run.stderr || run.stdout);
+      const report = invoke(env, 'report', 'conduct', '--markdown');
+      assert.equal(report.status, 0, report.stderr || report.stdout);
+      for (const pattern of expected) assert.match(report.stdout, pattern, `${mode}: ${pattern}`);
+      assert.match(report.stdout, /brief-before-dispatch, no-redraw-no-wait/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   }
 });
 

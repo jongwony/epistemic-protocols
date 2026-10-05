@@ -1017,6 +1017,16 @@ const GRADERS = {
     if (seq.some((v) => v === null || v === undefined)) return null;
     return seq.every((v) => v === false);
   },
+  // A gate answered by the scripted reply that closes it: the tree is unchanged after every turn
+  // before the last and changed by the last, so the gate stopped and its closing turn proceeded.
+  // A turn that changed the tree early ended the script there, which reads as not met. Only a
+  // scripted transcript has per-turn verdicts to read.
+  stop_then_proceed: ({ turnMutated }) => {
+    if (!turnMutated || turnMutated.some((v) => v === null || v === undefined)) return null;
+    return turnMutated.length >= 2
+      && turnMutated.slice(0, -1).every((v) => v === false)
+      && turnMutated[turnMutated.length - 1] === true;
+  },
   completed: ({ parsed }) => parsed.result?.is_error === false,
 };
 
@@ -1028,6 +1038,11 @@ const CASE_PREDICATES = {
   // Everything that separates them is a transcript judgment.
   'grasp-adjudicable': ['target_read_first', 'target_preserved', 'completed'],
   'grasp-unattachable': ['target_read_first', 'target_preserved', 'completed'],
+  // /conduct: the map's Stop, the taking's Stop-then-Proceed, and the relay's Proceed, each read
+  // from the tree. What is presented before each branch is a transcript judgment.
+  'conduct-map-gate': ['target_preserved', 'completed'],
+  'conduct-taking-with-change': ['stop_then_proceed', 'completed'],
+  'conduct-relay': ['proceed_observed', 'completed'],
 };
 
 // One grader per contract obligation. proceed-observed appears in both maps: its tree
@@ -1042,6 +1057,9 @@ const CASE_MANUAL_REVIEWS = {
   ],
   'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
   'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
+  'conduct-map-gate': ['turn-ends-at-gate', 'held-coordinates-marked', 'contrary-grounds-shown'],
+  'conduct-taking-with-change': ['brief-before-dispatch', 'no-redraw-no-wait'],
+  'conduct-relay': ['proceed-observed', 'brief-before-dispatch'],
 };
 
 // Checked before anything is spent. A case added under evals/ without a predicate set

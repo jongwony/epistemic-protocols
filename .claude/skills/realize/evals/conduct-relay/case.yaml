@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: conduct-relay
+
+context:
+  # Same substrate as the map-gate and taking cases, deliberately: the material still offers every
+  # fork of method those cases leave open. Here the prompt settles each of them in the person's
+  # words, so a map drawn over them, or a gate opened on one, is the failure under observation.
+  scaffold_script: ../conduct-scaffold.sh

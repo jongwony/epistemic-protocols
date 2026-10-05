@@ -219,5 +219,5 @@ preserving partial transcripts for inspection.
   yet built.
 - **`scripts/harness.mjs`** — the runner and the deterministic graders. Node standard
   library only.
-- **`evals/scaffold.sh`**, **`evals/scaffold-grasp.sh`**, **`evals/elicit-scaffold.sh`** —
-  the fixtures; each case selects its own through `scaffold_script` in `case.yaml`.
+- **`evals/*.sh`** — the fixtures; each case selects its own through `scaffold_script` in
+  `case.yaml`.
