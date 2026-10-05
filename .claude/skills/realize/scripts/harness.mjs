@@ -833,11 +833,13 @@ function parseClaudeTurn(events) {
   const result = events.find((e) => e.type === 'result');
   const toolUses = [];
   const skillInvocations = [];
+  let writes = 0;
   for (const e of events) {
     const content = e?.message?.content;
     if (e.type === 'assistant' && Array.isArray(content)) {
       for (const b of content) {
         if (b.type !== 'tool_use') continue;
+        if (WRITE_TOOLS.has(b.name)) writes++;
         toolUses.push(b.name === 'Bash' && readsThroughShell(String(b.input?.command || ''))
           ? 'Read' : b.name);
         // The identifier only. Matching against the serialized input would also match a
@@ -850,7 +852,7 @@ function parseClaudeTurn(events) {
   const texts = events.filter((e) => e.type === 'assistant' && Array.isArray(e?.message?.content))
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
-  return { init, result, toolUses, skillInvocations, texts };
+  return { init, result, toolUses, skillInvocations, texts, writes };
 }
 
 function parseClaude(events) {
@@ -871,7 +873,7 @@ function parseClaude(events) {
     result,
     toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations: turns.flatMap((t) => t.skillInvocations),
-    turns: turns.map((t) => ({ toolUses: t.toolUses })),
+    turns: turns.map((t) => ({ toolUses: t.toolUses, writes: t.writes })),
     lastMessage: texts[texts.length - 1] || '',
   };
 }
@@ -892,7 +894,8 @@ function parseCodexTurn(events) {
     .map(() => 'Read');
   const messages = items.filter((item) => item.type === 'agent_message').map((item) => item.text).filter(Boolean);
   const completed = events.find((e) => e.type === 'turn.completed');
-  return { toolUses, skillInvocations, messages, completed };
+  const writes = items.filter((item) => item.type === 'file_change').length;
+  return { toolUses, skillInvocations, messages, completed, writes };
 }
 
 function parseCodex(events) {
@@ -911,7 +914,7 @@ function parseCodex(events) {
     usage,
     toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations,
-    turns: turns.map((t) => ({ toolUses: t.toolUses })),
+    turns: turns.map((t) => ({ toolUses: t.toolUses, writes: t.writes })),
     lastMessage: messages[messages.length - 1] || '',
   };
 }
@@ -961,6 +964,9 @@ function treeMutated(workdir, caseName) {
 }
 
 const isRead = (t) => t === 'Read' || t === 'Grep' || t === 'Glob';
+// A file write the trace names as one: Claude's file-editing tools, Codex's `file_change` item. A
+// write made through the shell is not among them; the tree digest is what sees that one.
+const WRITE_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 // A shell command that prints files or the tree. Both runners read through the shell, so
 // a read is recognised by what the command does rather than by which tool carried it.
 const READ_LIKE = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
@@ -1017,6 +1023,16 @@ const GRADERS = {
     if (seq.some((v) => v === null || v === undefined)) return null;
     return seq.every((v) => v === false);
   },
+  // Turn 1 started the work, wherever the tree ended up. A method may undo its own write -- put a
+  // file back and stop -- so an unchanged tree at the end of the turn is not a Stop. What the
+  // harness can see of a write made during the turn is a write the trace names (a Codex
+  // `file_change`, a Claude Write or Edit) or a tree that differs once the turn ends; a write made
+  // only through the shell and undone in the same turn shows as neither.
+  dispatch_observed: ({ parsed, mutated, turnMutated }) => {
+    const tree = (turnMutated || [mutated])[0];
+    if ((parsed.turns?.[0]?.writes || 0) > 0 || tree === true) return true;
+    return tree === false ? false : null;
+  },
   // A gate answered by the scripted reply that closes it: the tree is unchanged after every turn
   // before the last and changed by the last, so the gate stopped and its closing turn proceeded.
   // A turn that changed the tree early ended the script there, which reads as not met. Only a
@@ -1042,7 +1058,7 @@ const CASE_PREDICATES = {
   // from the tree. What is presented before each branch is a transcript judgment.
   'conduct-map-gate': ['target_preserved', 'completed'],
   'conduct-taking-with-change': ['stop_then_proceed', 'completed'],
-  'conduct-relay': ['proceed_observed', 'completed'],
+  'conduct-relay': ['dispatch_observed', 'completed'],
 };
 
 // One grader per contract obligation. proceed-observed appears in both maps: its tree

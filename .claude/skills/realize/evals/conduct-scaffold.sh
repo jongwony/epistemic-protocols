@@ -6,8 +6,9 @@
 # All three cases mount the SAME directory, deliberately. The map-gate case and the taking case
 # send one prompt that leaves the method open, and are graded on the map that stops and on the
 # taking turn that hands off; the relay case sends a prompt that settles the method itself, and is
-# graded on proceeding without a map. A different substrate under the relay case would let a run
-# relay or stop because of the tree rather than because of what the person's words settled.
+# graded on relaying the map and proceeding without a gate. A different substrate under the relay
+# case would let a run relay or stop because of the tree rather than because of what the person's
+# words settled.
 #
 # What the material makes a real fork of method, for a prompt that does not settle it:
 #   lines        three exporters, each with its own module and its own test -> one line each, or one

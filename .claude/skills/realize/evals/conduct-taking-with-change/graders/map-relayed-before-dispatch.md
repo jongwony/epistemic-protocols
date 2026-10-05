@@ -36,6 +36,10 @@ answered map unchanged, with the reply's change nowhere on it.
 Turn 1 presented no map ending at a gate (see `oracle.md`), or the run ended at turn 1. Record it
 under this grader; it is neither met nor not met.
 
+Item 3 alone is not exercised where turn 1's map already ran the exporters one at a time with XML
+first: the reply then changes nothing, and there is no change to show. Judge items 1 and 2 as
+usual and record item 3 as not exercised.
+
 ## Judging note
 
 How the change is shown — a ledger line, a note beside the map, a before-and-after — is the run's.

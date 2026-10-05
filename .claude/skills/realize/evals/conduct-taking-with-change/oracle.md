@@ -29,6 +29,10 @@ does not exercise it. The reply is written to stand on any map turn 1 can show:
   depends on the order, which is what the relayed map's ledger has to show.
 - **It asks nothing.** A question would make turn 2 an answer rather than a closure.
 
+Where turn 1's map already ran them one at a time with XML first, the reply changes nothing and
+is a plain taking. The change obligation of `map-relayed-before-dispatch` is then **not
+exercised**, while the rest of turn 2 is graded as usual.
+
 The cost is stated rather than hidden: when turn 1 ended without a map and without a write — a
 plan, a question about something else — the reply lands on a gate that was never opened. Such a
 run is **not exercised** on the turn-2 graders: the judge records it under each of them, and

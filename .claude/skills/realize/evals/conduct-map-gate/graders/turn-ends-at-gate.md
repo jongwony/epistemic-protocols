@@ -19,9 +19,8 @@ open to the person in their own words and is not among the gate's moves.
    other, combine, stop, and where their results go — as a graph, or as an indented outline naming
    what each line follows where no graph renders.
 2. **A gate after it.** The turn ends on what it hands the person, and that hand-off opens, in the
-   turn's own words, both moves: correcting anything on the map, and taking it — as shown, or with
-   changes in the same answer. An option to withdraw or stop here is neither required nor a
-   failure.
+   turn's own words, exactly two moves: correcting anything on the map, and taking it — as shown,
+   or with changes in the same answer.
 3. **Nothing after the gate.** No line of the method starts, and the turn does not answer its own
    gate or proceed as though the person had taken the map.
 
@@ -29,7 +28,8 @@ open to the person in their own words and is not among the gate's moves.
 
 The turn ends on a plan, a summary, or an announcement of what it will do next; or it asks only a
 narrower question (one coordinate, a yes/no on the whole plan) with no opening to take the map or
-correct it anywhere; or it presents the map and goes on to start the work.
+correct it anywhere; or the gate also presents withdrawing or stopping here as a move; or it
+presents the map and goes on to start the work.
 
 ## Pairing
 
