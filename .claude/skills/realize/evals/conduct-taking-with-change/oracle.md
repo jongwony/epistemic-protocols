@@ -26,7 +26,7 @@ does not exercise it. The reply is written to stand on any map turn 1 can show:
   sequential with the XML exporter first. A draft that ran the lines side by side gains an order
   and loses its parallelism; a draft that already ran them one at a time almost surely began
   elsewhere, since nothing in the material puts XML first. Either way the change re-fills what
-  depends on the order, which is what the taking brief's ledger has to show.
+  depends on the order, which is what the relayed map's ledger has to show.
 - **It asks nothing.** A question would make turn 2 an answer rather than a closure.
 
 The cost is stated rather than hidden: when turn 1 ended without a map and without a write — a
@@ -36,6 +36,6 @@ run is **not exercised** on the turn-2 graders: the judge records it under each 
 
 ## What turn 2 is graded on
 
-Turn 2 is the closing turn. Its graders read what it presents before the dispatch — the taking
-brief and the change it carries — and that it does not wait. Whatever the substrate does once the
+Turn 2 is the closing turn. Its graders read what it presents before the dispatch — the map,
+relayed with the change on it — and that it does not wait. Whatever the substrate does once the
 method is handed off, the quality of the migration included, is outside the case.

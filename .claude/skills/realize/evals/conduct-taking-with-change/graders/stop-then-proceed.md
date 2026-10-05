@@ -8,10 +8,10 @@ predicate: tree_digest(after turn 1) == tree_digest(scaffold) and tree_digest(af
 # The map stops, and the taking proceeds in the same turn
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, `conduct`, the
-`.mapGate`, `.converge` and `.handoff` entries of TOOL GROUNDING, and the Rule "Taking brief").
+`.mapGate`, `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING, and CONVERGENCE).
 Turn 1 presents the map and stops. The person's reply takes it, with one change; the turn that
-reads that taking presents the taking brief and hands the method off in the same turn without
-waiting, so the work starts there.
+reads that taking relays the map and hands the method off in the same turn without waiting, so
+the work starts there.
 
 `Write`, `Edit` and `Bash` are granted on purpose, so an unchanged tree after turn 1 is evidence of
 `Stop` rather than of a missing capability, and a changed tree after turn 2 is the witness that the
@@ -32,6 +32,6 @@ another gate.
 ## Pairing
 
 A changed tree after turn 2 says the work started; it does not say what was presented before it.
-`brief-before-dispatch` reads the brief and its order relative to the first write, and
-`no-redraw-no-wait` reads that nothing stood between the taking and the dispatch. The content of
+`map-relayed-before-dispatch` reads the relayed map and its order relative to the first write,
+and `relayed-not-gated` reads that nothing stood between the taking and the dispatch. The content of
 the change is the substrate's work and is not read here.

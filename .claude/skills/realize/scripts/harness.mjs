@@ -1058,8 +1058,8 @@ const CASE_MANUAL_REVIEWS = {
   'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
   'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
   'conduct-map-gate': ['turn-ends-at-gate', 'method-written-out', 'contrary-grounds-shown'],
-  'conduct-taking-with-change': ['brief-before-dispatch', 'no-redraw-no-wait'],
-  'conduct-relay': ['proceed-observed', 'brief-before-dispatch'],
+  'conduct-taking-with-change': ['map-relayed-before-dispatch', 'relayed-not-gated'],
+  'conduct-relay': ['proceed-observed', 'map-relayed-before-dispatch'],
 };
 
 // Checked before anything is spent. A case added under evals/ without a predicate set

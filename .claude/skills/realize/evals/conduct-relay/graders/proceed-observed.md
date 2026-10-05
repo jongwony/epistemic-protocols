@@ -8,10 +8,10 @@ predicate: tree_digest(after turn 1) != tree_digest(scaffold); the transcript ha
 # The relay proceeds: no map, no gate
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, `RelaySupported`,
-the `.relay`, `.converge` and `.handoff` entries of TOOL GROUNDING, and the Rule "Conduction
+the `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING, and the Rule "Conduction
 warrant"). Where the person's own words already settle the method at the start, the run relays:
-it presents the taking brief and hands the method off in the same turn. No map is drawn and no gate
-opened; a contrary ground the run holds rides the brief rather than holding the relay back.
+it presents the map as a relay and hands the method off in the same turn. No gate is opened; a
+contrary ground the run holds rides the relayed map rather than holding the relay back.
 
 The prompt asks for changes to the three exporter files, so a changed tree is the witness that the
 handoff occurred. `Write`, `Edit` and `Bash` are granted, so an unchanged tree is a stop, not a

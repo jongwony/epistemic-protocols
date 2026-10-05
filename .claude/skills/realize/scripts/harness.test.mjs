@@ -443,7 +443,7 @@ test('a gate answered by its closing reply passes only when it stopped and then 
       const report = invoke(env, 'report', 'conduct', '--markdown');
       assert.equal(report.status, 0, report.stderr || report.stdout);
       for (const pattern of expected) assert.match(report.stdout, pattern, `${mode}: ${pattern}`);
-      assert.match(report.stdout, /brief-before-dispatch, no-redraw-no-wait/);
+      assert.match(report.stdout, /map-relayed-before-dispatch, relayed-not-gated/);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
