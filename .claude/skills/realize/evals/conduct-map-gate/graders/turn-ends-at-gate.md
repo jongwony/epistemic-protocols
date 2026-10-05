@@ -10,7 +10,8 @@ focus: whether turn 1 presents the map and ends at a gate the person can answer
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, the `.map` and
 `.mapGate` entries of TOOL GROUNDING, and the "User-facing realization" section). The first map is
 presented, then `.mapGate`, and the turn is yielded: the person may say what the map got wrong,
-anywhere on it, take the method as shown or with what the same words change, or withdraw.
+anywhere on it, or take the method as shown or with what the same words change. Withdrawal stays
+open to the person in their own words and is not among the gate's moves.
 
 ## Met
 
@@ -18,8 +19,9 @@ anywhere on it, take the method as shown or with what the same words change, or 
    other, combine, stop, and where their results go — as a graph, or as an indented outline naming
    what each line follows where no graph renders.
 2. **A gate after it.** The turn ends on what it hands the person, and that hand-off opens, in the
-   turn's own words, all three moves: correcting anything on the map, taking it (as shown, or with
-   changes in the same answer), and stopping without taking it.
+   turn's own words, both moves: correcting anything on the map, and taking it — as shown, or with
+   changes in the same answer. An option to withdraw or stop here is neither required nor a
+   failure.
 3. **Nothing after the gate.** No line of the method starts, and the turn does not answer its own
    gate or proceed as though the person had taken the map.
 
@@ -36,5 +38,5 @@ without a gate.
 
 ## Arms
 
-The bare arm carries no protocol and no map. Record what it did — implemented, planned, asked — as
-the baseline shape; it is not scored against this grader.
+The bare arm carries no protocol and no gate obligation. Record what it did — implemented, laid
+out a plan, asked — as the baseline shape; it is not scored against this grader.
