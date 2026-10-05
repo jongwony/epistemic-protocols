@@ -189,7 +189,8 @@ axiom placement : Context P → String
 
 /-- **Your reading**: what the method needs from its substrate to run as drawn — an act, a tool, a
     session, a record to write to where a result's destination is a later session; and, where the
-    substrate does not share this session, a way back to the person for what comes back to them, and a way to read the person's turns that govern its grants and coordinates. -/
+    substrate does not share this session, a way back to the person for what comes back to them, and
+    a way to read the person's turns that govern its grants and coordinates. -/
 axiom required : Context P → List String
 
 /-- **Your judgment**: the cited observation shows whether the substrate can provide `k`. -/
@@ -312,14 +313,13 @@ structure Deferred where
   binds    : String
   toPerson : Bool
 
-/-- **Your reading**: what the method leaves open, each read along two questions that may both
-    hold: does its deciding evidence arrive only later, and can only the person supply or settle
-    it? One whose evidence arrives
-    later is decided by the substrate only where a recorded grant's reach covers it, shown on the
-    map as covered by that grant; where the grant is open or its reach unclear, and wherever only
-    the person can supply or settle it, it returns to them (`toPerson`)
-    — a secret or credential to set, a runtime error the substrate cannot resolve, a deployment
-    handed to runtime, a fusion whose shape only the person can choose. -/
+/-- **Your reading**: what the method leaves open, each read along two questions that may both hold:
+    does its deciding evidence arrive only later, and can only the person supply or settle it? One
+    whose evidence arrives later is decided by the substrate only where a recorded grant's reach
+    covers it, shown on the map as covered by that grant; where the grant is open or its reach
+    unclear, and wherever only the person can supply or settle it, it returns to them (`toPerson`) —
+    a secret or credential to set, a runtime error the substrate cannot resolve, a deployment handed
+    to runtime, a fusion whose shape only the person can choose. -/
 axiom deferred : Context P → List Deferred
 
 /-- **Your reading**: how long the method's grants and readings hold — following a horizon the
@@ -412,19 +412,20 @@ axiom source : Context P → Option NavigationBlock
 /-- `ConductedMethod`: the method handed off and what it carries — each field as the taking brief
     showed it, and the substrate reads what is uncertain against this record. `plan` is the method
     as the map the closing turn answered showed it, with what that turn itself set or changed and
-    what was re-filled because of it — on a relay, the person's words for what they settled and
-    your draft for the rest — and where its text and a recorded value differ, the recorded value
-    governs. The substrate executes it as the Rule "Handoff carries its obligations" names. Independent lines are handed off so they do not see each other's results before
-    those results combine. Every navigation block this method leaves for a reader outside this
-    session — `source`, and the one over the record a later-session result is written to — is
-    supplied by its producer from that record's own identity, source session, and purpose; its
-    grounding instruction directs the recipient to run `/inquire` or equivalent grounding over the
-    record and its cited sources, recover the retained and entrusted judgments from the governing
-    utterances, and keep an unsupported decision open while independent work may continue.
-    `pointer` is the incoming block, carried unchanged. `required` names what the substrate must
-    provide; naming it is not evidence that it is there, which `feasibility` reads.
-    `c` is the session context its citations resolve in, and is not part of what the handoff
-    dispatches; `source` is how a substrate outside it reaches what they cite. -/
+    what was re-filled because of it — on a relay, the person's words for what they settled and your
+    draft for the rest — and where its text and a recorded value differ, the recorded value governs.
+    The substrate executes it as the Rule "Handoff carries its obligations" names. Independent lines
+    are handed off so they do not see each other's results before those results combine. Every
+    navigation block this method leaves for a reader outside this session — `source`, and the one
+    over the record a later-session result is written to — is supplied by its producer from that
+    record's own identity, source session, and purpose; its grounding instruction directs the
+    recipient to run `/inquire` or equivalent grounding over the record and its cited sources,
+    recover the retained and entrusted judgments from the governing utterances, and keep an
+    unsupported decision open while independent work may continue. `pointer` is the incoming block,
+    carried unchanged. `required` names what the substrate must provide; naming it is not evidence
+    that it is there, which `feasibility` reads. `c` is the session context its citations resolve
+    in, and is not part of what the handoff dispatches; `source` is how a substrate outside it
+    reaches what they cite. -/
 structure ConductedMethod (P : Type) (c : Context P) where
   plan        : Method
   placement   : String
