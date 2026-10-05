@@ -9,7 +9,7 @@ Conduct how a session's epistemic work will be carried out — the lines of work
 
 ## Definition
 
-**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine; what rests on me goes no further without me and comes back to me at the end, while the rest runs on. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes first presents a brief of what was taken — with its evidence, your contrary grounds, and what the person had not yet seen — and hands it off in the same turn without waiting, carrying what the brief showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs — a way back to the person among them — and the run ends there.
+**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine; what rests on me goes no further without me and comes back to me at the end, while the rest runs on. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes first presents a brief of what was taken — with its evidence, your contrary grounds, and what the person had not yet seen — and hands it off in the same turn without waiting, carrying what the brief showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
 
 ```lean
 /-!
@@ -188,9 +188,7 @@ axiom draft : Context P → Method
 axiom placement : Context P → String
 
 /-- **Your reading**: what the method needs from its substrate to run as drawn — an act, a tool, a
-    session, a record to write to where a result's destination is a later session; and, where the
-    substrate does not share this session, a way back to the person for what comes back to them, and
-    a way to read the person's turns that govern its grants and coordinates. -/
+    session, a record to write to where a result's destination is a later session. -/
 axiom required : Context P → List String
 
 /-- **Your judgment**: the cited observation shows whether the substrate can provide `k`. -/
@@ -347,8 +345,7 @@ axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
 /-- **Your judgment**, read only where the run opens, before any map: the person's own words, read
     against the context as it now stands, already settle every person-held judgment the method needs
     — what deferred decisions remain is said explicitly, and where they give a grant, its horizon —
-    so no value of yours on a coordinate the person holds would be taken unseen. It stands only
-    where, if the person will not be present, the way back to them is not unconfirmed; your contrary
+    so no value of yours on a coordinate the person holds would be taken unseen. Your contrary
     grounds do not hold it back — they ride the taking brief. The placement, the lifetime past what
     the person fixed, and what the method needs are your inference, not among these: the relay
     presentation and the taking brief show them, each need observed or unconfirmed. Words from an
@@ -598,7 +595,7 @@ Present the map as TOOL GROUNDING's `.map` entry names it, then `.mapGate`, and 
 
 ## Rules
 
-- **Conduction warrant**: Invoking `/conduct` declares the deficit; do not judge it away. Where you read that the work needs no conducting, show it as a contrary ground, like any other you hold. Relay only at the start, where the person's own words already settle the method — their grant's horizon included where they give a grant — and, for a person who will not be present, the way back to them is not unconfirmed; never on a run you opened, before its first map. A contrary ground you hold rides the relay's taking brief rather than holding the relay back. Otherwise draw the map; once a map is shown, the method closes on a taking. Hyphegesis never conducts itself.
+- **Conduction warrant**: Invoking `/conduct` declares the deficit; do not judge it away. Where you read that the work needs no conducting, show it as a contrary ground, like any other you hold. Relay only at the start, where the person's own words already settle the method — their grant's horizon included where they give a grant; never on a run you opened, before its first map. A contrary ground you hold rides the relay's taking brief rather than holding the relay back. Otherwise draw the map; once a map is shown, the method closes on a taking. Hyphegesis never conducts itself.
 - **Recognition over Recall**: Present the whole method on one map with differential futures and yield at every Constitution interaction, so the person recognizes the method instead of composing it.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn or the taking brief, or placement relative to the gate is in question.
 - **Map precision**: Draw the map only as precisely as reaching the goal is worth; where trying is cheap and can be undone, a coarse map run once and checked against its use may be the method.
