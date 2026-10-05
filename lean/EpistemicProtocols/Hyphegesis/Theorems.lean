@@ -35,14 +35,22 @@ theorem unrelated_holds_gate (respond session : Context P → Response P) (c : C
       conduct respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [conduct, h]
 
-theorem uncovered_redraws (respond session : Context P → Response P) (c : Context P)
+theorem untaken_redraws (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false)
-    (hc : ¬ Covered (observe (fuse c u))) :
+    (hr : isFilled (resolution (observe (fuse c u))) = false) :
     conduct respond session c (u :: us) =
       conduct respond session
         (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
-  simp [conduct, hre, hw, hc]
+  simp [conduct, hre, hw, hr]
+
+theorem taking_hands_off_without_redraw (respond session : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (hw : isFilled (withdrawal (fuse c u)) = false)
+    (hr : isFilled (resolution (observe (fuse c u))) = true) :
+    conduct respond session c (u :: us) =
+      .conducted (observe (fuse c u)) (respond (observe (fuse c u))) := by
+  simp [conduct, hre, hw, hr]
 
 theorem observe_extends (c : Context P) : c <+: observe c := by
   simp only [observe]
@@ -54,7 +62,7 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
     (∃ c', c <+: c' ∧ conduct respond session c' us = o) ∨
     (isFilled (withdrawal (fuse c u)) = true ∧
       o = .withdrawn (closed (fuse c u))) ∨
-    (isFilled (resolution (observe (fuse c u))) = true ∧ Covered (observe (fuse c u)) ∧
+    (isFilled (resolution (observe (fuse c u))) = true ∧
       o = .conducted (observe (fuse c u)) (respond (observe (fuse c u)))) := by
   have fused : ∀ t : List (Turn P), c <+: fuse c u ++ t := fun t =>
     (List.prefix_append c [u.val]).trans (List.prefix_append _ _)
@@ -66,24 +74,24 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
   · split at h
     · exact .inr (.inl ⟨by assumption, h.symm⟩)
     · split at h
-      · rename_i hc
-        exact .inr (.inr ⟨hc.1, hc.2, h.symm⟩)
+      · rename_i hr
+        exact .inr (.inr ⟨hr, h.symm⟩)
       · exact .inl ⟨_, grows _, h⟩
 
-theorem conducted_by_person_covered (respond session : Context P → Response P) (c : Context P)
+theorem conducted_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
     (h : conduct respond session c us = .conducted c₁ t) :
-    c <+: c₁ ∧ isFilled (resolution c₁) = true ∧ Covered c₁ ∧ t = respond c₁ := by
+    c <+: c₁ ∧ isFilled (resolution c₁) = true ∧ t = respond c₁ := by
   induction us generalizing c with
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', hp, h'⟩ | ⟨_, h'⟩ | ⟨hr, hc, h'⟩
+        ⟨c', hp, h'⟩ | ⟨_, h'⟩ | ⟨hr, h'⟩
     · have := ih c' h'
       exact ⟨hp.trans this.1, this.2⟩
     · cases h'
     · cases h'
-      exact ⟨(List.prefix_append c [u.val]).trans (observe_extends _), hr, hc, rfl⟩
+      exact ⟨(List.prefix_append c [u.val]).trans (observe_extends _), hr, rfl⟩
 
 theorem map_shown_never_relays (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P) :
@@ -93,7 +101,7 @@ theorem map_shown_never_relays (respond session : Context P → Response P) (c :
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', -, h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩
+        ⟨c', -, h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
     · cases h'
@@ -106,7 +114,7 @@ theorem withdrawn_by_person (respond session : Context P → Response P) (c : Co
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', -, h'⟩ | ⟨hw, h'⟩ | ⟨_, _, h'⟩
+        ⟨c', -, h'⟩ | ⟨hw, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨_, hw, rfl⟩
@@ -115,7 +123,7 @@ theorem withdrawn_by_person (respond session : Context P → Response P) (c : Co
 theorem start_closes_only_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) :
     (∀ c₁ t, start respond session c us = .conducted c₁ t →
-      c <+: c₁ ∧ isFilled (resolution c₁) = true ∧ Covered c₁) ∧
+      c <+: c₁ ∧ isFilled (resolution c₁) = true) ∧
     (∀ c₁ t, start respond session c us = .relayed c₁ t →
       c₁ = observe c ∧ isFilled (relay c₁) = true) ∧
     (∀ r, start respond session c us = .withdrawn r →
@@ -125,9 +133,8 @@ theorem start_closes_only_by_person (respond session : Context P → Response P)
     simp only [start] at h
     split at h
     · cases h
-    · have := conducted_by_person_covered respond session _ us c₁ t h
-      exact ⟨((observe_extends c).trans (List.prefix_append _ _)).trans this.1, this.2.1,
-        this.2.2.1⟩
+    · have := conducted_by_person respond session _ us c₁ t h
+      exact ⟨((observe_extends c).trans (List.prefix_append _ _)).trans this.1, this.2.1⟩
   · intro c₁ t h
     simp only [start] at h
     split at h
@@ -151,7 +158,7 @@ theorem closure_hands_off (c : Context P) (t : Response P) :
 
 theorem handoff_only_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (h : handedOffBy (start respond session c us) = some .handoff) :
-    (∃ c₁ : Context P, c <+: c₁ ∧ isFilled (resolution c₁) = true ∧ Covered c₁) ∨
+    (∃ c₁ : Context P, c <+: c₁ ∧ isFilled (resolution c₁) = true) ∨
       isFilled (relay (observe c)) = true := by
   have ⟨hc, hr, _⟩ := start_closes_only_by_person respond session c us
   cases ho : start respond session c us with
