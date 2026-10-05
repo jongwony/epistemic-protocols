@@ -348,12 +348,11 @@ axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
     — what deferred decisions remain is said explicitly, and where they give a grant, its horizon —
     so no value of yours on a coordinate the person holds would be taken unseen. Your contrary
     grounds do not hold it back — they ride the taking brief. The placement, the lifetime past what
-    the person fixed, and what the method needs are your inference, not among these: the relay
-    presentation and the taking brief show them, each need observed or unconfirmed. Words from an
-    earlier run settle nothing here, and a run you opened does not relay: nothing said before its
-    first map settles it. Once a map has been shown, words that settle the method are a taking. Your
-    reading that the work needs no conducting settles nothing here: it is a contrary ground like any
-    other. -/
+    the person fixed, and what the method needs are your inference, not among these: the taking
+    brief shows them, each need observed or unconfirmed. Words from an earlier run settle nothing
+    here, and a run you opened does not relay: nothing said before its first map settles it. Once a
+    map has been shown, words that settle the method are a taking. Your reading that the work needs
+    no conducting settles nothing here: it is a contrary ground like any other. -/
 axiom RelaySupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person's words settle a method without a map. -/
@@ -404,21 +403,21 @@ axiom source : Context P → Option NavigationBlock
 
 /-- `ConductedMethod`: the method handed off and what it carries — each field as the taking brief
     showed it, and the substrate reads what is uncertain against this record. `plan` is the method
-    as the map the closing turn answered showed it, with what that turn itself set or changed and
-    what was re-filled because of it — on a relay, the person's words for what they settled and your
-    draft for the rest — and where its text and a recorded value differ, the recorded value governs.
-    The substrate executes it as the Rule "Handoff carries its obligations" names. Independent lines
-    are handed off so they do not see each other's results before those results combine. Every
-    navigation block this method leaves for a reader outside this session — `source`, and the one
-    over the record a later-session result is written to — is supplied by its producer from that
-    record's own identity, source session, and purpose; its grounding instruction directs the
-    recipient to run `/inquire` or equivalent grounding over the record and its cited sources,
-    recover the retained and entrusted judgments from the governing utterances, and keep an
-    unsupported decision open while independent work may continue. `pointer` is the incoming block,
-    carried unchanged. `required` names what the substrate must provide; naming it is not evidence
-    that it is there, which `feasibility` reads. `c` is the session context its citations resolve
-    in, and is not part of what the handoff dispatches; `source` is how a substrate outside it
-    reaches what they cite. -/
+    as the map the closing turn answered showed it, with what changed since that map, as the taking
+    brief showed it — on a relay, the person's words for what they settled and your draft for the
+    rest — and where its text and a recorded value differ, the recorded value governs. The substrate
+    executes it as the Rule "Handoff carries its obligations" names. Independent lines are handed
+    off so they do not see each other's results before those results combine. Every navigation block
+    this method leaves for a reader outside this session — `source`, and the one over the record a
+    later-session result is written to — is supplied by its producer from that record's own
+    identity, source session, and purpose; its grounding instruction directs the recipient to run
+    `/inquire` or equivalent grounding over the record and its cited sources, recover the retained
+    and entrusted judgments from the governing utterances, and keep an unsupported decision open
+    while independent work may continue. `pointer` is the incoming block, carried unchanged.
+    `required` names what the substrate must provide; naming it is not evidence that it is there,
+    which `feasibility` reads. `c` is the session context its citations resolve in, and is not part
+    of what the handoff dispatches; `source` is how a substrate outside it reaches what they cite.
+    -/
 structure ConductedMethod (P : Type) (c : Context P) where
   plan        : Method
   placement   : String

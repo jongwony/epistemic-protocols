@@ -44,7 +44,7 @@ theorem untaken_redraws (respond session : Context P → Response P) (c : Contex
         (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
   simp [conduct, hre, hw, hr]
 
-theorem taking_hands_off_without_redraw (respond session : Context P → Response P)
+theorem taking_closes_on_its_turn (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (fuse c u)) = false)
     (hr : isFilled (resolution (observe (fuse c u))) = true) :
