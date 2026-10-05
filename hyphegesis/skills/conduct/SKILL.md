@@ -322,10 +322,11 @@ axiom deferred : Context P → List Deferred
     otherwise; past it, what rested on them returns open, as `operative` reads it. -/
 axiom lifetime : Context P → String
 
-/-- **Your record**: the contrary grounds you hold at the closure — a value you would set
-    otherwise, the draft's weakest assumption, a line you doubt, that the work may need no
-    conducting, a capability you expect the substrate cannot provide, a pointer that did not
-    resolve — shown on the taking brief and attached to the closure; empty when there are none. -/
+/-- **Your record**: the contrary grounds you hold at the closure — a value you would set otherwise,
+    the draft's weakest assumption, a line you doubt, that the work may need no conducting, a
+    capability you expect the substrate cannot provide, a pointer that did not resolve — shown on
+    the taking brief, or in a withdrawal's record, and attached to the closure; empty when there are
+    none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the cited turn takes the method as the map showed it, read against the
@@ -526,10 +527,9 @@ beside the coordinates still open, each draft value the person had not seen on a
 closing turn marked so and left open; the substrate placement and the lifetime, marked as your
 inference where the person's coordinates leave them open; the deferred decisions, each marked as
 returning to the person or as covered by the recorded grant it names; what the method needs, each
-observed or unconfirmed, and what an observation after the closing turn changed; the navigation
-block `source` carries, or that there is none; and the dissent attached to the closure. The handoff
-carries what the brief showed. Withdrawal keeps its partial record and hands nothing off.
-Demonstrated, not asserted.
+observed or unconfirmed; the navigation block `source` carries, or that there is none; and the
+dissent attached to the closure. The handoff carries what the brief showed. Withdrawal keeps its
+partial record and hands nothing off. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -602,7 +602,6 @@ Present the map as TOOL GROUNDING's `.map` entry names it, then `.mapGate`, and 
 - **Substrate placement is inferred**: Infer who runs each line, where, and whether the person will be present from the tools the running harness describes and the accumulated context; show it as your inference and keep the person's involvement to the broad direction; where their words fix a direction, whether they will be present, or a horizon, that stands as their constraint, and placement and lifetime follow it. A tool description grounds no verdict about what is reachable. Where the person will not be present, present before they leave the authority the method would need, and separate what must be decided before they leave from what can come back at the end.
 - **Person's coordinates**: When to stop, how lines combine, where results go, the constraints in force, and the authority entrusted with its limits stand only by the person's words, read again against the context as it now stands. Read authority as a broad direction; where an act falls outside it or its place inside it is unclear, the person sees it as a contrary ground before the handoff, on the map or on the taking brief; after the handoff, it comes back as the Rule "Handoff carries its obligations" names.
 - **Map as a graph**: Draw the lines of work as a graph the host can render, each line's id and order held in its source; an indented outline only where no graph renders.
-- **Map change shown**: After every answer that neither takes the method nor withdraws, show what changed as a ledger under the current map — the person's edits first, then each re-drafted value pointing to the edit that caused it, marked necessary consequence or proposal, then what changed for any other reason, a removed line or replaced value kept with what it was — flag a previously taken or granted value the change alters, and name a person's value whose reach the change left unclear, leaving it open.
 - **Taking brief**: Take the method on the person's taking of the latest map, whatever the same turn changes with it. The closing turn presents the taking brief CONVERGENCE names, any tally derived from the rows actually shown, then hands off in the same turn without waiting; a change the taking turn makes rides the brief, never a redrawn map. An open coordinate stays open; it is never adopted by default.
 - **Handoff carries its obligations**: Hand off the method with what `ConductedMethod` carries — what the taking brief showed — then stop: independent lines kept apart until they combine, and every navigation block left for another session supplied by its producer with its grounding instruction. The substrate runs what does not rest on the person without waiting for them and, when the method has run, returns to them once with every line's results; what rests on the person — a step that cannot be undone, where a contrary ground the taking brief carried, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them.
 - **Re-entry**: After a handoff, a later utterance that changes the method's direction opens a new run over the accumulated context, where what stood is read again, and that run's plan names the method it replaces; stopping what still runs is the substrate's. A question about status reopens nothing; an answer to what came back goes to it. A withdrawn run is not reopened this way: a person who wants it again invokes `/conduct`, and the draft is drawn from the accumulated context.

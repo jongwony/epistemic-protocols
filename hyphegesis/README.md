@@ -52,7 +52,7 @@ These are the questions the map answers from the work in front of it — guidanc
 | Independence | Whether lines see each other's results before those results combine |
 | Combination | How separately produced results are combined (the user's to decide) |
 | Stopping | When each line, and the whole method, stops (the user's to decide) |
-| Destination | Where each result goes beyond the end summary every result returns in — a next unit of work, for one (the user's to decide) |
+| Destination | Where each result goes beyond the return at the end that carries every line's results — a next unit of work, for one (the user's to decide) |
 | Constraints | What is in force on the work — a direction for who runs it, whether the user will be present, a horizon among them (the user's to decide) |
 | Authority | What the user entrusts and its limits, given as a broad direction (the user's to decide) |
 
