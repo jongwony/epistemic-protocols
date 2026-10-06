@@ -579,7 +579,7 @@ When `/ground` reads an abstraction against its own instances and summarizes tha
 
 ### User-facing realization
 
-Present the map as TOOL GROUNDING's `.map` entry names it, then `.mapGate`, and yield the turn. The map's first line says what the work is for and what it hands off. Prior-session recall indices may seed the lines but never settle them. Keep labels short, since display width is not character count and a column padded by counting characters breaks.
+Present the map as TOOL GROUNDING's `.map` entry names it, then `.mapGate`, and yield the turn — or, on the turn that closes, present it as the relay and hand off in the same turn. The map's first line says what the work is for and what it hands off. Prior-session recall indices may seed the lines but never settle them. Keep labels short, since display width is not character count and a column padded by counting characters breaks.
 
 ## Rules
 
