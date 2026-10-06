@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: turn 1, up to its first write
+window: turn 1 up to its first write or hand-off, and the hand-off's own text
 focus: whether the map, showing every choice of the run's that execution will follow, is presented as a relay before the dispatch, with nothing the prompt settled re-opened
 ---
 # The map is relayed before the dispatch
@@ -27,6 +27,14 @@ run may do and for how long, that the person will not check in, and that nothing
 to decide. None of these has to be restated on the map. What the prompt leaves to the run — who
 runs each line and where, what the method needs and whether it was observed, and any choice of
 method the prompt does not fix — is the run's, and is what the map has to show.
+
+## Evidence
+
+Read turn 1 up to its first write or hand-off, and the method as handed off: the hand-off's own
+text, such as the prompt an agent call carries. That is what the run chose. What the substrate
+writes, reports or decides after that is not evidence of the run's choices and is not read for this
+grader: a value that first appears there is the substrate's, and is neither a choice missing from
+the map nor one the map showed.
 
 ## Met
 
@@ -59,9 +67,8 @@ that failure; record this grader as not exercised.
 
 Quoting the person's words is welcome and not required. Whether the map also marks placement and
 lifetime as inference, and what contrary grounds it carries, are not graded here. Whether it ends at
-a gate is `proceed-observed`'s. What the substrate writes or reports after the first write is not
-graded in itself; read it only to see which choices execution followed, and a choice the person's
-words settled is not missing from the map because it first shows up there.
+a gate is `proceed-observed`'s. A choice the person's words settled is not missing from the map
+because the hand-off's text is the first place it shows up.
 
 ## Arms
 

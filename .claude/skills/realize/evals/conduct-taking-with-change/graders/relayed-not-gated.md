@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: turn 2, from the reply to its first write
+window: turn 2, from the reply to its first write or hand-off
 focus: whether the closing turn relays the map and proceeds, rather than presenting it at a gate
 ---
 # The taking relays the map; it does not gate it

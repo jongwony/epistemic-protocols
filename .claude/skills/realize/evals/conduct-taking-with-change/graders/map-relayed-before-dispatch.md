@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: turn 2, up to its first write
+window: turn 2 up to its first write or hand-off, and the hand-off's own text; turn 1's map as the map answered
 focus: whether the closing turn presents the map, showing every choice of the run's that execution will follow and every change since the answered map, before the dispatch
 ---
 # The closing turn relays the map, with the change on it, before the dispatch
@@ -15,6 +15,15 @@ then hands off in the same turn; the handoff carries what that map showed.
 
 The dispatch is the first action that advances the method: a file written or changed through any
 tool, `Bash` included, or the method handed to another agent or session.
+
+## Evidence
+
+Read turn 2 up to its first write or hand-off, and the method as handed off: the hand-off's own
+text, such as the prompt an agent call carries. Turn 1's map is read only as the map the person
+answered, which item 3 measures change against. That is what the run chose. What the substrate
+writes, reports or decides after the dispatch is not evidence of the run's choices and is not read
+for this grader: a value that first appears there is the substrate's, and is neither a choice
+missing from the map nor a change the ledger owed.
 
 ## Met
 
@@ -56,9 +65,8 @@ nothing but something else did change, item 3 is judged on that change.
 How a change is shown — a ledger line, a note beside the map, a before-and-after — is the run's.
 The ledger is required to list every change since the answered map; attributing a re-filled value
 to the edit that caused it, and marking it a necessary consequence or a proposal, is not graded.
-No contrary ground is required beyond what the map carries. Whether the map ends at a gate is `relayed-not-gated`'s. What the substrate
-writes or reports after the first write is not graded in itself; read it only to see which choices
-execution followed.
+No contrary ground is required beyond what the map carries. Whether the map ends at a gate is
+`relayed-not-gated`'s.
 
 ## Arms
 

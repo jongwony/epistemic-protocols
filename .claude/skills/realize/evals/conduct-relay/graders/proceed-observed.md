@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: turn 1
+window: turn 1, up to its first post-handoff action
 focus: whether turn 1 relays the map and starts the work in the same turn, with no gate between them
 ---
 # The map is relayed and the work starts in the same turn
@@ -32,7 +32,10 @@ the turn did not wait.
 ## Judging note
 
 Judge the transition, not what the substrate leaves behind: a run that started the first exporter
-and then, under the prompt's own retry rule, put it back and stopped has proceeded. Judge the
+and then, under the prompt's own retry rule, put it back and stopped has proceeded. Past the first
+post-handoff action nothing is read; that action counts only as the witness that the work started,
+never for what it holds. Whether an agent or session call handed the method off is read from the
+call's own text — what it asks the recipient to do — not from what the recipient produced. Judge the
 subject of a question, not its shape. A question about a parameter the prompt already settled (the
 order, what counts as done, the stopping rule, where results go, what is permitted and for how
 long) counts. If you find a clause of the prompt genuinely underdetermined, record a case defect

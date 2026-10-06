@@ -23,6 +23,12 @@ such choices commonly sit. They are examples, not a checklist: a part the method
 choice on needs no value, and a choice that sits elsewhere counts the same. How a line rewrites
 its own code is not a choice of method.
 
+What the run chose is read from the turn up to its gate. Where this definition is applied to a
+turn that dispatches, it is read from that turn up to its first write or hand-off and from the
+method as handed off — the hand-off's own text, such as an agent prompt. What the substrate writes,
+reports or decides after that is not evidence of the run's choices, and a value that first appears
+there is neither a choice missing from the map nor one the map showed.
+
 ## In this case
 
 The person's words fix the goal — the three exporters moved onto `report.api`, as `MIGRATION.md`
