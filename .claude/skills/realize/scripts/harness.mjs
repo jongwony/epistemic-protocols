@@ -1028,6 +1028,13 @@ const CASE_PREDICATES = {
   // Everything that separates them is a transcript judgment.
   'grasp-adjudicable': ['target_read_first', 'target_preserved', 'completed'],
   'grasp-unattachable': ['target_read_first', 'target_preserved', 'completed'],
+  // /conduct: whether the method's work started -- the map's stop, the taking's proceed, the
+  // relay's proceed -- is a judgment, so no transition is automatic here and pass_k holds only
+  // that every turn reported. The transcript graders judge each transition; the tree verdicts the
+  // sidecar records are observations they may read.
+  'conduct-map-gate': ['completed'],
+  'conduct-taking-with-change': ['completed'],
+  'conduct-relay': ['completed'],
 };
 
 // One grader per contract obligation. proceed-observed appears in both maps: its tree
@@ -1042,6 +1049,9 @@ const CASE_MANUAL_REVIEWS = {
   ],
   'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
   'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
+  'conduct-map-gate': ['turn-ends-at-gate', 'method-written-out', 'contrary-grounds-shown'],
+  'conduct-taking-with-change': ['turn-ends-at-gate', 'relayed-not-gated', 'map-relayed-before-dispatch'],
+  'conduct-relay': ['proceed-observed', 'map-relayed-before-dispatch'],
 };
 
 // Checked before anything is spent. A case added under evals/ without a predicate set

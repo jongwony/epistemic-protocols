@@ -192,8 +192,12 @@ collection that left nothing open, and the absence of a design gate remain manua
 files. For `grasp`, the automatic set is what both cases share — the target read in the
 first turn, the tree unchanged after every turn, every turn reported — and the quoted
 correction, the withheld verdict with its named need, the stop at each gate, and closure on
-the user's word are manual. The `predicates` column breaks `pass_k` down by predicate;
-`turns` shows how many scripted turns a multi-turn cell reached.
+the user's word are manual. For `conduct`, the only automatic predicate is every turn reported:
+whether the method's work started — the map's stop, the taking's proceed, the relay's proceed —
+is read from the transcript, so each transition is manual along with what its turn presents.
+Whether the tree differed from the scaffold after each turn is recorded in the cell's sidecar as
+an observation those graders may read, not as a verdict. The `predicates` column breaks
+`pass_k` down by predicate; `turns` shows how many scripted turns a multi-turn cell reached.
 
 On Claude, `skill` says whether the protocol fired where it was available, and `n/a`
 where there was no plugin to fire. Codex reports `trace-unavailable` for that column and
@@ -219,5 +223,5 @@ preserving partial transcripts for inspection.
   yet built.
 - **`scripts/harness.mjs`** — the runner and the deterministic graders. Node standard
   library only.
-- **`evals/scaffold.sh`**, **`evals/scaffold-grasp.sh`**, **`evals/elicit-scaffold.sh`** —
-  the fixtures; each case selects its own through `scaffold_script` in `case.yaml`.
+- **`evals/*.sh`** — the fixtures; each case selects its own through `scaffold_script` in
+  `case.yaml`.

@@ -1,0 +1,16 @@
+schema_version: "1.1"
+name: conduct-taking-with-change
+
+context:
+  # Same substrate and same prompt as the map-gate case, deliberately: turn 1 here is another
+  # sample of that case's Stop, and turn 2 is what the person's taking of that map does.
+  scaffold_script: ../conduct-scaffold.sh
+
+multi_turn:
+  # The one user turn after the first is a fixed script, sent by the harness: reply-1.md.
+  # oracle.md states the policy and why it reads nothing of what the subject said.
+  oracle: oracle.md
+  driver: harness
+  # The harness digests the tree after every subject turn; the sidecar records each digest's verdict
+  # as an observation the transcript graders may read.
+  snapshot_tree_per_turn: true

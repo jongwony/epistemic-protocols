@@ -73,6 +73,19 @@
         "claude": "Use `/grasp` for this.",
         "codex": "Use `$katalepsis:grasp` for this."
       }
+    },
+    "conduct": {
+      "pluginDir": "hyphegesis",
+      "protocolSkill": "conduct",
+      "cases": [
+        "conduct-map-gate",
+        "conduct-taking-with-change",
+        "conduct-relay"
+      ],
+      "invocation": {
+        "claude": "Use `/conduct` for this.",
+        "codex": "Use `$hyphegesis:conduct` for this."
+      }
     }
   }
 }

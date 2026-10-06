@@ -55,7 +55,7 @@ if (kind === 'exec') {
   if (process.env.FAKE_CODEX_MODE === 'incomplete') process.exit(9);
   if (process.env.FAKE_CODEX_MODE === 'mutate'
       || (process.env.FAKE_CODEX_MODE === 'mutate-on-resume' && resume)) {
-    appendFileSync(process.cwd() + '/app/main.py', '\\nthis is not valid Python\\n');
+    appendFileSync(process.cwd() + '/' + (process.env.FAKE_CODEX_MUTATE_FILE || 'app/main.py'), '\\nthis is not valid Python\\n');
   }
   if (process.env.FAKE_CODEX_MODE === 'replace-auth' && authLink) {
     // What a writer that renames over its target would leave: a regular file in the link's place.
@@ -409,6 +409,43 @@ test('a turn that changes the tree ends the script and fails preservation', () =
       /\| 0 \| 0\/1 \| 1 \| n\/a \| target_read_first 1\/1, target_preserved 0\/1, completed 1\/1 \| 2\/5 \|/);
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a conduct cell records its tree as an observation and scores no transition', () => {
+  const row = (name, turns) =>
+    new RegExp(`\\| bare \\| ${name} \\| 1 \\| 1 \\| 1/1 \\| 1 \\| n/a \\| completed 1/1 \\| ${turns} \\|`);
+  const meta = (root, caseName) => JSON.parse(readFileSync(
+    filesNamed(join(root, 'results'), 'run-1.meta.json').find((p) => p.includes(`/${caseName}/`)), 'utf8'));
+  for (const [mode, expected] of [
+    // Only the resumed turn writes: the taking reaches its second turn.
+    ['mutate-on-resume', { gate: false, relay: false, taking: [false, true], turns: '2/2' }],
+    // Every turn writes: the harness's reply rule ends the taking at turn 1, as for any target.
+    ['mutate', { gate: true, relay: true, taking: [true], turns: '1/2' }],
+  ]) {
+    const { root, env } = fixture();
+    env.CODEX_API_KEY = 'codex-secret';
+    env.FAKE_CODEX_MODE = mode;
+    env.FAKE_CODEX_MUTATE_FILE = 'exporters/csv_export.py';
+    env.REALIZE_CASES = 'conduct-map-gate,conduct-taking-with-change,conduct-relay';
+    try {
+      assert.equal(invoke(env, 'setup', 'conduct').status, 0);
+      const run = invoke(env, 'run', 'conduct');
+      assert.equal(run.status, 0, run.stderr || run.stdout);
+      assert.equal(meta(root, 'conduct-map-gate').mutated, expected.gate);
+      assert.equal(meta(root, 'conduct-relay').mutated, expected.relay);
+      assert.deepEqual(meta(root, 'conduct-taking-with-change').turnMutated, expected.taking);
+
+      // Whether the tree changed decides no score: every row passes on its reported turns alone.
+      const report = invoke(env, 'report', 'conduct', '--markdown');
+      assert.equal(report.status, 0, report.stderr || report.stdout);
+      assert.match(report.stdout, row('conduct-map-gate', '-'));
+      assert.match(report.stdout, row('conduct-relay', '-'));
+      assert.match(report.stdout, row('conduct-taking-with-change', expected.turns));
+      assert.match(report.stdout, /conduct-taking-with-change: turn-ends-at-gate, relayed-not-gated, map-relayed-before-dispatch/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   }
 });
 

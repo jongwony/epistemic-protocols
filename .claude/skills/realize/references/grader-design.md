@@ -83,6 +83,13 @@ The failure mode is worse than a miss. It misses them in every arm alike, so the
 predicate looks stable across the matrix while measuring nothing — which is the shape
 a broken grader takes when it is not caught.
 
+The tree is a witness only where a changed tree is the branch. Where a run can write without
+having left a gate — a draft of its plan saved beside the work — or start the work without a
+write the trace or the tree shows — a hand-off to another agent that writes nothing yet — whether
+the work started is a judgment of what the turn did, and it goes to a transcript grader. The tree
+verdict stays recorded beside the transcript as an observation that grader may read, never scored
+as the transition. `/conduct`'s cases are of this kind.
+
 The scaffold is deterministic, so the reference tree is rebuilt on demand rather than
 stored beside the results and kept in sync with it. In a target whose requested
 prospect is a plan, delivery of the requested plan would be the corresponding witness;
