@@ -473,6 +473,50 @@ test('a gate answered by its closing reply passes only when it stopped and then 
   }
 });
 
+test('a handoff to another agent that writes nothing counts as dispatch', () => {
+  const row = (name, cells) => new RegExp(`\\| bare \\| ${name} \\|[^\\n]*${cells}`);
+  for (const [mode, expected] of [
+    // Every turn hands off and writes nothing: the relay dispatched in its turn, and the taking's
+    // turn 1 handed off, so its gate did not stop.
+    ['always', [
+      row('conduct-relay', 'dispatch_observed 1/1'),
+      row('conduct-taking-with-change', 'stop_then_proceed 0/1'),
+    ]],
+    // Only the resumed turn hands off: the taking stopped at turn 1 and proceeded at turn 2, and a
+    // single-turn relay that handed nothing off has not dispatched.
+    ['on-resume', [
+      row('conduct-relay', 'dispatch_observed 0/1'),
+      row('conduct-taking-with-change', 'stop_then_proceed 1/1'),
+    ]],
+  ]) {
+    const { root, env } = fixture();
+    const bin = join(root, 'bin', 'claude');
+    writeFileSync(bin, `#!/usr/bin/env node
+const args = process.argv.slice(2);
+const handoff = process.env.FAKE_CLAUDE_HANDOFF === 'always'
+  || (process.env.FAKE_CLAUDE_HANDOFF === 'on-resume' && args.includes('--resume'));
+console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default' }));
+if (handoff) console.log(JSON.stringify({ type: 'assistant', message: { content: [
+  { type: 'tool_use', name: 'Agent', input: { description: 'run the method', prompt: 'the method' } }] } }));
+console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
+`);
+    chmodSync(bin, 0o755);
+    env.REALIZE_RUNNER = 'claude';
+    env.REALIZE_CASES = 'conduct-taking-with-change,conduct-relay';
+    env.HOME = root;
+    env.FAKE_CLAUDE_HANDOFF = mode;
+    try {
+      const run = invoke(env, 'run', 'conduct');
+      assert.equal(run.status, 0, run.stderr || run.stdout);
+      const report = invoke(env, 'report', 'conduct', '--markdown');
+      assert.equal(report.status, 0, report.stderr || report.stdout);
+      for (const pattern of expected) assert.match(report.stdout, pattern, `${mode}: ${pattern}`);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+});
+
 test('a multi-turn case whose oracle needs a reader is refused before anything runs', () => {
   const { root, env } = fixture();
   env.REALIZE_CASES = 'elicit-aporia';

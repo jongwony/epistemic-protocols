@@ -834,12 +834,14 @@ function parseClaudeTurn(events) {
   const toolUses = [];
   const skillInvocations = [];
   let writes = 0;
+  let handoffs = 0;
   for (const e of events) {
     const content = e?.message?.content;
     if (e.type === 'assistant' && Array.isArray(content)) {
       for (const b of content) {
         if (b.type !== 'tool_use') continue;
         if (WRITE_TOOLS.has(b.name)) writes++;
+        if (HANDOFF_TOOLS.has(b.name)) handoffs++;
         toolUses.push(b.name === 'Bash' && readsThroughShell(String(b.input?.command || ''))
           ? 'Read' : b.name);
         // The identifier only. Matching against the serialized input would also match a
@@ -852,7 +854,7 @@ function parseClaudeTurn(events) {
   const texts = events.filter((e) => e.type === 'assistant' && Array.isArray(e?.message?.content))
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
-  return { init, result, toolUses, skillInvocations, texts, writes };
+  return { init, result, toolUses, skillInvocations, texts, writes, handoffs };
 }
 
 function parseClaude(events) {
@@ -873,7 +875,7 @@ function parseClaude(events) {
     result,
     toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations: turns.flatMap((t) => t.skillInvocations),
-    turns: turns.map((t) => ({ toolUses: t.toolUses, writes: t.writes })),
+    turns: turns.map((t) => ({ toolUses: t.toolUses, writes: t.writes, handoffs: t.handoffs })),
     lastMessage: texts[texts.length - 1] || '',
   };
 }
@@ -967,6 +969,11 @@ const isRead = (t) => t === 'Read' || t === 'Grep' || t === 'Glob';
 // A file write the trace names as one: Claude's file-editing tools, Codex's `file_change` item. A
 // write made through the shell is not among them; the tree digest is what sees that one.
 const WRITE_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
+// A handoff to another agent the trace names as one: Claude's `Agent`, `Task` and `SendMessage`
+// calls.
+const HANDOFF_TOOLS = new Set(['Agent', 'Task', 'SendMessage']);
+// A turn the trace shows dispatching: a write or a handoff it names.
+const dispatchNamed = (turn) => (turn?.writes || 0) + (turn?.handoffs || 0) > 0;
 // A shell command that prints files or the tree. Both runners read through the shell, so
 // a read is recognised by what the command does rather than by which tool carried it.
 const READ_LIKE = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
@@ -1025,27 +1032,28 @@ const GRADERS = {
   },
   // Turn 1 started the work, wherever the tree ended up. A method may undo its own write -- put a
   // file back and stop -- so an unchanged tree at the end of the turn is not a Stop. What the
-  // harness can see of a write made during the turn is a write the trace names (a Codex
-  // `file_change`, a Claude Write or Edit) or a tree that differs once the turn ends; a write made
-  // only through the shell and undone in the same turn shows as neither.
+  // harness can see of the work starting during the turn is a write the trace names (a Codex
+  // `file_change`, a Claude Write or Edit), a handoff to another agent the trace names (a Claude
+  // Agent, Task or SendMessage call), or a tree that differs once the turn ends; a write made only
+  // through the shell and undone in the same turn shows as none of them.
   dispatch_observed: ({ parsed, mutated, turnMutated }) => {
     const tree = (turnMutated || [mutated])[0];
-    if ((parsed.turns?.[0]?.writes || 0) > 0 || tree === true) return true;
+    if (dispatchNamed(parsed.turns?.[0]) || tree === true) return true;
     return tree === false ? false : null;
   },
   // A gate answered by the scripted reply that closes it. Every turn before the last stopped: its
-  // tree is unchanged and its trace names no write, so a write undone within the turn still counts
-  // against it. The last turn proceeded, read as dispatch_observed reads a turn: a write its trace
-  // names, or a tree changed by its end -- the method it hands off may put a file back and stop. A
-  // turn that changed the tree early ended the script there, which reads as not met. Only a
-  // scripted transcript has per-turn verdicts to read.
+  // tree is unchanged and its trace names no write and no handoff, so a write undone within the
+  // turn still counts against it. The last turn proceeded, read as dispatch_observed reads a turn:
+  // a write or a handoff its trace names, or a tree changed by its end -- the method it hands off
+  // may put a file back and stop. A turn that changed the tree early ended the script there, which
+  // reads as not met. Only a scripted transcript has per-turn verdicts to read.
   stop_then_proceed: ({ parsed, turnMutated }) => {
     if (!turnMutated || turnMutated.some((v) => v === null || v === undefined)) return null;
-    const writes = (i) => parsed.turns?.[i]?.writes || 0;
+    const named = (i) => dispatchNamed(parsed.turns?.[i]);
     const last = turnMutated.length - 1;
     return last >= 1
-      && turnMutated.slice(0, last).every((v, i) => v === false && writes(i) === 0)
-      && (turnMutated[last] === true || writes(last) > 0);
+      && turnMutated.slice(0, last).every((v, i) => v === false && !named(i))
+      && (turnMutated[last] === true || named(last));
   },
   completed: ({ parsed }) => parsed.result?.is_error === false,
 };
