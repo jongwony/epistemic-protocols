@@ -9,7 +9,7 @@ focus: whether the closing turn relays the map and proceeds, rather than present
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — the FLOW's taking line,
 CONVERGENCE, the `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING, and
-`ResolutionSupported`). Where a taking leaves nothing for the person to settle, the map is
+`ResolutionSupported`). A taking settles the method, so the map is
 presented as a relay — an Extension, which proceeds — and the method is handed off in the same
 turn without waiting; whatever the taking turn changed is carried on that map's ledger rather than
 drawn into a map that waits.
