@@ -24,8 +24,9 @@ choice on needs no value, and a choice that sits elsewhere counts the same. How 
 its own code is not a choice of method.
 
 What the run chose is read from the turn up to its gate. Where this definition is applied to a
-turn that dispatches, it is read from that turn up to its first write or hand-off and from the
-method as handed off — the hand-off's own text, such as an agent prompt. What the substrate writes,
+turn that dispatches, it is read from that turn up to its dispatch — its first write to the work,
+or a call to another agent or session that hands the method off — and from that call's own text
+where there is one. What the substrate writes,
 reports or decides after that is not evidence of the run's choices, and a value that first appears
 there is neither a choice missing from the map nor one the map showed.
 

@@ -3,13 +3,15 @@ type: code
 target: trace+files
 kind: deterministic
 window: turn 1
-predicate: true when turn 1's trace holds a write it names as one (a Codex file_change item, a Claude Write, Edit, MultiEdit or NotebookEdit call) or tree_digest(after turn 1) != tree_digest(scaffold); otherwise null when the trace names a call to another agent or session (a Claude Agent, Task or SendMessage call); otherwise false
+predicate: null when turn 1's trace names a call to another agent or session (a Claude call to a tool of delegationTools in harness.config.json; a Codex collab_tool_call item); otherwise true when its trace names a write to a work target (a Codex file_change path, a Claude Write, Edit, MultiEdit or NotebookEdit file_path) or the work targets in tree_digest(after turn 1) differ from the scaffold's; otherwise null when the tree after turn 1 went unread; otherwise false
 ---
 # The work started in the relay's turn
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, CONVERGENCE, and the
 `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING). On a relay the map is presented and
 the method handed off in the same turn, so the substrate's first action falls inside that turn.
+The case runs with delegation unavailable (`case.yaml`): the substrate is this session, and the
+method's first action is a write to the work.
 
 The witness is a write made during the turn, not what the tree holds at its end. The prompt's own
 method puts an exporter back and stops when its retry allowance runs out, so a run that relayed and
@@ -17,25 +19,31 @@ proceeded correctly can end on the scaffold's tree.
 
 ## Predicate
 
-Met (true) when turn 1's trace holds a write the runner names as one — a Codex `file_change`
-item, or a Claude `Write`, `Edit`, `MultiEdit` or `NotebookEdit` call — or the working tree after
-turn 1 differs from the scaffold (the harness's tree digest: sha256 per file over sorted relative
-paths, dotfiles and `__pycache__` excluded).
+The work's targets are the paths `workTargets` of the `conduct` target in `harness.config.json`
+names.
 
-Unreadable (null) when neither holds and the trace names a call to another agent or session — a
-Claude `Agent`, `Task` or `SendMessage` call. Such a call may hand the method off or only prepare
-it, and the trace does not say which; `proceed-observed` decides the cell from the transcript.
+Met (true) when turn 1's trace names a write whose path is a work target — a Codex `file_change`
+path, or the `file_path` of a Claude `Write`, `Edit`, `MultiEdit` or `NotebookEdit` call — or a
+work target in the tree after turn 1 was added, removed or changed (the harness's tree digest:
+sha256 per file over sorted relative paths, dotfiles and `__pycache__` excluded).
 
-Not met (false) when turn 1 shows none of these.
+Not met (false) when turn 1 shows neither. With no agent or session to hand the method to, a turn
+that wrote no work target has not started the work.
+
+Unreadable (null) when the trace names a call to another agent or session — a Claude call to a
+tool `delegationTools` in `harness.config.json` names, or a Codex `collab_tool_call` item where
+codex emits one — whatever else the turn shows: the case's environment had no such call to offer,
+so the run is reported under treatment integrity and is not evidence; or when the trace names no
+write to a work target and the tree went unread. `proceed-observed` decides the cell from the
+transcript.
 
 ## Known limits
 
-The tree is digested only once the turn ends, so a write made through the shell and undone within
-the same turn shows as none of these and reads as not met. A hand-off outside the calls named
-above — on Codex, every hand-off — that writes nothing in the turn reads as not met too. A named
-agent or session call with no write reads as unreadable, whether it handed the method off or only
-prepared it. `proceed-observed` reads the transition from the transcript and is where each of these
-is recognized.
+The tree is digested only once the turn ends, so a write to a work target made through the shell
+and undone within the same turn shows as neither and reads as not met. A hand-off made by
+launching another agent through the shell, which the environment does not remove, reads as not
+met when nothing it writes to a work target is in the tree by the turn's end. `proceed-observed`
+reads the transition from the transcript and is where each is recognized.
 
 ## Pairing
 

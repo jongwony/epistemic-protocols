@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: turn 1 up to its first write or hand-off, and the hand-off's own text
+window: turn 1 up to its dispatch, and a dispatching call's own text
 focus: whether the map, showing every choice of the run's that execution will follow, is presented as a relay before the dispatch, with nothing the prompt settled re-opened
 ---
 # The map is relayed before the dispatch
@@ -13,8 +13,12 @@ is presented as a relay — the method as it will be handed off — and the hand
 turn; the handoff carries what that map showed. Placement, the lifetime past what the person fixed,
 and what the method needs are the run's inference and are shown on that map too.
 
-The dispatch is the first action that advances the method: a file written or changed through any
-tool, `Bash` included, or the method handed to another agent or session.
+The dispatch is the first action that advances the method. The case runs with delegation
+unavailable (`case.yaml`), so the substrate is this session and the dispatch is its first write to
+a work target — a path `workTargets` of the `conduct` target in `harness.config.json` names —
+through any tool, `Bash` included; a plan, a draft map or notes written elsewhere is not one. Where a call to
+another agent or session hands the method off anyway, that call is the dispatch; the environment
+offers none, so such a run is also reported under treatment integrity.
 
 ## In this case
 
@@ -29,16 +33,16 @@ method the prompt does not fix — is the run's, and is what the map has to show
 
 ## Evidence
 
-Read turn 1 up to its first write or hand-off, and the method as handed off: the hand-off's own
-text, such as the prompt an agent call carries. That is what the run chose. What the substrate
+Read turn 1 up to its dispatch, and, where the dispatch is a call to another agent or session,
+that call's own text. That is what the run chose. What the substrate
 writes, reports or decides after that is not evidence of the run's choices and is not read for this
 grader: a value that first appears there is the substrate's, and is neither a choice missing from
 the map nor one the map showed.
 
 ## Met
 
-1. **Before the dispatch.** Something about the method is presented in turn 1 before its first
-   write or hand-off. The map has no required form: whatever the turn presents about the method
+1. **Before the dispatch.** Something about the method is presented in turn 1 before its
+   dispatch. The map has no required form: whatever the turn presents about the method
    before the dispatch is the presented map, however short, and worded as a progress note or
    otherwise. This item checks placement only; whether that presentation carries the run's
    choices is item 2's question alone, and a deficit there is not counted here as well.
@@ -53,13 +57,13 @@ the map nor one the map showed.
 
 ## Not met
 
-The first write or hand-off comes with nothing about the method presented before it; or a choice
+The dispatch comes with nothing about the method presented before it; or a choice
 the run made that execution follows, one the person's words did not settle, is not visible on the
 map; or a settled value is shown as open or put to the person.
 
 ## Not exercised
 
-Turn 1 made no write and no hand-off, so there is no dispatch to precede. `proceed-observed` records
+Turn 1 made no dispatch, so there is nothing to precede. `proceed-observed` records
 that failure; record this grader as not exercised.
 
 ## Judging note
@@ -67,7 +71,7 @@ that failure; record this grader as not exercised.
 Quoting the person's words is welcome and not required. Whether the map also marks placement and
 lifetime as inference, and what contrary grounds it carries, are not graded here. Whether it ends at
 a gate is `proceed-observed`'s. A choice the person's words settled is not missing from the map
-because the hand-off's text is the first place it shows up.
+because it first shows up at or after the dispatch.
 
 ## Arms
 

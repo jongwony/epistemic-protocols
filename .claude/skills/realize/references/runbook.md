@@ -128,6 +128,17 @@ what `setup.sh` builds per target. Codex takes the same shape through a separate
 run is spent. The harness clears volatile state before each run and passes
 `--no-session-persistence` wherever nothing resumes, so a re-run reads its own environment.
 
+A target with `delegation: false` runs every arm and every turn, first and resumed, without
+delegation to another agent or session. Claude gets `--disallowed-tools` with the root
+`delegationTools`, and each turn's `init` event must list none of them. For Codex, setup writes
+`model-catalog.json` beside the homes — `codex debug models --bundled` with every model's
+`multi_agent_version` cleared, the catalog field that offers a model the collaboration tools
+(`spawn_agent`, `send_message` and the rest) — and every `codex exec` and `exec resume` of the
+target passes it as `model_catalog_json`. Before each cell, `codex debug prompt-input` for the
+cell's model under that catalog must carry no `<multi_agent_role>` message; otherwise the cell
+fails to launch. Those runs read the binary's bundled model metadata rather than a refreshed
+catalog, the same for every arm.
+
 Set `maxBudgetUsd` above the one-time system-prompt cache creation that a session's
 first turn pays; later turns read that cache cheaply, so the floor is per session
 rather than per turn.
@@ -183,15 +194,18 @@ own; the working directories it was read from are neither uploaded nor kept.
 
 Read `integrity` before anything else. It reports whether each arm's treatment
 actually applied — whether the plugin was loaded exactly when the arm says it should
-be. A row whose integrity is short of its `n` is not evidence about the protocol, and
-the report prints those rows again under a separate heading so they are not read as
-results.
+be, and, in a target that removes delegation, whether every turn ran without it. A row whose
+integrity is short of its `n` is not evidence about the protocol, and the report prints those
+rows again under a separate heading so they are not read as results, with each delegation call
+or offer it found. Beneath them it lists each unreadable work predicate with the transcript
+grader that decides it, turn by turn.
 
 `pass_k` is one when every repetition passed the deterministic transition composite,
 zero otherwise. `predicates` breaks it down — each predicate's passes over the repetitions it
 could read — so a zero names the transition that failed. `turns`, on a scripted multi-turn
 case, is the subject turns reached over those the script holds; short of it means a turn
-changed the tree and the dialogue stopped there. The `manual` column is separate: it counts transcript judgments whose
+changed the tree — the work's targets in it, where the target declares `workTargets` — and the
+dialogue stopped there. The `manual` column is separate: it counts transcript judgments whose
 grader files fix the observation criteria but which no automated judge executed.
 Constructor coverage, semantic question ordering, and user-facing classification are
 therefore never implied by an automatic pass.
@@ -217,9 +231,10 @@ as `reply-1.md`, `reply-2.md`, … and the harness sends them itself, on either 
 first turn opens a session (Codex without `--ephemeral`, Claude without
 `--no-session-persistence`), and each reply resumes it with the same model and flags. The
 transcript holds every turn, each preceded by a `realize.turn` marker naming the message that
-opened it; the sidecar records the tree verdict after every turn. The one reply rule the
-harness applies itself is mechanical: a turn that changed the tree ends the dialogue, since
-it has left the gate. Every turn must produce its runner's complete start/end pair, or the
+opened it; the sidecar records the tree verdict after every turn, and the work targets' verdict
+where the target declares them. The one reply rule the harness applies itself is mechanical: a
+turn that changed the tree — its work targets, where declared — ends the dialogue, since it has
+left the gate. Every turn must produce its runner's complete start/end pair, or the
 cell is a launch failure.
 
 The script reads nothing of what the subject said, so each reply must stand at whichever

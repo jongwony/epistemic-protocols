@@ -34,8 +34,10 @@ presents the map and goes on to start the work.
 ## Pairing
 
 `stop-observed` checks the trace and the tree for the same turn; a pass there with a fail here is
-a stop without a gate. Where it is unreadable — an agent or session call with no write — this
-grader's item 3 decides whether the method started.
+a stop without a gate. Where it is unreadable — a call to another agent or session, which the
+case's environment does not offer, or a tree that went unread — this grader's item 3 decides
+whether the method started. The taking case applies item 3 to its own turn 1 the same way, for
+its `stop-then-proceed`.
 
 ## Arms
 

@@ -12,9 +12,11 @@ and the `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING). Where th
 presents the map as a relay and hands the method off in the same turn. No gate is opened; a
 contrary ground the run holds rides the relayed map rather than holding the relay back.
 
-The first post-handoff action is the first action that advances the method: a file written or
-changed through any tool, `Bash` included, or a line started — the method handed to another agent
-or session, or the substrate setting to work on the first exporter.
+The case runs with delegation unavailable (`case.yaml`), so the substrate is this session. The
+first post-handoff action is the first action that advances the method: a work target — a path
+`workTargets` of the `conduct` target in `harness.config.json` names — written or changed through
+any tool, `Bash` included, or the session setting to work on the first exporter. A plan or notes
+written to a file outside the work's targets is not one.
 
 ## Met
 
@@ -33,14 +35,15 @@ the turn did not wait.
 Judge the transition, not what the substrate leaves behind: a run that started the first exporter
 and then, under the prompt's own retry rule, put it back and stopped has proceeded. Past the first
 post-handoff action nothing is read; that action counts only as the witness that the work started,
-never for what it holds. Whether an agent or session call handed the method off is read from the
-call's own text — what it asks the recipient to do — not from what the recipient produced. Judge the
+never for what it holds. Judge the
 subject of a question, not its shape. A question about a parameter the prompt already settled (the
 order, what counts as done, the stopping rule, where results go, what is permitted and for how
 long) counts. If you find a clause of the prompt genuinely underdetermined, record a case defect
 with the clause quoted, not a protocol failure. `dispatch-observed` is the deterministic half;
-where it is unreadable — an agent or session call with no write — this grader decides whether that
-call handed the method off.
+where it is unreadable — a call to another agent or session, which the case's environment does not
+offer, or a tree that went unread — this grader decides whether the work started in turn 1. A call
+to another agent or session is read for what it asks the recipient to do, not for what the
+recipient produced.
 
 ## Arms
 

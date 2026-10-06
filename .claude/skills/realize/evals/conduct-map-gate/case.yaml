@@ -6,4 +6,8 @@ context:
   # send one prompt that leaves the method open; the relay case sends one that settles it. With
   # differing substrates a run could stop or relay because of the tree rather than because of what
   # the person's words settled.
+  # The environment, for every arm and every turn, first and resumed: delegation to another agent
+  # or session is unavailable (`delegation: false` of the `conduct` target in harness.config.json),
+  # so the method runs in this session, and the work starts with a write to one of that target's
+  # `workTargets`.
   scaffold_script: ../conduct-scaffold.sh

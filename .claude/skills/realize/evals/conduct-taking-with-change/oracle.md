@@ -9,8 +9,9 @@ of `/conduct` can be compared on one transcript shape.
 After the subject's turn 1, the harness either sends `reply-1.md` verbatim or ends the run:
 
 1. **End the run** when either holds:
-   - turn 1 changed the working tree: it has left the gate, so a taking sent after it would take
-     nothing that was shown and waiting;
+   - turn 1 changed one of the work's targets in the tree (`workTargets` of the `conduct` target in
+     `harness.config.json`): it has left the gate, so a taking sent after it would take nothing
+     that was shown and waiting. A draft map or notes saved elsewhere does not end the run;
    - turn 1 did not complete: a launch failure, not an observation.
 2. Otherwise **send** `reply-1.md`, then end the run after the subject's next turn, whatever it
    contains.
@@ -33,10 +34,10 @@ Where turn 1's map already ran them one at a time with XML first, the reply chan
 is a plain taking. The change obligation of `map-relayed-before-dispatch` is then **not
 exercised**, while the rest of turn 2 is graded as usual.
 
-The cost is stated rather than hidden: when turn 1 ended without a map and without a write — a
-plan, a question about something else — the reply lands on a gate that was never opened. Such a
-run is **not exercised** on the turn-2 graders: the judge records it under each of them, and
-`stop-then-proceed` still reads whatever the tree did.
+The cost is stated rather than hidden: when turn 1 ended without a map and without a write to the
+work — a plan, a question about something else — the reply lands on a gate that was never opened.
+Such a run is **not exercised** on the turn-2 graders: the judge records it under each of them,
+and `stop-then-proceed` still reads whatever the trace and the work's targets did.
 
 ## What turn 2 is graded on
 

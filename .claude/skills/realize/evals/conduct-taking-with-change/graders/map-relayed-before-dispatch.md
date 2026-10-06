@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: turn 2 up to its first write or hand-off, and the hand-off's own text; turn 1's map as the map answered
+window: turn 2 up to its dispatch, and a dispatching call's own text; turn 1's map as the map answered
 focus: whether the closing turn presents the map, showing every choice of the run's that execution will follow and every change since the answered map, before the dispatch
 ---
 # The closing turn relays the map, with the change on it, before the dispatch
@@ -13,13 +13,17 @@ taking closes whatever the same turn changed. The closing turn presents the map 
 handed off once more, as a relay, with the change ledger since the map the person answered, and
 then hands off in the same turn; the handoff carries what that map showed.
 
-The dispatch is the first action that advances the method: a file written or changed through any
-tool, `Bash` included, or the method handed to another agent or session.
+The dispatch is the first action that advances the method. The case runs with delegation
+unavailable (`case.yaml`), so the substrate is this session and the dispatch is its first write to
+a work target — a path `workTargets` of the `conduct` target in `harness.config.json` names —
+through any tool, `Bash` included; a plan, a draft map or notes written elsewhere is not one. Where a call to
+another agent or session hands the method off anyway, that call is the dispatch; the environment
+offers none, so such a run is also reported under treatment integrity.
 
 ## Evidence
 
-Read turn 2 up to its first write or hand-off, and the method as handed off: the hand-off's own
-text, such as the prompt an agent call carries. Turn 1's map is read only as the map the person
+Read turn 2 up to its dispatch, and, where the dispatch is a call to another agent or session,
+that call's own text. Turn 1's map is read only as the map the person
 answered, which item 3 measures change against. That is what the run chose. What the substrate
 writes, reports or decides after the dispatch is not evidence of the run's choices and is not read
 for this grader: a value that first appears there is the substrate's, and is neither a choice
@@ -27,8 +31,8 @@ missing from the map nor a change the ledger owed.
 
 ## Met
 
-1. **Before the dispatch.** Something about the method is presented in turn 2 before its first
-   write or hand-off. The map has no required form: whatever the turn presents about the method
+1. **Before the dispatch.** Something about the method is presented in turn 2 before its
+   dispatch. The map has no required form: whatever the turn presents about the method
    before the dispatch is the presented map, however short, and worded as a progress note or
    otherwise. This item checks placement only; whether that presentation carries the run's
    choices is item 2's question alone, and whether it carries the change is item 3's, and a
@@ -45,7 +49,7 @@ missing from the map nor a change the ledger owed.
 
 ## Not met
 
-The first write or hand-off comes with nothing about the method presented before it; or a choice
+The dispatch comes with nothing about the method presented before it; or a choice
 the run made that execution follows is not visible on the map; or it is the answered map
 unchanged, with the reply's change nowhere on it; or something changed since the answered map
 that the ledger does not show as changed.
