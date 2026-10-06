@@ -8,7 +8,7 @@ focus: whether every choice the run made that execution will follow is visible o
 # Every choice execution will follow is on the map, as the plan
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `draft`, the `.map` and
-`.mapGate` entries of TOOL GROUNDING, `StandingSupported`, and the Rule "Recognition over Recall").
+`.mapGate` entries of TOOL GROUNDING, `Interaction.realization`, and `StandingSupported`).
 The map is the full state taking it as is would take, and a value the run drafted is adopted only
 if it was shown on a map before the taking turn. So every choice the run made that execution will
 follow is visible on the map. Values the person's own words already fixed are outside this

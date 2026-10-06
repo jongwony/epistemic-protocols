@@ -584,12 +584,10 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 ## Rules
 
 - **Conduction warrant**: Hyphegesis never conducts itself.
-- **Recognition over Recall**: Present the whole method on one map and yield at every Constitution interaction, so the person recognizes the method instead of composing it.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
 - **Person's coordinates**: Read the authority the person entrusts as a broad direction; where an act falls outside it or its place inside it is unclear, the person sees it as a contrary ground before the handoff, on the map; after the handoff, it comes back as the Rule "Handoff carries its obligations" names.
 - **Handoff carries its obligations**: The substrate runs what does not rest on the person without waiting for them and, when the method has run, returns to them once with every line's results; what rests on the person — a step that cannot be undone, where a contrary ground the relayed map carried, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them.
 - **Re-entry**: After a handoff, a later utterance that changes the method's direction opens a new run over the accumulated context, where what stood is read again, and that run's plan names the method it replaces; stopping what still runs is the substrate's. A question about status reopens nothing; an answer to what came back goes to it. A withdrawn run is not reopened this way: a person who wants it again invokes `/conduct`, and the draft is drawn from the accumulated context.
-- **`/apportion` seam**: Treat an incoming plan as a checked navigation pointer, not an import: dereference it, run the grounding instruction it carries against the current work, and carry the block unchanged.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and any overlapping constraint that remains.
 
 ## Adversarial Guards
