@@ -551,7 +551,7 @@ def grounding : Op → Annot × String
   | .mapGate       => (.interaction .constitution, "what the map got wrong, anywhere on it — or take the method, as shown or with what the same words change; silence holds and takes nothing")
   | .withdraw      => (.interaction .extension, "at the person's word: what you took as withdrawn, and the partial record — the values that stand with who proposed each and how it stood, what is open, the deferred decisions, and your contrary grounds; nothing is handed off")
   | .relay | .converge => (.interaction .extension, "the map, presented as a relay where the person's words settle the method — at the start, or by a taking — before the dispatch in the same turn")
-  | .handoff       => (.dispatch, "delegate: after the relayed map, in the same turn, the ConductedMethod handed to the substrate, which executes it — its fields as that map showed them, `source` aside, which its producer supplies, never the session context its citations resolve in; the substrate runs it as the Rule \"Handoff carries its obligations\" names; an incoming pointer rides the method unchanged while the record it names stays where its locator names; then this run ends")
+  | .handoff       => (.dispatch, "delegate: after the relayed map, in the same turn, the ConductedMethod handed to the substrate, which executes it; the record an incoming pointer names stays where its locator names; then this run ends")
 
 /-- The operation an outcome hands off through: a conducted or relayed run hands `emitted` to the
     substrate by `.handoff`, after the relayed map; a withdrawal or a holding hands nothing off. -/
