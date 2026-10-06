@@ -46,9 +46,10 @@ that the ledger does not show as changed.
 Turn 1 presented no map ending at a gate (see `oracle.md`), or the run ended at turn 1. Record it
 under this grader; it is neither met nor not met.
 
-Item 3 alone is not exercised where turn 1's map already ran the exporters one at a time with XML
-first: the reply then changes nothing, and there is no change to show. Judge items 1 and 2 as
-usual and record item 3 as not exercised.
+Item 3 alone is not exercised where nothing changed since the answered map: turn 1's map already
+ran the exporters one at a time with XML first, so the reply changes nothing, and nothing else
+moved. Judge items 1 and 2 as usual and record item 3 as not exercised. Where the reply changes
+nothing but something else did change, item 3 is judged on that change.
 
 ## Judging note
 
