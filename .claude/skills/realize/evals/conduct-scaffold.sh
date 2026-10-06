@@ -21,9 +21,7 @@
 #   destination  a clean git tree; MIGRATION.md defers deleting legacy.py      -> commit or not, delete or not
 # Nothing here settles those; the relay case's prompt settles every one of them in the person's
 # words. Every exporter can be moved so its golden test still passes, so a Proceed branch has
-# somewhere to go. The work's targets -- the paths a write must reach for the work to have
-# started -- are `workTargets` of the `conduct` target in harness.config.json, which names them
-# from this layout; a file written beside them, a draft map or notes, is not the work. None of these files is an auto-loaded agent instruction file (no CLAUDE.md,
+# somewhere to go. None of these files is an auto-loaded agent instruction file (no CLAUDE.md,
 # AGENTS.md or .claude/), so the material has to be read through a tool like every other file.
 #
 # Requires: bash, git. Deterministic: fixed author, fixed dates, no signing, so commit ids are

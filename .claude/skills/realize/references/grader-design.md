@@ -83,18 +83,12 @@ The failure mode is worse than a miss. It misses them in every arm alike, so the
 predicate looks stable across the matrix while measuring nothing — which is the shape
 a broken grader takes when it is not caught.
 
-A run also writes things that are not the work: a draft of its plan, notes, scratch files. Where
-those can land before a gate, the witness is scoped to the work. A target that declares
-`workTargets` reads only the paths named there, in the tree and in the writes its trace names by
-path, and a write anywhere else witnesses nothing. A witness inferred from every write turns a run
-that saved its draft map before stopping into one that started the work.
-
-A witness also needs an observation surface that holds the actions it reads. Where an action can
-start the work without leaving a write the witness sees — a hand-off to another agent that writes
-nothing yet — the case removes that action from the environment rather than inferring it from a
-trace that may not name it: a target sets `delegation: false`, every arm and every turn runs
-without delegation to another agent or session, and a call to one, should it appear, is a
-treatment-integrity failure rather than a reading.
+The tree is a witness only where a changed tree is the branch. Where a run can write without
+having left a gate — a draft of its plan saved beside the work — or start the work without a
+write the trace or the tree shows — a hand-off to another agent that writes nothing yet — whether
+the work started is a judgment of what the turn did, and it goes to a transcript grader. The tree
+verdict stays recorded beside the transcript as an observation that grader may read, never scored
+as the transition. `/conduct`'s cases are of this kind.
 
 The scaffold is deterministic, so the reference tree is rebuilt on demand rather than
 stored beside the results and kept in sync with it. In a target whose requested
@@ -188,8 +182,6 @@ request for a Codex style arm fails closed.
 An arm whose treatment silently failed produces a transcript that reads exactly like a
 protocol behaving badly. Every other grader is unreadable until this one passes, which
 is why the report prints failing rows separately rather than folding them into a rate.
-A target's environment is part of the treatment: where it removes delegation, a turn offered
-or making a call to another agent or session fails integrity, and the report names each one.
 
 This is not a theoretical precaution. Both of the authentication and budget failures
 described in the runbook presented as runs that simply did not work, and neither had

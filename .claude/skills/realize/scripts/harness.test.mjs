@@ -23,12 +23,7 @@ const { appendFileSync, lstatSync, readlinkSync, readFileSync, unlinkSync, write
 const { join } = require('node:path');
 const args = process.argv.slice(2);
 const kind = args[0] === 'plugin' && args[1] === 'list'
-  ? 'list' : (args[0] === 'plugin' ? 'plugin' : (args[0] === 'debug' ? 'debug'
-    : (args.includes('exec') ? 'exec' : 'other')));
-const config = (key) => {
-  const arg = args.find((a, i) => args[i - 1] === '-c' && a.startsWith(key + '='));
-  return arg ? JSON.parse(arg.slice(key.length + 1)) : null;
-};
+  ? 'list' : (args[0] === 'plugin' ? 'plugin' : (args.includes('exec') ? 'exec' : 'other'));
 const auth = join(process.env.CODEX_HOME || '.', 'auth.json');
 let authLink = null;
 try {
@@ -45,21 +40,8 @@ if (process.env.FAKE_CODEX_LOG) appendFileSync(process.env.FAKE_CODEX_LOG, JSON.
   resume,
   ephemeral: args.includes('--ephemeral'),
   session: resume ? args[args.length - 2] : null,
-  catalog: config('model_catalog_json'),
   message: args[args.length - 1],
 }) + '\\n');
-if (kind === 'debug' && args[1] === 'models') {
-  console.log(JSON.stringify({ models: [{ slug: 'gpt-6-luna', multi_agent_version: 'v2' }, { slug: 'gpt-5.5' }] }));
-  process.exit(0);
-}
-if (kind === 'debug' && args[1] === 'prompt-input') {
-  // The model's multi-agent role reaches its input unless the catalog it reads clears the version.
-  const catalog = config('model_catalog_json');
-  const entry = catalog && JSON.parse(readFileSync(catalog, 'utf8')).models.find((m) => m.slug === config('model'));
-  const role = process.env.FAKE_CODEX_MODE === 'leaky-catalog' || !entry || entry.multi_agent_version !== null;
-  console.log(JSON.stringify(role ? [{ type: 'message', content: '<multi_agent_role>' }] : []));
-  process.exit(0);
-}
 if (kind === 'list') {
   console.log(JSON.stringify({ installed: [], available: [] }));
   process.exit(0);
@@ -80,20 +62,6 @@ if (kind === 'exec') {
     const body = readFileSync(auth, 'utf8');
     unlinkSync(auth);
     writeFileSync(auth, body);
-  }
-  if (process.env.FAKE_CODEX_MODE === 'file-change'
-      || (process.env.FAKE_CODEX_MODE === 'file-change-on-resume' && resume)) {
-    // A write the trace names, undone before the turn ends: the tree is the scaffold's again.
-    console.log(JSON.stringify({
-      type: 'item.completed',
-      item: { type: 'file_change', changes: [{ path: process.env.FAKE_CODEX_CHANGE_PATH || 'exporters/csv_export.py', kind: 'update' }], status: 'completed' },
-    }));
-  }
-  if (process.env.FAKE_CODEX_MODE === 'collab' && !resume) {
-    console.log(JSON.stringify({
-      type: 'item.completed',
-      item: { type: 'collab_tool_call', tool: 'spawn_agent', status: 'completed' },
-    }));
   }
   console.log(JSON.stringify({
     type: 'item.completed',
@@ -444,221 +412,37 @@ test('a turn that changes the tree ends the script and fails preservation', () =
   }
 });
 
-const CONDUCT_CASES = 'conduct-map-gate,conduct-taking-with-change,conduct-relay';
-
-test('a conduct gate is read from writes that reach the work targets, on Codex', () => {
-  const row = (name, cells) => new RegExp(`\\| bare \\| ${name} \\| 1 \\| ${cells}`);
-  for (const [mode, file, expected] of [
-    // Turn 1 leaves the targets alone and only the resumed turn writes one: the map stops, the
-    // taking proceeds, and a single-turn relay that wrote nothing has not proceeded.
-    ['mutate-on-resume', 'exporters/csv_export.py', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_observed 1/1, completed 1/1 \\| - \\|'),
-      row('conduct-taking-with-change', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_then_proceed 1/1, completed 1/1 \\| 2/2 \\|'),
-      row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
-    ]],
-    // Turn 1 writes a target: the map did not stop, the script ends before the taking, and the
-    // relay proceeded.
-    ['mutate', 'exporters/csv_export.py', [
-      row('conduct-map-gate', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_observed 0/1, completed 1/1 \\| - \\|'),
-      row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 1/2 \\|'),
-      row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| dispatch_observed 1/1, completed 1/1 \\| - \\|'),
-    ]],
-    // Every turn saves a draft map beside the work, outside its targets: the map stops, the reply
-    // still reaches the taking, whose turn 2 started nothing, and the relay did not proceed.
-    ['mutate', 'MAP.md', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_observed 1/1, completed 1/1 \\| - \\|'),
-      row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 2/2 \\|'),
-      row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
-    ]],
-    // Every turn writes a target and puts it back: the relay started its work though its tree ends
-    // as the scaffold's, and the map's and the taking's turn 1 wrote, so neither gate stopped.
-    ['file-change', 'exporters/csv_export.py', [
-      row('conduct-map-gate', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_observed 0/1, completed 1/1 \\| - \\|'),
-      row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 2/2 \\|'),
-      row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| dispatch_observed 1/1, completed 1/1 \\| - \\|'),
-    ]],
-    // A named write outside the targets is no witness either.
-    ['file-change', 'PLAN.md', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_observed 1/1, completed 1/1 \\| - \\|'),
-      row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 2/2 \\|'),
-      row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
-    ]],
-    // Only the resumed turn writes a target, and puts it back: the taking stopped at turn 1 and
-    // proceeded at turn 2, though no turn leaves a changed tree.
-    ['file-change-on-resume', 'exporters/csv_export.py', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_observed 1/1, completed 1/1 \\| - \\|'),
-      row('conduct-taking-with-change', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_then_proceed 1/1, completed 1/1 \\| 2/2 \\|'),
-      row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
-    ]],
+test('a conduct cell records its tree as an observation and scores no transition', () => {
+  const row = (name, turns) =>
+    new RegExp(`\\| bare \\| ${name} \\| 1 \\| 1 \\| 1/1 \\| 1 \\| n/a \\| completed 1/1 \\| ${turns} \\|`);
+  const meta = (root, caseName) => JSON.parse(readFileSync(
+    filesNamed(join(root, 'results'), 'run-1.meta.json').find((p) => p.includes(`/${caseName}/`)), 'utf8'));
+  for (const [mode, expected] of [
+    // Only the resumed turn writes: the taking reaches its second turn.
+    ['mutate-on-resume', { gate: false, relay: false, taking: [false, true], turns: '2/2' }],
+    // Every turn writes: the harness's reply rule ends the taking at turn 1, as for any target.
+    ['mutate', { gate: true, relay: true, taking: [true], turns: '1/2' }],
   ]) {
     const { root, env } = fixture();
     env.CODEX_API_KEY = 'codex-secret';
     env.FAKE_CODEX_MODE = mode;
-    env.FAKE_CODEX_MUTATE_FILE = file;
-    env.FAKE_CODEX_CHANGE_PATH = file;
-    env.REALIZE_CASES = CONDUCT_CASES;
+    env.FAKE_CODEX_MUTATE_FILE = 'exporters/csv_export.py';
+    env.REALIZE_CASES = 'conduct-map-gate,conduct-taking-with-change,conduct-relay';
     try {
       assert.equal(invoke(env, 'setup', 'conduct').status, 0);
       const run = invoke(env, 'run', 'conduct');
       assert.equal(run.status, 0, run.stderr || run.stdout);
+      assert.equal(meta(root, 'conduct-map-gate').mutated, expected.gate);
+      assert.equal(meta(root, 'conduct-relay').mutated, expected.relay);
+      assert.deepEqual(meta(root, 'conduct-taking-with-change').turnMutated, expected.taking);
+
+      // Whether the tree changed decides no score: every row passes on its reported turns alone.
       const report = invoke(env, 'report', 'conduct', '--markdown');
       assert.equal(report.status, 0, report.stderr || report.stdout);
-      for (const pattern of expected) assert.match(report.stdout, pattern, `${mode} ${file}: ${pattern}`);
-      assert.match(report.stdout, /map-relayed-before-dispatch, relayed-not-gated, conduct-map-gate\/turn-ends-at-gate/);
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
-  }
-});
-
-test('Codex conduct runs read a catalog with no multi-agent version on every turn, and only conduct does', () => {
-  const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
-  env.FAKE_CODEX_MODE = 'complete';
-  env.REALIZE_CASES = CONDUCT_CASES;
-  try {
-    assert.equal(invoke(env, 'setup', 'conduct').status, 0);
-    const catalog = join(root, 'state', 'conduct', 'model-catalog.json');
-    assert.deepEqual(JSON.parse(readFileSync(catalog, 'utf8')).models.map((m) => m.multi_agent_version), [null, null]);
-    assert.equal(invoke(env, 'run', 'conduct').status, 0);
-    const execs = logged(root).filter((c) => c.kind === 'exec');
-    assert.equal(execs.length, 4, 'two single-turn cases, and the taking resumed once');
-    assert.ok(execs.some((c) => c.resume));
-    for (const c of execs) assert.equal(c.catalog, catalog);
-    const checks = logged(root).filter((c) => c.kind === 'debug');
-    assert.ok(checks.length >= 4, 'the catalog is generated once and checked before every cell');
-
-    const inquire = fixture();
-    inquire.env.CODEX_API_KEY = 'codex-secret';
-    inquire.env.FAKE_CODEX_MODE = 'complete';
-    try {
-      assert.equal(invoke(inquire.env, 'setup', 'inquire').status, 0);
-      assert.equal(invoke(inquire.env, 'run', 'inquire').status, 0);
-      for (const c of logged(inquire.root)) assert.equal(c.catalog, null);
-      assert.equal(logged(inquire.root).some((c) => c.kind === 'debug'), false);
-    } finally {
-      rmSync(inquire.root, { recursive: true, force: true });
-    }
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
-});
-
-test('a Codex conduct cell whose model is still offered agents, or that calls one, is not evidence', () => {
-  const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
-  env.REALIZE_CASES = CONDUCT_CASES;
-  try {
-    assert.equal(invoke(env, 'setup', 'conduct').status, 0);
-    // Checked before the cell runs: nothing is spent on it.
-    env.FAKE_CODEX_MODE = 'leaky-catalog';
-    const leaky = invoke(env, 'run', 'conduct');
-    assert.notEqual(leaky.status, 0);
-    assert.match(leaky.stdout, /still carries the multi-agent role/);
-    assert.equal(logged(root).filter((c) => c.kind === 'exec').length, 0);
-
-    // Named in the trace anyway: integrity fails, and every work predicate reading that turn is unreadable.
-    env.FAKE_CODEX_MODE = 'collab';
-    assert.equal(invoke(env, 'run', 'conduct').status, 0);
-    const report = invoke(env, 'report', 'conduct', '--markdown');
-    assert.notEqual(report.status, 0);
-    assert.match(report.stdout, /\| conduct-map-gate \| 1 \| - \| 0\/1 \| 0 \|[^\n]*stop_observed 0\/0 \(1 unreadable\)/);
-    assert.match(report.stdout, /\| conduct-relay \| 1 \| - \| 0\/1 \| 0 \|[^\n]*dispatch_observed 0\/0 \(1 unreadable\)/);
-    assert.match(report.stdout, /\| conduct-taking-with-change \| 1 \| - \| 0\/1 \| 0 \|[^\n]*stop_then_proceed 0\/0 \(1 unreadable\)/);
-    assert.match(report.stdout, /conduct-relay\/1: turn 1 called spawn_agent/);
-    assert.match(report.stdout, /conduct-taking-with-change: stop_then_proceed \(1 unreadable\) -- turn 1: conduct-map-gate\/turn-ends-at-gate; turn 2: relayed-not-gated/);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
-});
-
-test('on Claude, delegation is disallowed on every turn; a target write decides, a draft beside it does not, an agent call is a leak', () => {
-  // Columns from the case on: n | pass_k | rate | integrity | ... | predicates.
-  const row = (name, passK, integrity, cells) =>
-    new RegExp(`\\| bare \\| ${name} \\| 1 \\| ${passK} \\| [01]/1 \\| ${integrity} \\|[^\\n]*${cells}`);
-  const unread = (predicate) => `${predicate} 0/0 \\(1 unreadable\\)`;
-  // Per subject turn, what the fake runner's trace names: a Write to a work target, a Write of a
-  // draft map beside the work, an Agent call, or nothing. The tree is never changed, so every
-  // verdict here comes from the trace.
-  // `failing`: the report lists a delegation leak and exits non-zero.
-  for (const [turns, expected, { offered = false, failing = false } = {}] of [
-    // A draft map saved before the gate, then a target written on the taking.
-    ['draft,target', [
-      row('conduct-map-gate', '1', '1', 'stop_observed 1/1'),
-      row('conduct-relay', '0', '1', 'dispatch_observed 0/1'),
-      row('conduct-taking-with-change', '1', '1', 'stop_then_proceed 1/1'),
-    ]],
-    ['target,target', [
-      row('conduct-map-gate', '0', '1', 'stop_observed 0/1'),
-      row('conduct-relay', '1', '1', 'dispatch_observed 1/1'),
-      row('conduct-taking-with-change', '0', '1', 'stop_then_proceed 0/1'),
-    ]],
-    // A taking that writes only a draft map started nothing.
-    ['none,draft', [
-      row('conduct-map-gate', '1', '1', 'stop_observed 1/1'),
-      row('conduct-relay', '0', '1', 'dispatch_observed 0/1'),
-      row('conduct-taking-with-change', '0', '1', 'stop_then_proceed 0/1'),
-    ]],
-    // An agent call is a leak whatever it did: the turns it sits in decide nothing, a target
-    // write beside it included, and the row fails integrity.
-    ['agent+target,target', [
-      row('conduct-map-gate', '-', '0', unread('stop_observed')),
-      row('conduct-relay', '-', '0', unread('dispatch_observed')),
-      row('conduct-taking-with-change', '-', '0', unread('stop_then_proceed')),
-    ], { failing: true }],
-    ['none,agent+target', [
-      row('conduct-map-gate', '1', '1', 'stop_observed 1/1'),
-      row('conduct-relay', '0', '1', 'dispatch_observed 0/1'),
-      row('conduct-taking-with-change', '-', '0', unread('stop_then_proceed')),
-    ], { failing: true }],
-    // A runner that offers the disallowed tools anyway fails integrity though nothing called them.
-    ['none,target', [
-      row('conduct-map-gate', '1', '0', 'stop_observed 1/1'),
-      row('conduct-relay', '0', '0', 'dispatch_observed 0/1'),
-      row('conduct-taking-with-change', '1', '0', 'stop_then_proceed 1/1'),
-    ], { offered: true, failing: true }],
-  ]) {
-    const { root, env } = fixture();
-    const bin = join(root, 'bin', 'claude');
-    writeFileSync(bin, `#!/usr/bin/env node
-const { appendFileSync } = require('node:fs');
-const args = process.argv.slice(2);
-appendFileSync(process.env.FAKE_CLAUDE_LOG, JSON.stringify(args) + '\\n');
-const turns = process.env.FAKE_CLAUDE_TURNS.split(',');
-const shows = turns[args.includes('--resume') ? 1 : 0].split('+');
-const at = args.indexOf('--disallowed-tools');
-const disallowed = at < 0 || process.env.FAKE_CLAUDE_OFFERS ? [] : args[at + 1].split(',');
-const tools = ['Read', 'Write', 'Edit', 'Bash', 'Task', 'SendMessage', 'Workflow'].filter((t) => !disallowed.includes(t));
-const blocks = [];
-if (shows.includes('agent')) blocks.push({ type: 'tool_use', name: 'Agent', input: { description: 'list the exporters', prompt: 'inventory' } });
-if (shows.includes('target')) blocks.push({ type: 'tool_use', name: 'Write', input: { file_path: process.cwd() + '/exporters/csv_export.py', content: 'x' } });
-if (shows.includes('draft')) blocks.push({ type: 'tool_use', name: 'Write', input: { file_path: process.cwd() + '/PLAN.md', content: 'x' } });
-console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default', tools }));
-if (blocks.length) console.log(JSON.stringify({ type: 'assistant', message: { content: blocks } }));
-console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
-`);
-    chmodSync(bin, 0o755);
-    env.REALIZE_RUNNER = 'claude';
-    env.REALIZE_CASES = CONDUCT_CASES;
-    env.HOME = root;
-    env.FAKE_CLAUDE_TURNS = turns;
-    env.FAKE_CLAUDE_LOG = join(root, 'claude.log');
-    if (offered) env.FAKE_CLAUDE_OFFERS = '1';
-    try {
-      const run = invoke(env, 'run', 'conduct');
-      assert.equal(run.status, 0, run.stderr || run.stdout);
-      // Every call, first and resumed, disallows the same tools, and an option follows the list.
-      const calls = readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n').map(JSON.parse);
-      assert.equal(calls.length, 4);
-      for (const args of calls) {
-        const at = args.indexOf('--disallowed-tools');
-        assert.equal(args[at + 1], 'Agent,Task,SendMessage,Workflow,RemoteTrigger');
-        assert.match(args[at + 2], /^--/);
-      }
-      const report = invoke(env, 'report', 'conduct', '--markdown');
-      for (const pattern of expected) assert.match(report.stdout, pattern, `${turns}: ${pattern}\n${report.stdout}`);
-      assert.equal(report.status === 0, !failing, `${turns}: ${report.stdout}`);
-      assert.equal(/Treatment integrity: delegation reached/.test(report.stdout), failing, turns);
+      assert.match(report.stdout, row('conduct-map-gate', '-'));
+      assert.match(report.stdout, row('conduct-relay', '-'));
+      assert.match(report.stdout, row('conduct-taking-with-change', expected.turns));
+      assert.match(report.stdout, /conduct-taking-with-change: turn-ends-at-gate, relayed-not-gated, map-relayed-before-dispatch/);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

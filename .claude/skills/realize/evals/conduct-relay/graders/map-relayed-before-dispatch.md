@@ -13,12 +13,10 @@ is presented as a relay — the method as it will be handed off — and the hand
 turn; the handoff carries what that map showed. Placement, the lifetime past what the person fixed,
 and what the method needs are the run's inference and are shown on that map too.
 
-The dispatch is the first action that advances the method. The case runs with delegation
-unavailable (`case.yaml`), so the substrate is this session and the dispatch is its first write to
-a work target — a path `workTargets` of the `conduct` target in `harness.config.json` names —
-through any tool, `Bash` included; a plan, a draft map or notes written elsewhere is not one. Where a call to
-another agent or session hands the method off anyway, that call is the dispatch; the environment
-offers none, so such a run is also reported under treatment integrity.
+The dispatch is the first action that advances the method, as `proceed-observed` defines it: a
+change to the work, or a call to another agent or session that hands the method off. Whether turn 1
+reached one, and whether anything was put to the person before it, is that grader's; this one
+judges what was presented before it.
 
 ## In this case
 
@@ -52,14 +50,14 @@ the map nor one the map showed.
    quote it, or point at the person's message for it. The run's own choices must be on the map —
    the placement, the lifetime past what the person fixed, what the method needs, and anything the
    prompt left open.
-3. **Nothing re-opened.** No value the prompt settled appears on the map as open, as a question,
-   or as something the person still has to decide.
+3. **Nothing re-opened.** No value the prompt settled appears on the map as open, undecided, or
+   still to be settled.
 
 ## Not met
 
 The dispatch comes with nothing about the method presented before it; or a choice
 the run made that execution follows, one the person's words did not settle, is not visible on the
-map; or a settled value is shown as open or put to the person.
+map; or the map shows a settled value as open.
 
 ## Not exercised
 
@@ -70,8 +68,9 @@ that failure; record this grader as not exercised.
 
 Quoting the person's words is welcome and not required. Whether the map also marks placement and
 lifetime as inference, and what contrary grounds it carries, are not graded here. Whether it ends at
-a gate is `proceed-observed`'s. A choice the person's words settled is not missing from the map
-because it first shows up at or after the dispatch.
+a gate, and any question put to the person before the dispatch — a settled value asked about
+included — is `proceed-observed`'s and is not counted here as well. A choice the person's words
+settled is not missing from the map because it first shows up at or after the dispatch.
 
 ## Arms
 

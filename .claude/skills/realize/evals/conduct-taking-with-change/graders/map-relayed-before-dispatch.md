@@ -13,12 +13,10 @@ taking closes whatever the same turn changed. The closing turn presents the map 
 handed off once more, as a relay, with the change ledger since the map the person answered, and
 then hands off in the same turn; the handoff carries what that map showed.
 
-The dispatch is the first action that advances the method. The case runs with delegation
-unavailable (`case.yaml`), so the substrate is this session and the dispatch is its first write to
-a work target — a path `workTargets` of the `conduct` target in `harness.config.json` names —
-through any tool, `Bash` included; a plan, a draft map or notes written elsewhere is not one. Where a call to
-another agent or session hands the method off anyway, that call is the dispatch; the environment
-offers none, so such a run is also reported under treatment integrity.
+The dispatch is the first action that advances the method, as `relayed-not-gated` defines it: a
+change to the work, or a call to another agent or session that hands the method off. Whether turn 2
+reached one, and whether anything was put to the person before it, is that grader's; this one
+judges what was presented before it.
 
 ## Evidence
 
@@ -56,8 +54,9 @@ that the ledger does not show as changed.
 
 ## Not exercised
 
-Turn 1 presented no map ending at a gate (see `oracle.md`), or the run ended at turn 1. Record it
-under this grader; it is neither met nor not met.
+Turn 1 presented no map ending at a gate (see `oracle.md`), or the run ended at turn 1; or turn 2
+made no dispatch, so there is nothing to precede — `relayed-not-gated` records that failure. Record
+it under this grader; it is neither met nor not met.
 
 Item 3 alone is not exercised where nothing changed since the answered map: turn 1's map already
 ran the exporters one at a time with XML first, so the reply changes nothing, and nothing else

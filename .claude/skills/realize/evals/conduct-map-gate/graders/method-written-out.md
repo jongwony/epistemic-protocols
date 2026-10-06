@@ -59,7 +59,9 @@ their presence or absence does not change the verdict. A value the map states an
 the one most worth correcting is still stated. Values may be spread over the graph, its labels and
 the prose around it; read the whole turn up to the gate. Whether a value is the right one is not
 graded. When citing a missing choice, name what execution would have to settle and why the method
-offers that choice.
+offers that choice. Whether the turn ends at a gate, and what that gate offers, is
+`turn-ends-at-gate`'s; a value put to the person as a question counts here only as a value the map
+does not state.
 
 ## Not exercised
 

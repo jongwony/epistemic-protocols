@@ -98,15 +98,6 @@ selects the committed Luna xhigh profile. Results are keyed by target, runner, a
 hash of the actual protocol/style treatment, so one skill or ablation cannot reuse
 another's cache.
 
-A target may also fix its cases' environment, the same for every arm and every turn, first and
-resumed. `delegation: false` makes delegation to another agent or session unavailable: Claude
-runs with the root `delegationTools` disallowed, and Codex reads a copy of its bundled model
-catalog, written by setup, in which no model has a multi-agent version — the field that offers a
-model the collaboration tools. `workTargets` names the paths the target's work writes to: a write
-that reaches one, named in the trace or seen in the tree, is the witness that the work started,
-and a write anywhere else is not. `conduct` sets both: `/conduct` hands its method to a substrate
-inside the session, and here that substrate is the session itself.
-
 Prefer a capable model for the primary measurement. The weakest available one
 exercises the safeguards but not the protocol, so a failure there cannot separate a
 defect in the contract from a limit of the model.
@@ -189,10 +180,9 @@ walked by hand (`references/runbook.md`) and refused if registered.
 
 Read `integrity` first. It reports whether each arm's treatment actually applied — both
 dimensions of it, the plugin and the output style, since either can fail silently and
-leave two arms running the same treatment — and, for a target that removes delegation, that no
-turn was offered or made a call to another agent or session. A row whose integrity falls short of
-its run count is not evidence about the protocol, and the report reprints those rows separately
-so they are not mistaken for findings; it names each delegation call or offer it found.
+leave two arms running the same treatment. A row whose integrity falls short of its run
+count is not evidence about the protocol, and the report reprints those rows separately
+so they are not mistaken for findings.
 
 `pass_k` is one only when every repetition passed its deterministic transition
 predicates. The `manual` column counts scenario-specific transcript judgments excluded from that
@@ -202,11 +192,11 @@ collection that left nothing open, and the absence of a design gate remain manua
 files. For `grasp`, the automatic set is what both cases share — the target read in the
 first turn, the tree unchanged after every turn, every turn reported — and the quoted
 correction, the withheld verdict with its named need, the stop at each gate, and closure on
-the user's word are manual. For `conduct`, the automatic set is the branch each case's turns
-took — the map's stop, the taking's stop then proceed, the relay's proceed — read from writes
-that reach the work's targets; what each turn presents before its branch is manual. A work
-predicate the trace cannot decide — a delegation call, a tree left unread — is unreadable, and
-the report names, per turn, the transcript grader that decides it. The `predicates` column breaks
+the user's word are manual. For `conduct`, the only automatic predicate is every turn reported:
+whether the method's work started — the map's stop, the taking's proceed, the relay's proceed —
+is read from the transcript, so each transition is manual along with what its turn presents.
+Whether the tree differed from the scaffold after each turn is recorded in the cell's sidecar as
+an observation those graders may read, not as a verdict. The `predicates` column breaks
 `pass_k` down by predicate; `turns` shows how many scripted turns a multi-turn cell reached.
 
 On Claude, `skill` says whether the protocol fired where it was available, and `n/a`

@@ -27,10 +27,10 @@
 import { spawnSync } from 'node:child_process';
 import {
   mkdirSync, writeFileSync, readFileSync, existsSync, cpSync, rmSync,
-  readdirSync, lstatSync, readlinkSync, symlinkSync, unlinkSync, statSync, realpathSync,
+  readdirSync, lstatSync, readlinkSync, symlinkSync, unlinkSync, statSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname, resolve, basename, relative, isAbsolute, normalize } from 'node:path';
+import { join, dirname, resolve, basename, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir, tmpdir } from 'node:os';
 
@@ -209,27 +209,6 @@ if (!INVOCATION) {
   process.exit(1);
 }
 
-// A target's environment, the same for every arm and every turn, first and resumed.
-// `delegation: false` removes delegation to another agent or session from the run: Claude is
-// started with `delegationTools` disallowed; Codex reads CODEX_CATALOG, the binary's bundled model
-// catalog with every model's `multi_agent_version` cleared, since that version is what offers a
-// model the collaboration tools. A call to one of them in such a target's trace is a
-// treatment-integrity failure.
-const DELEGATION_OFF = CFG.delegation === false;
-const DELEGATION_TOOLS = new Set(CFG.delegationTools || []);
-if (DELEGATION_OFF && RUNNER === 'claude' && !DELEGATION_TOOLS.size) {
-  console.error(`target ${JSON.stringify(TARGET)} sets delegation: false, but delegationTools names no tool to disallow`);
-  process.exit(1);
-}
-const CODEX_CATALOG = join(CODEX_STATE_DIR, 'model-catalog.json');
-// The paths the target's work writes to, relative to the case's tree: an entry ending in `/` is
-// that directory's subtree, any other entry one file. Where a target declares them, the work
-// started when a write reaches one of them -- named by the trace or seen in the tree -- and a
-// write anywhere else is no witness. A target that declares none reads the whole tree.
-const WORK_TARGETS = CFG.workTargets || null;
-const inWorkTargets = (rel) => rel !== null
-  && (!WORK_TARGETS || WORK_TARGETS.some((t) => (t.endsWith('/') ? rel.startsWith(t) : rel === t)));
-
 function treatmentId(arm) {
   const h = createHash('sha256').update(`${TARGET}\n${RUNNER}\n${JSON.stringify(arm)}\n`);
   h.update(`${INVOCATION || ''}\n`);
@@ -243,13 +222,6 @@ function treatmentId(arm) {
         permissionMode: CFG.permissionMode,
         allowedTools: CFG.allowedTools,
       }));
-  if (DELEGATION_OFF || WORK_TARGETS) {
-    h.update(JSON.stringify({
-      delegation: !DELEGATION_OFF,
-      ...(DELEGATION_OFF && RUNNER === 'claude' ? { delegationTools: [...DELEGATION_TOOLS] } : {}),
-      workTargets: WORK_TARGETS,
-    }));
-  }
   if (arm.protocol) h.update(readFileSync(PROTOCOL_SKILL));
   if (arm.style) h.update(readFileSync(expand(CFG.styleSource)));
   return h.digest('hex').slice(0, 12);
@@ -495,7 +467,6 @@ function runSetupCommand(args, home) {
   if (r.status !== 0) {
     throw new Error(`codex ${args.join(' ')} failed: ${(r.stderr || r.stdout || '').trim()}`);
   }
-  return r.stdout;
 }
 
 function setupCodex() {
@@ -519,21 +490,11 @@ function setupCodex() {
     runSetupCommand(['plugin', 'marketplace', 'add', REPO, '--json'], home);
     runSetupCommand(['plugin', 'add', `${PLUGIN_NAME}@${MARKETPLACE_NAME}`, '--json'], home);
   }
-  // One catalog for every home, so every arm reads the same model metadata.
-  if (DELEGATION_OFF) {
-    const catalog = JSON.parse(runSetupCommand(['debug', 'models', '--bundled'], [...homes.keys()][0]));
-    if (!Array.isArray(catalog.models) || !catalog.models.length) {
-      throw new Error('codex debug models --bundled returned no models');
-    }
-    for (const model of catalog.models) model.multi_agent_version = null;
-    writeFileSync(CODEX_CATALOG, JSON.stringify(catalog, null, 2) + '\n');
-  }
 
   console.log(`runner      : codex`);
   console.log(`target      : ${TARGET}`);
   console.log(`state homes : ${[...homes.keys()].join(', ')}`);
   console.log(`model       : ${CFG.models.join(', ')} (${CFG.codex.reasoningEffort})`);
-  if (DELEGATION_OFF) console.log(`catalog     : ${CODEX_CATALOG} (multi-agent version cleared; no delegation)`);
   console.log('setup consumed and stored no credential; run requires process-scoped CODEX_API_KEY,');
   console.log('or REALIZE_CODEX_AUTH=login to borrow this machine\'s codex login for each exec only');
 }
@@ -622,20 +583,6 @@ function codexTreatmentIntegrity(arm) {
   }
 }
 
-const codexCatalogArgs = () => (DELEGATION_OFF
-  ? ['-c', `model_catalog_json=${JSON.stringify(CODEX_CATALOG)}`] : []);
-
-// Whether the model-visible input this cell's model would receive, under the cell's own catalog
-// argument, carries Codex's multi-agent role: true when it does not. Read without a credential.
-function codexDelegationClosed(arm, model) {
-  if (!existsSync(CODEX_CATALOG)) return false;
-  const r = spawnSync('codex', [
-    'debug', 'prompt-input', '-c', `model=${JSON.stringify(model)}`, ...codexCatalogArgs(), 'realize',
-  ], { cwd: CODEX_STATE_DIR, encoding: 'utf8', env: codexEnv(codexHome(arm)) });
-  if (r.status !== 0) return null;
-  return !r.stdout.includes('<multi_agent_role>');
-}
-
 // Existence of the transcript IS the cache, so an empty one written here would freeze
 // the cell: every later invocation reports `cached` and grading reads the emptiness as
 // the protocol failing. Require evidence that the runner actually started and actually
@@ -668,17 +615,10 @@ function runOne({ model, armName, arm, caseName, rep }) {
   if (existsSync(outFile)) return { skipped: true, outFile };
 
   resetVolatile();
-  let treatmentIntegrity = RUNNER === 'codex' ? codexTreatmentIntegrity(arm) : null;
+  const treatmentIntegrity = RUNNER === 'codex' ? codexTreatmentIntegrity(arm) : null;
   if (RUNNER === 'codex' && treatmentIntegrity !== true) {
     return { skipped: false, launchFailed: true, outFile, exit: null,
              reason: 'isolated CODEX_HOME does not match the declared plugin treatment; re-run setup' };
-  }
-  if (RUNNER === 'codex' && DELEGATION_OFF) {
-    treatmentIntegrity = codexDelegationClosed(arm, model);
-    if (treatmentIntegrity !== true) {
-      return { skipped: false, launchFailed: true, outFile, exit: null,
-               reason: `target ${TARGET} removes delegation, yet ${model}'s input still carries the multi-agent role; re-run setup` };
-    }
   }
 
   const wd = join(WORK, `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_'));
@@ -699,14 +639,13 @@ function runOne({ model, armName, arm, caseName, rep }) {
           '-a', 'never', 'exec',
           // Resume reads the session from disk; a cell with nothing to resume stays ephemeral.
           ...(scripted ? [] : ['--ephemeral']),
-          '--strict-config', '--model', model, '-c', effort, ...codexCatalogArgs(),
+          '--strict-config', '--model', model, '-c', effort,
           '--sandbox', 'workspace-write', '--cd', wd,
           '--skip-git-repo-check', '--json', message,
         ];
       }
       return [
         '-a', 'never', 'exec', 'resume', '--strict-config', '--model', model, '-c', effort,
-        ...codexCatalogArgs(),
         // `exec resume` takes no --sandbox or --cd: the policy goes in as config, and the
         // child is spawned in the cell's directory.
         '-c', 'sandbox_mode="workspace-write"',
@@ -722,8 +661,6 @@ function runOne({ model, armName, arm, caseName, rep }) {
       '--max-budget-usd', String(CFG.maxBudgetUsd),
       '--permission-mode', CFG.permissionMode,
       '--allowed-tools', CFG.allowedTools.join(','),
-      // Variadic, like --allowed-tools: an option must follow it, never the message.
-      ...(DELEGATION_OFF ? ['--disallowed-tools', [...DELEGATION_TOOLS].join(',')] : []),
       '--settings', join(SKILL, 'arms', `${armName.replace('+', '-')}.json`),
     ];
     if (arm.protocol) args.push('--plugin-dir', arm.formal === false ? prosePluginDir() : expand(CFG.pluginDir));
@@ -746,7 +683,6 @@ function runOne({ model, armName, arm, caseName, rep }) {
 
   const messages = [{ name: 'prompt.md', body: promptBody(caseName, arm) }, ...replies];
   const turnMutated = [];
-  const turnWork = [];
   let stream = '';
   let sessionId = null;
   let lastExit = null;
@@ -771,7 +707,6 @@ function runOne({ model, armName, arm, caseName, rep }) {
     stream += marker + out;
     // Read now, while the working directory exists; see the sidecar note below.
     turnMutated.push(treeMutated(wd, caseName));
-    if (WORK_TARGETS) turnWork.push(treeMutated(wd, caseName, true));
     if (i === 0) sessionId = sessionIdOf(out);
     if (i + 1 < messages.length) {
       if (!sessionId) {
@@ -780,13 +715,9 @@ function runOne({ model, armName, arm, caseName, rep }) {
                  reason: 'the first turn reported no session id, so no scripted turn can reach it' };
       }
       // The one reply rule the harness applies itself, because it needs no reading of the
-      // subject's words: a turn that changed the tree -- the work's targets in it, where the
-      // target declares them -- has left the gate, and a scripted answer sent after it would
-      // answer nothing the subject asked.
-      if (WORK_TARGETS ? turnWork[i] : turnMutated[i]) {
-        ended = `${WORK_TARGETS ? 'work' : 'tree'}-changed-at-turn-${turn}`;
-        break;
-      }
+      // subject's words: a turn that changed the tree has left the gate, and a scripted
+      // answer sent after it would answer nothing the subject asked.
+      if (turnMutated[i]) { ended = `tree-changed-at-turn-${turn}`; break; }
     }
   }
 
@@ -799,9 +730,6 @@ function runOne({ model, armName, arm, caseName, rep }) {
     JSON.stringify({
       runner: RUNNER, model, treatment, treatmentIntegrity,
       exit: lastExit, mutated: turnMutated[turnMutated.length - 1],
-      // Where the trace's absolute paths resolve against: the cell's directory as spawned and as resolved.
-      workdir: [...new Set([wd, realpathSync(wd)])],
-      ...(WORK_TARGETS ? { turnWork } : {}),
       ...(scripted ? { turns: turnMutated.length, scripted: messages.length, turnMutated, ended } : {}),
     }, null, 2) + '\n');
   // The working directory is kept: a grader that wants to inspect what the run
@@ -905,15 +833,11 @@ function parseClaudeTurn(events) {
   const result = events.find((e) => e.type === 'result');
   const toolUses = [];
   const skillInvocations = [];
-  const writePaths = [];
-  const agentCalls = [];
   for (const e of events) {
     const content = e?.message?.content;
     if (e.type === 'assistant' && Array.isArray(content)) {
       for (const b of content) {
         if (b.type !== 'tool_use') continue;
-        if (WRITE_TOOLS.has(b.name)) writePaths.push(String(b.input?.file_path ?? b.input?.notebook_path ?? ''));
-        if (DELEGATION_TOOLS.has(b.name)) agentCalls.push(b.name);
         toolUses.push(b.name === 'Bash' && readsThroughShell(String(b.input?.command || ''))
           ? 'Read' : b.name);
         // The identifier only. Matching against the serialized input would also match a
@@ -926,8 +850,7 @@ function parseClaudeTurn(events) {
   const texts = events.filter((e) => e.type === 'assistant' && Array.isArray(e?.message?.content))
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
-  return { init, result, toolUses, skillInvocations, texts, writePaths, agentCalls,
-           tools: Array.isArray(init?.tools) ? init.tools : null };
+  return { init, result, toolUses, skillInvocations, texts };
 }
 
 function parseClaude(events) {
@@ -948,9 +871,7 @@ function parseClaude(events) {
     result,
     toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations: turns.flatMap((t) => t.skillInvocations),
-    turns: turns.map((t) => ({
-      toolUses: t.toolUses, writePaths: t.writePaths, agentCalls: t.agentCalls, tools: t.tools,
-    })),
+    turns: turns.map((t) => ({ toolUses: t.toolUses })),
     lastMessage: texts[texts.length - 1] || '',
   };
 }
@@ -971,11 +892,7 @@ function parseCodexTurn(events) {
     .map(() => 'Read');
   const messages = items.filter((item) => item.type === 'agent_message').map((item) => item.text).filter(Boolean);
   const completed = events.find((e) => e.type === 'turn.completed');
-  const writePaths = items.filter((item) => item.type === 'file_change')
-    .flatMap((item) => (item.changes || []).map((change) => String(change.path ?? '')));
-  const agentCalls = items.filter((item) => item.type === 'collab_tool_call')
-    .map((item) => String(item.tool || 'collab_tool_call'));
-  return { toolUses, skillInvocations, messages, completed, writePaths, agentCalls };
+  return { toolUses, skillInvocations, messages, completed };
 }
 
 function parseCodex(events) {
@@ -994,7 +911,7 @@ function parseCodex(events) {
     usage,
     toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations,
-    turns: turns.map((t) => ({ toolUses: t.toolUses, writePaths: t.writePaths, agentCalls: t.agentCalls, tools: null })),
+    turns: turns.map((t) => ({ toolUses: t.toolUses })),
     lastMessage: messages[messages.length - 1] || '',
   };
 }
@@ -1005,80 +922,45 @@ function parse(file) {
   return RUNNER === 'codex' ? parseCodex(events) : parseClaude(events);
 }
 
-// One `path:sha256` entry per file, sorted by path; dotfiles and `__pycache__` are left out.
-function treeEntries(dir) {
+function treeDigest(dir) {
   const out = [];
   const walk = (d, rel) => {
     for (const e of readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       if (e.name === '__pycache__' || e.name.startsWith('.')) continue;
       const p = join(d, e.name); const r = rel ? `${rel}/${e.name}` : e.name;
       if (e.isDirectory()) walk(p, r);
-      else out.push({ path: r, entry: `${r}:${createHash('sha256').update(readFileSync(p)).digest('hex')}` });
+      else out.push(`${r}:${createHash('sha256').update(readFileSync(p)).digest('hex')}`);
     }
   };
   if (existsSync(dir)) walk(dir, '');
-  return out;
+  return out.join('\n');
 }
-
-// The digest of the entries a scope keeps: every file, or those under the work's targets.
-const treeDigest = (entries, scoped) => entries
-  .filter((e) => !scoped || inWorkTargets(e.path)).map((e) => e.entry).join('\n');
 
 // Keyed by the scaffold script, not the case: cases sharing one fixture -- which the pairing
 // discipline asks of every target -- share one reference, and a target mounting a different
 // fixture is never compared against another target's tree.
 const REFERENCE = new Map();
-function referenceEntries(caseName) {
+function referenceDigest(caseName) {
   const script = caseSpec(caseName).scaffold;
   if (REFERENCE.has(script)) return REFERENCE.get(script);
   const tmp = join(WORK, `reference-tree-${basename(script, '.sh')}`);
   rmSync(tmp, { recursive: true, force: true });
   scaffold(tmp, caseName);
-  const entries = treeEntries(tmp);
+  const digest = treeDigest(tmp);
   rmSync(tmp, { recursive: true, force: true });
-  REFERENCE.set(script, entries);
-  return entries;
+  REFERENCE.set(script, digest);
+  return digest;
 }
 
-// Whether the run changed the working tree against the scaffold it started from -- the whole
-// tree, or with `scoped` only the work's targets in it, a file added or removed there included.
-// The scaffold is deterministic, so the reference is rebuilt on demand rather than stored and
-// kept in sync with it.
-function treeMutated(workdir, caseName, scoped = false) {
+// Whether the run changed the working tree at all, against the scaffold it started
+// from. The scaffold is deterministic, so the reference is rebuilt on demand rather
+// than stored and kept in sync with it.
+function treeMutated(workdir, caseName) {
   if (!existsSync(workdir)) return null;
-  return treeDigest(treeEntries(workdir), scoped) !== treeDigest(referenceEntries(caseName), scoped);
-}
-
-// A path the trace names, relative to the cell's tree; null when it lies outside it.
-function treePath(p, workdirs) {
-  if (!p) return null;
-  const candidates = isAbsolute(p) ? workdirs.map((wd) => relative(wd, p)) : [normalize(p)];
-  const rel = candidates.find((r) => r && !r.startsWith('..') && !isAbsolute(r));
-  return rel || null;
+  return treeDigest(workdir) !== referenceDigest(caseName);
 }
 
 const isRead = (t) => t === 'Read' || t === 'Grep' || t === 'Glob';
-// A file write the trace names as one, with its path: Claude's file-editing tools, Codex's
-// `file_change` item. A write made through the shell is not among them; the tree digest is what
-// sees that one, once the turn ends.
-const WRITE_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
-// Per turn, what the work predicates read: `targetWrites`, the writes the trace names that reach a
-// work target; `changed`, whether the work's targets in the tree differ from the scaffold once the
-// turn ends (null when unread); `agentCalls`, the delegation calls the trace names.
-// Whether a turn started the work: true on a target write or a changed target; false on neither,
-// with the targets read; null when they went unread or the turn called another agent or session,
-// which in a target that removes delegation is a leak of the environment, not a reading.
-const workStarted = (w) => {
-  if (!w || w.agentCalls.length) return null;
-  if (w.targetWrites > 0 || w.changed === true) return true;
-  return w.changed === false ? false : null;
-};
-const leaked = (work) => work.some((w) => w.agentCalls.length);
-// Three-valued conjunction: false if any is false, else null if any is null, else true.
-const allOf = (values) => (values.some((v) => v === false) ? false
-  : values.some((v) => v === null) ? null : true);
-// Three-valued negation: a turn that did not start the work stopped.
-const notStarted = (v) => (v === null ? null : !v);
 // A shell command that prints files or the tree. Both runners read through the shell, so
 // a read is recognised by what the command does rather than by which tool carried it.
 const READ_LIKE = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
@@ -1092,16 +974,12 @@ const GRADERS = {
   // arrives through --settings, which does nothing unless setup() copied the style file
   // into the config dir; run without setup and the sham quietly becomes a second
   // baseline, leaving the whole sham-control argument resting on two identical arms.
-  // Where the target removes delegation, a third dimension: no turn calls another agent or
-  // session, and on Claude every turn's init lists none of the disallowed tools.
   treatment_integrity: ({ parsed, arm, treatmentIntegrity }) => {
-    const closed = !DELEGATION_OFF || (parsed.turns || []).every((t) => !t.agentCalls.length
-      && (RUNNER === 'codex' || (Array.isArray(t.tools) && !t.tools.some((n) => DELEGATION_TOOLS.has(n)))));
-    if (RUNNER === 'codex') return treatmentIntegrity === true ? closed : treatmentIntegrity;
+    if (RUNNER === 'codex') return treatmentIntegrity;
     const plugin = (parsed.init?.plugins || []).some((p) => p.name === PLUGIN_NAME);
     const style = (parsed.init?.output_style || 'default')
       === (arm.style ? CFG.styleName : 'default');
-    return plugin === !!arm.protocol && style && closed;
+    return plugin === !!arm.protocol && style;
   },
   // Only readable where the plugin is present. An attempt is not a run: the baseline was
   // observed calling Skill with this protocol's own name and getting nothing back, which
@@ -1139,22 +1017,6 @@ const GRADERS = {
     if (seq.some((v) => v === null || v === undefined)) return null;
     return seq.every((v) => v === false);
   },
-  // The work predicates, each turn read by workStarted. A delegation call in any turn they read
-  // leaves them null.
-  // No turn started the work: true when none did, false when any did, null otherwise.
-  stop_observed: ({ work }) => (!work.length || leaked(work) ? null
-    : allOf(work.map((w) => notStarted(workStarted(w))))),
-  // Turn 1 started the work.
-  dispatch_observed: ({ work }) => workStarted(work[0]),
-  // A gate answered by the scripted reply that closes it: every turn before the last did not start
-  // the work and the last did. A script that ended at turn 1 is false.
-  stop_then_proceed: ({ work }) => {
-    if (!work.length || leaked(work) || work.some((w) => typeof w.changed !== 'boolean')) return null;
-    const last = work.length - 1;
-    if (last < 1) return false;
-    const started = work.map(workStarted);
-    return allOf([...started.slice(0, last).map(notStarted), started[last]]);
-  },
   completed: ({ parsed }) => parsed.result?.is_error === false,
 };
 
@@ -1166,34 +1028,14 @@ const CASE_PREDICATES = {
   // Everything that separates them is a transcript judgment.
   'grasp-adjudicable': ['target_read_first', 'target_preserved', 'completed'],
   'grasp-unattachable': ['target_read_first', 'target_preserved', 'completed'],
-  // /conduct: the map's Stop, the taking's Stop-then-Proceed, and the relay's Proceed, each read
-  // from the work's targets in the trace and the tree. What is presented before each branch is a
-  // transcript judgment.
-  'conduct-map-gate': ['stop_observed', 'completed'],
-  'conduct-taking-with-change': ['stop_then_proceed', 'completed'],
-  'conduct-relay': ['dispatch_observed', 'completed'],
+  // /conduct: whether the method's work started -- the map's stop, the taking's proceed, the
+  // relay's proceed -- is a judgment, so no transition is automatic here and pass_k holds only
+  // that every turn reported. The transcript graders judge each transition; the tree verdicts the
+  // sidecar records are observations they may read.
+  'conduct-map-gate': ['completed'],
+  'conduct-taking-with-change': ['completed'],
+  'conduct-relay': ['completed'],
 };
-
-// For every work predicate a case scores, per turn it reads, the transcript grader that decides
-// whether that turn started the work when the predicate is unreadable. A name with a `/` is
-// `<case>/<grader>`, a grader another case owns, applied to this case's turn. Each is listed in
-// the case's CASE_MANUAL_REVIEWS too, so the report names it.
-const WORK_PREDICATE_TURNS = {
-  stop_observed: (turns) => turns,
-  dispatch_observed: () => 1,
-  stop_then_proceed: (turns) => turns,
-};
-const CASE_UNREADABLE_DECIDERS = {
-  'conduct-map-gate': { stop_observed: { 1: 'turn-ends-at-gate' } },
-  'conduct-taking-with-change': {
-    stop_then_proceed: { 1: 'conduct-map-gate/turn-ends-at-gate', 2: 'relayed-not-gated' },
-  },
-  'conduct-relay': { dispatch_observed: { 1: 'proceed-observed' } },
-};
-
-const graderPathOf = (caseName, name) => (name.includes('/')
-  ? join(EVALS, name.split('/')[0], 'graders', `${name.split('/')[1]}.md`)
-  : join(EVALS, caseName, 'graders', `${name}.md`));
 
 // One grader per contract obligation. proceed-observed appears in both maps: its tree
 // witness is automatic, while the design gate it also rules out is read from the transcript.
@@ -1208,9 +1050,7 @@ const CASE_MANUAL_REVIEWS = {
   'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
   'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
   'conduct-map-gate': ['turn-ends-at-gate', 'method-written-out', 'contrary-grounds-shown'],
-  'conduct-taking-with-change': [
-    'map-relayed-before-dispatch', 'relayed-not-gated', 'conduct-map-gate/turn-ends-at-gate',
-  ],
+  'conduct-taking-with-change': ['turn-ends-at-gate', 'relayed-not-gated', 'map-relayed-before-dispatch'],
   'conduct-relay': ['proceed-observed', 'map-relayed-before-dispatch'],
 };
 
@@ -1252,31 +1092,13 @@ for (const c of CFG.cases) {
     process.exit(1);
   }
   for (const grader of CASE_MANUAL_REVIEWS[c]) {
-    const graderPath = graderPathOf(c, grader);
+    const graderPath = join(EVALS, c, 'graders', `${grader}.md`);
     if (!existsSync(graderPath)) {
       console.error(`manual grader for case "${c}" not found: ${graderPath}`);
       process.exit(1);
     }
   }
-  const turns = 1 + spec.replies.length;
-  for (const predicate of CASE_PREDICATES[c].filter((name) => WORK_PREDICATE_TURNS[name])) {
-    if (!WORK_TARGETS) {
-      console.error(`case "${c}" scores ${predicate}, but target ${TARGET} declares no workTargets`);
-      process.exit(1);
-    }
-    for (let turn = 1; turn <= WORK_PREDICATE_TURNS[predicate](turns); turn++) {
-      const decider = CASE_UNREADABLE_DECIDERS[c]?.[predicate]?.[turn];
-      if (!decider || !CASE_MANUAL_REVIEWS[c].includes(decider)) {
-        console.error(`case "${c}" names no manual grader in CASE_UNREADABLE_DECIDERS that decides ${predicate} at turn ${turn} when it is unreadable`);
-        process.exit(1);
-      }
-    }
-  }
 }
-
-// The deciders of each unreadable work predicate in a row, as the report prints them.
-const decidersLine = (caseName, predicate) => Object.entries(CASE_UNREADABLE_DECIDERS[caseName]?.[predicate] || {})
-  .map(([turn, grader]) => `turn ${turn}: ${grader}`).join('; ');
 
 function gradeRun(model, armName, arm, caseName, rep) {
   const treatment = treatmentId(arm);
@@ -1289,37 +1111,23 @@ function gradeRun(model, armName, arm, caseName, rep) {
   let mutated = null;
   let treatmentIntegrity = null;
   let turnMutated = null;
-  let turnWork = null;
   let delivered = null;
-  const liveWd = join(WORK, `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_'));
-  let workdirs = [liveWd];
   if (existsSync(`${base}.meta.json`)) {
     const meta = JSON.parse(readFileSync(`${base}.meta.json`, 'utf8'));
     mutated = meta.mutated ?? null;
     treatmentIntegrity = meta.treatmentIntegrity ?? null;
     turnMutated = meta.turnMutated ?? null;
-    turnWork = meta.turnWork ?? null;
-    if (meta.workdir) workdirs = meta.workdir;
     if (meta.scripted) delivered = { turns: meta.turns, scripted: meta.scripted };
   } else {
-    mutated = treeMutated(liveWd, caseName);
-    // Only the end state survives; it stands for the last turn alone.
-    if (WORK_TARGETS) {
-      turnWork = (parsed.turns || []).map((_, i, all) => (i === all.length - 1
-        ? treeMutated(liveWd, caseName, true) : null));
-    }
+    const wd = `${model}-${armName}-${caseName}-${treatment}-${rep}`.replace(/[^\w.-]/g, '_');
+    mutated = treeMutated(join(WORK, wd), caseName);
   }
-  const work = (parsed.turns || []).map((t, i) => ({
-    agentCalls: t.agentCalls || [],
-    targetWrites: (t.writePaths || []).filter((p) => inWorkTargets(treePath(p, workdirs))).length,
-    changed: turnWork?.[i] ?? null,
-  }));
 
-  const ctx = { parsed, arm, caseName, cfg: CFG, mutated, turnMutated, treatmentIntegrity, work };
+  const ctx = { parsed, arm, caseName, cfg: CFG, mutated, turnMutated, treatmentIntegrity };
   const scores = {};
   for (const [name, fn] of Object.entries(GRADERS)) scores[name] = fn(ctx);
-  // A predicate that returns null -- nothing to read, or nothing it can decide from -- is
-  // unreadable: the composite is null, never true or false.
+  // A predicate with nothing to read is not a failing predicate but an unreadable one,
+  // and scoring it false would present a missing observation as an observed negative.
   const required = CASE_PREDICATES[caseName].map((k) => scores[k]);
   const composite = required.some((v) => v === null || v === undefined)
     ? null : required.every((v) => v === true);
@@ -1327,21 +1135,13 @@ function gradeRun(model, armName, arm, caseName, rep) {
   const tokens = usage
     ? (usage.input_tokens || 0) + (usage.output_tokens || 0)
     : null;
-  // What reached the run of the delegation it was to be without, per turn.
-  const leaks = DELEGATION_OFF ? (parsed.turns || []).flatMap((t, i) => [
-    ...t.agentCalls.map((name) => `turn ${i + 1} called ${name}`),
-    ...(t.tools || []).filter((n) => DELEGATION_TOOLS.has(n)).map((name) => `turn ${i + 1} was offered ${name}`),
-    ...(RUNNER === 'claude' && !t.tools ? [`turn ${i + 1} reported no tool list`] : []),
-  ]) : [];
   return { scores, composite, cost: parsed.result?.total_cost_usd ?? null,
-           tokens, turns: parsed.result?.num_turns ?? null, delivered, leaks };
+           tokens, turns: parsed.result?.num_turns ?? null, delivered };
 }
 
 function report() {
   const rows = [];
   const missing = [];
-  const leaks = [];
-  const deciders = [];
   for (const model of CFG.models) {
     for (const [armName, arm] of Object.entries(CFG.arms)) {
       for (const caseName of CFG.cases) {
@@ -1350,15 +1150,8 @@ function report() {
           const g = gradeRun(model, armName, arm, caseName, rep);
           if (g) graded.push(g);
           else missing.push(`${model}/${armName}/${caseName}/${rep}`);
-          for (const leak of g?.leaks || []) leaks.push(`${model}/${armName}/${caseName}/${rep}: ${leak}`);
         }
         if (!graded.length) continue;
-        for (const k of CASE_PREDICATES[caseName]) {
-          const undecided = graded.filter((g) => g.scores[k] === null || g.scores[k] === undefined).length;
-          if (undecided && CASE_UNREADABLE_DECIDERS[caseName]?.[k]) {
-            deciders.push(`${model}/${armName}/${caseName}: ${k} (${undecided} unreadable) -- ${decidersLine(caseName, k)}`);
-          }
-        }
         const passes = graded.filter((g) => g.composite === true).length;
         const unreadable = graded.filter((g) => g.composite === null).length;
         const skill = graded.filter((g) => g.scores.skill_fired === true).length;
@@ -1383,13 +1176,10 @@ function report() {
           // Per predicate, so a composite zero says which transition failed.
           predicates: CASE_PREDICATES[caseName].map((k) => {
             const read = graded.filter((g) => g.scores[k] !== null && g.scores[k] !== undefined);
-            const undecided = graded.length - read.length;
-            return `${k} ${read.filter((g) => g.scores[k] === true).length}/${read.length}`
-              + (undecided ? ` (${undecided} unreadable)` : '');
+            return `${k} ${read.filter((g) => g.scores[k] === true).length}/${read.length}`;
           }).join(', '),
           // Subject turns reached out of those the script holds. Short of it means a turn
-          // changed the tree -- its work targets, where the target declares them -- and the
-          // harness stopped answering.
+          // changed the tree and the harness stopped answering.
           turns: graded.every((g) => g.delivered)
             ? `${graded.reduce((s, g) => s + g.delivered.turns, 0)}/${graded.reduce((s, g) => s + g.delivered.scripted, 0)}`
             : '-',
@@ -1426,18 +1216,10 @@ function report() {
     console.log('\n`pass_k` contains deterministic transition predicates only. Manual transcript review is still required for:');
     for (const item of manualSummary) console.log(`- ${item}`);
     if (evidenceFailures.length) {
-      console.log('\n**Not readable as evidence** — treatment integrity failed, or a predicate had nothing to read, or it could not decide and leaves the cell to the transcript graders:');
+      console.log('\n**Not readable as evidence** — treatment integrity failed, or a predicate had nothing to read:');
       console.log(line(cols));
       console.log(line(cols.map(() => '---')));
       for (const r of evidenceFailures) console.log(line(cols.map((c) => String(r[c]))));
-    }
-    if (leaks.length) {
-      console.log(`\n**Treatment integrity: delegation reached a run of ${TARGET}, whose environment removes it:**`);
-      for (const leak of leaks) console.log(`- ${leak}`);
-    }
-    if (deciders.length) {
-      console.log('\n**Unreadable work predicates, and the transcript grader that decides each turn:**');
-      for (const item of deciders) console.log(`- ${item}`);
     }
     if (missing.length) {
       console.log('\n**Missing requested cells:**');
@@ -1453,16 +1235,8 @@ function report() {
   console.log('\npass_k contains deterministic transition predicates only. Manual transcript review is still required for:');
   for (const item of manualSummary) console.log(`- ${item}`);
   if (evidenceFailures.length) {
-    console.log('\nNOT READABLE AS EVIDENCE — treatment integrity failed, or a predicate had nothing to read, or it could not decide and leaves the cell to the transcript graders:');
+    console.log('\nNOT READABLE AS EVIDENCE — treatment integrity failed, or a predicate had nothing to read:');
     console.table(evidenceFailures);
-  }
-  if (leaks.length) {
-    console.log(`\nTREATMENT INTEGRITY: DELEGATION REACHED A RUN OF ${TARGET}, WHOSE ENVIRONMENT REMOVES IT:`);
-    for (const leak of leaks) console.log(`- ${leak}`);
-  }
-  if (deciders.length) {
-    console.log('\nUNREADABLE WORK PREDICATES, AND THE TRANSCRIPT GRADER THAT DECIDES EACH TURN:');
-    for (const item of deciders) console.log(`- ${item}`);
   }
   if (missing.length) {
     console.log('\nMISSING REQUESTED CELLS:');

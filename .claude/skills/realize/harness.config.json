@@ -49,13 +49,6 @@
     "Edit"
   ],
   "permissionMode": "acceptEdits",
-  "delegationTools": [
-    "Agent",
-    "Task",
-    "SendMessage",
-    "Workflow",
-    "RemoteTrigger"
-  ],
   "targets": {
     "inquire": {
       "pluginDir": "aitesis",
@@ -92,14 +85,7 @@
       "invocation": {
         "claude": "Use `/conduct` for this.",
         "codex": "Use `$hyphegesis:conduct` for this."
-      },
-      "delegation": false,
-      "workTargets": [
-        "exporters/",
-        "report/",
-        "tests/",
-        "MIGRATION.md"
-      ]
+      }
     }
   }
 }
