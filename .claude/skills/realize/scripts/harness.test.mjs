@@ -427,29 +427,29 @@ test('a gate answered by its closing reply passes only when it stopped and then 
     // Turn 1 leaves the tree alone and only the resumed turn writes: the map stops, the taking
     // proceeds, and a single-turn relay that wrote nothing has not proceeded.
     ['mutate-on-resume', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| target_preserved 1/1, completed 1/1 \\| - \\|'),
+      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_observed 1/1, completed 1/1 \\| - \\|'),
       row('conduct-taking-with-change', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_then_proceed 1/1, completed 1/1 \\| 2/2 \\|'),
       row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
     ]],
     // Turn 1 writes: the map did not stop, the script ends before the taking, and the relay
     // proceeded.
     ['mutate', [
-      row('conduct-map-gate', '0 \\| 0/1 \\| 1 \\| n/a \\| target_preserved 0/1, completed 1/1 \\| - \\|'),
+      row('conduct-map-gate', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_observed 0/1, completed 1/1 \\| - \\|'),
       row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 1/2 \\|'),
       row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| dispatch_observed 1/1, completed 1/1 \\| - \\|'),
     ]],
     // Every turn writes and puts the file back: the relay started its work though its tree ends
-    // as the scaffold's, and the taking's turn 1 wrote, so its gate did not stop, though its tree
-    // is unchanged after every turn.
+    // as the scaffold's, and the map's and the taking's turn 1 wrote, so neither gate stopped,
+    // though every tree is unchanged.
     ['file-change', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| target_preserved 1/1, completed 1/1 \\| - \\|'),
+      row('conduct-map-gate', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_observed 0/1, completed 1/1 \\| - \\|'),
       row('conduct-taking-with-change', '0 \\| 0/1 \\| 1 \\| n/a \\| stop_then_proceed 0/1, completed 1/1 \\| 2/2 \\|'),
       row('conduct-relay', '1 \\| 1/1 \\| 1 \\| n/a \\| dispatch_observed 1/1, completed 1/1 \\| - \\|'),
     ]],
     // Only the resumed turn writes, and puts the file back: the taking stopped at turn 1 and
     // proceeded at turn 2, though no turn leaves a changed tree.
     ['file-change-on-resume', [
-      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| target_preserved 1/1, completed 1/1 \\| - \\|'),
+      row('conduct-map-gate', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_observed 1/1, completed 1/1 \\| - \\|'),
       row('conduct-taking-with-change', '1 \\| 1/1 \\| 1 \\| n/a \\| stop_then_proceed 1/1, completed 1/1 \\| 2/2 \\|'),
       row('conduct-relay', '0 \\| 0/1 \\| 1 \\| n/a \\| dispatch_observed 0/1, completed 1/1 \\| - \\|'),
     ]],
@@ -473,44 +473,76 @@ test('a gate answered by its closing reply passes only when it stopped and then 
   }
 });
 
-test('a handoff to another agent that writes nothing counts as dispatch', () => {
-  const row = (name, cells) => new RegExp(`\\| bare \\| ${name} \\|[^\\n]*${cells}`);
-  for (const [mode, expected] of [
-    // Every turn hands off and writes nothing: the relay dispatched in its turn, and the taking's
-    // turn 1 handed off, so its gate did not stop.
-    ['always', [
-      row('conduct-relay', 'dispatch_observed 1/1'),
-      row('conduct-taking-with-change', 'stop_then_proceed 0/1'),
+test('a named agent call is decisive for neither predicate; a named write or a changed tree is', () => {
+  // Columns from the case on: n | pass_k | rate | ... | predicates.
+  const row = (name, passK, cells) => new RegExp(`\\| bare \\| ${name} \\| 1 \\| ${passK} \\|[^\\n]*${cells}`);
+  const unread = (predicate) => `${predicate} 0/0 \\(1 unreadable\\)`;
+  // Per subject turn, what the fake runner's trace names: an Agent call, a Write call, both, or
+  // neither. The tree is never changed, so every verdict here comes from the trace.
+  for (const [turns, expected] of [
+    // Every turn calls an agent and writes nothing: no turn of any case is decided by the trace.
+    ['agent,agent', [
+      row('conduct-map-gate', '-', unread('stop_observed')),
+      row('conduct-relay', '-', unread('dispatch_observed')),
+      row('conduct-taking-with-change', '-', unread('stop_then_proceed')),
     ]],
-    // Only the resumed turn hands off: the taking stopped at turn 1 and proceeded at turn 2, and a
-    // single-turn relay that handed nothing off has not dispatched.
-    ['on-resume', [
-      row('conduct-relay', 'dispatch_observed 0/1'),
-      row('conduct-taking-with-change', 'stop_then_proceed 1/1'),
+    // Turn 1 shows nothing and the resumed turn only calls an agent: the map stopped, a
+    // single-turn relay that showed nothing has not dispatched, and the taking's proceed is
+    // undecided.
+    ['none,agent', [
+      row('conduct-map-gate', '1', 'stop_observed 1/1'),
+      row('conduct-relay', '0', 'dispatch_observed 0/1'),
+      row('conduct-taking-with-change', '-', unread('stop_then_proceed')),
+    ]],
+    // An agent call in turn 1 -- an inventory before a map that stops -- then a write in turn 2:
+    // turn 1 is undecided, so neither the map nor the taking is failed on it.
+    ['agent,write', [
+      row('conduct-map-gate', '-', unread('stop_observed')),
+      row('conduct-relay', '-', unread('dispatch_observed')),
+      row('conduct-taking-with-change', '-', unread('stop_then_proceed')),
+    ]],
+    // A write beside the agent call decides the turn: the relay dispatched, and neither the map
+    // nor the taking's turn 1 stopped.
+    ['agent+write,write', [
+      row('conduct-map-gate', '0', 'stop_observed 0/1'),
+      row('conduct-relay', '1', 'dispatch_observed 1/1'),
+      row('conduct-taking-with-change', '0', 'stop_then_proceed 0/1'),
+    ]],
+    // Turn 1 shows nothing and the resumed turn writes beside its agent call: the taking stopped
+    // and then proceeded.
+    ['none,agent+write', [
+      row('conduct-map-gate', '1', 'stop_observed 1/1'),
+      row('conduct-relay', '0', 'dispatch_observed 0/1'),
+      row('conduct-taking-with-change', '1', 'stop_then_proceed 1/1'),
     ]],
   ]) {
     const { root, env } = fixture();
     const bin = join(root, 'bin', 'claude');
     writeFileSync(bin, `#!/usr/bin/env node
 const args = process.argv.slice(2);
-const handoff = process.env.FAKE_CLAUDE_HANDOFF === 'always'
-  || (process.env.FAKE_CLAUDE_HANDOFF === 'on-resume' && args.includes('--resume'));
+const turns = process.env.FAKE_CLAUDE_TURNS.split(',');
+const shows = turns[args.includes('--resume') ? 1 : 0].split('+');
+const blocks = [];
+if (shows.includes('agent')) blocks.push({ type: 'tool_use', name: 'Agent', input: { description: 'list the exporters', prompt: 'inventory' } });
+if (shows.includes('write')) blocks.push({ type: 'tool_use', name: 'Write', input: { file_path: 'notes.txt', content: 'x' } });
 console.log(JSON.stringify({ type: 'system', subtype: 'init', session_id: 's', plugins: [], output_style: 'default' }));
-if (handoff) console.log(JSON.stringify({ type: 'assistant', message: { content: [
-  { type: 'tool_use', name: 'Agent', input: { description: 'run the method', prompt: 'the method' } }] } }));
+if (blocks.length) console.log(JSON.stringify({ type: 'assistant', message: { content: blocks } }));
 console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.01, num_turns: 1 }));
 `);
     chmodSync(bin, 0o755);
     env.REALIZE_RUNNER = 'claude';
-    env.REALIZE_CASES = 'conduct-taking-with-change,conduct-relay';
+    env.REALIZE_CASES = 'conduct-map-gate,conduct-taking-with-change,conduct-relay';
     env.HOME = root;
-    env.FAKE_CLAUDE_HANDOFF = mode;
+    env.FAKE_CLAUDE_TURNS = turns;
     try {
       const run = invoke(env, 'run', 'conduct');
       assert.equal(run.status, 0, run.stderr || run.stdout);
       const report = invoke(env, 'report', 'conduct', '--markdown');
-      assert.equal(report.status, 0, report.stderr || report.stdout);
-      for (const pattern of expected) assert.match(report.stdout, pattern, `${mode}: ${pattern}`);
+      for (const pattern of expected) assert.match(report.stdout, pattern, `${turns}: ${pattern}`);
+      // An undecided predicate leaves its row unreadable, which the report lists apart and exits on.
+      const undecided = expected.some((p) => p.source.includes('unreadable'));
+      assert.equal(report.status === 0, !undecided, `${turns}: ${report.stdout}`);
+      assert.equal(/Not readable as evidence/.test(report.stdout), undecided, turns);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

@@ -33,8 +33,9 @@ presents the map and goes on to start the work.
 
 ## Pairing
 
-`target-preserved` checks the tree for the same turn; a pass there with a fail here is a stop
-without a gate.
+`stop-observed` checks the trace and the tree for the same turn; a pass there with a fail here is
+a stop without a gate. Where it is unreadable — an agent or session call with no write — this
+grader's item 3 decides whether the method started.
 
 ## Arms
 

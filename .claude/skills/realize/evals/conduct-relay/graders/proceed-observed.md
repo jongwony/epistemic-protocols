@@ -36,7 +36,9 @@ and then, under the prompt's own retry rule, put it back and stopped has proceed
 subject of a question, not its shape. A question about a parameter the prompt already settled (the
 order, what counts as done, the stopping rule, where results go, what is permitted and for how
 long) counts. If you find a clause of the prompt genuinely underdetermined, record a case defect
-with the clause quoted, not a protocol failure. `dispatch-observed` is the deterministic half.
+with the clause quoted, not a protocol failure. `dispatch-observed` is the deterministic half;
+where it is unreadable — an agent or session call with no write — this grader decides whether that
+call handed the method off.
 
 ## Arms
 

@@ -834,14 +834,14 @@ function parseClaudeTurn(events) {
   const toolUses = [];
   const skillInvocations = [];
   let writes = 0;
-  let handoffs = 0;
+  let agentCalls = 0;
   for (const e of events) {
     const content = e?.message?.content;
     if (e.type === 'assistant' && Array.isArray(content)) {
       for (const b of content) {
         if (b.type !== 'tool_use') continue;
         if (WRITE_TOOLS.has(b.name)) writes++;
-        if (HANDOFF_TOOLS.has(b.name)) handoffs++;
+        if (AGENT_CALL_TOOLS.has(b.name)) agentCalls++;
         toolUses.push(b.name === 'Bash' && readsThroughShell(String(b.input?.command || ''))
           ? 'Read' : b.name);
         // The identifier only. Matching against the serialized input would also match a
@@ -854,7 +854,7 @@ function parseClaudeTurn(events) {
   const texts = events.filter((e) => e.type === 'assistant' && Array.isArray(e?.message?.content))
     .map((e) => e.message.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n'))
     .filter(Boolean);
-  return { init, result, toolUses, skillInvocations, texts, writes, handoffs };
+  return { init, result, toolUses, skillInvocations, texts, writes, agentCalls };
 }
 
 function parseClaude(events) {
@@ -875,7 +875,7 @@ function parseClaude(events) {
     result,
     toolUses: turns.flatMap((t) => t.toolUses),
     skillInvocations: turns.flatMap((t) => t.skillInvocations),
-    turns: turns.map((t) => ({ toolUses: t.toolUses, writes: t.writes, handoffs: t.handoffs })),
+    turns: turns.map((t) => ({ toolUses: t.toolUses, writes: t.writes, agentCalls: t.agentCalls })),
     lastMessage: texts[texts.length - 1] || '',
   };
 }
@@ -969,11 +969,22 @@ const isRead = (t) => t === 'Read' || t === 'Grep' || t === 'Glob';
 // A file write the trace names as one: Claude's file-editing tools, Codex's `file_change` item. A
 // write made through the shell is not among them; the tree digest is what sees that one.
 const WRITE_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
-// A handoff to another agent the trace names as one: Claude's `Agent`, `Task` and `SendMessage`
-// calls.
-const HANDOFF_TOOLS = new Set(['Agent', 'Task', 'SendMessage']);
-// A turn the trace shows dispatching: a write or a handoff it names.
-const dispatchNamed = (turn) => (turn?.writes || 0) + (turn?.handoffs || 0) > 0;
+// A call to another agent or session the trace names as one: Claude's `Agent`, `Task` and
+// `SendMessage` calls.
+const AGENT_CALL_TOOLS = new Set(['Agent', 'Task', 'SendMessage']);
+// Whether a turn's record shows the method's work starting. true: the trace names a write, or the
+// tree differs from the scaffold once the turn ends. null: neither, and the turn's only witness is
+// a named agent or session call, or its tree went unread. false: none of these.
+const workStarted = (turn, tree) => {
+  if ((turn?.writes || 0) > 0 || tree === true) return true;
+  if ((turn?.agentCalls || 0) > 0 || tree === null || tree === undefined) return null;
+  return false;
+};
+// Three-valued conjunction: false if any is false, else null if any is null, else true.
+const allOf = (values) => (values.some((v) => v === false) ? false
+  : values.some((v) => v === null) ? null : true);
+// Three-valued negation: a turn that did not start the work stopped.
+const notStarted = (v) => (v === null ? null : !v);
 // A shell command that prints files or the tree. Both runners read through the shell, so
 // a read is recognised by what the command does rather than by which tool carried it.
 const READ_LIKE = /\b(?:rg|grep|sed|awk|cat|nl|head|tail|less|more|find|pwd)\b|\bgit\s+(?:status|log|show|diff)\b/;
@@ -1030,30 +1041,24 @@ const GRADERS = {
     if (seq.some((v) => v === null || v === undefined)) return null;
     return seq.every((v) => v === false);
   },
-  // Turn 1 started the work, wherever the tree ended up. A method may undo its own write -- put a
-  // file back and stop -- so an unchanged tree at the end of the turn is not a Stop. What the
-  // harness can see of the work starting during the turn is a write the trace names (a Codex
-  // `file_change`, a Claude Write or Edit), a handoff to another agent the trace names (a Claude
-  // Agent, Task or SendMessage call), or a tree that differs once the turn ends; a write made only
-  // through the shell and undone in the same turn shows as none of them.
-  dispatch_observed: ({ parsed, mutated, turnMutated }) => {
-    const tree = (turnMutated || [mutated])[0];
-    if (dispatchNamed(parsed.turns?.[0]) || tree === true) return true;
-    return tree === false ? false : null;
-  },
-  // A gate answered by the scripted reply that closes it. Every turn before the last stopped: its
-  // tree is unchanged and its trace names no write and no handoff, so a write undone within the
-  // turn still counts against it. The last turn proceeded, read as dispatch_observed reads a turn:
-  // a write or a handoff its trace names, or a tree changed by its end -- the method it hands off
-  // may put a file back and stop. A turn that changed the tree early ended the script there, which
-  // reads as not met. Only a scripted transcript has per-turn verdicts to read.
+  // No turn started the work, each read by workStarted: false when any did, null when none did
+  // and any is undecided, true otherwise.
+  stop_observed: ({ parsed, mutated, turnMutated }) =>
+    allOf((turnMutated || [mutated]).map((tree, i) => notStarted(workStarted(parsed.turns?.[i], tree)))),
+  // Turn 1 started the work, read by workStarted: a named write or a changed tree is true, a named
+  // agent or session call alone is null, a turn showing neither is false.
+  dispatch_observed: ({ parsed, mutated, turnMutated }) =>
+    workStarted(parsed.turns?.[0], (turnMutated || [mutated])[0]),
+  // A gate answered by the scripted reply that closes it: every turn before the last stopped and
+  // the last proceeded, each turn read by workStarted. An earlier turn that started the work is
+  // false; an earlier turn whose only witness is a named agent or session call is null. A script
+  // that ended at turn 1 is false. Only a scripted transcript has per-turn verdicts to read.
   stop_then_proceed: ({ parsed, turnMutated }) => {
     if (!turnMutated || turnMutated.some((v) => v === null || v === undefined)) return null;
-    const named = (i) => dispatchNamed(parsed.turns?.[i]);
     const last = turnMutated.length - 1;
-    return last >= 1
-      && turnMutated.slice(0, last).every((v, i) => v === false && !named(i))
-      && (turnMutated[last] === true || named(last));
+    if (last < 1) return false;
+    const started = turnMutated.map((tree, i) => workStarted(parsed.turns?.[i], tree));
+    return allOf([...started.slice(0, last).map(notStarted), started[last]]);
   },
   completed: ({ parsed }) => parsed.result?.is_error === false,
 };
@@ -1067,8 +1072,9 @@ const CASE_PREDICATES = {
   'grasp-adjudicable': ['target_read_first', 'target_preserved', 'completed'],
   'grasp-unattachable': ['target_read_first', 'target_preserved', 'completed'],
   // /conduct: the map's Stop, the taking's Stop-then-Proceed, and the relay's Proceed, each read
-  // from the tree. What is presented before each branch is a transcript judgment.
-  'conduct-map-gate': ['target_preserved', 'completed'],
+  // from the trace and the tree by workStarted. What is presented before each branch is a
+  // transcript judgment.
+  'conduct-map-gate': ['stop_observed', 'completed'],
   'conduct-taking-with-change': ['stop_then_proceed', 'completed'],
   'conduct-relay': ['dispatch_observed', 'completed'],
 };
@@ -1162,8 +1168,8 @@ function gradeRun(model, armName, arm, caseName, rep) {
   const ctx = { parsed, arm, caseName, cfg: CFG, mutated, turnMutated, treatmentIntegrity };
   const scores = {};
   for (const [name, fn] of Object.entries(GRADERS)) scores[name] = fn(ctx);
-  // A predicate with nothing to read is not a failing predicate but an unreadable one,
-  // and scoring it false would present a missing observation as an observed negative.
+  // A predicate that returns null -- nothing to read, or nothing it can decide from -- is
+  // unreadable: the composite is null, never true or false.
   const required = CASE_PREDICATES[caseName].map((k) => scores[k]);
   const composite = required.some((v) => v === null || v === undefined)
     ? null : required.every((v) => v === true);
@@ -1212,7 +1218,9 @@ function report() {
           // Per predicate, so a composite zero says which transition failed.
           predicates: CASE_PREDICATES[caseName].map((k) => {
             const read = graded.filter((g) => g.scores[k] !== null && g.scores[k] !== undefined);
-            return `${k} ${read.filter((g) => g.scores[k] === true).length}/${read.length}`;
+            const undecided = graded.length - read.length;
+            return `${k} ${read.filter((g) => g.scores[k] === true).length}/${read.length}`
+              + (undecided ? ` (${undecided} unreadable)` : '');
           }).join(', '),
           // Subject turns reached out of those the script holds. Short of it means a turn
           // changed the tree and the harness stopped answering.
@@ -1252,7 +1260,7 @@ function report() {
     console.log('\n`pass_k` contains deterministic transition predicates only. Manual transcript review is still required for:');
     for (const item of manualSummary) console.log(`- ${item}`);
     if (evidenceFailures.length) {
-      console.log('\n**Not readable as evidence** — treatment integrity failed, or a predicate had nothing to read:');
+      console.log('\n**Not readable as evidence** — treatment integrity failed, or a predicate had nothing to read, or it could not decide and leaves the cell to the transcript graders:');
       console.log(line(cols));
       console.log(line(cols.map(() => '---')));
       for (const r of evidenceFailures) console.log(line(cols.map((c) => String(r[c]))));
@@ -1271,7 +1279,7 @@ function report() {
   console.log('\npass_k contains deterministic transition predicates only. Manual transcript review is still required for:');
   for (const item of manualSummary) console.log(`- ${item}`);
   if (evidenceFailures.length) {
-    console.log('\nNOT READABLE AS EVIDENCE — treatment integrity failed, or a predicate had nothing to read:');
+    console.log('\nNOT READABLE AS EVIDENCE — treatment integrity failed, or a predicate had nothing to read, or it could not decide and leaves the cell to the transcript graders:');
     console.table(evidenceFailures);
   }
   if (missing.length) {

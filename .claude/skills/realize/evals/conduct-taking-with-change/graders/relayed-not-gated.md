@@ -36,7 +36,9 @@ under this grader; it is neither met nor not met.
 Presenting the map again in the closing turn is expected; what separates a relay from a gate is
 whether the person is asked to answer it. Whatever the substrate says or asks after the work starts
 — its closing report, or something it returns to the person there — is the substrate's and outside
-this grader. `stop-then-proceed` reads the tree half.
+this grader. `stop-then-proceed` reads the trace and tree half; where turn 2 leaves it unreadable
+— an agent or session call with no write — this grader decides whether that call handed the method
+off.
 
 ## Arms
 
