@@ -8,8 +8,7 @@ focus: whether turn 1 relays the map and starts the work in the same turn, with 
 # The map is relayed and the work starts in the same turn
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, `RelaySupported`,
-the `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING, and the Rule "Conduction
-warrant"). Where the person's own words already settle the method at the start, the run relays: it
+and the `.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING). Where the person's own words already settle the method at the start, the run relays: it
 presents the map as a relay and hands the method off in the same turn. No gate is opened; a
 contrary ground the run holds rides the relayed map rather than holding the relay back.
 

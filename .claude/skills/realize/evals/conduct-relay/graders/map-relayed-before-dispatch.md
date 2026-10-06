@@ -8,8 +8,7 @@ focus: whether the map, showing every choice of the run's that execution will fo
 # The map is relayed before the dispatch
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — CONVERGENCE, the
-`.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING, `RelaySupported`, and the Rule
-"Conduction warrant"). Where the person's own words already settle the method at the start, the map
+`.relay`/`.converge` and `.handoff` entries of TOOL GROUNDING, and `RelaySupported`). Where the person's own words already settle the method at the start, the map
 is presented as a relay — the method as it will be handed off — and the handoff follows in the same
 turn; the handoff carries what that map showed. Placement, the lifetime past what the person fixed,
 and what the method needs are the run's inference and are shown on that map too.

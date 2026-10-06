@@ -7,9 +7,9 @@ focus: whether turn 1 presents the map and ends at a gate the person can answer
 ---
 # The map ends at a gate the person can answer
 
-Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, the `.map` and
-`.mapGate` entries of TOOL GROUNDING, and the "User-facing realization" section). The first map is
-presented, then `.mapGate`, and the turn is yielded: the person may say what the map got wrong,
+Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `start`, PHASE TRANSITIONS,
+the `.map` and `.mapGate` entries of TOOL GROUNDING, and `Interaction.realization`). The first map
+is presented, then `.mapGate`, and the turn is yielded: the person may say what the map got wrong,
 anywhere on it, or take the method as shown or with what the same words change. Withdrawal stays
 open to the person in their own words and is not among the gate's moves.
 
