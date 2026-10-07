@@ -39,11 +39,11 @@ One unit is one execution interval is one entry, carrying that unit's whole cert
 
 ## The Handoff
 
-The run does what does not rest on the user without waiting for them and, when the plan has run, returns once with every unit's result. What rests on the user — a unit that cannot be undone where a doubt the plan carries bears on it, an act outside the granted authority or unclear within it, a reserved judgment the grant does not reach — does not proceed; it comes back in that one return with what did not proceed because of it, and nothing is decided for the user.
+The run does what does not rest on the user without waiting for them, follows the dependencies the units' seams cite, and, when the plan has run, returns once with every unit's result; a unit whose done no check settles comes back unconfirmed. What rests on the user — a unit that cannot be undone where a doubt the plan carries, or one execution brings evidence for, bears on it; an act outside the granted authority or unclear within it; a reserved judgment the grant does not reach; work whose deciding source cannot be reached — does not proceed, and comes back in that one return with what did not proceed because of it. A reservation holds back only what rests on it; within the grant the run settles one it reaches and reports its basis, never the whole-goal acceptance. Nothing is decided for the user. The contract's Rule "Handoff carries its obligations" is the full statement. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
 
 ## Composition
 
-The taken plan leaves as session text and a navigation block over its carrier, so any later line of work — a method designed with `/conduct`, issues in a tracker, another session — reads it by pointer. Which one reads it next is the user's call. Concrete executor selection stays outside: units carry capability requirements, never a binding. `/contextualize` and `/grasp` verify after the interval.
+The taken plan leaves as session text and a navigation block over its carrier, so any later line of work — a method designed with `/conduct`, issues in a tracker, another session — reads it by pointer. Reading the block grounds the plan and starts nothing. Concrete executor selection stays outside: units carry capability requirements, never a binding. `/contextualize` and `/grasp` verify after the interval.
 
 ## Known Limitations
 

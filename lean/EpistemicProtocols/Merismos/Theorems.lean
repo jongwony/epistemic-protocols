@@ -21,16 +21,17 @@ variable {P : Type}
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 instance : Nonempty Derivation := ⟨⟨[], [], []⟩⟩
 
-theorem silence (respond : Context P → Response P) (c : Context P) :
-    apportion respond c [] = .holding c := by
+theorem silence (respond session : Context P → Response P) (c : Context P) :
+    apportion respond session c [] = .holding c := by
   simp [apportion]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
   let c₁ := c ++ (collect c).map (·.val)
   exact ⟨(collect c).map (·.val) ++ (passRecord c₁).map (·.val), by simp [pass, c₁]⟩
 
-theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
+theorem apportioned_on_take (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (a : Apportioned P)
+    (h : apportion respond session c us = .apportioned a) :
     ∃ c₁ : Context P, isFilled (resolution c₁) = true ∧ Closable c₁ ∧ a = close c₁ ∧
       Recorded a.navigation a.context := by
   induction us generalizing c with
@@ -38,16 +39,24 @@ theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
   | cons u us ih =>
     simp only [apportion] at h
     split at h
-    · rename_i hk
-      split at h
-      · rename_i hc
+    · exact ih _ h
+    · split at h
+      · rename_i hk
         split at h
-        · rename_i hr
-          cases h
-          exact ⟨_, hk, hc, rfl, hr⟩
+        · rename_i hc
+          split at h
+          · rename_i hr
+            cases h
+            exact ⟨_, hk, hc, rfl, hr⟩
+          · exact ih _ h
         · exact ih _ h
       · exact ih _ h
-    · exact ih _ h
+
+theorem unrelated_holds (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    apportion respond session c (u :: us) =
+      apportion respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
+  simp [apportion, h]
 
 theorem taken_hands_off (a : Apportioned P) : handedOffBy (.apportioned a) = some .handoff := rfl
 
@@ -83,7 +92,7 @@ theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
     (certificate (derivation c u)).terminates = true := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [terminationCovered, List.all_eq_true] at ht
   exact ht u hu
 
@@ -91,7 +100,7 @@ theorem closable_bound (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u �
     (derivation c u).Bound u := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, hb⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, hb⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [derivationsBound, List.all_eq_true, Bool.and_eq_true] at hb
   obtain ⟨⟨hk, hr⟩, hsv⟩ := hb u hu
   refine ⟨fun k hk' => ?_, fun r hr' => ?_, fun s hs' => ?_⟩
@@ -99,13 +108,22 @@ theorem closable_bound (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u �
   · simpa using hr r hr'
   · simpa using hsv s hs'
 
+theorem closable_grant (c : Context P) (h : Closable c) (ha : authority c ≠ []) :
+    isFilled (grant c) = true := by
+  have hs := h.1
+  simp only [Structural, status, Bool.and_eq_true] at hs
+  obtain ⟨_, hg⟩ := hs
+  cases hau : authority c with
+  | nil => exact absurd hau ha
+  | cons _ _ => simpa [hau] using hg
+
 theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
     s ∈ (certificate d).reserved := hs
 
 theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ [] := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨_, hn⟩ := hs
+  obtain ⟨⟨_, hn⟩, _⟩ := hs
   cases hu : units c with
   | nil => cases ho : oos c with
     | nil => simp [hu, ho] at hn
@@ -118,7 +136,7 @@ theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
       (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [fitSettled, List.all_eq_true] at hfit
   have hu' := hfit u hu
   cases ho : override c u with

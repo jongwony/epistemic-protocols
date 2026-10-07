@@ -11,7 +11,6 @@ Composition edges a protocol's own contract declares — where one protocol's ou
 | Chain | Pattern |
 |-------|---------|
 | `/preview` → `/ground` | A chosen direction that maps onto an account already in play, and whose intended inferences need an audit, is tagged at harvest for `/ground` |
-| `/apportion` → `/conduct` | A taken unit plan leaves as a navigation block over its carrier; where the units' arrangement is itself unsettled, the person may conduct the method over it — the next move is theirs |
 | `/ground` → `/conduct` | When `/ground` reads an abstraction against its own cases and summarizes that reading as a split into rival groups — a summary, not a verdict it computes — the per-group work goes to `/conduct` to be conducted |
 | `/sublate` → `/inquire` / `/bound` | A missing pre-execution fact is routed to `/inquire`; a question a convention or ownership decision settles is routed to `/bound` |
 
