@@ -179,8 +179,8 @@ def Settled.isHeld : Settled → Bool
     it without settling it. It stands only on that turn: in their own words (`set`), or by taking a
     candidate put forward before (`adopted`) — where you put it forward, only if it was visible as
     yours, with what decides it and your contrary grounds, before that turn. A question, a request to look, a deferral, or a bare mention settles nothing.
-    A held value changes only by the person's later words: evidence against it is shown before any
-    step that depends on it and cannot be undone, and the value stands. A fact is read again
+    A held value changes only by the person's later words: evidence against it is shown, and the
+    value stands. A fact is read again
     against the evidence as it now stands; where it changes, the convergence trace shows the
     correction, citing both turns. -/
 axiom Settles : Entry → Context P → Turn P → Settled → Prop

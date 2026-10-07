@@ -175,8 +175,7 @@ def standingCoord (x : Entry) : Coord P Determination :=
 /-- **Your reading**: how coordinate `x` stands in `c` — filled by the person's latest turn that
     makes it stand; open where none does, carrying as candidate only a turn of the person's or
     evidence that points toward a value not yet taken. A value a person's turn made stand changes
-    only by their later words: evidence against it is shown — before any step that depends on it
-    and cannot be undone — and the value stands. -/
+    only by their later words: evidence against it is shown, and the value stands. -/
 axiom operative : (c : Context P) → (x : Entry) → Occ (standingCoord (P := P) x) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
