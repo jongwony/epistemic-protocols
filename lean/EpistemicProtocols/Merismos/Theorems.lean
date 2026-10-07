@@ -31,15 +31,13 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
 
 theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (a : Apportioned P) (h : apportion respond c us = .apportioned a) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .take ∧ Closable c₁ ∧ a = close c₁ ∧
+    ∃ c₁ : Context P, isFilled (resolution c₁) = true ∧ Closable c₁ ∧ a = close c₁ ∧
       Recorded a.navigation a.context := by
   induction us generalizing c with
   | nil => simp [apportion] at h
   | cons u us ih =>
     simp only [apportion] at h
     split at h
-    · cases h
-    · cases h
     · rename_i hk
       split at h
       · rename_i hc
@@ -51,49 +49,22 @@ theorem apportioned_on_take (respond : Context P → Response P) (c : Context P)
       · exact ih _ h
     · exact ih _ h
 
-theorem withdrawn_on_stop (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (c₁ : Context P) (h : apportion respond c us = .withdrawn c₁) :
-    filledValue (closing c₁) = some .stop := by
-  induction us generalizing c with
-  | nil => simp [apportion] at h
-  | cons u us ih =>
-    simp only [apportion] at h
-    split at h
-    · rename_i hk
-      cases h
-      exact hk
-    · cases h
-    · split at h
-      · split at h
-        · cases h
-        · exact ih _ h
-      · exact ih _ h
-    · exact ih _ h
+theorem taken_hands_off (a : Apportioned P) : handedOffBy (.apportioned a) = some .handoff := rfl
 
-theorem routed_on_route (respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (c₁ : Context P)
-    (h : apportion respond c us = .routed t c₁) : filledValue (closing c₁) = some (.route t) := by
-  induction us generalizing c with
-  | nil => simp [apportion] at h
-  | cons u us ih =>
-    simp only [apportion] at h
-    split at h
-    · cases h
-    · rename_i hk
-      cases h
-      exact hk
-    · split at h
-      · split at h
-        · cases h
-        · exact ih _ h
-      · exact ih _ h
-    · exact ih _ h
+theorem untaken_hands_off_nothing (o : Outcome P) (h : ∀ a, o ≠ .apportioned a) :
+    handedOffBy o = none := by
+  cases o with
+  | apportioned a => exact absurd rfl (h a)
+  | _ => rfl
 
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+theorem taken_by_person (c : Context P) (h : isFilled (resolution c) = true) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
-  cases hc : closing c with
-  | open_ _ => simp [hc, filledValue] at h
+  cases hc : resolution c with
+  | open_ _ => simp [hc, isFilled] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
+
+theorem grant_by_person {c : Context P} {s : Cite c}
+    (ok : (grantCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 theorem acceptance_by_person {c : Context P} {s : Cite c}
     (ok : (acceptanceCoord (P := P)).admits s.src) : s.src.val = .person := ok
@@ -112,9 +83,21 @@ theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
     (certificate (derivation c u)).terminates = true := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [terminationCovered, List.all_eq_true] at ht
   exact ht u hu
+
+theorem closable_bound (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u ∈ units c) :
+    (derivation c u).Bound u := by
+  have hs := h.1
+  simp only [Structural, status, Bool.and_eq_true] at hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, hb⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  simp only [derivationsBound, List.all_eq_true, Bool.and_eq_true] at hb
+  obtain ⟨⟨hk, hr⟩, hsv⟩ := hb u hu
+  refine ⟨fun k hk' => ?_, fun r hr' => ?_, fun s hs' => ?_⟩
+  · simpa using hk k hk'
+  · simpa using hr r hr'
+  · simpa using hsv s hs'
 
 theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
     s ∈ (certificate d).reserved := hs
@@ -135,7 +118,7 @@ theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
       (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [fitSettled, List.all_eq_true] at hfit
   have hu' := hfit u hu
   cases ho : override c u with
@@ -173,10 +156,12 @@ theorem waiver_reservation_exclusive (c : Context P) :
   | some a =>
     cases a <;> simp [List.any_flatMap, List.any_map, ReservedSubject.isAcceptance]
 
-theorem plan_reads_back (e : Emission) (ds : List String) (pv : List Provenance) :
-    (package e ds pv).units = e.units ∧ (package e ds pv).planConditions = e.planConditions ∧
-      (package e ds pv).reserved = e.envelope.reserved ∧
-      (package e ds pv).waived = e.envelope.waived :=
+theorem plan_reads_back (e : Emission) (au : List String) (g : Option String)
+    (ds : List String) (pv : List Provenance) :
+    (package e au g ds pv).units = e.units ∧
+      (package e au g ds pv).planConditions = e.planConditions ∧
+      (package e au g ds pv).reserved = e.envelope.reserved ∧
+      (package e au g ds pv).waived = e.envelope.waived :=
   ⟨rfl, rfl, rfl, rfl⟩
 
 theorem navigation_locates_carrier (c : Context P) :
