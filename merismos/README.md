@@ -39,7 +39,7 @@ One unit is one execution interval is one entry, carrying that unit's whole cert
 
 ## The Handoff
 
-The run does what does not rest on the user without waiting for them and, when the plan has run, returns once with every unit's result. What rests on the user — a unit that cannot be undone where a doubt the plan carries bears on it, an act outside the granted authority or unclear within it, a reserved judgment — does not proceed; it comes back in that one return with what did not proceed because of it, and nothing is decided for the user.
+The run does what does not rest on the user without waiting for them and, when the plan has run, returns once with every unit's result. What rests on the user — a unit that cannot be undone where a doubt the plan carries bears on it, an act outside the granted authority or unclear within it, a reserved judgment the grant does not reach — does not proceed; it comes back in that one return with what did not proceed because of it, and nothing is decided for the user.
 
 ## Composition
 
