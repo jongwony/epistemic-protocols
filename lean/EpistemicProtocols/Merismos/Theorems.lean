@@ -170,7 +170,7 @@ theorem plan_reads_back (e : Emission) (au ds : List String) (pv : List Provenan
   ⟨rfl, rfl, rfl, rfl⟩
 
 theorem plan_carries_obligations (e : Emission) (au ds : List String) (pv : List Provenance) :
-    (package e au ds pv).obligations = handoffObligations := rfl
+    (package e au ds pv).runObligations = handoffObligations := rfl
 
 theorem navigation_locates_carrier (c : Context P) :
     (navigation c).canonicalLocator = ⟨carrierRecord c, sessionId c⟩ := rfl
