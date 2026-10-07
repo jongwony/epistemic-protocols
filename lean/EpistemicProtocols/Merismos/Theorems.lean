@@ -72,9 +72,6 @@ theorem taken_by_person (c : Context P) (h : isFilled (resolution c) = true) :
   | open_ _ => simp [hc, isFilled] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-theorem grant_by_person {c : Context P} {s : Cite c}
-    (ok : (grantCoord (P := P)).admits s.src) : s.src.val = .person := ok
-
 theorem acceptance_by_person {c : Context P} {s : Cite c}
     (ok : (acceptanceCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
@@ -92,7 +89,7 @@ theorem closable_certifies (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
     (certificate (derivation c u)).terminates = true := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, _⟩, ht⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [terminationCovered, List.all_eq_true] at ht
   exact ht u hu
 
@@ -100,7 +97,7 @@ theorem closable_bound (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u �
     (derivation c u).Bound u := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, hb⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, _⟩, _⟩, hb⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [derivationsBound, List.all_eq_true, Bool.and_eq_true] at hb
   obtain ⟨⟨hk, hr⟩, hsv⟩ := hb u hu
   refine ⟨fun k hk' => ?_, fun r hr' => ?_, fun s hs' => ?_⟩
@@ -108,22 +105,13 @@ theorem closable_bound (c : Context P) (h : Closable c) (u : PlanUnit) (hu : u �
   · simpa using hr r hr'
   · simpa using hsv s hs'
 
-theorem closable_grant (c : Context P) (h : Closable c) (ha : authority c ≠ []) :
-    isFilled (grant c) = true := by
-  have hs := h.1
-  simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨_, hg⟩ := hs
-  cases hau : authority c with
-  | nil => exact absurd hau ha
-  | cons _ _ => simpa [hau] using hg
-
 theorem reservation_not_hidden (d : Derivation) (s : Reservation) (hs : s ∈ d.reserved) :
     s ∈ (certificate d).reserved := hs
 
 theorem closable_nonempty (c : Context P) (h : Closable c) : units c ≠ [] ∨ oos c ≠ [] := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨_, hn⟩, _⟩ := hs
+  obtain ⟨_, hn⟩ := hs
   cases hu : units c with
   | nil => cases ho : oos c with
     | nil => simp [hu, ho] at hn
@@ -136,7 +124,7 @@ theorem unfit_needs_person (c : Context P) (h : Closable c) (u : PlanUnit) (hu :
       (sup : OverrideSupported u c (c[s.idx]'s.lt) a), override c u = .filled a s ok sup := by
   have hs := h.1
   simp only [Structural, status, Bool.and_eq_true] at hs
-  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
+  obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨_, _⟩, hfit⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩, _⟩ := hs
   simp only [fitSettled, List.all_eq_true] at hfit
   have hu' := hfit u hu
   cases ho : override c u with
@@ -174,13 +162,15 @@ theorem waiver_reservation_exclusive (c : Context P) :
   | some a =>
     cases a <;> simp [List.any_flatMap, List.any_map, ReservedSubject.isAcceptance]
 
-theorem plan_reads_back (e : Emission) (au : List String) (g : Option String)
-    (ds : List String) (pv : List Provenance) :
-    (package e au g ds pv).units = e.units ∧
-      (package e au g ds pv).planConditions = e.planConditions ∧
-      (package e au g ds pv).reserved = e.envelope.reserved ∧
-      (package e au g ds pv).waived = e.envelope.waived :=
+theorem plan_reads_back (e : Emission) (au ds : List String) (pv : List Provenance) :
+    (package e au ds pv).units = e.units ∧
+      (package e au ds pv).planConditions = e.planConditions ∧
+      (package e au ds pv).reserved = e.envelope.reserved ∧
+      (package e au ds pv).waived = e.envelope.waived :=
   ⟨rfl, rfl, rfl, rfl⟩
+
+theorem plan_carries_obligations (e : Emission) (au ds : List String) (pv : List Provenance) :
+    (package e au ds pv).obligations = handoffObligations := rfl
 
 theorem navigation_locates_carrier (c : Context P) :
     (navigation c).canonicalLocator = ⟨carrierRecord c, sessionId c⟩ := rfl
