@@ -39,7 +39,7 @@ One unit is one execution interval is one entry, carrying that unit's whole cert
 
 ## The Handoff
 
-Every taken plan carries the obligations its run follows, wherever and whenever it is started — the contract's `handoffObligations`, which is the full statement. In short: what does not rest on the user runs without waiting for them; what rests on them — an irreversible unit a carried doubt bears on, an act that needs their own words, a judgment they did not entrust — comes back once at the end with what did not proceed because of it, alongside every unit's result and every whole-goal condition; nothing is decided for the user. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
+Every taken plan carries the obligations its run follows, wherever and whenever it is started — the contract's `handoffObligations`, the same handoff obligation `/conduct` carries for its substrate: what does not rest on the user runs without waiting for them; when the plan has run, the run returns once with every unit's result, and what rests on the user — an irreversible unit a carried doubt bears on among them — comes back in that return with what did not proceed because of it; nothing is decided for the user. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
 
 ## Composition
 
@@ -47,7 +47,7 @@ The taken plan leaves as session text and a navigation block over its carrier, s
 
 ## Known Limitations
 
-- **Bounded platform claim**: the `/goal` leaf-executor characterization is verified against Claude Code v2.1.140 only; re-verify on harness version change.
+- **Unverified platform claim**: that a session can start `/goal` on the taking is not verified on any Claude Code version; where it cannot, the navigation block is the handoff and the user starts the run.
 - **Obligation reading is heuristic**: an obligation never uttered and never captured upstream will not be read, so coverage is hard only over what *was* read. The sheet is where the omission becomes visible: obligations are re-read every turn, so stating the missing one adds it to the plan.
 - **Seam evidence is often absent**: abstract goals frequently supply no evidenced joint, and heuristic cuts can leave duplicated setup or cross-unit state leakage.
 - **Horizon fit is an estimate**: judged before the run from the goal's description; the override path exists because the user often knows better.

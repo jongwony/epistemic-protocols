@@ -694,10 +694,11 @@ def emit (c : Context P) : Emission :=
     planConditions := planOf c
     envelope := envelope c }
 
-/-- What every run of a taken plan carries, wherever and whenever it is started. This text is the
-    statement; the Rule "Handoff carries its obligations" names it. -/
+/-- What every run of a taken plan carries, wherever and whenever it is started — the same handoff
+    obligation the method contract carries for its substrate. This text is the statement; the Rule
+    "Handoff carries its obligations" names it. -/
 def handoffObligations : String :=
-  "Do what does not rest on the person without waiting for them, respecting the dependencies the units' seams cite; any further order or arrangement is not settled by this plan. A unit closes on its checks only where nothing else in its certificate is still open; one whose done also rests on an accepted gap or a reservation runs through its work once and comes back unconfirmed. Discharge each whole-goal condition when its requirement holds, and report how it stood. What rests on the person does not proceed and nothing is decided for them: a unit that cannot be undone where a doubt the plan carries, or one execution brings evidence for, bears on it; an act outside the authority the plan carries — which governs where the governing utterances read differently — or marked as needing the person's own words; a reservation, unless the person's words entrusted that judgment to the run, and never the whole-goal acceptance; work whose deciding source cannot be reached, or whose needed premise its source no longer supports. A reservation holds back only what rests on it, never the unit's other work, and supplies no answer or actor assignment; a coordinator's reply or a passing check supplies no act reserved to someone else. When the plan has run, return to the person once with every unit's result, every whole-goal condition, what came back unconfirmed, each reservation the run settled under the person's words with its decision and basis, and each item that did not proceed with what did not proceed because of it."
+  "The run does what does not rest on the person without waiting for them and, when the plan has run, returns to them once with every unit's result; what rests on the person — a unit that cannot be undone, where a doubt the plan carries, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them."
 
 /-- `ConditionBearingUnitPlan`, with the authority the run will reach, the doubts the taking
     carried, how each value came to stand, and the obligations every run of it carries. -/
@@ -768,7 +769,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
+  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
@@ -879,10 +880,11 @@ open Classical in
     goals, each stated outcome and the shared-procedure bond, as the question of which goal this
     apportionment takes; each field labelled by the question it answers, in the person's everyday
     words; each value marked the person's or the draft's. Then the ledger of every change since the
-    sheet the person answered. Then your doubts, each beside what it bears on. Then the focus with
+    sheet the person answered, each line marked by its kind. Then your doubts, each beside what it bears on. Then the focus with
     its actions, each with its consequence, an action marked recommended only as `recommend`
-    carries it; with nothing open, whether to take the plan, and what a taking would not yet
-    satisfy. After a taking that did not close — the structure did not allow it, or something it
+    carries it; with nothing open, whether to take the plan, what a taking would not yet satisfy,
+    and that a taking hands the plan to the run in the same turn unless the person keeps the start
+    for themselves. After a taking that did not close — the structure did not allow it, or something it
     would take had not been shown — the sheet says so and what stands in the way. After a carrier write that came back incomplete, the sheet
     says what is missing and that nothing was closed. Where the context holds an earlier taken plan
     for this goal, the sheet names it as the plan this one replaces. Wherever a person's earlier
@@ -979,7 +981,7 @@ def grounding : Op → Annot × String
   | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
   | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet shows what is missing")
   | .converge      => (.interaction .extension, "the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; the authority as it stands; each value's provenance with the turns read, quoted; and the doubts the plan carries")
-  | .handoff       => (.dispatch, "delegate: after the trace, in the same turn, the plan handed to the autonomous run through the navigation block, whose plan carries `handoffObligations` — a substrate that runs one unit per stretch and closes each by its own checks; where the session can start none, the start fails, or the person's taking keeps the start for themselves, the block is the handoff and the person starts the run, and the same turn says which of these happened — a failed start with what it returned; then this run ends")
+  | .handoff       => (.dispatch, "delegate: after the trace, in the same turn, the plan handed to the autonomous run through the navigation block, whose plan carries `handoffObligations` — where the plan holds no unit, nothing is started and the block alone is the handoff — a substrate that runs one unit per stretch and evaluates each unit's checks; where the session can start none, the start fails, or the person's taking keeps the start for themselves, the block is the handoff and the person starts the run, and the same turn says which of these happened — a failed start with what it returned; then this run ends")
 
 /-- The operation an outcome hands off through: a taken plan goes to the run by `.handoff`, after
     the trace; a relay or a holding hands nothing off. -/
@@ -1047,7 +1049,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 
 ## Rules
 
-- **Handoff carries its obligations**: Every taken plan carries `handoffObligations`, and every run of it, wherever and whenever started, does what that text says: what does not rest on the person runs without waiting for them, what rests on them comes back once at the end with what did not proceed because of it, and nothing is decided for them. The plan travels by its navigation block, never copied.
+- **Handoff carries its obligations**: Every taken plan carries `handoffObligations`, and every run of it, wherever and whenever started, does what that text states. The plan travels by its navigation block, never copied.
 - **Re-entry**: After the handoff this run has ended. An answer to what came back is the person's to give to the run that returned it; changing the plan is a new `/apportion` the person invokes, whose sheet is drawn from the accumulated context and names the plan it replaces; stopping what still runs is the run's.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 - **One sheet, every turn**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of every change since the sheet the person answered. The plan and every question about it share that one sheet.
