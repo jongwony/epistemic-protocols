@@ -496,7 +496,8 @@ def Structural (c : Context P) : Bool :=
 axiom Covered : Context P → Prop
 
 /-- A line of the sheet, named as the sheet shows it — the goal, a unit, a condition, a plan
-    condition, the acceptance criterion, a subtraction, an out-of-scope declaration. -/
+    condition, the acceptance criterion, an authority line, a subtraction, an out-of-scope
+    declaration. -/
 abbrev Entry := String
 
 /-- **Your reading**: the lines the sheet shows as the context now stands — every line on every
@@ -697,7 +698,7 @@ def emit (c : Context P) : Emission :=
 /-- What every run of a taken plan carries, wherever and whenever it is started. This text is the
     statement; the Rule "Handoff carries its obligations" names it. -/
 def handoffObligations : String :=
-  "The run does what does not rest on the person without waiting for them and, when the plan has run, returns to them once with every unit's result; what rests on the person — a unit that cannot be undone, where a doubt the plan carries, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them."
+  "The run does what does not rest on the person without waiting for them and, when the plan has run, returns to them once with every unit's result; what rests on the person — a step that cannot be undone, where a doubt the plan carries, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them."
 
 /-- `ConditionBearingUnitPlan`, with the authority the run will reach, the doubts the taking
     carried, how each value came to stand, and the obligations every run of it carries. -/
@@ -750,11 +751,12 @@ def bindPointer (c : Context P) : Context P := c ++ (groundPointer c).map (·.va
     compilation can leave open is not this: it stays reserved. False without a pointer. -/
 axiom PointerUnreadable : Context P → Prop
 
-/-- **Your record**: the identity the carrier-creating write returned; empty where none returned. -/
+/-- **Your record**: the identity this taking's carrier-creating write returned; empty where none
+    returned. -/
 axiom carrierRecord : Context P → String
 
-/-- **Your reading** of what the writes returned: the emission was recorded and the carrier holds
-    the whole packaged plan — not only an identity allocated for it. -/
+/-- **Your reading** of what the writes returned: the emission was recorded and the carrier
+    `carrierRecord` names holds the whole packaged plan — not only an identity allocated for it. -/
 axiom CarrierComplete : Context P → Prop
 
 /-- **Your record**: this session's id. -/
@@ -869,22 +871,22 @@ open Classical in
     residuals shown as one the run cannot tell is done; the plan conditions with the requirement
     that makes each safe to discharge; the acceptance question — the person's settling, or the
     draft's criterion marked as the draft's; the authority the run will reach, by kind, target, and
-    limit; the out-of-scope obligations with their substrates; what
-    was subtracted as the host's standing contract; any hole; where the request bundles several
-    goals, each stated outcome and the shared-procedure bond, as the question of which goal this
-    apportionment takes; each field labelled by the question it answers, in the person's everyday
-    words; each value marked the person's or the draft's. Then the ledger of every change since the
-    sheet the person answered, each line marked by its kind. Then your doubts, each beside what it bears on. Then the focus with
-    its actions, each with its consequence, an action marked recommended only as `recommend`
+    limit; the out-of-scope obligations with their substrates; what was subtracted as the host's
+    standing contract; any hole; where the request bundles several goals, each stated outcome and
+    the shared-procedure bond, as the question of which goal this apportionment takes; each field
+    labelled by the question it answers, in the person's everyday words; each value marked the
+    person's or the draft's. Then the ledger of every change since the sheet the person answered,
+    each line marked by its kind. Then your doubts, each beside what it bears on. Then the focus
+    with its actions, each with its consequence, an action marked recommended only as `recommend`
     carries it; with nothing open, whether to take the plan, what a taking would not yet satisfy,
     and that a taking hands the plan to the run in the same turn unless the person keeps the start
-    for themselves. After a taking that did not close — the structure did not allow it, or something it
-    would take had not been shown — the sheet says so and what stands in the way. After a carrier write that came back incomplete, the sheet
-    says what was written and where — each identity the writes returned —, what is missing, and
-    that the plan is therefore not yet a handed-off plan. Where the context holds an earlier taken plan
-    for this goal, the sheet names it as the plan this one replaces. Wherever a person's earlier
-    turn is read as setting a value, the sheet says which turn and what was taken from it, quoting
-    their words. -/
+    for themselves. After a taking that did not close — the structure did not allow it, or something
+    it would take had not been shown — the sheet says so and what stands in the way. After a carrier
+    write that came back incomplete, the sheet says what was written and where — each identity the
+    writes returned —, what is missing, and that the plan is therefore not yet a handed-off plan.
+    Where the context holds an earlier taken plan for this goal, the sheet names it as the plan this
+    one replaces. Wherever a person's earlier turn is read as setting a value, the sheet says which
+    turn and what was taken from it, quoting their words. -/
 def apportion (respond session : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -974,7 +976,7 @@ def grounding : Op → Annot × String
   | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
   | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the authority, the doubts the taking carried, and the obligations every run of it carries, and each value's provenance")
   | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
-  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet says what was written and where, what is missing, and that the plan is therefore not yet handed off")
+  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing and presents no block: the sheet says what was written and where, what is missing, and that the plan is therefore not yet handed off")
   | .converge      => (.interaction .extension, "the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; the authority as it stands; each value's provenance with the turns read, quoted; and the doubts the plan carries")
   | .handoff       => (.dispatch, "delegate: after the trace, in the same turn, the plan handed to the autonomous run through the navigation block, whose plan carries `handoffObligations` — where the plan holds no unit, nothing is started and the block alone is the handoff — a substrate that runs one unit per stretch and evaluates each unit's checks; where the session can start none, the start fails, or the person's taking keeps the start for themselves, the block is the handoff and the person starts the run, and the same turn says which of these happened — a failed start with what it returned; then this run ends")
 
@@ -1028,9 +1030,9 @@ Then one focus, with concrete actions and what each would do. Mark one action as
 
 The person may answer in their own words, and one answer may edit several units. An answer to the focus settles that point only; a taking is said of the plan and takes everything the sheet shows, adopting what the draft proposed — the authority shown included — and accepting the gaps shown. Where a taking does not close — the plan's structure does not yet allow it, or something it would take was not yet shown — the next sheet says so and what stands in the way. A unit that does not fit is taken only by words that take it over its fit; for a fit that could not be judged, those words name the uncertainty. With nothing open, the focus asks whether to take the plan and says what a taking would not yet satisfy. Wherever you read one of the person's earlier turns as setting a value, say which turn and what you took from it, quoting their words.
 
-A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. A check the run itself could change so that it passes is said so. Where an obligation could become a predicate once sharpened, the draft proposes the sharpened check as that obligation's whole check, marked as its own; a taking adopts it, and where the person declines it the gap stands. A check that covers only part of an obligation leaves the rest beside it as a gap or a held-open item, so the two read apart. A unit whose done rests only on accepted gaps is shown as one the run cannot tell is done. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
+A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. A check the run itself could change so that it passes is said so. Where an obligation could become a predicate once sharpened, the draft proposes the sharpened check as that obligation's whole check, marked as the draft's; a taking adopts it, and where the person declines it the gap stands. A check that covers only part of an obligation leaves the rest beside it as a gap or a held-open item, so the two read apart. A unit whose done rests only on accepted gaps is shown as one the run cannot tell is done. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
 
-On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it; the run dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover the authority the plan carries and each reservation's retained or entrusted judgment. Where the carrier write comes back incomplete, nothing closes: the sheet says what was written and where, what is missing, and that the plan is therefore not yet handed off. Once the block records the carrier, hand the plan to the run in the same turn.
+On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it; the run dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover the authority the plan carries and each reservation's retained or entrusted judgment. Once the block records the carrier, hand the plan to the run in the same turn.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must travel unchanged, material belongs to another round or trace, or phase order determines placement.
 
@@ -1050,7 +1052,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 - **One sheet for the whole plan**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of every change since the sheet the person answered. The plan and every question about it share that one sheet.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
 - **The person takes and closes**: Only the person's taking closes the run, whatever its form; silence, a stop, or a turn to other work leaves the sheet holding. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
-- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave. A taking adopts it as shown, like every line of the sheet.
+- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave.
 - **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it, the run reads it under `handoffObligations`, and it is raised again only on new evidence.
 - **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
 - **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
