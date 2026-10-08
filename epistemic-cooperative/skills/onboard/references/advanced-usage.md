@@ -11,7 +11,6 @@ Composition edges a protocol's own contract declares — where one protocol's ou
 | Chain | Pattern |
 |-------|---------|
 | `/preview` → `/ground` | A chosen direction that maps onto an account already in play, and whose intended inferences need an audit, is tagged at harvest for `/ground` |
-| `/apportion` ⇄ `/conduct` | A non-trivial multi-unit plan passes to `/conduct` as a navigation block; an unresolved autonomous region from `/conduct` passes back for apportionment — advisory both ways |
 | `/ground` → `/conduct` | When `/ground` reads an abstraction against its own cases and summarizes that reading as a split into rival groups — a summary, not a verdict it computes — the per-group work goes to `/conduct` to be conducted |
 | `/sublate` → `/inquire` / `/bound` | A missing pre-execution fact is routed to `/inquire`; a question a convention or ownership decision settles is routed to `/bound` |
 
@@ -50,4 +49,4 @@ Composition edges a protocol's own contract declares — where one protocol's ou
 | Chain | Pattern |
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
-| `/batch` → `/apportion` | Batch operations planned, then apportioned into units each closed before the run — by its own completion condition, by a recorded acceptance where none compiles, or by a recorded reservation where a judgment settles it (*projected*; see the provenance caveat) |
+| `/batch` → `/apportion` | Batch operations planned, then apportioned into units, each carrying one certificate of its compiled checks, accepted gaps, and reserved judgments, handed to the run with the authority granted before the person leaves (*projected*; see the provenance caveat) |

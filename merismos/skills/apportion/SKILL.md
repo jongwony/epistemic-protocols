@@ -5,11 +5,11 @@ description: "One goal is about to be handed to an autonomous run: cut it into u
 
 # Merismos Protocol
 
-Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions before the run begins: cut the goal at its evidenced seams so each unit fits one execution horizon and no obligation is orphaned, derive per-unit completion and invariant predicates plus the cross-unit plan conditions, and emit one goal entry per unit. Type: `(GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan`.
+Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions before the run begins: cut the goal at its evidenced seams so each unit fits one execution horizon and no obligation is orphaned, derive per-unit completion and invariant predicates plus the cross-unit plan conditions, show the authority the unattended run will need, and on the person's taking emit one goal entry per unit and hand the plan to the run with its obligations. Type: `(GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan`.
 
 ## Definition
 
-**Merismos** (μερισμός: a dividing into parts, an apportionment): A dialogical act of apportioning one stated autonomous goal — deciding **which units the goal is carried out in** and **what each unit's done means** — when the goal is stated but its plan is uncompiled. The protocol's lexical verb is `/apportion`. It reads the goal's obligations — the host's own standing procedural contract subtracted, since that attaches to every change the host accepts whatever the goal is — cuts them into coarse units at seams it can cite, judges each unit against one execution horizon, derives a completion predicate and any invariant predicates per unit, separates the conditions whose subject is the whole goal rather than any one unit, and shows the whole plan on one sheet every turn, beside what the person's last turn changed. An item no check could settle because what settles it is a judgment made against the context accumulated by then and what the person has actually said by then is reserved rather than compiled — recorded with the ground that settles it, at the unit level and for the whole-goal acceptance criterion alike, and kept apart from the waiver that records an acceptance criterion the plan simply lacks. Each unit's certificate carries every compiled check, every accepted gap, and every reservation of its done together, so no one of them hides another. Activation takes one goal: a request bundling several stated outcomes whose only common bond is that standing contract relays at the checkpoint instead, one apportionment per goal. The person takes the plan, stops, or goes elsewhere; your contrary grounds stand before them and ride the plan when they take it over them. Merismos apportions and conditions; it does **not** order — sequence, independence, reconciliation, termination topology and routing are outside its own scope, so the emitted plan is a **pre-conduct** artifact. The protocol holds no state during execution.
+**Merismos** (μερισμός: a dividing into parts, an apportionment): A dialogical act of apportioning one stated autonomous goal — deciding **which units the goal is carried out in** and **what each unit's done means** — when the goal is stated but its plan is uncompiled. The protocol's lexical verb is `/apportion`. It reads the goal's obligations — the host's own standing procedural contract subtracted, since that attaches to every change the host accepts whatever the goal is — cuts them into coarse units at seams it can cite, judges each unit against one execution horizon, derives a completion predicate and any invariant predicates per unit, separates the conditions whose subject is the whole goal rather than any one unit, and shows the whole plan on one sheet on every turn that bears on it, beside what changed since the sheet the person answered. An item no check could settle because what settles it is a judgment made against the context accumulated by then and what the person has actually said by then is reserved rather than compiled — recorded with the ground that settles it, at the unit level and for the whole-goal acceptance criterion alike, and kept apart from the waiver that records an acceptance criterion the plan simply lacks. Each unit's certificate carries every compiled check, every accepted gap, and every reservation of its done together, so no one of them hides another. Because the run proceeds without the person, the sheet also shows the authority it will reach — each by kind, target, and limit — so the person grants it before they leave, and what rests on them still comes back at the end. One apportionment takes one goal: where a request bundles several stated outcomes whose only common bond is that standing contract, the sheet names each and asks which goal this apportionment takes. Once it has run, the person can say: this goal runs in these units, each done when these checks pass; what no check settles, what only I decide, and what the run may not do without me, I saw on one sheet; I settled before leaving what had to be settled, and the rest comes back to me once at the end with what did not proceed because of it; I took this plan as mine. Your contrary grounds — each with what it bears on and what it rests on — stand before the person and ride the plan when they take it over them; only the person's taking closes the run, and a person who stops or turns to other work leaves it holding. On the taking, the plan is handed off in the same turn, as the `.handoff` grounding names, with the obligations its Rule "Handoff carries its obligations" names. Merismos apportions and conditions; it does **not** arrange — sequence, independence, reconciliation, and termination topology stay outside its own scope. The protocol holds no state during execution.
 
 ```lean
 /-!
@@ -23,47 +23,54 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 /-! ── FLOW ──
 Merismos(G) → start(c) → apportion(c, utterances), where c is the fused session context:
   start: ground the goal's navigation block where one is in scope →
-    [no autonomous interval | a composite goal | the handoff unreadable | the plan already
-     condition-bearing: relay → report]
+    [the handoff unreadable: relay → report]
   pass(c): read what the goal needs — its obligations, the host's standing contract subtracted,
-    the out-of-scope ones set apart, seam evidence — then judge the whole plan afresh against the
-    context as it now stands: the units, each unit's fit and seam, each unit's conditions, the
-    whole-goal conditions, the acceptance question, and how each value came to stand → record
+    the out-of-scope ones set apart, seam evidence, the authority the run will reach — then judge
+    the whole plan afresh against the context as it now stands: whether the request is one goal,
+    the units, each unit's fit and seam, each unit's conditions, the whole-goal conditions, the
+    acceptance question, the authority, and how each value came to stand → record
   [nothing could be read from the goal's scope: relay(too thin) → report]
-  present the whole plan on one sheet, the ledger of what this turn changed, your contrary
-    grounds, and one focus with concrete actions → Stop
-  next utterance u: c₁ := pass(fuse(c, u)) →
-    [the person stops]                                   withdrawn
-    [the person goes on to a protocol they name]         routed
-    [the person takes the plan ∧ it is closable]         emit → park the carrier → hand off →
-      [the block records the carrier: apportioned | the write came back incomplete: the sheet
-       again, the failure shown, nothing closed]
-    [otherwise] the sheet again, with the ledger of what u changed → Stop
+  present the whole plan on one sheet, the ledger of what changed since the sheet the person
+    answered, your doubts beside what each bears on, and one focus with concrete actions → Stop
+  next utterance u, fused into c →
+    [it does not bear on this run, or it stops here]     the session answers it; the run holds
+  otherwise c₁ := pass(fuse(c, u)) →
+    [the person takes the plan ∧ it is closable]         emit → park the carrier → record the
+      block → [the block records the carrier: hand off as `.handoff` names → apportioned | the
+       write came back incomplete: the sheet again, saying what was written and where, what is
+       missing, and that the plan is not yet handed off; nothing closed]
+    [the person takes the plan ∧ it is not closable]     the sheet again, saying the taking did
+      not close and what stands in the way → Stop
+    [otherwise] the sheet again, with the ledger → Stop
   no utterance: the sheet holds; nothing is taken, and nothing is emitted
+  after the handoff: the run executes the plan as the Rule "Handoff carries its obligations"
+    names; this protocol holds nothing of it.
 -/
 
 /-! ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
-  → probe(goal)                        -- ONE stated autonomous goal whose unit plan is uncompiled; a bundle bound only by the host's standing procedural contract relays here rather than activating
+  → probe(goal)                        -- the stated autonomous goal whose unit plan is uncompiled; a bundle bound only by the host's standing procedural contract is a scope question on the first sheet
   → read_obligations(goal) → O_G       -- the goal's obligations with the host's standing contract subtracted — an ambient invariant every unit inherits — and what was subtracted shown on the sheet
   → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is set out of scope with the substrate that must catch it
   → cut(O_G \ oos, horizon) → units    -- the irreducible core, part one: coarse units, each fitting one execution horizon, together a partition of what is in scope; each cut declares its seam and its fit
   → derive(unit) → certificate         -- the irreducible core, part two: per obligation a verifiable predicate, a residual left unguarded, or a reservation naming the ground that settles it
   → derive_plan(goal, units) → P       -- conditions whose subject is the whole goal, never distributed across units, none naming an order
-  → sheet(plan, ledger, dissent, focus)  -- the whole plan every turn, what the last turn changed, your contrary grounds, and one focus
-  → take(person)                       -- the person takes the plan with everything it holds in view; that taking adopts what the draft proposed and accepts the residuals shown
-  → emit(goal_entries) → package → park_carrier → record_handoff
+  → authority(goal, units)             -- what the unattended run will reach that needs the person's authority, by kind, target, and limit
+  → sheet(plan, ledger, dissent, focus)  -- the whole plan on every turn that bears on the run, every change since the sheet the person answered, your doubts, and one focus
+  → take(person)                       -- the person takes the plan with everything it holds in view; that taking adopts what the draft proposed, the authority shown included, and accepts the residuals shown
+  → emit(goal_entries) → package → park_carrier → record_handoff → handoff(run)
   → ConditionBearingUnitPlan
 requires: user_initiated(G)            -- the person declares autonomous execution intent via /apportion
-requires: single_goal(G)               -- ONE stated outcome; shared procedure is not a shared goal
+requires: single_goal(G)               -- read, not enforced: ONE stated outcome, shared procedure being no shared goal; a bundle is the person's to settle on the sheet, and a taking over it takes the bundle as one goal with your reading attached
 deficit:  GoalPlanUncompiled           -- activation precondition (Layer 1)
 preserves: G                           -- compile-time only; the context only grows (pass_extends), and no execution state is touched
-invariant: Apportion over Order        -- Merismos cuts the units and conditions them; it does not sequence them
+invariant: Apportion over Order        -- Merismos cuts the units and conditions them; it does not sequence or arrange them
 invariant: Whole Plan over Serial Cut  -- nothing is taken before the plan it belongs to has been shown whole
 invariant: Coverage over Convenience   -- every goal obligation belongs to some unit or is visibly set out of scope
 invariant: Fit over Ambition           -- every unit fits one execution horizon, or the person took it over its verdict (unfit_needs_person)
 invariant: Declared Seam over Asserted Joint  -- every cut declares its seam: the evidence it cites, or heuristic
 invariant: the person takes and closes; your judgments stand as proposals and contrary grounds
+invariant: Handoff carries its obligations  -- what rests on the person comes back once at the end, never decided for them
 -/
 
 namespace Merismos
@@ -265,7 +272,8 @@ inductive PredicateKind | completion | invariant
 
 /-- `κ`: a verifiable predicate — an executable check with a determinate pass/fail outcome — for
     one obligation of its unit; a completion predicate says when the unit is done, an invariant a
-    boundary the interval preserves while completing. -/
+    boundary the interval preserves while completing. A check the run itself could change so that
+    it passes says so in its condition, on the sheet and to the run. -/
 structure Compiled where
   obligation : Obligation
   kind       : PredicateKind
@@ -302,9 +310,13 @@ def Derivation.Bound (u : PlanUnit) (d : Derivation) : Prop :=
 
 /-- **Your judgment** for `u`, made afresh on every pass: per obligation a verifiable predicate — a
     completion or an invariant — a residual, or a reservation; every obligation of `u` lands in at
-    least one, and `Derivation.Bound u`. A condition a person's turn set stands on the scope their
-    words reach; where a change upstream leaves that scope unclear, the sheet names it and it stays
-    open. -/
+    least one, and `Derivation.Bound u`. A check that covers only part of an obligation leaves the
+    rest as a residual or a reservation beside it. Where an obligation could become a check once
+    sharpened, the sharpened check is your proposal and derives that obligation alone, with no
+    residual beside it, so it reads apart from a partial check; it is shown as the draft's beside
+    the obligation it sharpens, a taking adopts it, and where the person declines it the obligation
+    is a residual again. A condition a person's turn set stands on the scope their words reach;
+    where a change upstream leaves that scope unclear, the sheet names it and it stays open. -/
 axiom derivation : Context P → PlanUnit → Derivation
 
 def Derivation.derives (d : Derivation) (o : Obligation) : Bool :=
@@ -314,6 +326,15 @@ def Derivation.derives (d : Derivation) (o : Obligation) : Bool :=
 /-- `obligations_derived`. -/
 def obligationsDerived (c : Context P) : Bool :=
   (units c).all (fun u => u.obligations.all ((derivation c u).derives))
+
+/-- Every record of every unit's derivation names an obligation of that unit — `Derivation.Bound`,
+    read over the plan. -/
+def derivationsBound (c : Context P) : Bool :=
+  (units c).all (fun u =>
+    let d := derivation c u
+    d.compiled.all (fun k => u.obligations.contains k.obligation) &&
+      d.residuals.all (fun r => u.obligations.contains r.obligation) &&
+      d.reserved.all (fun s => u.obligations.contains s.obligation))
 
 structure LeafConjunct where
   condition : String
@@ -370,8 +391,9 @@ structure PlanCondition where
 
 /-- **Your judgment**, made afresh on every pass: the conditions whose subject is the whole goal —
     final integration, global non-regression, a whole-goal invariant, or another scope the goal
-    carries — never distributed across units. The whole-goal acceptance criterion is not among
-    them: it is the acceptance question below. -/
+    carries — never distributed across units, and none naming a unit identity, a move, a region,
+    or an order position; a condition you read as naming one is a contrary ground on the sheet.
+    The whole-goal acceptance criterion is not among them: it is the acceptance question below. -/
 axiom planConditions : Context P → List PlanCondition
 
 /-- How the whole-goal acceptance question is settled. -/
@@ -426,10 +448,12 @@ def acceptanceCondition (c : Context P) : Option PlanCondition :=
 def planOf (c : Context P) : List PlanCondition :=
   ((planConditions c) ++ (acceptanceCondition c).toList).map (bindPlan c)
 
-/-- **Your judgment** (`topology_free`) over a requirement's content: it names no unit identity,
-    move, move region, or order position. A reading over content, not a structural proof: where it
-    fails, it is a contrary ground on the sheet, never a refusal of the person's taking. -/
-axiom TopologyFree : Context P → PlanStateRequirement → Bool
+/-- **Your reading**: what the run will reach, while the person is away, that needs their
+    authority — each named by its kind, its target, and its limit, read from the goal, the units,
+    and the context as it now stands. It is shown on the sheet before the person leaves, since
+    what it will meet forms only at runtime; the exact act is the run's to meet. It stands as the
+    person set it or as their taking adopted it, like any line of the sheet. -/
+axiom authority : Context P → List String
 
 /-- What the sheet shows about the plan's shape. -/
 structure Status where
@@ -437,33 +461,33 @@ structure Status where
   partitioned            : Bool
   fitSettled             : Bool
   obligationsDerived     : Bool
+  derivationsBound       : Bool
   terminationCovered     : Bool
   oosSubstrateNamed      : Bool
   reservationGroundNamed : Bool
   acceptanceSettled      : Bool
   planNonempty           : Bool
-  topologyFree           : Bool
 
 def status (c : Context P) : Status :=
   { coverageComplete := coverageComplete c
     partitioned := partitioned c
     fitSettled := fitSettled c
     obligationsDerived := obligationsDerived c
+    derivationsBound := derivationsBound c
     terminationCovered := terminationCovered c
     oosSubstrateNamed := (oos c).all (fun d => d.substrate != "")
     reservationGroundNamed := (units c).all (fun u => (derivation c u).reserved.all (·.ground != ""))
     acceptanceSettled := isFilled (acceptance c)
-    planNonempty := !(units c).isEmpty || !(oos c).isEmpty
-    topologyFree := (planOf c).all (fun p => TopologyFree c p.dischargeableWhen) }
+    planNonempty := !(units c).isEmpty || !(oos c).isEmpty }
 
-/-- What a taking needs from the plan's structure; a plan with nothing in it is never taken.
-    Topology-freedom is not among them: it is your reading over content, and it stands as a
-    contrary ground. -/
+/-- What a taking needs from the plan's structure; a plan with nothing in it is never taken. A
+    reading of yours over content — that a condition names an order, that a unit will not fit —
+    is not among them: it stands as a contrary ground. -/
 def Structural (c : Context P) : Bool :=
   let s := status c
   s.coverageComplete && s.partitioned && s.fitSettled && s.obligationsDerived &&
-    s.terminationCovered && s.oosSubstrateNamed && s.reservationGroundNamed && s.acceptanceSettled &&
-    s.planNonempty
+    s.derivationsBound && s.terminationCovered && s.oosSubstrateNamed &&
+    s.reservationGroundNamed && s.acceptanceSettled && s.planNonempty
 
 /-- **Your judgment**, the adoption condition: every value the taking would take was shown on a
     sheet the person answered — who proposed it and how it came to stand, its ground, and your
@@ -472,7 +496,8 @@ def Structural (c : Context P) : Bool :=
 axiom Covered : Context P → Prop
 
 /-- A line of the sheet, named as the sheet shows it — the goal, a unit, a condition, a plan
-    condition, the acceptance criterion, a subtraction, an out-of-scope declaration. -/
+    condition, the acceptance criterion, an authority line, a subtraction, an out-of-scope
+    declaration. -/
 abbrev Entry := String
 
 /-- **Your reading**: the lines the sheet shows as the context now stands — every line on every
@@ -517,15 +542,20 @@ inductive LedgerKind
   | necessary
   /-- a value the draft re-filled because you propose it -/
   | proposal
+  /-- a change for any other reason — a new observation -/
+  | other
 
-/-- One change since the last sheet: what changed, the edit that caused it, and its kind. A
+/-- One change since the sheet the person answered: what changed, the edit that caused it where
+    one did, and its kind. A
     removed unit and a replaced value stay in the ledger with what they were. -/
 structure LedgerLine where
   change : String
   cause  : Option Entry
   kind   : LedgerKind
 
-/-- **Your record**: what the latest turn changed, the person's edits first. -/
+/-- **Your record**: every change since the sheet the person answered — their edits first, then
+    each value re-filled because of them, then anything else that moved, each line marked by its
+    kind. Pointing a line to the edit that caused it is welcome, not required. -/
 axiom ledger : Context P → List LedgerLine
 
 /-- One concrete action for the focus: what it would change, and what then happens. -/
@@ -538,9 +568,10 @@ structure Focus where
   item    : String
   actions : List Action
 
-/-- **Your selection** of the focus: a hole in coverage first, then a unit that does not fit, then
-    the acceptance question, then the point whose change would most change the plan; `none` where
-    nothing is open and the question is whether to take the plan. -/
+/-- **Your selection** of the focus: a request that bundles several goals first, then a hole in
+    coverage, then a unit that does not fit, then the acceptance question, then the point whose
+    change would most change the plan; `none` where nothing is open and the question is whether
+    to take the plan. -/
 axiom focus : Context P → Option Focus
 
 /-- **Your judgment**: the ground clearly separates action `i` of `f` from the others — not that it
@@ -552,33 +583,34 @@ axiom Separates : Context P → Focus → Nat → Prop
     alone. -/
 axiom recommend : (c : Context P) → (f : Focus) → Option {i : Nat // Separates c f i}
 
-/-- **Your record**: the contrary grounds you showed before the person's answers — a plan
-    condition you read as naming topology, a cut a second reading backs as well, a subtraction or
-    a classification you would make otherwise, a unit you expect not to fit — attached to the plan
-    when the person takes it over them; empty when there were none. -/
+/-- **Your record**: the doubts you hold about the plan, each naming what it bears on — a unit, a
+    condition, the authority, the whole plan — and what it rests on, read from the context as it
+    now stands; empty when you hold none. Each is shown beside what it bears on, before the
+    person's turn it bears on, and refuses no taking. A taking over one keeps it attached to the
+    plan — taken, and evidentially disputed — naming at emission the unit by the ref it is emitted
+    under; it is raised again only on new evidence, and the run reads it under
+    `handoffObligations`. -/
 axiom dissent : Context P → List String
 
-/-- How the person ends the run. -/
-inductive Closing
-  /-- take the plan as the sheet shows it -/
-  | take
-  /-- stop here, with no plan -/
-  | stop
-  /-- go on to the protocol the person names -/
-  | route (target : String)
+/-- **Your judgment**: the cited turn takes the plan as the latest sheet showed it, read against
+    the context as it now stands; whatever the same turn changes is read with it. A turn before
+    the latest sheet takes nothing on it, an answer to the focus takes nothing, a turn after the
+    person stopped this run takes nothing unless their words return to this plan, and your own
+    reading that the plan is ready takes nothing. -/
+axiom ResolutionSupported : Context P → Turn P → Unit → Prop
 
-/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
-    stands, the order of its turns included: a closing said before a later sheet was presented was
-    answered by that sheet. An answer to the focus closes nothing; taking the plan is said of the
-    plan. -/
-axiom ClosingSupported : Context P → Turn P → Closing → Prop
+/-- Only the person takes the plan. -/
+def resolutionCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := ResolutionSupported }
 
-/-- Only the person closes. -/
-def closeCoord : Coord P Closing :=
-  { admits := (·.val = .person), supports := ClosingSupported }
+/-- **Your reading**: the person's taking of the plan; `open_` until one reaches it. -/
+axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
 
-/-- **Your reading**: the person's closing; `open_` until one reaches it. -/
-axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
+/-- **Your judgment**: the latest utterance bears on this run — an edit, an answer to the focus, a
+    settling of the acceptance question, a change to the authority, a taking. An utterance about other work, or one
+    that stops here, leaves the run as it stands: the session answers it, that answer stays in the
+    context, the sheet is not drawn again, and the run holds. -/
+axiom Reaches : Context P → Prop
 
 /-- The plan may be taken: its structure holds and everything it takes was shown. -/
 def Closable (c : Context P) : Prop := Structural c = true ∧ Covered c
@@ -614,6 +646,8 @@ structure UnitEntry where
   ref          : UnitRef
   subject      : String
   obligations  : List Obligation
+  fit          : SpanFit
+  seam         : Seam
   certificate  : Certificate
   capabilities : List String
   feasibility  : List String
@@ -642,7 +676,7 @@ structure Emission where
 def numbered {α : Type} (l : List α) : List (Nat × α) := (List.range l.length).zip l
 
 def entry (i : UnitRef) (u : PlanUnit) (k : Certificate) : UnitEntry :=
-  ⟨i, u.subject, u.obligations, k, u.capabilities, u.feasibility⟩
+  ⟨i, u.subject, u.obligations, u.fit, u.seam, k, u.capabilities, u.feasibility⟩
 
 def envelope (c : Context P) : Envelope :=
   let a := filledValue (acceptance c)
@@ -661,8 +695,13 @@ def emit (c : Context P) : Emission :=
     planConditions := planOf c
     envelope := envelope c }
 
-/-- `ConditionBearingUnitPlan`, with the dissent the taking carried and how each value came to
-    stand. -/
+/-- What every run of a taken plan carries, wherever and whenever it is started. This text is the
+    statement; the Rule "Handoff carries its obligations" names it. -/
+def handoffObligations : String :=
+  "The run does what does not rest on the person without waiting for them and, when the plan has run, returns to them once with every unit's result; what rests on the person — a step that cannot be undone, where a doubt the plan carries, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them."
+
+/-- `ConditionBearingUnitPlan`, with the authority the run will reach, the doubts the taking
+    carried, how each value came to stand, and the obligations every run of it carries. -/
 structure ConditionBearingUnitPlan where
   units             : List UnitEntry
   planConditions    : List PlanCondition
@@ -671,15 +710,18 @@ structure ConditionBearingUnitPlan where
   oos               : List OOSDeclaration
   subtracted        : List Obligation
   waived            : Bool
+  authority         : List String
   dissent           : List String
   provenance        : List Provenance
+  runObligations    : String
 
 /-- `package`: the returned plan read back from what was emitted, never derived beside it. -/
-def package (e : Emission) (ds : List String) (pv : List Provenance) : ConditionBearingUnitPlan :=
+def package (e : Emission) (au : List String) (ds : List String) (pv : List Provenance) :
+    ConditionBearingUnitPlan :=
   { units := e.units, planConditions := e.planConditions,
     acceptedResiduals := e.envelope.acceptedResiduals, reserved := e.envelope.reserved,
     oos := e.envelope.oos, subtracted := e.envelope.subtracted, waived := e.envelope.waived,
-    dissent := ds, provenance := pv }
+    authority := au, dissent := ds, provenance := pv, runObligations := handoffObligations }
 
 structure HandoffLocator where
   record  : String
@@ -709,22 +751,12 @@ def bindPointer (c : Context P) : Context P := c ++ (groundPointer c).map (·.va
     compilation can leave open is not this: it stays reserved. False without a pointer. -/
 axiom PointerUnreadable : Context P → Prop
 
-/-- **Your judgment**: an autonomous interval is in scope. -/
-axiom AutonomousIntent : Context P → Prop
-
-/-- **Your judgment**, read off what the goal states: one outcome. Several stated outcomes bound
-    only by the host's standing procedural contract are a bundle. -/
-axiom SingleGoal : Context P → Prop
-
-/-- **Your judgment**, against the plan read back from the carrier the pointer names: its units and
-    conditions are already present, every unit's certificate saying when it is done. -/
-axiom ConditionBearing : Context P → Prop
-
-/-- **Your record**: the identity the carrier-creating write returned; empty where none returned. -/
+/-- **Your record**: the identity this taking's carrier-creating write returned; empty where none
+    returned. -/
 axiom carrierRecord : Context P → String
 
-/-- **Your reading** of what the writes returned: the emission was recorded and the carrier holds
-    the whole packaged plan — not only an identity allocated for it. -/
+/-- **Your reading** of what the writes returned: the emission was recorded and the carrier
+    `carrierRecord` names holds the whole packaged plan — not only an identity allocated for it. -/
 axiom CarrierComplete : Context P → Prop
 
 /-- **Your record**: this session's id. -/
@@ -738,7 +770,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and judgment authority from the governing utterances and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires. Stop dependent work when a decision-bearing source is unreachable or a needed premise lacks support-integrity; a coordinator's summary does not substitute for source wording that settles authority. Surface the plan's reservations with their settling grounds and the dissent it carries. Resolve a live item within an applicable grant, or put its open question to the person retaining that judgment; where its question is still future, keep it open and continue independent work. A reservation supplies no answer, actor assignment, or blanket stop; a coordinator's response or a completed predicate supplies no act reserved to someone else."
+  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances — a taking read with the sheet it took among them — and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
@@ -757,19 +789,16 @@ def HandoffRecorded (n : NavigationBlock) (c : Context P) : Prop :=
 /-- The writes landed: the carrier holds the plan, and the block locates it. -/
 def Recorded (n : NavigationBlock) (c : Context P) : Prop := CarrierComplete c ∧ HandoffRecorded n c
 
-/-- Why the run ends without a plan, on your judgment rather than the person's. -/
+/-- Why the run ends without a plan, on evidence rather than the person's turn: the incoming
+    handoff could not be read, or nothing could be read from the goal's scope. -/
 inductive RelayKind
-  | noAutonomousInterval
-  /-- the relay names each stated outcome and the shared-procedure bond; one apportionment per
-      goal -/
-  | compositeGoal
   | handoffUnreadable
-  | conditionBearing
   /-- nothing could be read from the goal's scope -/
   | tooThin
 
 /-- The emitted result: the context after the writes, what was emitted, the plan read back from
-    it, and the navigation block over its carrier. -/
+    it, and the navigation block over its carrier. It is handed off by `.handoff` in the same
+    turn, and the run executes it as the Rule "Handoff carries its obligations" names. -/
 structure Apportioned (P : Type) where
   context    : Context P
   emission   : Emission
@@ -778,12 +807,12 @@ structure Apportioned (P : Type) where
 
 inductive Outcome (P : Type)
   | relayed     (kind : RelayKind) (c : Context P)
-  /-- the person stopped: nothing is emitted -/
-  | withdrawn   (c : Context P)
-  /-- the person named another protocol: proceed to it, citing their words -/
-  | routed      (target : String) (c : Context P)
-  /-- the person took the plan, and the navigation block records its carrier -/
+  /-- the person took the plan, the navigation block records its carrier, and the plan is handed
+      off as `.handoff` names -/
   | apportioned (a : Apportioned P)
+  /-- no taking closed: the sheet holds, whether the person is silent, stopped, or turned to other
+      work; nothing is handed off, and after a carrier write that came back incomplete the sheet
+      that said what was written, where, and what is missing stays in the context -/
   | holding     (c : Context P)
 
 /-! ── MODE STATE ──
@@ -801,16 +830,17 @@ abbrev Mode (P : Type) := Context P
 A step is one arm of a structural recursion over the person's utterances. A pass is the silent
 work: the reads the plan needs enter the context, then the pass's record — the plan judged afresh,
 each value with how it came to stand. `respond` presents the sheet; a taking over a closable plan
-writes the emission and the carrier instead.
+writes the emission and the carrier instead; `session` is the session's own answer to an utterance
+about other work, or one that stops here, which stays in the context without drawing the sheet.
 -/
 
 /-- **Your reads** for a pass: the goal's cited material, and seam evidence over its substrate. -/
 axiom collect : Context P → List (Evidence P)
 
 /-- **Your record** of a pass, once its reads have entered the context: the plan as judged —
-    units, conditions, plan conditions, the acceptance question, subtraction and out-of-scope
-    classification, provenance, the ledger, your contrary grounds, and the focus. A record grounds
-    nothing. -/
+    whether the request bundles several goals, units, conditions, plan conditions, the acceptance
+    question, the authority, subtraction and out-of-scope classification, provenance, the ledger,
+    your doubts, and the focus. A record grounds nothing. -/
 axiom passRecord : Context P → List (Response P)
 
 def pass (c : Context P) : Context P :=
@@ -823,50 +853,57 @@ axiom persist : Context P → List (Evidence P)
 
 def close (c : Context P) : Apportioned P :=
   let c₃ := c ++ (persist c).map (·.val)
-  { context := c₃, emission := emit c, plan := package (emit c) (dissent c) (provenance c),
+  { context := c₃, emission := emit c,
+    plan := package (emit c) (authority c) (dissent c) (provenance c),
     navigation := navigation c₃ }
 
 def tooThin (c : Context P) : Bool := (obligations c).isEmpty
 
 open Classical in
 def relayAt (c : Context P) : Option RelayKind :=
-  if ¬ AutonomousIntent c then some .noAutonomousInterval
-  else if ¬ SingleGoal c then some .compositeGoal
-  else if PointerUnreadable c then some .handoffUnreadable
-  else if ConditionBearing c then some .conditionBearing
+  if PointerUnreadable c then some .handoffUnreadable
   else none
 
 open Classical in
 /-- `respond` presents the sheet. First the whole plan: every unit with its obligations, fit, seam
     with its citation or heuristic declaration, capabilities and feasibility, and its certificate —
-    checks, residuals, reservations with their grounds; the plan conditions with the requirement
+    checks, residuals, reservations with their grounds — a unit whose done rests only on accepted
+    residuals shown as one the run cannot tell is done; the plan conditions with the requirement
     that makes each safe to discharge; the acceptance question — the person's settling, or the
-    draft's criterion marked as the draft's; the out-of-scope obligations with their substrates;
-    what was subtracted as the host's standing contract; any hole; each field labelled by the
-    question it answers, in the person's everyday words; each value marked the person's or the
-    draft's. Then the ledger, the person's edits first, each re-fill pointing to its cause
-    and marked necessary or proposal. Then your contrary grounds. Then the focus with its actions,
-    each with its consequence, an action marked recommended only as `recommend` carries it; with
-    nothing open, whether to take the plan, and what a taking would not yet satisfy. After a
-    carrier write that came back incomplete, the sheet says what is missing and that nothing was
-    closed. Wherever a person's earlier turn is read as setting a value, the sheet says which turn
-    and what was taken from it, quoting their words. -/
-def apportion (respond : Context P → Response P) :
+    draft's criterion marked as the draft's; the authority the run will reach, by kind, target, and
+    limit; the out-of-scope obligations with their substrates; what was subtracted as the host's
+    standing contract; any hole; where the request bundles several goals, each stated outcome and
+    the shared-procedure bond, as the question of which goal this apportionment takes; each field
+    labelled by the question it answers, in the person's everyday words; each value marked the
+    person's or the draft's. Then the ledger of every change since the sheet the person answered,
+    each line marked by its kind. Then your doubts, each beside what it bears on, with what it rests
+    on. Then the focus with its actions, each with its consequence, an action marked recommended
+    only as `recommend` carries it; with nothing open, whether to take the plan and what a taking
+    would not yet satisfy; wherever a taking would close the run, that it hands the plan off in the
+    same turn as `.handoff` names, unless the person keeps the start for themselves. After a taking
+    that did not close — the structure did not allow it, or something it would take had not been
+    shown — the sheet says so and what stands in the way. After a carrier write that came back
+    incomplete, the sheet says what was written and where — each identity the writes returned —,
+    what is missing, and that the plan is therefore not yet a handed-off plan. Where the context
+    holds an earlier taken plan for this goal, the sheet names it as the plan this one replaces.
+    Wherever a person's earlier turn is read as setting a value, the sheet says which turn and what
+    was taken from it, quoting their words. -/
+def apportion (respond session : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
-    let c₁ := pass (fuse c u)
-    match filledValue (closing c₁) with
-    | some .stop      => .withdrawn c₁
-    | some (.route t) => .routed t c₁
-    | some .take =>
-      if Closable c₁ then
-        if Recorded (close c₁).navigation (close c₁).context then .apportioned (close c₁)
-        else apportion respond ((close c₁).context ++ [(respond (close c₁).context).val]) us
-      else apportion respond (c₁ ++ [(respond c₁).val]) us
-    | none => apportion respond (c₁ ++ [(respond c₁).val]) us
+    let c₀ := fuse c u
+    if ¬ Reaches c₀ then apportion respond session (c₀ ++ [(session c₀).val]) us
+    else
+      let c₁ := pass c₀
+      if isFilled (resolution c₁) = true then
+        if Closable c₁ then
+          if Recorded (close c₁).navigation (close c₁).context then .apportioned (close c₁)
+          else apportion respond session ((close c₁).context ++ [(respond (close c₁).context).val]) us
+        else apportion respond session (c₁ ++ [(respond c₁).val]) us
+      else apportion respond session (c₁ ++ [(respond c₁).val]) us
 
-def start (respond : Context P → Response P) (c : Context P)
+def start (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   let c₁ := bindPointer c
   match relayAt c₁ with
@@ -874,25 +911,28 @@ def start (respond : Context P → Response P) (c : Context P)
   | none =>
     let c₂ := pass c₁
     if tooThin c₂ then .relayed .tooThin c₂
-    else apportion respond (c₂ ++ [(respond c₂).val]) us
+    else apportion respond session (c₂ ++ [(respond c₂).val]) us
 
 /-! ── LOOP ──
-Every sheet re-judges the whole plan against the whole context: nothing counts down, no stage is
+An utterance about other work, or one that stops here, is the session's to answer and leaves the
+run holding. Every sheet re-judges the whole plan against the whole context: nothing counts down, no stage is
 entered, and no answer is held for a later gate. A person's edit reaches what their words reach —
 one unit, a region, a condition, the acceptance question — and the draft re-fills what depends on
-it, the ledger saying which re-fills are forced and which you propose. A cut sent back, a unit
-reopened, a condition adjusted are all edits of the same kind. The loop is dialogue: each sheet
-ends at the focus, and the person ends the run. The run holds no state into the execution interval.
+it, and the ledger carries every change since the sheet the person answered. A cut sent back, a
+unit reopened, a condition adjusted are all edits of the same kind; re-reading rewrites no value a
+person's turn made stand beyond the reach their later words give. The loop is dialogue: each
+sheet ends at the focus, and only the person's taking closes the run. The run holds no state into
+the execution interval.
 -/
 
 /-! ── CONVERGENCE ──
 apportioned(G): the person took the plan with everything it holds in view, its structure held —
-never an empty plan — the carrier holding the whole plan, and the navigation block over it
-presented (`Recorded`).
-The taking adopted what the draft proposed and accepted every residual shown; it established
-nothing about whether a check is the right one, and a contrary ground it was taken over rides the
-plan as dissent.
-withdrawn: the person stopped; nothing is emitted. routed: the person named the next protocol.
+never an empty plan — the carrier holding the whole plan, the navigation block over it presented
+(`Recorded`), and the plan handed off in the same turn as `.handoff` names — to the run, or by the
+navigation block alone where no run was started, the turn saying which.
+The taking adopted what the draft proposed, the authority shown included, and accepted every
+residual shown; it established nothing about whether a check is the right one, and a doubt it was
+taken over rides the plan attached to what it bears on.
 Convergence evidence, at emission: (a) the goal restated as its units, one plain sentence each;
 (b) per unit, the obligations, the seam with its citation or heuristic declaration, the fit or the
 person's taking over it with their words, the certificate — every check, every accepted gap, every
@@ -900,9 +940,10 @@ reservation with its ground — and the capability requirements and feasibility 
 conditions with the requirement that makes each safe to discharge; (d) every out-of-scope
 obligation with its substrate, and what was subtracted as the host's standing contract; (e) the
 acceptance question as settled — the criterion and whose it was, the reservation stated as left
-open on purpose, or the waiver — never two of these; (f) how each value came to stand — who
-proposed it, set or adopted — and the turns read as setting values, quoted; (g) the dissent the
-plan carries. Demonstrated, not asserted.
+open on purpose, or the waiver — never two of these; (f) the authority the run will reach, as it
+stands; (g) how each value came to stand — who proposed it, set or adopted — and the turns
+read as setting values, quoted; (h) the doubts the plan carries, each with what it bears on.
+Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -923,28 +964,34 @@ def Interaction.realization : Interaction → Continuation
   | .extension    => .proceed
 
 inductive Op | probe | relay | collect | judge | record | sheet | readTurn | emit | package
-             | parkCarrier | recordHandoff | converge | seam
+             | parkCarrier | recordHandoff | converge | handoff
 
 def grounding : Op → Annot × String
-  | .probe         => (.observe, "record read, artifact read: autonomous intent, goal singleness, and uncompiled-plan detection over the goal, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names — and its grounding instruction run once; condition-bearing is decided against the plan read back from that carrier")
-  | .relay         => (.interaction .extension, "no autonomous interval; a composite goal, naming each stated outcome and the shared-procedure bond; an unreadable handoff, which never falls through to fresh compilation; a plan already condition-bearing; or nothing read from the goal's scope. No activation")
+  | .probe         => (.observe, "record read, artifact read: the goal and whether its plan is uncompiled, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names — and its grounding instruction run once; the plan read back from that carrier enters the context, and where it already carries its conditions the first sheet draws from it with that reading as a contrary ground")
+  | .relay         => (.interaction .extension, "an unreadable handoff, which never falls through to fresh compilation, or nothing read from the goal's scope. No activation")
   | .collect       => (.observe, "record read, artifact read, artifact search: the goal's cited material and seam evidence over its substrate; read-only")
-  | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, how each value came to stand, and your contrary grounds; a person's value stands on the scope their words reach")
+  | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — whether the request bundles several goals, obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, the authority the run will reach, how each value came to stand, and your doubts with what each bears on; a person's value stands on the scope their words reach")
   | .record        => (.track, "record: the pass's record of the plan as judged, the ledger, and the focus")
-  | .sheet         => (.interaction .constitution, "the whole plan on one sheet, each value marked the person's or the draft's; the ledger of what the last turn changed, edits first and each re-fill marked necessary or proposal; your contrary grounds; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan")
-  | .readTurn      => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — an edit and its scope, an answer to the focus, a settling of the acceptance question, a taking over a fit, a closing — whatever form it takes")
+  | .sheet         => (.interaction .constitution, "the whole plan on one sheet, each value marked the person's or the draft's, the authority the run will reach; the ledger of every change since the sheet the person answered; your doubts, each beside what it bears on, with what it rests on; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan; wherever a taking would close the run, that it hands the plan off in the same turn unless the person keeps the start. Silence holds and takes nothing")
+  | .readTurn      => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on this run at all, and there an edit and its scope, an answer to the focus, a settling of the acceptance question, a change to the authority, a taking over a fit, a taking of the plan — whatever form it takes")
   | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
-  | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the dissent the taking carried and each value's provenance")
+  | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the authority, the doubts the taking carried, and the obligations every run of it carries, and each value's provenance")
   | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
-  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing: the sheet shows what is missing")
-  | .converge      => (.interaction .extension, "the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; and the dissent the plan carries")
-  | .seam          => (.interaction .extension, "at a chain the person declared, naming the next protocol, proceed to it citing that turn; a composition edge this file declares — /bound or /conduct into /apportion, /apportion into /conduct — is offered as a hint, never taken on its own; the edge to predicate enforcement needs its own activation; every Constitution gate here and in the next protocol fires unchanged")
+  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing and presents no block: the sheet says what was written and where, what is missing, and that the plan is therefore not yet handed off")
+  | .converge      => (.interaction .extension, "the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; the authority as it stands; each value's provenance with the turns read, quoted; and the doubts the plan carries")
+  | .handoff       => (.dispatch, "delegate: after the trace, in the same turn, the plan handed to the autonomous run through the navigation block, whose plan carries `handoffObligations` — where the plan holds no unit, nothing is started and the block alone is the handoff — a substrate that runs one unit per stretch and evaluates each unit's checks; where the session can start none, the start fails, or the person's taking keeps the start for themselves, the block is the handoff and the person starts the run, and the same turn says which of these happened — a failed start with what it returned; then this run ends")
+
+/-- The operation an outcome hands off through: a taken plan goes to the run by `.handoff`, after
+    the trace; a relay or a holding hands nothing off. -/
+def handedOffBy : Outcome P → Option Op
+  | .apportioned _ => some .handoff
+  | _              => none
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
-Two-way advisory with /conduct, neither direction a precondition, both guarded against reentry.
-The receiving session runs the block's grounding instruction against the work at hand; the
-emission supplies no answer to a reserved judgment.
+The plan leaves as session text and a navigation block over its carrier; what reads it next is the
+person's and the session's to settle. The receiving side runs the block's grounding instruction
+against the work at hand; the emission supplies no answer to a reserved judgment.
 -/
 
 end
@@ -954,63 +1001,64 @@ end Merismos
 
 ## Core Principle
 
-Merismos compiles one autonomous goal into coarse, horizon-fit units and the conditions by which each unit is done. It apportions and conditions; order, independence, reconciliation, termination topology, routing, and execution belong downstream. The whole plan is shown on one sheet every turn, so coverage, fit, seam quality, and conditions stay inspectable together, and nothing is taken before it has been seen whole.
+Merismos compiles one autonomous goal into coarse, horizon-fit units and the conditions by which each unit is done, and shows what the run will need from the person before they leave. It apportions and conditions; order, independence, reconciliation, and termination topology stay outside it, and execution belongs to the run it hands off to. The whole plan is shown on one sheet on every turn that bears on the run, so coverage, fit, seam quality, conditions, and authority stay inspectable together, and nothing is taken before it has been seen whole.
 
 ## Substrate Boundary
 
-Merismos stops after emitting and parking the condition-bearing plan. Units carry functional capability requirements and feasibility notes; predicate enforcement, pre-action interception, workflow control, and concrete executor binding belong to the consuming substrate.
+Merismos hands the taken plan to the autonomous run and stops: the handoff is its delegation point, as the `.handoff` grounding names it, with the capability it needs and where the navigation block alone is the handoff. Units carry functional capability requirements and feasibility notes; predicate enforcement, pre-action interception, workflow control, and concrete executor binding belong to that substrate.
 
 ## Mode Activation
 
 ### Activation
 
-`/apportion` is user-initiated. Activate only for one stated autonomous goal with no condition-bearing unit plan. A host requirement that applies to every accepted change is inherited by every unit and is excluded from the goal's obligation set unless the goal itself states it as an outcome.
+`/apportion` is user-initiated: the invocation declares autonomous execution intent for a stated goal with no condition-bearing unit plan. A host requirement that applies to every accepted change is inherited by every unit and is excluded from the goal's obligation set unless the goal itself states it as an outcome.
 
-Read prior protocol output first, then explicit arguments, then conversation context. A boundary map or an unresolved autonomous region may ground a fresh apportionment; an existing `/apportion` result is condition-bearing when its carrier gives every unit a certificate that says when it is done.
+Read prior material first — a boundary already drawn, an earlier plan — then explicit arguments, then conversation context. An existing `/apportion` result read back from its carrier is the first sheet's material; where it already gives every unit a certificate that says when it is done, the sheet says so as a contrary ground, and the person takes it, changes it, or leaves it.
 
 ### Activation exceptions
 
-Relay and deactivate when there is no autonomous interval, the request bundles several outcomes held together only by the host's standing procedure, the goal is already condition-bearing, or its scope yields no obligation. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
+Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several outcomes held together only by the host's standing procedure is a question of scope there; neither ends the run. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
 
 ## Protocol
 
 ### The sheet
 
-Every turn shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field reads on its own under a label that is the question it answers, worded in the person's everyday language, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
+Every turn that bears on the run shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the authority the run will reach while the person is away — each by kind, target, and limit — the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field reads on its own under a label that is the question it answers, worded in the person's everyday language, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
 
-Under the sheet, the ledger of what the last turn changed: the person's edits first, then each value the draft re-filled because of them, pointing to the edit that caused it and marked as forced by that edit or as your proposal. A removed unit and a replaced value stay in the ledger with what they were. Then your contrary grounds, each beside the value it bears on.
+Under the sheet, the ledger of every change since the sheet the person answered: their edits first, then each value re-filled because of them, then anything else that moved. A removed unit and a replaced value stay in the ledger with what they were. Then your doubts, each beside what it bears on, with what it rests on.
 
 Then one focus, with concrete actions and what each would do. Mark one action as recommended only where the ground clearly separates it from the others; where the actions are comparable, leave them side by side with their consequences.
 
-The person may answer in their own words, and one answer may edit several units. An answer to the focus settles that point only; a taking is said of the plan and takes everything the sheet shows, adopting what the draft proposed and accepting the gaps shown. A unit that does not fit is taken only by words that take it over its fit; for a fit that could not be judged, those words name the uncertainty. With nothing open, the focus asks whether to take the plan and says what a taking would not yet satisfy. Wherever you read one of the person's earlier turns as setting a value, say which turn and what you took from it, quoting their words.
+The person may answer in their own words, and one answer may edit several units. An answer to the focus settles that point only; a taking is said of the plan and takes everything the sheet shows, adopting what the draft proposed — the authority shown included — and accepting the gaps shown. Where a taking does not close — the plan's structure does not yet allow it, or something it would take was not yet shown — the next sheet says so and what stands in the way. A unit that does not fit is taken only by words that take it over its fit; for a fit that could not be judged, those words name the uncertainty. With nothing open, the focus asks whether to take the plan and says what a taking would not yet satisfy. Wherever a taking would close the run, the sheet says that it hands the plan off in the same turn, unless the person keeps the start for themselves. Wherever you read one of the person's earlier turns as setting a value, say which turn and what you took from it, quoting their words.
 
-A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. An obligation that could become a predicate after sharpening is a gap left unguarded. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
+A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. A check the run itself could change so that it passes is said so. Where an obligation could become a predicate once sharpened, the draft proposes the sharpened check as that obligation's whole check, marked as the draft's; a taking adopts it, and where the person declines it the gap stands. A check that covers only part of an obligation leaves the rest beside it as a gap or a held-open item, so the two read apart. A unit whose done rests only on accepted gaps is shown as one the run cannot tell is done. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
 
-On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it; a receiving session dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover each reservation's retained or entrusted judgment. Where the carrier write comes back incomplete, nothing closes: the sheet shows what is missing.
+On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it; the run dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover the authority the plan carries and each reservation's retained or entrusted judgment. Where the carrier write comes back incomplete, nothing closes: the sheet says what was written and where, what is missing, and that the plan is therefore not yet handed off. Once the block records the carrier, hand the plan off in the same turn as the `.handoff` grounding names, saying how it went.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must travel unchanged, material belongs to another round or trace, or phase order determines placement.
 
 ## Composition
 
-A non-trivial multi-unit plan may pass to `/conduct` as a navigation block over its parked carrier; an unresolved autonomous region from `/conduct` may pass here for apportionment. Both directions are advisory and guarded against re-entry: a chain the person declared moves along them, while an edge this file declares is offered only as a hint. `/bound` may supply an upstream boundary map, and the person may send the acceptance criterion's definition there. Predicate enforcement begins only through a separate user activation after Merismos emits.
+The taken plan is handed to the autonomous run as the `.handoff` grounding names it, and also leaves as session text and a navigation block over its parked carrier, so another line of work the person declares reads it by pointer; this contract names no other protocol as that reader.
 
 ## Known Limitations
 
-Goal singleness, the host-contract subtraction, the out-of-scope classification, seam quality, horizon fit, the residual-versus-reservation classification, and a whole-goal condition's freedom from order are contextual judgments rather than proofs. They stay on the sheet, correctable by the person's next turn; the formal invariants certify the resulting plan structure, not the infallibility of those readings. That every obligation was read is itself a judgment: coverage checks the plan against the obligations read, not the reading against the goal.
+Goal singleness, the host-contract subtraction, the out-of-scope classification, seam quality, horizon fit, the residual-versus-reservation classification, a whole-goal condition's freedom from order, and the authority the run will reach are contextual judgments rather than proofs. They stay on the sheet, correctable by the person's next turn; the formal invariants certify the resulting plan structure, not the infallibility of those readings. That every obligation was read is itself a judgment: coverage checks the plan against the obligations read, not the reading against the goal. Whether the run keeps its handoff obligations is the run's; this protocol has ended by then.
 
 ## Rules
 
-- **Separate activation**: Emission completes the epistemic work. Starting the autonomous interval is a separate constitutive act by the user.
-- **No-reentry across the `/conduct` seam**: Carry the parked plan by navigation block rather than copying it. Fixed topology is not re-conducted, and a trivial unit arrangement bypasses `/conduct`.
+- **Handoff carries its obligations**: Every taken plan carries `handoffObligations`, and every run of it, wherever and whenever started, does what that text states. The plan travels by its navigation block, never copied.
+- **Re-entry**: After the handoff this run has ended. An answer to what came back is the person's to give to the run that returned it; changing the plan is a new `/apportion` the person invokes, whose sheet is drawn from the accumulated context and names the plan it replaces; stopping what still runs is the run's.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
-- **One sheet, every turn**: Show the whole plan every turn — the goal, units, conditions, whole-goal conditions, the acceptance question, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of what the last turn changed. The plan and every question about it share that one sheet.
+- **One sheet for the whole plan**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of every change since the sheet the person answered. The plan and every question about it share that one sheet.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
-- **The person takes and closes**: The plan is taken, stopped, or routed only by the person's turn, whatever its form. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
-- **Contrary grounds ride the plan**: Show your contrary grounds before the focus. A reading of yours never refuses a taking; a plan taken over it carries it as dissent.
+- **The person takes and closes**: Only the person's taking closes the run, whatever its form; silence, a stop, or a turn to other work leaves the sheet holding. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
+- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave.
+- **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it, the run reads it under `handoffObligations`, and it is raised again only on new evidence.
 - **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
 - **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
 - **Host contract subtraction**: Exclude goal-independent host procedure from `O_G`; it is inherited process, not an out-of-scope obligation. A requirement the goal states as its own outcome remains in scope. Show what was subtracted on every sheet and in the trace, so a misjudged subtraction stays correctable.
-- **One goal per apportionment**: A composite request relays its constituent outcomes and their shared-procedure bond; each outcome requires its own apportionment.
+- **One goal per apportionment**: Where a request bundles outcomes held together only by shared procedure, the sheet names each outcome and the bond and asks which goal this apportionment takes; each outcome takes its own apportionment, and a taking over that question takes the bundle as one goal with your reading attached as a doubt.
 - **Reservation disposition**: Hold open an item only live judgment can settle, record the ground that settles it, and keep the classification on the sheet for correction. A reservation is neither an accepted gap nor a delegated pre-action obligation.
-- **Convergence evidence**: Before deactivation, present the plan readback; each unit's obligations, seam, fit or the person's taking over it, whole certificate, capabilities, and feasibility; plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; each value's provenance with the turns read, quoted; the dissent the plan carries; and the navigation block over the parked carrier.
+- **Convergence evidence**: Before the handoff, present the plan readback; each unit's obligations, seam, fit or the person's taking over it, whole certificate, capabilities, and feasibility; plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; the authority as it stands; each value's provenance with the turns read, quoted; the doubts the plan carries; and the navigation block over the parked carrier.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
