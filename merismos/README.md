@@ -51,7 +51,7 @@ The taken plan leaves as session text and a navigation block over its carrier, s
 - **Obligation reading is heuristic**: an obligation never uttered and never captured upstream will not be read, so coverage is hard only over what *was* read. The sheet is where the omission becomes visible: obligations are re-read on every turn that bears on the run, so stating the missing one adds it to the plan.
 - **Seam evidence is often absent**: abstract goals frequently supply no evidenced joint, and heuristic cuts can leave duplicated setup or cross-unit state leakage.
 - **Horizon fit is an estimate**: judged before the run from the goal's description; the override path exists because the user often knows better.
-- **Predicate coverage**: subjective quality bars do not derive. Where sharpening could still produce a predicate, the draft proposes it and the gap stands until the user takes it; where a judgment and not a check settles the item, it is reserved instead. A check the run could itself change so that it passes is flagged on the sheet.
+- **Predicate coverage**: subjective quality bars do not derive. Where sharpening could still produce a predicate, the draft proposes it as that obligation's check, and the gap stands only where the user declines it; where a judgment and not a check settles the item, it is reserved instead. A check the run could itself change so that it passes is flagged on the sheet.
 - **The handoff is honored by the run**: once the plan is handed off, this protocol has ended; whether the run keeps the handoff obligations is the run's, and pre-action interception belongs to the harness substrate.
 
 ## Install
