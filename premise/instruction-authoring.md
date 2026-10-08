@@ -32,6 +32,8 @@ Bound completeness, absence, and uniqueness claims to the domain actually examin
 
 Give each rule one authoritative home. Rely on co-presence only where the intended reader actually receives the whole set; otherwise provide a precise point-of-need reference. Where a self-contained delivery surface requires a compiled copy, preserve its source relation and check propagation when either end changes.
 
+Where the reader receives both, an obligation stated twice in different words is a defect even when each statement is correct, because the reader takes the difference in wording for a difference in meaning; keep one statement, in its authoritative home. Rephrasing an obligation stated once, for preferred wording alone, can change what the reader does in ways reading cannot predict; make such a rephrase where an exercised reading failed or a defect named in this document calls for it, not where a reviewer would have phrased it otherwise.
+
 ## Inscription Economics
 
 Account for the cost of loading, revising, and applying an entry. Consider volatility, relevance at the loading moment, and portability; these are prompts for judgment, not an exhaustive cost taxonomy.
