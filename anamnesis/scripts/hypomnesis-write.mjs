@@ -389,7 +389,7 @@ function buildHaikuArgs() {
   return [
     "-p",
     "--no-session-persistence",
-    "--model", "haiku",
+    "--model", "claude-haiku-5-5",
     "--disable-slash-commands",
     "--strict-mcp-config",
     "--dangerously-skip-permissions",

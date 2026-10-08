@@ -204,7 +204,7 @@ test("callHaiku delivers only disabled-tool arguments and carries prompt on the 
     run: (_file, args, opts) => execFileSync(process.execPath, ["-e", child, "--", ...args], opts),
   }));
   assert.equal(consumed.input, prompt);
-  assert.deepEqual(consumed.args, ["-p", "--no-session-persistence", "--model", "haiku", "--disable-slash-commands",
+  assert.deepEqual(consumed.args, ["-p", "--no-session-persistence", "--model", "claude-haiku-5-5", "--disable-slash-commands",
     "--strict-mcp-config", "--dangerously-skip-permissions", "--setting-sources", "", "--tools", ""]);
 });
 
