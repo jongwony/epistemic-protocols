@@ -41,11 +41,6 @@
       "description": "Check that a result fits everywhere it lands — misfits and omissions on one sheet — /contextualize (ἐφαρμογή: an application)"
     },
     {
-      "name": "elenchus",
-      "source": "./elenchus",
-      "description": "Challenge the context you are about to act on, before acting — /sublate (ἔλεγχος: cross-examination)"
-    },
-    {
       "name": "horismos",
       "source": "./horismos",
       "description": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)"

@@ -66,7 +66,7 @@
     "note": "README's own worked case: the term has two referents in this session and what the work is for has not been fixed as coordinates. The conversation carries that ambiguity, so the label rests on the state the channel actually sends rather than on the prompt alone. /apportion does not fit - it compiles a goal already determined, and here it is not. This is the least separable label in the set: an adjudicator who reads the missing purpose as a user-held fact rather than an undetermined axis would mark it several with /inquire."
   },
   {
-    "id": "several-fit-inquire-sublate",
+    "id": "several-fit-inquire-contextualize",
     "outcome": "several",
     "prompt": "That hook was written before any of this existed. Reconsider in light of it.",
     "conversation": [
@@ -81,11 +81,10 @@
     ],
     "expected": [
       "contextualize",
-      "inquire",
-      "sublate"
+      "inquire"
     ],
     "adjudicated": false,
-    "note": "Verbatim shape of a real turn from the session this was built in. inquire and sublate fit and neither dominates: what changed is user-held, and the assumptions the standing artifact was built on are now suspect. contextualize fits too: the hook is a result already written, and the new state is the context it has to fit."
+    "note": "Verbatim shape of a real turn from the session this was built in. inquire and contextualize fit and neither dominates: what changed is user-held, and the hook is a result already written whose new state is the context it has to fit."
   },
   {
     "id": "singleton-ideate-unframed",

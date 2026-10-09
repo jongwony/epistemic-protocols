@@ -141,7 +141,6 @@ const CODEX_SUBMIT_DIST_DIR = path.join(DIST_DIR, 'codex-submit');
 const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'analogia', skill: 'ground' },
-  { dir: 'elenchus', skill: 'sublate' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'euporia', skill: 'elicit' },
   { dir: 'heuresis', skill: 'ideate' },

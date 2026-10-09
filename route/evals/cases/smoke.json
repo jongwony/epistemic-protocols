@@ -30,16 +30,6 @@
     "note": "Constructed so an earlier conclusion exists, is named as existing, and is not in the present context. The user is asking for it back, not for a fresh decision."
   },
   {
-    "id": "reach-sublate",
-    "protocol": "sublate",
-    "conversation": [
-      { "role": "user", "text": "The auth middleware was written before the gateway existed. Back then it was the only thing checking a token." },
-      { "role": "assistant", "text": "The gateway now rejects an unsigned request before anything reaches the service." }
-    ],
-    "prompt": "So go back over what that middleware still assumes, given what's in front of it now.",
-    "note": "Constructed so existing context was sound when written and may not survive what has since changed. The user wants what is carried re-examined rather than extended."
-  },
-  {
     "id": "reach-contextualize",
     "protocol": "contextualize",
     "conversation": [

@@ -12,7 +12,7 @@ import { envWithoutKeys, shippedKeyEnv } from "./route-test-env.mjs";
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-evaluator-eval.mjs");
 
 test("correctness is set equality, not overlap", () => {
-  assert.ok(correct(["inquire", "sublate"], ["sublate", "inquire"]));
+  assert.ok(correct(["inquire", "contextualize"], ["contextualize", "inquire"]));
   assert.ok(correct([], []));
   // A right name beside a wrong one is not a right advisory.
   assert.ok(!correct(["inquire"], ["inquire", "ground"]));
