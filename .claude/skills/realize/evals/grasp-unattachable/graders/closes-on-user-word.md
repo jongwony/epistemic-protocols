@@ -23,8 +23,8 @@ standing holds the closure back".
    question about what to cover next is a round closing, not the task closing, and is not a
    failure here. Nor is a round that shows the map with an opening to say it is enough: it is not a
    closure and not the final convergence evidence.
-2. **Closure on it.** Turn 5, answering the closing word, ends the task: it closes it, and may
-   present the convergence evidence. Whether it is faithful is not graded here.
+2. **Closure on it.** Turn 5, answering the closing word, ends the task. Whether it presents
+   the record, and whether that record is faithful, are `map-grounded`'s to grade.
 
 ## Not met
 

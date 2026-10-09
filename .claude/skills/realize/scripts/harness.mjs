@@ -209,19 +209,38 @@ if (!INVOCATION) {
   process.exit(1);
 }
 
-// The case's own files -- prompt, scripted replies, oracle, case.yaml -- are part of the key,
-// so a changed script starts a new cell rather than reusing one run against the old script.
+// What reaches the subject or shapes its substrate -- the prompt, case.yaml, the scripted replies
+// and the scaffold script case.yaml names -- is part of the key, so a changed script starts a new
+// cell rather than reusing one run against the old script. The oracle only explains the script
+// and reaches no subject, so it is not.
 function caseDigest(caseName) {
   const h = createHash('sha256');
-  const dir = join(EVALS, caseName);
-  const names = ['prompt.md', 'oracle.md', 'case.yaml', ...caseSpec(caseName).replies.map((r) => r.name)];
-  for (const name of names) {
-    const file = join(dir, name);
-    h.update(`${name}\n`);
+  const spec = caseSpec(caseName);
+  const files = [
+    ...['prompt.md', 'case.yaml', ...spec.replies.map((r) => r.name)].map((n) => join(EVALS, caseName, n)),
+    spec.scaffold,
+  ];
+  for (const file of files) {
+    h.update(`${relative(EVALS, file)}\n`);
     if (existsSync(file)) h.update(readFileSync(file));
     h.update('\n');
   }
   return h.digest('hex');
+}
+
+// A protocol arm runs the skill's references/ beside its SKILL.md, so they are part of the
+// treatment too.
+function hashSkillReferences(h) {
+  const dir = join(dirname(PROTOCOL_SKILL), 'references');
+  if (!existsSync(dir)) return;
+  const files = readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile())
+    .map((e) => join(e.parentPath ?? e.path, e.name))
+    .sort();
+  for (const file of files) {
+    h.update(`${relative(dir, file)}\n`);
+    h.update(readFileSync(file));
+  }
 }
 
 function treatmentId(arm, caseName) {
@@ -238,7 +257,10 @@ function treatmentId(arm, caseName) {
         permissionMode: CFG.permissionMode,
         allowedTools: CFG.allowedTools,
       }));
-  if (arm.protocol) h.update(readFileSync(PROTOCOL_SKILL));
+  if (arm.protocol) {
+    h.update(readFileSync(PROTOCOL_SKILL));
+    hashSkillReferences(h);
+  }
   if (arm.style) h.update(readFileSync(expand(CFG.styleSource)));
   return h.digest('hex').slice(0, 12);
 }

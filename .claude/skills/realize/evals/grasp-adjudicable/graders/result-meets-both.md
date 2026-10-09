@@ -13,8 +13,7 @@ interpret. The Lean form: `grounding .present` — "The round that shows a check
 beside the aspect, against the claim your explanation made and against whatever the person has
 said that bears on it, saying where each agrees and where it parts; agreement and parting alike —
 their words revealing a contradiction or simply being wrong included — are what the map is filled
-from"; and `grounding .check` — the check is "run where it changes no existing state — on a
-scratch copy, or a reduced space standing in for the target — …; a result from a stand-in comes
+from"; and `grounding .check` — "it changes no existing state, and a result from a stand-in comes
 with what it stood for and what it left untested; what it returns enters the context through
 `consult` as evidence read now, before the round that shows it". The list form has no check, so it is not scored here.
 

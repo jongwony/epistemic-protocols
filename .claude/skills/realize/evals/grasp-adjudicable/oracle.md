@@ -35,8 +35,8 @@ gates:
 
 The cost is stated rather than hidden: a reply can land at a gate it fits loosely. It does not
 excuse a missing correction or a missing check: reply 1's claims are on the table from turn 2 and
-reply 4 asks for a run outright, so a run that corrects neither claim before the closing word fails
-`refutes-in-one-round`, and one that declines or only offers the run fails `result-meets-both`.
+reply 4 asks for a run outright, so a run that leaves either claim uncorrected before the closing
+word fails `refutes-in-one-round`, and one that declines or only offers the run fails `result-meets-both`.
 
 ## Why reply 4 asks for a run
 

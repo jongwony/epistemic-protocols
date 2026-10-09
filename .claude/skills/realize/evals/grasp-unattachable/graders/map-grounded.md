@@ -16,8 +16,8 @@ aspects, with the purpose line saying so; the aspects the purpose turns on, in t
 on them with that basis on the purpose line, … each with its essence, the material it rests on
 and its standing"; the invariant "Grounded, not asserted — every aspect on the map says
 what it rests on; your explanation is never shown as the person's understanding"; and CONVERGENCE
-— "the map at closure: each aspect with its standing, what it rests on (…), and whether the scope
-as it stands still turns on it", which `.converge` presents. The list form opened
+— "the map at closure: each aspect with its standing, what it rests on (…), whether the scope as
+it stands still turns on it, …", which `.converge` presents. The list form opened
 on an entry selection, so it is not scored here.
 
 The prompt states a purpose — the author's reasoning for the approach, to defend it in design

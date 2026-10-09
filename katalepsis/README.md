@@ -22,7 +22,7 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 |-----------|-------------------|------------|
 | Direction | AI talks, user listens | AI shows the map; the user moves it — accepting, asking to see, or pushing back |
 | Entry point | AI decides what to explain | The user's stated purpose, or AI's reading of it, marked as AI's and corrected in one line |
-| Confirmation | Assumed after explanation | Each aspect says what it rests on: the user's own reading checked against the target, a result seen together, or only AI's explanation |
+| Confirmation | Assumed after explanation | Each aspect says what it rests on: the user's own reading borne out by the target, a result seen together, or only AI's explanation |
 | Ending | Undefined | The user says it is understood enough for their purpose; the map, with what is still to be checked and how, and any AI doubt, is the record |
 
 ## Protocol Flow
