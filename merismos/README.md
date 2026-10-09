@@ -39,7 +39,7 @@ One unit is one execution interval is one entry, carrying that unit's whole cert
 
 ## The Handoff
 
-Every taken plan carries the obligations its run follows, wherever and whenever it is started — the contract's `handoffObligations`, the same handoff obligation `/conduct` carries for its substrate: what does not rest on the user runs without waiting for them; when the plan has run, the run returns once with every unit's result, and what rests on the user — an irreversible step that a carried doubt, or evidence found while running, bears on among them — comes back in that return with what did not proceed because of it; nothing is decided for the user. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
+Every taken plan carries the obligations its run follows, wherever and whenever it is started — the contract's `handoffObligations`: what does not rest on the user runs without waiting for them; when the plan has run, the run returns once with every unit's result, and what rests on the user — an irreversible step that a carried doubt, or evidence found while running, bears on among them — comes back in that return with what did not proceed because of it; nothing is decided for the user. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
 
 ## Composition
 
