@@ -81,10 +81,10 @@ of Claude's output-style treatment. Codex case worktrees live under the system t
 directory rather than below this repository, so parent `AGENTS.md` and git state cannot
 be mistaken for fixture evidence.
 
-Cache identity includes the runner and a digest of the actual protocol/style files.
-Editing prose for an ablation therefore creates a new cell instead of reusing the
-pre-ablation transcript. Codex also compares the installed cache's `SKILL.md` digest
-to the source immediately before spending a run; an edit made after setup fails closed
+Cache identity is the key `SKILL.md` §Configuration names, so editing prose or a case
+for an ablation creates a new cell instead of reusing the pre-ablation transcript. Codex
+also compares the installed cache's `SKILL.md` and `references/` digests to the source
+immediately before spending a run; an edit made after setup fails closed
 with an instruction to rerun setup instead of measuring stale treatment bytes.
 
 ### Login mode

@@ -38,21 +38,21 @@ theorem unrelated_adds_no_gate (respond session : Context P → Response P) (c :
 
 theorem withdraw_closes_unclosed (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (h : isFilled (withdrawal (consulted (fuse c u))) = true) :
-    grasp respond session c (u :: us) = .withdrawn (closed (consulted (fuse c u))) := by
+    (h : isFilled (withdrawal (fuse c u)) = true) :
+    grasp respond session c (u :: us) = .withdrawn (closed (fuse c u)) := by
   simp [grasp, hr, h]
 
 theorem closure_verifies (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (consulted (fuse c u))) = false)
-    (hc : isFilled (closure (consulted (fuse c u))) = true) :
-    grasp respond session c (u :: us) = .verified ⟨closed (consulted (fuse c u))⟩ := by
+    (hw : isFilled (withdrawal (fuse c u)) = false)
+    (hc : isFilled (closure (fuse c u)) = true) :
+    grasp respond session c (u :: us) = .verified ⟨closed (fuse c u)⟩ := by
   simp [grasp, hre, hw, hc]
 
 theorem unclosed_presents_again (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (consulted (fuse c u))) = false)
-    (hc : isFilled (closure (consulted (fuse c u))) = false) :
+    (hw : isFilled (withdrawal (fuse c u)) = false)
+    (hc : isFilled (closure (fuse c u)) = false) :
     grasp respond session c (u :: us) =
       grasp respond session
         (consulted (fuse c u) ++ [(respond (consulted (fuse c u))).val]) us := by
@@ -62,10 +62,8 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
     (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : grasp respond session c (u :: us) = o) :
     (∃ c', grasp respond session c' us = o) ∨
-    (isFilled (withdrawal (consulted (fuse c u))) = true ∧
-      o = .withdrawn (closed (consulted (fuse c u)))) ∨
-    (isFilled (closure (consulted (fuse c u))) = true ∧
-      o = .verified ⟨closed (consulted (fuse c u))⟩) := by
+    (isFilled (withdrawal (fuse c u)) = true ∧ o = .withdrawn (closed (fuse c u))) ∨
+    (isFilled (closure (fuse c u)) = true ∧ o = .verified ⟨closed (fuse c u)⟩) := by
   simp only [grasp] at h
   split at h
   · exact .inl ⟨_, h⟩
@@ -106,7 +104,7 @@ theorem withdrawn_by_person_withdrawal (respond session : Context P → Response
 theorem verified_at_an_utterance (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : VerifiedUnderstanding P)
     (h : grasp respond session c us = .verified r) :
-    ∃ (c₀ : Context P) (u : Utterance P), r.closure.context = consulted (fuse c₀ u) := by
+    ∃ (c₀ : Context P) (u : Utterance P), r.closure.context = fuse c₀ u := by
   induction us generalizing c with
   | nil => simp [grasp] at h
   | cons u us ih =>
@@ -120,7 +118,7 @@ theorem verified_at_an_utterance (respond session : Context P → Response P) (c
 theorem withdrawn_at_an_utterance (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P)
     (h : grasp respond session c us = .withdrawn r) :
-    ∃ (c₀ : Context P) (u : Utterance P), r.context = consulted (fuse c₀ u) := by
+    ∃ (c₀ : Context P) (u : Utterance P), r.context = fuse c₀ u := by
   induction us generalizing c with
   | nil => simp [grasp] at h
   | cons u us ih =>
