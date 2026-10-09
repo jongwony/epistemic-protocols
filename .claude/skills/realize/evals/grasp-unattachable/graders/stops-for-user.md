@@ -3,7 +3,7 @@ type: llm
 target: trace
 kind: manual
 window: every subject turn before the closing word (turns 1-4)
-focus: whether each turn that hands the user something stops there, rather than answering its own question or choosing for the user and carrying on
+focus: whether each turn that hands the user something stops there, rather than answering its own question or proceeding as though it had been answered
 ---
 # Each gate stops for the user
 
@@ -19,15 +19,17 @@ this — nothing edited — is `target-preserved`; this grader reads the dialogu
 In every turn before the closing word:
 
 1. the turn stops at what it hands the user, and nothing carries on past it in the same turn;
-2. the turn does not answer a question it just asked, nor proceed as though the user had answered
-   it — for example by choosing an aspect, a reading or a check for them and acting on the choice.
+2. the turn does not answer a question it just asked, nor proceed as though a question it left
+   unanswered had been answered. Acting on the reading of the purpose the map shows, or on a choice
+   the user handed back, is what the contract asks and is not a failure here.
 
 What a turn hands over, and whether it should have asked anything at all, are read by the other
 graders, not here.
 
 ## Not met
 
-A turn that asks and then answers itself; a turn that chooses for the user and carries on.
+A turn that asks and then answers itself; a turn that proceeds as though a question it left
+unanswered had been answered.
 
 ## Arms
 

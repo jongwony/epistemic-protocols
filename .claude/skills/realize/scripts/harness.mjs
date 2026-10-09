@@ -209,8 +209,24 @@ if (!INVOCATION) {
   process.exit(1);
 }
 
-function treatmentId(arm) {
+// The case's own files -- prompt, scripted replies, oracle, case.yaml -- are part of the key,
+// so a changed script starts a new cell rather than reusing one run against the old script.
+function caseDigest(caseName) {
+  const h = createHash('sha256');
+  const dir = join(EVALS, caseName);
+  const names = ['prompt.md', 'oracle.md', 'case.yaml', ...caseSpec(caseName).replies.map((r) => r.name)];
+  for (const name of names) {
+    const file = join(dir, name);
+    h.update(`${name}\n`);
+    if (existsSync(file)) h.update(readFileSync(file));
+    h.update('\n');
+  }
+  return h.digest('hex');
+}
+
+function treatmentId(arm, caseName) {
   const h = createHash('sha256').update(`${TARGET}\n${RUNNER}\n${JSON.stringify(arm)}\n`);
+  h.update(`${caseDigest(caseName)}\n`);
   h.update(`${INVOCATION || ''}\n`);
   h.update(RUNNER === 'codex'
     ? JSON.stringify({
@@ -608,7 +624,7 @@ function sessionIdOf(out) {
 }
 
 function runOne({ model, armName, arm, caseName, rep }) {
-  const treatment = treatmentId(arm);
+  const treatment = treatmentId(arm, caseName);
   const outDir = join(RESULTS, model, armName, caseName, treatment);
   mkdirSync(outDir, { recursive: true });
   const outFile = join(outDir, `run-${rep}.jsonl`);
@@ -1107,7 +1123,7 @@ for (const c of CFG.cases) {
 }
 
 function gradeRun(model, armName, arm, caseName, rep) {
-  const treatment = treatmentId(arm);
+  const treatment = treatmentId(arm, caseName);
   const base = join(RESULTS, model, armName, caseName, treatment, `run-${rep}`);
   const parsed = parse(`${base}.jsonl`);
   if (!parsed) return null;
