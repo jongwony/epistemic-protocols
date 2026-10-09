@@ -14,7 +14,7 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 
 ### The Solution
 
-**Comprehension over Explanation**: Rather than lecturing at the user or quizzing them, AI first reads the target and the sources around it, then shows a map of understanding over the user's purpose — the purpose as they said it, or AI's reading of it marked as AI's, and the aspects it turns on, each with its essence in a line, the material it rests on, and how it stands. AI explains one aspect at a time in the one picture, example, or metaphor that carries it best, and goes deeper when the user asks. The user moves the map with their own words: "got it" leaves an aspect resting on AI's explanation, accepted; "I'd need to see it" runs a check whose result they look at together; "that seems off" is met with the material that settles it, or with no verdict and what would settle it.
+**Comprehension over Explanation**: Rather than lecturing at the user or quizzing them, AI first reads the target and the sources around it, then shows a map of understanding over the user's purpose — the purpose as they said it, or AI's reading of it marked as AI's, and the aspects it turns on, each with its essence in a line, the material it rests on, and how it stands. AI explains each aspect in the one picture, example, or metaphor that carries it best, and goes deeper when the user asks. The user moves the map with their own words: "got it" leaves an aspect resting on AI's explanation, accepted; "I'd need to see it" runs a check whose result they look at together; "that seems off" is met with the material that settles it, or with no verdict and what would settle it.
 
 ### Difference from Simple Explanation
 
@@ -31,7 +31,7 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 Gather   → Read the target's material, and the sources that bear on it
 Map      → The purpose (the user's words, or AI's reading marked as AI's) and the
            aspects it turns on, each with what it rests on and how it stands
-Explain  → One aspect at a time, in one fitting representation; the user's move
+Explain  → Each aspect in one fitting representation; the user's move
            answered with its material — a check they ask for runs and its result
            is shown; no verdict without material: what would settle it is named
            (gate interaction)

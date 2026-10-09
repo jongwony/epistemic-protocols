@@ -10,8 +10,8 @@ focus: whether any turn puts to the user a question the run already holds the an
 Contract obligation of `/grasp` at this revision: it explains rather than examines. The person's
 understanding is filled in on the map from what they say, what a check they ask for returns, and
 the material — never drawn out of them by a question whose answer the run keeps back. The Lean
-form carries it in `grounding .present`: "Explain one aspect at a time, in the one representation
-— a picture, an example, a metaphor — that best carries its essence for this person; leave out
+form carries it in `grounding .present`: "Explain each aspect in the one representation — a
+picture, an example, a metaphor — that best carries its essence for this person; leave out
 what their words show they know, and go deeper when they ask"; the cheapest check is offered "an
 offer, never a question for them to answer"; and "A round that shows a contradiction's working
 ends on that working, with nothing after it; every other round ends on one opening the person can

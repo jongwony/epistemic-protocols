@@ -11,10 +11,9 @@ Contract obligation of `/grasp` at this revision: where the user's reading and t
 run shows the whole working at once and hands it over, rather than having the user explain first
 or checking them afterwards. The Lean form: `grounding .present` — "Where what they said and the
 target or a check's result part on the same scope and premises, or two of their own utterances do,
-show it with its working in one round: their words quoted; the narrowest `Measure` — the target's
-material or an outside source you read, never your own explanation — scoped to what that material
-settles; why the two part; what they got right; and another reading beside it where the material
-allows", and "A round that shows a contradiction's working ends on that working, with nothing
+show it with its working in one round: their words quoted; the narrowest `Measure`, never your own
+explanation — scoped to what that material settles; why the two part; what they got right; and
+another reading beside it where the material allows", and "A round that shows a contradiction's working ends on that working, with nothing
 after it"; the material is quoted in place (`SourceRead`: "quoted in place … your own reasoning is
 never a measure"), from a turn that carries the target itself rather than the reasoning that
 produced it (`IsTarget`). The list form shares the quoted-material half: "When you adjudicate
