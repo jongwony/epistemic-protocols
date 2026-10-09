@@ -31,27 +31,26 @@ theorem start_presents_first (respond session : Context P → Response P) (c : C
       grasp respond session (consulted c ++ [(respond (consulted c)).val]) us := rfl
 
 theorem unrelated_adds_no_gate (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (consulted (fuse c u))) :
+    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     grasp respond session c (u :: us) =
-      grasp respond session
-        (consulted (fuse c u) ++ [(session (consulted (fuse c u))).val]) us := by
+      grasp respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [grasp, h]
 
 theorem withdraw_closes_unclosed (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (consulted (fuse c u)))
+    (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (h : isFilled (withdrawal (consulted (fuse c u))) = true) :
     grasp respond session c (u :: us) = .withdrawn (closed (consulted (fuse c u))) := by
   simp [grasp, hr, h]
 
 theorem closure_verifies (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (consulted (fuse c u)))
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (consulted (fuse c u))) = false)
     (hc : isFilled (closure (consulted (fuse c u))) = true) :
     grasp respond session c (u :: us) = .verified ⟨closed (consulted (fuse c u))⟩ := by
   simp [grasp, hre, hw, hc]
 
 theorem unclosed_presents_again (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (consulted (fuse c u)))
+    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hw : isFilled (withdrawal (consulted (fuse c u))) = false)
     (hc : isFilled (closure (consulted (fuse c u))) = false) :
     grasp respond session c (u :: us) =
@@ -155,6 +154,10 @@ theorem closed_only_by_person {c : Context P} {s : Cite c}
 
 theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
     (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem unasked_consult_only_gathers (c : Context P) (h : ¬ AsksCheck c) :
+    consult c = gathered c := by
+  simp [consult, h]
 
 theorem check_only_when_asked (c : Context P) (h : Op.check ∈ consultOps c) : AsksCheck c :=
   Classical.byContradiction fun hn => by simp [consultOps, hn] at h

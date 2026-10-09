@@ -209,38 +209,46 @@ if (!INVOCATION) {
   process.exit(1);
 }
 
-// What reaches the subject or shapes its substrate -- the prompt, case.yaml, the scripted replies
-// and the scaffold script case.yaml names -- is part of the key, so a changed script starts a new
-// cell rather than reusing one run against the old script. The oracle only explains the script
-// and reaches no subject, so it is not.
+// What reaches the subject or shapes its substrate -- the prompt and scripted replies as sent,
+// frontmatter stripped; case.yaml; the scaffold script case.yaml names -- is part of the key, so
+// a changed script starts a new cell rather than reusing one run against the old script. The
+// oracle only explains the script and reaches no subject, so it is not.
+const CASE_DIGESTS = new Map();
 function caseDigest(caseName) {
+  if (CASE_DIGESTS.has(caseName)) return CASE_DIGESTS.get(caseName);
   const h = createHash('sha256');
   const spec = caseSpec(caseName);
-  const files = [
-    ...['prompt.md', 'case.yaml', ...spec.replies.map((r) => r.name)].map((n) => join(EVALS, caseName, n)),
-    spec.scaffold,
-  ];
-  for (const file of files) {
-    h.update(`${relative(EVALS, file)}\n`);
-    if (existsSync(file)) h.update(readFileSync(file));
-    h.update('\n');
+  const part = (name, bytes) => h.update(`${name}\n`).update(bytes).update('\n');
+  const prompt = join(EVALS, caseName, 'prompt.md');
+  part('prompt.md', existsSync(prompt) ? stripFrontmatter(readFileSync(prompt, 'utf8')) : '');
+  for (const r of spec.replies) part(r.name, r.body);
+  const yaml = join(EVALS, caseName, 'case.yaml');
+  part('case.yaml', existsSync(yaml) ? readFileSync(yaml) : '');
+  part(relative(EVALS, spec.scaffold), existsSync(spec.scaffold) ? readFileSync(spec.scaffold) : '');
+  const digest = h.digest('hex');
+  CASE_DIGESTS.set(caseName, digest);
+  return digest;
+}
+
+// A protocol arm runs the skill's references/ beside its SKILL.md, so they are part of the
+// treatment, and an installed copy must carry the same ones.
+function referencesDigest(skillDir) {
+  const h = createHash('sha256');
+  const dir = join(skillDir, 'references');
+  if (existsSync(dir)) {
+    const files = readdirSync(dir, { recursive: true, withFileTypes: true })
+      .filter((e) => e.isFile())
+      .map((e) => join(e.parentPath ?? e.path, e.name))
+      .sort();
+    for (const file of files) h.update(`${relative(dir, file)}\n`).update(readFileSync(file));
   }
   return h.digest('hex');
 }
 
-// A protocol arm runs the skill's references/ beside its SKILL.md, so they are part of the
-// treatment too.
-function hashSkillReferences(h) {
-  const dir = join(dirname(PROTOCOL_SKILL), 'references');
-  if (!existsSync(dir)) return;
-  const files = readdirSync(dir, { recursive: true, withFileTypes: true })
-    .filter((e) => e.isFile())
-    .map((e) => join(e.parentPath ?? e.path, e.name))
-    .sort();
-  for (const file of files) {
-    h.update(`${relative(dir, file)}\n`);
-    h.update(readFileSync(file));
-  }
+let repoReferencesDigest = null;
+function skillReferencesDigest() {
+  repoReferencesDigest ??= referencesDigest(dirname(PROTOCOL_SKILL));
+  return repoReferencesDigest;
 }
 
 function treatmentId(arm, caseName) {
@@ -259,7 +267,7 @@ function treatmentId(arm, caseName) {
       }));
   if (arm.protocol) {
     h.update(readFileSync(PROTOCOL_SKILL));
-    hashSkillReferences(h);
+    h.update(skillReferencesDigest());
   }
   if (arm.style) h.update(readFileSync(expand(CFG.styleSource)));
   return h.digest('hex').slice(0, 12);
@@ -615,7 +623,8 @@ function codexTreatmentIntegrity(arm) {
       PLUGIN_VERSION, 'skills', CFG.protocolSkill, 'SKILL.md');
     if (!existsSync(installedSkill)) return false;
     return createHash('sha256').update(readFileSync(installedSkill)).digest('hex')
-      === createHash('sha256').update(readFileSync(PROTOCOL_SKILL)).digest('hex');
+      === createHash('sha256').update(readFileSync(PROTOCOL_SKILL)).digest('hex')
+      && referencesDigest(dirname(installedSkill)) === skillReferencesDigest();
   } catch {
     return null;
   }

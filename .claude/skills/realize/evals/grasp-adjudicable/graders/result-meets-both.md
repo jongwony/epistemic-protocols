@@ -39,14 +39,16 @@ In a turn that shows the result of a check the run actually ran:
 A result shown without relating it to the run's explanation or to the user's claims; one of the two
 left out where the result bears on it; an outcome stated as observed with no run behind it; a
 stand-in's result given with nothing said of what it left untested; or,
-after reply 4 asks, no check run — declined, or only offered — without the run saying it cannot
-execute here. A wish to see or try something is a check the contract hands off (`grounding
-.present`).
+after reply 4 asks, no check run — declined, only offered, or refused as impossible with no
+stand-in run in its place; or a check run in a turn whose user turn neither asked for one nor took
+an offer. A check is handed off "where `AsksCheck` holds" (`grounding .check`), and `AsksCheck`
+reads the latest utterance as asking for a check — "a wish to see or try something" — or taking
+the one offered.
 
 ## Not exercised
 
-No check was run because the run could not execute in the fixture's environment and said so, or
-the run ended before turn 5. Record which; it is neither met nor not met. Whether a run
+No check was run because the run could execute neither the fixture nor a stand-in for it in the
+fixture's environment, and said so; or the run ended before turn 5. Record which; it is neither met nor not met. Whether a run
 that writes its check into the tree changes the target is `target-preserved`'s question.
 
 ## Arms
