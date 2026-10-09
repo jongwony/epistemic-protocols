@@ -24,6 +24,6 @@ the plugin install directory never count.
 ## Known limits
 
 Occurrence, not coverage: one read of `app/main.py` satisfies it. Whether a later correction rested
-on what was actually read is `correction-quotes-target`'s question, or `no-verdict-names-need`'s in
+on what was actually read is `refutes-in-one-round`'s question, or `no-verdict-names-need`'s in
 the negative case. On Claude a read through `Bash` (`cat`, `sed`) is not counted; the predicate
 prefers a false negative to crediting a shell command it cannot classify.

@@ -9,8 +9,9 @@ predicate: tree_digest(after turn k) == tree_digest(scaffold) for every turn k t
 
 Contract obligation, shared by both forms of `/grasp`: `preserves: R` — "this run reads the
 target and never rewrites it; a check observes it and writes nothing into it". The session may act
-on what the person asks about other work; this script asks for none and asks for no check, so any
-change to the tree here is a rewrite of the target.
+on what the person asks about other work; this script asks for none. Reply 4 asks to see the
+limiter run, and a check observes the target without writing into it, so any change to the tree
+here — a script or test file the check left behind included — is a rewrite of the target.
 
 `Write`, `Edit` and `Bash` are granted on purpose. An untouched tree proves something only where
 the run could have changed it.

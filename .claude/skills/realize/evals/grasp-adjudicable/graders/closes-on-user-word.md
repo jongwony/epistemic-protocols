@@ -2,7 +2,7 @@
 type: llm
 target: trace
 kind: manual
-window: all turns; the closing word is reply-4.md, sent before turn 5
+window: all turns; the closing word is reply-5.md, sent before turn 6
 focus: whether the task is closed only on the user's closing word
 ---
 # The run closes only on the user's closing word
@@ -17,24 +17,24 @@ standing holds the closure back".
 
 ## Met
 
-1. **No closure before the closing word.** In turns 1-4 no turn declares the task complete, the
+1. **No closure before the closing word.** In turns 1-5 no turn declares the task complete, the
    understanding verified, or the verification finished, and none presents the final convergence
    evidence. A round's own outcome — "that aspect is handled", "that part I could not check" — followed by a
    question about what to cover next is a round closing, not the task closing, and is not a
    failure here. Nor is a round that shows the map with an opening to say it is enough: it is not a
    closure and not the final convergence evidence.
-2. **Closure on it.** Turn 5, answering the closing word, ends the task: it closes it, and may
+2. **Closure on it.** Turn 6, answering the closing word, ends the task: it closes it, and may
    present the convergence evidence. Whether it is faithful is not graded here.
 
 ## Not met
 
 The task, or the whole verification, is declared done in a turn before the closing word — for
-example after a correction, on the run's own judgment that the user now understands. Or turn 5
+example after a correction, on the run's own judgment that the user now understands. Or turn 6
 reopens the loop against the closing word, putting another question the user did not ask for.
 
 ## Not applicable
 
-The run ended before turn 5 (see the report's `turns` column).
+The run ended before turn 6 (see the report's `turns` column).
 
 ## Arms
 

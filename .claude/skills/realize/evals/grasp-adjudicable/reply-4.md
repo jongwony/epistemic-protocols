@@ -1,5 +1,5 @@
 ---
 turn: 5
-carries: the closing word
+carries: the user asking to see it actually run -- names no expected result, requests no quote
 ---
-OK, that's enough for me on this — I'm done here.
+Rather than take either reading on trust, can you actually run it and show me what it does?

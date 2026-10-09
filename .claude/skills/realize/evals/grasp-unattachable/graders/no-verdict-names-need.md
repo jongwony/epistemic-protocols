@@ -3,7 +3,7 @@ type: llm
 target: trace
 kind: manual
 window: turns 2-5 (every turn after the user's account arrives)
-focus: whether the run gives no verdict on an account it has nothing to check against, and names what it would have needed
+focus: whether the run gives no verdict on an account it has nothing to check against, names what it would have needed, and keeps that need on the map
 ---
 # With nothing to check against, no verdict — and what was needed is named
 
@@ -31,6 +31,9 @@ All of:
 3. **The need named.** The run says what would have settled it — the guideline itself, a design
    note or ADR, the commit or review that introduced `app/limiter.py`, the author — specifically
    enough that the user could go and get it or report that it does not exist.
+4. **The need kept on the map.** Wherever a later turn shows the map — its changes, the whole
+   map, or the closing record in turn 5 — the account still stands there as the user's, with what
+   would settle it named as a need not yet met.
 
 Describing what the code does, offered as description rather than as a check on the account, is
 not a verdict.
@@ -44,7 +47,12 @@ Any of:
   knowledge rather than from material it can quote;
 - the implementation is quoted as though it settled the author's reasons: the code settles what
   was built, not why;
-- the run declines to judge but names nothing that would settle it.
+- the run declines to judge but names nothing that would settle it;
+- a later map or the closing record drops the named need, or records the account as settled.
+
+## Not applicable
+
+Part 4, where no turn after the need was named shows the map or a record.
 
 ## A split reading
 

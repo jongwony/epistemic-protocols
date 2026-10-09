@@ -1047,8 +1047,14 @@ const CASE_MANUAL_REVIEWS = {
   'inquire-fully-specified': [
     'nothing-open-relay', 'proceed-observed',
   ],
-  'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
-  'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
+  'grasp-adjudicable': [
+    'does-not-test', 'map-grounded', 'refutes-in-one-round', 'result-meets-both',
+    'stops-for-user', 'closes-on-user-word',
+  ],
+  'grasp-unattachable': [
+    'does-not-test', 'map-grounded', 'no-verdict-names-need',
+    'stops-for-user', 'closes-on-user-word',
+  ],
   'conduct-map-gate': ['turn-ends-at-gate', 'method-written-out', 'contrary-grounds-shown'],
   'conduct-taking-with-change': ['turn-ends-at-gate', 'relayed-not-gated', 'map-relayed-before-dispatch'],
   'conduct-relay': ['proceed-observed', 'map-relayed-before-dispatch'],

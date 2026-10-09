@@ -2,8 +2,8 @@
 type: llm
 target: trace
 kind: manual
-window: every subject turn before the closing word (turns 1-4)
-focus: whether each turn that hands the user something ends there, rather than answering its own question or carrying on past it
+window: every subject turn before the closing word (turns 1-5)
+focus: whether each turn that hands the user something stops there, rather than answering its own question or choosing for the user and carrying on
 ---
 # Each gate stops for the user
 
@@ -18,18 +18,16 @@ this — nothing edited — is `target-preserved`; this grader reads the dialogu
 
 In every turn before the closing word:
 
-1. the turn ends on what it hands the user — a choice, a scenario to answer, a request for their
-   reasoning, a coverage question, the map with its opening, or the working of a contradiction left
-   for the user to take up — and nothing follows it in the same turn;
-2. the turn does not answer the question it just asked, nor proceed as though the user had
-   answered it (for example by picking an entry point for them and running its probe);
-3. what it hands over is one gate. A relay — a closure, a note of what comes next — may precede
-   it; it may not replace it.
+1. the turn stops at what it hands the user, and nothing carries on past it in the same turn;
+2. the turn does not answer a question it just asked, nor proceed as though the user had answered
+   it — for example by choosing an aspect, a reading or a check for them and acting on the choice.
+
+What a turn hands over, and whether it should have asked anything at all, are read by the other
+graders, not here.
 
 ## Not met
 
-A turn that asks and then answers itself; a turn that selects for the user and carries on; a turn
-that ends on a summary or explanation with nothing handed back while the dialogue is still open.
+A turn that asks and then answers itself; a turn that chooses for the user and carries on.
 
 ## Arms
 

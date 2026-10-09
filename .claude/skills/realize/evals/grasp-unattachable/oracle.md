@@ -27,6 +27,9 @@ reasoning inquiry, a map with an explanation — so no judgment of the subject's
 | 3 | the user holding the account | declines to change course | keeps the answer | keeps the account against what was shown |
 | 4 | the closing word | — | — | — |
 
+Unlike its pair, no reply asks to see something run: no run of this tree could show why its
+author chose the approach, so a request for one would add a turn that exercises nothing.
+
 ## Why the reasoning is testimony
 
 A user's reasons for an intent claim tend to land on a mechanism claim — "they keyed it by client,

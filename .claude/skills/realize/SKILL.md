@@ -190,9 +190,10 @@ composite; the report names them. For `inquire`, collection-before-surfacing ord
 unasked cheap evidence, faithful basis, kept ownership, stated answer openings, the relay of a
 collection that left nothing open, and the absence of a design gate remain manual observations grounded by the grader
 files. For `grasp`, the automatic set is what both cases share — the target read in the
-first turn, the tree unchanged after every turn, every turn reported — and the quoted
-correction, the withheld verdict with its named need, the stop at each gate, and closure on
-the user's word are manual. For `conduct`, the only automatic predicate is every turn reported:
+first turn, the tree unchanged after every turn, every turn reported — and the absence of a
+test, the grounded opening map, the one-round correction, a check's result set against both
+readings, the withheld verdict with its need kept on the map, the stop at each gate, and closure
+on the user's word are manual. For `conduct`, the only automatic predicate is every turn reported:
 whether the method's work started — the map's stop, the taking's proceed, the relay's proceed —
 is read from the transcript, so each transition is manual along with what its turn presents.
 Whether the tree differed from the scaffold after each turn is recorded in the cell's sidecar as
