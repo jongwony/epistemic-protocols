@@ -58,7 +58,6 @@ Compact mapping for inline use.
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 2+ concrete cases with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
 | Merismos `/apportion` | Execution | An autonomous goal is stated but its unit plan is uncompiled — cut it into coarse units at cited seams and close each unit before the run begins — a derived completion condition where one compiles, a recorded acceptance or a recorded reservation where none does — then hand the taken plan to the run | An unattended-run directive ("work through", "go through all", "run until done"), a goal that plainly exceeds one execution horizon, or a stop-hook being configured — each only shows an autonomous interval is *intended*, so the deciding check is whether the goal already carries units whose completion conditions are settled — closed by a determinate predicate, by a recorded acceptance, or by a recorded reservation; where one already does, `/apportion` shows that plan on its first sheet with that reading as a contrary ground |
 | Epharmoge `/contextualize` | Verification | A result — this session's or another's — is correct but may not fit where it lands or may leave out an intent the conversation stated | Misfits and omissions against everywhere the result lands and the session-built constraints, shown on one sheet |
-| Elenchus `/sublate` | Verification | The working context about to be acted on — externalized or committed — may no longer hold: stale, weakly sourced, or contradicted | Dialectical antithesis per claim under test (provenance / counterfactual / cross-source consistency / inference) before action rests on it |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Provisional whole map, progressive examination, source-bound settlement and residual |
 | Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions — one session, or a line of work, topic, or settled concept spread across several | Cross-session state recovery via narrative recognition (Recognition over Retrieval); a unit above one session is composed from its deposits at read time |
 | Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for a target present in context and quotable, whoever produced it — reviews, plans, papers, docs, or code changes |
@@ -100,7 +99,7 @@ Then **Gate #2**:
 - Options:
   - Pre-execution (Planning) — /inquire, /elicit, /ideate, /preview, /sketch
   - Analysis — /ground, /induce
-  - Execution / Verification / Cross-cutting — /apportion, /contextualize, /sublate, /bound, /recollect, /conduct, /grasp
+  - Execution / Verification / Cross-cutting — /apportion, /contextualize, /bound, /recollect, /conduct, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection

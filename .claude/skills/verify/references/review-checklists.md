@@ -123,7 +123,6 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, INDUCE)
   - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE-CYCLE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
-  - Elenchus: ContextSuspect → VettedContext (User-initiated, VET)
   - Merismos: GoalPlanUncompiled → ConditionBearingUnitPlan (User-initiated, APPORTION)
   - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
   - Katalepsis: TargetUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)

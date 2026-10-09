@@ -183,30 +183,13 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: first name two or three constraints you live with — say low-sodium, no dairy, fifteen minutes to cook — then ask for a lunch idea. When the answer comes back, invoke /contextualize and I'll show how it checks that answer against the constraints you set"
 
 **Quiz Q (situation)**: You've been discussing "beginner-level Python for a 10-year-old" with Claude for 20 minutes. You ask for a "small starter project." Claude returns a project using metaclasses and async generators — technically beginner-friendly in general, but completely detached from the accumulated context.
-- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Elenchus `/sublate` — D) Analogia `/ground`
+- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Katalepsis `/grasp` — D) Analogia `/ground`
 - Answer: B
 
 **Quiz Q (design)**: After a long conversation where you established many specific constraints, Claude answers a new question correctly-in-general but ignores the accumulated context. How would you systematically check for context fit?
 - Hint: The output is not wrong on its own — it's mismatched against the context you both built up this session.
 
 **Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct output that doesn't fit the accumulated conversation context is not useful output. The user's awareness that context has been built up in this session is the trigger. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, this ignores everything we just discussed" → accumulated-context mismatch surfaces → adapt, leave as is with a reason, stop using it, or leave it to whoever owns it.
-
-## Elenchus `/sublate`
-
-**Situation**: You've been collecting context for two hours — a teammate's verbal claim about API behavior, a doc you read at the start, a Slack thread quote, an inferred constraint built across three hops. Now you're about to share the plan in a meeting. One of those sources has aged, another's verification path is provisional, and two of them quietly point at the same referent in conflicting directions — but you don't know which.
-
-**Intervention**: `/sublate` vets the working context before an action that depends on it — sharing it, committing to it — goes ahead. It selects audit-candidate sources (high-leverage, age beyond horizon, long inference chain, cross-source contradiction, or an inference-character conclusion — a source that is itself an inferred conclusion) and posits a dialectical antithesis per claim under test — one per source in the ordinary case, and one each where a source turns out to be read as authority for two distinct claims — provenance challenge ("X's verification path is provisional"), counterfactual gap ("under condition Z, Y fails at point P"), cross-source divergence ("X₁ and X₂ collide at Q"), or inference-fallacy audit ("Y's soundness rests on a reasoning archetype that fails here"). You say in your own words what you make of each claim once the challenge has been put to it — and anything you want done with it, such as no longer relying on the source, looking again once a condition holds, or handing it to another kind of problem, rides in those same words — before you act on it.
-
-**Trial prompt**: "Let's practice: first list the sources a plan of yours rests on — a doc you read this morning, a teammate's verbal claim, a quoted chat message, one conclusion you inferred yourself — then say you're about to share the plan in 15 minutes and want to vet it first, and I'll show how /sublate dialectically tests each source."
-
-**Quiz Q (situation)**: You've spent the afternoon building a context about a teammate's preferences from three different conversations and one inferred guess. You're about to make a decision based on the synthesis. Something feels off but you can't name which source decayed.
-- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Elenchus `/sublate` — D) Horismos `/bound`
-- Answer: C
-
-**Quiz Q (design)**: After hours of context accumulation, before you act on it, how would you stress-test which sources still hold and which have decayed — without re-collecting everything from scratch?
-- Hint: The output isn't yet produced — the *input* (working context) is what carries silent decay. A dialectical antithesis put to each claim under test is the test, not gap detection across the decision.
-
-**Philosophy**: ἔλεγχος (cross-examination, refutation) — the Socratic mode of testing a claim by deliberately positing its counter-claim and seeing what survives the exchange. The lexical verb `/sublate` carries the Hegelian *Aufhebung* — preserve + negate + lift up. Core principle: **Dialectical Vetting over Silent Trust**. Working context decays silently as time passes, downstream concentration warps incidental claims into load-bearing premises, and cross-source contradictions hide behind topical proximity. Workflow position: Verification cluster — alongside `/contextualize`, but pre-execution rather than post (Elenchus tests inputs before action; Epharmoge tests outputs after). Game feel: "We've built so much context — is any of it still standing?" → per-claim antithesis → your own answer to each → vetted context.
 
 ## Katalepsis `/grasp`
 
@@ -244,7 +227,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 ## Composition Patterns
 
-Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Three patterns that appear most in practice:
+Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Patterns that appear most in practice:
 
 ### `/recollect * /inquire` — Recalled context plus fresh facts
 
@@ -257,9 +240,3 @@ When you say "find me that café we talked about — and check if it's open toda
 When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/apportion` cuts the cleanup into units the run can finish one at a time and derives each one's completion condition (what counts as done for that unit, what it must leave untouched while it works), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
 
 **Shape**: pre-execution unit cut with conditions → post-execution context-fit.
-
-### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
-
-When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each claim a source is read as authority for via dialectical antithesis (provenance / counterfactual / cross-source); you answer each claim in your own words, and where the surfaced concern belongs to a different protocol family you say so in that answer — `/sublate` reports the handoff and never rewrites a source, its source list being read-only to it. Two routes are built in, and `/sublate` can hand a claim on by its own certificate, reported with why: a missing pre-execution fact — nothing to vet, something to acquire — goes to `/inquire`, and a question a convention or an ownership decision settles goes to `/bound`; where it cannot tell, the claim is shown to you with that doubt beside its challenge. Any other destination is yours to name, reported as you named it with no hint attached. A source that bundles two distinct claims is split first, so each claim gets its own antithesis and its own answer. Pre-execution counterpart to `/contextualize` (which vets after the fact).
-
-**Shape**: per-claim antithesis → your answer → handoff routing where the deficit belongs to another protocol family.

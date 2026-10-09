@@ -18,14 +18,14 @@ Netting a gain against a loss hides the loss, so the harness scores in pairs —
 
 ```json
 {
-  "id": "several-fit-inquire-sublate",
+  "id": "several-fit-inquire-contextualize",
   "outcome": "several",
   "prompt": "…the text the UserPromptSubmit hook would receive…",
   "conversation": [
     { "role": "user", "text": "…what the session accumulated before that prompt…" },
     { "role": "assistant", "text": "…and the reply to it…" }
   ],
-  "expected": ["contextualize", "inquire", "sublate"],
+  "expected": ["contextualize", "inquire"],
   "adjudicated": false,
   "note": "why this is the right answer, in the adjudicator's words"
 }
