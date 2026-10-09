@@ -10,10 +10,10 @@ focus: whether the run gives no verdict on an account it has nothing to check ag
 Contract obligation, shared by both forms of `/grasp`. The list form: "Where you have nothing to
 attach, do not adjudicate at all: take the answer, say you have no ground to check it against, and
 name what you would have needed", and "A ground you cannot attach is not a ground you can
-adjudicate from here — this instrument admits exactly what it can quote". The Lean form: a
-correction exists only as an `Adjudication` carrying a `Measure` quoted from the target or from a
-source the user cited and was read now; "With unavailable material use `accepted`, naming what is
-missing and carrying the unverified edge to coverage".
+adjudicate from here — this instrument admits exactly what it can quote". The Lean form: an
+answer is measured only against a `Measure` quoted from the target or from an outside source read
+now, and `grounding .present` lets "an adjudication follow only where you have material to
+attach"; what is not shown stays in the `residual`.
 
 Reply 1 claims the author followed a platform guideline that required this approach. The tree
 records no reason for the choice: no comment, docstring, ADR, guideline, README or commit (the

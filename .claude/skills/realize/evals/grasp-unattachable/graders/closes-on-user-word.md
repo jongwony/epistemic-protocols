@@ -9,8 +9,9 @@ focus: whether the task is closed only on the user's closing word
 
 Contract obligation, shared by both forms of `/grasp`. The list form completes a task only when
 the user selects "sufficient" at the coverage gate (or confirms a zero-gap finding), and converges
-only once every selected task is completed. The Lean form states it as an invariant: "a task is
-completed only by the user's Confirm or sufficient; no reading of yours closes one".
+only once every selected task is completed. The Lean form admits the closure only from a person's turn
+(`closureCoord`) that says the target is understood enough for their purpose: "Shown aspects, an
+empty residual, or your own reading close nothing".
 
 ## Met
 

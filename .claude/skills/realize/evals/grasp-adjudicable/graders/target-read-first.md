@@ -10,8 +10,9 @@ predicate: turn 1 contains at least one read of the fixture -- Read, Grep or Glo
 Contract obligation, shared by both forms of `/grasp`: the comprehension target must be present
 and quotable (`requires: target_exists(R)`), and every adjudication against an answer is drawn
 from the target itself. The list form orients on the target in Phase 0 and attaches the material
-an adjudication was drawn from; the Lean form's `grounding .route` reads the target before the
-route map, and every `Adjudication` carries a `Measure` quoted from it.
+an adjudication was drawn from; the Lean form's `start` opens on `consulted`, whose `grounding .gather`
+reads the target's material now, before the first round, and an adjudication quotes a `Measure`
+drawn from it.
 
 ## Predicate
 

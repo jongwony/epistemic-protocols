@@ -14,24 +14,27 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 
 ### The Solution
 
-**Comprehension over Explanation**: Rather than lecturing, AI first offers intent-scented entry points in the user's language. Users select the path closest to what they need to understand, decide, explain, or modify; then AI grounds that path in the artifact and verifies understanding through progressive questioning.
+**Comprehension over Explanation**: Rather than lecturing, AI checks understanding through the user's own answers. When the user has already said what they want to understand and why, verification starts there; otherwise AI first offers intent-scented entry points in the user's language, and the user takes one or names their own path. AI grounds each question in the target's material and records only what the user's own answers show — and how: unaided, after steps they asked for, or after a disclosure.
 
 ### Difference from Simple Explanation
 
 | Dimension | Simple Explanation | Katalepsis |
 |-----------|-------------------|------------|
-| Direction | AI talks, user listens | AI verifies, user confirms |
-| Entry point | AI decides what to explain | User selects an intent-scented path |
-| Confirmation | Assumed after explanation | Verified through questions |
-| Progress | Undefined | Each selected entry point is a task the user closes |
+| Direction | AI talks, user listens | AI asks, the user shows |
+| Entry point | AI decides what to explain | The user's stated purpose, or an intent-scented path they take |
+| Confirmation | Assumed after explanation | Shown in the user's own answers, measured against the target |
+| Ending | Undefined | The user says it is understood enough for their purpose; what is still unshown and any AI doubt are shown with the record |
 
 ## Protocol Flow
 
 ```
-Phase 0: Orient       → Infer likely comprehension intents from the result and user signal
-Phase 1: Entry Point  → Present intent-scented paths, user selects (gate interaction)
-Phase 2: Ground       → Materialize artifact basis; each selected entry point becomes a task
-Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction)
+Gather   → Read the target's material, and any source a turn cites
+Scope    → The user says what they mean to understand and for what purpose
+           (in their own words, or by taking an entry AI shows while the scope is open)
+Verify   → Each round probes one aspect; an answer shows it, or a miss is met with
+           a disclosure or an adjudication carrying its material (gate interaction)
+Close    → The user says it is understood enough; the record shows what was shown
+           and how, what stays unshown, and any dissent
 ```
 
 ## When to Use
@@ -59,17 +62,13 @@ claude plugin install katalepsis@epistemic-protocols
 /grasp
 ```
 
-## Gap Types
+## What a Round Looks For
 
-| Type | Description |
-|------|-------------|
-| **Expectation** | User's assumed behavior differs from actual |
-| **Causality** | User doesn't understand why something happens |
-| **Scope** | User doesn't see full impact of changes |
-| **Sequence** | User doesn't understand execution order |
-| **Horizon** | A co-intended but unspoken edge of the current entry point the user could not name from within their own framing — surfaced only when evidence-bound, material, and unspoken (false-positive guarded) |
-| **Contradiction** | Two statements in the session that cannot both hold, each quoted where it stands — taken up by whose it is: one the user holds a side of asks first for their explanation, one inside the target is shown as a finding about it, one against an earlier AI explanation is the AI's to correct |
-| **Emergent** | Gap outside the canonical types, adapted to the specific comprehension deficit |
+| Aspect | Description |
+|--------|-------------|
+| **Ordinary gap** | Where the user's expectation, sense of cause, view of scope, or grasp of order differs from what the target does — first the user's reasoning is heard, then an adjudication quotes the material that settles it |
+| **Horizon** | An edge of what the target does that the user has not voiced and their purpose needs, grounded in the target's material — probed first through an everyday scenario only, then disclosed with its material if missed |
+| **Contradiction** | Two sourced statements that cannot both hold on the same scope — taken up by whose it is: one the user holds a side of asks first for their explanation, one inside the target is shown as a finding about it, one against an earlier AI explanation is the AI's to correct |
 
 ## Author
 
