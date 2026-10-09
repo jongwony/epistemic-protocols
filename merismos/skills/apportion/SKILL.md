@@ -9,7 +9,7 @@ Apportion an autonomous goal into coarse execution units and derive each unit's 
 
 ## Definition
 
-**Merismos** (μερισμός: a dividing into parts, an apportionment): A dialogical act of apportioning one stated autonomous goal — deciding **which units the goal is carried out in** and **what each unit's done means** — when the goal is stated but its plan is uncompiled. The protocol's lexical verb is `/apportion`. It reads the goal's obligations — the host's own standing procedural contract subtracted, since that attaches to every change the host accepts whatever the goal is — cuts them into coarse units at seams it can cite, judges each unit against one execution horizon, derives a completion predicate and any invariant predicates per unit, separates the conditions whose subject is the whole goal rather than any one unit, and shows the whole plan on one sheet on every turn that bears on it, beside what changed since the sheet the person answered. An item no check could settle because what settles it is a judgment made against the context accumulated by then and what the person has actually said by then is reserved rather than compiled — recorded with the ground that settles it, at the unit level and for the whole-goal acceptance criterion alike, and kept apart from the waiver that records an acceptance criterion the plan simply lacks. Each unit's certificate carries every compiled check, every accepted gap, and every reservation of its done together, so no one of them hides another. Because the run proceeds without the person, the sheet also shows the authority it will reach — each by kind, target, and limit — so the person grants it before they leave, and what rests on them still comes back at the end. One apportionment takes one goal: where a request bundles several stated outcomes whose only common bond is that standing contract, the sheet names each and asks which goal this apportionment takes. Once it has run, the person can say: this goal runs in these units, each done when these checks pass; what no check settles, what only I decide, and what the run may not do without me, I saw on one sheet; I settled before leaving what had to be settled, and the rest comes back to me once at the end with what did not proceed because of it; I took this plan as mine. Your contrary grounds — each with what it bears on and what it rests on — stand before the person and ride the plan when they take it over them; only the person's taking closes the run, and a person who stops or turns to other work leaves it holding. On the taking, the plan is handed off in the same turn, as the `.handoff` grounding names, with the obligations its Rule "Handoff carries its obligations" names. Merismos apportions and conditions; it does **not** arrange — sequence, independence, reconciliation, and termination topology stay outside its own scope. The protocol holds no state during execution.
+**Merismos** (μερισμός: a dividing into parts, an apportionment): A dialogical act of apportioning one stated autonomous goal — deciding **which units the goal is carried out in** and **what each unit's done means** — when the goal is stated but its plan is uncompiled. The protocol's lexical verb is `/apportion`. It reads the goal's obligations — the host's own standing procedural contract subtracted, since that attaches to every change the host accepts whatever the goal is — cuts them into coarse units at seams it can cite, judges each unit against one execution horizon, derives a completion predicate and any invariant predicates per unit, separates the conditions whose subject is the whole goal rather than any one unit, and shows the whole plan on one sheet on every turn that bears on it, beside what changed since the sheet the person answered. An item no check could settle because what settles it is a judgment made against the context accumulated by then and what the person has actually said by then is reserved rather than compiled — recorded with the ground that settles it, at the unit level and for the whole-goal acceptance criterion alike, and kept apart from the waiver that records an acceptance criterion the plan simply lacks. Each unit's certificate carries every compiled check, every accepted gap, and every reservation of its done together, so no one of them hides another. One apportionment takes one goal: where a request bundles several stated outcomes whose only common bond is that standing contract, the sheet names each and asks which goal this apportionment takes. Once it has run, the person can say: this goal runs in these units, each done when these checks pass; what no check settles, what only I decide, and what the run may not do without me, I saw on one sheet; I settled before leaving what had to be settled, and the rest comes back to me once at the end with what did not proceed because of it; I took this plan as mine. Your contrary grounds — each with what it bears on and what it rests on — stand before the person and ride the plan when they take it over them; only the person's taking closes the run, and a person who stops or turns to other work leaves it holding. On the taking, the plan is handed off in the same turn, as the `.handoff` grounding names, with the obligations its Rule "Handoff carries its obligations" names. Merismos apportions and conditions; it does **not** arrange — sequence, independence, reconciliation, and termination topology stay outside its own scope. The protocol holds no state during execution.
 
 ```lean
 /-!
@@ -49,7 +49,7 @@ Merismos(G) → start(c) → apportion(c, utterances), where c is the fused sess
 
 /-! ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
-  → probe(goal)                        -- the stated autonomous goal whose unit plan is uncompiled; a bundle bound only by the host's standing procedural contract is a scope question on the first sheet
+  → probe(goal)                        -- the stated autonomous goal whose unit plan is uncompiled; a bundle bound only by the host's standing procedural contract is the question of which goal this apportionment takes, on the first sheet
   → read_obligations(goal) → O_G       -- the goal's obligations with the host's standing contract subtracted — an ambient invariant every unit inherits — and what was subtracted shown on the sheet
   → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is set out of scope with the substrate that must catch it
   → cut(O_G \ oos, horizon) → units    -- the irreducible core, part one: coarse units, each fitting one execution horizon, together a partition of what is in scope; each cut declares its seam and its fit
@@ -61,7 +61,7 @@ AutonomousGoal × ExecutionHorizon
   → emit(goal_entries) → package → park_carrier → record_handoff → handoff(run)
   → ConditionBearingUnitPlan
 requires: user_initiated(G)            -- the person declares autonomous execution intent via /apportion
-requires: single_goal(G)               -- read, not enforced: ONE stated outcome, shared procedure being no shared goal; a bundle is the person's to settle on the sheet, and a taking over it takes the bundle as one goal with your reading attached
+requires: single_goal(G)               -- read, not enforced: ONE stated outcome, the host's standing procedural contract being no shared goal; a bundle is the person's to settle on the sheet, and a taking over it takes the bundle as one goal with your reading attached as a doubt
 deficit:  GoalPlanUncompiled           -- activation precondition (Layer 1)
 preserves: G                           -- compile-time only; the context only grows (pass_extends), and no execution state is touched
 invariant: Apportion over Order        -- Merismos cuts the units and conditions them; it does not sequence or arrange them
@@ -568,10 +568,10 @@ structure Focus where
   item    : String
   actions : List Action
 
-/-- **Your selection** of the focus: a request that bundles several goals first, then a hole in
-    coverage, then a unit that does not fit, then the acceptance question, then the point whose
-    change would most change the plan; `none` where nothing is open and the question is whether
-    to take the plan. -/
+/-- **Your selection** of the focus: a request that bundles several stated outcomes first, then
+    a hole in coverage, then a unit that does not fit, then the acceptance question, then the
+    point whose change would most change the plan; `none` where nothing is open and the question
+    is whether to take the plan. -/
 axiom focus : Context P → Option Focus
 
 /-- **Your judgment**: the ground clearly separates action `i` of `f` from the others — not that it
@@ -838,9 +838,9 @@ about other work, or one that stops here, which stays in the context without dra
 axiom collect : Context P → List (Evidence P)
 
 /-- **Your record** of a pass, once its reads have entered the context: the plan as judged —
-    whether the request bundles several goals, units, conditions, plan conditions, the acceptance
-    question, the authority, subtraction and out-of-scope classification, provenance, the ledger,
-    your doubts, and the focus. A record grounds nothing. -/
+    whether the request bundles several stated outcomes, units, conditions, plan conditions, the
+    acceptance question, the authority, subtraction and out-of-scope classification, provenance,
+    the ledger, your doubts, and the focus. A record grounds nothing. -/
 axiom passRecord : Context P → List (Response P)
 
 def pass (c : Context P) : Context P :=
@@ -872,10 +872,11 @@ open Classical in
     that makes each safe to discharge; the acceptance question — the person's settling, or the
     draft's criterion marked as the draft's; the authority the run will reach, by kind, target, and
     limit; the out-of-scope obligations with their substrates; what was subtracted as the host's
-    standing contract; any hole; where the request bundles several goals, each stated outcome and
-    the shared-procedure bond, as the question of which goal this apportionment takes; each field
-    labelled by the question it answers, in the person's everyday words; each value marked the
-    person's or the draft's. Then the ledger of every change since the sheet the person answered,
+    standing contract; any hole; where the request bundles several stated outcomes, each stated
+    outcome and their bond in the host's standing procedural contract, as the question of which
+    goal this apportionment takes; each field labelled by the question it answers, in the person's
+    everyday words; each value marked the person's or the draft's. Then the ledger of every change
+    since the sheet the person answered,
     each line marked by its kind. Then your doubts, each beside what it bears on, with what it rests
     on. Then the focus with its actions, each with its consequence, an action marked recommended
     only as `recommend` carries it; with nothing open, whether to take the plan and what a taking
@@ -970,7 +971,7 @@ def grounding : Op → Annot × String
   | .probe         => (.observe, "record read, artifact read: the goal and whether its plan is uncompiled, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names — and its grounding instruction run once; the plan read back from that carrier enters the context, and where it already carries its conditions the first sheet draws from it with that reading as a contrary ground")
   | .relay         => (.interaction .extension, "an unreadable handoff, which never falls through to fresh compilation, or nothing read from the goal's scope. No activation")
   | .collect       => (.observe, "record read, artifact read, artifact search: the goal's cited material and seam evidence over its substrate; read-only")
-  | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — whether the request bundles several goals, obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, the authority the run will reach, how each value came to stand, and your doubts with what each bears on; a person's value stands on the scope their words reach")
+  | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — whether the request bundles several stated outcomes, obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, the authority the run will reach, how each value came to stand, and your doubts with what each bears on; a person's value stands on the scope their words reach")
   | .record        => (.track, "record: the pass's record of the plan as judged, the ledger, and the focus")
   | .sheet         => (.interaction .constitution, "the whole plan on one sheet, each value marked the person's or the draft's, the authority the run will reach; the ledger of every change since the sheet the person answered; your doubts, each beside what it bears on, with what it rests on; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan; wherever a taking would close the run, that it hands the plan off in the same turn unless the person keeps the start. Silence holds and takes nothing")
   | .readTurn      => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on this run at all, and there an edit and its scope, an answer to the focus, a settling of the acceptance question, a change to the authority, a taking over a fit, a taking of the plan — whatever form it takes")
@@ -1017,7 +1018,7 @@ Read prior material first — a boundary already drawn, an earlier plan — then
 
 ### Activation exceptions
 
-Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several outcomes held together only by the host's standing procedure is a question of scope there; neither ends the run. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
+Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
 
 ## Protocol
 
@@ -1058,7 +1059,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 - **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
 - **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
 - **Host contract subtraction**: Exclude goal-independent host procedure from `O_G`; it is inherited process, not an out-of-scope obligation. A requirement the goal states as its own outcome remains in scope. Show what was subtracted on every sheet and in the trace, so a misjudged subtraction stays correctable.
-- **One goal per apportionment**: Where a request bundles outcomes held together only by shared procedure, the sheet names each outcome and the bond and asks which goal this apportionment takes; each outcome takes its own apportionment, and a taking over that question takes the bundle as one goal with your reading attached as a doubt.
+- **One goal per apportionment**: Where a request bundles several stated outcomes held together only by the host's standing procedural contract, the sheet names each outcome and the bond and asks which goal this apportionment takes; each outcome takes its own apportionment, and a taking over that question takes the bundle as one goal with your reading attached as a doubt.
 - **Reservation disposition**: Hold open an item only live judgment can settle, record the ground that settles it, and keep the classification on the sheet for correction. A reservation is neither an accepted gap nor a delegated pre-action obligation.
 - **Convergence evidence**: Before the handoff, present the plan readback; each unit's obligations, seam, fit or the person's taking over it, whole certificate, capabilities, and feasibility; plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; the authority as it stands; each value's provenance with the turns read, quoted; the doubts the plan carries; and the navigation block over the parked carrier.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.
