@@ -8,8 +8,8 @@ User-facing emit (round text, the convergence evidence, gate options, and any te
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, the convergence evidence, or later rounds.
 
-## When this protocol's own phases bear on where a sentence sits relative to a gate
+## When where a sentence sits relative to the gate is in question
 
 Output analysis, evidence, and rationale as text before the gate that stops for the person's turn. The question carries the essential question; each option carries its own differential implication, and context an option needs in order to be judged may sit with that option.

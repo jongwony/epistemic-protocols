@@ -110,22 +110,50 @@ theorem closure_carries_record (respond session : Context P → Response P) (c :
   obtain ⟨c₀, hc, rfl⟩ := verified_by_person_closure respond session c us r h
   exact ⟨c₀, hc, rfl, rfl, rfl⟩
 
+theorem verified_ends_in_utterance (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : VerifiedUnderstanding P)
+    (h : grasp respond session c us = .verified r) :
+    ∃ (c₀ : Context P) (u : Utterance P), r.closure.context = consulted (fuse c₀ u) := by
+  induction us generalizing c with
+  | nil => simp [grasp] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
+      exact ⟨c, u, rfl⟩
+
+theorem withdrawn_ends_in_utterance (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : Closed P)
+    (h : grasp respond session c us = .withdrawn r) :
+    ∃ (c₀ : Context P) (u : Utterance P), r.context = consulted (fuse c₀ u) := by
+  induction us generalizing c with
+  | nil => simp [grasp] at h
+  | cons u us ih =>
+    rcases each_step_continues_or_closes respond session c u us _ h with
+        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+      exact ⟨c, u, rfl⟩
+    · cases h'
+
 theorem shown_by_person (c : Context P) :
-    ∀ s ∈ shown c, s.src.src.val = .person ∧
-      ShownSupported c (c[s.src.idx]'s.src.lt) s.aspect s.measure s.help :=
-  fun s _ => ⟨s.byPerson, s.supported⟩
+    ∀ x ∈ shown c, x.2.src.src.val = .person ∧
+      ShownSupported c x.2.src x.1 x.2.measure x.2.help :=
+  fun x _ => ⟨x.2.byPerson, x.2.supported⟩
 
-theorem residual_unshown (c : Context P) (a : Entry) (h : a ∈ residual c) :
-    ∀ s ∈ shown c, s.aspect ≠ a := by
-  intro s hs hsa
-  simp only [residual, List.mem_filter, Bool.not_eq_eq_eq_not, Bool.not_true,
-    List.any_eq_false, beq_iff_eq] at h
-  exact h.2 s hs hsa
+theorem residual_is_unshown (c : Context P) (a : Entry) :
+    a ∈ residual c ↔ a ∈ aspects c ∧ showing c a = none := by
+  simp [residual, Option.isNone_iff_eq_none]
 
-theorem unshown_in_residual (c : Context P) (a : Entry) (ha : a ∈ aspects c)
-    (hn : ∀ s ∈ shown c, s.aspect ≠ a) : a ∈ residual c := by
-  simp only [residual, List.mem_filter, Bool.not_eq_eq_eq_not, Bool.not_true,
-    List.any_eq_false, beq_iff_eq]
-  exact ⟨ha, hn⟩
+theorem scope_only_by_person {c : Context P} {s : Cite c}
+    (ok : (scopeCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem closed_only_by_person {c : Context P} {s : Cite c}
+    (ok : (closureCoord (P := P)).admits s.src) : s.src.val = .person := ok
+
+theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
+    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 end Katalepsis

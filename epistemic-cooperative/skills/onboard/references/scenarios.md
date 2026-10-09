@@ -212,9 +212,9 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: A dense plan, document, or code change is in front of you in the conversation — the AI produced it, or someone else wrote it and you pasted it in. You need to get oriented before you approve, explain, or modify it, but the first menu of artifact categories would slow you down because you do not yet know which part maps to your concern.
 
-**Intervention**: `/grasp` structures rapid comprehension by first offering intent-scented entry points such as what changed, why it matters, what needs approval, or what could break. After you pick the closest path, it grounds that path in the artifact and probes your grasp through Socratic questions.
+**Intervention**: `/grasp` offers intent-scented entry points — what changed, why it matters, what needs approval, what could break — only when you have not yet said what you want to understand; otherwise probing starts on what you asked. Each question is grounded in the target, and your own answers show what you grasp. The run closes when you say you understand enough, with what is still unshown shown beside the record.
 
-**Trial prompt**: "Let's practice: first put something to understand into this conversation — paste a short plan, a diff, or a document, or ask me to draft a plan for a small task — then say 'Help me understand what I need to approve here' and I'll show how /grasp routes through an intent entry point before verifying comprehension"
+**Trial prompt**: "Let's practice: first put something to understand into this conversation — paste a short plan, a diff, or a document, or ask me to draft a plan for a small task — then say 'Help me understand this' and I'll show how /grasp asks what you want to understand, then probes it before you close"
 
 **Quiz Q (situation)**: You pasted a long article into the conversation, skimmed it, and nodded along. A colleague asks you to summarize its main argument in one sentence and you freeze — skimming wasn't the same as grasping, and the article is still right there in the chat.
 - A) Periagoge `/induce` — B) Analogia `/ground` — C) Katalepsis `/grasp` — D) Anamnesis `/recollect`

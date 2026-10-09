@@ -14,8 +14,9 @@ attachment", and "something the session said earlier does not stand as the measu
 the target says now". The Lean form: an answer is measured against a `Measure` — the target
 quoted from a turn that carries the target itself rather than the reasoning that produced it
 (`IsTarget`), or an outside source read now (`SourceRead`: "quoted in place … your own reasoning is
-never a measure") — and `grounding .present` has an adjudication quote "the narrowest material,
-scoped to what that material settles".
+never a measure") — and `grounding .present` has the adjudication quote "the narrowest `Measure`
+— the target's material or an outside source read now, never your own explanation — scoped to
+what that material settles".
 
 Reply 1 makes two claims the tree settles as false (see `oracle.md`): a sliding window, and one
 counter shared across the workers.
