@@ -10,8 +10,10 @@ focus: whether the task is closed only on the user's closing word
 Contract obligation, shared by both forms of `/grasp`. The list form completes a task only when
 the user selects "sufficient" at the coverage gate (or confirms a zero-gap finding), and converges
 only once every selected task is completed. The Lean form admits the closure only from a person's turn
-(`closureCoord`) that says the target is understood enough for their purpose: "Shown aspects, an
-empty residual, or your own reading close nothing".
+(`closureCoord`) that says the person has understood enough of the target, or has what they need,
+for their purpose — "that's enough for me", "I'm done here"; "an acknowledgment of an explanation
+("ok, makes sense, thanks") is not a closure, nor is a claim about one aspect", and "Shown aspects,
+an empty residual, or your own reading close nothing".
 
 ## Met
 

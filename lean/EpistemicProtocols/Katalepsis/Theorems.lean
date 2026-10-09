@@ -156,4 +156,10 @@ theorem closed_only_by_person {c : Context P} {s : Cite c}
 theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
     (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
+-- About the annotations TOOL GROUNDING declares: no operation is annotated `.transform` or
+-- `.dispatch`. It reads the declaration, not what a run does.
+theorem writes_and_dispatches_nothing (op : Op) :
+    (grounding op).1 ≠ .transform ∧ (grounding op).1 ≠ .dispatch := by
+  cases op <;> simp [grounding]
+
 end Katalepsis

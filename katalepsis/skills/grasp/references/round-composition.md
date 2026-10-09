@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When where a sentence sits relative to the gate is in question
 
-Output analysis, evidence, and rationale as text before the gate that stops for the person's turn. The question carries the essential question; each option carries its own differential implication, and context an option needs in order to be judged may sit with that option.
+Put analysis, evidence, and rationale before the question. The gate carries the question and the implications needed to distinguish its answers; a sentence stays in the gate only where removing it would erase an answer's differential implication.
