@@ -723,9 +723,11 @@ def package (e : Emission) (au : List String) (ds : List String) (pv : List Prov
     oos := e.envelope.oos, subtracted := e.envelope.subtracted, waived := e.envelope.waived,
     authority := au, dissent := ds, provenance := pv, runObligations := handoffObligations }
 
+/-- Where the carrier is: its record identity, and the session that identity is scoped to where
+    it is scoped to one. -/
 structure HandoffLocator where
   record  : String
-  session : String
+  session : Option String
 
 /-- `N`, `NavigationBlock`: the fixed cross-session shape — a pointer, never a copied record. -/
 structure NavigationBlock where
@@ -746,8 +748,8 @@ axiom groundPointer : Context P → List (Evidence P)
 
 def bindPointer (c : Context P) : Context P := c ++ (groundPointer c).map (·.val)
 
-/-- **Your judgment**: the pointer is unreachable or missing half its locator, or compiling this
-    goal needs a premise its record does not support. An unsupported downstream judgment the
+/-- **Your judgment**: the pointer's locator does not reach its carrier, or compiling this goal
+    needs a premise its record does not support. An unsupported downstream judgment the
     compilation can leave open is not this: it stays reserved. False without a pointer. -/
 axiom PointerUnreadable : Context P → Prop
 
@@ -759,8 +761,11 @@ axiom carrierRecord : Context P → String
     `carrierRecord` names holds the whole packaged plan — not only an identity allocated for it. -/
 axiom CarrierComplete : Context P → Prop
 
-/-- **Your record**: this session's id. -/
-axiom sessionId : Context P → String
+/-- **Your record**: the session the carrier record is scoped to, where it is scoped to one — with
+    the record identity, what a later session dereferences to reach the carrier; `none` where the
+    record identity reaches it alone. Where the environment carries more than one session id,
+    which one reaches the carrier is yours to read. -/
+axiom sessionId : Context P → Option String
 
 /-- **Your reading**: what a receiving session needs to know the plan is for. -/
 axiom purposeFrame : Context P → String
@@ -770,21 +775,22 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances — a taking read with the sheet it took among them — and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
+  "Using /inquire where available or an equivalent grounding pass, dereference the carrier at its locator, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances — a taking read with the sheet it took among them — and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
   { purposeFrame := purposeFrame c
     canonicalLocator := ⟨carrierRecord c, sessionId c⟩
-    dereferenceInstruction := "read the carrier record at the canonical locator's record identity, within the session it names; one read yields the whole plan"
+    dereferenceInstruction := "read the carrier record at the canonical locator's record identity, within the session it names, where it names one; one read yields the whole plan"
     snapshotAnchor := snapshotAnchor c
     groundingInstruction := receivingProcedure }
 
-/-- `handoff_recorded`, its structural half: the block locates the carrier the write returned, both
-    halves present, and states its purpose. That it was presented is the text itself. -/
+/-- `handoff_recorded`, its structural half: the block's locator reaches the carrier the write
+    returned — its record identity present, within the session that identity is scoped to where it
+    is scoped to one — and the block states its purpose. That it was presented is the text itself. -/
 def HandoffRecorded (n : NavigationBlock) (c : Context P) : Prop :=
   n.purposeFrame ≠ "" ∧ n.canonicalLocator = ⟨carrierRecord c, sessionId c⟩ ∧
-    n.canonicalLocator.record ≠ "" ∧ n.canonicalLocator.session ≠ ""
+    n.canonicalLocator.record ≠ ""
 
 /-- The writes landed: the carrier holds the plan, and the block locates it. -/
 def Recorded (n : NavigationBlock) (c : Context P) : Prop := CarrierComplete c ∧ HandoffRecorded n c
@@ -967,7 +973,7 @@ inductive Op | probe | relay | collect | judge | record | sheet | readTurn | emi
              | parkCarrier | recordHandoff | converge | handoff
 
 def grounding : Op → Annot × String
-  | .probe         => (.observe, "record read, artifact read: the goal and whether its plan is uncompiled, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names — and its grounding instruction run once; the plan read back from that carrier enters the context, and where it already carries its conditions the first sheet draws from it with that reading as a contrary ground")
+  | .probe         => (.observe, "record read, artifact read: the goal and whether its plan is uncompiled, cue cited. A navigation block in scope is dereferenced — the one carrier at its locator, within the session it names, where it names one — and its grounding instruction run once; the plan read back from that carrier enters the context, and where it already carries its conditions the first sheet draws from it with that reading as a contrary ground")
   | .relay         => (.interaction .extension, "an unreadable handoff, which never falls through to fresh compilation, or nothing read from the goal's scope. No activation")
   | .collect       => (.observe, "record read, artifact read, artifact search: the goal's cited material and seam evidence over its substrate; read-only")
   | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — whether the request bundles several stated outcomes, obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, the authority the run will reach, how each value came to stand, and your doubts with what each bears on; a person's value stands on the scope their words reach")
@@ -977,7 +983,7 @@ def grounding : Op → Annot × String
   | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
   | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the authority, the doubts the taking carried, and the obligations every run of it carries, and each value's provenance")
   | .parkCarrier   => (.track, "record: the packaged plan written into one new carrier record, whose write returns its identity")
-  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, locator with both halves, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block missing a half, closes nothing and presents no block: the sheet says what was written and where (each identity the writes returned), what is missing, and that the plan is therefore not yet handed off")
+  | .recordHandoff => (.interaction .extension, "the navigation block over the carrier — purpose, a locator that reaches the carrier, dereference instruction, snapshot anchor only where needed, and the receiving procedure; entry points only. A write that returned no identity or left the plan incomplete in the carrier, or a block whose locator does not reach the carrier, closes nothing and presents no block: the sheet says what was written and where (each identity the writes returned), what is missing, and that the plan is therefore not yet handed off")
   | .converge      => (.interaction .extension, "the apportionment trace after the navigation block — per unit its obligations, seam, fit or the person's taking over it, whole certificate, capabilities and feasibility; the plan conditions; out-of-scope and subtracted obligations; the acceptance question as settled; the authority as it stands; each value's provenance with the turns read, quoted; and the doubts the plan carries")
   | .handoff       => (.dispatch, "delegate: after the trace, in the same turn, the plan handed to the autonomous run through the navigation block, whose plan carries `handoffObligations` — where the plan holds no unit, nothing is started and the block alone is the handoff — a substrate that runs one unit per stretch and evaluates each unit's checks; where the session can start none, the start fails, or the person's taking keeps the start for themselves, the block is the handoff and the person starts the run, and the same turn says which of these happened — a failed start with what it returned; then this run ends")
 
@@ -1017,7 +1023,7 @@ Read prior material first — a boundary already drawn, an earlier plan — then
 
 ### Activation exceptions
 
-Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block that cannot be dereferenced, lacks its session half, or leaves a premise required for current compilation unsupported is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
+Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block whose locator does not reach its carrier, or that leaves a premise required for current compilation unsupported, is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
 
 ## Protocol
 
