@@ -11,12 +11,12 @@ Contract obligation, shared by both forms of `/grasp`. The list form: "When you 
 the user's answer, attach what you adjudicated from. Quote that material in place, at the
 narrowest span that actually supports the correction … A pointer they have to go open is not an
 attachment", and "something the session said earlier does not stand as the measure against what
-the target says now". The Lean form: an answer is measured against a `Measure` — the target
+the target says now". The Lean form: a person's reading is measured against a `Measure` — the target
 quoted from a turn that carries the target itself rather than the reasoning that produced it
 (`IsTarget`), or an outside source read in this run (`SourceRead`: "quoted in place … your own reasoning is
-never a measure") — and `grounding .present` has the adjudication quote "the narrowest `Measure`
-— the target's material or an outside source you read, never your own explanation — scoped to
-what that material settles".
+never a measure") — and `grounding .present` has the working of a contradiction between the
+person's reading and the target quote "the narrowest `Measure` — the target's material or an
+outside source you read, never your own explanation — scoped to what that material settles".
 
 Reply 1 makes two claims the tree settles as false (see `oracle.md`): a sliding window, and one
 counter shared across the workers.
@@ -42,8 +42,8 @@ Any of:
 
 ## Not exercised
 
-The run reached no verdict on either claim in any turn — for example every turn was a selection
-or an inquiry and the closing word came first. Record it; it is neither met nor not met.
+The run reached no verdict on either claim in any turn — for example every turn was a selection,
+an inquiry or an explanation and the closing word came first. Record it; it is neither met nor not met.
 
 ## Scope
 

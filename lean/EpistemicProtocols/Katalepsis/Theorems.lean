@@ -19,6 +19,8 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
+instance {c : Context P} {a : Entry} : Nonempty (Cell c a) := ⟨⟨none, []⟩⟩
+
 theorem silence (respond session : Context P → Response P) (c : Context P) :
     grasp respond session c [] = .holding c := by
   simp [grasp]
@@ -130,14 +132,20 @@ theorem withdrawn_at_an_utterance (respond session : Context P → Response P) (
       exact ⟨c, u, rfl⟩
     · cases h'
 
-theorem shown_by_person (c : Context P) :
-    ∀ x ∈ shown c, x.2.src.src.val = .person ∧
-      ShownSupported c x.2.src x.1 x.2.measure x.2.help :=
-  fun x _ => ⟨x.2.byPerson, x.2.supported⟩
+theorem map_rows_every_aspect (c : Context P) :
+    (map c).map (·.1) = aspects c := by
+  simp [map, Function.comp_def]
 
-theorem residual_is_unshown (c : Context P) (a : Entry) :
-    a ∈ residual c ↔ a ∈ aspects c ∧ showing c a = none := by
-  simp [residual, Option.isNone_iff_eq_none]
+theorem handled_by_person (c : Context P) :
+    ∀ x ∈ map c, ∀ h ∈ x.2.handled,
+      h.src.src.val = .person ∧ ShownSupported c h.src x.1 h.measure :=
+  fun _ _ h _ => ⟨h.byPerson, h.supported⟩
+
+theorem checks_observed (c : Context P) :
+    ∀ x ∈ map c, ∀ k ∈ x.2.checks,
+      (k.result.src.val = .external ∨ k.result.src.val = .peer) ∧
+        CheckSupported c k.result x.1 :=
+  fun _ _ k _ => ⟨k.observed, k.supported⟩
 
 theorem scope_only_by_person {c : Context P} {s : Cite c}
     (ok : (scopeCoord (P := P)).admits s.src) : s.src.val = .person := ok
@@ -148,10 +156,10 @@ theorem closed_only_by_person {c : Context P} {s : Cite c}
 theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
     (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
--- About the annotations TOOL GROUNDING declares: no operation is annotated `.transform` or
--- `.dispatch`. It reads the declaration, not what a run does.
-theorem writes_and_dispatches_nothing (op : Op) :
-    (grounding op).1 ≠ .transform ∧ (grounding op).1 ≠ .dispatch := by
+-- About the annotations TOOL GROUNDING declares: no operation is annotated `.transform`, and the
+-- only operation annotated `.dispatch` is `.check`. It reads the declaration, not what a run does.
+theorem transforms_nothing_dispatches_only_check (op : Op) :
+    (grounding op).1 ≠ .transform ∧ ((grounding op).1 = .dispatch ↔ op = .check) := by
   cases op <;> simp [grounding]
 
 end Katalepsis

@@ -10,11 +10,12 @@ focus: whether the run gives no verdict on an account it has nothing to check ag
 Contract obligation, shared by both forms of `/grasp`. The list form: "Where you have nothing to
 attach, do not adjudicate at all: take the answer, say you have no ground to check it against, and
 name what you would have needed", and "A ground you cannot attach is not a ground you can
-adjudicate from here — this instrument admits exactly what it can quote". The Lean form: an
-answer is measured only against a `Measure` quoted from the target or from an outside source read
-now, and `grounding .present` reads "an adjudication follows only where you have material to
-attach; where there is none, give no verdict: say you have nothing to check the answer against and
-name what would settle it"; what is not shown stays in the `residual`.
+adjudicate from here — this instrument admits exactly what it can quote". The Lean form: a
+person's reading is measured only against a `Measure` quoted from the target or from an outside
+source read in this run, and `grounding .present` reads "an adjudication follows only where you
+have material to attach; where there is none, give no verdict: say you have nothing to check the
+account against and name what would settle it"; CONVERGENCE keeps "the person's account with
+neither measure nor check, attributed to them, with no verdict and what would settle it".
 
 Reply 1 claims the author followed a platform guideline that required this approach. The tree
 records no reason for the choice: no comment, docstring, ADR, guideline, README or commit (the

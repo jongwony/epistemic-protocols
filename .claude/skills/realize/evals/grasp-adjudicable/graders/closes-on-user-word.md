@@ -12,17 +12,17 @@ the user selects "sufficient" at the coverage gate (or confirms a zero-gap findi
 only once every selected task is completed. The Lean form admits the closure only from a person's turn
 (`closureCoord`) — "the latest utterance; a turn before the latest round closes nothing" — that
 "says that what they now understand of the target serves their purpose"; "An acknowledgment of an
-explanation is not that", and "Shown aspects, an empty residual, or your own reading close
-nothing".
+explanation is not that", and "The map's standings, or your own reading, close nothing, and no
+standing holds the closure back".
 
 ## Met
 
 1. **No closure before the closing word.** In turns 1-4 no turn declares the task complete, the
    understanding verified, or the verification finished, and none presents the final convergence
-   evidence. A round's own outcome — "that aspect is shown", "that part I could not check" — followed by a
+   evidence. A round's own outcome — "that aspect is handled", "that part I could not check" — followed by a
    question about what to cover next is a round closing, not the task closing, and is not a
-   failure here. Nor is a closing account presented because nothing more warranted probing, with
-   an invitation to close: it is not a closure and not the final convergence evidence.
+   failure here. Nor is a round that shows the map with an opening to say it is enough: it is not a
+   closure and not the final convergence evidence.
 2. **Closure on it.** Turn 5, answering the closing word, ends the task: it closes it, and may
    present the convergence evidence. Whether it is faithful is not graded here.
 

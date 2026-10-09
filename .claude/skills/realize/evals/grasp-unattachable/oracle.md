@@ -18,14 +18,14 @@ After each subject turn, the harness either sends the next reply file verbatim o
 
 Nothing in this policy reads the subject's words, for the reason `grasp-adjudicable/oracle.md`
 gives: every reply is written to stand at whichever gate it lands on — a selection, a probe, a
-reasoning inquiry — so no judgment of the subject's turn is exercised by the runner.
+reasoning inquiry, a map with an explanation — so no judgment of the subject's turn is exercised by the runner.
 
-| reply | what it carries | at a selection | at a probe or inquiry |
-|---|---|---|---|
-| 1 | the part to look at, and the user's account of the author's reasons | picks the rationale | offers the account as the answer |
-| 2 | "start wherever you think is best", and why the user believes it | hands the choice back | gives the reasoning |
-| 3 | the user holding the account | declines to change course | keeps the answer |
-| 4 | the closing word | — | — |
+| reply | what it carries | at a selection | at a probe or inquiry | at a map or explanation |
+|---|---|---|---|---|
+| 1 | the part to look at, and the user's account of the author's reasons | picks the rationale | offers the account as the answer | names the purpose and offers the account against the map |
+| 2 | "start wherever you think is best", and why the user believes it | hands the choice back | gives the reasoning | leaves the order to the run and gives the reasoning |
+| 3 | the user holding the account | declines to change course | keeps the answer | keeps the account against what was shown |
+| 4 | the closing word | — | — | — |
 
 ## Why the reasoning is testimony
 

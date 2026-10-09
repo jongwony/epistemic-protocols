@@ -19,7 +19,8 @@ this — nothing edited — is `target-preserved`; this grader reads the dialogu
 In every turn before the closing word:
 
 1. the turn ends on what it hands the user — a choice, a scenario to answer, a request for their
-   reasoning, a coverage question — and nothing follows it in the same turn;
+   reasoning, a coverage question, the map with its opening, or the working of a contradiction left
+   for the user to take up — and nothing follows it in the same turn;
 2. the turn does not answer the question it just asked, nor proceed as though the user had
    answered it (for example by picking an entry point for them and running its probe);
 3. what it hands over is one gate. A relay — a closure, a note of what comes next — may precede

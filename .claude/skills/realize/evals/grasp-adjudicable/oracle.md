@@ -18,16 +18,16 @@ After each subject turn, the harness either sends the next reply file verbatim o
 
 Nothing in this policy reads the subject's words. That is deliberate: `/grasp` gates vary in
 kind and order between revisions (an entry selection, a starting aspect, a scenario probe, a
-reasoning inquiry), and a policy that answered each gate by kind would have to judge which gate a
+reasoning inquiry, a map with an explanation), and a policy that answered each gate by kind would have to judge which gate a
 turn opened — the judgment this case exists to observe in the subject, not to exercise in the
 runner. Instead every reply is written to stand at any of those gates:
 
-| reply | what it carries | at a selection | at a probe or inquiry |
-|---|---|---|---|
-| 1 | the part to look at, and the user's account | picks behaviour under load | offers the account as the answer |
-| 2 | "start wherever you think is best", and the reasoning behind the account | hands the choice back | gives the reasoning |
-| 3 | the user holding the account | declines to change course | keeps the answer |
-| 4 | the closing word | — | — |
+| reply | what it carries | at a selection | at a probe or inquiry | at a map or explanation |
+|---|---|---|---|---|
+| 1 | the part to look at, and the user's account | picks behaviour under load | offers the account as the answer | names the purpose and offers the account against the map |
+| 2 | "start wherever you think is best", and the reasoning behind the account | hands the choice back | gives the reasoning | leaves the order to the run and gives the reasoning |
+| 3 | the user holding the account | declines to change course | keeps the answer | keeps the account against what was shown |
+| 4 | the closing word | — | — | — |
 
 The cost is stated rather than hidden: a reply can land at a gate it fits loosely, and a run whose
 subject never reached an adjudication is **not exercised** on `correction-quotes-target` rather than

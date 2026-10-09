@@ -14,28 +14,29 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 
 ### The Solution
 
-**Comprehension over Explanation**: Rather than lecturing, AI checks understanding through the user's own answers. When the user has already said what they want to understand, verification starts there; otherwise AI first offers intent-scented entry points in the user's language, and the user takes one or names their own path. AI grounds each question in the target's material and records only what the user's own answers show — and how: unaided, after help (steps they asked for, or a hint), or after a disclosure.
+**Comprehension over Explanation**: Rather than lecturing at the user or quizzing them, AI first reads the target and the sources around it, then shows a map of understanding over the user's purpose — the purpose as they said it, or AI's reading of it marked as AI's, and the aspects it turns on, each with its essence in a line, the material it rests on, and how it stands. AI explains one aspect at a time in the one picture, example, or metaphor that carries it best, and goes deeper when the user asks. The user moves the map with their own words: "got it" leaves an aspect resting on AI's explanation, accepted; "I'd need to see it" runs a check whose result they look at together; "that seems off" is met with the material that settles it, or with no verdict and what would settle it.
 
 ### Difference from Simple Explanation
 
 | Dimension | Simple Explanation | Katalepsis |
 |-----------|-------------------|------------|
-| Direction | AI talks, user listens | AI asks, the user shows |
-| Entry point | AI decides what to explain | The user's stated purpose, or an intent-scented path they take |
-| Confirmation | Assumed after explanation | Shown in the user's own answers, measured against the target |
-| Ending | Undefined | The user says it is understood enough for their purpose; what is still unshown and any AI doubt are shown with the record |
+| Direction | AI talks, user listens | AI shows the map; the user moves it — accepting, asking to see, or pushing back |
+| Entry point | AI decides what to explain | The user's stated purpose, or AI's reading of it, marked as AI's and corrected in one line |
+| Confirmation | Assumed after explanation | Each aspect says what it rests on: the user's own reading checked against the target, a result seen together, or only AI's explanation |
+| Ending | Undefined | The user says it is understood enough for their purpose; the map, with what is still to be checked and how, and any AI doubt, is the record |
 
 ## Protocol Flow
 
 ```
-Gather   → Read the target's material, and any source a turn cites
-Scope    → The user says what they mean to understand, and for what purpose where they say it
-           (in their own words, or by taking an entry AI shows while the scope is open)
-Verify   → Each round probes one aspect; an answer shows it, or a miss is met with
-           a disclosure or an adjudication carrying its material — no verdict
-           without material: the need is named (gate interaction)
-Close    → The user says it is understood enough; the record shows what was shown
-           and how, what stays unshown, and any dissent
+Gather   → Read the target's material, and the sources that bear on it
+Map      → The purpose (the user's words, or AI's reading marked as AI's) and the
+           aspects it turns on, each with what it rests on and how it stands
+Explain  → One aspect at a time, in one fitting representation; the user's move
+           answered with its material — a check they ask for runs and its result
+           is shown; no verdict without material: what would settle it is named
+           (gate interaction)
+Close    → The user says it is understood enough; the map at that moment is the
+           record, with any dissent
 ```
 
 ## When to Use
@@ -63,13 +64,14 @@ claude plugin install katalepsis@epistemic-protocols
 /grasp
 ```
 
-## What a Round Looks For
+## What the Map Carries
 
 | Aspect | Description |
 |--------|-------------|
-| **Ordinary gap** | Where the user's expectation, sense of cause, view of scope, or grasp of order differs from what the target does — first the user's reasoning is heard, then an adjudication quotes the material that settles it |
-| **Horizon** | An edge of what the target does that the user has not voiced and their purpose needs, grounded in the target's material — probed first through an everyday scenario only, then disclosed with its material if missed |
-| **Contradiction** | Two sourced statements that cannot both hold on the same scope — taken up by whose it is: one the user holds a side of asks first for their explanation, one inside the target is shown as a finding about it, one against an earlier AI explanation is the AI's to correct |
+| **What the purpose turns on** | What the target does that the user's purpose needs — explained in one representation, deeper on request; the user's own reading of it is checked against the material that settles it |
+| **Unvoiced edge** | An edge of what the target does that the user has not voiced and their purpose needs, grounded in the target's material — raised openly on the map like any other aspect |
+| **Contradiction** | Two sourced statements that cannot both hold on the same scope — taken up by whose it is: one the user holds a side of is shown with its working in one round (their words, the target's material, why they part, what they got right); one inside the target is shown as a finding about it; one against an earlier AI explanation is the AI's to correct |
+| **Check** | Something the user wants to see or try before trusting an aspect — run on their word, its result shown beside the aspect; AI offers the cheapest such check only where a judgment the user is about to make rests on AI's explanation alone |
 
 ## Author
 
