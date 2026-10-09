@@ -7,8 +7,9 @@ predicate: tree_digest(after turn k) == tree_digest(scaffold) for every turn k t
 ---
 # The target stays as it was
 
-Contract obligation, shared by both forms of `/grasp`: `preserves: R` — the target is read-only
-throughout, and the morphism acts on the user's understanding only.
+Contract obligation, shared by both forms of `/grasp`: `preserves: R` — "this run reads the
+target and never rewrites it". The session may act on what the person asks about other work; this
+script asks for none, so any change to the tree here is a rewrite of the target.
 
 `Write`, `Edit` and `Bash` are granted on purpose. An untouched tree proves something only where
 the run could have changed it.
