@@ -81,13 +81,12 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something you can't name yet — pin down what they have in common |
 | [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and can tell when they are done |
 | [Epharmoge](./epharmoge) | `/contextualize` | A result — this session's or another's — may be correct but not fit your actual situation, or leave out something you asked for |
-| [Elenchus](./elenchus) | `/sublate` | The context you are about to act on may no longer hold — stale, weakly sourced, or contradicted — vet it dialectically before acting |
 | [Horismos](./horismos) | `/bound` | You cannot yet see what needs deciding in a task, or which decisions to keep or entrust |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it — one session, or a line of work, topic, or concept spread across several |
 | [Katalepsis](./katalepsis) | `/grasp` | Something in front of you — code, a document, a result — needs to be actually understood: you can't follow it yet, or you nod along and aren't sure |
 | [Hyphegesis](./hyphegesis) | `/conduct` | The work takes several lines of thinking, and it isn't obvious what order they run in, which can run apart, how their results combine, when to stop, or where each result goes — settle how it runs before starting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## Utilities
 
@@ -148,7 +147,6 @@ When editing the project's public description, follow the guidance in [Mission B
 | Euporia | εὐπορία | Way through, resourcefulness |
 | Merismos | μερισμός | Apportionment |
 | Epharmoge | ἐφαρμογή | Application, fitting |
-| Elenchus | ἔλεγχος | Cross-examination, refutation |
 | Anamnesis | ἀνάμνησις | Recollection |
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
 | Proplasma | πρόπλασμα | Preliminary model, first mold |

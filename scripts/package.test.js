@@ -203,11 +203,11 @@ describe('parseFrontmatter', () => {
   });
 
   it('preserves block list through parse → serialize round-trip', () => {
-    const content = '---\nname: rt\nskills:\n  - aitesis:inquire\n  - elenchus:sublate\n---\nBody';
+    const content = '---\nname: rt\nskills:\n  - aitesis:inquire\n  - epharmoge:contextualize\n---\nBody';
     const { fields, body } = parseFrontmatter(content);
     const rebuilt = serializeFrontmatter(fields) + '\n' + body;
     const reparsed = parseFrontmatter(rebuilt);
-    assert.deepEqual(reparsed.fields.get('skills'), ['aitesis:inquire', 'elenchus:sublate']);
+    assert.deepEqual(reparsed.fields.get('skills'), ['aitesis:inquire', 'epharmoge:contextualize']);
     assert.equal(reparsed.fields.get('name'), 'rt');
   });
 });
@@ -893,8 +893,8 @@ describe('unified release artifact contract', () => {
   });
 
   it('rejects a SKILL.md references/ pointer left dangling by removing a skill\'s only reference file', () => {
-    const plugin = { dir: 'elenchus', skill: 'sublate' };
-    const relativeReference = 'skills/sublate/references/round-composition.md';
+    const plugin = { dir: 'epharmoge', skill: 'contextualize' };
+    const relativeReference = 'skills/contextualize/references/round-composition.md';
     const sourceReferences = fs.readdirSync(
       path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'references')
     );
@@ -909,7 +909,7 @@ describe('unified release artifact contract', () => {
       for (const profile of ['release', 'codex-submit']) {
         assert.throws(
           () => buildSkillArtifact(plugin, { root, profile }),
-          /unresolved local reference: sublate\/SKILL\.md -> references\/round-composition\.md/,
+          /unresolved local reference: contextualize\/SKILL\.md -> references\/round-composition\.md/,
           profile
         );
       }
@@ -1019,7 +1019,7 @@ describe('generateReleaseNotes', () => {
 
   it('shows dash for protocols not in buildResults', () => {
     const notes = generateReleaseNotes(mockResults);
-    // elenchus is not in mockResults, should show —
+    // epharmoge is not in mockResults, should show —
     assert.ok(notes.includes('| — |'));
   });
 
@@ -1051,7 +1051,7 @@ describe('generateReleaseNotes', () => {
     const changelog = {
       groups: {
         analogia: [{ hash: 'abc1234', type: 'feat', message: 'Two-mode redesign' }],
-        elenchus: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
+        epharmoge: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
       },
       ungrouped: [],
     };
@@ -1128,7 +1128,6 @@ describe('package.js CLI', () => {
         'reduced-space-test.zip',
         'route.zip',
         'sketch.zip',
-        'sublate.zip',
         'white-bear.zip',
         'zero-shot.zip',
       ].sort(),

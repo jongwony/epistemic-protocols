@@ -74,7 +74,7 @@ const resolveSkillProtocol = (called) => {
 const protocolMap = {
   "/inquire": ["inquire", "aitesis"],
   "/ground": ["ground", "analogia"], "/recollect": ["recollect", "anamnesis"],
-  "/sublate": ["sublate", "elenchus"], "/contextualize": ["contextualize", "epharmoge"],
+  "/contextualize": ["contextualize", "epharmoge"],
   "/elicit": ["elicit", "euporia"], "/ideate": ["ideate", "heuresis"],
   "/bound": ["bound", "horismos"], "/conduct": ["conduct", "hyphegesis"],
   "/grasp": ["grasp", "katalepsis"], "/apportion": ["apportion", "merismos"],

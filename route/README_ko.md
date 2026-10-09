@@ -85,7 +85,7 @@ Route가 둘 다를 나눠 공급합니다: **언제는 훅들이 정하고, 무
 **`UserPromptSubmit` → `scripts/route-evaluator.mjs`** 는 같은 이벤트에 붙는 두 번째 항목이고, **`config/evaluator.json` 이 이름하는 환경 변수에 키가 없으면 침묵합니다.** 무장되면 constrained-output 평가자 — 호출자가 선언한 답 공간 위에서 답하고 산문을 쓰지 않는 모델 — 에게 이 프롬프트가 설치된 프로토콜 중 어느 것에 맞아 보이는지 묻고, 그 이름을 담은 한 줄을 덧붙입니다:
 
 ```
-[route advisory — not a /route outcome] This prompt may fit /inquire, /sublate. Verify each is loaded and fits the full context before invoking /route; ignore any that does not. This is not a routing decision and nothing has been invoked.
+[route advisory — not a /route outcome] This prompt may fit /inquire, /contextualize. Verify each is loaded and fits the full context before invoking /route; ignore any that does not. This is not a routing decision and nothing has been invoked.
 ```
 
 `route-prompt.mjs` 안이 아니라 자기 훅 항목으로 등록됩니다 — 여기서의 타임아웃이나 장애가 정적 지시문을 같이 끌어내리지 못하게 하기 위해서입니다. 지시문은 이쪽이 무엇을 말하든, 아무 말도 하지 않든 나갑니다. 그게 핵심입니다: 평가자는 턴 도중 뒤늦게 드러나는 결핍을 볼 수 없고, 하네스가 실제로 로드한 것이 아니라 디스크의 설치본을 후보로 읽습니다. 이쪽의 침묵은 세션에 결핍이 없다는 판정이 아닙니다.

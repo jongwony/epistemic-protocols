@@ -85,7 +85,7 @@ This surface is the one payload charged on every prompt, and it accumulates: eac
 **`UserPromptSubmit` → `scripts/route-evaluator.mjs`** is a second entry on the same event, **silent unless a key is present in the environment variable `config/evaluator.json` names**. Armed, it asks a constrained-output evaluator — a model that answers over an answer space the caller declares and writes no prose — which of the installed protocols the session looks like it fits, and adds one line naming them:
 
 ```
-[route advisory — not a /route outcome] This prompt may fit /inquire, /sublate. Verify each is loaded and fits the full context before invoking /route; ignore any that does not. This is not a routing decision and nothing has been invoked.
+[route advisory — not a /route outcome] This prompt may fit /inquire, /contextualize. Verify each is loaded and fits the full context before invoking /route; ignore any that does not. This is not a routing decision and nothing has been invoked.
 ```
 
 It is registered as its own hook entry rather than inside `route-prompt.mjs`, so a timeout or an outage here cannot take the static directive down with it. The directive goes out whatever this says, including when it says nothing — which is the point: the evaluator cannot see a deficit that surfaces later in the turn, and it reads candidates from what is installed on disk rather than from what the harness actually loaded. Its silence is not a finding that the session holds none.

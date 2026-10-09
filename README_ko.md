@@ -81,13 +81,12 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Periagoge](./periagoge) | `/induce` | 여러 구체적 사례가 무언가를 공유하는 것 같은데 아직 이름 붙이지 못했을 때 — 그 공통점을 붙잡을 때 |
 | [Merismos](./merismos) | `/apportion` | 목표 하나를 자율 실행에 넘기기 직전 — 한 번의 실행 구간에 들어가는 단위로 자르고, 단위마다 언제 끝났는지 판단할 수 있게 할 때 |
 | [Epharmoge](./epharmoge) | `/contextualize` | 결과 — 이 세션의 것이든 다른 곳의 것이든 — 가 정확해도 내 실제 상황에 안 맞거나, 요청한 것을 빠뜨렸을 수 있을 때 |
-| [Elenchus](./elenchus) | `/sublate` | 행동의 근거로 삼으려는 작업 맥락이 여전히 유효한지 의심스러울 때 — 낡았거나 출처가 약하거나 서로 어긋나는 부분을 행동 전에 변증법적으로 검증 |
 | [Horismos](./horismos) | `/bound` | 작업에서 무엇을 결정해야 하는지, 어떤 결정은 직접 내리고 어떤 결정은 맡길지 아직 분명하지 않을 때 |
 | [Anamnesis](./anamnesis) | `/recollect` | 이전에 논의했던 무언가가 막연히 기억나지만 구체적으로 짚어낼 수 없을 때 — 한 세션이든, 여러 세션에 걸친 작업 라인·토픽·개념이든 |
 | [Katalepsis](./katalepsis) | `/grasp` | 코드·문서·결과처럼 눈앞에 있는 것을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없을 때 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 갈래의 사고가 필요한데 그 순서, 따로 돌릴 수 있는지, 결과를 어떻게 합칠지, 언제 멈출지, 각 결과가 어디로 갈지가 자명하지 않을 때 — 시작하기 전에 작업 방식을 정할 때 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
 
 ## 유틸리티
 
@@ -148,7 +147,6 @@ Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claud
 | Euporia | εὐπορία | 통로, 자원성 |
 | Merismos | μερισμός | 부분으로 나눔 |
 | Epharmoge | ἐφαρμογή | 적용, 맞춤 |
-| Elenchus | ἔλεγχος | 반박, 교차 심문 |
 | Anamnesis | ἀνάμνησις | 상기, 회상 |
 | Hyphegesis | ὑφήγησις | 앞서 이끌기, 안내 |
 | Proplasma | πρόπλασμα | 예비 모형, 첫 거푸집 |
