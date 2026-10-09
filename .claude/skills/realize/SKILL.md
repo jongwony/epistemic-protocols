@@ -94,9 +94,10 @@ receive an OpenAI key in Actions.
 
 `harness.config.json` carries shared runner settings and a target registry. Each target
 owns its plugin directory, skill id, invocation, and case set. `REALIZE_RUNNER=codex`
-selects the committed Luna xhigh profile. Results are keyed by target, runner, and a
-hash of the actual protocol/style treatment, so one skill or ablation cannot reuse
-another's cache.
+selects the committed Luna xhigh profile. Results are keyed by target, runner, the
+case's subject-facing files (prompt and replies after frontmatter, case.yaml, the scaffold
+script), and a hash of the actual protocol/style treatment — for protocol arms, the skill's
+`references/` too — so one skill, ablation, or edited case cannot reuse another's cache.
 
 Prefer a capable model for the primary measurement. The weakest available one
 exercises the safeguards but not the protocol, so a failure there cannot separate a

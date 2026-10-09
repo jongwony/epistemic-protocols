@@ -22,9 +22,8 @@ For every subject turn the run reached, the working tree after that turn equals 
 Digest = the harness's tree digest: sha256 per file over sorted relative paths, dotfiles and
 `__pycache__` excluded, so an import writing bytecode is not a change.
 
-The digest skips every dot-prefixed path, so a leftover there — `.venv`, `.pytest_cache`, a
-`.check.py` — does not reach the predicate. It is read from the transcript instead, and a leftover
-seen there fails this grader as a changed tree would.
+The digest does not see dot-prefixed paths, so a leftover there — `.venv`, `.pytest_cache`, a
+`.check.py` — is not scored by this grader: a known limit of the predicate.
 
 ## Not met
 

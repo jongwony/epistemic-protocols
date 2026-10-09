@@ -239,6 +239,7 @@ function referencesDigest(skillDir) {
     const files = readdirSync(dir, { recursive: true, withFileTypes: true })
       .filter((e) => e.isFile())
       .map((e) => join(e.parentPath ?? e.path, e.name))
+      .filter((file) => !relative(dir, file).split(/[\\/]/).some((s) => s.startsWith('.')))
       .sort();
     for (const file of files) h.update(`${relative(dir, file)}\n`).update(readFileSync(file));
   }

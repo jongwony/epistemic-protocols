@@ -197,9 +197,10 @@ structure Shown (c : Context P) (a : Entry) where
   measure   : Measure c
   supported : ShownSupported c src a measure
 
-/-- **Your judgment**: the cited turn is what a check on aspect `a`, handed off as `.check` says,
-    returned — a run, an experiment, a source read to settle it; what it shows for the aspect is
-    read on the context as it now stands, and may be that it settles nothing. -/
+/-- **Your judgment**: the cited turn is what `checked` returned for a check on aspect `a` handed
+    off where `AsksCheck` holds — a run, an experiment, a source read to settle it; a read `gathered`
+    returned is not one. What it shows for the aspect is read on the context as it now stands, and
+    may be that it settles nothing. -/
 axiom CheckSupported : (c : Context P) → Cite c → Entry → Prop
 
 /-- A check run on aspect `a`: the turn its result arrived in, from outside the conversation, with
@@ -417,7 +418,7 @@ end Katalepsis
 
 ### Map rendering
 
-Label each row by what the person will understand or decide through it, and keep the target's anchors — code, plan, document, analysis, model, or a mix — behind the label; one line per row, its standing said in words.
+Label each row by what the person will understand or decide through it, and keep the target's anchors — code, plan, document, analysis, model, or a mix — beside the label; one line per row, its standing said in words.
 
 ### Verification rendering and safeguards
 
