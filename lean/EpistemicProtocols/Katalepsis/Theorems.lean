@@ -156,9 +156,8 @@ theorem closed_only_by_person {c : Context P} {s : Cite c}
 theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
     (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-theorem unasked_consult_only_gathers (c : Context P) (h : ¬ AsksCheck c) :
-    consult c = consultBy c .gather := by
-  simp [consult, consultOps, h]
+theorem check_only_when_asked (c : Context P) (h : Op.check ∈ consultOps c) : AsksCheck c :=
+  Classical.byContradiction fun hn => by simp [consultOps, hn] at h
 
 -- About the annotations TOOL GROUNDING declares: no operation is annotated `.transform`, and the
 -- only operation annotated `.dispatch` is `.check`. It reads the declaration, not what a run does.

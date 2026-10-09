@@ -289,28 +289,16 @@ inductive Outcome (P : Type)
   | withdrawn (r : Closed P)
   | holding   (c : Context P)
 
-/-- The operations TOOL GROUNDING grounds, one constructor each — declared here because what
-    `consult` reads is read by operation. -/
-inductive Op | gather | assess | present | check | readAnswer | converge | withdraw
-
 /-- **Your judgment**: the latest utterance, bearing on this run, asks for a check or takes the
     one you offered, read on the context as it now stands. -/
 axiom AsksCheck : Context P → Prop
 
-open Classical in
-/-- The operations whose returns `consult` appends to the context: `.gather`, and `.check` where
-    `AsksCheck` holds. -/
-def consultOps (c : Context P) : List Op := if AsksCheck c then [.gather, .check] else [.gather]
-
-/-- **Your read**, now, by operation, of what the next judgment needs: for `.gather`, the target's
-    material and the sources that bear on it — any a turn cites, and any you find — as far as
-    relevant access reaches, what you say you read, read to the end; for `.check`, what the check
-    handed off at `.check` returned. Empty for any other operation, where nothing outside the
-    context bears, and for an utterance that does not bear on this run. -/
-axiom consultBy : Context P → Op → List (Evidence P)
-
-/-- What is read now: each operation `consultOps` names, in turn. -/
-def consult (c : Context P) : List (Evidence P) := (consultOps c).flatMap (consultBy c)
+/-- **Your read**, now, of what the next judgment needs: the target's material; the sources that
+    bear on it — any a turn cites, and any you find — as far as relevant access reaches; and the
+    result of a check, where `consultOps` hands one off. What you say you read, you read to the
+    end. Empty where nothing outside the context bears, and nothing for an utterance that does
+    not bear on this run. -/
+axiom consult : Context P → List (Evidence P)
 
 /-- The context with what `consult` read now appended. -/
 def consulted (c : Context P) : Context P := c ++ (consult c).map (·.val)
@@ -385,6 +373,8 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
+inductive Op | gather | assess | present | check | readAnswer | converge | withdraw
+
 def grounding : Op → Annot × String
   | .gather     => (.observe, "artifact read, artifact search: read-only reads, now, of the target's material and of the sources that bear on it — any the latest turn cites, and any you find as far as relevant access reaches; name what was reached and what was not, and any conflict among what was gathered")
   | .assess     => (.sense, "Internal analysis: the purpose reading, the live inventory of aspects and each one's row on the map, over the whole fused context as it now stands")
@@ -393,6 +383,11 @@ def grounding : Op → Annot × String
   | .readAnswer => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches` and the judgments above read it — read whole against the fused context as it now stands")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with VerifiedUnderstanding")
   | .withdraw   => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
+
+open Classical in
+/-- The operations whose returns `consult` appends to the context: what `.gather` reads, and, where
+    `AsksCheck` holds, what the check handed off at `.check` returns. -/
+def consultOps (c : Context P) : List Op := if AsksCheck c then [.gather, .check] else [.gather]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
