@@ -102,15 +102,7 @@ theorem withdrawn_by_person_withdrawal (respond session : Context P → Response
       exact ⟨_, hw, rfl⟩
     · cases h'
 
-theorem closure_carries_record (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : VerifiedUnderstanding P)
-    (h : grasp respond session c us = .verified r) :
-    ∃ c₀, isFilled (closure c₀) = true ∧ r.closure.context = c₀ ∧
-      r.closure.residual = residual c₀ ∧ r.closure.dissent = dissent c₀ := by
-  obtain ⟨c₀, hc, rfl⟩ := verified_by_person_closure respond session c us r h
-  exact ⟨c₀, hc, rfl, rfl, rfl⟩
-
-theorem verified_ends_in_utterance (respond session : Context P → Response P) (c : Context P)
+theorem verified_at_an_utterance (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : VerifiedUnderstanding P)
     (h : grasp respond session c us = .verified r) :
     ∃ (c₀ : Context P) (u : Utterance P), r.closure.context = consulted (fuse c₀ u) := by
@@ -124,7 +116,7 @@ theorem verified_ends_in_utterance (respond session : Context P → Response P) 
     · cases h'
       exact ⟨c, u, rfl⟩
 
-theorem withdrawn_ends_in_utterance (respond session : Context P → Response P) (c : Context P)
+theorem withdrawn_at_an_utterance (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Closed P)
     (h : grasp respond session c us = .withdrawn r) :
     ∃ (c₀ : Context P) (u : Utterance P), r.context = consulted (fuse c₀ u) := by

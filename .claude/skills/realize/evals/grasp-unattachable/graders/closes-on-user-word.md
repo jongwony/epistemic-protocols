@@ -5,7 +5,7 @@ kind: manual
 window: all turns; the closing word is reply-4.md, sent before turn 5
 focus: whether the task is closed only on the user's closing word
 ---
-# A task closes only on the user's closing word
+# The run closes only on the user's closing word
 
 Contract obligation, shared by both forms of `/grasp`. The list form completes a task only when
 the user selects "sufficient" at the coverage gate (or confirms a zero-gap finding), and converges

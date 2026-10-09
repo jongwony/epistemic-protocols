@@ -13,9 +13,9 @@ narrowest span that actually supports the correction … A pointer they have to 
 attachment", and "something the session said earlier does not stand as the measure against what
 the target says now". The Lean form: an answer is measured against a `Measure` — the target
 quoted from a turn that carries the target itself rather than the reasoning that produced it
-(`IsTarget`), or an outside source read now (`SourceRead`: "quoted in place … your own reasoning is
+(`IsTarget`), or an outside source read in this run (`SourceRead`: "quoted in place … your own reasoning is
 never a measure") — and `grounding .present` has the adjudication quote "the narrowest `Measure`
-— the target's material or an outside source read now, never your own explanation — scoped to
+— the target's material or an outside source you read, never your own explanation — scoped to
 what that material settles".
 
 Reply 1 makes two claims the tree settles as false (see `oracle.md`): a sliding window, and one
