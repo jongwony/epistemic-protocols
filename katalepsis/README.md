@@ -14,7 +14,7 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 
 ### The Solution
 
-**Comprehension over Explanation**: Rather than lecturing, AI checks understanding through the user's own answers. When the user has already said what they want to understand, verification starts there; otherwise AI first offers intent-scented entry points in the user's language, and the user takes one or names their own path. AI grounds each question in the target's material and records only what the user's own answers show — and how: unaided, after steps they asked for, or after a disclosure.
+**Comprehension over Explanation**: Rather than lecturing, AI checks understanding through the user's own answers. When the user has already said what they want to understand, verification starts there; otherwise AI first offers intent-scented entry points in the user's language, and the user takes one or names their own path. AI grounds each question in the target's material and records only what the user's own answers show — and how: unaided, after help (steps they asked for, or a hint), or after a disclosure.
 
 ### Difference from Simple Explanation
 
@@ -32,7 +32,8 @@ Gather   → Read the target's material, and any source a turn cites
 Scope    → The user says what they mean to understand, and for what purpose where they say it
            (in their own words, or by taking an entry AI shows while the scope is open)
 Verify   → Each round probes one aspect; an answer shows it, or a miss is met with
-           a disclosure or an adjudication carrying its material (gate interaction)
+           a disclosure or an adjudication carrying its material — no verdict
+           without material: the need is named (gate interaction)
 Close    → The user says it is understood enough; the record shows what was shown
            and how, what stays unshown, and any dissent
 ```

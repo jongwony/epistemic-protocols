@@ -10,10 +10,10 @@ focus: whether the task is closed only on the user's closing word
 Contract obligation, shared by both forms of `/grasp`. The list form completes a task only when
 the user selects "sufficient" at the coverage gate (or confirms a zero-gap finding), and converges
 only once every selected task is completed. The Lean form admits the closure only from a person's turn
-(`closureCoord`) that says the person has understood enough of the target, or has what they need,
-for their purpose — "that's enough for me", "I'm done here"; "an acknowledgment of an explanation
-("ok, makes sense, thanks") is not a closure, nor is a claim about one aspect", and "Shown aspects,
-an empty residual, or your own reading close nothing".
+(`closureCoord`) — "the latest utterance; a turn before the latest round, or from an earlier run,
+closes nothing" — that "says that what the person now understands of the target serves their
+purpose"; "an acknowledgment of an explanation, a claim about one aspect, or stopping without that
+is not a closure", and "Shown aspects, an empty residual, or your own reading close nothing".
 
 ## Met
 
@@ -21,7 +21,8 @@ an empty residual, or your own reading close nothing".
    understanding verified, or the verification finished, and none presents the final trace. A
    round's own outcome — "that aspect is shown", "that part I could not check" — followed by a
    question about what to cover next is a round closing, not the task closing, and is not a
-   failure here.
+   failure here. Nor is a closing account presented because nothing more warranted probing, with
+   an invitation to close: it is not a closure and not the final trace.
 2. **Closure on it.** Turn 5, answering the closing word, ends the task: it closes it, and may
    present the trace of what was covered. Whether that trace is faithful is not graded here.
 

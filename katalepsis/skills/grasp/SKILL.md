@@ -45,7 +45,7 @@ Target
   → VerifiedUnderstanding
 requires: target_exists(R)              -- the comprehension target is present in context and can be quoted verbatim; its provenance is unconstrained. An admission condition on the target, not a promise that every answer finds enough ground for adjudication
 deficit:  TargetUngrasped               -- activation precondition (Layer 1)
-preserves: R                            -- the target is read, never rewritten
+preserves: R                            -- this run reads the target and never rewrites it
 invariant: Demonstrated, not asserted   -- only a person's turn shows an aspect, and only against material; assent, a self-rating, a bare pick or an echo shows nothing
 invariant: Focus never records          -- the inventory and the presentation are re-read every turn and carry no authority; only the person's turns move a value into the record
 -/
@@ -114,7 +114,7 @@ noncomputable section
 variable {P : Type}
 
 /-- `R`, the target: material present in the context and quotable verbatim — code, a document, a
-    result — whatever produced it. Read from the context; never rewritten. -/
+    result — whatever produced it. Read from the context; this run never rewrites it. -/
 abbrev Target (P : Type) := Context P
 
 /-- A scope entry or an aspect, named as the presentation shows it. -/
@@ -122,8 +122,10 @@ abbrev Entry := String
 
 /-- **Your judgment**: the cited person turn says what they mean to understand of the target —
     and, where they say it, for what purpose — read against the context as it now stands, in their
-    own words or by taking entries you showed; taking what was shown adopts it as it was shown. The
-    invoking utterance fills it when it says it. A later turn may change the scope; whether an
+    own words, by taking entries you showed, or by handing the choice to you. Taking what was shown
+    adopts it as it was shown; handing the choice to you lets you set it within the target, and you
+    say in the next round what you set, as yours, open to their correction. The invoking utterance
+    fills it when it says it. A later turn may change the scope; whether an
     earlier one still reaches what is now at issue is read on the current context. -/
 axiom ScopeSupported : Context P → Turn P → Entry → Prop
 
@@ -168,16 +170,17 @@ axiom IsTarget : (c : Context P) → Side c → Prop
     the material; your own reasoning is never a measure. -/
 axiom SourceRead : (c : Context P) → Cite c → String → Prop
 
-/-- What an answer is measured against: the target's own material, or a source outside the
-    context read now. -/
+/-- What an answer is measured against: the target's own material, in the turn quoted even after
+    the target changes, or a source outside the context read now. -/
 inductive Measure (c : Context P)
   | target (s : Side c) (object : IsTarget c s)
   | source (observed : Cite c) (readNow : observed.src.val = .external) (span : String)
       (linked : SourceRead c observed span)
 
-/-- The help that came before the showing turn on this aspect: a disclosure, or an excerpt that
-    supplied its substance, is `afterDisclosure`; any lesser help — steps the person asked for, or a
-    hint you gave — is `afterCue`; none is `independent`. -/
+/-- The help that came before the showing turn on this aspect: a disclosure, or any explanation or
+    excerpt — yours in this run or in the session's answers — that already supplied its substance,
+    is `afterDisclosure`; lesser help — steps the person asked for, or a hint you gave — is
+    `afterCue`; none is `independent`. -/
 inductive Demonstration | independent | afterCue | afterDisclosure
 
 /-- **Your judgment**, the record rule: the cited person turn shows the aspect — produces,
@@ -222,23 +225,19 @@ axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a scope, an answer, a request for
     steps, a correction of your reading, a question about the round, a closure, a withdrawal —
-    judged on what the whole utterance does. A proposal to change the target bears on this run: it
-    is named, held, and carried to the closing account, not acted on while the run stands. An
-    utterance about other work
-    leaves the run as it stands: the session answers it, that answer stays in the context, and no
-    gate of this run is raised. -/
+    judged on what the whole utterance does. An utterance about other work leaves the run as it
+    stands: the session answers it, that answer stays in the context, and no gate of this run is
+    raised. -/
 axiom Reaches : Context P → Prop
 
-/-- **Your judgment**: the cited turn says the person has understood enough of the target, or has
-    what they need, for their purpose — "that's enough for me", "I'm done here" — read against the
-    context as it now stands; an acknowledgment of an explanation ("ok, makes sense, thanks") is not
-    a closure, nor is a claim about one aspect. It closes the run wherever it is said: aspects need
-    not all be shown, and what is unshown is residual. Shown aspects, an empty residual, or your
-    own reading close nothing. "Enough about that example" sets that aspect aside without closing
-    the run; an unshown aspect set aside stays in the residual, and one already shown stays shown.
-    Whether an earlier closure still
-    reaches this run is read on the current context: a closure from an earlier run does not close a
-    new one. -/
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round, or
+    from an earlier run, closes nothing — says that what the person now understands of the target
+    serves their purpose, read against the context as it now stands. An acknowledgment of an
+    explanation, a claim about one aspect, or stopping without that is not a closure; stopping is a
+    withdrawal. It closes the run wherever it is said: aspects need not all be shown, and what is
+    unshown is residual. Shown aspects, an empty residual, or your own reading close nothing.
+    Setting one aspect aside does not close the run; an unshown aspect set aside stays in the
+    residual, and one already shown stays shown. -/
 axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person closes the run. -/
@@ -248,11 +247,11 @@ def closureCoord : Coord P Unit :=
 /-- **Your reading**: the person's closure; `open_` until one reaches it. -/
 axiom closure : (c : Context P) → Occ (closureCoord (P := P)) c
 
-/-- **Your judgment**: the cited turn withdraws: the person stops here and says the run should end
-    without having what they need — the target is not understood enough, or no longer worth the
-    run — and nothing open is delegated; read against the context as it now stands.
-    Silence, or turning to other work, is not withdrawal. Whether an earlier withdrawal still
-    reaches this run is read on the current context. Your own reading that the run should end
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round, or
+    from an earlier run, withdraws nothing — withdraws: the person stops here and says the run
+    should end without having what they need — the target is not understood enough, or no longer
+    worth the run — and nothing open is delegated; read against the context as it now stands.
+    Silence, or turning to other work, is not withdrawal. Your own reading that the run should end
     closes nothing. -/
 axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
 
@@ -338,8 +337,7 @@ record. Convergence evidence, at the closure: the scope as it stands, open inclu
 aspect → how it was shown (unaided, after help, or after a disclosure) → against which material →
 in the person's words; the residual, each with how it stands — whether it was asked, whether the
 scope as it stands still turns on it, and what the person said of it: an answer missed, nothing to
-check it against, set aside, or claimed as understood; the dissent; and any proposal to change the
-target the person raised during the run, left for after it. A doubt you held that was not shown
+check it against, set aside, or claimed as understood; and the dissent. A doubt you held that was not shown
 before the closing turn is shown here and attached, and the closure stands — accepted,
 evidentially disputed. An untested Horizon edge is named once probing has ended — in the closing
 account or here at closure — and not before. Demonstrated, not asserted.
@@ -367,10 +365,10 @@ inductive Op | gather | assess | present | readAnswer | converge | withdraw
 def grounding : Op → Annot × String
   | .gather     => (.observe, "artifact read, artifact search: read-only reads, now, of the target's material and of any source the latest turn cites; name what was reached and what was not, and any conflict among what was gathered")
   | .assess     => (.sense, "Internal analysis: the scope reading and the live inventory of aspects, over the whole fused context as it now stands")
-  | .present    => (.interaction .constitution, "the round, every round the first included. While the scope is open, the round shows entries as §Intent-scented entry rendering says, and probing waits for the scope. A contradiction that involves the person is taken first: ask how the two quoted sides fit before any verdict, then show what remains with both sources, the target's evidence and the reason, and check it by an application; a contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against the target is yours to correct, quoting the target, as relay. Otherwise choose the next aspect, and say why when you depart from starting with a Horizon edge — about a Horizon edge, after its answer; when none warrants probing, the round is the closing account: what was shown and how, what is unshown — an untested Horizon edge now named, since probing has ended —, the scope as it stands, and your contrary grounds, with the invitation to say it is understood enough or to go on. A Horizon probe is an everyday scenario only — no label, edge, expected answer or reason before the answer — but concealment never withholds material the person needs to contest an adjudication. A probe gives the target context and a concrete scenario and always leaves a free response; prefer an open question to a menu where the answer is the evidence. After a miss, first read whether the answer aims at another intent: say that reading as a candidate with its basis and where it moves, adding no question; if the person sets it aside, return to the missed answer with their correction. Within the intent, a Horizon miss is disclosed at once with the material it rests on, then checked by an application question; an ordinary miss first hears the person's reasoning, and an adjudication follows only where you have material to attach; where there is none, give no verdict: say you have nothing to check the answer against and name what would settle it. Where there is, the adjudication quotes the narrowest `Measure` — the target's material or an outside source read now, never your own explanation — scoped to what that material settles, keeping what the answer got right and saying any other reading beside it. The person may ask for steps instead of a disclosure at any time. An owed disclosure, reasoning question or correction completes before the next aspect. Where it bears on a judgment the person is about to make, show where the run stands — what was shown and how, what is unshown, and your contrary grounds — without naming an untested Horizon edge. An objection you raise yourself is relay: shown with its basis, and the run continues. A proposal to change the target is named and held for after this run, not acted on. The answer may take any form — an answer, a request for steps, saying it is understood enough, or stopping.")
+  | .present    => (.interaction .constitution, "the round, every round the first included. While the scope is open, the round shows entries as §Intent-scented entry rendering says, and probing waits for the scope. Once the scope is set, a contradiction that involves the person is taken first: ask how the two quoted sides fit before any verdict, then show what remains with both sources, the target's evidence and the reason, and check it by an application; a contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against the target is yours to correct, quoting the target, as relay. Otherwise choose the next aspect, starting from a Horizon edge where one is due; when you start elsewhere, say why only after that Horizon probe has been answered. A set-aside aspect is not probed again unless the person returns to it. When none warrants probing, the round is the closing account: what was shown and how, what is unshown — an untested Horizon edge now named, since probing has ended —, the scope as it stands, and your contrary grounds, with the invitation to say it is understood enough or to go on. A Horizon probe is an everyday scenario only — no label, edge, expected answer or reason before the answer — but concealment never withholds material the person needs to contest an adjudication. A probe gives the target context and a concrete scenario and always leaves a free response; prefer an open question to a menu where the answer is the evidence. After a miss, first read whether the answer aims at another intent: say that reading as a candidate with its basis and where it moves, adding no question; if the person sets it aside, return to the missed answer with their correction. Within the intent, a Horizon miss is disclosed at once with the material it rests on, then checked by an application question; an ordinary miss first hears the person's reasoning, and an adjudication follows only where you have material to attach; where there is none, give no verdict: say you have nothing to check the answer against and name what would settle it. Where there is, the adjudication quotes the narrowest `Measure` — the target's material or an outside source read now, never your own explanation — scoped to what that material settles, keeping what the answer got right and saying any other reading beside it. Where what you could not reach, or a conflict among what you gathered, bears on an adjudication or a judgment the person is making, say it there. The person may ask for steps instead of a disclosure at any time. An owed disclosure, reasoning question or correction completes before the next aspect. Once you hold a contrary ground — an adjudication the person disputes, a doubt about the target — it rides every later round briefly with its basis, until it is settled. Where a judgment the person is about to make turns on the run, also show what was shown and how and what is unshown; an untested Horizon edge is not named before its probe, only said to remain. An objection you raise yourself is relay: shown with its basis, and the run continues. The answer may take any form — an answer, a request for steps, saying it is understood enough, or stopping.")
   | .readAnswer => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches` and the judgments above read it — read whole against the fused context as it now stands")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with VerifiedUnderstanding")
-  | .withdraw   => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record, as CONVERGENCE lists it at closure; the person's next words correct it")
+  | .withdraw   => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record, as CONVERGENCE lists it at closure")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -399,9 +397,9 @@ Compose each round under TOOL GROUNDING's `present` entry. When grounding an exp
 
 | Level | Realization |
 |-------|-------------|
-| Light | One Constitution probe of core understanding |
-| Medium | One scenario probe of prediction or impact |
-| Heavy | Decomposed probes of causal or sequential understanding |
+| Light | The core of what the purpose turns on |
+| Medium | Adds a prediction or impact scenario |
+| Heavy | Follows the target's mechanism step by step |
 
 ## Rules
 
