@@ -9,7 +9,7 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 
 ## Definition
 
-**Proplasma** (πρόπλασμα): the preliminary clay model a sculptor shapes before committing to marble. A dialogical act for the moment right before a direction commitment when the candidate directions cannot be recognized from their descriptions: the AI derives the axes on which the candidates genuinely diverge, relays the drafted axes, placeholder policy, probe target set, and realization tier with the basis that chose each, instantiates cheap placeholder probes that commit different values on those axes, presents them probe-first with a per-axis contrast, and the user constitutes the direction decision on recognized futures — or asks to see something no probe has materialized yet, and the AI fans over that. Probes are discard-committed instruments — never evidence, never promoted.
+**Proplasma** (πρόπλασμα): the preliminary clay model a sculptor shapes before committing to marble. A dialogical act for the moment right before a direction commitment when the candidate directions cannot be recognized from their descriptions: the AI relays what it is about to build — its reading of the purpose, the axes the purpose turns on, the placeholder policy, which candidates get probes, and the tier — each with its basis, builds cheap placeholder probes that commit different values on those axes, and shows a map of the directions: each probe first, then, per axis, what each direction's future looks like and what that rests on — a probe the person saw, a description alone, or a check they asked for. The person's words are laid beside what was shown, and the person settles a direction, says the preview is no longer needed, or ends it. Probes are discard-committed instruments — evidence for no claim, never promoted.
 
 ```lean
 /-!
@@ -22,54 +22,52 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 
 /-! ── FLOW ──
 Proplasma(X) → start(c) → preview(c, utterances), where c is the fused session context:
-  start: Phase 0, first match wins: no imminent commitment or fewer than two candidates |
-    futures recognizable from text | a routing row matches | a type guard fails → the relay with
-    its basis → not activated
-  fan(c): the spec relayed whole — axes, placeholder policy, probe target set, realization tier,
-    each with its basis, and on every later fan the ledger of what changed — before anything is
-    generated; it yields no turn → the probes, each entering c as written
-  round: present probe-first → the per-axis contrast with common commitments → exposed unknowns →
-    your readings with their basis (an insufficient contrast with the revision you propose, a
-    sibling deficit, futures already recognizable or a collapsed premise, contrary grounds) →
-    Qdir → Stop
-  next utterance u: c' := fuse(c, u) →
-    [the person constitutes d ∧ covered]       harvest → cleanup_verify → DirectionalContrast
-    [the person dissolves the run]             cleanup_verify → DissolutionExit
-    [the person stops]                         cleanup_verify → EarlyExit
-    [the person names another protocol]        cleanup_verify → routed
-    [the person asks to see what no probe materialized — a revised spec, a composition, a
-      named candidate]                         fan(c') → round
-    [otherwise]                                answered — a question about a probe within
-                                               placeholder discipline, a composition whose
-                                               intent is unclear asked about → round
-  no utterance: the gate holds; nothing is constituted, generated, or discarded
+  start: your reading that this is not this protocol's case (`notActivated`), in plain words with
+    its basis → not activated; otherwise what bears on the decision is gathered → fan → round
+  fan(c): the spec relayed whole — your reading of the purpose, marked as yours unless they said
+    it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
+    any waits; the tier — each with its basis, and on every later fan what changed since the last;
+    it yields no turn → the probes, each entering c as written
+  round: the map — each probe first, from its realization; per axis, what each direction's future
+    looks like there and what that rests on; the premises every probe shares; the open unknowns
+    with what would settle each; your readings and contrary grounds, each with what it bears on
+    and rests on → one opening, or a contradiction's working with nothing after it → Stop
+  next utterance u, read on fuse(c, u):
+    [does not bear on this run]   the session answers it; that answer stays in c; no gate of this run
+    [the person constitutes d]    harvest → cleanup → DirectionalContrast
+    [the person dissolves]        cleanup → DissolutionExit
+    [the person withdraws]        cleanup → Withdrawn
+    [otherwise]                   what is gathered now, and the check they asked for, enter c; a
+                                  fan where they ask to see what no probe materialized → round
+  no utterance: the gate holds; nothing is constituted, generated, checked, or discarded
 -/
 
 /-! ── MORPHISM ──
 DirectionProspect
-  → detect                  -- deficit predicate + 4-step routing (type guards: fake_data_sufficient, placeholder_fidelity)
-  → derive_axes             -- divergence axis candidates (where the candidate directions must commit different values)
-  → set_placeholder_policy  -- visible synthesis + non-evidence stamp + skeleton-faithful/data-fake split (draft)
-  → relay_spec              -- the spec whole with the basis for each element, relayed BEFORE any generation; on a later fan, with the ledger of what changed
-  → instantiate_probes      -- transform (∥ over the drafted target set, temp-isolated, artifact_ref registered)
-  → contrast                -- per-axis juxtaposition → ContrastMap + ExposedUnknowns + CommonCommitments
-  → present                 -- probe-first relay (probes one by one → contrast map → new unknowns → your readings)
-  → constitute              -- the person constitutes the direction with its deciding evidence and your contrary grounds in view
-  → harvest                 -- direction + deciding contrast rows + routed unknowns read BEFORE discard
-  → cleanup_verify          -- per-probe discard verification → the discard trace
-  → assemble                -- terminal record built from the harvest + the completed discard trace
+  → gather          -- what bears on the decision, read now (focus)
+  → relay_spec      -- the spec whole with its basis, BEFORE any generation; on a later fan, with what changed
+  → instantiate     -- placeholder probes over the target set, temp-isolated, each realization registered
+  → present         -- the map: probes first, then per axis what each future shows and what it rests on (focus)
+  → fuse(u)         -- the person's turn joins the context whole
+  → check           -- a check the person asked for, handed to execution; its result returns as evidence
+  → constitute      -- the person's closing over the map (`ClosingSupported`)
+  → harvest         -- direction + deciding cells + open unknowns, read BEFORE discard
+  → cleanup         -- per-probe discard, each disposition observed → the discard trace
+  → assemble        -- the record, built from the harvest and the completed discard trace
   → DirectionalContrast
-  -- primary-path codomain: DissolutionExit — the convergent stand-down the person closes — emits the enriched axes
-  --   with its cited basis instead of this record: the deficit dissolved, so no resolution object is owed
-requires: pre_commit(direction) ∧ |direction_candidates(X)| ≥ 2   -- runtime checkpoint (Phase 0)
+  -- DissolutionExit — the person says no preview is owed — carries the map and the unknowns in
+  --   place of this record: the deficit dissolved, so no resolution object is owed
+requires: pre_commit(direction) ∧ |direction_candidates(X)| ≥ 2   -- read before activation (`notActivated`)
 deficit:  DirectionUnrecognizable                                  -- activation precondition (Layer 1/2)
-preserves: commit_target_identity(X)   -- the pending commitment itself is unchanged; probes never mutate it; the context only grows
+preserves: commit_target_identity(X)   -- the pending commitment is unchanged; probes and checks change no existing state; the context only grows
 invariant: Contrast over Simulation    -- direction judgment rests on recognized materialized futures, not mental simulation
+invariant: Grounded, not asserted      -- every cell says what it rests on; a probe is evidence for no claim
 invariant: after activation only the person closes; your readings settle none of the closings
-The steps between detect and constitute are how you work toward recognizable futures; the contract
-fixes the deficit and its resolution, the one coordinate only the person fills — the closing — the
-closings themselves, and the orderings the premises ground: the spec relayed before any probe is
-generated, and the harvest read before anything is discarded.
+The steps between gather and constitute are how you work toward recognizable futures; the
+contract fixes the deficit and its resolution, the coordinates only the person fills — the closing,
+and the purpose where they say it — the closings themselves, and the orderings the premises
+ground: the spec relayed before any probe is generated, and the harvest read before anything is
+discarded.
 -/
 
 namespace Proplasma
@@ -142,116 +140,39 @@ abbrev DirectionProspect (P : Type) := Context P
 
 abbrev Direction := String
 
-/-- A declared divergence axis: a direction unknown on which the probes must commit different
-    values. -/
+/-- A divergence axis, named as the map shows it: a direction unknown on which the probes commit
+    different values. -/
 abbrev DirectionAxis := String
 
-/-- **Your judgment** at Phase 0: a direction commitment is imminent. A question about what one
-    option means, or what doing it would involve, asks for a description; it is not a direction
-    decision, and it is answered rather than previewed. -/
-axiom PreCommit : Context P → Prop
-/-- **Your judgment** at Phase 0: the candidate directions. -/
-axiom candidates : Context P → List Direction
+/-- **Your reading**, before activation only: why this is not this protocol's case, in plain words
+    with its basis — no direction commitment is imminent, or fewer than two candidates stand to
+    compare; the futures are already recognizable from their descriptions; the turn asks what one
+    option means or what doing it would involve, which is answered as asked rather than previewed;
+    the directions can be judged only on real evidence, not on a depiction; or placeholders could
+    not carry the difference without blurring it. An unmet need is said as what would settle it.
+    `none` where the case is this protocol's. -/
+axiom notActivated : Context P → Option String
 
-/-- **Your judgment**: the candidate futures are recognizable from their descriptions; a
-    regular gate suffices. -/
-axiom RecognizableFromText : Context P → Prop
+/-- **Your judgment**: the cited person turn says what the decision is for, or what matters in it,
+    read against the context as it now stands — in their own words, or by taking the reading of
+    the purpose the map showed, which adopts it as shown. A later turn may change it. -/
+axiom PurposeSupported : Context P → Turn P → String → Prop
 
-/-- The sibling deficits the routing rows name. Each is a binding with its command as the hint;
-    which protocol takes it is the session's. -/
-inductive Deficit
-  /-- ① a mapping against a target account already in play leaves its intended inferences
-      uncertain (hint: /ground) -/
-  | mappingUncertain
-  /-- ② real evidence is required before the directions can be judged (hint: /inquire) -/
-  | contextInsufficient
-  /-- ③ the candidate field is thin — one or none (hint: /ideate) -/
-  | candidateFieldUnderexpanded
-  /-- ③ the coordinates live implicit in externalized substrate (hint: /elicit) -/
-  | abstractAporia
+/-- Only a person's turn sets the purpose. -/
+def purposeCoord : Coord P String :=
+  { admits := (·.val = .person), supports := PurposeSupported }
 
-/-- **Your judgment**: the routing row that matches, first match wins; `none` where no row
-    takes the case — candidates ≥ 2, evidence-free, placeholder-carriable — which is this
-    protocol's own. -/
-axiom routeRow : Context P → Option Deficit
+/-- **Your reading**: the purpose as it stands; `open_` until a person's turn says it. It holds back
+    neither a round nor a closing: while it is open, the map shows your reading of it, marked as
+    yours. -/
+axiom purpose : (c : Context P) → Occ (purposeCoord (P := P)) c
 
-/-- **Your judgment**, the first type guard: the direction contrast holds with placeholder concreta
-    alone — no real evidence required. -/
-axiom FakeDataSufficient : Context P → Prop
-/-- **Your judgment**, the second type guard: placeholder concretization carries the differential
-    futures on the divergence axes without distortion — divergence lives in the skeleton, and
-    fake data does not blur it. -/
-axiom PlaceholderFidelity : Context P → Prop
-
-/-- Why Phase 0 does not activate; each is relayed with its basis. -/
-inductive NotActivated
-  /-- no imminent commitment, or fewer than two candidates; one or zero candidates is handed to
-      row ③'s targets as a hint -/
-  | requiresFail
-  | noDeficit
-  | routeAway (d : Deficit)
-  /-- a type guard fails and no row matches: the decision stays at a regular gate -/
-  | unfit
-
-open Classical in
-def phase0 (c : Context P) : Option NotActivated :=
-  if ¬ (PreCommit c ∧ 2 ≤ (candidates c).length) then some .requiresFail
-  else if RecognizableFromText c then some .noDeficit
-  else match routeRow c with
-    | some d => some (.routeAway d)
-    | none   => if FakeDataSufficient c ∧ PlaceholderFidelity c then none else some .unfit
-
-/-- Visible synthesis (artifacts are overtly placeholder), the non-evidence stamp (probes are
-    evidence for no claim), and the skeleton/data split (structure faithful to each direction;
-    data values fake). -/
-structure PlaceholderPolicy where
-  visibleSynthesis  : String
-  nonEvidenceStamp  : String
-  skeletonDataSplit : String
-
-/-- `vignette`: text-vignette probes, concrete placeholder-filled narration in session text, no
-    file artifacts. `mockup`: real artifacts in temp isolation, optionally instantiated by
-    parallel agents. -/
+/-- `vignette`: concrete placeholder narration in session text, no file artifacts. `mockup`: real
+    artifacts in temp isolation. Which one the spec names is your judgment, relayed with it. -/
 inductive RealizationTier | vignette | mockup
 
-/-- The drafted spec: the divergence axes, the placeholder policy, the probe target set, and the
-    realization tier. -/
-structure Spec where
-  axes   : List DirectionAxis
-  policy : PlaceholderPolicy
-  tgt    : List Direction
-  tier   : RealizationTier
-
-/-- **Your record**: the spec your latest relay presented; `none` before the first. Its target set
-    is your judgment of what to materialize now: enough that at least two futures stand in view
-    once the probes already made are counted — a candidate the person named, or a composition,
-    can be probed alone against them — and few enough to take in at once, about four new probes a
-    fan; where candidates wait, the draft names which and why, and each stays reachable at the
-    gate. -/
-axiom spec : Context P → Option Spec
-
-/-- What a ledger line records. -/
-inductive LedgerKind
-  /-- the person's own send-back or edit -/
-  | personEdit
-  /-- a spec element you re-drew because an edit forces it -/
-  | necessary
-  /-- a spec element you re-drew because you propose it -/
-  | proposal
-
-/-- One change to the spec since the last relay. -/
-structure LedgerLine where
-  change : String
-  cause  : Option String
-  kind   : LedgerKind
-
-/-- **Your record**: what changed in the spec since the previous relay, the person's edits first;
-    empty on the first relay. -/
-axiom ledger : Context P → List LedgerLine
-
 /-- How a probe is realized, carried on the probe itself: a Vignette's narration, re-presented
-    as instantiated and never regenerated; or a Mockup's temp-isolated path, registered at
-    creation. -/
+    as written and never regenerated; or a Mockup's temp-isolated path, registered at creation. -/
 inductive Realized
   | narration (text : String)
   | artifact (path : String)
@@ -261,9 +182,8 @@ def Realized.location : Realized → Option String
   | .artifact p  => some p
 
 structure Probe where
-  direction    : Direction
-  axesRealized : List (DirectionAxis × String)
-  realized     : Realized
+  direction : Direction
+  realized  : Realized
 
 /-- **Your record**, read from the context: every probe instantiated so far, cumulative across
     fans; a discarded probe stays listed for the trace. -/
@@ -271,76 +191,56 @@ axiom probes : Context P → List Probe
 
 def directions (c : Context P) : List Direction := (probes c).map (·.direction)
 
-/-- A pre-commit check the person carries once the settled direction materializes into a
-    committed action (`preCommit`), or a factual unknown needing real evidence now
-    (`inquire`) — placeholders can never ground it. -/
-inductive DownstreamRoute | preCommit | inquire
-
-/-- A direction unknown exposed by the contrast, or recorded at a question about a probe, with the
-    route it carries. -/
-structure ExposedUnknown where
-  text  : String
-  route : DownstreamRoute
-
-/-- Per axis in force, the futures each probe exposes on that axis. -/
+/-- Per axis, each direction's cell: what that direction's future shows on the axis and what it
+    rests on — a probe the person was shown, your description alone, or a check's result. -/
 abbrev ContrastMap := List (DirectionAxis × List (Direction × String))
 
-/-- `common`: design decisions forced uniformly across all probes, reported so a shared premise
-    is not mistaken for a divergence axis; recomputed over every probe at each contrast, since a
-    later fan can break an earlier fan's shared premise. -/
-structure Contrast where
-  map     : ContrastMap
-  exposed : List ExposedUnknown
-  common  : List String
+/-- **Your reading**, afresh on the context: the map's rows — the axes the purpose turns on, in the
+    order it turns on them; a vivid difference that does not bear on the purpose is not made
+    deciding unsaid. Premises every probe shares are shown as shared, not as axes, and re-read
+    whenever the comparison changes. On an axis introduced after earlier probes, their cells are
+    re-read from what the artifact carries, and otherwise say the difference is unshown there. -/
+axiom contrastMap : Context P → ContrastMap
 
-/-- **Your judgment**: the per-axis contrast over every probe so far. A new axis relayed on a
-    later fan predates earlier probes: their positions on it are re-derived from their artifacts
-    where those carry them, and the cell is declared undifferentiated where they do not. -/
-axiom contrast : Context P → Contrast
+/-- **Your reading**: the direction unknowns open on the context as it now stands, each with what
+    would settle it, re-read every round. -/
+axiom unknowns : Context P → List String
 
-/-- **Your record**: every exposed unknown with its route, each route read on the context as it now
-    stands. -/
-axiom unknowns : Context P → List ExposedUnknown
-
-/-- **Your judgment**: the contrast in force does not make the candidate futures recognizable on
-    the axes in force — an axis with no differentiated values across the probes. Shown with its
-    basis and the spec revision you propose; you do not fan over it on your own. -/
-axiom Insufficient : Context P → Prop
-
-/-- **Your reading**: a sibling deficit a routing row now names — the candidates may simply not
-    diverge, or another deficit fits — shown with its basis and the command as a hint; `none`
-    where none does. It closes nothing. -/
-axiom siblingReading : Context P → Option Deficit
-
-/-- **Your reading**: the futures are already recognizable from the sharpened description, or the
-    activation premise has collapsed, with its basis; `none` otherwise. It closes nothing. -/
-axiom dissolutionReading : Context P → Option String
-
-/-- **Your record**: the contrary grounds you showed before the person's answers — a direction
-    whose future no probe materialized, a probe you read as not carrying its direction, a closing
-    you would weigh otherwise — attached to the closing when the person closes over them; empty
-    when there were none. -/
+/-- **Your record**: the contrary grounds you showed before the person's closing turn, each with
+    what it bears on and what it rests on — a direction whose future no probe materialized among
+    them — attached when the person closes over them, and raised again only on new evidence;
+    empty when there were none. -/
 axiom dissent : Context P → List String
+
+/-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a reading or
+    an expectation of a future, a question about a probe, a send-back, a wish to see or to check
+    something — judged on what the whole utterance does, on the context with it. An utterance
+    about other work leaves the run as it stands: the session answers it, that answer stays in
+    the context, and no gate of this run is raised. -/
+axiom Reaches : Context P → Prop
 
 /-- How the person ends the run. -/
 inductive Closing
   /-- settle this direction: a probed one, a composition of the probes, or a candidate no probe
       materialized -/
   | constitute (d : Direction)
-  /-- the futures are recognizable without further probes, or the activation premise collapsed:
-      no preview is owed -/
+  /-- no preview is owed: the futures are recognizable without further probes, or the commitment
+      the run was for no longer stands -/
   | dissolve
-  /-- stop here, no direction constituted -/
-  | stop
-  /-- go on to the protocol the person names -/
-  | route (target : String)
+  /-- end here with neither -/
+  | withdraw
 
-/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
-    stands, the order of its turns included: a closing said before a later round was presented
-    was answered by that round. Whatever form the turn takes — an option number, a restated goal,
-    a side remark — it constitutes only what its words settle. A composition that says to go with
-    it constitutes it; one that asks to see it, or a candidate named to be seen, closes nothing;
-    where the intent is unclear, nothing closes and the next round asks. -/
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
+    nothing — closes the run this way, read whole on the context as it now stands. Its words
+    decide what it settles, whatever form it takes — an option number, a restated goal, a side
+    remark; a mere lean, a comparison, or an acknowledgment of what you showed closes nothing. A
+    composition that says to go with it constitutes it; one asking to see it, or a candidate named
+    to be seen, closes nothing. Taking what the map showed adopts it as shown, with no second
+    permission. A direction no probe materialized constitutes only where a round had already shown
+    that its future was never materialized; named first in this turn, the next round shows that,
+    and a later turn constitutes. Where the intent is unclear, nothing closes and the next round
+    asks. Your readings, the map's cells, and the open unknowns close nothing and hold no closing
+    back. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -354,45 +254,54 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
   | .open_ _     => none
   | .filled a .. => some a
 
-/-- **Your judgment**, the adoption condition: the direction a constitution takes was shown with
-    what decides it — its probe and the contrast rows, or for a composition the probes it composes
-    — together with your contrary grounds, on the round the closing answered. A direction no probe
-    materialized is covered only once the ground that its future was never materialized was shown
-    and the person settles it over that ground. Where anything would be taken unseen, the round is
-    presented again with it. -/
-axiom Covered : Context P → Prop
-
-/-- **Your judgment**: the person's turns, read against the context as it now stands, ask to see
-    something no probe has materialized — a spec element sent back (an axis, the policy, the tier,
-    the target set, the probe material), a composition to be seen, a named candidate, or the
-    revision you proposed taken up. -/
+/-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
+    spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
+    material), a composition to be seen, a named candidate, probed alone
+    against the probes already made, or the revision you proposed taken up. -/
 axiom FanRequested : Context P → Prop
 
-/-- **Your reading** of the contrast rows that made `d`'s future recognizable. It is your reading,
-    shown as such, unless the person's words name the rows; empty where no probe materialized
-    `d`. -/
+/-- **Your judgment**: the latest utterance asks to observe something real that bears on a
+    direction — a run, a measurement, a source read — or takes the check you offered; judged
+    apart from a wish to see a depiction, which `FanRequested` reads. -/
+axiom AsksCheck : Context P → Prop
+
+/-- **Your read**, now, of what the next judgment needs: the candidates' material and the sources
+    that bear on the decision — any a turn cites, and any you find — as far as relevant access
+    reaches. What you say you read, you read to the end. Empty where nothing outside the context
+    bears. -/
+axiom gathered : Context P → List (Evidence P)
+
+/-- **Your read**, now: what the check handed off at `.check` returned. -/
+axiom checked : Context P → List (Evidence P)
+
+open Classical in
+/-- What is read now: what is gathered, and what the check returned where `AsksCheck` holds, as
+    `consultOps` hands it off. -/
+def consult (c : Context P) : List (Evidence P) :=
+  gathered c ++ (if AsksCheck c then checked c else [])
+
+/-- The context with what `consult` read now appended. -/
+def consulted (c : Context P) : Context P := c ++ (consult c).map (·.val)
+
+/-- **Your reading** of the cells that made `d`'s future recognizable. It is your reading, shown as
+    such, unless the person's words name them; empty where no probe materialized `d`. -/
 axiom decidingRows : Context P → Direction → ContrastMap
 
-/-- **Your judgment**: the constituted direction has a mapping against a target account already in
-    play whose intended inferences need an audit — a `/ground` next move to propose. -/
-axiom groundTag : Context P → Option String
-
-/-- Read before discard; it carries no discard trace. `probed` says whether a probe materialized
-    the direction. -/
+/-- Read before discard. `probed` says whether a probe materialized the direction. A probe stays
+    evidence for no claim here and in every remnant: a deciding cell records what made a future
+    recognizable, never a finding about the world. -/
 structure Harvest where
   direction    : Direction
   probed       : Bool
   decidingRows : ContrastMap
-  unknowns     : List ExposedUnknown
-  groundTag    : Option String
+  unknowns     : List String
 
 def harvestOf (c : Context P) (d : Direction) : Harvest :=
-  ⟨d, (directions c).contains d, decidingRows c d, unknowns c, groundTag c⟩
+  ⟨d, (directions c).contains d, decidingRows c d, unknowns c⟩
 
 /-- `fileDestroyed`: the path removed and verified absent (Mockup). `noFileArtifact`: a
-    Vignette, nothing to destroy — discard is non-promotion, and the remnant text stays under the
-    non-evidence stamp. `discardFailed`: attempted with one retry and still present, or never
-    verified; declared, never silent. -/
+    Vignette, nothing to destroy — discard is non-promotion. `discardFailed`: still present, or
+    never verified; declared, never silent. -/
 inductive Disposition
   | fileDestroyed
   | noFileArtifact
@@ -418,35 +327,36 @@ structure TraceEntry where
 def discardTrace (c : Context P) : List TraceEntry :=
   (probes c).zipIdx.map fun (p, i) => ⟨i, p.direction, p.realized.location, disposition c i⟩
 
-/-- `DirectionalContrast`, assembled after cleanup from the harvest read before it. What persists
-    is the harvest, the discard trace, and the dissent; `context` is what their readings point
-    into, and probe detail stays session-local. -/
+/-- `DirectionalContrast`, assembled after cleanup from the harvest read before it: the purpose
+    and the map as they stood, the harvest, the discard trace, and the dissent; `context` is what
+    their readings point into, and probe detail stays session-local. -/
 structure DirectionalContrast (P : Type) where
   context : Context P
+  purpose : Occ (purposeCoord (P := P)) context
+  map     : ContrastMap
   harvest : Harvest
   trace   : List TraceEntry
   dissent : List String
 
-/-- What a run hands on when it ends without a direction: the unknowns with their routes, the
-    discard trace, and the dissent. -/
+/-- What a run hands on when it ends without a direction: the purpose and the map as they stood,
+    the open unknowns, the discard trace, and the dissent. -/
 structure Closed (P : Type) where
   context  : Context P
-  unknowns : List ExposedUnknown
+  purpose  : Occ (purposeCoord (P := P)) context
+  map      : ContrastMap
+  unknowns : List String
   trace    : List TraceEntry
   dissent  : List String
 
 inductive Outcome (P : Type)
-  | notActivated (c : Context P) (why : NotActivated)
+  | notActivated (c : Context P) (why : String)
   | contrasted   (r : DirectionalContrast P)
-  /-- `DissolutionExit`: a convergent stand-down the person closed; the enriched axes, the
-      unknowns with their routes, the dispositions, and any candidate still pending go to the
-      regular gate as live candidates -/
+  /-- `DissolutionExit`: no preview is owed; the map, the open unknowns, every probe's
+      disposition, and any candidate still pending stay with the decision as live candidates -/
   | dissolved    (r : Closed P)
-  /-- `EarlyExit`: the person stopped; the partial trace, the residual declared, no direction
-      constituted -/
+  /-- `Withdrawn`: the person ended the run with neither; the partial record, with every
+      disposition of the probes this run wrote -/
   | withdrawn    (r : Closed P)
-  /-- the person named another protocol: proceed to it, citing their words -/
-  | routed       (target : String) (r : Closed P)
   | holding      (c : Context P)
 
 /-! ── MODE STATE ──
@@ -458,20 +368,25 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. Your turns are
-`AITurns`: a fan relays the spec — whole, with its ledger — before anything is generated, then the
-probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy` names,
-one probe per agent where delegated); `respond` presents the round and closes it at the gate.
+`AITurns`: a fan relays the spec — whole, with what changed — before anything is generated, then
+the probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy`
+names); `respond` is the round, as TOOL GROUNDING's `present` entry names it; `session` is the
+session's own answer to an utterance about other work, which stays in the context without being a
+gate of this run.
 -/
 
-/-- Your turns. `narrate` writes each Vignette probe's narration, re-presented as instantiated and
-    never regenerated; being yours, it grounds nothing — a probe is evidence for no claim. -/
+/-- Your turns. `narrate` writes each Vignette probe's narration, re-presented as written and never
+    regenerated; being yours, it grounds nothing. -/
 structure AITurns (P : Type) where
   relay   : Context P → Response P
   narrate : Context P → List (Response P)
   respond : Context P → Response P
+  session : Context P → Response P
 
-/-- **Your instantiation** of the Mockup probes under the relayed spec: each artifact as observed at
-    creation, its path registered then. Existing project files stay unchanged. -/
+/-- **Your instantiation** of the Mockup probes under the relayed spec, beneath temp isolation:
+    each artifact as observed at creation, its path registered then; existing project files stay
+    unchanged. The observation evidences that the artifact exists at its path, and nothing it
+    depicts. -/
 axiom instantiate : Context P → List (Evidence P)
 
 def fan (ai : AITurns P) (c : Context P) : Context P :=
@@ -479,78 +394,68 @@ def fan (ai : AITurns P) (c : Context P) : Context P :=
   c₁ ++ (ai.narrate c₁).map (·.val) ++ (instantiate c₁).map (·.val)
 
 /-- **Your cleanup**: per probe, the destruction step read off its realization, then the
-    verification of absence; a failure retries once, then is observed as `discardFailed`. -/
+    verification of absence; a probe whose absence was not verified is observed as
+    `discardFailed`. -/
 axiom cleanup : Context P → List (Evidence P)
 
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
 def closed (c : Context P) : Closed P :=
   let c₁ := discard c
-  ⟨c₁, unknowns c, discardTrace c₁, dissent c⟩
+  ⟨c₁, purpose c₁, contrastMap c, unknowns c, discardTrace c₁, dissent c⟩
 
 def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
   let c₁ := discard c
-  ⟨c₁, harvestOf c d, discardTrace c₁, dissent c⟩
+  ⟨c₁, purpose c₁, contrastMap c, harvestOf c d, discardTrace c₁, dissent c⟩
 
 open Classical in
-/-- `respond` presents the round. After a fan: each probe first, from its realization — the
-    narration re-presented as instantiated, a Mockup walked through, never regenerated — then the
-    per-axis contrast with the common commitments declared as shared premises, then the exposed
-    unknowns with their routes. Then your readings, each with its basis: an insufficient contrast
-    with the revision you propose, a sibling deficit with its command as a hint, futures already
-    recognizable or a collapsed premise, and your contrary grounds about any direction. Where a
-    turn was read as a closing that is not yet covered, what it would take is shown and asked.
-    Where the person asked about a probe, the answer — design intent within placeholder
-    discipline, a factual unknown recorded with the `inquire` route. Then the gate `Qdir`: one
-    Select per probed direction, each pointing at the future it settles, plus composing from the
-    probes; sending back any spec element, naming a candidate no probe materialized, asking about a
-    probe, stopping, and naming another protocol are said before the gate, never as options. -/
+/-- A turn about other work is answered by the session and leaves the run as it stands; a closing
+    is read from the person's turn before anything is consulted; otherwise what is consulted now
+    enters the context, a fan runs where the turn asks to see what no probe materialized, and the
+    round follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
-    let c' := fuse c u
-    match filledValue (closing c') with
-    | some (.constitute d) =>
-      if Covered c' then .contrasted (constituted c' d)
-      else preview ai (c' ++ [(ai.respond c').val]) us
-    | some .dissolve  => .dissolved (closed c')
-    | some .stop      => .withdrawn (closed c')
-    | some (.route t) => .routed t (closed c')
+    let f := fuse c u
+    if ¬ Reaches f then preview ai (f ++ [(ai.session f).val]) us
+    else match filledValue (closing f) with
+    | some (.constitute d) => .contrasted (constituted f d)
+    | some .dissolve       => .dissolved (closed f)
+    | some .withdraw       => .withdrawn (closed f)
     | none =>
-      let c₁ := if FanRequested c' then fan ai c' else c'
-      preview ai (c₁ ++ [(ai.respond c₁).val]) us
+      let c₁ := consulted f
+      let c₂ := if FanRequested f then fan ai c₁ else c₁
+      preview ai (c₂ ++ [(ai.respond c₂).val]) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
-  match phase0 c with
+  match notActivated c with
   | some why => .notActivated c why
   | none =>
-    let c₁ := fan ai c
+    let c₁ := fan ai (consulted c)
     preview ai (c₁ ++ [(ai.respond c₁).val]) us
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: nothing counts down and no answer
 waits for a later gate. A fan happens where the person's turn asks to see something no probe has
-materialized, and nowhere else: an insufficiency you find is shown with the revision you propose,
-and you fan over it once the person takes it up. Each fan relays the spec whole with its ledger
-before it generates. A question about a probe and a send-back are turns of the same kind as a
-closing. The loop is dialogue: each round ends at the gate, and the person ends the run.
+materialized, and a check where it asks for one, and nowhere else: an insufficiency you find is
+shown with its basis and the revision you propose, and you fan over it once the person takes it
+up. Each fan relays the spec whole, with what changed, before it generates. The loop is dialogue:
+each round ends at the gate, and the person ends the run.
 -/
 
 /-! ── CONVERGENCE ──
-converged: a DirectionalContrast — a direction the person constituted with its deciding evidence
-and your contrary grounds in view, harvested before discard, every probe's disposition declared —
-or a DissolutionExit the person closed. EarlyExit and a route are not convergent. A constitution
-adopts the direction the person settled; it establishes nothing about a direction no probe
-materialized, and a contrary ground it was taken over rides the closing as dissent. Convergence
-evidence: at terminal, present the transformation trace over the steps actually completed — the
-turn read as the closing, quoted, and the intent taken from it; at DirectionalContrast, each axis
-in force mapped to the contrast rows that made its futures recognizable (your reading unless the
-person named them, and none where no probe materialized the direction), the constituted direction,
-each exposed unknown with its downstream route, the per-probe discard disposition with where each
-probe lived, and the dissent attached to the closing. Each other terminal presents its own relay
-payload (TOOL GROUNDING). The framing readout names the work in play — axes being drafted, probes
-under contrast, direction being constituted, discard being verified — never a completion tally.
-Demonstrated, not asserted.
+converged: a DirectionalContrast — a direction the person constituted over the map, harvested
+before discard, every probe's disposition declared — or a DissolutionExit the person closed.
+Withdrawal keeps its partial record. A constitution adopts the direction as the map showed it; it
+establishes nothing about a direction no probe materialized, and a contrary ground it was taken
+over rides it as dissent. The convergence evidence: the turn read as the closing, quoted, and the
+intent taken from it; the purpose as it stands, marked as yours where you read it; at
+DirectionalContrast, the constituted direction and the cells that made its future recognizable,
+each with what it rests on (your reading unless the person named them; none where no probe
+materialized the direction); at every exit, the open unknowns with what would settle each, every
+probe's disposition with where it lived, and the dissent. The framing readout names the work in
+play — the spec being drafted, probes under contrast, a direction being constituted, discard being
+verified — never a completion tally. Grounded, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -570,41 +475,40 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | noDeficitRelay | routeAwayRelay | unfitRelay | requiresFailRelay
-             | deriveAxes | draftPolicy | specRelay | instantiate | instantiateDelegate
-             | contrast | present | qdir | readTurn | harvest | cleanup | cleanupVerify
-             | assemble | converge | dissolutionRelay | withdraw | routeRelay | seam
+inductive Op | detect | notActivatedRelay | gather | specRelay | instantiate | instantiateDelegate
+             | assess | present | check | readTurn | harvest | cleanup | cleanupVerify | assemble
+             | converge | dissolutionRelay | withdraw | seam
 
 def grounding : Op → Annot × String
-  | .detect            => (.sense, "Internal analysis: the deficit predicate and the 4-step routing, first match wins; a question about what an option means is answered, not previewed; no external tool")
-  | .noDeficitRelay    => (.interaction .extension, "futures recognizable from text — the finding with its reasoning; a regular gate suffices; not activated")
-  | .routeAwayRelay    => (.interaction .extension, "routing rows ①–③ — the matched row with its basis and its command as a hint; which protocol takes it is the session's; not activated")
-  | .unfitRelay        => (.interaction .extension, "a type guard fails and no routing row matches — the failed guard and why; the decision stays at a regular gate; not activated")
-  | .requiresFailRelay => (.interaction .extension, "no imminent commitment, or fewer than two candidates — the failed requirement; one or zero candidates points to row ③'s targets as hints — /ideate for the thin field, /elicit for its narrower case; not activated")
-  | .deriveAxes        => (.sense, "Internal analysis: divergence axis candidates from the candidate directions")
-  | .draftPolicy       => (.sense, "Internal analysis: the placeholder policy draft — visible synthesis, non-evidence stamp, skeleton-data split")
-  | .specRelay         => (.interaction .extension, "the spec whole — divergence axes, placeholder policy, probe target set, realization tier — each with the basis that chose it and, where a candidate waits, which and why; on every later fan the whole spec again with its ledger, each changed line marked the person's edit, a necessary consequence, or your proposal; fires before any probe is generated and yields no turn")
+  | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it; no external tool")
+  | .notActivatedRelay => (.interaction .extension, "before activation only: your reading that this is not this protocol's case, in plain words with its basis — a question about what an option means answered as asked, an unmet need said as what would settle it; not activated")
+  | .gather            => (.observe, "artifact read, artifact search: read-only reads, now, of what the next judgment needs — the candidates' material and the sources that bear on the decision, any a turn cites and any you find — as far as relevant access reaches; name what was reached and what was not, and any conflict among what was gathered")
+  | .specRelay         => (.interaction .extension, "the spec whole before any probe is generated — your reading of the purpose, marked as yours unless they said it; the axes the purpose turns on; the placeholder policy: each probe overtly synthetic, its structure faithful to its direction and its data values fake, and where a placeholder may blur a difference; which candidates get probes and why any waits, a candidate the person named being probed alone against the probes already made; and the tier — each with the basis that chose it. On every later fan the whole spec again with what changed since the last relay; marking a change by its cause is welcome, not required. It yields no turn")
   | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the target set, each realization registered at creation; existing project files never modified; the Vignette tier writes no file — its narration is your own turn (`narrate`), recorded on the probe and never regenerated")
-  | .instantiateDelegate => (.dispatch, "delegate (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with its path registered; subordinate to the active runtime policy)")
-  | .contrast          => (.sense, "Internal analysis: per-axis juxtaposition over every probe so far, the exposed unknowns with their routes, the common commitments recomputed over every probe, and your readings — insufficiency with the revision you propose, a sibling deficit, futures already recognizable or a collapsed premise, contrary grounds")
-  | .present           => (.interaction .extension, "probe-first order — probes one by one, each from its realization, never regenerated → the per-axis contrast map with the common commitments declared → newly exposed unknowns → your readings, each with its basis; table-first re-abstracts and reproduces the deficit")
-  | .qdir              => (.interaction .constitution, "mandatory direction gate — one concrete Select per probe-exposed direction plus composing from the probes, each option pointing at the future it settles; sending back any spec element, naming a candidate no probe materialized, asking about a probe, stopping, and naming another protocol are declared in the pre-gate text, never as peer options")
-  | .readTurn          => (.sense, "Internal analysis: the new turn and every earlier turn of the person's it bears on, read against the fused context as it now stands — a closing and whether it is covered, a request to see something unmaterialized, a question about a probe — whatever form it takes; a turn read as a closing is quoted with the intent taken from it")
-  | .harvest           => (.sense, "Internal analysis: the constituted direction, whether a probe materialized it, the deciding contrast rows marked as your reading unless the person named them, the routed unknowns, and any GroundTag, read from the context before discard")
-  | .cleanup           => (.transform, "environment run: the destruction step — per-probe artifact destruction, one retry on failure; every exit with probes runs it first")
-  | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each Path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified")
+  | .instantiateDelegate => (.dispatch, "delegate (conditional, Mockup tier): a probe's write handed to execution, temp-isolated, its path registered at creation")
+  | .assess            => (.sense, "Internal analysis: the purpose reading, the axes, each cell and what it rests on, the shared premises, the open unknowns, and your readings, over the whole fused context as it now stands")
+  | .present           => (.interaction .constitution, "the round, every round the first included. After a fan, each new probe first, from its realization — a narration re-presented as written, a Mockup walked through at its path, never regenerated. Then the map: the purpose as the person said it, or else your reading of it, marked as yours; per axis the purpose turns on, what each direction's future looks like there and what that rests on — a probe they saw, your description alone, or a check's result with what it measured and, where it ran on a stand-in, what it left untested; the premises every probe shares, as shared; the open unknowns, each with what would settle it; your readings with their basis — an insufficient contrast with the revision you propose, a reading that the futures are already recognizable or that the commitment no longer stands, each closing nothing; and your contrary grounds, each with what it bears on and what it rests on, a direction whose future no probe materialized among them. Every later round shows what changed on the map, and the whole map when the person asks for it, and answers what they asked — a question about a probe within placeholder discipline, saying what the probe was built to show and never a claim about the world; an analogy you offer says which axis it weights. A correction of the purpose moves the map. Read the person's turn whole. Where they voice a reading or an expectation of a future, lay it beside what the probes show, saying where the two agree and where they part; before reading it as at odds with a probe, read whether it speaks to another purpose, a preference, or an assumption a placeholder cannot reach, and say which, moving the map — a placeholder never settles how a future will be lived. Where their words and what was shown part on the same axis and premises, or two of their own utterances do — a criterion they stated and a pick they made — show it with its working in one round: their words quoted, the narrowest material that bears on it, why the two part, and what they got right; a contradiction they keep after its working stays in view as a held contrary ground, worked again only on new material. Where what could not be reached, or a conflict among what was gathered, bears on a direction, say it there. Where a direction they lean toward rests on your description alone and a cheap check would show it, offer that check — an offer, never a question for them to answer. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — settle a direction, a composition, or one no probe showed; send back any part of the spec; name a candidate to see; ask about a probe or ask to check something; say the preview is no longer needed; or end here")
+  | .check             => (.dispatch, "delegate: where `AsksCheck` holds, the check handed to execution with the direction and axis it bears on and what it is to show; it changes no existing state — what it has to write goes to a scratch space outside the project tree — and a result from a stand-in comes with what it stood for and what it left untested; what it returns enters the context through `consult` as evidence read now, before the round that shows it, and never as a probe")
+  | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a reading or expectation, a request to see or to check, a question — read whole against the fused context as it now stands, as `Reaches` and the judgments above read it")
+  | .harvest           => (.sense, "Internal analysis: the constituted direction, whether a probe materialized it, the deciding cells marked as your reading unless the person named them, and the open unknowns, read from the context before discard")
+  | .cleanup           => (.transform, "environment run: the destruction step — per-probe artifact destruction; every exit with probes runs it first")
+  | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and the direction the person settled stands")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
-  | .converge          => (.interaction .extension, "the transformation trace — the turn read as the closing, quoted, with the intent taken; axes → deciding contrast rows → direction; unknowns with routes; per-probe discard disposition with where each probe lived; the dissent attached")
-  | .dissolutionRelay  => (.interaction .extension, "when the person accepts or declares that the futures are recognizable without further probes, or that the activation premise collapsed — state the basis, the sharpened axes themselves, and hand to the regular gate the enriched axes with every exposed unknown and its route and, wherever probes exist, the per-probe dispositions plus any candidate still pending as live candidates; attach any dissent; stand down as DissolutionExit — a success, not an abandonment")
-  | .withdraw          => (.interaction .extension, "the person stops — the partial trace and the residual declared; cleanup_verify enforced; EarlyExit. A hard escape yields no turn, so cleanup cannot run: temp isolation's bounded lifecycle is the backstop")
-  | .routeRelay        => (.interaction .extension, "the person names another protocol — cleanup_verify enforced; the unknowns with their routes and the contrast as context; proceed to the named protocol citing their words")
-  | .seam              => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed to it citing that source; a harvested GroundTag proposes /ground with its basis and moves nothing on its own; every Constitution gate inside this protocol and the next fires unchanged")
+  | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with DirectionalContrast")
+  | .dissolutionRelay  => (.interaction .extension, "the person says no preview is owed — the futures recognizable without further probes, or the commitment the run was for no longer standing: their turn quoted with the intent taken, the map with the sharpened axes, every open unknown with what would settle it, every probe's disposition, any candidate still pending as live, and the dissent; DissolutionExit — a success, not an abandonment")
+  | .withdraw          => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists with every probe's disposition")
+  | .seam              => (.interaction .extension, "after a terminal, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise the record is handed on as session text, the dissent travelling in it")
 
-/-- The operations that write a fan's probes, by the spec's tier: a Mockup through `.instantiate`,
-    and `.instantiateDelegate` where delegated; a Vignette writes no file. -/
+/-- The operations that write a fan's probes, by tier: a Mockup through `.instantiate`, and
+    `.instantiateDelegate` where delegated; a Vignette writes no file. -/
 def instantiatedBy : RealizationTier → List Op
   | .vignette => []
   | .mockup   => [.instantiate, .instantiateDelegate]
+
+open Classical in
+/-- The operations whose returns `consult` appends to the context: what `.gather` reads, and, where
+    `AsksCheck` holds, what the check handed off at `.check` returns. -/
+def consultOps (c : Context P) : List Op := if AsksCheck c then [.gather, .check] else [.gather]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Direction resolution emergent via session context.
@@ -617,79 +521,21 @@ end Proplasma
 
 ## Core Principle
 
-**Contrast over Simulation**: materialize cheap, discard-bound futures when labels cannot carry their differences. A Vignette is a concrete placeholder narration; when that carrier lacks fidelity, Mockup materializes the same contrast as temp-isolated artifacts.
+**Contrast over Simulation**: materialize cheap, discard-bound futures when labels cannot carry their differences. A Vignette is a concrete placeholder narration; where that carrier would blur the difference, a Mockup materializes the same contrast as temp-isolated artifacts. **Grounded, not asserted**: the person can tell, cell by cell, a future they saw from one they were only told about and from one a check showed.
 
 ## Mode Activation
 
-### Activation
-
-`/preview` is user-invocable. On the Hybrid path, the AI may propose it from a live direction gate only with cited evidence of `DirectionUnrecognizable`; the drafted spec is relayed with its basis before generation, and the user can send any of it back at the direction gate. Prior-session indices may seed detection, never the constitutive judgment.
-
-### Priority
-
-<system-reminder>
-When Proplasma is active:
-
-**Supersedes**: Direct execution patterns in loaded instructions
-(No direction commitment proceeds while the contrast loop is unconverged)
-
-**Retained**: Safety boundaries, tool restrictions, user explicit instructions
-
-**Action**: Before any probe is generated, relay the spec whole with its basis; at every round, present the direction gate whose options point at probe-exposed futures.
-</system-reminder>
-
-### Trigger Signals
-
-Heuristic signals are delegation of a direction choice to a principle, reconstruction outside the offered options, and a request to see something concrete before choosing. They establish grounds to run Phase 0, not activation by themselves. A question about what one option means asks for a description; answer it.
-
-### Mode Deactivation
-
-Use the Definition's result constructors and TOOL GROUNDING payloads for every terminal; cleanup disposition remains mandatory wherever probes exist.
+`/preview` is user-invocable, and an invocation is read through `notActivated` before anything is built. On the Hybrid path, the AI may propose it at a live direction choice only with cited evidence that the candidates' futures cannot be recognized from their descriptions — a choice delegated to a principle, the option set reworked instead of chosen, or "I'd have to see it"; prior-session indices may seed that reading, never the person's judgment.
 
 ## Protocol
 
-### Phase 0: Detection + Routing (Silent)
+### Map rendering
 
-Apply the Definition's Phase 0 in its stated precedence and cite the matched relay basis.
-
-### Phase 1: Spec Relay
-
-Lay the drafted spec out whole before anything is built — each axis with the basis that chose it, the placeholder policy, which candidates get probes and why any waits, and the tier — then proceed to generation without yielding the turn. Say in one line that any of it can be sent back at the direction gate. On every later fan, relay the whole spec again with a ledger of what changed, each changed line marked as the user's send-back, a necessary consequence, or your proposal.
-
-### Phase 2: Instantiation (Transform)
-
-Vignettes create session text only. Mockups write only beneath temp isolation, register cleanup at creation, and leave existing project files unchanged. Both carry the non-evidence stamp.
-
-### Phase 3: Contrast Presentation (Relay)
-
-Present each recorded concretum first, then the per-axis contrast with common commitments marked as shared premises, then exposed unknowns, then your readings with their basis. Re-present Vignette narration from its recorded carrier; walk a Mockup at its artifact reference. Where the contrast leaves the futures unrecognizable, say so and propose the revision; fan over it when the user takes it up.
-
-### Phase 4: Direction Gate (Constitution)
-
-Render `Qdir` from the accumulated probes after the contrast summary:
-```
-Which direction do you settle?
-
-Options:
-1…N. **Select: {probed direction}** — {the deciding axis values its probe exposed}
-N+1. **Compose** — combine the probes: say to go with the combination, or to see it first
-```
-Name the free-response paths from `Direction-gate response discipline` before this gate; they are not numbered direction options.
-
-### Phase 5: Harvest → Discard (in this order)
-
-Accept the constituted direction before cleanup: a `DiscardFailed` disposition triggers the manual-cleanup handoff at the location the trace records but does not revoke that direction. Persist only the Definition's terminal record — the harvest, the discard trace, and the dissent; probe detail remains session-local.
-
-## UX Safeguards
-
-Keep placeholder status visible in every probe and contrast. A Mockup is sandbox matter, not a project edit; cleanup disposition reports artifact survival, not whether the user's direction was accepted.
+Label each row by what the person decides through it, and say each cell's footing — saw it, told it, checked it — in words beside its content. Where the session has a surface that stays in view, the map can stay there as well.
 
 ## Rules
 
-- **Direction-gate response discipline**: Name before `Qdir` what the user can say besides a Select: send back any spec element, name a candidate no probe materialized, ask about a probe, stop, or name another protocol. A named candidate the user wants to see is probed alone against the probes already made. Answer design-intent questions within placeholder discipline, record factual unknowns for `/inquire`, and state which axis an analogy weights. Route the pre-commit check to `/inquire` as well once the direction becomes committed; propose `/ground` when a direction's mapping against an account already in play needs its intended inferences audited — the proposal moves nothing until the user takes it up.
-- **Draft relayed with its basis**: relay every axis, the policy, the target set, and the tier with the basis that chose it, then generate; every later fan relays the whole spec again with the ledger of what changed.
-- **Fans follow the user's turn**: generate probes only where the user's turn asks to see something no probe has materialized — a revised spec, a composition, a named candidate, or a revision you proposed. An insufficiency you find is shown with its basis and the revision you propose, never repaired on your own.
-- **Closure by the user**: After activation only the user closes — settling a direction, dissolving the run, stopping, or naming another protocol; your readings of an insufficient contrast, a sibling deficit, or a collapsed premise settle none of them. Read the closing from whatever the user said, quote the turn you read and the intent you took, and ask where it is unclear. Before the gate, show any contrary ground you hold about a direction; a direction no probe materialized is settled only after you have said its future was never materialized. Where the user closes with a ground standing, attach it to the closure record. Which contrast rows decided is your reading, shown as yours unless the user names them.
-- **Harvest before discard**: retain only the constituted direction, deciding contrast rows, and routed unknowns before cleanup. Cleanup produces the discard trace; assemble the durable record afterward, leaving probe detail session-local.
-- **Round composition**: use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
-- **Form feedback**: choose each round's density from the current request; carry an explicit form preference until countermanded. Change the open aspects of form directly, preserve content, order, cadence, and turn boundaries fixed elsewhere, and state both the adjustment and any overlapping constraint that remains.
+- **Placeholder discipline**: Keep placeholder status visible in every probe and on the map; a Mockup is sandbox matter, not a project edit.
+- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before its gate. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before or inside the gate is in question.
+- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Contract execution**: As FLOW, the judgments' doc comments, LOOP, TOOL GROUNDING's `specRelay` and `present` entries, and CONVERGENCE state.
