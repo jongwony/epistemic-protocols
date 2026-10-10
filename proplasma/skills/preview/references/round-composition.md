@@ -8,7 +8,7 @@ User-facing emit (probe narrations, the map, the round's opening, the convergenc
 
 ## When some of what is in view belongs to a later round or the convergence evidence rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence (the relevant probe or map cell), and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, the convergence evidence, or later rounds.
+Each user-facing round bundles the current judgment, its nearest material (the relevant probe or map cell), and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, the convergence evidence, or later rounds.
 
 ## When whether text belongs before or inside the gate is in question
 
