@@ -1,7 +1,7 @@
 {
   "name": "euporia",
   "description": "Find the decisions a rough intent turns on, traced from your own material and the domain's usual decisions — /elicit (εὐπορία: way through)",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
