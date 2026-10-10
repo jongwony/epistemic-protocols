@@ -94,9 +94,10 @@ receive an OpenAI key in Actions.
 
 `harness.config.json` carries shared runner settings and a target registry. Each target
 owns its plugin directory, skill id, invocation, and case set. `REALIZE_RUNNER=codex`
-selects the committed Luna xhigh profile. Results are keyed by target, runner, and a
-hash of the actual protocol/style treatment, so one skill or ablation cannot reuse
-another's cache.
+selects the committed Luna xhigh profile. Results are keyed by target, runner, the
+case's subject-facing files (prompt and replies after frontmatter, case.yaml, the scaffold
+script), and a hash of the actual protocol/style treatment — for protocol arms, the skill's
+`references/` too — so one skill, ablation, or edited case cannot reuse another's cache.
 
 Prefer a capable model for the primary measurement. The weakest available one
 exercises the safeguards but not the protocol, so a failure there cannot separate a
@@ -190,9 +191,10 @@ composite; the report names them. For `inquire`, collection-before-surfacing ord
 unasked cheap evidence, faithful basis, kept ownership, stated answer openings, the relay of a
 collection that left nothing open, and the absence of a design gate remain manual observations grounded by the grader
 files. For `grasp`, the automatic set is what both cases share — the target read in the
-first turn, the tree unchanged after every turn, every turn reported — and the quoted
-correction, the withheld verdict with its named need, the stop at each gate, and closure on
-the user's word are manual. For `conduct`, the only automatic predicate is every turn reported:
+first turn, the tree unchanged after every turn, every turn reported — and the absence of a
+test, the grounded opening map, the one-round correction, a check's result set against both
+readings, the withheld verdict with its need kept on the map, the stop at each gate, and closure
+on the user's word are manual. For `conduct`, the only automatic predicate is every turn reported:
 whether the method's work started — the map's stop, the taking's proceed, the relay's proceed —
 is read from the transcript, so each transition is manual along with what its turn presents.
 Whether the tree differed from the scaffold after each turn is recorded in the cell's sidecar as

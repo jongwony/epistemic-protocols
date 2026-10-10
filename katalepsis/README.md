@@ -14,24 +14,29 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 
 ### The Solution
 
-**Comprehension over Explanation**: Rather than lecturing, AI first offers intent-scented entry points in the user's language. Users select the path closest to what they need to understand, decide, explain, or modify; then AI grounds that path in the artifact and verifies understanding through progressive questioning.
+**Grounded, not asserted**: each aspect shows what it rests on — the user's reading borne out by the material, a result they asked to see, or the AI's explanation alone — and an explanation is never taken as understanding. Rather than lecturing at the user or quizzing them, AI first reads the target and the sources around it, then shows a map of understanding over the user's purpose — the purpose as they said it, or AI's reading of it marked as AI's, and the aspects it turns on, each with its essence in a line, the material it rests on, and how it stands. AI explains each aspect in the one picture, example, or metaphor that carries it best, and goes deeper when the user asks. The user moves the map with their own words: "got it" leaves an aspect resting on AI's explanation, accepted; "I'd need to see it" runs a check whose result they look at together; "that seems off" is met with the material that settles it, or with no verdict and what would settle it.
 
 ### Difference from Simple Explanation
 
 | Dimension | Simple Explanation | Katalepsis |
 |-----------|-------------------|------------|
-| Direction | AI talks, user listens | AI verifies, user confirms |
-| Entry point | AI decides what to explain | User selects an intent-scented path |
-| Confirmation | Assumed after explanation | Verified through questions |
-| Progress | Undefined | Each selected entry point is a task the user closes |
+| Direction | AI talks, user listens | AI shows the map; the user moves it — accepting, asking to see, or pushing back |
+| Entry point | AI decides what to explain | The user's stated purpose, or AI's reading of it, marked as AI's and corrected in one line |
+| Confirmation | Assumed after explanation | Each aspect says what it rests on: the user's own reading borne out by the target, a result seen together, or only AI's explanation |
+| Ending | Undefined | The user says it is understood enough for their purpose; the map, with what is still to be checked and how, and any AI doubt, is the record |
 
 ## Protocol Flow
 
 ```
-Phase 0: Orient       → Infer likely comprehension intents from the result and user signal
-Phase 1: Entry Point  → Present intent-scented paths, user selects (gate interaction)
-Phase 2: Ground       → Materialize artifact basis; each selected entry point becomes a task
-Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction)
+Gather   → Read the target's material, and the sources that bear on it
+Map      → The purpose (the user's words, or AI's reading marked as AI's) and the
+           aspects it turns on, each with what it rests on and how it stands
+Explain  → Each aspect in one fitting representation; the user's move
+           answered with its material — a check they ask for runs and its result
+           is shown; no verdict without material: what would settle it is named
+           (gate interaction)
+Close    → The user says it is understood enough; the map at that moment is the
+           record, with any dissent
 ```
 
 ## When to Use
@@ -59,17 +64,14 @@ claude plugin install katalepsis@epistemic-protocols
 /grasp
 ```
 
-## Gap Types
+## What the Map Carries
 
-| Type | Description |
-|------|-------------|
-| **Expectation** | User's assumed behavior differs from actual |
-| **Causality** | User doesn't understand why something happens |
-| **Scope** | User doesn't see full impact of changes |
-| **Sequence** | User doesn't understand execution order |
-| **Horizon** | A co-intended but unspoken edge of the current entry point the user could not name from within their own framing — surfaced only when evidence-bound, material, and unspoken (false-positive guarded) |
-| **Contradiction** | Two statements in the session that cannot both hold, each quoted where it stands — taken up by whose it is: one the user holds a side of asks first for their explanation, one inside the target is shown as a finding about it, one against an earlier AI explanation is the AI's to correct |
-| **Emergent** | Gap outside the canonical types, adapted to the specific comprehension deficit |
+| Aspect | Description |
+|--------|-------------|
+| **What the purpose turns on** | What the target does that the user's purpose needs — explained in one representation, deeper on request; the user's own reading of it is checked against the material that settles it |
+| **Unvoiced edge** | An edge of what the target does that the user has not voiced and their purpose needs, grounded in the target's material — raised openly on the map like any other aspect |
+| **Contradiction** | Two sourced statements that cannot both hold on the same scope — taken up by whose it is: one the user holds a side of is shown with its working in one round (their words, the target's material, why they part, what they got right); one inside the target is shown as a finding about it; one against an earlier AI explanation is the AI's to correct |
+| **Check** | Something the user wants to see or try before trusting an aspect — run on their word, its result shown beside the aspect; AI offers the cheapest such check only where a judgment the user is about to make rests on AI's explanation alone |
 
 ## Author
 

@@ -60,7 +60,7 @@ Compact mapping for inline use.
 | Epharmoge `/contextualize` | Verification | A result — this session's or another's — is correct but may not fit where it lands or may leave out an intent the conversation stated | Misfits and omissions against everywhere the result lands and the session-built constraints, shown on one sheet |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Provisional whole map, progressive examination, source-bound settlement and residual |
 | Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions — one session, or a line of work, topic, or settled concept spread across several | Cross-session state recovery via narrative recognition (Recognition over Retrieval); a unit above one session is composed from its deposits at read time |
-| Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for a target present in context and quotable, whoever produced it — reviews, plans, papers, docs, or code changes |
+| Katalepsis `/grasp` | Cross-cutting | Something in play you can't follow yet, or nod along to unsure — a map of understanding over your purpose, each aspect saying what it rests on | User-intent grasp for a target present in context and quotable, whoever produced it — reviews, plans, papers, docs, or code changes |
 | Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, combination, stopping, where results go | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
 
 ## Phase Execution

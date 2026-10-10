@@ -209,8 +209,52 @@ if (!INVOCATION) {
   process.exit(1);
 }
 
-function treatmentId(arm) {
+// What reaches the subject or shapes its substrate -- the prompt and scripted replies as sent,
+// frontmatter stripped; case.yaml; the scaffold script case.yaml names -- is part of the key, so
+// a changed script starts a new cell rather than reusing one run against the old script. The
+// oracle only explains the script and reaches no subject, so it is not.
+const CASE_DIGESTS = new Map();
+function caseDigest(caseName) {
+  if (CASE_DIGESTS.has(caseName)) return CASE_DIGESTS.get(caseName);
+  const h = createHash('sha256');
+  const spec = caseSpec(caseName);
+  const part = (name, bytes) => h.update(`${name}\n`).update(bytes).update('\n');
+  const prompt = join(EVALS, caseName, 'prompt.md');
+  part('prompt.md', existsSync(prompt) ? stripFrontmatter(readFileSync(prompt, 'utf8')) : '');
+  for (const r of spec.replies) part(r.name, r.body);
+  const yaml = join(EVALS, caseName, 'case.yaml');
+  part('case.yaml', existsSync(yaml) ? readFileSync(yaml) : '');
+  part(relative(EVALS, spec.scaffold), existsSync(spec.scaffold) ? readFileSync(spec.scaffold) : '');
+  const digest = h.digest('hex');
+  CASE_DIGESTS.set(caseName, digest);
+  return digest;
+}
+
+// A protocol arm runs the skill's references/ beside its SKILL.md, so they are part of the
+// treatment, and an installed copy must carry the same ones.
+function referencesDigest(skillDir) {
+  const h = createHash('sha256');
+  const dir = join(skillDir, 'references');
+  if (existsSync(dir)) {
+    const files = readdirSync(dir, { recursive: true, withFileTypes: true })
+      .filter((e) => e.isFile())
+      .map((e) => join(e.parentPath ?? e.path, e.name))
+      .filter((file) => !relative(dir, file).split(/[\\/]/).some((s) => s.startsWith('.')))
+      .sort();
+    for (const file of files) h.update(`${relative(dir, file)}\n`).update(readFileSync(file));
+  }
+  return h.digest('hex');
+}
+
+let repoReferencesDigest = null;
+function skillReferencesDigest() {
+  repoReferencesDigest ??= referencesDigest(dirname(PROTOCOL_SKILL));
+  return repoReferencesDigest;
+}
+
+function treatmentId(arm, caseName) {
   const h = createHash('sha256').update(`${TARGET}\n${RUNNER}\n${JSON.stringify(arm)}\n`);
+  h.update(`${caseDigest(caseName)}\n`);
   h.update(`${INVOCATION || ''}\n`);
   h.update(RUNNER === 'codex'
     ? JSON.stringify({
@@ -222,7 +266,10 @@ function treatmentId(arm) {
         permissionMode: CFG.permissionMode,
         allowedTools: CFG.allowedTools,
       }));
-  if (arm.protocol) h.update(readFileSync(PROTOCOL_SKILL));
+  if (arm.protocol) {
+    h.update(readFileSync(PROTOCOL_SKILL));
+    h.update(skillReferencesDigest());
+  }
   if (arm.style) h.update(readFileSync(expand(CFG.styleSource)));
   return h.digest('hex').slice(0, 12);
 }
@@ -577,7 +624,8 @@ function codexTreatmentIntegrity(arm) {
       PLUGIN_VERSION, 'skills', CFG.protocolSkill, 'SKILL.md');
     if (!existsSync(installedSkill)) return false;
     return createHash('sha256').update(readFileSync(installedSkill)).digest('hex')
-      === createHash('sha256').update(readFileSync(PROTOCOL_SKILL)).digest('hex');
+      === createHash('sha256').update(readFileSync(PROTOCOL_SKILL)).digest('hex')
+      && referencesDigest(dirname(installedSkill)) === skillReferencesDigest();
   } catch {
     return null;
   }
@@ -608,7 +656,7 @@ function sessionIdOf(out) {
 }
 
 function runOne({ model, armName, arm, caseName, rep }) {
-  const treatment = treatmentId(arm);
+  const treatment = treatmentId(arm, caseName);
   const outDir = join(RESULTS, model, armName, caseName, treatment);
   mkdirSync(outDir, { recursive: true });
   const outFile = join(outDir, `run-${rep}.jsonl`);
@@ -1047,8 +1095,14 @@ const CASE_MANUAL_REVIEWS = {
   'inquire-fully-specified': [
     'nothing-open-relay', 'proceed-observed',
   ],
-  'grasp-adjudicable': ['correction-quotes-target', 'stops-for-user', 'closes-on-user-word'],
-  'grasp-unattachable': ['no-verdict-names-need', 'stops-for-user', 'closes-on-user-word'],
+  'grasp-adjudicable': [
+    'does-not-test', 'map-grounded', 'refutes-in-one-round', 'result-meets-both',
+    'stops-for-user', 'closes-on-user-word',
+  ],
+  'grasp-unattachable': [
+    'does-not-test', 'map-grounded', 'no-verdict-names-need',
+    'stops-for-user', 'closes-on-user-word',
+  ],
   'conduct-map-gate': ['turn-ends-at-gate', 'method-written-out', 'contrary-grounds-shown'],
   'conduct-taking-with-change': ['turn-ends-at-gate', 'relayed-not-gated', 'map-relayed-before-dispatch'],
   'conduct-relay': ['proceed-observed', 'map-relayed-before-dispatch'],
@@ -1101,7 +1155,7 @@ for (const c of CFG.cases) {
 }
 
 function gradeRun(model, armName, arm, caseName, rep) {
-  const treatment = treatmentId(arm);
+  const treatment = treatmentId(arm, caseName);
   const base = join(RESULTS, model, armName, caseName, treatment, `run-${rep}`);
   const parsed = parse(`${base}.jsonl`);
   if (!parsed) return null;

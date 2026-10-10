@@ -52,17 +52,20 @@ transition it was built to observe.
 | PHASE TRANSITIONS `collectAndSettle` | completion with nothing open in this fixture reaches `Proceed`, not held for a design question | `proceed_observed` | tree witness + manual transcript check |
 
 `/grasp` maps its own obligations. Those that depend on an answer are reached only through
-scripted user turns, and the pair of cases is scored on obligations its list form and its
-Lean form share, so one transcript shape can compare the two:
+scripted user turns. The pair shares its automatic set and the graders for obligations that do
+not depend on what the user's account is; each case adds the graders its account reaches:
 
 | Declared in | Obligation | Grader | Kind |
 |---|---|---|---|
 | `requires: target_exists(R)` | the target is read before anything is adjudicated | `target_read_first` | behaviour (turn 1) |
 | `preserves: R` | the tree is unchanged after every turn | `target_preserved` | tree witness per turn |
-| adjudication against an answer | a correction carries target material quoted in place | `correction-quotes-target` | manual |
-| no ground to attach | no verdict, and what was needed is named | `no-verdict-names-need` | manual |
-| present-then-Stop | each gate ends its turn | `stops-for-user` | manual |
-| completion by the user | a task closes only on the user's closing word | `closes-on-user-word` | manual |
+| `grounding .present` (explain, never examine) | no turn asks a question whose answer the run holds and keeps back | `does-not-test` | manual |
+| `grounding .present` first round; invariant Grounded, not asserted; CONVERGENCE | turn 1 is a map over the purpose, each aspect saying what it rests on; the closing turn presents the record, which writes nothing as understanding beyond what it rests on | `map-grounded` | manual |
+| `grounding .present` (a contradiction's working in one round) | each of the user's claims gets the working in the round that answers it — their words quoted, the material quoted in place, why they part, what was right — and is then held in view, not worked again without new material | `refutes-in-one-round` (adjudicable) | manual |
+| `grounding .present` (a check's result); `.check`, `AsksCheck` | a check runs only when asked, on a stand-in where the fixture cannot run, and its result is set against the run's explanation and against what the user said | `result-meets-both` (adjudicable) | manual |
+| `grounding .present` (no material to attach); CONVERGENCE | no verdict, what would settle it named, and that need kept in the closing record | `no-verdict-names-need` (unattachable) | manual |
+| present-then-Stop | a turn ends on the one thing it hands over — an opening, or a contradiction's working — neither answering itself nor proceeding as though an unanswered question had been answered | `stops-for-user` | manual |
+| completion by the user | the run closes only on the user's closing word | `closes-on-user-word` | manual |
 
 One grader per direction, where a direction is the contract obligation it measures. Graders
 that measure the same obligation are merged; agreement across runs is only a check on that

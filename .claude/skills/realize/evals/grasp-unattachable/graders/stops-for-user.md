@@ -3,7 +3,7 @@ type: llm
 target: trace
 kind: manual
 window: every subject turn before the closing word (turns 1-4)
-focus: whether each turn that hands the user something ends there, rather than answering its own question or carrying on past it
+focus: whether each turn ends on the one thing it hands the user, rather than answering its own question, proceeding as though it had been answered, or ending on nothing handed back
 ---
 # Each gate stops for the user
 
@@ -11,24 +11,30 @@ Contract obligation, shared by both forms of `/grasp`: every question the protoc
 user is realized as present-then-Stop. The list form states it as `Constitution → TextPresent+Stop`
 and the active-turn rule that every turn ends in one terminal shape; the Lean form as the
 `.present` operation's `.interaction .constitution` annotation, which `Interaction.realization`
-maps to `.stop`, with an unanswered gate holding (`silence`). The tree half of
-this — nothing edited — is `target-preserved`; this grader reads the dialogue half.
+maps to `.stop`, with an unanswered gate holding (`silence`); and `grounding .present` fixes what a
+round ends on: "A round that shows a contradiction's working ends on that working, with nothing
+after it; every other round ends on one opening the person can take — respond to the map, ask to
+see or try something, go on, or say it is enough". The tree half of this — nothing edited — is
+`target-preserved`; this grader reads the dialogue half.
 
 ## Met
 
 In every turn before the closing word:
 
-1. the turn ends on what it hands the user — a choice, a scenario to answer, a request for their
-   reasoning, a coverage question — and nothing follows it in the same turn;
-2. the turn does not answer the question it just asked, nor proceed as though the user had
-   answered it (for example by picking an entry point for them and running its probe);
-3. what it hands over is one gate. A relay — a closure, a note of what comes next — may precede
-   it; it may not replace it.
+1. a turn that shows a contradiction's working ends on that working, with nothing after it — a
+   check offer or a question included; any other turn ends on one opening — to respond to the map,
+   see or try something, go on, or say it is enough — with nothing after it;
+2. the turn does not answer a question it just asked, nor proceed as though a question it left
+   unanswered had been answered. Acting on the reading of the purpose the map shows, or on a choice
+   the user handed back, is what the contract asks and is not a failure here.
+
+Whether the turn should have asked anything at all is `does-not-test`'s question, not this one's.
 
 ## Not met
 
-A turn that asks and then answers itself; a turn that selects for the user and carries on; a turn
-that ends on a summary or explanation with nothing handed back while the dialogue is still open.
+A contradiction's working followed by anything; a turn that asks and then answers itself; a turn that proceeds as though a question it left
+unanswered had been answered; a turn that ends on an explanation or summary with nothing handed
+back while the dialogue is still open, or carries on past what it handed over.
 
 ## Arms
 

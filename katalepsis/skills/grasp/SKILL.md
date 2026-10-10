@@ -9,40 +9,44 @@ Achieve certain comprehension of a target in play — code, a document, a result
 
 ## Definition
 
-**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped target into verified user understanding through intent-scented entry points and progressive verification.
+**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped target into verified user understanding through a map of understanding built with the person and checked against the target's material and the results they ask to see.
 
 ```lean
 /-!
-How to read this block. It is core Lean 4 and elaborates as written.
-Every `axiom` declaration is a judgment that is yours to make from the material in front of
-you; its doc comment says what you judge there, and nothing in this block decides it for you.
-Every `def`, `inductive`, and `structure` is fixed by the contract.
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
 /-! ── FLOW ──
-Orient silently → present intent-scented entries and route adequacy → Stop.
-Fuse the next utterance → read it once at that context → advance → present the resulting Round.
-Task priority and answer handling are defined below, in settle and advance respectively.
-A final person's closure → certified task trace → VerifiedUnderstanding.
-Withdrawal → the trace so far. Silence → the existing gate holds.
+Katalepsis(R) → start(c) → grasp(c, utterances), where c is the fused session context:
+  present(c): the map and the next round, read afresh from the context → Stop
+  next utterance u, read on fuse(c, u) →
+    [the utterance does not bear on this run]   the session answers it; that answer stays in the
+                                                context; nothing is consulted; no gate of this run
+    [the person withdraws (WithdrawalSupported)] → Withdrawn
+    [the person closes (ClosureSupported)]       → VerifiedUnderstanding
+    [otherwise] c' := fuse(c, u) with what `consult` reads now appended, a check's result
+      included → present(c')
+  no utterance: the gate holds; nothing is taken
 -/
 
 /-! ── MORPHISM ──
 Target
-  → orient(target, user_signal)        -- infer likely comprehension intents from the target and the user's wording
-  → derive_entries(intent)             -- transform inferred intent into high-scent entry points
-  → assess_route(intents, entries, context) -- annotate entry-point adequacy before user selection
-  → select(intent_entry_point, route_map) -- user chooses the closest intent-scented entry point
-  → materialize(artifact_basis)        -- derive concrete artifact anchors for the chosen intent
-  → register(tasks)                    -- identify selected tasks by their selection turn and position
-  → verify(comprehension)              -- Socratic probing per gap type, each adjudication against an answer attaching the material it was drawn from; a Horizon the answer missed is disclosed with its material and applied; a contradiction in the context is taken up by whose it is
-  → confirm(coverage)                  -- aspect coverage check per entry point
+  → gather               -- the target's material and the sources that bear on it, read now (focus)
+  → map                  -- the purpose the person said (`ScopeSupported`), else your reading of it marked as yours; the aspects it turns on, each with what it rests on (focus)
+  → present              -- the map's changes and the next round, with its material (focus)
+  → fuse(u)              -- the person's turn joins the context whole
+  → check                -- a check handed to execution as `.check` says; its result returns through `consult`
+  → close                -- the person's closure over the map (`ClosureSupported`)
   → VerifiedUnderstanding
 requires: target_exists(R)              -- the comprehension target is present in context and can be quoted verbatim; its provenance is unconstrained. An admission condition on the target, not a promise that every answer finds enough ground for adjudication
 deficit:  TargetUngrasped               -- activation precondition (Layer 1)
-preserves: R                            -- read-only throughout; morphism acts on user understanding only
-invariant: Comprehension over Explanation
-invariant: Completion by the user       -- a task is completed only by the user's Confirm or sufficient; no reading of yours closes one
+preserves: R                            -- this run reads the target and never rewrites it; a check changes no existing state; a change to the target is the session's other work
+invariant: Grounded, not asserted       -- every aspect on the map says what it rests on; your explanation is never shown as the person's understanding
+invariant: Focus never records          -- the map and the presentation are re-read every turn and carry no authority; only the person's turns move a value the person holds, and an observed result moves only what it observed
 -/
 
 namespace Katalepsis
@@ -105,504 +109,258 @@ def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c 
 /-! ── TYPES ── -/
 
 noncomputable section
-open Classical
+
 variable {P : Type}
 
-/-- The target is material present and quotable, regardless of its producer. -/
+/-- `R`, the target: material present in the context and quotable verbatim — code, a document, a
+    result — whatever produced it. Read from the context; this run never rewrites it. -/
 abbrev Target (P : Type) := Context P
 
-inductive Intent
-  | orientation | rationale | impact | approval | transfer | emergent (name : String)
-  deriving DecidableEq
+/-- A purpose or an aspect, named as the map shows it. -/
+abbrev Entry := String
 
-structure EntryPoint where
-  label : String
-  intent : Intent
-  anchor : String
+/-- **Your judgment**: the cited person turn says what they mean to understand of the target —
+    and, where they say it, for what purpose — read against the context as it now stands, in their
+    own words, by taking the reading of their purpose the map showed, or by handing the choice to
+    you. Taking what was shown adopts it as it was shown; handing the choice to you lets you set it
+    within the target, and the map says what you set, as yours, open to their correction. The
+    invoking utterance fills it when it says it. A later turn may change the scope; whether an
+    earlier one still reaches what is now at issue is read on the current context. -/
+axiom ScopeSupported : Context P → Turn P → Entry → Prop
 
-structure RouteQuestion where
-  route : String
-  reason : String
-  signalNeeded : String
+/-- Only a person's turn sets the scope. -/
+def scopeCoord : Coord P Entry :=
+  { admits := (·.val = .person), supports := ScopeSupported }
 
-structure RouteMap where
-  entries : List EntryPoint
-  cheapestProbe : List (String × String)
-  hiddenRoutes : List String
-  openQuestions : List RouteQuestion
+/-- **Your reading**: the scope as it stands in `c` — filled by the person's latest turn that sets
+    it; `open_` until one does. -/
+axiom scope : (c : Context P) → Occ (scopeCoord (P := P)) c
 
-/-- Judge likely comprehension intents from target and user signal, deriving high-scent entries
-    and adequacy annotations. Preserve the user's paths and distinguish entry fit without
-    exposing expected probe answers. Materialize anchors when an entry is selected. -/
-axiom routeMap : Context P → RouteMap
+def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
+  | .open_ _   => false
+  | .filled .. => true
 
-/-- Selection turn and position within its ordered entries; identity is local to this run. -/
-abbrev RecordId := Nat × Nat
+/-- **Your judgment**, the live inventory: every aspect of the target this run has raised for the
+    purpose — what the purpose turns on, a contradiction, an edge the person has not voiced alike.
+    An aspect raised once stays here — whether or not the current round shows it, and even when a
+    later scope no longer turns on it, marked so; a set-aside aspect stays too. The person may
+    merge or reword aspects; whether a reworded aspect is the same aspect is your judgment.
+    Guidance for the reading, not types it fixes: a Horizon edge is an edge of what the target
+    does that the person has not voiced and the purpose needs, raised openly like any other aspect
+    where the target's material grounds it — not a decision to make, a reframing, or a choice of
+    route, though understanding it may change how the person frames their purpose. A contradiction
+    needs two distinct sourced sides on the same scope and premises; a repeated claim, the target
+    and your quotation of it, or your explanation drawn from it is one side, not corroboration. -/
+axiom aspects : Context P → List Entry
 
-structure Task where
-  id : RecordId
-  entry : EntryPoint
-
-inductive GapType
-  | expectation | causality | scope | sequence | horizon | contradiction
-  | emergent (description : String)
-  deriving DecidableEq
-
-def offered : GapType → Bool
-  | .horizon | .contradiction => false
-  | _ => true
-
-abbrev Selectable := {g : GapType // offered g = true}
-inductive ProbeForm | qc | qs
-
-def probeKind (g : Selectable) : ProbeForm :=
-  match g.val with
-  | .expectation | .sequence => .qc
-  | _ => .qs
-
-/-- `edge` is a stable name for the same edge across its contextual re-descriptions. -/
-structure HorizonCandidate where
-  edge : String
-  anchors : List String
-  failureMode : String
-
-/-- Location is distinct from eligibility as evidence: an AI explanation can be a side. -/
+/-- A located span of one turn. -/
 structure Side (c : Context P) where
-  idx : Nat
-  lt : idx < c.length
+  idx  : Nat
+  lt   : idx < c.length
   span : String
 
-structure Contradiction (c : Context P) where
-  one : Side c
-  other : Side c
-
-/-- Judge that the located turn carries the target itself, with the quoted span, rather than
+/-- **Your judgment**: the located turn carries the target itself, at the quoted span, rather than
     the reasoning that produced it. Target provenance is unrestricted; where the turn is your own,
     whether it carries the target or reasoning about it is read here from its content. -/
 axiom IsTarget : (c : Context P) → Side c → Prop
 
-/-- Judge that the person's cited turn identifies this source and that the observation reads
-    that source now. The span is the narrowest material supporting the judgment, quoted in place. -/
-axiom SourceRead : (c : Context P) → Cite c → Cite c → String → Prop
+/-- **Your judgment**: the observed turn read its source in this run, when it was made, and the
+    span is the narrowest material supporting the judgment, quoted in place. A locator the person
+    must go open is not the material. -/
+axiom SourceRead : (c : Context P) → Cite c → String → Prop
 
+/-- What a person's reading is measured against: the target's own material, in the turn quoted
+    even after the target changes, or material from outside the conversation read in this run — a
+    source outside the context, or the output a check returned. Your own reasoning is never a
+    measure, nor another agent's — a peer turn measures only as what a source it read or a check
+    it ran returned. -/
 inductive Measure (c : Context P)
   | target (s : Side c) (object : IsTarget c s)
-  | source (citation : Cite c) (user : citation.src.val = .person)
-      (observed : Cite c) (readNow : observed.src.val = .external)
-      (span : String) (linked : SourceRead c citation observed span)
+  | source (observed : Cite c)
+      (readNow : observed.src.val = .external ∨ observed.src.val = .peer) (span : String)
+      (linked : SourceRead c observed span)
 
-/-- The actual material consumed by disclosure or correction, including the reading it supports.
-    Any alternative reading of the material is said beside it. -/
-structure Adjudication (c : Context P) where
-  correction : String
-  measure : Measure c
-  otherReading : String
+/-- **Your judgment**, the record rule: the cited person turn handles the aspect — produces,
+    applies, predicts, or explains its relations at the level the aspect asks, in a reading of
+    their own — where the material it is measured against bears it out, read against the context
+    as it now stands. A reading the material parts from handles nothing and stays the person's
+    reading. Assent, a self-rating, a bare pick among options you offered, or an echo of your own
+    wording handles nothing; an explanatory paraphrase handles what it reaches. -/
+axiom ShownSupported : (c : Context P) → Cite c → Entry → Measure c → Prop
 
-/-- The ownership distinction determines the obligation; your correction already carries its
-    measure, while a finding about the target may leave both sides unsettled. -/
-inductive ConflictReading (c : Context P)
-  | user (conflict : Contradiction c)
-  | target (conflict : Contradiction c) (settled : Option (Adjudication c))
-  | yours (conflict : Contradiction c) (correction : Adjudication c)
+/-- How a person's turn handled aspect `a`: the turn, and the material it was measured against,
+    with that turn's support. -/
+structure Shown (c : Context P) (a : Entry) where
+  src       : Cite c
+  byPerson  : src.src.val = .person
+  measure   : Measure c
+  supported : ShownSupported c src a measure
 
-inductive Demonstration | independent | afterCue | afterDisclosure
-  deriving DecidableEq
+/-- **Your judgment**: the cited turn is what `checked` returned for a check on aspect `a` handed
+    off where `AsksCheck` holds — a run, an experiment, a source read to settle it; a read `gathered`
+    returned is not one. What it shows for the aspect is read on the context as it now stands, and
+    may be that it settles nothing. -/
+axiom CheckSupported : (c : Context P) → Cite c → Entry → Prop
 
-/-- Horizon edges have separate identities even when both belong to the Horizon gap type.
-    Ordinary gap types use the empty key. -/
-abbrev Aspect := GapType × String
+/-- A check run on aspect `a`: the turn its result arrived in, from outside the conversation, with
+    that turn's support. A check someone has named and no one has asked to run is not one; it is
+    read on the map with who named it. -/
+structure Check (c : Context P) (a : Entry) where
+  result    : Cite c
+  observed  : result.src.val = .external ∨ result.src.val = .peer
+  supported : CheckSupported c result a
 
-/-- Gate names identify obligations, not the wording or material of their presentation. -/
-inductive Gate
-  | entrySelection
-  | zeroGap (t : RecordId)
-  | startAspect (t : RecordId)
-  | coverage (t : RecordId)
-  | horizonProbe (t : RecordId) (edge : String)
-  | cue (t : RecordId) (edge : String)
-  | reveal (t : RecordId) (edge : String)
-  | conflict (t : RecordId)
-  | resolve (t : RecordId)
-  | probe (t : RecordId) (g : Selectable)
-  | inquiry (t : RecordId) (g : Aspect)
+/-- An aspect's row on the map: the person's own handling of it, if any, and the checks run on it.
+    How the row stands is your judgment from these and the context — resting on your explanation
+    alone, checked together, handled by the person, waiting on a check named and not run, or
+    misaligned where the person's reading and the material part — and no standing is stored. -/
+structure Cell (c : Context P) (a : Entry) where
+  handled : Option (Shown c a)
+  checks  : List (Check c a)
 
-def Gate.task : Gate → Option RecordId
-  | .entrySelection => none
-  | .zeroGap t | .startAspect t | .coverage t | .horizonProbe t _ | .cue t _
-  | .reveal t _ | .conflict t | .resolve t | .probe t _ | .inquiry t _ => some t
+/-- **Your reading**: aspect `a`'s row, read afresh on `c`; whether a turn bears on a reworded
+    aspect is your judgment. Where several person turns handle it, which one stands is read on the
+    current context, and a later turn that contradicts it may leave it unhandled. -/
+axiom cell : (c : Context P) → (a : Entry) → Cell c a
 
-def Gate.aspect : Gate → Option Aspect
-  | .horizonProbe _ edge | .cue _ edge | .reveal _ edge => some (.horizon, edge)
-  | .conflict .. | .resolve .. => some (.contradiction, "")
-  | .probe _ g => some (g.val, "")
-  | .inquiry _ g => some g
-  | _ => none
+/-- The map: every aspect of the live inventory, with its row. -/
+def map (c : Context P) : List ((a : Entry) × Cell c a) :=
+  (aspects c).map fun a => ⟨a, cell c a⟩
 
-def Gate.closable : Gate → Bool
-  | .zeroGap _ | .coverage _ => true
-  | _ => false
+/-- **Your record**: your contrary grounds bearing on the person's judgment, each with what it
+    bears on and what it rests on, shown as `present` and CONVERGENCE say; new evidence after the
+    closure is shown in the session beside it, and the closure stands. Empty when there are
+    none. -/
+axiom dissent : Context P → List String
 
-inductive Choice
-  | entries (es : List EntryPoint)
-  | aspect (g : Selectable)
-  | close
+/-- **Your judgment**: the latest utterance bears on this run — a purpose, a reading of the target,
+    an acknowledgment, a wish to see or try something, a request for more depth, a correction of
+    your reading, a question about the map, a closure, a withdrawal — judged on what the whole
+    utterance does, read on the context with it before anything is consulted. An utterance about
+    other work leaves the run as it stands: the session answers it, that answer stays in the
+    context, and no gate of this run is raised. -/
+axiom Reaches : Context P → Prop
 
-/-- The mutually exclusive handling forms of one utterance. A compound or unsettled utterance
-    stays `pending` with its full content in context; the person is never asked to classify it.
-    `met` carries the measure of what was shown. `accepted` carries what remains unattested.
-    `correct` carries a standing adjudication after reasoning, or the material of an in-intent
-    Horizon miss or standing contradiction. With unavailable material use `accepted`, naming
-    what is missing and carrying the unverified edge to coverage. -/
-inductive Answer (c : Context P)
-  | pending
-  | choose (value : Choice)
-  | reopen (description : String)
-  | steps
-  | other (entry : EntryPoint) (basis : String)
-  | met (measure : Measure c)
-  | accepted (reason : String)
-  | dissolved
-  | object (reason : String)
-  | correct (judgment : Adjudication c)
-  | propose (verbatim : String)
-  | withdraw
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
+    nothing — says that what they now understand of the target serves their purpose, read on the
+    context as it now stands. An acknowledgment of an explanation is not that. The map's
+    standings, or your own reading, close nothing, and no standing holds the closure back. Setting
+    one aspect aside does not close the run; a set-aside aspect stays on the map as it stood. -/
+axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
-structure Reading (c : Context P) where
-  gate : Gate
-  answer : Answer c
+/-- Only the person closes the run. -/
+def closureCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := ClosureSupported }
 
-/-- **Your read**, before judging person turn `u`, of any source it cites, now — observed. Empty
-    where the answer rests on nothing outside the context. -/
-axiom consult : Context P → Utterance P → List (Evidence P)
+/-- **Your reading**: the person's closure; `open_` until one reaches it. -/
+axiom closure : (c : Context P) → Occ (closureCoord (P := P)) c
 
-/-- The context an answer is judged against: the turn fused, then what `consult` observed. -/
-def consulted (c : Context P) (u : Utterance P) : Context P :=
-  fuse c u ++ (consult c u).map (·.val)
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round
+    withdraws nothing — ends the run without saying that what they understand serves their
+    purpose, for whatever reason, given or not; nothing open is delegated. Silence, or turning to
+    other work, ends nothing. Your own reading that the run should end ends nothing. -/
+axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
 
-/-- Read the whole person turn, whatever its form, once against the context that stood when it
-    was sent and what `consult` observed for it. Selecting entries, choosing an aspect, and
-    closing the task (Confirm at zero-gap, sufficient at coverage) are `choose`. `gate` is
-    the presentation it answered; if it sets aside your preceding candidate intent reading,
-    restore the original gate and read the original missed answer with this correction.
-    At a Horizon answer: reached → met; request for steps → steps; otherwise read intent before
-    disclosure. At any missed answer, including reasoning, another intent → other, offered as
-    a candidate with its basis, destination, and invitation to correct it. Within intent:
-    Horizon miss → correct; contradiction explanation → dissolved, correct if material settles
-    it, accepted otherwise; probe/application → object before any adjudication, met only with
-    material verifying it, accepted otherwise; inquiry → correct only if the objection stands.
-    No knowledge is inferred from completion. A proposal changes the system outside the target;
-    explanation, navigation and clarification stay within this loop. -/
-axiom read : (c : Context P) → (u : Utterance P) → Reading (consulted c u)
+/-- Only the person withdraws. -/
+def withdrawalCoord : Coord P Unit :=
+  { admits := (·.val = .person), supports := WithdrawalSupported }
 
-/-- A projection for the trace, never a second state store. Ground remains at the original turn. -/
-inductive Act
-  | hold | select (entries : List EntryPoint) | close | reopen (description : String)
-  | steps | other (entry : EntryPoint) (basis : String) | met | accepted (reason : String)
-  | dissolved | object (reason : String) | correct | propose (verbatim : String) | withdraw
+/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
+axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
 
-structure Record where
-  gate : Gate
-  act : Act
+/-- The record every exit carries, as CONVERGENCE lists it. -/
+structure Closed (P : Type) where
+  context : Context P
+  scope   : Occ (scopeCoord (P := P)) context
+  map     : List ((a : Entry) × Cell context a)
+  dissent : List String
 
-def recorded {c : Context P} (r : Reading c) : Record :=
-  ⟨r.gate, match r.answer with
-    | .pending => .hold
-    | .choose v => match r.gate, v with
-      | .entrySelection, .entries es => .select es
-      | .zeroGap _, .close | .coverage _, .close => .close
-      | _, _ => .hold
-    | .reopen d => .reopen d
-    | .steps => match r.gate with
-      | .horizonProbe .. | .cue .. => .steps
-      | _ => .hold
-    | .other e b => .other e b
-    | .met _ => .met
-    | .accepted s => .accepted s
-    | .dissolved => .dissolved
-    | .object s => .object s
-    | .correct _ => match r.gate with
-      | .horizonProbe .. | .cue .. | .conflict .. | .inquiry .. => .correct
-      | _ => .hold
-    | .propose s => .propose s
-    | .withdraw => .withdraw⟩
+def closed (c : Context P) : Closed P :=
+  { context := c, scope := scope c, map := map c, dissent := dissent c }
 
-def readRecord (c : Context P) (u : Utterance P) : Record := recorded (read c u)
-
-def asUtterance (e : Turn P) : Option (Utterance P) :=
-  match e with
-  | ⟨.person, p⟩ => some ⟨⟨.person, p⟩, rfl⟩
-  | _ => none
-
-/-- Historical choices and outcomes are read at their original prefix; fresh task assessment
-    below still uses the entire fused context. These are two different temporal obligations. -/
-def said (c : Context P) : List (Nat × Record) :=
-  (List.range c.length).filterMap fun i =>
-    (c[i]?.bind asUtterance).map fun u => (i, readRecord (c.take i) u)
-
-def tasks (c : Context P) : List Task :=
-  (said c).flatMap fun (i, r) => match r.act with
-    | .select es => es.zipIdx.map fun (e, j) => ⟨(i, j), e⟩
-    | _ => []
-
-def completed (c : Context P) (t : RecordId) : Prop :=
-  ∃ i r, (i, r) ∈ said c ∧ r.gate.task = some t ∧ r.act = .close
-
-def current (c : Context P) : Option Task :=
-  (tasks c).find? fun t => decide (¬ completed c t.id)
-
-/-- Judge whether the registered entry serves the candidate intent, including emergent intents
-    with different wording. Identity of labels alone does not decide this. -/
-axiom Serves : EntryPoint → EntryPoint → Prop
-
-def taskFor (c : Context P) (e : EntryPoint) : Option Task :=
-  (tasks c).find? fun t => decide (Serves t.entry e ∧ ¬ completed c t.id)
-
-/-- Entry selection opens its own first selected task, even after an intent redirect. -/
-def selectedTask (c : Context P) : Option Task :=
-  (tasks c).find? fun t => t.id.1 + 1 == c.length && decide (¬ completed c t.id)
-
-def Asked (c : Context P) (t : RecordId) (edge : String) : Prop :=
-  ∃ i r, (i, r) ∈ said c ∧ r.gate = .horizonProbe t edge
-
-def probed (c : Context P) (t : RecordId) : Bool :=
-  (said c).any fun (_, r) => match r.gate with
-    | .probe task _ => task == t
-    | _ => false
-
-def reopenedGaps (c : Context P) (t : RecordId) : List Selectable :=
-  (said c).filterMap fun (_, r) => match r.gate, r.act with
-    | .zeroGap task, .reopen d => if task = t then some ⟨.emergent d, rfl⟩ else none
-    | _, _ => none
-
-/-- Judge the gaps, qualifying Horizon candidates and due contradiction afresh over the whole
-    context. Candidates are evidence-bound, material, unspoken across signal, labels and answers,
-    and belong to comprehension of this entry; exactly one will be admitted by `admissible`.
-    Keep stable names for identical edges. A Reopen adds its emergent gap. Contradictions require
-    distinct sourced sides, the same scope and premises, and readiness to be understood; a
-    repeated claim is one side. A contradiction already taken up is absent from `conflict`.
-    Explicit Reopen gaps and prior probes are derived separately from history. -/
-structure Assessment (c : Context P) where
-  gaps : List Selectable
-  candidates : List HorizonCandidate
-  conflict : Option (ConflictReading c)
-
-/-- Assess task `t` under the constraints of `Assessment`, from the fused context. -/
-axiom assess : (c : Context P) → RecordId → Assessment c
-
-def admissible (a : Assessment (P := P) c) : Option HorizonCandidate :=
-  match a.candidates with
-  | [h] => some h
-  | _ => none
-
-def dueHorizon (c : Context P) (t : RecordId) : Option HorizonCandidate :=
-  (admissible (assess c t)).filter fun h => decide (¬ Asked c t h.edge)
-
-def userConflict (c : Context P) (t : RecordId) : Option (Contradiction c) :=
-  match (assess c t).conflict with
-  | some (.user k) => some k
-  | _ => none
-
-/-- The history fixes assistance provenance; a later answer cannot turn assisted performance
-    into independent detection. -/
-def assistance (c : Context P) (t : RecordId) (g : Aspect) : Demonstration :=
-  if (said c).any (fun (_, r) => r.gate.task == some t && r.gate.aspect == some g &&
-      match r.act with | .correct => true | _ => false) then .afterDisclosure
-  else if (said c).any (fun (_, r) => r.gate.task == some t && r.gate.aspect == some g &&
-      match r.act with | .steps => true | _ => false) then .afterCue
-  else .independent
-
-/-- Trace rows retain source-turn positions: material and the full reading are recoverable there.
-    Only `met` demonstrates an aspect; accepting, closing and failing to refute do not. -/
-def shown (c : Context P) : List (RecordId × Aspect × Demonstration) :=
-  (said c).filterMap fun (i, r) => match r.act, r.gate.task, r.gate.aspect with
-    | .met, some t, some g => some (t, g, assistance (c.take i) t g)
-    | _, _, _ => none
-
-def AllClosed (c : Context P) : Prop :=
-  tasks c ≠ [] ∧ ∀ t ∈ tasks c, completed c t.id
-
-/-! ── MODE STATE ──
-The state is the fused context alone. `said`, `tasks`, `shown` and the live assessment are
-projections of it. Records identify the selection that created a task, not an external writer.
--/
-
-/-! ── PHASE TRANSITIONS ── -/
-
-/-- Relay carried with the next gate. Render evidence beside its judgment and implication.
-    `intent` includes the invitation to correct the candidate reading, adding no question.
-    `finding` is the target's contradiction; `correction` is your own explanation's correction.
-    `order` is said with its basis when a user contradiction preempts. For a Horizon ahead of a
-    chosen aspect, say only that the chosen aspect comes next; explain precedence after the answer. -/
-inductive Notice (c : Context P)
-  | routes (map : RouteMap)
-  | closure (outcome : String)
-  | intent (entry : EntryPoint) (basis : String)
-  | material (judgment : Adjudication c)
-  | demonstration (measure : Measure c)
-  | sides (conflict : Contradiction c)
-  | scenario (candidate : HorizonCandidate)
-  | finding (conflict : Contradiction c)
-  | correction (conflict : Contradiction c)
-  | order
-  | proposal (verbatim : String)
-
-structure Round (c : Context P) where
-  gate : Gate
-  notices : List (Notice c) := []
-
-def entryRound (c : Context P) : Round c := ⟨.entrySelection, [.routes (routeMap c)]⟩
-
-/-- Centralized task priority. Non-user contradictions ride the next presentation as relay.
-    A Horizon presentation is an everyday scenario only: conceal its edge and rationale until
-    the answer. A chosen aspect remains in context and is offered at subsequent coverage. -/
-def settle (c : Context P) (t : RecordId) (fallback : Gate) : Round c :=
-  let relay := match (assess c t).conflict with
-    | some (.target k a) => .finding k :: (a.toList.map Notice.material)
-    | some (.yours k a) => [.correction k, .material a]
-    | _ => []
-  match userConflict c t with
-  | some k => ⟨.conflict t, [.sides k, .order]⟩
-  | none => match dueHorizon c t with
-    | some h => ⟨.horizonProbe t h.edge, .scenario h :: relay⟩
-    | none => ⟨fallback, relay⟩
-
-def gateFor (c : Context P) (t : RecordId) : Round c :=
-  let a := assess c t
-  settle c t (if (a.gaps ++ reopenedGaps c t).isEmpty ∧ admissible a = none then .zeroGap t
-    else if probed c t = false ∧ ¬ ∃ edge, Asked c t edge then .startAspect t
-    else .coverage t)
-
-def redirect (c : Context P) (e : EntryPoint) (basis : String) : Round c :=
-  let r := match taskFor c e with
-    | some t => gateFor c t.id
-    | none => entryRound c
-  { r with notices := .intent e basis :: r.notices }
-
-def resumeOf : Gate → Gate
-  | .horizonProbe t _ => .coverage t
-  | g => g
-
-def again (t : RecordId) (a : Aspect) : Gate :=
-  match a.1 with
-  | .horizon => .reveal t a.2
-  | .contradiction => .resolve t
-  | .expectation => .probe t ⟨.expectation, rfl⟩
-  | .causality => .probe t ⟨.causality, rfl⟩
-  | .scope => .probe t ⟨.scope, rfl⟩
-  | .sequence => .probe t ⟨.sequence, rfl⟩
-  | .emergent d => .probe t ⟨.emergent d, rfl⟩
-
-def returning (c : Context P) (g : Gate) (outcome : String) : Round c :=
-  let r := match g.task with
-    | some t => settle c t (.coverage t)
-    | none => entryRound c
-  { r with notices := .closure outcome :: r.notices }
-
-inductive Step (c : Context P)
-  | gate (round : Round c)
-  | done (closed : AllClosed c)
-  | withdrawn
-
-/-- The single source of transition policy. Only an actual latest-person choice at a closure
-    gate enters completion; material-bearing correction consumes its adjudication directly.
-    A question re-entered after insufficient ground stays open and explains what is missing. -/
-def advance (c : Context P) (r : Reading c) : Step c :=
-  match r.answer with
-  | .withdraw => .withdrawn
-  | .propose s => .gate ⟨resumeOf r.gate, [.proposal s]⟩
-  | .other e b => .gate (redirect c e b)
-  | .choose v => match r.gate, v with
-    | .entrySelection, .entries _ =>
-      .gate (match selectedTask c with | some t => gateFor c t.id | none => entryRound c)
-    | .zeroGap _, .close | .coverage _, .close =>
-      if h : AllClosed c then .done h
-      else .gate (match current c with | some t => gateFor c t.id | none => ⟨r.gate, []⟩)
-    | .startAspect t, .aspect g | .coverage t, .aspect g =>
-      .gate (settle c t (.probe t g))
-    | _, _ => .gate ⟨r.gate, []⟩
-  | .steps => match r.gate with
-    | .horizonProbe t e | .cue t e => .gate ⟨.cue t e, []⟩
-    | _ => .gate ⟨r.gate, []⟩
-  | .correct a => match r.gate with
-    | .horizonProbe t edge | .cue t edge => .gate ⟨.reveal t edge, [.material a]⟩
-    | .conflict t => .gate ⟨.resolve t, [.material a]⟩
-    | .inquiry t g => .gate ⟨again t g, [.material a]⟩
-    | _ => .gate ⟨r.gate, []⟩
-  | .object reason => match r.gate with
-    | .probe t g => .gate ⟨.inquiry t (g.val, ""), [.closure reason]⟩
-    | .reveal t edge => .gate ⟨.inquiry t (.horizon, edge), [.closure reason]⟩
-    | .resolve t => .gate ⟨.inquiry t (.contradiction, ""), [.closure reason]⟩
-    | _ => .gate ⟨r.gate, []⟩
-  | .met m =>
-    let next := returning c r.gate "Shown against this measure; record assistance."
-    .gate { next with notices := .demonstration m :: next.notices }
-  | .dissolved => .gate (returning c r.gate "The user's explanation dissolved the contradiction.")
-  | .accepted reason => .gate (returning c r.gate reason)
-  | .reopen _ => .gate (match r.gate.task with
-    | some t => gateFor c t | none => ⟨r.gate, []⟩)
-  | .pending => .gate ⟨r.gate, []⟩
-
-/-- Present the whole packet: its closure/evidence/intent relay followed by its single gate.
-    At zero-gap give reasoning and Confirm/Reopen; at coverage show probed/unprobed aspects and
-    sufficient/another aspect/proposal; at an ordinary probe give artifact context and a concrete
-    scenario, Qc/Qs from probeKind, and free response. Inquiry hears reasoning before judgment;
-    disclosure names the edge and asks for application. A closure includes task status, the
-    return gate and available next moves. Conflict asks how both quoted sides fit
-    before a verdict. A target finding judges a side only with settling material outside it;
-    your own correction quotes the target. Relay never replaces an active gate. -/
-def present (respond : (c : Context P) → Round c → Response P)
-    (c : Context P) (r : Round c) : Context P :=
-  c ++ [(respond c r).val]
-
-/-- What the trace renderer receives, computed from the same context it narrates. -/
-structure Trace where
-  selected : List Task
-  records : List (Nat × Record)
-  demonstrated : List (RecordId × Aspect × Demonstration)
-
-def traceOf (c : Context P) : Trace := ⟨tasks c, said c, shown c⟩
-
-/-- The closure certificate applies before the trace's assistant presentation. The trace shows
-    each selected task, its closure, every aspect shown with assistance, contradictions and their
-    ownership/outcomes, candidate intent readings and subsequent corrections, and any dissent
-    that stood before the person's closure. It certifies traversal, not omniscient comprehension. -/
+/-- `VerifiedUnderstanding`: the person's closure over the map CONVERGENCE lists — what each
+    aspect rests on, as they saw it when they closed. It records that closure, not a certificate
+    of what was demonstrated, nor omniscient comprehension. -/
 structure VerifiedUnderstanding (P : Type) where
-  basis : Context P
-  closed : AllClosed basis
-  presentation : Response P
+  closure : Closed P
 
 inductive Outcome (P : Type)
-  | verified (value : VerifiedUnderstanding P)
-  | withdrawn (basis : Context P) (presentation : Response P)
-  | holding (context : Context P)
+  | verified  (r : VerifiedUnderstanding P)
+  /-- the partial record: the map as it stood -/
+  | withdrawn (r : Closed P)
+  | holding   (c : Context P)
 
-def grasp (respond : (c : Context P) → Round c → Response P)
-    (trace : Context P → Trace → Response P) :
+/-- **Your judgment**: the latest utterance, bearing on this run, asks for a check — a wish to see
+    or try something — or takes the one you offered, read on the context as it now stands. -/
+axiom AsksCheck : Context P → Prop
+
+/-- **Your read**, now, of what the next judgment needs: the target's material and the sources that
+    bear on it — any a turn cites, and any you find — as far as relevant access reaches. What you
+    say you read, you read to the end. Empty where nothing outside the context bears. -/
+axiom gathered : Context P → List (Evidence P)
+
+/-- **Your read**, now: what the check handed off at `.check` returned. -/
+axiom checked : Context P → List (Evidence P)
+
+open Classical in
+/-- What is read now: what is gathered, and what the check returned where `AsksCheck` holds, as
+    `consultOps` hands it off. -/
+def consult (c : Context P) : List (Evidence P) :=
+  gathered c ++ (if AsksCheck c then checked c else [])
+
+/-- The context with what `consult` read now appended. -/
+def consulted (c : Context P) : Context P := c ++ (consult c).map (·.val)
+
+/-! ── A-BINDING ──
+bind(R) = the target the argument names, else the target most recently in play; words in the
+invocation that say what to understand of it fill the scope (`ScopeSupported`).
+-/
+
+/-! ── MODE STATE ──
+Λ is the fused context and nothing else; every reading above is taken from it.
+-/
+
+/-! ── PHASE TRANSITIONS ──
+A step is one arm of a structural recursion over the person's utterances. `respond` is the next
+round, as TOOL GROUNDING's `present` entry names it; `session` is the session's own answer to an
+utterance about other work, which stays in the context without being a gate of this run.
+-/
+
+open Classical in
+def grasp (respond session : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
-  | c, [] => .holding c
+  | c, []      => .holding c
   | c, u :: us =>
-    let c' := consulted c u
-    match advance c' (read c u) with
-    | .done h => .verified ⟨c', h, trace c' (traceOf c')⟩
-    | .withdrawn => .withdrawn c' (trace c' (traceOf c'))
-    | .gate r => grasp respond trace (present respond c' r) us
+    let f := fuse c u
+    if ¬ Reaches f then grasp respond session (f ++ [(session f).val]) us
+    else if isFilled (withdrawal f) = true then .withdrawn (closed f)
+    else if isFilled (closure f) = true then .verified ⟨closed f⟩
+    else
+      let c' := consulted f
+      grasp respond session (c' ++ [(respond c').val]) us
 
-def start (respond : (c : Context P) → Round c → Response P)
-    (trace : Context P → Trace → Response P)
-    (c : Context P) (us : List (Utterance P)) : Outcome P :=
-  grasp respond trace (present respond c (entryRound c)) us
+/-- The run opens on a gathering and its first round. -/
+def start (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) : Outcome P :=
+  grasp respond session (consulted c ++ [(respond (consulted c)).val]) us
 
 /-! ── LOOP ──
-Recursion consumes only actual utterances. An unanswered gate holds. A round returns a gate,
-certified completion, or withdrawal with the trace. Live priority is centralized in `settle`;
-an owed cue, disclosure or reasoning question completes the current answer's handling before
-returning to that priority. A task's closure respects the person's sufficient/Confirm judgment.
+Every answer is read against the whole context as it now stands: nothing counts rounds, and no
+earlier answer is held apart from what later ones say. No fixed cap: each round is dialogue.
 -/
 
 /-! ── CONVERGENCE ──
-`VerifiedUnderstanding.closed` requires a nonempty selected roster and a person's closure for
-every task. The trace derives from historical readings: accepting an answer, accepting a task,
-and demonstrating an aspect remain different. None substitutes for another.
+converged: a VerifiedUnderstanding the person's utterance closed. Withdrawal keeps its partial
+record. The convergence evidence — the map at closure: each aspect with its standing, what it rests
+on (the person's own reading with the material it was measured against, in their words; each check
+run, with what it showed and, where it ran on a stand-in, what it left untested; each check named
+and not run, with who named it and what it would settle; the person's account with neither measure
+nor check, attributed to them, with no verdict and what would settle it; acceptance of your
+explanation where that is what it rests on), whether the scope as it stands still turns on it, and
+whether what it rests on was measured against a version of the target that has since changed; the
+purpose and scope as they stand, open included, and marked as yours where you read or set it; what
+could not be reached that bears on an aspect; the dissent — a contrary ground not shown before the
+closing turn is shown here, and the closure stands. Grounded, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -622,23 +380,28 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | route | read | assess | record | present | material | converge | seam
+inductive Op | gather | assess | present | check | readAnswer | converge | withdraw
 
 def grounding : Op → Annot × String
-  | .route => (.observe, "Read target if needed, then routeMap: silent intent-scented orientation and route adequacy")
-  | .read => (.observe, "consult: read any source the answer cites, now; then read the whole answer once against that context")
-  | .assess => (.sense, "Assess the fused context afresh, under Assessment")
-  | .record => (.track, "Context records selections, answers and presentations; said projects their history")
-  | .present => (.interaction .constitution, "the Round under present's contract")
-  | .material => (.sense, "Quote in place the Measure carried by the adjudication, at the narrowest span")
-  | .converge => (.interaction .extension, "show the completed or withdrawn trace under VerifiedUnderstanding")
-  | .seam => (.interaction .extension, "Proceed to a next protocol only on a user-declared chain, citing that declaration; this contract declares no wired outbound edge")
+  | .gather     => (.observe, "artifact read, artifact search: read-only reads, now, of the target's material and the sources that bear on it — any a turn cites, and any you find — as far as relevant access reaches; name what was reached and what was not, and any conflict among what was gathered")
+  | .assess     => (.sense, "Internal analysis: the purpose reading, the live inventory of aspects and each one's row on the map, over the whole fused context as it now stands")
+  | .present    => (.interaction .constitution, "the round, every round the first included. The first round is the map: the purpose as the person said it, or else your reading of it, marked as yours — where nothing grounds a useful reading, the target's main aspects, with the purpose line saying so; the aspects the purpose turns on, in the order it turns on them with that basis on the purpose line, an edge the person has not voiced among them where the material grounds one, each with its essence, the material it rests on and its standing; and your contrary grounds with their basis. A correction of the purpose moves the map. Every later round shows what changed on the map, and the whole map when the person asks for it; where the session has a surface that stays in view, the map can stay there as well. A contrary ground you hold stays in view until it is settled — on the surface that stays in view where the session has one, otherwise briefly beside each round. Explain each aspect in the one representation — a picture, an example, a metaphor — that best carries its essence for this person; leave out what their words show they know, and go deeper when they ask. Read the person's turn whole. The round that shows a check's result sets it beside the aspect, against the claim your explanation made and against whatever the person has said that bears on it, saying where each agrees and where it parts; agreement and parting alike — their words revealing a contradiction or simply being wrong included — are what the map is filled from. Before reading their words as a misreading, read whether they aim at another purpose: say that reading as a candidate with its basis and move the map, adding no question; if the person sets it aside, their words are read again as a reading of the target. A reading or application of their own is measured against the material: an adjudication follows only where you have material to attach; where there is none, give no verdict: say you have nothing to check the account against and name what would settle it. Where what they said and a `Measure` part on the same scope and premises, or two of their own utterances do, show it with its working in one round: their words quoted; the narrowest `Measure` where one bears on it, never your own explanation — scoped to what that material settles; why the two part; what they got right; and another reading beside it where the material allows. A contradiction whose working was shown and that the person keeps is not worked again: it stays in view as a held contrary ground, is worked again only on new material, and the round ends on its opening. A contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against a `Measure` is yours to correct, quoting it, as relay. An objection you raise yourself is relay: shown with its basis, and the run continues. Where what you could not reach, or a conflict among what you gathered, bears on an aspect or on a judgment the person is making, say it there. Where a judgment the person is about to make turns on an aspect resting on your explanation, offer to run the cheapest check that would show it and to show its result — an offer, never a question for them to answer; offer it again only on new evidence or a changed purpose. An aspect the person set aside is not explained or offered again unless they return to it. Other work in the utterance neither closes this run nor answers its judgments. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — respond to the map, ask to see or try something, go on, or say it is enough.")
+  | .check      => (.dispatch, "delegate: where `AsksCheck` holds, the check handed to execution with the aspect and what it is to show; it changes no existing state — what it has to write goes to a scratch space outside the target's tree — and a result from a stand-in comes with what it stood for and what it left untested; what it returns enters the context through `consult` as evidence read now, before the round that shows it")
+  | .readAnswer => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches` and the judgments above read it — read whole against the fused context as it now stands")
+  | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with VerifiedUnderstanding")
+  | .withdraw   => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
+
+open Classical in
+/-- The operations whose returns `consult` appends to the context: what `.gather` reads, and, where
+    `AsksCheck` holds, what the check handed off at `.check` returns. -/
+def consultOps (c : Context P) : List Op := if AsksCheck c then [.gather, .check] else [.gather]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 -/
 
 end
+
 end Katalepsis
 ```
 
@@ -646,36 +409,20 @@ end Katalepsis
 
 `/grasp` is user-invoked only: activate when the user signals a wish to understand a target already present in context and available for verbatim quotation, whatever its provenance — AI-produced work, code or a document someone else wrote, or material the session has put on the table; a bare command refers to the current target. Do not activate for an unrelated general question, an accurate account that already demonstrates understanding, an explicit decline, or a trivial formatting-only result.
 
-Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Katalepsis is active.
-
 ## Protocol
 
-### Intent-scented entry rendering
+### Map rendering
 
-Derive up to three first-turn labels from the user's likely comprehension intent — Orientation, Rationale, Impact, Approval, Transfer, or an Emergent intent — and phrase each as what the user will understand, decide, explain, or change by taking that path. Keep Code, Plan, Document, Analysis, Model, or mixed artifact bases behind those labels as grounding anchors. Descriptions state what becomes clear and why it matters; route-map metadata may enrich a label but never reveal a probe answer or reasoning path. A user-authored path remains valid when it stays within `TargetUngrasped → VerifiedUnderstanding`; multiple concerns the user already named become the ordered task list directly.
+Label each row by what the person will understand or decide through it, and keep the target's anchors — code, plan, document, analysis, model, or a mix — beside the label, its standing said in words.
 
 ### Verification rendering and safeguards
 
-Present the selected artifact context and a concrete scenario before each probe. For non-Horizon classificatory probes, render recognizable correct, partial, and misconception trajectories with domain-specific consequences; constitutive probes invite the user's own reasoning, and every probe preserves a free-response path.
-
-Apply `read` and `advance` for answer handling, `settle` for priority, and `present` for the round's obligations. Scope a correction to the part the material actually settles, preserving what the answer already got right.
-
-When grounding an explanation or correction, cite concrete locations in the target — file and line where it is code, the equivalent anchor where it is not. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or trace, or phase order determines whether text belongs before or inside a gate.
-
-### Intensity
-
-| Level | Realization |
-|-------|-------------|
-| Light | One Constitution probe of core understanding |
-| Medium | One scenario probe of prediction or impact |
-| Heavy | Decomposed probes of causal or sequential understanding |
+Compose each round under TOOL GROUNDING's `present` entry. When grounding an explanation or correction, cite concrete locations in the target — file and line where it is code, the equivalent anchor where it is not. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before or inside the gate is in question.
 
 ## Rules
 
-- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; a withdrawal during a run ends it with what was shown on record, and leaving without saying so is the host's to deliver.
-- **Intent scent before artifact taxonomy**: First user-facing options name the user's likely comprehension outcome; artifact categories remain grounding material.
-- **User authority**: The user's account of what they understand stands for the ground it covers. Do not probe that ground again.
+- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; a withdrawal during a run ends it with the map as it stood on record.
+- **User authority**: An acknowledgment of your explanation stands as the person's judgment: it is not probed again, a factual disagreement or new evidence is shown beside it, and it is recorded as acceptance of your explanation, as CONVERGENCE lists.
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Contract execution**: Read each utterance under `read`; apply `advance`, with task priority from `settle`. Present the entire `Round` under `present`, and the terminal trace under `VerifiedUnderstanding`. These definitions carry the intent correction, ownership, grounding, closure, and continuation obligations.
-- **Horizon calibration**: Demote or revise the instrumentation after repeated applicable opportunities if detections remain absent, speculative, or unhelpful.
+- **Contract execution**: As FLOW, the judgments' doc comments, TOOL GROUNDING's `present` entry, and CONVERGENCE state.

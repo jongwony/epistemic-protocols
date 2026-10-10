@@ -373,20 +373,21 @@ test('a scripted multi-turn case resumes one session and reports every turn', ()
     assert.equal(run.status, 0, run.stderr || run.stdout);
 
     const execs = logged(root).filter((c) => c.kind === 'exec');
-    assert.equal(execs.length, 5, 'the prompt and four scripted replies');
+    assert.equal(execs.length, 6, 'the prompt and five scripted replies');
     assert.equal(execs[0].resume, false);
     assert.equal(execs[0].ephemeral, false, 'a cell that resumes keeps its session on disk');
     for (const c of execs.slice(1)) {
       assert.equal(c.resume, true);
       assert.equal(c.session, 'test-thread');
     }
-    assert.match(execs[4].message, /I'm done here/);
+    assert.match(execs[5].message, /I'm done here/);
 
     const report = invoke(env, 'report', 'grasp', '--markdown');
     assert.equal(report.status, 0, report.stderr || report.stdout);
     assert.match(report.stdout,
-      /target_read_first 1\/1, target_preserved 1\/1, completed 1\/1 \| 5\/5 \|/);
-    assert.match(report.stdout, /correction-quotes-target/);
+      /target_read_first 1\/1, target_preserved 1\/1, completed 1\/1 \| 6\/6 \|/);
+    assert.match(report.stdout, /refutes-in-one-round/);
+    assert.match(report.stdout, /result-meets-both/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -483,7 +484,7 @@ console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.
     const run = invoke(env, 'run', 'grasp');
     assert.equal(run.status, 0, run.stderr || run.stdout);
     const calls = readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n').map(JSON.parse);
-    assert.equal(calls.length, 5);
+    assert.equal(calls.length, 6);
     assert.equal(calls[0].includes('--resume'), false);
     for (const args of calls) assert.equal(args.includes('--no-session-persistence'), false);
     for (const args of calls.slice(1)) {
@@ -494,8 +495,8 @@ console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.
     }
     const report = invoke(env, 'report', 'grasp', '--markdown');
     assert.equal(report.status, 0, report.stderr || report.stdout);
-    assert.match(report.stdout, /\| 5\/5 \|/);
-    assert.match(report.stdout, /\| 0\.0500 \|/);
+    assert.match(report.stdout, /\| 6\/6 \|/);
+    assert.match(report.stdout, /\| 0\.0600 \|/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
