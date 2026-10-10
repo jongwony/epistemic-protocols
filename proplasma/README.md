@@ -14,7 +14,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 ### The Solution
 
-**Contrast over Simulation**: draft the divergence axes — the ones your purpose turns on, with the AI's reading of that purpose marked as its own until you say it — and the placeholder policy, and relay them with their basis before anything is generated; then generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups) and show them first, followed by the map: per axis, what each direction's future looks like and what that rests on — a probe you saw, a description alone, or a check you asked for (**Grounded, not asserted**). What you say you expect of a future is laid beside what the probes show, where the two agree and where they part. You settle a direction on recognition — or ask to see something no probe has materialized yet (a revised spec, a combination, a candidate left out), and the AI fans over that, relaying the whole spec again with what changed; or ask to check something real, and the result sits in its cell as evidence, never as a probe. When the AI finds the contrast insufficient, or reads that the futures are already recognizable, it says so with its basis and proposes; only you close the run. Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (a failed destruction is declared with a cleanup handoff, never silent) — only the direction decision, the cells that decided it, and the open unknowns survive.
+**Contrast over Simulation**: draft the divergence axes — the ones your purpose turns on, with the AI's reading of that purpose marked as its own until you say it — and the placeholder policy, and relay them with their basis before anything is generated; then generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups) and show them first, followed by the map: per axis, what each direction's future looks like and what that rests on — a probe you saw, a description alone, or evidence read in this run, from a source or a check you asked for (**Grounded, not asserted**). What you say you expect of a future is laid beside what the probes show, where the two agree and where they part. You settle a direction on recognition — or ask to see something no probe has materialized yet (a revised spec, a combination, a candidate left out), and the AI fans over that, relaying the whole spec again with what changed; or ask to check something real, and the result sits in its cell as evidence, never as a probe. When the AI finds the contrast insufficient, or reads that the futures are already recognizable, it says so with its basis and proposes; only you close the run. Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (a failed destruction is declared with a cleanup handoff, never silent) — only the direction decision, the cells that decided it, and the open unknowns survive.
 
 ### Difference from Other Protocols
 
@@ -28,7 +28,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 **The trichotomy**: understanding lacking → `/grasp` (verify that I understood); boundary lacking → `/bound` (settle how far); **future unrecognizable → `/preview` (see the directions, then judge)**.
 
-**When it does not activate**: before anything is built, the AI reads whether this is the protocol's case — two or more candidates, a commitment at hand, futures a placeholder depiction can carry — and where it is not (the futures already read from their descriptions, a question about what one option means, a decision only real evidence can settle, a field too thin to compare), it says so in plain words with its basis and what would settle the need.
+**When it does not activate**: before anything is built, the AI reads whether this is the protocol's case — two or more candidates, a commitment at hand, futures a placeholder depiction can carry — and where it is not (the futures already read from their descriptions, a question about what one option means, a choice that turns on whether an analogy or account already in play licenses its inferences rather than on how each future would look, a decision only real evidence can settle, a field too thin to compare), it says so in plain words with its basis and what would settle the need.
 
 ## Three Breach Conditions
 
@@ -36,9 +36,9 @@ The protocol's legitimacy lives in a survival chain — spec relay → probe gen
 
 | Breach | Guard |
 |--------|-------|
-| A divergence axis that commits a probe value before it was relayed with its basis | The spec relay goes out before any generation, and any drafted element can be sent back at the direction gate |
+| A divergence axis that commits a probe value before it was relayed with its basis | The spec relay goes out before any generation, and any drafted element can be sent back at any round |
 | A write to a permanent project file | Temp isolation + cleanup registered at creation |
-| A probe treated as evidence for any claim | A probe stays evidence for no claim in the harvest and in every remnant; a check you ask for is the evidence channel, and it is never a probe |
+| A probe treated as evidence for any claim | A probe stays evidence for no claim in the harvest and in every remnant; evidence comes from a source read or a check you ask for, never from a probe |
 
 ## Install
 

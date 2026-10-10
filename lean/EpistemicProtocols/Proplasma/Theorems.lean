@@ -104,6 +104,9 @@ theorem unasked_consult_only_gathers (c : Context P) (h : ¬ AsksCheck c) :
     consult c = gathered c := by
   simp [consult, h]
 
+theorem check_only_when_asked (c : Context P) (h : Op.check ∈ consultOps c) : AsksCheck c :=
+  Classical.byContradiction fun hn => by simp [consultOps, hn] at h
+
 theorem trace_total (c : Context P) : (discardTrace c).length = (probes c).length := by
   simp [discardTrace]
 

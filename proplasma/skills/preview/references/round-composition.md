@@ -10,6 +10,6 @@ User-facing emit (probe narrations, the map, the round's opening, the convergenc
 
 Each user-facing round bundles the current judgment, its nearest evidence (the relevant probe or map cell), and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, the convergence evidence, or later rounds.
 
-## When this protocol's own phases bear on where a sentence sits relative to a gate
+## When whether text belongs before or inside the gate is in question
 
-Analysis, evidence, the map, and any contrary ground the AI holds about a direction — a reading that the futures are already recognizable included — are text output before each gate; the gate carries the opening and the implications needed to distinguish what the person can take.
+Analysis, evidence, the map, and any contrary ground the AI holds about a direction — a reading that the futures are already recognizable included — are text output before each gate; the gate carries the opening and the implications needed to distinguish what the person can take. A round that works a contradiction ends on that working instead, as the round's `present` entry fixes.
