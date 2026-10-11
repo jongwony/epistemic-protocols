@@ -28,8 +28,7 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
     [otherwise]  collect(c): to the limit of your reach over what the mapping rests on — the
         source's relations and their target counterparts, and the checks on the claims bearing
         on K; every place looked joins the context, a null result included →
-      [the collected context leaves a choice of purpose, conclusions, or pair only the person
-          settles]  the question gate, wait
+      [the collected context leaves a choice only the person settles]  the question gate, wait
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it; present it and proceed — no verdict is asked
   next requested move: as TOOL GROUNDING `seam` states
@@ -129,7 +128,8 @@ variable {P : Type}
 abbrev Text (c : Context P) := List (Fin c.length)
 
 /-- A part of the source or the target structure; where an abstraction is tested against its own
-    cases, a target component's name says which case it belongs to. -/
+    cases, a target component's name says which case it belongs to, in the same words
+    `FitClaim.missing`'s `inCase` uses. -/
 structure Component where
   name      : String
   structure_ : String
@@ -174,10 +174,10 @@ structure Question where
     — and the turn asks nothing narrower, the conclusion is that the structure is preserved in the
     target; the relations under it are what collection finds, never a list fixed here. A narrower
     question the turn asks — whether the retries will match, say — is that turn's whole scope.
-    Where an abstraction is tested against its own cases (the abstraction the source, its cases the
-    target), the conclusion for each case asked about is that it instantiates the abstraction, and a
-    collective relation asked of the cases together is one more conclusion, never replaced by the
-    per-case ones.
+    Where a located abstraction is tested against its own cases and the turn asks nothing narrower
+    (the abstraction the source, its cases the target), the conclusion for each case asked about is
+    that it instantiates the abstraction, and a collective relation asked of the cases together is
+    one more conclusion, never replaced by the per-case ones.
     Articulating what a stated purpose entails is reading it; choosing among materially different
     purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes is read,
     not asked.
@@ -238,14 +238,14 @@ inductive FitClaim
     `overextended`, reported as a step with no counterpart. -/
 axiom fitClaims : Context P → List FitClaim
 
-/-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed. A source
-    feature the target lacks bears on `k` only where `k` needs that feature; under the preservation
-    conclusion every source relation is needed, and a missing counterpart is reported as
-    missing. Whether an absence was meant is the person's to say — their turn can narrow the
-    conclusion — never yours to infer. Where `k` is that a case instantiates an abstraction, what
-    bears is what the abstraction actually requires of that case — read per reading where its
-    purpose leaves several: a feature it leaves optional, absent there, is no misfit. Direction:
-    `references/judgments.md` §BearsOn. -/
+/-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed, under any
+    of the source's materially different readings where it has several. A source feature the target
+    lacks bears on `k` only where `k` needs that feature; under the preservation conclusion every
+    source relation is needed, and a missing counterpart is reported as missing. Whether an absence
+    was meant is the person's to say — their turn can narrow the conclusion — never yours to infer.
+    Where `k` is that a case instantiates an abstraction, what bears is what the abstraction
+    actually requires of that case: a feature it leaves optional, absent there, is no misfit.
+    Direction: `references/judgments.md` §BearsOn. -/
 axiom BearsOn : Context P → FitClaim → Inference → Prop
 
 /-- A fit claim a conclusion of the standing question turns on. -/
@@ -319,10 +319,10 @@ inductive Verdict (c : Context P)
 
 /-- **Your judgment** per conclusion, reading the grounds' bearing on `k` rather than a
     label-to-verdict polarity. Where the verdict on `k` turns on which of the source's materially
-    different readings holds, `k` is Undetermined, its `missing` naming which reading as the
-    person's to say, with each reading's verdict and grounds shown side by side; where the
-    readings reach the same verdict, judge it plainly. Direction: `references/judgments.md`
-    §judge. -/
+    different readings holds and no evidence this session can reach settles it, `k` is Undetermined,
+    its `missing` naming the reading as the person's to say, with each reading's verdict and grounds
+    shown side by side; where the readings reach the same verdict, judge it plainly. Direction:
+    `references/judgments.md` §judge. -/
 axiom judge : (c : Context P) → Inference → Verdict c
 
 inductive Pref | adopted | setAside
@@ -390,9 +390,9 @@ def assessed (c : Context P) : Assessed c :=
     presents it. -/
 inductive Outcome (P : Type)
   /-- the question gate is presented and waits for the person's turn — before collection, after
-      collection surfaced a choice of purpose, conclusions, or pair only the person settles, or
-      when a later turn reopens it after an assessment; nothing more is collected while it
-      waits, and evidence already collected stays. A run status, not a closure. -/
+      collection surfaced a choice only the person settles, or when a later turn reopens it after
+      an assessment; nothing more is collected while it waits, and evidence already collected
+      stays. A run status, not a closure. -/
   | holding    (c : Context P) (relay : Response P)
   /-- `MappingAssessment` over the collected context `c`, on which the question stands: every
       conclusion's verdict with its grounds and limits, every check with its warrant, scope,
@@ -432,8 +432,7 @@ opening a pass.
 open Classical in
 /-- One pass. While the question does not stand, it is presented and nothing more is collected.
     Once it stands, collection runs; where the collected context leaves the question open again — a
-    choice of purpose, conclusions, or pair only the person settles surfaced — it is presented;
-    otherwise the assessment is. -/
+    choice only the person settles surfaced — it is presented; otherwise the assessment is. -/
 def pass (respond : Context P → Response P) (c : Context P) : Outcome P :=
   if ¬ QuestionStands c then .holding c (respond c)
   else
@@ -484,7 +483,8 @@ assessment and is not settled by it; a check this session can reach and has not 
 reported Undetermined. Convergence evidence: the question with the person's turn it stands on,
 who first put it forward, and whether that turn set it or took a draft —
 the purpose, K, and the source and target audited, with the turn or fact that fixed them or the
-person's answer where the choice was open; for each k in K, one line
+person's answer where the choice was open; the reading the person named, with the turn that named
+it, where a conclusion's sense was fixed that way; for each k in K, one line
 (MappingUncertain(k) → verdict(k)) showing the source relation, or chain of relations, that
 carries it, the correspondences it rode on, the likenesses, the differences in both directions,
 and the unknowns; for a case tested against an abstraction, or the cases together where that
@@ -526,8 +526,8 @@ inductive Op | questionRead | questionGate | questionReadback | collect | constr
 
 def grounding : Op → Annot × String
   | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
-  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice of purpose, conclusions, or source–target pair only the person settles, or when a later turn reopens it: with material in the context to draft from, a question drafted from it — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words; with no referent to draft from, ask for the material to audit, inventing no candidate, and design the question with them once it is there; nothing more is collected while it waits, and evidence already collected stays")
-  | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
+  | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice only the person settles, or when a later turn reopens it: with material in the context to draft from, a question drafted from it — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words; with no referent to draft from, ask for the material to audit, inventing no candidate, and design the question with them once it is there; nothing more is collected while it waits, and evidence already collected stays")
+  | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited, and the reading the person named, where they named one — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
   | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: collection as `observe` states")
   | .construct        => (.sense, "Internal analysis: the correspondences over what collection found and their fit claims")
   | .checkRead        => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, target-side defeater, and reach")
@@ -571,7 +571,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, present the question gate (TOOL GROUNDING `questionGate`) rather than an open question, and collect nothing more until their turn takes or sets the question; what was already collected stays. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
-Present the whole assessment in everyday language: the question; for each conclusion, the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on how the source reads, show each reading with its verdict and grounds side by side, and name which reading holds as the reader's to say.
+Present the whole assessment in everyday language: the question; for each conclusion, the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on how the source reads, show each reading with its verdict and grounds side by side, and name the reading they mean as the reader's to say.
 
 Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, any materially different explanation its evidence fits as well, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not; where collected material conflicts, name what conflicts with what. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
