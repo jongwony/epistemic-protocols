@@ -149,9 +149,8 @@ abbrev DirectionAxis := String
     option means or what doing it would involve, which is answered as asked rather than previewed;
     what the choice turns on is whether an analogy or an account already in play licenses its
     inferences, not how each future would look; the directions can be judged only on real
-    evidence, not on a depiction; or placeholders could
-    not carry the difference without blurring it. An unmet need is said as what would settle it.
-    `none` where the case is this protocol's. -/
+    evidence, not on a depiction; or placeholders could not carry the difference without blurring
+    it. An unmet need is said as what would settle it. `none` where the case is this protocol's. -/
 axiom notActivated : Context P → Option String
 
 /-- **Your judgment**: the cited person turn says what the decision is for, or what matters in it,
@@ -236,16 +235,15 @@ inductive Closing
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
     nothing — closes the run this way, read whole on the context as it now stands. Its words
     decide what it settles, whatever form it takes — an option number, a restated goal, a side
-    remark; a mere lean or a comparison closes nothing. A
-    composition of probes already shown that says to go with it constitutes at once; one asking
-    to see it, or a candidate named to be seen, closes nothing. Taking what the map showed adopts
-    it as shown, with no second permission. A direction no probe materialized — read from the
-    accumulated context — and not a composition of probes already shown constitutes as the turn
-    names it, and the closing says its future was never materialized. Where its intent is unclear,
-    it closes nothing; where you took it as a closing — a pick handed to a principle or to you
-    among them — the next round says so, the probes stay in place, and a later turn of theirs
-    that takes it, however short, closes. Your readings, the map's cells, and
-    the open unknowns close nothing and hold no closing back. -/
+    remark; a mere lean or a comparison closes nothing. A composition of probes already shown
+    that says to go with it constitutes at once; one asking to see it, or a candidate named to be
+    seen, closes nothing. Taking what the map showed adopts it as shown, with no second
+    permission. A direction no probe materialized — read from the accumulated context — and not a
+    composition of probes already shown constitutes as the turn names it. Where its intent is
+    unclear, it closes nothing; where you took it as a closing — a pick handed to a principle or
+    to you among them — the probes stay in place, and their next turn, where it takes that
+    reading, however short, closes. Your readings, the map's cells, and the open unknowns close
+    nothing and hold no closing back. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -269,15 +267,15 @@ axiom FanRequested : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
     candidates' material and the sources that bear on the decision — any a turn cites, and any you
-    find — and whatever exists now that bears on it — a running system, a scratch copy of
-    something that exists; read or run without changing existing state: what you
-    create only to look goes to a scratch space outside the project tree and is removed afterwards.
-    What the context already holds from a read or a run is not read or run again unless the person
-    asks for it again, or an utterance, evidence, or a change made in the session since says it
-    moved. What you say you read, you read to the end. A run's result comes with what it ran on and
-    what that leaves untested. What was reached and what was not, with what each unreached one
-    would need — a change to existing state, a permission — and any conflict among what was
-    gathered, are named. Empty where nothing outside the context bears. -/
+    find — and whatever exists now that bears on it — a running system, a scratch copy of something
+    that exists; read or run without changing existing state: what you create only to look goes to a
+    scratch space outside the project tree and is removed afterwards. What the context already holds
+    from a read or a run is not read or run again unless the person asks for it again, or an
+    utterance, evidence, or a change made in the session since says it moved. What you say you read,
+    you read to the end. A run's result comes with what it ran on and what that leaves untested.
+    What was reached and what was not, with what each unreached one would need — a change to
+    existing state, a permission — and any conflict among what was gathered, are named. Empty where
+    nothing outside the context bears. -/
 axiom gathered : Context P → List (Evidence P)
 
 /-- The context with what `gathered` read now appended. -/
@@ -421,7 +419,7 @@ def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some .withdraw       => .withdrawn (closed f)
     | none =>
       let c₁ := consulted f
-      let c₂ := if FanRequested f then fan ai c₁ else c₁
+      let c₂ := if FanRequested c₁ then fan ai c₁ else c₁
       preview ai (c₂ ++ [(ai.respond c₂).val]) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
@@ -435,10 +433,10 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: nothing counts down and no answer
 waits for a later gate. A fan happens where the person's turn asks to see something no probe has
-materialized, and nowhere else: an insufficiency you find is
-shown with its basis and the revision you propose, and you fan over it once the person takes it
-up. Each fan relays the spec whole, with what changed, before it generates. The loop is dialogue:
-each round ends at the gate, and the person ends the run.
+materialized, and nowhere else: an insufficiency you find is shown with its basis and the revision
+you propose, and you fan over it once the person takes it up. Each fan relays the spec whole, with
+what changed, before it generates. The loop is dialogue: each round ends at the gate, and the person
+ends the run.
 -/
 
 /-! ── CONVERGENCE ──
@@ -447,7 +445,7 @@ before discard, every probe's disposition declared.
 Withdrawal keeps its partial record. A constitution adopts the direction as the map showed it; it
 establishes nothing about a direction no probe materialized, and a contrary ground it was taken
 over rides it as dissent. The convergence evidence: the turn read as the closing, quoted, and the
-intent taken from it, and where it took a reading an earlier round showed of an unclear turn, that
+intent taken from it, and where it took a reading the round before showed of an unclear turn, that
 earlier turn quoted too; the purpose as it stands, marked as yours where you read it; at
 DirectionalContrast, the constituted direction and the deciding cells, as `decidingRows` reads
 them, each with what it rests on; at any other exit, the map as it stood; at every exit, the open
@@ -482,12 +480,12 @@ inductive Op | detect | notActivatedRelay | gather | specRelay | instantiate | i
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
   | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
-  | .gather            => (.observe, "artifact read, artifact search, environment run: what `gathered` reads or runs, now, as its doc states; what it returns enters the context as evidence before the round that shows it")
+  | .gather            => (.observe, "artifact read, artifact search, environment run: what `gathered` reads or runs, now, as its doc states; what it returns enters the context as an evidence turn, on the footing `ContrastMap` gives it, before the round that shows it")
   | .specRelay         => (.interaction .extension, "the spec whole before any probe is generated — your reading of the purpose, marked as yours unless they said it; the axes the purpose turns on; the placeholder policy: each probe overtly synthetic, its structure faithful to its direction and its data values fake, evidence for no claim, and where a placeholder may blur a difference; which candidates get probes — enough that at least two futures stand in view once the probes already made are counted, a candidate the person named, or a composition, being probed alone against them, and few enough to take in at once, about four new probes a fan — and, where candidates wait, which and why; and the tier — each with the basis that chose it. On every later fan the whole spec again with what changed since the last relay; marking a change by its cause is welcome, not required. It yields no turn")
   | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the candidates the relay named for probes, each realization registered at creation; existing project files never modified; the Vignette tier writes no file — its narration is your own turn (`narrate`), recorded on the probe")
   | .instantiateDelegate => (.dispatch, "delegate (conditional, Mockup tier): a probe's write handed to execution, temp-isolated, its path registered at creation")
   | .assess            => (.sense, "Internal analysis: the purpose reading, the axes, each cell and what it rests on, the shared premises, the open unknowns, and your readings, over the whole fused context as it now stands")
-  | .present           => (.interaction .constitution, "the round, every round the first included. After a fan, each new probe first, from its realization — a Mockup walked through at its path. Then the map: the purpose as the person said it, or else your reading of it, marked as yours; per axis the purpose turns on, what each direction's future looks like there and what that rests on, as `ContrastMap` defines it; the premises every probe shares, as shared; the open unknowns, each with what would settle it; your readings with their basis — an insufficient contrast with the revision you propose, or a reading that the run has reached a case `notActivated` names — the futures already recognizable or the commitment no longer standing among them —, each closing nothing; and your contrary grounds, each with what it bears on and what it rests on, a direction whose future no probe materialized among them. Every later round shows what changed on the map, and the whole map when the person asks for it, and answers what they asked — a question about a probe within placeholder discipline, saying what the probe was built to show and never a claim about the world; an analogy you offer says which axis it weights. A correction of the purpose moves the map. Read the person's turn whole; where its intent was unclear, say in one line how you took it, with no question asked back. The round that shows evidence read in this run sets it in its cell against the claim your description made and against whatever the person has said that bears on it, saying where each agrees and where it parts. Where they voice a reading or an expectation of a future, or check their understanding against what was shown, lay it beside what the probes show, saying where the two agree and where they part; before reading it as at odds with a probe, read whether it speaks to another purpose, a preference, or an assumption a placeholder cannot reach, and say which, moving the map — a placeholder never settles how a future will be lived. Where their words and evidence read in this run — the candidates' material, a source, a result gathered — part on the same axis and premises, or two of their own utterances do — a criterion they stated and a pick they made — show it with its working in one round: their words quoted, the narrowest such material that bears on it, why the two part, and what they got right; a probe, or anything gathered from one, is never that material, and where their words part from one, the laying-beside above governs; a contradiction they keep after its working stays in view as a held contrary ground until it is settled — on a surface that stays in view where the session has one, otherwise briefly beside each round. Where what could not be reached, or a conflict among what was gathered, bears on a direction, say it there. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — settle a direction, a composition, or one no probe showed; send back any part of the spec; name a candidate to see; ask about a probe, or to see something real observed; or end here")
+  | .present           => (.interaction .constitution, "the round, every round the first included. After a fan, each new probe first, from its realization — a Mockup walked through at its path. Then the map: the purpose as the person said it, or else your reading of it, marked as yours; per axis the purpose turns on, what each direction's future looks like there and what that rests on, as `ContrastMap` defines it; the premises every probe shares, as shared; the open unknowns, each with what would settle it; your readings with their basis — an insufficient contrast with the revision you propose, or a reading that the run has reached a case `notActivated` names — the futures already recognizable or the commitment no longer standing among them — each closing nothing; and your contrary grounds, each with what it bears on and what it rests on, a direction whose future no probe materialized among them. Every later round shows what changed on the map, and the whole map when the person asks for it, and answers what they asked — a question about a probe within placeholder discipline, saying what the probe was built to show and never a claim about the world; an analogy you offer says which axis it weights. A correction of the purpose moves the map. Read the person's turn whole; where its intent was unclear, say in one line how you took it, with no question asked back. The round that shows evidence read in this run sets it in its cell against the claim your description made and against whatever the person has said that bears on it, saying where each agrees and where it parts. Where they voice a reading or an expectation of a future, or check their understanding against what was shown, lay it beside what the probes show, saying where the two agree and where they part; before reading it as at odds with a probe, read whether it speaks to another purpose, a preference, or an assumption a placeholder cannot reach, and say which, moving the map — a placeholder never settles how a future will be lived. Where their words and evidence read in this run — the candidates' material, a source, a result gathered — part on the same axis and premises, or two of their own utterances do — a criterion they stated and a pick they made — show it with its working in one round: their words quoted, the narrowest such material that bears on it, why the two part, and what they got right; a probe, or anything gathered from one, is never that material, and where their words part from one, the laying-beside above governs; a contradiction they keep after its working stays in view as a held contrary ground until it is settled — on a surface that stays in view where the session has one, otherwise briefly beside each round. Where what could not be reached, or a conflict among what was gathered, bears on a direction, say it there. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — settle a direction, a composition, or one no probe showed; send back any part of the spec; name a candidate to see; ask about a probe, or to see something real observed; or end here")
   | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a reading or expectation, a request to see something depicted or observed, a question — read whole against the fused context as it now stands, as `Reaches` and the judgments above read it")
   | .harvest           => (.sense, "Internal analysis: the constituted direction, whether a probe materialized it, the deciding cells as `decidingRows` reads them, and the open unknowns, read from the context before discard")
   | .cleanup           => (.transform, "environment run: the destruction step — per-probe artifact destruction; every exit with probes runs it first")

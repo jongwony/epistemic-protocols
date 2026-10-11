@@ -6,7 +6,7 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 
 ## What is Proplasma?
 
-A modern reinterpretation of Greek πρόπλασμα (preliminary model) — a protocol for the moment **right before a direction commitment, when the candidate directions cannot be judged from their descriptions and you feel you would have to see them to decide**. It materializes cheap placeholder probes that diverge on axes the AI drafts and relays with their basis, shows a map of the directions in which every cell says what it rests on, and lets you constitute the direction decision on futures you have actually seen — then discards every probe.
+A modern reinterpretation of Greek πρόπλασμα (preliminary model) — a protocol for the moment **right before a direction commitment, when the candidate directions cannot be judged from their descriptions and you feel you would have to see them to decide**. It materializes cheap placeholder probes that diverge on axes the AI drafts and relays with their basis, shows a map of the directions in which every cell says what it rests on, and lets you constitute the direction decision on the futures you have seen — or, knowingly, on one no probe showed — then discards every probe.
 
 ### The Core Problem
 
