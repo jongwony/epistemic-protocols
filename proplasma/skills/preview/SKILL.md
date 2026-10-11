@@ -248,9 +248,10 @@ inductive Closing
     it as shown, with no second permission. A direction no probe materialized — read from the
     accumulated context — and not a composition of probes already shown constitutes as the turn
     names it, and the closing says its future was never materialized. Where its intent is unclear,
-    your reading of the turn decides, with no question asked back: the next round says briefly how
-    you took it, and a closing says it in the convergence evidence. Your readings, the map's cells,
-    and the open unknowns close nothing and hold no closing back. -/
+    it closes nothing: the next round says in one line how you took it and goes on, with no
+    question asked back, and where you took it as a closing, the probes stay in place and the
+    person's next turn, however short, closes. Your readings, the map's cells, and the open
+    unknowns close nothing and hold no closing back. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
