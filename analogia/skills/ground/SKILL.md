@@ -167,23 +167,24 @@ structure Question where
   standing    : Standing
 
 /-- **Your judgment**: the cited turn establishes question `q` in `c`, in the whole scope that turn
-    asks — a turn asking about A and B supports no question narrowed to A — with conclusions to
-    audit. Where the purpose is to carry a structure over — a port, a migration, a sibling's shape
-    — and the turn asks nothing narrower, the conclusion is that the structure is preserved in the
-    target; the relations under it are what collection finds, never a list fixed here. Where an
-    abstraction is tested against its own cases, each case within the scope the turn asks is a
-    conclusion — that it instantiates the abstraction — and a collective relation the turn asks of
-    the cases together is a conclusion of its own, never replaced by the per-case ones. A narrower
-    question the turn asks — whether the retries will match, say — is that turn's whole scope.
-    Articulating what a stated purpose entails is reading it; choosing among materially different
-    purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes is read,
-    not asked. How the source reads is none of these choices: its materially different readings
-    are yours to infer while constructing, and the question does not wait on them. Once a
-    person's turn names which reading they mean, that turn fixes the sense of their question's
-    conclusions. The question stands only on the person's turn that sets it in their own words (`set`) or takes a draft you put forward, as it was or corrected (`adopted`); a
-    draft counts only where it was visible as yours, with its grounds, before that turn. A draft
-    alone is a proposal, and an instruction to do the next task takes none. You never choose, drop,
-    or conflate source–target pairs. -/
+    asks of `q`'s source and target — a turn asking about A and B of them supports no question
+    narrowed to A — with conclusions to audit. Where the purpose is to carry a structure over — a
+    port, a migration, a sibling's shape — and the turn asks nothing narrower, the conclusion is
+    that the structure is preserved in the target; the relations under it are what collection finds,
+    never a list fixed here. Where an abstraction is tested against its own cases, each case within
+    the scope the turn asks is a conclusion — that it instantiates the abstraction — and a
+    collective relation the turn asks of the cases together is a conclusion of its own, never
+    replaced by the per-case ones. A narrower question the turn asks — whether the retries will
+    match, say — is that turn's whole scope. Articulating what a stated purpose entails is reading
+    it; choosing among materially different purposes, conclusions, or source–target pairs is not,
+    and a pair `R` or a fact fixes is read, not asked. How the source reads is none of these
+    choices: its materially different readings are yours to infer while constructing, and the
+    question does not wait on them. Once a person's turn names which reading they mean, that turn
+    fixes the sense of their question's conclusions. The question stands only on the person's turn
+    that sets it in their own words (`set`) or takes a draft you put forward, as it was or corrected
+    (`adopted`); a draft counts only where it was visible as yours, with its grounds, before that
+    turn. A draft alone is a proposal, and an instruction to do the next task takes none. You never
+    drop or conflate source–target pairs. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -542,11 +543,11 @@ end Analogia
 
 ### Activation heuristics and exceptions
 
-Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or a located abstraction tested against its own members. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
+Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or an abstraction already stated, tested against its own cases. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
 
 A source or target account this session can reach — code, documents, a repository, a published source — is read as evidence inside the audit, whether or not the reader already holds it; the audit never waits for the reader to bring an account first, and never asks them to judge a correspondence. Where what the reader wants is only to come to hold an account, with no mapping being relied on, that is explanation rather than this audit, and the AI-guided path does not activate. Absence of evidence that a mapping is being relied on establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
 
-Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no located abstraction yet, is a different deficit; a located abstraction tested against its own members is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
+Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no abstraction stated yet, is a different deficit; an abstraction already stated, tested against its own cases, is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
 
 ### Evidence loading
 
