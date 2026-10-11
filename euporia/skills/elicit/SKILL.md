@@ -127,11 +127,12 @@ axiom aporia : Context P → Prop
 abbrev Entry := String
 
 /-- **Your judgment**, the live inventory: every coordinate the intent turns on that this run has
-    raised and the person's words have not since retired or merged — read over the whole fused
+    raised and the person's words have not since merged into another — read over the whole fused
     context: the seed, every answer, what reads of the person's material returned, and the
     decision structure of the domain the intent sits in. A coordinate raised once stays here
-    whether or not the current surface shows it; the person may add, merge, reword, or retire any
-    coordinate, the axis itself included. Whether a reworded coordinate is the same coordinate is
+    whether or not the current surface shows it; one the person's words retired stays too, marked
+    as retired in their words, and is not raised again unless they return to it. The person may
+    add, merge, reword, or retire any coordinate, the axis itself included. Whether a reworded coordinate is the same coordinate is
     your judgment; rewording it does not drop the value that stands on it. Guidance for the reading, not steps it must take: read
     the person's material where the intent turns on it rather than from scratch each round, and a
     coordinate whose basis is still thin may wait before it is raised. -/
@@ -175,7 +176,9 @@ def standingCoord (x : Entry) : Coord P Determination :=
 /-- **Your reading**: how coordinate `x` stands in `c` — filled by the person's latest turn that
     makes it stand; open where none does, carrying as candidate only a turn of the person's or
     evidence that points toward a value not yet taken. A value a person's turn made stand changes
-    only by their later words: evidence against it is shown, and the value stands. -/
+    only by their later words: evidence against it is shown, and the value stands. A coordinate
+    the person retired is open from the turn that retired it, and nothing stands on it until their
+    later words make a value stand on it again. -/
 axiom operative : (c : Context P) → (x : Entry) → Occ (standingCoord (P := P) x) c
 
 def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
@@ -201,7 +204,8 @@ def record (c : Context P) : List (Recorded c) :=
   (coordinates c).flatMap (fun x => recordOf x (operative c x))
 
 /-- What is still open: every coordinate of the live inventory whose occurrence is open, whether
-    it was deferred, left unanswered, or never reached. None closes by default. -/
+    it was deferred, left unanswered, never reached, or retired by the person — a retired one
+    shown as retired, in their words. None closes by default. -/
 def residual (c : Context P) : List Entry :=
   (coordinates c).filter (fun x => !isFilled (operative c x))
 
