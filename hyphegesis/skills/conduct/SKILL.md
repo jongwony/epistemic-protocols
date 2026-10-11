@@ -590,4 +590,5 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 
 ## Adversarial Guards
 
+- **object-control-conflation**: The conduct method owns its ordering, focus, lifetime, state, and recursion.
 - **cross-span-absorption**: A result crossing into a later session declares its record and externalization only; portability auditing and the later session's cognition stay with the receiving session.
