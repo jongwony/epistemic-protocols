@@ -6,7 +6,7 @@ Discover a form by marking what does not fit on concrete sketches until one is r
 
 ## What is Hypotyposis?
 
-A modern reinterpretation of Greek ὑποτύπωσις (outline, sketch) — a protocol for the moment **when a form has to be made and you cannot yet say what it should be, but you would recognize it on sight**. It produces a concrete sketch under a focus the AI drafts and relays with its basis, takes your marks on it — what does not fit, and what to keep — as first-class utterances, revises the retained version under those marks, and stops when you recognize one version as the form for a stated purpose.
+A modern reinterpretation of Greek ὑποτύπωσις (outline, sketch) — a protocol for the moment **when a form has to be made and you cannot yet say what it should be, but you would recognize it on sight**. It makes concrete versions — after relaying what they will try, with its basis — in a medium where the qualities you are judging can be met, takes your reactions to them in your own words (what does not fit, what to keep, what to change), revises the versions those words point to into new ones, and stops when you recognize one version you met as the form for your purpose, or end the run.
 
 ### The Core Problem
 
@@ -14,7 +14,7 @@ Some forms cannot be specified before they are seen (`FitUnrecognized`): the pla
 
 ### The Solution
 
-**Recognition over Description**: draft each round's focus, the perception it needs, and how many variants to produce, relay the draft with its basis, and produce the sketches in temp isolation; present them and take your marks on a specific version — settling or sending back the round's readings in the same answer; revise the retained version — never regenerate it from the coordinates that describe it — and repeat until you finish on a version for a stated purpose. Your marks stay your words; what the AI reads from them stays provisional until you settle it. At the end you name where the recognized version lives (there is no default), and everything else is released with its disposition declared.
+**Recognition over Description**: you need not specify the form first. Before anything is made, the AI relays what the next versions will try, which versions they revise, how many, the medium each is shown in and what that medium can and cannot show, and where each will be — each with its basis — and then makes them. Each round shows the new versions first, as you will meet them, then where the run stands: what your words set and on which version, which of the AI's proposals you took, what rests on a check against a reference, what stays unestablished, and what changed since you last answered. Where a quality has a right answer — a glyph that is right or wrong — the versions are checked against a reference before you see them, and your preference never stands in for that check. You react in your own words; a revision is always a new version made from the ones your words point to, never regenerated from a description. You end the run by taking one version you met as the form — its home shown in that round or named in your answer, with no separate placement step — or by stopping; the versions you passed over stay where they are unless you say otherwise. The recognition covers what the version's medium showed: a quality it did not show stays open on the record.
 
 ### Difference from Other Protocols
 
@@ -30,23 +30,26 @@ Some forms cannot be specified before they are seen (`FitUnrecognized`): the pla
 
 ## Three Breach Conditions
 
-The protocol's legitimacy lives in a chain — spec relay → production → recognition gate → placement gate → account. Violating any of these dissolves it:
+The protocol's legitimacy lives in a chain — intent relay → production → the round → your recognition → the record. Violating any of these dissolves it:
 
 | Breach | Guard |
 |--------|-------|
-| A sketch regenerated from coordinates instead of revised from the retained version | Concretum Retention: each round revises the parent the brief names |
-| An AI interpretation of a mark treated as your commitment | Interpretations stay provisional until you settle them at the recognition gate |
-| A recognized version left at a temporary path | The placement gate has no default; you name a reference that outlives the session |
+| A version regenerated from a description instead of revised from the versions your words point to | A revision is always a new version made from the retained versions; a version shown stays as it was shown |
+| An AI reading of your words, or an AI proposal, treated as your commitment | A value stands only on your turn — one that said it, or one that took it after it was shown as the AI's — and the record says which |
+| A recognition taken to cover what was never shown | A recognition reaches what the version's medium showed and never a revision not yet shown; what went unshown stays unestablished |
 
 ## Grounding
 
 Literature the design rests on, with the strength at which the primary source was checked (*verified*: primary text read; *mostly*: core claim checked, surrounding detail synthesized):
 
-- Alexander, C. (1964). *Notes on the Synthesis of Form*. Harvard UP — *verified*. Good fit has no positive description; misfit is immediate and enumerable. Decides the gate's answer type: marks on a version, never a description of the form.
-- Dorst, K. & Cross, N. (2001). Creativity in the design process: co-evolution of problem–solution. *Design Studies* 22(5) — *mostly*. Problem and solution take shape together. Decides that coordinates are revisable with provenance rather than fixed once accepted.
-- Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. One design shown alone inflates ratings and suppresses criticism. Decides that the variant count is drafted per round rather than defaulting to one, and corrected at the recognition gate.
-- Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. Alternatives built before feedback improve the result and the maker's stake. Decides that alternatives are drafted per round and corrected at the recognition gate, not fixed to a round schedule.
-- Wadinambiarachchi, S. et al. (2024). The effects of generative AI on design fixation and divergent thinking. *CHI 2024* — *verified*. Early concrete material narrows what people go on to imagine. Decides that the round spec is relayed with its basis before anything is produced, so what narrowed the sketch is visible, and that an unexpected mark stays admissible whatever the focus.
+- Alexander, C. (1964). *Notes on the Synthesis of Form*. Harvard UP — *verified*. Good fit has no positive description; misfit is immediate and enumerable. Decides that you react to versions in your own words rather than describing the form first.
+- Dorst, K. & Cross, N. (2001). Creativity in the design process: co-evolution of problem–solution. *Design Studies* 22(5) — *mostly*. Problem and solution take shape together. Decides that what your words set is re-read on the whole context every round, with who proposed it kept apart.
+- Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. One design shown alone inflates ratings and suppresses criticism. Decides that how many versions to show is relayed per round rather than defaulting to one, and can be sent back at the next round.
+- Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. Alternatives built before feedback improve the result and the maker's stake. Decides that alternatives are relayed per round and can be sent back at the next round, not fixed to a round schedule.
+- Wadinambiarachchi, S. et al. (2024). The effects of generative AI on design fixation and divergent thinking. *CHI 2024* — *verified*. Early concrete material narrows what people go on to imagine. Decides that the production intent is relayed with its basis before anything is made, so what narrowed the versions is visible, and that a reaction the intent did not ask about still counts.
+- Sadler, D. R. (1989). Formative assessment and the design of instructional systems. *Instructional Science* 18(2) — *verified*. Quality can be judged without a prior list of criteria, and closing a gap needs a comparison against a reference. Decides that a bare rejection counts without a diagnosis, and that a quality with a right answer is checked against a reference before it is shown.
+- Gentner, D. & Markman, A. B. (1997). Structure mapping in analogy and similarity. *American Psychologist* 52(1) — *verified*. Differences within a shared structure are noticed more than differences between unrelated things. Decides that versions offered as alternatives differ in ways you can see, and that one that would not differ perceptibly is not offered as another choice.
+- Hsee, C. K., Loewenstein, G. F., Blount, S. & Bazerman, M. H. (1999). Preference reversals between joint and separate evaluations of options. *Psychological Bulletin* 125(5) — *verified*. Side-by-side comparison can overweight a difference that vanishes when the chosen option is used alone. Decides that a version picked beside others and used alone may be shown alone before it is taken.
 
 ## Install
 
@@ -61,7 +64,7 @@ claude plugin install hypotyposis@epistemic-protocols
 /sketch [what you are about to make, and anything already settled about it]
 ```
 
-Hypotyposis binds what you already settled, relays a first round's focus and variants with their basis, produces the sketches, and presents them for your marks. Each round you mark a version, declare one focus adequate, or finish on a version for the purpose you state. On finish you name where the recognized version lives; the result carries the settled commitments, the trace of what each mark became, the axes you left open, and a reference to the version you recognized — a witness of what you recognized, not a specification of what to build.
+Hypotyposis gathers what bears on the form, relays what the first versions will try with its basis, makes them, and shows them before where the run stands. Each round you react in your own words — mark what does not fit, keep what does, ask for a change, a combination, or another medium, or ask about a version — and the next versions are made from the ones your words point to. You end it by taking one version you met as the form for your purpose, its home shown or named in that turn, or by stopping. The record carries every version with where it is, the values you hold with who proposed each and whether your words set it or your turn took it, what was checked and against what, what stays open, and any contrary ground the AI held with your answer to it — a witness of what you recognized, not a specification of what to build.
 
 ## Author
 
