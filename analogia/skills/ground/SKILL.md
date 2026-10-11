@@ -238,13 +238,13 @@ inductive FitClaim
 axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed, under any
-    of the source's materially different readings where it has several. A source feature the target
-    lacks bears on `k` only where `k` needs that feature; under the preservation conclusion every
-    source relation is needed, and a missing counterpart is reported as missing. Whether an absence
-    was meant is the person's to say — their turn can narrow the conclusion — never yours to infer.
-    Where `k` is that a case instantiates an abstraction, what bears is what the abstraction
-    actually requires of that case: a feature it leaves optional, absent there, is no misfit.
-    Direction: `references/judgments.md` §BearsOn. -/
+    of the source's materially different readings (`references/judgments.md` §collection) where it
+    has several. A source feature the target lacks bears on `k` only where `k` needs that feature;
+    under the preservation conclusion every source relation is needed, and a missing counterpart is
+    reported as missing. Whether an absence was meant is the person's to say — their turn can narrow
+    the conclusion — never yours to infer. Where `k` is that a case instantiates an abstraction,
+    what bears is what the abstraction actually requires of that case: a feature it leaves optional,
+    absent there, is no misfit. Direction: `references/judgments.md` §BearsOn. -/
 axiom BearsOn : Context P → FitClaim → Inference → Prop
 
 /-- A fit claim a conclusion of the standing question turns on. -/
@@ -485,10 +485,9 @@ person's answer where the choice was open; the reading the person named, with th
 it, where a conclusion's sense was fixed that way; for each k in K, one line
 (MappingUncertain(k) → verdict(k)) showing the source relation, or chain of relations, that
 carries it, the correspondences it rode on, the likenesses, the differences in both directions,
-and the unknowns; for a case tested against an abstraction, or the cases together where that
-conclusion is itself a fit to the abstraction, a Licensed verdict's level of abstraction and
-consequence concrete enough to fail, and the contrast that makes its fit diagnostic or that none
-was reachable;
+and the unknowns; for an instantiation of an abstraction, by a case or by the cases together, a
+Licensed verdict's level of abstraction and consequence concrete enough to fail, and the contrast
+that makes its fit diagnostic or that none was reachable;
 for each checked fit claim, its label, warrant (`Check.warrant`), and scope beside the grounds,
 the stated defeater, the reach or its absence, whether the check was unmet, survived, or
 failed, and any materially different explanation the evidence fits as well; correspondences
@@ -569,7 +568,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, present the question gate (TOOL GROUNDING `questionGate`) rather than an open question, and collect nothing more until their turn takes or sets the question; what was already collected stays. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
-Present the whole assessment in everyday language: the question; for each conclusion, the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on how the source reads, show each reading with its verdict and grounds side by side, and name the reading they mean as the reader's to say.
+Present the whole assessment in everyday language: the question; for each conclusion, the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on which materially different reading of the source holds, show each reading with its verdict and grounds side by side, and name the reading they mean as the reader's to say.
 
 Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, any materially different explanation its evidence fits as well, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not; where collected material conflicts, name what conflicts with what. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
@@ -593,7 +592,7 @@ Read `references/round-composition.md` before composing when terminology must re
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
 - **A reading the source leaves open is shown, not chosen**: Where a conclusion's verdict turns on which materially different reading of the source holds, it stays Undetermined with each reading's verdict and grounds shown side by side; the person's turn naming the reading they mean fixes the sense of the conclusions, and they are judged again on it.
-- **Self-grounding judges each case**: Where an abstraction is tested against its own cases, each case asked about gets its own verdict and a collective relation asked of them is judged on its own; a Licensed verdict on a case, or on the cases together where that conclusion is itself a fit to the abstraction, names the level of abstraction its fit is claimed at and a consequence concrete enough to fail, shows the contrast that makes the fit diagnostic, and where none was reachable its limits say the fit was not shown to be diagnostic.
+- **Self-grounding judges each case**: Where an abstraction is tested against its own cases, each case asked about gets its own verdict and a collective relation asked of them is judged on its own; a Licensed verdict on an instantiation of the abstraction, by a case or by the cases together, names the level of abstraction its fit is claimed at and a consequence concrete enough to fail, shows the contrast that makes the fit diagnostic, and where none was reachable its limits say the fit was not shown to be diagnostic.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
 - **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. Which turn opens a pass is `BearsOnRun`'s reading; the reader is never asked to classify their own turn.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
