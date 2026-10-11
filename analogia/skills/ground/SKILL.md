@@ -197,8 +197,8 @@ def questionCoord : Coord P Question :=
   { admits := (·.val = .person), supports := QuestionSupported }
 
 /-- **Your judgment**: how the question stands in `c`, read again against the context as it now
-    stands. Every question one turn took stands; which of them a later turn bears on is your
-    reading of that turn, read whole against the context. A taken question not yet audited is
+    stands. Every question one turn took stands; which of them a turn bears on — the taking turn
+    and every later one — is your reading of that turn, read whole against the context. A taken question not yet audited is
     shown as waiting, with one line of what it will check. Where you read taken questions as
     bearing on one another — one's answer constrains another's, or comparing them is the point —
     put forward a combined question as a draft; it stands only when the person's turn takes it. -/
