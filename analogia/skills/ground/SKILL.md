@@ -158,7 +158,8 @@ inductive Standing | set | adopted
 /-- The question an audit answers: what the comparison is for, the conclusions at stake (`K`), and
     the source and target — carried only where `R` and the context leave a materially different
     choice of either open, `none` where they fix it — with who first put it forward and how it
-    came to stand. A question concerns one source–target pair. -/
+    came to stand. A question concerns one source–target pair; questions taken together because
+    they bear on one another are one question whose conclusions each name their pair. -/
 structure Question where
   purpose     : String
   conclusions : List Inference
@@ -181,11 +182,11 @@ structure Question where
     are yours to infer while constructing, and the question does not wait on them. The question
     stands only on the person's turn that sets it in their own words (`set`) or takes a draft you
     put forward, as it was or corrected (`adopted`); a draft counts only where it was visible as
-    yours, with its grounds, before that turn. A draft alone is a
-    proposal, and an instruction to do the next task takes none. Several drafts a turn takes
-    establish one question where their whole scope is one pair's; drafts shown as separate audits
-    of different pairs, taken in one turn, each establish their own question. Either way you never
-    choose, drop, or conflate pairs; otherwise the question stays open. -/
+    yours, with its grounds, before that turn. A draft alone is a proposal, and an instruction to
+    do the next task takes none. Several drafts a turn takes establish one question where their
+    whole scope is one pair's; drafts shown as separate audits of different pairs, taken in one
+    turn, each establish their own question. Either way you never choose or drop pairs, and never
+    merge pairs unnamed; otherwise the question stays open. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -198,9 +199,9 @@ def questionCoord : Coord P Question :=
     bearing on this audit bears on: a reading, a ground, a counterexample, or an instruction about
     order goes to the question it concerns, assessed or waiting, and a go-on that names none takes
     the first, in the order shown, not yet assessed. Where you read the taken questions as bearing
-    on one another — one's answer constrains another's, or comparing them is the point — they are
-    audited side by side in one pass, each question's verdicts kept apart; independent ones are
-    taken one at a time, and the rest wait. -/
+    on one another — one's answer constrains another's, or comparing them is the point — they stand
+    as one question, its `K` the union of their conclusions, each conclusion naming its own pair;
+    independent ones are taken one at a time, and the rest wait. -/
 axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- `K`: the conclusions of the question that stands; empty while it is open. -/
@@ -568,7 +569,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, present the question gate (TOOL GROUNDING `questionGate`) rather than an open question, and collect nothing more until their turn takes or sets the question; what was already collected stays. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
-Present the whole assessment in everyday language: the question; for each conclusion, the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on how the source reads, show each reading with its verdict and grounds side by side, and name which reading holds as the reader's to say.
+Present the whole assessment in everyday language: the question; for each conclusion — grouped by the taken question it came from, where questions taken together stand as one — the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on how the source reads, show each reading with its verdict and grounds side by side, and name which reading holds as the reader's to say.
 
 Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, any materially different explanation its evidence fits as well, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not; where collected material conflicts, name what conflicts with what. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
