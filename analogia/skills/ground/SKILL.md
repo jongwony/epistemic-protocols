@@ -171,23 +171,23 @@ structure Question where
   standing    : Standing
 
 /-- **Your judgment**: the cited turn establishes question `q` in `c`, in the whole scope that turn
-    asks — a turn asking about A and B supports no question narrowed to A — with conclusions to
-    audit. Where the purpose is to carry a structure over — a port, a migration, a sibling's shape —
-    and the turn asks nothing narrower, the conclusion is that the structure is preserved in the
-    target; the relations under it are what collection finds, never a list fixed here. A narrower
-    question the turn asks — whether the retries will match, say — is that turn's whole scope. Where
-    an abstraction is tested against its own cases (the abstraction the source, its cases the
-    target; each case a conclusion of its own), the conclusion for each case asked about is that it
-    instantiates the abstraction, and a collective relation asked of the cases together is one more
-    conclusion, never replaced by the per-case ones. Articulating what a stated purpose entails is
-    reading it; choosing among materially different purposes, conclusions, or source–target pairs is
-    not, and a pair `R` or a fact fixes is read, not asked. How the source reads is none of these
-    choices, and the question does not wait on it. Once a person's turn names which reading they
-    mean, that turn fixes the sense of their question's conclusions. The question stands only on the
-    person's turn that sets it in their own words (`set`) or takes a draft you put forward, as it
-    was or corrected (`adopted`); a draft counts only where it was visible as yours, with its
-    grounds, before that turn. A draft alone is a proposal, and an instruction to do the next task
-    takes none. -/
+    asks of its pair — a turn asking A and B of one pair supports no question narrowed to A — with
+    conclusions to audit. Where the purpose is to carry a structure over — a port, a migration, a
+    sibling's shape — and the turn asks nothing narrower, the conclusion is that the structure is
+    preserved in the target; the relations under it are what collection finds, never a list fixed
+    here. A narrower question the turn asks — whether the retries will match, say — is that turn's
+    whole scope. Where an abstraction is tested against its own cases (the abstraction the source,
+    its cases the target; each case a conclusion of its own), the conclusion for each case asked
+    about is that it instantiates the abstraction, and a collective relation asked of the cases
+    together is one more conclusion, never replaced by the per-case ones. Articulating what a stated
+    purpose entails is reading it; choosing among materially different purposes, conclusions, or
+    source–target pairs is not, and a pair `R` or a fact fixes is read, not asked. How the source
+    reads is none of these choices, and the question does not wait on it. Once a person's turn names
+    which reading they mean, that turn fixes the sense of their question's conclusions. The question
+    stands only on the person's turn that sets it in their own words (`set`) or takes a draft you
+    put forward, as it was or corrected (`adopted`); a draft counts only where it was visible as
+    yours, with its grounds, before that turn. A draft alone is a proposal, and an instruction to do
+    the next task takes none. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
