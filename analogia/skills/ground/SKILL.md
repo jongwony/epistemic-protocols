@@ -198,10 +198,11 @@ def questionCoord : Coord P Question :=
 
 /-- **Your judgment**: how the question stands in `c`, read again against the context as it now
     stands. Every question one turn took stands; which of them a turn bears on — the taking turn
-    and every later one — is your reading of that turn, read whole against the context. A taken question not yet audited is
-    shown as waiting, with one line of what it will check. Where you read taken questions as
-    bearing on one another — one's answer constrains another's, or comparing them is the point —
-    put forward a combined question as a draft; it stands only when the person's turn takes it. -/
+    and every later one — is your reading of that turn, read whole against the context. A taken
+    question not yet audited is shown as waiting, with one line of what it will check. Where you
+    read taken questions as bearing on one another — one's answer constrains another's, or
+    comparing them is the point — put forward a combined question as a draft; it stands only when
+    the person's turn takes it. -/
 axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- `K`: the conclusions of the question that stands; empty while it is open. -/
@@ -589,7 +590,7 @@ Read `references/round-composition.md` before composing when terminology must re
 - **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
 - **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose, narrow the conclusions below what the cited turn asks, or pick between materially different sources or targets without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise the question gate (`questionGate`) is presented, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
 - **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
-- **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not. Where an abstraction is tested against its own cases, every case within the question's scope carries its own verdict, an unresolved one included.
+- **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite; met checks on every step alone never license it. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict reaches only the relations and composites checked, and its limits name them.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
 - **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. Which turn opens a pass is `BearsOnRun`'s reading; the reader is never asked to classify their own turn.
