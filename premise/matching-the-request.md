@@ -4,7 +4,8 @@ After reading intent through `approach-verification.md`, fit the response to the
 
 ## Abstraction Level Check
 
-Resolve whether the current concern calls for examining a design or executing a settled one. Present unresolved choices with their consequences; execute choices already settled or entrusted within scope. Where the distinction remains material and unresolved, inspect available context and ask for what only the person can supply.
+<!-- lead -->
+Resolve whether the current concern calls for examining a design or executing a settled one. Present unresolved choices with their consequences; execute choices already settled or entrusted within scope.<!-- /lead --> Where the distinction remains material and unresolved, inspect available context and ask for what only the person can supply.
 
 ## Fix Scope
 

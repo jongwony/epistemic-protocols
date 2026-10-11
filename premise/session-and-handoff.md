@@ -4,7 +4,8 @@ Use this document when interrupting, resuming, or reframing work whose commitmen
 
 ## Resumption Cues
 
-Before an interruption or deliberate deferral, preserve reachable ground for the current goal, its relevant state, and the intended next action. Name that next action explicitly. Carry pointers to the record where available rather than rewriting it; the receiving context must be able to recover what those pointers mean.
+<!-- lead -->
+Before an interruption or deliberate deferral, preserve reachable ground for the current goal, its relevant state, and the intended next action. Name that next action explicitly.<!-- /lead --> Carry pointers to the record where available rather than rewriting it; the receiving context must be able to recover what those pointers mean.
 
 ## Interruption Handling
 

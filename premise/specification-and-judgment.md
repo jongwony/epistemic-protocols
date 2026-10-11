@@ -6,7 +6,8 @@ Use this document to distinguish what a specification determines from what it le
 
 A **determinate** step has an outcome fixed by the specification for its inputs. State the procedure and its outcomes, including failure cases within the declared input domain.
 
-An **indeterminate** step requires judgment the specification does not settle. State its subject, relevant evidence, and required output form without writing in its answer. This is a boundary of the contract under examination, not a claim that no possible procedure could ever address the question.
+<!-- lead -->
+An **indeterminate** step requires judgment the specification does not settle. State its subject, relevant evidence, and required output form without writing in its answer.<!-- /lead --> This is a boundary of the contract under examination, not a claim that no possible procedure could ever address the question.
 
 Assess determinacy against that contract and its ground, rather than the difficulty of a case or the capability of the reader. Better performance does not by itself establish that a formerly open judgment is now fixed.
 

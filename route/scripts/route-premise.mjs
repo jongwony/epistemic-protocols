@@ -1,15 +1,23 @@
 /**
- * The premise index, rendered for injection at session start and again at
- * the tool calls the matcher can see are its moments.
+ * The premise index, rendered for injection at session start, at a
+ * subagent's start, and again at the tool calls the matcher can see are its
+ * moments.
  *
  * The premise documents are a reference surface that ships beside the plugins
  * in this marketplace, under `premise/` — the collaboration premises the
- * protocols rest on. This file carries their index: each document and the
- * moment that calls for it. The index lives here rather than in a file under
- * `premise/` because the hooks are its one delivery channel — a file there
- * would be a second one, picked up by directory convention and delivered
- * twice — and because an entry's path is only useful absolute, which is
- * something a hook resolves at every epoch and a file cannot carry.
+ * protocols rest on. This file carries their index: each document, the
+ * moments that call for it, and — read from the document itself — its lead
+ * clause. The index lives here rather than in a file under `premise/`
+ * because the hooks are its one delivery channel — a file there would be a
+ * second one, picked up by directory convention and delivered twice — and
+ * because an entry's path is only useful absolute, which is something a
+ * hook resolves at every epoch and a file cannot carry.
+ *
+ * The lead clause is the document's own words: each document marks one span
+ * with `<!-- lead -->` … `<!-- /lead -->`, which renders as nothing, and the
+ * line quotes that span with its whitespace runs collapsed and nothing else
+ * changed. A document without exactly one marked span still gets its line,
+ * without a quote.
  *
  * The premise root is the marketplace checkout the host keeps for this
  * plugin's own marketplace: `known_marketplaces.json` records where that
@@ -19,18 +27,19 @@
  * the plugin root is the same directory. An entry whose document is not
  * there is left out; a root holding none of them is no root.
  *
- * Two delivery channels. The session-start index carries every document's
- * moments under `when`: recognizing a moment as it arrives is the reader's,
- * and the index is what the reader recognizes it against. A moment the
- * host's tool matcher can also see — a named file tool touching a path of
- * a given shape, a named agent tool being called — is delivered a second
- * time at that call, through the PreToolUse hook (route-tool.mjs): an `at`
- * field on the entry names the matcher-decided moment and the clause for
- * the line delivered there. The second delivery is a reinforcement, not a
- * replacement: a hook's context reaches the model on the request after the
- * call, so the call has run by the time the line is read, and the line
- * asks for the document before the result is built on. The session line
- * therefore stays for every moment, including the ones the matcher sees.
+ * Two delivery channels. The session-start index (and the same index at a
+ * subagent's start) carries every document's moments under `moments`:
+ * recognizing a moment as it arrives is the reader's, and the index is what
+ * the reader recognizes it against. A moment the host's tool matcher can
+ * also see — a named file tool touching a path of a given shape, a named
+ * agent tool being called — is delivered a second time at that call,
+ * through the PreToolUse hook (route-tool.mjs): an `at` field on the entry
+ * names the matcher-decided moment and the sentence saying what the call
+ * is. The second delivery is a reinforcement, not a replacement: a hook's
+ * context reaches the model on the request after the call, so the call has
+ * run by the time the line is read, and the line carries the lead clause
+ * for the result that is built on next. The session line therefore stays
+ * for every moment, including the ones the matcher sees.
  *
  * What qualifies for the tool channel is what the matcher decides without
  * reading the call's content: a tool name, a path shape. A moment that
@@ -59,8 +68,9 @@
  *
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
- * exists, every document has an entry, every entry has a `when`, and every
- * `at` names a moment the matcher can decide.
+ * exists, every document has an entry, every entry has its moments, every
+ * document marks exactly one lead that extraction returns unchanged, and
+ * every `at` names a moment the matcher can decide.
  *
  * Every shortfall yields "" so the caller can fail open. Zero external
  * dependencies: Node.js standard library only.
@@ -70,42 +80,45 @@ import fs from "node:fs";
 import path from "node:path";
 import { configDir, identify, pluginRoot, readJson } from "./route-protocols.mjs";
 
-// Headed like the deficit table: the injection says what to do with the
-// lines beneath, and the entries carry the rest. Nothing here describes the
-// collection or how the lines arrived — the reader needs neither to
-// recognize a situation and reach a document.
+// Headed like the deficit table, and stated as fact: what each line holds,
+// and that the document holds the rest. Nothing here describes how the
+// lines arrived — the reader needs that neither to recognize a moment nor
+// to reach a document.
 const PREMISE_HEADER =
-  "Collaboration premises — read each document when the situation it names arises:";
+  "Collaboration premises — each line gives a document, its lead clause in the document's own words, and the moments it governs; the document holds the rest of what applies at those moments:";
 
-// Heads a tool-channel injection: it says the situation has arisen, so the
-// line beneath reads as arriving now rather than as a standing instruction.
-// The call has run by the time this is read, so it asks for the document
-// before the work continues; how the line arrived is not the reader's
-// concern and is not said.
+// Heads a tool-channel injection. The call has run by the time this is
+// read, so the line says what the call was and quotes the clause that
+// governs what is built on it.
 const TOOL_HEADER =
-  "Collaboration premises — the situation named below has just arisen. Read the document before continuing this work:";
+  "Collaboration premise for the tool call just made:";
 
-// One entry per document. `when` is the clause for the session-start line
-// and carries every moment. `at` names a matcher-decided moment (a key of
-// MOMENTS) and the clause for the line delivered again at that call.
+// The marker pair a document puts around its lead clause.
+const LEAD_OPEN = "<!-- lead -->";
+const LEAD_CLOSE = "<!-- /lead -->";
+
+// One entry per document. `moments` is the session-start line's list of the
+// moments the document governs, each one the reader can observe in its own
+// work. `at` names a matcher-decided moment (a key of MOMENTS) and `call`,
+// the sentence the line delivered at that call opens with.
 const PREMISE_INDEX = [
-  { file: "recognition-and-authority.md", when: "when deciding whether to settle something yourself or put it to the person you are working with, when setting up work that will continue without that person present, when presenting a set of options for someone to choose from, and when deciding whether a rule may fix an answer before the situation it applies to is known." },
-  { file: "interaction-factorization.md", when: "when designing the options offered at a checkpoint, and when judging whether those options genuinely diverge or collapse to one dominant answer dressed up as several." },
-  { file: "gate-design.md", when: "when designing or defending a checkpoint, when deciding what that checkpoint should present, when deciding what counts as done and when to stop, and when checking whether a required step can be skipped." },
-  { file: "tiering-and-scope.md", when: "when deciding a principle's role, scope, loading moment, or revision basis, including after a model change." },
-  { file: "specification-and-judgment.md", when: "when deciding what a procedure can settle in advance and what has to be judged in the situation, and when each added exception to a rule keeps producing the next one." },
-  { file: "calibration-methodology.md", when: "when setting or changing how much may be decided without asking the person you are working with." },
-  { file: "approach-verification.md", when: "before deciding what to do with a request, when an utterance's grammatical form may differ from the action it actually wants, and when an instruction changes some parts of a thing and leaves the rest as it was." },
-  { file: "matching-the-request.md", when: "when unsure whether the conversation is at design level or implementation level, when deciding how far a fix should reach, when deciding how detailed a question back to the person should be, and when a time or date arrives without a stated zone." },
-  { file: "verification-discipline.md", when: "before stating a claim about the state of a system or artifact, including claims that work is complete, before starting a change, when a delegated agent reports that its work is complete, when weighing advice that arrived from outside the work, and when deciding whether something warrants an independent second look." },
+  { file: "recognition-and-authority.md", moments: "about to settle something the person may hold a judgment on, or to ask them about it; about to present options for someone to choose from; handing off work that will continue without the person present; a rule would fix an answer before the situation it applies to is known." },
+  { file: "interaction-factorization.md", moments: "about to offer options at a checkpoint; the options may collapse to one answer that a fact, prior decision, or convention already fixes." },
+  { file: "gate-design.md", moments: "about to design, present, or defend a checkpoint; deciding what counts as done and when to stop; a required step looks skippable." },
+  { file: "tiering-and-scope.md", moments: "deciding a principle's role, scope, or revision basis; a model change is offered as the reason to retire or keep a rule." },
+  { file: "specification-and-judgment.md", moments: "deciding which steps a procedure can settle in advance and which must be judged in the situation; each added exception to a rule calls for the next one." },
+  { file: "calibration-methodology.md", moments: "setting or changing how much may be decided without asking the person." },
+  { file: "approach-verification.md", moments: "about to act on a request; a question or statement may want an action its grammar does not show; the person's words admit more than one reading; an instruction changes part of something and leaves the rest." },
+  { file: "matching-the-request.md", moments: "unclear whether the conversation is at design level or implementation level; deciding how far a fix reaches; about to ask the person something and choosing its level of detail; a time or date arrives without a zone." },
+  { file: "verification-discipline.md", moments: "about to state a claim about a system's or artifact's state, including that work is done; about to start a change; a delegated agent reports its work complete; advice arrives from outside the work; deciding whether something needs an independent second look." },
   { file: "instruction-authoring.md",
-    when: "when writing or revising instructions and durable records, when judging whether a new rule earns its place, before adding to standing instructions that already carry entries, when a defect has been found and the repair is about to be written, when two instructions turn out to conflict, when deciding how much to inline for a reader versus leaving as a reference, and again on the text once it is written.",
-    at: { moment: "instruction-surface-change", when: "when writing or revising instructions and durable records, before adding to standing instructions that already carry entries, and again on the text once it is written." } },
+    moments: "about to write or revise instructions or a durable record — a rule, a skill, a recorded decision; a new rule or principle is proposed, including one the person states to adopt; about to add to standing instructions that already carry entries; a defect is found and its repair is about to be written; two instructions conflict; deciding where a principle loads or how much to inline versus reference; reading the text back once it is written.",
+    at: { moment: "instruction-surface-change", call: "This call changes an instruction surface." } },
   { file: "delegation-and-subagents.md",
-    when: "when assigning work to another reasoning context or receiving its result, checking what the recipient can access, and deciding what a coordinator keeps versus delegates.",
-    at: { moment: "delegation", when: "when handing work to another agent." } },
-  { file: "session-and-handoff.md", when: "when deferring work or crossing a session boundary, when an input arrives that would pull focus off the task currently in progress, when someone interrupts the work mid-task, when attention has already moved off a commitment that is still open, and when the way the work is understood has been replaced since a commitment was written down." },
-  { file: "boundaries-and-safety.md", when: "before replacing a file or taking any other hard-to-reverse action, when reading configuration text that could be executed, and when deciding when work needs to be made durable." },
+    moments: "about to hand work to another agent or reasoning context, including deciding what its brief carries; its result arrives; deciding what a coordinator keeps and what it delegates.",
+    at: { moment: "delegation", call: "This call hands work to another agent." } },
+  { file: "session-and-handoff.md", moments: "about to defer work or cross a session boundary; an input arrives that would pull focus off the task in progress; the work is interrupted mid-task; a commitment is still open after attention moved off it; the understanding of the work has changed since a commitment was written down." },
+  { file: "boundaries-and-safety.md", moments: "about to replace or overwrite a file or other state, or take another hard-to-reverse action; reading configuration text that could be executed; deciding when work needs to be made durable." },
 ];
 
 // ---------------------------------------------------------------------------
@@ -162,6 +175,30 @@ function bindsAt(entry, call) {
 }
 
 /**
+ * The span a document marks as its lead, with whitespace runs collapsed —
+ * or "" unless the document carries exactly one marker pair, in order.
+ */
+function leadOf(text) {
+  if (typeof text !== "string") return "";
+  const open = text.split(LEAD_OPEN).length - 1;
+  const close = text.split(LEAD_CLOSE).length - 1;
+  if (open !== 1 || close !== 1) return "";
+  const start = text.indexOf(LEAD_OPEN) + LEAD_OPEN.length;
+  const end = text.indexOf(LEAD_CLOSE);
+  if (end < start) return "";
+  return text.slice(start, end).replace(/\s+/g, " ").trim();
+}
+
+/** The lead of the document at `file`, or "" where it cannot be read. */
+function readLead(file) {
+  try {
+    return leadOf(fs.readFileSync(file, "utf8"));
+  } catch {
+    return "";
+  }
+}
+
+/**
  * The marketplace checkout this plugin was installed from, as the host
  * records it — or null where the records do not reach it.
  */
@@ -197,8 +234,23 @@ function premiseRoot(env = {}) {
   return candidates.find((c) => present(c).length > 0) ?? null;
 }
 
-function line(root, e, when) {
-  return `Read \`${path.join(root, e.file)}\` ${when}`;
+/** The quoted lead, with the space after it, or nothing where there is none. */
+function quoted(file) {
+  const lead = readLead(file);
+  return lead ? `"${lead}" ` : "";
+}
+
+/** A session-start line: the path, the quoted lead, the moments. */
+function line(root, e) {
+  const file = path.join(root, e.file);
+  return `\`${file}\` — ${quoted(file)}Moments: ${e.moments}`;
+}
+
+/** A tool-channel line: what the call is, the path, the quoted lead. */
+function toolLine(root, e) {
+  const file = path.join(root, e.file);
+  const lead = readLead(file);
+  return `${e.at.call} \`${file}\` governs this moment${lead ? `: "${lead}"` : "."}`;
 }
 
 /**
@@ -209,7 +261,7 @@ function renderPremise(root) {
   if (!root) return "";
   const entries = present(root);
   if (entries.length === 0) return "";
-  return [PREMISE_HEADER, ...entries.map((e) => line(root, e, e.when))].join("\n");
+  return [PREMISE_HEADER, ...entries.map((e) => line(root, e))].join("\n");
 }
 
 /**
@@ -220,17 +272,20 @@ function renderToolPremise(root, call) {
   if (!root) return "";
   const entries = present(root).filter((e) => bindsAt(e, call));
   if (entries.length === 0) return "";
-  return [TOOL_HEADER, ...entries.map((e) => line(root, e, e.at.when))].join("\n");
+  return [TOOL_HEADER, ...entries.map((e) => toolLine(root, e))].join("\n");
 }
 
 export {
   AGENT_TOOLS,
+  LEAD_CLOSE,
+  LEAD_OPEN,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
   TOOL_HEADER,
   bindsAt,
   isInstructionSurface,
+  leadOf,
   premiseRoot,
   renderPremise,
   renderToolPremise,

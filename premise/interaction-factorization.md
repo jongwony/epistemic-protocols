@@ -12,7 +12,7 @@ Separate the abstract interaction design from its concrete realization. Give eac
 
 Informed acceptance is constitutive even when the person accepts the proposal unchanged. An earlier grant can authorize a downstream choice within scope without supplying an answer to a checkpoint whose contract still requires that response. Assess the consequences of a missed interaction from its actual recovery path; its label alone supplies no bound.
 
-**Option-set-level relay test**: before presenting a decision gate, determine whether its alternatives remain genuinely viable under the applicable ground. If a citable fact, prior decision, or convention already fixes the direction, present that result and basis as relay. Distinct edit shapes do not necessarily reopen a settled direction.
+**Option-set-level relay test**: before presenting a decision gate, determine whether its alternatives remain genuinely viable under the applicable ground. <!-- lead -->If a citable fact, prior decision, or convention already fixes the direction, present that result and basis as relay.<!-- /lead --> Distinct edit shapes do not necessarily reopen a settled direction.
 
 An AI preference among viable alternatives does not collapse the set. If choosing requires a value judgment, use an applicable grant or leave it with its holder. A verification gate can deliberately include one correct answer and is outside this decision-set test.
 
