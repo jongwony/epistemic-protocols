@@ -170,7 +170,7 @@ structure Question where
     Where the purpose is to carry a structure over — a port, a migration, a sibling's shape — and
     the turn asks nothing narrower, the conclusion is that the structure is preserved in the target;
     the relations under it are what collection finds, never a list fixed here. Where an abstraction
-    is tested against its own cases — the abstraction the source, its cases together the target —
+    is tested against its own cases (the abstraction the source, its cases together the target),
     each case asked about is a conclusion — that it instantiates the abstraction — and a collective
     relation asked of the cases together is a conclusion of its own, never replaced by the per-case
     ones. Articulating what a stated purpose entails is reading it; choosing among materially
@@ -189,8 +189,7 @@ def questionCoord : Coord P Question :=
   { admits := (·.val = .person), supports := QuestionSupported }
 
 /-- **Your judgment**: how the question stands in `c`, read again against the context as it now
-    stands. A pass audits one question; where several stand on the person's turns, which one this
-    pass audits is your reading of the context, and the others still stand. -/
+    stands. -/
 axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- `K`: the conclusions of the question that stands; empty while it is open. -/
