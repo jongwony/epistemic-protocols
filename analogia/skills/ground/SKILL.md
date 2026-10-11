@@ -194,7 +194,8 @@ def questionCoord : Coord P Question :=
 
 /-- **Your judgment**: how the question stands in `c`, read again against the context as it now
     stands. Where one turn took several questions, the one standing is the first taken, in the
-    order shown, whose assessment is not yet in the context; the others wait. -/
+    order shown, whose assessment is not yet in the context; the others wait, through silence and
+    through turns about other work, until a turn bearing on this audit opens the next one. -/
 axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- `K`: the conclusions of the question that stands; empty while it is open. -/
@@ -367,8 +368,9 @@ def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
     brings this audit a relevant new ground — a fact, a source, a counterexample, a result — bears
     on it whatever its grammatical form, a question included; a question about this audit opens a
     pass unless the current grounds answer it entirely; a question about other work is the
-    session's. While questions one turn took still wait, the person's next turn opens the pass of
-    the next one, and whatever else that turn does is read there too. -/
+    session's. While questions one turn took still wait, a turn that goes on to the next one, asks
+    about a waiting question, or brings a ground for it bears on this audit and opens the next
+    one's pass; a turn about other work is the session's. -/
 axiom BearsOnRun : Context P → Prop
 
 /-- What an assessment carries, read off the contract's own readings over the collected context:
@@ -569,7 +571,7 @@ Present the whole assessment in everyday language: the question; for each conclu
 
 Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, any materially different explanation its evidence fits as well, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not; where collected material conflicts, name what conflicts with what. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
-Then state what a later turn would change, and proceed without asking for a verdict; where questions the reader took together still wait, name them in the order they were shown — their next turn opens the next one's pass, and silence leaves them waiting; next work the person requests follows TOOL GROUNDING `seam`. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about this audit the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn that turns to other work is simply answered; the question stays open.
+Then state what a later turn would change, and proceed without asking for a verdict; where questions the reader took together still wait, name them as waiting, in the order they were shown, in the assessment and in the answer to a turn about other work alike; next work the person requests follows TOOL GROUNDING `seam`. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about this audit the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question waits, a turn that turns to other work is simply answered; the question stays open.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or composing the question requires placing evidence before its question and option-specific consequences inside the options.
 
