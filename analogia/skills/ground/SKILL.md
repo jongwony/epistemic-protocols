@@ -179,15 +179,15 @@ structure Question where
     Articulating what a stated purpose entails is reading it; choosing among materially different
     purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes is read,
     not asked. How the source reads is none of these choices: its materially different readings
-    are yours to infer while constructing, and the question does not wait on them. A person's turn
-    naming which reading they mean fixes the sense of their question's conclusions, so that sense
-    stands only on the person's turn. The question
-    stands only on the person's turn that sets it in their own words (`set`) or takes a draft you
+    are yours to infer while constructing, and the question does not wait on them. Once a
+    person's turn names which reading they mean, that turn fixes the sense of their question's
+    conclusions; no other turn does. The question stands only on the person's turn that sets it in their own words (`set`) or takes a draft you
     put forward, as it was or corrected (`adopted`); a draft counts only where it was visible as
     yours, with its grounds, before that turn. A draft alone is a proposal, and an instruction to
     do the next task takes none. Several drafts a turn takes establish one question where their
     whole scope is one pair's; drafts shown as separate audits of different pairs, taken in one
-    turn, each establish their own question; a combined draft the person takes establishes one.
+    turn, each establish their own question; a combined draft the person takes establishes one in
+    place of those it combines.
     Either way you never choose, drop, or conflate pairs; otherwise the question stays open. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
@@ -197,8 +197,9 @@ def questionCoord : Coord P Question :=
   { admits := (·.val = .person), supports := QuestionSupported }
 
 /-- **Your judgment**: how the question stands in `c`, read again against the context as it now
-    stands. Every question one turn took stands; which of them a turn bears on — the taking turn
-    and every later one — is your reading of that turn, read whole against the context. A taken
+    stands. Every question one turn took stands; which of them a person's turn bears on — the
+    taking turn and every later one — is your reading of that turn, read whole against the
+    context, and the evidence collection returns never moves that reading. A taken
     question not yet audited is shown as waiting, with one line of what it will check. Where you
     read taken questions as bearing on one another — one's answer constrains another's, or
     comparing them is the point — put forward a combined question as a draft; it stands only when
@@ -234,8 +235,9 @@ inductive FitClaim
     component with no evidenced correspondent missing. They cover the composite of every chain of
     source relations a conclusion of `K` rests on; under the preservation conclusion, the chains the
     source itself runs as one or asserts equal to another path. A step whose endpoints have
-    counterparts but whose relation has none is that step's correspondence placed `overextended`; a
-    step whose component has no counterpart is that component `missing`. -/
+    counterparts but whose relation has none is that step's correspondence placed `overextended`,
+    reported as a step with no counterpart; a step whose component has no counterpart is that
+    component `missing`. -/
 axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed. A source
@@ -319,8 +321,8 @@ inductive Verdict (c : Context P)
 
 /-- **Your judgment** per conclusion, reading the grounds' bearing on `k` rather than a
     label-to-verdict polarity. Where the verdict on `k` turns on which of the source's materially
-    different readings holds, `k` is Undetermined, its `missing` naming which reading as the person's to say, with
-    each reading's verdict and grounds shown side by side; where the readings reach the same
+    different readings holds, `k` is Undetermined, its `missing` naming which reading as the
+    person's to say, with each reading's verdict and grounds shown side by side; where the readings reach the same
     verdict, judge it plainly. Direction: `references/judgments.md` §judge. -/
 axiom judge : (c : Context P) → Inference → Verdict c
 
@@ -391,8 +393,7 @@ def assessed (c : Context P) : Assessed c :=
 inductive Outcome (P : Type)
   /-- the question gate is presented and waits for the person's turn — before collection, after
       collection surfaced a choice of purpose, conclusions, or pair only the person settles, or
-      when a later turn reopens it after
-      an assessment; nothing more is collected while it waits, and evidence already collected
+      when a later turn reopens it after an assessment; nothing more is collected while it waits, and evidence already collected
       stays. A run status, not a closure. -/
   | holding    (c : Context P) (relay : Response P)
   /-- `MappingAssessment` over the collected context `c`, on which the question stands: every
@@ -471,8 +472,8 @@ def start (respond session : Context P → Response P) (c : Context P)
 Every utterance is read whole against the context as it now stands: nothing counts passes or
 reconstructions, and no earlier reading is held apart from what later turns say. A changed
 purpose, conclusion, source or target, or a new ground is simply the context the next pass reads;
-evidence already gathered stays in the context, and every verdict is judged again over the
-question that now stands. Silence takes nothing: the last outcome stands, and a waiting question
+evidence already gathered stays in the context, and every verdict is judged again over each
+question a turn bears on as it now stands. Silence takes nothing: the last outcome stands, and a waiting question
 stays open. Adoption changes no warrant or verdict. Stopping in the middle of a pass is the
 harness's interrupt.
 -/
