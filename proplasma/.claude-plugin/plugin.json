@@ -1,7 +1,7 @@
 {
   "name": "proplasma",
   "description": "Compare throwaway probes of candidate directions before committing to one — /preview (πρόπλασμα: a preliminary clay model)",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
