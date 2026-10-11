@@ -28,8 +28,7 @@ An internal scan may surface only detected items. Open-ended generation, per-ite
 
 ## Differential Future Requirement (Derived)
 
-<!-- lead -->
-For a decision gate, each peer option must have a materially different trajectory on the decision axis. Collapse options differing only in incidental packaging when their equivalence is established.<!-- /lead --> Preserve distinct options when equivalence depends on person-held knowledge or is plausibly contested.
+For a decision gate, each peer option must have a materially different trajectory on the decision axis. Collapse options differing only in incidental packaging when their equivalence is established. Preserve distinct options when equivalence depends on person-held knowledge or is plausibly contested.
 
 Exits, deferrals, or off-axis information gathering with no trajectory on that axis belong to free-response pathways or another appropriate affordance. A withdrawal that performs independently required cleanup has its own trajectory and may remain a peer option.
 

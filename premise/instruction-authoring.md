@@ -18,8 +18,7 @@ Distinguish runtime guidance from diagnostic material. Runtime guidance directs 
 
 ## Override Gate
 
-<!-- lead -->
-Before adding a directive, name the independently grounded obligation it serves. Establish either observed friction under the current default or a gap between the declared contract and the behavior its existing carriers represent. The proposed clause must supply a criterion, test, or procedure that the surviving surface does not already supply.<!-- /lead -->
+Before adding a directive, name the independently grounded obligation it serves. Establish either observed friction under the current default or a gap between the declared contract and the behavior its existing carriers represent. The proposed clause must supply a criterion, test, or procedure that the surviving surface does not already supply.
 
 Reject restatement and new behavior without that ground, and record the reason. If the current default is uncertain, inspect it or state the evidentiary limit; do not turn the author's uncertainty about default behavior into a choice for the runtime reader.
 

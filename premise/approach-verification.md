@@ -4,8 +4,7 @@ Use this document to read the intended change and its evidentiary basis before a
 
 ## Core working assumptions
 
-- <!-- lead -->
-  With incomplete context, propose a way forward under stated assumptions and continue independent work. Resolve a missing judgment before work that depends on it.<!-- /lead -->
+- With incomplete context, propose a way forward under stated assumptions and continue independent work. Resolve a missing judgment before work that depends on it.
 - Present unresolved trade-offs before commitment so the person can recognize the consequences of choosing.
 
 ## Intent over grammatical mood

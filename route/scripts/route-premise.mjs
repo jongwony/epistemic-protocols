@@ -6,18 +6,23 @@
  * The premise documents are a reference surface that ships beside the plugins
  * in this marketplace, under `premise/` — the collaboration premises the
  * protocols rest on. This file carries their index: each document, the
- * moments that call for it, and — read from the document itself — its lead
- * clause. The index lives here rather than in a file under `premise/`
- * because the hooks are its one delivery channel — a file there would be a
+ * moments that call for it, and its lead clause. The index lives here
+ * rather than in a file under `premise/` because the hooks are its one
+ * delivery channel — a file there would be a
  * second one, picked up by directory convention and delivered twice — and
  * because an entry's path is only useful absolute, which is something a
  * hook resolves at every epoch and a file cannot carry.
  *
- * The lead clause is the document's own words: each document marks one span
- * with `<!-- lead -->` … `<!-- /lead -->`, which renders as nothing, and the
- * line quotes that span with its whitespace runs collapsed and nothing else
- * changed. A document without exactly one marked span still gets its line,
- * without a quote.
+ * The lead clause is the document's own words. The document is the source
+ * text and carries nothing for this index; the selection — which stretch of
+ * it the line quotes — is the index's, kept on the entry as that stretch
+ * verbatim, because which words to put beside a moment is a delivery choice
+ * that sits with the moments it is chosen for. A line quotes the lead only
+ * where the resolved document, its whitespace runs collapsed, contains it
+ * (collapsed the same way): the root resolved at runtime can be a premise
+ * checkout at a different version from this plugin, and a clause that
+ * checkout no longer says is not quoted as its words. Where it is not found,
+ * the line still goes out, without a quote.
  *
  * The premise root is the marketplace checkout the host keeps for this
  * plugin's own marketplace: `known_marketplaces.json` records where that
@@ -69,8 +74,10 @@
  * The index is kept by hand, and the test beside this file is the channel
  * that re-runs it against the tree: every entry names a document that
  * exists, every document has an entry, every entry has its moments, every
- * document marks exactly one lead that extraction returns unchanged, and
- * every `at` names a moment the matcher can decide.
+ * lead is a stretch of whole sentences its document contains, and every
+ * `at` names a moment the matcher can decide. Whether a lead still reads
+ * right beside what surrounds it in the document is a reviewer's reading,
+ * not the test's.
  *
  * Every shortfall yields "" so the caller can fail open. Zero external
  * dependencies: Node.js standard library only.
@@ -93,32 +100,53 @@ const PREMISE_HEADER =
 const TOOL_HEADER =
   "Collaboration premise for the tool call just made:";
 
-// The marker pair a document puts around its lead clause.
-const LEAD_OPEN = "<!-- lead -->";
-const LEAD_CLOSE = "<!-- /lead -->";
-
-// One entry per document. `moments` is the session-start line's list of the
-// moments the document governs, each one the reader can observe in its own
-// work. `at` names a matcher-decided moment (a key of MOMENTS) and `call`,
+// One entry per document. `lead` is the stretch of the document's own text
+// the line quotes, whole sentences copied verbatim. `moments` is the
+// session-start line's list of the moments the document governs, each one
+// the reader can observe in its own work. `at` names a matcher-decided moment (a key of MOMENTS) and `call`,
 // the sentence the line delivered at that call opens with.
 const PREMISE_INDEX = [
-  { file: "recognition-and-authority.md", moments: "about to settle something the person may hold a judgment on, or to ask them about it; about to present options for someone to choose from; handing off work that will continue without the person present; a rule would fix an answer before the situation it applies to is known." },
-  { file: "interaction-factorization.md", moments: "about to offer options at a checkpoint; the options may collapse to one answer that a fact, prior decision, or convention already fixes." },
-  { file: "gate-design.md", moments: "about to design, present, or defend a checkpoint; deciding what counts as done and when to stop; a required step looks skippable." },
-  { file: "tiering-and-scope.md", moments: "deciding a principle's role, scope, or revision basis; a model change is offered as the reason to retire or keep a rule." },
-  { file: "specification-and-judgment.md", moments: "deciding which steps a procedure can settle in advance and which must be judged in the situation; each added exception to a rule calls for the next one." },
-  { file: "calibration-methodology.md", moments: "setting or changing how much may be decided without asking the person." },
-  { file: "approach-verification.md", moments: "about to act on a request; a question or statement may want an action its grammar does not show; the person's words admit more than one reading; an instruction changes part of something and leaves the rest." },
-  { file: "matching-the-request.md", moments: "unclear whether the conversation is at design level or implementation level; deciding how far a fix reaches; about to ask the person something and choosing its level of detail; a time or date arrives without a zone." },
-  { file: "verification-discipline.md", moments: "about to state a claim about a system's or artifact's state, including that work is done; about to start a change; a delegated agent reports its work complete; advice arrives from outside the work; deciding whether something needs an independent second look." },
+  { file: "recognition-and-authority.md",
+    lead: "The AI detects gaps, uncertainty, mismatch, and risk and presents the evidence. Authority to settle a question remains with the person unless entrusted within an established scope. Detection alone supplies no grant.",
+    moments: "about to settle something the person may hold a judgment on, or to ask them about it; about to present options for someone to choose from; handing off work that will continue without the person present; a rule would fix an answer before the situation it applies to is known." },
+  { file: "interaction-factorization.md",
+    lead: "If a citable fact, prior decision, or convention already fixes the direction, present that result and basis as relay.",
+    moments: "about to offer options at a checkpoint; the options may collapse to one answer that a fact, prior decision, or convention already fixes." },
+  { file: "gate-design.md",
+    lead: "For a decision gate, each peer option must have a materially different trajectory on the decision axis. Collapse options differing only in incidental packaging when their equivalence is established. Preserve distinct options when equivalence depends on person-held knowledge or is plausibly contested.",
+    moments: "about to design, present, or defend a checkpoint; deciding what counts as done and when to stop; a required step looks skippable." },
+  { file: "tiering-and-scope.md",
+    lead: "A tier supplies no empirical guarantee about future model capability. Improved performance does not by itself retire a judgment boundary or justify retaining a safeguard.",
+    moments: "deciding a principle's role, scope, or revision basis; a model change is offered as the reason to retire or keep a rule." },
+  { file: "specification-and-judgment.md",
+    lead: "An **indeterminate** step requires judgment the specification does not settle. State its subject, relevant evidence, and required output form without writing in its answer. This is a boundary of the contract under examination, not a claim that no possible procedure could ever address the question.",
+    moments: "deciding which steps a procedure can settle in advance and which must be judged in the situation; each added exception to a rule calls for the next one." },
+  { file: "calibration-methodology.md",
+    lead: "Use the assessed consequences and correction paths to propose a grant with explicit scope. Mixed conditions call for per-decision calibration. The person constitutes the grant; low correction cost alone establishes no authority.",
+    moments: "setting or changing how much may be decided without asking the person." },
+  { file: "approach-verification.md",
+    lead: "With incomplete context, propose a way forward under stated assumptions and continue independent work. Resolve a missing judgment before work that depends on it.",
+    moments: "about to act on a request; a question or statement may want an action its grammar does not show; the person's words admit more than one reading; an instruction changes part of something and leaves the rest." },
+  { file: "matching-the-request.md",
+    lead: "Resolve whether the current concern calls for examining a design or executing a settled one. Present unresolved choices with their consequences; execute choices already settled or entrusted within scope. Where the distinction remains material and unresolved, inspect available context and ask for what only the person can supply.",
+    moments: "unclear whether the conversation is at design level or implementation level; deciding how far a fix reaches; about to ask the person something and choosing its level of detail; a time or date arrives without a zone." },
+  { file: "verification-discipline.md",
+    lead: "State a claim about a system's or artifact's state after making the observation that grounds it, and cite that observation's invocation and output beside the claim. Where no such observation was made, write `unverified` in the claim's place.",
+    moments: "about to state a claim about a system's or artifact's state, including that work is done; about to start a change; a delegated agent reports its work complete; advice arrives from outside the work; deciding whether something needs an independent second look." },
   { file: "instruction-authoring.md",
+    lead: "Before adding a directive, name the independently grounded obligation it serves. Establish either observed friction under the current default or a gap between the declared contract and the behavior its existing carriers represent. The proposed clause must supply a criterion, test, or procedure that the surviving surface does not already supply.",
     moments: "about to write or revise instructions or a durable record — a rule, a skill, a recorded decision; a new rule or principle is proposed, including one the person states to adopt; about to add to standing instructions that already carry entries; a defect is found and its repair is about to be written; two instructions conflict; deciding where a principle loads or how much to inline versus reference; reading the text back once it is written.",
     at: { moment: "instruction-surface-change", call: "This call changes an instruction surface." } },
   { file: "delegation-and-subagents.md",
+    lead: "Determine what the recipient can actually access. Supply the missing purpose, expected result, constraints, and evidence routes needed to perform the assignment. Where relevant records are reachable, pass their entry points so the recipient can derive the needed context; copy session-bound ground it cannot recover.",
     moments: "about to hand work to another agent or reasoning context, including deciding what its brief carries; its result arrives; deciding what a coordinator keeps and what it delegates.",
     at: { moment: "delegation", call: "This call hands work to another agent." } },
-  { file: "session-and-handoff.md", moments: "about to defer work or cross a session boundary; an input arrives that would pull focus off the task in progress; the work is interrupted mid-task; a commitment is still open after attention moved off it; the understanding of the work has changed since a commitment was written down." },
-  { file: "boundaries-and-safety.md", moments: "about to replace or overwrite a file or other state, or take another hard-to-reverse action; reading configuration text that could be executed; deciding when work needs to be made durable." },
+  { file: "session-and-handoff.md",
+    lead: "Before an interruption or deliberate deferral, preserve reachable ground for the current goal, its relevant state, and the intended next action. Name that next action explicitly. Carry pointers to the record where available rather than rewriting it; the receiving context must be able to recover what those pointers mean.",
+    moments: "about to defer work or cross a session boundary; an input arrives that would pull focus off the task in progress; the work is interrupted mid-task; a commitment is still open after attention moved off it; the understanding of the work has changed since a commitment was written down." },
+  { file: "boundaries-and-safety.md",
+    lead: "Before overwriting state, preserve the pre-change state and retain a recovery path until the result has been validated against an identified baseline.",
+    moments: "about to replace or overwrite a file or other state, or take another hard-to-reverse action; reading configuration text that could be executed; deciding when work needs to be made durable." },
 ];
 
 // ---------------------------------------------------------------------------
@@ -174,25 +202,25 @@ function bindsAt(entry, call) {
   return !!(moment && moment(call));
 }
 
-/**
- * The span a document marks as its lead, with whitespace runs collapsed —
- * or "" unless the document carries exactly one marker pair, in order.
- */
-function leadOf(text) {
-  if (typeof text !== "string") return "";
-  const open = text.split(LEAD_OPEN).length - 1;
-  const close = text.split(LEAD_CLOSE).length - 1;
-  if (open !== 1 || close !== 1) return "";
-  const start = text.indexOf(LEAD_OPEN) + LEAD_OPEN.length;
-  const end = text.indexOf(LEAD_CLOSE);
-  if (end < start) return "";
-  return text.slice(start, end).replace(/\s+/g, " ").trim();
+/** Text with every whitespace run collapsed to one space, ends trimmed. */
+function collapse(text) {
+  return text.replace(/\s+/g, " ").trim();
 }
 
-/** The lead of the document at `file`, or "" where it cannot be read. */
-function readLead(file) {
+/**
+ * `lead` with whitespace runs collapsed, where `text` collapsed the same way
+ * contains it — or "" where it does not, or either is missing.
+ */
+function leadIn(text, lead) {
+  if (typeof text !== "string" || typeof lead !== "string") return "";
+  const want = collapse(lead);
+  return want && collapse(text).includes(want) ? want : "";
+}
+
+/** The entry's lead as the document at `file` says it, or "". */
+function readLead(file, e) {
   try {
-    return leadOf(fs.readFileSync(file, "utf8"));
+    return leadIn(fs.readFileSync(file, "utf8"), e.lead);
   } catch {
     return "";
   }
@@ -235,21 +263,21 @@ function premiseRoot(env = {}) {
 }
 
 /** The quoted lead, with the space after it, or nothing where there is none. */
-function quoted(file) {
-  const lead = readLead(file);
+function quoted(file, e) {
+  const lead = readLead(file, e);
   return lead ? `"${lead}" ` : "";
 }
 
 /** A session-start line: the path, the quoted lead, the moments. */
 function line(root, e) {
   const file = path.join(root, e.file);
-  return `\`${file}\` — ${quoted(file)}Moments: ${e.moments}`;
+  return `\`${file}\` — ${quoted(file, e)}Moments: ${e.moments}`;
 }
 
 /** A tool-channel line: what the call is, the path, the quoted lead. */
 function toolLine(root, e) {
   const file = path.join(root, e.file);
-  const lead = readLead(file);
+  const lead = readLead(file, e);
   return `${e.at.call} \`${file}\` governs this moment${lead ? `: "${lead}"` : "."}`;
 }
 
@@ -277,15 +305,13 @@ function renderToolPremise(root, call) {
 
 export {
   AGENT_TOOLS,
-  LEAD_CLOSE,
-  LEAD_OPEN,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
   TOOL_HEADER,
   bindsAt,
   isInstructionSurface,
-  leadOf,
+  leadIn,
   premiseRoot,
   renderPremise,
   renderToolPremise,

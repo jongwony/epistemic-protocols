@@ -10,15 +10,13 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  LEAD_CLOSE,
-  LEAD_OPEN,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
   TOOL_HEADER,
   bindsAt,
   isInstructionSurface,
-  leadOf,
+  leadIn,
   premiseRoot,
   renderPremise,
   renderToolPremise,
@@ -125,7 +123,8 @@ test("renders the header and one line per document with its absolute path", () =
     const lines = renderPremise(root).split("\n");
     assert.equal(lines[0], PREMISE_HEADER);
     assert.equal(lines.length, 1 + PREMISE_INDEX.length);
-    // These fixture documents mark no lead, so each line goes out unquoted.
+    // These fixture documents do not contain their leads, so each line goes
+    // out unquoted.
     PREMISE_INDEX.forEach((e, i) => {
       assert.equal(lines[1 + i], `\`${path.join(root, e.file)}\` — Moments: ${e.moments}`);
     });
@@ -172,34 +171,65 @@ test("the tool channel renders the entries whose moment the call is, under its h
   }
 });
 
-test("a marked lead is quoted on both channels in the document's own words", () => {
+test("a lead the document contains is quoted on both channels in its own words", () => {
   const host = makeHost();
   try {
     const root = premiseRoot(host.env);
-    const lead = "The first sentence holds.\n  The second sentence wraps.";
+    // Each fixture document carries its entry's lead wrapped across lines,
+    // the way a paragraph is; the line quotes it with the runs collapsed.
     for (const e of PREMISE_INDEX) {
-      fs.writeFileSync(path.join(root, e.file), `# ${e.file}\n\n${LEAD_OPEN}\n${lead}${LEAD_CLOSE} What follows stays out.\n`);
+      const wrapped = e.lead.replace(/ /g, (s, i) => (i % 3 === 0 ? "\n" : "  "));
+      fs.writeFileSync(path.join(root, e.file), `# ${e.file}\n\nWhat comes before. ${wrapped} What follows.\n`);
     }
-    const quoted = '"The first sentence holds. The second sentence wraps."';
     const lines = renderPremise(root).split("\n");
     PREMISE_INDEX.forEach((e, i) => {
-      assert.equal(lines[1 + i], `\`${path.join(root, e.file)}\` — ${quoted} Moments: ${e.moments}`);
+      assert.equal(lines[1 + i], `\`${path.join(root, e.file)}\` — "${e.lead}" Moments: ${e.moments}`);
     });
     const out = renderToolPremise(root, { event: "PreToolUse", tool: "Agent", files: [] }).split("\n");
     const delegation = TOOL.filter((e) => e.at.moment === "delegation");
-    assert.deepEqual(out.slice(1), delegation.map((e) => `${e.at.call} \`${path.join(root, e.file)}\` governs this moment: ${quoted}`));
+    assert.deepEqual(out.slice(1), delegation.map((e) => `${e.at.call} \`${path.join(root, e.file)}\` governs this moment: "${e.lead}"`));
   } finally {
     cleanup(host);
   }
 });
 
-test("a lead is read only from exactly one marker pair, in order", () => {
-  assert.equal(leadOf(`a ${LEAD_OPEN} b  c\n d ${LEAD_CLOSE} e`), "b c d");
-  assert.equal(leadOf("no markers"), "");
-  assert.equal(leadOf(`${LEAD_CLOSE} b ${LEAD_OPEN}`), "", "reversed pair");
-  assert.equal(leadOf(`${LEAD_OPEN} a ${LEAD_CLOSE} ${LEAD_OPEN} b ${LEAD_CLOSE}`), "", "two pairs");
-  assert.equal(leadOf(`${LEAD_OPEN} unclosed`), "");
-  assert.equal(leadOf(undefined), "");
+test("a document that does not say the lead gets its line on both channels, unquoted", () => {
+  // A premise checkout at another version may have reworded or dropped the
+  // clause; the line then goes out without words the document does not hold.
+  const host = makeHost();
+  try {
+    const root = premiseRoot(host.env);
+    for (const e of PREMISE_INDEX) {
+      // The lead with one word changed, and the lead cut short of its end.
+      const reworded = e.lead.replace(/\b(\w+)\b/, "$1x");
+      fs.writeFileSync(path.join(root, e.file), `# ${e.file}\n\n${reworded}\n\n${e.lead.slice(0, -2)}\n`);
+    }
+    const lines = renderPremise(root).split("\n");
+    PREMISE_INDEX.forEach((e, i) => {
+      assert.equal(lines[1 + i], `\`${path.join(root, e.file)}\` — Moments: ${e.moments}`);
+    });
+    for (const call of [
+      { event: "PreToolUse", tool: "Agent", files: [] },
+      { event: "PreToolUse", tool: "Edit", files: ["/p/CLAUDE.md"] },
+    ]) {
+      const out = renderToolPremise(root, call).split("\n");
+      const bound = TOOL.filter((e) => bindsAt(e, call));
+      assert.ok(bound.length > 0);
+      assert.deepEqual(out.slice(1), bound.map((e) => `${e.at.call} \`${path.join(root, e.file)}\` governs this moment.`));
+    }
+  } finally {
+    cleanup(host);
+  }
+});
+
+test("a lead is found only where the document holds it, whitespace runs aside", () => {
+  assert.equal(leadIn("a b  c\n d e", "b c d"), "b c d");
+  assert.equal(leadIn("a b\n\n  c d", " b   c "), "b c");
+  assert.equal(leadIn("a b c", "b d"), "");
+  assert.equal(leadIn("a b c", ""), "");
+  assert.equal(leadIn("a b c", "   "), "");
+  assert.equal(leadIn(undefined, "a"), "");
+  assert.equal(leadIn("a", undefined), "");
 });
 
 test("an instruction surface is recognized by path shape, on any host", () => {
@@ -249,26 +279,24 @@ test("the index and the premise directory name the same documents", () => {
   }
 });
 
-test("every indexed document marks exactly one lead, and extraction returns it unchanged", () => {
-  // The lead is quoted into the index at runtime, so the document is its
-  // one source. This re-runs that relation: one marker pair per document,
-  // the span a complete stretch of sentences, and extraction returning the
-  // marked text itself — whitespace runs collapsed, nothing else.
+test("every entry's lead is whole sentences its document says verbatim", () => {
+  // The index holds the selection and the document holds the words, so this
+  // re-runs that relation against the tree: the lead, whitespace runs
+  // collapsed, is a stretch of the document collapsed the same way, and it
+  // starts where a sentence starts and ends where one ends.
   const root = path.join(REPO, "premise");
   for (const e of PREMISE_INDEX) {
+    assert.ok(typeof e.lead === "string" && e.lead.trim(), `${e.file}: an entry carries its lead`);
+    assert.equal(e.lead, e.lead.replace(/\s+/g, " ").trim(), `${e.file}: the lead is kept on one line`);
     const text = fs.readFileSync(path.join(root, e.file), "utf8");
-    assert.equal(text.split(LEAD_OPEN).length - 1, 1, `${e.file}: one opening marker`);
-    assert.equal(text.split(LEAD_CLOSE).length - 1, 1, `${e.file}: one closing marker`);
-    const raw = text.slice(text.indexOf(LEAD_OPEN) + LEAD_OPEN.length, text.indexOf(LEAD_CLOSE));
-    const lead = leadOf(text);
-    assert.equal(lead, raw.replace(/\s+/g, " ").trim(), `${e.file}: extraction returns the marked span`);
-    assert.ok(!raw.trim().includes("\n"), `${e.file}: the lead sits within one paragraph line`);
-    assert.match(lead, /^[A-Z*`]/, `${e.file}: the lead opens a sentence`);
-    assert.match(lead, /[.!?]$/, `${e.file}: the lead closes a sentence`);
-    // With the markers lifted out, the document reads as it would unmarked,
-    // and the lead is a verbatim stretch of it.
-    const unmarked = text.replace(new RegExp(`${LEAD_OPEN}\\s*`), "").replace(LEAD_CLOSE, "");
-    assert.ok(unmarked.includes(lead), `${e.file}: the lead is the document's own words`);
+    assert.equal(leadIn(text, e.lead), e.lead, `${e.file}: the document says the lead`);
+    const escaped = e.lead.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+");
+    const at = text.search(new RegExp(escaped));
+    const end = at + text.slice(at).match(new RegExp(escaped))[0].length;
+    assert.match(e.lead, /^[A-Z*`]/, `${e.file}: the lead opens with a sentence's first word`);
+    assert.match(text.slice(0, at), /(?:^|\n|[.!?:]\s)\s*(?:[-*]\s+)?$/, `${e.file}: the lead starts where a sentence starts`);
+    assert.match(e.lead, /[.!?]$/, `${e.file}: the lead closes a sentence`);
+    assert.match(text.slice(end), /^(?:\s|$)/, `${e.file}: the lead ends where a sentence ends`);
   }
 });
 
@@ -285,7 +313,8 @@ test("the shipped index stays inside one injection with the table beside it", ()
     for (const e of PREMISE_INDEX) fs.copyFileSync(path.join(premise, e.file), path.join(root, e.file));
     const out = renderPremise(root);
     assert.equal(out.split("\n").length, 1 + PREMISE_INDEX.length);
-    assert.ok(out.includes('"'), "the copied documents carry their leads");
+    const quotedLines = out.split("\n").slice(1).filter((l) => l.includes('" Moments: '));
+    assert.equal(quotedLines.length, PREMISE_INDEX.length, "every line carries its lead");
     assert.ok(out.length <= 8500, `the index is ${out.length} characters`);
   } finally {
     fs.rmSync(host, { recursive: true, force: true });
