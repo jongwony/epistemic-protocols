@@ -168,19 +168,19 @@ structure Question where
 
 /-- **Your judgment**: the cited turn establishes question `q` in `c`, with conclusions to audit.
     Where the purpose is to carry a structure over — a port, a migration, a sibling's shape — and
-    nothing narrower is asked, the conclusion is that the structure is preserved in the target; the
-    relations under it are what collection finds, never a list fixed here. Where an abstraction is
-    tested against its own cases, each case asked about is a conclusion — that it instantiates the
-    abstraction — and a collective relation asked of the cases together is a conclusion of its own,
-    never replaced by the per-case ones. Articulating what a stated purpose entails is reading it;
-    choosing among materially different purposes, conclusions, or source–target pairs is not, and a
-    pair `R` or a fact fixes is read, not asked. How the source reads is none of these choices, and
-    the question does not wait on it. Once a person's turn names which reading they mean, that turn
-    fixes the sense of their question's conclusions. The question stands only on the person's turn
-    that sets it in their own words (`set`) or takes a draft you put forward, as it was or corrected
-    (`adopted`); a draft counts only where it was visible as yours, with its grounds, before that
-    turn. A draft alone is a proposal, and an instruction to do the next task takes none. You never
-    narrow what the person asked, drop what they took, or conflate source–target pairs. -/
+    the turn asks nothing narrower, the conclusion is that the structure is preserved in the target;
+    the relations under it are what collection finds, never a list fixed here. Where an abstraction
+    is tested against its own cases — the abstraction the source, its cases together the target —
+    each case asked about is a conclusion — that it instantiates the abstraction — and a collective
+    relation asked of the cases together is a conclusion of its own, never replaced by the per-case
+    ones. Articulating what a stated purpose entails is reading it; choosing among materially
+    different purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes
+    is read, not asked. How the source reads is none of these choices, and the question does not
+    wait on it. Once a person's turn names which reading they mean, that turn fixes the sense of
+    their question's conclusions. The question stands only on the person's turn that sets it in
+    their own words (`set`) or takes a draft you put forward, as it was or corrected (`adopted`); a
+    draft counts only where it was visible as yours, with its grounds, before that turn. A draft
+    alone is a proposal, and an instruction to do the next task takes none. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -189,7 +189,8 @@ def questionCoord : Coord P Question :=
   { admits := (·.val = .person), supports := QuestionSupported }
 
 /-- **Your judgment**: how the question stands in `c`, read again against the context as it now
-    stands. -/
+    stands. A pass audits one question; where several stand on the person's turns, which one this
+    pass audits is your reading of the context, and the others still stand. -/
 axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- `K`: the conclusions of the question that stands; empty while it is open. -/
@@ -220,10 +221,10 @@ inductive FitClaim
     found, each distinct claim once — each correspondence in exactly one cell, and every source
     component with no evidenced correspondent missing. They cover the composite of every chain of
     source relations a conclusion of `K` rests on; under the preservation conclusion, the chains the
-    source itself runs as one, and each equality the source asserts between two paths as a claim of
-    its own. A step whose endpoints have counterparts but whose relation has none is that step's
-    correspondence placed `overextended`, reported as a step with no counterpart; a step whose
-    component has no counterpart is that component `missing`. -/
+    source itself runs as one or asserts equal to another path. A step whose endpoints have
+    counterparts but whose relation has none is that step's correspondence placed `overextended`,
+    reported as a step with no counterpart; a step whose component has no counterpart is that
+    component `missing`. -/
 axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed. A source
@@ -576,12 +577,12 @@ Read `references/round-composition.md` before composing when terminology must re
 ## Rules
 
 - **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **The question stands on the person's turn**: Read the purpose, the conclusions at stake as asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose, narrow what the person asked, drop what they took, or pick between materially different sources or targets without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise the question gate (`questionGate`) is presented, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
-- **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and nothing narrower is asked, audit whether the whole structure is preserved, with its relations found by collection.
+- **The question stands on the person's turn**: Read the purpose, the conclusions at stake as asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose or the conclusions, or pick between materially different sources or targets, without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise the question gate (`questionGate`) is presented, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite; met checks on every step alone never license it. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
 - **A reading the source leaves open is shown, not chosen**: Where a conclusion's verdict turns on which materially different reading of the source holds, it stays Undetermined with each reading's verdict and grounds shown side by side; the person's turn naming the reading they mean fixes the sense of the conclusions, and they are judged again on it.
-- **Self-grounding judges each case**: Where an abstraction is tested against its own cases, each case gets its own verdict and a collective relation asked of them is judged on its own; a Licensed case names the level of abstraction its fit is claimed at and the contrast that makes the fit diagnostic, or says none was reachable.
+- **Self-grounding judges each case**: Where an abstraction is tested against its own cases, each case gets its own verdict and a collective relation asked of them is judged on its own; a Licensed case names the level of abstraction its fit is claimed at and a consequence concrete enough to fail, shows the contrast that makes the fit diagnostic, and where none was reachable its limits say the fit was not shown to be diagnostic.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
 - **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. Which turn opens a pass is `BearsOnRun`'s reading; the reader is never asked to classify their own turn.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
