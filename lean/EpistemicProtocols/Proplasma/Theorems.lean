@@ -40,7 +40,6 @@ private theorem step (ai : AITurns P) (c : Context P) (u : Utterance P) (us : Li
     (∃ c', preview ai c' us = o) ∨
     (∃ d, filledValue (closing (fuse c u)) = some (.constitute d) ∧
       o = .contrasted (constituted (fuse c u) d)) ∨
-    (filledValue (closing (fuse c u)) = some .dissolve ∧ o = .dissolved (closed (fuse c u))) ∨
     (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) := by
   simp only [preview] at h
   split at h
@@ -49,9 +48,7 @@ private theorem step (ai : AITurns P) (c : Context P) (u : Utterance P) (us : Li
     · rename_i d hk
       exact .inr (.inl ⟨d, hk, h.symm⟩)
     · rename_i hk
-      exact .inr (.inr (.inl ⟨hk, h.symm⟩))
-    · rename_i hk
-      exact .inr (.inr (.inr ⟨hk, h.symm⟩))
+      exact .inr (.inr ⟨hk, h.symm⟩)
     · exact .inl ⟨_, h⟩
 
 theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Utterance P))
@@ -61,24 +58,10 @@ theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Ut
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
-    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨d, hk, h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
+    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨d, hk, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨_, d, hk, rfl, rfl⟩
-    · cases h'
-    · cases h'
-
-theorem dissolved_on_dissolve (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .dissolved r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .dissolve ∧ r = closed c₁ := by
-  induction us generalizing c with
-  | nil => simp [preview] at h
-  | cons u us ih =>
-    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨hk, h'⟩ | ⟨_, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hk, rfl⟩
     · cases h'
 
 theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utterance P))
@@ -87,9 +70,8 @@ theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utter
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
-    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨_, h'⟩ | ⟨hk, h'⟩
+    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨hk, h'⟩
     · exact ih c' h'
-    · cases h'
     · cases h'
     · cases h'
       exact ⟨_, hk, rfl⟩
