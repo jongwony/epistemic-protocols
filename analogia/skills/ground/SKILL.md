@@ -166,25 +166,21 @@ structure Question where
   proposer    : Proposer
   standing    : Standing
 
-/-- **Your judgment**: the cited turn establishes question `q` in `c`, in the whole scope that turn
-    asks of `q`'s source and target — a turn asking about A and B of them supports no question
-    narrowed to A — with conclusions to audit. Where the purpose is to carry a structure over — a
-    port, a migration, a sibling's shape — and the turn asks nothing narrower, the conclusion is
-    that the structure is preserved in the target; the relations under it are what collection finds,
-    never a list fixed here. Where an abstraction is tested against its own cases, each case within
-    the scope the turn asks is a conclusion — that it instantiates the abstraction — and a
-    collective relation the turn asks of the cases together is a conclusion of its own, never
-    replaced by the per-case ones. A narrower question the turn asks — whether the retries will
-    match, say — is that turn's whole scope. Articulating what a stated purpose entails is reading
-    it; choosing among materially different purposes, conclusions, or source–target pairs is not,
-    and a pair `R` or a fact fixes is read, not asked. How the source reads is none of these
-    choices: its materially different readings are yours to infer while constructing, and the
-    question does not wait on them. Once a person's turn names which reading they mean, that turn
+/-- **Your judgment**: the cited turn establishes question `q` in `c`, with conclusions to audit.
+    Where the purpose is to carry a structure over — a port, a migration, a sibling's shape — and
+    nothing narrower is asked, the conclusion is that the structure is preserved in the target; the
+    relations under it are what collection finds, never a list fixed here. Where an abstraction is
+    tested against its own cases, each case asked about is a conclusion — that it instantiates the
+    abstraction — and a collective relation asked of the cases together is a conclusion of its own,
+    never replaced by the per-case ones. Articulating what a stated purpose entails is reading it;
+    choosing among materially different purposes, conclusions, or source–target pairs is not, and a
+    pair `R` or a fact fixes is read, not asked. How the source reads is none of these choices, and
+    the question does not wait on it. Once a person's turn names which reading they mean, that turn
     fixes the sense of their question's conclusions. The question stands only on the person's turn
     that sets it in their own words (`set`) or takes a draft you put forward, as it was or corrected
     (`adopted`); a draft counts only where it was visible as yours, with its grounds, before that
     turn. A draft alone is a proposal, and an instruction to do the next task takes none. You never
-    drop or conflate source–target pairs. -/
+    narrow what the person asked, drop what they took, or conflate source–target pairs. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -224,10 +220,10 @@ inductive FitClaim
     found, each distinct claim once — each correspondence in exactly one cell, and every source
     component with no evidenced correspondent missing. They cover the composite of every chain of
     source relations a conclusion of `K` rests on; under the preservation conclusion, the chains the
-    source itself runs as one or asserts equal to another path. A step whose endpoints have
-    counterparts but whose relation has none is that step's correspondence placed `overextended`,
-    reported as a step with no counterpart; a step whose component has no counterpart is that
-    component `missing`. -/
+    source itself runs as one, and each equality the source asserts between two paths as a claim of
+    its own. A step whose endpoints have counterparts but whose relation has none is that step's
+    correspondence placed `overextended`, reported as a step with no counterpart; a step whose
+    component has no counterpart is that component `missing`. -/
 axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed. A source
@@ -515,7 +511,7 @@ inductive Op | questionRead | questionGate | questionReadback | collect | constr
              | warrantRead | judge | surface | converge | readAnswer | seam
 
 def grounding : Op → Annot × String
-  | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
+  | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake as asked, and whether R and the context leave a materially different choice of source or target open")
   | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice of purpose, conclusions, or source–target pair only the person settles, or when a later turn reopens it: with material in the context to draft from, a question drafted from it — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words; with no referent to draft from, ask for the material to audit, inventing no candidate, and design the question with them once it is there; nothing more is collected while it waits, and evidence already collected stays")
   | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
   | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: collection as `observe` states")
@@ -543,11 +539,11 @@ end Analogia
 
 ### Activation heuristics and exceptions
 
-Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or an abstraction already stated, tested against its own cases. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
+Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or a located abstraction tested against its own cases. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
 
 A source or target account this session can reach — code, documents, a repository, a published source — is read as evidence inside the audit, whether or not the reader already holds it; the audit never waits for the reader to bring an account first, and never asks them to judge a correspondence. Where what the reader wants is only to come to hold an account, with no mapping being relied on, that is explanation rather than this audit, and the AI-guided path does not activate. Absence of evidence that a mapping is being relied on establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
 
-Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no abstraction stated yet, is a different deficit; an abstraction already stated, tested against its own cases, is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
+Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no located abstraction yet, is a different deficit; a located abstraction tested against its own cases is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
 
 ### Evidence loading
 
@@ -580,10 +576,12 @@ Read `references/round-composition.md` before composing when terminology must re
 ## Rules
 
 - **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose, narrow the conclusions below what the cited turn asks, or pick between materially different sources or targets without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise the question gate (`questionGate`) is presented, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
-- **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
+- **The question stands on the person's turn**: Read the purpose, the conclusions at stake as asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose, narrow what the person asked, drop what they took, or pick between materially different sources or targets without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise the question gate (`questionGate`) is presented, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
+- **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and nothing narrower is asked, audit whether the whole structure is preserved, with its relations found by collection.
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite; met checks on every step alone never license it. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
+- **A reading the source leaves open is shown, not chosen**: Where a conclusion's verdict turns on which materially different reading of the source holds, it stays Undetermined with each reading's verdict and grounds shown side by side; the person's turn naming the reading they mean fixes the sense of the conclusions, and they are judged again on it.
+- **Self-grounding judges each case**: Where an abstraction is tested against its own cases, each case gets its own verdict and a collective relation asked of them is judged on its own; a Licensed case names the level of abstraction its fit is claimed at and the contrast that makes the fit diagnostic, or says none was reachable.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
 - **Round composition**: Keep each correspondence beside its nearest evidence, scenario, warrant, and next-move implication. Which turn opens a pass is `BearsOnRun`'s reading; the reader is never asked to classify their own turn.
 - **Structural evidence**: Cite the specific source and target structures supporting each correspondence, and include a concrete target-domain instantiation. Where a claim turns on an artifact's behavior, exercise the artifact and cite what it did; its own account of that behavior evidences the claim made, not the behavior.
