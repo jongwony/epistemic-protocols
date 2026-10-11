@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { PREMISE_INDEX, TOOL_HEADER } from "./route-premise.mjs";
+import { AGENT_TOOLS, PREMISE_INDEX, TOOL_HEADER } from "./route-premise.mjs";
 import { changedPaths, describeCall, render } from "./route-tool.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-tool.mjs");
@@ -40,7 +40,7 @@ function lines(out) {
 }
 
 function expectLines(host, entries) {
-  return entries.map((e) => `Read \`${path.join(host.premise, e.file)}\` ${e.at.when}`);
+  return entries.map((e) => `${e.at.call} \`${path.join(host.premise, e.file)}\` governs this moment.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -120,6 +120,53 @@ test("handing work to an agent delivers the delegation entry, and nothing after 
     assert.deepEqual(lines(render(payload("Task", { prompt: "..." }), host.env)).slice(1), expectLines(host, byMoment("delegation")));
     // The return is a report or a launch notice, which only the reader can tell apart.
     assert.equal(render(payload("Agent", { prompt: "..." }, "PostToolUse"), host.env), "");
+  } finally {
+    cleanup(host);
+  }
+});
+
+test("sending a message to another agent delivers the delegation entry with its own call text", () => {
+  // A message may be a reply rather than an assignment, and the matcher does
+  // not read it, so the line says only that a message went out.
+  const host = makeHost();
+  try {
+    const sent = (e) => `This call sends a message to another agent. \`${path.join(host.premise, e.file)}\` governs this moment.`;
+    const out = lines(render(payload("SendMessage", { to: "worker", message: "..." }), host.env));
+    assert.equal(out[0], TOOL_HEADER);
+    assert.deepEqual(out.slice(1), byMoment("delegation").map(sent));
+    // Handing work over keeps its own sentence.
+    assert.deepEqual(lines(render(payload("Agent", { prompt: "..." }), host.env)).slice(1), expectLines(host, byMoment("delegation")));
+    assert.ok(expectLines(host, byMoment("delegation")).every((l) => l.startsWith("This call hands work to another agent. ")));
+    // A neighbouring tool that passes nothing to an agent is no moment.
+    assert.equal(render(payload("TaskStop", { task_id: "..." }), host.env), "");
+    assert.equal(render(payload("SendMessage", { message: "..." }, "PostToolUse"), host.env), "");
+  } finally {
+    cleanup(host);
+  }
+});
+
+test("the hook's matcher admits every tool a moment names", () => {
+  // The predicates decide the moment; the host only runs the hook on a tool
+  // its matcher admits, so a tool the predicate names but the matcher omits
+  // would never be delivered.
+  const hooks = JSON.parse(fs.readFileSync(path.join(path.dirname(SCRIPT), "..", "hooks", "hooks.json"), "utf8"));
+  const matcher = new RegExp(hooks.hooks.PreToolUse[0].matcher);
+  for (const tool of [...AGENT_TOOLS, "Edit", "Write", "MultiEdit", "NotebookEdit", "apply_patch"]) {
+    assert.ok(matcher.test(tool), tool);
+  }
+  assert.ok(!matcher.test("TaskStop"));
+});
+
+test("the output carries the context and no other field", () => {
+  // Codex fails a PreToolUse hook that returns suppressOutput (or continue,
+  // or stopReason) and drops its context with it.
+  const host = makeHost();
+  try {
+    for (const p of [payload("Agent", { prompt: "..." }), payload("Edit", { file_path: "/p/CLAUDE.md" })]) {
+      const out = JSON.parse(render(p, host.env));
+      assert.deepEqual(Object.keys(out), ["hookSpecificOutput"]);
+      assert.deepEqual(Object.keys(out.hookSpecificOutput).sort(), ["additionalContext", "hookEventName"]);
+    }
   } finally {
     cleanup(host);
   }
