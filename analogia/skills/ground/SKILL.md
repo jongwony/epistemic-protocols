@@ -185,7 +185,7 @@ structure Question where
     yours, with its grounds, before that turn. A draft alone is a proposal, and an instruction to
     do the next task takes none. Several drafts a turn takes establish one question where their
     whole scope is one pair's; drafts shown as separate audits of different pairs, taken in one
-    turn, each establish their own question. Either way you never choose or drop pairs, and never
+    turn, establish the questions `question` reads them as. Either way you never choose or drop pairs, and never
     merge pairs unnamed; otherwise the question stays open. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
