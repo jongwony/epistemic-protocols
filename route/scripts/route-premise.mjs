@@ -104,7 +104,8 @@ const TOOL_HEADER =
 // the line quotes, whole sentences copied verbatim. `moments` is the
 // session-start line's list of the moments the document governs, each one
 // the reader can observe in its own work. `at` names a matcher-decided moment (a key of MOMENTS) and `call`,
-// the sentence the line delivered at that call opens with.
+// the sentence the line delivered at that call opens with unless CALL_TEXT
+// holds a narrower one for the call's tool.
 const PREMISE_INDEX = [
   { file: "recognition-and-authority.md",
     lead: "The AI detects gaps, uncertainty, mismatch, and risk and presents the evidence. Authority to settle a question remains with the person unless entrusted within an established scope. Detection alone supplies no grant.",
@@ -119,8 +120,8 @@ const PREMISE_INDEX = [
     lead: "A tier supplies no empirical guarantee about future model capability. Improved performance does not by itself retire a judgment boundary or justify retaining a safeguard.",
     moments: "deciding a principle's role, scope, or revision basis; a model change is offered as the reason to retire or keep a rule." },
   { file: "specification-and-judgment.md",
-    lead: "An **indeterminate** step requires judgment the specification does not settle. State its subject, relevant evidence, and required output form without writing in its answer. This is a boundary of the contract under examination, not a claim that no possible procedure could ever address the question.",
-    moments: "deciding which steps a procedure can settle in advance and which must be judged in the situation; each added exception to a rule calls for the next one." },
+    lead: "Inspect a growing chain of cases when each answers a problem created by the preceding addition rather than by the original subject. Determine whether the first step tried to compute what the contract leaves to judgment.",
+    moments: "each added exception to a rule calls for the next one; deciding which steps a procedure can settle in advance and which must be judged in the situation." },
   { file: "calibration-methodology.md",
     lead: "Use the assessed consequences and correction paths to propose a grant with explicit scope. Mixed conditions call for per-decision calibration. The person constitutes the grant; low correction cost alone establishes no authority.",
     moments: "setting or changing how much may be decided without asking the person." },
@@ -170,11 +171,21 @@ function isInstructionSurface(file) {
   return /(^|\/)agents(\/|$)/.test(dir);
 }
 
-// The tools that hand work to another agent, as the hosts name them (Codex
-// reports its own under the same canonical name). An unmatched name costs
-// nothing, so a host's rename shows as a missed delivery rather than a
-// fault.
-const AGENT_TOOLS = new Set(["Agent", "Task"]);
+// The tools that pass work or a message to another agent, as the hosts name
+// them: Agent and Task start one on an assignment (Codex reports its own
+// under the same canonical name), and SendMessage continues a spawned
+// subagent or messages a peer agent. An unmatched name costs nothing, so a
+// host's rename shows as a missed delivery rather than a fault.
+const MESSAGE_TOOLS = new Set(["SendMessage"]);
+const AGENT_TOOLS = new Set(["Agent", "Task", ...MESSAGE_TOOLS]);
+
+// The sentence a tool line opens with for a call of a tool in the set, in
+// place of the entry's own `call`. The matcher does not read the message,
+// and a message may be a reply rather than an assignment, so the sentence
+// states only what every call of those tools is.
+const CALL_TEXT = new Map([
+  [MESSAGE_TOOLS, "This call sends a message to another agent."],
+]);
 
 /**
  * Each observable moment, as a predicate over the call: the hook event, the
@@ -274,11 +285,17 @@ function line(root, e) {
   return `\`${file}\` — ${quoted(file, e)}Moments: ${e.moments}`;
 }
 
+/** What the call is: the sentence CALL_TEXT holds for its tool, else the entry's. */
+function callText(e, call) {
+  for (const [tools, text] of CALL_TEXT) if (tools.has(call.tool)) return text;
+  return e.at.call;
+}
+
 /** A tool-channel line: what the call is, the path, the quoted lead. */
-function toolLine(root, e) {
+function toolLine(root, e, call) {
   const file = path.join(root, e.file);
   const lead = readLead(file, e);
-  return `${e.at.call} \`${file}\` governs this moment${lead ? `: "${lead}"` : "."}`;
+  return `${callText(e, call)} \`${file}\` governs this moment${lead ? `: "${lead}"` : "."}`;
 }
 
 /**
@@ -300,11 +317,13 @@ function renderToolPremise(root, call) {
   if (!root) return "";
   const entries = present(root).filter((e) => bindsAt(e, call));
   if (entries.length === 0) return "";
-  return [TOOL_HEADER, ...entries.map((e) => toolLine(root, e))].join("\n");
+  return [TOOL_HEADER, ...entries.map((e) => toolLine(root, e, call))].join("\n");
 }
 
 export {
   AGENT_TOOLS,
+  CALL_TEXT,
+  MESSAGE_TOOLS,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,

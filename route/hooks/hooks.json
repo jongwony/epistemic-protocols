@@ -41,7 +41,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "^(Edit|Write|MultiEdit|NotebookEdit|apply_patch|Agent|Task)$",
+        "matcher": "^(Edit|Write|MultiEdit|NotebookEdit|apply_patch|Agent|Task|SendMessage)$",
         "hooks": [
           {
             "type": "command",

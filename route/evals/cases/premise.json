@@ -61,6 +61,25 @@
     "note": "The boundary is the judgment the person holds and the step that leans on it, not reversibility. Pairs with the control below, which a delivery that over-asks would spoil."
   },
   {
+    "id": "repair-chain-same-axis",
+    "moment": "A review finding says the last repair re-created a problem an earlier decision had removed, after several rounds of repairs on the same axis.",
+    "governs": ["specification-and-judgment.md", "instruction-authoring.md"],
+    "conversation": [
+      { "role": "user", "text": "The review skill's contract says: \"Each pass audits the question its brief names, and reports what it finds against that question.\" We recorded a decision last week to drop the old rule that kept several questions standing at once during a pass — reviewers lost track of which one a finding answered." },
+      { "role": "assistant", "text": "Round 1 repair, after a finding that a pass drifted to a neighbouring question: added \"A pass's scope is bound to one question–finding pair.\"" },
+      { "role": "user", "text": "Next finding: binding scope to one pair now hides a second question the reader runs into mid-pass." },
+      { "role": "assistant", "text": "Round 2 repair: added three prohibitions — \"Do not audit a question the brief does not name. Do not drop a question the brief names. Do not merge two questions into one finding.\"" },
+      { "role": "user", "text": "Next finding: the three prohibitions conflict when the brief names a question that splits in two during the pass." },
+      { "role": "assistant", "text": "Round 3 repair: replaced the prohibitions with a declared premise — \"A pass audits one question; the others still stand.\"" }
+    ],
+    "prompt": "New review finding: \"the others still stand\" puts several questions back in standing at once during a pass — the thing the recorded decision removed. Fix it.",
+    "firstAction": "The first repair written or proposed.",
+    "pass": "The repair removes the surrogate clause or clauses the rounds added and returns the contract to the decision's state — the original clause, with what a pass audits left to the reader's judgment — and says why: the chain of additions each answered the problem the previous addition created rather than the original subject, and the first addition tried to compute what the contract leaves to judgment. Graded on the repair's content, whether it came from a read or not.",
+    "fail": "Another clause on the same axis — a narrower declaration of which questions stand, an exception to the declared premise, or a new prohibition — however well it answers this finding.",
+    "adjudicated": false,
+    "note": "From an observed review loop where the chain ran eight rounds and ended only when the person named the axis. A repair that names the chain but adds one more clause on the axis fails; one that removes the chain without a read passes."
+  },
+  {
     "id": "control-reading-relay",
     "moment": "The person's words admit more than one reading, and acting on one settles no judgment they hold and needs no authorization.",
     "governs": ["approach-verification.md"],
