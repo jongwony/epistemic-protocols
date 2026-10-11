@@ -128,8 +128,7 @@ variable {P : Type}
 abbrev Text (c : Context P) := List (Fin c.length)
 
 /-- A part of the source or the target structure; where an abstraction is tested against its own
-    cases, a target component's name says which case it belongs to, in the same words
-    `FitClaim.missing`'s `inCase` uses. -/
+    cases, a target component's name says which case it belongs to. -/
 structure Component where
   name      : String
   structure_ : String
@@ -174,10 +173,10 @@ structure Question where
     — and the turn asks nothing narrower, the conclusion is that the structure is preserved in the
     target; the relations under it are what collection finds, never a list fixed here. A narrower
     question the turn asks — whether the retries will match, say — is that turn's whole scope.
-    Where a located abstraction is tested against its own cases and the turn asks nothing narrower
-    (the abstraction the source, its cases the target), the conclusion for each case asked about is
-    that it instantiates the abstraction, and a collective relation asked of the cases together is
-    one more conclusion, never replaced by the per-case ones.
+    Where a located abstraction is tested against its own cases (the abstraction the source, its
+    cases the target), the conclusion for each case asked about is that it instantiates the
+    abstraction, and a collective relation asked of the cases together is one more conclusion, never
+    replaced by the per-case ones.
     Articulating what a stated purpose entails is reading it; choosing among materially different
     purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes is read,
     not asked.
@@ -319,10 +318,9 @@ inductive Verdict (c : Context P)
 
 /-- **Your judgment** per conclusion, reading the grounds' bearing on `k` rather than a
     label-to-verdict polarity. Where the verdict on `k` turns on which of the source's materially
-    different readings holds and no evidence this session can reach settles it, `k` is Undetermined,
-    its `missing` naming the reading as the person's to say, with each reading's verdict and grounds
-    shown side by side; where the readings reach the same verdict, judge it plainly. Direction:
-    `references/judgments.md` §judge. -/
+    different readings holds, `k` is Undetermined, its `missing` naming the reading as the person's
+    to say, with each reading's verdict and grounds shown side by side; where the readings reach the
+    same verdict, judge it plainly. Direction: `references/judgments.md` §judge. -/
 axiom judge : (c : Context P) → Inference → Verdict c
 
 inductive Pref | adopted | setAside
@@ -527,7 +525,7 @@ inductive Op | questionRead | questionGate | questionReadback | collect | constr
 def grounding : Op → Annot × String
   | .questionRead     => (.sense, "Internal analysis: how the question stands on the person's turns — the purpose, the conclusions at stake in the whole scope asked, and whether R and the context leave a materially different choice of source or target open")
   | .questionGate     => (.interaction .constitution, "when the question does not stand on a person's turn — before collection, after collection surfaced a choice only the person settles, or when a later turn reopens it: with material in the context to draft from, a question drafted from it — the purpose, the conclusions, and the source–target pair where open — with its grounds, one draft per materially divergent candidate, each with what it would audit, for the person to take, correct, or replace in their own words; with no referent to draft from, ask for the material to audit, inventing no candidate, and design the question with them once it is there; nothing more is collected while it waits, and evidence already collected stays")
-  | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited, and the reading the person named, where they named one — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
+  | .questionReadback => (.interaction .extension, "when the question stands, relay it — the purpose, the conclusions, and the source and target audited — with the person's turn it stands on, and what a revision added, removed, or reformulated; no approval required")
   | .collect          => (.observe, "artifact read, artifact search, record read, external fetch, environment run: collection as `observe` states")
   | .construct        => (.sense, "Internal analysis: the correspondences over what collection found and their fit claims")
   | .checkRead        => (.sense, "Internal analysis: one check per fit claim bearing on K, each with its scope, target-side defeater, and reach")
@@ -593,7 +591,7 @@ Read `references/round-composition.md` before composing when terminology must re
 - **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words before collecting, constructing, or reassessing. The AI drafts the question with the person but never makes it stand: it does not settle the purpose, narrow the conclusions below what the cited turn asks, or pick between materially different sources or targets without their turn, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; otherwise the question gate (`questionGate`) is presented, and nothing more is collected while it waits. Constitution options remain viable under different user value weightings; shared trajectories collapse, while off-axis responses remain free-response pathways.
 - **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
-- **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite; met checks on every step alone never license it. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
+- **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
 - **A reading the source leaves open is shown, not chosen**: Where a conclusion's verdict turns on which materially different reading of the source holds, it stays Undetermined with each reading's verdict and grounds shown side by side; the person's turn naming the reading they mean fixes the sense of the conclusions, and they are judged again on it.
 - **Self-grounding judges each case**: Where an abstraction is tested against its own cases, each case asked about gets its own verdict and a collective relation asked of them is judged on its own; a Licensed verdict on a case, or on the cases together where that conclusion is itself a fit to the abstraction, names the level of abstraction its fit is claimed at and a consequence concrete enough to fail, shows the contrast that makes the fit diagnostic, and where none was reachable its limits say the fit was not shown to be diagnostic.
 - **Every bearing claim carries its own defeater**: For each fit claim a conclusion turns on, state what target-side fact or observable result, within that claim's own scope, would require it to change, and who can reach that evidence. The builder and the checker being the same process is not the defect; a claim with no stated way to be wrong is. A check nobody ran is reported unmet.
