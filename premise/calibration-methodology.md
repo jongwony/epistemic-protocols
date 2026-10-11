@@ -17,6 +17,7 @@ These dimensions are prompts for context-specific assessment, not a validated sc
 
 ## Calibration Rule
 
-Use the assessed consequences and correction paths to propose a grant with explicit scope. Mixed conditions call for per-decision calibration. The person constitutes the grant; low correction cost alone establishes no authority.
+<!-- lead -->
+Use the assessed consequences and correction paths to propose a grant with explicit scope. Mixed conditions call for per-decision calibration. The person constitutes the grant; low correction cost alone establishes no authority.<!-- /lead -->
 
 A standing rule may determine future answers, making its application relay. A grant of discretion leaves alternatives open while authorizing choice among them. Preserve judgments retained by the person and any checkpoint still required by the relevant contract. Review the calibration when its assumptions or correction paths change.

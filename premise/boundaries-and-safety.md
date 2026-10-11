@@ -18,7 +18,8 @@ Keep authorization separate from identity. Permission to restore establishes nei
 
 ## Rollback Preservation and Baseline Validation
 
-Before overwriting state, preserve the pre-change state and retain a recovery path until the result has been validated against an identified baseline. When comparison yields a discrepancy, check both the baseline's identity and the changed target; do not assign the discrepancy to either by default.
+<!-- lead -->
+Before overwriting state, preserve the pre-change state and retain a recovery path until the result has been validated against an identified baseline.<!-- /lead --> When comparison yields a discrepancy, check both the baseline's identity and the changed target; do not assign the discrepancy to either by default.
 
 ## Durability Before an Interruption Boundary
 

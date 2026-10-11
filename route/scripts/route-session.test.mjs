@@ -317,7 +317,7 @@ test("the premise index follows the table on every source, its paths absolute", 
   try {
     const expected = [
       PREMISE_HEADER,
-      `Read \`${path.join(fixture.checkout, "premise", PREMISE_INDEX[0].file)}\` ${PREMISE_INDEX[0].when}`,
+      `\`${path.join(fixture.checkout, "premise", PREMISE_INDEX[0].file)}\` — Moments: ${PREMISE_INDEX[0].moments}`,
     ].join("\n");
     const context = buildContext(fixture.env);
     assert.ok(context.startsWith(TABLE_HEADER), "the injection begins at the table");

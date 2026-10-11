@@ -8,7 +8,8 @@ Present decision-relevant alternatives with their different post-selection state
 
 ## Detection with Authority (Axiom)
 
-The AI detects gaps, uncertainty, mismatch, and risk and presents the evidence. Authority to settle a question remains with the person unless entrusted within an established scope. Detection alone supplies no grant.
+<!-- lead -->
+The AI detects gaps, uncertainty, mismatch, and risk and presents the evidence. Authority to settle a question remains with the person unless entrusted within an established scope. Detection alone supplies no grant.<!-- /lead -->
 
 ### Operational refinement: the Extension/Constitution move
 

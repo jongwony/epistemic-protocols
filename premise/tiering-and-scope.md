@@ -13,7 +13,8 @@ Classify a principle by the obligation it serves:
 | Architectural | A decision about structure, placement, or scope. |
 | Safeguard | A provisional guard supported by an observed failure; re-evaluate when relevant evidence changes. |
 
-A tier supplies no empirical guarantee about future model capability. Improved performance does not by itself retire a judgment boundary or justify retaining a safeguard.
+<!-- lead -->
+A tier supplies no empirical guarantee about future model capability. Improved performance does not by itself retire a judgment boundary or justify retaining a safeguard.<!-- /lead -->
 
 ## Checkpoint Policy Stays at the Meta Layer (Derived)
 

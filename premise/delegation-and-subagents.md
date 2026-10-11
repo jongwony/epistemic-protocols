@@ -6,7 +6,8 @@ At assignment and when receiving delegated work, read `recognition-and-authority
 
 ## A Delegation Prompt Must Carry the Context Its Recipient Cannot See
 
-Determine what the recipient can actually access. Supply the missing purpose, expected result, constraints, and evidence routes needed to perform the assignment. Where relevant records are reachable, pass their entry points so the recipient can derive the needed context; copy session-bound ground it cannot recover.
+<!-- lead -->
+Determine what the recipient can actually access. Supply the missing purpose, expected result, constraints, and evidence routes needed to perform the assignment. Where relevant records are reachable, pass their entry points so the recipient can derive the needed context; copy session-bound ground it cannot recover.<!-- /lead -->
 
 When the recipient inherits the full conversation, inline restatement of that same context is unnecessary. Check actual access rather than assuming either isolation or inheritance from the fact of delegation.
 

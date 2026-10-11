@@ -11,9 +11,10 @@
  * this hook fires on it. So such an entry goes out here a second time, at
  * that call. A hook's context reaches the model on the request after the
  * call, so this is a reinforcement at the moment rather than a gate before
- * it; the line asks for the document before the result is built on. Which
- * calls are which moments is defined beside the index (route-premise.mjs,
- * MOMENTS); this hook supplies the call, read off the payload.
+ * it; the line says what the call was and quotes the document's lead clause
+ * for the result that is built on next. Which calls are which moments is
+ * defined beside the index (route-premise.mjs, MOMENTS); this hook supplies
+ * the call, read off the payload.
  *
  * The paths a call names are read without interpreting the call. A file
  * tool (Edit, Write, MultiEdit, NotebookEdit) names its path in its input.
@@ -24,10 +25,12 @@
  * and the project's own instruction-file pointer stay the route for it.
  *
  * Output is the shape both hosts accept for adding context around a call
- * without deciding permission: hookSpecificOutput.additionalContext. On no
- * match nothing is written, and every failure path is silent — a hook that
- * blocks a call is worse than one that delivers a line less. Zero
- * external dependencies: Node.js standard library only.
+ * without deciding permission: hookSpecificOutput.additionalContext, and no
+ * other field — Codex fails a PreToolUse hook that returns suppressOutput
+ * and drops its context. On no match nothing is written, and every failure
+ * path is silent — a hook that blocks a call is worse than one that
+ * delivers a line less. Zero external dependencies: Node.js standard
+ * library only.
  */
 
 import fs from "node:fs";
@@ -78,7 +81,6 @@ function render(raw, env) {
   }
   if (!context) return "";
   return JSON.stringify({
-    suppressOutput: true,
     hookSpecificOutput: {
       hookEventName: call.event,
       additionalContext: context,

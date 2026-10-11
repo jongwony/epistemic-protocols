@@ -10,12 +10,15 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  LEAD_CLOSE,
+  LEAD_OPEN,
   MOMENTS,
   PREMISE_HEADER,
   PREMISE_INDEX,
   TOOL_HEADER,
   bindsAt,
   isInstructionSurface,
+  leadOf,
   premiseRoot,
   renderPremise,
   renderToolPremise,
@@ -122,8 +125,9 @@ test("renders the header and one line per document with its absolute path", () =
     const lines = renderPremise(root).split("\n");
     assert.equal(lines[0], PREMISE_HEADER);
     assert.equal(lines.length, 1 + PREMISE_INDEX.length);
+    // These fixture documents mark no lead, so each line goes out unquoted.
     PREMISE_INDEX.forEach((e, i) => {
-      assert.equal(lines[1 + i], `Read \`${path.join(root, e.file)}\` ${e.when}`);
+      assert.equal(lines[1 + i], `\`${path.join(root, e.file)}\` — Moments: ${e.moments}`);
     });
     // Every path is absolute and under the root; no relative link survives.
     for (const m of lines.join("\n").matchAll(/`([^`]+)`/g)) {
@@ -139,7 +143,7 @@ test("an entry whose document is absent is left out; the rest go out", () => {
   try {
     const out = renderPremise(premiseRoot(host.env));
     assert.equal(out.split("\n").length, 2);
-    assert.match(out, new RegExp(`Read \`[^\`]*${FIRST.replace(".", "\\.")}\``));
+    assert.match(out, new RegExp(`^\`[^\`]*${FIRST.replace(".", "\\.")}\` — `, "m"));
   } finally {
     cleanup(host);
   }
@@ -160,12 +164,42 @@ test("the tool channel renders the entries whose moment the call is, under its h
     const out = renderToolPremise(root, { event: "PreToolUse", tool: "Edit", files: ["/p/src/a.js", "/p/CLAUDE.md"] }).split("\n");
     assert.equal(out[0], TOOL_HEADER);
     const surface = TOOL.filter((e) => e.at.moment === "instruction-surface-change");
-    assert.deepEqual(out.slice(1), surface.map((e) => `Read \`${path.join(root, e.file)}\` ${e.at.when}`));
+    assert.deepEqual(out.slice(1), surface.map((e) => `${e.at.call} \`${path.join(root, e.file)}\` governs this moment.`));
     assert.equal(renderToolPremise(root, { event: "PreToolUse", tool: "Edit", files: ["/p/src/a.js"] }), "");
     assert.equal(renderToolPremise(root, { event: "PostToolUse", tool: "Agent", files: [] }), "");
   } finally {
     cleanup(host);
   }
+});
+
+test("a marked lead is quoted on both channels in the document's own words", () => {
+  const host = makeHost();
+  try {
+    const root = premiseRoot(host.env);
+    const lead = "The first sentence holds.\n  The second sentence wraps.";
+    for (const e of PREMISE_INDEX) {
+      fs.writeFileSync(path.join(root, e.file), `# ${e.file}\n\n${LEAD_OPEN}\n${lead}${LEAD_CLOSE} What follows stays out.\n`);
+    }
+    const quoted = '"The first sentence holds. The second sentence wraps."';
+    const lines = renderPremise(root).split("\n");
+    PREMISE_INDEX.forEach((e, i) => {
+      assert.equal(lines[1 + i], `\`${path.join(root, e.file)}\` — ${quoted} Moments: ${e.moments}`);
+    });
+    const out = renderToolPremise(root, { event: "PreToolUse", tool: "Agent", files: [] }).split("\n");
+    const delegation = TOOL.filter((e) => e.at.moment === "delegation");
+    assert.deepEqual(out.slice(1), delegation.map((e) => `${e.at.call} \`${path.join(root, e.file)}\` governs this moment: ${quoted}`));
+  } finally {
+    cleanup(host);
+  }
+});
+
+test("a lead is read only from exactly one marker pair, in order", () => {
+  assert.equal(leadOf(`a ${LEAD_OPEN} b  c\n d ${LEAD_CLOSE} e`), "b c d");
+  assert.equal(leadOf("no markers"), "");
+  assert.equal(leadOf(`${LEAD_CLOSE} b ${LEAD_OPEN}`), "", "reversed pair");
+  assert.equal(leadOf(`${LEAD_OPEN} a ${LEAD_CLOSE} ${LEAD_OPEN} b ${LEAD_CLOSE}`), "", "two pairs");
+  assert.equal(leadOf(`${LEAD_OPEN} unclosed`), "");
+  assert.equal(leadOf(undefined), "");
 });
 
 test("an instruction surface is recognized by path shape, on any host", () => {
@@ -201,10 +235,10 @@ test("the index and the premise directory name the same documents", () => {
     .sort();
   assert.deepEqual(indexed, shipped);
   for (const e of PREMISE_INDEX) {
-    assert.match(e.when, /^(when|before) /, `${e.file}: an entry states the moment it is for`);
+    assert.ok(typeof e.moments === "string" && e.moments.trim().endsWith("."), `${e.file}: an entry states the moments it is for`);
     if (e.at) {
       assert.ok(MOMENTS[e.at.moment], `${e.file}: names a moment the matcher can decide`);
-      assert.match(e.at.when, /^(when|before) /, `${e.file}: the tool clause states the moment it is for`);
+      assert.ok(typeof e.at.call === "string" && e.at.call.trim().endsWith("."), `${e.file}: the tool line says what the call is`);
     }
   }
   assert.equal(new Set(indexed).size, indexed.length, "no document is indexed twice");
@@ -212,5 +246,48 @@ test("the index and the premise directory name the same documents", () => {
   // Every observable moment the hook defines is some document's moment.
   for (const m of Object.keys(MOMENTS)) {
     assert.ok(TOOL.some((e) => e.at.moment === m), `${m}: a moment no entry names is dead`);
+  }
+});
+
+test("every indexed document marks exactly one lead, and extraction returns it unchanged", () => {
+  // The lead is quoted into the index at runtime, so the document is its
+  // one source. This re-runs that relation: one marker pair per document,
+  // the span a complete stretch of sentences, and extraction returning the
+  // marked text itself — whitespace runs collapsed, nothing else.
+  const root = path.join(REPO, "premise");
+  for (const e of PREMISE_INDEX) {
+    const text = fs.readFileSync(path.join(root, e.file), "utf8");
+    assert.equal(text.split(LEAD_OPEN).length - 1, 1, `${e.file}: one opening marker`);
+    assert.equal(text.split(LEAD_CLOSE).length - 1, 1, `${e.file}: one closing marker`);
+    const raw = text.slice(text.indexOf(LEAD_OPEN) + LEAD_OPEN.length, text.indexOf(LEAD_CLOSE));
+    const lead = leadOf(text);
+    assert.equal(lead, raw.replace(/\s+/g, " ").trim(), `${e.file}: extraction returns the marked span`);
+    assert.ok(!raw.trim().includes("\n"), `${e.file}: the lead sits within one paragraph line`);
+    assert.match(lead, /^[A-Z*`]/, `${e.file}: the lead opens a sentence`);
+    assert.match(lead, /[.!?]$/, `${e.file}: the lead closes a sentence`);
+    // With the markers lifted out, the document reads as it would unmarked,
+    // and the lead is a verbatim stretch of it.
+    const unmarked = text.replace(new RegExp(`${LEAD_OPEN}\\s*`), "").replace(LEAD_CLOSE, "");
+    assert.ok(unmarked.includes(lead), `${e.file}: the lead is the document's own words`);
+  }
+});
+
+test("the shipped index stays inside one injection with the table beside it", () => {
+  // Claude Code caps each additionalContext string at 10,000 characters and
+  // the deficit table rides the same string at session start; past the cap
+  // the host substitutes a file path and a preview. 8,500 leaves the table
+  // its room. The root here is longer than an install path usually is.
+  const premise = path.join(REPO, "premise");
+  const host = fs.mkdtempSync(path.join(os.tmpdir(), "route-premise-budget-"));
+  const root = path.join(host, "x".repeat(Math.max(1, 100 - host.length)), "premise");
+  try {
+    fs.mkdirSync(root, { recursive: true });
+    for (const e of PREMISE_INDEX) fs.copyFileSync(path.join(premise, e.file), path.join(root, e.file));
+    const out = renderPremise(root);
+    assert.equal(out.split("\n").length, 1 + PREMISE_INDEX.length);
+    assert.ok(out.includes('"'), "the copied documents carry their leads");
+    assert.ok(out.length <= 8500, `the index is ${out.length} characters`);
+  } finally {
+    fs.rmSync(host, { recursive: true, force: true });
   }
 });
