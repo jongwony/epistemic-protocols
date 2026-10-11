@@ -1084,6 +1084,37 @@ describe('generate-changelog.js CLI', () => {
     assert.ok('groups' in result);
     assert.ok('ungrouped' in result);
   });
+
+  it('lists a PR merged with a merge commit as one entry, not its branch commits', () => {
+    const repo = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'changelog-first-parent-'));
+    const env = {
+      ...process.env,
+      GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@example.com',
+      GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@example.com',
+    };
+    const git = (...args) => execFileSync('git', ['-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', ...args], {
+      cwd: repo, env, encoding: 'utf8',
+    });
+    try {
+      git('init', '-q', '-b', 'main');
+      git('commit', '-q', '--allow-empty', '-m', 'chore: base');
+      git('tag', 'v2026.01.01');
+      git('checkout', '-q', '-b', 'feature');
+      git('commit', '-q', '--allow-empty', '-m', 'feat(x): inner one');
+      git('commit', '-q', '--allow-empty', '-m', 'fix(x): inner two');
+      git('checkout', '-q', 'main');
+      git('merge', '-q', '--no-ff', '-m', 'feat(x): title (#1)', 'feature');
+
+      const output = execFileSync(process.execPath, [path.join(__dirname, 'generate-changelog.js')], {
+        cwd: repo, env, encoding: 'utf8',
+      });
+      const result = JSON.parse(output);
+      assert.deepEqual(result.groups.x.map(entry => entry.message), ['title (#1)']);
+      assert.deepEqual(result.ungrouped, []);
+    } finally {
+      fs.rmSync(repo, { recursive: true, force: true });
+    }
+  });
 });
 
 // ============================================================

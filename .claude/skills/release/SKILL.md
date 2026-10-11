@@ -43,9 +43,9 @@ Creates a CalVer tagged release with a hand-written narrative prepended to the b
 
 ### Phase 4: Narrative drafting
 
-Analyze commits since previous tag:
+Analyze commits since previous tag — each line is one merged PR; read a PR's own commits with `git log <merge>^1..<merge>^2` when its detail is needed:
 ```bash
-git log --oneline <prev-tag>..HEAD
+git log --oneline --first-parent <prev-tag>..HEAD
 ```
 
 Select 3-4 highest-impact changes. Prioritize:

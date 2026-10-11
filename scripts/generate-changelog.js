@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Parse git conventional commits between tags for release notes
+ * Reads the first-parent line, so each merged PR is one entry (its merge commit)
  * Zero external dependencies: Node.js standard library only
  *
  * Usage:
@@ -47,7 +48,7 @@ function findRange(currentTag) {
 }
 
 function parseCommits(range) {
-  const raw = execFileSync('git', ['log', '--format=%h %s', range], {
+  const raw = execFileSync('git', ['log', '--first-parent', '--format=%h %s', range], {
     encoding: 'utf8',
   }).trim();
 
