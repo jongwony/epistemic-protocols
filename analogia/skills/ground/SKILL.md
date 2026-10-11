@@ -180,8 +180,7 @@ structure Question where
     not asked. How the source reads is none of these choices: its materially different readings
     are yours to infer while constructing, and the question does not wait on them. Once a
     person's turn names which reading they mean, that turn fixes the sense of their question's
-    conclusions; no other turn does. The question stands only on the person's turn that sets it in
-    their own words (`set`) or takes a draft you put forward, as it was or corrected (`adopted`); a
+    conclusions. The question stands only on the person's turn that sets it in their own words (`set`) or takes a draft you put forward, as it was or corrected (`adopted`); a
     draft counts only where it was visible as yours, with its grounds, before that turn. A draft
     alone is a proposal, and an instruction to do the next task takes none. You never choose, drop,
     or conflate source–target pairs. -/
