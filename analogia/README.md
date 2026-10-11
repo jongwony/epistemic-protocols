@@ -41,8 +41,9 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 ```
 Question  → Read from your words: the purpose, the conclusions at stake, and the source and
             target where that is still open. If your words leave it open, a question drafted
-            from the context is put forward for you to take, correct, or replace — several
-            together if you like; nothing more is collected while it waits.
+            from the context is put forward for you to take, correct, or replace; nothing
+            more is collected while it waits. Several sources or targets asked at once set
+            one question per pair, audited one after another.
 Collect   → To the limit of reach over what the mapping rests on; every place looked is named,
             reached or not
 Assess    → Construct the correspondences, state what would defeat each bearing claim, run the
@@ -54,7 +55,7 @@ Later     → A turn that bears on the audit is read whole and the audit runs ag
             grounds answer entirely — is simply answered
 ```
 
-The question is the only decision gate, and it is designed with you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, Analogia puts forward a question drafted from the context — one per divergent candidate, with its grounds — for you to take, correct, or replace; you can take several together. It stands only once your turn does; asking for the next task takes no draft. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection, unless your turn asks something narrower. A pass on a question that stands ends in an assessment unless collection turns up a choice of purpose, conclusions, or source and target only you can make; a conclusion that stays undetermined is part of it, not a failure to finish. How the source reads is not such a choice: where a conclusion's verdict turns on which reading of it holds, the conclusion stays undetermined with each reading's verdict shown side by side, and naming the reading you hold runs the audit again. The question can wait before collection, after collection turns up such a choice, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. Turning to other work closes nothing: the waiting question stays open. What you ask for next — while the question waits or after an assessment — follows the contract's [`seam`](./skills/ground/SKILL.md).
+The question is the only decision gate, and it is designed with you: where your own words leave the purpose, the conclusions, or a materially different choice of source or target open, Analogia puts forward a question drafted from the context — one per divergent candidate, with its grounds — for you to take, correct, or replace. Asking about several sources or targets at once sets one question for each pair, audited one after another. It stands only once your turn does; asking for the next task takes no draft. Where the purpose is to carry a structure over — a port, a migration, a sibling job's shape — the audit checks whether the whole structure is preserved, with its relations found by collection, unless your turn asks something narrower. A pass on a question that stands ends in an assessment unless collection turns up a choice of purpose, conclusions, or source and target only you can make; a conclusion that stays undetermined is part of it, not a failure to finish. How the source reads is not such a choice: where a conclusion's verdict turns on which reading of it holds, the conclusion stays undetermined with each reading's verdict shown side by side, and naming the reading you hold runs the audit again. The question can wait before collection, after collection turns up such a choice, or when a later turn reopens it; nothing more is collected while it waits, and what was collected stays. Turning to other work closes nothing: the waiting question stays open. What you ask for next — while the question waits or after an assessment — follows the contract's [`seam`](./skills/ground/SKILL.md).
 
 ## What a later turn does
 
@@ -63,7 +64,7 @@ The question is the only decision gate, and it is designed with you: where your 
 | **Cite a ground** | Its relevance and scope are checked, and the audit runs again with it before conclusions are judged |
 | **Adopt / set aside a conclusion** | Recorded as yours, reported apart from the evidence, moves no warrant and opens no new pass; asking for the next task adopts nothing |
 | **Revise the purpose, conclusions, source or target** | Reads back the revised question and audits again; evidence already gathered carries over, verdicts are judged again |
-| **Name the reading you mean** | Fixes the sense of your question's conclusions about that source; verdicts are judged again under it |
+| **Name the reading you mean** | Fixes the sense of your question's conclusions; verdicts are judged again under it |
 | **Question about this audit** | Answered from current grounds when they answer it entirely; any other question — one they do not settle, or one that brings a fact, a source, a counterexample, or a result — opens a new pass |
 | **Something unrelated** | Answered; the last outcome stands |
 
