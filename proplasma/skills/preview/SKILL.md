@@ -203,7 +203,8 @@ abbrev ContrastMap := List (DirectionAxis × List (Direction × String))
     order it turns on them; a vivid difference that does not bear on the purpose is not made
     deciding unsaid. Premises every probe shares are shown as shared, not as axes, and re-read
     whenever the comparison changes. On an axis introduced after earlier probes, their cells are
-    re-read from what its realization carries, and otherwise say the difference is unshown there. -/
+    re-read from what each one's realization carries, and otherwise say the difference is unshown
+    there. -/
 axiom contrastMap : Context P → ContrastMap
 
 /-- **Your reading**: the unknowns open — a factual question a probe cannot answer included — on
@@ -213,14 +214,16 @@ axiom unknowns : Context P → List String
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on — a
     direction whose future no probe materialized, or a probe you read as not carrying its
     direction, among them — shown and attached as `present` and CONVERGENCE say, and raised again
-    only on new evidence; new evidence after the closing is shown in the session beside it, and the
-    closing stands; empty when there were none. -/
+    only on new evidence; new evidence after the closing is shown in the session beside it, before
+    any step resting on it that cannot be undone, and the closing stands; empty when there were
+    none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a reading or
     an expectation of a future, a question about a probe, a send-back, taking up something you
     proposed (a revision, a reading), a wish to see something depicted or observed — judged on what
-    the whole utterance does, on the context with it. An utterance about other work leaves the run
+    the whole utterance does, on the context with it; other work in an utterance that bears on the
+    run neither closes it nor answers its judgments. An utterance about other work leaves the run
     as it stands: the session answers it, saying briefly, where reading it as other work was
     unclear, that the run was left as it stands; that answer stays in the context, and no gate of
     this run is raised. -/
@@ -238,12 +241,12 @@ inductive Closing
     nothing — closes the run this way, read whole on the context as it now stands. Its words
     decide what it settles, whatever form it takes — an option number, a restated goal, a side
     remark. A composition of probes already shown that says to go with it constitutes at once; one
-    asking to see it, or a candidate named to be seen, closes nothing. Taking what the map showed
-    adopts it as shown, with no second permission. A direction no probe materialized — read from the
-    accumulated context — and not a composition of probes already shown constitutes as the turn
-    names it. Where its intent is unclear, it closes nothing, and where you took it as a closing the
-    probes stay in place. Your readings, the map's cells, and the open unknowns close nothing and
-    hold no closing back. -/
+    asking to see it, or a candidate named to be seen, closes nothing. Taking what a round showed —
+    the map, or how you took an unclear turn — adopts it as shown, with no second permission. A
+    direction no probe materialized — read from the accumulated context — and not a composition of
+    probes already shown constitutes as the turn names it. Where its intent is unclear, it closes
+    nothing, and where you took it as a closing the probes stay in place. Your readings, the map's
+    cells, and the open unknowns close nothing and hold no closing back. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -448,7 +451,7 @@ over rides it as dissent. The convergence evidence: the turn read as the closing
 intent taken from it, and where it took a reading the round before showed of an unclear turn, that
 earlier turn quoted too; the purpose as it stands, marked as yours where you read it; at
 DirectionalContrast, the constituted direction and the deciding cells, as `decidingRows` reads
-them, each with what it rests on; at any other exit, the map as it stood; at every exit, the open
+them, each with what it rests on; at a withdrawal, the map as it stood; at either closing, the open
 unknowns with what would settle each, every probe's disposition with where it lived, and the
 dissent — a contrary ground first visible at the closing turn, a criterion they stated against the
 pick that turn makes included, is shown here and attached, and the closure stands. The framing
