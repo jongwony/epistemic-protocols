@@ -32,7 +32,7 @@ It does not ask you to certify the mapping. Your agreement is not evidence about
 **Key differences**:
 - **vs. Aitesis**: Aitesis collects the facts the AI can reach and names what only the user holds (factual). Analogia audits what a mapping licenses from the evidence for its structural claims (relational).
 - **vs. Epharmoge**: Epharmoge checks post-execution applicability. Analogia audits the conclusions licensed by a mapping between abstraction levels.
-- **vs. Proplasma**: Proplasma contrasts discard-committed placeholder probes when direction futures remain unrecognizable from descriptions after its routing checks. Analogia audits a mapping that is being relied on — a direction that survives the contrast flows to Analogia when its intended conclusions need that audit.
+- **vs. Proplasma**: Proplasma contrasts discard-committed placeholder probes when direction futures remain unrecognizable from descriptions. Analogia audits a mapping that is being relied on. The two compose by text: a direction the person settles can be audited separately when its intended conclusions rest on a mapping.
 
 **Litmus test**: If the uncertainty is about *what a mapping from structure A licenses about B*, it's Analogia. If it's about *which facts the AI can still reach and which only the user holds*, it's Aitesis.
 

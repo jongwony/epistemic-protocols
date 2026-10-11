@@ -19,7 +19,6 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty Contrast := ⟨⟨[], [], []⟩⟩
 
 theorem silence (ai : AITurns P) (c : Context P) : preview ai c [] = .holding c := by
   simp [preview]
@@ -30,79 +29,52 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
   simp only [List.append_assoc]
   exact ⟨_, rfl⟩
 
+theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    preview ai c (u :: us) = preview ai (fuse c u ++ [(ai.session (fuse c u)).val]) us := by
+  simp [preview, h]
+
+/-- One step either continues on some context or ends at a closing the person's turn filled. -/
+private theorem step (ai : AITurns P) (c : Context P) (u : Utterance P) (us : List (Utterance P))
+    (o : Outcome P) (h : preview ai c (u :: us) = o) :
+    (∃ c', preview ai c' us = o) ∨
+    (∃ d, filledValue (closing (fuse c u)) = some (.constitute d) ∧
+      o = .contrasted (constituted (fuse c u) d)) ∨
+    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) := by
+  simp only [preview] at h
+  split at h
+  · exact .inl ⟨_, h⟩
+  · split at h
+    · rename_i d hk
+      exact .inr (.inl ⟨d, hk, h.symm⟩)
+    · rename_i hk
+      exact .inr (.inr ⟨hk, h.symm⟩)
+    · exact .inl ⟨_, h⟩
+
 theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Utterance P))
     (r : DirectionalContrast P) (h : preview ai c us = .contrasted r) :
     ∃ (c₁ : Context P) (d : Direction), filledValue (closing c₁) = some (.constitute d) ∧
-      Covered c₁ ∧ r.harvest = harvestOf c₁ d ∧ r.context = discard c₁ := by
+      r.harvest = harvestOf c₁ d ∧ r.context = discard c₁ := by
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
-    simp only [preview] at h
-    split at h
-    · rename_i d hk
-      split at h
-      · rename_i hc
-        cases h
-        exact ⟨_, d, hk, hc, rfl, rfl⟩
-      · exact ih _ h
-    · cases h
-    · cases h
-    · cases h
-    · exact ih _ h
+    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨d, hk, h'⟩ | ⟨_, h'⟩
+    · exact ih c' h'
+    · cases h'
+      exact ⟨_, d, hk, rfl, rfl⟩
+    · cases h'
 
-theorem dissolved_on_dissolve (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .dissolved r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .dissolve ∧ r = closed c₁ := by
-  induction us generalizing c with
-  | nil => simp [preview] at h
-  | cons u us ih =>
-    simp only [preview] at h
-    split at h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · rename_i hk
-      cases h
-      exact ⟨_, hk, rfl⟩
-    · cases h
-    · cases h
-    · exact ih _ h
-
-theorem withdrawn_on_stop (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utterance P))
     (r : Closed P) (h : preview ai c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = closed c₁ := by
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .withdraw ∧ r = closed c₁ := by
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
-    simp only [preview] at h
-    split at h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · cases h
-    · rename_i hk
-      cases h
+    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨hk, h'⟩
+    · exact ih c' h'
+    · cases h'
+    · cases h'
       exact ⟨_, hk, rfl⟩
-    · cases h
-    · exact ih _ h
-
-theorem routed_on_route (ai : AITurns P) (c : Context P) (us : List (Utterance P)) (t : String)
-    (r : Closed P) (h : preview ai c us = .routed t r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = closed c₁ := by
-  induction us generalizing c with
-  | nil => simp [preview] at h
-  | cons u us ih =>
-    simp only [preview] at h
-    split at h
-    · split at h
-      · cases h
-      · exact ih _ h
-    · cases h
-    · cases h
-    · rename_i t' hk
-      cases h
-      exact ⟨_, hk, rfl⟩
-    · exact ih _ h
 
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by

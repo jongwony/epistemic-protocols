@@ -371,7 +371,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 4. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (declared protocol chains, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ — a declared chain that touches a protocol they experienced comes first.
+   Present 3-5 tips from `references/advanced-usage.md` (multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ.
 
 5. **Continue exploring** (when MAP results contain unexplored protocols):
 

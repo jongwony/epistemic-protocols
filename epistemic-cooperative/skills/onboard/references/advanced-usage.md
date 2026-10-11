@@ -1,16 +1,8 @@
 # Advanced Usage Patterns
 
-Curated protocol usage patterns for Phase 6 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days, except Protocol Chaining, which lists the edges the protocols' own contracts declare.
+Curated protocol usage patterns for Phase 6 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days.
 
 Provenance caveat: those sessions ran before `/apportion` existed. The rows marked *projected* that name it are projections onto the workflow slot a predecessor protocol occupied, carried forward because the slot is the same, and they are NOT observations under `/apportion`'s own contract — that predecessor compiled conditions for an already-bounded interval, while `/apportion` cuts a goal into units first. Read them as candidate chains until sessions under the current contract accumulate.
-
-## Protocol Chaining
-
-Composition edges a protocol's own contract declares — where one protocol's output is written to be picked up by the next. Declared, not observed frequencies, and not a prescribed sequence: each edge fires only when its condition holds.
-
-| Chain | Pattern |
-|-------|---------|
-| `/preview` → `/ground` | A chosen direction that maps onto an account already in play, and whose intended inferences need an audit, is tagged at harvest for `/ground` |
 
 ## Multi-Protocol Sessions
 
