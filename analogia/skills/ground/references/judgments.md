@@ -4,7 +4,7 @@ Direction for judgments the `/ground` contract leaves to the model. Each section
 
 ## collection
 
-`observe` states what collection does; this is the direction behind it. Collection is bounded by what the mapping rests on, not by what is available: every source that could show a source relation, its counterpart in the target, or the state of a check on a claim bearing on the question — and, where an abstraction is tested against its own cases, the contrast case, a case outside the abstraction or a rival abstraction, that makes its fit diagnostic. The places named as reached and not reached are what lets the reader point at one you missed. What no source settles is shown with what an answer would change, never as a stall.
+`observe` states what collection does; this is the direction behind it. Collection is bounded by what the mapping rests on, not by what is available: every source that could show a source relation, its counterpart in each target a conclusion is about, or the state of a check on a claim bearing on the question — and, where an abstraction is tested against its own cases, the contrast case, a case outside the abstraction or a rival abstraction, that makes its fit diagnostic. The places named as reached and not reached are what lets the reader point at one you missed. What no source settles is shown with what an answer would change, never as a stall.
 
 ## BearsOn
 

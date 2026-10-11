@@ -9,7 +9,7 @@ Audit what a mapping licenses: on the question the person's own words set, colle
 
 ## Definition
 
-**Analogia** (ἀναλογία): A dialogical act of auditing analogical inference. A mapping — a framework, an analogy, an earlier design, an abstraction — is being relied on, and what it licenses about the target is unclear: the feeling that it fits does not tell which conclusions it supports. The person's own words set the question: what the comparison is for, the conclusions at stake, and which source and which target where that choice is open; the AI may draft it, and only the person's turn makes it stand. The AI then collects to the limit of its own reach over what the mapping rests on — the source's relations and their counterparts in the target, reading any account it can reach itself — names the places it reached and those it could not, constructs the correspondences, warrants each fit claim against evidence with what would defeat it, and reports for each conclusion the source relation, or chain of relations, that carries it, what was checked and found, what difference would break it, and whether it holds and how far, is blocked, or stays undetermined with what is missing and who can reach it. What remains open is shown as the person's own unknown. The person's utterance supplies grounds and records what they adopt; it never promotes a claim to warranted, because assent is not evidence about the world. An assessment establishes no correctness beyond the evidence it cites, and a blocked conclusion is not thereby false.
+**Analogia** (ἀναλογία): A dialogical act of auditing analogical inference. A mapping — a framework, an analogy, an earlier design, an abstraction — is being relied on, and what it licenses about the target is unclear: the feeling that it fits does not tell which conclusions it supports. The person's own words set the question: what the comparison is for, the conclusions at stake, and which source and which target where that choice is open; the AI may draft it, and only the person's turn makes it stand. The AI then collects to the limit of its own reach over what the mapping rests on — the source's relations and their counterparts in the target or targets, reading any account it can reach itself — names the places it reached and those it could not, constructs the correspondences, warrants each fit claim against evidence with what would defeat it, and reports for each conclusion the source relation, or chain of relations, that carries it, what was checked and found, what difference would break it, and whether it holds and how far, is blocked, or stays undetermined with what is missing and who can reach it. What remains open is shown as the person's own unknown. The person's utterance supplies grounds and records what they adopt; it never promotes a claim to warranted, because assent is not evidence about the world. An assessment establishes no correctness beyond the evidence it cites, and a blocked conclusion is not thereby false.
 
 ```lean
 /-!
@@ -26,8 +26,9 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
     [the question does not stand on a person's turn]  the question gate (TOOL GROUNDING
         `questionGate`); wait; nothing more is collected, and what was collected stays
     [otherwise]  collect(c): to the limit of your reach over what the mapping rests on — the
-        source's relations and their target counterparts, and the checks on the claims bearing
-        on K; every place looked joins the context, a null result included →
+        source's relations and their counterparts in each target a conclusion is about, and the
+        checks on the claims bearing on K; every place looked joins the context, a null result
+        included →
       [the collected context leaves a choice of purpose, conclusions, or pair only the person
           settles]  the question gate, wait
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
@@ -128,6 +129,9 @@ variable {P : Type}
     context, as the positions of its turns. -/
 abbrev Text (c : Context P) := List (Fin c.length)
 
+/-- A part of the source structure or of a target structure. Its name says which target wherever
+    conclusions are about several targets, so two targets' components of the same name are different
+    components, and their correspondences different values. -/
 structure Component where
   name      : String
   structure_ : String
@@ -143,24 +147,24 @@ structure Correspondence where
   relation : String
 
 /-- One conclusion the mapping is being asked to license about a target: a prediction, a permission,
-    a limit, an expected behavior. Wherever the question's `pair` is `none`, the conclusion names
-    the source and target it is about, so conclusions about different pairs are different claims. -/
+    a limit, an expected behavior. The conclusion names the source and target it is about, so
+    conclusions about different pairs are different claims. -/
 structure Inference where
   claim : String
 
 /-- Who first put the question forward: you, as a draft read from the context and shown with its
-    grounds, or the person. -/
+    grounds, or the person; a question joined from several drafts is a draft. -/
 inductive Proposer | draft | person
 
 /-- What the person's turn that made the question stand did: set it in its own words, or took a
-    draft put forward before, as it was or corrected. -/
+    draft put forward before, or several together, as it was or corrected. -/
 inductive Standing | set | adopted
 
 /-- The question an audit answers: what the comparison is for, the conclusions at stake (`K`), and
     the source and target — carried only where `R` and the context leave a materially different
     choice of either open, `none` where they fix it — with who first put it forward and how it came
     to stand. Each conclusion is about a source and a target; where the conclusions are about
-    different pairs, `pair` is `none` and each conclusion names its own. -/
+    different pairs, `pair` is `none`. -/
 structure Question where
   purpose     : String
   conclusions : List Inference
@@ -171,7 +175,7 @@ structure Question where
 /-- **Your judgment**: the cited turn establishes question `q` in `c`, in the whole scope that turn
     asks — a turn asking about A and B supports no question narrowed to A — with conclusions to
     audit. Where the purpose is to carry a structure over — a port, a migration, a sibling's shape —
-    and the turn asks nothing narrower, the conclusion, for each source and target asked, is that
+    and the turn asks nothing narrower, the conclusion, for each source–target pair asked, is that
     the source's structure is preserved in that target; the relations under it are what collection
     finds, never a list fixed here. A narrower question the turn asks — whether the retries will
     match, say — is that turn's whole scope. Where an abstraction is tested against its own cases
@@ -184,9 +188,10 @@ structure Question where
     choices, and the question does not wait on it. Once a person's turn names which reading they
     mean, that turn fixes the sense of their question's conclusions about that source. The question
     stands only on the person's turn that sets it in their own words (`set`) or takes a draft you
-    put forward, as it was or corrected, or several together, their purposes and conclusions joined
-    (`adopted`); a draft counts only where it was visible as yours, with its grounds, before that
-    turn. A draft alone is a proposal, and an instruction to do the next task takes none. -/
+    put forward, as it was or corrected, or several together, their purposes and conclusions joined,
+    a conclusion two drafts share counted once (`adopted`); a draft counts only where it was visible
+    as yours, with its grounds, before that turn. A draft alone is a proposal, and an instruction to
+    do the next task takes none. -/
 axiom QuestionSupported : Context P → Turn P → Question → Prop
 
 /-- The question stands only on a person's turn: this audit closes on evidence, so no later turn of
@@ -220,15 +225,19 @@ inductive FitLabel
     warranted or defeated. -/
 inductive FitClaim
   | fit     (c : Correspondence) (l : FitLabel)
-  | missing (x : Component)
+  /-- a component of a conclusion's source with no evidenced correspondent in that conclusion's
+      target, named -/
+  | missing (x : Component) (target : String)
 
 /-- **Your judgment**: the fit claims over the correspondences constructed from what collection
-    found, each distinct claim once — each correspondence in exactly one cell, and, for each target
-    a conclusion is about, every source component with no evidenced correspondent in that target
-    missing. They cover the composite of every chain of source relations a conclusion of `K` rests
-    on; under the preservation conclusion, the chains the source itself runs as one or asserts equal
-    to another path. A step whose endpoints have counterparts but whose relation has none is that
-    step's correspondence placed `overextended`, reported as a step with no counterpart. -/
+    found, each distinct claim once — each correspondence in exactly one cell, and, for each
+    source–target pair a conclusion is about, every component of that source with no evidenced
+    correspondent in that target missing in it — for a collective conclusion, whose target is the
+    cases together, a component no case has a correspondent for. They cover the composite of every
+    chain of source relations a conclusion of `K` rests on; under the preservation conclusion, the
+    chains the source itself runs as one or asserts equal to another path. A step whose endpoints
+    have counterparts but whose relation has none is that step's correspondence placed
+    `overextended`, reported as a step with no counterpart. -/
 axiom fitClaims : Context P → List FitClaim
 
 /-- **Your judgment**: whether `x` bears on `k` — its verdict would change if `x` changed. A source
@@ -334,22 +343,21 @@ def prefCoord (k : Inference) : Coord P Pref :=
 axiom preference : (c : Context P) → (k : Inference) → Occ (prefCoord k) c
 
 /-- **Your collection** from `c`, to the limit of your own reach, over what the mapping rests on:
-    the source's relations and their counterparts in the target, the checks on the fit claims
-    bearing on `K`, and every one collection exposes; where to look is yours to judge, and no list
-    of sources bounds it. A source or target account you can reach, you read yourself, and what
-    you say you read, you read whole. Each place you look returns an evidence turn, a null result
-    included, so the places looked stay in the context by name. Where collected
+    the source's relations and their counterparts in each target a conclusion is about, the checks
+    on the fit claims bearing on `K`, and every one collection exposes; where to look is yours to
+    judge, and no list of sources bounds it. A source or target account you can reach, you read
+    yourself, and what you say you read, you read whole. Each place you look returns an evidence
+    turn, a null result included, so the places looked stay in the context by name. Where collected
     material conflicts, name what conflicts with what and show it, not only as a check's grounds.
-    What the context already holds from a source is not fetched again unless an utterance,
-    evidence, or your own work since says it changed. Read and run without changing existing state;
-    what you create only to look you remove afterwards. An observation that needs to change
-    existing state, someone's permission, or another's authority is not made and leaves no evidence
-    turn: name it, with what it needs, in what you present, and leave it open. Where a claim turns
-    on what an artifact does, exercise it over the case that separates the readings. Collection
-    includes trying the construction it needs: a reachable check that constructing the
-    correspondences over what was collected exposes is run within collection as well. What is
-    still open once collection ends is shown as the person's own unknown. Direction:
-    `references/judgments.md` §collection. -/
+    What the context already holds from a source is not fetched again unless an utterance, evidence,
+    or your own work since says it changed. Read and run without changing existing state; what you
+    create only to look you remove afterwards. An observation that needs to change existing state,
+    someone's permission, or another's authority is not made and leaves no evidence turn: name it,
+    with what it needs, in what you present, and leave it open. Where a claim turns on what an
+    artifact does, exercise it over the case that separates the readings. Collection includes trying
+    the construction it needs: a reachable check that constructing the correspondences over what was
+    collected exposes is run within collection as well. What is still open once collection ends is
+    shown as the person's own unknown. Direction: `references/judgments.md` §collection. -/
 axiom observe : Context P → List (Evidence P)
 
 def collect (c : Context P) : Context P := c ++ (observe c).map (·.val)
