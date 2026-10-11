@@ -573,8 +573,6 @@ end Hyphegesis
 
 `/conduct` is directly invocable: the invocation declares the deficit, and the first map shows the method as drafted — the person may take it at once — unless the invocation's own words already settle it as `RelaySupported` reads them, where it relays. AI-guided activation requires work with several lines of thinking whose order, independence, combination, stopping point, or destination is not obvious; scale and budget alone do not warrant it. Conduct the method before beginning its object-level work, while retaining loaded safety boundaries, capability restrictions, and explicit user instructions.
 
-When `/ground` reads an abstraction against its own instances and summarizes that reading as a split into rival groups — a summary of its reading, not a verdict it computes — read `references/decompose-recovery.md` before conducting the per-group work.
-
 ## Protocol
 
 ### User-facing realization
@@ -592,5 +590,4 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 
 ## Adversarial Guards
 
-- **object-control-conflation**: Decompose transforms abstractions; the conduct method owns its ordering, focus, lifetime, state, and recursion.
 - **cross-span-absorption**: A result crossing into a later session declares its record and externalization only; portability auditing and the later session's cognition stay with the receiving session.
