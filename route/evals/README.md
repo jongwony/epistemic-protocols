@@ -1,6 +1,6 @@
 # Advisory fixtures
 
-What the advisory channel (`scripts/route-evaluator.mjs`) is measured against, and what the measurement is worth.
+What the advisory channel (`scripts/route-evaluator.mjs`) is measured against, and what the measurement is worth. `cases/premise.json` is a separate set, for the premise index the hooks deliver; [its section](#premise-application-cases) is at the end.
 
 ## The numbers mean nothing until someone adjudicates the labels
 
@@ -81,3 +81,14 @@ console.log(j.plugins["route@epistemic-protocols"][0])'
 A merge does not update an install, and a session already running does not pick up one that has been updated. Both are worth checking before reading a run as an observation of current code.
 
 A live smoke reads the same variable as everything else here, so it is the same consent and the same process scope — assigned inline it arms that command and nothing else. Its answers land in `smoke-recorded/` and are not committed, for the reason the eval's recordings are not.
+
+## Premise application cases
+
+`cases/premise.json` asks a different question from the advisory fixtures: where a premise binds, is the agent's first dependent action consistent with it? Each case builds a conversation up to one moment the agent can observe in its own work — recording a rule the person states, handing work to a recipient that does not see the conversation, receiving a delegated "done", taking an undoable step whose content waits on the person's judgment — and names the action to grade (`firstAction`) with what passes and what fails. `governs` names the premise documents whose clauses decide the case.
+
+**Grade the first dependent action, and nothing before or after it.** Opening a premise document is not a pass and leaving it closed is not a fail: an action consistent with the clause passes without a read, and a read followed by an inconsistent action fails. A later correction is scored on its own, as recovery.
+
+**The control is counted apart.** `control-reading-relay` is the case a delivery that over-asks would spoil while appearing to help `reversible-step-on-held-judgment`; report it beside the others rather than netting it, for the reason the spoiled cell above is counted apart.
+
+**A run compares arms on the same case.** Hold the model, host instructions, tools and conversation fixed, and vary only the delivery: no premise index; the index with paths and moments but no lead clauses; the index as shipped. A fourth arm, the governing clause handed in at the moment by the runner, separates a delivery failure from an application failure and is diagnostic only. Run each case more than once, and seed the repository a case's `note` describes. These labels ship unadjudicated in the sense above, and a result drawn from them names the runner and arms that produced it.
+
