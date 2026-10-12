@@ -29,14 +29,14 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
 /-- A crystallized abstraction comes only from a confirm — a person's turn, by `closed_by_person` —
-    fused onto the context it answered, and carries the goal and the candidate that confirm
-    recognized. -/
+    fused onto the context it answered, whose sheet showed a candidate; the record is that sheet's,
+    with that candidate. -/
 theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond declare c us = .crystallized r) :
-    ∃ (c₀ : Context P) (u : Utterance P) (g : String) (k : Candidate),
-      filledValue (closing (fuse c₀ u)) = some (.confirm g k) ∧
-      r = crystallize declare c₀ (fuse c₀ u) g k ∧ r.goal = g ∧ r.candidate = k := by
+    ∃ (c₀ : Context P) (u : Utterance P) (k : Candidate),
+      filledValue (closing (fuse c₀ u)) = some .confirm ∧ shownCandidate c₀ = some k ∧
+      r = crystallize declare c₀ (fuse c₀ u) k := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -44,15 +44,16 @@ theorem crystallized_on_confirm (respond declare : Context P → Response P) (c 
     split at h
     · exact ih _ h
     · split at h
-      · rename_i g k hk
+      · rename_i k hc hk
         cases h
-        exact ⟨c, u, g, k, hk, rfl, rfl, rfl⟩
+        exact ⟨c, u, k, hc, hk, rfl⟩
       · cases h
       · exact ih _ h
 
 theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Withdrawn P) (h : induce respond declare c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = withdraw declare c₁ := by
+    ∃ (c₀ : Context P) (u : Utterance P),
+      filledValue (closing (fuse c₀ u)) = some .stop ∧ r = withdraw declare c₀ (fuse c₀ u) := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -61,9 +62,9 @@ theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Cont
     · exact ih _ h
     · split at h
       · cases h
-      · rename_i hk
+      · rename_i hc
         cases h
-        exact ⟨_, hk, rfl⟩
+        exact ⟨c, u, hc, rfl⟩
       · exact ih _ h
 
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
@@ -122,6 +123,17 @@ theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate
     · cases h
   · cases h
 
+/-- The candidate of a crystallized abstraction stands on a reading in play on the sheet the confirm
+    answered, so the record's cross view carries that reading's row. -/
+theorem crystallized_candidate_live (respond declare : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : CrystallizedAbstraction P)
+    (h : induce respond declare c us = .crystallized r) :
+    ∃ c₀ : Context P, r.candidate.reading ∈ live c₀ ∧
+      (r.candidate.reading, row c₀ r.candidate.reading) ∈ r.crossView := by
+  obtain ⟨c₀, u, k, _, hk, rfl⟩ := crystallized_on_confirm respond declare c us r h
+  have hl := shown_candidate_live c₀ k hk
+  exact ⟨c₀, hl, live_reading_crossed c₀ k.reading hl⟩
+
 /-- A line's standing is a filled occurrence that cites a turn the person sent: no value of yours
     stands set or adopted on your own reading. -/
 theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
@@ -136,27 +148,40 @@ theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
     subst h
     exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
+/-- Every line a crystallized or withdrawn record carries is one the sheet it answered showed: the
+    record holds no line that sheet did not show. -/
+theorem record_lines_shown (declare : Context P → Response P) (c c' : Context P) (k : Candidate)
+    (p : Provenance) :
+    (p ∈ (crystallize declare c c' k).provenance → p.entry ∈ entries c) ∧
+    (p ∈ (withdraw declare c c').provenance → p.entry ∈ entries c) := by
+  constructor <;>
+  · intro hp
+    simp only [crystallize, withdraw, provenanceOf, List.mem_map] at hp
+    obtain ⟨e, he, rfl⟩ := hp
+    exact he
+
 /-- Every line of a crystallized record that carries a standing has it from a filled occurrence in
     the context the closing turn was fused into, citing a turn the person sent: the record gives no
     line a standing that no person's turn reached. -/
 theorem record_standing_by_person (declare : Context P → Response P) (c c' : Context P)
-    (g : String) (k : Candidate) (p : Provenance)
-    (hp : p ∈ (crystallize declare c c' g k).provenance) (s : Standing)
+    (k : Candidate) (p : Provenance)
+    (hp : p ∈ (crystallize declare c c' k).provenance) (s : Standing)
     (hs : p.standing = some s) :
     ∃ src ok sup, standingOcc c' p.entry = .filled s src ok sup ∧
       (c'[src.idx]'src.lt).origin = .person := by
-  simp only [crystallize, provenance, List.mem_map] at hp
+  simp only [crystallize, provenanceOf, List.mem_map] at hp
   obtain ⟨e, _, rfl⟩ := hp
   exact standing_by_person c' e s hs
 
-/-- Words an open item carries in the open trace are a filled occurrence that cites a turn the
-    person sent. -/
-theorem open_words_by_person (c : Context P) (t : Option Reading) (i : OpenItem) (w : String)
-    (h : (i, some w) ∈ openTrace c t) :
-    ∃ src ok sup, openWords c i = .filled w src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
+/-- Words an open item carries in the open trace are a filled occurrence, on the context the
+    words are read on, that cites a turn the person sent. -/
+theorem open_words_by_person (c c' : Context P) (t : Option Reading) (i : OpenItem) (w : String)
+    (h : (i, some w) ∈ openTrace c c' t) :
+    ∃ src ok sup, openWords c' i = .filled w src ok sup ∧
+      (c'[src.idx]'src.lt).origin = .person := by
   simp only [openTrace, List.mem_map, Prod.mk.injEq] at h
   obtain ⟨j, _, rfl, hw⟩ := h
-  cases hc : openWords c j with
+  cases hc : openWords c' j with
   | open_ _ => simp [hc, filledValue] at hw
   | filled a src ok sup =>
     simp only [hc, filledValue, Option.some.injEq] at hw
