@@ -5,11 +5,11 @@ description: "Something has to be made that the user cannot describe but would r
 
 # Hypotyposis Protocol
 
-Discover what a form should be by encountering concrete sketches and marking what does not fit, until the user recognizes a specific version as the form for a stated purpose. Type: `(FitUnrecognized, Hybrid, SKETCH-RECOGNIZE-CYCLE, FormIntentSeed) → RecognizedForm`.
+Discover what a form should be by encountering concrete versions and reacting to them, until the user recognizes one version they encountered as the form for their purpose. Type: `(FitUnrecognized, Hybrid, SKETCH-RECOGNIZE-CYCLE, FormIntentSeed) → RecognizedForm`.
 
 ## Definition
 
-**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit is immediate and can be pointed at (Alexander, 1964). So the protocol runs the other way round from a specification: the AI drafts what the next sketches should try and relays that draft with the basis that chose each part, then produces the sketches; the user marks a specific version — what does not fit and what to keep — as first-class utterances, settling or sending back the readings shown beside it in the same answer; the AI revises the retained version under those marks; and the run ends when the user recognizes one version as the form for a stated purpose and names where it lives.
+**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run ends when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn, or when they end it. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
 
 ```lean
 /-!
@@ -22,47 +22,55 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 
 /-! ── FLOW ──
 Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused session context:
-  [fitUnrecognized fails] the non-activation basis → not activated
-  [a realization the run needs is shown unsuppliable] the boundary relay → account → BoundaryExit
-  round(c): the spec relay — what the next sketches try, the perception the judgment needs, the
-    variant briefs, and every provisional reading, each with its basis; it yields no turn →
-    produce → present → Qfit → Stop
-  next utterance u: c' := fuse(c, u), every reading below taken afresh on c' →
-    [the person withdraws]                        account → EarlyExit
-    [the person accepts that no form is owed, its ground and your contrary grounds in view]
-                                                  account → DissolutionExit
-    [the person names where the run goes next, its ground and your contrary grounds in view]
-                                                  account → Routed
-      (either closing taken without them in view: the gate again, with them shown)
-    [a realization the run needs is shown unsuppliable] the boundary relay → account → BoundaryExit
-    [a recognition and a placement stand on c', taken with what they need in view]
-      retain and verify → every placed reference resolves: release the rest → RecognizedForm
-                        | a reference failed: Qplace again with the failure and every copy
-                          already written shown; nothing released
-    [a recognition stands, unplaced]              Qplace
-    [the answer calls for new sketches]           round(c') → Qfit
-    [otherwise — an interrogation, an answer with no marks and no acts]   the gate again
-  no utterance: the gate holds; nothing is recognized, placed, or released
+  start: what bears on the form is gathered; then your reading, on it, that this is not this
+    protocol's case (`notActivated`), in plain words with its basis → not activated; otherwise
+    → production → round
+  production(c): the intent relayed whole — your reading of the purpose, marked as yours unless
+    they said it, each part with what it rests on, a default marked as one; what the next versions
+    try and which versions they revise; how many; the medium each is realized in, what it can show
+    and what it cannot; where each will be; the reference a standard outside preference is checked
+    against — each with its basis, and on every later production what changed since the last; it
+    yields no turn → what the versions will be checked against, gathered → the versions, each
+    entering c as realized → what checking them needs, gathered
+  round: new versions first, each as encountered in its medium; then the standing — what the
+    person's words set and on which version, what of yours they took, what you propose not yet
+    taken, what rests on a check, what stays unestablished, what changed since the standing they
+    last answered, where each version is; your readings and contrary grounds, each with what it
+    bears on and rests on → one opening → Stop
+  next utterance u, read on fuse(c, u):
+    [does not bear on this run]   the session answers it; that answer stays in c; no gate of this run
+    [the person recognizes v]     what their words ask done to the versions, observed → RecognizedForm
+    [the person withdraws]        what their words ask done to the versions, observed → Withdrawn
+    [otherwise]                   what is gathered now enters c; a production where their turn
+                                  calls for a version none shown embodies; what their words ask
+                                  done to the versions is done and observed → round
+  no utterance: the gate holds; nothing is recognized, written, or removed
 -/
 
 /-! ── MORPHISM ──
 FormIntentSeed
-  → detect          -- deficit predicate over the utterance and the context (silent analysis)
-  → bind            -- prior material read from the context: settled where a person's utterance in it settled it, a candidate otherwise, provenance kept
-  → relay_round     -- what the next sketches try, the perception the judgment needs, and the variant briefs, drafted with the basis that chose each and relayed beside the provisional readings; nothing is settled here
-  → produce         -- one sketch per brief: a brief naming parents revises those retained versions, a brief naming none generates from the material it names or from prior material; each declares what producing it determined that no settled value covered
-  → present         -- each sketch from its concretum, what this realization cannot expose, whether an artifact was observed, what it was checked against, what it moved from a value the person settled, where the run stands, and any contrary ground held about it
-  → recognize       -- the person's words on a specific version: what does not fit, what to keep, an aspect that is right, the version that is the form for a stated purpose — and, in the same answer, the readings they settle, replace, or retire
-  → place           -- the person names where the recognized version lives and which passed-over versions are kept as revert points; no default for either
-  → account         -- every placed reference retained and verified, every other sketch released and verified, every copy written accounted for where it was written
+  → gather          -- what bears on the form, read or run now — the reference a standard outside preference is checked against included (focus)
+  → relay_intent    -- the production intent whole with its basis, BEFORE any version is made; on a later production, with what changed
+  → produce         -- versions realized in a medium that shows what the judgment concerns, each registered as realized
+  → present         -- new versions first, as encountered; then the standing (focus)
+  → fuse(u)         -- the person's turn joins the context whole
+  → recognize       -- the person's closing on a version they encountered (`ClosingSupported`)
+  → carry_out       -- what their words ask done to the versions shown before that turn, done and observed
+  → assemble        -- the record, `recordOf`, built after what the closing turn asked done is observed
   → RecognizedForm
-requires: form_purpose_in_scope(I)             -- runtime checkpoint (Phase 0): the work is about to make a form
-deficit:  FitUnrecognized                       -- activation precondition (Layer 1/2)
-preserves: utterance(I)                          -- the context only grows; the seed is never rewritten
-invariant: Concretum Retention                   -- a brief that revises does so on retained parents; a sketch under judgment is never regenerated from settled values alone
-invariant: Commitment Provenance Preservation    -- a value is settled only by a person's utterance, on the scope their words reach; a later one may replace what an earlier one settled; AI inference alone settles or replaces nothing
-invariant: Recognition over Description          -- fit is the person's recognition of a specific version, as it was presented, for a stated purpose
-invariant: the person recognizes, places, and closes; your judgments stand as proposals and contrary grounds
+requires: form_to_make(I)               -- read before activation (`notActivated`)
+deficit:  FitUnrecognized               -- activation precondition (Layer 1/2)
+preserves: utterance(I)                 -- the seed is never rewritten and the context only grows; an existing version moves or goes only at the person's word
+invariant: Recognition over Description -- fit is the person's recognition of a specific version, as it was encountered, for the purpose as it stands
+invariant: Encountered, not described   -- a recognition reaches what the version's medium showed; what it did not show stays unestablished
+invariant: Concretum Retention          -- a revision is a new version made from retained versions; a version shown stays as it was shown and is never regenerated from a description
+invariant: after activation only the person closes; your readings, proposals, and contrary grounds close nothing
+The steps between gather and recognize are how you work toward a recognizable form; the contract
+fixes the deficit and its resolution, the coordinates only the person fills — the purpose where
+they say it, the values they hold, the closing — the closings themselves, and the orderings the
+premises ground: the intent relayed before any version is made, a version shown before the
+standing that bears on it, and the record built after what the closing turn asked done is
+observed.
 -/
 
 namespace Hypotyposis
@@ -128,312 +136,186 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `I`, `FormIntentSeed`: the utterance that asks for a form, and the prior material it names
-    or the context already holds — a settled direction, a resolved intent, a candidate field,
-    an existing artifact, a prior session's record. Source-neutral; read from the context. -/
+/-- `I`, `FormIntentSeed`: the utterance that asks for a form, and the material it names or the
+    context already holds — a direction already taken, an intent already settled, an existing
+    artifact, a reference, a record of an earlier session. A seed may say much or little about the
+    form; nothing in it has to specify the form first. Source-neutral; read from the context. -/
 abbrev FormIntentSeed (P : Type) := Context P
 
-/-- **Your judgment** at Phase 0: a form-making purpose is in scope, decision-relevant intent
-    remains underdetermined, encountering and revising a concrete proposal is what would
-    constitute that intent, and the resolution sought is a recognized form with its
-    commitments and residuals. -/
-axiom fitUnrecognized : Context P → Prop
+/-- **Your reading**, before anything is produced: why this is not this protocol's case, in plain
+    words with its basis — no form is about to be made; the person can already say what the form
+    should be, or the context already settles it, so no encounter is needed to settle the intent;
+    the choice is among directions already named whose futures cannot be judged, rather than a
+    form to make; or the work is to understand, check, or carry out something that exists rather
+    than to make a form. An unmet need is said as what would settle it. `none` where the case is
+    this protocol's. -/
+axiom notActivated : Context P → Option String
 
-/-- An emergent label: "information unit", "reading order", "density", "tone". -/
-abbrev Axis := String
+/-- **Your judgment**: the cited person turn says what the form is for, or what matters in it,
+    read against the context as it now stands — in their own words, or by taking the reading of
+    the purpose a round showed, which adopts it as shown. A record of earlier work the turn passes
+    along as material does not say it. A later turn may change it. -/
+axiom PurposeSupported : Context P → Turn P → String → Prop
 
-/-- A determination on an axis, in the person's words or read off a sketch. -/
-abbrev Value := String
+/-- Only a person's turn sets the purpose. -/
+def purposeCoord : Coord P String :=
+  { admits := (·.val = .person), supports := PurposeSupported }
 
-/-- The identity of one version; every mark, placement, and disposition points at one. -/
-structure SketchRef where
-  id : Nat
+/-- **Your reading**: the purpose as it stands; `open_` until a person's turn says it. It holds back
+    neither a round nor a closing while it is open: the round shows what the person said of it and
+    your reading of the rest, marked as yours. That reading grows from the run rather than being
+    front-loaded: each part names what it rests on — a default you brought in before any reaction
+    (the convention of the kind of form, the request's own words, an example you picked), marked as
+    a default; or the person's reaction to a specific version, or the gathered material, it came
+    from. A default gives way to what the reactions bring. Each round shows what the reading gained,
+    lost, or changed since the last round, and from which reaction or material. -/
+axiom purpose : (c : Context P) → Occ (purposeCoord (P := P)) c
 
-/-- What prior material is and where it came from. -/
-structure ReferencedMaterial where
-  source  : String
-  content : String
-
-/-- One sketch to produce. With no parents, generate from the settled values and from the
-    material `source` names, or from the bound prior material where it names none — the first
-    sketches, and a fresh start the person names. With one parent, revise that retained version;
-    with several, draw on each as the person's words or the brief say — how they combine is your
-    judgment, stated in the brief, never a fixed merge. A spec revision that keeps a version
-    names it as parent, so the re-drafted sketches revise it rather than regenerating it. A brief
-    may name parents and a new source together: changing where the material comes from does not
-    itself abandon a parent. -/
-structure VariantBrief where
-  parents : List SketchRef
-  source  : Option ReferencedMaterial
-  commits : List (Axis × Value)
-
-/-- The draft a spec relay presents. What the next sketches try, what perception the judgment
-    needs, and how many variants to produce are your judgment, drafted from the whole context:
-    try what the person's latest words leave most open; where it opens an axis carrying a
-    standard outside both parties' preference, name the referent each sketch is checked against
-    — a referent this session cannot supply is `Unsuppliable`, never something to proceed
-    without; a count the person stated holds on the scope their words reach. -/
-structure RoundSpec where
-  focus       : String
-  realization : String
-  briefs      : List VariantBrief
-  nonempty    : briefs ≠ []
-
-/-- `text`: narration carried in session text. `artifact`: a file under temp isolation,
-    versioned at creation. -/
-inductive Concretum
-  | text (value : String)
-  | artifact (versionedRef : String)
-
-structure Sketch where
-  ref       : SketchRef
-  concretum : Concretum
-
-/-- **Your record**, read from the context: every version produced so far, each retained for
-    revision until account. -/
-axiom sketches : Context P → List Sketch
-
-/-- **Your record**: the round spec your latest relay presented; `none` before the first. -/
-axiom spec : Context P → Option RoundSpec
-
-/-- A reference the person judges to outlive the session. The durability is their judgment;
-    account checks only that the reference resolves to that version's concretum when
-    checked. -/
+/-- A place a version can live: a path, a reference, an address. -/
 abbrev Location := String
 
-/-- One copy the run wrote: which version, and where — its temp-isolated reference at creation,
-    session text for a Text sketch, or a location the person named. -/
-structure Copy where
-  ref : SketchRef
-  loc : Location
+/-- How a version is realized, carried on the version itself: narration in session text,
+    re-presented as written; or an artifact at the location registered when it was made. The medium
+    it is met in, and what that medium can and cannot show of the qualities the judgment concerns,
+    are your reading of it. -/
+inductive Realization
+  | narration (text : String)
+  | artifact (location : Location)
 
-/-- **Your record**, read from the context: every copy the run has written, at creation and at
-    every placement attempt. -/
-axiom written : Context P → List Copy
+/-- One version, under the label every reaction to it and every recognition of it points at. -/
+structure Version where
+  ref      : Nat
+  realized : Realization
 
-inductive Disposition
-  | retained
-  | released
-  | releaseFailed (reason : String)
-  | retainFailed (reason : String)
+/-- **Your record**, read from the context: every version produced so far, cumulative. -/
+axiom versions : Context P → List Version
 
-/-- **Your reading** of the account observations: what became of each copy — one entry per copy,
-    the latest standing. `retained` is read only where the observation shows the reference
-    resolving to that version's exact concretum. -/
-axiom dispositions : Context P → List (Copy × Disposition)
+/-- Where a version is. `places`: where observations show it now — not the session text a
+    narration lives in, so a narration has a place only where it was written and observed since;
+    none for an artifact whose removal was observed. `pending`: what the person's words asked done
+    to it that no observation yet shows done — a destination to write it to, a removal — each with
+    the reason where it failed. Agreement on a home is not evidence that the move happened. -/
+structure Whereabouts where
+  places  : List Location
+  pending : List String
 
-/-- What every spec a relay presents owes (Concretum Retention): each parent a brief names is a
-    version produced with a copy still unreleased. -/
-def SpecOwes (c : Context P) (s : RoundSpec) : Prop :=
-  ∀ b ∈ s.briefs, ∀ p ∈ b.parents,
-    (∃ x ∈ sketches c, x.ref = p) ∧
-    ∃ w ∈ written c, w.ref = p ∧ (w, Disposition.released) ∉ dispositions c
+/-- **Your reading** of where version `v` is and what is pending on it, from its realization, the
+    person's words, and what was observed since. -/
+axiom whereabouts : Context P → Version → Whereabouts
 
-/-- A mark: a person's utterance on a version, cited as said. What it points at, whether it
-    names a misfit or something to keep, and which axis it reaches are your reading of it,
-    carried with its basis; a keep is retained, never dropped, and a concern the version's
-    focus did not ask about stays admissible. -/
-structure Mark (c : Context P) where
-  sketch   : SketchRef
-  src      : Cite c
-  byPerson : src.src.val = .person
+/-- A value the form carries, named as the standing shows it: "reading order: by scene", "stroke
+    ends: brush". -/
+abbrev Value := String
 
-/-- **Your reading** of every mark the person's utterances placed. -/
-axiom marks : (c : Context P) → List (Mark c)
-
-/-- **Your judgment**: the cited turn states or settles value `v` on axis `a` — a settlement of a
-    reading shown beside a version, a replacement the person stated, a statement that a version is
-    right on an aspect (the value as that version shows it), or a commitment they made earlier in
-    this context — read against the context as it now stands, on the scope the person's words
-    reach. -/
-axiom AxisSupported : Axis → Context P → Turn P → Value → Prop
-
-/-- A value is settled only by a person's turn. A record of a commitment made in an earlier
-    session is a candidate for it, never its fill. -/
-def axisCoord (a : Axis) : Coord P Value :=
-  { admits := (·.val = .person), supports := AxisSupported a }
-
-/-- **Your reading**: how axis `a` stands in `c` — filled by the person's latest turn that
-    settles or replaces it; open where nothing settles it, and where the person retired it with
-    nothing in its place. An open axis carries as candidate the material that proposes a value
-    without settling it, a record of an earlier session's commitment included. A later version
-    that moves a settled value does not unsettle it: the move is a ledger line shown before the
-    next gate. -/
-axiom operative : (c : Context P) → (a : Axis) → Occ (axisCoord (P := P) a) c
-
-/-- A determination the AI puts forward: read from a mark, or rendered into a sketch that no
-    settled value covered. It settles nothing; it is shown at the spec relay and again beside
-    the version at Qfit. -/
-structure Proposal (c : Context P) where
-  axis   : Axis
-  value  : Value
-  /-- the mark it was read from; `none` for a production's own determination -/
-  mark   : Option (Cite c)
-  /-- the version it was rendered into; `none` for a reading of a mark -/
-  sketch : Option SketchRef
-
-/-- **Your record**, read from the context: the provisional readings — every proposal the person
-    has neither settled, replaced, nor rejected. -/
-axiom provisional : (c : Context P) → List (Proposal c)
-
-/-- Recognition of the assembled form, not of one aspect. -/
-structure Recognition where
-  target       : SketchRef
-  purposeScope : String
-  residual     : List Axis
-
-/-- **Your judgment**: the cited turn recognizes `r` — its target a version presented as it
-    stands and still retained, for the purpose it states. Read against the context as it now
-    stands: a later turn that marks the form again, or asks for a version not yet presented,
-    leaves no recognition standing; words about where it lives or which versions are kept leave
-    it standing. Where a turn could be a recognition or a statement that one aspect is right,
-    show your reading before the next gate rather than acting on it. -/
-axiom RecognitionSupported : Context P → Turn P → Recognition → Prop
-
-def recognitionCoord : Coord P Recognition :=
-  { admits := (·.val = .person), supports := RecognitionSupported }
-
-/-- **Your reading**: the recognition that stands on the context as it now stands; `open_`
-    before a finish, and again once a later turn of the person's reopens the form. -/
-axiom recognition : (c : Context P) → Occ (recognitionCoord (P := P)) c
-
-def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
-  | .open_ _   => false
-  | .filled .. => true
-
-def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
-  | .open_ _     => none
-  | .filled a .. => some a
-
-/-- Qplace is open: a recognition stands on the context. -/
-def Placing (c : Context P) : Prop := isFilled (recognition c) = true
-
-/-- Where the recognized version lives, and which passed-over versions are kept as revert
-    points and where; `kept` may be empty. -/
-structure Placement where
-  location : Location
-  kept     : List (SketchRef × Location)
-
-/-- **Your judgment**: the cited turn names this placement for the recognition now standing. -/
-axiom PlacementSupported : Context P → Turn P → Placement → Prop
-
-/-- Placement has no default: only the person's turn fills it. -/
-def placementCoord : Coord P Placement :=
-  { admits := (·.val = .person), supports := PlacementSupported }
-
-/-- **Your reading**: the placement the person's latest answer at Qplace named. -/
-axiom placement : (c : Context P) → Occ (placementCoord (P := P)) c
-
-/-- `Fixture`: a recognition witness. It carries no implementation commitment and is not an
-    executable specification. -/
-structure Fixture where
-  ref      : Location
-  target   : SketchRef
-  scope    : String
-  residual : List Axis
-  kept     : List (SketchRef × Location)
-
-def fixture (c : Context P) : Option Fixture :=
-  match filledValue (recognition c), filledValue (placement c) with
-  | some r, some p => some ⟨p.location, r.target, r.purposeScope, r.residual, p.kept⟩
-  | _, _           => none
-
-/-- **Your judgment**, the adoption condition: what the person's answer closes on was shown, on a
-    gate the person answered, with what it takes. For a recognition and a placement: what
-    producing the recognized version determined, what it was checked against and how that came
-    out, what it moved from a value the person settled, your contrary grounds, and, after a
-    failed retention, every copy already written and where. For a dissolution or a route: the
-    ground the closing rests on, and your contrary grounds — a doubt about the dissolution, a
-    sibling deficit you read otherwise. A value the answer itself states counts where its
-    consequences were in view. Where anything would be taken unseen, the gate is drawn again
-    with it shown. A withdrawal needs nothing in view: the person may stop at any gate. -/
-axiom Covered : Context P → Prop
-
-/-- Every placed reference verified, and no version kept as a revert point is the recognized
-    one: those are the versions the run passed over. -/
-def Verified (c : Context P) (f : Fixture) : Prop :=
-  (∀ k ∈ f.kept, k.1 ≠ f.target) ∧
-  (⟨f.target, f.ref⟩, Disposition.retained) ∈ dispositions c ∧
-  ∀ k ∈ f.kept, (⟨k.1, k.2⟩, Disposition.retained) ∈ dispositions c
-
-/-- Every copy the run wrote has a declared disposition. -/
-def Accounted (c : Context P) : Prop := ∀ w ∈ written c, ∃ d, (w, d) ∈ dispositions c
-
-/-- A value on the record, named as the presentation shows it — a settled axis, the recognition,
-    the placement, a kept version. -/
-abbrev Entry := String
-
-/-- **Your reading**: the values the record holds as the context now stands. -/
-axiom entries : Context P → List Entry
-
-/-- Who first put a value forward. Kept apart from how it came to stand: a reading you proposed
-    that the person settled was proposed by you and set by the person's taking. -/
+/-- Who first put a value forward: you, or the person. -/
 inductive Proposer | draft | person
 
-/-- **Your reading**: the position of the turn that first put forward what `e` holds now. -/
-axiom introducedAt : Context P → Entry → Nat
-
-def proposer (c : Context P) (e : Entry) : Proposer :=
-  match c[introducedAt c e]? with
-  | some ⟨.person, _⟩ => .person
-  | _                 => .draft
-
-/-- How a value came to stand: the person's words set it, or their answer adopted yours. -/
+/-- What the turn that made a value stand did: gave it in its own words, or took a value put
+    forward before. -/
 inductive Standing | set | adopted
 
-/-- **Your reading**: the person's turn set what `e` holds now — named it or edited it — on the
-    scope their words reach. -/
-axiom setByPerson : Context P → Entry → Bool
-
-def standing (c : Context P) (e : Entry) : Standing := if setByPerson c e then .set else .adopted
-
-structure Provenance where
-  entry    : Entry
+/-- What stands: the value, who first put it forward, and how it came to stand. -/
+structure Determination where
+  value    : Value
   proposer : Proposer
   standing : Standing
 
-def provenance (c : Context P) : List Provenance :=
-  (entries c).map (fun e => ⟨e, proposer c e, standing c e⟩)
+/-- **Your judgment**, the record rule: the cited turn makes `d` stand, read against the context
+    as it now stands, on the scope the turn's words reach. Who proposed the value and how it stood
+    are read separately. The proposer is whoever first put the value forward in the context —
+    a value a version of yours embodied, or a reading of yours, was put forward by you. The
+    standing is a positive reading of what the cited turn itself did: gave the value in its own
+    words, a mark or a keep on a version among them (`set`); or took a value a round showed as
+    yours, with what it rests on and your contrary grounds, before this turn (`adopted`). A value
+    no person's turn reached stands on nothing and stays your proposal, however long it has gone
+    unchallenged. A question, a request to see something, a bare mention, or a record of earlier
+    work the turn passes along as material makes nothing stand. -/
+axiom StandingSupported : Context P → Turn P → Determination → Prop
 
-/-- What a ledger line records. -/
-inductive LedgerKind
-  /-- the person's own edit -/
-  | personEdit
-  /-- a change the person's words force -/
-  | necessary
-  /-- a change you propose, a later version moving a value the person settled included -/
-  | proposal
+/-- One value the person holds: what stands, and the person's turn it stands on, with that
+    turn's support. -/
+structure Held (c : Context P) where
+  det       : Determination
+  src       : Cite c
+  byPerson  : src.src.val = .person
+  supported : StandingSupported c (c[src.idx]'src.lt) det
 
-/-- One change since the last gate: what changed, the value it touches, and its kind. -/
-structure LedgerLine where
-  change : String
-  cause  : Option Entry
-  kind   : LedgerKind
+/-- **Your reading**: the values the person holds as the context now stands — each on the latest
+    turn of theirs that makes it stand; a later turn of theirs may replace or retire one, and
+    evidence against one is shown beside it while it stands. -/
+axiom held : (c : Context P) → List (Held c)
 
-/-- **Your record**: what the latest turn and the sketches produced since changed, the person's
-    edits first. -/
-axiom ledger : Context P → List LedgerLine
+/-- **Your record**: the lines of the record that are not the person's — what a check or a read
+    established, with what it was checked against and what that leaves unchecked, and a choice you
+    made within a grant the person gave, with that grant — each attributed to its source. None of
+    them is a value the person holds, and none stands for their recognition. -/
+axiom findings : Context P → List String
 
-/-- **Your record**: the contrary grounds you presented before the gate the closing answer
-    answered — a version failing a referent it was checked against, a commitment it breaks, a
-    defect found after the person judged it, a dissolution you doubt, a sibling deficit you
-    read — attached to the closure; empty when there were none. -/
+/-- **Your reading**: what stays open, re-read every round — a quality of the form no version's
+    medium showed or no reference could check, a value no person's turn set, a request of theirs not
+    yet realized in a version shown, material they entrusted to later versions that never came —
+    each named. -/
+axiom unestablished : Context P → List String
+
+/-- **Your record**: your contrary grounds, each with what it bears on — a version, a value, a
+    check, a medium, a premise every version shares, a comparison, what a closing reaches, or the
+    run as a whole — and what it rests on, and the person's answer to it where they gave one;
+    shown before the person's turn it bears on, as `present` says, and raised again only on new
+    evidence. New evidence about a version they already judged — a defect in its rendering
+    included — is shown as such in the next round. A closing over a contrary ground carries it.
+    Empty when there were none. -/
 axiom dissent : Context P → List String
 
-/-- How the person ends the run without a recognized form. -/
-inductive Closing
-  /-- stop here -/
-  | withdraw
-  /-- no form is owed: the sharpened description made it recognizable without a further
-      encounter, or the activation premise collapsed -/
-  | dissolve
-  /-- go on to what the person names — a sibling deficit, another protocol -/
-  | route (target : String)
+/-- What the run has made and where it stands, read from one context: every version with where it
+    is and what is pending on it, the purpose, the values the person holds, the findings, what
+    stays open, and the dissent. -/
+structure Record (c : Context P) where
+  versions      : List (Version × Whereabouts)
+  purpose       : Occ (purposeCoord (P := P)) c
+  values        : List (Held c)
+  findings      : List String
+  unestablished : List String
+  dissent       : List String
 
-/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
-    stands. Your own reading that no further encounter is owed, or that a sibling deficit is what
-    is going on, closes nothing: it is stated with its basis before the gate, and the person's
-    answer closes. -/
+def recordOf (c : Context P) : Record c :=
+  { versions := (versions c).map (fun v => (v, whereabouts c v)), purpose := purpose c,
+    values := held c, findings := findings c, unestablished := unestablished c,
+    dissent := dissent c }
+
+/-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a mark or a
+    keep, a value set or taken, a request for a version or a change of medium, a request to write,
+    move, or remove a version, a question about a version, a contrary ground answered — judged on
+    what the whole utterance does, on the context with it; other work in an utterance that bears
+    on the run neither closes it nor answers its judgments. An utterance about other work leaves
+    the run as it stands: the session answers it, saying briefly, where reading it as other work
+    was unclear, that the run was left as it stands; that answer stays in the context, and no gate
+    of this run is raised. -/
+axiom Reaches : Context P → Prop
+
+/-- How the person ends the run. -/
+inductive Closing
+  /-- take this version, one they encountered, as the form -/
+  | recognize (version : Nat)
+  /-- end here with no version recognized -/
+  | withdraw
+
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
+    nothing — closes the run this way, read whole on the context as it now stands, whatever form it
+    takes. `recognize v`: the turn takes version `v`, one the person encountered as it was realized,
+    as the form for the purpose as it stands, on the scope its words give. It reaches what that
+    realization showed; a quality the realization did not show stays unestablished and holds no
+    recognition back. Where the turn also marks the version or asks for changes, read the scope its
+    words give: where they recognize what was shown on that scope, it closes, and the requests ride
+    the record as open; where they make the requests conditions of recognizing, it closes nothing,
+    and the version those requests produce is shown before anything is recognized. A recognition
+    never reaches a version not yet shown. Taking the round adopts what it showed about the
+    closing — the home a recognition would take, how you took an unclear turn — with no second
+    permission; a home the person names in the turn is theirs, recorded as pending until a write
+    there is observed. Where the turn's intent is unclear, it closes nothing. `withdraw`: the turn
+    ends the run without recognizing a version, for whatever reason, given or not; what its words
+    set stands in the record like any other turn's. Silence and other work end nothing, and your own
+    reading that a version fits, that no encounter is still owed, or that the run cannot proceed
+    closes nothing. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -443,180 +325,182 @@ def closeCoord : Coord P Closing :=
 /-- **Your reading**: the person's closing; `open_` until one reaches it. -/
 axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
-/-- **Your judgment**, on reachable evidence only: a realization the next sketches or the
-    placement need is one this session cannot supply — a capability the host lacks, a referent
-    it cannot reach. A failed attempt alone is not this; where an alternative or a narrower scope
-    would need a judgment, present it and hold. The boundary relay then takes the place of the
-    next presentation. -/
-axiom Unsuppliable : Context P → Prop
+def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
+  | .open_ _     => none
+  | .filled a .. => some a
 
-/-- **Your judgment**: the latest answer, read with the context, calls for new sketches — marks,
-    an aspect found right with another to try, a fresh start, a spec revision. An interrogation
-    answered within the sketch's placeholder status, and an answer with no marks and no acts,
-    present the gate again with nothing produced. -/
-axiom Redraws : Context P → Prop
+/-- **Your judgment**: the latest utterance, read whole on the context with it, calls for a version
+    none shown embodies — a mark to revise, a bare rejection with no diagnosis among them; a
+    request; a fresh start; a combination to see; a change of medium; the means a version was
+    waiting on, supplied, or the person's word to go on in the medium at hand or without a
+    reference that cannot be reached; or a value they set or replaced that no version shown
+    embodies. A question about a version, answered as asked, and words that move nothing a version
+    would show produce nothing; a value they took that a shown version already embodies needs no
+    new version. Where a mark reads as about the rendering rather than the form, the next version
+    fixes the rendering and leaves the form as it was, and the round says so; where the evidence
+    does not settle which it is about, the round says that. -/
+axiom ProductionRequested : Context P → Prop
 
-/-- The record an exit that recognizes nothing carries: the context after account, the dissent
-    attached to the closure, and how each value came to stand. -/
-structure Closed (P : Type) where
-  context    : Context P
-  dissent    : List String
-  provenance : List Provenance
+/-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
+    material the form draws on and the sources that bear on it — any a turn cites, and any you
+    find — and whatever exists now that bears on it; read or run without changing existing state:
+    what you create only to look is removed afterwards. Where a quality the versions carry answers
+    to a standard outside both parties' preference — a glyph that is right or wrong, a fact a
+    version states — the reference that standard is checked against is read, and every version is
+    checked against it before it is shown, or, where the person goes on without a reference that
+    cannot be reached, shown with that quality unchecked and unestablished; preference never
+    certifies such a claim. What the context already holds from a read or a run is not read or run
+    again unless the person asks for it again, or an utterance, evidence, or a change made in the
+    session since says it moved. What you say you read, you read to the end. A run's result comes
+    with what it ran on and what that leaves untested. What was reached and what was not, with what
+    each unreached one would need, and any conflict among what was gathered, are named. Empty where
+    nothing outside the context bears. -/
+axiom gathered : Context P → List (Evidence P)
 
-/-- `RecognizedForm`, read from the context at the verified placement, before any release: the
-    settled values (`operative`), the fixture, the recognition, the trace of every mark, the
-    residual — axes left open and material the person entrusted to sketches that never came —
-    the readings still `provisional`, every copy written with its disposition, the dissent, and
-    how each value came to stand. It is assembled before any release, and the RecognizedForm
-    entire is the durable record of the run: sketch content beyond what placement retains stays
-    session-local. -/
+/-- The context with what `gathered` read now appended. -/
+def consulted (c : Context P) : Context P := c ++ (gathered c).map (·.val)
+
+/-- **Your carrying out** of what the person's latest words ask done to the versions shown before
+    that turn — a version written to a home they named or took as the round showed it, over no other
+    version unless their words reach it; a version removed at their word, a narration by being set
+    aside, leaving nothing pending — each done and observed; what was tried and failed stays pending
+    in `whereabouts` with its reason. No version is moved or removed without their words; one they
+    said nothing about stays where it is. Empty where their words ask nothing done. -/
+axiom carriedOut : Context P → List (Evidence P)
+
+/-- The context with what `carriedOut` observed now appended. -/
+def settle (c : Context P) : Context P := c ++ (carriedOut c).map (·.val)
+
+/-- `RecognizedForm`: the version the person recognized, and the record built after what the
+    recognizing turn asked done was observed. It records their recognition of fit for the purpose
+    as it stands, on what the version showed — a witness of what they recognized, not a
+    specification of what to build. -/
 structure RecognizedForm (P : Type) where
-  context    : Context P
-  fixture    : Fixture
-  dissent    : List String
-  provenance : List Provenance
+  context : Context P
+  version : Nat
+  record  : Record context
+
+/-- What a run hands on when the person ends it with no version recognized: the record built after
+    what the withdrawing turn asked done was observed. -/
+structure Closed (P : Type) where
+  context : Context P
+  record  : Record context
+
+def recognizedOn (c : Context P) (v : Nat) : RecognizedForm P :=
+  let c₁ := settle c
+  ⟨c₁, v, recordOf c₁⟩
+
+def closedOn (c : Context P) : Closed P :=
+  let c₁ := settle c
+  ⟨c₁, recordOf c₁⟩
 
 inductive Outcome (P : Type)
-  /-- `NoActivationRelay`: the failed predicate with its evidence; nothing produced -/
-  | notActivated (c : Context P)
-  | recognized   (f : RecognizedForm P)
-  /-- `DissolutionExit`: a convergent stand-down the person closed, no form owed; its basis stated -/
-  | dissolved    (r : Closed P)
-  /-- `Routed`: the person named where the run goes next; that is the session's to take up -/
-  | routed       (target : String) (r : Closed P)
-  /-- `EarlyExit`: the partial trace; any recognition stays in it -/
+  | notActivated (c : Context P) (why : String)
+  | recognized   (r : RecognizedForm P)
+  /-- `Withdrawn`: the person ended the run with no version recognized; the partial record -/
   | withdrawn    (r : Closed P)
-  /-- `BoundaryExit`: a realization shown unsuppliable, the obligation named -/
-  | boundary     (r : Closed P)
   | holding      (c : Context P)
 
-/-! ── A-BINDING ──
-bind(I) = explicit_arg ∪ recent_form_intent ∪ surfaced_fit_gap
-Priority: explicit_arg > recent_form_intent > surfaced_fit_gap
-  /sketch "what to make"       → I = the utterance, with the material it names or the context holds
-  /sketch (alone)              → I = the most recent form-making intent in session
-  "I'd know it when I see it"  → I = the utterance under discussion (AI-detected path: the spec
-                                 relay cites the evidence of FitUnrecognized as the run's basis;
-                                 a decline of the run is a withdrawal at the first Qfit)
--/
-
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else; every reading above is taken from it.
+Λ is the fused context and nothing else; every reading above is taken from it. No gate, stage, or
+count is stored: each round is judged afresh from the whole context.
 -/
-
-abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
-A step is one arm of a structural recursion over the person's utterances. `relay` is the spec
-relay: it presents `spec`, a `RoundSpec` carrying `SpecOwes`, and yields no turn; where
-`Unsuppliable` holds, the boundary relay takes its place. The sketches are then produced through
-the operations `producedBy` names for the spec, one sketch per executor where delegated, each
-temp-isolated.
+A step is one arm of a structural recursion over the person's utterances. Your turns are
+`AITurns`: a production relays the intent — whole, with what changed — before anything is made,
+gathers what the versions will be checked against, then makes them (`narrate` for narration, its
+claims checked as it is written; for an artifact, the operations `producedBy` names), and gathers
+what checking them needs; `respond` is the round, as TOOL GROUNDING's
+`present` entry names it; `session` is the session's own answer to an utterance about other work,
+which stays in the context without being a gate of this run.
 -/
 
-/-- **Your production** under the relayed spec: each Artifact sketch as observed at creation,
-    its versioned reference registered then. A Text sketch is narration the presentation carries
-    as recorded. Existing project files stay unchanged. -/
+/-- Your turns. `narrate` writes each narration version; being yours, it grounds nothing. -/
+structure AITurns (P : Type) where
+  relay   : Context P → Response P
+  narrate : Context P → List (Response P)
+  respond : Context P → Response P
+  session : Context P → Response P
+
+/-- **Your production** of the artifact versions under the relayed intent: each artifact as observed
+    at creation, written to the scratch place the session works in unless the person's words named a
+    place for it, beside any other version there rather than over it, its location registered then.
+    The observation evidences that the artifact exists there, and nothing about whether it fits.
+    Guidance for every version a production makes, narration included, not steps it fixes: realize
+    each in a medium in which the qualities the person's judgment concerns can be encountered;
+    revise the retained versions the context calls for — a mark stays attached to what it marked,
+    and the version revised need not be the version marked; a revision may draw on several
+    versions, on a changed source, or start fresh where the person asks. Where the versions will be
+    offered as alternatives, their differences are encounterable and what each implies
+    recognizable, and a version that would not differ perceptibly on what is judged is not offered
+    as another choice — alternatives that share a frame and differ on a few qualities, few enough
+    to hold at once, carry their differences best. -/
 axiom produce : Context P → List (Evidence P)
 
-def runRound (relay : Context P → Response P) (c : Context P) : Context P :=
-  let c₁ := c ++ [(relay c).val]
-  c₁ ++ (produce c₁).map (·.val)
-
-/-- **Your account** at a placement: retain the recognized version and each kept one at its
-    location, and verify that each reference resolves to that version's exact concretum — one
-    retry, then the failure is observed. Nothing is retained before a recognition and a
-    placement stand and were taken with what they need in view. -/
-axiom retain : Context P → List (Evidence P)
-
-/-- **Your account** at a terminal: release every sketch the context leaves unplaced — all of
-    them on a withdrawal, a dissolution, a route, or a boundary — and verify each absence; a
-    failure retries once, then is observed and declared with a handoff. A copy an earlier
-    placement attempt wrote to a location the person has since moved from is released only where
-    the person's words reach it; otherwise it is left where it is and declared. New evidence that
-    breaks a recognition or a value the person settled is shown before any release. What it
-    leaves is `Accounted`. -/
-axiom release : Context P → List (Evidence P)
-
-def settle (c : Context P) : Context P := c ++ (retain c).map (·.val)
-
-def closed (c : Context P) : Closed P :=
-  { context := c ++ (release c).map (·.val), dissent := dissent c, provenance := provenance c }
-
-def recognize (c : Context P) (f : Fixture) : RecognizedForm P :=
-  { context := c ++ (release c).map (·.val), fixture := f, dissent := dissent c,
-    provenance := provenance c }
+def production (ai : AITurns P) (c : Context P) : Context P :=
+  let c₁ := c ++ [(ai.relay c).val]
+  let c₂ := consulted c₁
+  let c₃ := c₂ ++ (ai.narrate c₂).map (·.val)
+  consulted (c₃ ++ (produce c₃).map (·.val))
 
 open Classical in
-/-- `respond` presents the gate: Qplace while a recognition stands, Qfit otherwise. Before it:
-    each sketch from its concretum — Text as recorded, an Artifact walked through at its
-    reference, reporting what was observed there or that it was not observed and what was tried;
-    what this realization cannot expose; what each sketch was checked against and how it came
-    out; which content came from the person and which is your proposal; what each sketch's own
-    production determined; the ledger, the person's edits first, a later version moving a value
-    they settled included; where the run stands — what is settled, what is still open, what was
-    entrusted to later sketches; and your contrary grounds, a reading that no further encounter
-    is owed or that a sibling deficit is what is going on included. At Qplace, the versions the
-    run passed over and, after a failed retention, the failure and every copy already written. -/
-def sketch (relay respond : Context P → Response P) :
-    Context P → List (Utterance P) → Outcome P
+/-- A turn about other work is answered by the session and leaves the run as it stands; a closing
+    is read from the person's turn before anything is gathered, and its record is built after what
+    that turn asked done is observed; otherwise what is gathered now enters the context, a
+    production runs where the turn calls for a version none shown embodies, what the turn asks
+    done to the versions is carried out, and the round follows. -/
+def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
-    let c' := fuse c u
-    match filledValue (closing c') with
-    | some .withdraw  => .withdrawn (closed c')
-    | some .dissolve  =>
-      if Covered c' then .dissolved (closed c')
-      else sketch relay respond (c' ++ [(respond c').val]) us
-    | some (.route t) =>
-      if Covered c' then .routed t (closed c')
-      else sketch relay respond (c' ++ [(respond c').val]) us
+    let f := fuse c u
+    if ¬ Reaches f then sketch ai (f ++ [(ai.session f).val]) us
+    else match filledValue (closing f) with
+    | some (.recognize v) => .recognized (recognizedOn f v)
+    | some .withdraw      => .withdrawn (closedOn f)
     | none =>
-      if Unsuppliable c' then .boundary (closed (c' ++ [(relay c').val]))
-      else
-        match fixture c' with
-        | some f =>
-          if Covered c' then
-            let c₁ := settle c'
-            if Verified c₁ f then .recognized (recognize c₁ f)
-            else sketch relay respond (c₁ ++ [(respond c₁).val]) us
-          else sketch relay respond (c' ++ [(respond c').val]) us
-        | none =>
-          if Placing c' ∨ ¬ Redraws c' then sketch relay respond (c' ++ [(respond c').val]) us
-          else
-            let c₁ := runRound relay c'
-            sketch relay respond (c₁ ++ [(respond c₁).val]) us
+      let c₁ := consulted f
+      let c₂ := if ProductionRequested c₁ then production ai c₁ else c₁
+      let c₃ := settle c₂
+      sketch ai (c₃ ++ [(ai.respond c₃).val]) us
 
-open Classical in
-def start (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) : Outcome P :=
-  if ¬ fitUnrecognized c then .notActivated c
-  else if Unsuppliable c then .boundary (closed (c ++ [(relay c).val]))
-  else
-    let c₁ := runRound relay c
-    sketch relay respond (c₁ ++ [(respond c₁).val]) us
+def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
+  let c₀ := consulted c
+  match notActivated c₀ with
+  | some why => .notActivated c₀ why
+  | none =>
+    let c₁ := production ai c₀
+    sketch ai (c₁ ++ [(ai.respond c₁).val]) us
 
 /-! ── LOOP ──
-Every answer is read against the whole context as it now stands: nothing counts rounds, and no
-earlier answer is held apart from what later ones say. A person's value stands on the scope their
-words reach; a later sketch that moves it is a ledger line, never a silent change. No fixed cap:
-each gate is dialogue, and the person can withdraw, dissolve, or route at any gate. At every spec
-relay, re-present the material the person entrusted to later sketches; a later answer of theirs
-takes it up or withdraws it.
+Every round re-judges the whole run against the whole context: nothing counts rounds or counts
+down, and no earlier answer is held apart from what later ones say. Neither "every earlier fit
+stands" nor "every revision stales it" is a rule: what a person's words reached is read again on
+the context as it now stands, and what changed since the standing they last answered is shown.
+A production happens where the person's turn calls for a version none shown embodies, and nowhere
+else: an insufficiency you find is shown with its basis and the revision you propose, and you
+produce it once the person takes it up. Each production relays its intent whole, with what changed,
+before it makes anything. The loop is dialogue: each round ends at the gate, and the person ends
+the run; no round count, cap, or fatigue closes it.
 -/
 
 /-! ── CONVERGENCE ──
-converged: a recognized form, its recognition and placement taken with what they need in view
-(`Covered`) and every placed reference verified (`Verified`); or a dissolution the person closed,
-with its basis. Every other exit is non-convergent and keeps its partial record. Convergence
-evidence: at RecognizedForm, present the trace — each mark → its reading → the revision it drove
-→ how it ended (recognized, replaced, or residual) — beside the recognized version, its placement,
-the versions kept as revert points, the settled values with who proposed each and how it came to
-stand, the readings still provisional, the residual — axes left open and material entrusted to
-sketches that never came — every copy written with its disposition, and the dissent attached to
-the closure. Every sketch's disposition is shown (`Accounted`); a failure is declared with its
-handoff, never silent. Each other terminal presents its own payload (TOOL GROUNDING).
-Demonstrated, not asserted.
+converged: a RecognizedForm — a version the person encountered and recognized for the purpose as
+it stands, its record built by `recordOf` after what the recognizing turn asked done was observed.
+Withdrawal keeps its partial record, built the same way. A recognition establishes the person's
+judgment of fit for that purpose on what the version's medium showed; correctness against a
+standard outside preference rests on the checks the findings name, and readiness for use on
+nothing here; a contrary ground it was taken over rides it in the dissent. The convergence
+evidence: the turn read as the closing, quoted, and the intent taken from it, and where it took a
+reading the round before showed of an unclear turn, that earlier turn quoted too; at
+RecognizedForm, the recognized version as it was encountered and where it is; at either closing,
+the purpose as it stands, marked as yours where you read it, each part with what it rests on; every
+version with where it is and what the person asked done to it that is not observed done, each
+failure with its reason; the values the person holds, each with who proposed it and whether their
+words set it or their turn took it; the findings with their sources; what stays unestablished; and
+the dissent, each item with what it bears on, what it rests on, and the person's answer where they
+gave one — a contrary ground first visible at the closing turn is shown here and attached, and the
+closure stands. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -636,37 +520,30 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | noActivationRelay | bind | draft | specRelay | produce | produceDelegate
-             | present | acquire | qfit | interpret | readAnswer | qplace | account | assemble
-             | dissolutionRelay | routeRelay | boundaryRelay | withdraw | converge | seam
+inductive Op | detect | notActivatedRelay | gather | intentRelay | produce | produceDelegate
+             | assess | present | readTurn | carryOut | assemble | converge | withdraw | seam
 
 def grounding : Op → Annot × String
-  | .detect            => (.sense, "Internal analysis: the deficit predicate over the utterance and the context; no external tool")
-  | .noActivationRelay => (.interaction .extension, "the non-activation basis — the failed predicate with its evidence; a sibling deficit seen in the scan is named as a finding and left to the session; not activated")
-  | .bind              => (.sense, "Internal analysis: prior material read from the context — settled where a person's utterance in this context settles it, a candidate otherwise, with where it came from; a record of a commitment made in an earlier session is a candidate")
-  | .draft             => (.sense, "Internal analysis: what the next sketches try, the perception the judgment needs, the referent a standard outside both parties' preference is checked against, and the variant briefs, drafted from the whole context — the settled values, the provisional readings, the prior material, every mark, and any spec revision the person named — read together rather than from any one of them")
-  | .specRelay         => (.interaction .extension, "the draft whole — what the next sketches try, what the judgment needs, the variant briefs, each with the basis that chose it, and each provisional reading with where it came from — laid out so that any of it can be settled, sent back, or replaced at Qfit; fires before anything is produced and settles nothing; on the AI-detected path it cites the evidence of FitUnrecognized as the run's basis; after a spec revision it is re-presented scoped to that revision")
-  | .produce           => (.transform, "artifact write, environment run: temp-isolated sketches, each with its concretum and a versioned reference registered at creation; a brief naming parents revises those retained versions, a brief naming none generates from the material its source names or from prior material; existing project files are never modified; Text concreta are session text only. Each sketch proposes as readings what it was rendered under that no settled value covered, so the person meets those determinations beside the sketch at Qfit")
-  | .produceDelegate   => (.dispatch, "delegate (conditional: more than one brief; parallel topology: one sketch per executor, each temp-isolated with its reference registered; subordinate to the active runtime policy)")
-  | .present           => (.interaction .extension, "each sketch from its concretum — Text as recorded, an Artifact walked through at its reference, reporting what was observed there or that it was not observed and what was tried — then what this realization cannot expose, what each sketch was checked against and how it came out, which content came from the person and which is the AI's proposal, what each sketch's own production determined, the ledger, where the run stands, and any contrary ground held — a defect found after the person judged a version, a reading that no further encounter is owed, a sibling deficit read — each stated with its basis and closing nothing")
-  | .acquire           => (.observe, "channel read: utterances anchored on a sketch; the marks arrive as the person's utterances. The channel is a capability the host supplies, named here and bound nowhere in this contract: the person can point at what they saw, and the pointing arrives with the utterance")
-  | .qfit              => (.interaction .constitution, "mandatory recognition gate on a specific version — Mark, Fit on this focus, Finish for a stated purpose — and, riding the same answer, which readings shown beside it the person settles, replaces, or retires; an answer with no marks and no acts presents the gate again; the pre-gate text declares interrogating a sketch, sending back what the next sketches try, contesting the premise, naming where the run goes next, and withdrawing")
-  | .interpret         => (.sense, "Internal analysis: marks read against the version they name, that version's brief, and how it was realized → provisional readings, each citing the mark it came from; whether a mark reaches the form or the realization is carried unresolved where the evidence does not settle it; never settled here")
-  | .readAnswer        => (.sense, "Internal analysis: the latest utterance, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — its marks, the values it settles and their scope, a recognition or its reopening, a placement, a closing — whatever form it takes")
-  | .qplace            => (.interaction .constitution, "mandatory placement gate — the recognized version and the capability it needs, a reference the person judges to outlive the session, beside the versions this run passed over; the person names the location and which of the others are kept and where; no default for either; after a retention failure the failure and every copy already written are shown before the gate, and the same location stays admissible")
-  | .account           => (.transform, "artifact write, environment run: only on a recognition and placement taken with what they need in view, retain every placed version and verify each reference resolves to that exact concretum — one retry, then the failure is declared and Qplace presented again with nothing released; once every placed version is verified, release the sketches placement did not keep and verify each — one retry, then ReleaseFailed declared with a handoff; each copy is accounted for where it was written, and a copy at a location the person moved from is released only where their words reach it")
-  | .assemble          => (.sense, "Internal analysis: RecognizedForm read from the context at the verified placement, before any release — the settled values with who proposed each and how it came to stand, the fixture, the recognition, the trace, the residual, the readings still provisional, every copy with its disposition, and the dissent attached to the closure; the RecognizedForm entire is the durable record of the run, and sketch content beyond what placement retains stays session-local")
-  | .dissolutionRelay  => (.interaction .extension, "when the person accepts or declares that no further encounter is owed — the sharpened description made the form recognizable without one, or the activation premise collapsed — state the basis, relay the settled values and every mark, attach any dissent, run account, stand down as DissolutionExit — a success, not an abandonment")
-  | .routeRelay        => (.interaction .extension, "when the person names where the run goes next — a sibling deficit, another protocol — relay the record so far with that target and its basis, attach any dissent, run account, exit as Routed; taking it up is the session's")
-  | .boundaryRelay     => (.interaction .extension, "where reachable evidence shows a realization the next sketches or the placement need cannot be supplied in this session — name the obligation and its basis, relay the record so far, run account, exit as BoundaryExit; the next protocol is the session's to choose")
-  | .withdraw          => (.interaction .extension, "explicit exit at any gate — the partial trace and residual declared, account enforced; EarlyExit. A hard interrupt yields no turn, so account cannot run: temp isolation's bounded lifecycle is the backstop")
-  | .converge          => (.interaction .extension, "the transformation trace — marks → readings → revisions → recognition — with the recognized version, its placement, the settled values and their provenance, the provisional readings, the residual, the dissent, and every copy's disposition")
-  | .seam              => (.interaction .extension, "at a user-declared chain naming the next protocol, proceed to it citing that source; the RecognizedForm enters it as prior material, its fixture a recognition witness and nothing more; this protocol declares no wired outbound edge, and every Constitution gate inside this protocol and the next fires unchanged")
+  | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
+  | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
+  | .gather            => (.observe, "artifact read, artifact search, record read, external fetch, environment run: what `gathered` reads or runs, now, as its doc states — at the start, after a production's relay and before any version is made, after its versions to check them, and on a turn that bears on the run and does not close it; what it returns enters the context as an evidence turn before the round that shows it")
+  | .intentRelay       => (.interaction .extension, "the production intent whole before any version is made — your reading of the purpose, marked as yours unless they said it, each part with what it rests on, a default marked as one; what the next versions try, and which retained versions each revises or that it starts fresh; how many and, where they will be offered as alternatives, how they differ; the medium each is realized in, one this session can realize, and what it can show of the qualities the judgment concerns and what it cannot — a version whose judged quality only a medium this session cannot supply would show, or whose right-or-wrong quality only a reference it cannot reach would check, is not made yet: that capability is named, with what it would show or check, and the version waits, as `present` holds it; where each will be, as `produce` places it, and whether in a scratch place or inside a project whose history commits keep, and whether the place holds content no commit keeps; and the reference a standard outside both parties' preference is checked against — each with the basis that chose it. On every later production the whole intent again with what changed since the last relay; marking a change by its cause is welcome, not required. It yields no turn and settles nothing; any of it can be sent back at the next round")
+  | .produce           => (.transform, "artifact write, environment run: what `produce` writes, as its doc states; a narration version writes no file — it is your own turn (`narrate`), recorded on the version")
+  | .produceDelegate   => (.dispatch, "delegate (conditional, artifact versions): a version's write handed to execution, its location registered at creation; subordinate to the active runtime policy")
+  | .assess            => (.sense, "Internal analysis: the purpose reading, what each version shows and does not, the standing, what stays unestablished, and your readings, over the whole fused context as it now stands")
+  | .present           => (.interaction .constitution, "the round, every round the first included. After a production, each new version first, as encountered in its medium — narration as written, an artifact shown or walked through at its location, saying what was observed there or that it was not observed and what was tried — and what this realization does not show of the qualities the person's judgment concerns; a realization that leaves the judged quality unexposed — a figure shown as its source, a still standing for motion — is said to be so. Then the standing: the purpose as `purpose` says the round shows it; what the person's words set and on which version, and what of yours their turns took; what you propose not yet taken; what rests on a check or a read, with what it was checked against and what that leaves unchecked; what stays unestablished; what changed since the standing they last answered, the parts kept unchanged included; and where each version is — whether in a scratch place, and whether that will outlive the session as far as what the session observes of it shows, or inside a project whose history commits keep, and whether the place holds content no commit keeps — what the person asked done to it that is not observed done, with the reason where it failed, and the home a recognition would take where the context gives one, said the same way. How the standing is drawn is the realization's; no invented completion measure or fixed sequence of phases is shown as where the run stands. Then your readings with their basis — a mark you read as about the rendering rather than the form, or a reading that the run has reached a case `notActivated` names — each closing nothing; and your contrary grounds, as `dissent` holds them. Where versions are offered as alternatives, how they differ and what each implies; where a pick was made side by side and the form will be used alone, consider showing it alone, and a reading that a difference only the side-by-side view made salient carried the pick is a contrary ground. Where a version the run needs calls for a capability this session cannot supply — a medium it cannot show, a reference it cannot reach — name that capability, and set side by side what the medium at hand already lets the person judge and what only the missing one would let them encounter or check; that version waits until they supply it, change the medium, go on in the medium at hand or without it, or end the run. Where a consequential home the context leaves unresolved bears on a recognition, the round may ask it. Read the person's turn whole; where its intent was unclear, say in one line how you took it, asking nothing back where that settles nothing the person holds, and answer what they asked — a question about a version as asked. Every round ends on one opening the person can take, in their own words — mark or keep what they see, ask for a change, a combination, or another medium, take a version as the form, or end here")
+  | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a mark or a keep, a value set or taken, a request for a version, a question — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `PurposeSupported`, `StandingSupported`, and `ProductionRequested` read it")
+  | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
+  | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
+  | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
+  | .withdraw          => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after a withdrawal, only to a next move the person declared with it; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a closing the record, with the recognized version where there is one — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
 
-/-- The operations that produce a round's sketches: `.produce`, and `.produceDelegate` only for a
-    spec with more than one brief. -/
-def producedBy (s : RoundSpec) : List Op :=
-  if s.briefs.length > 1 then [.produce, .produceDelegate] else [.produce]
+/-- The operations that write a version, by realization: an artifact through `.produce`, and
+    `.produceDelegate` where its write is handed to execution; narration writes no file. -/
+def producedBy : Realization → List Op
+  | .narration _ => []
+  | .artifact _  => [.produce, .produceDelegate]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Form resolution emergent via session context.
@@ -677,69 +554,18 @@ end
 end Hypotyposis
 ```
 
-## Scope Boundary
-
-The transformation the moment needs decides between neighbors; a sibling deficit seen in the scan or demonstrated in a round is named as a finding before the gate, and the user chooses whether the run goes there.
-
-- `/preview` — recognize and settle a direction among named alternatives; its probes are discarded. Here the resolution sought is a form, and the recognized version is kept; a direction settled by `/preview` can enter as prior material.
-- `/elicit` — resolve intent by reverse-tracing decision coordinates from externalized cognition. Here encountering and revising sketches constitutes the remaining form intent; readable prior material may already exist.
-- `/contextualize` — check a finished result against everywhere it lands and the intents it was meant to carry, with the fixes the user settles carried out. Here encountering sketches develops the form intent itself.
-- `/ideate` — a thin field of ideas widened, nothing selected. Here a form is recognized.
-
 ## Mode Activation
 
-`/sketch` is directly invocable. On the AI-detected path — the session routing the utterance here — cite the evidence of `FitUnrecognized` at the spec relay; a decline of the run is a withdrawal at the first `Qfit`. Loaded safety boundaries, capability restrictions, and explicit user instructions continue to bind while Hypotyposis is active.
-
-Heuristic discovery cues are a plan that cannot reach its first draft, a description rewritten instead of made, a request to see something before saying more, and an explicit "I'd know it when I see it". They establish grounds to run Phase 0 rather than activation predicates.
+`/sketch` is user-invocable, and an invocation is read through `notActivated` before anything is produced. On the Hybrid path, the AI may propose it only with cited evidence that the form cannot be settled from descriptions — a plan that cannot reach its first draft, a description rewritten instead of made, a request to see something before saying more, or "I'd know it when I see it"; prior-session indices may seed that reading, never the user's judgment.
 
 ## Protocol
 
-### Phase 0: Detection (Silent)
+### Version rendering
 
-Apply the deficit predicate in the Definition and cite the basis.
-
-### Phase 1: Bind
-
-Read each prior item from the context as settled only where a person's utterance in this context settled it, and as a candidate otherwise — a record of a commitment made in an earlier session included — with where it came from.
-
-### Phase 2: Round Spec Relay
-
-Lay out the draft TOOL GROUNDING's `specRelay` entry names — what the next sketches try, the perception it needs, the referent a standard is checked against where the focus carries one, each variant brief with the basis that chose it, and each provisional reading with the mark or production it came from — then produce without yielding the turn. Say in one line that any of it can be settled, sent back, or replaced at the recognition gate. Where reachable evidence shows a realization the sketches need cannot be supplied in this session, say so here and exit at the boundary before producing.
-
-### Phase 3: Production (Transform)
-
-Produce under the relayed spec as TOOL GROUNDING's `produce` entry states; every sketch carries its placeholder status visibly.
-
-### Phase 4: Recognition Gate (Constitution)
-
-Present as TOOL GROUNDING's `present` entry states — where the run stands, what a new version moved from a value the user settled, and any defect found in a version after the user judged it included — acquire the marks through the channel the host supplies, then render `Qfit`:
-```
-Which version are you marking, and what do you see?
-
-Options:
-1. **Mark** — point at what does not fit (and what to keep) on a named version; I revise from there
-2. **Fit on this focus** — this version is right on this aspect; the next sketches try another
-3. **Finish** — this version is the form, for the purpose you state, with the axes you leave open
-```
-With Mark, Fit, or Finish, name which of the readings shown beside the version you settle, reject, or replace; unnamed ones stay as they were. Name interrogating a sketch, sending back what the next sketches try, contesting the premise, naming where the run goes next, and withdrawing as free-response paths; they are not numbered options. An interrogation is answered within the sketch's placeholder status, and an answer with no marks and no acts presents the gate again; neither produces new sketches. Read each answer whole: where one answer could be a finish or a fit on one aspect, show your reading before the next gate rather than acting on it. Where you read that no further encounter is owed, or that a sibling deficit is what is going on, say so before the gate with its basis; the run ends there only when the user closes it.
-
-### Phase 5: Placement Gate (Constitution)
-
-Present the recognized version and the capability it needs — a reference that outlives the session — beside the versions the run passed over, and render `Qplace` with no default:
-```
-Where does the recognized version live from here?
-
-Options:
-1. **Place** — name the location; the version is retained there and verified. Name any other versions worth keeping as revert points and where they go; the rest are released
-```
-A version kept as a revert point is one the run passed over, never the recognized one. Nothing is written to a location before the user names it. When a retention failed, say so before re-presenting, together with every copy already written and where; the same location stays admissible, and a copy at a location the user moves away from stays where it is unless their words reach it. An answer here that marks the form again reopens the recognition, and the next sketches follow. Where reachable evidence shows the placement needs a capability this session cannot supply, say so with its basis and exit at the boundary.
+Where the session can render a figure, a page, or a motion, show the version rendered rather than described or shown as its source. Give each version a label that names it alone, and let no label the round's opening offers name anything else. Where the session has a surface that stays in view, the standing can stay there as well.
 
 ## Rules
 
-- **Utterance continuity**: Every gate answer joins the context as it was said, and the readings drawn from it are shown beside it as the AI's. Each answer is read against the context as it now stands; a value the user settled stands on the scope their words reach, and a later version that moves it is shown as a change before the next gate, never silently. At the spec relay, re-present outstanding material the user entrusted to later sketches; a subsequent act of theirs settles whether it is taken up or withdrawn. Whatever remains is declared in the terminal's residual.
-- **Ground interpretations**: Read each mark against the version it names, that version's brief, and how it was realized. What the evidence supports about the form and about the realization is the judgment; carry it with its basis, and where the evidence does not settle which of the two a mark reaches, carry that unresolved into the provisional reading the spec relay presents. Where the focus carries a standard outside both parties' preference, check each sketch against its referent before presenting, and show how it came out.
-- **Draft relayed with its basis**: relay what the next sketches try, the perception they need, and the variant briefs with the basis that chose each, the provisional readings beside them, and the affordance to send any of it back, then produce; the recognition gate is where the user settles a value or sends the draft back.
-- **Closure by the user**: A recognition, a placement, a dissolution, and a route are closed only by the user's utterance, and taken only with what they need in view; a withdrawal needs nothing more than the user's word. Before each gate, show any contrary ground you hold about the version or the placement; where the user closes with that ground standing, attach it to the closure record. Evidence found later that breaks a recognition or a value the user settled is shown before the next gate, and always before any release; the closed value itself is never rewritten by you. Record for each settled value who proposed it and whether the user's words set it or their answer adopted yours.
-- **Placement has no default**: The protocol names what the retained version needs — a reference the user judges to outlive the session — and the user names where, together with which other versions are kept and where. The fixture that results is a recognition witness and carries no implementation commitment.
-- **Round composition**: Use everyday language, put evidence and differential implications before the gate, and leave the gate to the question and options. Read `references/round-composition.md` before composing when wording must persist across rounds or phase placement is material.
+- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before its gate. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before or inside the gate is in question.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Contract execution**: As FLOW, the judgments' doc comments, LOOP, TOOL GROUNDING's `intentRelay` and `present` entries, and CONVERGENCE state.

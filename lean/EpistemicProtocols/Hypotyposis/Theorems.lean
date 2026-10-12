@@ -20,173 +20,99 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-theorem silence (relay respond : Context P → Response P) (c : Context P) :
-    sketch relay respond c [] = .holding c := by
+instance : Nonempty Whereabouts := ⟨⟨[], []⟩⟩
+
+theorem silence (ai : AITurns P) (c : Context P) : sketch ai c [] = .holding c := by
   simp [sketch]
 
-theorem relay_before_production (relay : Context P → Response P) (c : Context P) :
-    ∃ t, runRound relay c = c ++ [(relay c).val] ++ t :=
-  ⟨_, rfl⟩
+theorem relay_before_production (ai : AITurns P) (c : Context P) :
+    ∃ t, production ai c = c ++ [(ai.relay c).val] ++ t := by
+  unfold production consulted
+  simp only [List.append_assoc]
+  exact ⟨_, rfl⟩
 
-theorem held_gate_produces_nothing (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (fuse c u)) = none)
-    (hb : ¬ Unsuppliable (fuse c u)) (hf : fixture (fuse c u) = none)
-    (hh : Placing (fuse c u) ∨ ¬ Redraws (fuse c u)) :
-    sketch relay respond c (u :: us) =
-      sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [sketch, hk, hb, hf, hh]
+theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    sketch ai c (u :: us) = sketch ai (fuse c u ++ [(ai.session (fuse c u)).val]) us := by
+  simp [sketch, h]
 
-theorem uncovered_retains_nothing (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
-    (hk : filledValue (closing (fuse c u)) = none) (hb : ¬ Unsuppliable (fuse c u))
-    (hf : fixture (fuse c u) = some f) (hc : ¬ Covered (fuse c u)) :
-    sketch relay respond c (u :: us) =
-      sketch relay respond (fuse c u ++ [(respond (fuse c u)).val]) us := by
-  simp [sketch, hk, hb, hf, hc]
+/-- A turn that bears on the run, closes nothing, and calls for no version makes no version: the
+    round follows what was gathered and carried out. -/
+theorem unrequested_produces_nothing (ai : AITurns P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (hk : filledValue (closing (fuse c u)) = none)
+    (hp : ¬ ProductionRequested (consulted (fuse c u))) :
+    sketch ai c (u :: us) =
+      sketch ai (settle (consulted (fuse c u)) ++
+        [(ai.respond (settle (consulted (fuse c u)))).val]) us := by
+  simp [sketch, hr, hk, hp]
 
-theorem unverified_returns_to_placement (relay respond : Context P → Response P)
-    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (f : Fixture)
-    (hk : filledValue (closing (fuse c u)) = none) (hb : ¬ Unsuppliable (fuse c u))
-    (hf : fixture (fuse c u) = some f) (hc : Covered (fuse c u))
-    (hn : ¬ Verified (settle (fuse c u)) f) :
-    sketch relay respond c (u :: us) =
-      sketch relay respond (settle (fuse c u) ++ [(respond (settle (fuse c u))).val]) us := by
-  simp [sketch, hk, hb, hf, hc, hn]
-
-theorem each_step_continues_or_closes (relay respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
-    (h : sketch relay respond c (u :: us) = o) :
-    (∃ c', sketch relay respond c' us = o) ∨
-    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) ∨
-    (filledValue (closing (fuse c u)) = some .dissolve ∧ Covered (fuse c u) ∧
-      o = .dissolved (closed (fuse c u))) ∨
-    (∃ t, filledValue (closing (fuse c u)) = some (.route t) ∧ Covered (fuse c u) ∧
-      o = .routed t (closed (fuse c u))) ∨
-    (Unsuppliable (fuse c u) ∧ o = .boundary (closed (fuse c u ++ [(relay (fuse c u)).val]))) ∨
-    (∃ f, fixture (fuse c u) = some f ∧ Covered (fuse c u) ∧ Verified (settle (fuse c u)) f ∧
-      o = .recognized (recognize (settle (fuse c u)) f)) := by
+theorem each_step_continues_or_closes (ai : AITurns P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (o : Outcome P) (h : sketch ai c (u :: us) = o) :
+    (∃ c', sketch ai c' us = o) ∨
+    (∃ v, filledValue (closing (fuse c u)) = some (.recognize v) ∧
+      o = .recognized (recognizedOn (fuse c u) v)) ∨
+    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closedOn (fuse c u))) := by
   simp only [sketch] at h
   split at h
-  · exact .inr (.inl ⟨by assumption, h.symm⟩)
-  · rename_i hk
-    split at h
-    · rename_i hc
-      exact .inr (.inr (.inl ⟨hk, hc, h.symm⟩))
-    · exact .inl ⟨_, h⟩
-  · rename_i t hk
-    split at h
-    · rename_i hc
-      exact .inr (.inr (.inr (.inl ⟨t, hk, hc, h.symm⟩)))
-    · exact .inl ⟨_, h⟩
+  · exact .inl ⟨_, h⟩
   · split at h
-    · rename_i hu
-      exact .inr (.inr (.inr (.inr (.inl ⟨hu, h.symm⟩))))
-    · split at h
-      · rename_i f hf
-        split at h
-        · rename_i hc
-          split at h
-          · rename_i hv
-            exact .inr (.inr (.inr (.inr (.inr ⟨f, hf, hc, hv, h.symm⟩))))
-          · exact .inl ⟨_, h⟩
-        · exact .inl ⟨_, h⟩
-      · split at h
-        · exact .inl ⟨_, h⟩
-        · exact .inl ⟨_, h⟩
+    · rename_i v hk
+      exact .inr (.inl ⟨v, hk, h.symm⟩)
+    · rename_i hk
+      exact .inr (.inr ⟨hk, h.symm⟩)
+    · exact .inl ⟨_, h⟩
 
-theorem recognized_verified (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : RecognizedForm P)
-    (h : sketch relay respond c us = .recognized r) :
-    ∃ c₀, fixture c₀ = some r.fixture ∧ Covered c₀ ∧ Verified (settle c₀) r.fixture ∧
-      r = recognize (settle c₀) r.fixture := by
+theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
+    ∃ src ok sup, closing c = .filled k src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
+  cases hc : closing c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
+
+/-- A recognized form comes only from a closing that recognizes a version — a person's turn, by
+    `closed_by_person` — and its record is the one `recordOf` builds after what that turn asked
+    done was observed. -/
+theorem recognized_on_person_closing (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (r : RecognizedForm P) (h : sketch ai c us = .recognized r) :
+    ∃ (c₁ : Context P) (v : Nat), filledValue (closing c₁) = some (.recognize v) ∧
+      r = ⟨settle c₁, v, recordOf (settle c₁)⟩ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, _, h'⟩ |
-        ⟨_, h'⟩ | ⟨f, hf, hc, hv, h'⟩
+    rcases each_step_continues_or_closes ai c u us _ h with ⟨c', h'⟩ | ⟨v, hk, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
+      exact ⟨_, v, hk, rfl⟩
     · cases h'
-    · cases h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hf, hc, hv, rfl⟩
 
-theorem dissolved_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .dissolved r) :
-    ∃ c₀, filledValue (closing c₀) = some .dissolve ∧ Covered c₀ ∧ r = closed c₀ := by
+theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utterance P))
+    (r : Closed P) (h : sketch ai c us = .withdrawn r) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .withdraw ∧ r = closedOn c₁ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hk, hc, h'⟩ | ⟨_, _, _, h'⟩ |
-        ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
+    rcases each_step_continues_or_closes ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨hk, h'⟩
     · exact ih c' h'
     · cases h'
-    · cases h'
-      exact ⟨_, hk, hc, rfl⟩
-    · cases h'
-    · cases h'
-    · cases h'
-
-theorem routed_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (r : Closed P)
-    (h : sketch relay respond c us = .routed t r) :
-    ∃ c₀, filledValue (closing c₀) = some (.route t) ∧ Covered c₀ ∧ r = closed c₀ := by
-  induction us generalizing c with
-  | nil => simp [sketch] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨t', hk, hc, h'⟩ |
-        ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hk, hc, rfl⟩
-    · cases h'
-    · cases h'
-
-theorem withdrawn_by_person (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .withdrawn r) :
-    ∃ c₀, filledValue (closing c₀) = some .withdraw ∧ r = closed c₀ := by
-  induction us generalizing c with
-  | nil => simp [sketch] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨hk, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, _, h'⟩ |
-        ⟨_, h'⟩ | ⟨_, _, _, _, h'⟩
-    · exact ih c' h'
     · cases h'
       exact ⟨_, hk, rfl⟩
-    · cases h'
-    · cases h'
-    · cases h'
-    · cases h'
 
-theorem boundary_on_evidence (relay respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P) (h : sketch relay respond c us = .boundary r) :
-    ∃ c₀, Unsuppliable c₀ ∧ r = closed (c₀ ++ [(relay c₀).val]) := by
-  induction us generalizing c with
-  | nil => simp [sketch] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes relay respond c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, _, h'⟩ | ⟨_, _, _, h'⟩ |
-        ⟨hu, h'⟩ | ⟨_, _, _, _, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hu, rfl⟩
-    · cases h'
+/-- A filled purpose stands on a turn the person sent. -/
+theorem purpose_by_person (c : Context P) (a : String) (h : filledValue (purpose c) = some a) :
+    ∃ src ok sup, purpose c = .filled a src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
+  cases hc : purpose c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled b src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
-theorem settled_by_person {c : Context P} {a : Axis} {s : Cite c}
-    (ok : (axisCoord (P := P) a).admits s.src) : s.src.val = .person := ok
-
-theorem recognized_by_person {c : Context P} {s : Cite c}
-    (ok : (recognitionCoord (P := P)).admits s.src) : s.src.val = .person := ok
-
-theorem placed_by_person {c : Context P} {s : Cite c}
-    (ok : (placementCoord (P := P)).admits s.src) : s.src.val = .person := ok
-
-theorem closed_by_person {c : Context P} {s : Cite c}
-    (ok : (closeCoord (P := P)).admits s.src) : s.src.val = .person := ok
+/-- Every value the person holds stands on a turn the person sent. -/
+theorem held_by_person (c : Context P) (h : Held c) :
+    (c[h.src.idx]'h.src.lt).origin = .person :=
+  h.src.ok.trans h.byPerson
 
 end Hypotyposis
