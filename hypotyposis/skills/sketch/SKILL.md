@@ -161,15 +161,14 @@ axiom PurposeSupported : Context P → Turn P → String → Prop
 def purposeCoord : Coord P String :=
   { admits := (·.val = .person), supports := PurposeSupported }
 
-/-- **Your reading**: the purpose as it stands; `open_` until a person's turn says it. It holds
-    back neither a round nor a closing while it is open: the round shows what the person said of it
-    and your reading of the rest, marked as yours. That reading grows from the run rather than being
-    front-loaded: each part
-    names what it rests on — a default you brought in before any reaction (the convention of the
-    kind of form, the request's own words, an example you picked), marked as a default; or the
-    person's reaction to a specific version, or the gathered material, it came from. A default
-    gives way to what the reactions bring. Each round shows what the reading gained, lost, or
-    changed since the last round, and from which reaction or material. -/
+/-- **Your reading**: the purpose as it stands; `open_` until a person's turn says it. It holds back
+    neither a round nor a closing while it is open: the round shows what the person said of it and
+    your reading of the rest, marked as yours. That reading grows from the run rather than being
+    front-loaded: each part names what it rests on — a default you brought in before any reaction
+    (the convention of the kind of form, the request's own words, an example you picked), marked as
+    a default; or the person's reaction to a specific version, or the gathered material, it came
+    from. A default gives way to what the reactions bring. Each round shows what the reading gained,
+    lost, or changed since the last round, and from which reaction or material. -/
 axiom purpose : (c : Context P) → Occ (purposeCoord (P := P)) c
 
 /-- A place a version can live: a path, a reference, an address. -/
@@ -301,22 +300,22 @@ inductive Closing
   | withdraw
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
-    nothing — closes the run this way, read whole on the context as it now stands, whatever form
-    it takes. `recognize v`: the turn takes version `v`, one the person encountered as it was
-    realized, as the form for the purpose as it stands, on the scope its words give. It reaches
-    what that realization showed; a quality the realization did not show stays unestablished and
-    holds no recognition back. Where the turn also marks the version or asks for changes, read the
-    scope its words give: where they recognize what was shown on that scope, it closes, and the
-    requests ride the record as open; where they make the requests conditions of recognizing, it
-    closes nothing, and the version those requests produce is shown before anything is
-    recognized. A recognition never reaches a version not yet shown. Taking the round adopts what
-    it showed about the closing — the home a recognition would take, how you took an unclear
-    turn — with no second permission; a home the person names in the turn is theirs, recorded as
-    pending until a write there is observed. Where the turn's intent is unclear, it closes nothing.
-    `withdraw`: the turn ends the run without recognizing a version, for whatever reason, given or
-    not; what its words set stands in the record like any other turn's. Silence and other work end nothing, and your
-    own reading that a version fits, that no encounter is still owed, or that the run cannot
-    proceed closes nothing. -/
+    nothing — closes the run this way, read whole on the context as it now stands, whatever form it
+    takes. `recognize v`: the turn takes version `v`, one the person encountered as it was realized,
+    as the form for the purpose as it stands, on the scope its words give. It reaches what that
+    realization showed; a quality the realization did not show stays unestablished and holds no
+    recognition back. Where the turn also marks the version or asks for changes, read the scope its
+    words give: where they recognize what was shown on that scope, it closes, and the requests ride
+    the record as open; where they make the requests conditions of recognizing, it closes nothing,
+    and the version those requests produce is shown before anything is recognized. A recognition
+    never reaches a version not yet shown. Taking the round adopts what it showed about the
+    closing — the home a recognition would take, how you took an unclear turn — with no second
+    permission; a home the person names in the turn is theirs, recorded as pending until a write
+    there is observed. Where the turn's intent is unclear, it closes nothing. `withdraw`: the turn
+    ends the run without recognizing a version, for whatever reason, given or not; what its words
+    set stands in the record like any other turn's. Silence and other work end nothing, and your own
+    reading that a version fits, that no encounter is still owed, or that the run cannot proceed
+    closes nothing. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -350,22 +349,22 @@ axiom ProductionRequested : Context P → Prop
     version states — the reference that standard is checked against is read, and every version is
     checked against it before it is shown, or, where the person goes on without a reference that
     cannot be reached, shown with that quality unchecked and unestablished; preference never
-    certifies such a claim. What the
-    context already holds from a read or a run is not read or run again unless the person asks for
-    it again, or an utterance, evidence, or a change made in the session since says it moved. What
-    you say you read, you read to the end. A run's result comes with what it ran on and what that
-    leaves untested. What was reached and what was not, with what each unreached one would need,
-    and any conflict among what was gathered, are named. Empty where nothing outside the context
-    bears. -/
+    certifies such a claim. What the context already holds from a read or a run is not read or run
+    again unless the person asks for it again, or an utterance, evidence, or a change made in the
+    session since says it moved. What you say you read, you read to the end. A run's result comes
+    with what it ran on and what that leaves untested. What was reached and what was not, with what
+    each unreached one would need, and any conflict among what was gathered, are named. Empty where
+    nothing outside the context bears. -/
 axiom gathered : Context P → List (Evidence P)
 
 /-- The context with what `gathered` read now appended. -/
 def consulted (c : Context P) : Context P := c ++ (gathered c).map (·.val)
 
 /-- **Your carrying out** of what the person's latest words ask done to the versions shown before
-    that turn — a version written to a home they named or took as the round showed it, a version
-    removed at their word — each done and observed; what was tried and failed stays pending in
-    `whereabouts` with its reason. No version is moved or removed without their words; one they
+    that turn — a version written to a home they named or took as the round showed it, over no other
+    version unless their words reach it; a version removed at their word, a narration by being set
+    aside, leaving nothing pending — each done and observed; what was tried and failed stays pending
+    in `whereabouts` with its reason. No version is moved or removed without their words; one they
     said nothing about stays where it is. Empty where their words ask nothing done. -/
 axiom carriedOut : Context P → List (Evidence P)
 
@@ -424,11 +423,10 @@ structure AITurns (P : Type) where
   respond : Context P → Response P
   session : Context P → Response P
 
-/-- **Your production** of the artifact versions under the relayed intent: each artifact as
-    observed at creation, written to the scratch place the session works in unless the person's
-    words named a place for it, beside any version already shown there rather than over it, its
-    location registered then. The observation evidences that the artifact exists there, and
-    nothing about whether it fits.
+/-- **Your production** of the artifact versions under the relayed intent: each artifact as observed
+    at creation, written to the scratch place the session works in unless the person's words named a
+    place for it, beside any other version there rather than over it, its location registered then.
+    The observation evidences that the artifact exists there, and nothing about whether it fits.
     Guidance for every version a production makes, narration included, not steps it fixes: realize
     each in a medium in which the qualities the person's judgment concerns can be encountered;
     revise the retained versions the context calls for — a mark stays attached to what it marked,
@@ -539,7 +537,7 @@ def grounding : Op → Annot × String
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
   | .withdraw          => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after a withdrawal, only to a next move the person declared with it; otherwise the recognized version and the record are handed on as session text, every other version by where it is rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after a withdrawal, only to a next move the person declared with it; otherwise the recognized version and the record are handed on as session text, every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/

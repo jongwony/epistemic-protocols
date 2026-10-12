@@ -8,7 +8,7 @@ User-facing emit (the versions, the production relay, the standing, the round's 
 
 ## When some of what is in view belongs to a later round or the convergence evidence rather than this one
 
-Each user-facing round bundles the current judgment, its nearest material (the version under judgment and the marks it was revised from), and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, marks from earlier rounds that this version already absorbed, and unrelated findings to pre-gate text, the convergence evidence, or later rounds. A later version that moved a value the user holds belongs in this round only as a one-line change beside the version that moved it.
+Each user-facing round bundles the current judgment, its nearest material (the version under judgment and the marks it was revised from), and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, marks from earlier rounds that this version already absorbed, and unrelated findings to pre-gate text, the convergence evidence, or later rounds. A later version that moved a value the user holds belongs in this round as a one-line change beside the version that moved it.
 
 ## When whether text belongs before or inside the gate is in question
 
