@@ -41,7 +41,7 @@ This is a layered core, not a dual mission. The wording changes by audience; the
 
 ## Protocol Coverage
 
-For current protocol coverage and concern clusters, consult the [protocol table in README.md](../README.md#protocols); its concern-cluster line is held to `CANONICAL_CLUSTERS` in `scripts/load-protocols.js` by `/verify`. When editing public wording, preserve the early-correction entry story and make room for execution, verification, recall, and comprehension.
+For current protocol coverage, consult the [protocol table in README.md](../README.md#protocols). When editing public wording, preserve the early-correction entry story and make room for execution, verification, recall, and comprehension.
 
 ## Editing Rule
 

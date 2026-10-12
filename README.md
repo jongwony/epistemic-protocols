@@ -86,7 +86,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Katalepsis](./katalepsis) | `/grasp` | Something in front of you — code, a document, a result — needs to be actually understood: you can't follow it yet, or you nod along and aren't sure |
 | [Hyphegesis](./hyphegesis) | `/conduct` | The work takes several lines of thinking, and it isn't obvious what order they run in, which can run apart, how their results combine, when to stop, or where each result goes — settle how it runs before starting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+The protocols are not a fixed sequence or grouping: reach for the one whose deficit you are in, and combine them as the situation calls for.
 
 ## Utilities
 

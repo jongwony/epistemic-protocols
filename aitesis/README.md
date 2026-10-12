@@ -25,7 +25,7 @@ AI systems often proceed despite insufficient context (`ContextInsufficient`) â€
 
 **Key distinction**: Aitesis collects what the AI lacks and names what only the user holds â€” the AI reaches for context on its own and hands back what it cannot reach (heterocognitive: "what can I reach, and what is yours?").
 
-Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Aitesis supplies missing facts and names the user's unknowns; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
+Proplasma (`/preview`) is the neighbor on the direction axis: Aitesis supplies missing facts and names the user's unknowns; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
 
 ## Protocol Flow
 

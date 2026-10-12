@@ -86,7 +86,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Katalepsis](./katalepsis) | `/grasp` | 코드·문서·결과처럼 눈앞에 있는 것을 정말 이해해야 할 때 — 아직 못 따라가겠거나, 이해한 것 같은데 확신이 없을 때 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 갈래의 사고가 필요한데 그 순서, 따로 돌릴 수 있는지, 결과를 어떻게 합칠지, 언제 멈출지, 각 결과가 어디로 갈지가 자명하지 않을 때 — 시작하기 전에 작업 방식을 정할 때 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)
+프로토콜은 정해진 순서나 묶음이 아닙니다: 지금 처한 결핍에 맞는 것을 꺼내 쓰고, 상황이 요구하는 대로 조합하세요.
 
 ## 유틸리티
 

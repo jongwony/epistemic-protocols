@@ -44,14 +44,6 @@ const CANONICAL_PROTOCOL_SET = [
   'katalepsis',
 ];
 
-// Canonical workflow-cluster grouping — the single source of truth for which
-// protocols sit in which cluster. static-checks cross-ref-scan enforces this
-// string against README/CLAUDE.md, and package.js parses it to render the
-// first-release highlights cluster bullets. When a protocol's cluster
-// membership changes, edit here once: both the verifier and the release-notes
-// generator read this one definition (no hand-curated duplicate to drift).
-const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`, `/sketch`) · Analysis (`/ground`, `/induce`) · Execution (`/apportion`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`, `/conduct`)';
-
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless
 // of how many derivation views they request.
@@ -227,7 +219,6 @@ function protocolFiles(options) {
 module.exports = {
   CANONICAL_PRECEDENCE,
   CANONICAL_PROTOCOL_SET,
-  CANONICAL_CLUSTERS,
   discoverPlugins,
   protocolOrder,
   protocolFiles,
