@@ -136,8 +136,10 @@ axiom notActivated : Context P → Option String
     wherever it appears. -/
 axiom found : Context P → List Instance
 
-/-- **Your reading**: the cases the person brought — in their turns or in what they pointed you
-    to — and the cases you found that their words took up, read and never rewritten. -/
+/-- **Your reading**: the cases the person brought — named in their turns, or singled out by them
+    from what they pointed you to — and the cases you found that their words took up, read and
+    never rewritten. A collection they point you to without singling out cases is material you
+    collect from. -/
 axiom brought : Context P → List Instance
 
 /-- **Your judgment**, made afresh on every pass: the goal — what the abstraction is for — as it now
@@ -293,7 +295,8 @@ axiom entries : Context P → List Entry
 inductive Proposer | ai | person
 
 /-- **Your reading**: the position of the turn that first put forward line `e`; a case the person
-    pointed you to was put forward by the turn of theirs that pointed. -/
+    singled out from what they pointed you to was put forward by the turn of theirs that singled
+    it out. -/
 axiom introducedAt : Context P → Entry → Nat
 
 def proposer (c : Context P) (e : Entry) : Proposer :=
@@ -357,13 +360,12 @@ inductive Closing
     the person means, with no second permission; where that sheet showed no candidate, it
     recognizes nothing. A turn that changes anything that sheet shows — a rename, a rule
     correction, a move of the goal or the candidate, a reading set aside or brought back, a case
-    brought — recognizes nothing: the sheet is drawn again with the change. Saying a case falls
-    on the other side of the candidate's row — taken in where the sheet left it out, or left out
-    where it took it in — corrects that sheet and recognizes nothing. Holding a line back — not
-    taking it, without saying it is wrong — leaves it as it stood, your proposal where no turn of
-    the person's took it. Holding back a line other than the goal or the candidate, or words about
-    an open item, change nothing the sheet shows and leave a recognition standing; holding back
-    the goal, the candidate's name, or its rule recognizes nothing.
+    brought or placed on the other side of the candidate's row — recognizes nothing: the sheet is
+    drawn again with the change. Holding a line back — not taking it, without saying it is wrong —
+    leaves it as it stood, your proposal where no turn of the person's took it. Holding back a line
+    other than the goal or the candidate, or words about an open item, change nothing the sheet
+    shows and leave a recognition standing; holding back the goal, the candidate's name, or its
+    rule recognizes nothing.
     `stop`: the turn ends the run without recognizing an abstraction, for whatever reason, given or
     not, whatever else it says; the record is the sheet it followed, and a change the turn makes
     stays in the context the record carries. "Not yet" or a question closes nothing; silence, other
