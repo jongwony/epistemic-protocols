@@ -9,7 +9,7 @@ Name what several concrete cases share by crossing a working candidate with the 
 
 ## Definition
 
-**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet. From the first sheet the AI states the goal the abstraction serves and, where one is grounded, a working candidate — a name and a rule —, each value on the sheet marked as set by the user's words, taken by them from what the AI showed, or still the AI's proposal, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out, each case a row uses unfolded on the sheet when it is new or changed and every one when the sheet invites recognition. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, recognize the abstraction, or end the run. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
+**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet. From the first sheet the AI states the goal the abstraction serves and, where one is grounded, a working candidate — a name and a rule —, each value on the sheet marked as set by the user's words, taken by them from what the AI showed, or still the AI's proposal, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out, each case on the sheet unfolded when it is new or changed and every one when the sheet invites recognition. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, recognize the abstraction, or end the run. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
 
 ```lean
 /-!
@@ -137,7 +137,7 @@ axiom notActivated : Context P → Option String
 axiom found : Context P → List Instance
 
 /-- **Your reading**: the cases the person brought — in their turns or in what they pointed you
-    to —, read and never rewritten. -/
+    to — and the cases you found that their words took up, read and never rewritten. -/
 axiom brought : Context P → List Instance
 
 /-- **Your judgment**, made afresh on every pass: the goal — what the abstraction is for — as it now
@@ -292,7 +292,8 @@ axiom entries : Context P → List Entry
 /-- Who first put a value forward, kept apart from how it came to stand. -/
 inductive Proposer | ai | person
 
-/-- **Your reading**: the position of the turn that first put forward line `e`. -/
+/-- **Your reading**: the position of the turn that first put forward line `e`; a case the person
+    pointed you to was put forward by the turn of theirs that pointed. -/
 axiom introducedAt : Context P → Entry → Nat
 
 def proposer (c : Context P) (e : Entry) : Proposer :=
@@ -308,18 +309,18 @@ inductive Standing | set | adopted
     context as it now stands, on the scope its words reach — the turn gave it in its own words
     (`set`), or took it as a sheet showed it before that turn (`adopted`). A narrow answer stays
     narrow: taking one case's place in a row takes that placement, not the sheet around it. A turn
-    that recognizes the abstraction takes what the sheet it followed showed, on the scope its words
-    reach; a line it holds back or does not reach stays as it stood. A question, a request to see
-    something, or a bare mention makes nothing stand; a value no turn of the person's reached stays
-    your proposal, however long it has gone unchallenged. -/
+    that recognizes the abstraction takes every line the sheet it followed showed, with no second
+    permission; a line it holds back stays as it stood. A question, a request to see something, or
+    a bare mention makes nothing stand; a value no turn of the person's reached stays your proposal,
+    however long it has gone unchallenged. -/
 axiom StandingSupported : Entry → Context P → Turn P → Standing → Prop
 
 /-- Only the person's turn makes a value stand. -/
 def standingCoord (e : Entry) : Coord P Standing :=
   { admits := (·.val = .person), supports := StandingSupported e }
 
-/-- **Your reading**: the person's turn that first makes line `e` stand; a later turn that takes it
-    again leaves how it stood; `open_` while none reaches it. -/
+/-- **Your reading**: the person's turn that first makes line `e` stand and still reaches it; a
+    later turn that takes it again leaves how it stood; `open_` while none reaches it. -/
 axiom standingOcc : (c : Context P) → (e : Entry) → Occ (standingCoord (P := P) e) c
 
 def standing (c : Context P) (e : Entry) : Option Standing := filledValue (standingOcc c e)
@@ -378,19 +379,20 @@ def closeCoord : Coord P Closing :=
 axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
 /-- **Your judgment**: the latest utterance bears on this run — a move, a correction, a case, a
-    rename, a value taken, a closing, a question about the sheet. An utterance about other work
-    leaves the run as it stands. -/
+    rename, a value taken, words about an open item, an answer to a doubt, a closing, a question
+    about the sheet. An utterance about other work leaves the run as it stands. -/
 axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can name what their cases share, say which cases it takes in and
     which it leaves out, and recognize it as serving their goal.
     `CrystallizedAbstraction`: the sheet the person's confirm recognized, its views as that sheet
     carried them — its goal and candidate, its cross view, where the row of the candidate's reading
-    is what the candidate takes in and leaves out, its cases, the readings set aside, the open
-    trace, and the doubts — with every line it showed, who proposed it and, where a person's turn
-    reached it, how it stood. The declaration unfolds every case the record carries, folded on that
-    sheet or not, so the person sees each at the close. It records the person's settlement for
-    their goal, not proof that the reading is correct. -/
+    is what the candidate takes in and leaves out, its cases, the readings set aside with the
+    person's grounds, the open trace, and the doubts — with every line it showed, who proposed it
+    and, where a person's turn reached it, how it stood. The declaration unfolds every case the
+    record carries, folded on that sheet or not, and shows every reading set aside, whether that
+    sheet showed it or not, so the person sees each at the close. It records the person's settlement
+    for their goal, not proof that the reading is correct. -/
 structure CrystallizedAbstraction (P : Type) where
   context    : Context P
   goal       : String
@@ -403,9 +405,11 @@ structure CrystallizedAbstraction (P : Type) where
   provenance : List Provenance
 
 /-- What a run hands on when the person ends it: the sheet the ending followed, its views as that
-    sheet carried them, and the declaration unfolds every case it carries, folded on that sheet or
-    not; the run declares no completed abstraction. What the person's turns set or took stands as
-    recorded, and the rest — what no turn of theirs set or took — stands as your reading. -/
+    sheet carried them, the readings set aside with the person's grounds among them, and the
+    declaration unfolds every case it carries, folded on that sheet or not, and shows every reading
+    set aside, whether that sheet showed it or not; the run declares no completed abstraction. What
+    the person's turns set or took stands as recorded, and the rest — what no turn of theirs set or
+    took — stands as your reading. -/
 structure Withdrawn (P : Type) where
   context    : Context P
   goal       : String
@@ -565,7 +569,7 @@ Then the goal: what the abstraction is for. Where the user has said it, quote th
 
 Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — which of the cases shown it takes in and which it leaves out, and where the candidate sits on that reading; the candidate's own row places every case on the sheet. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the user brought, every case the rows use, and every case you found, unfolded in a few lines — what happened, what in it bears on the goal and the readings, how it surfaced, who brought it — so every case is read on the sheet itself. A sheet whose move invites recognition unfolds every case its rows use; elsewhere, unfold a new or changed case again, and an unchanged one may be folded as the same as the last sheet. Collect as widely as the judgment needs; the sheet carries what the current judgment needs, and a case that would decide it against the candidate is never left off. The readings the user set aside appear beside their own words when they change and when reconsidering needs them. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
-Under the sheet, what changed since the sheet the user last answered: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown here. The examples the last sheet showed stay as it showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal here. Then your doubts, each beside what it bears on, with what it rests on and the user's answer where they gave one; a doubt is raised again only on new evidence. A reading that the cases are no longer this protocol's to settle is shown the same way, with its basis, and closes nothing. Then the points still open, each in the words of whoever raised it — the user's quoted, yours marked as yours.
+Under the sheet, what changed since the sheet the user last answered: the user's moves first, then what you re-drew because of them and anything else that moved, each marked as forced by a move of theirs or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown here. The examples the last sheet showed stay as it showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal here. Then your doubts, each beside what it bears on, with what it rests on and the user's answer where they gave one; a doubt is raised again only on new evidence. A reading that the cases are no longer this protocol's to settle is shown the same way, with its basis, and closes nothing. Then the points still open, each in the words of whoever raised it — the user's quoted, yours marked as yours.
 
 Then one move to ask about, in words — the one whose answer would most change how goal and readings cross — and what each way of answering does to the goal and the candidate. Where every reading drawn so far was set aside, say so with the grounds shown, and ask whether to name a distinction the readings missed, read another set of cases, or move the goal. Invite recognition only where the candidate fits the goal on every case shown; where a case could still separate it, ask about that case first. Recognizing the abstraction and ending the run stay open on every sheet.
 
