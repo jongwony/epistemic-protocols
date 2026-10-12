@@ -1,7 +1,7 @@
 {
   "name": "epharmoge",
-  "version": "2.6.0",
-  "description": "Check that a result fits everywhere it lands — misfits and omissions on one sheet — /contextualize (ἐφαρμογή: an application)",
+  "version": "2.7.0",
+  "description": "See on one sheet where a result does not fit your situation, each misfit settled or withdrawn, the fixes carried out and reread — /contextualize (ἐφαρμογή: an application)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Epharmoge",
-    "shortDescription": "Check that a result fits everywhere it lands — misfits and omissions on one sheet — /contextualize (ἐφαρμογή: an application)",
-    "longDescription": "Check that a result fits everywhere it lands — misfits and omissions on one sheet — /contextualize (ἐφαρμογή: an application)",
+    "shortDescription": "See on one sheet where a result does not fit your situation, each misfit settled or withdrawn, the fixes carried out and reread — /contextualize (ἐφαρμογή: an application)",
+    "longDescription": "See on one sheet where a result does not fit your situation, each misfit settled or withdrawn, the fixes carried out and reread — /contextualize (ἐφαρμογή: an application)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

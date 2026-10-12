@@ -1,7 +1,7 @@
 {
   "name": "analogia",
-  "version": "4.9.0",
-  "description": "Check what an analogy, framework, or earlier design carried to a case actually supports — /ground (ἀναλογία: a proportion)",
+  "version": "4.10.0",
+  "description": "See what a framework, analogy, or earlier design carried to a case supports — each conclusion's grounds, checks, defeaters, and verdict — /ground (ἀναλογία: a proportion)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Analogia",
-    "shortDescription": "Check what an analogy, framework, or earlier design carried to a case actually supports — /ground (ἀναλογία: a proportion)",
-    "longDescription": "Check what an analogy, framework, or earlier design carried to a case actually supports — /ground (ἀναλογία: a proportion)",
+    "shortDescription": "See what a framework, analogy, or earlier design carried to a case supports — each conclusion's grounds, checks, defeaters, and verdict — /ground (ἀναλογία: a proportion)",
+    "longDescription": "See what a framework, analogy, or earlier design carried to a case supports — each conclusion's grounds, checks, defeaters, and verdict — /ground (ἀναλογία: a proportion)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

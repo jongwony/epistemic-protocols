@@ -1,7 +1,7 @@
 {
   "name": "merismos",
-  "version": "4.6.0",
-  "description": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
+  "version": "4.7.0",
+  "description": "Take as yours a plan cutting one autonomous goal into units, each with its checks, accepted gaps, and held judgments — /apportion (μερισμός: an apportionment)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Merismos",
-    "shortDescription": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
-    "longDescription": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
+    "shortDescription": "Take as yours a plan cutting one autonomous goal into units, each with its checks, accepted gaps, and held judgments — /apportion (μερισμός: an apportionment)",
+    "longDescription": "Take as yours a plan cutting one autonomous goal into units, each with its checks, accepted gaps, and held judgments — /apportion (μερισμός: an apportionment)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

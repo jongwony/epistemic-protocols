@@ -1,6 +1,6 @@
 # Katalepsis — /grasp (κατάληψις)
 
-Achieve certain comprehension of a target in play — code, a document, a result — (κατάληψις: grasping firmly)
+Close on an understanding that serves your purpose, on a map built with you and checked against its material (κατάληψις: grasping firmly)
 
 > [한국어](./README_ko.md)
 

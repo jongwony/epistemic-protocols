@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions before the run begins.
+Take as yours a plan cutting one autonomous goal into units, each with its checks, accepted gaps, and held judgments, before the run begins.
 
 ## Type Signature
 

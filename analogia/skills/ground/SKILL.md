@@ -1,6 +1,6 @@
 ---
 name: ground
-description: "A framework, analogy, or earlier design is carried to a case, or an abstraction tested against its own cases, and what it supports is unclear: back each conclusion with cited evidence, not assent."
+description: "A framework, analogy, or earlier design is carried to a case, or an abstraction tested: the user can say what carries each conclusion, what would break it, and if it holds, is blocked, or is open."
 ---
 
 # Analogia Protocol

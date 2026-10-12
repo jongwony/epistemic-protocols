@@ -8,17 +8,17 @@
     {
       "name": "katalepsis",
       "source": "./katalepsis",
-      "description": "Check that something in play — code, a document, a result — is actually understood, step by step — /grasp (κατάληψις: a grasping firmly)"
+      "description": "Close on an understanding that serves your purpose, on a map built with you and checked against its material — /grasp (κατάληψις: a grasping firmly)"
     },
     {
       "name": "aitesis",
       "source": "./aitesis",
-      "description": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)"
+      "description": "Recognize what the work rests on — what was settled and from where, what rests on weak or unreached ground, what only you decide — /inquire (αἴτησις: a requesting)"
     },
     {
       "name": "analogia",
       "source": "./analogia",
-      "description": "Check what an analogy, framework, or earlier design carried to a case actually supports — /ground (ἀναλογία: a proportion)"
+      "description": "See what a framework, analogy, or earlier design carried to a case supports — each conclusion's grounds, checks, defeaters, and verdict — /ground (ἀναλογία: a proportion)"
     },
     {
       "name": "periagoge",
@@ -28,22 +28,22 @@
     {
       "name": "euporia",
       "source": "./euporia",
-      "description": "Find the decisions a rough intent turns on, traced from your own material and the domain's usual decisions — /elicit (εὐπορία: way through)"
+      "description": "Reach an intent you can call yours, aligned enough — each recorded value on your own words, what you left open carried — /elicit (εὐπορία: way through)"
     },
     {
       "name": "merismos",
       "source": "./merismos",
-      "description": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)"
+      "description": "Take as yours a plan cutting one autonomous goal into units, each with its checks, accepted gaps, and held judgments — /apportion (μερισμός: an apportionment)"
     },
     {
       "name": "epharmoge",
       "source": "./epharmoge",
-      "description": "Check that a result fits everywhere it lands — misfits and omissions on one sheet — /contextualize (ἐφαρμογή: an application)"
+      "description": "See on one sheet where a result does not fit your situation, each misfit settled or withdrawn, the fixes carried out and reread — /contextualize (ἐφαρμογή: an application)"
     },
     {
       "name": "horismos",
       "source": "./horismos",
-      "description": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)"
+      "description": "See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it — /bound (ὁρισμός: a bounding)"
     },
     {
       "name": "epistemic-cooperative",
@@ -58,17 +58,17 @@
     {
       "name": "hyphegesis",
       "source": "./hyphegesis",
-      "description": "Settle how work with several lines of thinking runs before starting it — /conduct (ὑφήγησις: a leading-the-way)"
+      "description": "Take as yours how several lines of work run — order, combination, stopping points, where results go, what you entrusted and kept — /conduct (ὑφήγησις: a leading-the-way)"
     },
     {
       "name": "proplasma",
       "source": "./proplasma",
-      "description": "Compare throwaway probes of candidate directions before committing to one — /preview (πρόπλασμα: a preliminary clay model)"
+      "description": "See what taking each candidate direction means for your purpose and on what ground, then settle the one you take — /preview (πρόπλασμα: a preliminary clay model)"
     },
     {
       "name": "hypotyposis",
       "source": "./hypotyposis",
-      "description": "Discover a form by marking what does not fit on concrete sketches until one is recognized — /sketch (ὑποτύπωσις: an outline, a first sketch)"
+      "description": "React to concrete versions until you can point at one you met and say: this is the form, for this purpose — /sketch (ὑποτύπωσις: an outline, a first sketch)"
     },
     {
       "name": "heuresis",

@@ -1,7 +1,7 @@
 {
   "name": "euporia",
-  "version": "2.8.0",
-  "description": "Find the decisions a rough intent turns on, traced from your own material and the domain's usual decisions — /elicit (εὐπορία: way through)",
+  "version": "2.9.0",
+  "description": "Reach an intent you can call yours, aligned enough — each recorded value on your own words, what you left open carried — /elicit (εὐπορία: way through)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Euporia",
-    "shortDescription": "Find the decisions a rough intent turns on, traced from your own material and the domain's usual decisions — /elicit (εὐπορία: way through)",
-    "longDescription": "Find the decisions a rough intent turns on, traced from your own material and the domain's usual decisions — /elicit (εὐπορία: way through)",
+    "shortDescription": "Reach an intent you can call yours, aligned enough — each recorded value on your own words, what you left open carried — /elicit (εὐπορία: way through)",
+    "longDescription": "Reach an intent you can call yours, aligned enough — each recorded value on your own words, what you left open carried — /elicit (εὐπορία: way through)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

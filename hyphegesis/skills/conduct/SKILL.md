@@ -1,6 +1,6 @@
 ---
 name: conduct
-description: "The work needs several lines of thinking, and their order, independence, combination, stopping point, or where results go is not obvious: settle the method before starting."
+description: "Work needs several lines of thinking and how they run is not obvious: the user can then say how they order, combine, stop and where results go, what they entrusted and kept, and own the method."
 ---
 
 # Hyphegesis Protocol

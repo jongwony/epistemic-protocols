@@ -1,7 +1,7 @@
 {
   "name": "hypotyposis",
-  "version": "1.9.0",
-  "description": "Discover a form by marking what does not fit on concrete sketches until one is recognized — /sketch (ὑποτύπωσις: an outline, a first sketch)",
+  "version": "1.10.0",
+  "description": "React to concrete versions until you can point at one you met and say: this is the form, for this purpose — /sketch (ὑποτύπωσις: an outline, a first sketch)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Hypotyposis",
-    "shortDescription": "Discover a form by marking what does not fit on concrete sketches until one is recognized — /sketch (ὑποτύπωσις: an outline, a first sketch)",
-    "longDescription": "Discover a form by marking what does not fit on concrete sketches until one is recognized — /sketch (ὑποτύπωσις: an outline, a first sketch)",
+    "shortDescription": "React to concrete versions until you can point at one you met and say: this is the form, for this purpose — /sketch (ὑποτύπωσις: an outline, a first sketch)",
+    "longDescription": "React to concrete versions until you can point at one you met and say: this is the form, for this purpose — /sketch (ὑποτύπωσις: an outline, a first sketch)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

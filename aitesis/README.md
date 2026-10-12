@@ -1,6 +1,6 @@
 # Aitesis — /inquire (αἴτησις)
 
-Collect what the AI can reach on its own, hand back the rest as the user's unknown (αἴτησις: a requesting)
+Recognize what the work rests on — what was settled and from where, what rests on weak or unreached ground, what only you decide (αἴτησις: a requesting)
 
 > [한국어](./README_ko.md)
 

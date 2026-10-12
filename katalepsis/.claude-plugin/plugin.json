@@ -1,7 +1,7 @@
 {
   "name": "katalepsis",
-  "description": "Check that something in play — code, a document, a result — is actually understood, step by step — /grasp (κατάληψις: a grasping firmly)",
-  "version": "4.6.0",
+  "description": "Close on an understanding that serves your purpose, on a map built with you and checked against its material — /grasp (κατάληψις: a grasping firmly)",
+  "version": "4.7.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

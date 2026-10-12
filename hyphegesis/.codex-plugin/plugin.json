@@ -1,7 +1,7 @@
 {
   "name": "hyphegesis",
-  "version": "2.8.0",
-  "description": "Settle how work with several lines of thinking runs before starting it — /conduct (ὑφήγησις: a leading-the-way)",
+  "version": "2.9.0",
+  "description": "Take as yours how several lines of work run — order, combination, stopping points, where results go, what you entrusted and kept — /conduct (ὑφήγησις: a leading-the-way)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Hyphegesis",
-    "shortDescription": "Settle how work with several lines of thinking runs before starting it — /conduct (ὑφήγησις: a leading-the-way)",
-    "longDescription": "Settle how work with several lines of thinking runs before starting it — /conduct (ὑφήγησις: a leading-the-way)",
+    "shortDescription": "Take as yours how several lines of work run — order, combination, stopping points, where results go, what you entrusted and kept — /conduct (ὑφήγησις: a leading-the-way)",
+    "longDescription": "Take as yours how several lines of work run — order, combination, stopping points, where results go, what you entrusted and kept — /conduct (ὑφήγησις: a leading-the-way)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

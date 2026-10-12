@@ -70,21 +70,21 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 
 ## Protocols
 
-| Protocol | Command | When to use |
-|----------|---------|-------------|
-| [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown |
-| [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) and the domain's usual decisions hold the clues |
-| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any |
-| [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first |
-| [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight |
-| [Analogia](./analogia) | `/ground` | You're carrying a framework, an analogy, or an earlier design over to a case, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports |
-| [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something you can't name yet — pin down what they have in common |
-| [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and carry their own conditions for when they are done |
-| [Epharmoge](./epharmoge) | `/contextualize` | A result — this session's or another's — may be correct but not fit your actual situation, or leave out something you asked for |
-| [Horismos](./horismos) | `/bound` | You cannot yet see what needs deciding in a task, or which decisions to keep or entrust |
-| [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it — one session, or a line of work, topic, or concept spread across several |
-| [Katalepsis](./katalepsis) | `/grasp` | Something in front of you — code, a document, a result — needs to be actually understood: you can't follow it yet, or you nod along and aren't sure |
-| [Hyphegesis](./hyphegesis) | `/conduct` | The work takes several lines of thinking, and it isn't obvious what order they run in, which can run apart, how their results combine, when to stop, or where each result goes — settle how it runs before starting |
+| Protocol | Command | When to use | Once it has run |
+|----------|---------|-------------|-----------------|
+| [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown | You can recognize what was settled and from where, what rests on weak or unreached ground, and what only you decide |
+| [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) and the domain's usual decisions hold the clues | You can say "this is my intent, aligned enough" — each recorded value stands on your own words, and what you left open is carried |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any | — |
+| [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first | You can say what each direction means for your purpose, whether that rests on a probe you saw, a description, your own account, or evidence, and which one you take |
+| [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight | You can point at a version as you met it and say "this is the form, for this purpose", and see where it and the passed-over versions are |
+| [Analogia](./analogia) | `/ground` | You're carrying a framework, an analogy, or an earlier design over to a case, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports | You can say what carries each conclusion, what was checked and found, what would break it, and whether it holds, is blocked, or remains undetermined |
+| [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something you can't name yet — pin down what they have in common | — |
+| [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and carry their own conditions for when they are done | You can call the plan yours — units with their checks, accepted gaps, and held judgments; what needed you before the run is settled, and the rest comes back to you once at the end |
+| [Epharmoge](./epharmoge) | `/contextualize` | A result — this session's or another's — may be correct but not fit your actual situation, or leave out something you asked for | You can see each misfit found, settled or withdrawn by your words, your grant, or evidence, with the fixes carried out and reread until nothing remains open |
+| [Horismos](./horismos) | `/bound` | You cannot yet see what needs deciding in a task, or which decisions to keep or entrust | You can see each decision, what rests on it, its cost if wrong, what settled it, and what remains open and who settles it |
+| [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it — one session, or a line of work, topic, or concept spread across several | — |
+| [Katalepsis](./katalepsis) | `/grasp` | Something in front of you — code, a document, a result — needs to be actually understood: you can't follow it yet, or you nod along and aren't sure | You can say your understanding serves your purpose, on a map built with you and checked against the material, knowing what would settle the checks still pending |
+| [Hyphegesis](./hyphegesis) | `/conduct` | The work takes several lines of thinking, and it isn't obvious what order they run in, which can run apart, how their results combine, when to stop, or where each result goes — settle how it runs before starting | You can say how the lines order, combine, stop, and where their results go, recognize what you entrusted and kept, and call the method yours |
 
 The protocols are not a fixed sequence or grouping: reach for the one whose deficit you are in, and combine them as the situation calls for.
 
