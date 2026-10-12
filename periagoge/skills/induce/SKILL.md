@@ -9,7 +9,7 @@ Name what several concrete cases share by crossing a working candidate with the 
 
 ## Definition
 
-**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet. From the first sheet the AI states the goal the abstraction serves and, where one is grounded, a working candidate — a name and a rule —, each value on the sheet marked as set by the user's words, taken by them from what the AI showed, or still the AI's proposal, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out, each case on the sheet unfolded when it is new or changed and every one when the sheet invites recognition. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, recognize the abstraction, or end the run. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
+**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet, or that a name in use no longer says. From the first sheet the AI states the goal the abstraction serves and, where one is grounded, a working candidate — a name and a rule —, each value on the sheet marked as set by the user's words, taken by them from what the AI showed, or still a proposal, marked with who put it forward, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out, each case on the sheet unfolded when it is new or changed and every one when the sheet invites recognition. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, recognize the abstraction, or end the run. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
 
 ```lean
 /-!
@@ -207,8 +207,9 @@ structure Example where
 /-- One row of the cross view: what the reading becomes against the goal — the check it yields —,
     the cases shown that it takes in and those it leaves out, and where the working candidate sits
     on it. The row of the reading the candidate stands on sorts every case on the sheet into taken
-    in or left out; the other readings' rows carry the cases that separate them, and either of
-    their lists may then be empty. -/
+    in or left out, except a case the person's words place on the boundary, which it leaves in
+    neither list and the sheet shows with their words; the other readings' rows carry the cases
+    that separate them, and either of their lists may then be empty. -/
 structure Row where
   againstGoal   : String
   catches       : List Example
@@ -329,7 +330,7 @@ axiom standingOcc : (c : Context P) → (e : Entry) → Occ (standingCoord (P :=
 def standing (c : Context P) (e : Entry) : Option Standing := filledValue (standingOcc c e)
 
 /-- A line with who first put it forward and how it stood; `none` where no turn of the person's
-    reached it — still your proposal. -/
+    reached it — still a proposal, by whoever put it forward. -/
 structure Provenance where
   entry    : Entry
   proposer : Proposer
@@ -362,7 +363,7 @@ inductive Closing
     correction, a move of the goal or the candidate, a reading set aside or brought back, a case
     brought or placed on the other side of the candidate's row — recognizes nothing: the sheet is
     drawn again with the change. Holding a line back — not taking it, without saying it is wrong —
-    leaves it as it stood, your proposal where no turn of the person's took it. Holding back a line
+    leaves it as it stood, a proposal where no turn of the person's took it. Holding back a line
     other than the goal or the candidate, or words about an open item, change nothing the sheet
     shows and leave a recognition standing; holding back the goal, the candidate's name, or its
     rule recognizes nothing.
@@ -565,11 +566,11 @@ Bind the seed from an explicit argument first, then the most recent cluster of c
 
 ### The sheet
 
-Every sheet is in everyday language. Mark each value on the sheet as set by the user's words, taken by them from what you showed, or still your proposal. Each sheet opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up.
+Every sheet is in everyday language. Mark each value on the sheet as set by the user's words, taken by them from what you showed, or still a proposal, marked with who put it forward. Each sheet opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up.
 
 Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading. Under it, the working candidate — a name and a rule — always on a reading still in play: where the user sets that reading aside, propose one on a live reading; where no candidate is grounded yet or none stands on a live reading, say what is missing. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 
-Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — which of the cases shown it takes in and which it leaves out, and where the candidate sits on that reading; the candidate's own row places every case on the sheet. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the user brought, every case the rows use, and every case you found, unfolded in a few lines — what happened, what in it bears on the goal and the readings, how it surfaced, who brought it — so every case is read on the sheet itself. A sheet whose move invites recognition unfolds every case its rows use; elsewhere, unfold a new or changed case again, and an unchanged one may be folded as the same as the last sheet. Collect as widely as the judgment needs; the sheet carries what the current judgment needs, and a case that would decide it against the candidate is never left off. The readings the user set aside appear beside their own words when they change and when reconsidering needs them. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
+Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — which of the cases shown it takes in and which it leaves out, and where the candidate sits on that reading; the candidate's own row places every case on the sheet, except one the user's words put on the boundary, which it neither takes in nor leaves out, and the sheet shows that case with their words. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the user brought, every case the rows use, and every case you found, unfolded in a few lines — what happened, what in it bears on the goal and the readings, how it surfaced, who brought it — so every case is read on the sheet itself. A sheet whose move invites recognition unfolds every case its rows use; elsewhere, unfold a new or changed case again, and an unchanged one may be folded as the same as the last sheet. Collect as widely as the judgment needs; the sheet carries what the current judgment needs, and a case that would decide it against the candidate is never left off. The readings the user set aside appear beside their own words when they change and when reconsidering needs them. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
 Under the sheet, what changed since the sheet the user last answered: the user's moves first, then what you re-drew because of them and anything else that moved, each marked as forced by a move of theirs or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown here. The examples the last sheet showed stay as it showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal here. Then your doubts, each beside what it bears on, with what it rests on and the user's answer where they gave one; a doubt is raised again only on new evidence. A reading that the cases are no longer this protocol's to settle is shown the same way, with its basis, and closes nothing. Then the points still open, each in the words of whoever raised it — the user's quoted, yours marked as yours.
 
