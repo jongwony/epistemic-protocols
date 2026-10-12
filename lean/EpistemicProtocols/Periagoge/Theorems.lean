@@ -121,10 +121,15 @@ theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
   simp only [crossView, List.mem_map]
   exact ⟨r, h, rfl⟩
 
+theorem brought_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ brought c) :
+    (i, unfoldCase c i) ∈ casesSection c := by
+  simp only [casesSection, List.mem_map]
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_left _ (List.mem_append_left _ h)), rfl⟩
+
 theorem row_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ rowCases c) :
     (i, unfoldCase c i) ∈ casesSection c := by
   simp only [casesSection, List.mem_map]
-  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_left _ h), rfl⟩
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_left _ (List.mem_append_right _ h)), rfl⟩
 
 theorem found_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ found c) :
     (i, unfoldCase c i) ∈ casesSection c := by
