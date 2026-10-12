@@ -51,7 +51,7 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
 FormIntentSeed
   → gather          -- what bears on the form, read or run now — the reference a standard outside preference is checked against included (focus)
   → relay_intent    -- the production intent whole with its basis, BEFORE any version is made; on a later production, with what changed
-  → produce         -- versions realized in a medium that shows what the judgment concerns, each registered as realized; a revision is a new version
+  → produce         -- versions realized in a medium that shows what the judgment concerns, each registered as realized
   → present         -- new versions first, as encountered; then the standing (focus)
   → fuse(u)         -- the person's turn joins the context whole
   → recognize       -- the person's closing on a version they encountered (`ClosingSupported`)
@@ -174,8 +174,7 @@ axiom purpose : (c : Context P) → Occ (purposeCoord (P := P)) c
 abbrev Location := String
 
 /-- How a version is realized, carried on the version itself: narration in session text,
-    re-presented as written and never regenerated; or an artifact at the location registered when
-    it was made. The medium it is met in, and what that medium can and cannot show of the
+    re-presented as written; or an artifact at the location registered when it was made. The medium it is met in, and what that medium can and cannot show of the
     qualities the judgment concerns, are your reading of it. -/
 inductive Realization
   | narration (text : String)
@@ -186,8 +185,7 @@ structure Version where
   ref      : Nat
   realized : Realization
 
-/-- **Your record**, read from the context: every version produced so far, cumulative. A
-    revision is a new version, and a version shown stays as it was shown. -/
+/-- **Your record**, read from the context: every version produced so far, cumulative. -/
 axiom versions : Context P → List Version
 
 /-- Where a version is. `places`: where observations show it now — empty for narration, which
