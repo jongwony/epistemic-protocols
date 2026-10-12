@@ -277,7 +277,8 @@ axiom openWords : (c : Context P) → (i : OpenItem) → Occ (openCoord (P := P)
 def openTrace (c : Context P) (taken : Option Reading) : List (OpenItem × Option String) :=
   (openItems c taken).map (fun i => (i, filledValue (openWords c i)))
 
-/-- A line of the sheet, named as the sheet shows it. -/
+/-- A line of the sheet as the sheet shows it, its value included; a value that changes makes a new
+    line. -/
 abbrev Entry := String
 
 /-- **Your reading**: the lines the sheet shows as the context now stands. -/
@@ -286,7 +287,7 @@ axiom entries : Context P → List Entry
 /-- Who first put a value forward, kept apart from how it came to stand. -/
 inductive Proposer | ai | person
 
-/-- **Your reading**: the position of the turn that first put forward what `e` holds now. -/
+/-- **Your reading**: the position of the turn that first put forward line `e`. -/
 axiom introducedAt : Context P → Entry → Nat
 
 def proposer (c : Context P) (e : Entry) : Proposer :=
@@ -298,9 +299,9 @@ def proposer (c : Context P) (e : Entry) : Proposer :=
     proposed; or the person's turn took it as a sheet showed it. -/
 inductive Standing | set | proposed | adopted
 
-/-- **Your judgment**, the record rule: the cited turn makes what `e` holds now stand, read against
-    the context as it now stands, on the scope its words reach — the turn gave it in its own words
-    (`set`), or took the value a sheet showed before that turn (`adopted`). A narrow answer stays
+/-- **Your judgment**, the record rule: the cited turn makes line `e` stand, read against the
+    context as it now stands, on the scope its words reach — the turn gave it in its own words
+    (`set`), or took it as a sheet showed it before that turn (`adopted`). A narrow answer stays
     narrow: taking one correspondence takes that correspondence, not the sheet around it. A
     question, a request to see something, or a bare mention makes nothing stand; a value no turn
     of the person's reached stays your proposal, however long it has gone unchallenged. -/
@@ -310,8 +311,7 @@ axiom StandingSupported : Entry → Context P → Turn P → Standing → Prop
 def standingCoord (e : Entry) : Coord P Standing :=
   { admits := (·.val = .person), supports := StandingSupported e }
 
-/-- **Your reading**: the person's turn that makes what `e` holds now stand; `open_` while none
-    reaches it. -/
+/-- **Your reading**: the person's turn that makes line `e` stand; `open_` while none reaches it. -/
 axiom standingOcc : (c : Context P) → (e : Entry) → Occ (standingCoord (P := P) e) c
 
 def standing (c : Context P) (e : Entry) : Standing := (filledValue (standingOcc c e)).getD .proposed
