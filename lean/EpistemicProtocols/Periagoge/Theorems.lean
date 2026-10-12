@@ -104,7 +104,12 @@ theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
 theorem row_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ rowCases c) :
     (i, unfoldCase c i) ∈ casesSection c := by
   simp only [casesSection, List.mem_map]
-  exact ⟨i, h, rfl⟩
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_left _ h), rfl⟩
+
+theorem found_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ found c) :
+    (i, unfoldCase c i) ∈ casesSection c := by
+  simp only [casesSection, List.mem_map]
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_right _ h), rfl⟩
 
 theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate c = some k) :
     k.reading ∈ live c := by
@@ -117,41 +122,32 @@ theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate
     · cases h
   · cases h
 
-/-- A standing other than proposed is a filled occurrence that cites a turn the person sent: no
-    value of yours stands set or adopted on your own reading. -/
-theorem standing_by_person (c : Context P) (e : Entry) (h : standing c e ≠ .proposed) :
-    ∃ src ok sup, standingOcc c e = .filled (standing c e) src ok sup ∧
+/-- A line's standing is a filled occurrence that cites a turn the person sent: no value of yours
+    stands set or adopted on your own reading. -/
+theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
+    (h : standing c e = some s) :
+    ∃ src ok sup, standingOcc c e = .filled s src ok sup ∧
       (c[src.idx]'src.lt).origin = .person := by
-  unfold standing at h ⊢
+  unfold standing at h
   cases hc : standingOcc c e with
   | open_ _ => simp [hc, filledValue] at h
-  | filled a src ok sup => exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
-/-- A value the crystallized record marks adopted was on a line the answered sheet showed, or a
-    person's turn had already taken it: the confirm adopts no line the answered sheet did not
-    show. -/
-theorem adopted_shown_or_taken (declare : Context P → Response P) (c c' : Context P) (g : String)
-    (k : Candidate) (p : Provenance) (hp : p ∈ (crystallize declare c c' g k).provenance)
-    (ha : p.standing = .adopted) :
-    p.entry ∈ entries c ∨
-      (standing c' p.entry = .adopted ∧
-        ∃ src ok sup, standingOcc c' p.entry = .filled (standing c' p.entry) src ok sup ∧
-          (c'[src.idx]'src.lt).origin = .person) := by
-  simp only [crystallize, provenance, List.map_map, List.mem_map, Function.comp_def] at hp
+/-- Every line of a crystallized record that carries a standing has it from a filled occurrence in
+    the context the closing turn was fused into, citing a turn the person sent: the record gives no
+    line a standing that no person's turn reached. -/
+theorem record_standing_by_person (declare : Context P → Response P) (c c' : Context P)
+    (g : String) (k : Candidate) (p : Provenance)
+    (hp : p ∈ (crystallize declare c c' g k).provenance) (s : Standing)
+    (hs : p.standing = some s) :
+    ∃ src ok sup, standingOcc c' p.entry = .filled s src ok sup ∧
+      (c'[src.idx]'src.lt).origin = .person := by
+  simp only [crystallize, provenance, List.mem_map] at hp
   obtain ⟨e, _, rfl⟩ := hp
-  by_cases he : e ∈ entries c
-  · left
-    simp only [he, ite_true]
-    unfold adopt
-    split <;> exact he
-  · right
-    have heq : (if e ∈ entries c then adopt ⟨e, proposer c' e, standing c' e⟩
-        else ⟨e, proposer c' e, standing c' e⟩) = ⟨e, proposer c' e, standing c' e⟩ := by
-      simp [he]
-    rw [heq] at ha ⊢
-    dsimp only at ha
-    have hs : standing c' e ≠ .proposed := by rw [ha]; nofun
-    exact ⟨ha, standing_by_person c' e hs⟩
+  exact standing_by_person c' e s hs
 
 /-- Words an open item carries in the open trace are a filled occurrence that cites a turn the
     person sent. -/
